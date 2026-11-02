@@ -2882,6 +2882,11 @@
             "name": "BatchVerification",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/BatchVerification.cs"
+          },
+          {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -5766,6 +5771,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MeasuredRefusalTransactionTests.cs"
           },
           {
+            "name": "PlcCommittedReadbackTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/PlcCommittedReadbackTests.cs"
+          },
+          {
             "name": "TerminalPlacementTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/TerminalPlacementTests.cs"
@@ -5834,6 +5844,11 @@
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
+          },
+          {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
             "name": "SelectionSpikeTests",
@@ -6323,6 +6338,11 @@
             "name": "ImportDxfTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportDxfTests.cs"
+          },
+          {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -8498,6 +8518,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
           },
           {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
             "name": "SelectionSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
@@ -9095,6 +9120,11 @@
             "name": "ObjectReadTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ObjectReadTests.cs"
+          },
+          {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -9546,6 +9576,11 @@
             "name": "PlanDependencyPredictionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanDependencyPredictionTests.cs"
+          },
+          {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
             "name": "WriteSafetyTests",
@@ -10043,6 +10078,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlanVersion2Tests.cs"
           },
           {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
@@ -10299,6 +10339,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
           },
           {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
@@ -10427,6 +10472,11 @@
             "name": "PageOpenTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageOpenTests.cs"
+          },
+          {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
             "name": "SelectionSpikeTests",
@@ -13045,6 +13095,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
             "name": "PlcTests",
@@ -15966,6 +16021,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PlcDisplaySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
             "name": "SymbolDescriptionTests",

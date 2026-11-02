@@ -183,7 +183,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_try | destructive | action.try.execute<br>action.try.plan | 268 | 88 | 2 | 173 | 0 | 3/2/2 | A9 A40 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 5/4/0 | A77 | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 7/2/2 | A39 A56 A67 A68 A76 A77 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 7/2/3 | A39 A56 A67 A68 A76 A77 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
@@ -202,11 +202,11 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_context_get | read | project.snapshot | 97 | 40 | 4 | 31 | 0 | 2/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 75 | 43 | 2 | 29 | 0 | 9/4/4 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 33 | 19 | 0 | 14 | 0 | 6/2/7 | A11 A12 | 2026-10-21 pass（api-notes A24） |
-| eplan_device_place | write | device.place.execute<br>device.place.plan | 251 | 138 | 4 | 90 | 0 | 6/4/9 | A13 A14 A26 A53 A55 | — |
+| eplan_device_place | write | device.place.execute<br>device.place.plan | 251 | 138 | 4 | 90 | 0 | 7/4/10 | A13 A14 A26 A53 A55 | — |
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 75 | 33 | 0 | 42 | 0 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_device_update | write | device.update.execute<br>device.update.plan | 57 | 30 | 1 | 26 | 0 | 2/1/1 | A3 A11 A12 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 40 | 19 | 0 | 21 | 0 | 1/1/0 | A16 | — |
-| eplan_export_image | write | export.image.plan<br>export.image.run | 43 | 17 | 0 | 26 | 0 | 2/2/5 | A14 A16 | 2026-10-20 pass（api-notes A21） |
+| eplan_export_image | write | export.image.plan<br>export.image.run | 43 | 17 | 0 | 26 | 0 | 2/2/6 | A14 A16 | 2026-10-20 pass（api-notes A21） |
 | eplan_export_labels | write | export.labels.plan<br>export.labels.run | 36 | 16 | 0 | 20 | 0 | 1/2/1 | A24 A25 B9 | — |
 | eplan_export_parts | write | export.parts.plan<br>export.parts.run | 24 | 8 | 0 | 16 | 0 | 1/2/2 | A25 | — |
 | eplan_export_pdf | write | export.pdf.plan<br>export.pdf.run | 44 | 19 | 0 | 25 | 0 | 1/1/0 | A16 | — |
@@ -223,17 +223,17 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 93 | 42 | 0 | 49 | 0 | 4/2/2 | A12 A13 A14 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 1/0/4 | A4 | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
-| eplan_object_find | read | object.find<br>object.get<br>project.get | 380 | 218 | 63 | 160 | 0 | 2/1/6 | A57 A60 | — |
-| eplan_object_get | read | object.find<br>object.get<br>project.get | 461 | 299 | 63 | 160 | 0 | 1/1/2 | — | — |
+| eplan_object_find | read | object.find<br>object.get<br>project.get | 380 | 218 | 63 | 160 | 0 | 2/1/7 | A57 A60 | — |
+| eplan_object_get | read | object.find<br>object.get<br>project.get | 461 | 299 | 63 | 160 | 0 | 1/1/3 | — | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 0/3/0 | — | — |
 | eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A35 | — |
 | eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
-| eplan_page_create | write | page.create.execute<br>page.create.plan | 76 | 31 | 1 | 37 | 0 | 10/16/5 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
+| eplan_page_create | write | page.create.execute<br>page.create.plan | 76 | 31 | 1 | 37 | 0 | 10/16/6 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 67 | 34 | 0 | 33 | 0 | 3/9/1 | A15 A18 A24 | — |
-| eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 111 | 68 | 1 | 42 | 0 | 6/6/18 | A11 A12 A57 | — |
-| eplan_page_list | read | page.list | 41 | 19 | 1 | 21 | 0 | 15/4/10 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
-| eplan_page_open | read | page.open | 25 | 13 | 0 | 12 | 0 | 4/2/3 | A54 | — |
+| eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 111 | 68 | 1 | 42 | 0 | 6/6/19 | A11 A12 A57 | — |
+| eplan_page_list | read | page.list | 41 | 19 | 1 | 21 | 0 | 15/4/11 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
+| eplan_page_open | read | page.open | 25 | 13 | 0 | 12 | 0 | 4/2/4 | A54 | — |
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 68 | 28 | 0 | 40 | 0 | 2/1/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
 | eplan_page_review | read | page.review | 0 | 0 | 0 | 0 | 0 | 3/1/1 | A41 A64 A65 A72 A73 | — |
 | eplan_page_text_replace | write | page.text.replace.execute<br>page.text.replace.plan | 76 | 37 | 0 | 39 | 0 | 1/1/1 | A41 | — |
@@ -250,7 +250,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 233 | 138 | 5 | 87 | 0 | 6/2/4 | A57 A72 A76 | — |
 | eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 2/8/5 | A14 A17 A39 | — |
 | eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/6/3 | — | — |
-| eplan_plc_get | read | plc.get | 79 | 39 | 1 | 30 | 0 | 2/1/2 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
+| eplan_plc_get | read | plc.get | 79 | 39 | 1 | 30 | 0 | 2/1/3 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
 | eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 37 | 15 | 1 | 18 | 1 | 4/3/1 | A31 A32 A34 A35 | — |
 | eplan_project_get | read | project.get | 56 | 30 | 0 | 26 | 0 | 5/3/6 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/8 | — | 2026-10-18 pass（api-notes A10） |
@@ -265,7 +265,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_selection_set | read | selection.set | 180 | 41 | 0 | 139 | 0 | 2/1/1 | A54 B11 | — |
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/9 | — | 2026-10-18 pass（api-notes A10） |
-| eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 3/3/3 | A52 A53 A55 | — |
+| eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 3/3/4 | A52 A53 A55 | — |
 | eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/3 | — | — |
 | eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 84 | 36 | 0 | 48 | 0 | 0/1/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
 | eplan_terminal_strip_get | read | terminal.strip.get | 39 | 23 | 0 | 16 | 0 | 2/1/3 | — | — |
