@@ -15,7 +15,7 @@
 D4 增加与 `moves` 互斥的 `property_moves[1..50]`：每项 `{parent,property_id,property_index,x_mm,y_mm,angle_deg}`。parent 为最新绘图父定位器，ID 和零基序号取子项 properties 的同名字段；不能用共享父号的子定位器代替。角度为绝对 0/90/180/270 度，坐标为页面绝对毫米；仅改变选定文字，脱离停靠，父线和其他文字不变。绘图 properties 增加 angle_deg、docked；继承图层或非直角的原始旋转暂拒绝。规划绕文字插入点旋转外框并平移，页界不明或越界拒绝。输出 moves 增加 propertyId/propertyIndex/beforeAngle/angle；沿相同审批、完整页指纹、事务、提交前后读回和一步撤销流程，no-op 无撤销步。Small/Medium 覆盖同父同属性多项、角度/位置/旁项错误及 stale；Large 新页电缆竖排和 PNG 仅编写，未运行。
 默认符号文字属于只读库（A57，D4 失败日志），执行时在同一事务内先复制为父符号的本地属性放置，再按属性/序号重新取得选定文字。绘图文字以父对象号及属性/序号、内容几何摘要定位，复制本身不改变其绘图身份；完整页读回、旁项不变和回滚核验照常执行。此修复已补离线回归，实机组合仍待复验。
 ## 预览与错误
-A75：移动 Cable 时，其旧交叉处的同名 ConnectionDefinitionPoint 不作为移动子项，也不要求保持 OID。定义线的位置和外框仍须按计划位移，旧定义点须消失，移动后的每个导线交叉须恰有一个属于该电缆的定义点（按 reader 的 name 比较）；其他文字、引脚、逻辑连接及范围外放置继续逐项核验。单独移动 ConnectionDefinitionPoint 仍保持原身份校验。定义线几何不可读时仅报告未验证，不以缺失证据判违规。
+A75：移动闭包含 Cable 时，按移动前或移动后 reader 的 name 归属该电缆的全部 ConnectionDefinitionPoint 排除在闭包身份、放置数量和跟随比较之外；旧点可以暂留，新点可以新增，成员归属待生成连接后整理。Cable 定义线的位置、外框及自身文字仍须按计划位移，其余放置、另一电缆的定义点、引脚和逻辑连接继续逐项核验。结果 warning 提示：`Cable definition points are reconciled by eplan_connection_generate; run it, then eplan_page_review to confirm core membership.` 单独移动 ConnectionDefinitionPoint 仍保持原严格校验。缺失或不可读的归属证据只报告未验证，不判违规。
 A72：属性放置读回附带 `properties.displayed_property_id`，用于区分只读计算值与可写文字。同名中断点组内确有位置改变时，只允许其 20201 块属性的 text/display 与摘要重算；点数、名称、父归属、位置、外框及其余属性仍精确核验。失败恢复仍须核对原始完整指纹。
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 返回 `execution=not_started,dryRun=true,noOp`、栅格/`Page.Size`、闭包逐对象 locator/parent/before/requested/after/snapped/bounds，以及 `graphicalChanges` 的引脚/前后线段、`connectionChanges` 的受影响逻辑端点对和完整页 fingerprint。零增量/同绝对位置保持原位（即使原位不在栅格），或吸附回原位为 no-op，不创建事务。

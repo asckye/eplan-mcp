@@ -52,50 +52,18 @@ public static class PlacementMoveExecution
         }
         DrawingPlacement[] movedCables = scene.Page.Placements.Where(p => p.Kind == "Cable" && rows.Any(r => DrawingLocators.Matches(
             r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, p.Locator) && !JToken.DeepEquals(r["before"], r["after"]))).ToArray();
-        bool CablePoint(DrawingPlacement point, DrawingPlacement cable) => point.Kind == "ConnectionDefinitionPoint"
-            && cable.Properties.TryGetValue("name", out string? name) && !string.IsNullOrWhiteSpace(name)
-            && point.Properties.TryGetValue("name", out string? owner) && string.Equals(name, owner, StringComparison.Ordinal);
-        var oldCablePoints = new HashSet<DrawingPlacement>();
-        foreach (DrawingPlacement cable in movedCables)
-        {
-            double[][]? crossings = PlacementMovePlanner.CableCrossings(cable, scene.Graphical);
-            foreach (DrawingPlacement point in expected.Page.Placements.Where(p => CablePoint(p, cable)
-                && (crossings is null || crossings.Any(c => c.SequenceEqual(p.Location)))))
-            { oldCablePoints.Add(point); }
-        }
-        expected.Page.Placements.RemoveAll(oldCablePoints.Contains);
         void Verify(bool committed)
         {
             ConnectionCreatePlanner.Scene actual = Read();
+            // A75: points can be added before old crossings/core membership are reconciled by generation.
+            DrawingPlacement[] cables = movedCables.Concat(actual.Page.Placements.Where(p => p.Kind == "Cable"
+                && movedCables.Any(c => c.Locator.Type == p.Locator.Type && c.Locator.Oid == p.Locator.Oid))).ToArray();
+            expected.Page.Placements.RemoveAll(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c)));
+            actual.Page.Placements.RemoveAll(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c)));
             LayoutGuard.Model actualLayout = LayoutGuard.From(actual);
             if (!committed)
             { actualLayout.Lines = expected.Graphical.Select(s => new LayoutGuard.Segment { Points = s }).ToList(); }
             plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(beforeLayout, actualLayout)));
-            foreach (DrawingPlacement cable in movedCables)
-            {
-                DrawingPlacement moved = expected.Page.Placements.Single(p => p.Kind == "Cable" && p.Locator.Type == cable.Locator.Type && p.Locator.Oid == cable.Locator.Oid);
-                double[][]? crossings = PlacementMovePlanner.CableCrossings(moved, expected.Graphical);
-                DrawingPlacement[] oldPoints = oldCablePoints.Where(p => CablePoint(p, cable)).ToArray();
-                if (crossings is null || PlacementMovePlanner.CableCrossings(cable, scene.Graphical) is null
-                    || !cable.Properties.TryGetValue("name", out string? name) || string.IsNullOrWhiteSpace(name))
-                {
-                    plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], "Cable crossing verification is unverified: definition line or cable designation is unreadable."]);
-                    expected.Page.Placements.RemoveAll(p => CablePoint(p, cable));
-                    actual.Page.Placements.RemoveAll(p => CablePoint(p, cable));
-                    continue;
-                }
-                if (oldPoints.Any(p => actual.Page.Placements.Any(a => a.Locator.Type == p.Locator.Type && a.Locator.Oid == p.Locator.Oid)))
-                { throw Mismatch("old cable definition point remains"); }
-                DrawingPlacement[] points = actual.Page.Placements.Where(p => CablePoint(p, cable)).ToArray();
-                if (oldPoints.Any(p => points.Any(a => a.Location.SequenceEqual(p.Location)) && !crossings.Any(c => c.SequenceEqual(p.Location))))
-                { throw Mismatch("definition point remains at an old cable crossing"); }
-                foreach (double[] crossing in crossings)
-                {
-                    if (points.Count(p => p.Location.SequenceEqual(crossing)) != 1)
-                    { throw Mismatch("cable crossing must have exactly one definition point for " + name); }
-                }
-                actual.Page.Placements.RemoveAll(p => CablePoint(p, cable) && crossings.Any(c => c.SequenceEqual(p.Location)));
-            }
             var measuredBounds = new List<(JToken Row, double[]? Bounds)>();
             if (actual.Page.Placements.Count != expected.Page.Placements.Count)
             { throw Mismatch("placement count"); }
