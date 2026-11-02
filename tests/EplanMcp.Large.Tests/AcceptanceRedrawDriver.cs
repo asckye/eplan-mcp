@@ -792,8 +792,8 @@ internal sealed class AcceptanceRedrawDriver(
                 double x = point.GetProperty("position")[0].GetDouble() + display.GetProperty("offset_x_mm").GetDouble();
                 double y = point.GetProperty("position")[1].GetDouble() + display.GetProperty("offset_y_mm").GetDouble();
                 int id = display.GetProperty("property_id").GetInt32();
-                string? expected = id == 20213 ? card[card.LastIndexOf('-')..] : channel.GetProperty(id switch
-                { 20400 => "address", 20403 => "symbolicAddress", 20011 => "text", 20301 => "cardReference", 20300 => "mainReference", 20406 => "plugDesignation", _ => throw new InvalidOperationException("Unknown PLC display property.") }).GetString();
+                string? expected = id == 20213 ? card[card.LastIndexOf('-')..] : (channel.TryGetProperty(id switch
+                { 20400 => "address", 20403 => "symbolicAddress", 20011 => "text", 20301 => "cardReference", 20300 => "mainReference", 20406 => "plugDesignation", _ => throw new InvalidOperationException("Unknown PLC display property.") }, out JsonElement field) ? field.GetString() : null);
                 Check(() =>
                 {
                     JsonElement row = Assert.Single(drawings, d => d.GetProperty("kind").GetString() == "PropertyPlacement"
@@ -804,7 +804,11 @@ internal sealed class AcceptanceRedrawDriver(
                     string actual = row.GetProperty("properties").GetProperty("display").GetString()!;
                     output(FormattableString.Invariant($"PLC {Id(point)} property {id} at ({x}, {y}): {actual}"));
                     Assert.Equal("true", row.GetProperty("properties").GetProperty("visible").GetString());
-                    Assert.Equal(expected ?? "", actual);
+                    // Live d3 2026-11-02: a displayed reference drops the structure it shares with the page (=GAA), like SameName (A55).
+                    if (id == 20300 && !string.IsNullOrEmpty(expected))
+                    { Assert.True(SameName(expected, actual), FormattableString.Invariant($"20300 shows '{actual}' for '{expected}'")); }
+                    else
+                    { Assert.Equal(expected ?? "", actual); }
                 }, Id(point) + "/display_properties/" + id.ToString(System.Globalization.CultureInfo.InvariantCulture));
             }
         }
