@@ -15,6 +15,15 @@ namespace EplanMcp.Host.Tools;
 internal sealed class ConnectionCreateTools
 {
     public const string Tool = "eplan_connection_create";
+    /// <summary>
+    /// Live 2026-11-02 (d3 acceptance): a cable batch commits six times with full-page readbacks and took 66.5 s on a
+    /// dense page, past the 60 s write limit, which left its outcome unknown.
+    /// </summary>
+    internal static readonly TimeSpan CableLimit = TimeSpan.FromSeconds(180);
+    internal static TimeSpan Limit(JsonElement[] items) => items.Any(i => i.ValueKind == JsonValueKind.Object
+        && i.TryGetProperty("kind", out JsonElement kind) && kind.ValueKind == JsonValueKind.String && kind.GetString() == "cable_definition")
+        ? CableLimit : PageWriteTools.DefaultLimit;
+
     [McpServerTool(Name = Tool, Title = "Create connection symbols and explicit wire paths", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     [Description("Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies geometry, endpoints and core labels/colours. Undo steps: interruption calls 1 (also for ends without counterpart devices); wires: 2 undo steps; cables: 6-8. Failure undoes this call. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IBridgeClient bridge,
@@ -29,7 +38,7 @@ internal sealed class ConnectionCreateTools
         try
         {
             var request = new WriteRequest<object, object>(Tool, ToolTier.Write, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionCreateExecute,
-                args, plan => new { request = args, fingerprint = plan.Fingerprint }, dry_run, PageWriteTools.DefaultLimit, "Creating connections");
+                args, plan => new { request = args, fingerprint = plan.Fingerprint }, dry_run, Limit(items), "Creating connections");
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<object, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
             result["execution"] = outcome.Execution;

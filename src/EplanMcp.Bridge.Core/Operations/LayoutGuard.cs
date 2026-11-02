@@ -240,8 +240,17 @@ public static class LayoutGuard
         ? "Layout after write: R1-R9 on measured bounds, text metadata and routes. "
         : "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. ")
         + (model.DrawingArea is null ? "Boundary fallback: Page.Size minus layout.marginMm." : "Boundary: plot-frame drawing area.");
-    public static string Summary(IEnumerable<string?> messages) => string.Join("\n", messages.Where(s => !string.IsNullOrEmpty(s)).SelectMany(s => s!.Split('\n'))
-        .Distinct(StringComparer.Ordinal).OrderBy(s => s.StartsWith("Layout ", StringComparison.Ordinal) ? 0 : 1));
+    internal const int SummaryLines = 20;
+    public static string Summary(IEnumerable<string?> messages)
+    {
+        string[] lines = [.. messages.Where(s => !string.IsNullOrEmpty(s)).SelectMany(s => s!.Split('\n'))
+            .Distinct(StringComparer.Ordinal).OrderBy(s => s.StartsWith("Layout ", StringComparison.Ordinal) ? 0 : 1)];
+        // Live 2026-11-02: an uncapped page-wide summary can push a write result past its token budget, which then drops
+        // verification fields such as actualCores. Keep the first lines and say how many were left out.
+        return lines.Length <= SummaryLines ? string.Join("\n", lines)
+            : string.Join("\n", lines.Take(SummaryLines)) + "\n"
+                + FormattableString.Invariant($"Layout: {lines.Length - SummaryLines} more warnings not shown; run eplan_page_review on the page for the full list.");
+    }
     public static List<string> AfterWriting(Model before, Model? actual = null)
     {
         actual ??= before.ReadActual?.Invoke() ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Actual layout reader is unavailable; roll back the write.");
