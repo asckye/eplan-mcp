@@ -16,7 +16,7 @@ public sealed class BatchVerificationTests
         string[] actions = ["TestAction", "TestAction"];
         BatchEntry[] entries = BatchValues.Entries(actions);
         Dictionary<string, int> expected = BatchValues.ExpectedCounts(entries);
-        string[] properties = [.. ApiTryCatalog.PropertyGroups.Where(g => ApiTryCatalog.MethodAccess(g) is null)];
+        string[] properties = [.. ApiTryCatalog.PropertyGroups.Where(g => !ApiTryCatalog.MethodGroups.Contains(g, StringComparer.Ordinal))];
         string[] methods = ApiTryCatalog.MethodGroups;
         Assert.Equal(properties.Length + methods.Count(m => ApiTryCatalog.MethodAccess(m) == "read"), expected["api-read"]);
         Assert.Equal(properties.Count(p => ApiTryCatalog.ValueShape(p) is not null) + methods.Count(m => ApiTryCatalog.MethodAccess(m) == "write"), expected["api-write"]);
@@ -48,6 +48,9 @@ public sealed class BatchVerificationTests
     {
         foreach (BatchEntry entry in BatchValues.ApiEntries())
         {
+            // Indexed chain properties have no plain shape; their handle receiver needs a source call first.
+            if (entry.Signature is null && ApiTryCatalog.Shape(entry.Group) is null)
+            { Assert.Empty(entry.ObjectKinds!); Assert.True(entry.NeedsContext); continue; }
             string signature = entry.Signature ?? ApiTryCatalog.Shape(entry.Group)![1];
             string[]? receiver = ApiTryCatalog.ReceiverShape(signature);
             if (receiver is null)

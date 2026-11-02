@@ -42,7 +42,9 @@ internal static class BatchValues
     internal static BatchEntry[] ApiEntries()
     {
         var entries = new List<BatchEntry>();
-        foreach (string group in ApiTryCatalog.PropertyGroups.Where(g => ApiTryCatalog.MethodAccess(g) is null).Order(StringComparer.Ordinal))
+        // Property groups dispatched as methods are trialled in the method loop; indexed chain properties (read-only, a
+        // handle-method access but no MethodGroups row) stay here and need a handle context.
+        foreach (string group in ApiTryCatalog.PropertyGroups.Where(g => !ApiTryCatalog.MethodGroups.Contains(g, StringComparer.Ordinal)).Order(StringComparer.Ordinal))
         {
             string[]? kinds = ObjectKinds(group);
             entries.Add(new(group, "api-read", kinds));
