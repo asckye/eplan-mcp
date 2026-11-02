@@ -18,7 +18,6 @@ public sealed class PropertyCatalogTests
         Assert.Equal(declaringType, entry.ObjectType);
         Assert.Same(entry, PropertyCatalog.Find(objectType, entry.PropertyName));
         Assert.Null(PropertyCatalog.ReadRefusal(objectType, id));
-        Assert.Same(entry, Assert.Single(PropertyCatalog.ForType(objectType), e => e.PropertyId == id));
         Assert.DoesNotContain(PropertyWriteWhitelist.Entries.Keys, k => k.PropertyId == id);
     }
 

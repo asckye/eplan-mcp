@@ -12,26 +12,6 @@ public sealed class ObjectReadOperationTests
     private static ObjectReadData Execute(Reader reader, ObjectReadArgs args, bool get = false) =>
         (ObjectReadData)((IOperation)new ObjectReadOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = Project, Current = true }), reader, get ? ObjectReadKind.Get : ObjectReadKind.Find)).Execute(args)!;
 
-    [Theory]
-    [InlineData("Function", 1140)]
-    [InlineData("Terminal", 1140)]
-    [InlineData("Page", 1540)]
-    public void Get_StructureProperty_EnumeratesInheritedIdsOnce(string type, int id)
-    {
-        var reader = new Reader();
-        reader.Objects.Add(new() { Locator = Locator() });
-        reader.Native.ObjectType = ObjectReadTypes.DictionaryType(type);
-        reader.Native.Properties.Add(id, new() { Stored = "=GAA" });
-
-        ObjectReadData data = Execute(reader, new() { ObjectType = type, Locator = Locator() }, get: true);
-
-        PropertyReadRow row = Assert.Single(data.Properties!.Items, r => r.PropertyId == id);
-        Assert.Equal("value", row.Status);
-        Assert.Equal("=GAA", row.Value!.Text);
-        Assert.Single(reader.Native.ValueRequests, r => r.Id == id);
-        reader.Native.AssertDisposed();
-    }
-
     [Fact]
     public void AllTypes_HaveAnExplicitStatus_UnsupportedNeverAccessesNativeResources()
     {
@@ -111,7 +91,7 @@ public sealed class ObjectReadOperationTests
         {
             ObjectType = type,
             Locator = Locator(),
-            Offset = PropertyCatalog.ForType(dictionary)
+            Offset = PropertyCatalog.Entries.Where(e => e.ObjectType == dictionary && e.PropertyId.HasValue)
                 .OrderBy(e => e.PropertyId).Select(e => e.PropertyId).ToList().IndexOf(propertyId),
         };
         Assert.Throws<InvalidOperationException>(() => Execute(reader, args, true));

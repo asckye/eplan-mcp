@@ -25,11 +25,6 @@ public static class PropertyCatalog
     public static PropertyDictionaryEntry? Find(string objectType, string propertyName) =>
         Find(objectType, propertyName, _byName);
 
-    /// <summary>Public-ID rows from the object's property list and its bases, preferring the nearest declaration.</summary>
-    public static IEnumerable<PropertyDictionaryEntry> ForType(string objectType) => ObjectTypes(objectType)
-        .SelectMany(type => Entries.Where(e => e.ObjectType == type && e.PropertyId.HasValue))
-        .GroupBy(e => e.PropertyId).Select(g => g.First());
-
     private static PropertyDictionaryEntry? Find<T>(string objectType, T key,
         Dictionary<(string, T), PropertyDictionaryEntry> entries)
     {
