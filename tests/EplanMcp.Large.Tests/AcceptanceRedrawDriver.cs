@@ -146,6 +146,9 @@ internal sealed class AcceptanceRedrawDriver(
             { args["cursor"] = cursor; }
             JsonElement review = await ReadAsync("eplan_page_review", args);
             JsonElement summary = review.GetProperty("summary");
+            // Customer run 2026-11-02: a count mismatch must show the findings themselves.
+            foreach (JsonElement issue in review.GetProperty("issues").EnumerateArray())
+            { output("Review issue: " + issue.GetRawText()); }
             Assert.Equal(0, summary.GetProperty("errors").GetInt32());
             Assert.Equal(warnings, summary.GetProperty("warnings").GetInt32());
             Assert.Equal(warnings == 0, summary.GetProperty("clean").GetBoolean());
