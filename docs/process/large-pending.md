@@ -7,10 +7,7 @@
 | 官方 action 离线导入（`feat/official-actions`，2026-11-01 负责人 brief） | `BatchVerification`、`ActionTryTests`、`ActionCatalogTests` | 待运行：批量 action 仅取官方 action/TYPE 行，按第一条官方示例准备参数；需要文件、页或选择上下文仍为 needs_context。此次禁止运行 EPLAN；审批、scratch、unknown 停止与撤销断言保留。 |
 | 崩溃成员拒绝与失联停跑（`feat/crash-refusals`，2026-11-02，负责人 brief；A77） | `BatchVerification`、`ApiTryTests` | 待运行：本次禁止运行 EPLAN；拒绝写侧、保留 MacroBox 读取、失联后停止并持久暂停需验证。崩溃成员不再试执行，原生 target/value 未提供，不宣称复现原生崩溃。 |
 | 批量验证与 main 生成表合并（`feat/batch-verify`，2026-11-01，负责人 brief） | `BatchVerification`、`ApiTryTests`、`ActionTryTests` | 进行中：2026-11-01 已落地 main 68e9f61b，首批 10-31 结果导入后实机验证计数 171 → 228；当夜两槽循环续跑（单次运行在结果未知或状态不可信的条目处按设计停止并换新副本续跑），次日汇总导入。 |
-| 页面审查实机回归修复（2026-11-01，A75，B 槽） | `PageReviewTests`、`LayoutGuardTests`、`DevicePlaceTests`、`ConnectionCreateTests`、`CableDefinitionTests`、`DanglingInterruptionTests`、`MacroInsertTests`、`PlacementTextCreateTests`、`PlacementMoveTests`、`PlacementEditSpikeTests`、`AcceptanceRedrawTests` | 待运行：负责人本轮结果为 PageReviewTests 7/9、PlacementMove 1/1、ConnectionCreate 14/14；本次禁止 EPLAN。Cable 定义线 `[[80,128],[160,128]]` 平移 `(0,64)`，应删除 `59/69845` 并在 `(120,192)` 重建同名 `+A1-WReview103` 定义点，保留文字/引脚/连接闭包、回滚和撤销历史校验。dangling 是 `DynamicConnectionLine`（继承 SymbolReference、type 33）被误分类导致 R2 拒绝的产品缺陷；排除其布局符号和容器身份，保留已有 R3/R4 线几何，须以原测试场景复验 BAT 引脚接线端及真实符号重叠拒绝。Small/Medium 和编译不代替本次实机复验，主线程耗时未测。 |
 | 移动后重新分配电缆芯线（后续，2026-11-02 A73） | `PageReviewTests`（cable 场景） | 待设计：移动电缆会丢失芯线归属且生成不恢复；先做一次探测（产品建的带芯线模板电缆，移动、生成后试原生绑定与重新分配导线），确认后再定修复工具。当前 cable 场景只验证检测与目标坐标，修复步骤跳过。 |
-| 页面审查实机回归修复（2026-11-01，A75，B 槽；含 Cable 定义点延后整理修复） | `PageReviewTests`、`LayoutGuardTests`、`DevicePlaceTests`、`ConnectionCreateTests`、`CableDefinitionTests`、`DanglingInterruptionTests`、`MacroInsertTests`、`PlacementTextCreateTests`、`PlacementMoveTests`、`PlacementEditSpikeTests`、`AcceptanceRedrawTests` | 待运行：负责人后续结果为 PageReviewTests 8/9（dangling 通过）、PlacementMove 1/1、acceptance 13 阶段完成；此前 ConnectionCreate 14/14。本次禁止 EPLAN。Cable 定义线 `[[80,128],[160,128]]` 平移 `(0,64)` 仍因 placement count 回滚：旧点 `59/69845` 可暂留 `(120,128)`，新点在 `(120,192)` 新增，reader name 为 `+A1-WReview103`；旧点及芯线归属在生成连接后整理。本次排除该电缆定义点的闭包身份、数量与跟随比较，保留定义线、自身文字、其他放置和另一电缆定义点的校验；需以匹配插件复跑移动→生成连接→审查及回滚、单步撤销和既有历史。其他受影响类及真实符号重叠拒绝仍待复验。Small/Medium 和编译不代替本次实机复验，主线程耗时未测。 |
-| `feat/page-review` 变基合并与电缆分支坐标修复（2026-11-01，规格 `eplan_page_review.md`） | `PageReviewTests`、`AcceptanceRedrawTests`、`LayoutGuardTests`、`ConnectionCreateTests`、`CableDefinitionTests`、`PlacementMoveTests`、`DanglingInterruptionTests`、`NoSideEffectTests` | 待运行：负责人要求本次不启动 EPLAN。保留 main 布局守卫、T 节点穿通、Cable/定义点移动豁免及 39 步验收绘法；Small 复现 A75 三引脚 `(120,160)/(120,160)/(122,160)`，修复由路径及 Cable 定义线计算 `y=128→192`，非平行/缺失证据不给坐标。main 已连接 terminal7/link1 且不创建旧辅助器件，审查预期清单据此移除三条旧空引脚警告，25 条警告仍须完整分页实机核对，不代表已通过。需核对定义线读回、修复后芯线归属、同一步回滚与既有撤销历史；主线程耗时未测。 |
 | C1 服务入口（历史 brief/提交待补定位；security.md 第 5 节） | `ApiTryTests` | 待运行：服务读、写撤销与相关失败路径；测试已写，尚无实机结果。 |
 | C2 未验证 action（历史 brief/提交待补定位；security.md 第 5 节） | `ActionTryTests` | 待运行：scratch 限定、审批、事务、模态/unknown 等；规范注明 Large 已写待运行。 |
 | P06 功能与影响闭包（历史 brief/提交待补定位） | `PlanFunctionsTests`、`PlanImpactTests` | 待运行：Large README 明确尚未实跑；保留完整性与边界断言，缺页证据的现有拒绝行为需按当前常设规则另行评审，不在文档任务中弱化测试。 |
@@ -27,6 +24,7 @@
 
 ## 最近移出（已实机通过）
 
+- 2026-11-02，页面审查第 1 片（含 Cable 定义点修复、电缆建议改为重画）：`PageReviewTests` 8 项通过、cable 修复步骤按设计跳过，`PlacementMoveTests` 1/1，`AcceptanceRedrawTests` 按已知跳过结束（B 槽 Pro Panel），main 714d6200
 - 2026-11-01，句柄链与设置文本修复：`ApiTryTests` 13/13（A 槽 Electric P8，变基到含生命周期的 main 后），main c5672ab9
 - 2026-11-01，原生前置条件、无效对象枚举与事务诊断：`ApiTryTests` 10/10、`DevicePlaceTests` 8/8（B 槽 Pro Panel，合并设置/句柄后）；此前 A 槽 8/8、7/7、`ConnectionCreateTests` 14/14、`PlacementMoveTests` 1/1，main 0113de9d
 - 2026-11-01，数组/out 与设置、句柄、原生前置条件合并：`ApiTryTests` 11/11（B 槽，含 `ScratchCopy_ArrayWriteOneUndoRestoresGeometryAndEarlierHistory`），main c13de0fe
