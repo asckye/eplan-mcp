@@ -31,6 +31,12 @@ dotnet run --project eng\catalog\EplanMcp.Catalog -- extract --sdk "<EPLAN 安�
 | `mapping/tools.json` | 每个 MCP 工具 → Bridge 操作 → EPLAN API，附规格、测试、api-notes 引用和实机记录 | `generate` |
 | `coverage.json`、`../docs/eplan/coverage-report.md` | 按层次、命名空间、对象类型、工具的覆盖统计，口径见设计文档第 3、4 节 | `generate` |
 
+`coverage.json` 的 `reachability` 是独立的可调用汇总，不改变既有 layers 和 units 状态。
+`operation` 的 tools（沿用 implemented）、apiTry、callable（两者并集）均限于 overlay 排除后的同一分母；
+outsideDenominator 按原因列出未计入的 api_try 辅助组。operationsByNamespace 给出各命名空间的 callable。
+`action` 的 actionTry 按已提交 action 行及试执行的离线名称、拒绝与白名单规则统计，不包含本机 UI 动态目录。
+`schema/` 的现有 schema 只描述原始目录，不覆盖 `coverage.json`。
+
 ```powershell
 dotnet run --project eng\coverage -- scan       # 扫描 Bridge，结束后自动运行 generate
 dotnet run --project eng\coverage -- generate   # 由提交的文件重新生成其余三个文件，不需要 EPLAN

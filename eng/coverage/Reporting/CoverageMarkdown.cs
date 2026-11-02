@@ -39,11 +39,25 @@ internal static class CoverageMarkdown
             Line();
         }
 
+        if (report.SdkCatalog)
+        {
+            Line($"**{report.Reachability!.Headline(report.Layers["operation"].LiveVerified)}**");
+            Line();
+        }
+
         Line("> 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。");
         Line($"> 输入：目录 `{report.Catalog}/`（SDK 部分{(report.SdkCatalog ? "已提交" : "**尚未提交**")}，action 部分{(report.ActionCatalog ? "已提交" : "**尚未提交**")}）；`catalog/mapping/bridge-usage.json`（{usage.ScannedOn} 在 EPLAN {usage.EplanApi} 的程序集上扫描，Bridge 源码 {usage.ScannedSources}）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。");
         Line();
         Line("## 口径");
+        Line("- 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。");
+        Line("- action_try 只统计已提交 action 目录中、分母内符合 ActionTryTools.Check 离线规则的行：合法名称与 TYPE、未被 ActionTryPolicy 拒绝、未排除、且不在已发布 action 白名单。未计本机 UI 动态目录，运行时上下文、参数与审批仍须满足；与工具到达的行可能重叠，不直接相加。");
+        OperationReachability operationReachability = report.Reachability!.Operation;
+        Line($"- api_try 在操作层分母外还可到达 {operationReachability.OutsideDenominator.Values.Sum()} 组，不加入可调用数或分母；原因：{(operationReachability.OutsideDenominator.Count == 0 ? "无" : string.Join("，", operationReachability.OutsideDenominator.Select(p => (p.Key == "not_in_operation_layer" ? "不属于操作层重载组（辅助类型或依赖成员）" : p.Key) + "：" + p.Value.ToString(CultureInfo.InvariantCulture))))}。");
         Line("- C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。");
+        if (report.SdkCatalog && !File.Exists(Path.Combine(repositoryRoot, report.Catalog, "summary.json")))
+        {
+            Line("- api_try 选择所需的 summary.json 缺失，汇总暂未计入 api_try；这是证据缺口，不表示这些组不能试调用。");
+        }
         if (File.Exists(Path.Combine(repositoryRoot, report.Catalog, "summary.json")))
         {
             string[][] trials = [.. ApiTryGenerator.Report(repositoryRoot).Split('\n').Skip(1).Where(l => l.Length > 0).Select(l => l.Split('\t'))];
@@ -110,6 +124,8 @@ internal static class CoverageMarkdown
 
         if (report.ActionCatalog)
         {
+            ActionReachability action = report.Reachability.Action;
+            Line($"- action {action.Denominator} 行：工具到达 {action.Tools}，action_try 可尝试 {action.ActionTry}（离线规则，不代表实机验证）。");
             Line($"- action 名称：Bridge 用到 {report.ActionNames.Used} 个，没有整个排除的 action 共 {report.ActionNames.Registered} 个。");
         }
 
@@ -127,9 +143,10 @@ internal static class CoverageMarkdown
         }
         else
         {
-            Line("| 命名空间（overlay 排除后） | 分母 | implemented | live_verified |");
-            Line("|---|---:|---:|---:|");
-            report.OperationsByNamespace.ToList().ForEach(s => Line($"| `{s.Scope}` | {s.Denominator} | {Pct(s.Implemented, s.Denominator)} | {s.LiveVerified} |"));
+            Line("| 命名空间（overlay 排除后） | 分母 | implemented | callable | live_verified |");
+            Line("|---|---:|---:|---:|---:|");
+            Dictionary<string, int> callable = report.Reachability.OperationsByNamespace.ToDictionary(s => s.Scope, s => s.Callable, StringComparer.Ordinal);
+            report.OperationsByNamespace.ToList().ForEach(s => Line($"| `{s.Scope}` | {s.Denominator} | {Pct(s.Implemented, s.Denominator)} | {Pct(callable[s.Scope], s.Denominator)} | {s.LiveVerified} |"));
             Line();
             UnitCoverage[] objects = [.. report.Units.Where(u => u.Layer == ApiCatalog.DataDictionary)];
             Line($"数据字典中已实现的对象类型（{objects.Length} 个）：{(objects.Length == 0 ? "无" : string.Join("、", objects.Select(u => $"{u.Unit[2..]}（{u.Status}）")))}。");

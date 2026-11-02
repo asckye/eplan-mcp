@@ -71,6 +71,15 @@ internal static partial class ApiTryGenerator
             .SelectMany(e => e.Details.Where(d => d.Kind == "overload").Select(d => e.Row.Group + "\t" + d.Id + "\t"
                 + (Exclusion(e, d, enums, kinds, services) is { } reason ? "excluded\t" + reason : e.Details.Count(o => o.Kind == "overload" && Names(o) == Names(d) && Exclusion(e, o, enums, kinds, services) is null) != 1 ? "excluded\tambiguous_parameter_names" : Classification(e, services.ContainsKey(e.Type[2..])))))) + "\n")));
     }
+    internal static string[] PropertyGroups(string root)
+    {
+        ApiIndexData data = Data(root);
+        return PropertyGroups(Selected(data, Enums(root), ObjectKindGenerator.Kinds(root)), EntrySelected(EntryData(root)), Handles(root).Members);
+    }
+    private static string[] PropertyGroups(IEnumerable<(ApiEntry Entry, ApiDetail Member)> selected,
+        IEnumerable<(ApiEntry Entry, ApiDetail Member)> entries, IEnumerable<(ApiEntry Entry, ApiDetail Member)> handles) =>
+        [.. selected.Concat(entries.Where(s => s.Entry.Row.Kind == "property")).Concat(handles.Where(s => s.Entry.Row.Kind == "property"))
+            .Select(s => s.Entry.Row.Group).Distinct(StringComparer.Ordinal)];
     private static string BaseCatalog(string root)
     {
         ApiIndexData data = Data(root);
@@ -97,7 +106,7 @@ internal static partial class ApiTryGenerator
             + string.Join("\n", methods.Select(s => "        (" + Literal(s.Entry.Row.Group) + ", " + Literal(Names(s.Member)) + ") => [" + string.Join(", ", CallShape(s.Entry, s.Member).Select(Literal)) + "],"))
             + "\n        _ => EntryMethodShape(group, names) ?? HandleMethodShape(group, names),\n    });\n    public static string[][] Methods(string group) => System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(SettingsMethods(group), group switch\n    {\n"
             + string.Join("\n", methods.Concat(entries.Where(s => s.Entry.Row.Kind == "method")).Concat(handles.Where(s => HandleCallable(s.Entry, s.Member))).DistinctBy(s => s.Member.Signature).GroupBy(s => s.Entry.Row.Group).Select(g => "        " + Literal(g.Key) + " => [" + string.Join(", ", g.Select(s => "[" + string.Join(", ", CallShape(s.Entry, s.Member).Select(Literal)) + "]")) + "],"))
-            + "\n        _ => EntryMethods(group),\n    }));\n    public static string[] PropertyGroups => [" + string.Join(", ", selected.Concat(entries.Where(s => s.Entry.Row.Kind == "property")).Concat(handles.Where(s => s.Entry.Row.Kind == "property")).Select(s => s.Entry.Row.Group).Distinct(StringComparer.Ordinal).Select(Literal)) + "];\n    public static string? ExclusionReason(string group) => group switch\n    {\n"
+            + "\n        _ => EntryMethods(group),\n    }));\n    public static string[] PropertyGroups => [" + string.Join(", ", PropertyGroups(selected, entries, handles).Select(Literal)) + "];\n    public static string? ExclusionReason(string group) => group switch\n    {\n"
             + string.Join("\n", data.Entries.Where(e => !dispatchable.Contains(e.Row.Group)).Select(e => "        " + Literal(e.Row.Group) + " => " + Literal(Reason(e)) + ","))
             + "\n        _ => null,\n    };\n    public static string? MethodAccess(string group) => Settings(group) ? \"read\" : group switch\n    {\n"
             + string.Join("\n", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => "        " + Literal(s.Entry.Row.Group) + " => " + Literal(ReadMethod(s.Entry) ? "read" : "write") + ","))

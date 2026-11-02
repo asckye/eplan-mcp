@@ -15,7 +15,8 @@ internal static class ApiIndexGenerator
     internal static string Render(string root) => Encode(Data(root));
     internal static ApiIndexData Data(string root)
     {
-        CoverageReport report = CoverageReport.Build(root);
+        // Trial selection depends on this index; only the outer report computes reachability.
+        CoverageReport report = CoverageReport.Build(root, includeReachability: false);
         ToolMapping mapping = ToolMapping.Build(root);
         string directory = Path.Combine(root, report.Catalog);
         ApiCatalog catalog = ApiCatalog.Load(directory);

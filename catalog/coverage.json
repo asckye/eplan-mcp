@@ -21328,5 +21328,93 @@
       "date": "2026-10-31",
       "eplan": "2026.0.3.25421"
     }
+  },
+  "reachability": {
+    "operation": {
+      "denominator": 4014,
+      "tools": 1340,
+      "apiTry": 1703,
+      "callable": 1981,
+      "outsideDenominator": {}
+    },
+    "action": {
+      "denominator": 137,
+      "tools": 7,
+      "actionTry": 35
+    },
+    "operationsByNamespace": [
+      {
+        "scope": "Eplan.EplApi.ApplicationFramework",
+        "callable": 9
+      },
+      {
+        "scope": "Eplan.EplApi.Base",
+        "callable": 103
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel",
+        "callable": 796
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel.E3D",
+        "callable": 270
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel.EObjects",
+        "callable": 72
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel.Graphics",
+        "callable": 312
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel.Helpers",
+        "callable": 0
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel.MasterData",
+        "callable": 40
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel.Planning",
+        "callable": 101
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel.Revisions",
+        "callable": 18
+      },
+      {
+        "scope": "Eplan.EplApi.DataModel.Topology",
+        "callable": 14
+      },
+      {
+        "scope": "Eplan.EplApi.EServices",
+        "callable": 29
+      },
+      {
+        "scope": "Eplan.EplApi.EServices.Ged",
+        "callable": 4
+      },
+      {
+        "scope": "Eplan.EplApi.HEServices",
+        "callable": 189
+      },
+      {
+        "scope": "Eplan.EplApi.HEServices.Exceptions",
+        "callable": 0
+      },
+      {
+        "scope": "Eplan.EplApi.MasterData",
+        "callable": 24
+      },
+      {
+        "scope": "Eplan.EplApi.Starter",
+        "callable": 0
+      },
+      {
+        "scope": "Eplan.EplApi.System",
+        "callable": 0
+      }
+    ]
   }
 }

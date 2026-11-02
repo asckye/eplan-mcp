@@ -10,6 +10,20 @@ public sealed class CoverageReportTests : IDisposable
     private readonly TempRepository _repository = ReportFixture.Create();
 
     [Fact]
+    public void Build_ReachabilitySummaryPreservesAllExistingCoverageData()
+    {
+        CoverageReport before = CoverageReport.Build(_repository.Root, includeReachability: false);
+        CoverageReport after = CoverageReport.Build(_repository.Root);
+
+        Assert.Equivalent(before.Layers, after.Layers);
+        Assert.Equivalent(before.Units, after.Units);
+        Assert.Equal(before.OperationsByNamespace, after.OperationsByNamespace);
+        Assert.Null(before.Reachability);
+        Assert.Equal(before.Layers["operation"].Denominator, after.Reachability!.Operation.Denominator);
+        Assert.Equal(before.Layers["operation"].Implemented, after.Reachability.Operation.Tools);
+    }
+
+    [Fact]
     public void Build_TheOperationLayer_CountsOverloadGroups_WithExclusionsStatedAndStatusesNested()
     {
         LayerCount operation = CoverageReport.Build(_repository.Root).Layers["operation"];

@@ -79,7 +79,9 @@ internal sealed class CoverageReport
 
     public IReadOnlyDictionary<string, VerificationRecord> Verification { get; init; } = new Dictionary<string, VerificationRecord>();
 
-    public static CoverageReport Build(string repositoryRoot)
+    public CallableCoverage? Reachability { get; init; }
+
+    public static CoverageReport Build(string repositoryRoot, bool includeReachability = true)
     {
         BridgeUsage usage = CoverageJson.Read<BridgeUsage>(Path.Combine(repositoryRoot, BridgeUsage.RelativePath));
         ToolMapping mapping = ToolMapping.Build(repositoryRoot);
@@ -185,6 +187,10 @@ internal sealed class CoverageReport
             ReachedByTool = overlay.ReachedByTool,
             Availability = overlay.Availability,
             Verification = verification,
+            Reachability = includeReachability ? CallableCoverage.Build(all, status,
+                File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.Report(repositoryRoot) : "",
+                File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.PropertyGroups(repositoryRoot) : [],
+                CallableCoverage.ActionWhitelist()) : null,
         };
     }
 

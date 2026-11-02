@@ -16,7 +16,10 @@ public sealed class CoverageMarkdownTests
         Assert.Contains("| 　其中对象属性 | 1 | — | 1 | 1 / 1（100.0%） |", report, StringComparison.Ordinal);
         Assert.Contains("| action（按行） | 3 | printing：1 | 2 | 1 / 2（50.0%） |", report, StringComparison.Ordinal);
         Assert.Contains("登记 5 组（其中 0 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4 组，再按 overlay 排除后 4 组", report, StringComparison.Ordinal);
-        Assert.Contains("| `Eplan.EplApi.Test.Planning` | 1 | 0 / 1（0.0%） | 0 |", report, StringComparison.Ordinal);
+        Assert.Contains("| `Eplan.EplApi.Test.Planning` | 1 | 0 / 1（0.0%） | 0 / 1（0.0%） | 0 |", report, StringComparison.Ordinal);
+        Assert.Contains("**操作层 4 组：可调用 3（工具 3，api_try 0），实机验证 1**", report, StringComparison.Ordinal);
+        Assert.Contains("action 2 行：工具到达 1，action_try 可尝试 0", report, StringComparison.Ordinal);
+        Assert.Contains("summary.json 缺失，汇总暂未计入 api_try；这是证据缺口", report, StringComparison.Ordinal);
         Assert.Contains("无文档的重载组（不在 IntelliSense 中，仍在分母里，Q2）：共 1 组", report, StringComparison.Ordinal);
         Assert.Contains("工具：1 / 2（50.0%），共 1 条记录", report, StringComparison.Ordinal);
         Assert.Contains("Bridge 用到、目录中却没有的 ID（1 个）：`M:Eplan.EplApi.Test.Page.Missing`", report, StringComparison.Ordinal);
