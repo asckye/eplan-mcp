@@ -262,9 +262,10 @@ public sealed class CableDefinitionPlannerTests
     private static void Missing(CableDefinitionFixture f) => Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeErrorException>(() => f.Plan()).Error.Reason);
 
     [Fact]
-    public void DrawnPath_RunsThroughNodeCentresOnly_AndIsNullWhenAmbiguous()
+    public void DrawnPath_RunsThroughNodePinsOnly_AndIsNullWhenAmbiguous()
     {
         var scene = new EplanMcp.Bridge.Core.Operations.ConnectionCreatePlanner.Scene();
+        scene.Page.Placements.Add(new() { Kind = "SymbolReference", Locator = new() { Type = 42, Oid = 9 } });
         scene.Pins["17/1/0"] = new() { Location = [10, 10], Direction = "Up" };
         scene.Pins["17/2/0"] = new() { Location = [30, 30], Direction = "Left" };
         foreach (int index in new[] { 0, 1, 2 })
@@ -287,9 +288,91 @@ public sealed class CableDefinitionPlannerTests
         scene.Graphical.Add([[10, 30], [30, 30]]);
         scene.Pins["43/8/0"] = new() { Location = [10, 20], Direction = "Up" };
         scene.Pins["43/8/1"] = new() { Location = [10, 20], Direction = "Down" };
+        scene.Page.Placements.Add(new() { Kind = "SymbolReference", Locator = new() { Type = 43, Oid = 8 } });
         scene.Graphical.Add([[10, 10], [10, 20]]);
         scene.Graphical.Add([[10, 20], [10, 30]]);
         Assert.Null(EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [10, 10], [30, 30])); // two routes
+    }
+
+    [Theory]
+    [InlineData(69842, 69844, "[[120,220],[120,160],[122,160],[200,160]]")]
+    [InlineData(69842, 69843, "[[120,220],[120,160],[120,100]]")]
+    [InlineData(69843, 69844, "[[120,100],[120,160],[122,160],[200,160]]")]
+    public void DrawnPath_LiveTNode_KeepsDistinctTrunkAndBranchPins(int fromOid, int toOid, string expected)
+    {
+        var scene = TNodeFixture.Scene();
+        double[] from = scene.Pins[$"17/{fromOid}/0"].Location, to = scene.Pins[$"17/{toOid}/0"].Location;
+        double[][] path = JArray.Parse(expected).Select(p => p.Values<double>().ToArray()).ToArray();
+        Assert.Equal(path, EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, from, to, out int count));
+        Assert.Equal(1, count);
+        Assert.Equal(path.Reverse(), EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, to, from));
+        scene.Graphical.Add([[200, 160], [122, 160]]);
+        Assert.Equal(path, EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, from, to));
+    }
+
+    [Theory]
+    [InlineData("Function")]
+    [InlineData("Terminal")]
+    [InlineData("PotentialDefinition")]
+    public void DrawnPath_DevicePins_NeverPassThroughEvenWhenCoincident(string kind)
+    {
+        var scene = TNodeFixture.Scene();
+        scene.Page.Placements[0].Kind = kind;
+        scene.Pins.Remove("13/423458/1");
+        foreach (bool coincident in new[] { false, true })
+        {
+            if (coincident)
+            {
+                scene.Pins["13/423458/2"].Location = [120, 160];
+                scene.Graphical[2][0] = [120, 160];
+            }
+            Assert.Null(EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [120, 220], [200, 160]));
+        }
+    }
+
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("zero")]
+    [InlineData("outside")]
+    [InlineData("wrong_owner")]
+    [InlineData("single_pin")]
+    public void DrawnPath_TNode_RequiresOwnPinsInsideMeasuredOutline(string gap)
+    {
+        var scene = TNodeFixture.Scene();
+        var node = scene.Page.Placements[0];
+        switch (gap)
+        {
+            case "missing":
+                node.Bounds = null;
+                break;
+            case "zero":
+                node.Bounds = [0, 0, 0, 0];
+                break;
+            case "outside":
+                node.Bounds![2] = 121;
+                break;
+            case "wrong_owner":
+                node.Locator.Oid++;
+                break;
+            case "single_pin":
+                scene.Pins.Remove("13/423458/1");
+                scene.Pins.Remove("13/423458/2");
+                break;
+        }
+        Assert.Null(EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [120, 220], [200, 160]));
+    }
+
+    [Fact]
+    public void DrawnPath_LiveTNode_AlternativeDrawnRouteStillReturnsNull()
+    {
+        var scene = TNodeFixture.Scene();
+        scene.Page.Placements.Add(new() { Kind = "SymbolReference", Locator = new() { Type = 13, Oid = 423459 } });
+        scene.Pins["13/423459/0"] = new() { Location = [200, 220], Direction = "Left" };
+        scene.Pins["13/423459/1"] = new() { Location = [200, 220], Direction = "Down" };
+        scene.Graphical.Add([[120, 220], [200, 220]]);
+        scene.Graphical.Add([[200, 220], [200, 160]]);
+        Assert.Null(EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.DrawnPath(scene, [120, 220], [200, 160], out int count));
+        Assert.Equal(2, count);
     }
 
     [Fact]

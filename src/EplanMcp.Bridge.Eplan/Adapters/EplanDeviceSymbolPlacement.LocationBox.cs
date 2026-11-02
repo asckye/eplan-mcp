@@ -48,6 +48,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         Check(box.SymbolVariant.SymbolLibraryName == _symbol.Library && box.SymbolVariant.SymbolName == _symbol.Name && box.SymbolVariant.VariantNr == _symbol.Variant,
             $"symbol read back as {box.SymbolVariant.SymbolLibraryName}/{box.SymbolVariant.SymbolName}/{box.SymbolVariant.VariantNr}");
         Check(before.All(f => f.Function.Name == f.Name), "an existing device was renamed");
+        _placedLayout = box;
         return new DevicePlaceData
         {
             Page = _page.Name,

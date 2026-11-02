@@ -26,6 +26,7 @@ public interface IMacroReader
 /// <summary>What <see cref="IMacroReader.ReadMacro"/> copies out of a window macro.</summary>
 public sealed class MacroContent
 {
+    public bool LayoutVerified { get; set; }
     /// <summary>True only when every function and object has been read without a limit.</summary>
     public bool Complete { get; set; }
 

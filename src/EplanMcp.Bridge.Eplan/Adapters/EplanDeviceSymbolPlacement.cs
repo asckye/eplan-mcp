@@ -10,13 +10,15 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>A13/A52-A55: resolve before writing, read returned objects inside Transaction; never dispose owned objects.</summary>
-internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacement
+internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacement, LayoutGuard.IMeasurement
 {
     private readonly Project _project;
     private readonly Page _page;
     private readonly SymbolVariant _variant;
     private readonly SymbolSearchItem _symbol;
     private Function? _placedFunction;
+    private Placement? _placedLayout;
+    public LayoutGuard.Model ReadLayout() => EplanLayout.Measure(_project.ProjectFullName, _page.Name, _placedLayout is null ? [] : [_placedLayout]);
 
     public EplanDeviceSymbolPlacement(string path, string page, SymbolSearchItem symbol)
     {
@@ -104,6 +106,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         }
         PlcChannel? plc = args.PlcConnectionPoint is null ? null : EplanPlcReader.Channel((Terminal)function, new TextLanguage(ISOCode.Language.L___, false), properties);
         _placedFunction = function;
+        _placedLayout = function;
         return new DevicePlaceData { Page = _page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc };
     }
 

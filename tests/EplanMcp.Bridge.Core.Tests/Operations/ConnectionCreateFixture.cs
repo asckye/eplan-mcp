@@ -11,6 +11,7 @@ internal sealed class ConnectionCreateFixture : ISymbolReader
     internal ConnectionCreatePlanner.Scene Scene { get; } = new()
     {
         Complete = true,
+        Layout = new() { MarginMm = 0 },
         Project = new() { Name = "Line1", Path = "scratch-project" },
         Page = new() { Project = "scratch-project", Page = PageName, GridSize = 4, PageSize = [100, 100] },
         SymbolBounds = new() { ["CO/0"] = [-1, -1, 1, 1], ["TLRO/8"] = [-1, -1, 1, 1], ["PCP/2"] = [-1, -1, 1, 1] },

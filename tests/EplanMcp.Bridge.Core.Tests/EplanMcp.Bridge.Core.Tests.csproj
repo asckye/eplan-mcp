@@ -5,6 +5,7 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceRenamer.cs" Link="Adapters\EplanDeviceRenamer.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.Arrays.cs" Link="Adapters\EplanApiTryDispatcher.Arrays.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanText.cs" Link="Adapters\EplanText.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanTextFormat.cs" Link="Adapters\EplanTextFormat.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlcReader.cs" Link="Adapters\EplanPlcReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolReader.cs" Link="Adapters\EplanSymbolReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Terminal.cs" Link="Adapters\EplanDeviceSymbolPlacement.Terminal.cs" />
@@ -15,6 +16,7 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementTextWriter.cs" Link="Adapters\EplanPlacementTextWriter.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementMover.cs" Link="Adapters\EplanPlacementMover.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\TransactionScope.cs" Link="Adapters\TransactionScope.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\FunctionTransactionScope.cs" Link="Adapters\FunctionTransactionScope.cs" />
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <Compile Include="..\..\spikes\S26-action-run\R2\SpikeS26R2Assessment.cs" Link="Spikes\SpikeS26R2Assessment.cs" />
     <Compile Include="..\..\spikes\S26-action-run\R3\SpikeS26R3Assessment.cs" Link="Spikes\SpikeS26R3Assessment.cs" />

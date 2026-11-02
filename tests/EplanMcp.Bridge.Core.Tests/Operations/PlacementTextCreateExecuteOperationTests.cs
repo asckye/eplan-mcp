@@ -11,6 +11,101 @@ public sealed class PlacementTextCreateExecuteOperationTests
     private readonly PlacementTextStore _store = new();
 
     [Theory]
+    [InlineData("angle", "45", false)]
+    [InlineData("angle", "from_layer", false)]
+    [InlineData("height_mm", "0.25", true)]
+    public void R8_ReadbackRefusesOnlyHeightSetByCreate_LeavesDefaultAngleAsWarning(string attribute, string value, bool refuses)
+    {
+        var page = new PageDrawingGeometry { GridSize = 0.5, PageSize = [100, 100] };
+        var layout = new LayoutGuard.Model { Page = page };
+        layout.ReadActual = () =>
+        {
+            DrawingPlacement row = LayoutGuardTests.Row("Text", 10, 12.5, 22.5);
+            row.Properties[attribute] = value;
+            return new() { Page = new() { GridSize = 0.5, PageSize = [100, 100], Placements = [row] } };
+        };
+        var op = new PlacementTextCreateExecuteOperation(new FakeCatalog(_store.Project), _store, _store.Transactions, _store, (_, _) => layout);
+        if (refuses)
+        {
+            BridgeError error = Assert.Throws<BridgeErrorException>(() => op.Execute(PlacementTextStore.Args())).Error;
+            Assert.Equal(ExecutionState.RolledBack, error.Execution);
+            Assert.Contains("R8:", error.Message, StringComparison.Ordinal);
+            Assert.Empty(_store.Texts);
+        }
+        else
+        {
+            var data = Assert.IsType<PlacementTextCreateData>(op.Execute(PlacementTextStore.Args()));
+            Assert.Contains(value == "from_layer" ? "R8 unverified" : "R8: Warning:", data.Warning, StringComparison.Ordinal);
+            Assert.Single(_store.Texts);
+            Assert.Contains("Commit", _store.Transactions.Calls);
+        }
+    }
+
+    [Fact]
+    public void R8_ExplicitHeightBelowConfiguredMinimum_RefusesBeforeWriting()
+    {
+        var op = new PlacementTextCreateExecuteOperation(new FakeCatalog(_store.Project), _store, _store.Transactions, _store,
+            (_, _) => new() { Page = new() { GridSize = 0.5, PageSize = [100, 100] }, Config = new() { MinimumTextHeightMm = 4 } });
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => op.Execute(PlacementTextStore.Args())).Error;
+        Assert.Equal(ExecutionState.NotStarted, error.Execution);
+        Assert.Contains("R8:", error.Message, StringComparison.Ordinal);
+        Assert.Null(Newtonsoft.Json.JsonConvert.DeserializeObject<List<LayoutGuard.Violation>>(error.Metadata!["layoutViolations"])![0].NearestFreePosition);
+        Assert.Empty(_store.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void UnknownTextOutline_MeasurementInsideTransactionCommitsCleanResultOrRollsBackConflict(bool conflict)
+    {
+        DrawingPlacement blocker = LayoutGuardTests.Row("Function", 9, 40, 24);
+        var page = new PageDrawingGeometry { Project = "project", Page = "P", GridSize = 0.5, PageSize = [100, 100], Placements = [blocker] };
+        var layout = new LayoutGuard.Model { Page = page };
+        int measurements = 0;
+        layout.ReadActual = () =>
+        {
+            Assert.DoesNotContain("Commit", _store.Transactions.Calls);
+            Assert.Single(_store.Texts);
+            measurements++;
+            DrawingPlacement text = LayoutGuardTests.Row("Text", 10, 12.5, 22.5);
+            text.Bounds = [12.5, 22.5, conflict ? 44 : 20, 26];
+            return new() { Page = new() { GridSize = 0.5, PageSize = [100, 100], Placements = [blocker, text] } };
+        };
+        var op = new PlacementTextCreateExecuteOperation(new FakeCatalog(_store.Project), _store, _store.Transactions, _store, (_, _) => layout);
+        if (conflict)
+        {
+            BridgeError error = Assert.Throws<BridgeErrorException>(() => op.Execute(PlacementTextStore.Args())).Error;
+            Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+            Assert.Contains("R3", error.Message, StringComparison.Ordinal);
+            Assert.Contains("Suggested position", error.Message, StringComparison.Ordinal);
+            Assert.Empty(_store.Texts);
+            Assert.Equal(["Begin AI: eplan_placement_create", "Rollback", "Dispose"], _store.Transactions.Calls);
+        }
+        else
+        {
+            var data = Assert.IsType<PlacementTextCreateData>(op.Execute(PlacementTextStore.Args()));
+            Assert.Contains("after write", data.Warning, StringComparison.Ordinal);
+            Assert.Equal(["Begin AI: eplan_placement_create", "Commit", "CloseUndo", "Dispose"], _store.Transactions.Calls);
+        }
+        Assert.Equal(1, measurements);
+    }
+
+    [Fact]
+    public void LayoutGuard_TextOntoSymbol_RefusesBeforeTransaction()
+    {
+        var page = new PageDrawingGeometry { Project = "project", Page = "P", GridSize = 0.5, PageSize = [100, 100], Placements = [LayoutGuardTests.Row("Function", 9, 20, 20)] };
+        var op = new PlacementTextCreateExecuteOperation(new FakeCatalog(_store.Project), _store, _store.Transactions, _store,
+            (_, _) => new() { Page = page }, _ => [20, 20, 24, 24]);
+        PlacementTextCreateArgs args = PlacementTextStore.Args();
+        args.Text.Position = [20, 20];
+        BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => op.Execute(args));
+        Assert.Equal(ErrorReason.InvalidArgument, failure.Error.Reason);
+        Assert.Contains("R3", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("Suggested position", failure.Message, StringComparison.Ordinal);
+        Assert.Empty(_store.Transactions.Calls);
+    }
+
+    [Theory]
     [InlineData("line")]
     [InlineData("rectangle")]
     public void Mixed_ReadbackOfEitherGeometryDiffers_RestoresExistingStateAndLeavesNoUndo(string kind)
@@ -81,7 +176,8 @@ public sealed class PlacementTextCreateExecuteOperationTests
         Assert.True(JToken.DeepEquals(BridgeJson.FromObject(args.Text), BridgeJson.FromObject(data.Text)));
         Assert.Equal([12.5, 22.5], data.Text.Position);
         Assert.Equal(3.5, data.Text.HeightMm);
-        Assert.Null(data.Warning);
+        Assert.Contains("before write", data.Warning, StringComparison.Ordinal);
+        Assert.Contains("after write", data.Warning, StringComparison.Ordinal);
         Assert.Single(_store.Texts);
         Assert.Equal(1, _store.Validations);
         Assert.Equal(["Begin AI: eplan_placement_create", "Commit", "CloseUndo", "Dispose"], _store.Transactions.Calls);

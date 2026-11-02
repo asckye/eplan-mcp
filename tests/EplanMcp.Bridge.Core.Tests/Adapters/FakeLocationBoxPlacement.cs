@@ -8,6 +8,8 @@ internal sealed partial class EplanDeviceSymbolPlacement(Project project, Page p
 {
     private readonly Project _project = project;
     private readonly Page _page = page;
+    private Placement? _placedLayout;
+    public Placement? PlacedLayout => _placedLayout;
     private readonly object _variant = new();
     private readonly SymbolSearchItem _symbol = new() { Library = "SPECIAL", Name = "SC", Variant = 0 };
     public DevicePlaceData PlaceBox(DevicePlaceArgs args) => CreateLocationBox(args);

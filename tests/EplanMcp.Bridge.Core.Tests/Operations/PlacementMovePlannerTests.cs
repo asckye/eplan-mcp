@@ -9,6 +9,34 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class PlacementMovePlannerTests
 {
     [Fact]
+    public void MoveInsideContainer_WithOwnDefaultTextOverlap_IsAllowed()
+    {
+        var fixture = new MoveFixture();
+        fixture.Child('b', [20, 20]).Properties["angle"] = "45";
+        DrawingPlacement container = MoveFixture.Placement(45, 'c', [10, 10]);
+        container.Kind = "LocationBox";
+        container.Bounds = [10, 10, 80, 80];
+        fixture.Scene.Page.Placements.Add(container);
+        JObject plan = fixture.Plan();
+        Assert.Equal(2, ((JArray)plan["moves"]!).Count);
+        Assert.Contains("R3: Warning:", (string?)plan["warning"], StringComparison.Ordinal);
+        Assert.Contains("R8: Warning:", (string?)plan["warning"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void LayoutGuard_TextOntoSymbol_RefusesR3WithSuggestion()
+    {
+        var fixture = new MoveFixture();
+        fixture.Root.Kind = "Text";
+        fixture.Scene.Page.Placements.Add(MoveFixture.Placement(2, 'b', [40, 40]));
+        fixture.Request["moves"]![0]!["delta_mm"] = new JArray(20, 20);
+        BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => fixture.Plan());
+        Assert.Equal(ErrorReason.InvalidArgument, failure.Error.Reason);
+        Assert.Contains("R3", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("Suggested position", failure.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SceneWithACableReader_SerializesWithoutFollowingTheReader()
     {
         // The reader's closure refers back to the scene; serializing the scene must not follow it (regression 2026-10-31).
@@ -158,7 +186,7 @@ public sealed class PlacementMovePlannerTests
         AssertError(f, ErrorReason.InvalidArgument, "/moves");
         f = new MoveFixture();
         f.Child('b', [22, 22]).Bounds = null;
-        AssertError(f, ErrorReason.CapabilityMissing);
+        Assert.Contains("unknown bounds deferred", (string?)f.Plan()["warning"], StringComparison.Ordinal);
         f = new MoveFixture();
         f.Scene.Page.Placements.Add(MoveFixture.Placement(2, 'd', [25, 25]));
         AssertError(f, ErrorReason.InvalidArgument, "/moves");
@@ -321,7 +349,7 @@ internal sealed class MoveFixture
         Kind = "Function",
         Location = location,
         Bounds = [location[0] - 1, location[1] - 1, location[0] + 1, location[1] + 1],
-        Properties = new() { ["grouped"] = "false" },
+        Properties = new() { ["grouped"] = "false", ["height_mm"] = "3.5", ["angle"] = "0" },
     };
     internal static JObject Move(DrawingLocator locator, double[] delta) => new() { ["locator"] = BridgeJson.FromObject(locator), ["delta_mm"] = new JArray(delta) };
     internal JObject Plan(string? fingerprint = null) => PlacementMovePlanner.Plan(Request.ToString(), Scene, fingerprint);

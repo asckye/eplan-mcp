@@ -47,7 +47,12 @@ public sealed class MacroInsertExecuteOperation(
             throw WriteArguments.NotStarted(ex);
         }
 
-        Committed<PlacedMacro> committed = TransactionRunner.Run(transactions, Tool, () => Insert(request));
+        Committed<PlacedMacro> committed = TransactionRunner.Run(transactions, Tool, () =>
+        {
+            PlacedMacro placed = Insert(request);
+            request.LayoutWarnings.AddRange(LayoutGuard.AfterWriting(request.Page.Layout!));
+            return placed;
+        });
         List<PageDevice> inserted = MacroInsertRequest.Devices(committed.Result.Functions);
         return new MacroInsertData
         {
@@ -58,7 +63,7 @@ public sealed class MacroInsertExecuteOperation(
             DeviceCount = inserted.Count,
             ObjectCount = committed.Result.ObjectCount,
             PageSizeKnown = request.Page.Width is not null,
-            Warning = committed.Warning,
+            Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(committed.Warning)),
         };
     }
 

@@ -436,7 +436,17 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         public IReadOnlyList<OpenProject> ListOpenProjects() => [Project];
         public IReadOnlyList<string> PageNames(string projectPath) => [Page.Name];
         public IReadOnlyList<string> FunctionNames(string projectPath) { NameReads++; return Names; }
-        public MacroTargetPage? ReadPage(string projectPath, string pageName) => pageName == Page.Name ? Page : null;
+        public MacroTargetPage? ReadPage(string projectPath, string pageName)
+        {
+            if (pageName != Page.Name)
+            { return null; }
+            Page.Layout ??= new() { Page = new() { GridSize = 4 }, Config = new() { MarginMm = 0 } };
+            Page.Layout.Page.PageSize = [Page.Width ?? 420, Page.Height ?? 297];
+            Page.Layout.ReadActual ??= () => Page.Layout;
+            Page.PredictDevice ??= args => [LayoutGuard.Proposed(args.LocationBox is null ? "Function" : "LocationBox", [args.X, args.Y],
+                args.LocationBox is null ? null : [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value])];
+            return Page;
+        }
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) { Search = args; return Symbols; }
         public PartsDatabaseContent Read(string? database) { PartReads++; throw new NotSupportedException(); }
         public DeviceNames? ReadDevice(string projectPath, string tag) => throw new NotSupportedException();

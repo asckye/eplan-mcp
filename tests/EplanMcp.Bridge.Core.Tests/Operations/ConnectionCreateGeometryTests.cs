@@ -196,7 +196,7 @@ public sealed class ConnectionCreateGeometryTests
     public void Wire_OtherPlacementCrossesTerminalApproach_Rejects(int type, long oid, bool degenerate)
     {
         var fixture = new ConnectionCreateFixture();
-        fixture.Scene.Page.Placements.Add(new() { Locator = new() { Type = type, Oid = oid }, Bounds = degenerate ? [12, 4, 12, 12] : [10, 4, 14, 12] });
+        fixture.Scene.Page.Placements.Add(new() { Locator = new() { Type = type, Oid = oid }, Location = [12, 8], Bounds = degenerate ? [12, 4, 12, 12] : [10, 4, 14, 12] });
         RejectsOutline(fixture);
     }
 

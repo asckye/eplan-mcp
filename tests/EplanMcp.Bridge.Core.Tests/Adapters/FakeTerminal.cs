@@ -24,7 +24,7 @@ internal sealed class Terminal() : Function(3)
     public new FunctionPropertyList Properties { get; } = new();
     public new bool IsPlaced { get; set; } = true;
     public PLC? PLC { get; set; }
-    public BoxSymbolVariant SymbolVariant { get; } = new() { Library = "IEC_symbol", Name = "X" };
+    public new BoxSymbolVariant SymbolVariant { get; } = new() { Library = "IEC_symbol", Name = "X" };
     public void Create(TerminalStrip strip, Page page, object variant)
     {
         _owner = strip;

@@ -155,6 +155,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
 
     private sealed class ConfigFile
     {
+        public JsonElement? Layout { get; set; }
         public int PlanLifetimeHours { get; set; } = 24;
         public List<string>? HttpAllowedOrigins { get; set; }
         public List<string>? ScratchRoots { get; set; }

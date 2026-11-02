@@ -21,7 +21,7 @@ public static class CableDefinitionPlanner
     {
         public DrawingLocator Locator { get; set; } = new();
         public double[][] Points { get; set; } = [];
-        /// <summary>The drawn path through corner and T-node centres, when it differs from the two end points. It is not part
+        /// <summary>The drawn path through corner and T-node pins, when it differs from the two end points. It is not part
         /// of the locator digest, so listed and planned locators stay equal.</summary>
         [Newtonsoft.Json.JsonIgnore]
         public double[][]? Path { get; set; }
@@ -33,15 +33,21 @@ public static class CableDefinitionPlanner
     }
     public const string Colours = "BK BN RD OG YE GN BU VT GY WH PK TQ GNYE";
 
-    /// <summary>The single drawn path between two pins whose inner points are all corner or T-node centres; null when none or several.</summary>
+    /// <summary>The single drawn path between two pins through corner or T-node pin positions within their outlines; null when none or several.</summary>
     public static double[][]? DrawnPath(ConnectionCreatePlanner.Scene scene, double[] from, double[] to)
+        => DrawnPath(scene, from, to, out _);
+
+    /// <summary>Reports the paths found by the bounded search, which stops once uniqueness is disproved.</summary>
+    public static double[][]? DrawnPath(ConnectionCreatePlanner.Scene scene, double[] from, double[] to, out int pathCount)
     {
         static string P(double[] p) => FormattableString.Invariant($"{p[0]:R},{p[1]:R}");
-        // A node symbol keeps all its pins at its centre (api-notes acceptance trial).
-        var centres = new HashSet<string>(scene.Pins.GroupBy(p => string.Join("/", p.Key.Split('/').Take(2)))
-            .Where(g => g.Count() > 1 && g.Select(p => P(p.Value.Location)).Distinct().Count() == 1).Select(g => P(g.First().Value.Location)));
+        // A75 live helper read: a T node's branch pin is offset from its two trunk pins.
+        double[][][] nodes = scene.Page.Placements.Select(p => ConnectionNodeGeometry.PassThroughPins(p, scene.Pins))
+            .Where(pins => pins.Length > 0).Select(pins => pins.Select(pin => pin.Location).GroupBy(P).Select(g => g.First()).ToArray()).ToArray();
+        var nodePoints = new HashSet<string>(nodes.SelectMany(pins => pins).Select(P));
+        IEnumerable<double[][]> joins = nodes.SelectMany(pins => pins.SelectMany((pin, i) => pins.Skip(i + 1).Select(other => new[] { pin, other })));
         // The same drawn segment may be listed twice; repeated entries are one route, not two.
-        var edges = scene.Graphical.SelectMany(s => new[] { (From: P(s[0]), To: s[1]), (From: P(s[1]), To: s[0]) })
+        var edges = scene.Graphical.Concat(joins).SelectMany(s => new[] { (From: P(s[0]), To: s[1]), (From: P(s[1]), To: s[0]) })
             .GroupBy(e => e.From + "|" + P(e.To)).Select(g => g.First()).ToLookup(e => e.From, e => e.To);
         var paths = new List<double[][]>();
         void Walk(double[] at, List<double[]> trail)
@@ -54,11 +60,12 @@ public static class CableDefinitionPlanner
                 { continue; }
                 if (P(next) == P(to))
                 { paths.Add([.. trail, next]); continue; }
-                if (centres.Contains(P(next)))
+                if (nodePoints.Contains(P(next)))
                 { Walk(next, [.. trail, next]); }
             }
         }
         Walk(from, [from]);
+        pathCount = paths.Count;
         return paths.Count == 1 ? [.. paths[0]] : null;
     }
 

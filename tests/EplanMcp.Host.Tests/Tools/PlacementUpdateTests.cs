@@ -145,7 +145,8 @@ public sealed class PlacementUpdateTests
         }
         private static ConnectionCreatePlanner.Scene Clone(ConnectionCreatePlanner.Scene scene) => BridgeJson.FromObject(scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => throw new NotSupportedException();
-        public Action Prepare(string project, string page, JArray symbols) => throw new NotSupportedException();
+        public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
+        public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => throw new NotSupportedException();
         public List<string?[]> Endpoints(string project, string page) => throw new NotSupportedException();
         public void Undo(string project) => throw new NotSupportedException();
     }

@@ -92,6 +92,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         CheckTerminal(terminal.SymbolVariant.SymbolLibraryName == _symbol.Library && terminal.SymbolVariant.SymbolName == _symbol.Name && terminal.SymbolVariant.VariantNr == _symbol.Variant,
             $"symbol reads back as {terminal.SymbolVariant.SymbolLibraryName}/{terminal.SymbolVariant.SymbolName}/{terminal.SymbolVariant.VariantNr}");
         OperationContext.Current.ThrowIfCancellationRequested();
+        _placedLayout = terminal;
         return new()
         {
             Page = _page.Name,

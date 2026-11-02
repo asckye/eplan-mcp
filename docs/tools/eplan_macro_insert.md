@@ -109,3 +109,4 @@
   - 同一位置再插一次，返回 `INVALID_ARGUMENT`（`rolled_back`）；
   - scratch 之外的副本：`POLICY_DENIED`。
 - **Agent 评测**："在 scratch 项目的新页 `=GAA+A1&EFS1/60` 上放一个接触器反馈控制回路"，作答后用 `eplan_page_get` 核对页上的设备。
+共享布局守卫：R1–R5、R8 拒绝并给出规则与可用时的空位建议；R6/R7/R9 默认警告，layout.strict 时拒绝。图框可用区无法读取时继续使用页尺寸减 layout.marginMm 回退并在结果中说明。预测未知不拒绝：写前校验插入点、已知外框及路由；写后在原事务内测量符号与属性文字外框，再校验 R1–R9，违规整次回滚，返回原因、实测外框和可用时的最近空位。warning/hint 报告写前与写后检查；拒绝的 metadata.layoutViolations/layoutChecks 提供几何和阶段。连接提交后才生效的几何沿用原撤销补偿。参数与限制见 [布局守卫设计](../design/2026-11-01-layout-guard.md)。

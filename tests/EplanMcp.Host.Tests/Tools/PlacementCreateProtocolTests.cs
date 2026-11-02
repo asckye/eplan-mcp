@@ -71,14 +71,18 @@ public sealed class PlacementCreateProtocolTests
     }
 
     [Fact]
-    public async Task DryRunWithoutReliableTextOutline_ReportsCapabilityMissingWithoutWriting()
+    public async Task DryRunWithoutReliableTextOutline_DefersMeasurementWithoutWriting()
     {
         await WithClient(async (client, harness, store) =>
         {
+            store.Measure = false;
             Dictionary<string, object?> args = Args();
             args["dry_run"] = true;
-            JsonElement error = WriteToolHarness.Error(await client.CallToolAsync(PlacementCreateTools.Tool, args, cancellationToken: Token));
-            Assert.Equal(ErrorReason.CapabilityMissing, error.GetProperty("reason").GetString());
+            CallToolResult result = await client.CallToolAsync(PlacementCreateTools.Tool, args, cancellationToken: Token);
+            Assert.NotEqual(true, result.IsError);
+            JsonElement preview = WriteToolHarness.Structured(result);
+            Assert.Equal(JsonValueKind.Null, preview.GetProperty("items")[0].GetProperty("bounds").ValueKind);
+            Assert.Contains("unknown bounds deferred", preview.GetProperty("warning").GetString(), StringComparison.Ordinal);
             Assert.Empty(harness.Bridge.Writes);
             Assert.Empty(store.Calls);
         });
@@ -119,7 +123,15 @@ public sealed class PlacementCreateProtocolTests
         harness.Bridge.Handlers[OperationNames.ProjectGet] = _ => new ProjectGetData { Project = store.Project };
         harness.Bridge.Handlers[OperationNames.PageGet] = _ => new PageGetData { Page = new() { Name = "P", Type = "Circuit" } };
         harness.Bridge.Handlers[OperationNames.PageDrawingGet] = _ => store.Geometry;
-        var operation = new PlacementTextCreateExecuteOperation(store, store, store, store);
+        double[]? Measure(PlacementText text) => store.Measure ? [text.Position[0], text.Position[1], text.Position[0] + 8, text.Position[1] + 3.5] : null;
+        var operation = new PlacementTextCreateExecuteOperation(store, store, store, store, measureText: Measure);
+        var preflight = new PlacementTextCreateExecuteOperation(store, store, store, store, measureText: Measure, planning: true);
+        harness.Bridge.Handlers[OperationNames.PlacementTextCreatePlan] = args =>
+        {
+            try
+            { return preflight.Execute(preflight.ParseArgs(BridgeJson.FromObject(args)))!; }
+            catch (BridgeErrorException ex) { throw new BridgeCallException(ex.Error); }
+        };
         harness.Bridge.Handlers[OperationNames.PlacementTextCreateExecute] = args =>
         {
             try
@@ -152,6 +164,7 @@ public sealed class PlacementCreateProtocolTests
         public List<string> Calls { get; } = [];
         public int Writes { get; private set; }
         public bool Fail { get; set; }
+        public bool Measure { get; set; } = true;
         public IReadOnlyList<OpenProject> ListOpenProjects() => [Project];
         public PageDrawingGeometry Read(string projectPath, string pageName) => Geometry;
         public void Validate(string projectPath, string page, PlacementText text) => Assert.Equal((Project.Path, "P"), (projectPath, page));

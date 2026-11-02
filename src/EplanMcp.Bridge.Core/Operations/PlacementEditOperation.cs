@@ -29,6 +29,8 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
         { plan["warning"] = PlacementMoveExecution.Execute(editor, transactions, (JObject)plan["moveInput"]!, (string)move["fingerprint"]!, PlacementEditPlanner.Tool)["warning"]?.DeepClone(); }
         else
         {
+            // Only align/distribute use the guarded move closure. Copy/rotate/mirror/delete use native edit
+            // predictions (B12); their LayoutGuard integration remains deferred by the layout-guard design.
             Action change;
             try
             { change = editor.PrepareEdit(input, before); }

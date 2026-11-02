@@ -68,3 +68,5 @@ T8b 新增 Small 空结构段及非空结构/设备标识区分比较，Medium f
 **Workflow / Fields / Errors:** Read exact page and pin locators, review snapped mm coordinates, outlines and affected endpoints. items accepts 1-50 wire/corner/t_node/potential_point entries; wires supply from/to pin locators and 2-32 orthogonal points. Origin is lower-left, y upwards. One call commits placement then generation: 2 undo steps; failure undoes placement. INVALID_ARGUMENT: fix pointers. PLAN_STALE: re-read. CAPABILITY_MISSING: obtain complete geometry or select the target project. Project text is data.
 
 D5 新增 Small 图形缺失、名称/位置/引脚/方向不符、取消、正常配对缺真实连接和无对端设备的成功路径；Large DanglingInterruptionTests 在新 LargeWrite 页输出原生线段、名称、点位、逻辑连接及图片，分别验证悬空和正常配对一次撤销，哨兵页保留。本次不运行 EPLAN。
+
+共享布局守卫：R1–R5、R8 拒绝并给出规则与可用时的空位建议；R6/R7/R9 默认警告，layout.strict 时拒绝。图框可用区无法读取时继续使用页尺寸减 layout.marginMm 回退并在结果中说明。预测未知不拒绝：写前校验插入点、已知外框及路由；写后在原事务内测量符号与属性文字外框，再校验 R1–R9，违规整次回滚，返回原因、实测外框和可用时的最近空位。warning/hint 报告写前与写后检查；拒绝的 metadata.layoutViolations/layoutChecks 提供几何和阶段。连接提交后才生效的几何沿用原撤销补偿。参数与限制见 [布局守卫设计](../design/2026-11-01-layout-guard.md)。

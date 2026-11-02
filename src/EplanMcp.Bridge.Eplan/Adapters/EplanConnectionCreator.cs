@@ -25,16 +25,18 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     private static double[] XY(PointD point) => [point.X, point.Y];
     private static IEnumerable<SymbolVariant> Variants(string project) => EplanProjects.ByPath(project).SymbolLibraries.Where(l => l.Name == "SPECIAL")
         .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP" or "BPF").SelectMany(s => s.Variants);
-    public ConnectionCreatePlanner.Scene Read(string project, string page)
+    public ConnectionCreatePlanner.Scene Read(string project, string page) => Read(project, page, []);
+    public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(new EplanConnectionCreator(false).Read(project, page));
+    internal ConnectionCreatePlanner.Scene Read(string project, string page, IReadOnlyList<Placement> created)
     {
         OpenProject target = ProjectResolver.Resolve(new EplanProjectCatalog().ListOpenProjects(), project);
         if (target.ReadOnly)
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "Select a writable project."); }
         Page native = Page(target.Path, page);
-        PageDrawingGeometry geometry = new EplanDrawingReader().Read(target.Path, page)!;
+        PageDrawingGeometry geometry = new EplanDrawingReader().Read(target.Path, page, created)!;
         geometry.Project = target.Path;
         var scene = new ConnectionCreatePlanner.Scene { Project = target, Page = geometry, PageType = native.PageType.ToString(), Complete = true, Graphical = Graphical(target.Path, page) };
-        foreach (Placement placement in EplanNativePreconditions.Valid(native.AllPlacements))
+        foreach (Placement placement in EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)).GroupBy(p => p.ToStringIdentifier(), StringComparer.Ordinal).Select(g => g.First()))
         {
             if (!geometry.Placements.Any(p => p.Locator.Type == SnapshotCanonical.TypeOf(placement.ToStringIdentifier()) && p.Locator.Oid == placement.ObjectIdentifier))
             { scene.Complete = false; }
@@ -47,6 +49,23 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         foreach (SymbolVariant variant in readSymbolBounds ? Variants(target.Path) : [])
         { scene.SymbolBounds.Add(FormattableString.Invariant($"{variant.SymbolName}/{variant.VariantNr}"), Outline(variant)); }
         scene.Logical = Endpoints(target.Path, page).Select(p => new ConnectionRecord { StartDevice = p[0], EndDevice = p[1] }).ToList();
+        if (geometry.Placements.Any(p => p.Kind == nameof(ConnectionDefinitionPoint)))
+        {
+            ConnectionPointRouting.Initialize(scene);
+            using var finder = new DMObjectsFinder(EplanProjects.ByPath(target.Path));
+            foreach (Connection connection in finder.GetConnections(null).Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
+            {
+                ConnectionDefinitionPoint[] points = connection.ConnectionDefPoints;
+                if (points.Length == 0)
+                { continue; }
+                Pin? start = connection.StartPin, end = connection.EndPin;
+                ConnectionPointRouting.Record(scene,
+                    points.Select(point => FormattableString.Invariant($"{SnapshotCanonical.TypeOf(point.ToStringIdentifier())}/{point.ObjectIdentifier}")),
+                    start?.ParentFunction is { } a ? Key(a, start.Index) : null,
+                    end?.ParentFunction is { } b ? Key(b, end.Index) : null);
+            }
+        }
+        scene.Layout = EplanLayout.Config();
         scene.ReadCables = () => ReadCables(target.Path, page, scene);
         return scene;
     }
@@ -61,7 +80,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 || !scene.Pins.TryGetValue(Key(a, start.Index), out SymbolConnectionPoint? from) || !scene.Pins.TryGetValue(Key(b, end.Index), out SymbolConnectionPoint? to))
             { continue; }
             // Acceptance trial: logical connections run device to device through corner and T-node symbols, so one may span
-            // several drawn segments. Only a unique path through node centres makes it a core candidate; the planner still
+            // several drawn segments. Only a unique path through node pins makes it a core candidate; the planner still
             // refuses a definition line that crosses any drawn segment outside the selected cores.
             if (CableDefinitionPlanner.DrawnPath(scene, from.Location, to.Location) is not { } path)
             { continue; }
@@ -93,7 +112,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         CableDefinitionPlanner.Identify(wire, project, page, connection.ToStringIdentifier());
         return wire;
     }
-    public System.Action Prepare(string project, string page, JArray symbols)
+    public System.Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null)
     {
         AssertCurrent(project);
         Page target = Page(project, page);
@@ -101,9 +120,11 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         var selected = symbols.Select(s => (Row: s, Variant: variants.Single(v => v.SymbolName == (string)s["symbol"]!["name"]! && v.VariantNr == (int)s["symbol"]!["variant"]!))).ToArray();
         return () =>
         {
+            var created = new List<Placement>();
             foreach (var item in selected)
             {
                 SymbolReference placed = SymbolReference.Create(item.Variant, target);
+                created.Add(placed);
                 if (item.Row["interruption"] is { } interruption)
                 {
                     if (placed is not InterruptionPoint point)
@@ -131,12 +152,13 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     || placed.SymbolVariant.VariantNr != item.Variant.VariantNr || pins.Length != expected.Length
                     || pins.Where((p, i) => !p.SequenceEqual(expected[i].Location)).Any()
                     || placed.GraphicalConnectionPoints.Where((p, i) => p.Direction.ToString() != expected[i].Direction).Any()
-                    || !OutlineMatches(placed.GetBoundingBox().SelectMany(XY).ToArray(), item.Row["bounds"]!.Values<double>().ToArray(), XY(placed.Location)))
+                    || (bool?)item.Row["boundsKnown"] != false && !OutlineMatches(placed.GetBoundingBox().SelectMany(XY).ToArray(), item.Row["bounds"]!.Values<double>().ToArray(), XY(placed.Location)))
                 {
                     throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant(
                         $"Placed symbol geometry differs from the plan: {item.Variant.SymbolName}/{item.Variant.VariantNr} outline {string.Join(",", placed.GetBoundingBox().SelectMany(XY))}, pins {string.Join(";", pins.Select(p => string.Join(",", p)))}."));
                 }
             }
+            verifyLayout?.Invoke(LayoutGuard.From(new EplanConnectionCreator(false).Read(project, page, created)));
         };
     }
     private sealed class PlacementFactory(string project, bool undoCommitted) : ITransactionScopeFactory
@@ -191,14 +213,14 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 && actual[2] - actual[0] <= 10 && actual[3] - actual[1] <= 10
             : actual.SequenceEqual(planned);
     /// <summary>Unplaced library variants have no outline (BaseException); the point is checked against the placed outline.</summary>
-    private static double[] Outline(SymbolVariant variant)
+    internal static double[] Outline(SymbolVariant variant)
     {
         try
         { return variant.GetBoundingBox().SelectMany(XY).ToArray(); }
-        catch (BaseException nativeFailure)
+        catch (Exception ex) when (ex is BaseException or InvalidOperationException)
         {
-            WriteExceptionDiagnostics.Report(nativeFailure);
-            return [0, 0, 0, 0];
+            WriteExceptionDiagnostics.Report(ex);
+            return [];
         }
     }
     private static List<double[][]> Graphical(string project, string page) => EplanNativePreconditions.Valid(Page(project, page).AllPlacements).OfType<SymbolReference>().SelectMany(r => r.GraphicalConnections)

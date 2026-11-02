@@ -29,9 +29,9 @@ public static class PlacementMoveExecution
             { continue; }
             double[] delta = row["after"]!.Values<double>().Zip(placement.Location, (a, b) => a - b).ToArray();
             placement.Location = row["after"]!.Values<double>().ToArray();
-            placement.Bounds = row["bounds"]!.Values<double>().ToArray();
+            placement.Bounds = row["bounds"]!.Type == JTokenType.Null ? null : row["bounds"]!.Values<double>().ToArray();
             if (row["angle"] is { } angle)
-            { placement.Properties["angle_deg"] = ((double)angle).ToString("R", System.Globalization.CultureInfo.InvariantCulture); placement.Properties["docked"] = "false"; }
+            { placement.Properties["angle_deg"] = ((double)angle).ToString("R", System.Globalization.CultureInfo.InvariantCulture); placement.Properties["docked"] = "false"; if (placement.Properties.ContainsKey("angle")) { placement.Properties["angle"] = placement.Properties["angle_deg"]; } }
             if (placement.Parent is null)
             {
                 string prefix = FormattableString.Invariant($"{placement.Locator.Type}/{placement.Locator.Oid}/");
@@ -50,12 +50,18 @@ public static class PlacementMoveExecution
         void Verify(bool committed)
         {
             ConnectionCreatePlanner.Scene actual = Read();
+            LayoutGuard.Model actualLayout = LayoutGuard.From(actual);
+            if (!committed)
+            { actualLayout.Lines = expected.Graphical.Select(s => new LayoutGuard.Segment { Points = s }).ToList(); }
+            plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(LayoutGuard.From(scene), actualLayout)));
             var measuredBounds = new List<(JToken Row, double[]? Bounds)>();
             if (actual.Page.Placements.Count != expected.Page.Placements.Count)
             { throw Mismatch("placement count"); }
             for (int i = 0; i < expected.Page.Placements.Count; i++)
             {
                 DrawingPlacement want = expected.Page.Placements[i], found = actual.Page.Placements[i];
+                if (want.Bounds is null)
+                { want.Bounds = found.Bounds; }
                 JToken? row = rows.SingleOrDefault(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, want.Locator));
                 if (row is not null)
                 {
@@ -93,11 +99,16 @@ public static class PlacementMoveExecution
                 { measured.Row["bounds"] = measured.Bounds is null ? null : new JArray(measured.Bounds); }
             }
         }
-        Committed<bool> result = TransactionRunner.Run(transactions, tool, () => { move(); Verify(false); return true; }, _ => true,
+        Committed<bool> result = TransactionRunner.Run(transactions, tool, () =>
+        {
+            move();
+            Verify(false);
+            return true;
+        }, _ => true,
             _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { Verify(true); return true; }),
             () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => PlacementMovePlanner.Plan(input.ToString(Formatting.None), Read(), fingerprint)));
         plan["execution"] = ExecutionState.Committed;
-        plan["warning"] = result.Warning;
+        plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], result.Warning]);
         return plan;
     }
     private static BridgeErrorException Mismatch(string what) => new(ErrorReason.EplanOperationFailed, "Placement closure, following text, pins or connections differ from the approved move (" + what + ").");

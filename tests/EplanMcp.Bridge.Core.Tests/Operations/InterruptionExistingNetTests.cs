@@ -197,9 +197,10 @@ public sealed class InterruptionExistingNetTests
         internal JObject Plan() => ConnectionCreatePlanner.Plan(Fixture.Request.ToString(), Fixture.Scene, this);
         internal JObject Execute() => Assert.IsType<JObject>(new OperationContext("live-rehearsal", true, null).Run(() =>
             new ConnectionCreateExecuteOperation(this, this, Transactions).Execute(new JObject { ["request"] = Fixture.Request.DeepClone(), ["fingerprint"] = Plan()["fingerprint"] })));
-        public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Fixture.Scene : new() { Graphical = [.. Fixture.Scene.Graphical, .. _added] };
+        public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Fixture.Scene : new() { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = [.. Fixture.Scene.Graphical, .. _added] };
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => Fixture.Read(projectPath, args);
-        public Action Prepare(string project, string page, JArray symbols) => () => State = 1;
+        public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
+        public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => State = 1;
         public List<string?[]> Endpoints(string project, string page) => page == ConnectionCreateFixture.PageName ? Generated : [];
         public void Generate(string projectPath, IReadOnlyList<string> pages) => State = 2;
         public void Undo(string project) { State--; Undos++; }

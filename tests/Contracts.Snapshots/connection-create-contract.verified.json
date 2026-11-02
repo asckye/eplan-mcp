@@ -655,6 +655,9 @@
               "minItems": 4,
               "maxItems": 4
             },
+            "boundsKnown": {
+              "type": "boolean"
+            },
             "interruption": {
               "type": "object",
               "additionalProperties": false,
@@ -710,7 +713,8 @@
           "required": [
             "position",
             "symbol",
-            "bounds"
+            "bounds",
+            "boundsKnown"
           ]
         },
         "minItems": 0,
@@ -786,6 +790,12 @@
       "generation": {
         "type": "string",
         "minLength": 1
+      },
+      "warning": {
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "undoSteps": {
         "enum": [
@@ -1156,7 +1166,8 @@
           7.0,
           25.0,
           9.0
-        ]
+        ],
+        "boundsKnown": true
       }
     ],
     "graphicalAutoconnect": [
@@ -1199,7 +1210,8 @@
     "logicalDuringPlacement": 0,
     "generation": "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
     "undoSteps": 2,
-    "fingerprint": "11b3bfc291213be5456ccef5d3d3ec63b10efb6153a79b374d2d03633a7d75d9"
+    "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
+    "fingerprint": "e650dd142d711cd39d3f6d8b2be8beefa7c27dd9d80fb96e5bf2cbb7add1767f"
   },
   "interruptionExample": {
     "project": "Line1",
@@ -1336,6 +1348,7 @@
           61.0,
           61.0
         ],
+        "boundsKnown": true,
         "interruption": {
           "kind": "interruption_point",
           "name": "=F+A1-LINK",
@@ -1382,7 +1395,8 @@
           7.0,
           25.0,
           9.0
-        ]
+        ],
+        "boundsKnown": true
       }
     ],
     "graphicalAutoconnect": [
@@ -1425,6 +1439,7 @@
     "logicalDuringPlacement": 0,
     "generation": "Placement then generation share one undo step; graphical-only interruption ends need no logical connection.",
     "undoSteps": 1,
+    "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
     "affectedPages": [
       "=F+A1&EFS1/1",
       "=F+A1&EFS1/2"
@@ -1593,7 +1608,7 @@
       ],
       "preservedEndpoints": []
     },
-    "fingerprint": "a57e91585739f8c4b9f272a6927b59e30f0cfbeff9aba142d91e5c1452e16668"
+    "fingerprint": "332f7c1857e8dceda139a24dd379e28c7504d4bfb2f025f615577729e1c03d6c"
   },
   "interruptionReadback": [
     {
@@ -1866,6 +1881,9 @@
               "minItems": 4,
               "maxItems": 4
             },
+            "boundsKnown": {
+              "type": "boolean"
+            },
             "interruption": {
               "type": "object",
               "additionalProperties": false,
@@ -1921,7 +1939,8 @@
           "required": [
             "position",
             "symbol",
-            "bounds"
+            "bounds",
+            "boundsKnown"
           ]
         },
         "minItems": 0,
@@ -1997,6 +2016,12 @@
       "generation": {
         "type": "string",
         "minLength": 1
+      },
+      "warning": {
+        "type": [
+          "string",
+          "null"
+        ]
       },
       "undoSteps": {
         "type": "integer",
@@ -2363,7 +2388,8 @@
           7.0,
           25.0,
           9.0
-        ]
+        ],
+        "boundsKnown": true
       }
     ],
     "graphicalAutoconnect": [
@@ -2406,6 +2432,7 @@
     "logicalDuringPlacement": 0,
     "generation": "A55: wires -> generate -> definition line -> generate -> committed bind -> generate -> cores -> generate; failure undoes all confirmed commits.",
     "undoSteps": 8,
+    "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
     "cableDefinitions": [
       {
         "kind": "cable_definition",
@@ -2447,6 +2474,6 @@
         "before": null
       }
     ],
-    "fingerprint": "f7fdd6dcfc40ea4170679b53e327d09b212b292f0db8c1f2611e3f7a0669b9db"
+    "fingerprint": "732d1cf54726b6a052960585d0f24136287d8d1d4d0ae8435d531ffb5b4f014d"
   }
 }

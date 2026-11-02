@@ -36,6 +36,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
             Type = page.PageType.ToString(),
             Width = size?.X,
             Height = size?.Y,
+            Layout = EplanLayout.Read(projectPath, pageName),
 
             // Every placement on the page, groups resolved (EPLAN XML docs, Page.AllPlacements).
             Objects = [.. EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Select(placement => placement.ToStringIdentifier())],

@@ -23,6 +23,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         MacroTargetPage? result = new EplanMacroInserter().ReadPage(projectPath, pageName);
         if (result is not null)
         {
+            result.PredictDevice = args => EplanLayout.Device(projectPath, args, result.Layout!);
             foreach (LocationBox box in EplanNativePreconditions.Valid(Find(EplanProjects.ByPath(projectPath), pageName)!.AllPlacements).OfType<LocationBox>())
             {
                 using FunctionBasePropertyList parts = box.NameParts;

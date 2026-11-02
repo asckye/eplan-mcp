@@ -6,7 +6,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 public interface IConnectionCreator : ISymbolReader
 {
     public ConnectionCreatePlanner.Scene Read(string project, string page);
-    public Action Prepare(string project, string page, JArray symbols);
+    public LayoutGuard.Model Measure(string project, string page);
+    public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null);
     public List<string?[]> Endpoints(string project, string page);
     public void Undo(string project);
     public JObject Interruptions(string project, IReadOnlyList<string> pages);

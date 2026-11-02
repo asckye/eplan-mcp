@@ -37,6 +37,7 @@ internal static class CableDefinitionExecution
             if (result.Warning is not null)
             { throw Unknown(new InvalidOperationException(result.Warning)); }
             commits++;
+            plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(LayoutGuard.From(scene), creator.Measure(project, page))));
         }
         void Generate() => Commit(transactions, () => generator.Generate(project, [page]));
         string Segments(IEnumerable<double[][]> values) => string.Join(";", values.Select(s => string.Join("|", s.Select(p => new JArray(p).ToString()).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
@@ -87,6 +88,8 @@ internal static class CableDefinitionExecution
                 });
             }
             catch (Exception compensation) { throw Unknown(new AggregateException(failure, compensation)); }
+            if (failure is BridgeErrorException { Error.Reason: ErrorReason.InvalidArgument } refusal)
+            { refusal.Error.Execution = ExecutionState.RolledBack; throw; }
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cable creation failed; all commits from this call were undone. Re-read the page before retrying.", failure)
             { Error = { Execution = ExecutionState.RolledBack } };
         }

@@ -157,7 +157,8 @@ public sealed class CableDefinitionPlanTests : IDisposable
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => fixture.Base.Read(projectPath, args);
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => throw new InvalidOperationException("No interruption scope expected.");
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => throw new InvalidOperationException("No transaction expected.");
-        public Action Prepare(string project, string page, JArray symbols) { Prepares++; throw new InvalidOperationException("Cable execution is unavailable."); }
+        public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
+        public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) { Prepares++; throw new InvalidOperationException("Cable execution is unavailable."); }
         public List<string?[]> Endpoints(string project, string page) => throw new InvalidOperationException("No readback expected.");
         public void Undo(string project) => throw new InvalidOperationException("No undo expected.");
         public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) => throw new InvalidOperationException("No write expected.");

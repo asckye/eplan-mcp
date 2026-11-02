@@ -27,10 +27,11 @@ internal sealed class TransactionScope : ITransactionScope
         MainThread.Assert();
         SafetyPoint safetyPoint = SafetyPoint.Create();
         UndoManager? undoManager = null;
+        UndoStep? undoStep = null;
         try
         {
             undoManager = new UndoManager();
-            UndoStep undoStep = undoManager.CreateUndoStep();
+            undoStep = undoManager.CreateUndoStep();
             undoStep.SetUndoDescription(undoDescription);
             _quietMode = new QuietModeStep(QuietModes.ShowNoDialogs);
             _safetyPoint = safetyPoint;
@@ -41,6 +42,7 @@ internal sealed class TransactionScope : ITransactionScope
         {
             WriteExceptionDiagnostics.Report(nativeFailure);
             // Nothing was changed yet; a SafetyPoint released without a commit rolls back (A7).
+            undoStep?.Dispose();
             undoManager?.Dispose();
             safetyPoint.Dispose();
             throw;
@@ -81,7 +83,9 @@ internal sealed class TransactionScope : ITransactionScope
         try
         {
             EndQuietMode();
-            _undoManager.Dispose();
+            try
+            { _undoStep.Dispose(); }
+            finally { _undoManager.Dispose(); }
         }
         finally
         {

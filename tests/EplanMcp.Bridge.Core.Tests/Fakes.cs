@@ -368,6 +368,7 @@ internal sealed class FakeMacroReader(string root) : IMacroReader
 {
     public MacroContent Content { get; set; } = new()
     {
+        LayoutVerified = true,
         Representations = [new("MultiLine", [0, 1, 2, 3, 4, 5])],
         Width = 52,
         Height = 268,
@@ -403,7 +404,7 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
 
     public List<(string Page, string Macro, int Variant, double X, double Y, bool Number)> Inserts { get; } = [];
 
-    public MacroTargetPage? ReadPage(string projectPath, string pageName) => Pages.GetValueOrDefault(pageName);
+    public MacroTargetPage? ReadPage(string projectPath, string pageName) => LayoutFixture.Target(Pages.GetValueOrDefault(pageName));
 
     public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number)
     {

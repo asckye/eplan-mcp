@@ -8,6 +8,36 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class ConnectionCreatePlannerTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LayoutGuard_ParallelDifferentNet_IsWarningUnlessStrict(bool strict)
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.Scene.Graphical.Add([[12, 10], [20, 10]]);
+        fixture.Scene.Layout.Strict = strict;
+        if (strict)
+        {
+            BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => fixture.Plan());
+            Assert.Equal(ErrorReason.InvalidArgument, failure.Error.Reason);
+            Assert.Contains("R6", failure.Message, StringComparison.Ordinal);
+        }
+        else
+        { Assert.Contains("R6", (string?)fixture.Plan()["warning"], StringComparison.Ordinal); }
+    }
+
+    [Fact]
+    public void LayoutGuard_SymbolOverAnother_RefusesWithSuggestion()
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("potential_point", [40, 40], "Up"));
+        fixture.Scene.Page.Placements.Add(LayoutGuardTests.Row("Function", 9));
+        BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => fixture.Plan());
+        Assert.Equal(ErrorReason.InvalidArgument, failure.Error.Reason);
+        Assert.Contains("R2", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("Suggested position", failure.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Path_ExplicitOrthogonalBend_ResolvesSpecialCornerAndPinEndpoints()
     {
@@ -105,7 +135,7 @@ public sealed class ConnectionCreatePlannerTests
         Assert.Equal([22d, 9d], result["coordinates"]![1]!["requested"]!.Values<double>());
         Assert.Equal([24d, 8d], result["coordinates"]![1]!["actual"]!.Values<double>());
         fixture.Request["snap_to_grid"] = false;
-        Invalid(fixture, "/items/0/points/1");
+        Invalid(fixture, "/items/0/points");
     }
 
     [Theory]
@@ -256,14 +286,14 @@ public sealed class ConnectionCreatePlannerTests
     }
 
     [Fact]
-    public void Scene_PlacementWithoutBounds_NamesTheBlockingPlacement()
+    public void Scene_PlacementWithoutBounds_DefersBoundsAndStillChecksKnownRoute()
     {
         var fixture = new ConnectionCreateFixture();
         var locator = new DrawingLocator { Project = "scratch-project", Page = ConnectionCreateFixture.PageName, Type = 45, Oid = 9, Digest = new string('b', 64) };
         fixture.Scene.Page.Placements.Add(new() { Locator = locator, Kind = "PropertyPlacement", Location = [16, 8], Bounds = null });
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
-        Assert.Equal(ErrorReason.CapabilityMissing, error.Reason);
-        Assert.Contains("invalid bounds of PropertyPlacement 45/9", error.Message, StringComparison.Ordinal);
+        JObject plan = fixture.Plan();
+        Assert.Equal(ExecutionState.NotStarted, (string?)plan["execution"]);
+        Assert.Contains("unknown bounds deferred", (string?)plan["warning"], StringComparison.Ordinal);
     }
 
     [Fact]

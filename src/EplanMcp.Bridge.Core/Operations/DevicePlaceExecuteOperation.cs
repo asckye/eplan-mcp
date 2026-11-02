@@ -64,14 +64,24 @@ public sealed class DevicePlaceExecuteOperation(
         if (symbolSession is not null)
         {
             // S41: Abort without CloseUndo leaves no empty step. Lists are already released (A55).
-            Committed<DevicePlaceData> result = TransactionRunner.Run(symbolSession, Tool, () => PlaceSymbol(symbolSession, args, request.Tag, request.Page.Name), _ => true);
+            Committed<DevicePlaceData> result = TransactionRunner.Run(symbolSession, Tool, () =>
+            {
+                DevicePlaceData data = PlaceSymbol(symbolSession, args, request.Tag, request.Page.Name);
+                data.Warning = LayoutGuard.Summary(request.LayoutWarnings.Concat(LayoutGuard.AfterWriting(request.Page.Layout!, (symbolSession as LayoutGuard.IMeasurement)?.ReadLayout())));
+                return data;
+            }, _ => true);
             result.Result.Project = request.Project.Name;
             result.Result.PageSizeKnown = request.Page.Width is not null;
-            result.Result.Warning = result.Warning;
+            result.Result.Warning = LayoutGuard.Summary([result.Result.Warning, result.Warning]);
             return result.Result;
         }
 
-        Committed<PlacedDevice> committed = TransactionRunner.Run(transactions, Tool, () => Place(request));
+        Committed<PlacedDevice> committed = TransactionRunner.Run(transactions, Tool, () =>
+        {
+            PlacedDevice data = Place(request);
+            request.LayoutWarnings.AddRange(LayoutGuard.AfterWriting(request.Page.Layout!));
+            return data;
+        });
         PlacedDevice placed = committed.Result;
         return new DevicePlaceData
         {
@@ -85,7 +95,7 @@ public sealed class DevicePlaceExecuteOperation(
             Functions = placed.Names.Count,
             Unplaced = placed.Unplaced,
             PageSizeKnown = request.Page.Width is not null,
-            Warning = committed.Warning,
+            Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(committed.Warning)),
         };
     }
 

@@ -8,6 +8,61 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class ConnectionCreateExecutionTests
 {
     [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void MeasuredConflictAfterEitherCommit_RollsBackItsOpenStepAndPreservesRefusal(int commit)
+    {
+        var fake = new Creator { MeasureAfterCommit = commit };
+        fake.Measured = LayoutGuard.From(fake.Fixture.Scene);
+        fake.Measured.Page = new()
+        {
+            GridSize = 4,
+            PageSize = [100, 100],
+            Placements = [.. fake.Fixture.Scene.Page.Placements, new()
+            {
+                Kind = "SymbolReference", Locator = new() { Type = 17, Oid = 9 }, Location = [24, 8], Bounds = [20, 6, 26, 26]
+            }]
+        };
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Contains("R2", error.Message, StringComparison.Ordinal);
+        Assert.Contains("Geometry", error.Metadata!["layoutViolations"], StringComparison.Ordinal);
+        Assert.Equal(0, fake.State);
+        Assert.Equal(commit, fake.Transactions.Calls.Count(c => c == "Commit"));
+        Assert.Equal(commit - 1, fake.Transactions.Calls.Count(c => c == "CloseUndo"));
+        Assert.Contains("Rollback", fake.Transactions.Calls);
+        Assert.Equal(commit - 1, fake.Events.Count(e => e == "undo"));
+    }
+
+    [Fact]
+    public void UnknownPrediction_MeasuredOverlapRefusesAndRollsBackBeforeGeneration()
+    {
+        var fake = new Creator();
+        fake.Fixture.Scene.SymbolBounds.Clear();
+        LayoutGuard.Model actual = LayoutGuard.From(fake.Fixture.Scene);
+        actual.Page = new()
+        {
+            GridSize = 4,
+            PageSize = [100, 100],
+            Placements = [.. fake.Fixture.Scene.Page.Placements, new()
+        {
+            Kind = "SymbolReference", Locator = new() { Type = 17, Oid = 9 }, Location = [24, 8], Bounds = [20, 6, 26, 26]
+        }]
+        };
+        fake.Measured = actual;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Contains("R2", error.Message, StringComparison.Ordinal);
+        Assert.Contains("Geometry", error.Metadata!["layoutViolations"], StringComparison.Ordinal);
+        Assert.Contains("Suggested position", error.Message, StringComparison.Ordinal);
+        Assert.Equal(0, fake.State);
+        Assert.DoesNotContain("generate", fake.Events);
+        Assert.DoesNotContain("Commit", fake.Transactions.Calls);
+        Assert.Contains("Rollback", fake.Transactions.Calls);
+    }
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void Split_ExactReplacementGraphicsAndPreservedConnection_Commits(bool branchPin)
@@ -155,6 +210,8 @@ public sealed class ConnectionCreateExecutionTests
         public ConnectionCreateFixture Fixture { get; } = new();
         public FakeTransactions Transactions { get; } = new();
         public List<string> Events { get; } = [];
+        public LayoutGuard.Model? Measured { get; set; }
+        public int MeasureAfterCommit { get; init; }
         public string? Failure { get; init; }
         public List<double[][]>? Drawn { get; set; }
         public List<string?[]>? GeneratedEndpoints { get; set; }
@@ -175,15 +232,17 @@ public sealed class ConnectionCreateExecutionTests
             OperationContext.Current.ThrowIfCancellationRequested();
             if (State == 0)
             { return Fixture.Scene; }
-            return new() { Graphical = Graphical(project, page) };
+            return new() { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = Graphical(project, page) };
         }
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => Fixture.Read(projectPath, args);
-        public Action Prepare(string project, string page, JArray symbols)
+        public LayoutGuard.Model Measure(string project, string page) => MeasureAfterCommit > 0 && Transactions.Calls.Count(c => c == "Commit") >= MeasureAfterCommit
+            ? Measured! : LayoutGuard.From(Read(project, page));
+        public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null)
         {
             if (Failure == "prepare")
             { throw Failed(); }
             Assert.Empty(Transactions.Calls);
-            return () => { Events.Add("place"); State = 1; if (Failure == "placement") { throw Failed(); } };
+            return () => { Events.Add("place"); State = 1; if (Failure == "placement") { throw Failed(); } if (MeasureAfterCommit == 0 && Measured is { } measured) { verifyLayout?.Invoke(measured); } };
         }
         public List<double[][]> Graphical(string project, string page) => Failure == "graphical" ? [] : Drawn ?? Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!;
         public List<string?[]> Endpoints(string project, string page) => Failure == "endpoints" ? [["17/1/0", "17/9/0"]] : GeneratedEndpoints ?? [["17/1/0", "17/2/0"]];

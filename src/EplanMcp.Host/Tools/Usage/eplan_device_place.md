@@ -50,3 +50,4 @@ PLC digital input:
 ## Errors
 
 not_started/rolled_back: unchanged. INVALID_ARGUMENT lists violations/requested vs actual readback; correct source/coordinates/variant/structure. PART_NOT_FOUND: eplan_part_search; ALREADY_EXISTS: choose free tag/address. PAGE_NOT_FOUND/AMBIGUOUS_NAME: eplan_page_get/list. PLAN_STALE: re-plan. Policy/approval/audit/lock/connection/OUTCOME_UNKNOWN: see eplan_page_create; never retry unknown writes; inspect with read tools.
+R1-R5/R8 refuse; R6/R7/R9 warn; strict: refuse.

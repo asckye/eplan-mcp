@@ -24,10 +24,11 @@ internal sealed class FunctionTransactionScope : ITransactionScope
         project.LockAllObjects();
 #pragma warning restore RS0030
         _undoManager = new UndoManager();
+        UndoStep? undoStep = null;
         Transaction? transaction = null;
         try
         {
-            _undoStep = _undoManager.CreateUndoStep();
+            _undoStep = undoStep = _undoManager.CreateUndoStep();
             _undoStep.SetUndoDescription(description);
             transaction = new TransactionManager().CreateTransaction();
             _quietMode = new QuietModeStep(QuietModes.ShowNoDialogs);
@@ -37,6 +38,7 @@ internal sealed class FunctionTransactionScope : ITransactionScope
         {
             WriteExceptionDiagnostics.Report(nativeFailure);
             transaction?.Dispose();
+            undoStep?.Dispose();
             _undoManager.Dispose();
             throw;
         }
@@ -85,7 +87,11 @@ internal sealed class FunctionTransactionScope : ITransactionScope
         }
         finally
         {
-            _undoManager.Dispose();
+            // UndoStep owns the native protocol too (B7 XML: use inside using). End it on this thread,
+            // after Abort/transaction release, before its manager; never leave refusal cleanup to a finalizer.
+            try
+            { _undoStep.Dispose(); }
+            finally { _undoManager.Dispose(); }
         }
     }
 

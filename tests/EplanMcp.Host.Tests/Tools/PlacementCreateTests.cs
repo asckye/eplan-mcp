@@ -192,12 +192,12 @@ public sealed class PlacementCreateTests
     }
 
     [Fact]
-    public async Task TextOutline_UnknownOrInvalidFailsClosed()
+    public async Task TextOutline_UnknownOrInvalidDefersMeasurementUntilWrite()
     {
         foreach (double[]? outline in new double[]?[] { null, [], [1, 2, double.NaN, 4], [20, 20, 10, 10] })
         {
-            JsonElement error = Error(await PlacementCreatePlanning.PreviewAsync(Bridge(), Input(Text), "en_US", _ => outline, TestContext.Current.CancellationToken));
-            Assert.Equal("placement.text_outline", error.GetProperty("metadata").GetProperty("missing").GetString());
+            CallToolResult result = await PlacementCreatePlanning.PreviewAsync(Bridge(), Input(Text), "en_US", _ => outline, TestContext.Current.CancellationToken);
+            Assert.NotEqual(true, result.IsError);
         }
     }
 

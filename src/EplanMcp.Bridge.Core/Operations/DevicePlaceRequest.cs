@@ -120,7 +120,23 @@ internal sealed class DevicePlaceRequest
                 .Where(n => SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase))
                 .Distinct(StringComparer.Ordinal),
         ];
-        return new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing);
+        var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing);
+        if (args.Fingerprint is null)
+        { request.CheckFree(); }
+        if (args.Library is null && args.LocationBox is null && args.TerminalStrip is null)
+        { request.CheckLayout(args); }
+        return request;
+    }
+    public List<string> LayoutWarnings { get; private set; } = [];
+    public void CheckLayout(DevicePlaceArgs args)
+    {
+        LayoutGuard.Model layout = Page.Layout ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: read complete page layout before placing a device.");
+        layout.SetsTextAttribute = (row, attribute) => attribute == "height_mm" && row.Kind == "PropertyPlacement" && row.Parent is not null
+            && !layout.Page.Placements.Any(p => p.Parent is null && p.Locator.Type == row.Parent.Type && p.Locator.Oid == row.Parent.Oid)
+            && (args.DisplayProperties ?? []).Any(p => row.Properties.TryGetValue("property_id", out string? id) && id == p.PropertyId.ToString(CultureInfo.InvariantCulture)
+                && row.Location.SequenceEqual(new[] { args.X + p.OffsetXmm, args.Y + p.OffsetYmm }));
+        LayoutWarnings = LayoutGuard.Enforce(layout, Page.PredictDevice?.Invoke(args)
+            ?? [LayoutGuard.Proposed(args.LocationBox is null ? "Function" : "LocationBox", [args.X, args.Y], null)]);
     }
 
     /// <summary>The one change, for the dry run, the approval form and the audit (tool spec 5).</summary>
@@ -138,7 +154,7 @@ internal sealed class DevicePlaceRequest
 
     /// <summary>The plan's state (tool spec 5): the objects on the page, and how many functions carry the tag.</summary>
     public string StateFingerprint() =>
-        Fingerprint.Of(Page.Objects.Select(id => "object\t" + id).Concat(Existing.Select(n => "name\t" + n)).Concat(Page.LocationBoxStructures.Select(n => "box\t" + n)).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture)));
+        Fingerprint.Of(Page.Objects.Select(id => "object\t" + id).Concat(Existing.Select(n => "name\t" + n)).Concat(Page.LocationBoxStructures.Select(n => "box\t" + n)).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture)).Append(Protocol.BridgeJson.FromObject(new { Page.Layout, LayoutWarnings }).ToString()));
 
     /// <summary>ALREADY_EXISTS when a device carries the tag: EPLAN would merge the two (A13: it does not check).</summary>
     public void CheckFree()

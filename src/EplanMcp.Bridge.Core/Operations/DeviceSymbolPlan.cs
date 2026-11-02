@@ -71,8 +71,10 @@ internal static class DeviceSymbolPlan
         { changes.Add(new() { Action = "update", Kind = "pin", Name = request.Tag, Property = "20022[" + (i + 1).ToString(CultureInfo.InvariantCulture) + "]", NewValue = args.ConnectionDesignations![i] }); }
         TerminalPlacementData? terminalData = terminal ? DeviceTerminalPlan.Describe(args, request, changes) : null;
         DevicePlcPlan.Describe(args, request, changes);
+        request.CheckLayout(args);
         string resolved = BridgeJson.FromObject(symbol).ToString(Formatting.None);
         var details = new Dictionary<string, string> { ["symbol"] = resolved, ["tag"] = request.Tag, ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true" };
+        details["layoutWarnings"] = string.Join("\n", request.LayoutWarnings);
         if (box)
         { details["locationBox"] = BridgeJson.FromObject(new LocationBoxData { Structure = request.Tag, Bounds = [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value] }).ToString(Formatting.None); }
         if (terminalData is not null)

@@ -27,6 +27,7 @@ public sealed class DevicePlacePlanOperation(IProjectCatalog catalog, IPageReade
             Details = new Dictionary<string, string>
             {
                 ["part"] = request.Part,
+                ["layoutWarnings"] = string.Join("\n", request.LayoutWarnings),
                 ["variant"] = request.Variant,
                 ["tag"] = request.Tag,
                 ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true",

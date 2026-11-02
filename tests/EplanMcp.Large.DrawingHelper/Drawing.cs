@@ -22,6 +22,8 @@ internal static class Drawing
                 Project project = manager.OpenProject(projectFile);
                 try
                 {
+                    if (rollback == "frame-probe")
+                    { return FrameProbe.Read(project); }
                     if (rollback is not null)
                     { return TextCreation.Run(project.ProjectFullName, pageName, rollback == "mixed-rollback"); }
                     return JsonConvert.SerializeObject(new EplanDrawingReader().Read(project.ProjectFullName, pageName)

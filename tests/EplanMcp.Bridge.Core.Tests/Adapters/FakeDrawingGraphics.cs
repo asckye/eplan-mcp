@@ -5,9 +5,9 @@ namespace Eplan.EplApi.DataModel.Graphics;
 internal abstract class TextBase(long oid) : Placement(oid)
 {
     public int UndockCalls { get; private set; }
+    public double Rotation { get; set; }
     public MultiLangString Contents { get; set; } = new("en_US@Test;");
     public double Height { get; set; } = 3;
-    public double Rotation { get; set; }
     public bool IsDocked { get; set; }
     public bool ReadOnly { get; init; }
     public void UndockText()

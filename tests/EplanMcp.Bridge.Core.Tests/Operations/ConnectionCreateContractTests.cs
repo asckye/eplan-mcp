@@ -122,7 +122,7 @@ public sealed class ConnectionCreateContractTests
         });
         JObject optionalInterruption = (JObject)InputSchema()["properties"]!["items"]!["items"]!["oneOf"]!
             .Single(s => (string?)s["properties"]!["kind"]!["const"] == "interruption_point").DeepClone();
-        JObject placedSymbol = Object(new() { ["position"] = Point(), ["symbol"] = symbol, ["bounds"] = Array(new() { ["type"] = "number", ["minimum"] = 0 }, 4, 4), ["interruption"] = optionalInterruption }, "position symbol bounds");
+        JObject placedSymbol = Object(new() { ["position"] = Point(), ["symbol"] = symbol, ["bounds"] = Array(new() { ["type"] = "number", ["minimum"] = 0 }, 4, 4), ["boundsKnown"] = new JObject { ["type"] = "boolean" }, ["interruption"] = optionalInterruption }, "position symbol bounds boundsKnown");
         JObject counterpart = Object(new() { ["page"] = Text(), ["name"] = Text(), ["oid"] = Integer(1) });
         JObject point = Object(new()
         {
@@ -156,6 +156,7 @@ public sealed class ConnectionCreateContractTests
             ["coverage"] = Constant("complete_page_predicted_endpoints"),
             ["logicalDuringPlacement"] = new JObject { ["const"] = 0 },
             ["generation"] = Text(),
+            ["warning"] = new JObject { ["type"] = new JArray("string", "null") },
             ["undoSteps"] = new JObject { ["enum"] = new JArray(1, 2) },
             ["fingerprint"] = new JObject { ["type"] = "string", ["pattern"] = "^[0-9a-f]{64}$" },
             ["affectedPages"] = Array(Text(), 1, 21),

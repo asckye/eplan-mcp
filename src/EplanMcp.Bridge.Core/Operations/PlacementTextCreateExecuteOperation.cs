@@ -5,10 +5,11 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>A54: mixed primitives share one transaction; the staged single-TEXT request remains supported.</summary>
-public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog, IPlacementTextWriter writer, ITransactionScopeFactory transactions, IPageDrawingReader? drawings = null)
+public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog, IPlacementTextWriter writer, ITransactionScopeFactory transactions, IPageDrawingReader? drawings = null,
+    Func<string, string, LayoutGuard.Model>? layoutReader = null, Func<PlacementText, double[]?>? measureText = null, bool planning = false)
     : Operation<PlacementTextCreateArgs, PlacementTextCreateData>, IWriteOperation
 {
-    public override string Name => OperationNames.PlacementTextCreateExecute;
+    public override string Name => planning ? OperationNames.PlacementTextCreatePlan : OperationNames.PlacementTextCreateExecute;
 
     public override object ParseArgs(JToken? args)
     {
@@ -74,14 +75,32 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             { throw WriteArguments.NotStarted(InvalidArgument("/items: invalid kind or endpoint coordinates.")); }
             Validate(new() { Project = args.Project, Page = args.Page, Text = item });
         }
+        PageDrawingGeometry geometry = drawings?.Read(WriteArguments.Writable(catalog, args.Project).Path, args.Page)
+            ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "R1/R3: read complete page bounds before creating placements."));
+        LayoutGuard.Model layout = layoutReader?.Invoke(geometry.Project, args.Page) ?? new() { Page = geometry };
+        layout.SetsTextAttribute = (row, attribute) => attribute == "height_mm" && row.Kind == "Text" && row.Parent is null
+            && items.Any(p => p.Kind == "text" && p.Position.SequenceEqual(row.Location))
+            && !geometry.Placements.Any(p => p.Locator.Type == row.Locator.Type && p.Locator.Oid == row.Locator.Oid);
+        layout.ReadActual ??= () => new() { Page = drawings!.Read(geometry.Project, args.Page)!, Config = layout.Config, DrawingArea = layout.DrawingArea };
+        layout.Lines.AddRange(items.Where(p => p.Kind == "line").Select(p => new LayoutGuard.Segment { Points = [p.Position, p.EndPosition], Changed = true, Net = "graphics" }));
+        List<string> warnings = LayoutGuard.Enforce(layout, items.Select((p, i) =>
+        {
+            DrawingPlacement row = LayoutGuard.Proposed(p.Kind == "text" ? "Text" : p.Kind == "line" ? "Line" : "Rectangle", p.Position,
+            p.Kind == "text" ? measureText?.Invoke(p) : [Math.Min(p.Position[0], p.EndPosition[0]), Math.Min(p.Position[1], p.EndPosition[1]), Math.Max(p.Position[0], p.EndPosition[0]), Math.Max(p.Position[1], p.EndPosition[1])], i);
+            row.Properties = new() { ["height_mm"] = p.HeightMm.ToString("R", CultureInfo.InvariantCulture), ["angle"] = "0" };
+            return row;
+        }).ToArray());
+        if (planning)
+        { return new() { Text = items[0], Items = items, Warning = string.Join("\n", warnings) }; }
         Committed<List<PlacementText>> batch = TransactionRunner.Run(transactions, "eplan_placement_create", () =>
         {
             List<PlacementText> actual = writer.CreateBatch(WriteArguments.Writable(catalog, args.Project).Path, args.Page, items);
             if (actual.Count != items.Count)
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Incomplete batch readback; all items were rolled back."); }
+            warnings.AddRange(LayoutGuard.AfterWriting(layout));
             return items.Zip(actual, Verify).ToList();
         }, shouldCommit: _ => true);
-        return new() { Text = batch.Result[0], Items = batch.Result, Warning = batch.Warning };
+        return new() { Text = batch.Result[0], Items = batch.Result, Warning = LayoutGuard.Summary(warnings.Append(batch.Warning)) };
     }
 
     private OpenProject Validate(PlacementTextCreateArgs args)

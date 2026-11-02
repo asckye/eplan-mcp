@@ -164,7 +164,10 @@ public sealed class ConnectionCreatePlanTests : IDisposable
                 _fixture.Symbols[0].ConnectionPoints[0].Location = [4, 0];
                 break;
         }
-        Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), Outcome(() => RoundTripPlan()));
+        if (missing is "placement_bounds" or "symbol_bounds")
+        { Assert.Equal(ExecutionState.NotStarted, (string?)RoundTripPlan()["execution"]); }
+        else
+        { Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), Outcome(() => RoundTripPlan())); }
     }
 
     [Fact]
@@ -173,7 +176,7 @@ public sealed class ConnectionCreatePlanTests : IDisposable
         _fixture.Scene.Graphical.Add([[12, 0], [12, 16]]);
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Reason);
         _fixture.Scene.Graphical.Clear();
-        _fixture.Scene.Page.Placements.Add(new() { Bounds = [22, 6, 26, 10] });
+        _fixture.Scene.Page.Placements.Add(new() { Location = [24, 8], Bounds = [22, 6, 26, 10] });
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Reason);
     }
 

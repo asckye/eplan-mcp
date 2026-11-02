@@ -16,9 +16,12 @@ public static class ConnectionCreatePlanner
         public string PageType { get; set; } = "Circuit";
         public bool Complete { get; set; }
         public Dictionary<string, SymbolConnectionPoint> Pins { get; set; } = [];
+        public Dictionary<string, List<double[][]>> PointRoutes { get; set; } = [];
+        public Dictionary<string, string> PointRouteGaps { get; set; } = [];
         public List<double[][]> Graphical { get; set; } = [];
         public List<ConnectionRecord> Logical { get; set; } = [];
         public Dictionary<string, double[]> SymbolBounds { get; set; } = [];
+        public LayoutGuard.Options Layout { get; set; } = new();
         // A reader, not scene data: plans that serialize the scene (placement move) must not follow its closure back here.
         [Newtonsoft.Json.JsonIgnore]
         public Func<CableDefinitionPlanner.Inventory>? ReadCables { get; set; }
@@ -75,7 +78,6 @@ public static class ConnectionCreatePlanner
         {
             Require(token is JArray { Count: 2 } a && a.All(n => n.Type is JTokenType.Integer or JTokenType.Float && (double)n is >= 0 and <= 10000), at, "Supply [x_mm,y_mm] in 0..10000 mm.");
             double[] actual = token!.Select(n => DrawingCoordinates.Snap((double)n!, grid, snap)).ToArray();
-            Require(actual.All(v => Math.Abs(v / grid - Math.Round(v / grid)) < 1e-8), at, "Connection points must lie on the page grid.");
             Require(DrawingCoordinates.Contains(scene.Page.PageSize, [[actual[0], actual[1], actual[0], actual[1]]]), at, "Keep the path inside Page.Size.");
             requested.Add(new JObject { ["pointer"] = at, ["requested"] = token!.DeepClone(), ["actual"] = new JArray(actual) });
             return actual;
@@ -206,12 +208,12 @@ public static class ConnectionCreatePlanner
             double[] offset = symbol.ConnectionPoints[0].Location;
             double[] position = [node.Point[0] - offset[0], node.Point[1] - offset[1]];
             string key = FormattableString.Invariant($"{symbol.Name}/{symbol.Variant}");
-            double[] bounds = scene.SymbolBounds.TryGetValue(key, out double[]? found) ? found : throw Missing("Read the selected variant's complete outline before planning placement.");
+            double[] bounds = scene.SymbolBounds.TryGetValue(key, out double[]? found) && DrawingCoordinates.ValidBounds(found) ? found : [0, 0, 0, 0];
             double[] outline = [bounds[0] + position[0], bounds[1] + position[1], bounds[2] + position[0], bounds[3] + position[1]];
             Require(position.All(v => v is >= 0 and <= 10000) && DrawingCoordinates.Contains(scene.Page.PageSize, [outline, [position[0], position[1], position[0], position[1]]]), "/items", "Keep the full symbol outline inside Page.Size and insertion coordinates in 0..10000 mm.");
-            Require(!scene.Page.Placements.Where(Obstacle).Any(p => Overlaps(outline, p.Bounds!)) && !resolved.Any(p => Overlaps(outline, p["bounds"]!.Values<double>().ToArray())), "/items", "A symbol outline conflicts with another placement.");
             // Functional discovery metadata does not widen the existing routing-symbol contract.
             resolved.Add(new JObject { ["position"] = new JArray(position), ["symbol"] = BridgeJson.FromObject(new { symbol.Library, symbol.Name, symbol.Variant, symbol.Type, symbol.Kind, symbol.ConnectionPoints }), ["bounds"] = new JArray(outline) });
+            resolved.Last!["boundsKnown"] = DrawingCoordinates.ValidBounds(found);
             if (interruptions.TryGetValue(Key(node.Point), out JObject? interruption))
             { resolved.Last!["interruption"] = interruption; }
         }
@@ -248,10 +250,10 @@ public static class ConnectionCreatePlanner
                 && s.Any(p => p.SequenceEqual(split.Point)) && (s[0][0] == s[1][0]) != (e[0][0] == e[1][0])));
             Require(conflict is null, "/items", conflict is null ? "" : "The path " + FormatPoint(s[0]) + " -> " + FormatPoint(s[1]) + " conflicts with the existing autoconnect line "
                 + FormatPoint(conflict[0]) + " -> " + FormatPoint(conflict[1]) + "; plan an explicit replacement separately.");
-            if (scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => CrossesPlacement(s, p, scene.Pins)) is { } crossed)
+            if (scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => LayoutGuard.Crosses(s, p, scene.Pins, scene.PointRoutes)) is { } crossed)
             {
                 Require(false, "/items", FormattableString.Invariant(
-                    $"The path {FormatPoint(s[0])} -> {FormatPoint(s[1])} crosses the outline of {crossed.Kind} {crossed.Locator.Type}/{crossed.Locator.Oid} [{string.Join(",", crossed.Bounds!.Select(v => v.ToString("R", CultureInfo.InvariantCulture)))}]."));
+                    $"The path {FormatPoint(s[0])} -> {FormatPoint(s[1])} crosses the outline of {crossed.Kind} {crossed.Locator.Type}/{crossed.Locator.Oid} [{string.Join(",", crossed.Bounds!.Select(v => v.ToString("R", CultureInfo.InvariantCulture)))}]. R4: reroute around the outline."));
             }
             Require(!scene.Pins.Values.Any(p => On(p.Location, s) && !s.Any(e => e.SequenceEqual(p.Location))), "/items", "A different pin intercepts this path; select explicit endpoints.");
             foreach (var node in nodes.Values.Where(n => On(n.Point, s)))
@@ -309,6 +311,16 @@ public static class ConnectionCreatePlanner
             if (ends.Length > 1 || potential && ends.Length > 0)
             { logical.Add(new JObject { ["pins"] = new JArray(ends), ["potentialStartIsNull"] = potential }); }
         }
+        LayoutGuard.Model layout = LayoutGuard.From(scene);
+        string Net(double[][] s) => groups[Key(s[0])].OrderBy(k => k, StringComparer.Ordinal).First();
+        layout.Lines = layout.Lines.Where(l => !splits.Any(s => SegmentKey(s.Segment) == SegmentKey(l.Points))).ToList();
+        foreach (LayoutGuard.Segment line in layout.Lines)
+        { line.Net = Net(line.Points); }
+        layout.Lines.AddRange(segments.Select((s, i) => new LayoutGuard.Segment { Points = s, Changed = true, Net = Net(s), Locator = new() { Oid = -i - 1000 } }));
+        DrawingPlacement[] proposed = resolved.Select((p, i) => LayoutGuard.Proposed("SymbolReference", p["position"]!.ToObject<double[]>()!, p["bounds"]!.ToObject<double[]>()!, i)).ToArray();
+        for (int i = 0; i < proposed.Length; i++)
+        { foreach (SymbolConnectionPoint pin in resolved[i]["symbol"]!["connectionPoints"]!.ToObject<List<SymbolConnectionPoint>>()!) { layout.Pins.Add(FormattableString.Invariant($"0/{proposed[i].Locator.Oid}/{layout.Pins.Count}"), new() { Direction = pin.Direction, Location = pin.Location.Zip(proposed[i].Location, (a, b) => a + b).ToArray() }); } }
+        List<string> layoutWarnings = LayoutGuard.Enforce(layout, proposed, "/items: ");
         var result = new JObject
         {
             ["project"] = scene.Project.Name,
@@ -326,13 +338,16 @@ public static class ConnectionCreatePlanner
             ["generation"] = "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
             ["undoSteps"] = 2
         };
+        result["warning"] = layoutWarnings.Count == 0 ? null : string.Join("\n", layoutWarnings.Distinct(StringComparer.Ordinal));
         if (splits.Count > 0)
         { result["splitSegments"] = new JArray(splits.Select(s => new JObject { ["segment"] = JArray.FromObject(s.Segment), ["position"] = new JArray(s.Point) })); }
         if (interruptions.Count > 0)
         { InterruptionPointPlanning.Plan(result, scene, reader as IConnectionCreator ?? throw Missing("Read explicit counterpart scope before planning interruption points.")); }
         string cableFingerprint = CableDefinitionPlanner.Add(input, scene, result, Point);
-        string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), .. (cableFingerprint == "" ? Array.Empty<string>() : new[] { cableFingerprint }), BridgeJson.FromObject(new { scene.Project, PageProject = scene.Page.Project, scene.Page.Page, scene.Page.GridSize, scene.Page.PageSize, scene.PageType, scene.Complete }).ToString(Formatting.None), resolved.ToString(Formatting.None),
+        string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), .. (cableFingerprint == "" ? Array.Empty<string>() : new[] { cableFingerprint }), BridgeJson.FromObject(new { scene.Project, PageProject = scene.Page.Project, scene.Page.Page, scene.Page.GridSize, scene.Page.PageSize, scene.PageType, scene.Complete, scene.Layout }).ToString(Formatting.None), resolved.ToString(Formatting.None),
             .. scene.Page.Placements.Select(p => "placement:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Pins.Select(p => "pin:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)),
+            .. scene.PointRoutes.Select(p => "point-route:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)),
+            .. scene.PointRouteGaps.Select(p => "point-route-gap:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)),
             .. scene.Graphical.Select(p => "graphical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Logical.Select(p => "logical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.SymbolBounds.Select(p => "outline:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)), .. result["interruptionScope"] is { } evidence ? new[] { evidence.ToString(Formatting.None) } : []]);
         result["fingerprint"] = fingerprint;
         return expectedFingerprint is null || expectedFingerprint == fingerprint ? result : throw new BridgeErrorException(ErrorReason.PlanStale, "Page, pins or library geometry changed; create a new dry-run plan.");
@@ -345,23 +360,10 @@ public static class ConnectionCreatePlanner
         var split = new HashSet<string>(plan["splitSegments"]?.Select(s => SegmentKey(s["segment"]!.ToObject<double[][]>()!)) ?? [], StringComparer.Ordinal);
         return scene.Graphical.Where(s => !split.Contains(SegmentKey(s))).Concat(plan["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!);
     }
-    private static bool CrossesPlacement(double[][] segment, DrawingPlacement placement, Dictionary<string, SymbolConnectionPoint> pins)
-    {
-        double[] bounds = placement.Bounds!;
-        double[][] diagonal = [[bounds[0], bounds[1]], [bounds[2], bounds[3]]];
-        if (!Overlaps(Box(segment), bounds) && !((bounds[0] == bounds[2] || bounds[1] == bounds[3]) && Intersects(segment, diagonal)))
-        { return false; }
-        string owner = FormattableString.Invariant($"{placement.Locator.Type}/{placement.Locator.Oid}/");
-        // Only the terminal approach to this placement's own pin may enter its outline.
-        return !pins.Any(p => p.Key.StartsWith(owner, StringComparison.Ordinal) && On(p.Value.Location, diagonal)
-            && segment.Any(end => end.SequenceEqual(p.Value.Location) && segment.Any(other => !On(other, diagonal)
-                && Direction(end, other) == p.Value.Direction)));
-    }
     private static string Direction(double[] a, double[] b) => a[0] == b[0] ? b[1] > a[1] ? "Up" : "Down" : b[0] > a[0] ? "Right" : "Left";
     private static double Distance(double[] a, double[] b) => Math.Abs(a[0] - b[0]) + Math.Abs(a[1] - b[1]);
     private static double[] Box(double[][] s) => [Math.Min(s[0][0], s[1][0]), Math.Min(s[0][1], s[1][1]), Math.Max(s[0][0], s[1][0]), Math.Max(s[0][1], s[1][1])];
     private static bool On(double[] p, double[][] s) => p[0] >= Box(s)[0] && p[0] <= Box(s)[2] && p[1] >= Box(s)[1] && p[1] <= Box(s)[3];
-    private static bool Overlaps(double[] a, double[] b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
     internal static bool Intersects(double[][] a, double[][] b) => Box(a)[0] <= Box(b)[2] && Box(a)[2] >= Box(b)[0] && Box(a)[1] <= Box(b)[3] && Box(a)[3] >= Box(b)[1];
     internal static void Require(bool valid, string at, string message) { if (!valid) { throw WriteArguments.Invalid([at + ": " + message]); } }
     // Names the first failed scene check so the caller can tell which page object blocks drawing.
@@ -373,10 +375,6 @@ public static class ConnectionCreatePlanner
         { return "page type " + scene.PageType; }
         if (scene.Page.Project != scene.Project.Path || scene.Page.PageSize is null)
         { return "page geometry is unavailable"; }
-        if (scene.Page.Placements.FirstOrDefault(p => !DrawingCoordinates.ValidBounds(p.Bounds)) is { } placement)
-        { return FormattableString.Invariant($"invalid bounds of {placement.Kind} {placement.Locator.Type}/{placement.Locator.Oid}"); }
-        if (scene.SymbolBounds.FirstOrDefault(b => !DrawingCoordinates.ValidBounds(b.Value)) is { Key: not null } symbol)
-        { return "invalid outline of symbol " + symbol.Key; }
         if (scene.Pins.Count > 10000)
         { return "more than 10000 pins"; }
         if (scene.Pins.FirstOrDefault(p => p.Value.Location.Length != 2 || p.Value.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v) || v < 0 || v > 10000) || Opposite(p.Value.Direction) == ""
@@ -390,7 +388,7 @@ public static class ConnectionCreatePlanner
     }
 
     // Acceptance trial: a location box is a dashed frame around devices; wires and nodes cross and sit inside it.
-    private static bool Obstacle(DrawingPlacement placement) => placement.Kind != "LocationBox";
+    private static bool Obstacle(DrawingPlacement placement) => placement.Kind != "LocationBox" && LayoutGuard.Positioned(placement) && DrawingCoordinates.ValidBounds(placement.Bounds);
 
     private static string Owner(string pin) => string.Join("/", pin.Split('/').Take(2));
 

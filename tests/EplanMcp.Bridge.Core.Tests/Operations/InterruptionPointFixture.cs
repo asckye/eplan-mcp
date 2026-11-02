@@ -41,9 +41,10 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     internal JObject Plan(string? fingerprint = null) => ConnectionCreatePlanner.Plan(Request.ToString(), Base.Scene, this, fingerprint);
     internal JObject Arguments() => new() { ["request"] = Request.DeepClone(), ["fingerprint"] = Plan()["fingerprint"] };
     internal JObject Execute(JObject? args = null) => Assert.IsType<JObject>(new OperationContext("interruption-test", true, null).Run(() => new ConnectionCreateExecuteOperation(this, this, Generation).Execute(args ?? Arguments())));
-    public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Base.Scene : new() { Graphical = Geometry() };
+    public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Base.Scene : new() { Page = Base.Scene.Page, Layout = Base.Scene.Layout, Pins = Base.Scene.Pins, Graphical = Geometry() };
     public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => Base.Read(projectPath, args);
-    public Action Prepare(string project, string page, JArray symbols) => () =>
+    public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
+    public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () =>
     {
         Assert.Contains(symbols, s => (string?)s["interruption"]?["name"] == BusinessName);
         State = 1;

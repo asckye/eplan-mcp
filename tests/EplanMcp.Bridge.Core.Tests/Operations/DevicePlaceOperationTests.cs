@@ -57,6 +57,60 @@ public sealed class DevicePlaceOperationTests
     }
 
     [Fact]
+    public void LayoutGuard_OverlapRefusesWithSuggestion_BeforeAnyWrite()
+    {
+        MacroTargetPage page = LayoutFixture.Target(_placer.Pages[SamplePage])!;
+        page.Layout!.Page.Placements.Add(LayoutGuardTests.Row("Function", 9, 80, 160));
+        page.PredictDevice = _ => [LayoutGuardTests.Row("Function", 10, 80, 160)];
+        BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => Plan(Args(SamplePage, "-NEW")));
+        Assert.Equal(ErrorReason.InvalidArgument, failure.Error.Reason);
+        Assert.Contains("R2", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("Suggested position", failure.Message, StringComparison.Ordinal);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("Function")]
+    [InlineData("PropertyPlacement")]
+    public void LayoutGuard_UnknownPrediction_MeasuredConflictRollsBackWholeCall(string kind)
+    {
+        MacroTargetPage page = LayoutFixture.Target(_placer.Pages[SamplePage])!;
+        page.PredictDevice = _ => [LayoutGuard.Proposed("Function", [80, 160], null)];
+        DrawingPlacement old = LayoutGuardTests.Row("Function", 9, 100, 160);
+        page.Layout!.Page.Placements.Add(old);
+        LayoutGuard.Model actual = new() { Page = new() { GridSize = 4, PageSize = [420, 297], Placements = [old, LayoutGuardTests.Row(kind, 10, 100, 160)] } };
+        page.Layout.ReadActual = () => actual;
+        DevicePlaceArgs args = Args(SamplePage, "-NEW");
+        args.Fingerprint = Plan(args).Fingerprint;
+        BridgeError failure = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (failure.Reason, failure.Execution));
+        Assert.Contains(kind == "Function" ? "R2" : "R3", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("Suggested position", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("100.0", failure.Metadata!["layoutViolations"], StringComparison.Ordinal);
+        Assert.Contains("after write", failure.Metadata["layoutChecks"], StringComparison.Ordinal);
+        Assert.Single(_placer.Places);
+        Assert.DoesNotContain(_names.Functions, f => f.Name.Contains("NEW", StringComparison.Ordinal));
+        Assert.Equal(["1/1/1/0", "1/1/2/0"], page.Objects);
+        Assert.DoesNotContain("Commit", _transactions.Calls);
+        Assert.Contains("Rollback", _transactions.Calls);
+    }
+
+    [Fact]
+    public void LayoutGuard_UnknownPrediction_CleanMeasurementCommitsAndReportsFallbackAndBothStages()
+    {
+        MacroTargetPage page = LayoutFixture.Target(_placer.Pages[SamplePage])!;
+        page.PredictDevice = _ => [LayoutGuard.Proposed("Function", [80, 160], null)];
+        page.Layout!.ReadActual = () => new() { Page = new() { GridSize = 4, PageSize = [420, 297], Placements = [LayoutGuardTests.Row("Function", 10, 80, 160)] } };
+        DevicePlaceArgs args = Args(SamplePage, "-NEW");
+        args.Fingerprint = Plan(args).Fingerprint;
+        DevicePlaceData result = Execute(args);
+        Assert.Contains("before write", result.Warning, StringComparison.Ordinal);
+        Assert.Contains("after write", result.Warning, StringComparison.Ordinal);
+        Assert.Contains("Boundary fallback", result.Warning, StringComparison.Ordinal);
+        Assert.Equal(1, _transactions.Calls.Count(c => c == "Commit"));
+    }
+
+    [Fact]
     public void Plan_IsOneDeviceChange_WithTheTagInThePagesStructure()
     {
         WritePlan plan = Plan(Args(NewPage, "-KF20"));
@@ -295,7 +349,7 @@ public sealed class DevicePlaceOperationTests
 
         public List<(string Page, string Part, string Variant, double X, double Y, string Tag)> Places { get; } = [];
 
-        public MacroTargetPage? ReadPage(string projectPath, string pageName) => Pages.GetValueOrDefault(pageName);
+        public MacroTargetPage? ReadPage(string projectPath, string pageName) => LayoutFixture.Target(Pages.GetValueOrDefault(pageName));
 
         public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag)
         {

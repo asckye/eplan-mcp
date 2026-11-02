@@ -23,7 +23,9 @@ internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
     public long ObjectIdentifier { get; } = oid;
     public string Prefix { get; set; } = "53";
     public int IdentifierType { get; set; } = type;
-    public PointD Location { get; set; }
+    private PointD _location;
+    public Exception? LocationError { get; set; }
+    public PointD Location { get => LocationError is { } error ? throw error : _location; set => _location = value; }
     public Group? Group { get; set; }
     public PointD[] Bounds { get; set; } = [new(0, 0), new(10, 10)];
     public Exception? BoundsError { get; set; }
@@ -44,6 +46,7 @@ internal interface IPropertyPlacementsContainer
 
 internal class SymbolReference(long oid) : Placement(oid, 17)
 {
+    public BoxSymbolVariant SymbolVariant { get; } = new();
     public PropertyPlacement[] PropertyPlacements { get; set; } = [];
     public bool UseLocalPropertyPlacements { get; set; } = true;
     public int LocalCopies { get; private set; }
@@ -85,6 +88,7 @@ internal class Function(long oid) : FunctionBase(oid)
     public FunctionCategory FunctionCategory { get; set; } = FunctionCategory.Terminal;
     public ArticleReference[] ArticleReferences { get; set; } = [];
     public Function[] SubFunctions { get; set; } = [];
+    public Function? ParentFunction { get; set; }
     public Pin[] Pins { get; set; } = [];
 }
 
@@ -103,7 +107,9 @@ internal sealed class Page : StorableObject, IWriteProtection, IDisposable
     public PointD StoredSize { get; set; } = new(420, 297);
     public Exception? SizeError { get; set; }
     public PointD Size => SizeError is { } error ? throw error : StoredSize;
-    public PlotFrame? PlotFrame { get; set; }
+    private PlotFrame? _frame;
+    public Exception? FrameError { get; set; }
+    public PlotFrame? PlotFrame { get => FrameError is { } error ? throw error : _frame; set => _frame = value; }
     private Placement[] _placements = [];
     public Func<Placement[]>? FindPlacements { get; set; }
     public Placement[] AllPlacements { get => FindPlacements?.Invoke() ?? _placements; set => _placements = value; }
@@ -113,6 +119,8 @@ internal sealed class Page : StorableObject, IWriteProtection, IDisposable
 
 internal sealed class Project(params Page[] pages) : StorableObject
 {
+    public bool Locked { get; private set; }
+    public void LockAllObjects() { Locked = true; EplanMcp.Bridge.Core.Tests.Adapters.FakeMoveNative.Calls.Add("LockAll"); }
     public Page[] Pages { get; } = pages;
     public string Display { get; set; } = "zh_CN;";
     public Function[] UnplacedFunctions { get; set; } = [];

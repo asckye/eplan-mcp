@@ -20,11 +20,12 @@ line 必填 `points:[[x1,y1],[x2,y2]]`；rectangle 必填 `corners` 同形状，
 dry-run 回显实际 `project,page`、`execution=not_started,dryRun=true`、`gridSize,boundarySource=Page.Size`；`items` 逐项含 `requested,actual,bounds,snapped`，保留全部语言。`changes` 完整列出每项类型、页、索引、实际内容/几何和外框；`connectionChanges=[]`，不生成连接、不猜 locator。 执行成功为 `execution=committed,dryRun=false`，附 `warning,recovered`；结果来自已逐项核对的计划。
 dry-run 的外框是绝对 min-x/min-y/max-x/max-y，整体必须在可靠页界内；线/矩形取两点包围盒，文字只接受可信测量依赖，禁止按字数猜宽。未知页界不以图框尺寸兜底。concise/detailed 双份预算 5k/20k；装不下要求详细模式或减少项，不能截断影响清单。
 ## 4. 错误
-`INVALID_ARGUMENT`：schema、语言、字高、坐标或完整外框越界，`metadata.violations` 汇总 JSON Pointer；`PAGE_NOT_FOUND` 等读取错误沿用原码。dry-run 缺页界、显示语言证据或文字完整外框时返回 `CAPABILITY_MISSING`，执行缺可靠栅格同样拒绝。预检为 `execution=not_started`；写失败为 `rolled_back`，提交或回滚结果不能证明则为 `unknown` 并暂停。
+`INVALID_ARGUMENT`：schema、语言、字高、坐标或完整外框越界，`metadata.violations` 汇总 JSON Pointer；`PAGE_NOT_FOUND` 等读取错误沿用原码。dry-run 缺页界或显示语言证据时返回 `CAPABILITY_MISSING`，执行缺可靠栅格同样拒绝。预检为 `execution=not_started`；写失败为 `rolled_back`，提交或回滚结果不能证明则为 `unknown` 并暂停。
 ## 5. 实现要点
-只读规划复用 `project.get → page.get → page.drawing.get`，缺可靠页界或文字外框仍拒绝。为支持本次要求的新建空白页，执行仅承诺明确坐标范围、栅格与实际几何，返回 `boundarySource=unverified,bounds=null`，不宣称证明页内包含；完整文字测量与页界证据保留为缺口。
+只读规划复用 `project.get → page.get → page.drawing.get`，缺可靠页界仍拒绝，未知文字外框返回 `bounds=null` 并延后测量。执行在原事务提交前用实际外框校验布局；结果 warning 说明检查阶段和页尺寸减边距的 fallback。`boundarySource=unverified` 表示图框可用区尚未验证，不能把图框尺寸当作可用区。
 ## 6. 写操作专项
 执行沿既有 WritePipeline、scratch/外部审批、审计与 ADR-0010 恢复，不拆批、不重发；审批绑定完整内容和吸附几何，Bridge 同次调用先重核页几何指纹。单个 `SafetyPoint → UndoStep → QuietModeStep` 内创建全部，再读回全部，全部相等才提交；失败整体回滚且不关闭失败撤销步。`Rectangle.Create + SetArea` 与对象生命周期沿 S42 r3/A54/A55；默认 60 s，进度与取消沿流水线。
 ## 7. 测试
 Small 覆盖严格成员、JSON Pointer、有限数、容量、语言、吸附与几何读回；Medium 覆盖混合批量、第二项异常回滚全部、无空步、stale、策略和完整影响清单；工具契约及数量更新快照。
 Large 仅编写：LargeWrite 新页经 Host 创建混合批次，由 `eplan_page_get include_drawings` 核对并一次撤销恢复；DrawingHelper 的 `mixed-rollback` 在第二项后强制异常，回滚快照相同且下一次撤销移除哨兵页。实机执行、画面与重开持久、Agent 验收仍待维护者运行。
+共享布局守卫：R1–R5、R8 拒绝并给出规则与可用时的空位建议；R6/R7/R9 默认警告，layout.strict 时拒绝。图框可用区无法读取时继续使用页尺寸减 layout.marginMm 回退并在结果中说明。预测未知不拒绝：写前校验插入点、已知外框及路由；写后在原事务内测量符号与属性文字外框，再校验 R1–R9，违规整次回滚，返回原因、实测外框和可用时的最近空位。warning/hint 报告写前与写后检查；拒绝的 metadata.layoutViolations/layoutChecks 提供几何和阶段。连接提交后才生效的几何沿用原撤销补偿。参数与限制见 [布局守卫设计](../design/2026-11-01-layout-guard.md)。

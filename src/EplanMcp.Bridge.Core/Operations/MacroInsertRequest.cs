@@ -77,8 +77,11 @@ internal sealed class MacroInsertRequest
         string path = MacroFiles.Resolve(root, args.Macro);
         var request = new MacroInsertRequest(project, page, path, macros.ReadMacro(project.Path, path), args, number);
         violations.AddRange(request.Problems());
+        if (violations.Count == 0)
+        { request.LayoutWarnings = LayoutGuard.Enforce(page.Layout ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: read complete page layout before inserting a macro."), [LayoutGuard.Proposed("Macro", [args.X, args.Y], [args.X, args.Y - request.Content.Height, args.X + request.Content.Width, args.Y])]); }
         return violations.Count > 0 ? throw WriteArguments.Invalid(violations) : request;
     }
+    public List<string> LayoutWarnings { get; private set; } = [];
 
     /// <summary>The macro's functions other than wires, one per tag, with the macro's own tags.</summary>
     public List<PageDevice> MacroDevices() => Devices(Content.Functions);
@@ -107,6 +110,7 @@ internal sealed class MacroInsertRequest
     {
         var file = new FileInfo(MacroPath);
         IEnumerable<string> lines = Page.Objects.Select(id => "object\t" + id)
+            .Append(Protocol.BridgeJson.FromObject(Page.Layout!).ToString())
             .Append("macro\t" + file.Length.ToString(CultureInfo.InvariantCulture) + "\t" + file.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture));
         if (!Number)
         {

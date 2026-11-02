@@ -31,7 +31,22 @@ internal static class PlacementCreatePlanning
             { return Invalid(["/page: use a Circuit page from eplan_page_list."]); }
             args.Page = page.Page.Name;
             PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet, args, cancellationToken).ConfigureAwait(false);
-            return Plan(input, geometry, displayLanguage, measureText);
+            string? layoutWarnings = null;
+            if (measureText is null)
+            {
+                var preflight = new PlacementTextCreateArgs { Project = args.Project!, Page = args.Page, Items = [] };
+                foreach (JsonElement item in input.GetProperty("items").EnumerateArray())
+                {
+                    string kind = item.GetProperty("kind").GetString()!, field = kind == "text" ? "position" : kind == "line" ? "points" : "corners";
+                    double[][] points = kind == "text" ? [item.GetProperty(field).Deserialize<double[]>()!] : item.GetProperty(field).Deserialize<double[][]>()!;
+                    bool snap = !input.TryGetProperty("snap_to_grid", out JsonElement s) || s.GetBoolean();
+                    foreach (double[] point in points)
+                    { for (int i = 0; i < 2; i++) { point[i] = snap ? Math.Round(point[i] / geometry.GridSize, MidpointRounding.AwayFromZero) * geometry.GridSize : point[i]; } }
+                    preflight.Items.Add(new() { Kind = kind, Position = points[0], EndPosition = kind == "text" ? [] : points[1], HeightMm = kind == "text" ? item.GetProperty("height_mm").GetDouble() : 0, Contents = kind == "text" ? item.GetProperty("contents").Deserialize<Dictionary<string, string>>()! : [] });
+                }
+                layoutWarnings = (await bridge.InvokeAsync<PlacementTextCreateArgs, PlacementTextCreateData>(OperationNames.PlacementTextCreatePlan, preflight, cancellationToken).ConfigureAwait(false)).Warning;
+            }
+            return Plan(input, geometry, displayLanguage, measureText, layoutWarnings);
         }
         catch (BridgeCallException ex)
         {
@@ -113,7 +128,7 @@ internal static class PlacementCreatePlanning
         return problems;
     }
 
-    private static CallToolResult Plan(JsonElement input, PageDrawingGeometry page, string? displayLanguage, Func<JsonElement, double[]?>? measureText)
+    private static CallToolResult Plan(JsonElement input, PageDrawingGeometry page, string? displayLanguage, Func<JsonElement, double[]?>? measureText, string? layoutWarnings = null)
     {
         if (page.PageSize is not { Length: 2 } size || size.Any(n => !double.IsFinite(n) || n <= 0) || !double.IsFinite(page.GridSize) || page.GridSize <= 0)
         { return Missing("placement.page_geometry", "Reliable Page.Size and grid are required; plot-frame size is not a fallback."); }
@@ -141,9 +156,9 @@ internal static class PlacementCreatePlanning
             }
             double[]? bounds = kind == "text" ? measureText?.Invoke(JsonSerializer.SerializeToElement(actual)) :
                 [points.Min(p => p[0]!.GetValue<double>()), points.Min(p => p[1]!.GetValue<double>()), points.Max(p => p[0]!.GetValue<double>()), points.Max(p => p[1]!.GetValue<double>())];
-            if (bounds is not { Length: 4 } || bounds.Any(n => !double.IsFinite(n)) || bounds[0] > bounds[2] || bounds[1] > bounds[3])
-            { return Missing("placement.text_outline", "A reliable full text outline is required; character-count estimates are not supported."); }
-            if (bounds[0] < 0 || bounds[1] < 0 || bounds[2] > size[0] || bounds[3] > size[1] || bounds.Any(n => n > 10000))
+            if (bounds is not null && (bounds.Length != 4 || bounds.Any(n => !double.IsFinite(n)) || bounds[0] > bounds[2] || bounds[1] > bounds[3]))
+            { bounds = null; }
+            if (points.Any(p => p[0]!.GetValue<double>() > size[0] || p[1]!.GetValue<double>() > size[1]) || bounds is not null && (bounds[0] < 0 || bounds[1] < 0 || bounds[2] > size[0] || bounds[3] > size[1] || bounds.Any(n => n > 10000)))
             { problems.Add(at + ": the full outline after snapping must be inside Page.Size and 0..10000 mm."); }
             rows.Add(new JsonObject { ["requested"] = JsonNode.Parse(item.GetRawText()), ["actual"] = actual, ["bounds"] = JsonSerializer.SerializeToNode(bounds), ["snapped"] = !JsonElement.DeepEquals(item, JsonSerializer.SerializeToElement(actual)) });
             changes.Add($"create {kind} {ResultShaper.CleanFullText(page.Page)} item {i.ToString(CultureInfo.InvariantCulture)}: {actual.ToJsonString()} bounds {JsonSerializer.Serialize(bounds)}");
@@ -151,6 +166,8 @@ internal static class PlacementCreatePlanning
         if (problems.Count > 0)
         { return Invalid(problems); }
         var result = new JsonObject { ["project"] = ResultShaper.CleanText(page.Project), ["page"] = ResultShaper.CleanText(page.Page), ["execution"] = ExecutionState.NotStarted, ["dryRun"] = true, ["gridSize"] = page.GridSize, ["boundarySource"] = "Page.Size", ["items"] = rows, ["changes"] = JsonSerializer.SerializeToNode(changes), ["connectionChanges"] = new JsonArray() };
+        if (!string.IsNullOrEmpty(layoutWarnings))
+        { result["warning"] = layoutWarnings; }
         int budget = input.TryGetProperty("response_format", out JsonElement format) && format.GetString() == "detailed" ? 20000 : 5000;
         return ResultShaper.Fits(result, budget) ? ToolResults.Success("Dry run: would create text/graphics; no connection changes. Nothing was changed.", result)
             : Invalid(["/response_format: use detailed or fewer items; the complete impact list cannot be truncated."]);

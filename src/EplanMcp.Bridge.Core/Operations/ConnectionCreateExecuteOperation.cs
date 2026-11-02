@@ -24,7 +24,11 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             plan = ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), scene, creator, fingerprint);
             if (plan["cableDefinitions"] is null && plan["interruptionScope"] is null && (!plan["symbols"]!.Any() || (!plan["logicalAfterGenerate"]!.Any() && plan["splitSegments"] is null)))
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Supply symbols with connected logical endpoints; empty generation cannot provide 2 undo steps."); }
-            place = plan["cableDefinitions"] is null ? creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!) : () => { };
+            place = plan["cableDefinitions"] is null ? creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!, actual =>
+            {
+                actual.Lines = ConnectionCreatePlanner.ExpectedGraphical(scene, plan).Select(s => new LayoutGuard.Segment { Points = s }).ToList();
+                plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(LayoutGuard.From(scene), actual)));
+            }) : () => { };
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         if (plan["cableDefinitions"] is not null)
@@ -32,21 +36,34 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         string project = scene.Project.Path, page = scene.Page.Page;
         bool interruptions = plan["interruptionScope"] is not null, generationCommitted = false;
         string[] pages = interruptions ? InterruptionPointPlanning.Pages(plan) : [page];
-        void VerifyGraphical()
+        Dictionary<string, LayoutGuard.Model> layouts = pages.ToDictionary(p => p, p => LayoutGuard.From(p == page ? scene : creator.Read(project, p)), StringComparer.Ordinal);
+        void CheckLayout(bool predicted = false)
+        {
+            foreach (string target in pages)
+            {
+                LayoutGuard.Model actual = creator.Measure(project, target);
+                if (predicted && target == page)
+                { actual.Lines = ConnectionCreatePlanner.ExpectedGraphical(scene, plan).Select(s => new LayoutGuard.Segment { Points = s }).ToList(); }
+                plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(layouts[target], actual)));
+            }
+        }
+        void VerifyGraphical(string stage = "placement")
         {
             string Segments(IEnumerable<double[][]> values) => string.Join(";", values.Select(s => string.Join("|", s.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
             if (Segments(creator.Read(project, page).Graphical) is var drawn && Segments(ConnectionCreatePlanner.ExpectedGraphical(scene, plan)) is var predicted && drawn != predicted)
-            { throw Mismatch("autoconnect lines after placement/generation: " + drawn + "; predicted: " + predicted); }
+            { throw Mismatch("autoconnect lines after " + stage + ": " + drawn + "; predicted: " + predicted); }
         }
         if (interruptions)
         {
             // A55/D5: commit placement before generation; the documented UndoStep lifetime spans committed transactions.
-            Committed<bool> result = TransactionRunner.Run(creator.PlacementTransactions(project, undoCommitted: true), "eplan_connection_create", () => { place(); return true; }, _ => true,
+            Committed<bool> result = TransactionRunner.Run(creator.PlacementTransactions(project, undoCommitted: true), "eplan_connection_create", () => { place(); CheckLayout(predicted: true); return true; }, _ => true,
                 _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() =>
                 {
                     VerifyGraphical();
+                    CheckLayout();
                     plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify());
-                    VerifyGraphical();
+                    VerifyGraphical("generation");
+                    CheckLayout();
                     plan["actualGraphicalAutoconnect"] = JArray.FromObject(creator.Read(project, page).Graphical);
                     plan["interruptionPoints"] = InterruptionPointPlanning.Verify(plan, creator.Interruptions(project, pages));
                     return true;
@@ -54,16 +71,19 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint)));
             plan["execution"] = ExecutionState.Committed;
             plan["dryRun"] = false;
-            plan["warning"] = result.Warning;
+            plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], result.Warning]);
             return plan;
         }
-        Committed<bool> placed = TransactionRunner.Run(transactions, "eplan_connection_create", () => { place(); return true; }, _ => true);
+        Committed<bool> placed = TransactionRunner.Run(transactions, "eplan_connection_create", () => { place(); CheckLayout(predicted: true); return true; }, _ => true,
+            _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { CheckLayout(); return true; }),
+            () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint)));
         if (placed.Warning is not null)
         { throw Unknown(); }
         try
         {
             VerifyGraphical();
-            Committed<List<string?[]>> generated = TransactionRunner.Run(transactions, "eplan_connection_create", GenerateAndVerify, _ => true);
+            Committed<List<string?[]>> generated = TransactionRunner.Run(transactions, "eplan_connection_create", GenerateAndVerify, _ => true,
+                _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { CheckLayout(); return true; }));
             if (generated.Warning is not null)
             { throw Unknown(); }
             generationCommitted = true;
@@ -80,6 +100,8 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 { if (generationCommitted) { creator.Undo(project); } creator.Undo(project); return ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint); });
             }
             catch (Exception nativeFailure) { WriteExceptionDiagnostics.Report(nativeFailure); throw Unknown(); }
+            if (failure is BridgeErrorException { Error.Reason: ErrorReason.InvalidArgument } refusal)
+            { refusal.Error.Execution = ExecutionState.RolledBack; throw; }
             string cause = failure is BridgeErrorException { Error.Reason: ErrorReason.EplanOperationFailed } known ? " Cause: " + known.Error.Message : string.Empty;
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Connection creation failed; generation and placement were rolled back. Re-read the page before retrying." + cause, failure)
             { Error = { Execution = ExecutionState.RolledBack } };
@@ -128,6 +150,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             }
             if (added.Count == 0 && groups.Count > 0 && !interruptions)
             { throw Mismatch("generation added no connection"); }
+            CheckLayout();
             return actual;
         }
     }

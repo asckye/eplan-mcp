@@ -7,6 +7,35 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Medium")]
 public sealed class CableDefinitionExecutionTests
 {
+    [Fact]
+    public void ReboundExistingDefinitionPoint_UnknownRouteWarningReachesCommittedToolResultOnce()
+    {
+        using var fake = new Creator(false);
+        fake.Fixture.Base.Scene.Page.Placements.Add(new()
+        {
+            Kind = "ConnectionDefinitionPoint",
+            Locator = new() { Type = 59, Oid = 69919 },
+            Location = [40, 24],
+            Bounds = [38.75, 22.75, 41.25, 25.25],
+            Properties = new() { ["binding"] = "earlier call" }
+        });
+        fake.MeasureLayout = () =>
+        {
+            LayoutGuard.Model actual = Newtonsoft.Json.JsonConvert.DeserializeObject<LayoutGuard.Model>(
+                Newtonsoft.Json.JsonConvert.SerializeObject(LayoutGuard.From(fake.Fixture.Base.Scene)))!;
+            actual.Page.Placements.Single(p => p.Locator.Oid == 69919).Properties["binding"] = "mixed cable rebinding";
+            actual.PointRouteGaps["59/69919"] = "pins unresolved 17/56/0/17/80/0";
+            return actual;
+        };
+        JObject result = fake.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(6, fake.Commits);
+        string warning = (string)result["warning"]!;
+        Assert.Single(warning.Split('\n'), line => line ==
+            "R4 unverified: connection definition point 59/69919 has no readable owning route (pins unresolved 17/56/0/17/80/0)");
+        Assert.DoesNotContain("undo", fake.Events);
+    }
+
     [Theory]
     [InlineData(false, 6)]
     [InlineData(true, 8)]
@@ -256,13 +285,15 @@ public sealed class CableDefinitionExecutionTests
             if (Events.Contains("undo", StringComparer.Ordinal))
             { RestorationRead = true; }
             if (_state > 0 && Fixture.Base.Request["items"]!.Count() > 1)
-            { return new() { Graphical = _graphical }; }
+            { return new() { Page = Fixture.Base.Scene.Page, Layout = Fixture.Base.Scene.Layout, Pins = Fixture.Base.Scene.Pins, Graphical = _graphical }; }
             if (Failure == "restore" && RestorationRead)
             { Fixture.Base.Scene.Page.GridSize = 2; }
             return Fixture.Base.Scene;
         }
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => Fixture.Base.Read(projectPath, args);
-        public Action Prepare(string project, string page, JArray symbols) => () => Stage("symbols");
+        public Func<LayoutGuard.Model>? MeasureLayout { get; set; }
+        public LayoutGuard.Model Measure(string project, string page) => MeasureLayout?.Invoke() ?? LayoutGuard.From(Read(project, page));
+        public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => Stage("symbols");
         public Action PrepareCables(string project, string page, JObject request, JObject plan) => () => Stage("definitions");
         public void VerifyCables(string project, string page, JObject request, JObject plan)
         {

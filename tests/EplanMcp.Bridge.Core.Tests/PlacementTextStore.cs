@@ -4,7 +4,7 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Tests;
 
-internal sealed class PlacementTextStore : IPlacementTextWriter
+internal sealed class PlacementTextStore : IPlacementTextWriter, IPageDrawingReader
 {
     public List<PlacementText> Texts { get; } = [];
     public FakeTransactions Transactions { get; } = new();
@@ -15,7 +15,9 @@ internal sealed class PlacementTextStore : IPlacementTextWriter
     public int Validations { get; private set; }
     public int Writes { get; private set; }
     public OpenProject Project { get; } = new() { Name = "Line1", Path = "project" };
-    public PlacementTextCreateExecuteOperation Operation => new(new FakeCatalog(Project), this, Transactions);
+    public PlacementTextCreateExecuteOperation Operation => new(new FakeCatalog(Project), this, Transactions, this,
+        (_, _) => new() { Page = Read("project", "P"), Config = new() { MarginMm = 0 } }, t => [t.Position[0], t.Position[1], t.Position[0] + 1, t.Position[1] + 1]);
+    public PageDrawingGeometry Read(string projectPath, string page) => new() { Project = projectPath, Page = page, GridSize = 0.5, PageSize = [1000, 1000] };
 
     public PlacementTextStore()
     {
@@ -59,7 +61,7 @@ internal sealed class PlacementTextStore : IPlacementTextWriter
     {
         Project = "Line1",
         Page = "P",
-        Items = [Args().Text, new() { Kind = "line", Position = [10, 20], EndPosition = [30, 40] },
+        Items = [Args().Text, new() { Kind = "line", Position = [50, 20], EndPosition = [70, 40] },
             new() { Kind = "rectangle", Position = [10, 20], EndPosition = [30, 40] }],
     };
 

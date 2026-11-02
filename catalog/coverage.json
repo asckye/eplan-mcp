@@ -1241,9 +1241,9 @@
       "dependencies": 90,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
-      "small": 5,
+      "small": 6,
       "medium": 4,
-      "large": 7,
+      "large": 8,
       "apiNotes": [
         "A13",
         "A14",
@@ -2228,6 +2228,7 @@
         "page.drawing.get",
         "page.get",
         "placement.text.create.execute",
+        "placement.text.create.plan",
         "project.get"
       ],
       "apiIds": 165,
@@ -2238,7 +2239,7 @@
       "spec": "docs/tools/eplan_placement_create.md",
       "small": 4,
       "medium": 3,
-      "large": 5,
+      "large": 6,
       "apiNotes": [
         "A54"
       ]
@@ -2256,7 +2257,7 @@
       "dependencies": 61,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_edit.md",
-      "small": 1,
+      "small": 2,
       "medium": 1,
       "large": 1,
       "apiNotes": []
@@ -2276,7 +2277,7 @@
       "spec": "docs/tools/eplan_placement_update.md",
       "small": 4,
       "medium": 2,
-      "large": 2,
+      "large": 3,
       "apiNotes": [
         "A57",
         "A76"

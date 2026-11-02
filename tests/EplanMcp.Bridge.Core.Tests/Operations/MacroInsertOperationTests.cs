@@ -67,14 +67,26 @@ public sealed class MacroInsertOperationTests : IDisposable
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
     [Fact]
+    public void LayoutGuard_MacroEnvelopeOverSymbol_RefusesWithSuggestion()
+    {
+        MacroTargetPage page = LayoutFixture.Target(_inserter.Pages[SamplePage])!;
+        page.Layout!.Page.Placements.Add(LayoutGuardTests.Row("Function", 9, 40, 100));
+        BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => Plan(Args(SamplePage, 40, 290)));
+        Assert.Equal(ErrorReason.InvalidArgument, failure.Error.Reason);
+        Assert.Contains("R2", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("Suggested position", failure.Message, StringComparison.Ordinal);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
     public void Plan_IsOneMacroChange_WithTheMacroDevicesForTheDryRun()
     {
-        WritePlan plan = Plan(Args(NewPage, 40, 200));
+        WritePlan plan = Plan(Args(NewPage, 40, 280));
 
         Assert.Equal(("Line1", @"D:\Scratch\Line1"), (plan.Project, plan.ProjectPath));
         PlannedChange change = Assert.Single(plan.Changes);
         Assert.Equal(
-            ("create", "macro", NewPage, "Contactor_Feedback_Control.ema at (40, 200), numbering number, 3 devices"),
+            ("create", "macro", NewPage, "Contactor_Feedback_Control.ema at (40, 280), numbering number, 3 devices"),
             (change.Action, change.Kind, change.Name, change.NewValue));
         Assert.Equal(Macro, plan.Details!["macro"]);
         Assert.Equal(["+-WG6\t-WG6\tCable", "+-XG8:?\t-XG8\tTerminal", "=+A1-QA1\t-QA1\tNoContact"], plan.Details["devices"].Split('\n'));
@@ -118,7 +130,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     [Fact]
     public void Plan_AVariantTheMacroLacks_ListsItsVariants()
     {
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         args.Variant = 6;
 
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
@@ -138,11 +150,11 @@ public sealed class MacroInsertOperationTests : IDisposable
     }
 
     [Fact]
-    public void Plan_OnAPageOfUnknownSize_ChecksOnlyThatThePointIsNotNegative()
+    public void Plan_OnAPageOfUnknownSize_RefusesOutsideTrustedDrawingArea()
     {
-        WritePlan plan = Plan(Args(NewPage, 1000, 1000));
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(Args(NewPage, 1000, 1000))).Error;
 
-        Assert.Equal("false", plan.Details!["pageSizeKnown"]);
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
     }
 
     [Fact]
@@ -164,7 +176,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     [InlineData("EPLAN_Macro/Missing.ema", ErrorReason.MacroNotFound)]
     public void Plan_AMacroPathOutsideTheRulesOrMissing_IsRefusedBeforeOpening(string macro, string reason)
     {
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         args.Macro = macro;
 
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
@@ -179,7 +191,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     {
         _line1.ReadOnly = true;
 
-        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(Args(NewPage, 40, 200))).Error.Reason);
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(Args(NewPage, 40, 280))).Error.Reason);
         Assert.Null(_macros.Opened);
     }
 
@@ -222,18 +234,20 @@ public sealed class MacroInsertOperationTests : IDisposable
     [Fact]
     public void Execute_InsertsInOneCommittedTransaction_AndListsTheDevicesAsReadBack()
     {
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         args.Variant = 2;
         args.Fingerprint = Plan(args).Fingerprint;
 
         MacroInsertData data = Execute(args);
 
-        Assert.Equal(("Line1", NewPage, Macro, false, null), (data.Project, data.Page, data.Macro, data.PageSizeKnown, data.Warning));
+        Assert.Equal(("Line1", NewPage, Macro, false), (data.Project, data.Page, data.Macro, data.PageSizeKnown));
+        Assert.Contains("before write", data.Warning, StringComparison.Ordinal);
+        Assert.Contains("after write", data.Warning, StringComparison.Ordinal);
         Assert.Equal(
             [("+A1-WG7", "-WG7", "Cable"), ("+A1-XG9:?1", "-XG9", "Terminal"), ("=GAA+A1-?QA1", "-?QA1", "NoContact")],
             data.Devices.Select(d => (d.Tag, d.VisibleTag, d.Category)));
         Assert.Equal((3, 13), (data.DeviceCount, data.ObjectCount));
-        Assert.Equal((NewPage, Path.Combine([_root, .. Macro.Split('/')]), 2, 40.0, 200.0, true), Assert.Single(_inserter.Inserts));
+        Assert.Equal((NewPage, Path.Combine([_root, .. Macro.Split('/')]), 2, 40.0, 280.0, true), Assert.Single(_inserter.Inserts));
         Assert.Equal(["Begin AI: eplan_macro_insert", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
     }
 
@@ -241,7 +255,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     public void Execute_ManyDevices_ListsTheFirstFiftyAndCountsAll()
     {
         _inserter.Placed = _ => [.. Enumerable.Range(1, 60).Select(i => new MacroFunctionRecord { Name = "+A1-XG" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), Category = "Terminal" })];
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         args.Fingerprint = Plan(args).Fingerprint;
 
         MacroInsertData data = Execute(args);
@@ -252,7 +266,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     [Fact]
     public void Execute_WithKeep_ADeviceMergedWithAnExistingOne_IsAlreadyExistsAndRolledBack()
     {
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         args.Numbering = "keep";
         args.Fingerprint = Plan(args).Fingerprint;
 
@@ -272,7 +286,7 @@ public sealed class MacroInsertOperationTests : IDisposable
         // S10: PLC terminals keep the macro's structure in every mode, so a second insert repeats =K1+A1:1.4.
         _devices.Functions.Add(new FunctionRecord { Name = "=K1+A1:1.4", IsMain = true, Category = "PLCTerminal" });
         _inserter.Placed = _ => [new() { Name = "=K1+A1:1.4", Category = "PLCTerminal", Main = true }];
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         args.Fingerprint = Plan(args).Fingerprint;
 
         MacroInsertData data = Execute(args);
@@ -285,7 +299,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     [Fact]
     public void Execute_TheSameSymbolsOnTopOfEachOther_IsInvalidArgumentAndRolledBack()
     {
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         args.Fingerprint = Plan(args).Fingerprint;
         _inserter.Stacked = true;
 
@@ -312,7 +326,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     [Fact]
     public void Execute_WithoutAFingerprintOrWithBadArguments_IsNotStarted()
     {
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         BridgeError missing = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
         args.Fingerprint = "f";
         args.Page = "=GAA+A1&EFS2/1";
@@ -326,7 +340,7 @@ public sealed class MacroInsertOperationTests : IDisposable
     [Fact]
     public void Execute_ThroughTheRouter_RecordsTheOutcome()
     {
-        MacroInsertArgs args = Args(NewPage, 40, 200);
+        MacroInsertArgs args = Args(NewPage, 40, 280);
         args.Fingerprint = Plan(args).Fingerprint;
         var router = new OperationRouter([new MacroInsertExecuteOperation(_catalog, _pages, _devices, _macros, _inserter, _transactions)], new InlineDispatcher(), null, new ListLog(), TimeSpan.FromSeconds(10));
 

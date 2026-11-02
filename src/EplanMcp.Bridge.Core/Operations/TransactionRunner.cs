@@ -69,6 +69,11 @@ public static class TransactionRunner
         {
             WriteExceptionDiagnostics.Report(failure);
             Abandon(scope, tool, closeUndo: false, verifyRollback);
+            if (failure is BridgeErrorException { Error.Reason: ErrorReason.InvalidArgument } refusal)
+            {
+                refusal.Error.Execution = ExecutionState.RolledBack;
+                throw;
+            }
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Committed readback failed; all changes were rolled back. Re-read the page before retrying.", failure)
             { Error = { Execution = ExecutionState.RolledBack } };
         }

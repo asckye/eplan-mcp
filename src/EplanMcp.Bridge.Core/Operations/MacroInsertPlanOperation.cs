@@ -26,6 +26,7 @@ public sealed class MacroInsertPlanOperation(IProjectCatalog catalog, IPageReade
             Details = new Dictionary<string, string>
             {
                 ["macro"] = request.Macro,
+                ["layoutWarnings"] = string.Join("\n", request.LayoutWarnings),
                 ["deviceCount"] = inMacro.Count.ToString(CultureInfo.InvariantCulture),
                 ["devices"] = string.Join("\n", inMacro.Take(MacroInsertRequest.MaxDevices).Select(d => d.Tag + "\t" + d.VisibleTag + "\t" + d.Category)),
                 ["objectCount"] = request.Content.ObjectCount.ToString(CultureInfo.InvariantCulture),

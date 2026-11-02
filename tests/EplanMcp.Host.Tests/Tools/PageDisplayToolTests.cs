@@ -165,6 +165,7 @@ public sealed class PageDisplayToolTests
         harness.Bridge.Handlers[OperationNames.PageGet] = _ => new PageGetData { Page = new() { Name = "P", Type = "Circuit" } };
         harness.Bridge.Handlers[OperationNames.PageDrawingGet] = _ => new PageDrawingGeometry { Page = "P", GridSize = 5, PageSize = [100, 100] };
         harness.Bridge.Handlers[OperationNames.PlacementTextCreateExecute] = _ => new PlacementTextCreateData();
+        harness.Bridge.Handlers[OperationNames.PlacementTextCreatePlan] = _ => new PlacementTextCreateData();
         var incoming = new Pipe();
         var outgoing = new Pipe();
         HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = [], DisableDefaults = true });

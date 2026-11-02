@@ -1,8 +1,12 @@
+using EplanMcp.Contracts;
+
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>The page a macro goes on, as <see cref="IMacroInserter.ReadPage"/> reads it.</summary>
 public sealed class MacroTargetPage
 {
+    public LayoutGuard.Model? Layout { get; set; }
+    public Func<DevicePlaceArgs, IReadOnlyList<DrawingPlacement>>? PredictDevice { get; set; }
     /// <summary>Location identifiers of existing boxes on this page, for duplicate checks (A55).</summary>
     public List<string> LocationBoxStructures { get; set; } = [];
     /// <summary>The page's full name as EPLAN has it.</summary>
