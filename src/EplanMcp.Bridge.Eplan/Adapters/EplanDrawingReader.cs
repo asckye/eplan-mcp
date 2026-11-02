@@ -102,9 +102,11 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             using MultiLangString? contents = placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null };
             string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null;
             string? height = placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null;
+            // A75 catalog: DynamicConnectionLine derives from SymbolReference (DMClassId.InternalTypeId = 33),
+            // but its wire outline is neither a layout symbol nor a container.
             // Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
-            bool isContainer = placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant?.SymbolName == "PLCC"
-                || placement.GetType().Name == "PLC" || placement is Function boxFunction && boxFunction.FunctionCategory.ToString() is "PLCBox" or "BlackBox");
+            bool isContainer = placement is not DynamicConnectionLine && (placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant?.SymbolName == "PLCC"
+                || placement.GetType().Name == "PLC" || placement is Function boxFunction && boxFunction.FunctionCategory.ToString() is "PLCBox" or "BlackBox"));
             string? containerOwner = isContainer ? placement.ToStringIdentifier() : null;
             try
             {
@@ -139,7 +141,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             {
                 Properties = new Dictionary<string, string?>
                 {
-                    ["layout_symbol"] = placement is SymbolReference && placement.GetType().Name is not ("LocationBox" or "Cable") ? "true" : null,
+                    ["layout_symbol"] = placement is SymbolReference && placement.GetType().Name is not ("LocationBox" or "Cable" or "DynamicConnectionLine") ? "true" : null,
                     ["layout_container_owner"] = containerOwner,
                     ["layout_container"] = isContainer ? "true" : null,
                     ["grouped"] = (placement.Group is not null).ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant(),

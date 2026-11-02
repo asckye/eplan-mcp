@@ -277,7 +277,7 @@ public static class LayoutGuard
     public static bool Overlaps(double[] a, double[] b, double clearance = 0) => a[0] < b[2] + clearance && a[2] + clearance > b[0] && a[1] < b[3] + clearance && a[3] + clearance > b[1];
     private static bool Text(DrawingPlacement p) => p.Kind is "Text" or "PropertyPlacement";
     private static bool Container(DrawingPlacement p) => p.Properties.TryGetValue("layout_container", out string? value) && value == "true" || p.Kind is "LocationBox" or "PLC" or "PLCBox" or "Box";
-    private static bool Symbol(DrawingPlacement p) => !Container(p) && (p.Kind is "Function" or "SymbolReference" or "PotentialDefinition" or "ConnectionDefinitionPoint" or "Macro" || p.Properties.ContainsKey("layout_symbol"));
+    private static bool Symbol(DrawingPlacement p) => p.Kind != "DynamicConnectionLine" && !Container(p) && (p.Kind is "Function" or "SymbolReference" or "PotentialDefinition" or "ConnectionDefinitionPoint" or "Macro" || p.Properties.ContainsKey("layout_symbol"));
     private static bool OwnerId(DrawingLocator a, DrawingLocator b) => ProjectResolver.SamePath(a.Project, b.Project) && a.Page == b.Page && a.Type == b.Type && a.Oid == b.Oid;
     private static bool SameOwner(DrawingPlacement p, DrawingPlacement q) => OwnerId(p.Parent ?? p.Locator, q.Parent ?? q.Locator);
     private static DrawingPlacement GroupOwner(DrawingPlacement item, IReadOnlyList<DrawingPlacement> changed)

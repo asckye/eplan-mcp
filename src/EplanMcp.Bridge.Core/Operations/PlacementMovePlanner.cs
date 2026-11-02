@@ -74,7 +74,9 @@ public static class PlacementMovePlanner
         {
             double[] actual = target.Requested.SequenceEqual(target.Row.Location) ? target.Requested : target.Requested.Select(n => DrawingCoordinates.Snap(n, page.GridSize, (bool?)input["snap_to_grid"] ?? true)).ToArray();
             double[] offset = actual.Zip(target.Row.Location, (a, b) => a - b).ToArray();
-            DrawingPlacement[] closure = [target.Row, .. page.Placements.Where(p => p.Parent is not null && Same(p.Parent, target.Row.Locator))];
+            // A75: cable crossing points are recreated by EPLAN, not translated as owned children.
+            DrawingPlacement[] closure = [target.Row, .. page.Placements.Where(p => p.Parent is not null && Same(p.Parent, target.Row.Locator)
+                && !(target.Row.Kind == "Cable" && p.Kind == "ConnectionDefinitionPoint"))];
             foreach (DrawingPlacement child in closure)
             {
                 if (!child.Properties.TryGetValue("grouped", out string? grouped) || grouped != "false" || child.Kind is not ("Function" or "SymbolReference" or "PotentialDefinition" or "InterruptionPoint" or "Cable" or "ConnectionDefinitionPoint" or "Text" or "Line" or "Rectangle" or "PropertyPlacement"))
@@ -176,6 +178,30 @@ public static class PlacementMovePlanner
         string encoded = result.ToString(Formatting.None);
         Require((encoded.Count(c => c <= 127) + 3) / 4 + encoded.Count(c => c > 127) <= ((string?)input["response_format"] == "detailed" ? 20000 : 5000) - 256, "/response_format", "Use detailed or fewer moves; complete impact cannot be truncated.");
         return result;
+    }
+
+    internal static double[][]? CableCrossings(DrawingPlacement cable, IEnumerable<double[][]> wires)
+    {
+        // The drawing reader reports the straight definition line's absolute outline (A75).
+        if (cable.Bounds is not { Length: 4 } b || b.Any(n => double.IsNaN(n) || double.IsInfinity(n))
+            || (b[0] == b[2]) == (b[1] == b[3]))
+        { return null; }
+        bool vertical = b[0] == b[2];
+        var crossings = new List<double[]>();
+        foreach (double[][] wire in wires)
+        {
+            if (wire.Length != 2 || wire.Any(p => p.Length != 2 || p.Any(n => double.IsNaN(n) || double.IsInfinity(n))))
+            { return null; }
+            if (vertical == (wire[0][0] == wire[1][0]))
+            { continue; }
+            double[] crossing = vertical ? [b[0], wire[0][1]] : [wire[0][0], b[1]];
+            if (crossing[0] >= b[0] && crossing[0] <= b[2] && crossing[1] >= b[1] && crossing[1] <= b[3]
+                && crossing[0] >= Math.Min(wire[0][0], wire[1][0]) && crossing[0] <= Math.Max(wire[0][0], wire[1][0])
+                && crossing[1] >= Math.Min(wire[0][1], wire[1][1]) && crossing[1] <= Math.Max(wire[0][1], wire[1][1])
+                && !crossings.Any(p => p.SequenceEqual(crossing)))
+            { crossings.Add(crossing); }
+        }
+        return crossings.ToArray();
     }
 
     public static Dictionary<string, double[][]> Autoconnect(Dictionary<string, SymbolConnectionPoint> pins)
