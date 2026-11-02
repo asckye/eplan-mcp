@@ -666,15 +666,21 @@ internal sealed class AcceptanceRedrawDriver(
 
     private async Task InterruptionsAsync(bool dryRun = false)
     {
-        JsonElement[] points = Items("interruption_points");
-        if (points.Length == 0)
+        JsonElement[] all = Items("interruption_points");
+        if (all.Length == 0)
         { return; }
+        // A65 (customer page 13): two same-name points without counterparts pair with each other on the page.
+        bool HasPeer(JsonElement p) => p.TryGetProperty("counterpart_position", out _);
+        bool SamePagePair(JsonElement p) => !HasPeer(p) && all.Count(q => !HasPeer(q) && q.GetProperty("name").GetString() == p.GetProperty("name").GetString()) == 2;
         foreach ((string page, string peer, string position, string direction, string key) in new[]
         {
             (Page, CounterpartPage, "position", "direction", "page"),
             (CounterpartPage, Page, "counterpart_position", "counterpart_direction", "counterpart_page"),
         })
         {
+            JsonElement[] points = page == Page ? all : all.Where(HasPeer).ToArray();
+            if (points.Length == 0)
+            { continue; }
             string[] ids = points.Select(p => Id(p) + (page == Page ? "/page" : "/counterpart")).ToArray();
             // D2 (A65, 2026-11-02): optional sort codes order same-name points for pairing.
             string sortKey = page == Page ? "sort_code" : "counterpart_sort_code";
@@ -695,7 +701,7 @@ internal sealed class AcceptanceRedrawDriver(
             if (result is not { } read)
             { continue; }
             RequireComplete(read);
-            Check(() => Assert.Equal(points.Length * (page == Page ? 1 : 2), read.GetProperty("interruptionPoints").GetArrayLength()));
+            Check(() => Assert.Equal(points.Sum(p => page == Page && !SamePagePair(p) ? 1 : 2), read.GetProperty("interruptionPoints").GetArrayLength()));
             Check(() => Assert.Equal(1, read.GetProperty("undoSteps").GetInt32()));
             output("Interruption graphics on " + page + ": " + read.GetProperty("actualGraphicalAutoconnect").GetRawText());
             foreach (JsonElement point in points)
@@ -703,7 +709,11 @@ internal sealed class AcceptanceRedrawDriver(
                 Check(() =>
                 {
                     string name = Expand(point.GetProperty("name").GetString()!);
-                    JsonElement actual = Assert.Single(read.GetProperty("interruptionPoints").EnumerateArray(), p => p.GetProperty("page").GetString() == page && p.GetProperty("name").GetString() == name);
+                    double[] at = point.GetProperty(position).EnumerateArray().Select(n => n.GetDouble()).ToArray();
+                    JsonElement actual = Assert.Single(read.GetProperty("interruptionPoints").EnumerateArray().Where(p => p.GetProperty("page").GetString() == page && p.GetProperty("name").GetString() == name
+                        && ExpectedReview.Near(at, p.GetProperty("pin").EnumerateArray().Select(n => n.GetDouble()), _tolerance)).DistinctBy(p => p.GetProperty("oid").GetInt64()));
+                    if (SamePagePair(point))
+                    { Check(() => Assert.Equal(Page, Assert.Single(actual.GetProperty("counterparts").EnumerateArray()).GetProperty("page").GetString())); }
                     Check(() => Assert.Equal(name, actual.GetProperty("name").GetString()));
                     Check(() => Assert.Equal(point.GetProperty(direction).GetString(), actual.GetProperty("direction").GetString()));
                     Near(point.GetProperty(position).EnumerateArray().Select(n => n.GetDouble()).ToArray(), actual.GetProperty("pin"));

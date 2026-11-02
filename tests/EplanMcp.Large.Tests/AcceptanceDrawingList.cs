@@ -189,19 +189,23 @@ internal static class AcceptanceDrawingList
         var interruptionNames = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "interruption_points", "", (point, at) =>
         {
-            Object(point, at, "id name position direction counterpart_position counterpart_direction", "line_to sort_code counterpart_sort_code");
+            Object(point, at, "id name position direction", "counterpart_position counterpart_direction line_to sort_code counterpart_sort_code");
+            bool counterpart = point.TryGetProperty("counterpart_position", out _);
+            Require(counterpart == point.TryGetProperty("counterpart_direction", out _), at + "/counterpart_position", "counterpart_position and counterpart_direction are given together");
             Identity(point, at);
             Text(point, "name", at);
             // A65: same-name points pair by ascending sort code, so a repeated name needs codes on both pages.
             bool sorted = point.TryGetProperty("sort_code", out JsonElement sort) & point.TryGetProperty("counterpart_sort_code", out JsonElement peer);
             Require(!sorted ? !point.TryGetProperty("sort_code", out _) && !point.TryGetProperty("counterpart_sort_code", out _)
                 : sort.TryGetInt32(out int a) && peer.TryGetInt32(out int b) && a > 0 && b > 0, at + "/sort_code", "sort_code and counterpart_sort_code are positive integers given together");
-            Require(interruptionNames.Add(point.GetProperty("name").GetString()!) || sorted, at + "/name", "duplicate interruption name needs sort codes");
+            // A same-name pair on one page (no counterparts) pairs natively; other repeats need sort codes.
+            Require(interruptionNames.Add(point.GetProperty("name").GetString()!) || sorted || !counterpart, at + "/name", "duplicate interruption name needs sort codes or a same-page pair");
             Position(point.GetProperty("position"), at + "/position");
-            Position(point.GetProperty("counterpart_position"), at + "/counterpart_position");
+            if (counterpart)
+            { Position(point.GetProperty("counterpart_position"), at + "/counterpart_position"); }
             if (point.TryGetProperty("line_to", out JsonElement line))
             { Position(line, at + "/line_to"); }
-            foreach (string key in "direction counterpart_direction".Split(' '))
+            foreach (string key in (counterpart ? "direction counterpart_direction" : "direction").Split(' '))
             { Text(point, key, at); Require(point.GetProperty(key).GetString() is "Up" or "Down" or "Left" or "Right", at + "/" + key, "invalid direction"); }
         }, 0, 49);
         Each(root, "texts", "", (text, at) =>

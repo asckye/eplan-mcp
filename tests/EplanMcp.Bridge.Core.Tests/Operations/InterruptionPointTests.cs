@@ -146,6 +146,18 @@ public sealed class InterruptionPointTests
     }
 
     [Fact]
+    public void SamePagePair_SecondSameNamePoint_PairsOnTheTargetPage()
+    {
+        // Customer page 13: I2 and I5 share a name on one page and reference each other (A65).
+        var fake = new InterruptionPointFixture();
+        fake.Peers[0]!["page"] = ConnectionCreateFixture.PageName;
+        JObject result = fake.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(2, result["interruptionPoints"]!.Count());
+        Assert.All(result["interruptionPoints"]!, p => Assert.Equal(ConnectionCreateFixture.PageName, (string?)Assert.Single(p["counterparts"]!)["page"]));
+    }
+
+    [Fact]
     public void MissingCounterpart_RemainsExplicitlyUnpaired()
     {
         var fake = new InterruptionPointFixture();

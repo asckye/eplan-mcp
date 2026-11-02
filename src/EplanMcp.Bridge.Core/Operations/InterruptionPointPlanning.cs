@@ -24,7 +24,7 @@ public static class InterruptionPointPlanning
         {
             JToken item = row["interruption"]!;
             string name = (string)item["name"]!;
-            Require(!projected.Any(p => (string?)p["name"] == name && (string?)p["page"] == scene.Page.Page), "A business name may occur only once on the target page.");
+            // A65 (customer page 13): two same-name points on one page pair with each other; the per-name limit of two applies below.
             projected.Add(new JObject { ["name"] = name, ["page"] = scene.Page.Page, ["position"] = row["position"]!.DeepClone(), ["pin"] = new JArray(row["position"]!.Values<double>().Zip(row["symbol"]!["connectionPoints"]![0]!["location"]!.Values<double>(), (a, b) => a + b)), ["direction"] = item["direction"]!.DeepClone() });
             JToken[] peers = projected.Where(p => (string?)p["name"] == name && (string?)p["page"] != scene.Page.Page).ToArray();
             Require(peers.Length <= 1 && peers.All(p => item["counterpart_pages"]!.Values<string>().Contains((string?)p["page"], StringComparer.Ordinal)), "Pairing is ambiguous or outside counterpart_pages; narrow or correct the explicit scope.");
@@ -114,12 +114,12 @@ public static class InterruptionPointPlanning
             string name = (string)row["interruption"]!["name"]!;
             JToken[] pair = actual["points"]!.Where(p => (string?)p["name"] == name).ToArray();
             Require(pair.Length is 1 or 2, "Native pairing is missing or ambiguous.");
-            JToken placed = pair.Single(p => (string?)p["page"] == (string?)plan["page"]);
+            JToken? placed = pair.SingleOrDefault(p => (string?)p["page"] == (string?)plan["page"] && JToken.DeepEquals(p["position"], row["position"]));
             var pin = new JArray(row["position"]!.Values<double>().Zip(row["symbol"]!["connectionPoints"]![0]!["location"]!.Values<double>(), (a, b) => a + b));
-            Require(JToken.DeepEquals(placed["position"], row["position"]) && JToken.DeepEquals(placed["pin"], pin)
+            Require(placed is not null && JToken.DeepEquals(placed["pin"], pin)
                 && (string?)placed["direction"] == (string?)row["interruption"]!["direction"], "Interruption name, position, pin or direction readback differs.");
             if (row["interruption"]!["sort_code"] is { } sortCode)
-            { Require((string?)placed["sortCode"] == sortCode.ToString(), "Interruption sort code readback differs."); }
+            { Require((string?)placed!["sortCode"] == sortCode.ToString(), "Interruption sort code readback differs."); }
             foreach (JToken point in pair)
             {
                 JToken[] peers = pair.Where(p => !ReferenceEquals(p, point)).ToArray();
