@@ -23,7 +23,11 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
         return [.. document.RootElement.EnumerateArray().Select(row => Create(row.GetProperty("action").GetString()!, "official",
             row.GetProperty("type").GetString(), null, null, [.. row.GetProperty("parameters").EnumerateArray().Select(p => p.Clone())],
             row.TryGetProperty("reason", out var reason) ? reason.GetString() : null,
-            "docs/eplan/api-actions.md; row " + row.GetProperty("row").GetRawText() + "; " + row.GetProperty("docUrl").GetString()) with { Context = [.. row.GetProperty("context").EnumerateArray().Select(c => c.GetString()!)] })];
+            "docs/eplan/api-actions.md; row " + row.GetProperty("row").GetRawText() + "; " + row.GetProperty("docUrl").GetString()) with
+            {
+                Context = [.. row.GetProperty("context").EnumerateArray().Select(c => c.GetString()!)],
+                Examples = row.TryGetProperty("examples", out JsonElement examples) ? [.. examples.EnumerateArray().Select(e => e.Clone())] : null,
+            })];
     }
 
     internal static ActionCatalogItem Create(string name, string source, string? type, string? location, string? text,

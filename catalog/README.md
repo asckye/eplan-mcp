@@ -64,6 +64,10 @@ dotnet run --project eng\coverage -- check      # 与 CI 相同的检查
 `PropertyAddressValidation` 校验构造 DTO 之前的 snake_case 工具 JSON，汇总 RFC 6901 路径；locator 的项目参数须为已解析路径。
 值内容脱敏、运行时元数据校验和读适配器由后续变更实现；这里不将目录资源计为已实现或实机验证。
 
+## 官方 action 参数导入
+
+`dotnet run --project eng/coverage -c Release --no-build -- import-actions <folder>` 离线读取官方 2026 帮助的 `_index.html` 与 action 页面，按现有 action/TYPE 行补充 `values`、字面量 `default`、`type`（`string`、`flag`、`integer`、`path`、`file`）、`required` 和 `examples`。示例对象保留官方参数名和值，TYPE 用于匹配行；不保存说明文字或动态默认值。缺页、无法解析的参数和默认值以 warning 报告；索引与目录的差集分别列出，不自动增删行。导入后运行 `generate` 更新派生文件。
+
 ## 内部包装的生成
 设计文档第 8 节的"最小生成器"：从目录生成任务工具内部用的构件，**不生成 MCP 工具**，运行时不做反射调用。
 

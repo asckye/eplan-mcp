@@ -45,6 +45,10 @@ internal static class Program
             case ["generate"]:
                 Console.WriteLine("Wrote " + string.Join(", ", CoverageCheck.Generate(root)) + ".");
                 return 0;
+            case ["import-actions", var folder]:
+                foreach (string message in OfficialActionsImport.Import(root, folder))
+                { Console.WriteLine(message); }
+                return 0;
             case ["import-verification", .. var results] when results.Length > 0:
                 await VerificationImport.ImportAsync(root, results).ConfigureAwait(false);
                 Console.WriteLine("Merged verification results into " + Overlay.RelativePath + ". Run generate next.");
@@ -58,7 +62,7 @@ internal static class Program
                 Console.WriteLine(problems.Count == 0 ? "Coverage files match their inputs." : $"{problems.Count} coverage file(s) out of date.");
                 return problems.Count == 0 ? 0 : 1;
             default:
-                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | generate | check | import-verification <results.json> [<results.json> ...]");
+                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | generate | check | import-actions <folder> | import-verification <results.json> [<results.json> ...]");
                 return 2;
         }
     }

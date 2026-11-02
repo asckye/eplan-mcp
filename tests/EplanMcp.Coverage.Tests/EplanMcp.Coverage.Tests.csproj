@@ -13,5 +13,9 @@
     <EmbeddedResource Include="../../catalog/api-try.g.tsv" LogicalName="api-try.g.tsv" />
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" Aliases="host" />
     <Compile Include="..\EplanMcp.Large.Tests\BatchVerificationData.cs" Link="BatchVerificationData.cs" />
+    <EmbeddedResource Include="fixtures/actions/*.html" />
   </ItemGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);COVERAGE_TESTS</DefineConstants>
+  </PropertyGroup>
 </Project>

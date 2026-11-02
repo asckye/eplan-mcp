@@ -11,7 +11,9 @@
 
 输出、数据来源、版本缺口与安全边界沿用 [search 规格](eplan_action_catalog_search.md)；`items` 分页，避免同名定义超出结果预算。白名单 A 表示随产品发布的验证记录，不表示本机版本已实测，也不改变 actionRun 开关。
 
-每行的 `try_template` 给出 `eplan_action_try` 参数对象、已知参数及目录允许值、禁用状态、选择要求及设置方法。来源没有记录的必填性与值域明确为未知；禁止参数不会被放入示例。模板不改变试执行策略。
+每行的 `try_template` 给出 `eplan_action_try` 参数对象、已知参数及目录允许值、禁用状态、选择要求及设置方法。来源没有记录的必填性与值域明确为未知。模板不改变试执行策略。
+
+官方目录由离线 `import-actions` 补充参数类型、字面值、默认值和按 TYPE 匹配的调用示例。模板优先采用第一条示例；路径与文件值仅显示 scratch 的 imports/exports 占位符，仍受原禁止表约束。需要文件、页或选择上下文的批量项记为 `failed:needs_context`。
 
 `INVALID_ARGUMENT`：修正所有参数或移除游标；`RESOURCE_NOT_FOUND`：用 search 找到精确名称，错误 metadata 保留安装版本及缺口；安装缺失仍可返回官方项及缺口。
 

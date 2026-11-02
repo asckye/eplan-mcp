@@ -1,19 +1,21 @@
 extern alias host;
 using System.Text.Json;
+using System.Runtime.Versioning;
 using EplanMcp.Contracts;
 using EplanMcp.Large.Tests;
-using host::EplanMcp.Host.Bridge;
 using host::EplanMcp.Host.Tools;
 
 namespace EplanMcp.Coverage.Tests;
 
 [Trait("Size", "Small")]
+[SupportedOSPlatform("windows")]
 public sealed class BatchVerificationTests
 {
     [Fact]
     public void ExpectedCountsMatchTheGeneratedPropertyAndMethodTables()
     {
-        string[] actions = ["TestAction", "TestAction"];
+        ActionCatalogItem row = ActionCatalogReader.Create("TestAction", "official", null, null, null, [], null, "test");
+        ActionCatalogItem[] actions = [row, row];
         BatchEntry[] entries = BatchValues.Entries(actions);
         Dictionary<string, int> expected = BatchValues.ExpectedCounts(entries);
         string[] properties = [.. ApiTryCatalog.PropertyGroups.Where(g => !ApiTryCatalog.MethodGroups.Contains(g, StringComparer.Ordinal))];
@@ -23,12 +25,43 @@ public sealed class BatchVerificationTests
         Assert.Equal(1, expected["action"]);
         Assert.Equal(properties.Order(StringComparer.Ordinal), entries.Where(e => !e.Method && e.Kind == "api-read").Select(e => e.Group).Order(StringComparer.Ordinal));
         Assert.Equal(methods.Order(StringComparer.Ordinal), entries.Where(e => e.Method).Select(e => e.Group).Order(StringComparer.Ordinal));
-        Assert.Equal(actions.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Select(a => "A:" + a), entries.Where(e => e.Kind == "action").Select(e => e.Id));
+        Assert.Equal(["A:TestAction"], entries.Where(e => e.Kind == "action").Select(e => e.Id));
         Assert.Equal(entries.Length, entries.Select(e => e.Id).Distinct(StringComparer.Ordinal).Count());
         foreach (BatchEntry entry in entries.Where(e => e.Method))
         { Assert.NotNull(ApiTryCatalog.Shape(entry.Group, entry.Parameters!.Keys)); }
         foreach ((string kind, int count) in expected)
         { TestContext.Current.TestOutputHelper!.WriteLine($"Expected {kind}: {count}"); }
+    }
+
+    [Theory]
+    [InlineData("file")]
+    [InlineData("page")]
+    [InlineData("selection")]
+    public async Task ActionEntriesUseOnlyOfficialTypeRowsAndPreserveContextAsync(string context)
+    {
+        ActionCatalogItem row = ActionCatalogReader.Create("TestAction", "official", "FIRST", null, null,
+            [JsonSerializer.SerializeToElement(new { name = "MODE", required = true })], null, "test") with
+        { Examples = [JsonSerializer.SerializeToElement(new { TYPE = "FIRST", MODE = "exact" })] };
+        ActionCatalogItem[] rows = [row, row with { Type = "SECOND", Context = [context] }, row with { Name = "LocalOnly", Source = "ui" }];
+        BatchEntry[] actions = [.. BatchValues.Entries(rows).Where(e => e.Kind == "action")];
+        Assert.Equal(["A:TestAction/FIRST", "A:TestAction/SECOND"], actions.Select(e => e.Id));
+        Assert.Equal("exact", (await BatchValues.ArgumentsAsync(actions[0], _ => throw new InvalidOperationException()))!["MODE"]);
+        Assert.Null(await BatchValues.ArgumentsAsync(actions[1], _ => throw new InvalidOperationException()));
+        Assert.Equal("FIRST", actions[0].Action!.Type);
+    }
+
+    [Fact]
+    public async Task FileExamplesAndUnknownRequiredArgumentsNeedContextAsync()
+    {
+        ActionCatalogItem row = ActionCatalogReader.Create("TestAction", "official", null, null, null,
+            [JsonSerializer.SerializeToElement(new { name = "FILENAME", type = "file", required = true })], null, "test") with
+        { Examples = [JsonSerializer.SerializeToElement(new { FILENAME = "C:\\official.xml" })] };
+        Assert.Equal("<scratch imports/FILENAME>", ActionCallTemplates.Example(row)["FILENAME"]!.GetValue<string>());
+        foreach (ActionCatalogItem item in new[] { row, row with { Examples = null } })
+        {
+            BatchEntry entry = BatchValues.Entries([item]).Single(e => e.Kind == "action");
+            Assert.Null(await BatchValues.ArgumentsAsync(entry, _ => throw new InvalidOperationException()));
+        }
     }
 
     [Theory]
@@ -215,26 +248,18 @@ public sealed class BatchVerificationTests
 }
 
 [Trait("Size", "Medium")]
+[SupportedOSPlatform("windows")]
 public sealed class BatchActionCatalogTests
 {
     [Fact]
-    public async Task CountEligibleInstalledActionsWithoutConnectingToEplanAsync()
+    public async Task OfficialRowsIgnoreInstalledUiDefinitionsWithoutConnectingToEplanAsync()
     {
         if (!OperatingSystem.IsWindows())
         { return; }
         ActionCatalogData catalog = await new ActionCatalogReader().ReadAsync(TestContext.Current.CancellationToken);
-        var actions = new List<string>();
-        foreach (ActionCatalogItem item in catalog.Items)
-        {
-            if (item.Type is not null || item.Parameters.Length != 0)
-            { continue; }
-            try
-            { ActionTryTools.Check(catalog, "scratch", item.Name, null, default); }
-            catch (BridgeCallException) { continue; }
-            actions.Add(item.Name);
-        }
-        BatchEntry[] entries = BatchValues.Entries(actions);
-        Assert.Equal(actions.Distinct(StringComparer.Ordinal).Count(), entries.Count(e => e.Kind == "action"));
+        BatchEntry[] entries = BatchValues.Entries(catalog.Items);
+        Assert.Equal(ActionCatalogReader.Official().Length, entries.Count(e => e.Kind == "action"));
+        Assert.All(entries.Where(e => e.Kind == "action"), e => Assert.Equal("official", e.Action!.Source));
         foreach ((string kind, int count) in BatchValues.ExpectedCounts(entries))
         { TestContext.Current.TestOutputHelper!.WriteLine($"Expected {kind}: {count}"); }
         TestContext.Current.TestOutputHelper!.WriteLine($"Unique API groups: {entries.Where(e => e.Kind != "action").Select(e => e.Group).Distinct(StringComparer.Ordinal).Count()}");

@@ -231,6 +231,55 @@ public sealed class CallTemplateTests
     }
 
     [Fact]
+    public void OfficialActionExamplesKeepEnumsAndFlagsAndReplaceAllFilePaths()
+    {
+        string[] modes = ["A", "B"], flags = ["0", "1"];
+        ActionCatalogItem row = ActionCatalogReader.Create("XTest", "official", "EXPORT", null, null,
+            [JsonSerializer.SerializeToElement(new { name = "MODE", type = "string", values = modes, required = true }),
+             JsonSerializer.SerializeToElement(new { name = "FLAG", type = "flag", values = flags, required = false }),
+             JsonSerializer.SerializeToElement(new { name = "EXPORTFILE", type = "file" }),
+             JsonSerializer.SerializeToElement(new { name = "IMPORTFILE", type = "path" })], null, "test") with
+        {
+            Examples = [JsonSerializer.SerializeToElement(new { TYPE = "EXPORT", MODE = "B", FLAG = "0", EXPORTFILE = "C:\\unsafe\\file.xml", IMPORTFILE = "C:\\unsafe\\input.xml" })]
+        };
+        JsonObject template = ActionCallTemplates.For(row);
+        Assert.Equal("[\"A\",\"B\"]", template["arguments"]!["parameters"]!["MODE"]!["allowed_values"]!.ToJsonString());
+        Assert.Equal("flag", template["arguments"]!["parameters"]!["FLAG"]!["kind"]!.GetValue<string>());
+        JsonNode example = template["example"]!["parameters"]!;
+        Assert.Equal("B", example["MODE"]!.GetValue<string>());
+        Assert.Equal("0", example["FLAG"]!.GetValue<string>());
+        Assert.Null(example["TYPE"]);
+        Assert.Equal("<scratch exports/EXPORTFILE>", example["EXPORTFILE"]!.GetValue<string>());
+        Assert.Equal("<scratch imports/IMPORTFILE>", example["IMPORTFILE"]!.GetValue<string>());
+        Assert.DoesNotContain("unsafe", template.ToJsonString(), StringComparison.Ordinal);
+        Assert.True(template["arguments"]!["parameters"]!["EXPORTFILE"]!["denied"]!.GetValue<bool>());
+        Assert.True(template["denied"]!.GetValue<bool>());
+    }
+
+    [Theory]
+    [InlineData("backup", "ARCHIVENAME", "exports")]
+    [InlineData("restore", "ARCHIVENAME", "imports")]
+    [InlineData("XTest", "Source", "imports")]
+    public void AbsolutePathsAreConfinedEvenWhenMetadataIsIncomplete(string action, string parameter, string directory)
+    {
+        ActionCatalogItem row = ActionCatalogReader.Create(action, "official", null, null, null, [], null, "test") with
+        { Examples = [JsonSerializer.SerializeToElement(new Dictionary<string, string> { [parameter] = "C:\\official-example.zw1" })] };
+        Assert.Equal("<scratch " + directory + "/" + parameter + ">", ActionCallTemplates.Example(row)[parameter]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void AllOfficialFirstExamplesReplaceAbsolutePathsWithoutChangingTheCatalog()
+    {
+        foreach (ActionCatalogItem row in ActionCatalogReader.Official().Where(r => r.Examples is { Length: > 0 }))
+        {
+            string original = row.Examples![0].GetRawText();
+            foreach (var parameter in ActionCallTemplates.Example(row))
+            { Assert.DoesNotMatch(@"\A(?:[A-Za-z]:|\\\\)", parameter.Value!.GetValue<string>()); }
+            Assert.Equal(original, row.Examples[0].GetRawText());
+        }
+    }
+
+    [Fact]
     public void ValidationErrorCarriesARealTemplate()
     {
         JsonObject template = ApiCallTemplates.Closest(ApiIndex.Load(), "O:Eplan.EplApi.DataModel.Page.Name", default)!;

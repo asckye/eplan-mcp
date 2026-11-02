@@ -1,4 +1,11 @@
+#if COVERAGE_TESTS
+extern alias host;
+using host::EplanMcp.Host.Tools;
+#else
+using EplanMcp.Host.Tools;
+#endif
 using System.Globalization;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EplanMcp.Bridge.Core;
@@ -7,11 +14,16 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Large.Tests;
 
-internal sealed record BatchEntry(string Id, string Kind, string[]? ObjectKinds = null, string[]? ValueShape = null, Dictionary<string, string[]>? Parameters = null, bool Method = false, string? Signature = null)
+[SupportedOSPlatform("windows")]
+internal sealed record BatchEntry(string Id, string Kind, string[]? ObjectKinds = null, string[]? ValueShape = null, Dictionary<string, string[]>? Parameters = null, bool Method = false, string? Signature = null, ActionCatalogItem? Action = null)
 {
     internal string Group => Id.EndsWith("#write", StringComparison.Ordinal) ? Id[..^6] : Id;
     internal bool Destructive => ApiTryLifecycle.Effect(Group) == "removes";
-    internal bool NeedsContext => ObjectKinds is { Length: 0 } || Kind == "api-write" && Group.EndsWith(".FileName", StringComparison.Ordinal)
+    internal bool NeedsContext => Action is { } action && (action.Context?.Any(c => c is "file" or "page" or "selection") == true
+        || ActionCallTemplates.Example(action).Any(p => p.Value?.GetValue<string>().StartsWith("<scratch ", StringComparison.Ordinal) == true)
+        || action.Parameters.Any(p => p.TryGetProperty("required", out var required) && required.ValueKind == JsonValueKind.True
+            && !ActionCallTemplates.Example(action).ContainsKey(p.GetProperty("name").GetString()!)))
+        || ObjectKinds is { Length: 0 } || Kind == "api-write" && Group.EndsWith(".FileName", StringComparison.Ordinal)
         || Parameters?.Any(p => Signature is not null && ApiTryCatalog.PathDirection(Signature, p.Key) is not null
         || p.Value[0] is "handle" or "via" or "Eplan.EplApi.DataModel.Page") == true;
 }
@@ -29,9 +41,12 @@ internal sealed class BatchObservation(string id, string kind)
     public string? Detail { get; set; }
 }
 
+[SupportedOSPlatform("windows")]
 internal static class BatchValues
 {
-    internal static BatchEntry[] Entries(IEnumerable<string> actions) => [.. ApiEntries(), .. actions.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Select(name => new BatchEntry("A:" + name, "action"))];
+    internal static BatchEntry[] Entries(IEnumerable<ActionCatalogItem> actions) => [.. ApiEntries(), .. actions.Where(a => a.Source == "official")
+        .DistinctBy(a => (a.Name, a.Type)).OrderBy(a => a.Name, StringComparer.Ordinal).ThenBy(a => a.Type, StringComparer.Ordinal)
+        .Select(a => new BatchEntry("A:" + a.Name + (a.Type is null ? "" : "/" + a.Type), "action", Action: a))];
     internal static Dictionary<string, int> ExpectedCounts(BatchEntry[] entries) => new(StringComparer.Ordinal)
     {
         ["api-read"] = entries.Count(e => e.Kind == "api-read"),
@@ -72,6 +87,8 @@ internal static class BatchValues
     {
         if (entry.NeedsContext)
         { return null; }
+        if (entry.Action is { } action)
+        { return ActionCallTemplates.Example(action).ToDictionary(p => p.Key, p => (object?)p.Value?.GetValue<string>(), StringComparer.Ordinal); }
         if (entry.Signature is not null)
         {
             try

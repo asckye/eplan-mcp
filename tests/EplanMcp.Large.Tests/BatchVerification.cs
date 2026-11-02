@@ -52,8 +52,7 @@ public sealed class BatchVerification(LiveEplan eplan)
         await using ServiceProvider provider = services.BuildServiceProvider();
         IBridgeClient bridge = provider.GetRequiredService<IBridgeClient>();
         _version = (await bridge.SelectAsync(eplan.ProcessId, TestContext.Current.CancellationToken)).Eplan.Version;
-        ActionCatalogData actions = await provider.GetRequiredService<ActionCatalogReader>().ReadAsync(TestContext.Current.CancellationToken);
-        BatchEntry[] entries = Entries(actions);
+        BatchEntry[] entries = BatchValues.Entries(ActionCatalogReader.Official());
         _expected = BatchValues.ExpectedCounts(entries);
         foreach (var count in _expected)
         { TestContext.Current.TestOutputHelper.WriteLine($"Expected {count.Key}: {count.Value}"); }
@@ -166,7 +165,7 @@ public sealed class BatchVerification(LiveEplan eplan)
         var approvals = (TrialApprovals)provider.GetRequiredService<IApprovalChannel>();
         int questionsBefore = approvals.Questions.Count;
         CallToolResult call = entry.Kind == "action"
-            ? await ActivatorUtilities.CreateInstance<ActionTryTools>(provider).TryAsync(project, entry.Id[2..], cancellationToken: cancellationToken)
+            ? await ActivatorUtilities.CreateInstance<ActionTryTools>(provider).TryAsync(project, entry.Action!.Name, entry.Action.Type, JsonSerializer.SerializeToElement(parameters), cancellationToken: cancellationToken)
             : await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(parameters), cancellationToken: cancellationToken);
         if (entry.Destructive)
         {
@@ -314,18 +313,6 @@ public sealed class BatchVerification(LiveEplan eplan)
             entries = _results
         }, _json));
         File.Move(temporary, _file, overwrite: true);
-    }
-    private static BatchEntry[] Entries(ActionCatalogData catalog)
-    {
-        var actions = new List<string>();
-        foreach (ActionCatalogItem item in catalog.Items.Where(i => i.Type is null && i.Parameters.Length == 0).DistinctBy(i => i.Name).OrderBy(i => i.Name, StringComparer.Ordinal))
-        {
-            try
-            { ActionTryTools.Check(catalog, "scratch", item.Name, null, default); }
-            catch (BridgeCallException) { continue; }
-            actions.Add(item.Name);
-        }
-        return BatchValues.Entries(actions);
     }
     private static bool InRepository(string path) => Repository(path) is not null;
     private static string? Repository(string start)

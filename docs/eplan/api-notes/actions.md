@@ -70,6 +70,7 @@
 — 协调人经 spike S26 r3（`r2-sync`、`r2-type` 模式）实测，原始报告在 scratch 中，不提交。
 
 ### A61. 界面 action 的试执行（C2 `eplan_action_try`，2026-10-31，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 副本 LargeWrite 上）
+- 官方参数证据（2026-11-02，离线读取 2026 API 帮助，页脚日期 2026-03-18，未启动 EPLAN）：[backup](https://www.eplan.help/en-us/Infoportal/Content/api/2026/backup.html) 的 `BACKUPMETHOD` 为 `BACKUP/SOURCEOUT/ARCHIVE`，`AUTOCOPYREFDATA` 可选、`0/1`、默认 `0`；第一条 PROJECT 示例没有 `BACKUPMETHOD`，导入保留这一缺口，不补猜测值。[export](https://www.eplan.help/en-us/Infoportal/Content/api/2026/export.html) 的 `FORMAT` 默认 `TIF`，`COLORDEPTH` 为 `1/8/16/24/32`；[renumber](https://www.eplan.help/en-us/Infoportal/Content/api/2026/renumber.html) 的 `STARTVALUE` 为可选 integer、默认 `1`。导入只将文档字面量及示例作为数据，不代表 action 在本机可执行或已验证撤销；动态默认、缺页及名称差异保留 warning。路径模板遵守 scratch imports/exports 分向，但 C2 原有路径与参数禁止表仍生效，需要文件、页或选择上下文的批量行不猜测上下文。
 - `XGedZoomAllAction` 在没有打开图形页编辑器时，`Execute` 返回 false，不弹对话框，系统日志也没有消息；工具按失败处理并回滚。先用 `eplan_page_open` 打开一页后再执行，返回成功，业务快照和设计文件指纹都不变。— Large `ActionTryTests`。
 - 界面 action 作用于当前项目，所以试执行要求 EPLAN 中只打开目标 scratch 项目、并且它是当前项目。测试中按 A11/A41 依次关闭夹具副本来满足这一条件；恢复现场时，若测试打开过页面，重新打开的项目不会成为当前项目，需要在原当前项目里再打开一页（同 `eplan_page_open` 那条）。— 同上。
 

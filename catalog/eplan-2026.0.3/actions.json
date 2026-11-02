@@ -12,16 +12,63 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "MDTYPE"},
-      {"name": "SOURCEPATH"},
-      {"name": "FILENAME"},
-      {"name": "DESTINATIONPATH"},
-      {"name": "ARCHIVENAME"},
-      {"name": "COMMENT", "required": false}
+      {"name": "MDTYPE", "required": true, "type": "string", "values": ["SYMBOLS", "MACROS", "FORMS", "ARTICLES", "LANGUAGES", "STANDARDSHEET", "STATIONDATA"]},
+      {"name": "SOURCEPATH", "required": true, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "file"},
+      {"name": "DESTINATIONPATH", "required": true, "type": "path"},
+      {"name": "ARCHIVENAME", "required": true, "type": "file"},
+      {"name": "COMMENT", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "低优先级：主数据是公司/工作站级资源",
-    "notes": "备份主数据文件（符号、宏、表格等）。"
+    "notes": "备份主数据文件（符号、宏、表格等）。",
+    "examples": [
+      {
+        "TYPE": "MASTERDATA",
+        "FILENAME": "C:\\PlotFrames\\EPLAN\\ESS_A3DP.fn1",
+        "SOURCEPATH": "C:\\PlotFrames\\EPLAN",
+        "DESTINATIONPATH": "U:\\temp",
+        "ARCHIVENAME": "my_MasterData",
+        "COMMENT": "Hello world",
+        "MDTYPE": "STANDARDSHEET"
+      },
+      {
+        "TYPE": "MASTERDATA",
+        "FILENAME": "ESS_A3DP.fn1",
+        "SOURCEPATH": "C:\\PlotFrames\\EPLAN",
+        "DESTINATIONPATH": "U:\\temp",
+        "ARCHIVENAME": "my_MasterData",
+        "COMMENT": "Hello world",
+        "MDTYPE": "STANDARDSHEET"
+      },
+      {
+        "TYPE": "MASTERDATA",
+        "FILENAME": "*.fn1",
+        "SOURCEPATH": "C:\\PlotFrames\\EPLAN",
+        "DESTINATIONPATH": "U:\\temp",
+        "ARCHIVENAME": "my_MasterData",
+        "COMMENT": "Hello world",
+        "MDTYPE": "STANDARDSHEET"
+      },
+      {
+        "TYPE": "MASTERDATA",
+        "FILENAME": "*.*",
+        "SOURCEPATH": "C:\\PlotFrames\\EPLAN",
+        "DESTINATIONPATH": "U:\\temp",
+        "ARCHIVENAME": "my_MasterData",
+        "COMMENT": "Hello world",
+        "MDTYPE": "STANDARDSHEET"
+      },
+      {
+        "TYPE": "MASTERDATA",
+        "FILENAME": "*sh",
+        "SOURCEPATH": "C:\\PlotFrames\\EPLAN",
+        "DESTINATIONPATH": "U:\\temp",
+        "ARCHIVENAME": "my_MasterData",
+        "COMMENT": "Hello world",
+        "MDTYPE": "STANDARDSHEET"
+      }
+    ]
   },
   {
     "id": "A:backup/PROJECT",
@@ -35,18 +82,43 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "ARCHIVENAME"},
-      {"name": "DESTINATIONPATH"},
-      {"name": "COMMENT", "required": false},
-      {"name": "AUTOCOPYREFDATA", "required": false},
-      {"name": "INCLEXTDOCS", "required": false},
-      {"name": "INCLIMAGES", "required": false},
-      {"name": "BACKUPMETHOD"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "ARCHIVENAME", "required": true, "type": "file"},
+      {"name": "DESTINATIONPATH", "required": true, "type": "path"},
+      {"name": "COMMENT", "required": false, "type": "string"},
+      {"name": "AUTOCOPYREFDATA", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "INCLEXTDOCS", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "INCLIMAGES", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "BACKUPMETHOD", "required": true, "type": "string", "values": ["BACKUP", "SOURCEOUT", "ARCHIVE"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_project_backup，同时用作 Destructive 操作前的保护步骤。初期只允许 BACKUPMETHOD:BACKUP：文档没有说明 SOURCEOUT（filed off）和 ARCHIVE 对原项目有什么影响",
-    "notes": "把整个项目备份到归档文件。BACKUPMETHOD 取 SOURCEOUT 或 ARCHIVE 时对原项目的影响文档没有说明（7.2 第 3 条），初期只用 BACKUP。"
+    "notes": "把整个项目备份到归档文件。BACKUPMETHOD 取 SOURCEOUT 或 ARCHIVE 时对原项目的影响文档没有说明（7.2 第 3 条），初期只用 BACKUP。",
+    "examples": [
+      {
+        "TYPE": "PROJECT",
+        "DESTINATIONPATH": "U:\\temp",
+        "ARCHIVENAME": "EPLAN_Sample_Project.zw1",
+        "AUTOCOPYREFDATA": "0"
+      },
+      {
+        "TYPE": "PROJECT",
+        "DESTINATIONPATH": "U:\\temp",
+        "ARCHIVENAME": "EPLAN_Sample_Project.zw1",
+        "COMMENT": "Hello",
+        "AUTOCOPYREFDATA": "1",
+        "INCLIMAGES": "0",
+        "INCLEXTDOCS": "1"
+      },
+      {
+        "TYPE": "PROJECT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "DESTINATIONPATH": "U:\\temp",
+        "ARCHIVENAME": "EPLAN_Sample_Project.zw1",
+        "COMMENT": "Hello",
+        "BACKUPMETHOD": "BACKUP"
+      }
+    ]
   },
   {
     "id": "A:changelayer",
@@ -60,17 +132,52 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "LAYER[n]"},
-      {"name": "VISIBLE[n]", "required": false},
-      {"name": "PRINTED[n]", "required": false},
-      {"name": "TEXTHEIGHT[n]", "required": false},
-      {"name": "COLORID[n]", "required": false},
-      {"name": "TRANSPARENCY[n]", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "LAYER[n]", "required": true, "type": "string"},
+      {"name": "VISIBLE[n]", "required": false, "type": "string"},
+      {"name": "PRINTED[n]", "required": false, "type": "string"},
+      {"name": "TEXTHEIGHT[n]", "required": false, "type": "string"},
+      {"name": "COLORID[n]", "required": false, "type": "integer"},
+      {"name": "TRANSPARENCY[n]", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "放入 eplan_action_run，不单独做工具",
-    "notes": "修改图层属性（可见、打印、字高、颜色、3D 透明度）。"
+    "notes": "修改图层属性（可见、打印、字高、颜色、3D 透明度）。",
+    "examples": [
+      {
+        "LAYER": "EPLAN100",
+        "VISIBLE": "1",
+        "PRINTED": "1",
+        "TEXTHEIGHT": "2.75",
+        "COLORID": "1"
+      },
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "LAYER": "EPLAN200",
+        "VISIBLE": "1",
+        "PRINTED": "0",
+        "TEXTHEIGHT": "5.5",
+        "COLORID": "15"
+      },
+      {
+        "LAYER": "560",
+        "VISIBLE": "1",
+        "COLORID": "9",
+        "TRANSPARENCY": "0.1"
+      },
+      {
+        "LAYER1": "110",
+        "VISIBLE1": "1",
+        "PRINTED1": "1",
+        "TEXTHEIGHT1": "5",
+        "COLORID1": "1",
+        "LAYER2": "300",
+        "VISIBLE2": "1",
+        "PRINTED2": "1",
+        "TEXTHEIGHT2": "6",
+        "COLORID2": "11"
+      }
+    ]
   },
   {
     "id": "A:check/INSTALLATIONSPACE",
@@ -84,15 +191,21 @@
     "effect": ["writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "INSTALLATIONSPACENAME"},
-      {"name": "INSTALLATIONSPACENAMEn"},
-      {"name": "STRUCTURE"},
-      {"name": "STRUCTUREn"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "INSTALLATIONSPACENAME", "required": true, "type": "string"},
+      {"name": "INSTALLATIONSPACENAMEn", "required": true, "type": "string"},
+      {"name": "STRUCTURE", "required": true, "type": "string"},
+      {"name": "STRUCTUREn", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 工具家族中的检查",
-    "notes": "检查安装空间（3D）。推断：检查消息会写进项目的消息管理，不改设计数据；这一点尚未验证（api-actions 7.2 第 1 条），在真实项目上运行前必须先验证。"
+    "notes": "检查安装空间（3D）。推断：检查消息会写进项目的消息管理，不改设计数据；这一点尚未验证（api-actions 7.2 第 1 条），在真实项目上运行前必须先验证。",
+    "examples": [
+      {
+        "TYPE": "INSTALLATIONSPACE",
+        "INSTALLATIONSPACENAME": "BR1"
+      }
+    ]
   },
   {
     "id": "A:check/ONLYCOMPLETED",
@@ -106,8 +219,8 @@
     "effect": ["writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "VERIFICATIONSCHEME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "VERIFICATIONSCHEME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_check_run 的一个选项",
@@ -125,15 +238,26 @@
     "effect": ["writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "VERIFICATIONSCHEME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "SELn", "required": false},
-      {"name": "USEPAGEFILTER", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "VERIFICATIONSCHEME", "required": false, "type": "string"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "SELn", "required": false, "type": "string"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_check_run",
-    "notes": "检查页面。推断：检查消息会写进项目的消息管理，不改设计数据；这一点尚未验证（api-actions 7.2 第 1 条），在真实项目上运行前必须先验证。官方对 SELn 的说明写成只对 PAGE 值有效，而 TYPE 值是 PAGES（7.4）。"
+    "notes": "检查页面。推断：检查消息会写进项目的消息管理，不改设计数据；这一点尚未验证（api-actions 7.2 第 1 条），在真实项目上运行前必须先验证。官方对 SELn 的说明写成只对 PAGE 值有效，而 TYPE 值是 PAGES（7.4）。",
+    "examples": [
+      {
+        "TYPE": "PAGES",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP+ST1/6"
+      },
+      {
+        "TYPE": "PAGES",
+        "USEPAGEFILTER": "1"
+      }
+    ]
   },
   {
     "id": "A:check/PARTS",
@@ -148,10 +272,10 @@
     "effect": ["unknown"],
     "effectInferred": true,
     "parameters": [
-      {"name": "VERIFICATIONSCHEME", "required": false},
-      {"name": "VERIFYCOMPLETEDONLY"},
-      {"name": "PARTNUMBERn", "required": false},
-      {"name": "PARTVARIANTn", "required": false}
+      {"name": "VERIFICATIONSCHEME", "required": false, "type": "string"},
+      {"name": "VERIFYCOMPLETEDONLY", "required": true, "type": "string", "default": "0"},
+      {"name": "PARTNUMBERn", "required": false, "type": "string"},
+      {"name": "PARTVARIANTn", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_check_run 的可选范围；也可以并入部件工具",
@@ -169,14 +293,24 @@
     "effect": ["writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "VERIFICATIONSCHEME", "required": false},
-      {"name": "VERIFYCOMPLETEDONLY"},
-      {"name": "USEPAGEFILTER", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "VERIFICATIONSCHEME", "required": false, "type": "string"},
+      {"name": "VERIFYCOMPLETEDONLY", "required": true, "type": "string", "default": "0"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_check_run；结果用 PrjMessagesCollection 读取（见第 5 节）",
-    "notes": "检查项目。推断：检查消息会写进项目的消息管理，不改设计数据；这一点尚未验证（api-actions 7.2 第 1 条），在真实项目上运行前必须先验证。"
+    "notes": "检查项目。推断：检查消息会写进项目的消息管理，不改设计数据；这一点尚未验证（api-actions 7.2 第 1 条），在真实项目上运行前必须先验证。",
+    "examples": [
+      {
+        "TYPE": "PROJECT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "VERIFICATIONSCHEME": "Offline"
+      },
+      {
+        "TYPE": "PROJECT"
+      }
+    ]
   },
   {
     "id": "A:CleanWorkspaceAction",
@@ -190,13 +324,18 @@
     "effect": ["gui_only", "writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Workspacename"},
-      {"name": "Silent"}
+      {"name": "Workspacename", "required": true, "type": "string"},
+      {"name": "Silent", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "工作区是界面布局，与项目数据无关",
-    "notes": "清理工作区。需要主窗口（7.5）。"
+    "notes": "清理工作区。需要主窗口（7.5）。",
+    "examples": [
+      {
+        "Workspacename": "?"
+      }
+    ]
   },
   {
     "id": "A:compress",
@@ -210,12 +349,21 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "CONFIGSCHEME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_project_compress，Destructive，执行前先备份",
-    "notes": "按配置方案压缩项目。压缩会删除或改动哪些内容由配置方案决定，文档没有说明（7.2 第 4 条）。"
+    "notes": "按配置方案压缩项目。压缩会删除或改动哪些内容由配置方案决定，文档没有说明（7.2 第 4 条）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "CONFIGSCHEME": "config_scheme"
+      },
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:devicelist/DELETE",
@@ -229,11 +377,17 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "并入设备清单导入工具，Destructive",
-    "notes": "删除设备清单。删除项目中的设备清单数据。"
+    "notes": "删除设备清单。删除项目中的设备清单数据。",
+    "examples": [
+      {
+        "TYPE": "DELETE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:devicelist/EXPORT",
@@ -247,13 +401,20 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XDLXmlExporter", "XDLTxtImporterExporter", "XDLCsvImporterExporter"], "default": "XDLXmlExporter"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（设备清单）",
-    "notes": "导出设备清单。"
+    "notes": "导出设备清单。",
+    "examples": [
+      {
+        "TYPE": "EXPORT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "EXPORTFILE": "C:\\EPLAN\\deviceListe2.xml"
+      }
+    ]
   },
   {
     "id": "A:devicelist/IMPORT",
@@ -267,13 +428,20 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "IMPORTFILE"},
-      {"name": "FORMAT", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XDLXmlExporter", "XDLTxtImporterExporter", "XDLCsvImporterExporter"], "default": "XDLXmlExporter"}
     ],
     "status": "registered",
     "plannedHandling": "任务型导入工具，Destructive",
-    "notes": "导入设备清单。"
+    "notes": "导入设备清单。",
+    "examples": [
+      {
+        "TYPE": "IMPORT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "IMPORTFILE": "C:\\EPLAN\\deviceListe.xml"
+      }
+    ]
   },
   {
     "id": "A:edit",
@@ -287,18 +455,45 @@
     "effect": ["gui_only"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "DEVICENAME", "required": false},
-      {"name": "X", "required": false},
-      {"name": "Y", "required": false},
-      {"name": "INSTALLATIONSPACE", "required": false},
-      {"name": "DEVICENAME3D", "required": false},
-      {"name": "IGNOREWHENOPEN", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "DEVICENAME", "required": false, "type": "string"},
+      {"name": "X", "required": false, "type": "string"},
+      {"name": "Y", "required": false, "type": "string"},
+      {"name": "INSTALLATIONSPACE", "required": false, "type": "string"},
+      {"name": "DEVICENAME3D", "required": false, "type": "string"},
+      {"name": "IGNOREWHENOPEN", "required": false, "type": "flag", "values": ["0", "1"]}
     ],
     "status": "registered",
     "plannedHandling": "“打开项目”并入 eplan_project_open（更适合用 ProjectOpen）；“在界面中定位到某页或某设备”可以做成可选的展示工具",
-    "notes": "在界面中打开项目、页面、设备所在页或布局空间，可以定位到坐标。只定位或打开，不改数据。"
+    "notes": "在界面中打开项目、页面、设备所在页或布局空间，可以定位到坐标。只定位或打开，不改数据。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      },
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP+ST1/7"
+      },
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "DEVICENAME": "=AP+PT1-G1"
+      },
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP+ST1/7",
+        "X": "200",
+        "Y": "100"
+      },
+      {
+        "PROJECTNAME": "$(MD_PROJECTS)\\EPLAN_Sample_Project.elk",
+        "INSTALLATIONSPACE": "=EB3+ET1 (-MP1)"
+      },
+      {
+        "PROJECTNAME": "$(MD_PROJECTS)\\EPLAN_Sample_Project.elk",
+        "DEVICENAME3D": "=EB3+ET1-F14"
+      }
+    ]
   },
   {
     "id": "A:EplApiModuleAction",
@@ -312,15 +507,23 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "register"},
-      {"name": "registerModule"},
-      {"name": "unregister"},
-      {"name": "unregisterInternal"}
+      {"name": "register", "required": true, "type": "file"},
+      {"name": "registerModule", "required": true, "type": "string"},
+      {"name": "unregister", "required": true, "type": "string"},
+      {"name": "unregisterInternal", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "installer_registration",
     "plannedHandling": "只供安装器和 M1 内部使用：它改变 EPLAN 的插件配置，不应向代理开放",
-    "notes": "注册或注销 API 插件。"
+    "notes": "注册或注销 API 插件。",
+    "examples": [
+      {
+        "register": "C:Program Files\\\\EPLAN\\\\Platform\\\\...\\\\bin\\\\Eplan.EplAddIn.MyAddin3.dll"
+      },
+      {
+        "unregister": "Eplan.EplAddIn.MyAddin3"
+      }
+    ]
   },
   {
     "id": "A:EsCorrectConnections",
@@ -333,7 +536,9 @@
     "context": ["project"],
     "effect": ["writes_project"],
     "effectInferred": false,
-    "parameters": [],
+    "parameters": [
+
+    ],
     "status": "registered",
     "plannedHandling": "连接整理，Destructive；也可以放入白名单",
     "notes": "把连接定义点的图形属性合并到信号定义点，并删除空的连接定义点。会删除对象，并新建名为 correction-n 的信号。"
@@ -350,12 +555,20 @@
     "effect": ["unknown"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ScriptFile"}
+      {"name": "ScriptFile", "required": true, "type": "file"}
     ],
     "status": "excluded",
     "reason": "script_code_level",
     "plannedHandling": "属于 Code 级，默认禁用（ADR-0005）",
-    "notes": "运行脚本中带 [Start] 标记的函数。执行任意代码，效果记为 unknown；第一个参数之后可以带任意附加参数。"
+    "notes": "运行脚本中带 [Start] 标记的函数。执行任意代码，效果记为 unknown；第一个参数之后可以带任意附加参数。",
+    "examples": [
+      {
+        "ScriptFile": "C:\\...\\EPLAN\\Electric P8\\Scripts\\...\\SimpleScriptWithParameters.cs",
+        "Param1": "Hello",
+        "Param2": "EPLAN",
+        "Param3": "API developer!"
+      }
+    ]
   },
   {
     "id": "A:export/DWGPAGE",
@@ -369,13 +582,13 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "PAGENAMEn", "required": false},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "TARGET"},
-      {"name": "LANGUAGE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": false, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "TARGET", "required": true, "type": "string", "values": ["Disk", "FromSettings"]},
+      {"name": "LANGUAGE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（DXF/DWG）",
@@ -393,12 +606,12 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "TARGET"},
-      {"name": "LANGUAGE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": false, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "TARGET", "required": true, "type": "string", "values": ["Disk", "FromSettings"]},
+      {"name": "LANGUAGE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（DXF/DWG）",
@@ -416,11 +629,11 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAMEn", "required": false},
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
       {"name": "SELn"},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "TARGET"}
+      {"name": "DESTINATIONPATH", "required": false, "type": "path"},
+      {"name": "TARGET", "required": true, "type": "string", "values": ["Disk", "FromSettings"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（DXF/DWG）",
@@ -438,9 +651,9 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "TARGET"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "DESTINATIONPATH", "required": false, "type": "path"},
+      {"name": "TARGET", "required": true, "type": "string", "values": ["Disk", "FromSettings"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（DXF/DWG）",
@@ -458,17 +671,38 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "PAGENAMEn", "required": false},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "TARGET"},
-      {"name": "LANGUAGE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": false, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "TARGET", "required": true, "type": "string", "values": ["Disk", "FromSettings"]},
+      {"name": "LANGUAGE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（DXF/DWG）",
-    "notes": "把页面导出为 DXF。LANGUAGE 参数会在导出前翻译项目，是否改动项目需要验证（7.2 第 2 条）。"
+    "notes": "把页面导出为 DXF。LANGUAGE 参数会在导出前翻译项目，是否改动项目需要验证（7.2 第 2 条）。",
+    "examples": [
+      {
+        "TYPE": "DXFPAGE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP1+ST1/2",
+        "DESTINATIONPATH": "C:\\temp"
+      },
+      {
+        "TYPE": "DXFPAGE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "DESTINATIONPATH": "C:\\temp",
+        "EXPORTSCHEME": "dxf_scheme"
+      },
+      {
+        "TYPE": "DXFPAGE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PAGENAME1": "=AP1+ST1/2",
+        "PAGENAME2": "=AP+ST1/4",
+        "EXPORTSCHEME": "Standard Settings"
+      }
+    ]
   },
   {
     "id": "A:export/DXFPROJECT",
@@ -482,16 +716,23 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "TARGET"},
-      {"name": "LANGUAGE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": false, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "TARGET", "required": true, "type": "string", "values": ["Disk", "FromSettings"]},
+      {"name": "LANGUAGE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（DXF/DWG）",
-    "notes": "把项目导出为 DXF。LANGUAGE 参数会在导出前翻译项目，是否改动项目需要验证（7.2 第 2 条）。"
+    "notes": "把项目导出为 DXF。LANGUAGE 参数会在导出前翻译项目，是否改动项目需要验证（7.2 第 2 条）。",
+    "examples": [
+      {
+        "TYPE": "DXFPROJECT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "DESTINATIONPATH": "C:\\temp"
+      }
+    ]
   },
   {
     "id": "A:export/GRAPHICPAGE",
@@ -505,19 +746,41 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "FORMAT", "required": false},
-      {"name": "COLORDEPTH", "required": false},
-      {"name": "IMAGEWIDTH", "required": false},
-      {"name": "IMAGECOMPRESSION", "required": false},
-      {"name": "BLACKWHITE", "required": false},
-      {"name": "USEPAGEFILTER", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": false, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["BMP", "TIF", "GIF", "PNG", "JPG"], "default": "TIF"},
+      {"name": "COLORDEPTH", "required": false, "type": "integer", "values": ["1", "8", "16", "24", "32"], "default": "24"},
+      {"name": "IMAGEWIDTH", "required": false, "type": "integer", "default": "80"},
+      {"name": "IMAGECOMPRESSION", "required": false, "type": "string", "values": ["LZW", "RLE", "CCITT3", "CCITT4", "NONE"], "default": "NONE"},
+      {"name": "BLACKWHITE", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（图片）；可以提前用作页面预览（见第 5 节）",
-    "notes": "把页面导出为图片。"
+    "notes": "把页面导出为图片。",
+    "examples": [
+      {
+        "TYPE": "GRAPHICPAGE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP1+ST1/2",
+        "DESTINATIONPATH": "C:\\temp",
+        "FORMAT": "BMP",
+        "COLORDEPTH": "24",
+        "IMAGEWIDTH": "1024",
+        "BLACKWHITE": "1"
+      },
+      {
+        "TYPE": "GRAPHICPAGE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "DESTINATIONPATH": "C:\\temp",
+        "FORMAT": "BMP",
+        "COLORDEPTH": "24",
+        "IMAGEWIDTH": "1024",
+        "BLACKWHITE": "1",
+        "USEPAGEFILTER": "1"
+      }
+    ]
   },
   {
     "id": "A:export/GRAPHICPROJECT",
@@ -531,18 +794,29 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "FORMAT", "required": false},
-      {"name": "COLORDEPTH", "required": false},
-      {"name": "IMAGEWIDTH", "required": false},
-      {"name": "IMAGECOMPRESSION", "required": false},
-      {"name": "BLACKWHITE", "required": false},
-      {"name": "PAGENAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "DESTINATIONPATH", "required": false, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["BMP", "TIF", "GIF", "PNG", "JPG"], "default": "TIF"},
+      {"name": "COLORDEPTH", "required": false, "type": "integer", "values": ["1", "8", "16", "24", "32"], "default": "24"},
+      {"name": "IMAGEWIDTH", "required": false, "type": "integer", "default": "80"},
+      {"name": "IMAGECOMPRESSION", "required": false, "type": "string", "values": ["LZW", "RLE", "CCITT3", "CCITT4", "NONE"], "default": "NONE"},
+      {"name": "BLACKWHITE", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "PAGENAME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（图片）",
-    "notes": "把整个项目导出为图片（TIF/GIF/PNG/JPG，参数中另有 BMP）。"
+    "notes": "把整个项目导出为图片（TIF/GIF/PNG/JPG，参数中另有 BMP）。",
+    "examples": [
+      {
+        "TYPE": "GRAPHICPROJECT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "DESTINATIONPATH": "C:\\temp",
+        "FORMAT": "BMP",
+        "COLORDEPTH": "24",
+        "IMAGEWIDTH": "1024",
+        "BLACKWHITE": "1"
+      }
+    ]
   },
   {
     "id": "A:export/PDFPAGESSCHEME",
@@ -556,24 +830,35 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXPORTFILE"},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "PAGENAMEn", "required": false},
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
       {"name": "SELn"},
-      {"name": "BLACKWHITE", "required": false},
-      {"name": "USEZOOM"},
-      {"name": "ZOOMLEVEL"},
-      {"name": "USESIMPLELINK"},
-      {"name": "FASTWEBVIEW"},
-      {"name": "READONLYEXPORT"},
-      {"name": "USEPRINTMARGINS", "required": false},
-      {"name": "LANGUAGE"},
-      {"name": "EXPORTMODEL"}
+      {"name": "BLACKWHITE", "required": false, "type": "integer", "values": ["0", "1", "2", "3"], "default": "1"},
+      {"name": "USEZOOM", "required": true, "type": "string"},
+      {"name": "ZOOMLEVEL", "required": true, "type": "string"},
+      {"name": "USESIMPLELINK", "required": true, "type": "string"},
+      {"name": "FASTWEBVIEW", "required": true, "type": "string"},
+      {"name": "READONLYEXPORT", "required": true, "type": "string"},
+      {"name": "USEPRINTMARGINS", "required": false, "type": "string"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "EXPORTMODEL", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_pdf",
-    "notes": "按方案把指定页面导出为 PDF。LANGUAGE 参数会在导出前翻译项目，是否改动项目需要验证（7.2 第 2 条）。官方示例里用的 PDFPAGE 不在 TYPE 列表中（7.4）；SELn 在 2026-10-21 复核时只出现在 TYPE 的说明文字里，参数表没有这一行。"
+    "notes": "按方案把指定页面导出为 PDF。LANGUAGE 参数会在导出前翻译项目，是否改动项目需要验证（7.2 第 2 条）。官方示例里用的 PDFPAGE 不在 TYPE 列表中（7.4）；SELn 在 2026-10-21 复核时只出现在 TYPE 的说明文字里，参数表没有这一行。",
+    "examples": [
+      {
+        "TYPE": "PDFPAGESSCHEME",
+        "EXPORTSCHEME": "myScheme",
+        "PAGENAME1": "=AP+ST1/2",
+        "PAGENAME2": "=AP+ST1/4",
+        "PAGENAME3": "=AP+ST1/7",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "EXPORTFILE": "C:\\EPLAN_Sample_Project.pdf"
+      }
+    ]
   },
   {
     "id": "A:export/PDFPROJECTSCHEME",
@@ -587,22 +872,30 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXPORTFILE"},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "BLACKWHITE", "required": false},
-      {"name": "USEZOOM"},
-      {"name": "ZOOMLEVEL"},
-      {"name": "USESIMPLELINK"},
-      {"name": "FASTWEBVIEW"},
-      {"name": "READONLYEXPORT"},
-      {"name": "USEPRINTMARGINS", "required": false},
-      {"name": "LANGUAGE"},
-      {"name": "EXPORTMODEL"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "BLACKWHITE", "required": false, "type": "integer", "values": ["0", "1", "2", "3"], "default": "1"},
+      {"name": "USEZOOM", "required": true, "type": "string"},
+      {"name": "ZOOMLEVEL", "required": true, "type": "string"},
+      {"name": "USESIMPLELINK", "required": true, "type": "string"},
+      {"name": "FASTWEBVIEW", "required": true, "type": "string"},
+      {"name": "READONLYEXPORT", "required": true, "type": "string"},
+      {"name": "USEPRINTMARGINS", "required": false, "type": "string"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "EXPORTMODEL", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_pdf",
-    "notes": "按方案把整个项目导出为 PDF。LANGUAGE 参数会在导出前翻译项目，是否改动项目需要验证（7.2 第 2 条）。官方示例里用的 PDFPROJECT 不在 TYPE 列表中（7.4）。"
+    "notes": "按方案把整个项目导出为 PDF。LANGUAGE 参数会在导出前翻译项目，是否改动项目需要验证（7.2 第 2 条）。官方示例里用的 PDFPROJECT 不在 TYPE 列表中（7.4）。",
+    "examples": [
+      {
+        "TYPE": "PDFPROJECTSCHEME",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "EXPORTFILE": "C:\\EPLAN_Sample_Project.pdf",
+        "EXPORTSCHEME": "myScheme"
+      }
+    ]
   },
   {
     "id": "A:export/PXFPROJECT",
@@ -616,14 +909,21 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXPORTFILE"},
-      {"name": "EXPORTMASTERDATA", "required": false},
-      {"name": "EXPORTCONNECTIONS", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXPORTFILE", "required": false, "type": "path"},
+      {"name": "EXPORTMASTERDATA", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "EXPORTCONNECTIONS", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（PXF/EPJ）",
-    "notes": "把项目导出为 EPJ（PXF）。"
+    "notes": "把项目导出为 EPJ（PXF）。",
+    "examples": [
+      {
+        "TYPE": "PXFPROJECT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "EXPORTFILE": "C:\\temp\\myPxf_Sample_Project"
+      }
+    ]
   },
   {
     "id": "A:export3d/JT",
@@ -637,14 +937,14 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "INSTALLATIONSPACENAME"},
-      {"name": "INSTALLATIONSPACENAMEn", "required": false},
-      {"name": "STRUCTURE", "required": false},
-      {"name": "STRUCTUREn", "required": false},
-      {"name": "DESTINATIONPATH"},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "FILENAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "INSTALLATIONSPACENAME", "required": true, "type": "string"},
+      {"name": "INSTALLATIONSPACENAMEn", "required": false, "type": "string"},
+      {"name": "STRUCTURE", "required": false, "type": "string"},
+      {"name": "STRUCTUREn", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": true, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "FILENAME", "required": false, "type": "file"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 3D 导出",
@@ -662,18 +962,36 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "INSTALLATIONSPACENAME"},
-      {"name": "INSTALLATIONSPACENAMEn", "required": false},
-      {"name": "STRUCTURE", "required": false},
-      {"name": "STRUCTUREn", "required": false},
-      {"name": "DESTINATIONPATH"},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "SEPARATEFILES"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "INSTALLATIONSPACENAME", "required": true, "type": "string"},
+      {"name": "INSTALLATIONSPACENAMEn", "required": false, "type": "string"},
+      {"name": "STRUCTURE", "required": false, "type": "string"},
+      {"name": "STRUCTUREn", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": true, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "SEPARATEFILES", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 3D 导出",
-    "notes": "把安装空间导出为 STEP。"
+    "notes": "把安装空间导出为 STEP。",
+    "examples": [
+      {
+        "TYPE": "STEP",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "INSTALLATIONSPACENAME1": "BR1",
+        "INSTALLATIONSPACENAME2": "BR2",
+        "DESTINATIONPATH": "C:\\temp\\step_export"
+      },
+      {
+        "TYPE": "STEP",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "INSTALLATIONSPACENAME1": "BR1",
+        "STRUCTURE1": "=EB3+ET1",
+        "INSTALLATIONSPACENAME2": "BR2",
+        "STRUCTURE2": "=EB3+ET2",
+        "DESTINATIONPATH": "C:\\temp\\step_export"
+      }
+    ]
   },
   {
     "id": "A:ExportNCData",
@@ -687,16 +1005,24 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "MachineType", "required": true},
-      {"name": "MachineName", "required": true},
-      {"name": "ProjectName", "required": false},
-      {"name": "UseSelection", "required": false},
-      {"name": "TargetDirectory", "required": false},
-      {"name": "MaterialName", "required": false}
+      {"name": "MachineType", "required": true, "type": "integer", "values": ["1", "2", "3", "4", "5", "6", "7", "8"]},
+      {"name": "MachineName", "required": true, "type": "string"},
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "UseSelection", "required": false, "type": "integer", "default": "0"},
+      {"name": "TargetDirectory", "required": false, "type": "path"},
+      {"name": "MaterialName", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 生产输出",
-    "notes": "为加工设备导出 NC 数据。"
+    "notes": "为加工设备导出 NC 数据。",
+    "examples": [
+      {
+        "MACHINETYPE": "2",
+        "MACHINENAME": "Standard",
+        "TARGETDIRECTORY": "D:\\export",
+        "MATERIALNAME": "Steel"
+      }
+    ]
   },
   {
     "id": "A:ExportProductionWiring",
@@ -710,18 +1036,27 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "MachineType", "required": true},
-      {"name": "MachineName", "required": true},
-      {"name": "ProjectName", "required": false},
-      {"name": "UseSelection", "required": false},
-      {"name": "TargetDirectory", "required": false},
-      {"name": "FileName", "required": false},
-      {"name": "Language", "required": false},
-      {"name": "MultipleConnections", "required": false}
+      {"name": "MachineType", "required": true, "type": "integer", "values": ["1", "2", "3", "4", "5", "7", "8", "9"]},
+      {"name": "MachineName", "required": true, "type": "string"},
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "UseSelection", "required": false, "type": "integer", "default": "0"},
+      {"name": "TargetDirectory", "required": false, "type": "path"},
+      {"name": "FileName", "required": false, "type": "file"},
+      {"name": "Language", "required": false, "type": "string", "default": "de_DE"},
+      {"name": "MultipleConnections", "required": true, "type": "string", "default": "false"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 生产输出",
-    "notes": "为布线设备导出生产布线数据。MultipleConnections 说明项目会记录已导出状态，可能写入项目，需要验证（7.2 第 5 条）。"
+    "notes": "为布线设备导出生产布线数据。MultipleConnections 说明项目会记录已导出状态，可能写入项目，需要验证（7.2 第 5 条）。",
+    "examples": [
+      {
+        "MACHINETYPE": "5",
+        "MACHINENAME": "Metzner",
+        "TARGETDIRECTORY": "D:\\export",
+        "MultipleConnections": "1",
+        "UseSelection": "0"
+      }
+    ]
   },
   {
     "id": "A:ExportSegmentsTemplate",
@@ -735,13 +1070,20 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "FILENAME"},
-      {"name": "DESCRIPTION"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "file"},
+      {"name": "DESCRIPTION", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "预规划导出",
-    "notes": "把管段模板导出到文件（预规划）。依赖 Preplanning 授权，当前授权下不可用（7.5）。"
+    "notes": "把管段模板导出到文件（预规划）。依赖 Preplanning 授权，当前授权下不可用（7.5）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FILENAME": "C:\\temp.xml",
+        "DESCRIPTION": "Some_description"
+      }
+    ]
   },
   {
     "id": "A:exportToGraphics/GRAPHICPAGE",
@@ -755,20 +1097,48 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "DESTINATIONPATH"},
-      {"name": "FORMAT", "required": false},
-      {"name": "COLORDEPTH", "required": false},
-      {"name": "IMAGEWIDTH", "required": false},
-      {"name": "IMAGECOMPRESSION", "required": false},
-      {"name": "BLACKWHITE", "required": false},
-      {"name": "USEPAGEFILTER", "required": false},
-      {"name": "PAGENAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["BMP", "TIF", "GIF", "PNG", "JPG"]},
+      {"name": "COLORDEPTH", "required": false, "type": "integer", "values": ["1", "8", "16", "24", "32"]},
+      {"name": "IMAGEWIDTH", "required": false, "type": "integer"},
+      {"name": "IMAGECOMPRESSION", "required": false, "type": "string", "values": ["LZW", "RLE", "CCITT3", "CCITT4", "NONE"]},
+      {"name": "BLACKWHITE", "required": false, "type": "string", "default": "1"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"},
+      {"name": "PAGENAME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（图片），与 export 的 GRAPHIC* 二选一；可以提前用作页面预览",
-    "notes": "按图片方案把页面导出为图片。"
+    "notes": "按图片方案把页面导出为图片。",
+    "examples": [
+      {
+        "TYPE": "GRAPHICPAGE",
+        "PROJECTNAME": "C:\\\\Projects\\\\EPLAN\\\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP1+ST1/2",
+        "DESTINATIONPATH": "C:\\\\temp",
+        "FORMAT": "BMP",
+        "COLORDEPTH": "24",
+        "IMAGEWIDTH": "1024",
+        "BLACKWHITE": "1"
+      },
+      {
+        "TYPE": "GRAPHICPAGE",
+        "PROJECTNAME": "C:\\\\Projects\\\\EPLAN\\\\EPLAN_Sample_Project.elk",
+        "DESTINATIONPATH": "C:\\\\temp",
+        "FORMAT": "BMP",
+        "COLORDEPTH": "24",
+        "IMAGEWIDTH": "1024",
+        "BLACKWHITE": "1",
+        "USEPAGEFILTER": "1"
+      },
+      {
+        "TYPE": "GRAPHICPAGE",
+        "PROJECTNAME": "C:\\\\Projects\\\\EPLAN\\\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP1+ST1/2",
+        "EXPORTSCHEME": "Bitmap"
+      }
+    ]
   },
   {
     "id": "A:exportToGraphics/GRAPHICPROJECT",
@@ -782,19 +1152,30 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXPORTSCHEME", "required": false},
-      {"name": "DESTINATIONPATH"},
-      {"name": "FORMAT", "required": false},
-      {"name": "COLORDEPTH", "required": false},
-      {"name": "IMAGEWIDTH", "required": false},
-      {"name": "IMAGECOMPRESSION", "required": false},
-      {"name": "BLACKWHITE", "required": false},
-      {"name": "USEPAGEFILTER", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXPORTSCHEME", "required": false, "type": "string"},
+      {"name": "DESTINATIONPATH", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["BMP", "TIF", "GIF", "PNG", "JPG"]},
+      {"name": "COLORDEPTH", "required": false, "type": "integer", "values": ["1", "8", "16", "24", "32"]},
+      {"name": "IMAGEWIDTH", "required": false, "type": "integer"},
+      {"name": "IMAGECOMPRESSION", "required": false, "type": "string", "values": ["LZW", "RLE", "CCITT3", "CCITT4", "NONE"]},
+      {"name": "BLACKWHITE", "required": false, "type": "string", "default": "1"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（图片），与 export 的 GRAPHIC* 二选一",
-    "notes": "按图片方案把项目导出为图片。"
+    "notes": "按图片方案把项目导出为图片。",
+    "examples": [
+      {
+        "TYPE": "GRAPHICPROJECT",
+        "PROJECTNAME": "C:\\\\Projects\\\\EPLAN\\\\EPLAN_Sample_Project.elk",
+        "DESTINATIONPATH": "C:\\\\temp",
+        "FORMAT": "BMP",
+        "COLORDEPTH": "24",
+        "IMAGEWIDTH": "1024",
+        "BLACKWHITE": "1"
+      }
+    ]
   },
   {
     "id": "A:gedRedraw",
@@ -807,7 +1188,9 @@
     "context": ["gui"],
     "effect": ["gui_only"],
     "effectInferred": false,
-    "parameters": [],
+    "parameters": [
+
+    ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "只能交互使用",
@@ -825,18 +1208,27 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "CREATIONSCHEME", "required": false},
-      {"name": "NUMBERINGSCHEME", "required": false},
-      {"name": "AUTOSELECTSCHEME", "required": false},
-      {"name": "KEEPOLDNAMES", "required": false},
-      {"name": "STARTVALUE", "required": false},
-      {"name": "STEPVALUE", "required": false},
-      {"name": "ONLYAUTOCABLES", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "CREATIONSCHEME", "required": false, "type": "string"},
+      {"name": "NUMBERINGSCHEME", "required": false, "type": "string"},
+      {"name": "AUTOSELECTSCHEME", "required": false, "type": "string"},
+      {"name": "KEEPOLDNAMES", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "STARTVALUE", "required": false, "type": "string", "default": "1"},
+      {"name": "STEPVALUE", "required": false, "type": "string", "default": "1"},
+      {"name": "ONLYAUTOCABLES", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"}
     ],
     "status": "registered",
     "plannedHandling": "并入电缆工具",
-    "notes": "生成电缆。"
+    "notes": "生成电缆。",
+    "examples": [
+      {
+        "TYPE": "CABLES",
+        "KEEPOLDNAMES": "0",
+        "STARTVALUE": "5",
+        "STEPVALUE": "2",
+        "ONLYAUTOCABLES": "0"
+      }
+    ]
   },
   {
     "id": "A:generate/CONNECTIONS",
@@ -850,17 +1242,23 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "REBUILDALLCONNECTIONS"},
-      {"name": "PAGENAME", "required": false},
-      {"name": "USEPAGEFILTER", "required": false},
-      {"name": "PAGEFILTERNAME"},
-      {"name": "PAGENAMEn", "required": false},
-      {"name": "SELn", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "REBUILDALLCONNECTIONS", "required": true, "type": "string"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"},
+      {"name": "PAGEFILTERNAME", "required": true, "type": "string"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
+      {"name": "SELn", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "并入写工具，写入后可以更新连接",
-    "notes": "生成或更新连接。"
+    "notes": "生成或更新连接。",
+    "examples": [
+      {
+        "TYPE": "CONNECTIONS",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:generatemacros",
@@ -874,18 +1272,23 @@
     "effect": ["writes_files", "writes_master_data"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAMEn", "required": false},
-      {"name": "INSTALLATIONSPACENAMEn", "required": false},
-      {"name": "STRUCTUREn", "required": false},
-      {"name": "WINDOWMACRODIR"},
-      {"name": "PAGEMACRODIR"},
-      {"name": "FILTERSCHEME"},
-      {"name": "OVERWRITE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
+      {"name": "INSTALLATIONSPACENAMEn", "required": false, "type": "string"},
+      {"name": "STRUCTUREn", "required": false, "type": "string"},
+      {"name": "WINDOWMACRODIR", "required": true, "type": "path"},
+      {"name": "PAGEMACRODIR", "required": true, "type": "path"},
+      {"name": "FILTERSCHEME", "required": true, "type": "string"},
+      {"name": "OVERWRITE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "宏工具；目标目录必须在 scratch 内",
-    "notes": "从宏项目生成宏文件（项目类型必须是“宏项目”）。写宏目录，属于主数据（推断）；目标目录必须在 scratch 之内。"
+    "notes": "从宏项目生成宏文件（项目类型必须是“宏项目”）。写宏目录，属于主数据（推断）；目标目录必须在 scratch 之内。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:graphicallayertable/EXPORT",
@@ -899,12 +1302,19 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXPORTFILE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXPORTFILE", "required": true, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "低优先级",
-    "notes": "导出图层表。"
+    "notes": "导出图层表。",
+    "examples": [
+      {
+        "TYPE": "EXPORT",
+        "PROJECTNAME": "C:\\Projekte\\EPLAN\\EPLAN_Sample_Project.elk",
+        "EXPORTFILE": "C:\\EPLAN\\EPLAN_Sample_Project.elc"
+      }
+    ]
   },
   {
     "id": "A:graphicallayertable/IMPORT",
@@ -918,12 +1328,19 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "IMPORTFILE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "低优先级",
-    "notes": "导入图层表。"
+    "notes": "导入图层表。",
+    "examples": [
+      {
+        "TYPE": "IMPORT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "IMPORTFILE": "C:\\EPLAN\\EPLAN_Sample_Project.elc"
+      }
+    ]
   },
   {
     "id": "A:import/DWGPAGE",
@@ -937,18 +1354,30 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME"},
-      {"name": "IMPORTFILE"},
-      {"name": "IMPORTSCHEME", "required": false},
-      {"name": "XSCALE", "required": false},
-      {"name": "YSCALE", "required": false},
-      {"name": "XOFFSET", "required": false},
-      {"name": "YOFFSET", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": true, "type": "string"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "IMPORTSCHEME", "required": false, "type": "string"},
+      {"name": "XSCALE", "required": false, "type": "string", "default": "1"},
+      {"name": "YSCALE", "required": false, "type": "string", "default": "1"},
+      {"name": "XOFFSET", "required": false, "type": "string", "default": "0"},
+      {"name": "YOFFSET", "required": false, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "任务型导入工具，Destructive；目标项目必须在 scratch 内",
-    "notes": "把 DWG 插入页面。"
+    "notes": "把 DWG 插入页面。",
+    "examples": [
+      {
+        "TYPE": "DWGPAGE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP+ST1/4",
+        "IMPORTFILE": "C:\\Projects\\EPLAN\\DXF_DWG\\pline_1.dwg",
+        "XSCALE": "0.5",
+        "YSCALE": "0.5",
+        "XOFFSET": "100.0",
+        "YOFFSET": "100.0"
+      }
+    ]
   },
   {
     "id": "A:import/DXFDWGFILES",
@@ -962,15 +1391,23 @@
     "effect": ["writes_files", "writes_master_data"],
     "effectInferred": true,
     "parameters": [
-      {"name": "SOURCEPATH"},
-      {"name": "DESTINATIONPATH"},
-      {"name": "IMPORTSCHEME", "required": false},
-      {"name": "MACROPROJECT"},
-      {"name": "ONLYMACROPROJECT", "required": false}
+      {"name": "SOURCEPATH", "required": true, "type": "path"},
+      {"name": "DESTINATIONPATH", "required": true, "type": "path"},
+      {"name": "IMPORTSCHEME", "required": false, "type": "string"},
+      {"name": "MACROPROJECT", "required": true, "type": "path"},
+      {"name": "ONLYMACROPROJECT", "required": false, "type": "flag", "values": ["1", "0"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "任务型导入工具，Destructive；目标项目必须在 scratch 内",
-    "notes": "把一个目录里的 DXF/DWG 直接导入为宏。写出的宏项目和宏文件属于主数据，是否在 scratch 之内要由调用方保证。"
+    "notes": "把一个目录里的 DXF/DWG 直接导入为宏。写出的宏项目和宏文件属于主数据，是否在 scratch 之内要由调用方保证。",
+    "examples": [
+      {
+        "TYPE": "DXFDWGFILES",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "SOURCEPATH": "C:\\Projects\\DXF_DWG",
+        "DESTINATIONPATH": "C:\\Macros"
+      }
+    ]
   },
   {
     "id": "A:import/DXFPAGE",
@@ -984,14 +1421,14 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME"},
-      {"name": "IMPORTFILE"},
-      {"name": "IMPORTSCHEME", "required": false},
-      {"name": "XSCALE", "required": false},
-      {"name": "YSCALE", "required": false},
-      {"name": "XOFFSET", "required": false},
-      {"name": "YOFFSET", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": true, "type": "string"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "IMPORTSCHEME", "required": false, "type": "string"},
+      {"name": "XSCALE", "required": false, "type": "string", "default": "1"},
+      {"name": "YSCALE", "required": false, "type": "string", "default": "1"},
+      {"name": "XOFFSET", "required": false, "type": "string", "default": "0"},
+      {"name": "YOFFSET", "required": false, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "任务型导入工具，Destructive；目标项目必须在 scratch 内",
@@ -1009,8 +1446,8 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": true},
-      {"name": "IMPORTFILE"}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "导入后可以读取审阅意见，适合 AI 处理审图意见",
@@ -1028,15 +1465,22 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "IMPORTFILE"},
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "BALANCEARTICLES", "required": false},
-      {"name": "GENERATEAUTOMATICCABLES", "required": false},
-      {"name": "VERIFY", "required": false}
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "BALANCEARTICLES", "required": false, "type": "string", "default": "0"},
+      {"name": "GENERATEAUTOMATICCABLES", "required": false, "type": "string", "default": "0"},
+      {"name": "VERIFY", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "任务型导入工具，Destructive；目标项目必须在 scratch 内",
-    "notes": "导入 PXF（EPJ）项目。CODEPAGE、DRIVE、SOURCEMACROPATH、DESTINATIONFILE 等 EPLAN 4 时代遗留参数没有写明适用于哪个 TYPE（7.4）。"
+    "notes": "导入 PXF（EPJ）项目。CODEPAGE、DRIVE、SOURCEMACROPATH、DESTINATIONFILE 等 EPLAN 4 时代遗留参数没有写明适用于哪个 TYPE（7.4）。",
+    "examples": [
+      {
+        "TYPE": "PXFPROJECT",
+        "IMPORTFILE": "C:\\Projects\\EPLAN_Sample_Project.epj",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:import3d/DESIGNSPACE",
@@ -1050,9 +1494,9 @@
     "effect": ["writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "IMPORTFILE"},
-      {"name": "SCHEME", "required": false}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "SCHEME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 导入，Destructive",
@@ -1070,9 +1514,9 @@
     "effect": ["writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "IMPORTFILE"},
-      {"name": "SCHEME", "required": false}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "SCHEME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 导入，Destructive",
@@ -1090,9 +1534,9 @@
     "effect": ["writes_project"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "IMPORTFILE"},
-      {"name": "SCHEME", "required": false}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "SCHEME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 导入，Destructive",
@@ -1110,20 +1554,30 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "FILENAME", "required": true},
-      {"name": "SCHEMENAME", "required": true},
-      {"name": "TABLENAME"},
-      {"name": "DELIMITER"},
-      {"name": "HEADER", "required": false},
-      {"name": "TARGETNAME"},
-      {"name": "SKIPERRORS", "required": false},
-      {"name": "OVERWRITE", "required": false},
-      {"name": "UPDATEONLY", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "file"},
+      {"name": "SCHEMENAME", "required": true, "type": "string"},
+      {"name": "TABLENAME", "required": true, "type": "string"},
+      {"name": "DELIMITER", "required": true, "type": "string"},
+      {"name": "HEADER", "required": false, "type": "string", "default": "0"},
+      {"name": "TARGETNAME", "required": true, "type": "string"},
+      {"name": "SKIPERRORS", "required": false, "type": "string", "default": "1"},
+      {"name": "OVERWRITE", "required": false, "type": "string", "default": "1"},
+      {"name": "UPDATEONLY", "required": false, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "预规划导入，Destructive",
-    "notes": "从 Excel 或文本文件导入预规划数据。依赖 Preplanning 授权，当前授权下不可用（7.5）。"
+    "notes": "从 Excel 或文本文件导入预规划数据。依赖 Preplanning 授权，当前授权下不可用（7.5）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN_Sample_Project.elk",
+        "FILENAME": "C:\\Projects\\EPLAN\\preplanning.xls",
+        "SCHEMENAME": "config_scheme",
+        "HEADER": "1",
+        "SKIPERRORS": "0",
+        "UPDATEONLY": "0"
+      }
+    ]
   },
   {
     "id": "A:ImportSegmentsTemplate",
@@ -1137,12 +1591,18 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "FILENAME"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "file"}
     ],
     "status": "registered",
     "plannedHandling": "预规划导入",
-    "notes": "从文件导入管段模板（预规划）。依赖 Preplanning 授权，当前授权下不可用（7.5）。"
+    "notes": "从文件导入管段模板（预规划）。依赖 Preplanning 授权，当前授权下不可用（7.5）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FILENAME": "C:\\temp.xml"
+      }
+    ]
   },
   {
     "id": "A:InsertModelViewAction",
@@ -1156,30 +1616,46 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "LAYOUTSPACE", "required": true},
-      {"name": "STRUCTURE"},
-      {"name": "PAGENAME", "required": true},
-      {"name": "X", "required": true},
-      {"name": "Y", "required": true},
-      {"name": "DX", "required": true},
-      {"name": "DY", "required": true},
-      {"name": "VIEWNAME"},
-      {"name": "DESCRIPTION"},
-      {"name": "ANGLE"},
-      {"name": "SELECTIONSCHEME"},
-      {"name": "STYLE"},
-      {"name": "ITEMLABELING"},
-      {"name": "VIEWPOINT"},
-      {"name": "ROOTELEMENTS"},
-      {"name": "SCALESETTING"},
-      {"name": "SCALE"},
-      {"name": "VIEWTYPE"},
-      {"name": "OBJECTID", "output": true}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "LAYOUTSPACE", "required": true, "type": "string"},
+      {"name": "STRUCTURE", "required": true, "type": "string"},
+      {"name": "PAGENAME", "required": true, "type": "string"},
+      {"name": "X", "required": true, "type": "string"},
+      {"name": "Y", "required": true, "type": "string"},
+      {"name": "DX", "required": true, "type": "string"},
+      {"name": "DY", "required": true, "type": "string"},
+      {"name": "VIEWNAME", "required": true, "type": "string"},
+      {"name": "DESCRIPTION", "required": true, "type": "string"},
+      {"name": "ANGLE", "required": true, "type": "integer", "values": ["1", "2"]},
+      {"name": "SELECTIONSCHEME", "required": true, "type": "string"},
+      {"name": "STYLE", "required": true, "type": "integer", "values": ["0", "1", "2", "3", "4"]},
+      {"name": "ITEMLABELING", "required": true, "type": "string"},
+      {"name": "VIEWPOINT", "required": true, "type": "integer", "values": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]},
+      {"name": "ROOTELEMENTS", "required": true, "type": "string"},
+      {"name": "SCALESETTING", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "SCALE", "required": true, "type": "string"},
+      {"name": "VIEWTYPE", "required": true, "type": "integer", "values": ["0", "1", "2", "3", "4"]},
+      {"name": "OBJECTID", "output": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 模型视图",
-    "notes": "在页面上插入模型视图。"
+    "notes": "在页面上插入模型视图。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\testProject.elk",
+        "PAGENAME": "/1",
+        "VIEWNAME": "SomeName",
+        "LAYOUTSPACE": "ProjectLayoutSpaceName",
+        "X": "20",
+        "Y": "20",
+        "DX": "300",
+        "DY": "300",
+        "STYLE": "1",
+        "VIEWPOINT": "5",
+        "SCALESETTING": "0",
+        "VIEWTYPE": "1"
+      }
+    ]
   },
   {
     "id": "A:label",
@@ -1193,20 +1669,49 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "CONFIGSCHEME", "required": false},
-      {"name": "FILTERSCHEME", "required": false},
-      {"name": "SORTSCHEME"},
-      {"name": "LANGUAGE"},
-      {"name": "DESTINATIONFILE"},
-      {"name": "RECREPEAT", "required": false},
-      {"name": "TASKREPEAT", "required": false},
-      {"name": "SHOWOUTPUT", "required": false},
-      {"name": "USESELECTION", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"},
+      {"name": "FILTERSCHEME", "required": false, "type": "string"},
+      {"name": "SORTSCHEME", "required": true, "type": "string"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "DESTINATIONFILE", "required": true, "type": "file"},
+      {"name": "RECREPEAT", "required": false, "type": "integer", "default": "0"},
+      {"name": "TASKREPEAT", "required": false, "type": "integer", "default": "0"},
+      {"name": "SHOWOUTPUT", "required": false, "type": "string", "default": "0"},
+      {"name": "USESELECTION", "required": false, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（标签）",
-    "notes": "按配置方案生成标签数据文件（txt / xls / xlsx / xml）。输出 .xls 需要本机安装 Microsoft Excel（7.5）。"
+    "notes": "按配置方案生成标签数据文件（txt / xls / xlsx / xml）。输出 .xls 需要本机安装 Microsoft Excel（7.5）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "CONFIGSCHEME": "config_scheme",
+        "FILTERSCHEME": "filter_scheme",
+        "SORTSCHEME": "sort_scheme",
+        "LANGUAGE": "en_US",
+        "DESTINATIONFILE": "C:\\temp\\labeling.txt",
+        "RECREPEAT": "3",
+        "TASKREPEAT": "2"
+      },
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FILTERSCHEME": "filter_scheme",
+        "SORTSCHEME": "sort_scheme",
+        "LANGUAGE": "en_US",
+        "DESTINATIONFILE": "C:\\temp\\labeling.txt",
+        "RECREPEAT": "3",
+        "TASKREPEAT": "2"
+      },
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "CONFIGSCHEME": "config_scheme",
+        "LANGUAGE": "en_US",
+        "DESTINATIONFILE": "C:\\temp\\labeling.txt",
+        "RECREPEAT": "3",
+        "TASKREPEAT": "2"
+      }
+    ]
   },
   {
     "id": "A:masterdata/UPDATEPROJECT",
@@ -1220,11 +1725,16 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "Destructive，执行前先备份",
-    "notes": "用系统主数据更新项目中的主数据。会覆盖项目内的表格、符号等（推断）。"
+    "notes": "用系统主数据更新项目中的主数据。会覆盖项目内的表格、符号等（推断）。",
+    "examples": [
+      {
+        "TYPE": "UPDATEPROJECT"
+      }
+    ]
   },
   {
     "id": "A:MfExportRibbonBarAction",
@@ -1238,12 +1748,17 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "FileName"}
+      {"name": "FileName", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "界面定制，与项目数据无关",
-    "notes": "把功能区定制导出为 XML。"
+    "notes": "把功能区定制导出为 XML。",
+    "examples": [
+      {
+        "FileName": "?"
+      }
+    ]
   },
   {
     "id": "A:MfImportRibbonBarAction",
@@ -1257,12 +1772,17 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "FileName"}
+      {"name": "FileName", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "界面定制",
-    "notes": "从 XML 导入功能区定制。"
+    "notes": "从 XML 导入功能区定制。",
+    "examples": [
+      {
+        "FileName": "?"
+      }
+    ]
   },
   {
     "id": "A:navigateToEEC",
@@ -1276,12 +1796,17 @@
     "effect": ["gui_only"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EECOBJECTID"}
+      {"name": "EECOBJECTID", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "界面导航，目标是另一个产品",
-    "notes": "跳转到 EPLAN Engineering Configuration 中的对象。"
+    "notes": "跳转到 EPLAN Engineering Configuration 中的对象。",
+    "examples": [
+      {
+        "EECOBJECTID": "?"
+      }
+    ]
   },
   {
     "id": "A:OpenWorkspaceAction",
@@ -1295,13 +1820,22 @@
     "effect": ["gui_only", "writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Workspacename"},
-      {"name": "Silent", "required": false}
+      {"name": "Workspacename", "required": true, "type": "string"},
+      {"name": "Silent", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "界面布局",
-    "notes": "打开工作区。需要主窗口（7.5）。"
+    "notes": "打开工作区。需要主窗口（7.5）。",
+    "examples": [
+      {
+        "Workspacename": "Standard"
+      },
+      {
+        "Workspacename": "?",
+        "Silent": "0"
+      }
+    ]
   },
   {
     "id": "A:partslist/DELETESTOREDPROPERTIES",
@@ -1315,12 +1849,23 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "CONFIGSCHEME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Destructive",
-    "notes": "从项目中删除存储的属性。删除项目中存储的属性。"
+    "notes": "从项目中删除存储的属性。删除项目中存储的属性。",
+    "examples": [
+      {
+        "TYPE": "DELETESTOREDPROPERTIES",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "CONFIGSCHEME": "config_scheme"
+      },
+      {
+        "TYPE": "DELETESTOREDPROPERTIES",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:partslist/EXPORT",
@@ -1334,14 +1879,22 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "FIELDASSIGNMENTSCHEME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPalXmlExporter", "XPalCSVConverter"], "default": "XPalXmlExporter"},
+      {"name": "FIELDASSIGNMENTSCHEME", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（部件清单）",
-    "notes": "导出项目的部件清单。"
+    "notes": "导出项目的部件清单。",
+    "examples": [
+      {
+        "TYPE": "EXPORT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FORMAT": "XPalCSVConverter",
+        "EXPORTFILE": "C:\\temp\\PartsList.csv"
+      }
+    ]
   },
   {
     "id": "A:partslist/EXPORTFROMSYSTEM",
@@ -1355,8 +1908,8 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false}
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml"], "default": "XPamExportXml"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_*",
@@ -1374,15 +1927,23 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "IMPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "FIELDASSIGNMENTSCHEME", "required": false},
-      {"name": "MODE", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPalXmlExporter", "XPalCSVConverter"], "default": "XPalXmlExporter"},
+      {"name": "FIELDASSIGNMENTSCHEME", "required": false, "type": "string"},
+      {"name": "MODE", "required": false, "type": "integer", "values": ["0", "1", "2"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "任务型导入工具，Destructive",
-    "notes": "把部件清单导入项目。"
+    "notes": "把部件清单导入项目。",
+    "examples": [
+      {
+        "TYPE": "IMPORT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FORMAT": "XPalCSVConverter",
+        "IMPORTFILE": "C:\\temp\\PartsList.csv"
+      }
+    ]
   },
   {
     "id": "A:partslist/IMPORTTOSYSTEM",
@@ -1396,10 +1957,10 @@
     "effect": ["writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "IMPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "MODE", "required": false},
-      {"name": "ADDITIONAL_LANGUAGE", "required": false}
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml"], "default": "XPamExportXml"},
+      {"name": "MODE", "required": false, "type": "integer", "values": ["0", "1", "2"], "default": "0"},
+      {"name": "ADDITIONAL_LANGUAGE", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_*，Destructive；部件库必须是测试库",
@@ -1417,19 +1978,47 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false},
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml", "IXPartsImportExportEdz"], "default": "XPamExportXml"},
       {"name": "PARTNUMBER(n)", "required": false},
       {"name": "MANUFACTURER(n)", "required": false},
       {"name": "CONSTRUCTION(n)", "required": false},
       {"name": "CONNECTIONPOINTPATTERN(n)", "required": false},
       {"name": "ACCESSORYLIST(n)", "required": false},
       {"name": "ACCESSORYPLACEMENT(n)", "required": false},
-      {"name": "FILTERSCHEME"}
+      {"name": "FILTERSCHEME", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_export",
-    "notes": "导出部件及其他记录。"
+    "notes": "导出部件及其他记录。",
+    "examples": [
+      {
+        "TYPE": "EXPORT",
+        "EXPORTFILE": "C:\\temp\\PartsList.xml",
+        "PARTNUMBER": "A-B.100-C09EJ01",
+        "MANUFACTURER": "LAPP",
+        "CONSTRUCTION": "A-B.100-C_FS0_I_CH_DP"
+      },
+      {
+        "TYPE": "EXPORT",
+        "EXPORTFILE": "C:\\temp\\PartsList.xml",
+        "PARTNUMBER1": "A-B.100-C09EJ01",
+        "PARTNUMBER2": "A-B.140M-C-AFA11",
+        "MANUFACTURER1": "LAPP",
+        "MANUFACTURER2": "Rittal"
+      },
+      {
+        "TYPE": "EXPORT",
+        "FORMAT": "IXPartsImportExportEdz",
+        "EXPORTFILE": "C:\\temp\\PartsList.edz",
+        "PARTNUMBER1": "*"
+      },
+      {
+        "TYPE": "EXPORT",
+        "FILTERSCHEME": "ExportFilterScheme",
+        "EXPORTFILE": "C:\\temp\\PartsList.xml"
+      }
+    ]
   },
   {
     "id": "A:partsmanagementapi/EXPORTACCESSORYLISTS",
@@ -1443,10 +2032,10 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "PROPERTYIDn"},
-      {"name": "PROPERTYVALUEn"}
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml", "IXPartsImportExportEdz"]},
+      {"name": "PROPERTYIDn", "required": true, "type": "string"},
+      {"name": "PROPERTYVALUEn", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_export",
@@ -1464,10 +2053,10 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "PROPERTYIDn"},
-      {"name": "PROPERTYVALUEn"}
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml", "IXPartsImportExportEdz"]},
+      {"name": "PROPERTYIDn", "required": true, "type": "string"},
+      {"name": "PROPERTYVALUEn", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_export",
@@ -1485,10 +2074,10 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "PROPERTYIDn"},
-      {"name": "PROPERTYVALUEn"}
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml", "IXPartsImportExportEdz"]},
+      {"name": "PROPERTYIDn", "required": true, "type": "string"},
+      {"name": "PROPERTYVALUEn", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_export",
@@ -1506,14 +2095,24 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "PROPERTYIDn"},
-      {"name": "PROPERTYVALUEn"}
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml", "IXPartsImportExportEdz"]},
+      {"name": "PROPERTYIDn", "required": true, "type": "string"},
+      {"name": "PROPERTYVALUEn", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_export",
-    "notes": "按属性条件导出结构。"
+    "notes": "按属性条件导出结构。",
+    "examples": [
+      {
+        "TYPE": "EXPORTCONSTRUCTIONS",
+        "PROPERTYID1": "22931",
+        "PROPERTYVALUE1": "FES.130642",
+        "PROPERTYID2": "22931",
+        "PROPERTYVALUE2": "RIT.SV9677x65",
+        "EXPORTFILE": "C:\\temp\\ConstructionsList"
+      }
+    ]
   },
   {
     "id": "A:partsmanagementapi/EXPORTMANUFACTURERS",
@@ -1527,14 +2126,23 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "PROPERTYIDn"},
-      {"name": "PROPERTYVALUEn"}
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml", "IXPartsImportExportEdz"]},
+      {"name": "PROPERTYIDn", "required": true, "type": "string"},
+      {"name": "PROPERTYVALUEn", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_export",
-    "notes": "按属性条件导出制造商。"
+    "notes": "按属性条件导出制造商。",
+    "examples": [
+      {
+        "TYPE": "EXPORTMANUFACTURERS",
+        "FORMAT": "IXPartsImportExportEdz",
+        "PROPERTYID1": "22900",
+        "PROPERTYVALUE1": "PXC",
+        "EXPORTFILE": "C:\\temp\\Manufactures"
+      }
+    ]
   },
   {
     "id": "A:partsmanagementapi/EXPORTPARTS",
@@ -1548,14 +2156,24 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "PROPERTYIDn"},
-      {"name": "PROPERTYVALUEn"}
+      {"name": "EXPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml", "IXPartsImportExportEdz"]},
+      {"name": "PROPERTYIDn", "required": true, "type": "string"},
+      {"name": "PROPERTYVALUEn", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_export",
-    "notes": "按属性条件导出部件。"
+    "notes": "按属性条件导出部件。",
+    "examples": [
+      {
+        "TYPE": "EXPORTPARTS",
+        "PROPERTYID1": "22024",
+        "PROPERTYVALUE1": "2",
+        "PROPERTYID2": "22007",
+        "PROPERTYVALUE2": "ABB",
+        "EXPORTFILE": "C:\\temp\\PartsList"
+      }
+    ]
   },
   {
     "id": "A:partsmanagementapi/IMPORT",
@@ -1569,15 +2187,33 @@
     "effect": ["writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "IMPORTFILE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "MODE", "required": false},
-      {"name": "ADDITIONAL_LANGUAGE", "required": false},
-      {"name": "FILTERSCHEME"}
+      {"name": "IMPORTFILE", "required": true, "type": "path"},
+      {"name": "FORMAT", "required": false, "type": "string", "values": ["XPamImportXml", "XPamExportXml", "IXPartsImportExportEdz"], "default": "XPamImportXml"},
+      {"name": "MODE", "required": false, "type": "integer", "values": ["0", "1", "2", "3"], "default": "0"},
+      {"name": "ADDITIONAL_LANGUAGE", "required": false, "type": "string"},
+      {"name": "FILTERSCHEME", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_import（EDZ 导入，对应 api-coverage 第 4 节的需求），Destructive",
-    "notes": "把部件及其他记录导入部件管理（支持 .edz）。写系统部件库，部件库必须是测试库。"
+    "notes": "把部件及其他记录导入部件管理（支持 .edz）。写系统部件库，部件库必须是测试库。",
+    "examples": [
+      {
+        "TYPE": "IMPORT",
+        "MODE": "1",
+        "IMPORTFILE": "C:\\temp\\PartsList.xml"
+      },
+      {
+        "TYPE": "IMPORT",
+        "FORMAT": "IXPartsImportExportEdz",
+        "IMPORTFILE": "C:\\temp\\PartsList.edz"
+      },
+      {
+        "TYPE": "IMPORT",
+        "MODE": "0",
+        "FORMAT": "IXPartsImportExportEdz",
+        "IMPORTFILE": "C:\\temp\\PartsList.edz"
+      }
+    ]
   },
   {
     "id": "A:plcservice/BUSDATAEXPORT",
@@ -1591,21 +2227,46 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "LANGUAGE"},
-      {"name": "CONVERTERID"},
-      {"name": "CONFIGURATIONPROJECT"},
-      {"name": "DESTINATIONFILE"},
-      {"name": "OVERWRITE"},
-      {"name": "FORMAT", "required": false},
-      {"name": "EXPORTPORTSPECIFICINTERCONNECTION", "required": false},
-      {"name": "EXPORTACCESSORIES", "required": false},
-      {"name": "EXPORTDRIVES", "required": false},
-      {"name": "EXPORTDEVICESPECIFICCONFIGURATIONVALUES", "required": false}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "CONVERTERID", "required": true, "type": "string", "values": ["PlcDcExchangerBeckhoffTC3AML", "PlcDcExchangerBoschAML", "PlcDcExchangerLogiCals3AML", "PlcDcExchangerMitsubishiAML", "PlcDcExchangerMitsubishi110AML", "PlcDcExchangerPhoenixContactAML", "PlcDcExchangerRockwellArchitectAML", "PlcDcExchangerSiemensTIA15AML", "PlcDcExchangerSiemensTIA151AML", "PlcDcExchangerSiemensTIA16AML", "PlcDcExchangerSiemensTIA17AML", "PlcDcExchangerSiemensTIA18AML", "PlcDcExchangerSiemensTIA19AML", "PlcDcExchangerSiemensTSTAML", "PlcDcAMLExchangerGeneral", "PlcDcXMLExchangerABB", "PlcDcXMLExchangerBandR", "PlcDcXMLExchangerRexroth", "PlcDcXMLExchangerSchneider", "PlcDcXMLExchangerSiemens", "PlcDcXMLExchangerUniversal"]},
+      {"name": "CONFIGURATIONPROJECT", "required": true, "type": "string"},
+      {"name": "DESTINATIONFILE", "required": true, "type": "file"},
+      {"name": "OVERWRITE", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "FORMAT", "required": false, "type": "string"},
+      {"name": "EXPORTPORTSPECIFICINTERCONNECTION", "required": false, "type": "flag", "values": ["0", "1"]},
+      {"name": "EXPORTACCESSORIES", "required": false, "type": "flag", "values": ["0", "1"]},
+      {"name": "EXPORTDRIVES", "required": false, "type": "flag", "values": ["0", "1"]},
+      {"name": "EXPORTDEVICESPECIFICCONFIGURATIONVALUES", "required": false, "type": "flag", "values": ["0", "1"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（PLC 数据）",
-    "notes": "用指定转换器导出 PLC 总线数据（AutomationML、TIA、TwinCAT 等）。"
+    "notes": "用指定转换器导出 PLC 总线数据（AutomationML、TIA、TwinCAT 等）。",
+    "examples": [
+      {
+        "TYPE": "BUSDATAEXPORT",
+        "CONFIGURATIONPROJECT": "Schneider-Electric",
+        "DESTINATIONFILE": "c:\\tempdir\\plcservice_export_1.xef",
+        "PROJECTNAME": "C:\\Users\\Public\\EPLAN\\Electric P8\\Projects\\Microsoft\\EPLAN_Sample_Project.elk",
+        "LANGUAGE": "de_DE",
+        "CONVERTERID": "PlcDcXMLExchangerSchneider",
+        "OVERWRITE": "1"
+      },
+      {
+        "TYPE": "BUSDATAEXPORT",
+        "CONFIGURATIONPROJECT": "Phoenix1",
+        "DESTINATIONFILE": "c:\\tempdir\\plcservice_export_1.aml",
+        "PROJECTNAME": "C:\\Users\\Public\\EPLAN\\Electric P8\\Projects\\Microsoft\\EPLAN_Sample_Project.elk",
+        "LANGUAGE": "de_DE",
+        "CONVERTERID": "PlcDcAMLExchangerGeneral",
+        "OVERWRITE": "1",
+        "FORMAT": "AutomationML AR APC V1.4.0",
+        "EXPORTPORTSPECIFICINTERCONNECTION": "1",
+        "EXPORTACCESSORIES": "1",
+        "EXPORTDRIVES": "1",
+        "EXPORTDEVICESPECIFICCONFIGURATIONVALUES": "1"
+      }
+    ]
   },
   {
     "id": "A:plcservice/BUSDATAIMPORT",
@@ -1619,15 +2280,24 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "LANGUAGE"},
-      {"name": "CONVERTERID"},
-      {"name": "SOURCEFILE"},
-      {"name": "IMPORTMATCH"}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "CONVERTERID", "required": true, "type": "string", "values": ["PlcDcExchangerBeckhoffTC3AML", "PlcDcExchangerBoschAML", "PlcDcExchangerLogiCals3AML", "PlcDcExchangerMitsubishiAML", "PlcDcExchangerMitsubishi110AML", "PlcDcExchangerPhoenixContactAML", "PlcDcExchangerRockwellArchitectAML", "PlcDcExchangerSiemensTIA15AML", "PlcDcExchangerSiemensTIA151AML", "PlcDcExchangerSiemensTIA16AML", "PlcDcExchangerSiemensTIA17AML", "PlcDcExchangerSiemensTIA18AML", "PlcDcExchangerSiemensTIA19AML", "PlcDcExchangerSiemensTSTAML", "PlcDcAMLExchangerGeneral", "PlcDcXMLExchangerABB", "PlcDcXMLExchangerBandR", "PlcDcXMLExchangerRexroth", "PlcDcXMLExchangerSchneider", "PlcDcXMLExchangerSiemens", "PlcDcXMLExchangerUniversal"]},
+      {"name": "SOURCEFILE", "required": true, "type": "file"},
+      {"name": "IMPORTMATCH", "required": true, "type": "integer", "values": ["0", "1", "2"]}
     ],
     "status": "registered",
     "plannedHandling": "导入工具（PLC），Destructive；禁止 IMPORTMATCH:1",
-    "notes": "导入 PLC 总线数据。IMPORTMATCH 取 1 时可能弹出比较对话框，静默调用时必须避免（7.3）。"
+    "notes": "导入 PLC 总线数据。IMPORTMATCH 取 1 时可能弹出比较对话框，静默调用时必须避免（7.3）。",
+    "examples": [
+      {
+        "TYPE": "BUSDATAIMPORT",
+        "SOURCEFILE": "c:\\tempdir\\plcservice_export_2.pbf",
+        "PROJECTNAME": "C:\\Users\\Public\\EPLAN\\Electric P8\\Projects\\Microsoft\\EPLAN_Sample_Project.elk",
+        "LANGUAGE": "de_DE",
+        "CONVERTERID": "PlcDcXMLExchangerUniversal"
+      }
+    ]
   },
   {
     "id": "A:plcservice/EXPORTADDRESSOVERVIEW",
@@ -1641,15 +2311,25 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "CONFIGURATIONPROJECT"},
-      {"name": "PLCSTATION"},
-      {"name": "PLCCPU"},
-      {"name": "DESTINATIONFILE"}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "CONFIGURATIONPROJECT", "required": true, "type": "string"},
+      {"name": "PLCSTATION", "required": true, "type": "string"},
+      {"name": "PLCCPU", "required": true, "type": "string"},
+      {"name": "DESTINATIONFILE", "required": true, "type": "file"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（PLC 地址）",
-    "notes": "导出 PLC 地址总览。"
+    "notes": "导出 PLC 地址总览。",
+    "examples": [
+      {
+        "TYPE": "EXPORTADDRESSOVERVIEW",
+        "PROJECTNAME": "C:\\Users\\Public\\EPLAN\\Electric P8\\Projects\\Microsoft\\EPLAN_Sample_Project.elk",
+        "CONFIGURATIONPROJECT": "CAx_AML_Drive_00",
+        "PLCSTATION": "S71500/ET200MP station_1",
+        "PLCCPU": "1",
+        "DESTINATIONFILE": "c:\\tempdir\\address_overview_export.csv"
+      }
+    ]
   },
   {
     "id": "A:plcservice/GENERATEPLCSCHEMATIC",
@@ -1663,16 +2343,25 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "CONFIGFILE"},
-      {"name": "SINGLELINEPAGES"},
-      {"name": "MULTILINEPAGES"},
-      {"name": "OVERVIEWS"},
-      {"name": "RACKOVERVIEWS"}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "CONFIGFILE", "required": true, "type": "path"},
+      {"name": "SINGLELINEPAGES", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "MULTILINEPAGES", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "OVERVIEWS", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "RACKOVERVIEWS", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "并入 PLC 写工具",
-    "notes": "按配置文件生成 PLC 原理图页。"
+    "notes": "按配置文件生成 PLC 原理图页。",
+    "examples": [
+      {
+        "TYPE": "GENERATEPLCSCHEMATIC",
+        "PROJECTNAME": "C:\\Users\\Public\\EPLAN\\Electric P8\\Projects\\Microsoft\\EPLAN_Sample_Project.elk",
+        "CONFIGFILE": "c:\\tempdir\\schematics_generation_config.xml",
+        "SINGLELINEPAGES": "1",
+        "MULTILINEPAGES": "1"
+      }
+    ]
   },
   {
     "id": "A:preparemacros",
@@ -1686,15 +2375,20 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAMEn", "required": false},
-      {"name": "GroupMacroBoxes"},
-      {"name": "GroupPageMacros"},
-      {"name": "SetHandleActive"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
+      {"name": "GroupMacroBoxes", "required": true, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "GroupPageMacros", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "SetHandleActive", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "宏工具（与 generatemacros 配套）",
-    "notes": "为生成宏准备宏项目。"
+    "notes": "为生成宏准备宏项目。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:print/PAGES",
@@ -1708,20 +2402,37 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PRINTERNAME", "required": false},
-      {"name": "PRINTCOLLATE", "required": false},
-      {"name": "PRINTREVERSE", "required": false},
-      {"name": "NUMBER"},
-      {"name": "DESTINATIONFILE"},
-      {"name": "USEPAGEFILTER", "required": false},
-      {"name": "PRINTCHANGEDPAGES"},
-      {"name": "PAGENAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PRINTERNAME", "required": false, "type": "string"},
+      {"name": "PRINTCOLLATE", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "PRINTREVERSE", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "NUMBER", "required": true, "type": "integer", "default": "1"},
+      {"name": "DESTINATIONFILE", "required": true, "type": "path"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"},
+      {"name": "PRINTCHANGEDPAGES", "required": true, "type": "string"},
+      {"name": "PAGENAME", "required": false, "type": "string"}
     ],
     "status": "excluded",
     "reason": "printing",
     "plannedHandling": "会产生物理输出，而且工作站打印设置会覆盖 action 参数；PDF 需求由 export 满足",
-    "notes": "打印页面。同 PROJECT：物理输出，工作站打印设置会覆盖参数（7.3）。"
+    "notes": "打印页面。同 PROJECT：物理输出，工作站打印设置会覆盖参数（7.3）。",
+    "examples": [
+      {
+        "TYPE": "PAGES",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PAGENAME": "=AP+ST1/6",
+        "PRINTERNAME": "my_printer",
+        "NUMBER": "2"
+      },
+      {
+        "TYPE": "PAGES",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PRINTCOLLATE": "0",
+        "PRINTREVERSE": "1",
+        "DESTINATIONFILE": "C:\\TEMP\\ESS_Sample_Project_print.prn",
+        "USEPAGEFILTER": "1"
+      }
+    ]
   },
   {
     "id": "A:print/PROJECT",
@@ -1735,19 +2446,28 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PRINTERNAME", "required": false},
-      {"name": "PRINTCOLLATE", "required": false},
-      {"name": "PRINTREVERSE", "required": false},
-      {"name": "NUMBER"},
-      {"name": "DESTINATIONFILE"},
-      {"name": "USEPAGEFILTER", "required": false},
-      {"name": "PRINTCHANGEDPAGES"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PRINTERNAME", "required": false, "type": "string"},
+      {"name": "PRINTCOLLATE", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "PRINTREVERSE", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "NUMBER", "required": true, "type": "integer", "default": "1"},
+      {"name": "DESTINATIONFILE", "required": true, "type": "path"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"},
+      {"name": "PRINTCHANGEDPAGES", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "printing",
     "plannedHandling": "会产生物理输出，而且工作站打印设置会覆盖 action 参数；PDF 需求由 export 满足",
-    "notes": "打印项目。会产生物理输出，而且工作站的打印设置会覆盖 action 参数（7.3）。"
+    "notes": "打印项目。会产生物理输出，而且工作站的打印设置会覆盖 action 参数（7.3）。",
+    "examples": [
+      {
+        "TYPE": "PROJECT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PRINTCOLLATE": "0",
+        "PRINTREVERSE": "1",
+        "DESTINATIONFILE": "C:\\TEMP\\\\ESS_Sample_Project_print.prn"
+      }
+    ]
   },
   {
     "id": "A:ProjectAction",
@@ -1761,15 +2481,23 @@
     "effect": ["unknown"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "Action"},
-      {"name": "NOCLOSE", "required": false},
-      {"name": "OpenMode", "required": false},
-      {"name": "EnableDialogs"}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "Action", "required": true, "type": "string"},
+      {"name": "NOCLOSE", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "OpenMode", "required": false, "type": "string", "values": ["Standard", "ReadOnly", "Exclusive"]},
+      {"name": "EnableDialogs", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Bridge 内部机制，不单独暴露；OpenMode:ReadOnly 可以保证 M2 只读",
-    "notes": "打开指定项目，执行另一个 action，然后关闭项目。效果取决于内层 action；OpenMode 取 ReadOnly 可以保证只读。"
+    "notes": "打开指定项目，执行另一个 action，然后关闭项目。效果取决于内层 action；OpenMode 取 ReadOnly 可以保证只读。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN_Sample_Project.elk",
+        "Action": "export",
+        "TYPE": "PDFPROJECT",
+        "EXPORTFILE": "C:\\pdf\\export.pdf"
+      }
+    ]
   },
   {
     "id": "A:projectmanagement/CORRECTPROJECTITEMS",
@@ -1783,12 +2511,19 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "SCHEME"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "SCHEME", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Destructive，执行前先备份",
-    "notes": "修正项目条目。"
+    "notes": "修正项目条目。",
+    "examples": [
+      {
+        "TYPE": "CORRECTPROJECTITEMS",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "SCHEME": "Default"
+      }
+    ]
   },
   {
     "id": "A:projectmanagement/CREATESNAPSHOTCOPY",
@@ -1802,9 +2537,9 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "FILENAME"},
-      {"name": "SCHEME"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "path"},
+      {"name": "SCHEME", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "可以用来为真实项目生成 scratch 副本，配合硬性规则 1；需要在 scratch 中验证",
@@ -1823,12 +2558,19 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "FILENAME"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "只读导出到临时目录",
-    "notes": "导出属性放置方案。对项目只读，只写出文件。"
+    "notes": "导出属性放置方案。对项目只读，只写出文件。",
+    "examples": [
+      {
+        "TYPE": "EXPORTPROPERTYPLACEMENTSSCHEMAS",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FILENAME": "C:\\Files\\PPSchemas.xml"
+      }
+    ]
   },
   {
     "id": "A:projectmanagement/IMPORTPROPERTYPLACEMENTSSCHEMAS",
@@ -1842,14 +2584,22 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "FILENAME"},
-      {"name": "OVERWRITE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "path"},
+      {"name": "OVERWRITE", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "settings_write_disabled",
     "plannedHandling": "写入属于 Code 级，默认禁用",
-    "notes": "导入属性放置方案。"
+    "notes": "导入属性放置方案。",
+    "examples": [
+      {
+        "TYPE": "IMPORTPROPERTYPLACEMENTSSCHEMAS",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FILENAME": "C:\\Files\\PPSchemas.xml",
+        "OVERWRITE": "1"
+      }
+    ]
   },
   {
     "id": "A:projectmanagement/LOADDIRECTORY",
@@ -1863,13 +2613,23 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTSDIRECTORY"},
-      {"name": "SCANSUBDIRECTORIES"}
+      {"name": "PROJECTSDIRECTORY", "required": true, "type": "path"},
+      {"name": "SCANSUBDIRECTORIES", "required": true, "type": "flag", "values": ["0", "1"], "default": "1"}
     ],
     "status": "excluded",
     "reason": "outside_scratch_scope",
     "plannedHandling": "改变工作站级的项目登记，代理不需要",
-    "notes": "扫描目录，把找到的项目加入项目管理。改变工作站级的项目登记，代理不需要。"
+    "notes": "扫描目录，把找到的项目加入项目管理。改变工作站级的项目登记，代理不需要。",
+    "examples": [
+      {
+        "TYPE": "LOADDIRECTORY",
+        "PROJECTSDIRECTORY": "C:\\Projects\\EPLAN",
+        "SCANSUBDIRECTORIES": "true"
+      },
+      {
+        "TYPE": "LOADDIRECTORY"
+      }
+    ]
   },
   {
     "id": "A:projectmanagement/PUBLISHSMARTPRODUCTION",
@@ -1883,8 +2643,8 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "FILENAME"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "outside_scratch_scope",
@@ -1903,12 +2663,19 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "FILENAME"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "FILENAME", "required": true, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "写项目信息，Destructive",
-    "notes": "从 XML 文件把项目信息读入项目。"
+    "notes": "从 XML 文件把项目信息读入项目。",
+    "examples": [
+      {
+        "TYPE": "READPROJECTINFO",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FILENAME": "C:\\Files\\ProjectInfo.xml"
+      }
+    ]
   },
   {
     "id": "A:projectmanagement/REORGANIZE",
@@ -1922,12 +2689,19 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "EXTENDEDMODE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "EXTENDEDMODE", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "项目维护，执行前先备份",
-    "notes": "重组项目。"
+    "notes": "重组项目。",
+    "examples": [
+      {
+        "TYPE": "REORGANIZE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "EXTENDEDMODE": "1"
+      }
+    ]
   },
   {
     "id": "A:ProjectOpen",
@@ -1941,12 +2715,20 @@
     "effect": ["gui_only"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Project"},
-      {"name": "OpenMode", "required": false}
+      {"name": "Project", "required": true, "type": "string"},
+      {"name": "OpenMode", "required": false, "type": "string", "values": ["Standard", "ReadOnly", "Exclusive"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_project_open；M2 读取时用 OpenMode:ReadOnly",
-    "notes": "打开项目。只打开不改数据；需要升级的项目以 ReadOnly 打开。"
+    "notes": "打开项目。只打开不改数据；需要升级的项目以 ReadOnly 打开。",
+    "examples": [
+      {
+        "Project": "C:\\EPLAN\\Projects\\EPLAN_Sample_Project.elk"
+      },
+      {
+        "Project": "C:\\EPLAN\\my own Projects\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:RegisterCustomPropertyEditorAction",
@@ -1960,17 +2742,93 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PropertyId"},
-      {"name": "PropertyIndex"},
-      {"name": "PropertyIdentName"},
-      {"name": "Action"},
-      {"name": "Editable"},
-      {"name": "Register"}
+      {"name": "PropertyId", "required": true, "type": "string"},
+      {"name": "PropertyIndex", "required": true, "type": "integer"},
+      {"name": "PropertyIdentName", "required": true, "type": "string"},
+      {"name": "Action", "required": true, "type": "string"},
+      {"name": "Editable", "required": true, "type": "string"},
+      {"name": "Register", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "界面扩展",
-    "notes": "为某个属性注册或注销自定义编辑对话框。"
+    "notes": "为某个属性注册或注销自定义编辑对话框。",
+    "examples": [
+      {
+        "Register": "True",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyId": "40001",
+        "PropertyIndex": "0",
+        "Editable": "False"
+      },
+      {
+        "Register": "True",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyId": "40002",
+        "PropertyIndex": "0",
+        "Editable": "True"
+      },
+      {
+        "Register": "1",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyId": "20901",
+        "PropertyIndex": "1",
+        "Editable": "0"
+      },
+      {
+        "Register": "1",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyId": "20901",
+        "PropertyIndex": "2",
+        "Editable": "1"
+      },
+      {
+        "Register": "1",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyIdentName": "EPLAN.Page.UserSupplementaryField1",
+        "Editable": "0"
+      },
+      {
+        "Register": "1",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyIdentName": "EPLAN.Page.UserSupplementaryField2",
+        "Editable": "1"
+      },
+      {
+        "Register": "False",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyId": "40001",
+        "PropertyIndex": "0"
+      },
+      {
+        "Register": "0",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyId": "40002",
+        "PropertyIndex": "0"
+      },
+      {
+        "Register": "False",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyId": "20901",
+        "PropertyIndex": "1"
+      },
+      {
+        "Register": "0",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyId": "20901",
+        "PropertyIndex": "2"
+      },
+      {
+        "Register": "False",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyIdentName": "EPLAN.Page.UserSupplementaryField1"
+      },
+      {
+        "Register": "0",
+        "Action": "WPF_Demo_Custom_Editor",
+        "PropertyIdentName": "EPLAN.Page.UserSupplementaryField2"
+      }
+    ]
   },
   {
     "id": "A:RegisterScript",
@@ -1984,14 +2842,19 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ScriptFile"},
-      {"name": "RegisterAgain"},
-      {"name": "ShowDecider"}
+      {"name": "ScriptFile", "required": true, "type": "path"},
+      {"name": "RegisterAgain", "required": true, "type": "string", "values": ["true"]},
+      {"name": "ShowDecider", "required": true, "type": "string", "values": ["true", "false"]}
     ],
     "status": "excluded",
     "reason": "script_code_level",
     "plannedHandling": "属于 Code 级，默认禁用（ADR-0005）",
-    "notes": "注册脚本（.cs 或 .vb）。"
+    "notes": "注册脚本（.cs 或 .vb）。",
+    "examples": [
+      {
+        "ScriptFile": "c:\\program\\EPLAN\\Scripts\\myScript1.cs"
+      }
+    ]
   },
   {
     "id": "A:renumber/CABLES",
@@ -2005,17 +2868,41 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "USESELECTION", "required": false},
-      {"name": "CONFIGSCHEME", "required": false},
-      {"name": "STARTVALUE", "required": false},
-      {"name": "STEPVALUE", "required": false},
-      {"name": "KEEPEXISTING", "required": false},
-      {"name": "KEEPIDENTIFIER", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "USESELECTION", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"},
+      {"name": "STARTVALUE", "required": false, "type": "integer", "default": "1"},
+      {"name": "STEPVALUE", "required": false, "type": "string", "default": "1"},
+      {"name": "KEEPEXISTING", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "KEEPIDENTIFIER", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_renumber，Destructive，执行前先备份",
-    "notes": "电缆重编号。"
+    "notes": "电缆重编号。",
+    "examples": [
+      {
+        "CONFIGSCHEME": "Standard",
+        "TYPE": "CABLES",
+        "STARTVALUE": "7",
+        "STEPVALUE": "7",
+        "USESELECTION": "1",
+        "KEEPEXISTING": "1"
+      },
+      {
+        "CONFIGSCHEME": "Standard",
+        "TYPE": "CABLES",
+        "STARTVALUE": "1",
+        "STEPVALUE": "1",
+        "USESELECTION": "0",
+        "KEEPEXISTING": "0",
+        "KEEPIDENTIFIER": "1"
+      },
+      {
+        "TYPE": "CABLES",
+        "STARTVALUE": "999",
+        "USESELECTION": "0"
+      }
+    ]
   },
   {
     "id": "A:renumber/CONNECTIONS",
@@ -2029,20 +2916,34 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "USESELECTION", "required": false},
-      {"name": "CONFIGSCHEME", "required": false},
-      {"name": "STARTVALUE_n"},
-      {"name": "STEPVALUE_n"},
-      {"name": "GROUP_n"},
-      {"name": "OVERWRITE"},
-      {"name": "AVOIDIDENTICALDESIGNATIONS"},
-      {"name": "VISIBILITY"},
-      {"name": "MARKASMANUAL"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "USESELECTION", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"},
+      {"name": "STARTVALUE_n", "required": true, "type": "string"},
+      {"name": "STEPVALUE_n", "required": true, "type": "string"},
+      {"name": "GROUP_n", "required": true, "type": "string"},
+      {"name": "OVERWRITE", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "AVOIDIDENTICALDESIGNATIONS", "required": true, "type": "integer", "values": ["0", "1", "2", "3"]},
+      {"name": "VISIBILITY", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "MARKASMANUAL", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_renumber，Destructive，执行前先备份；对应 api-coverage 第 4 节的“线号管理器”需求",
-    "notes": "连接重编号（线号）。"
+    "notes": "连接重编号（线号）。",
+    "examples": [
+      {
+        "TYPE": "CONNECTIONS",
+        "CONFIGSCHEME": "Verbindungsorientiert",
+        "STARTVALUE_1": "1",
+        "STEPVALUE_1": "1",
+        "OVERWRITE": "1",
+        "AVOIDIDENTICALDESIGNATIONS": "1",
+        "VISIBILITY": "1",
+        "MARKASMANUAL": "0",
+        "USESELECTION": "1",
+        "GROUP_1": "1"
+      }
+    ]
   },
   {
     "id": "A:renumber/DEVICES",
@@ -2056,20 +2957,32 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "USESELECTION", "required": false},
-      {"name": "FILTERSCHEME", "required": false},
-      {"name": "CONFIGSCHEME", "required": false},
-      {"name": "STARTVALUE", "required": false},
-      {"name": "STEPVALUE", "required": false},
-      {"name": "POSTNUMERATE", "required": false},
-      {"name": "ALSONUMERATEDBYPLC"},
-      {"name": "IDENTIFIER", "required": false},
-      {"name": "NUMERATECABLES", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "USESELECTION", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "FILTERSCHEME", "required": false, "type": "string"},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"},
+      {"name": "STARTVALUE", "required": false, "type": "integer", "default": "1"},
+      {"name": "STEPVALUE", "required": false, "type": "string", "default": "1"},
+      {"name": "POSTNUMERATE", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "ALSONUMERATEDBYPLC", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "IDENTIFIER", "required": false, "type": "string"},
+      {"name": "NUMERATECABLES", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_renumber，Destructive，执行前先备份",
-    "notes": "设备重编号。官方示例里出现了参数表没有的 OMITNUMERATEDBYPLC（7.4）。"
+    "notes": "设备重编号。官方示例里出现了参数表没有的 OMITNUMERATEDBYPLC（7.4）。",
+    "examples": [
+      {
+        "TYPE": "DEVICES",
+        "IDENTIFIER": "V",
+        "POSTNUMERATE": "0",
+        "ALSONUMERATEDBYPLC": "1",
+        "NUMERATECABLES": "1",
+        "STARTVALUE": "100",
+        "STEPVALUE": "5",
+        "USESELECTION": "1"
+      }
+    ]
   },
   {
     "id": "A:renumber/PAGES",
@@ -2083,18 +2996,30 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "USESELECTION", "required": false},
-      {"name": "STARTVALUE", "required": false},
-      {"name": "STEPVALUE", "required": false},
-      {"name": "STRUCTUREORIENTED"},
-      {"name": "KEEPINTERVAL"},
-      {"name": "KEEPTEXT"},
-      {"name": "SUBPAGES"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "USESELECTION", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "STARTVALUE", "required": false, "type": "integer", "default": "1"},
+      {"name": "STEPVALUE", "required": false, "type": "string", "default": "1"},
+      {"name": "STRUCTUREORIENTED", "required": true, "type": "string"},
+      {"name": "KEEPINTERVAL", "required": true, "type": "string"},
+      {"name": "KEEPTEXT", "required": true, "type": "string"},
+      {"name": "SUBPAGES", "required": true, "type": "integer", "values": ["0", "1", "2"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_renumber，Destructive，执行前先备份",
-    "notes": "页面重编号。"
+    "notes": "页面重编号。",
+    "examples": [
+      {
+        "TYPE": "PAGES",
+        "STRUCTUREORIENTED": "0",
+        "STARTVALUE": "3",
+        "STEPVALUE": "10",
+        "KEEPINTERVAL": "1",
+        "KEEPTEXT": "0",
+        "SUBPAGES": "1",
+        "USESELECTION": "0"
+      }
+    ]
   },
   {
     "id": "A:renumber/TERMINALS",
@@ -2108,28 +3033,47 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "USESELECTION", "required": false},
-      {"name": "CONFIGSCHEME", "required": false},
-      {"name": "STARTVALUE", "required": false},
-      {"name": "STEPVALUE", "required": false},
-      {"name": "POSTNUMERATE", "required": false},
-      {"name": "ALSONUMERATEDBYPLC"},
-      {"name": "PERMITSORTCHANGE", "required": false},
-      {"name": "FILLGAPS", "required": false},
-      {"name": "PREFIX"},
-      {"name": "SUFFIX"},
-      {"name": "SEQUENCE"},
-      {"name": "EXTENT"},
-      {"name": "POTENTIAL_N"},
-      {"name": "POTENTIAL_PE"},
-      {"name": "POTENTIAL_SH"},
-      {"name": "MULTIPLETERMINALS"},
-      {"name": "KEEPALPHA"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "USESELECTION", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"},
+      {"name": "STARTVALUE", "required": false, "type": "integer", "default": "1"},
+      {"name": "STEPVALUE", "required": false, "type": "string", "default": "1"},
+      {"name": "POSTNUMERATE", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "ALSONUMERATEDBYPLC", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "PERMITSORTCHANGE", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "FILLGAPS", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "PREFIX", "required": true, "type": "string"},
+      {"name": "SUFFIX", "required": true, "type": "string"},
+      {"name": "SEQUENCE", "required": true, "type": "integer", "values": ["0", "1", "2", "3"]},
+      {"name": "EXTENT", "required": true, "type": "flag", "values": ["0", "1"]},
+      {"name": "POTENTIAL_N", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "POTENTIAL_PE", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "POTENTIAL_SH", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "MULTIPLETERMINALS", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "KEEPALPHA", "required": true, "type": "integer", "values": ["0", "1", "2"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_renumber，Destructive，执行前先备份",
-    "notes": "端子重编号。"
+    "notes": "端子重编号。",
+    "examples": [
+      {
+        "TYPE": "TERMINALS",
+        "CONFIGSCHEME": "Numerisch",
+        "SEQUENCE": "1",
+        "POTENTIAL_N": "1",
+        "POTENTIAL_PE": "2",
+        "POTENTIAL_SH": "2",
+        "POSTNUMERATE": "0",
+        "ALSONUMERATEDBYPLC": "1",
+        "MULTIPLETERMINALS": "1",
+        "KEEPALPHA": "0",
+        "STARTVALUE": "1",
+        "STEPVALUE": "1",
+        "PREFIX": "p_",
+        "SUFFIX": "_s",
+        "USESELECTION": "1"
+      }
+    ]
   },
   {
     "id": "A:reports/CREATECOPPERUNFOLDS",
@@ -2143,9 +3087,9 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "TEMPLATEn"},
-      {"name": "REPLACEEXISTING"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "TEMPLATEn", "required": true, "type": "string"},
+      {"name": "REPLACEEXISTING", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 报表",
@@ -2163,9 +3107,9 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "TEMPLATEn"},
-      {"name": "REPLACEEXISTING"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "TEMPLATEn", "required": true, "type": "string"},
+      {"name": "REPLACEEXISTING", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 报表",
@@ -2183,9 +3127,9 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "TEMPLATEn"},
-      {"name": "REPLACEEXISTING"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "TEMPLATEn", "required": true, "type": "string"},
+      {"name": "REPLACEEXISTING", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 报表",
@@ -2203,12 +3147,12 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "USEPAGEFILTER", "required": false},
-      {"name": "PAGEFILTERNAME"},
-      {"name": "PAGENAMEn", "required": false},
-      {"name": "SELn", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"},
+      {"name": "PAGEFILTERNAME", "required": true, "type": "string"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
+      {"name": "SELn", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_report_update",
@@ -2226,11 +3170,17 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_report_update",
-    "notes": "生成项目报表（更新全部评估）。"
+    "notes": "生成项目报表（更新全部评估）。",
+    "examples": [
+      {
+        "TYPE": "PROJECT",
+        "PROJECTNAME": "C\\\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:reports/UPDATEMODELVIEWPAGES",
@@ -2244,12 +3194,12 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PAGENAME", "required": false},
-      {"name": "USEPAGEFILTER", "required": false},
-      {"name": "PAGEFILTERNAME"},
-      {"name": "PAGENAMEn", "required": false},
-      {"name": "SELn", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"},
+      {"name": "PAGEFILTERNAME", "required": true, "type": "string"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
+      {"name": "SELn", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 报表",
@@ -2267,13 +3217,20 @@
     "effect": ["writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ARCHIVENAME"},
-      {"name": "DESTINATIONPATH"}
+      {"name": "ARCHIVENAME", "required": true, "type": "file"},
+      {"name": "DESTINATIONPATH", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "outside_scratch_scope",
     "plannedHandling": "会写入系统主数据，超出 scratch 范围",
-    "notes": "还原主数据。会写入系统主数据，超出 scratch 范围。"
+    "notes": "还原主数据。会写入系统主数据，超出 scratch 范围。",
+    "examples": [
+      {
+        "TYPE": "MASTERDATA",
+        "ARCHIVENAME": "C:\\temp\\EPLAN_Sample_Project.zw2",
+        "DESTINATIONPATH": "C:\\temp"
+      }
+    ]
   },
   {
     "id": "A:restore/PROJECT",
@@ -2287,14 +3244,22 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "ARCHIVENAME"},
-      {"name": "UNPACKPROJECT", "required": false},
-      {"name": "MODE", "required": false}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "ARCHIVENAME", "required": true, "type": "file"},
+      {"name": "UNPACKPROJECT", "required": false, "type": "flag", "values": ["1", "0"], "default": "0"},
+      {"name": "MODE", "required": false, "type": "string", "default": "1"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_project_restore；把 .zw1 还原到 scratch 目录，是生成 scratch 项目的标准途径",
-    "notes": "从归档还原项目，还原后自动升级到当前版本。目标项目已存在时怎样处理，文档没有说明（7.2 第 9 条）。"
+    "notes": "从归档还原项目，还原后自动升级到当前版本。目标项目已存在时怎样处理，文档没有说明（7.2 第 9 条）。",
+    "examples": [
+      {
+        "TYPE": "PROJECT",
+        "ARCHIVENAME": "C:\\temp\\EPLAN_Sample_Project.zw1",
+        "PROJECTNAME": "C:\\temp\\EPLAN_Sample_Project.elk",
+        "UNPACKPROJECT": "0"
+      }
+    ]
   },
   {
     "id": "A:SaveWorkspaceAction",
@@ -2308,13 +3273,18 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Workspacename"},
-      {"name": "Silent", "required": false}
+      {"name": "Workspacename", "required": true, "type": "string"},
+      {"name": "Silent", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "界面布局",
-    "notes": "保存工作区。需要主窗口（7.5）。"
+    "notes": "保存工作区。需要主窗口（7.5）。",
+    "examples": [
+      {
+        "Workspacename": "Standard"
+      }
+    ]
   },
   {
     "id": "A:search/ALLPROPERTIES",
@@ -2328,16 +3298,16 @@
     "effect": ["read"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "SEARCHITEM"},
-      {"name": "CASESENSITIVE", "required": false},
-      {"name": "WHOLETEXT", "required": false},
-      {"name": "LOGICPAGES", "required": false},
-      {"name": "GRAPHICPAGES", "required": false},
-      {"name": "EVALUATIONPAGES", "required": false},
-      {"name": "NOTPLACEDFUNCTIONS", "required": false},
-      {"name": "FILTERSCHEME", "required": false},
-      {"name": "SEARCHDB", "deprecated": true}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "SEARCHITEM", "required": true, "type": "string"},
+      {"name": "CASESENSITIVE", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "WHOLETEXT", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "LOGICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "GRAPHICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "EVALUATIONPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "NOTPLACEDFUNCTIONS", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "FILTERSCHEME", "required": false, "type": "string"},
+      {"name": "SEARCHDB", "deprecated": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.Search 加 GetAllSearchDBEntries，或 DMObjectsFinder",
@@ -2355,16 +3325,16 @@
     "effect": ["read"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "SEARCHITEM"},
-      {"name": "CASESENSITIVE", "required": false},
-      {"name": "WHOLETEXT", "required": false},
-      {"name": "LOGICPAGES", "required": false},
-      {"name": "GRAPHICPAGES", "required": false},
-      {"name": "EVALUATIONPAGES", "required": false},
-      {"name": "NOTPLACEDFUNCTIONS", "required": false},
-      {"name": "FILTERSCHEME", "required": false},
-      {"name": "SEARCHDB", "deprecated": true}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "SEARCHITEM", "required": true, "type": "string"},
+      {"name": "CASESENSITIVE", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "WHOLETEXT", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "LOGICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "GRAPHICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "EVALUATIONPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "NOTPLACEDFUNCTIONS", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "FILTERSCHEME", "required": false, "type": "string"},
+      {"name": "SEARCHDB", "deprecated": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.Search 加 GetAllSearchDBEntries，或 DMObjectsFinder",
@@ -2382,20 +3352,32 @@
     "effect": ["read"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "SEARCHITEM"},
-      {"name": "CASESENSITIVE", "required": false},
-      {"name": "WHOLETEXT", "required": false},
-      {"name": "LOGICPAGES", "required": false},
-      {"name": "GRAPHICPAGES", "required": false},
-      {"name": "EVALUATIONPAGES", "required": false},
-      {"name": "NOTPLACEDFUNCTIONS", "required": false},
-      {"name": "FILTERSCHEME", "required": false},
-      {"name": "SEARCHDB", "deprecated": true}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "SEARCHITEM", "required": true, "type": "string"},
+      {"name": "CASESENSITIVE", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "WHOLETEXT", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "LOGICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "GRAPHICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "EVALUATIONPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "NOTPLACEDFUNCTIONS", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "FILTERSCHEME", "required": false, "type": "string"},
+      {"name": "SEARCHDB", "deprecated": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.Search 加 GetAllSearchDBEntries，或 DMObjectsFinder",
-    "notes": "在页面数据中搜索。同 DEVICETAG：结果只在界面里，选项沿用界面当前值（7.3）。"
+    "notes": "在页面数据中搜索。同 DEVICETAG：结果只在界面里，选项沿用界面当前值（7.3）。",
+    "examples": [
+      {
+        "TYPE": "PAGEDATA",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "SEARCHITEM": "Antrieb",
+        "CASESENSITIVE": "0",
+        "WHOLETEXT": "0",
+        "LOGICPAGES": "1",
+        "EVALUATIONPAGES": "1",
+        "NOTPLACEDFUNCTIONS": "1"
+      }
+    ]
   },
   {
     "id": "A:search/PROJECTDATA",
@@ -2409,16 +3391,16 @@
     "effect": ["read"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "SEARCHITEM"},
-      {"name": "CASESENSITIVE", "required": false},
-      {"name": "WHOLETEXT", "required": false},
-      {"name": "LOGICPAGES", "required": false},
-      {"name": "GRAPHICPAGES", "required": false},
-      {"name": "EVALUATIONPAGES", "required": false},
-      {"name": "NOTPLACEDFUNCTIONS", "required": false},
-      {"name": "FILTERSCHEME", "required": false},
-      {"name": "SEARCHDB", "deprecated": true}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "SEARCHITEM", "required": true, "type": "string"},
+      {"name": "CASESENSITIVE", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "WHOLETEXT", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "LOGICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "GRAPHICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "EVALUATIONPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "NOTPLACEDFUNCTIONS", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "FILTERSCHEME", "required": false, "type": "string"},
+      {"name": "SEARCHDB", "deprecated": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.Search 加 GetAllSearchDBEntries，或 DMObjectsFinder",
@@ -2436,20 +3418,30 @@
     "effect": ["read"],
     "effectInferred": true,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "SEARCHITEM"},
-      {"name": "CASESENSITIVE", "required": false},
-      {"name": "WHOLETEXT", "required": false},
-      {"name": "LOGICPAGES", "required": false},
-      {"name": "GRAPHICPAGES", "required": false},
-      {"name": "EVALUATIONPAGES", "required": false},
-      {"name": "NOTPLACEDFUNCTIONS", "required": false},
-      {"name": "FILTERSCHEME", "required": false},
-      {"name": "SEARCHDB", "deprecated": true}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "SEARCHITEM", "required": true, "type": "string"},
+      {"name": "CASESENSITIVE", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "WHOLETEXT", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "LOGICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "GRAPHICPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "EVALUATIONPAGES", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "NOTPLACEDFUNCTIONS", "required": false, "type": "flag", "values": ["1", "0"]},
+      {"name": "FILTERSCHEME", "required": false, "type": "string"},
+      {"name": "SEARCHDB", "deprecated": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.Search 加 GetAllSearchDBEntries，或 DMObjectsFinder",
-    "notes": "搜索文本。同 DEVICETAG：结果只在界面里，选项沿用界面当前值（7.3）。"
+    "notes": "搜索文本。同 DEVICETAG：结果只在界面里，选项沿用界面当前值（7.3）。",
+    "examples": [
+      {
+        "TYPE": "TEXTS",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "SEARCHITEM": "Hallo",
+        "CASESENSITIVE": "1",
+        "WHOLETEXT": "0",
+        "LOGICPAGES": "1"
+      }
+    ]
   },
   {
     "id": "A:selectionset/LAYOUTSPACES",
@@ -2467,7 +3459,12 @@
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.SelectionSet，它返回对象而不是字符串；3D 读取",
-    "notes": "返回选中的布局空间（以 ; 分隔）。"
+    "notes": "返回选中的布局空间（以 ; 分隔）。",
+    "examples": [
+      {
+        "TYPE": "LAYOUTSPACES"
+      }
+    ]
   },
   {
     "id": "A:selectionset/PAGES",
@@ -2485,7 +3482,12 @@
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.SelectionSet，它返回对象而不是字符串",
-    "notes": "返回选中的页面（以 ; 分隔）。"
+    "notes": "返回选中的页面（以 ; 分隔）。",
+    "examples": [
+      {
+        "TYPE": "PAGES"
+      }
+    ]
   },
   {
     "id": "A:selectionset/PROJECT",
@@ -2503,7 +3505,12 @@
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.SelectionSet，它返回对象而不是字符串",
-    "notes": "在 CallingContext 中返回当前项目。"
+    "notes": "在 CallingContext 中返回当前项目。",
+    "examples": [
+      {
+        "TYPE": "PROJECT"
+      }
+    ]
   },
   {
     "id": "A:selectionset/PROJECTS",
@@ -2521,7 +3528,12 @@
     ],
     "status": "registered",
     "plannedHandling": "用 HEServices.SelectionSet，它返回对象而不是字符串",
-    "notes": "返回选中的项目（以 ; 分隔）。"
+    "notes": "返回选中的项目（以 ; 分隔）。",
+    "examples": [
+      {
+        "TYPE": "PROJECTS"
+      }
+    ]
   },
   {
     "id": "A:SetProjectLanguage",
@@ -2535,14 +3547,24 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "DISPLAY"},
-      {"name": "VARIABLE"},
-      {"name": "SOURCE"}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "DISPLAY", "required": true, "type": "string"},
+      {"name": "VARIABLE", "required": true, "type": "string"},
+      {"name": "SOURCE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_translate_*（设置语言）",
-    "notes": "设置项目语言（显示语言、可变语言、源语言），不翻译。"
+    "notes": "设置项目语言（显示语言、可变语言、源语言），不翻译。",
+    "examples": [
+      {
+        "DISPLAY": "en_US;de_DE",
+        "VARIABLE": "en_US"
+      },
+      {
+        "DISPLAY": "en_US;de_DE;pl_PL;fr_FR",
+        "VARIABLE": "04_04"
+      }
+    ]
   },
   {
     "id": "A:subprojects/FILEOFF",
@@ -2556,14 +3578,21 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "DESTINATIONPATH", "required": false},
-      {"name": "SPNR"},
-      {"name": "EXTENDONLY", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "DESTINATIONPATH", "required": false, "type": "path", "default": "$(MD_PROJECTS)"},
+      {"name": "SPNR", "required": true, "type": "string"},
+      {"name": "EXTENDONLY", "required": false, "type": "string", "default": "FALSE"}
     ],
     "status": "registered",
     "plannedHandling": "低优先级，Destructive",
-    "notes": "导出子项目（项目必须以独占方式打开，执行后源项目对象失效）。"
+    "notes": "导出子项目（项目必须以独占方式打开，执行后源项目对象失效）。",
+    "examples": [
+      {
+        "TYPE": "FILEOFF",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "SPNR": "1"
+      }
+    ]
   },
   {
     "id": "A:subprojects/STORE",
@@ -2577,13 +3606,21 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "SPNR"},
-      {"name": "SUBPROJECTDIR", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "SPNR", "required": true, "type": "string"},
+      {"name": "SUBPROJECTDIR", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "低优先级，Destructive",
-    "notes": "导入（回存）子项目。"
+    "notes": "导入（回存）子项目。",
+    "examples": [
+      {
+        "TYPE": "STORE",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "SPNR": "1",
+        "SUBPROJECTDIR": "C:\\Projects\\Subprojects"
+      }
+    ]
   },
   {
     "id": "A:SwitchProjectType",
@@ -2597,12 +3634,18 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "PROJECTTYPE", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "PROJECTTYPE", "required": false, "type": "integer", "values": ["1", "2"]}
     ],
     "status": "registered",
     "plannedHandling": "宏流程的配套步骤",
-    "notes": "切换项目类型（1 原理图项目，2 宏项目）。"
+    "notes": "切换项目类型（1 原理图项目，2 宏项目）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "PROJECTTYPE": "2"
+      }
+    ]
   },
   {
     "id": "A:synchronize/MULTILINE",
@@ -2616,7 +3659,7 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "并入写工具",
@@ -2634,7 +3677,7 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "并入写工具",
@@ -2652,11 +3695,17 @@
     "effect": ["writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_sync，Destructive；部件库必须是测试库",
-    "notes": "把项目部件加入系统部件库。写系统部件库，部件库必须是测试库。"
+    "notes": "把项目部件加入系统部件库。写系统部件库，部件库必须是测试库。",
+    "examples": [
+      {
+        "TYPE": "PARTSTOSYSTEM",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:synchronize/SINGLELINE",
@@ -2670,7 +3719,7 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "并入写工具",
@@ -2688,8 +3737,8 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "STOREMODE", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "STOREMODE", "required": false, "type": "integer", "values": ["0", "1", "2"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_sync",
@@ -2707,11 +3756,17 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "拓扑工具（api-coverage 把 Topology 放在 M4b）",
-    "notes": "生成连接到布线支点的拓扑功能。"
+    "notes": "生成连接到布线支点的拓扑功能。",
+    "examples": [
+      {
+        "TYPE": "CreateFunctions",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:Topology/RouteConnections",
@@ -2725,11 +3780,17 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "拓扑工具（api-coverage 把 Topology 放在 M4b）",
-    "notes": "布线拓扑连接（需要 Cabling 授权选项）。需要 Cabling 授权选项（7.5）。"
+    "notes": "布线拓扑连接（需要 Cabling 授权选项）。需要 Cabling 授权选项（7.5）。",
+    "examples": [
+      {
+        "TYPE": "RouteConnections",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:translate/CORRECT",
@@ -2743,8 +3804,8 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "CONVERTTRANSLATEDTEXTS"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "CONVERTTRANSLATEDTEXTS", "required": true, "type": "string", "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_translate_*；Destructive（修正项目内的翻译）",
@@ -2762,9 +3823,9 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "EXPORTFILE"},
-      {"name": "CONVERTER", "required": false},
-      {"name": "LANGUAGE"}
+      {"name": "EXPORTFILE", "required": true, "type": "file"},
+      {"name": "CONVERTER", "required": false, "type": "string", "default": "XTrLanguageDbXmlConverterImpl"},
+      {"name": "LANGUAGE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_translate_*；翻译库只能用测试库（从系统翻译库导出）",
@@ -2782,14 +3843,23 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "LANGUAGE"},
-      {"name": "EXPORTFILE"},
-      {"name": "CONVERTER", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "EXPORTFILE", "required": true, "type": "file"},
+      {"name": "CONVERTER", "required": false, "type": "string", "default": "XTrLanguageDbXmlConverterImpl"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_translate_*（只读导出，可以较早实现）",
-    "notes": "导出缺失词表。对项目只读，只写出文件。"
+    "notes": "导出缺失词表。对项目只读，只写出文件。",
+    "examples": [
+      {
+        "TYPE": "EXPORTMISSINGTRANSLATIONS",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "LANGUAGE": "en_US",
+        "EXPORTFILE": "C:\\temp\\missingTransFile.txt",
+        "CONVERTER": "XTrLanguageDbXmlConverterImpl"
+      }
+    ]
   },
   {
     "id": "A:translate/IMPORTTOTRANSDB",
@@ -2803,13 +3873,21 @@
     "effect": ["writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "IMPORTFILE"},
-      {"name": "CONVERTER", "required": false},
-      {"name": "LANGUAGE"}
+      {"name": "IMPORTFILE", "required": true, "type": "file"},
+      {"name": "CONVERTER", "required": false, "type": "string", "default": "XTrLanguageDbXmlConverterImpl"},
+      {"name": "LANGUAGE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "写系统翻译库，Destructive；只能用测试库",
-    "notes": "把文本导入翻译数据库。写系统翻译库，只能用测试库。"
+    "notes": "把文本导入翻译数据库。写系统翻译库，只能用测试库。",
+    "examples": [
+      {
+        "TYPE": "IMPORTTOTRANSDB",
+        "CONVERTER": "XTrLanguageDbXmlConverterImpl",
+        "IMPORTFILE": "c:\\test\\TranslationDB_FULL.etd",
+        "LANGUAGE": "de_DE"
+      }
+    ]
   },
   {
     "id": "A:translate/REMOVELANGUAGE",
@@ -2823,12 +3901,19 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "LANGUAGE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "LANGUAGE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_translate_*；Destructive",
-    "notes": "从项目中删除语言（主语言不能删除）。"
+    "notes": "从项目中删除语言（主语言不能删除）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "TYPE": "REMOVELANGUAGE",
+        "LANGUAGE": "en_US"
+      }
+    ]
   },
   {
     "id": "A:translate/TRANSLATEPAGES",
@@ -2842,13 +3927,13 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "LANGUAGE"},
-      {"name": "USEPAGEFILTER", "required": false},
-      {"name": "PAGFILTERNAME"},
-      {"name": "PAGENAME", "required": false},
-      {"name": "PAGENAMEn", "required": false},
-      {"name": "SELn", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "USEPAGEFILTER", "required": false, "type": "string", "default": "0"},
+      {"name": "PAGFILTERNAME", "required": true, "type": "string"},
+      {"name": "PAGENAME", "required": false, "type": "string"},
+      {"name": "PAGENAMEn", "required": false, "type": "string"},
+      {"name": "SELn", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_translate_*",
@@ -2866,12 +3951,18 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "LANGUAGE"}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "LANGUAGE", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_translate_*",
-    "notes": "翻译整个项目。"
+    "notes": "翻译整个项目。",
+    "examples": [
+      {
+        "TYPE": "TRANSLATEPROJECT",
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:UnregisterScript",
@@ -2885,12 +3976,17 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ScriptFile"}
+      {"name": "ScriptFile", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "script_code_level",
     "plannedHandling": "属于 Code 级，默认禁用",
-    "notes": "注销脚本。"
+    "notes": "注销脚本。",
+    "examples": [
+      {
+        "ScriptFile": "c:\\program\\EPLAN\\Scripts\\myScript2.vb"
+      }
+    ]
   },
   {
     "id": "A:UpdateSegmentsFilling",
@@ -2904,11 +4000,16 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "布线工具",
-    "notes": "计算并写入所有布线段的 CABLINGSEGMENT_FILLING（填充率）。"
+    "notes": "计算并写入所有布线段的 CABLINGSEGMENT_FILLING（填充率）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:XAfActionSetting",
@@ -2922,14 +4023,20 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "set"},
-      {"name": "index", "required": false},
-      {"name": "value"}
+      {"name": "set", "required": true, "type": "string"},
+      {"name": "index", "required": false, "type": "integer"},
+      {"name": "value", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "settings_write_disabled",
     "plannedHandling": "写入属于 Code 级，默认禁用。读取用 Settings 类（见第 5 节）",
-    "notes": "设置一个设置项的值（不含项目设置）。"
+    "notes": "设置一个设置项的值（不含项目设置）。",
+    "examples": [
+      {
+        "set": "USER.MacrosLog.Pxf.writeDebugInfo",
+        "value": "1"
+      }
+    ]
   },
   {
     "id": "A:XAfActionSettingProject",
@@ -2943,15 +4050,21 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Project"},
-      {"name": "set"},
-      {"name": "index", "required": false},
-      {"name": "value"}
+      {"name": "Project", "required": true, "type": "path"},
+      {"name": "set", "required": true, "type": "string"},
+      {"name": "index", "required": false, "type": "integer"},
+      {"name": "value", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "settings_write_disabled",
     "plannedHandling": "写入属于 Code 级，默认禁用；读取用 ProjectSettings 类（见第 5 节）",
-    "notes": "设置一个项目设置的值。改的是项目设置。"
+    "notes": "设置一个项目设置的值。改的是项目设置。",
+    "examples": [
+      {
+        "set": "EsCrossReference.ContactImage.MotorSwitchDisplayBitMask",
+        "value": "1"
+      }
+    ]
   },
   {
     "id": "A:XAMlExportProductionData2RASCenterAction",
@@ -2965,15 +4078,25 @@
     "effect": ["gui_only", "writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ProjectPath"},
-      {"name": "FileName"},
-      {"name": "DatabaseId"},
-      {"name": "WholeProject", "required": false},
-      {"name": "ConfigScheme", "required": false}
+      {"name": "ProjectPath", "required": true, "type": "path"},
+      {"name": "FileName", "required": true, "type": "file"},
+      {"name": "DatabaseId", "required": true, "type": "string"},
+      {"name": "WholeProject", "required": false, "type": "string"},
+      {"name": "ConfigScheme", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel 生产输出；必须传入不存在的 FileName",
-    "notes": "把安装空间导出为 AutomationML，供 Rittal RiPanel Processing Center 使用。FileName 为空或目标文件已存在时会弹对话框，必须传入不存在的 FileName（7.3）。"
+    "notes": "把安装空间导出为 AutomationML，供 Rittal RiPanel Processing Center 使用。FileName 为空或目标文件已存在时会弹对话框，必须传入不存在的 FileName（7.3）。",
+    "examples": [
+      {
+        "ProjectPath": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "FileName": "C:\\Exports\\EPLAN\\EPLAN_Sample_Project.aml"
+      },
+      {
+        "DatabaseId": "27",
+        "FileName": "C:\\Exports\\EPLAN\\EPLAN_Sample_Project.aml"
+      }
+    ]
   },
   {
     "id": "A:XAMlExportProductionData2SmartMountingAction",
@@ -2986,7 +4109,9 @@
     "context": ["project", "file"],
     "effect": ["unknown"],
     "effectInferred": false,
-    "parameters": [],
+    "parameters": [
+
+    ],
     "status": "registered",
     "plannedHandling": "待核实，见第 7 节",
     "notes": "官方总表里的一个 Pro Panel 导出 action；总表给它的说明与 RASCenter 版逐字相同，疑似复制粘贴。详细页面在 2025 和 2026 都返回 404，参数和行为都未核实（7.1、7.4），2026-10-21 复核时仍然 404。"
@@ -3003,13 +4128,21 @@
     "effect": ["read", "writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ProjectName", "required": false},
-      {"name": "DatabaseId", "required": false},
-      {"name": "CabinetTotalWeight", "output": true}
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "DatabaseId", "required": false, "type": "string"},
+      {"name": "CabinetTotalWeight", "output": true, "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "Pro Panel；One cabinet 模式可以作为只读查询",
-    "notes": "计算机柜总重。All cabinets 模式把结果写进属性 FUNCTION3D_CABINET_TOTALWEIGHT；One cabinet 模式不写属性，结果放在 context 中，机柜经 StorableObjectContext 传入。"
+    "notes": "计算机柜总重。All cabinets 模式把结果写进属性 FUNCTION3D_CABINET_TOTALWEIGHT；One cabinet 模式不写属性，结果放在 context 中，机柜经 StorableObjectContext 传入。",
+    "examples": [
+      {
+        "DatabaseId": "28"
+      },
+      {
+        "ProjectName": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:XCCreateGravingtextAction",
@@ -3023,11 +4156,16 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Complete", "required": false}
+      {"name": "Complete", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "并入电缆工具，或放入白名单",
-    "notes": "用电缆源和目标的设备标识生成刻字文本（VASS 规则）。作用范围是选中对象还是整个项目文档没有说明（7.2 第 8 条）；示例里 action 名称写重复了（7.4）。"
+    "notes": "用电缆源和目标的设备标识生成刻字文本（VASS 规则）。作用范围是选中对象还是整个项目文档没有说明（7.2 第 8 条）；示例里 action 名称写重复了（7.4）。",
+    "examples": [
+      {
+        "Complete": "1"
+      }
+    ]
   },
   {
     "id": "A:XCMRemoveUnnecessaryNDPsAction",
@@ -3041,11 +4179,16 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Quiet"}
+      {"name": "Quiet", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "连接整理，Destructive",
-    "notes": "删除当前项目中多余的网络定义点。会删除对象，并可能新建连接定义点。"
+    "notes": "删除当前项目中多余的网络定义点。会删除对象，并可能新建连接定义点。",
+    "examples": [
+      {
+        "Quiet": "true"
+      }
+    ]
   },
   {
     "id": "A:XCMUniteNetDefinitionPointsAction",
@@ -3058,7 +4201,9 @@
     "context": ["project"],
     "effect": ["writes_project"],
     "effectInferred": false,
-    "parameters": [],
+    "parameters": [
+
+    ],
     "status": "registered",
     "plannedHandling": "连接整理，Destructive",
     "notes": "合并同一网络上的网络定义点。"
@@ -3075,15 +4220,23 @@
     "effect": ["gui_only"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PartNr"},
-      {"name": "PartVariant"},
-      {"name": "ProjectId"},
-      {"name": "PropertyIndex"}
+      {"name": "PartNr", "required": true, "type": "string"},
+      {"name": "PartVariant", "required": true, "type": "string"},
+      {"name": "ProjectId", "required": true, "type": "string"},
+      {"name": "PropertyIndex", "required": true, "type": "integer"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "需要人在界面上操作；M3 用 DataModel 插入设备",
-    "notes": "启动插入设备的交互。文档写明只能交互使用。"
+    "notes": "启动插入设备的交互。文档写明只能交互使用。",
+    "examples": [
+      {
+        "PartNr": "MOE.010042",
+        "PartVariant": "1",
+        "PropertyIndex": "0",
+        "ProjectId": "0"
+      }
+    ]
   },
   {
     "id": "A:XEGActionInsertSymRef",
@@ -3097,18 +4250,25 @@
     "effect": ["gui_only"],
     "effectInferred": false,
     "parameters": [
-      {"name": "SymbolLibName"},
-      {"name": "SymbolId"},
-      {"name": "VariantId"},
-      {"name": "FctDefTag"},
-      {"name": "Placementmode"},
-      {"name": "SymbolType"},
-      {"name": "CustomSymbols"}
+      {"name": "SymbolLibName", "required": true, "type": "string"},
+      {"name": "SymbolId", "required": true, "type": "integer"},
+      {"name": "VariantId", "required": true, "type": "integer"},
+      {"name": "FctDefTag", "required": true, "type": "string"},
+      {"name": "Placementmode", "required": true, "type": "string"},
+      {"name": "SymbolType", "required": true, "type": "string"},
+      {"name": "CustomSymbols", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "需要人在界面上操作",
-    "notes": "查找并插入符号引用。文档写明只能交互使用。"
+    "notes": "查找并插入符号引用。文档写明只能交互使用。",
+    "examples": [
+      {
+        "SymbolLibName": "IEC_symbol",
+        "SymbolId": "55",
+        "VariantId": "0"
+      }
+    ]
   },
   {
     "id": "A:XEsGetPagePropertyAction",
@@ -3122,14 +4282,26 @@
     "effect": ["read"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PropertyId", "required": true},
-      {"name": "PropertyIdentName", "required": true},
-      {"name": "PropertyIndex", "required": true},
-      {"name": "PropertyValue", "output": true}
+      {"name": "PropertyId", "required": true, "type": "integer"},
+      {"name": "PropertyIdentName", "required": true, "type": "string"},
+      {"name": "PropertyIndex", "required": true, "type": "integer"},
+      {"name": "PropertyValue", "output": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "用 DataModel 读取页面属性",
-    "notes": "读取第一个选中页面的一个属性。依赖界面当前选择。"
+    "notes": "读取第一个选中页面的一个属性。依赖界面当前选择。",
+    "examples": [
+      {
+        "PropertyId": "?",
+        "PropertyIndex": "0",
+        "PropertyValue": "?"
+      },
+      {
+        "PropertyIdentName": "?",
+        "PropertyIndex": "0",
+        "PropertyValue": "?"
+      }
+    ]
   },
   {
     "id": "A:XEsGetProjectPropertyAction",
@@ -3143,14 +4315,24 @@
     "effect": ["read"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PropertyId", "required": true},
-      {"name": "PropertyIdentName", "required": true},
-      {"name": "PropertyIndex", "required": true},
-      {"name": "PropertyValue", "output": true}
+      {"name": "PropertyId", "required": true, "type": "integer"},
+      {"name": "PropertyIdentName", "required": true, "type": "string"},
+      {"name": "PropertyIndex", "required": true, "type": "integer"},
+      {"name": "PropertyValue", "output": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "用 DataModel 读取项目属性",
-    "notes": "读取当前项目的一个属性。依赖当前项目。"
+    "notes": "读取当前项目的一个属性。依赖当前项目。",
+    "examples": [
+      {
+        "PropertyId": "?",
+        "PropertyIndex": "0"
+      },
+      {
+        "PropertyIdentName": "?",
+        "PropertyIndex": "0"
+      }
+    ]
   },
   {
     "id": "A:XEsGetPropertyAction",
@@ -3164,14 +4346,24 @@
     "effect": ["read"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PropertyId"},
-      {"name": "PropertyIdentName"},
-      {"name": "PropertyIndex"},
-      {"name": "PropertyValue", "output": true}
+      {"name": "PropertyId", "required": true, "type": "integer"},
+      {"name": "PropertyIdentName", "required": true, "type": "string"},
+      {"name": "PropertyIndex", "required": true, "type": "integer"},
+      {"name": "PropertyValue", "output": true, "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "用 DataModel 加 SelectionSet",
-    "notes": "读取选中对象的一个属性。依赖界面当前选择。"
+    "notes": "读取选中对象的一个属性。依赖界面当前选择。",
+    "examples": [
+      {
+        "PropertyId": "?",
+        "PropertyIndex": "0"
+      },
+      {
+        "PropertyIdentName": "?",
+        "PropertyIndex": "0"
+      }
+    ]
   },
   {
     "id": "A:XEsSetPagePropertyAction",
@@ -3185,14 +4377,26 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PropertyId", "required": true},
-      {"name": "PropertyIdentName", "required": true},
-      {"name": "PropertyIndex", "required": true},
-      {"name": "PropertyValue", "required": true}
+      {"name": "PropertyId", "required": true, "type": "integer"},
+      {"name": "PropertyIdentName", "required": true, "type": "string"},
+      {"name": "PropertyIndex", "required": true, "type": "integer"},
+      {"name": "PropertyValue", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "M3 属性写工具，用 DataModel 实现：目标明确，可以控制事务和撤销",
-    "notes": "设置选中页面的一个属性。"
+    "notes": "设置选中页面的一个属性。",
+    "examples": [
+      {
+        "PropertyId": "?",
+        "PropertyIndex": "0",
+        "PropertyValue": "?"
+      },
+      {
+        "PropertyIdentName": "?",
+        "PropertyIndex": "0",
+        "PropertyValue": "?"
+      }
+    ]
   },
   {
     "id": "A:XEsSetProjectPropertyAction",
@@ -3206,14 +4410,26 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PropertyId", "required": true},
-      {"name": "PropertyIdentName", "required": true},
-      {"name": "PropertyIndex", "required": true},
-      {"name": "PropertyValue", "required": true}
+      {"name": "PropertyId", "required": true, "type": "integer"},
+      {"name": "PropertyIdentName", "required": true, "type": "string"},
+      {"name": "PropertyIndex", "required": true, "type": "integer"},
+      {"name": "PropertyValue", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "M3 属性写工具，用 DataModel 实现：目标明确，可以控制事务和撤销",
-    "notes": "设置当前项目的一个属性。属性不存在时也返回 true，错误要从系统消息读取。"
+    "notes": "设置当前项目的一个属性。属性不存在时也返回 true，错误要从系统消息读取。",
+    "examples": [
+      {
+        "PropertyId": "?",
+        "PropertyIndex": "0",
+        "PropertyValue": "?"
+      },
+      {
+        "PropertyIdentName": "?",
+        "PropertyIndex": "0",
+        "PropertyValue": "?"
+      }
+    ]
   },
   {
     "id": "A:XEsSetPropertyAction",
@@ -3227,14 +4443,26 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PropertyId", "required": true},
-      {"name": "PropertyIdentName", "required": true},
-      {"name": "PropertyIndex", "required": true},
-      {"name": "PropertyValue", "required": true}
+      {"name": "PropertyId", "required": true, "type": "integer"},
+      {"name": "PropertyIdentName", "required": true, "type": "string"},
+      {"name": "PropertyIndex", "required": true, "type": "integer"},
+      {"name": "PropertyValue", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "M3 属性写工具，用 DataModel 实现：目标明确，可以控制事务和撤销",
-    "notes": "设置选中对象的一个属性。"
+    "notes": "设置选中对象的一个属性。",
+    "examples": [
+      {
+        "PropertyId": "?",
+        "PropertyIndex": "0",
+        "PropertyValue": "?"
+      },
+      {
+        "PropertyIdentName": "?",
+        "PropertyIndex": "0",
+        "PropertyValue": "?"
+      }
+    ]
   },
   {
     "id": "A:XEsUserPropertiesExportAction",
@@ -3249,12 +4477,18 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "XMLFile"},
-      {"name": "Project"}
+      {"name": "XMLFile", "required": true, "type": "path"},
+      {"name": "Project", "required": true, "type": "path"}
     ],
     "status": "registered",
     "plannedHandling": "只读导出到临时目录",
-    "notes": "把用户自定义属性（定义）导出到 XML。对项目只读，只写出文件。"
+    "notes": "把用户自定义属性（定义）导出到 XML。对项目只读，只写出文件。",
+    "examples": [
+      {
+        "XMLFile": "c:\\my_user.xml",
+        "Project": "c:\\...\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:XEsUserPropertiesImportAction",
@@ -3268,14 +4502,20 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "XMLFile", "required": false},
-      {"name": "Project", "required": false},
-      {"name": "Overwrite", "required": false}
+      {"name": "XMLFile", "required": false, "type": "path"},
+      {"name": "Project", "required": false, "type": "path"},
+      {"name": "Overwrite", "required": false, "type": "string"}
     ],
     "status": "excluded",
     "reason": "settings_write_disabled",
     "plannedHandling": "写入默认禁用",
-    "notes": "把用户自定义属性从 XML 导入项目。缺少 XMLFile、Project 或 Overwrite 时会弹对话框（7.3）。"
+    "notes": "把用户自定义属性从 XML 导入项目。缺少 XMLFile、Project 或 Overwrite 时会弹对话框（7.3）。",
+    "examples": [
+      {
+        "XMLFile": "c:\\my_user.xml",
+        "Project": "c:\\...\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:XGedClosePage",
@@ -3288,7 +4528,9 @@
     "context": ["page", "selection", "gui"],
     "effect": ["gui_only"],
     "effectInferred": false,
-    "parameters": [],
+    "parameters": [
+
+    ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "界面操作",
@@ -3306,7 +4548,7 @@
     "effect": ["gui_only"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Name"}
+      {"name": "Name", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
@@ -3325,14 +4567,32 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ProjectName", "required": false},
-      {"name": "SchemeName", "required": false},
-      {"name": "AutoAssignLastUsedRecord", "required": false},
-      {"name": "NewVariant"}
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "SchemeName", "required": false, "type": "string"},
+      {"name": "AutoAssignLastUsedRecord", "required": false, "type": "string"},
+      {"name": "NewVariant", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "宏工具，Destructive",
-    "notes": "更新宏（选中对象、指定项目，或经 context 传入的对象）。"
+    "notes": "更新宏（选中对象、指定项目，或经 context 传入的对象）。",
+    "examples": [
+      {},
+      {
+        "ProjectName": "C:\\\\My Folder\\\\MyProject.elk"
+      },
+      {
+        "ProjectName": "C:\\\\My Folder\\\\MyProject"
+      },
+      {
+        "ProjectName": "My Folder\\\\MyProject.elk"
+      },
+      {
+        "ProjectName": "MyProject.elk"
+      },
+      {
+        "ProjectName": "MyProject"
+      }
+    ]
   },
   {
     "id": "A:XMActionDCCommonExport",
@@ -3346,18 +4606,27 @@
     "effect": ["gui_only", "writes_files", "writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DATABASEID", "required": false},
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "COMPLETEPROJECT"},
-      {"name": "CONFIGSCHEME", "required": false},
-      {"name": "LANGUAGE"},
-      {"name": "DESTINATION"},
-      {"name": "EXECUTIONMODE"},
-      {"name": "IMMEDIATEIMPORT", "required": false}
+      {"name": "DATABASEID", "required": false, "type": "string"},
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "COMPLETEPROJECT", "required": true, "type": "flag", "values": ["0", "1"]},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "DESTINATION", "required": true, "type": "file"},
+      {"name": "EXECUTIONMODE", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "IMMEDIATEIMPORT", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_export_*（项目数据表），只允许 EXECUTIONMODE:0",
-    "notes": "导出项目数据供外部编辑（txt / xlsx / xml）。不传 CONFIGSCHEME 时弹对话框；EXECUTIONMODE 取 1 或 2 需要人参与（7.3），只允许模式 0。"
+    "notes": "导出项目数据供外部编辑（txt / xlsx / xml）。不传 CONFIGSCHEME 时弹对话框；EXECUTIONMODE 取 1 或 2 需要人参与（7.3），只允许模式 0。",
+    "examples": [
+      {
+        "CONFIGSCHEME": "config_scheme",
+        "COMPLETEPROJECT": "1",
+        "LANGUAGE": "en_US",
+        "DESTINATION": "c:\\\\temp\\\\Pages.xlsx",
+        "EXECUTIONMODE": "0"
+      }
+    ]
   },
   {
     "id": "A:XMActionDCImport",
@@ -3371,13 +4640,19 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ProjectLink"},
-      {"name": "DataConfigurationFile"},
-      {"name": "ProgressTitle", "required": false}
+      {"name": "ProjectLink", "required": true, "type": "path"},
+      {"name": "DataConfigurationFile", "required": true, "type": "path"},
+      {"name": "ProgressTitle", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "批量属性导入，Destructive；与 M3 的 DataModel 属性工具二选一",
-    "notes": "把数据配置文件（.edc）导入项目，用来修改功能的属性。"
+    "notes": "把数据配置文件（.edc）导入项目，用来修改功能的属性。",
+    "examples": [
+      {
+        "ProjectLink": "c:\\\\Projects\\\\EPLAN\\\\test.elk",
+        "DataConfigurationFile": "c:\\\\EPLAN\\\\DataCfgFile.edc"
+      }
+    ]
   },
   {
     "id": "A:XMDeleteReprTypeAction",
@@ -3391,14 +4666,21 @@
     "effect": ["gui_only", "writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "RepresentationType"},
-      {"name": "Source"},
-      {"name": "Destination"}
+      {"name": "RepresentationType", "required": true, "type": "integer", "values": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"]},
+      {"name": "Source", "required": true, "type": "path"},
+      {"name": "Destination", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "只能交互使用，而且改的是主数据",
-    "notes": "从宏文件中删除某个表达类型。改宏文件，而且只能交互使用。"
+    "notes": "从宏文件中删除某个表达类型。改宏文件，而且只能交互使用。",
+    "examples": [
+      {
+        "RepresentationType": "0",
+        "Source": "c:\\macros\\*.ema",
+        "Destination": "c:\\dest"
+      }
+    ]
   },
   {
     "id": "A:XMExportConnectionsAction",
@@ -3412,20 +4694,29 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DatabaseId", "required": false},
-      {"name": "ProjectName", "required": false},
-      {"name": "CompleteProject"},
-      {"name": "ConfigScheme", "required": false},
-      {"name": "Language"},
-      {"name": "Destination"},
-      {"name": "ExecutionMode"},
-      {"name": "ImmediateImport", "required": false},
-      {"name": "IncludeGraphicalConnections", "required": false}
+      {"name": "DatabaseId", "required": false, "type": "string"},
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "CompleteProject", "required": true, "type": "flag", "values": ["0", "1"]},
+      {"name": "ConfigScheme", "required": false, "type": "string"},
+      {"name": "Language", "required": true, "type": "string"},
+      {"name": "Destination", "required": true, "type": "file"},
+      {"name": "ExecutionMode", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "ImmediateImport", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "IncludeGraphicalConnections", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "backward_compat",
     "plannedHandling": "仅为向后兼容保留，官方建议改用 XMActionDCCommonExport",
-    "notes": "导出连接（供外部编辑）。"
+    "notes": "导出连接（供外部编辑）。",
+    "examples": [
+      {
+        "ConfigScheme": "config_scheme",
+        "CompleteProject": "1",
+        "Language": "en_US",
+        "Destination": "c:\\\\temp\\\\Connection.xlsx",
+        "ExecutionMode": "0"
+      }
+    ]
   },
   {
     "id": "A:XMExportDCArticleDataAction",
@@ -3439,16 +4730,25 @@
     "effect": ["gui_only", "writes_files", "writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "COMPLETEPROJECT", "required": false},
-      {"name": "CONFIGSCHEME", "required": false},
-      {"name": "LANGUAGE"},
-      {"name": "DESTINATION"},
-      {"name": "EXECUTIONMODE"},
-      {"name": "IMMEDIATEIMPORT", "required": false}
+      {"name": "COMPLETEPROJECT", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "CONFIGSCHEME", "required": false, "type": "string"},
+      {"name": "LANGUAGE", "required": true, "type": "string"},
+      {"name": "DESTINATION", "required": true, "type": "file"},
+      {"name": "EXECUTIONMODE", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "IMMEDIATEIMPORT", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_export，只允许 EXECUTIONMODE:0",
-    "notes": "导出部件库数据供外部编辑。不传 CONFIGSCHEME 时弹对话框；EXECUTIONMODE 取 1 或 2 需要人参与，并会导回部件库（7.3），只允许模式 0。"
+    "notes": "导出部件库数据供外部编辑。不传 CONFIGSCHEME 时弹对话框；EXECUTIONMODE 取 1 或 2 需要人参与，并会导回部件库（7.3），只允许模式 0。",
+    "examples": [
+      {
+        "CONFIGSCHEME": "config_scheme",
+        "LANGUAGE": "en_US",
+        "DESTINATION": "c:\\\\temp\\\\Articles.xlsx",
+        "EXECUTIONMODE": "0",
+        "COMPLETEPROJECT": "1"
+      }
+    ]
   },
   {
     "id": "A:XMExportFunctionAction",
@@ -3462,19 +4762,28 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DatabaseId", "required": false},
-      {"name": "ProjectName", "required": false},
-      {"name": "CompleteProject"},
-      {"name": "ConfigScheme", "required": false},
-      {"name": "Language"},
-      {"name": "Destination"},
-      {"name": "ExecutionMode"},
-      {"name": "ImmediateImport", "required": false}
+      {"name": "DatabaseId", "required": false, "type": "string"},
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "CompleteProject", "required": true, "type": "flag", "values": ["0", "1"]},
+      {"name": "ConfigScheme", "required": false, "type": "string"},
+      {"name": "Language", "required": true, "type": "string"},
+      {"name": "Destination", "required": true, "type": "file"},
+      {"name": "ExecutionMode", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "ImmediateImport", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "backward_compat",
     "plannedHandling": "向后兼容，被 XMActionDCCommonExport 取代",
-    "notes": "导出功能。"
+    "notes": "导出功能。",
+    "examples": [
+      {
+        "ConfigScheme": "config_scheme",
+        "CompleteProject": "1",
+        "Language": "en_US",
+        "Destination": "c:\\\\temp\\\\Function.xlsx",
+        "ExecutionMode": "0"
+      }
+    ]
   },
   {
     "id": "A:XMExportLocationBoxesAction",
@@ -3488,19 +4797,28 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DatabaseId", "required": false},
-      {"name": "ProjectName", "required": false},
-      {"name": "CompleteProject"},
-      {"name": "ConfigScheme", "required": false},
-      {"name": "Language"},
-      {"name": "Destination"},
-      {"name": "ExecutionMode"},
-      {"name": "ImmediateImport", "required": false}
+      {"name": "DatabaseId", "required": false, "type": "string"},
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "CompleteProject", "required": true, "type": "flag", "values": ["0", "1"]},
+      {"name": "ConfigScheme", "required": false, "type": "string"},
+      {"name": "Language", "required": true, "type": "string"},
+      {"name": "Destination", "required": true, "type": "file"},
+      {"name": "ExecutionMode", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "ImmediateImport", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "backward_compat",
     "plannedHandling": "向后兼容，被 XMActionDCCommonExport 取代",
-    "notes": "导出位置盒。"
+    "notes": "导出位置盒。",
+    "examples": [
+      {
+        "ConfigScheme": "config_scheme",
+        "CompleteProject": "1",
+        "Language": "en_US",
+        "Destination": "c:\\\\temp\\\\Pages.xlsx",
+        "ExecutionMode": "0"
+      }
+    ]
   },
   {
     "id": "A:XMExportPagesAction",
@@ -3514,19 +4832,28 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DatabaseId", "required": false},
-      {"name": "ProjectName"},
-      {"name": "CompleteProject"},
-      {"name": "ConfigScheme", "required": false},
-      {"name": "Language"},
-      {"name": "Destination"},
-      {"name": "ExecutionMode"},
-      {"name": "ImmediateImport", "required": false}
+      {"name": "DatabaseId", "required": false, "type": "string"},
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "CompleteProject", "required": true, "type": "flag", "values": ["0", "1"]},
+      {"name": "ConfigScheme", "required": false, "type": "string"},
+      {"name": "Language", "required": true, "type": "string"},
+      {"name": "Destination", "required": true, "type": "file"},
+      {"name": "ExecutionMode", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "ImmediateImport", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "backward_compat",
     "plannedHandling": "向后兼容，被 XMActionDCCommonExport 取代",
-    "notes": "导出页面。"
+    "notes": "导出页面。",
+    "examples": [
+      {
+        "ConfigScheme": "config_scheme",
+        "CompleteProject": "1",
+        "Language": "en_US",
+        "Destination": "c:\\\\temp\\\\Pages.xlsx",
+        "ExecutionMode": "0"
+      }
+    ]
   },
   {
     "id": "A:XMExportPipeLineDefsAction",
@@ -3540,19 +4867,28 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DatabaseId", "required": false},
-      {"name": "ProjectName", "required": false},
-      {"name": "CompleteProject"},
-      {"name": "ConfigScheme", "required": false},
-      {"name": "Language"},
-      {"name": "Destination"},
-      {"name": "ExecutionMode"},
-      {"name": "ImmediateImport", "required": false}
+      {"name": "DatabaseId", "required": false, "type": "string"},
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "CompleteProject", "required": true, "type": "flag", "values": ["0", "1"]},
+      {"name": "ConfigScheme", "required": false, "type": "string"},
+      {"name": "Language", "required": true, "type": "string"},
+      {"name": "Destination", "required": true, "type": "file"},
+      {"name": "ExecutionMode", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "ImmediateImport", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "backward_compat",
     "plannedHandling": "向后兼容，被 XMActionDCCommonExport 取代",
-    "notes": "导出管道定义。"
+    "notes": "导出管道定义。",
+    "examples": [
+      {
+        "ConfigScheme": "config_scheme",
+        "CompleteProject": "1",
+        "Language": "en_US",
+        "Destination": "c:\\\\temp\\\\defs.xlsx",
+        "ExecutionMode": "0"
+      }
+    ]
   },
   {
     "id": "A:XMExportPotentialDefsAction",
@@ -3566,19 +4902,28 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DatabaseId", "required": false},
-      {"name": "ProjectName", "required": false},
-      {"name": "CompleteProject"},
-      {"name": "ConfigScheme", "required": false},
-      {"name": "Language"},
-      {"name": "Destination"},
-      {"name": "ExecutionMode"},
-      {"name": "ImmediateImport", "required": false}
+      {"name": "DatabaseId", "required": false, "type": "string"},
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "CompleteProject", "required": true, "type": "flag", "values": ["0", "1"]},
+      {"name": "ConfigScheme", "required": false, "type": "string"},
+      {"name": "Language", "required": true, "type": "string"},
+      {"name": "Destination", "required": true, "type": "file"},
+      {"name": "ExecutionMode", "required": true, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "ImmediateImport", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "excluded",
     "reason": "backward_compat",
     "plannedHandling": "向后兼容，被 XMActionDCCommonExport 取代",
-    "notes": "导出电位定义。"
+    "notes": "导出电位定义。",
+    "examples": [
+      {
+        "ConfigScheme": "config_scheme",
+        "CompleteProject": "1",
+        "Language": "en_US",
+        "Destination": "c:\\\\temp\\\\defs.xlsx",
+        "ExecutionMode": "0"
+      }
+    ]
   },
   {
     "id": "A:XMImportDCArticleDataAction",
@@ -3592,15 +4937,20 @@
     "effect": ["writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DATACONFIGURATIONFILE"},
-      {"name": "PROGRESSTITLE", "required": false},
-      {"name": "SHOWIMPORTMESSAGES", "required": false},
-      {"name": "IMPORTMODE", "required": false},
-      {"name": "IDENTIFYBYNAMEINSTEADOFID", "required": false}
+      {"name": "DATACONFIGURATIONFILE", "required": true, "type": "path"},
+      {"name": "PROGRESSTITLE", "required": false, "type": "string"},
+      {"name": "SHOWIMPORTMESSAGES", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "IMPORTMODE", "required": false, "type": "integer", "values": ["0", "1", "2"]},
+      {"name": "IDENTIFYBYNAMEINSTEADOFID", "required": false, "type": "flag", "values": ["0", "1"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_import（表格导入），Destructive，必须传 IMPORTMODE",
-    "notes": "把数据配置文件导入部件库。不传 IMPORTMODE 时会询问（7.3），必须传。"
+    "notes": "把数据配置文件导入部件库。不传 IMPORTMODE 时会询问（7.3），必须传。",
+    "examples": [
+      {
+        "DataConfigurationFile": "c:\\\\EPLAN\\\\DataCfgFile.edc"
+      }
+    ]
   },
   {
     "id": "A:XPamConvertPartDatabaseToArticleDatabaseAction",
@@ -3614,13 +4964,28 @@
     "effect": ["writes_files", "writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "OldDatabase"},
-      {"name": "NewDatabase"}
+      {"name": "OldDatabase", "required": true, "type": "string"},
+      {"name": "NewDatabase", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "one_off_migration",
     "plannedHandling": "一次性的部件库迁移，属于管理员操作",
-    "notes": "把 V2.9 部件库转换为 V2022 部件库。不传参数时弹对话框（7.3）。"
+    "notes": "把 V2.9 部件库转换为 V2022 部件库。不传参数时弹对话框（7.3）。",
+    "examples": [
+      {},
+      {
+        "OldDatabase": "C:\\<DataDirectory>\\Article\\EPLAN\\ESS_part001.mdb",
+        "NewDatabase": "C:\\<DataDirectory>\\Article\\EPLAN\\ESS_part001.alk"
+      },
+      {
+        "OldDatabase": "SQLEXPRESS|parts_old|0",
+        "NewDatabase": "SQLEXPRESS|parts_2022|0"
+      },
+      {
+        "OldDatabase": "SQL2019|parts_old|2|Mustermann|12345",
+        "NewDatabase": "SQL2019|parts_2022|2|Mustermann|12345"
+      }
+    ]
   },
   {
     "id": "A:XPamsDeviceSelectionAction",
@@ -3634,13 +4999,30 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ProjectName", "required": false},
-      {"name": "Mode", "required": false},
-      {"name": "KeepSwappedConnPointInformation", "required": false}
+      {"name": "ProjectName", "required": false, "type": "path"},
+      {"name": "Mode", "required": false, "type": "string", "values": ["selectDevice", "updateDevice"], "default": "selectDevice"},
+      {"name": "KeepSwappedConnPointInformation", "required": false, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "eplan_part_*（更新设备数据），Destructive",
-    "notes": "为项目、功能或连接重新选型，或更新设备数据。selectDevice 模式会删除并重新分配部件引用。"
+    "notes": "为项目、功能或连接重新选型，或更新设备数据。selectDevice 模式会删除并重新分配部件引用。",
+    "examples": [
+      {
+        "ProjectName": "C:\\\\My Folder\\\\MyProject.elk"
+      },
+      {
+        "ProjectName": "C:\\\\My Folder\\\\MyProject"
+      },
+      {
+        "ProjectName": "My Folder\\\\MyProject.elk"
+      },
+      {
+        "ProjectName": "MyProject.elk"
+      },
+      {
+        "ProjectName": "MyProject"
+      }
+    ]
   },
   {
     "id": "A:XPamSelectPart",
@@ -3654,17 +5036,22 @@
     "effect": ["gui_only"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DatabaseId", "required": false},
-      {"name": "SingleSelection", "required": false},
-      {"name": "SelectedPartsCount", "output": true},
-      {"name": "PartNr<nr>", "output": true},
-      {"name": "Variant<nr>", "output": true},
-      {"name": "PartType<nr>", "output": true}
+      {"name": "DatabaseId", "required": false, "type": "string"},
+      {"name": "SingleSelection", "required": false, "type": "flag", "values": ["0", "1"], "default": "1"},
+      {"name": "SelectedPartsCount", "output": true, "required": true, "type": "integer"},
+      {"name": "PartNr<nr>", "output": true, "required": true, "type": "string"},
+      {"name": "Variant<nr>", "output": true, "required": true, "type": "string"},
+      {"name": "PartType<nr>", "output": true, "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "需要人操作；读取部件用 MasterData API",
-    "notes": "打开部件选择（对话框），在 context 中返回选中的部件。需要人在对话框中选择，数据只读。"
+    "notes": "打开部件选择（对话框），在 context 中返回选中的部件。需要人在对话框中选择，数据只读。",
+    "examples": [
+      {
+        "SingleSelection": "false"
+      }
+    ]
   },
   {
     "id": "A:XPartsSetDataSourceAction",
@@ -3678,22 +5065,52 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "DataSourceType"},
-      {"name": "DataBaseFileName"},
-      {"name": "SqlServer"},
-      {"name": "SqlCatalog"},
-      {"name": "SqlUserName"},
-      {"name": "SqlPassword", "sensitive": true},
-      {"name": "SqlLogin"},
-      {"name": "SqlFullName"},
-      {"name": "CollectionName"},
-      {"name": "CollectionId"},
-      {"name": "Force"}
+      {"name": "DataSourceType", "required": true, "type": "integer", "values": ["0", "1", "3"], "default": "0"},
+      {"name": "DataBaseFileName", "required": true, "type": "path"},
+      {"name": "SqlServer", "required": true, "type": "string"},
+      {"name": "SqlCatalog", "required": true, "type": "string"},
+      {"name": "SqlUserName", "required": true, "type": "string"},
+      {"name": "SqlPassword", "sensitive": true, "required": true, "type": "string"},
+      {"name": "SqlLogin", "required": true, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "SqlFullName", "required": true, "type": "string"},
+      {"name": "CollectionName", "required": true, "type": "string"},
+      {"name": "CollectionId", "required": true, "type": "string"},
+      {"name": "Force", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "settings_write_disabled",
     "plannedHandling": "写入默认禁用；带密码参数，永远不能由代理传入",
-    "notes": "切换部件管理使用的数据源。SqlPassword 是密码参数，永远不能由代理传入。"
+    "notes": "切换部件管理使用的数据源。SqlPassword 是密码参数，永远不能由代理传入。",
+    "examples": [
+      {
+        "DataSourceType": "0",
+        "DataBaseFileName": "C:\\Users\\Public\\EPLAN\\Data\\Article\\COMPANY_NAME\\Database.alk"
+      },
+      {
+        "DataSourceType": "1",
+        "SqlLogin": "0",
+        "SqlServer": "SQL_SERVER_NAME",
+        "SqlCatalog": "SQL_DATABASE"
+      },
+      {
+        "DataSourceType": "1",
+        "SqlLogin": "1",
+        "SqlServer": "SQL_SERVER_NAME",
+        "SqlCatalog": "SQL_DATABASE",
+        "SqlUserName": "SQL_USERNAME",
+        "SqlPassword": "SQL_PASSWORD"
+      },
+      {
+        "DataSourceType": "1",
+        "SqlLogin": "1",
+        "SqlFullName": "SQL_SERVER_NAME|SQL_DATABASE|2|SQL_USERNAME|SQL_PASSWORD"
+      },
+      {
+        "DataSourceType": "3",
+        "CollectionName": "ESTOCK_COLLECTION_NAME",
+        "CollectionId": "ESTOCK_COLLECTION_ID"
+      }
+    ]
   },
   {
     "id": "A:XPlaUpdateDetailAction",
@@ -3707,16 +5124,23 @@
     "effect": ["writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME", "required": false},
-      {"name": "UpdateMacros", "required": false},
-      {"name": "UpdateIdentifier", "required": false},
-      {"name": "UpdatePlaceholder", "required": false},
-      {"name": "UpdatePipedata", "required": false},
-      {"name": "UpdateParts", "required": false}
+      {"name": "PROJECTNAME", "required": false, "type": "path"},
+      {"name": "UpdateMacros", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "UpdateIdentifier", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "UpdatePlaceholder", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "UpdatePipedata", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"},
+      {"name": "UpdateParts", "required": false, "type": "flag", "values": ["0", "1"], "default": "0"}
     ],
     "status": "registered",
     "plannedHandling": "预规划到详细设计",
-    "notes": "按选中的规划对象更新详细设计（预规划）。依赖 Preplanning 授权，当前授权下不可用（7.5）。"
+    "notes": "按选中的规划对象更新详细设计（预规划）。依赖 Preplanning 授权，当前授权下不可用（7.5）。",
+    "examples": [
+      {
+        "PROJECTNAME": "C:\\Projects\\EPLAN\\EPLAN_Sample_Project.elk",
+        "UpdateMacros": "1",
+        "UpdateIdentifier": "1"
+      }
+    ]
   },
   {
     "id": "A:XPrjActionUpgradeProjects",
@@ -3730,23 +5154,28 @@
     "effect": ["writes_files", "writes_project"],
     "effectInferred": false,
     "parameters": [
-      {"name": "Project"},
-      {"name": "Folder"},
-      {"name": "Archive"},
-      {"name": "BaseProject"},
-      {"name": "UpgradeWriteProtectedProjects"},
-      {"name": "UpgradeXMLProjects"},
-      {"name": "FileTypes"},
-      {"name": "PackOriginalProject"},
-      {"name": "UpdateConnections"},
-      {"name": "NoBackup"},
-      {"name": "IgnoreUpgradeBackups"},
-      {"name": "DoDataModelUpgrades"},
-      {"name": "FileDescription"}
+      {"name": "Project", "required": true, "type": "file"},
+      {"name": "Folder", "required": true, "type": "path"},
+      {"name": "Archive", "required": true, "type": "string", "values": ["true"]},
+      {"name": "BaseProject", "required": true, "type": "string", "values": ["true"]},
+      {"name": "UpgradeWriteProtectedProjects", "required": true, "type": "string", "values": ["true"]},
+      {"name": "UpgradeXMLProjects", "required": true, "type": "string", "values": ["true"]},
+      {"name": "FileTypes", "required": true, "type": "string"},
+      {"name": "PackOriginalProject", "required": true, "type": "string", "values": ["true"], "default": "true"},
+      {"name": "UpdateConnections", "required": true, "type": "string", "values": ["true"], "default": "false"},
+      {"name": "NoBackup", "required": true, "type": "string", "values": ["true"], "default": "false"},
+      {"name": "IgnoreUpgradeBackups", "required": true, "type": "string", "values": ["true"], "default": "false"},
+      {"name": "DoDataModelUpgrades", "required": true, "type": "string", "values": ["true"], "default": "true"},
+      {"name": "FileDescription", "required": true, "type": "integer", "values": ["0", "1", "2"]}
     ],
     "status": "registered",
     "plannedHandling": "eplan_project_upgrade；禁止 NoBackup:true，也禁止对 scratch 之外的 Folder 做批量升级",
-    "notes": "把一个或多个项目升级到当前数据库版本。默认先备份，并把原项目打包成 7zip；禁止 NoBackup:true，也禁止对 scratch 之外的 Folder 做批量升级。"
+    "notes": "把一个或多个项目升级到当前数据库版本。默认先备份，并把原项目打包成 7zip；禁止 NoBackup:true，也禁止对 scratch 之外的 Folder 做批量升级。",
+    "examples": [
+      {
+        "Project": "$(MD_PROJECTS)\\EPLAN_Sample_Project.elk"
+      }
+    ]
   },
   {
     "id": "A:XPrjConvertBaseProjectsAction",
@@ -3760,14 +5189,29 @@
     "effect": ["writes_files", "writes_master_data"],
     "effectInferred": false,
     "parameters": [
-      {"name": "ProjectTemplate"},
-      {"name": "Folder"},
-      {"name": "FileTypes"}
+      {"name": "ProjectTemplate", "required": true, "type": "file"},
+      {"name": "Folder", "required": true, "type": "path"},
+      {"name": "FileTypes", "required": true, "type": "string"}
     ],
     "status": "excluded",
     "reason": "one_off_migration",
     "plannedHandling": "一次性迁移，属于管理员操作",
-    "notes": "把旧的基本项目（.ept/.epb）转换为 .zw9。写主数据模板目录。"
+    "notes": "把旧的基本项目（.ept/.epb）转换为 .zw9。写主数据模板目录。",
+    "examples": [
+      {
+        "ProjectTemplate": "$(MD_TEMPLATES)\\IEC_tpl001.ept"
+      },
+      {
+        "ProjectTemplate": "$(MD_TEMPLATES)\\GES_SBP.epb"
+      },
+      {
+        "Folder": "$(MD_TEMPLATES)"
+      },
+      {
+        "Folder": "$(MD_TEMPLATES)",
+        "FileTypes": "*.ept"
+      }
+    ]
   },
   {
     "id": "A:XSDPreviewAction",
@@ -3781,15 +5225,33 @@
     "effect": ["gui_only"],
     "effectInferred": false,
     "parameters": [
-      {"name": "PROJECTNAME"},
-      {"name": "PAGENAME"},
-      {"name": "MACRONAME"},
-      {"name": "SHOW"}
+      {"name": "PROJECTNAME", "required": true, "type": "path"},
+      {"name": "PAGENAME", "required": true, "type": "string"},
+      {"name": "MACRONAME", "required": true, "type": "path"},
+      {"name": "SHOW", "required": true, "type": "flag", "values": ["1", "0"]}
     ],
     "status": "excluded",
     "reason": "interactive_ui",
     "plannedHandling": "只是界面预览窗口",
-    "notes": "打开或关闭页面、宏的预览窗口。"
+    "notes": "打开或关闭页面、宏的预览窗口。",
+    "examples": [
+      {
+        "PROJECTNAME": "EPLAN_Sample_Project",
+        "PAGENAME": "=CA1+EAA/1"
+      },
+      {
+        "PROJECTNAME": "C:\\\\Users\\\\Public\\\\EPLAN\\\\Electric P8\\\\Projects\\\\EPLAN\\\\EPLAN_Sample_Project",
+        "PAGENAME": "=CA1+EAA/2"
+      },
+      {
+        "PROJECTNAME": "EPLAN_Sample_Project",
+        "MACRONAME": "Macro_0001.ema"
+      },
+      {
+        "PROJECTNAME": "$(MD_PROJECTS)\\\\EPLAN_Sample_Project",
+        "MACRONAME": "$(MD_MACROS)\\\\Macro_0001.ema"
+      }
+    ]
   },
   {
     "id": "A:XSettingsExport",
@@ -3804,13 +5266,40 @@
     "effect": ["writes_files"],
     "effectInferred": false,
     "parameters": [
-      {"name": "node"},
-      {"name": "XMLFile"},
-      {"name": "prj"}
+      {"name": "node", "required": true, "type": "path"},
+      {"name": "XMLFile", "required": true, "type": "file"},
+      {"name": "prj", "required": true, "type": "string"}
     ],
     "status": "registered",
     "plannedHandling": "只读导出到临时目录，用于批量快照；读取个别设置用 Settings API",
-    "notes": "把设置节点（USER / STATION / COMPANY / 项目）导出为 XML。对设置只读，只写出文件。"
+    "notes": "把设置节点（USER / STATION / COMPANY / 项目）导出为 XML。对设置只读，只写出文件。",
+    "examples": [
+      {
+        "node": "USER",
+        "XMLFile": "c:\\my_user.xml"
+      },
+      {
+        "node": "STATION",
+        "XMLFile": "c:\\my_station.xml"
+      },
+      {
+        "node": "COMPANY",
+        "XMLFile": "c:\\my_company.xml"
+      },
+      {
+        "node": "USER.DIALOGSETTINGS",
+        "XMLFile": "c:\\my_dialog_settings.xml"
+      },
+      {
+        "prj": "EPLAN_Sample_Project",
+        "XMLFile": "c:\\my_project.xml"
+      },
+      {
+        "prj": "EPLAN_Sample_Project",
+        "node": "XSbGui.CustomSymbols",
+        "XMLFile": "c:\\my_custom_symbols.xml"
+      }
+    ]
   },
   {
     "id": "A:XSettingsImport",
@@ -3824,14 +5313,32 @@
     "effect": ["writes_project", "writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "XmlFile"},
-      {"name": "Node"},
-      {"name": "Project"}
+      {"name": "XmlFile", "required": true, "type": "file"},
+      {"name": "Node", "required": true, "type": "string"},
+      {"name": "Project", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "settings_write_disabled",
     "plannedHandling": "写入属于 Code 级，默认禁用",
-    "notes": "从 XML 导入项目、工作站、公司或用户设置。XmlFile 为空时弹对话框（7.3）。"
+    "notes": "从 XML 导入项目、工作站、公司或用户设置。XmlFile 为空时弹对话框（7.3）。",
+    "examples": [
+      {
+        "XmlFile": "c:\\file.xml"
+      },
+      {
+        "XmlFile": "c:\\file.xml",
+        "Node": "User.XSbGui.CustomSymbols"
+      },
+      {
+        "XmlFile": "c:\\my_project.xml",
+        "Project": "c:\\...\\EPLAN_Sample_Project.elk"
+      },
+      {
+        "XmlFile": "c:\\my_project.xml",
+        "Project": "c:\\...\\EPLAN_Sample_Project.elk",
+        "Node": "XSbGui.CustomSymbols"
+      }
+    ]
   },
   {
     "id": "A:XSettingsRegisterAction",
@@ -3845,13 +5352,18 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "path"},
-      {"name": "installFile"}
+      {"name": "path", "required": true, "type": "path"},
+      {"name": "installFile", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "installer_registration",
     "plannedHandling": "只供安装器使用",
-    "notes": "注册 Add-on。"
+    "notes": "注册 Add-on。",
+    "examples": [
+      {
+        "Path": "c:\\MyAddOn"
+      }
+    ]
   },
   {
     "id": "A:XSettingsUnregisterAction",
@@ -3865,12 +5377,17 @@
     "effect": ["writes_settings"],
     "effectInferred": false,
     "parameters": [
-      {"name": "path"},
-      {"name": "installFile"}
+      {"name": "path", "required": true, "type": "path"},
+      {"name": "installFile", "required": true, "type": "path"}
     ],
     "status": "excluded",
     "reason": "installer_registration",
     "plannedHandling": "只供安装器使用",
-    "notes": "注销 Add-on。官方示例的说明文字误写成 Registering Add-ons（7.4）。"
+    "notes": "注销 Add-on。官方示例的说明文字误写成 Registering Add-ons（7.4）。",
+    "examples": [
+      {
+        "Path": "c:\\MyAddOn"
+      }
+    ]
   }
 ]
