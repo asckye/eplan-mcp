@@ -32,7 +32,7 @@
 | B1 | 682 | 主数据、部件/翻译库与宏资源；库/资源副本、受控工厂、对象链及主数据备份恢复 |
 | B2 | 791 | 属性组、接收者与返回值、只读设置对象链；下表逐类型给来源 |
 | B3 | 267 | 工程适配；保持现行安全边界，补工厂、具体服务、生命周期、编译分支及路径/集合形状 |
-| B4 | 451 | 安全或审批边界；ADR-0036..0045 逐份待决定 |
+| B4 | 451 | 安全或审批边界；ADR-0036..0045 已于 2026-11-01 接受，按边界逐组实施（0043 先只读，0044 最后） |
 | B5 | 1 | 正式分母内的纯原生句柄入口 SetMainFrame；见指针核对 |
 | 合计 | 2192 | 与 4014 − 1822 一致 |
 
@@ -352,16 +352,16 @@ B3 路径适配仅指可将输入限制为 imports、输出限制为新建 expor
 
 | 类别 | 首阻组数 | ADR |
 |---|---:|---|
-| 设置与方案 | 114 | [ADR-0036](../adr/0036-settings-and-schemes.md)（Proposed） |
-| 交互与共享状态 | 253 | [ADR-0037](../adr/0037-interactive-and-session-state.md)（Proposed） |
-| 禁用符号 | 36 | [ADR-0038](../adr/0038-banned-symbol-adapters.md)（Proposed） |
-| 内部接口 | 0 | [ADR-0039](../adr/0039-internal-api-boundary.md)（Proposed） |
-| 弃用接口 | 0 | [ADR-0040](../adr/0040-deprecated-api-boundary.md)（Proposed） |
-| 签名不适用 | 0 | [ADR-0041](../adr/0041-not-applicable-signatures.md)（Proposed） |
-| 目录外路径 | 35 | [ADR-0042](../adr/0042-external-path-grants.md)（Proposed） |
-| 授权 | 9 | [ADR-0043](../adr/0043-licensing-operations.md)（Proposed） |
-| 网络 | 2 | [ADR-0044](../adr/0044-network-operations.md)（Proposed） |
-| 打印 | 2 | [ADR-0045](../adr/0045-printing-operations.md)（Proposed） |
+| 设置与方案 | 114 | [ADR-0036](../adr/0036-settings-and-schemes.md)（Accepted） |
+| 交互与共享状态 | 253 | [ADR-0037](../adr/0037-interactive-and-session-state.md)（Accepted） |
+| 禁用符号 | 36 | [ADR-0038](../adr/0038-banned-symbol-adapters.md)（Accepted） |
+| 内部接口 | 0 | [ADR-0039](../adr/0039-internal-api-boundary.md)（Accepted） |
+| 弃用接口 | 0 | [ADR-0040](../adr/0040-deprecated-api-boundary.md)（Accepted） |
+| 签名不适用 | 0 | [ADR-0041](../adr/0041-not-applicable-signatures.md)（Accepted） |
+| 目录外路径 | 35 | [ADR-0042](../adr/0042-external-path-grants.md)（Accepted） |
+| 授权 | 9 | [ADR-0043](../adr/0043-licensing-operations.md)（Accepted） |
+| 网络 | 2 | [ADR-0044](../adr/0044-network-operations.md)（Accepted） |
+| 打印 | 2 | [ADR-0045](../adr/0045-printing-operations.md)（Accepted） |
 
 正式缺口内还包含 internal 原生签名 1 条（`DrawingService.DrawDisplayList` 的 HWND 重载）及 deprecated 签名 22 条（7 组）；它们分别仍有公开/非弃用重载，所以主阻归交互、工程或主数据，不重复计入 B4 三个零项。签名 not_applicable 在正式缺口中为 0。分母外 635 组为 not_applicable 359、internal 147、gui 72、deprecated 54、unsafe 3；本次未将这些排除偷偷取消或加回 4014。
 
