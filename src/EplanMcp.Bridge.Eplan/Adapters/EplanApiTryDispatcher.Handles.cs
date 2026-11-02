@@ -29,6 +29,7 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
     }
     private static string? NativeOwner(object value) => (value is StorableObject ? value : ApiTryHandleDispatch.Owner(value)) is StorableObject { IsValid: true } obj ? (obj as Project ?? obj.Project)?.ProjectFullName : null;
     private static bool SettingsHandle(string type) => type.IndexOf("Settings", StringComparison.OrdinalIgnoreCase) >= 0 || type.IndexOf("Scheme", StringComparison.OrdinalIgnoreCase) >= 0 || type.IndexOf("ProjectSections", StringComparison.OrdinalIgnoreCase) >= 0;
+    private static bool ChainReadOnly(string type) => SettingsHandle(type) || type.IndexOf("Setting", StringComparison.OrdinalIgnoreCase) >= 0;
     private static bool Scratch(ApiTryArgs args, string path)
     {
         if (args.ScratchPath.Length == 0 || !ProjectResolver.SamePath(args.ScratchPath, path) || !ProjectPaths.IsPlainFullPath(path))
@@ -60,25 +61,6 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
         foreach ((JToken token, string type) in ArgumentObjects(shape, p))
         { ResolveObject(args, token, type, write, descriptions); }
         args.HandleSources = string.Join("; ", descriptions);
-    }
-    private object? InvokeHandleMember(ApiTryArgs args, JObject p, (object? Value, Func<string?> Owner, bool ReadOnly) target, bool read = false)
-    {
-        string[] shape = ApiTryCatalog.Shape(args.Group, p.Properties().Select(v => v.Name))!;
-        var descriptions = new List<string>();
-        bool write = !read && (ApiTryCatalog.MethodAccess(args.Group) == "write" || p.ContainsKey("value"));
-        object Resolver(JToken token, string type) => ResolveObject(args, token, type, write, descriptions).Value;
-        bool extra = ApiTryCatalog.HandleShape(args.Group) is not null || ApiTryCatalog.HandleMethodShape(args.Group, p.Properties().Select(v => v.Name)) is not null;
-        object? result;
-        if (extra)
-        { result = ApiTryHandleDispatch.Invoke(shape[1], target.Value!, p, Resolver); }
-        else
-        { result = InvokeEntry(args, p, target.Value, ApiTryCatalog.MethodAccess(args.Group) is not null, Resolver); }
-        if (result is null || read)
-        { return result; }
-        result = ApiTryHandleDispatch.Elements(shape[1], result);
-        if (result is ApiTryNativeElements elements)
-        { return CaptureElements(args, elements, target, shape[1]); }
-        return Detach(args.Project, result, native: value => NativeResult(args, value, target, ReferenceEquals(value, result) ? ChainResultType(value, shape[1]) : null), nativeType: value => ApiTryHandleDispatch.Type(value) is not null);
     }
     private object NativeResult(ApiTryArgs args, object result, (object? Value, Func<string?> Owner, bool ReadOnly) target, string? declared = null)
     {

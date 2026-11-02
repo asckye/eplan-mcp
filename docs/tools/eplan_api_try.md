@@ -32,6 +32,8 @@
 链式扩展沿用 main 已验证的句柄表、会话和到期规则；生成返回类型闭包最多 4 层，继承和已实现接口不额外计层。集合先有界枚举前 200 个元素、略去空项，再经既有 Detach：有限数值、locator 优先于 handle，每个句柄复用 A68 的 ProjectLinkFilePath、同名 .edb 与父目录归属检查。数组沿用缓存分页；原生集合通过既有命名输出形状返回 returnValue（集合句柄）和 outputs.items（元素分页），不另设旧式句柄专用结果。简单键索引属性按完整参数名集合选择唯一只读签名，Int16/UInt32 检查范围；类型层字段仍不可调用。设置与派生句柄只读，链式行为和撤销未运行实机验证。
 
 ### 设置只读切片
+设置组（`ApiTryCatalog.Settings(group)`）以 Project 定位器调用时，优先使用 A67 的设置文本适配器；即使同一签名也出现在句柄分发表中，仍返回原有文本。设置属性入口继续只读，临时设置对象留在适配层内部；其他类型的链式句柄和集合元素保持可用。
+
 `Settings`、`SettingNode`、`SchemeSetting`、`ProjectSettings`、`ProjectSettingNode` 及 `Project.DeviceTagSettings` 的公开读取使用 scratch Project 定位器作为 `target`；`Project.Settings` 返回根标记 `PROJECT`，后续通过同一定位器读取项目设置，不返回原生句柄。除根标记和 DeviceTagSettings 属性外，参数增加 `node`：只允许 `USER`、`STATION`、`PROJECT` 及逐级枚举出的子节点；ProjectSettings/ProjectSettingNode 只接受 PROJECT。Base.Settings 只接受 USER/STATION；Base.SettingNode/SchemeSetting 在 PROJECT 下分别绑定 ProjectSettingNode/ProjectSchemeSetting。
 
 先调用 `SettingNode.GetListOfNodes` / `GetListOfSettings`（项目亦可用 ProjectSettingNode），传 `node`、`offset`（0–1000000）、`limit`（1–200），ref 输出容器与 bAbsolutPath 不由客户端传入，固定返回相对名称。`value` 是 JSON 文本，含 items/total/nextOffset，按 nextOffset 翻页；`GetListOfAllSettings` 同样分页。`strSettingPath` / `strName` 必须来自相应节点的叶设置/方案子节点枚举；路径在规划及执行时重新枚举核对，失效报 PLAN_STALE。索引 idx/nIdx 为 0–1000000 整数；完整路径由适配层拼接。多语言值返回保留语言标签的原始文本，不冒充单语言显示值。

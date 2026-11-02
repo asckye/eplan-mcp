@@ -5,6 +5,7 @@
 
 ## [Unreleased]
 
+- 修复 `eplan_api_try` 链式句柄分发覆盖设置文本的回归：以 Project 定位器读取 `Project.Settings` 仍返回字符串 `PROJECT`，设置列表和属性入口保持既有文本，其他类型的句柄与集合元素继续可用；补实际分发路径的 Small 回归，修复后 Large 待验。
 - 原生调用前检查只读与页上下文；全项目对象枚举跳过无效项并记录数量，写事务内捕获原生异常时记录带 correlation id 的 Warning。审批、暂停与回滚行为保持；实机待验见 native-preconditions 台账。
 ### Fixed
 - 布局 R3 对本次创建或改变对象的默认文字位置冲突只给警告，列出文字归属、冲突对象及 `property_moves` 修复建议；显式定位文字仍拒绝冲突。补充 W4 精确几何回归，实机复验待运行。

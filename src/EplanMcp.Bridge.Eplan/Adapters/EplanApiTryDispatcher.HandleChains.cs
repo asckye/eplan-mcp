@@ -12,7 +12,6 @@ internal sealed class ApiTryNativeElements(object? value, bool collection, strin
 }
 internal sealed partial class EplanApiTryDispatcher
 {
-    private static bool ChainReadOnly(string type) => SettingsHandle(type) || type.IndexOf("Setting", StringComparison.OrdinalIgnoreCase) >= 0;
     private static string? ChainResultType(object value, string signature)
     {
         string? known = ApiTryHandleDispatch.Type(value), declared = ApiTryHandleDispatch.ReturnType(signature);

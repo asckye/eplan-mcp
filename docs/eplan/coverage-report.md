@@ -160,7 +160,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_try | destructive | action.try.execute<br>action.try.plan | 268 | 88 | 2 | 173 | 0 | 3/2/1 | A9 A40 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 4/4/0 | — | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 7/2/1 | A39 A56 A68 A76 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 7/2/1 | A39 A56 A67 A68 A76 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
