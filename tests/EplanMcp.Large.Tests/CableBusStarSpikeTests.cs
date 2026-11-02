@@ -65,7 +65,10 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
                 new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
             double grid = geometry.GridSize;
             string suffix = page.Split('/')[^1];
-            // Place the node first so no pre-existing A-C logical edge constrains the variant observation.
+            // A and B first: a lone node has no logical endpoints and is refused. C after the node: facing collinear A and C
+            // would autoconnect directly before the node exists (T3b).
+            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "A", [20 * grid, 40 * grid], "Right");
+            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "B", [40 * grid, 20 * grid], "Up");
             JsonElement placed = await host.CallAsync("eplan_connection_create", new()
             {
                 ["project"] = session.Project,
@@ -74,8 +77,6 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
                 ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind = "t_node", position = new[] { 40 * grid, 40 * grid }, directions = _busDirections, variant } }),
             });
             Assert.Equal(ExecutionState.Committed, placed.GetProperty("execution").GetString());
-            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "A", [20 * grid, 40 * grid], "Right");
-            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "B", [40 * grid, 20 * grid], "Up");
             await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "C", [60 * grid, 40 * grid], "Left");
             await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
             JsonElement connections = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
