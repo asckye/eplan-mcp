@@ -60,13 +60,16 @@ public static class PlacementMoveExecution
                 && movedCables.Any(c => c.Locator.Type == p.Locator.Type && c.Locator.Oid == p.Locator.Oid))).ToArray();
             expected.Page.Placements.RemoveAll(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c)));
             actual.Page.Placements.RemoveAll(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c)));
+            // Described before the size-only bounds normalization below, so a mismatch reports the measured bounds.
+            JObject[] observed = actual.Page.Placements.Select(PlacementMoveMismatch.Describe).ToArray();
+            BridgeErrorException Mismatch(string check, string detail, object want, object found) => PlacementMoveMismatch.Create(check, detail, scene, expected, actual, observed, want, found);
             LayoutGuard.Model actualLayout = LayoutGuard.From(actual);
             if (!committed)
             { actualLayout.Lines = expected.Graphical.Select(s => new LayoutGuard.Segment { Points = s }).ToList(); }
             plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(beforeLayout, actualLayout)));
             var measuredBounds = new List<(JToken Row, double[]? Bounds)>();
             if (actual.Page.Placements.Count != expected.Page.Placements.Count)
-            { throw Mismatch("placement count"); }
+            { throw Mismatch("count", "placement count", expected.Page.Placements.Count, actual.Page.Placements.Count); }
             for (int i = 0; i < expected.Page.Placements.Count; i++)
             {
                 DrawingPlacement want = expected.Page.Placements[i], found = actual.Page.Placements[i];
@@ -97,21 +100,24 @@ public static class PlacementMoveExecution
                 { found.Locator.Digest = want.Locator.Digest; if (found.Parent is not null && want.Parent is not null) { found.Parent.Digest = want.Parent.Digest; } }
             }
             if (!actual.Complete || actual.PageType != scene.PageType)
-            { throw Mismatch("page inventory"); }
+            { throw Mismatch("closure", "page inventory", new { scene.Complete, scene.PageType }, new { actual.Complete, actual.PageType }); }
             for (int i = 0; i < expected.Page.Placements.Count; i++)
             {
                 JToken want = BridgeJson.FromObject(expected.Page.Placements[i]), found = BridgeJson.FromObject(actual.Page.Placements[i]);
                 if (!JToken.DeepEquals(want, found))
-                { throw Mismatch("placement " + want.ToString(Formatting.None) + " read back as " + found.ToString(Formatting.None)); }
+                {
+                    throw Mismatch((string?)want["kind"] is "PropertyPlacement" or "Text" ? "text" : "closure",
+                    FormattableString.Invariant($"placement {i} {(string?)want["kind"]} {want["locator"]!["type"]}/{want["locator"]!["oid"]}"), want, found);
+                }
             }
             if (!JToken.DeepEquals(BridgeJson.FromObject(expected.Page), BridgeJson.FromObject(actual.Page)))
-            { throw Mismatch("page geometry"); }
+            { throw Mismatch("closure", "page geometry", expected.Page, actual.Page); }
             if (!JToken.DeepEquals(BridgeJson.FromObject(expected.Pins), BridgeJson.FromObject(actual.Pins)))
-            { throw Mismatch("pins"); }
+            { throw Mismatch("pins", "pins", expected.Pins, actual.Pins); }
             if (!JToken.DeepEquals(BridgeJson.FromObject(scene.Logical), BridgeJson.FromObject(actual.Logical)))
-            { throw Mismatch("logical connections"); }
+            { throw Mismatch("connections", "logical connections", scene.Logical, actual.Logical); }
             if (committed && Segments(expected.Graphical) != Segments(actual.Graphical))
-            { throw Mismatch("autoconnect lines " + Segments(actual.Graphical) + " instead of " + Segments(expected.Graphical)); }
+            { throw Mismatch("connections", "autoconnect lines", Segments(expected.Graphical).Split(';'), Segments(actual.Graphical).Split(';')); }
             if (committed)
             {
                 foreach (var measured in measuredBounds)
@@ -143,5 +149,4 @@ public static class PlacementMoveExecution
                 && rows.Any(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, p.Locator) && !JToken.DeepEquals(r["before"], r["after"])));
         }
     }
-    private static BridgeErrorException Mismatch(string what) => new(ErrorReason.EplanOperationFailed, "Placement closure, following text, pins or connections differ from the approved move (" + what + ").");
 }

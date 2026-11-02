@@ -524,7 +524,13 @@ internal sealed class AcceptanceRedrawDriver(
 
     private async Task VerifyCablesAsync(JsonElement created, JsonElement[] cables)
     {
-        JsonElement[] actual = created.GetProperty("actualCores").EnumerateArray().ToArray();
+        // Live 2026-11-02: a committed cable batch came back without actualCores; name the fields and their sizes.
+        if (!created.TryGetProperty("actualCores", out JsonElement cores))
+        {
+            string fields = string.Join(", ", created.EnumerateObject().Select(p => FormattableString.Invariant($"{p.Name}={p.Value.GetRawText().Length}")));
+            throw new InvalidOperationException("eplan_connection_create committed without actualCores; fields (chars): " + fields);
+        }
+        JsonElement[] actual = cores.EnumerateArray().ToArray();
         Check(() => Assert.Equal(cables.Sum(c => c.GetProperty("cores").GetArrayLength()), actual.Length));
         Check(() => Assert.Equal(actual.Length, actual.Select(c => c.GetProperty("oid").GetInt64()).Distinct().Count()));
         foreach (JsonElement cable in cables)

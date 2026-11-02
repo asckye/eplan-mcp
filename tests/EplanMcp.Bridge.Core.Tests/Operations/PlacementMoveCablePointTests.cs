@@ -9,6 +9,79 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class PlacementMoveCablePointTests
 {
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LiveCable_DeltaZeroPlus64_CountMismatchReportsAddedAndRemovedPlacements(bool afterCommit)
+    {
+        var mover = new Mover { Failure = "count_both", AfterCommit = afterCommit, KeepOldPoint = true };
+        string before = BridgeJson.FromObject(mover.Scene).ToString();
+        int expectedCount = mover.Scene.Page.Placements.Count - 1;
+        Assert.Equal([0d, 64d], mover.Request["moves"]![0]!["delta_mm"]!.Values<double>());
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => mover.Execute()).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        string json = error.Metadata!["moveMismatch"];
+        JObject mismatch = JObject.Parse(json);
+        Assert.Equal(json, mismatch.ToString(Newtonsoft.Json.Formatting.None));
+        Assert.Equal("count", (string?)mismatch["check"]);
+        Assert.Contains(FormattableString.Invariant($"expected {expectedCount}, actual {expectedCount + 1}; added 2, removed 1"), error.Message, StringComparison.Ordinal);
+        Assert.Equal(expectedCount, (int)mismatch["expectedCount"]!);
+        Assert.Equal(expectedCount + 1, (int)mismatch["actualCount"]!);
+        Assert.Equal(2, (int)mismatch["addedTotal"]!);
+        Assert.Equal(1, (int)mismatch["removedTotal"]!);
+        Assert.Equal([69860L, 69861L], mismatch["added"]!.Select(p => (long)p["oid"]!));
+        JToken added = mismatch["added"]![0]!;
+        Assert.Equal(("ConnectionDefinitionPoint", 59, "+A1-WAdded"), ((string?)added["kind"], (int)added["type"]!, (string?)added["name"]));
+        Assert.Equal([120d, 260d], added["location"]!.Values<double>());
+        Assert.Equal([118.75, 258.75, 121.25, 261.25], added["bounds"]!.Values<double>());
+        JToken removed = Assert.Single(mismatch["removed"]!);
+        Assert.Equal(("ConnectionDefinitionPoint", 59, 69850L, "+A1-WOther"),
+            ((string?)removed["kind"], (int)removed["type"]!, (long)removed["oid"]!, (string?)removed["name"]));
+        Assert.Equal([120d, 260d], removed["location"]!.Values<double>());
+        Assert.Equal([118.75, 258.75, 121.25, 261.25], removed["bounds"]!.Values<double>());
+        Assert.Empty(mismatch["changed"]!);
+        Assert.Equal(before, BridgeJson.FromObject(mover.Scene).ToString());
+        Assert.Contains("Rollback", mover.Transactions.Calls);
+        Assert.DoesNotContain("CloseUndo", mover.Transactions.Calls);
+        Assert.Equal(afterCommit ? 1 : 0, mover.Transactions.Calls.Count(c => c == "Commit"));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LiveCable_ClosureMismatchReportsOriginalApprovedAndMeasuredGeometry(bool afterCommit)
+    {
+        var mover = new Mover { Failure = "line", AfterCommit = afterCommit };
+        string before = BridgeJson.FromObject(mover.Scene).ToString();
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => mover.Execute()).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        JObject mismatch = JObject.Parse(error.Metadata!["moveMismatch"]);
+        Assert.Equal("closure", (string?)mismatch["check"]);
+        Assert.Contains("closure: placement", error.Message, StringComparison.Ordinal);
+        Assert.Equal(1, (int)mismatch["changedTotal"]!);
+        JToken change = Assert.Single(mismatch["changed"]!);
+        foreach (string state in new[] { "before", "expected", "after" })
+        {
+            Assert.Equal(("Cable", 10005, 70000L, "+A1-WReview103"),
+                ((string?)change[state]!["kind"], (int)change[state]!["type"]!, (long)change[state]!["oid"]!, (string?)change[state]!["name"]));
+        }
+        Assert.Equal([80d, 128d], change["before"]!["location"]!.Values<double>());
+        Assert.Equal([80d, 128d, 160d, 128d], change["before"]!["bounds"]!.Values<double>());
+        Assert.Equal([80d, 192d], change["expected"]!["location"]!.Values<double>());
+        Assert.Equal([80d, 192d, 160d, 192d], change["expected"]!["bounds"]!.Values<double>());
+        Assert.Equal([80d, 192d], change["after"]!["location"]!.Values<double>());
+        Assert.Equal([80d, 192d, 160d, 196d], change["after"]!["bounds"]!.Values<double>());
+        Assert.Contains(mismatch["differences"]!, d => (string?)d["path"] == "/bounds/3" && (double?)d["expected"] == 192 && (double?)d["actual"] == 196);
+        Assert.Equal(before, BridgeJson.FromObject(mover.Scene).ToString());
+        Assert.Contains("Rollback", mover.Transactions.Calls);
+        Assert.DoesNotContain("CloseUndo", mover.Transactions.Calls);
+        Assert.Equal(afterCommit ? 1 : 0, mover.Transactions.Calls.Count(c => c == "Commit"));
+    }
+
+    [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]
@@ -249,6 +322,15 @@ public sealed class PlacementMoveCablePointTests
                     break;
                 case "other_point_deleted":
                     scene.Page.Placements.RemoveAll(p => p.Locator.Oid == 69850);
+                    break;
+                case "count_both":
+                    scene.Page.Placements.RemoveAll(p => p.Locator.Oid == 69850);
+                    foreach (long oid in new[] { 69860L, 69861L })
+                    {
+                        DrawingPlacement added = Point(oid, oid == 69860 ? 260 : 280);
+                        added.Properties["name"] = "+A1-WAdded";
+                        scene.Page.Placements.Add(added);
+                    }
                     break;
                 case "line":
                     scene.Page.Placements.Single(p => p.Kind == "Cable").Bounds![3] += 4;

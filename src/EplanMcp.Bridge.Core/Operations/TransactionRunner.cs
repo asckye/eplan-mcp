@@ -74,8 +74,14 @@ public static class TransactionRunner
                 refusal.Error.Execution = ExecutionState.RolledBack;
                 throw;
             }
-            throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Committed readback failed; all changes were rolled back. Re-read the page before retrying.", failure)
+            var error = new BridgeErrorException(ErrorReason.EplanOperationFailed, "Committed readback failed; all changes were rolled back. Re-read the page before retrying.", failure)
             { Error = { Execution = ExecutionState.RolledBack } };
+            if (failure is BridgeErrorException mismatch && mismatch.Error.Metadata?.TryGetValue("moveMismatch", out string? facts) == true)
+            {
+                error.Error.Metadata = new() { ["moveMismatch"] = facts };
+                error.Error.Message += " " + mismatch.Error.Message;
+            }
+            throw error;
         }
         try
         {

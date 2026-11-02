@@ -69,6 +69,22 @@ public sealed class PlacementMoveExecutionTests
         Assert.Equal(["Begin AI: eplan_placement_update", "Commit", "CloseUndo", "Dispose"], mover.Transactions.Calls);
     }
 
+    [Fact]
+    public void TextMismatch_ReportsMeasuredBoundsBeforeSizeOnlyNormalization()
+    {
+        var mover = new Mover { Failure = "child", PropertyBoundsOffset = 4.27875 };
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => mover.Execute()).Error;
+
+        JObject mismatch = JObject.Parse(error.Metadata!["moveMismatch"]);
+        Assert.Equal("text", (string?)mismatch["check"]);
+        JToken change = Assert.Single(mismatch["changed"]!);
+        Assert.Equal([22d, 22d], change["before"]!["location"]!.Values<double>());
+        Assert.Equal([27d, 22d], change["expected"]!["location"]!.Values<double>());
+        Assert.Equal([22d, 22d], change["after"]!["location"]!.Values<double>());
+        Assert.Equal([30.27875, 21d, 32.27875, 23d], change["after"]!["bounds"]!.Values<double>());
+    }
+
     [Theory]
     [InlineData("location")]
     [InlineData("child")]
@@ -86,6 +102,32 @@ public sealed class PlacementMoveExecutionTests
         Assert.Equal(before, BridgeJson.FromObject(mover.Scene).ToString());
         Assert.DoesNotContain("CloseUndo", mover.Transactions.Calls);
         Assert.Contains("Rollback", mover.Transactions.Calls);
+        if (failure is not ("cancel" or "pins"))
+        {
+            JObject mismatch = JObject.Parse(error.Metadata!["moveMismatch"]);
+            string check = failure switch { "child" => "text", "pins" => "pins", "logical" or "graphical" => "connections", _ => "closure" };
+            Assert.Equal(check, (string?)mismatch["check"]);
+            Assert.Contains(check + ":", error.Message, StringComparison.Ordinal);
+            Assert.NotEmpty(mismatch["differences"]!);
+        }
+    }
+
+    [Fact]
+    public void PinsMismatch_ReportsAddedPinAndRestoresTheScene()
+    {
+        var mover = new Mover { Failure = "extra_pin" };
+        string before = BridgeJson.FromObject(mover.Scene).ToString();
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => mover.Execute()).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        JObject mismatch = JObject.Parse(error.Metadata!["moveMismatch"]);
+        Assert.Equal("pins", (string?)mismatch["check"]);
+        JToken difference = Assert.Single(mismatch["differences"]!);
+        Assert.Equal("/17~11~11", (string?)difference["path"]);
+        Assert.Equal(JTokenType.Null, difference["expected"]!.Type);
+        Assert.Equal([25d, 20d], difference["actual"]!["location"]!.Values<double>());
+        Assert.Equal(before, BridgeJson.FromObject(mover.Scene).ToString());
     }
 
     [Theory]
@@ -160,6 +202,8 @@ public sealed class PlacementMoveExecutionTests
             { Scene.Page.Placements[3].Location = [41, 20]; }
             if (Failure == "pins")
             { Scene.Pins["17/1/0"].Location = [20, 20]; }
+            if (Failure == "extra_pin")
+            { Scene.Pins["17/1/1"] = new() { Location = [25, 20], Direction = "Right" }; }
             if (Failure == "cancel")
             { OperationContext.Current.Cancel(); }
         };
