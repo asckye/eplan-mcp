@@ -92,6 +92,20 @@ public sealed class ConnectionCreatePlannerTests
             new JArray(plan["graphicalAutoconnect"]!.OrderBy(s => s.ToString(Newtonsoft.Json.Formatting.None), StringComparer.Ordinal)).ToString(Newtonsoft.Json.Formatting.None));
     }
 
+    [Fact]
+    public void NodeOwners_SymbolReferenceWithOffsetPin_IsANode_DevicesAreNot()
+    {
+        // Live 2026-11-02 (customer page): TOUR variant 0 at branchT0 was taken for a device, splitting X6:1 from I2.
+        (string, double[])[] pins =
+        [
+            ("42/5/0", [40, 40]), ("42/5/1", [40, 40]), ("42/5/2", [42, 40]),
+            ("42/6/0", [60, 60]), ("42/6/1", [60, 60]),
+            ("17/1/0", [0, 0]), ("17/1/1", [0, 3]),
+        ];
+
+        Assert.Equal(["42/5", "42/6"], ConnectionCreatePlanner.NodeOwners(pins, ["42/5"]).Order(StringComparer.Ordinal));
+    }
+
     private static ConnectionCreateFixture TNodeVariants()
     {
         var fixture = new ConnectionCreateFixture();

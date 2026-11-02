@@ -305,10 +305,15 @@ public static class ConnectionCreatePlanner
             foreach (string key in group)
             { groups[key] = group; }
         }
-        // Acceptance trial: an existing corner or T-node keeps all its pins at one point. Its pins are not logical ends (EPLAN
-        // connects the devices through it), and a point no new segment touches predicts nothing.
-        var nodeOwners = new HashSet<string>(scene.Pins.GroupBy(p => Owner(p.Key), StringComparer.Ordinal)
-            .Where(g => g.Count() > 1 && g.Select(p => Key(p.Value.Location)).Distinct(StringComparer.Ordinal).Count() == 1).Select(g => g.Key), StringComparer.Ordinal);
+        // Acceptance trial: an existing corner or T-node's pins are not logical ends (EPLAN connects the devices through it),
+        // and a point no new segment touches predicts nothing. A64: a variant's offset pin still belongs to the same node.
+        HashSet<string> nodeOwners = NodeOwners(scene.Pins.Select(p => (p.Key, p.Value.Location)), scene.Page.Placements.Where(p => p.Kind == "SymbolReference").Select(p => FormattableString.Invariant($"{p.Locator.Type}/{p.Locator.Oid}")));
+        foreach (string owner in nodeOwners)
+        {
+            var group = new HashSet<string>(scene.Pins.Where(p => Owner(p.Key) == owner).SelectMany(p => groups[Key(p.Value.Location)]), StringComparer.Ordinal);
+            foreach (string key in group)
+            { groups[key] = group; }
+        }
         var touched = new HashSet<string>(segments.SelectMany(s => s).Select(Key), StringComparer.Ordinal);
         foreach (HashSet<string> connected in groups.Values.Distinct().Where(g => g.Overlaps(touched)))
         {
@@ -413,6 +418,14 @@ public static class ConnectionCreatePlanner
     private static bool Obstacle(DrawingPlacement placement) => placement.Kind != "LocationBox" && LayoutGuard.Positioned(placement) && DrawingCoordinates.ValidBounds(placement.Bounds);
 
     private static string Owner(string pin) => string.Join("/", pin.Split('/').Take(2));
+    // Nodes are SymbolReference placements (devices are Function/Terminal); older evidence knows them by all pins at one point.
+    internal static HashSet<string> NodeOwners(IEnumerable<(string Pin, double[] Location)> pins, IEnumerable<string> symbolOwners)
+    {
+        var references = new HashSet<string>(symbolOwners, StringComparer.Ordinal);
+        return new HashSet<string>(pins.GroupBy(p => Owner(p.Pin), StringComparer.Ordinal)
+            .Where(g => g.Count() > 1 && (references.Contains(g.Key) || g.Select(p => FormattableString.Invariant($"{p.Location[0]},{p.Location[1]}")).Distinct(StringComparer.Ordinal).Count() == 1))
+            .Select(g => g.Key), StringComparer.Ordinal);
+    }
 
     private static string FormatPoint(double[] location) => string.Join(",", location.Select(v => v.ToString("R", CultureInfo.InvariantCulture)));
 

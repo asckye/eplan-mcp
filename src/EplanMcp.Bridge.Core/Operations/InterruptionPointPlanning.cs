@@ -47,9 +47,15 @@ public static class InterruptionPointPlanning
             string name = (string)page["page"]!;
             foreach (JProperty pin in ((JObject)page["pins"]!).Properties())
             { string key = Vertex(name, pin.Value["location"]!); Group(key); pins.Add(pin.Name, key); }
-            foreach (var owner in ((JObject)page["pins"]!).Properties().GroupBy(p => string.Join("/", p.Name.Split('/').Take(2)), StringComparer.Ordinal)
-                .Where(g => g.Count() > 1 && g.Select(p => Vertex(name, p.Value["location"]!)).Distinct(StringComparer.Ordinal).Count() == 1))
-            { nodePins.UnionWith(owner.Select(p => p.Name)); }
+            JProperty[] pagePins = [.. ((JObject)page["pins"]!).Properties()];
+            HashSet<string> nodes = ConnectionCreatePlanner.NodeOwners(pagePins.Select(p => (p.Name, p.Value["location"]!.Values<double>().ToArray())),
+                page["drawing"]!["placements"]!.Where(p => (string?)p["kind"] == "SymbolReference").Select(p => (string?)p["locator"]!["type"] + "/" + (string?)p["locator"]!["oid"]));
+            foreach (var owner in pagePins.GroupBy(p => string.Join("/", p.Name.Split('/').Take(2)), StringComparer.Ordinal).Where(g => nodes.Contains(g.Key)))
+            {
+                nodePins.UnionWith(owner.Select(p => p.Name));
+                foreach (JProperty pin in owner)
+                { Join(Vertex(name, owner.First().Value["location"]!), Vertex(name, pin.Value["location"]!)); }
+            }
             IEnumerable<JToken> lines = page["graphical"]!;
             if (name == scene.Page.Page)
             { lines = lines.Concat(plan["graphicalAutoconnect"]!); }
