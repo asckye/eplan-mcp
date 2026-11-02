@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_connection_create` 支持用 `t_node.variant` 选择同方向引脚的 SPECIAL 变体，以及用 `interruption_point.sort_code` 在放置事务中设置排序码 24809 并读回；省略参数沿用原行为。D1/D2 的变体流向及跨页配对 Spike 已补，待实机运行。
+
 ## [0.4.1] - 2026-11-02
 
 - 按 A77 拒绝三个已使 EPLAN 崩溃的 API 写侧，保留 4014 分母并单列 `refused_unsafe`；批量验证跳过这些侧，失联时停止并暂停写入，导入时丢弃未实际观察的后续结果。

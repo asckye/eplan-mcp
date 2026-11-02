@@ -33,6 +33,28 @@ public sealed class ToolContractTests : IDisposable
     public void Dispose() => _services.Dispose();
 
     [Fact]
+    public void ConnectionOptions_AreOptionalAndRestrictedToTheirItemKinds()
+    {
+        JsonElement[] branches = Tools.Single(t => t.Name == ConnectionCreateTools.Tool).InputSchema
+            .GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf").EnumerateArray().ToArray();
+        foreach (JsonElement branch in branches)
+        {
+            JsonElement properties = branch.GetProperty("properties");
+            string? kind = properties.GetProperty("kind").GetProperty("const").GetString();
+            Assert.Equal(kind == "t_node", properties.TryGetProperty("variant", out JsonElement variant));
+            Assert.Equal(kind == "interruption_point", properties.TryGetProperty("sort_code", out JsonElement sort));
+            Assert.DoesNotContain(branch.GetProperty("required").EnumerateArray(), p => p.GetString() is "variant" or "sort_code");
+            if (kind == "t_node")
+            { Assert.Equal("integer", variant.GetProperty("type").GetString()); }
+            if (kind == "interruption_point")
+            {
+                Assert.Equal("integer", sort.GetProperty("type").GetString());
+                Assert.Equal(0, sort.GetProperty("minimum").GetInt32());
+            }
+        }
+    }
+
+    [Fact]
     public void PageUpdate_OffersOptionalDescriptionAndFrame_WithUnchangedWriteAnnotations()
     {
         Tool tool = Tools.Single(t => t.Name == PageWriteTools.UpdateTool);

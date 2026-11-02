@@ -19,6 +19,64 @@ namespace EplanMcp.Large.Tests;
 [Trait("Spike", "D2")]
 public sealed class InterruptionPairingSpikeTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
+    private static readonly int[] _crossPageSortCodes = [1, 3, 4, 2];
+
+    [Fact]
+    public async Task TwoPages_DefaultThenSortCodes_PrintsNativeCounterparts()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string[] pages = await session.CreatePagesAsync(2);
+        await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+            new() { Project = session.Project, Page = pages[0] }, TestContext.Current.CancellationToken);
+        double grid = geometry.GridSize;
+        string suffix = pages[0].Split('/')[^1];
+        string sharedName = "=GAA+A1-D2SORT" + suffix;
+        string[] labels = ["L", "R", "P1", "P2"];
+        string[] initialNames = labels.Select(label => sharedName + label).ToArray();
+        for (int i = 0; i < labels.Length; i++)
+        {
+            JsonElement placed = await host.CallAsync("eplan_connection_create", new()
+            {
+                ["project"] = session.Project,
+                ["page"] = pages[i / 2],
+                ["response_format"] = "detailed",
+                ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind = "interruption_point", name = initialNames[i],
+                    position = new[] { (25 + 30 * (i % 2)) * grid, 40 * grid }, direction = i % 2 == 0 ? "Right" : "Left", counterpart_pages = pages } }),
+            });
+            Assert.Equal(ExecutionState.Committed, placed.GetProperty("execution").GetString());
+        }
+        string helper = OfflineHost.RepositoryFile("tests", "EplanMcp.Large.ConnectionHelper", "EplanMcp.Large.ConnectionHelper.dll");
+        Assert.True(File.Exists(helper), "Build tests/EplanMcp.Large.ConnectionHelper before running D2.");
+        await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
+        try
+        {
+            // Keep the existing product scope guard: only the test helper renames this known four-point inventory.
+            JsonElement initial = await ProbeAsync(new { project = session.Project, pages, mode = "read" }, "D2 sort setup");
+            JsonElement[] inventory = initial.GetProperty("observation").GetProperty("interruptions").EnumerateArray().ToArray();
+            Assert.Equal(4, inventory.Length);
+            long[] ids = initialNames.Select(name => Assert.Single(inventory, p => p.GetProperty("name").GetString() == name).GetProperty("oid").GetInt64()).ToArray();
+            TestContext.Current.TestOutputHelper!.WriteLine($"D2 labels={JsonSerializer.Serialize(labels)}, oids={JsonSerializer.Serialize(ids)}, pages={JsonSerializer.Serialize(pages)}");
+            foreach (bool sorted in new[] { false, true })
+            {
+                string scenario = sorted ? "sort L=1,P2=2,R=3,P1=4; intended L-P2,R-P1" : "default without sort codes";
+                JsonElement changed = sorted
+                    ? await ProbeAsync(new { project = session.Project, pages, mode = "rename", name = sharedName, oids = ids, sort_codes = _crossPageSortCodes }, "D2 " + scenario + " setup")
+                    : await ProbeAsync(new { project = session.Project, pages, mode = "rename", name = sharedName, oids = ids }, "D2 " + scenario + " setup");
+                Assert.True(changed.GetProperty("success").GetBoolean(), "Four-point setup failed; inspect the printed native error.");
+                var generated = await eplan.CallOrErrorAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = pages });
+                TestContext.Current.TestOutputHelper!.WriteLine($"D2 {scenario} generate: {generated.Result}");
+                Assert.True(generated.Succeeded, "Generation setup failed; inspect the printed native error.");
+                await ProbeAsync(new { project = session.Project, pages, mode = "read" }, "D2 " + scenario + " native counterparts");
+            }
+        }
+        finally
+        {
+            await PlanStepLiveSession.ActionAsync("EplApiModuleAction /unregister:\"EplanMcp.Large.ConnectionHelper\" /Quiet");
+        }
+    }
+
     [Theory]
     [InlineData(true, false)]
     [InlineData(true, true)]

@@ -81,6 +81,9 @@ public sealed class ConnectionCreateContractTests
             ["counterpart_pages"] = Array(Text(), 1, 20),
         });
         interruption["properties"]!["counterpart_pages"]!["uniqueItems"] = true;
+        interruption["properties"]!["sort_code"] = new JObject { ["type"] = "integer", ["minimum"] = 0 };
+        JObject tNode = Node("t_node", 3);
+        tNode["properties"]!["variant"] = new JObject { ["type"] = "integer" };
         JObject cable = Object(new()
         {
             ["kind"] = Constant("cable_definition"),
@@ -100,7 +103,7 @@ public sealed class ConnectionCreateContractTests
         {
             ["project"] = Text(),
             ["page"] = Text(),
-            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), Node("t_node", 3), Node("potential_point", 1), interruption, cable) }, 1, 50),
+            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable) }, 1, 50),
             ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = false },
             ["snap_to_grid"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["response_format"] = new JObject { ["type"] = "string", ["enum"] = new JArray("concise", "detailed"), ["default"] = "concise" },
@@ -133,6 +136,7 @@ public sealed class ConnectionCreateContractTests
             ["pin"] = Point(),
             ["direction"] = Text(),
             ["crossReference"] = new JObject { ["type"] = new JArray("string", "null") },
+            ["sortCode"] = new JObject { ["type"] = new JArray("string", "null") },
             ["counterparts"] = Array(counterpart, 0, 1),
         });
         JObject scope = Object(new()

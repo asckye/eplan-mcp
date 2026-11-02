@@ -104,6 +104,13 @@ public sealed class SpikeAction : IEplAction
         if (points.Length != ids.Length || finder.GetInterruptionPoints(null).Any(p => p.Name == name && !pages.Any(page => page.Name == p.Page.Name)))
         { throw new InvalidOperationException("Rename must stay within the new pages and an isolated business name."); }
         foreach (InterruptionPoint point in points)
-        { point.Name = name; }
+        {
+            point.Name = name;
+            if (request["sort_codes"] is JArray codes)
+            {
+                using InterruptionPointPropertyList properties = point.Properties;
+                properties[(Properties.InterruptionPoint)24809] = (long)codes[Array.IndexOf(ids, point.ObjectIdentifier)]!;
+            }
+        }
     }
 }

@@ -118,6 +118,8 @@ public static class InterruptionPointPlanning
             var pin = new JArray(row["position"]!.Values<double>().Zip(row["symbol"]!["connectionPoints"]![0]!["location"]!.Values<double>(), (a, b) => a + b));
             Require(JToken.DeepEquals(placed["position"], row["position"]) && JToken.DeepEquals(placed["pin"], pin)
                 && (string?)placed["direction"] == (string?)row["interruption"]!["direction"], "Interruption name, position, pin or direction readback differs.");
+            if (row["interruption"]!["sort_code"] is { } sortCode)
+            { Require((string?)placed["sortCode"] == sortCode.ToString(), "Interruption sort code readback differs."); }
             foreach (JToken point in pair)
             {
                 JToken[] peers = pair.Where(p => !ReferenceEquals(p, point)).ToArray();

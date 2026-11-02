@@ -21,6 +21,67 @@ namespace EplanMcp.Large.Tests;
 public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     private static readonly string[] _starDirections = ["Up", "Down", "Right"];
+    private static readonly string[] _busDirections = ["Down", "Left", "Right"];
+
+    [Fact]
+    public async Task DownBranchTNode_EachVariant_PrintsLogicalEndpoints()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        var nodes = new List<JsonElement>();
+        string? cursor = null;
+        do
+        {
+            JsonElement found = await eplan.CallAsync("eplan_symbol_search", new()
+            {
+                ["project"] = session.Project,
+                ["library"] = "SPECIAL",
+                ["kind"] = "t_node",
+                ["limit"] = 200,
+                ["cursor"] = cursor,
+            });
+            foreach (JsonElement symbol in found.GetProperty("symbols").EnumerateArray()
+                .Where(s => s.GetProperty("name").GetString() is "TLRO" or "TLRU" or "TOUL" or "TOUR"))
+            {
+                nodes.Add(symbol.Clone());
+                TestContext.Current.TestOutputHelper!.WriteLine($"D1 SPECIAL variant and pins: {symbol}");
+            }
+            cursor = found.GetProperty("nextCursor").GetString();
+        } while (cursor is not null);
+        JsonElement[] busVariants = nodes.Where(s => s.GetProperty("connectionPoints").GetArrayLength() == 3
+            && s.GetProperty("connectionPoints").EnumerateArray().Select(p => p.GetProperty("direction").GetString())
+                .OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(_busDirections)).ToArray();
+        Assert.NotEmpty(busVariants);
+        string[] pages = await session.CreatePagesAsync(busVariants.Length);
+        await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        ListData<SymbolSearchItem> devices = await bridge.InvokeAsync<SymbolSearchArgs, ListData<SymbolSearchItem>>(OperationNames.SymbolSearch,
+            new() { Project = session.Project, Library = "IEC_symbol", NameContains = "BAT", Limit = 200 }, TestContext.Current.CancellationToken);
+        Assert.Equal(devices.Total, devices.Items.Count);
+        for (int i = 0; i < busVariants.Length; i++)
+        {
+            string page = pages[i];
+            int variant = busVariants[i].GetProperty("variant").GetInt32();
+            PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+                new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+            double grid = geometry.GridSize;
+            string suffix = page.Split('/')[^1];
+            // Place the node first so no pre-existing A-C logical edge constrains the variant observation.
+            JsonElement placed = await host.CallAsync("eplan_connection_create", new()
+            {
+                ["project"] = session.Project,
+                ["page"] = page,
+                ["response_format"] = "detailed",
+                ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind = "t_node", position = new[] { 40 * grid, 40 * grid }, directions = _busDirections, variant } }),
+            });
+            Assert.Equal(ExecutionState.Committed, placed.GetProperty("execution").GetString());
+            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "A", [20 * grid, 40 * grid], "Right");
+            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "B", [40 * grid, 20 * grid], "Up");
+            await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "C", [60 * grid, 40 * grid], "Left");
+            await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
+            JsonElement connections = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
+            TestContext.Current.TestOutputHelper!.WriteLine($"D1 bus variant={variant.ToString(CultureInfo.InvariantCulture)}, page={page}, logical endpoints: {connections}");
+        }
+    }
 
     [Theory]
     [InlineData(true)]

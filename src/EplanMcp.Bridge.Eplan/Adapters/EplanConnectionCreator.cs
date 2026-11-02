@@ -126,6 +126,11 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     if (placed is not InterruptionPoint point)
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "BPF did not create an interruption point."); }
                     point.Name = (string)interruption["name"]!;
+                    if (interruption["sort_code"] is { } sortCode)
+                    {
+                        using InterruptionPointPropertyList properties = point.Properties;
+                        properties[(Properties.InterruptionPoint)24809] = (long)sortCode;
+                    }
                     if (point.Name != (string)interruption["name"]!)
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs; supply the exact full name."); }
                 }
@@ -179,6 +184,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 // A55: acquire once, release before returning; no wrapper survives into Abort or compensation.
                 using InterruptionPointPropertyList properties = point.Properties;
                 using PropertyValue reference = properties[(Properties.InterruptionPoint)24300];
+                using PropertyValue sort = properties[(Properties.InterruptionPoint)24809];
                 PinBase pin = point.GraphicalConnectionPoints.Single();
                 points.Add(new JObject
                 {
@@ -189,6 +195,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     ["pin"] = new JArray(point.Location.X + pin.Location.X, point.Location.Y + pin.Location.Y),
                     ["direction"] = pin.Direction.ToString(),
                     ["crossReference"] = reference.IsEmpty ? null : reference.ToString(),
+                    ["sortCode"] = sort.IsEmpty ? null : sort.ToString(),
                     // Live T7b: CrossReferencedObjectsAll includes the point itself.
                     ["counterparts"] = new JArray(point.CrossReferencedObjectsAll.Where(peer => peer.ObjectIdentifier != point.ObjectIdentifier).Select(peer => peer is InterruptionPoint other
                         ? new JObject { ["page"] = other.Page.Name, ["name"] = other.Name, ["oid"] = other.ObjectIdentifier }

@@ -9,6 +9,73 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class ConnectionCreatePlannerTests
 {
     [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void TNode_ExplicitVariant_SelectsAmongMatchingPins(int variant)
+    {
+        var fixture = TNodeVariants();
+        fixture.Request["items"]![0]!["variant"] = variant;
+        JToken symbol = Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!;
+        Assert.Equal("TLRU", (string?)symbol["name"]);
+        Assert.Equal(variant, (int)symbol["variant"]!);
+    }
+
+    [Fact]
+    public void TNode_UnknownVariant_ListsOnlyVariantsWithRequestedPins()
+    {
+        var fixture = TNodeVariants();
+        fixture.Symbols.Add(ConnectionCreateFixture.Variant("TLRO", "TNodeUp", 9, "Left", "Right", "Up"));
+        fixture.Request["items"]![0]!["variant"] = 9;
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Contains("/items/0/variant", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Contains("Available variants for the requested cardinal pins: 0, 1, 2, 3.", error.Metadata["violations"], StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("null")]
+    [InlineData("1.0")]
+    [InlineData("\"1\"")]
+    [InlineData("2147483648")]
+    public void TNode_NonIntegerVariant_IsInvalid(string value)
+    {
+        var fixture = TNodeVariants();
+        fixture.Request["items"]![0]!["variant"] = JToken.Parse(value);
+        Invalid(fixture, "/items/0/variant");
+    }
+
+    [Fact]
+    public void TNode_NoVariant_PreservesUniqueMatchRequirement()
+    {
+        var fixture = TNodeVariants();
+        Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error.Reason);
+        fixture.Symbols.RemoveRange(1, 3);
+        Assert.Equal(0, (int)Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!["variant"]!);
+    }
+
+    [Fact]
+    public void TNode_ExplicitVariant_KeepsPinGeometryChecks()
+    {
+        var fixture = TNodeVariants();
+        fixture.Symbols[2].ConnectionPoints[0].Location = [4, 0];
+        fixture.Request["items"]![0]!["variant"] = 2;
+        Invalid(fixture, "/items/0/variant");
+    }
+
+    private static ConnectionCreateFixture TNodeVariants()
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.Scene.Pins.Clear();
+        fixture.Scene.Page.Placements.Clear();
+        fixture.Symbols.Clear();
+        fixture.Symbols.AddRange(Enumerable.Range(0, 4).Select(v => ConnectionCreateFixture.Variant("TLRU", "TNodeDown", v, "Down", "Left", "Right")));
+        fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("t_node", [40, 40], "Down", "Left", "Right"));
+        return fixture;
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void LayoutGuard_ParallelDifferentNet_IsWarningUnlessStrict(bool strict)

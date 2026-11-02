@@ -81,6 +81,7 @@
 - 电缆画在**主干段**（A 与节点之间）上：A→B 与 A→C **共用同一个连接定义点**（同一 oid），即一根芯线分配给经过该段的全部逻辑连接。
 - 连接得到芯线后，连接的颜色（31004）与截面（31002）取自芯线：本例芯线未定义颜色，颜色变为空、截面变为电缆默认 0.5；未经过电缆的连接保持连接定义的 BK / 1,5。
 - 对重画的影响：芯线归属由电缆所在的图形段决定，不按逻辑连接逐条指定；要让一根芯线（如 RD）只属于某一条逻辑连接，电缆必须画在只有这条连接经过的分支段上。— Large `CableBusStarSpikeTests`。
+- 2026-11-02 官方文档补充：[T-node Direction](https://www.eplan.help/en-us/Infoportal/Content/Plattform/2.9/Content/htm/egedgui_d_tstueck.htm) 说明四方向各四变体，变体决定连接流向；无编号点为来源，直线 1 与斜线 2 决定目标次序。结合 A52 的 SPECIAL 符号事实，产品按方向引脚过滤后允许显式选择符号变体。各变体在 EPLAN 2026.0.3 的实际逻辑端点尚待 D1 Spike，不从原星形实验推定链形结果。
 
 ### A65. 同名中断点的配对（D2 实验，同上）
 - 同名中断点先按页在项目中的顺序、再按页内位置从左到右排序，相邻两两配对（第 1 与第 2、第 3 与第 4……）；与创建顺序无关（正序、倒序创建结果相同）。
@@ -88,6 +89,7 @@
 - 同页时（从左到右 A、B、C、D）：两个 → A–B；三个 → A–B，C 落单；四个 → A–B、C–D。
 - 落单的中断点不产生逻辑连接，生成连接时不报错。
 - 对重画的影响：同页同名中断点（如客户页的 I2/I5）要按页内从左到右的位置安排，使相邻两个正好是要连接的一对。— Large `InterruptionPairingSpikeTests`。
+- 2026-11-02 官方文档补充：上述为未指定排序码的观察；[INTERRUPTIONPOINT_SORT_CODE](https://www.eplan.help/en-us/infoportal/content/api/2022/Eplan.EplApi.DataModelu~Eplan.EplApi.DataModel.InterruptionPointPropertyList~INTERRUPTIONPOINT_SORT_CODE.html)（24809）定义中断点排序次序，本机 2026.0.3 `Eplan.EplApi.DataModelu.xml` 同名属性确认值为 Int64。D2 待验输入为两页 L/R、P1/P2，默认无排序码，再设 L=1、P2=2、R=3、P1=4，打印原生对端；目标 L–P2、R–P1 尚未实机验证。本次不运行 EPLAN。
 
 ### D5 离线实现说明（2026-10-31，未运行 EPLAN）
 - A55/A65 的无对端设备或落单中断点允许零逻辑连接；产品仍完整核对实际自动连线、名称、位置、引脚方向和原生配对，两侧真实设备引脚仍须连通。

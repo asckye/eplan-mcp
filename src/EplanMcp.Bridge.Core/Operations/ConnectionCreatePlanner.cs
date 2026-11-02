@@ -73,6 +73,7 @@ public static class ConnectionCreatePlanner
         var requested = new JArray();
         var resolved = new JArray();
         var interruptions = new Dictionary<string, JObject>(StringComparer.Ordinal);
+        var requestedVariants = new Dictionary<string, (int Number, string Pointer)>(StringComparer.Ordinal);
         string Key(double[] p) => FormattableString.Invariant($"{p[0]},{p[1]}");
         double[] Point(JToken? token, string at)
         {
@@ -128,7 +129,9 @@ public static class ConnectionCreatePlanner
             bool wire = (string?)item["kind"] == "wire";
             if ((string?)item["kind"] == "interruption_point")
             {
-                Members(item, at, "kind name direction position counterpart_pages", "");
+                Members(item, at, "kind name direction position counterpart_pages", "sort_code");
+                Require(item["sort_code"] is null || item["sort_code"]!.Type == JTokenType.Integer
+                    && long.TryParse(item["sort_code"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out _), at + "/sort_code", "Supply a nonnegative Int64 integer.");
                 Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])
                     && !((string)item["name"]!).Any(char.IsControl), at + "/name", "Supply the exact shared full business name (1..200 characters).");
                 Require(item["direction"]?.Type == JTokenType.String, at + "/direction", "Supply Up, Down, Left or Right.");
@@ -139,11 +142,17 @@ public static class ConnectionCreatePlanner
                 interruptions.Add(Key(point), (JObject)item.DeepClone());
                 continue;
             }
-            Members(item, at, wire ? "kind from to points" : "kind position directions", "");
+            Members(item, at, wire ? "kind from to points" : "kind position directions", (string?)item["kind"] == "t_node" ? "variant" : "");
             if (!wire)
             {
                 Require(item["directions"] is JArray d && d.All(v => v.Type == JTokenType.String), at + "/directions", "Supply a direction array.");
-                Node(Point(item["position"], at + "/position"), item["directions"]!.Values<string>().Select(v => v!).ToArray(), (string?)item["kind"] ?? "", at);
+                double[] point = Point(item["position"], at + "/position");
+                Node(point, item["directions"]!.Values<string>().Select(v => v!).ToArray(), (string?)item["kind"] ?? "", at);
+                if (item["variant"] is { } variant)
+                {
+                    Require(variant.Type == JTokenType.Integer && int.TryParse(variant.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _), at + "/variant", "Supply an Int32 variant number.");
+                    requestedVariants.Add(Key(point), ((int)variant, at + "/variant"));
+                }
                 continue;
             }
             Require(item["points"] is JArray { Count: >= 2 and <= 32 }, at + "/points", "Supply 2..32 orthogonal points.");
@@ -204,6 +213,12 @@ public static class ConnectionCreatePlanner
             // A52/S40: PCP has one offset pin and mirrored variants sharing its direction.
             if (node.Kind is "potential_point" or "interruption_point" && matches.Length > 0)
             { matches = matches.Where(s => s.Variant == matches[0].Variant).ToArray(); }
+            if (requestedVariants.TryGetValue(Key(node.Point), out var requestedVariant))
+            {
+                Require(matches.Any(s => s.Variant == requestedVariant.Number), requestedVariant.Pointer,
+                    "Available variants for the requested cardinal pins: " + string.Join(", ", matches.Select(s => s.Variant.ToString(CultureInfo.InvariantCulture)).Distinct(StringComparer.Ordinal)) + ".");
+                matches = matches.Where(s => s.Variant == requestedVariant.Number).ToArray();
+            }
             SymbolSearchItem symbol = matches.Length == 1 ? matches[0] : throw Missing("Select a verified SPECIAL variant with the requested cardinal pins using eplan_symbol_search.");
             double[] offset = symbol.ConnectionPoints[0].Location;
             double[] position = [node.Point[0] - offset[0], node.Point[1] - offset[1]];

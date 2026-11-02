@@ -30,7 +30,7 @@ internal sealed class ConnectionCreateTools
         [Description("Project name/path")] string project, string page,
         [Description("1-50 wire/corner/t_node/potential_point/interruption_point/cable_definition; interruptions require counterpart_pages; see usage")] JsonElement[] items,
         bool dry_run = false, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
-        [Description(PageDisplay.Description)] bool show_page = false,
+        [Description("Open this page before drawing; UI only, no data change.")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
         var args = new { project, page, items, dry_run, snap_to_grid, response_format };

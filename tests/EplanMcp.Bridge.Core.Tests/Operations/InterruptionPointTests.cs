@@ -7,6 +7,55 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class InterruptionPointTests
 {
+    [Theory]
+    [InlineData(0L)]
+    [InlineData(3L)]
+    [InlineData(long.MaxValue)]
+    public void SortCode_ReachesPlacementAndReadsBack(long sortCode)
+    {
+        var fake = new InterruptionPointFixture();
+        fake.Request["items"]!.Last!["sort_code"] = sortCode;
+        JObject result = fake.Execute();
+        Assert.Equal(sortCode, fake.PlacedSortCode);
+        Assert.Equal(sortCode.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            (string?)Assert.Single(result["interruptionPoints"]!, p => (long?)p["oid"] == 91)["sortCode"]);
+        Assert.Single(fake.Placement.Calls, c => c == "Commit");
+    }
+
+    [Theory]
+    [InlineData("-1")]
+    [InlineData("1.5")]
+    [InlineData("\"3\"")]
+    [InlineData("null")]
+    [InlineData("9223372036854775808")]
+    public void SortCode_InvalidValue_IsRejectedBeforePlacement(string value)
+    {
+        var fake = new InterruptionPointFixture();
+        fake.Request["items"]!.Last!["sort_code"] = JToken.Parse(value);
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Plan()).Error;
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("/items/1/sort_code", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Empty(fake.Placement.Calls);
+    }
+
+    [Fact]
+    public void SortCode_Omitted_IsNotWritten()
+    {
+        var fake = new InterruptionPointFixture();
+        Assert.Null(Assert.Single(fake.Plan()["symbols"]!, s => s["interruption"] is not null)["interruption"]!["sort_code"]);
+        fake.Execute();
+        Assert.Null(fake.PlacedSortCode);
+    }
+
+    [Fact]
+    public void SortCode_ReadbackMismatch_RollsBackPlacement()
+    {
+        var fake = new InterruptionPointFixture { Failure = "sort_code" };
+        fake.Request["items"]!.Last!["sort_code"] = 3;
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error.Execution);
+        Assert.Equal(0, fake.State);
+    }
+
     [Fact]
     public void Plan_ExplicitScopeAndPairEvidence_DoesNotWrite()
     {

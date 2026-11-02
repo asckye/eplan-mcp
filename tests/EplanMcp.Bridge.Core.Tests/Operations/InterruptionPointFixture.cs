@@ -21,6 +21,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     internal int Undos { get; private set; }
     internal string DrawingRevision { get; set; } = "initial";
     private bool _connected;
+    internal long? PlacedSortCode { get; private set; }
     internal bool Isolated { get; set; }
     internal bool Dangling { get; set; }
     internal JObject Request => Base.Request;
@@ -48,6 +49,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     {
         Assert.Contains(symbols, s => (string?)s["interruption"]?["name"] == BusinessName);
         State = 1;
+        PlacedSortCode = (long?)Assert.Single(symbols, s => s["interruption"] is not null)["interruption"]!["sort_code"];
         if (Failure == "cancel")
         { OperationContext.Current.Cancel(); }
         if (Failure == "placement")
@@ -94,6 +96,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
         if (State > 0)
         {
             points.Add(Point(ConnectionCreateFixture.PageName, 91, [60d, 60d], "Up"));
+            points.Last!["sortCode"] = Failure == "sort_code" ? "999" : PlacedSortCode?.ToString(System.Globalization.CultureInfo.InvariantCulture);
             foreach (JToken point in points)
             {
                 JToken[] others = points.Where(p => !ReferenceEquals(p, point)).ToArray();
@@ -136,6 +139,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
         ["pin"] = new JArray(position),
         ["direction"] = direction,
         ["crossReference"] = null,
+        ["sortCode"] = null,
         ["counterparts"] = new JArray(),
     };
     public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) => throw new NotSupportedException();
