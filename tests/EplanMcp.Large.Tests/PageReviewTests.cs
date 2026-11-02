@@ -120,8 +120,14 @@ public sealed class PageReviewTests(LiveEplan eplan, WriteHost host) : IClassFix
                 case "cable":
                     JsonElement cablePlacement = Assert.Single((await Drawing()).GetProperty("items").EnumerateArray(), p => p.GetProperty("kind").GetString() == "Cable");
                     double[] location = cablePlacement.GetProperty("location").EnumerateArray().Select(v => v.GetDouble()).ToArray();
+                    // Live 2026-11-02: the move commits but the review still finds no A-B core; record the native points,
+                    // members and crossed segments before the move, after it and after generation in one run.
+                    await NativeAsync(new { project = session.Project, pages, mode = "read" });
                     await Move([(cablePlacement, location[0] + cableLayout.Branch[0][0] - cableLayout.Trunk[0][0], location[1] + cableLayout.Branch[0][1] - cableLayout.Trunk[0][1])]);
+                    await NativeAsync(new { project = session.Project, pages, mode = "read" });
                     await Generate();
+                    await NativeAsync(new { project = session.Project, pages, mode = "read" });
+                    TestContext.Current.TestOutputHelper!.WriteLine("Connections after repair: " + (await ReadConnections()).GetRawText());
                     break;
             }
             JsonElement after = await Review();
