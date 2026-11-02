@@ -4288,6 +4288,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
           },
           {
+            "name": "PageReviewCableFixTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewCableFixTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -10596,7 +10601,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_review.md",
-        "specStatus": "首片已实现（图片留待后续；Large 仅编写，未运行）",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A41",
           "A64",
@@ -10609,6 +10614,11 @@
             "name": "PageReviewTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewTests.cs"
+          },
+          {
+            "name": "PlacementMoveCablePointTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementMoveCablePointTests.cs"
           },
           {
             "name": "ToolContractTests",
@@ -12646,11 +12656,6 @@
             "name": "MoveTransactionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MoveTransactionTests.cs"
-          },
-          {
-            "name": "PageReviewCableFixTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewCableFixTests.cs"
           },
           {
             "name": "PageReviewTests",
