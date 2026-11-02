@@ -136,7 +136,9 @@ public sealed class PlacementMoveWireAnnotationTests
             { Scene.PointRoutes["59/70000"] = [Scene.Graphical[0], Scene.Graphical[1]]; }
             Request = new()
             {
-                ["project"] = Scene.Project.Name, ["page"] = Scene.Page.Page, ["dry_run"] = true,
+                ["project"] = Scene.Project.Name,
+                ["page"] = Scene.Page.Page,
+                ["dry_run"] = true,
                 ["moves"] = new JArray(MoveFixture.Move(Target.Locator, [0, 64]))
             };
         }

@@ -5706,6 +5706,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/LocationBoxPlacementTests.cs"
           },
           {
+            "name": "MeasuredRefusalTransactionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MeasuredRefusalTransactionTests.cs"
+          },
+          {
             "name": "TerminalPlacementTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/TerminalPlacementTests.cs"
@@ -5754,6 +5759,11 @@
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
+          },
+          {
+            "name": "LayoutGuardTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/LayoutGuardTests.cs"
           },
           {
             "name": "PlacementEditSpikeTests",
@@ -11752,6 +11762,7 @@
         "page.drawing.get",
         "page.get",
         "placement.text.create.execute",
+        "placement.text.create.plan",
         "project.get"
       ],
       "api": [
@@ -11970,6 +11981,11 @@
             "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
           },
           {
+            "name": "LayoutGuardTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/LayoutGuardTests.cs"
+          },
+          {
             "name": "PlacementEditSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
@@ -12000,6 +12016,11 @@
             "name": "PageGetOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageGetOperationTests.cs"
+          },
+          {
+            "name": "PlacementTextCreateExecuteOperationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementTextCreateExecuteOperationTests.cs"
           },
           {
             "name": "ProjectGetOperationTests",
@@ -12214,6 +12235,11 @@
         "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "PlacementMoveExecutionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementMoveExecutionTests.cs"
+          },
           {
             "name": "ToolContractTests",
             "size": "Small",
@@ -12515,6 +12541,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MoveTransactionTests.cs"
           },
           {
+            "name": "PlacementMoveExecutionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementMoveExecutionTests.cs"
+          },
+          {
             "name": "PlacementMoverTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/PlacementMoverTests.cs"
@@ -12538,6 +12569,11 @@
             "name": "CableDefinitionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
+          },
+          {
+            "name": "LayoutGuardTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/LayoutGuardTests.cs"
           },
           {
             "name": "PlacementMoveTests",

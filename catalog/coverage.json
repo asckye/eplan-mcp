@@ -2275,7 +2275,7 @@
       "dependencies": 87,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
-      "small": 4,
+      "small": 5,
       "medium": 2,
       "large": 3,
       "apiNotes": [
