@@ -15,10 +15,9 @@ public sealed class ApiTryLifecycleScanTests
     private static ApiTryArgs Factory() => new()
     {
         Project = Project,
-        Group = "O:Eplan.EplApi.DataModel.Graphics.Line.#ctor+Create",
+        Group = "O:Eplan.EplApi.DataModel.Graphics.Line.Create",
         Parameters = JsonConvert.SerializeObject(new
         {
-            target = Locator(string.Empty, 1),
             page = Locator(Page, 2),
             pntStart = new { x = 4, y = 4 },
             pntEnd = new { x = 12, y = 4 },

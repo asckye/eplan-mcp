@@ -36,9 +36,6 @@ internal sealed partial class EplanApiTryDispatcher
         }
     }
 
-    private static object? LifecycleResult(ApiTryArgs args, object? target, object? result) =>
-        args.Group.EndsWith(".Create", StringComparison.Ordinal) && !ApiTryCatalog.Service(args.Group) && result is null ? target : result;
-
     public Dictionary<string, string> Observe(ApiTryArgs args)
     {
         MainThread.Assert();

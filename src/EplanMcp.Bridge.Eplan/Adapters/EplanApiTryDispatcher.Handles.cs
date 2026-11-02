@@ -73,8 +73,6 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
         { result = ApiTryHandleDispatch.Invoke(shape[1], target.Value!, p, Resolver); }
         else
         { result = InvokeEntry(args, p, target.Value, ApiTryCatalog.MethodAccess(args.Group) is not null, Resolver); }
-        if (!read)
-        { result = LifecycleResult(args, target.Value, result); }
         if (result is null || read)
         { return result; }
         return Detach(args.Project, result, native: value => NativeResult(args, value, target), nativeType: value => ApiTryHandleDispatch.Type(value) is not null);

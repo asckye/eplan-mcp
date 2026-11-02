@@ -23,6 +23,8 @@ public sealed class ApiTryLifecycleGeneratorTests
     public void LifecycleShapesBecomeWritesWithExplicitEffects(string name, string effect)
     {
         ApiEntry entry = Entry(name);
+        if (name == "Create")
+        { entry = entry with { Details = [entry.Details[0] with { Note = "Create" }] }; }
         Assert.Single(ApiTryGenerator.Methods(new([entry], [])));
         Assert.False(ApiTryGenerator.ReadMethod(entry));
         Assert.Equal(effect, ApiTryLifecycle.Effect(entry.Row.Group));
@@ -56,31 +58,43 @@ public sealed class ApiTryLifecycleGeneratorTests
     [InlineData(",\"access\":\"protected\"", "", false)]
     [InlineData(",\"excluded\":{}", "", false)]
     [InlineData(",\"static\":true", "", false)]
-    [InlineData(",\"params\":[{\"name\":\"x\",\"type\":\"System.Int32\"}]", "", true)]
+    [InlineData(",\"params\":[{\"name\":\"x\",\"type\":\"System.Int32\"}]", "", false)]
     [InlineData("", ",\"modifiers\":\"abstract\"", false)]
     [InlineData("", ",\"access\":\"internal\"", false)]
     public void FactoryRequiresPublicConcreteTypeAndPublicEmptyConstructor(string ctorExtra, string typeExtra, bool expected)
     {
         JsonElement type = JsonSerializer.Deserialize<JsonElement>("{\"id\":\"T:" + TypeName + "\",\"kind\":\"class\",\"ns\":\"Eplan.EplApi.DataModel.Graphics\"" + typeExtra + "}");
         JsonElement ctor = JsonSerializer.Deserialize<JsonElement>("{\"id\":\"M:" + TypeName + ".#ctor\",\"type\":\"T:" + TypeName + "\"" + ctorExtra + "}");
-        ApiEntry[] factories = ApiTryGenerator.Factories(new([Entry("Create")], []), [ctor], [type]);
+        ApiEntry create = Entry("Create");
+        ApiEntry[] factories = ApiTryGenerator.Factories(new([create], []), [ctor], [type]);
         Assert.Equal(expected ? 1 : 0, factories.Length);
         if (expected)
         {
-            Assert.Equal("O:" + TypeName + ".#ctor+Create", factories[0].Row.Group);
+            Assert.Equal("O:" + TypeName + ".Create", factories[0].Row.Group);
+            Assert.Equal(create.Row, factories[0].Row);
+            Assert.Equal(create.Details[0].Id, factories[0].Details[0].Id);
+            Assert.Equal(create.Details[0].Signature, factories[0].Details[0].Signature);
             Assert.Equal("creates", ApiTryLifecycle.Effect(factories[0].Row.Group));
         }
     }
     [Fact]
     public void FactoryDispatchUsesCompiledConstructionAndReturnsTheCreatedReceiver()
     {
-        ApiEntry entry = Entry("#ctor+Create", [new("page", "Eplan.EplApi.DataModel.Page")]);
+        ApiEntry entry = Entry("Create", [new("page", "Eplan.EplApi.DataModel.Page")]);
         ApiDetail member = entry.Details[0] with { Note = "Create" };
         string combined = ApiTryGenerator.FactoryDispatch(entry, member, p => p.Name);
         Assert.Contains("new global::" + TypeName + "(); created.Create(page); return created;", combined, StringComparison.Ordinal);
-        Assert.Contains("return new global::" + TypeName + "(page);", ApiTryGenerator.FactoryDispatch(entry, member with { Note = "#ctor" }, p => p.Name), StringComparison.Ordinal);
+        Assert.Contains(JsonSerializer.Serialize(member.Signature!), combined, StringComparison.Ordinal);
         Assert.True(ApiTryGenerator.BannedFactory(entry, member, new(StringComparer.Ordinal) { "M:" + TypeName + ".#ctor" }));
-        Assert.False(ApiTryGenerator.BannedFactory(entry, member with { Note = "#ctor" }, new(StringComparer.Ordinal) { "M:" + TypeName + ".#ctor" }));
+        Assert.False(ApiTryGenerator.BannedFactory(entry, member with { Note = null }, new(StringComparer.Ordinal) { "M:" + TypeName + ".#ctor" }));
+    }
+    [Fact]
+    public void ParameterizedConstructorDoesNotIntroduceAnOperationGroup()
+    {
+        JsonElement type = JsonSerializer.Deserialize<JsonElement>("{\"id\":\"T:" + TypeName + "\",\"kind\":\"class\"}");
+        JsonElement ctor = JsonSerializer.Deserialize<JsonElement>("{\"id\":\"M:" + TypeName + ".#ctor\",\"type\":\"T:" + TypeName + "\",\"params\":[{\"name\":\"page\",\"type\":\"Eplan.EplApi.DataModel.Page\"}]}");
+        Assert.Empty(ApiTryGenerator.Factories(new([Entry("Create")], []), [ctor], [type]));
+        Assert.Empty(ApiTryGenerator.Factories(new([], []), [ctor], [type]));
     }
     [Fact]
     public void ResourceProjectionsDetachOnlySupportedPrimitiveIdentities()
@@ -104,20 +118,30 @@ public sealed class ApiTryLifecycleGeneratorTests
         { Assert.DoesNotContain("GetRecordNames()", ApiTryGenerator.LifecycleReadback(new([names with { Details = [detail] }], []), kinds), StringComparison.Ordinal); }
     }
     [Fact]
-    public void GeneratedFactoryUsesProjectAnchorAndExactPageAndPointShapes()
+    public void GeneratedFactoryUsesExistingGroupWithoutReceiverAndExactPageAndPointShapes()
     {
-        const string group = "O:" + TypeName + ".#ctor+Create";
+        const string group = "O:" + TypeName + ".Create";
         Assert.Equal("write", ApiTryCatalog.MethodAccess(group));
-        Assert.Equal(["project"], ApiTryCatalog.TargetKinds(group));
-        string[] shape = ApiTryCatalog.Shape(group, ["target", "page", "pntStart", "pntEnd"])!;
+        string[] shape = ApiTryCatalog.Shape(group, ["page", "pntStart", "pntEnd"])!;
         Assert.Contains(ApiTryCatalog.Methods(group), method => method.SequenceEqual(shape));
-        Assert.Equal(["Eplan.EplApi.DataModel.Project"], Assert.IsType<string[]>(ApiTryCatalog.ReceiverShape(shape[1])));
-        const string create = "O:" + TypeName + ".Create";
-        string[] ordinary = ApiTryCatalog.Shape(create, ["target", "page", "pntStart", "pntEnd"])!;
-        Assert.Contains(ApiTryCatalog.Methods(create), method => method.SequenceEqual(ordinary));
-        Assert.Equal(["Eplan.EplApi.DataModel.Graphics.Line"], Assert.IsType<string[]>(ApiTryCatalog.ReceiverShape(ordinary[1])));
+        Assert.Null(ApiTryCatalog.ReceiverShape(shape[1]));
+        Assert.True(ApiTryCatalog.Factory(shape[1]));
+        Assert.StartsWith(TypeName + ".Create(", shape[1], StringComparison.Ordinal);
         Assert.Equal("Eplan.EplApi.DataModel.Page", ApiTryCatalog.ParameterShape(shape[1], "page")![0]);
         Assert.Equal("Eplan.EplApi.Base.PointD", ApiTryCatalog.ParameterShape(shape[1], "pntStart")![0]);
-        Assert.Null(ApiTryCatalog.Shape(group, ["target", "unknown"]));
+        Assert.Null(ApiTryCatalog.Shape(group, ["unknown"]));
+    }
+    [Theory]
+    [InlineData("E3D.HandleMate", "mate")]
+    [InlineData("Graphics.GraphicalLayer", "table", "name", "description")]
+    public void ExistingHandleFactoriesAlsoOmitReceiverAndReturnThroughTheirProducers(string type, params string[] names)
+    {
+        string native = "Eplan.EplApi.DataModel." + type, group = "O:" + native + ".Create";
+        string[] shape = Assert.IsType<string[]>(ApiTryCatalog.Shape(group, names));
+        Assert.True(ApiTryCatalog.HandleType(native));
+        Assert.True(ApiTryCatalog.Factory(shape[1]));
+        Assert.Null(ApiTryCatalog.ReceiverShape(shape[1]));
+        Assert.Contains(group, ApiTryCatalog.Producers(native));
+        Assert.Equal("write", ApiTryCatalog.MethodAccess(group));
     }
 }

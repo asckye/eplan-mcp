@@ -6,12 +6,11 @@ namespace EplanMcp.Coverage;
 
 internal static partial class ApiTryGenerator
 {
-    private const string FactoryTargetCondition = " || group.EndsWith(\".#ctor+Create\", System.StringComparison.Ordinal)";
-    internal static bool Factory(ApiEntry entry) => entry.Name == "#ctor+Create";
-    internal static bool BannedFactory(ApiEntry entry, ApiDetail member, HashSet<string> banned) => Factory(entry) && member.Note == "Create" && banned.Contains("M:" + entry.Type[2..] + ".#ctor");
+    internal static bool Factory(ApiDetail member) => member.Note == "Create";
+    internal static bool BannedFactory(ApiEntry entry, ApiDetail member, HashSet<string> banned) => member.Note == "Create" && banned.Contains("M:" + entry.Type[2..] + ".#ctor");
     private static readonly string[] _lifecyclePrefixes = ["Create", "Remove", "Delete", "Erase"];
     private static readonly string[] _sessionPrefixes = ["Destroy", "Init", "init", "Freeze", "Lock"];
-    internal static bool Lifecycle(ApiEntry entry) => Factory(entry) || _lifecyclePrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal));
+    internal static bool Lifecycle(ApiEntry entry) => _lifecyclePrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal));
     internal static string? LifecycleExclusion(ApiEntry entry, ApiDetail member)
     {
         if (_sessionPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)))
@@ -38,36 +37,37 @@ internal static partial class ApiTryGenerator
         {
             string id = type.GetProperty("id").GetString()!;
             JsonElement[] ctors = [.. constructors.Where(c => c.GetProperty("type").GetString() == id && Public(c))];
-            ApiEntry? create = data.Entries.FirstOrDefault(e => e.Type == id && e.Name == "Create" && e.Row.ExcludedReason is null);
             bool empty = ctors.Any(c => !c.TryGetProperty("params", out JsonElement p) || p.GetArrayLength() == 0);
-            string group = "O:" + id[2..] + ".#ctor+Create";
-            // The source member ID keeps catalog and banned-symbol exclusions effective for the combined call.
-            var details = (empty && create is not null ? create.Details : []).Where(d => d.Kind == "overload" && !d.Static).Select(d => d with
-            { Signature = d.Signature![..d.Signature!.LastIndexOf(" : ", StringComparison.Ordinal)].Replace(".Create(", ".#ctor+Create(", StringComparison.Ordinal) + " : " + id[2..], ReturnType = id[2..], Note = "Create" }).ToList();
-            foreach (JsonElement ctor in ctors.Where(c => c.TryGetProperty("params", out JsonElement p) && p.GetArrayLength() > 0))
+            foreach (ApiEntry entry in data.Entries.Where(e => empty && e.Type == id && e.Row.ExcludedReason is null && e.Name == "Create"))
             {
-                ApiParameter[] parameters = JsonSerializer.Deserialize<ApiParameter[]>(ctor.GetProperty("params").GetRawText(), CoverageJson.Options)!;
-                var detail = new ApiDetail("overload", ctor.GetProperty("id").GetString()!, id[2..] + ".#ctor+Create(" + string.Join(", ", parameters.Select(p => p.Type + " " + p.Name)) + ") : " + id[2..], Parameters: parameters, ReturnType: id[2..], Note: "#ctor");
-                if (!details.Any(d => Names(d) == Names(detail)))
-                { details.Add(detail); }
+                // Keep the native group, member ID and signature; only dispatch returns the created receiver.
+                ApiDetail[] details = [.. entry.Details.Select(d => d.Kind == "overload" && !d.Static
+                    ? d with { ReturnType = id[2..], Note = entry.Name } : d)];
+                if (details.Any(Factory))
+                { result.Add(entry with { Details = details }); }
             }
-            if (details.Count > 0)
-            { result.Add(new(new(details[0].Id, group, "method", details[0].Signature!, "registered", null, [], false), type.GetProperty("ns").GetString()!, id, "#ctor+Create", null, [group], [.. details])); }
         }
         return [.. result];
     }
     internal static ApiIndexData WithLifecycleFactories(string root, ApiIndexData data)
     {
         string directory = Path.Combine(root, "catalog/eplan-2026.0.3");
+        if (!File.Exists(Path.Combine(directory, "types.jsonl")))
+        { return data; }
         JsonElement[] types = [.. File.ReadLines(Path.Combine(directory, "types.jsonl")).Select(l => JsonSerializer.Deserialize<JsonElement>(l))];
         JsonElement[] constructors = [.. Directory.GetFiles(Path.Combine(directory, "members"), "Eplan.EplApi.DataModel*.jsonl").SelectMany(File.ReadLines)
             .Select(l => JsonSerializer.Deserialize<JsonElement>(l)).Where(m => m.GetProperty("kind").GetString() == "constructor")];
-        var supported = ObjectKindGenerator.Build(types, data).Where(k => k.Reason is null).Select(k => "T:" + k.Type).ToHashSet(StringComparer.Ordinal);
-        return data with { Entries = [.. data.Entries, .. Factories(data, constructors, types.Where(t => supported.Contains(t.GetProperty("id").GetString()!)).ToArray())] };
+        // Selection below still requires a discovery kind or an independently reachable handle; no new roots.
+        var factories = Factories(data, constructors, types).ToDictionary(e => e.Row.Group, StringComparer.Ordinal);
+        return data with
+        {
+            Entries = [.. data.Entries.Select(e => factories.GetValueOrDefault(e.Row.Group)
+            ?? (e.Name == "Create" ? e with { Details = [.. e.Details.Select(d => d.Kind == "overload" && !d.Static ? d with { Note = "factory_constructor_unavailable" } : d)] } : e))]
+        };
     }
     internal static string FactoryDispatch(ApiEntry entry, ApiDetail member, Func<ApiParameter, string> argument) =>
-        "            case " + Literal(member.Signature!) + ": { " + (member.Note == "#ctor" ? "return new global::" + entry.Type[2..] + "(" : "var created = new global::" + entry.Type[2..] + "(); created.Create(")
-        + string.Join(", ", member.Parameters!.Select(argument)) + ");" + (member.Note == "#ctor" ? "" : " return created;") + " }";
+        "            case " + Literal(member.Signature!) + ": { var created = new global::" + entry.Type[2..] + "(); created.Create("
+        + string.Join(", ", member.Parameters!.Select(argument)) + "); return created; }";
     private static readonly string[] _resourceNames = ["GetRecordNames", "GetVariableNames", "AssignedObjects", "SubPlacements", "SubPlacement3Ds", "ReferencedPlacements", "Connections", "ConnectionPoints", "FunctionTemplates", "PropertiesConfigurations", "LinkedSegments", "DaisyChains"];
     internal static string? ResourceProjection(string? type, Dictionary<string, string[]> kinds) => type switch
     {

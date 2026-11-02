@@ -8,7 +8,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class ApiTryLifecycleTests
 {
     private const string Project = @"D:\scratch\Scratch";
-    private const string Factory = "O:Eplan.EplApi.DataModel.Graphics.Line.#ctor+Create";
+    private const string Factory = "O:Eplan.EplApi.DataModel.Graphics.Line.Create";
     private readonly FakeTransactions _transactions = new();
     private readonly Dispatcher _dispatch = new();
     private ApiTryPlanOperation Planner() => new(2026, new Catalog(), _dispatch);
@@ -18,7 +18,7 @@ public sealed class ApiTryLifecycleTests
         Project = Project,
         Group = remove ? "O:Eplan.EplApi.DataModel.Page.Remove" : Factory,
         Parameters = (remove ? new JObject { ["target"] = Target() }
-            : new JObject { ["target"] = Target(), ["page"] = Target(), ["pntStart"] = new JObject { ["x"] = 0, ["y"] = 0 }, ["pntEnd"] = new JObject { ["x"] = 4, ["y"] = 4 } }).ToString(),
+            : new JObject { ["page"] = Target(), ["pntStart"] = new JObject { ["x"] = 0, ["y"] = 0 }, ["pntEnd"] = new JObject { ["x"] = 4, ["y"] = 4 } }).ToString(),
     };
     private ApiTryArgs Planned(bool remove = false)
     {
@@ -53,6 +53,27 @@ public sealed class ApiTryLifecycleTests
         Assert.Equal("write", Assert.Single(plan.Changes).Action);
         Assert.Equal("creates", plan.Details!["lifecycle"]);
         Assert.Equal(0, _dispatch.Invocations);
+    }
+    [Theory]
+    [InlineData("Graphics.Line", false)]
+    [InlineData("Graphics.Line", true)]
+    [InlineData("ProtectedGroup", false)]
+    public void FactoryWithExistingReceiverIsRejectedBeforePlanningOrExecution(string type, bool handle)
+    {
+        ApiTryArgs args = Args();
+        args.Group = "O:Eplan.EplApi.DataModel." + type + ".Create";
+        JObject parameters = JObject.Parse(args.Parameters);
+        parameters["target"] = handle ? JObject.FromObject(new { handle = "h:" + new string('a', 32), type = "Eplan.EplApi.DataModel.Graphics.Line" }) : Target();
+        args.Parameters = parameters.ToString();
+        BridgeError planned = Assert.Throws<BridgeErrorException>(() => Planner().Execute(args)).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (planned.Reason, planned.Execution));
+        Assert.Contains("Omit target for factory creation", planned.Message, StringComparison.Ordinal);
+        BridgeError executed = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (executed.Reason, executed.Execution));
+        Assert.Equal(0, _dispatch.Checks);
+        Assert.Equal(0, _dispatch.Observations);
+        Assert.Equal(0, _dispatch.Invocations);
+        Assert.Empty(_transactions.Calls);
     }
     [Theory]
     [InlineData("extra")]
@@ -111,11 +132,13 @@ public sealed class ApiTryLifecycleTests
         public bool Exists { get; set; }
         public bool FailInvoke { get; set; }
         public int Invocations { get; private set; }
+        public int Checks { get; private set; }
+        public int Observations { get; private set; }
         public Action? OnRefresh { get; set; }
-        public void CheckTarget(ApiTryArgs args) { }
+        public void CheckTarget(ApiTryArgs args) { Checks++; }
         public string? Read(ApiTryArgs args) => null;
         public Dictionary<string, string> Inspect(ApiTryArgs args) => Observe(args);
-        public Dictionary<string, string> Observe(ApiTryArgs args) => Exists ? new() { ["object:line:2"] = "removed line" } : [];
+        public Dictionary<string, string> Observe(ApiTryArgs args) { Observations++; return Exists ? new() { ["object:line:2"] = "removed line" } : []; }
         public DrawingLocator Refresh(string project, DrawingLocator locator)
         {
             OnRefresh?.Invoke();

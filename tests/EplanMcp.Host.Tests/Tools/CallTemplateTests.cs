@@ -83,7 +83,9 @@ public sealed class CallTemplateTests
     [InlineData("Graphics.PlaceHolder.ApplyRecord", "write", "strRecordName")]
     [InlineData("DocumentTypeManager.IsLogicalPageDocType", "read", "nPageType")]
     [InlineData("ProjectSettings.GetBoolSetting", "read", "strSettingPath")]
-    [InlineData("Graphics.Line.#ctor+Create", "write", "page")]
+    [InlineData("Graphics.Line.Create", "write", "page")]
+    [InlineData("Graphics.GraphicalLayer.Create", "write", "table")]
+    [InlineData("E3D.HandleMate.Create", "write", "mate")]
     public void RepresentativeGroupsComeFromTheGeneratedCatalog(string name, string access, string parameter)
     {
         ApiEntry entry = ApiIndex.Load().Data.Entries.Single(e => e.Row.Group == "O:Eplan.EplApi.DataModel." + name);
@@ -93,8 +95,8 @@ public sealed class CallTemplateTests
         Assert.All(templates, t => Assert.Equal(access, t["access"]!.GetValue<string>()));
         Assert.All(templates, t => Assert.NotNull(t["arguments"]!["parameters"]!["properties"]![parameter]));
         Assert.All(templates, t => Assert.True(ApiTryTools.MethodParameters(entry.Row.Group, JsonSerializer.SerializeToElement(t["example"]!["parameters"])), t.ToJsonString()));
-        if (name.EndsWith(".#ctor+Create", StringComparison.Ordinal))
-        { Assert.All(templates, t => Assert.Equal("project", t["arguments"]!["parameters"]!["properties"]!["target"]!["object_type"]!.GetValue<string>())); }
+        if (name.EndsWith(".Create", StringComparison.Ordinal))
+        { Assert.All(templates, t => Assert.Null(t["arguments"]!["parameters"]!["properties"]!["target"])); }
         if (parameter == "nKind")
         { Assert.Equal(ApiTryCatalog.ParameterShape(ApiTryCatalog.Methods(entry.Row.Group)[0][1], parameter)![1..], templates[0]["arguments"]!["parameters"]!["properties"]![parameter]!["allowed_values"]!.AsArray().Select(v => v!.GetValue<string>())); }
     }

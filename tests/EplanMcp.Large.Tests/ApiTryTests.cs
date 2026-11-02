@@ -80,9 +80,8 @@ public sealed partial class ApiTryTests(LiveEplan eplan) : IAsyncLifetime
         await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
         string sentinel = Assert.Single(await selection.CreatePagesAsync(1));
         string before = await selection.StateAsync();
-        JsonElement created = await Call(selection.Project, "Graphics.Line.#ctor+Create", new
+        JsonElement created = await Call(selection.Project, "Graphics.Line.Create", new
         {
-            target = await Locator(selection.Project, "Project"),
             page = await Locator(selection.Project, page: sentinel),
             pntStart = new { x = 4, y = 4 },
             pntEnd = new { x = 12, y = 4 },

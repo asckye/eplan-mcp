@@ -73,10 +73,9 @@ public sealed class ApiTryObservationTests
         ApiTryArgs args = Rotate(page);
         JObject parameters = JObject.Parse(args.Parameters);
         JObject locator = (JObject)parameters["plcmnts"]![0]!;
-        args.Group = remove ? "O:Eplan.EplApi.DataModel.Placement.Remove" : "O:Eplan.EplApi.DataModel.Graphics.Line.#ctor+Create";
+        args.Group = remove ? "O:Eplan.EplApi.DataModel.Placement.Remove" : "O:Eplan.EplApi.DataModel.Graphics.Line.Create";
         args.Parameters = (remove ? new JObject { ["target"] = locator } : new JObject
         {
-            ["target"] = parameters["target"],
             ["page"] = locator,
             ["pntStart"] = new JObject { ["x"] = 4, ["y"] = 4 },
             ["pntEnd"] = new JObject { ["x"] = 12, ["y"] = 4 },

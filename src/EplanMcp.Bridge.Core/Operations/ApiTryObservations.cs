@@ -34,7 +34,7 @@ internal static class ApiTryObservations
             string page = (string)locator["page"]!;
             if (page.Length > 0)
             { pages.Add(page); }
-            else if (!ReferenceEquals(locator, parameters["target"]) || !(ApiTryCatalog.Service(args.Group) || args.Group.EndsWith(".#ctor+Create", StringComparison.Ordinal)))
+            else if (!ReferenceEquals(locator, parameters["target"]) || !ApiTryCatalog.Service(args.Group))
             { return null; }
         }
         if (ApiTryLifecycle.Effect(args.Group) is not null && parameters.Descendants().OfType<JObject>().Any(p => p.ContainsKey("handle")))

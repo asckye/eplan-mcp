@@ -6,7 +6,7 @@ public sealed partial class ApiTryPlanOperation
 {
     private static bool EntryParameters(string group, string[] shape, JObject p, bool setter, string project)
     {
-        bool statik = ApiTryCatalog.Static(shape[1]), via = p.ContainsKey("via"), key = p.ContainsKey("via_key");
+        bool statik = ApiTryCatalog.Static(shape[1]) || ApiTryCatalog.Factory(shape[1]), via = p.ContainsKey("via"), key = p.ContainsKey("via_key");
         if (!statik && ApiTryCatalog.Entry(shape[1]) && !via && !ApiTryCatalog.SettingsMethods(group).Any(s => s.SequenceEqual(shape)) && (p["target"] is not JObject handle || !Handle(handle)))
         { return false; }
         if (statik ? p.ContainsKey("target") || via || key : p["target"] is not JObject target || !(Locator(target) || !via && Handle(target)))

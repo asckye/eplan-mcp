@@ -12,7 +12,7 @@ internal static partial class ApiTryGenerator
     {
         string path = Path.Combine(root, "src/EplanMcp.Bridge.Eplan/BannedSymbols.txt");
         var banned = (File.Exists(path) ? File.ReadLines(path).Where(l => !l.StartsWith("//", StringComparison.Ordinal) && l.Contains(';', StringComparison.Ordinal)).Select(l => l.Split(';')[0]) : []).ToHashSet(StringComparer.Ordinal);
-        ApiIndexData data = ApiIndexGenerator.Data(root);
+        ApiIndexData data = WithLifecycleFactories(root, ApiIndexGenerator.Data(root));
         return data with { Entries = [.. data.Entries.Select(e => e with { Details = [.. e.Details.Select(d => banned.Contains(d.Id) || banned.Contains(e.Type) || BannedFactory(e, d, banned) ? d with { ExcludedReason = "banned_symbol" } : d)] })] };
     }
     private static string Literal(string value) => JsonSerializer.Serialize(value);
@@ -42,7 +42,9 @@ internal static partial class ApiTryGenerator
         { return reason; }
         if (LifecycleExclusion(entry, member) is { } lifecycleReason)
         { return lifecycleReason; }
-        if (entry.Name == "Dispose" || entry.Name.StartsWith('#') && !Factory(entry) || !service && _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)) && !Lifecycle(entry))
+        if (!service && member.Note == "factory_constructor_unavailable")
+        { return "factory_constructor_unavailable"; }
+        if (entry.Name == "Dispose" || entry.Name.StartsWith('#') && !Factory(member) || !service && _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)) && !Lifecycle(entry))
         { return "lifecycle_or_creation"; }
         if (member.Static || member.Access is not null)
         { return "static_or_nonpublic"; }
@@ -101,13 +103,14 @@ internal static partial class ApiTryGenerator
             + "\n        _ => EntryAccess(group) ?? HandleMethodAccess(group),\n    };\n    public static string[] Producers(string type) => type switch\n    {\n"
             + string.Join("\n", methods.Concat(selected).Concat(entries).Concat(handles).SelectMany(s => ProducedTypes(s.Member).Select(type => (s.Entry, Type: type))).GroupBy(s => s.Type).Select(g => "        " + Literal(g.Key) + " => [" + string.Join(", ", g.Select(s => Literal(s.Entry.Row.Group)).Distinct()) + "],"))
             + "\n        _ => [],\n    };\n    public static string[]? ReceiverShape(string signature) => signature switch\n    {\n"
-            + string.Join("\n", methods.Concat(selected).Concat(handles).DistinctBy(s => s.Member.Signature).Where(s => !s.Member.Static && (!s.Entry.Name.StartsWith('#') || Factory(s.Entry))).Select(s => "        " + Literal(s.Member.Signature!) + " => " + (Factory(s.Entry) || services.ContainsKey(s.Entry.Type[2..]) && (methods.Any(m => m.Member.Id == s.Member.Id) || !handleModel.Reachable.Contains(s.Entry.Type[2..])) ? "[\"Eplan.EplApi.DataModel.Project\"]" : ObjectType(s.Entry.Type[2..], kinds) ? Shape(s.Entry.Type[2..]) : "[\"handle\", " + Literal(s.Entry.Type[2..]) + "]") + ","))
-            + "\n        _ => EntryReceiverShape(signature) ?? SettingsReceiverShape(signature),\n    };\n    public static string[]? ParameterShape(string signature, string name) => SettingsParameterShape(signature, name) ?? ((signature, name) switch\n    {\n"
+            + string.Join("\n", methods.Concat(selected).Concat(handles).DistinctBy(s => s.Member.Signature).Where(s => !s.Member.Static && (!s.Entry.Name.StartsWith('#') || Factory(s.Member))).Select(s => "        " + Literal(s.Member.Signature!) + " => " + (Factory(s.Member) ? "null" : services.ContainsKey(s.Entry.Type[2..]) && (methods.Any(m => m.Member.Id == s.Member.Id) || !handleModel.Reachable.Contains(s.Entry.Type[2..])) ? "[\"Eplan.EplApi.DataModel.Project\"]" : ObjectType(s.Entry.Type[2..], kinds) ? Shape(s.Entry.Type[2..]) : "[\"handle\", " + Literal(s.Entry.Type[2..]) + "]") + ","))
+            + "\n        _ => EntryReceiverShape(signature) ?? SettingsReceiverShape(signature),\n    };\n"
+            + "    public static bool Factory(string signature) => signature switch { " + string.Join(" ", methods.Concat(handles).Where(s => Factory(s.Member)).Select(s => Literal(s.Member.Signature!) + " => true,")) + " _ => false };\n    public static string[]? ParameterShape(string signature, string name) => SettingsParameterShape(signature, name) ?? ((signature, name) switch\n    {\n"
             + string.Join("\n", methods.SelectMany(s => Inputs(s.Member).Select(p => "        (" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Shape(p.Type) + ",")))
             + "\n        _ => EntryParameter(signature, name) ?? HandleParameterShape(signature, name),\n    });\n" + FileCatalog(methods, services) + "    public static string[]? ValueShape(string group) => group switch\n    {\n"
             + string.Join("\n", selected.Where(s => PropertyWritable(s.Member, enums)).Select(s => "        " + Literal(s.Entry.Row.Group) + " => [" + string.Join(", ", (enums.TryGetValue(s.Member.ReturnType!, out string[]? values) ? _enumShape.Concat(values) : [s.Member.ReturnType!]).Select(Literal)) + "],"))
             + "\n        _ => EntryValue(group) ?? HandleValueShape(group),\n    };\n    public static bool Service(string group) => group switch { " + string.Join(" ", methods.Where(s => services.ContainsKey(s.Entry.Type[2..])).DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => true,")) + " _ => HandleService(group) };\n"
-            + "    public static string[] TargetKinds(string group) => Settings(group) || Service(group)" + FactoryTargetCondition + " ? [\"project\"] : Kinds(Shape(group)?[0] ?? (group switch { " + string.Join(" ", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(s.Entry.Type[2..]) + ",")) + " _ => null }));\n    public static string[] Kinds(string? type) => type switch\n    {\n"
+            + "    public static string[] TargetKinds(string group) => Settings(group) || Service(group) ? [\"project\"] : Kinds(Shape(group)?[0] ?? (group switch { " + string.Join(" ", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(s.Entry.Type[2..]) + ",")) + " _ => null }));\n    public static string[] Kinds(string? type) => type switch\n    {\n"
             + string.Join("\n", kinds.Select(p => "        " + Literal("Eplan.EplApi.DataModel." + p.Key) + " => [" + string.Join(", ", p.Value.Select(Literal)) + "],"))
             + "\n        _ => [],\n    };\n"
             + SettingsCatalog(data)

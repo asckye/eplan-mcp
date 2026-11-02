@@ -8,7 +8,7 @@ public static class ApiTryLifecycle
     public static string? Effect(string group)
     {
         string name = group.Substring(group.LastIndexOf('.') + 1);
-        return name.StartsWith("Create", StringComparison.Ordinal) || name == "#ctor+Create" ? "creates"
+        return name.StartsWith("Create", StringComparison.Ordinal) ? "creates"
             : _removePrefixes.Any(p => name.StartsWith(p, StringComparison.Ordinal)) ? "removes" : null;
     }
 }

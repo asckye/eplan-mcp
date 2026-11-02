@@ -27,6 +27,8 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
             ApiEntry? entry = index.Data.Entries.FirstOrDefault(e => e.Row.Group == group);
             if (entry is null || entry.Row.ExcludedReason is not null || !ApiTryCatalog.Allowed(group))
             { throw ActionRunCatalog.Denied("This API group is unknown or excluded from trial execution."); }
+            if (parameters.ValueKind == JsonValueKind.Object && parameters.TryGetProperty("target", out _) && group.EndsWith(".Create", StringComparison.Ordinal) && !ApiTryCatalog.Service(group))
+            { return ToolResults.Error(new BridgeError { Reason = ErrorReason.InvalidArgument, Execution = ExecutionState.NotStarted, Message = "Omit target for factory creation; Create cannot be called on an existing instance." }, ApiCallTemplates.Closest(index, group, parameters)); }
             if (string.IsNullOrWhiteSpace(project) || parameters.ValueKind != JsonValueKind.Object || parameters.GetRawText().Length > 131072
                 || parameters.EnumerateObject().Select(p => p.Name).Distinct(StringComparer.Ordinal).Count() != parameters.EnumerateObject().Count()
                 || parameters.EnumerateObject().Any(p => Kind(p.Value) is "Object" or "Null" || p.Value.ValueKind == JsonValueKind.Array && ApiTryCatalog.MethodAccess(group) is null) || !MethodParameters(group, parameters))

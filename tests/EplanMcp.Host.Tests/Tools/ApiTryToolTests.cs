@@ -234,17 +234,17 @@ public sealed partial class ApiTryToolTests : IDisposable
     [Fact]
     public async Task LifecycleFactoryRequiresEveryApprovalAndReportsUnverifiedUndoExpectation()
     {
-        const string factory = "O:Eplan.EplApi.DataModel.Graphics.Line.#ctor+Create";
+        const string factory = "O:Eplan.EplApi.DataModel.Graphics.Line.Create";
         _harness.Bridge.Handlers[OperationNames.ApiTryPlan] = a =>
         {
             var args = (ApiTryArgs)a!;
-            WritePlan plan = _harness.Plan([new() { Action = "write", Kind = "unverified API", Name = factory, Property = "Line.#ctor+Create(Page)" }]);
+            WritePlan plan = _harness.Plan([new() { Action = "write", Kind = "unverified API", Name = factory, Property = "Line.Create(Page)" }]);
             plan.Details = new() { ["status"] = "dispatchable", ["unverified"] = "true", ["lifecycle"] = "creates", ["rawParameters"] = args.Parameters };
             return plan;
         };
         _harness.Bridge.Handlers[OperationNames.ApiTryExecute] = _ => new ApiTryData { UndoExpected = true };
         var locator = new { project = _harness.ProjectPath, page = "", type = 1, oid = 1, digest = new string('a', 64) };
-        string parameters = JsonSerializer.Serialize(new { target = locator, page = locator });
+        string parameters = JsonSerializer.Serialize(new { page = locator });
         Assert.True(WriteToolHarness.Structured(await Call(group: factory, parameters: parameters)).GetProperty("undoExpected").GetBoolean());
         WriteToolHarness.Structured(await Call(group: factory, parameters: parameters));
         Assert.Equal(2, _approval.Questions.Count);
@@ -252,6 +252,21 @@ public sealed partial class ApiTryToolTests : IDisposable
         _approved = false;
         Assert.Equal(ErrorReason.ApprovalDenied, WriteToolHarness.Error(await Call(group: factory, parameters: parameters)).GetProperty("reason").GetString());
         Assert.Equal(2, _harness.Bridge.Writes.Count);
+    }
+    [Theory]
+    [InlineData("Graphics.Line", false)]
+    [InlineData("Graphics.Line", true)]
+    [InlineData("ProtectedGroup", false)]
+    public async Task FactoryRejectsExistingReceiverBeforeBridgeOrApproval(string type, bool handle)
+    {
+        object receiver = handle ? new { handle = "h:" + new string('a', 32), type = "Eplan.EplApi.DataModel.Graphics.Line" } : Target();
+        _harness.Bridge.Handlers.Clear();
+        JsonElement error = WriteToolHarness.Error(await Call(group: "O:Eplan.EplApi.DataModel." + type + ".Create", parameters: JsonSerializer.Serialize(new { target = receiver, page = Target() })));
+        Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
+        Assert.Equal(ExecutionState.NotStarted, error.GetProperty("execution").GetString());
+        Assert.Contains("Omit target for factory creation", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+        Assert.Empty(_approval.Questions);
+        Assert.Empty(_harness.Bridge.Writes);
     }
 
     [Fact]
