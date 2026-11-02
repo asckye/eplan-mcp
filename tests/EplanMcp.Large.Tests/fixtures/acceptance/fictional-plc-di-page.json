@@ -892,6 +892,7 @@
     },
     {
       "id": "cableW4",
+      "text_layout": { "position": [260, 88], "angle_deg": 90 },
       "tag": "=GAA+A1-W{run}4",
       "type_text": "Fictional M1 control cable",
       "core_count": 1,
