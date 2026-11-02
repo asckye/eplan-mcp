@@ -76,10 +76,12 @@ public static class TransactionRunner
             }
             var error = new BridgeErrorException(ErrorReason.EplanOperationFailed, "Committed readback failed; all changes were rolled back. Re-read the page before retrying.", failure)
             { Error = { Execution = ExecutionState.RolledBack } };
-            if (failure is BridgeErrorException mismatch && mismatch.Error.Metadata?.TryGetValue("moveMismatch", out string? facts) == true)
+            // Customer redraw 2026-11-02: without the cause the caller only saw "readback failed"; the reason was in the bridge log.
+            if (failure is BridgeErrorException mismatch)
             {
-                error.Error.Metadata = new() { ["moveMismatch"] = facts };
-                error.Error.Message += " " + mismatch.Error.Message;
+                error.Error.Message += " Cause: " + mismatch.Error.Message;
+                if (mismatch.Error.Metadata?.TryGetValue("moveMismatch", out string? facts) == true)
+                { error.Error.Metadata = new() { ["moveMismatch"] = facts }; }
             }
             throw error;
         }

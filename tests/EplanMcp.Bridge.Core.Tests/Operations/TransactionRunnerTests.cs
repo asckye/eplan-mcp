@@ -72,6 +72,16 @@ public sealed class TransactionRunnerTests
         Assert.Equal(["=A/1"], _project);
     }
 
+    [Fact]
+    public void AFailedCommittedReadBack_RollsBackAndNamesTheCause()
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => TransactionRunner.Run(_transactions, Tool, () => Change("=A/2"), _ => true,
+            _ => throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "generation added the unplanned connection a - b"))).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.EndsWith(" Cause: generation added the unplanned connection a - b", error.Message, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("Rollback")]
     [InlineData("Dispose")]
