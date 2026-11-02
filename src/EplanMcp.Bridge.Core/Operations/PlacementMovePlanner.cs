@@ -77,7 +77,7 @@ public static class PlacementMovePlanner
             DrawingPlacement[] closure = [target.Row, .. page.Placements.Where(p => p.Parent is not null && Same(p.Parent, target.Row.Locator))];
             foreach (DrawingPlacement child in closure)
             {
-                if (!child.Properties.TryGetValue("grouped", out string? grouped) || grouped != "false" || child.Kind is not ("Function" or "SymbolReference" or "PotentialDefinition" or "Text" or "Line" or "Rectangle" or "PropertyPlacement"))
+                if (!child.Properties.TryGetValue("grouped", out string? grouped) || grouped != "false" || child.Kind is not ("Function" or "SymbolReference" or "PotentialDefinition" or "Cable" or "ConnectionDefinitionPoint" or "Text" or "Line" or "Rectangle" or "PropertyPlacement"))
                 { throw Missing("Grouped objects, macro groups and unverified placement kinds cannot be moved."); }
                 offsets.Add(child, offset);
                 // A54: all-zero outlines have no visible ink; unknown positions do not constrain the move.
@@ -130,7 +130,8 @@ public static class PlacementMovePlanner
         layout.Lines = after.Select((p, i) => new LayoutGuard.Segment { Points = p.Value, Changed = !before.TryGetValue(p.Key, out double[][]? old) || Segment(old) != Segment(p.Value), Net = p.Key, Locator = new() { Oid = -i - 1000 } }).ToList();
         layoutWarnings.AddRange(LayoutGuard.Enforce(layout, proposed, "/moves: "));
         Require(!pins.GroupBy(p => string.Join(",", p.Value.Location.Select(n => n.ToString("R", CultureInfo.InvariantCulture))), StringComparer.Ordinal).Any(g => g.Select(p => Owner(p.Key)).Distinct(StringComparer.Ordinal).Count() > 1), "/moves", "Pins from different placements must not coincide.");
-        foreach (DrawingPlacement moved in offsets.Keys.Where(p => LayoutGuard.Positioned(p) && offsets[p].Any(n => n != 0)))
+        // A64/A75: these annotate wires; EPLAN resolves cable membership after generation, then eplan_page_review checks it.
+        foreach (DrawingPlacement moved in offsets.Keys.Where(p => p.Kind is not ("Cable" or "ConnectionDefinitionPoint") && LayoutGuard.Positioned(p) && offsets[p].Any(n => n != 0)))
         {
             double[] b = Box(moved);
             Require(!after.Any(l => !l.Key.Split('|').Any(k => Owner(k) == Id(moved.Parent ?? moved.Locator)) && Math.Min(l.Value[0][0], l.Value[1][0]) <= b[2] && Math.Max(l.Value[0][0], l.Value[1][0]) >= b[0] && Math.Min(l.Value[0][1], l.Value[1][1]) <= b[3] && Math.Max(l.Value[0][1], l.Value[1][1]) >= b[1]), "/moves", "A moved outline conflicts with an autoconnect line.");
