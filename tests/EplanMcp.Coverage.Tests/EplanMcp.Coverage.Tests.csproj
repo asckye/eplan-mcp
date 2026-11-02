@@ -10,5 +10,8 @@
     <EmbeddedResource Include="../../catalog/mapping/overlay.yaml" LogicalName="mapping-overlay.yaml" />
     <EmbeddedResource Include="../Contracts.Snapshots/server-contract.verified.json" LogicalName="tool-contract.json" />
     <EmbeddedResource Include="../../src/EplanMcp.Bridge.Eplan/Adapters/*.cs" LogicalName="%(Filename)%(Extension)" />
+    <EmbeddedResource Include="../../catalog/api-try.g.tsv" LogicalName="api-try.g.tsv" />
+    <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" Aliases="host" />
+    <Compile Include="..\EplanMcp.Large.Tests\BatchVerificationData.cs" Link="BatchVerificationData.cs" />
   </ItemGroup>
 </Project>

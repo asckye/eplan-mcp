@@ -565,6 +565,11 @@
             "name": "ActionTryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
+          },
+          {
+            "name": "BatchVerification",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/BatchVerification.cs"
           }
         ],
         "operationTests": [
@@ -2864,6 +2869,11 @@
             "name": "ApiTryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
+          },
+          {
+            "name": "BatchVerification",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/BatchVerification.cs"
           }
         ],
         "operationTests": [

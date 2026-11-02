@@ -49,7 +49,7 @@ flowchart LR
 
 ## 4. 分批计划
 
-每批独立推送 main（本地门禁），每个新工具先写工具规格。顺序按"先可查、再可试、再验证、再专用"，并优先解决客户页差异。
+每批独立推送 main（本地门禁），每个新工具先写工具规格。负责人 2026-10-31 决定顺序改为“先可查、再可试、再验证、再白名单化”，并优先解决客户页差异。
 
 ### 4.1 第 1 批：可查（B 级，只读）
 | 编号 | 工具（暂定名） | 内容 | 数据来源 |
@@ -68,10 +68,14 @@ flowchart LR
 ### 4.3 第 3 批：批量验证
 | 编号 | 内容 |
 |---|---|
-| V1 | 维护者工具：在 scratch 副本上逐组试跑读取类与写入类（写入在 `SafetyPoint` 中），记录弹窗、耗时、改动、能否回滚、能否一步撤销 |
-| V2 | 结果写入 `catalog/mapping/overlay.yaml` 与覆盖报告（live_verified / env_blocked / 不可回滚），结论写进 api-notes；通过者按 ADR-0021 流程升为 A 级 |
+| V1 | Large `BatchVerification`：仅在 `EPLANMCP_BATCH_VERIFY=1` 时运行，`PlanStepLiveSession` 确保只有 LargeWrite 副本打开；经 `TrialApprovals` 逐次回答审批。遍历 main 当前生成分发表的全部读取、属性/方法写入（含设置、句柄、数组、生命周期）及策略允许的无参数 action；记录结果、耗时、变更、系统消息和一步撤销。服务保留 Project target，工厂 Create 省略 target，Remove 保留 destructive 审批与备份；缺少句柄来源、文件或页面等参数上下文时记录 failed:needs_context，不猜测调用 |
+| V2 | JSON 仅保存于 scratch；`eng/coverage import-verification <results.json>` 校验既有分母内的目录 ID、日期和版本，未知/已排除 ID 逐项报告并丢弃，按 ID 合并到 overlay 的 `verification`，保留人工审阅的其他条目；`generate` 更新分类统计、通过 API 组的 live_verified 和 `verified-whitelist.yaml` 晋级候选。未运行不标为通过或 env_blocked；未知、弹窗、超时立即停跑并保留写入暂停，撤销不恢复也停跑 |
 
-### 4.4 第 4 批：专用工具（A 级），按功能区
+### 4.4 第 4 批：先验证，再白名单化（A 级）
+
+**负责人决定（2026-10-31）**：第 4 批以第 3 批证据为依据，按 ADR-0021 / ADR-0032 把通过项作为数据逐批晋级；条件为 `outcome=ok`，且只读未变更或 `undo_restores=true`。`catalog/mapping/verified-whitelist.yaml` 由 `generate` 生成，当前仅供审阅，不被运行器加载，不自动放宽安全策略。晋级仍须核对级别、参数、版本、事务和副作用，按 ADR 流程发布。
+
+手写有类型工具只用于客户差异 D1–D6，以及确实需要规划、组合、校验或读回逻辑的功能；下表是能力分类，不再要求每个操作组单独写工具。
 | 功能区 | 主要能力 |
 |---|---|
 | 编辑 | 删除对象、复制/粘贴/多重复制、旋转、镜像、比例缩放、组合与取消组合、对齐/分布、置顶/置底 |

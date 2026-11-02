@@ -84,6 +84,8 @@ internal sealed class Overlay
     [YamlMember(Alias = "reached-by-tool", ApplyNamingConventions = false)]
     public List<ToolReach> ReachedByTool { get; set; } = [];
 
+    public Dictionary<string, VerificationRecord> Verification { get; set; } = [];
+
     public static Overlay Load(string repositoryRoot, IReadOnlyCollection<string> tools)
     {
         string path = Path.Combine(repositoryRoot, RelativePath);
@@ -107,6 +109,9 @@ internal sealed class Overlay
         {
             throw new InvalidDataException($"{RelativePath}: {ex.Message}", ex);
         }
+
+        foreach ((string id, VerificationRecord record) in overlay.Verification)
+        { record.Id = id; }
 
         string[] problems =
         [

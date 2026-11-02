@@ -77,6 +77,8 @@ internal sealed class CoverageReport
 
     public required IReadOnlyList<Availability> Availability { get; init; }
 
+    public IReadOnlyDictionary<string, VerificationRecord> Verification { get; init; } = new Dictionary<string, VerificationRecord>();
+
     public static CoverageReport Build(string repositoryRoot)
     {
         BridgeUsage usage = CoverageJson.Read<BridgeUsage>(Path.Combine(repositoryRoot, BridgeUsage.RelativePath));
@@ -136,6 +138,17 @@ internal sealed class CoverageReport
             }
         }
 
+        Dictionary<string, string> eligible = VerificationImport.EligibleIds(repositoryRoot);
+        var verification = overlay.Verification.Where(p => eligible.TryGetValue(p.Key, out string? kind) && p.Value.Kind == kind).ToDictionary(StringComparer.Ordinal);
+        foreach ((string id, VerificationRecord evidence) in verification.Where(p => p.Value.Verifies))
+        {
+            string group = id.EndsWith("#write", StringComparison.Ordinal) ? id[..^6] : id;
+            if (catalog.Units.ContainsKey(group))
+            {
+                var use = used.GetValueOrDefault(group, (0, new(StringComparer.Ordinal), new(StringComparer.Ordinal)));
+                used[group] = (2, use.Tools, use.Ids);
+            }
+        }
         Dictionary<string, string> status = catalog.Units.Values.ToDictionary(u => u.Key, u => Status(u, used, overlay), StringComparer.Ordinal);
         bool Partial(string key) => catalog.Groups.TryGetValue(key, out var members) && used.TryGetValue(key, out var use)
             && members.Count(m => !m.Excluded && use.Ids.Contains(m.Id)) < members.Count(m => !m.Excluded);
@@ -171,6 +184,7 @@ internal sealed class CoverageReport
             OverlayRules = overlay.Api,
             ReachedByTool = overlay.ReachedByTool,
             Availability = overlay.Availability,
+            Verification = verification,
         };
     }
 

@@ -80,6 +80,33 @@
   2. **存档文件**：自己制作的小项目，以 EPLAN 备份格式（`.zw1`）放在 `tests/fixtures/projects/`，测试时还原到 scratch 目录。只用于代码难以构造的场景，例如特定版本的旧项目升级。
 - 每个夹具都有一份 `README.md`，说明内容、制作方法和使用的 EPLAN 版本。
 
+### 批量实机验证（第 3 批 V1/V2）
+
+仅在专用开发机上运行 `BatchVerification`，先按 Large README 用 `eval-fixture.ps1 -WriteCopies -Force` 准备新的 LargeWrite，并按 A41 配置 `EPLREMOTE_HOST`（本机 IPv4）、`EPLREMOTE_PORT`（默认 49152）及可选的 `EPLANMCP_EPLREMOTE`。`PlanStepLiveSession` 只关闭已知夹具副本，并确认 LargeWrite 是唯一打开的 scratch 项目；`TrialApprovals` 只逐次批准这两个试运行工具，拒绝解除写入暂停。
+
+```powershell
+$env:EPLANMCP_BATCH_VERIFY = '1'
+$env:EPLANMCP_BATCH_MINUTES = '120'
+# 可选：从指定 ID 开始（包含该项），省略则从头开始
+# $env:EPLANMCP_BATCH_FROM = 'O:Eplan.EplApi.DataModel.Page.Name'
+# 或从指定 ID 的下一项续跑；FROM 与 AFTER 只能设置一个
+# $env:EPLANMCP_BATCH_AFTER = 'O:Eplan.EplApi.DataModel.Page.Name'
+dotnet test --project tests/EplanMcp.Large.Tests -- --filter-trait 'Batch=Verification'
+```
+
+写入（API 与 action）每项上限 90 秒，只读每项 30 秒；整轮默认 120 分钟（可设大于 0、不超过 1440），每完成 25 项输出数量、耗时和当前 ID。条目来自 main 当前生成的 `ApiTryCatalog.PropertyGroups`、`MethodGroups` 与逐组 `Methods(group)`，覆盖设置、句柄、数组和生命周期；方法每组选择参数最少的重载，完整数量由本轮 expected 输出和 Coverage 测试核对，不固定历史计数。接收器取生成的 `ReceiverShape`：服务保留 Project 定位器，静态调用和 Create 工厂省略 target，Remove 使用现有 destructive 审批和执行前备份，不绕过 ADR-0035。布尔和整数不猜值；句柄/via 来源、文件、显式页参数及其他无法自动生成的参数记为 `failed:needs_context`，不调用。对象参数从生成的 `ObjectReadTypes` 支持表和同一 scratch 副本的 `eplan_object_find` 结果取得，数组填入非空的已发现定位器；未发现接收对象记为 `skipped:no_object`。随后执行无参数、无 TYPE、经 Host 校验和 `ActionTryPolicy` 筛选的 action；数量随安装目录变化。结果在 FROM/AFTER 筛选之前记录完整 expected 数量。
+
+结果路径打印在测试输出中：`<scratch>/batch-verification/<运行 ID>/results.json`，每轮独立保存，每项后原子保存，包含日期、真实 EPLAN 版本、条目 ID、kind、outcome、seconds、changed、undo_restores、eplan_messages，以及停止位置。API 写入 ID 后缀为 `#write`，action ID 为 `A:<名称>`。输出、审计与暂停状态都留在 scratch，不写仓库。只读若改变设计、撤销未恢复、结果未知、模态窗口或超时均停跑；先保存当前项的 modal/outcome_unknown 等结果，再持久化暂停，不再执行清理或切换项目，工程师检查后通过正常审批渠道解除暂停。FROM 包含指定项，AFTER 跳过指定项供外部驱动重启后续跑；续跑只选择起点，不解除暂停，也不自动重试未知项。
+
+写值由读值推导：布尔取反、整数加 1、浮点加 0.5、字符串加 `_v`、枚举取下一成员；写后一次 `XEsUndoAction`，比对原值和页快照。action 先打开第一页，设计指纹变化时检查一次撤销；其恢复证据同时核对页快照与设计文件哈希（不含 User/锁文件），数据库字节不恢复时不能晋级。快照有现有范围限制，相等不证明完全没有副作用。
+
+```powershell
+dotnet run --project eng/coverage -c Release -- import-verification '<第一轮 results.json 路径>' '<后续轮 results.json 路径>'
+dotnet run --project eng/coverage -c Release -- generate
+```
+
+导入使用仓库目录和 overlay 的既有分母与排除规则，不依赖本机 action 目录；只接受其中的组/action ID。未知、已移除或已排除 ID 逐项报告并丢弃，已有 verification 中同类旧 ID 一并移除；不会添加目录或排除规则，不改变操作层 4014 分母。本机 UI action 若不在已登记的 action 分母，也只报告不导入。单文件内重复 ID、版本、日期或已知 ID 的证据格式错误时，全部文件拒绝且不修改 overlay。重复导入幂等；按命令行文件顺序合并，同 ID 后面的文件覆盖前面的，其余有效证据及人工维护的 live/api/availability/reached-by-tool 原文保留。报告按三种 kind 分列“通过且撤销恢复／只读通过／失败／未知／跳过／需要上下文”；回滚归失败，但错误含 `EPLAN could not complete` 且无系统消息时记为 `failed:needs_context`。未运行不标为通过或环境阻塞，`verified-whitelist.yaml` 只供审阅，不改变运行时白名单。
+
 ### 断言方式
 - **结构化断言优先**：用只读工具读回项目状态（页面、设备、连接、属性）后比较，而不是比对截图。
 - 读回的 JSON 先做规范化处理（去掉会话内句柄、时间戳、本机路径），再与 golden 文件比较。

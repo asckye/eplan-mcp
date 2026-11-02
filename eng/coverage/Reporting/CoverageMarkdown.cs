@@ -143,6 +143,19 @@ internal static class CoverageMarkdown
 
         Line();
         Line("## 4. 实机验证");
+        Line();
+        Line("### 批量验证（按条目，最新导入结果）");
+        Line("只读通过要求未观察到变更；写入通过要求一步撤销恢复。rolled_back 归入失败；failed:needs_context 单列，表示需要选择或特定窗口；modal/timeout/outcome_unknown 归入未知；未运行不冒充跳过或环境阻塞。晋级候选见 `catalog/mapping/verified-whitelist.yaml`，仅为数据，不改变运行时白名单。");
+        Line();
+        Line("| kind | 通过且撤销恢复 | 只读通过 | 失败 | 未知 | 跳过 | 需要上下文 |");
+        Line("|---|---:|---:|---:|---:|---:|---:|");
+        foreach (string kind in new[] { "api-read", "api-write", "action" })
+        {
+            VerificationRecord[] rows = [.. report.Verification.Values.Where(v => v.Kind == kind)];
+            Line($"| {kind} | {rows.Count(v => v.Verifies && v.UndoRestores == true)} | {rows.Count(v => v.Verifies && v.UndoRestores != true)} | {rows.Count(v => v.Outcome is "failed" or "rolled_back" || v.Outcome == "ok" && !v.Verifies)} | {rows.Count(v => v.Outcome is "outcome_unknown" or "modal" or "timeout")} | {rows.Count(v => v.Outcome.StartsWith("skipped:", StringComparison.Ordinal))} | {rows.Count(v => v.Outcome == "failed:needs_context")} |");
+        }
+        Line();
+        Line("### 既有工具记录");
         ToolEntry[] verified = [.. mapping.Tools.Where(t => t.Live.Any(r => r.Verifies))];
         Line($"有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：{Pct(verified.Length, mapping.Tools.Count)}，共 {verified.Sum(t => t.Live.Count(r => r.Verifies))} 条记录。版本和变体按来源原样填写，来源没写的标\"未注明\"。");
         Line();

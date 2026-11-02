@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using EplanMcp.Coverage.Mapping;
 using EplanMcp.Coverage.Scanning;
 using Microsoft.CodeAnalysis;
 
@@ -12,7 +13,7 @@ namespace EplanMcp.Coverage;
 /// </summary>
 internal static class Program
 {
-    private static int Main(string[] args)
+    private static async Task<int> Main(string[] args)
     {
         string? root = RepositoryRoot(Environment.CurrentDirectory);
         if (root is null)
@@ -32,6 +33,10 @@ internal static class Program
             case ["generate"]:
                 Console.WriteLine("Wrote " + string.Join(", ", CoverageCheck.Generate(root)) + ".");
                 return 0;
+            case ["import-verification", .. var results] when results.Length > 0:
+                await VerificationImport.ImportAsync(root, results).ConfigureAwait(false);
+                Console.WriteLine("Merged verification results into " + Overlay.RelativePath + ". Run generate next.");
+                return 0;
             case ["check"]:
                 // In GitHub Actions the lines become annotations on the run and the pull request.
                 bool github = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
@@ -41,7 +46,7 @@ internal static class Program
                 Console.WriteLine(problems.Count == 0 ? "Coverage files match their inputs." : $"{problems.Count} coverage file(s) out of date.");
                 return problems.Count == 0 ? 0 : 1;
             default:
-                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | generate | check");
+                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | generate | check | import-verification <results.json> [<results.json> ...]");
                 return 2;
         }
     }

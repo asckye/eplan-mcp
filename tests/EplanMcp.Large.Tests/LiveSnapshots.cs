@@ -23,7 +23,9 @@ internal static class LiveSnapshots
     }
 
     /// <summary>Every chunk of the snapshot <paramref name="args"/> asks for, and how long each took.</summary>
-    public static async Task<Snapshot> TakeAsync(BridgeClient bridge, ProjectSnapshotArgs args)
+    public static Task<Snapshot> TakeAsync(BridgeClient bridge, ProjectSnapshotArgs args) => TakeCancellableAsync(bridge, args, TestContext.Current.CancellationToken);
+
+    public static async Task<Snapshot> TakeCancellableAsync(BridgeClient bridge, ProjectSnapshotArgs args, CancellationToken cancellationToken)
     {
         var chunks = new List<ProjectSnapshotData>();
         var clock = Stopwatch.StartNew();
@@ -31,7 +33,7 @@ internal static class LiveSnapshots
         do
         {
             args.AfterPage = after;
-            ProjectSnapshotData chunk = await bridge.InvokeAsync<ProjectSnapshotArgs, ProjectSnapshotData>(OperationNames.ProjectSnapshot, args, TestContext.Current.CancellationToken);
+            ProjectSnapshotData chunk = await bridge.InvokeAsync<ProjectSnapshotArgs, ProjectSnapshotData>(OperationNames.ProjectSnapshot, args, cancellationToken);
             chunks.Add(chunk);
             after = chunk.NextAfterPage;
             Assert.True(chunks.Count <= 1000, "The snapshot does not end.");

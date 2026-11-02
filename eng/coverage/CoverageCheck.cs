@@ -34,6 +34,7 @@ internal static class CoverageCheck
         (ObjectKindGenerator.TypesPath, ObjectKindGenerator.Types),
         (ObjectKindGenerator.DispatchPath, ObjectKindGenerator.Dispatch),
         (ObjectKindGenerator.TablePath, ObjectKindGenerator.Table),
+        (VerificationImport.WhitelistPath, VerificationImport.Whitelist),
     ];
 
     /// <summary>Writes every derived file, wrappers first, removes generated files no longer selected; returns the paths written.</summary>

@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="EplanMcp.Host.Tests" />
+    <InternalsVisibleTo Include="EplanMcp.Coverage.Tests" />
     <!-- Large test Q6 calls the Bridge's plan and execute operations itself, with the Host's BridgeClient. -->
     <InternalsVisibleTo Include="EplanMcp.Large.Tests" />
     <!-- The Workbench's Medium tests run this WorkbenchChannel against the real Workbench pipe server (M5 design 7). -->

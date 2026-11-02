@@ -3,7 +3,7 @@ using EplanMcp.Host.Safety;
 namespace EplanMcp.Large.Tests;
 
 /// <summary>The engineer of these trials: grants each question of one tool bound to exactly what was asked, and keeps every question.</summary>
-internal sealed class TrialApprovals(string tool) : IApprovalChannel
+internal sealed class TrialApprovals(params string[] tools) : IApprovalChannel
 {
     private readonly List<ApprovalQuestion> _questions = [];
 
@@ -38,7 +38,7 @@ internal sealed class TrialApprovals(string tool) : IApprovalChannel
             _questions.Add(question);
         }
 
-        ApprovalDecision decision = question.Tool == tool && question.Release is null ? ApprovalDecision.Granted : ApprovalDecision.Denied;
+        ApprovalDecision decision = tools.Contains(question.Tool, StringComparer.Ordinal) && question.Release is null ? ApprovalDecision.Granted : ApprovalDecision.Denied;
         return Task.FromResult<ApprovalAnswer?>(new ApprovalAnswer(question.RequestId, question.Plan.Fingerprint, question.ArgumentsHash, decision));
     }
 }

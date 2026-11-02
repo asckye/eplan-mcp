@@ -14,6 +14,8 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
     private readonly HashSet<string> _originalPages = new(StringComparer.Ordinal);
     private readonly string _backups = Directory.CreateTempSubdirectory("eplanmcp-p17-backups-").FullName;
     private int _nextNumber;
+    private bool _cleanupPaused;
+    internal void PauseCleanup() => _cleanupPaused = true;
     public string Project => project;
     public int NextNumber => ++_nextNumber;
     public string NextPage => DestructiveHost.Prefix + NextNumber.ToString(CultureInfo.InvariantCulture);
@@ -143,6 +145,25 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
     public Task<LiveSnapshots.Snapshot> SnapshotAsync(params string[] pages) => LiveSnapshots.TakeAsync(bridge, new() { Project = Project, Pages = pages.Length == 0 ? null : [.. pages] });
     public async Task<string> StateAsync() => string.Join("\n", (await SnapshotAsync()).Pages.OrderBy(p => p.Name, StringComparer.Ordinal).Select(p => p.Name + "\t" + p.Hash));
     public async Task<string[]> OpenPathsAsync() => [.. (await ProjectsAsync()).Select(p => p.Path).Order(StringComparer.Ordinal)];
+    internal async Task EnsureAloneAsync()
+    {
+        OpenProject[] others = [.. (await ProjectsAsync()).Where(p => !string.Equals(p.Path, Project, StringComparison.OrdinalIgnoreCase))];
+        foreach (OpenProject other in others)
+        {
+            Assert.True(other.Path.StartsWith(Path.Combine(LiveEplan.ScratchRoot(), "fixtures") + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(other.Path, Path.Combine(WriteHost.OutsideFolder, "LargeOutside"), StringComparison.OrdinalIgnoreCase), "Only known fixture copies may be closed.");
+        }
+        foreach (OpenProject other in others)
+        {
+            string page = (await LiveSnapshots.TakeAsync(bridge, new() { Project = other.Path })).Pages.OrderBy(p => p.Name, StringComparer.Ordinal).First().Name;
+            await bridge.InvokeAsync<PageOpenArgs, PageOpenData>(OperationNames.PageOpen, new() { Project = other.Path, Page = page }, TestContext.Current.CancellationToken);
+            Assert.Equal(other.Path, (await CurrentAsync()).Path, ignoreCase: true);
+            await ActionAsync("XPrjActionProjectClose");
+            _closed.Add(other.Path);
+        }
+        await AssertCurrentAsync();
+        Assert.Equal([Project], await OpenPathsAsync());
+    }
     public async Task UndoAsync()
     {
         await AssertCurrentAsync();
@@ -237,6 +258,12 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
 
     public async ValueTask DisposeAsync()
     {
+        if (_cleanupPaused)
+        {
+            // An unknown/modal/timed-out trial must not trigger cleanup writes or project switching.
+            await bridge.DisposeAsync();
+            return;
+        }
         try
         {
             if (_originalPages.Count > 0)
