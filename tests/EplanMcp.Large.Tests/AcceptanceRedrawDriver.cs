@@ -458,7 +458,14 @@ internal sealed class AcceptanceRedrawDriver(
             { Skip(Id(cable), "The shared wire batch is incomplete; cable cores require the complete topology."); }
             return;
         }
-        items.AddRange(nodes.Select(n => (object)new { kind = n.GetProperty("kind").GetString(), position = n.GetProperty("position"), directions = n.GetProperty("directions") }));
+        // D1 (A64, 2026-11-02): a list may name the T-node variant; variant 0 chains source, branch and continuation.
+        items.AddRange(nodes.Select(n =>
+        {
+            var node = new Dictionary<string, object?> { ["kind"] = n.GetProperty("kind").GetString(), ["position"] = n.GetProperty("position"), ["directions"] = n.GetProperty("directions") };
+            if (n.TryGetProperty("variant", out JsonElement variant))
+            { node["variant"] = variant.GetInt32(); }
+            return (object)node;
+        }));
         cables = cables.Where(c => !NeedsGeneratedCores(c)).ToArray();
         items.AddRange(cables.Select(c => CableItem(c, id => new { item_index = _wires[id].ItemIndex!.Value })));
         if (items.Count == 0)
@@ -667,7 +674,15 @@ internal sealed class AcceptanceRedrawDriver(
         })
         {
             string[] ids = points.Select(p => Id(p) + (page == Page ? "/page" : "/counterpart")).ToArray();
-            var items = points.Select(p => (object)new { kind = "interruption_point", name = Expand(p.GetProperty("name").GetString()!), position = p.GetProperty(position), direction = p.GetProperty(direction).GetString(), counterpart_pages = new[] { peer } }).ToList();
+            // D2 (A65, 2026-11-02): optional sort codes order same-name points for pairing.
+            string sortKey = page == Page ? "sort_code" : "counterpart_sort_code";
+            var items = points.Select(p =>
+            {
+                var point = new Dictionary<string, object?> { ["kind"] = "interruption_point", ["name"] = Expand(p.GetProperty("name").GetString()!), ["position"] = p.GetProperty(position), ["direction"] = p.GetProperty(direction).GetString(), ["counterpart_pages"] = new[] { peer } };
+                if (p.TryGetProperty(sortKey, out JsonElement sort))
+                { point["sort_code"] = sort.GetInt64(); }
+                return (object)point;
+            }).ToList();
             var args = new Dictionary<string, object?> { ["page"] = page, ["response_format"] = "detailed", ["items"] = items };
             if (dryRun)
             {
