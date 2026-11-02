@@ -3,7 +3,6 @@ using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Core.Protocol;
-using EplanMcp.Contracts;
 using EplanMcp.Bridge.Eplan.Adapters;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;

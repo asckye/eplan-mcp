@@ -5,7 +5,6 @@ namespace Eplan.EplApi.DataModel.Graphics;
 internal abstract class TextBase(long oid) : Placement(oid)
 {
     public int UndockCalls { get; private set; }
-    public void UndockText() { UndockCalls++; if (IsReadOnly) { throw new BaseException("数据库写保护"); } }
     public MultiLangString Contents { get; set; } = new("en_US@Test;");
     public double Height { get; set; } = 3;
     public double Rotation { get; set; }
@@ -13,6 +12,9 @@ internal abstract class TextBase(long oid) : Placement(oid)
     public bool ReadOnly { get; init; }
     public void UndockText()
     {
+        UndockCalls++;
+        if (IsReadOnly)
+        { throw new BaseException("数据库写保护"); }
         if (ReadOnly)
         { throw new BaseException(); }
         IsDocked = false;
