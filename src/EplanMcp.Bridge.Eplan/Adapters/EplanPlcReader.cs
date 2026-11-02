@@ -63,9 +63,9 @@ internal sealed class EplanPlcReader : IPlcReader
             if (detailed)
             {
                 channel.Owner ??= plc.Name;
-                // Other representations only: a parentless channel never counts itself as its own duplicate.
-                channel.ParentlessRepresentations = Math.Max(0, representations[channel.Name].Count(t => t.PLC is null)
-                    - (terminal.PLC is null ? 1 : 0));
+                // Live T7d/D3: every same-name PLCTerminal without a PLC parent counts, the channel itself included
+                // (a placed point is parentless itself, which is the 1 the live tests read).
+                channel.ParentlessRepresentations = representations[channel.Name].Count(t => t.PLC is null);
             }
             record.Channels.Add(channel);
         }

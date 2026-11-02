@@ -1,6 +1,6 @@
 # 工具规格：`eplan_plc_get`
 
-T7d 兼容读回字段仅在 `response_format=detailed` 时返回：`owner`（原生 PLC 父名，为空时取当前卡名）、`manualSymbolicAddress`（20402）、`cardReference`（只读 20301 概览引用）及 `parentlessRepresentations`（同名且无 PLC 父对象的 PLCTerminal 数量，扣除当前通道自身，A55）；未设置的可选字段省略。默认 concise 保持 T7d 之前的字段和 5k token 预算。
+T7d 兼容读回字段仅在 `response_format=detailed` 时返回：`owner`（原生 PLC 父名，为空时取当前卡名）、`manualSymbolicAddress`（20402）、`cardReference`（只读 20301 概览引用）及 `parentlessRepresentations`（同名且无 PLC 父对象的 PLCTerminal 数量，含通道自身；实机放置的点自身就无 PLC 父对象，A55）；未设置的可选字段省略。默认 concise 保持 T7d 之前的字段和 5k token 预算。
 
 通道先保留 `PLC.PLCTerminals` 原序及同名成员，再从卡标识前缀查询补入缺失名称的已放置表达（主表达优先，否则按页名取首个）；无页表达不新增通道。
 

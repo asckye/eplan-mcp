@@ -53,8 +53,10 @@ public sealed class PlcTests(LiveEplan eplan)
             await eplan.CallAsync("eplan_plc_get", new() { ["plc"] = tag, ["limit"] = 1 });
         }
 
-        // S21 counted 20 PLC boxes; the list keeps one per tag (A12), so it may show fewer.
-        Assert.InRange(listed.GetProperty("total").GetInt32(), 1, 20);
+        // S21 counted 20 PLC boxes; the list keeps one per tag (A12), so it may show fewer. PlcDisplaySpikeTests adds
+        // -D3KF<n> cards to the same scratch copy in a run; they are not fixture boxes.
+        int fixture = listed.GetProperty("devices").EnumerateArray().Count(d => !d.GetProperty("tag").GetString()!.Contains("-D3KF", StringComparison.Ordinal));
+        Assert.InRange(fixture, 1, 20);
     }
 
     [Fact]

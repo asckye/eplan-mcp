@@ -46,7 +46,7 @@ PLC digital input:
 - plc_connection_point: 20022; connection_designations must match. Writes 20400/20402/20011=address/manual symbolic address/??_?? text; calculated 20403/20301 read-only.
 - plc_plug_designation: optional manual 20406, 1-64 nonblank characters, no controls; requires four PLC fields. Name stays card:point.
 - PLC displays: 20213=card DT, 20406=plug, 20300=main/auxiliary, 20301=overview. References are native/read-only, may be empty; overview needs a matching representation.
-- Local PLC displays: references set 20021=2. Verify text/position/visibility before/after commit by fresh IDs (A77/A78).
+- Local PLC displays: references set 20021=2. Verify text/position/visibility before/after commit by fresh IDs (A78/A79).
 - plc: committed fields + plugDesignation/mainReference; readback failure keeps committed + warning. Verify with eplan_plc_get detailed / eplan_page_get include_drawings before retry. functions/unplaced=null; plc_get counts same-name parentlessRepresentations (A55). Use returned names.
 - show_page opens/focuses the page before drawing; UI only, no project data change.
 

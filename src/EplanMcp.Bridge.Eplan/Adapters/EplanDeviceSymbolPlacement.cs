@@ -74,7 +74,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         string[]? requested = args.ConnectionDesignations;
         for (int i = 0; i < (requested?.Length ?? 0); i++)
         { properties[(Properties.Function)20022, i + 1] = requested![i]; }
-        // A77: local placements are independent of the symbol variant (documentation only).
+        // A78: local placements are independent of the symbol variant (documentation only).
         if (args.PlcConnectionPoint is not null && args.DisplayProperties is { Count: > 0 })
         { function.SwitchLocalPropertyPlacements(true); Require(function.UseLocalPropertyPlacements); }
         string? visible = null;

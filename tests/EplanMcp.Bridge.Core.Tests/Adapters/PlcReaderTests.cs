@@ -72,7 +72,7 @@ public sealed class PlcReaderTests
         Assert.Equal((point.Name, pointPage.Name, false, "I0.1"), (channel.Name, channel.Page, channel.Main, channel.Address));
         Assert.Equal(detailed ? "-X10" : null, channel.PlugDesignation);
         Assert.Equal(detailed ? plc.Name : null, channel.Owner);
-        Assert.Equal(detailed ? (int?)1 : null, channel.ParentlessRepresentations);
+        Assert.Equal(detailed ? (int?)2 : null, channel.ParentlessRepresentations);
         Assert.Equal(2, project.FunctionQueries.Count);
         Assert.Equal((plc.Name + ":", false, (FunctionCategory?)FunctionCategory.PLCTerminal), project.FunctionQueries[1]);
     }
@@ -100,7 +100,7 @@ public sealed class PlcReaderTests
         var channel = Assert.Single(record.Channels);
         Assert.Equal((point.Name, pointPage.Name, false), (channel.Name, channel.Page, channel.Main));
         Assert.Equal(detailed ? plc.Name : null, channel.Owner);
-        Assert.Equal(detailed ? (int?)2 : null, channel.ParentlessRepresentations);
+        Assert.Equal(detailed ? (int?)3 : null, channel.ParentlessRepresentations);
     }
 
     [Theory]
@@ -132,7 +132,7 @@ public sealed class PlcReaderTests
         Assert.Equal((first.Name, hasMain ? lastPage.Name : firstPage.Name, hasMain, hasMain ? "I0.1" : "I0.0"),
             (channel.Name, channel.Page, channel.Main, channel.Address));
         Assert.Equal(detailed ? plc.Name : null, channel.Owner);
-        Assert.Equal(detailed ? (int?)(hasMain ? 2 : 1) : null, channel.ParentlessRepresentations);
+        Assert.Equal(detailed ? (int?)2 : null, channel.ParentlessRepresentations); // first and the unplaced one; last has a PLC parent
     }
 
     [Theory]

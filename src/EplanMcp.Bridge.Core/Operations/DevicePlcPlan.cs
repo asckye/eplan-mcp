@@ -4,7 +4,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 internal static class DevicePlcPlan
 {
-    // A77: the Name suffix is 20022, not 20406. A composite Name changes the pin, not the plug.
+    // A78: the Name suffix is 20022, not 20406. A composite Name changes the pin, not the plug.
     internal static string Suffix(DevicePlaceArgs args) => args.PlcConnectionPoint!;
     internal static string Parent(DevicePlaceArgs args, string tag) => tag.Substring(0, tag.Length - Suffix(args).Length - 1);
 

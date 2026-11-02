@@ -76,7 +76,8 @@ public sealed class PlcDisplaySpikeTests(LiveEplan eplan)
         JsonElement channel = Assert.Single(read.GetProperty("channels").EnumerateArray(), c => c.GetProperty("page").GetString() == page && c.GetProperty("address").GetString() == "I0.1");
         Assert.Equal(tag, channel.GetProperty("owner").GetString());
         Assert.Equal("-X10", channel.GetProperty("plugDesignation").GetString());
-        string reference = channel.GetProperty("mainReference").GetString() ?? string.Empty;
+        // Optional fields are omitted when unset: no 20300 reference means no mainReference field.
+        string reference = channel.TryGetProperty("mainReference", out JsonElement main) ? main.GetString() ?? string.Empty : string.Empty;
         Assert.NotEqual(page, cardPage);
         // D3 TRX: a standalone point has no 20300 reference merely because its box is on another page.
         Assert.Equal(string.Empty, reference);
