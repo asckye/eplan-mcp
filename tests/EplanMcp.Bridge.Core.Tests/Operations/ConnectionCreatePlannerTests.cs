@@ -56,10 +56,16 @@ public sealed class ConnectionCreatePlannerTests
     }
 
     [Fact]
-    public void TNode_ExplicitVariant_KeepsPinGeometryChecks()
+    public void TNode_ExplicitVariant_AcceptsTheTargetPinOffset_ButNotFarPins()
     {
+        // Live 2026-11-02: TLRU variants 0-3 carry their diagonal target pin 2 mm off the insertion point; only 8 has all at (0,0).
         var fixture = TNodeVariants();
-        fixture.Symbols[2].ConnectionPoints[0].Location = [4, 0];
+        fixture.Symbols[2].ConnectionPoints[2].Location = [2, 0];
+        fixture.Request["items"]![0]!["variant"] = 2;
+        Assert.Equal(2, (int)Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!["variant"]!);
+
+        fixture = TNodeVariants();
+        fixture.Symbols[2].ConnectionPoints[2].Location = [100, 0];
         fixture.Request["items"]![0]!["variant"] = 2;
         Invalid(fixture, "/items/0/variant");
     }

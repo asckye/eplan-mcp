@@ -223,6 +223,9 @@
                       "Right"
                     ]
                   }
+                },
+                "variant": {
+                  "type": "integer"
                 }
               },
               "required": [
@@ -312,6 +315,10 @@
                   "minItems": 1,
                   "maxItems": 20,
                   "uniqueItems": true
+                },
+                "sort_code": {
+                  "type": "integer",
+                  "minimum": 0
                 }
               },
               "required": [
@@ -699,6 +706,10 @@
                   "minItems": 1,
                   "maxItems": 20,
                   "uniqueItems": true
+                },
+                "sort_code": {
+                  "type": "integer",
+                  "minimum": 0
                 }
               },
               "required": [
@@ -877,6 +888,12 @@
                     "null"
                   ]
                 },
+                "sortCode": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "counterparts": {
                   "type": "array",
                   "items": {
@@ -914,6 +931,7 @@
                 "pin",
                 "direction",
                 "crossReference",
+                "sortCode",
                 "counterparts"
               ]
             },
@@ -986,6 +1004,12 @@
                 "null"
               ]
             },
+            "sortCode": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
             "counterparts": {
               "type": "array",
               "items": {
@@ -1023,6 +1047,7 @@
             "pin",
             "direction",
             "crossReference",
+            "sortCode",
             "counterparts"
           ]
         },
@@ -1460,6 +1485,7 @@
           ],
           "direction": "Down",
           "crossReference": null,
+          "sortCode": null,
           "counterparts": []
         }
       ],
@@ -1608,7 +1634,7 @@
       ],
       "preservedEndpoints": []
     },
-    "fingerprint": "332f7c1857e8dceda139a24dd379e28c7504d4bfb2f025f615577729e1c03d6c"
+    "fingerprint": "d1850b51925a4d93a5255eb0b584fffca3d6f6661f702d42095ad608254647de"
   },
   "interruptionReadback": [
     {
@@ -1625,6 +1651,7 @@
       ],
       "direction": "Down",
       "crossReference": "native:=F+A1&EFS1/1",
+      "sortCode": null,
       "counterparts": [
         {
           "page": "=F+A1&EFS1/1",
@@ -1647,6 +1674,7 @@
       ],
       "direction": "Up",
       "crossReference": "native:=F+A1&EFS1/2",
+      "sortCode": null,
       "counterparts": [
         {
           "page": "=F+A1&EFS1/2",
@@ -1925,6 +1953,10 @@
                   "minItems": 1,
                   "maxItems": 20,
                   "uniqueItems": true
+                },
+                "sort_code": {
+                  "type": "integer",
+                  "minimum": 0
                 }
               },
               "required": [
@@ -2102,6 +2134,12 @@
                     "null"
                   ]
                 },
+                "sortCode": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "counterparts": {
                   "type": "array",
                   "items": {
@@ -2139,6 +2177,7 @@
                 "pin",
                 "direction",
                 "crossReference",
+                "sortCode",
                 "counterparts"
               ]
             },
@@ -2211,6 +2250,12 @@
                 "null"
               ]
             },
+            "sortCode": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
             "counterparts": {
               "type": "array",
               "items": {
@@ -2248,6 +2293,7 @@
             "pin",
             "direction",
             "crossReference",
+            "sortCode",
             "counterparts"
           ]
         },

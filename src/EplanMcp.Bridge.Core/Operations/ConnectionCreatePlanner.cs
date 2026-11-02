@@ -208,7 +208,7 @@ public static class ConnectionCreatePlanner
                 _ => s.Name == "PCP" && s.Type == "PotentialTerminal",
             }) && s.ConnectionPoints.Count == node.Directions.Length && s.ConnectionPoints.All(p => p.Location.Length == 2
                 && p.Location.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && Math.Abs(v) <= 2 * grid)
-                && (node.Kind is "potential_point" or "interruption_point" || p.Location.All(v => v == 0)))
+                && (node.Kind is "potential_point" or "interruption_point" || requestedVariants.ContainsKey(Key(node.Point)) || p.Location.All(v => v == 0)))
                 && s.ConnectionPoints.Select(p => p.Direction).OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(node.Directions.OrderBy(d => d, StringComparer.Ordinal))).OrderBy(s => s.Variant).ToArray();
             // A52/S40: PCP has one offset pin and mirrored variants sharing its direction.
             if (node.Kind is "potential_point" or "interruption_point" && matches.Length > 0)
