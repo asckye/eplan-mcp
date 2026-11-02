@@ -54,12 +54,18 @@ internal static class AcceptanceDrawingList
         });
         Each(root, "devices", "", (item, at) => Device(item, at));
         JsonElement plc = root.GetProperty("plc");
-        Object(plc, "/plc", "box points", "");
+        Object(plc, "/plc", "box points", "box_page");
+        if (plc.TryGetProperty("box_page", out _))
+        { Text(plc, "box_page", "/plc"); Require(plc.GetProperty("box_page").GetString() == root.GetProperty("counterpart_page").GetString(), "/plc/box_page", "must be the new counterpart page"); }
         Device(plc.GetProperty("box"), "/plc/box");
         var addresses = new HashSet<string>(StringComparer.Ordinal);
         Each(plc, "points", "/plc", (point, at) =>
         {
-            Object(point, at, "id tag position connection_designations connection_point address symbolic_address function_text direction", "display_properties");
+            Object(point, at, "id tag position connection_designations connection_point address symbolic_address function_text direction", "display_properties plug_designation main_reference_contains main_reference");
+            foreach (string field in "plug_designation main_reference_contains".Split(' '))
+            { if (point.TryGetProperty(field, out _)) { Text(point, field, at); } }
+            if (point.TryGetProperty("main_reference", out JsonElement nativeReference))
+            { Require(nativeReference.ValueKind == JsonValueKind.String, at + "/main_reference", "must be an exact native reference string, including empty"); }
             Identity(point, at);
             foreach (string key in "tag connection_point address symbolic_address function_text".Split(' '))
             { Text(point, key, at); }
@@ -77,7 +83,7 @@ internal static class AcceptanceDrawingList
                 {
                     Object(display, pointer, "property_id offset_x_mm offset_y_mm", "");
                     int id = Integer(display.GetProperty("property_id"), pointer + "/property_id", 0, int.MaxValue);
-                    Require(id is 20400 or 20403 or 20011 or 20301 && displayed.Add(id), pointer + "/property_id", "must be a distinct PLC display property");
+                    Require(id is 20400 or 20403 or 20011 or 20301 or 20300 or 20213 or 20406 && displayed.Add(id), pointer + "/property_id", "must be a distinct PLC display property");
                     foreach (string axis in "offset_x_mm offset_y_mm".Split(' '))
                     { Require(display.GetProperty(axis).ValueKind == JsonValueKind.Number, pointer + "/" + axis, "must be a finite number"); }
                 }, 0, 8);

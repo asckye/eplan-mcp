@@ -26,7 +26,7 @@ public sealed class AcceptanceRedrawDriverTests
         string[] skipped = report.GetProperty("skipped").EnumerateArray().Select(s => s.GetProperty("item").GetString()!).ToArray();
         Assert.DoesNotContain("plc", skipped);
         Assert.DoesNotContain("strip", skipped);
-        Assert.All(Enumerable.Range(0, 7), i => Assert.Contains("input" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/display_properties", skipped));
+        Assert.Empty(skipped);
         Assert.DoesNotContain(skipped, id => id.StartsWith("terminal", StringComparison.Ordinal));
         JsonElement[] placements = fake.Requests.Where(r => r.Tool == "eplan_device_place").Select(r => r.Args).ToArray();
         Assert.Equal(["SSRW", "SSRW", "SSD", "SSD", "SONOT2", "SSD"], placements.Skip(2).Take(6).Select(a => a.GetProperty("symbol").GetString()));
@@ -61,7 +61,7 @@ public sealed class AcceptanceRedrawDriverTests
         {
             Assert.Equal("+A1-KFtest1", a.GetProperty("tag").GetString());
             Assert.Equal("DI_NATIVE", a.GetProperty("symbol").GetString());
-            Assert.False(a.TryGetProperty("display_properties", out _));
+            Assert.True(a.TryGetProperty("display_properties", out _));
             Assert.False(a.TryGetProperty("connection_designations", out _));
             JsonElement point = Assert.Single(list.GetProperty("plc").GetProperty("points").EnumerateArray(), p => p.GetProperty("connection_point").GetString() == a.GetProperty("plc_connection_point").GetString());
             Assert.Equal(point.GetProperty("function_text").GetString(), a.GetProperty("plc_text").GetString());
@@ -81,7 +81,7 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.All(textMoves, m => Assert.Equal(90, m.GetProperty("angle_deg").GetInt32()));
         Assert.All(terminals.Skip(1), a => Assert.False(a.TryGetProperty("terminal_strip_text", out _)));
         Assert.All(terminals, a => Assert.False(a.TryGetProperty("tag", out _) || a.TryGetProperty("library", out _) || a.TryGetProperty("connection_designations", out _)));
-        Assert.Equal(7, skipped.Length);
+        Assert.Empty(skipped);
         Assert.All(skipped, id => Assert.EndsWith("/display_properties", id, StringComparison.Ordinal));
         Assert.Equal(2, fake.Calls.Count(c => c == "eplan_cable_get"));
         JsonElement[] generations = evidence.Where(e => e.GetProperty("tool").GetString() == "eplan_connection_generate").Select(e => e.GetProperty("result")).ToArray();
@@ -177,6 +177,20 @@ public sealed class AcceptanceRedrawDriverTests
             Assert.All(points, p => Assert.Equal(call.GetProperty("page").GetString() == "=GAA+A1&EFS1/test" ? "=GAA+A1&EFS1/test2" : "=GAA+A1&EFS1/test", Assert.Single(p.GetProperty("counterpart_pages").EnumerateArray()).GetString()));
             Assert.All(call.GetProperty("items").EnumerateArray(), i => Assert.Equal("interruption_point", i.GetProperty("kind").GetString()));
         }
+    }
+
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("text")]
+    [InlineData("hidden")]
+    [InlineData("parent")]
+    public async Task PlcRequiredDisplay_MissingWrongOrHiddenText_FailsAcceptance(string fault)
+    {
+        var fake = new DrawingTools { ConnectWires = true, PlcDisplayFault = fault };
+        var driver = Driver(fake);
+        await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        Assert.DoesNotContain("eplan_export_image", fake.Calls);
+        Assert.Equal(0, driver.SkippedCount);
     }
 
     [Theory]
@@ -362,7 +376,10 @@ public sealed class AcceptanceRedrawDriverTests
     {
         var fake = new DrawingTools { ConnectWires = true, MissingInterruptionLine = true };
         await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(Driver(fake).DrawAsync);
-        Assert.DoesNotContain(fake.Requests.Where(r => r.Tool == "eplan_device_place"), r => r.Args.GetProperty("page").GetString() == "=GAA+A1&EFS1/test2");
+        JsonElement card = Assert.Single(fake.Requests, r => r.Tool == "eplan_device_place"
+            && r.Args.GetProperty("page").GetString() == "=GAA+A1&EFS1/test2").Args;
+        Assert.Equal("SPECIAL", card.GetProperty("library").GetString());
+        Assert.Equal("PLCC", card.GetProperty("symbol").GetString());
     }
 
     [Theory]
@@ -402,6 +419,7 @@ public sealed class AcceptanceRedrawDriverTests
     [InlineData("symbolic_address")]
     [InlineData("text")]
     [InlineData("owner")]
+    [InlineData("mainReference")]
     public async Task PlcReadback_WrongNativeValue_FailsWithoutTreatingThePointAsUnsupported(string field)
     {
         var fake = new DrawingTools { WrongPlcField = field };
@@ -560,12 +578,12 @@ public sealed class AcceptanceRedrawDriverTests
     [Fact]
     public async Task KeepGoing_OnlyUnsupportedItems_StillFailsAtTheEnd()
     {
-        var fake = new DrawingTools { ConnectWires = true };
+        var fake = new DrawingTools { ConnectWires = true, Refuse = (tool, args) => tool == "eplan_device_place" && args.TryGetProperty("plc_connection_point", out _) ? Refusal(ErrorReason.CapabilityMissing, ExecutionState.NotStarted) : null };
         var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", TwoSwitches(), "test", _ => { }, keepGoing: true);
         var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
         Assert.Empty(JsonSerializer.SerializeToElement(driver.Report).GetProperty("problems").EnumerateArray());
         Assert.True(driver.SkippedCount > 0);
-        Assert.Contains("/display_properties", error.Message, StringComparison.Ordinal);
+        Assert.Contains("input", error.Message, StringComparison.Ordinal);
         Assert.Contains("eplan_placement_create", fake.Calls);
     }
 
@@ -630,7 +648,8 @@ public sealed class AcceptanceRedrawDriverTests
         bool deferredCable = !explicitWires || mixed;
         var fake = new DrawingTools { ConnectWires = true };
         var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", list, "test", _ => { }, keepGoing: true, preflight: true);
-        await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
+        await driver.DrawAsync();
+        Assert.Equal(0, driver.SkippedCount);
         JsonElement[] dryRuns = fake.Requests.Where(r => r.Tool == "eplan_connection_create" && r.Args.TryGetProperty("dry_run", out _)).Select(r => r.Args).ToArray();
         JsonElement[] writes = fake.Requests.Where(r => r.Tool == "eplan_connection_create" && !r.Args.TryGetProperty("dry_run", out _)).Select(r => r.Args).ToArray();
         Assert.Equal(3, dryRuns.Length);
@@ -818,6 +837,7 @@ public sealed class AcceptanceRedrawDriverTests
         internal Func<string, JsonElement, JsonElement?>? Refuse { get; init; }
         internal bool MissingPoint { get; init; }
         internal string? WrongPlcField { get; init; }
+        internal string? PlcDisplayFault { get; init; }
         internal bool MissingMember { get; init; }
         internal bool WrongStripText { get; init; }
         internal string? FailPlace { get; init; }
@@ -906,6 +926,7 @@ public sealed class AcceptanceRedrawDriverTests
                         { _stripText = (string)text!; _functions[parent] = JsonSerializer.SerializeToElement(new { tag = parent, category = "TerminalStrip", pins = Array.Empty<string>(), page = args["page"], text }); }
                         _functions[tag] = JsonSerializer.SerializeToElement(new { tag, category, pins, page = args["page"], text = (string?)null });
                         double x = (double)args["x"]!, y = (double)args["y"]!;
+                        long functionOid = _oid + 1;
                         _drawings.Add(new { page = args["page"], kind = terminal || input ? "Terminal" : "Function", properties = new { name = "=" + tag }, location = new[] { x, y }, bounds = new[] { x - 4, y - (pins.Length > 1 ? 12 : 4), x + (horizontal ? 12 : 4), y + 4 }, locator = new { project = "LargeWrite", page = args["page"], type = 1, oid = ++_oid, digest = new string('a', 64) } });
                         object? member = null;
                         if (terminal)
@@ -920,9 +941,24 @@ public sealed class AcceptanceRedrawDriverTests
                         }
                         if (input)
                         {
+                            string mainReference = WrongPlcField == "mainReference" ? "&EFS1/invented.2" : "";
                             string? Field(string field) => WrongPlcField == field ? "wrong" : (string?)args["plc_" + field];
-                            _channels.Add(new { name = tag, owner = WrongPlcField == "owner" ? "+OTHER-KF1" : parent, page = args["page"], address = Field("address"), manualSymbolicAddress = Field("symbolic_address"), symbolicAddress = Field("address"), text = Field("text"), parentlessRepresentations = 1 });
+                            _channels.Add(new { name = tag, owner = WrongPlcField == "owner" ? "+OTHER-KF1" : parent, page = args["page"], address = Field("address"), manualSymbolicAddress = Field("symbolic_address"), symbolicAddress = Field("address"), text = Field("text"), parentlessRepresentations = 1, plugDesignation = args.GetValueOrDefault("plc_plug_designation"), mainReference = mainReference, cardReference = (string?)null });
                             _channels.Add(new { name = parent, address = (string?)null });
+                            if (args.TryGetValue("display_properties", out object? requested))
+                            {
+                                foreach (JsonElement display in ((JsonElement)requested!).EnumerateArray())
+                                {
+                                    int id = display.GetProperty("property_id").GetInt32();
+                                    if (PlcDisplayFault == "missing" && id == 20213)
+                                    { continue; }
+                                    object? value = id switch { 20400 or 20403 => Field("address"), 20011 => Field("text"), 20301 => "", 20300 => mainReference, 20213 => parent[parent.LastIndexOf('-')..], 20406 => args.GetValueOrDefault("plc_plug_designation"), _ => "" };
+                                    if (PlcDisplayFault == "text" && id == 20213)
+                                    { value = "-WRONG"; }
+                                    _drawings.Add(new { page = args["page"], kind = "PropertyPlacement", properties = new { display = value, visible = PlcDisplayFault == "hidden" && id == 20213 ? "false" : "true" }, location = new[] { x + display.GetProperty("offset_x_mm").GetDouble(), y + display.GetProperty("offset_y_mm").GetDouble() }, parent = new { type = 1, oid = PlcDisplayFault == "parent" && id == 20213 ? -1 : functionOid }, locator = new { type = 1, oid = functionOid } });
+                                }
+                            }
+
                         }
                         result = new { execution = "committed", undo = "Device", recovered = false, device = new { tag, category }, terminal = member, symbol = new { description, connectionPoints = _symbolPoints[tag] } };
                     }
@@ -1103,7 +1139,7 @@ public sealed class AcceptanceRedrawDriverTests
         private object End(JsonElement wire, string key)
         {
             JsonElement reference = wire.GetProperty(key);
-            JsonElement row = Assert.Single(_drawings.Select(d => JsonSerializer.SerializeToElement(d)), d => d.TryGetProperty("locator", out JsonElement locator) && locator.GetProperty("oid").GetInt64() == reference.GetProperty("locator").GetProperty("oid").GetInt64());
+            JsonElement row = Assert.Single(_drawings.Select(d => JsonSerializer.SerializeToElement(d)), d => d.GetProperty("kind").GetString() != "PropertyPlacement" && d.TryGetProperty("locator", out JsonElement locator) && locator.GetProperty("oid").GetInt64() == reference.GetProperty("locator").GetProperty("oid").GetInt64());
             string tag = row.GetProperty("properties").GetProperty("name").GetString()![1..];
             return Endpoint(tag, reference.GetProperty("pin_index").GetInt32());
         }

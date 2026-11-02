@@ -134,6 +134,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 angle,
                 name = (placement as FunctionBase)?.Name,
                 display,
+                visible = placement is PropertyPlacement visibleProperty ? visibleProperty.IsVisible : (bool?)null,
                 start = placement is Line line ? XY(line.StartPoint) : null,
                 end = placement is Line endLine ? XY(endLine.EndPoint) : null,
             }));
@@ -155,6 +156,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     ["docked"] = placement is PropertyPlacement docked ? docked.IsDocked.ToString().ToLowerInvariant() : null,
                     ["cross_reference"] = placement is PropertyPlacement crossText && DisplayedId(crossText) is 20300 or 20314 or 20304 or 20252 or 20306 or 20302 or 24300 ? "true" : null,
                     ["angle"] = angle,
+                    ["visible"] = placement is PropertyPlacement visible ? visible.IsVisible.ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant() : null,
                     ["height_mm"] = height
                 }
                     .Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),

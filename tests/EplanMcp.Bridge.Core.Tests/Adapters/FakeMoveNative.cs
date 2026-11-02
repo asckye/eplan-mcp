@@ -8,6 +8,7 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters
     {
         [ThreadStatic] private static List<string>? _calls;
         [ThreadStatic] public static int Value;
+        [ThreadStatic] public static Action? EndTransaction;
         [ThreadStatic] private static List<int>? _history;
         public static List<string> Calls => _calls ??= [];
         public static List<int> History => _history ??= [];
@@ -67,9 +68,10 @@ namespace Eplan.EplApi.DataModel
     internal sealed class Transaction : IDisposable
     {
         private readonly int _before = FakeMoveNative.Value;
-        public void Commit() => FakeMoveNative.Calls.Add("Commit");
-        public void Abort() { FakeMoveNative.Calls.Add("Abort"); FakeMoveNative.Value = _before; }
-        public void Dispose() => FakeMoveNative.Calls.Add("ReleaseTransaction");
+        private readonly Action? _endTransaction = FakeMoveNative.EndTransaction;
+        public void Commit() { FakeMoveNative.Calls.Add("Commit"); _endTransaction?.Invoke(); }
+        public void Abort() { FakeMoveNative.Calls.Add("Abort"); FakeMoveNative.Value = _before; _endTransaction?.Invoke(); }
+        public void Dispose() { FakeMoveNative.Calls.Add("ReleaseTransaction"); _endTransaction?.Invoke(); }
     }
 }
 

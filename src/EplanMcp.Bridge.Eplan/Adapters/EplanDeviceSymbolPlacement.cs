@@ -10,32 +10,39 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>A13/A52-A55: resolve before writing, read returned objects inside Transaction; never dispose owned objects.</summary>
-internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacement, LayoutGuard.IMeasurement
+internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacement, LayoutGuard.IMeasurement, IDeviceSymbolCommittedReadback
 {
-    private readonly Project _project;
-    private readonly Page _page;
-    private readonly SymbolVariant _variant;
+    private readonly string _projectPath;
+    private readonly string _pageName;
     private readonly SymbolSearchItem _symbol;
-    private Function? _placedFunction;
-    private Placement? _placedLayout;
-    public LayoutGuard.Model ReadLayout() => EplanLayout.Measure(_project.ProjectFullName, _page.Name, _placedLayout is null ? [] : [_placedLayout]);
+    private IReadOnlyList<DeviceSymbolDisplay> _placedDisplays = [];
+    private long? _placedFunctionId;
+    private long? _plcCardId;
+    private LayoutGuard.Model? _placedLayout;
+    public LayoutGuard.Model ReadLayout() => _placedLayout ?? EplanLayout.Measure(_projectPath, _pageName, []);
 
     public EplanDeviceSymbolPlacement(string path, string page, SymbolSearchItem symbol)
     {
         MainThread.Assert();
-        _project = EplanProjects.ByPath(path);
-        _page = _project.Pages.Single(p => string.Equals(p.Name, page, StringComparison.Ordinal));
-        _variant = _project.SymbolLibraries.Single(l => l.Name == symbol.Library).Symbols.Single(s => s.Name == symbol.Name)
-            .Variants.Single(v => v.VariantNr == symbol.Variant);
+        _projectPath = path;
+        _pageName = page;
         _symbol = symbol;
     }
 
-    public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(_project, undoDescription);
+    public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(_projectPath), undoDescription);
 
     public DevicePlaceData Place(DevicePlaceArgs args, string tag)
     {
         try
-        { return args.TerminalStrip is not null ? CreateTerminal(args, tag) : args.LocationBox is null ? Create(args, tag) : CreateLocationBox(args); }
+        {
+            MainThread.Assert();
+            Project project = EplanProjects.ByPath(_projectPath);
+            Page page = project.Pages.Single(p => string.Equals(p.Name, _pageName, StringComparison.Ordinal));
+            SymbolVariant variant = project.SymbolLibraries.Single(l => l.Name == _symbol.Library).Symbols.Single(s => s.Name == _symbol.Name)
+                .Variants.Single(v => v.VariantNr == _symbol.Variant);
+            return args.TerminalStrip is not null ? CreateTerminal(args, tag, project, page, variant)
+                : args.LocationBox is null ? Create(args, tag, project, page, variant) : CreateLocationBox(args, project, page, variant);
+        }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException && new EplanExceptionMapper().Map(ex) is null)
         {
             WriteExceptionDiagnostics.Report(ex);
@@ -44,11 +51,11 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         }
     }
 
-    private DevicePlaceData Create(DevicePlaceArgs args, string tag)
+    private DevicePlaceData Create(DevicePlaceArgs args, string tag, Project project, Page page, SymbolVariant variant)
     {
         MainThread.Assert();
 #pragma warning disable CA2000 // A39/A55: returned persistent functions belong to EPLAN, including on Abort.
-        Function function = CreateFunction(args, tag);
+        Function function = CreateFunction(args, tag, project, page, variant);
 #pragma warning restore CA2000
         function.Name = tag;
         // Live T7d: a standalone contact is not a main function by default, so device reads cannot find it. The tag is
@@ -67,6 +74,9 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         string[]? requested = args.ConnectionDesignations;
         for (int i = 0; i < (requested?.Length ?? 0); i++)
         { properties[(Properties.Function)20022, i + 1] = requested![i]; }
+        // A77: local placements are independent of the symbol variant (documentation only).
+        if (args.PlcConnectionPoint is not null && args.DisplayProperties is { Count: > 0 })
+        { function.SwitchLocalPropertyPlacements(true); Require(function.UseLocalPropertyPlacements); }
         string? visible = null;
         foreach (DeviceDisplayProperty display in args.DisplayProperties ?? [])
         {
@@ -87,7 +97,9 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
             string text = placement.GetDisplayString();
             if (display.PropertyId is 20214 or 20213 or 20211 or 20215)
             {
-                Require(text.IndexOf(tag.Substring(tag.LastIndexOf('-')), StringComparison.Ordinal) >= 0);
+#pragma warning disable CA2249 // net481 has no string.Contains overload taking StringComparison; Small tests link this adapter on net10.
+                Require(text.IndexOf(DeviceSymbolDisplays.DeviceTag(args, tag), StringComparison.Ordinal) >= 0);
+#pragma warning restore CA2249
                 visible ??= text;
             }
         }
@@ -95,7 +107,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         // A13: finder cannot see uncommitted functions. Check the returned function and its pins directly.
         Pin[] pins = function.Pins;
         Require(_symbol.FunctionCategory is null || function.FunctionCategory.ToString() == _symbol.FunctionCategory);
-        Require(function.IsPlaced && function.Page.Name == _page.Name && DevicePlaceRequest.SameName(tag, function.Name) && function.ArticleReferences.Length == 0
+        Require(function.IsPlaced && function.Page.Name == page.Name && DevicePlaceRequest.SameName(tag, function.Name) && function.ArticleReferences.Length == 0
             && function.Location.X == args.X && function.Location.Y == args.Y && pins.Length == _symbol.ConnectionPoints.Count
             && function.SymbolVariant.SymbolLibraryName == _symbol.Library && function.SymbolVariant.SymbolName == _symbol.Name
             && function.SymbolVariant.VariantNr == _symbol.Variant);
@@ -105,9 +117,12 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
             Require(!value.IsEmpty && value.ToString() == requested![i] && pins[i].Name == requested[i]);
         }
         PlcChannel? plc = args.PlcConnectionPoint is null ? null : EplanPlcReader.Channel((Terminal)function, new TextLanguage(ISOCode.Language.L___, false), properties);
-        _placedFunction = function;
-        _placedLayout = function;
-        return new DevicePlaceData { Page = _page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc };
+        _placedFunctionId = function.ObjectIdentifier;
+        _placedLayout = EplanLayout.Measure(_projectPath, _pageName, [function]);
+        // A55: only managed identity, values and display snapshots may outlive this transaction.
+        if (args.DisplayProperties is { Count: > 0 })
+        { _placedDisplays = ReadDisplays(function); }
+        return new DevicePlaceData { Page = page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc };
     }
 
     private static void Require(bool matches)

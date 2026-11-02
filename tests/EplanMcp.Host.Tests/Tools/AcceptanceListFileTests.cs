@@ -27,7 +27,7 @@ public sealed class AcceptanceListFileTests
             await File.WriteAllTextAsync(report, JsonSerializer.Serialize(driver.Report), TestContext.Current.CancellationToken);
             using JsonDocument saved = JsonDocument.Parse(await File.ReadAllTextAsync(report, TestContext.Current.CancellationToken));
             string[] skipped = saved.RootElement.GetProperty("skipped").EnumerateArray().Select(s => s.GetProperty("item").GetString()!).ToArray();
-            Assert.Equal(7, skipped.Length);
+            Assert.Empty(skipped);
             Assert.All(skipped, id => Assert.EndsWith("/display_properties", id, StringComparison.Ordinal));
             Assert.Equal(2, fake.Requests.Count(r => r.Tool == "eplan_cable_get"));
             Assert.Equal(4, fake.Requests.Count(r => r.Tool == "eplan_connection_create"));

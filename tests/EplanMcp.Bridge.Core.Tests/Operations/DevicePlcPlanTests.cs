@@ -7,11 +7,22 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class DevicePlcPlanTests
 {
     [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("-X10\n")]
+    [InlineData(null)]
+    public void Plug_InvalidOrMissingPlcSource_IsRejectedBeforeWriting(string? plug)
+    {
+        var args = new DevicePlaceArgs { PlcPlugDesignation = plug ?? "-X10" };
+        Assert.Contains("/plc_plug_designation", Assert.Throws<BridgeErrorException>(() => DevicePlcPlan.Check(args)).Error.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData(20400)]
     [InlineData(20403)]
     [InlineData(20011)]
     [InlineData(20301)]
-    public void Check_RequestedPlcDisplay_ReportsMissingCapability(int propertyId)
+    public void Check_RequestedPlcDisplay_IsAccepted(int propertyId)
     {
         var args = new DevicePlaceArgs
         {
@@ -22,10 +33,7 @@ public sealed class DevicePlcPlanTests
             PlcText = "Start input",
             DisplayProperties = [new() { PropertyId = propertyId, OffsetYmm = -8 }]
         };
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => DevicePlcPlan.Check(args)).Error;
-        Assert.Equal(ErrorReason.CapabilityMissing, error.Reason);
-        Assert.Equal("device.place.plc.displays", error.Metadata!["missing"]);
-        Assert.False(error.Retryable);
+        DevicePlcPlan.Check(args);
     }
 
     [Theory]

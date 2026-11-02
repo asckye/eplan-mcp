@@ -10,7 +10,10 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanTextFormat.cs" Link="Adapters\EplanTextFormat.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlcReader.cs" Link="Adapters\EplanPlcReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolReader.cs" Link="Adapters\EplanSymbolReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.cs" Link="Adapters\EplanDeviceSymbolPlacement.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Plc.cs" Link="Adapters\EplanDeviceSymbolPlacement.Plc.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Terminal.cs" Link="Adapters\EplanDeviceSymbolPlacement.Terminal.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Displays.cs" Link="Adapters\EplanDeviceSymbolPlacement.Displays.cs" />
     <Compile Include="..\Shared\ConnectionCreateLayout.cs" Link="ConnectionCreateLayout.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" Link="Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanConnectionCreator.Cables.cs" Link="Adapters\EplanConnectionCreator.Cables.cs" />

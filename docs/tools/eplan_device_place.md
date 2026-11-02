@@ -60,6 +60,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - `functions`：设备的全部功能数；`unplaced`：其中没有放置的（S20：线圈放置，4 个触点未放置）。
 - `undo`、`recovered`：同 `eplan_page_create`。标识按项目数据处理，经过 ResultShaper。
 - `hint`：有未放置的功能时说明它们要在 EPLAN 中放置（实现时改：`eplan_macro_insert` 会新建设备，放不了已有设备的功能）；页的幅面未知时（新建的空页，A14）说明只检查了 x、y 不小于 0。
+- PLC 已确认提交后，无法定位对象或完成回读核对时仍返回 `execution=committed`；`hint` 警告列明未能验证的点身份/页、卡归属、原生属性或显示布局，提示读取页面与 `eplan_plc_get` 后再决定后续操作。保留已读到的 PLC 值及撤销步骤警告，不暂停写入；只有提交本身或执行结果确实不明时才返回 `OUTCOME_UNKNOWN`。
 - 一行摘要：`Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.` / `Dry run: would place one device. Nothing was changed.`
 - 符号来源另带 `symbol`（解析后的库/符号/变体及局部引脚）和 `changes`（审批清单）；`functions=1,unplaced=0` 在 dry-run 为预测、提交后为读回，`part,variant` 为空。dry-run 不猜 `visibleTag/category`；提交后显示标识取请求的带前缀属性实际显示串，未请求时为空。20214 由 EPLAN 计算；默认空的 20029[2] 不算请求的属性。
 
@@ -130,6 +131,8 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - Small 覆盖互斥/有限数/复合键与原生读回失败；Medium 假对象覆盖预览、复用、审批、stale、读回不符/取消后回滚及无空步。LargeWrite 新页创建 1..3、读回排成员/顺序、重复拒绝与逐调用一步撤销；另验独立生成后的连接分段。本次只编写，未运行。
 
 ### T7d：PLC 数字输入与常开/常闭触点
+
+- **D3 扩展**：可选 `plc_plug_designation` 独立写入 20406（1–64 字符，无控制符，须有完整 PLC 来源）；点名始终为 `<卡>:<plc_connection_point>`，不把插头重复拼入 20022（2026-11-01 失败证据见 api-notes A77/A78）。显示增加 20406、20300；20213 显示卡设备标识，20300/20301 精确匹配 EPLAN 原生引用，包括空值，不以卡页名填造引用。请求引用显示时设置 20021=2；PLC 显示采用本地属性排列。提交前校验属性、归属和布局；事务内仅保存托管身份、属性显示及布局快照；提交结束后按 `ObjectIdentifier` 重新获取放置点和父 PLC 盒，不保留原生对象，不按名称查找。卡的 `PLCTerminals` 按点对象号核对成员，读回插头及原生引用并再次枚举显示；提交后核对失败保留现场，按 `committed` 加具体验证警告报告。完整插头与显示调用尚待 Large 复验。
 
 - 库符号来源可显式创建 SPECIAL/PLCC 主 PLC 盒；连接点使用已有原生主 PLC 卡的 `tag`（如 `-KF1`），另给 `plc_connection_point`（如 `X10:2`、`DI a.0`）、`plc_address`（如 `I0.0`）、`plc_symbolic_address` 和 `plc_text`。四字段同时必填、非空且无控制字符；连接点最多 64 字符且不含前导冒号，其余最多 256 字符。仅支持发现到真实 DI 功能定义、且单引脚的 PLC 图形变体，不能把普通功能当作 PLC 点；不隐式创建父卡。
 - 原生点名为 `<卡>:<连接点>`；按 `SameName` 容忍项目省略前导高层代号，保留已有拼写，父关系按名称识别。全项目复合键及该卡已有 I/O 地址忽略大小写拒绝重复；普通器件不能冒充父卡。指纹额外覆盖父卡、全部通道及其属性，批准后变化即拒绝。

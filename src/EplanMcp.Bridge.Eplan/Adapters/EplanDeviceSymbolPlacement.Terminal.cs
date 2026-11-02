@@ -3,6 +3,7 @@ using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.DataModel.Graphics;
+using Eplan.EplApi.DataModel.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
@@ -11,11 +12,11 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanDeviceSymbolPlacement
 {
-    private DevicePlaceData CreateTerminal(DevicePlaceArgs args, string tag)
+    private DevicePlaceData CreateTerminal(DevicePlaceArgs args, string tag, Project project, Page page, SymbolVariant variant)
     {
         MainThread.Assert();
         string name = tag.Substring(0, tag.LastIndexOf(':'));
-        using var finder = new DMObjectsFinder(_project);
+        using var finder = new DMObjectsFinder(project);
         TerminalStrip[] matches = [.. EplanNativePreconditions.Valid(finder.GetTerminalStrips(null)).ToArray().Where(s => Same(name.ToUpperInvariant(), s.Name.ToUpperInvariant()))];
         CheckTerminal(matches.Length <= 1, "several strips share this name");
         bool create = matches.Length == 0;
@@ -27,16 +28,16 @@ internal sealed partial class EplanDeviceSymbolPlacement
             // Acceptance trial: Create(Page) placed the strip definition at the page origin, outside the frame. An
             // unplaced definition (Create(Project, FunctionDefinition)) is listed in the navigator only.
             if (args.TerminalStripPosition is { } position)
-            { strip.Create(_page); strip.Location = new PointD(position[0], position[1]); }
+            { strip.Create(page); strip.Location = new PointD(position[0], position[1]); }
             else
-            { strip.Create(_project, _project.FunctionDefinitionLibrary.FunctionDefinitions.First(d => d.FunctionCategory == FunctionCategory.TerminalDefText)); }
+            { strip.Create(project, project.FunctionDefinitionLibrary.FunctionDefinitions.First(d => d.FunctionCategory == FunctionCategory.TerminalDefText)); }
             strip.IsMainFunction = true;
             strip.Name = name;
         }
         var terminal = new Terminal();
 #pragma warning restore CA2000
         CheckTerminal(!strip.Terminals.Any(t => Same(tag.ToUpperInvariant(), t.Name.ToUpperInvariant())), "the strip already has this terminal");
-        terminal.Create(strip, _page, _variant);
+        terminal.Create(strip, page, variant);
         terminal.Name = tag;
         terminal.Location = new PointD(args.X, args.Y);
         if (args.TerminalStripText is { } text)
@@ -53,7 +54,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         }
         if (args.TerminalStripPosition is { } expected)
         {
-            CheckTerminal(create && strip.IsPlaced && strip.Page.Name == _page.Name && strip.Location.X == expected[0] && strip.Location.Y == expected[1], "strip definition page or position differs");
+            CheckTerminal(create && strip.IsPlaced && strip.Page.Name == page.Name && strip.Location.X == expected[0] && strip.Location.Y == expected[1], "strip definition page or position differs");
             foreach (int numberId in new[] { 20214, 20011 })
             {
                 PropertyPlacement? display = strip.PropertyPlacements.FirstOrDefault(p => { using AnyPropertyId id = p.DisplayedProperty; return id.AsInt == numberId; });
@@ -86,16 +87,16 @@ internal sealed partial class EplanDeviceSymbolPlacement
         // Live T7c: an existing strip's owner object differs from the finder's strip (other OID, same name); strips are identified by name.
         CheckTerminal(owner is null || Same(name, owner.Name), $"terminal owner reads back as '{owner?.Name}'");
         CheckTerminal(terminal.FunctionCategory.ToString() == "Terminal", $"category reads back as {terminal.FunctionCategory}");
-        CheckTerminal(terminal.IsPlaced && terminal.Page.Name == _page.Name, "terminal is not placed on the page");
+        CheckTerminal(terminal.IsPlaced && terminal.Page.Name == page.Name, "terminal is not placed on the page");
         CheckTerminal(terminal.Location.X == args.X && terminal.Location.Y == args.Y, FormattableString.Invariant($"position reads back as {terminal.Location.X},{terminal.Location.Y}"));
         CheckTerminal(terminal.ArticleReferences.Length == 0, "terminal has parts");
         CheckTerminal(terminal.SymbolVariant.SymbolLibraryName == _symbol.Library && terminal.SymbolVariant.SymbolName == _symbol.Name && terminal.SymbolVariant.VariantNr == _symbol.Variant,
             $"symbol reads back as {terminal.SymbolVariant.SymbolLibraryName}/{terminal.SymbolVariant.SymbolName}/{terminal.SymbolVariant.VariantNr}");
         OperationContext.Current.ThrowIfCancellationRequested();
-        _placedLayout = terminal;
+        _placedLayout = EplanLayout.Measure(_projectPath, _pageName, [terminal]);
         return new()
         {
-            Page = _page.Name,
+            Page = page.Name,
             Tag = terminal.Name,
             Category = "Terminal",
             Functions = create ? 2 : 1,

@@ -1,6 +1,7 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.Graphics;
+using Eplan.EplApi.DataModel.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
@@ -9,14 +10,14 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanDeviceSymbolPlacement
 {
-    private DevicePlaceData CreateLocationBox(DevicePlaceArgs args)
+    private DevicePlaceData CreateLocationBox(DevicePlaceArgs args, Project project, Page page, SymbolVariant variant)
     {
         MainThread.Assert();
-        using var finder = new DMObjectsFinder(_project);
+        using var finder = new DMObjectsFinder(project);
         var before = EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => (Function: f, Name: f.Name)).ToArray();
         // A55: use the native box factory, never a graphical rectangle substitute.
 #pragma warning disable CA2000 // A39/A55: native placements belong to EPLAN, also after Abort.
-        SymbolReference created = SymbolReference.Create(_variant, _page);
+        SymbolReference created = SymbolReference.Create(variant, page);
 #pragma warning restore CA2000
         Check(created is LocationBox, "factory did not return a location box");
         var box = (LocationBox)created;
@@ -42,16 +43,16 @@ internal sealed partial class EplanDeviceSymbolPlacement
         string structure = location.IsEmpty ? string.Empty : "+" + location.ToString();
         RectangleD area = box.GetLogicalArea();
         Check(structure == args.LocationBox, $"structure read back as '{structure}'");
-        Check(box.Page.Name == _page.Name, "box is on another page");
+        Check(box.Page.Name == page.Name, "box is on another page");
         Check(area.LowerLeft.X == args.X && area.LowerLeft.Y == args.Y && area.UpperRight.X == args.CornerX && area.UpperRight.Y == args.CornerY,
             FormattableString.Invariant($"area read back as {area.LowerLeft.X},{area.LowerLeft.Y} - {area.UpperRight.X},{area.UpperRight.Y}"));
         Check(box.SymbolVariant.SymbolLibraryName == _symbol.Library && box.SymbolVariant.SymbolName == _symbol.Name && box.SymbolVariant.VariantNr == _symbol.Variant,
             $"symbol read back as {box.SymbolVariant.SymbolLibraryName}/{box.SymbolVariant.SymbolName}/{box.SymbolVariant.VariantNr}");
         Check(before.All(f => f.Function.Name == f.Name), "an existing device was renamed");
-        _placedLayout = box;
+        _placedLayout = EplanLayout.Measure(_projectPath, _pageName, [box]);
         return new DevicePlaceData
         {
-            Page = _page.Name,
+            Page = page.Name,
             Tag = structure,
             Category = "LocationBox",
             Functions = 0,

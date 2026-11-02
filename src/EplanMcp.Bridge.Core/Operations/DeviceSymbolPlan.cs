@@ -20,7 +20,7 @@ internal static class DeviceSymbolPlan
             || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.SymbolVariant is null or < 0))
         { throw WriteArguments.Invalid(["/library: specify an exclusive library, symbol and nonnegative symbol_variant source."]); }
         if (args.DisplayProperties is { } displays && (displays.Count > 8 || displays.Any(p => p is null
-            || p.PropertyId is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027 or 20400 or 20403 or 20301)
+            || p.PropertyId is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027 or 20400 or 20403 or 20301 or 20300 or 20406)
             || !Finite(p.OffsetXmm) || !Finite(p.OffsetYmm) || !Finite(args.X + p.OffsetXmm) || !Finite(args.Y + p.OffsetYmm))))
         { throw WriteArguments.Invalid(["/display_properties: require at most 8 allowed property IDs and finite relative offsets."]); }
         if (args.ConnectionDesignations?.Any(p => string.IsNullOrWhiteSpace(p) || p.Length > 64 || p.Any(char.IsControl)) == true)

@@ -97,6 +97,8 @@ internal sealed class PlcTools
                     ParentlessRepresentations = detailed ? c.ParentlessRepresentations : null,
                     Owner = detailed ? ResultShaper.CleanText(c.Owner) : null,
                     CardReference = detailed ? ResultShaper.CleanText(c.CardReference) : null,
+                    MainReference = detailed ? ResultShaper.CleanText(c.MainReference) : null,
+                    PlugDesignation = detailed ? ResultShaper.CleanText(c.PlugDesignation) : null,
                     ManualSymbolicAddress = detailed ? ResultShaper.CleanText(c.ManualSymbolicAddress) : null,
                     Page = ResultShaper.CleanText(c.Page),
                     Main = c.Main,

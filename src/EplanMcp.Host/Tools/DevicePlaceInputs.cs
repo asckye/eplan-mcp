@@ -19,11 +19,14 @@ internal static partial class DevicePlaceInputs
             """);
         schema["properties"]!["display_properties"] = JsonNode.Parse("""
             {"type":["array","null"],"maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["property_id","offset_x_mm","offset_y_mm"],"properties":{
-            "property_id":{"type":"integer","enum":[20214,20213,20211,20215,20058,20011,20027,20400,20403,20301]},"offset_x_mm":{"type":"number"},"offset_y_mm":{"type":"number"}}}}
+            "property_id":{"type":"integer","enum":[20214,20213,20211,20215,20058,20011,20027,20400,20403,20301,20300,20406]},"offset_x_mm":{"type":"number"},"offset_y_mm":{"type":"number"}}}}
             """);
         schema["dependentRequired"] = JsonNode.Parse("""{"plc_connection_point":["library","symbol","symbol_variant","tag","plc_address","plc_symbolic_address","plc_text"],"plc_address":["plc_connection_point"],"plc_symbolic_address":["plc_connection_point"],"plc_text":["plc_connection_point"]}""");
         foreach (string field in new[] { "plc_connection_point", "plc_address", "plc_symbolic_address", "plc_text" })
         { schema["properties"]![field]!["minLength"] = 1; schema["properties"]![field]!["maxLength"] = 256; }
+        schema["dependentRequired"]!["plc_plug_designation"] = JsonNode.Parse("""["plc_connection_point"]""");
+        schema["properties"]!["plc_plug_designation"]!["minLength"] = 1;
+        schema["properties"]!["plc_plug_designation"]!["maxLength"] = 64;
         schema["properties"]!["plc_connection_point"]!["maxLength"] = 64;
         schema["properties"]!["terminal_number"]!["minLength"] = 1;
         schema["properties"]!["terminal_number"]!["maxLength"] = 64;
@@ -41,6 +44,8 @@ internal static partial class DevicePlaceInputs
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
         if (args.TerminalStripPosition is { } position && (args.TerminalStrip is null || args.TerminalStripText is null || position.Length != 2 || position.Any(n => !double.IsFinite(n) || n is < 0 or > 10000)))
         { problems.Add("/terminal_strip_position: require a terminal source, new strip text and two finite page coordinates 0..10000 mm."); }
+        if (args.PlcPlugDesignation is { } plug && (args.PlcConnectionPoint is null || string.IsNullOrWhiteSpace(plug) || plug.Length > 64 || plug.Any(char.IsControl)))
+        { problems.Add("/plc_plug_designation: require a complete PLC source and 1..64 nonblank characters without controls."); }
         foreach ((string field, string? text) in new[] { ("plc_text", args.PlcText), ("terminal_strip_text", args.TerminalStripText) })
         {
             if (text is not null && StoredLanguage().IsMatch(text))
@@ -108,7 +113,7 @@ internal static partial class DevicePlaceInputs
             if (item.ValueKind != JsonValueKind.Object || item.EnumerateObject().Count() != 3
                 || item.EnumerateObject().Select(p => p.Name).Distinct(StringComparer.Ordinal).Count() != 3
                 || !item.TryGetProperty("property_id", out JsonElement id) || id.ValueKind != JsonValueKind.Number || !id.TryGetInt32(out int number)
-                || number is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027 or 20400 or 20403 or 20301)
+                || number is not (20214 or 20213 or 20211 or 20215 or 20058 or 20011 or 20027 or 20400 or 20403 or 20301 or 20300 or 20406)
                 || !Offset(item, "offset_x_mm", out double x) || !Offset(item, "offset_y_mm", out double y)
                 || !double.IsFinite(args.X + x) || !double.IsFinite(args.Y + y))
             { problems.Add(at + ": require allowed property_id and finite offset_x_mm, offset_y_mm; no other or duplicate members."); continue; }

@@ -75,6 +75,8 @@ internal sealed class EplanPlcReader : IPlcReader
         (string? text, string? textLanguage) = EplanText.ReadWithLanguage(properties.FUNC_TEXT, language);
         return new PlcChannel
         {
+            PlugDesignation = detailed ? EplanText.Read(properties.FUNC_PLCPLUG_DESIGNATION_MANUAL, language) : null,
+            MainReference = detailed ? EplanText.Read(properties.FUNC_CROSSREFERENCE, language) : null,
             Name = terminal.Name ?? string.Empty,
             Page = terminal.Page?.Name,
             Main = terminal.IsMainFunction,

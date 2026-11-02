@@ -40,7 +40,7 @@ public sealed class DevicePlaceArgs
     /// <summary>Optional absolute [x,y] mm for a new strip definition; requires TerminalStripText.</summary>
     public double[]? TerminalStripPosition { get; set; }
 
-    /// <summary>PLC connection point suffix; Tag identifies its existing PLC card. Symbol source only.</summary>
+    /// <summary>PLC pin designation; with an explicit plug the suffix is plug:point. Tag identifies its existing card.</summary>
     public string? PlcConnectionPoint { get; set; }
     /// <summary>PLC I/O address (20400), required with PlcConnectionPoint.</summary>
     public string? PlcAddress { get; set; }
@@ -48,6 +48,9 @@ public sealed class DevicePlaceArgs
     public string? PlcSymbolicAddress { get; set; }
     /// <summary>Language-independent PLC function text (20011), required with PlcConnectionPoint.</summary>
     public string? PlcText { get; set; }
+
+    /// <summary>Optional manual PLC plug designation (20406); requires a complete PLC point source.</summary>
+    public string? PlcPlugDesignation { get; set; }
 
     /// <summary>The insertion point's x, in millimetres from the page's left edge.</summary>
     public double X { get; set; }

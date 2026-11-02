@@ -223,7 +223,7 @@ internal sealed class AcceptanceRedrawDriver(
     private async Task PlcAsync()
     {
         JsonElement plc = list.GetProperty("plc"), box = plc.GetProperty("box");
-        await PlaceDeviceAsync(box);
+        await PlaceDeviceAsync(box, plc.TryGetProperty("box_page", out JsonElement boxPage) ? Expand(boxPage.GetString()!) : Page);
         if (_devices.TryGetValue(Id(box), out JsonElement card))
         { Check(() => Assert.Equal("PLCBox", card.GetProperty("category").GetString())); }
         var symbols = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
@@ -239,14 +239,17 @@ internal sealed class AcceptanceRedrawDriver(
             foreach (string field in new[] { "connection_point", "address", "symbolic_address" })
             { args["plc_" + field] = point.GetProperty(field).GetString(); }
             args["plc_text"] = point.GetProperty("function_text").GetString();
+            if (point.TryGetProperty("plug_designation", out JsonElement plug))
+            { args["plc_plug_designation"] = plug.GetString(); }
+            if (point.TryGetProperty("display_properties", out JsonElement requestedDisplays))
+            { args["display_properties"] = requestedDisplays; }
             JsonElement? result = await WriteAsync("eplan_device_place", args, [Id(point)]);
             if (result is not { } placed)
             { continue; }
             await ObserveAsync(Id(point), () => RememberDeviceAsync(point, placed, parent));
             if (_devices.TryGetValue(Id(point), out JsonElement actual))
             { Check(() => Assert.Equal("PLCTerminal", actual.GetProperty("category").GetString())); }
-            if (point.TryGetProperty("display_properties", out JsonElement displays) && displays.GetArrayLength() > 0)
-            { Skip(Id(point) + "/display_properties", "A55 live T7d: display_properties are refused for PLC points because added displays do not survive commit; native PLC values are verified separately."); }
+
         }
         if (!_actualTags.TryGetValue(Id(box), out string? tag))
         { return; }
@@ -268,6 +271,13 @@ internal sealed class AcceptanceRedrawDriver(
                 Check(() => Assert.Equal(point.GetProperty("function_text").GetString(), channel.GetProperty("text").GetString()));
                 Check(() => Assert.False(string.IsNullOrWhiteSpace(channel.GetProperty("symbolicAddress").GetString())));
                 Check(() => Assert.Equal(1, channel.GetProperty("parentlessRepresentations").GetInt32()));
+                if (point.TryGetProperty("plug_designation", out JsonElement expectedPlug))
+                { Check(() => Assert.Equal(expectedPlug.GetString(), channel.GetProperty("plugDesignation").GetString())); }
+                if (point.TryGetProperty("main_reference_contains", out JsonElement reference))
+                { Check(() => Assert.Contains(Expand(reference.GetString()!), channel.GetProperty("mainReference").GetString(), StringComparison.Ordinal)); }
+                if (point.TryGetProperty("main_reference", out JsonElement exactReference))
+                { Check(() => Assert.Equal(Expand(exactReference.GetString()!), channel.GetProperty("mainReference").GetString() ?? string.Empty)); }
+
             }, Id(point));
         }
     }
@@ -711,6 +721,7 @@ internal sealed class AcceptanceRedrawDriver(
                 Near(device.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()).ToArray(), row.GetProperty("location"));
             }, Id(device));
         }
+        await VerifyPlcDisplaysAsync(drawings);
         foreach (JsonElement text in Items("texts"))
         {
             Check(() =>
@@ -724,7 +735,9 @@ internal sealed class AcceptanceRedrawDriver(
         JsonElement[] peerConnections = await ConnectionsAsync(CounterpartPage);
         Check(() => Assert.Empty(peerConnections));
         JsonElement[] peerDrawings = await DrawingsAsync(CounterpartPage);
-        Check(() => Assert.DoesNotContain(peerDrawings, d => d.GetProperty("kind").GetString() == "Function"));
+        Check(() => Assert.DoesNotContain(peerDrawings, d => d.GetProperty("kind").GetString() == "Function"
+            && !_devicePages.Any(pair => pair.Value == CounterpartPage
+                && SameName(_actualTags[pair.Key], d.GetProperty("properties").GetProperty("name").GetString()!))));
         // Terminal pins are unnamed in EPLAN's connection readback, so a terminal end is compared by device only.
         string Endpoint(JsonElement endpoint) => JsonSerializer.Serialize(new[] { endpoint.GetProperty("item").GetString(),
             IsTerminal(endpoint.GetProperty("item").GetString()!) ? null : endpoint.GetProperty("pin").GetString() });
@@ -759,6 +772,41 @@ internal sealed class AcceptanceRedrawDriver(
 
     private static bool SameSegment(JsonElement line, JsonElement a, JsonElement b) =>
         JsonElement.DeepEquals(line[0], a) && JsonElement.DeepEquals(line[1], b) || JsonElement.DeepEquals(line[0], b) && JsonElement.DeepEquals(line[1], a);
+
+    private async Task VerifyPlcDisplaysAsync(JsonElement[] drawings)
+    {
+        if (!_actualTags.TryGetValue(Id(list.GetProperty("plc").GetProperty("box")), out string? card))
+        { return; }
+        JsonElement plc = await ReadAsync("eplan_plc_get", new() { ["plc"] = card, ["language"] = "??_??", ["limit"] = 200, ["response_format"] = "detailed" });
+        RequireComplete(plc);
+        foreach (JsonElement point in list.GetProperty("plc").GetProperty("points").EnumerateArray().Where(p => _placed.ContainsKey(Id(p))))
+        {
+            if (!point.TryGetProperty("display_properties", out JsonElement displays))
+            { continue; }
+            JsonElement parent = Function(drawings, _actualTags[Id(point)]).GetProperty("locator");
+            JsonElement channel = Assert.Single(plc.GetProperty("channels").EnumerateArray(), c => SameName(_actualTags[Id(point)], c.GetProperty("name").GetString()!) && c.GetProperty("page").GetString() == Page);
+            foreach (JsonElement display in displays.EnumerateArray())
+            {
+                double x = point.GetProperty("position")[0].GetDouble() + display.GetProperty("offset_x_mm").GetDouble();
+                double y = point.GetProperty("position")[1].GetDouble() + display.GetProperty("offset_y_mm").GetDouble();
+                int id = display.GetProperty("property_id").GetInt32();
+                string? expected = id == 20213 ? card[card.LastIndexOf('-')..] : channel.GetProperty(id switch
+                { 20400 => "address", 20403 => "symbolicAddress", 20011 => "text", 20301 => "cardReference", 20300 => "mainReference", 20406 => "plugDesignation", _ => throw new InvalidOperationException("Unknown PLC display property.") }).GetString();
+                Check(() =>
+                {
+                    JsonElement row = Assert.Single(drawings, d => d.GetProperty("kind").GetString() == "PropertyPlacement"
+                        && d.TryGetProperty("parent", out JsonElement owner) && owner.ValueKind == JsonValueKind.Object
+                        && owner.GetProperty("oid").GetInt64() == parent.GetProperty("oid").GetInt64()
+                        && d.GetProperty("parent").GetProperty("type").GetInt32() == parent.GetProperty("type").GetInt32()
+                        && Math.Abs(d.GetProperty("location")[0].GetDouble() - x) < 0.01 && Math.Abs(d.GetProperty("location")[1].GetDouble() - y) < 0.01);
+                    string actual = row.GetProperty("properties").GetProperty("display").GetString()!;
+                    output(FormattableString.Invariant($"PLC {Id(point)} property {id} at ({x}, {y}): {actual}"));
+                    Assert.Equal("true", row.GetProperty("properties").GetProperty("visible").GetString());
+                    Assert.Equal(expected ?? "", actual);
+                }, Id(point) + "/display_properties/" + id.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+        }
+    }
 
     private async Task<JsonElement[]> DrawingsAsync(string page)
     {

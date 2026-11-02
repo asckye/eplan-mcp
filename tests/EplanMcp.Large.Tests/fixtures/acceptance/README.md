@@ -18,7 +18,7 @@ UTF-8 JSON，最大 256 KiB、深度 32，成员封闭；拒绝重复键、未�
 | page、counterpart_page | 不同的完整 Circuit 页名；页名、tag 和中断点 name 中的 `{run}` 替换为本次运行的新页号，`{next}` 替换为下一个页号，避免重复运行冲突；页名须使用样例项目已有的结构（如 `=GAA+A1&EFS1/{run}`），新结构段的页名 EPLAN 会拒绝（S063133）；无占位符时同名页直接失败，不覆盖 |
 | location_boxes | `{id,structure,corners:[[左,下],[右,上]]}`；structure 为 +位置标识；盒不传播结构，器件 tag 必须显式包含自己的结构 |
 | devices | `{id,tag,library,symbol,variant,position,connection_designations,contact_kind?}`；variant 为原生非负编号，代号按符号连接点数组顺序；contact_kind 为 no/nc |
-| plc | `{box,points}`；box 使用设备字段；每个 DI point 为 `{id,tag,position,connection_designations,connection_point,address,symbolic_address,function_text,direction,display_properties?}`；direction 指定引脚方向，驱动分页发现具有真实 DI 定义的单引脚变体，不猜符号名；display_properties 为 `{property_id,offset_x_mm,offset_y_mm}` 数组，仅允许 20400/20403/20011/20301，当前明确记录为 skipped，不传给放置工具；禁止用自由文本模拟 PLC 属性表 |
+| plc | `{box,points,box_page?}`；box 使用设备字段；每个 DI point 为 `{id,tag,position,connection_designations,connection_point,address,symbolic_address,function_text,direction,display_properties?,plug_designation?,main_reference?,main_reference_contains?}`；点名为 `<卡>:<connection_point>`，插头独立写 20406；main_reference 精确核对原生引用（可为空），main_reference_contains 则核对显式给出的非空片段。direction 指定原生引脚方向，驱动分页发现真实单引脚 DI 变体；display_properties 为 `{property_id,offset_x_mm,offset_y_mm}` 数组，允许 20400/20403/20011/20301/20213/20300/20406，传给工具并在提交后逐项核对属性文字、父点、位置和可见格式；禁止用自由文本模拟属性表 |
 | terminal_strip | `{id,tag,function_text,position,terminals}`；每个 terminal 使用设备字段并增加 number，tag 为排标识加 `:号` |
 | wires | `{id,from:{item,pin},to:{item,pin},points}`；item 引用设备、端子或 PLC 点的 ID，pin 是实际代号；points 至少两点、最多 32 点，只允许首点 `"from"`、末点 `"to"` 为引脚锚点，其余为显式坐标。`["from","to"]` 表示由 EPLAN 自动连线连接，不调用 connection_create；两引脚必须在同一轴上相向（同 x 的 Up/Down 或同 y 的 Left/Right，并朝向对方），否则必须给出显式转折坐标；不自动寻路 |
 | nodes | `{id,kind,position,directions}`；kind 为 corner/t_node/potential_point，方向为 Up/Down/Left/Right；分支必须显式声明 |
@@ -66,3 +66,9 @@ dotnet test --project tests/EplanMcp.Large.Tests -c Release --no-build -- --filt
 Remove-Item Env:EPLANMCP_ACCEPTANCE_KEEP_GOING
 Remove-Item Env:EPLANMCP_ACCEPTANCE_PREFLIGHT
 ```
+
+### D3：PLC 通道文字
+
+虚构 PLC 主卡放在新建的 `counterpart_page`（`plc.box_page` 必须引用该页）；input0 增加手工插头 `-X10`，要求 20213 卡设备标识、20406 插头和 20300 主辅功能引用。`main_reference_contains` 指定展开后的对页与列号分隔符，驱动同时用 plc_get 的原生值和 page_get 的父对象、坐标及可见文字校验，缺文字即失败，不再跳过 PLC 显示。其余点保留地址、功能文本与可空的概览引用。所有显示打印到 TestOutputHelper，既有整页 PNG 导出保留。
+
+`PlcDisplaySpikeTests.NativePlcDisplays_NewLargeWritePages_PrintPropertiesPlacementsAndImage` 只打印对照观察（先读取无插头点，再对同一点以 eplan_api_try 试写组合名称并重读，另放一点显式写 20406）；试执行沿用工程师逐次审批，不预设组合名称会设置哪项属性；`PlcChannel_CardTagPlugAndMainReference_AreVisibleAfterCommit` 断言三类文字。它们仅操作 LargeWrite 新页，保留现场；本次未运行。真实客户清单仍只允许外部读取，禁止入库。

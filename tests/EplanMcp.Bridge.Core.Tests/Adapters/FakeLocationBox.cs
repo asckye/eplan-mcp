@@ -38,8 +38,10 @@ internal sealed class PropertyValue(string text, Action? checkAlive = null) : ID
     public string Text { get { checkAlive?.Invoke(); return text; } }
     public bool IsEmpty => Text.Length == 0;
     public override string ToString() => Text;
+    public int ToInt() => int.Parse(Text, System.Globalization.CultureInfo.InvariantCulture);
+    public static implicit operator PropertyValue(int value) => new(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
     public static implicit operator PropertyValue(string text) => new(text);
-    public Eplan.EplApi.Base.MultiLangString ToMultiLangString() => new(Text);
+    public Eplan.EplApi.Base.MultiLangString ToMultiLangString() => new(Text.Contains('@', StringComparison.Ordinal) ? Text : "??_??@" + Text + ";");
     public static implicit operator PropertyValue(Eplan.EplApi.Base.MultiLangString value) => new(value.GetAsString());
     public void Dispose() { checkAlive?.Invoke(); Disposed = true; }
 }

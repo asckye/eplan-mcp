@@ -18,9 +18,12 @@ internal interface IWriteProtection
 
 internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
 {
-    public Page Page { get; set; } = null!;
-    public bool IsPlaced => Page is not null;
-    public long ObjectIdentifier { get; } = oid;
+    private Page _page = null!;
+    private bool? _isPlaced;
+    public Page Page { get { CheckNative?.Invoke(); return _page; } set { CheckNative?.Invoke(); _page = value; } }
+    public bool IsPlaced { get { CheckNative?.Invoke(); return _isPlaced ?? _page is not null; } set { CheckNative?.Invoke(); _isPlaced = value; } }
+    public Action? CheckNative { get; set; }
+    public long ObjectIdentifier { get { CheckNative?.Invoke(); return oid; } }
     public string Prefix { get; set; } = "53";
     public int IdentifierType { get; set; } = type;
     private PointD _location;
@@ -84,16 +87,34 @@ internal class FunctionBase(long oid) : SymbolReference(oid)
     public int NameReads { get; private set; }
     public string Name
     {
-        get { NameReads++; return IsValid ? _name : throw new BaseException("S063001错误:无对象"); }
-        set => _name = value;
+        get { CheckNative?.Invoke(); NameReads++; return IsValid ? _name : throw new BaseException("S063001错误:无对象"); }
+        set { CheckNative?.Invoke(); _name = value; }
     }
 }
 
-internal class Function(long oid) : FunctionBase(oid)
+internal class Function(long oid = 1) : FunctionBase(oid)
 {
-    private FunctionPropertyList? _properties;
-    public FunctionPropertyList Properties => _properties ??= new();
-    public bool IsMainFunction { get; set; }
+    private bool _main;
+    public bool IsMainFunction { get { CheckNative?.Invoke(); return _main; } set { CheckNative?.Invoke(); _main = value; } }
+    private readonly FunctionPropertyList _properties = new();
+    public FunctionPropertyList Properties { get { CheckNative?.Invoke(); return _properties; } }
+    private MasterData.FunctionDefinition _definition = new();
+    public MasterData.FunctionDefinition FunctionDefinition
+    {
+        get => _definition;
+        set { _definition = value; FunctionCategory = value.FunctionCategory; }
+    }
+    public void Create(Page page, MasterData.SymbolVariant variant)
+    {
+        Page = page;
+        UseLocalPropertyPlacements = false;
+        SymbolVariant.Library = variant.SymbolLibraryName;
+        SymbolVariant.Name = variant.SymbolName;
+        SymbolVariant.Variant = variant.VariantNr;
+        page.AllPlacements = [.. page.AllPlacements, this];
+        if (this is EObjects.Terminal terminal)
+        { EObjects.Terminal.OnCreate?.Invoke(terminal); }
+    }
     public string? VisibleName { get; set; }
     public FunctionCategory FunctionCategory { get; set; } = FunctionCategory.Terminal;
     public ArticleReference[] ArticleReferences { get; set; } = [];
@@ -130,11 +151,15 @@ internal sealed class Page : StorableObject, IWriteProtection, IDisposable
 internal sealed class Project(params Page[] pages) : StorableObject
 {
     public bool Locked { get; private set; }
-    public void LockAllObjects() { Locked = true; EplanMcp.Bridge.Core.Tests.Adapters.FakeMoveNative.Calls.Add("LockAll"); }
+    public void LockAllObjects() { EplanMcp.Bridge.Core.Tests.Adapters.FakeMoveNative.EndTransaction = EndTransaction; Locked = true; EplanMcp.Bridge.Core.Tests.Adapters.FakeMoveNative.Calls.Add("LockAll"); }
+    public Action? EndTransaction { get; set; }
+    public string ProjectFullName { get; set; } = "project";
     public Page[] Pages { get; } = pages;
     public string Display { get; set; } = "zh_CN;";
     public Function[] UnplacedFunctions { get; set; } = [];
     public bool RejectUnfilteredFunctions { get; set; }
+    public bool OmitTerminalsFromFunctions { get; set; }
+    public Func<FunctionsFilter?, Function[]>? FindFunctions { get; set; }
     public List<(string? Name, bool Exact, FunctionCategory? Category)> FunctionQueries { get; } = [];
     public MasterData.SymbolLibrary[] SymbolLibraries { get; set; } =
         [new() { Name = "SPECIAL", Symbols = [new() { Type = MasterData.Symbol.SymbolType.CableDefinitionLine, Variants = [new()] }] }];
@@ -154,9 +179,13 @@ internal sealed class DMObjectsFinder(Project project) : IDisposable
     {
         Assert.False(project.RejectUnfilteredFunctions && filter is null, "A whole-project function scan is forbidden for this read.");
         project.FunctionQueries.Add((filter?.Name, filter?.ExactNameMatching ?? false, filter?.FunctionCategory));
+        if (project.FindFunctions is { } find)
+        { return find(filter); }
         IEnumerable<Function> functions = project.Pages.SelectMany(p => p.AllPlacements).OfType<Function>().Concat(project.UnplacedFunctions);
         return [.. functions.Where(f => (filter?.Name is not { } name || (filter.ExactNameMatching ? f.Name == name : f.Name.StartsWith(name, StringComparison.Ordinal)))
-            && (filter?.FunctionCategory is not { } category || f.FunctionCategory == category))];
+            && (filter?.FunctionCategory is not { } category || f.FunctionCategory == category)
+            && (filter?.Page is null || f.Page == filter.Page)
+            && !(project.OmitTerminalsFromFunctions && f is EObjects.Terminal))];
     }
     public Connection[] GetConnections(object? filter) => project.FindConnections?.Invoke() ?? [];
     public Page[] GetPages(PagesFilter filter) => [.. project.Pages.Where(p => p.Name.StartsWith(filter.Name, StringComparison.OrdinalIgnoreCase))];

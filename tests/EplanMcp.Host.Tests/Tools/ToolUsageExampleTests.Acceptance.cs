@@ -15,13 +15,9 @@ public sealed partial class ToolUsageExampleTests
         var fake = new AcceptanceRedrawDriverTests.DrawingTools { ConnectWires = true };
         JsonElement list = explicitWires ? AcceptanceRedrawDriverTests.ExplicitWiresList() : AcceptanceDrawingList.Read(AcceptanceDrawingListTests.Fixture());
         var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", list, "schema", _ => { }, keepGoing: preflight, preflight: preflight);
-        if (preflight)
-        { await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync); }
-        else
-        {
-            await driver.DrawAsync();
-            await driver.ExportAsync();
-        }
+        await driver.DrawAsync();
+        await driver.ExportAsync();
+        Assert.Equal(0, driver.SkippedCount);
         foreach ((string name, JsonElement args) in fake.Requests)
         {
             JsonElement schema = Assert.Single(Tools, tool => tool.Name == name).InputSchema;

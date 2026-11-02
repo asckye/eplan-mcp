@@ -6,6 +6,44 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class DeviceSymbolDisplaysTests
 {
+    [Theory]
+    [InlineData("X10:2")]
+    [InlineData("DI-a.0")]
+    public void PlcDeviceTag_ExcludesTheConnectionPointSuffix(string point)
+    {
+        Assert.Equal("-KF1", DeviceSymbolDisplays.DeviceTag(new() { PlcConnectionPoint = point }, "+A1-KF1:" + point));
+    }
+
+    [Fact]
+    public void ExplicitPlug_IsIndependentOfTheCardAndPinIdentity()
+    {
+        var args = new DevicePlaceArgs { PlcConnectionPoint = "1", PlcPlugDesignation = "-X10" };
+        Assert.Equal("1", DevicePlcPlan.Suffix(args));
+        Assert.Equal("+A1-KF1", DevicePlcPlan.Parent(args, "+A1-KF1:1"));
+        Assert.Equal("-KF1", DeviceSymbolDisplays.DeviceTag(args, "+A1-KF1:1"));
+    }
+
+    [Theory]
+    [InlineData("-KF1", true)]
+    [InlineData("-KF10", false)]
+    public void PlcDisplays_CardTagPlugAndNativeReference_AreComparedExactly(string shownTag, bool succeeds)
+    {
+        var args = new DevicePlaceArgs
+        {
+            PlcConnectionPoint = "X10:2",
+            X = 100,
+            Y = 180,
+            DisplayProperties = [new() { PropertyId = 20213, OffsetYmm = -8 }, new() { PropertyId = 20406, OffsetYmm = -16 }, new() { PropertyId = 20300, OffsetYmm = -24 }]
+        };
+        var channel = new PlcChannel { PlugDesignation = "-X10", MainReference = "&EFA1/1.2" };
+        DeviceSymbolDisplay[] displays = [Display(20213, -8, shownTag), Display(20406, -16, "-X10"), Display(20300, -24, "&EFA1/1.2")];
+        void Readback() => DeviceSymbolDisplays.Verify(args, Tag, Page, channel, displays);
+        if (succeeds)
+        { Readback(); }
+        else
+        { Assert.Equal(ErrorReason.EplanOperationFailed, Assert.Throws<BridgeErrorException>(Readback).Error.Reason); }
+    }
+
     private const string Tag = "+A1-KF1:X10:2";
     private const string Page = "=F+A1/1";
     private readonly DevicePlaceArgs _args = new()

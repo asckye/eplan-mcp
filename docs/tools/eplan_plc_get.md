@@ -75,3 +75,5 @@ T7d 兼容读回字段仅在 `response_format=detailed` 时返回：`owner`（�
 - Medium：假 Bridge 上的命中、不是 PLC 盒、找不到。
 - Large：示例项目副本上 `=K1+A2-KE1` 有 34 个通道（S21）。
 - Agent 评测："-KE1 还有哪些空闲的输入通道？"
+
+- D3 读回扩展：详细通道结果增加 `plugDesignation`（20406 手工插头代号）和 `mainReference`（20300 原生主辅功能引用）；未设置时省略，不合成引用文字。设备放置结果中的同名字段可用本工具独立核实；新增 Large 断言仅编写，未运行。

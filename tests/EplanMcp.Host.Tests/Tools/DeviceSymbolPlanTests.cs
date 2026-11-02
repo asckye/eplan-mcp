@@ -282,7 +282,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
     private WritePlan Plan(DevicePlaceArgs args) => (WritePlan)new DevicePlacePlanOperation(_store, _store, _store, _store, _store, _store, _store).Execute(args)!;
     private static DevicePlaceArgs Args() => new() { Project = "Line1", Page = Page, Library = "IEC_symbol", Symbol = "K", SymbolVariant = 0, X = 80, Y = 160, Tag = "-K2" };
 
-    private sealed class Placement(Store store) : IDeviceSymbolPlacement
+    private sealed class Placement(Store store) : IDeviceSymbolPlacement, IDeviceSymbolCommittedReadback
     {
         public List<string> Calls { get; } = [];
         public string? FailAt { get; set; }
@@ -372,7 +372,8 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                 }
                 if (args.PlcConnectionPoint is not null)
                 {
-                    Assert.Empty(args.DisplayProperties ?? []);
+                    foreach (DeviceSymbolDisplay display in Displays)
+                    { display.Text = display.PropertyId switch { 20400 or 20403 => args.PlcAddress!, 20011 => args.PlcText!, 20406 => args.PlcPlugDesignation ?? "", _ => "" }; }
                     var channel = new PlcChannel
                     {
                         Name = tag,
@@ -382,6 +383,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                         SymbolicAddress = args.PlcAddress,
                         ManualSymbolicAddress = FailAt == "PlcSymbol" ? "WRONG" : args.PlcSymbolicAddress,
                         Text = FailAt == "PlcText" ? "WRONG" : args.PlcText,
+                        PlugDesignation = FailAt == "PlcPlug" ? "-WRONG" : args.PlcPlugDesignation,
                         CardReference = null
                     };
                     store.Channels.Add(channel);
@@ -390,6 +392,14 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                 return new() { Tag = tag, VisibleTag = "-K2", Page = args.Page, Functions = 1, Category = Resolved?.FunctionCategory ?? "Coil" };
             }
             finally { Calls.Add("ReleaseLists"); }
+        }
+        public void ReadCommitted(DevicePlaceArgs args, DevicePlaceData data)
+        {
+            Calls.Add("CommittedReadback");
+            if (FailAt == "CommittedReadback")
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Display lost after commit."); }
+            if (FailAt == "CommittedNameLookup")
+            { data.Plc = Array.Empty<PlcChannel>().Single(c => c.Name == data.Tag); }
         }
         public IReadOnlyList<DeviceSymbolDisplay> ReadDisplays()
         {

@@ -129,6 +129,7 @@ internal sealed class DeviceWriteTools
         string? plc_address = null,
         string? plc_symbolic_address = null,
         string? plc_text = null,
+        string? plc_plug_designation = null,
         [Description("Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change.")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -156,6 +157,7 @@ internal sealed class DeviceWriteTools
             PlcConnectionPoint = plc_connection_point,
             PlcAddress = plc_address,
             PlcSymbolicAddress = plc_symbolic_address,
+            PlcPlugDesignation = plc_plug_designation,
             PlcText = plc_text
         };
         List<string> violations = DevicePlaceInputs.Check(args, display_properties);
@@ -196,6 +198,7 @@ internal sealed class DeviceWriteTools
                 PlcAddress = args.PlcAddress,
                 PlcSymbolicAddress = args.PlcSymbolicAddress,
                 PlcText = args.PlcText,
+                PlcPlugDesignation = args.PlcPlugDesignation,
                 Fingerprint = plan.Fingerprint
             },
             dry_run,
@@ -265,6 +268,8 @@ internal sealed class DeviceWriteTools
             plc.SymbolicAddress = ResultShaper.CleanText(plc.SymbolicAddress);
             plc.Text = ResultShaper.CleanText(plc.Text);
             plc.CardReference = ResultShaper.CleanText(plc.CardReference);
+            plc.MainReference = ResultShaper.CleanText(plc.MainReference);
+            plc.PlugDesignation = ResultShaper.CleanText(plc.PlugDesignation);
             plc.DataType = ResultShaper.CleanText(plc.DataType);
         }
         if (result.LocationBox is { } location)

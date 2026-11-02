@@ -98,15 +98,15 @@ internal sealed class DevicePlaceRequest
         if (terminal)
         { full += ":" + args.TerminalNumber; }
         if (args.PlcConnectionPoint is not null)
-        { full += ":" + args.PlcConnectionPoint; }
+        { full += ":" + DevicePlcPlan.Suffix(args); }
         string[] existing = terminal || args.PlcConnectionPoint is not null ? [.. names.FunctionNames(project.Path)] : box ? [.. names.FunctionNames(project.Path), FormattableString.Invariant($"bounds:{page.Width},{page.Height}")] : [];
         if (terminal && existing.FirstOrDefault(n => SameName(full.Substring(0, full.LastIndexOf(':')), n, ignoreCase: true)) is { } canonical)
         { full = canonical + ":" + args.TerminalNumber; }
-        if (args.PlcConnectionPoint is { } point && existing.FirstOrDefault(n => SameName(full.Substring(0, full.Length - point.Length - 1), n, ignoreCase: true)) is { } card)
-        { full = card + ":" + point; }
-        if (args.PlcConnectionPoint is { } designation)
+        if (args.PlcConnectionPoint is not null && existing.FirstOrDefault(n => SameName(DevicePlcPlan.Parent(args, full), n, ignoreCase: true)) is { } card)
+        { full = card + ":" + DevicePlcPlan.Suffix(args); }
+        if (args.PlcConnectionPoint is not null)
         {
-            string parent = full.Substring(0, full.Length - designation.Length - 1);
+            string parent = DevicePlcPlan.Parent(args, full);
             PlcRecord? state = plc?.ReadPlc(project.Path, parent, TextLanguages.Independent, detailed: true);
             if (state?.Plc is null)
             { throw new BridgeErrorException(ErrorReason.DeviceNotFound, "An existing native PLC card is required; create it explicitly first."); }

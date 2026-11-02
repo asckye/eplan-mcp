@@ -70,9 +70,23 @@ public sealed class DevicePlaceExecuteOperation(
                 data.Warning = LayoutGuard.Summary(request.LayoutWarnings.Concat(LayoutGuard.AfterWriting(request.Page.Layout!, (symbolSession as LayoutGuard.IMeasurement)?.ReadLayout())));
                 return data;
             }, _ => true);
+            string? warning = result.Warning;
+            if (args.PlcConnectionPoint is not null && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
+            {
+                try
+                { committedReadback.ReadCommitted(args, result.Result); }
+                catch (Exception failure)
+                {
+                    // Commit succeeded: a lookup/verification failure cannot make its outcome unknown.
+                    string readbackWarning = failure is BridgeErrorException { Error.Execution: ExecutionState.Committed } known
+                        ? known.Error.Message
+                        : "The PLC point was committed, but its identity, card ownership, address, symbolic address, text, plug designation, native references and displays could not be fully verified. Inspect the page and eplan_plc_get before repeating the placement.";
+                    warning = warning is null ? readbackWarning : warning + " " + readbackWarning;
+                }
+            }
             result.Result.Project = request.Project.Name;
             result.Result.PageSizeKnown = request.Page.Width is not null;
-            result.Result.Warning = LayoutGuard.Summary([result.Result.Warning, result.Warning]);
+            result.Result.Warning = LayoutGuard.Summary([result.Result.Warning, warning]);
             return result.Result;
         }
 
@@ -102,11 +116,12 @@ public sealed class DevicePlaceExecuteOperation(
     private static DevicePlaceData PlaceSymbol(IDeviceSymbolPlacement session, DevicePlaceArgs args, string tag, string page)
     {
         DevicePlaceData data = session.Place(args, tag);
-        if (args.PlcConnectionPoint is { } point && (data.Plc is not { } channel || !DevicePlaceRequest.SameName(tag, channel.Name)
+        if (args.PlcConnectionPoint is not null && (data.Plc is not { } channel || !DevicePlaceRequest.SameName(tag, channel.Name)
             || data.Page != page || !DevicePlaceRequest.SameName(tag, data.Tag) || channel.Page != page || data.Category != "PLCTerminal"
-            || channel.Owner is not null && !DevicePlaceRequest.SameName(tag.Substring(0, tag.Length - point.Length - 1), channel.Owner)
+            || channel.Owner is not null && !DevicePlaceRequest.SameName(DevicePlcPlan.Parent(args, tag), channel.Owner)
+            || args.PlcPlugDesignation is not null && channel.PlugDesignation != args.PlcPlugDesignation
             || channel.Address != args.PlcAddress || channel.ManualSymbolicAddress != args.PlcSymbolicAddress || channel.Text != args.PlcText))
-        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "PLC point identity, owner, address or text readback differs; nothing was committed."); }
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "PLC point identity, owner, plug, address or text readback differs; nothing was committed."); }
         if (args.LocationBox is not null && (data.LocationBox is not { } box || box.Structure != args.LocationBox
             || box.Outline != "dashed" || box.AffectedDevices.Length != 0 || !box.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Location box structure, outline or unaffected-device readback differs; nothing was committed."); }

@@ -13,6 +13,10 @@ public sealed class PlcChannel
     public string? Owner { get; set; }
     /// <summary>EPLAN-calculated overview cross-reference (20301); null when unset, never synthesized.</summary>
     public string? CardReference { get; set; }
+    /// <summary>Manual plug designation (20406), null when unset.</summary>
+    public string? PlugDesignation { get; set; }
+    /// <summary>EPLAN-calculated main/auxiliary cross-reference (20300), never synthesized.</summary>
+    public string? MainReference { get; set; }
     /// <summary>Manually entered symbolic address (20402); null when unset.</summary>
     public string? ManualSymbolicAddress { get; set; }
     /// <summary>The full name (<c>Terminal.Name</c>), e.g. <c>=K1+A2-KE1:2.3</c>.</summary>

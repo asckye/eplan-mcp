@@ -79,9 +79,7 @@ public sealed partial class DevicePlaceTests
             args["plc_address"] = "I0." + number;
             args["plc_symbolic_address"] = "Input_" + number;
             args["plc_text"] = "Fictional input " + number;
-            // Live T7d: added displays are not on the page after the commit, so the tool refuses them for PLC points.
-            JsonElement refused = await eplan.ErrorAsync("eplan_device_place", new(args) { ["display_properties"] = JsonSerializer.SerializeToElement(_plcDisplayIds.Select((id, row) => new { property_id = id, offset_x_mm = 0, offset_y_mm = -8 - 8 * row })) });
-            Assert.Equal((ErrorReason.CapabilityMissing, ExecutionState.NotStarted), (refused.GetProperty("reason").GetString(), refused.GetProperty("execution").GetString()));
+            args["display_properties"] = JsonSerializer.SerializeToElement(_plcDisplayIds.Select((id, row) => new { property_id = id, offset_x_mm = 0, offset_y_mm = -8 - 8 * row }));
             JsonElement placed = await Place(args);
             Assert.Equal(JsonValueKind.Null, placed.GetProperty("functions").ValueKind);
             Assert.Equal(args["plc_address"], Text(placed.GetProperty("plc"), "address"));

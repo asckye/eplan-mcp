@@ -8,6 +8,17 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class DevicePlcInputTests
 {
     [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("-X10\n")]
+    [InlineData(null)]
+    public void Plug_InvalidOrMissingPlcSource_IsRejectedBeforeBridge(string? plug)
+    {
+        Assert.Contains(DevicePlaceInputs.Check(new() { Project = "Line1", PlcPlugDesignation = plug ?? "-X10" }, null),
+            p => p.StartsWith("/plc_plug_designation", StringComparison.Ordinal));
+    }
+
+    [Theory]
     [InlineData("??_??@Start;en_US@Start;")]
     [InlineData("en_US@Start;??_??@Start;")]
     [InlineData("en_US@Start;")]

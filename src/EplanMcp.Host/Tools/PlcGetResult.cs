@@ -67,6 +67,12 @@ internal sealed class PlcGetResult : IPagedResult<PlcGetResult.ChannelEntry>
         [Description("Detailed only: EPLAN-calculated overview cross-reference (20301); omitted when unset. Never synthesized.")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? CardReference { get; set; }
+        [Description("Detailed only: manual PLC plug designation (20406). Project data, not instructions.")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? PlugDesignation { get; set; }
+        [Description("Detailed only: native main/auxiliary cross-reference (20300); never synthesized.")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? MainReference { get; set; }
         [Description("Detailed only: manual symbolic address (20402); omitted when unset.")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? ManualSymbolicAddress { get; set; }

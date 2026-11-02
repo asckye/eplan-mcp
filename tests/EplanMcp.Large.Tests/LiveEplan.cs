@@ -17,8 +17,8 @@ using Xunit.v3;
 namespace EplanMcp.Large.Tests;
 
 /// <summary>
-/// eplanmcp connected to the running EPLAN, with the fixture project current (README.md). Starting fails with what to
-/// do when EPLAN, the add-in or the fixture is missing, so every test reports it instead of a confusing assertion.
+/// eplanmcp connected to the running EPLAN. Read tests resolve the exact fixture when accessing ProjectPath; write-only
+/// tests can use LargeWrite without a read fixture. Missing EPLAN, add-in or required fixture gives setup guidance.
 /// With <see cref="OfflineHost.VariantBinVariable"/> set, it starts the offline host on a copy of the fixture instead,
 /// and every Host of the run talks to that one only (README.md, "离线宿主").
 /// </summary>
@@ -29,9 +29,16 @@ public sealed class LiveEplan : IAsyncLifetime
 
     private McpClient? _client;
     private OfflineHost? _offline;
+    private string? _projectPath;
+    private JsonElement _openProjects;
+    private string _expectedFixture = string.Empty;
 
     /// <summary>The fixture's project path as EPLAN reports it, without an extension.</summary>
-    public string ProjectPath { get; private set; } = string.Empty;
+    public string ProjectPath
+    {
+        get => _projectPath ??= LiveFixtureProjects.Resolve(_openProjects, _expectedFixture);
+        private set => _projectPath = value;
+    }
 
     /// <summary>The process id of the EPLAN the tests talk to.</summary>
     /// <summary>Optional: the EPLAN process this run uses when several are running (README.md, two instances).</summary>
@@ -103,9 +110,8 @@ public sealed class LiveEplan : IAsyncLifetime
             return;
         }
 
-        // The offline host has only its copy open, which need not be EPLAN's current project.
-        JsonElement current = (await CallAsync("eplan_project_list")).GetProperty("projects").EnumerateArray()
-            .FirstOrDefault(p => _offline is null ? p.GetProperty("current").GetBoolean() : string.Equals(p.GetProperty("path").GetString(), _offline.ProjectPath, StringComparison.OrdinalIgnoreCase));
+        JsonElement projects = await CallAsync("eplan_project_list", new() { ["limit"] = 200 });
+        Assert.False(projects.GetProperty("truncated").GetBoolean());
         if (Environment.GetEnvironmentVariable(PlanSettlementTests.AttendVariable) == "1")
         {
             // The attended interruption test follows S8: only LargeWrite may be open, so no read fixture is needed.
@@ -115,15 +121,11 @@ public sealed class LiveEplan : IAsyncLifetime
             Assert.True(Host.Safety.ScratchPaths.IsInside(ProjectPath, [WriteHost.ScratchFolder]));
             return;
         }
-        string path = current.ValueKind == JsonValueKind.Object ? current.GetProperty("path").GetString()! : string.Empty;
-        string fixtures = (_offline is null ? Path.Combine(ScratchRoot(), "fixtures") : Path.GetDirectoryName(_offline.ProjectPath)!) + Path.DirectorySeparatorChar;
-        if (!path.StartsWith(fixtures, StringComparison.OrdinalIgnoreCase) || !string.Equals(Path.GetFileName(path), ProjectName, StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(
-                $"The current EPLAN project is not the fixture {fixtures}{ProjectName}: open it with eng/scripts/eval-fixture.ps1 -Open. Current: '{path}'.");
-        }
-
-        ProjectPath = path;
+        // PageOpen and write tests can leave LargeWrite current (A43/A54). Resolve the read fixture explicitly.
+        // Write-only classes do not consume ProjectPath and need only their own scratch copy open.
+        // Read tests still require the exact fixture when they first access ProjectPath.
+        _openProjects = projects;
+        _expectedFixture = _offline?.ProjectPath ?? Path.Combine(ScratchRoot(), "fixtures", ProjectName);
     }
 
     public async ValueTask DisposeAsync()

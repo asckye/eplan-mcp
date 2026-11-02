@@ -4,7 +4,6 @@ internal sealed class TerminalStrip() : Function(2)
 {
     public Terminal[] Terminals { get; set; } = [];
     public new TerminalStripPropertyListComplete Properties { get; } = new();
-    public new bool IsPlaced { get; private set; }
     public void Create(Page page) { Page = page; IsPlaced = true; page.AllPlacements = [.. page.AllPlacements, this]; }
     // Unplaced definition: navigator only, never a page placement.
     public Project? DefinedIn { get; private set; }
@@ -15,20 +14,21 @@ internal sealed class TerminalStrip() : Function(2)
     }
 }
 
-internal sealed class Terminal() : Function(3)
+internal sealed class Terminal(long oid = 3) : Function(oid)
 {
     [ThreadStatic]
     public static Action<Terminal>? OnCreate;
     private TerminalStrip? _owner;
     public TerminalStrip? TerminalStrip => _owner;
-    public new FunctionPropertyList Properties { get; } = new();
-    public new bool IsPlaced { get; set; } = true;
     public PLC? PLC { get; set; }
-    public new BoxSymbolVariant SymbolVariant { get; } = new() { Library = "IEC_symbol", Name = "X" };
     public void Create(TerminalStrip strip, Page page, object variant)
     {
         _owner = strip;
         Page = page;
+        var symbol = (MasterData.SymbolVariant)variant;
+        SymbolVariant.Library = symbol.SymbolLibraryName;
+        SymbolVariant.Name = symbol.SymbolName;
+        SymbolVariant.Variant = symbol.VariantNr;
         page.AllPlacements = [.. page.AllPlacements, this];
         OnCreate?.Invoke(this);
     }

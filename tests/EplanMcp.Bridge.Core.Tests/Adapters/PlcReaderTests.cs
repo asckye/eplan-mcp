@@ -22,6 +22,8 @@ public sealed class PlcReaderTests
         channel.Properties.FUNC_PLCADDRESS = "??_??@I0.0;";
         channel.Properties.FUNC_PLCSYMBOLICADDRESS_MANUAL = "??_??@Start;";
         channel.Properties.FUNC_TEXT = "??_??@Start input;";
+        channel.Properties.FUNC_PLCPLUG_DESIGNATION_MANUAL = "??_??@-X10;";
+        channel.Properties.FUNC_CROSSREFERENCE = "??_??@&EFA1/1.2;";
         plc.PLCTerminals = [channel, Point(channel.Name, overview, plc)];
         overview.AllPlacements = [plc, Point(channel.Name, overview)];
         circuit.AllPlacements = [channel, Point("+A1-KF10:1", circuit)];
@@ -36,6 +38,8 @@ public sealed class PlcReaderTests
         Assert.Equal(("I0.0", "Start input"), (record.Channels[0].Address, record.Channels[0].Text));
         Assert.Equal(detailed ? plc.Name : null, record.Channels[0].Owner);
         Assert.Equal(detailed ? "Start" : null, record.Channels[0].ManualSymbolicAddress);
+        Assert.Equal(detailed ? "-X10" : null, record.Channels[0].PlugDesignation);
+        Assert.Equal(detailed ? "&EFA1/1.2" : null, record.Channels[0].MainReference);
         Assert.All(record.Channels, c => Assert.Equal(detailed ? (int?)2 : null, c.ParentlessRepresentations));
         Assert.Equal(detailed ? 2 : 1, project.FunctionQueries.Count);
         if (detailed)

@@ -3,6 +3,11 @@ using EplanMcp.Bridge.Core.Operations;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
+internal sealed class EplanExceptionMapper : IExceptionMapper
+{
+    public EplanMcp.Contracts.BridgeError? Map(Exception exception) => null;
+}
+
 internal static class EplanProjects
 {
     [ThreadStatic]

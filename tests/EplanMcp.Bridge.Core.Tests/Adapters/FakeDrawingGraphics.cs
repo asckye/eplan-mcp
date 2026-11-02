@@ -6,6 +6,8 @@ internal abstract class TextBase(long oid) : Placement(oid)
 {
     public int UndockCalls { get; private set; }
     public double Rotation { get; set; }
+    public enum JustificationType { BaseLineLeft }
+    public JustificationType Justification { get; set; }
     public MultiLangString Contents { get; set; } = new("en_US@Test;");
     public double Height { get; set; } = 3;
     public bool IsDocked { get; set; }
@@ -19,7 +21,7 @@ internal abstract class TextBase(long oid) : Placement(oid)
         { throw new BaseException(); }
         IsDocked = false;
     }
-    public bool IsVisible { get; set; }
+    public bool IsVisible { get; set; } = true;
 }
 
 internal sealed class Text(long oid = 99) : TextBase(oid)
@@ -43,8 +45,13 @@ internal class PropertyPlacement(long oid = 99, Placement? parent = null) : Text
     {
         Parent = owner;
         DisplayedId = id.AsInt;
-        using MultiLangString text = ((EObjects.TerminalStrip)owner).Properties.FUNC_TEXT.ToMultiLangString();
-        Display = id.AsInt == 20214 ? owner.Name : text.GetStringToDisplay(ISOCode.Language.L___);
+        if (owner is EObjects.TerminalStrip strip)
+        {
+            using MultiLangString text = strip.Properties.FUNC_TEXT.ToMultiLangString();
+            Display = id.AsInt == 20214 ? owner.Name : text.GetStringToDisplay(ISOCode.Language.L___);
+        }
+        else
+        { Display = id.AsInt switch { 20213 => "-D3KF5", 20406 => "-X10", 20400 => "I0.1", _ => "" }; }
         owner.PropertyPlacements = [.. owner.PropertyPlacements, this];
     }
     public PointD[] GetBoundingBox(bool relative)

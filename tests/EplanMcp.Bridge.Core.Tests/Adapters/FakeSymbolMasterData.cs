@@ -22,6 +22,8 @@ internal sealed class Symbol
 
 internal sealed class SymbolVariant
 {
+    public string SymbolLibraryName { get; set; } = "IEC_symbol";
+    public string SymbolName { get; set; } = "PLC_CBOX";
     public int VariantNr { get; set; }
     public NativeSymbolPoint[] ConnectionPoints { get; set; } = [];
 }

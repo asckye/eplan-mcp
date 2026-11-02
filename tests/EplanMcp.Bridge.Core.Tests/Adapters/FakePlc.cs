@@ -1,8 +1,8 @@
 namespace Eplan.EplApi.DataModel.EObjects;
 
-internal sealed class PLC() : Function(4)
+internal sealed class PLC(long oid = 4) : Function(oid)
 {
     public bool IsCPU { get; set; }
-    public Terminal[] PLCTerminals { get; set; } = [];
-    public new FunctionPropertyList Properties { get; } = new();
+    private Terminal[] _terminals = [];
+    public Terminal[] PLCTerminals { get { CheckNative?.Invoke(); return _terminals; } set { CheckNative?.Invoke(); _terminals = value; } }
 }

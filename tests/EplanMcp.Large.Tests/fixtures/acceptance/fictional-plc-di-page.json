@@ -179,8 +179,25 @@
             "property_id": 20301,
             "offset_x_mm": 4,
             "offset_y_mm": -32
+          },
+          {
+            "property_id": 20213,
+            "offset_x_mm": 4,
+            "offset_y_mm": 12
+          },
+          {
+            "property_id": 20300,
+            "offset_x_mm": 4,
+            "offset_y_mm": 8
+          },
+          {
+            "property_id": 20406,
+            "offset_x_mm": 4,
+            "offset_y_mm": 4
           }
-        ]
+        ],
+        "plug_designation": "-X10",
+        "main_reference": ""
       },
       {
         "id": "input1",
@@ -410,7 +427,8 @@
           }
         ]
       }
-    ]
+    ],
+    "box_page": "=GAA+A1&EFS1/{next}"
   },
   "terminal_strip": {
     "id": "strip",

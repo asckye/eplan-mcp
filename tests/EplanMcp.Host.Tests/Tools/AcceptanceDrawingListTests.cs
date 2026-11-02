@@ -44,7 +44,8 @@ public sealed class AcceptanceDrawingListTests
         Assert.All(list.GetProperty("plc").GetProperty("points").EnumerateArray(), point =>
         {
             Assert.Equal("Up", point.GetProperty("direction").GetString());
-            Assert.Equal([20400, 20403, 20011, 20301], point.GetProperty("display_properties").EnumerateArray().Select(p => p.GetProperty("property_id").GetInt32()));
+            int[] expectedDisplays = point.GetProperty("id").GetString() == "input0" ? [20400, 20403, 20011, 20301, 20213, 20300, 20406] : [20400, 20403, 20011, 20301];
+            Assert.Equal(expectedDisplays, point.GetProperty("display_properties").EnumerateArray().Select(p => p.GetProperty("property_id").GetInt32()));
         });
         Assert.Contains(list.GetProperty("nodes").EnumerateArray(), n => n.GetProperty("kind").GetString() == "t_node");
         Assert.False(list.TryGetProperty("interruption_support", out _));
