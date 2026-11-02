@@ -193,7 +193,8 @@ public sealed class PropertyReadTargetTests
     [InlineData("Connection", 31002, "value")]
     [InlineData("Function", 31002, "read_refused")]
     [InlineData("Connection", 20011, "read_refused")]
-    [InlineData("Cable", 20011, "read_refused")]
+    [InlineData("Cable", 20011, "value")]
+    [InlineData("Cable", 2002, "read_refused")]
     [InlineData("TerminalStrip", 20011, "value")]
     [InlineData("UnknownFunctionSubtype", 20011, "read_refused")]
     public void Read_ResolvedDictionaryType_ClassifiesBeforeAnyPropertyGetter(string objectType, int id, string status)

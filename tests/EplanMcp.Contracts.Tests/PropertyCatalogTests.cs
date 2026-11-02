@@ -7,6 +7,36 @@ namespace EplanMcp.Contracts.Tests;
 [Trait("Size", "Small")]
 public sealed class PropertyCatalogTests
 {
+    [Theory]
+    [InlineData("Function", 1140, "FunctionBase")]
+    [InlineData("Terminal", 1240, "FunctionBase")]
+    [InlineData("Cable", 1340, "FunctionBase")]
+    [InlineData("Page", 1540, "Page")]
+    public void Lookup_PropertyListInheritance_ResolvesIdAndFormalName(string objectType, int id, string declaringType)
+    {
+        PropertyDictionaryEntry entry = Assert.IsType<PropertyDictionaryEntry>(PropertyCatalog.Find(objectType, id));
+        Assert.Equal(declaringType, entry.ObjectType);
+        Assert.Same(entry, PropertyCatalog.Find(objectType, entry.PropertyName));
+        Assert.Null(PropertyCatalog.ReadRefusal(objectType, id));
+        Assert.Same(entry, Assert.Single(PropertyCatalog.ForType(objectType), e => e.PropertyId == id));
+        Assert.DoesNotContain(PropertyWriteWhitelist.Entries.Keys, k => k.PropertyId == id);
+    }
+
+    [Fact]
+    public void Lookup_BaseExclusionsAndNearestDeclarations_ArePreserved()
+    {
+        Assert.Equal("user_metadata", PropertyCatalog.ReadRefusal("Function", 2002));
+        Assert.Equal("Connection3D", PropertyCatalog.Find("Connection3D", 31159)!.ObjectType);
+        Assert.Equal("obsolete", PropertyCatalog.ReadRefusal("Connection3D", 31159));
+        Assert.Equal(31159, PropertyCatalog.Find("Connection3D", "CONNECTION3D_BUNDLE_WIRE_INDEX")!.PropertyId);
+        Assert.Same(PropertyCatalog.Entries.Single(e => e.ObjectType == "Page" && e.PropertyId == 1140),
+            PropertyCatalog.Find("Page", 1140));
+        Assert.Equal("unreviewed", PropertyCatalog.ReadRefusal("Function", 1540));
+        Assert.Equal("unreviewed", PropertyCatalog.ReadRefusal("Function", int.MaxValue));
+        Assert.Equal("unreviewed", PropertyCatalog.ReadRefusal("Page", int.MaxValue));
+        Assert.Equal("unreviewed", PropertyCatalog.ReadRefusal("Unknown", 1140));
+    }
+
     [Fact]
     public void EmbeddedCatalog_IncludesUnknownIdsWithoutInventingConstants()
     {

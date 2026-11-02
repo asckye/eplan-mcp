@@ -11,6 +11,21 @@ public sealed class PropertyAddressValidationTests
     private const string At = "/queries/0/properties/0";
 
     [Theory]
+    [InlineData("Function", "{\"property_id\":1140}", 1140)]
+    [InlineData("Function", "{\"property_name\":\"DESIGNATION_FULLPLANT_WITHPREFIX\"}", 1140)]
+    [InlineData("Page", "{\"property_id\":1540}", 1540)]
+    [InlineData("Page", "{\"property_name\":\"DESIGNATION_FULLDOCTYPE_WITHPREFIX\"}", 1540)]
+    public void Selector_StructureProperty_UsesTheSameInheritedLookupAsRead(string objectType, string json, int id)
+    {
+        var violations = new List<PropertyViolation>();
+
+        PropertyDictionaryEntry? entry = PropertyAddressValidation.Selector(JToken.Parse(json), objectType, At, violations);
+
+        Assert.Empty(violations);
+        Assert.Equal(id, entry!.PropertyId);
+    }
+
+    [Theory]
     [InlineData("{\"property_id\":20011}")]
     [InlineData("{\"property_name\":\"FUNC_TEXT\"}")]
     [InlineData("{\"property_name\":\"FUNC_TEXT\",\"index\":-2147483648}")]

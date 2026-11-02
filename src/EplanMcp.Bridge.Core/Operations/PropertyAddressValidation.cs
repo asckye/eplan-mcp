@@ -13,7 +13,7 @@ public static class PropertyAddressValidation
     private static readonly string[] _locatorFields = ["project", "kind", "type", "oid", "name", "page", "category", "pos"];
     private static readonly string[] _locatorChecks = ["name", "page", "category", "pos"];
 
-    /// <summary>Resolves only formal names on the exact dictionary type; classification precedes any value access.</summary>
+    /// <summary>Resolves IDs and formal names through catalog-declared base lists; classification precedes any value access.</summary>
     public static PropertyDictionaryEntry? Selector(JToken? input, string objectType, string path, ICollection<PropertyViolation> violations)
     {
         int before = violations.Count;

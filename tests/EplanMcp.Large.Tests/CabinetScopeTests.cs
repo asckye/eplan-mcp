@@ -11,6 +11,8 @@ namespace EplanMcp.Large.Tests;
 public sealed class CabinetScopeTests(LiveEplan eplan)
 {
     private static readonly (int Id, string Marker)[] _properties = [(1140, "="), (1240, "+"), (1540, "&"), (1340, "=="), (1740, "++"), (1640, "#")];
+    // The document type (&, 1540) is a page structure; function property lists do not declare it.
+    private static readonly (int Id, string Marker)[] _functionProperties = [.. _properties.Where(p => p.Id != 1540)];
 
     [Fact]
     public async Task CabinetOf_SampleDesignations_MatchesNativeStructureProperties()
@@ -24,7 +26,7 @@ public sealed class CabinetScopeTests(LiveEplan eplan)
 
         foreach (SnapshotPage page in sample.Snapshot.Pages)
         {
-            await CompareAsync(page.Name, new PropertyTarget(page: page.Name));
+            await CompareAsync(page.Name, new PropertyTarget(page: page.Name), _properties);
         }
 
         // Complete plan.functions evidence includes page-less functions, independent of page membership.
@@ -39,7 +41,7 @@ public sealed class CabinetScopeTests(LiveEplan eplan)
                 Oid = function.Oid,
                 Name = function.Name,
                 Page = function.Page,
-            }));
+            }), _functionProperties);
         }
 
         Assert.Contains("+A1", locations);
@@ -48,11 +50,11 @@ public sealed class CabinetScopeTests(LiveEplan eplan)
         Assert.True(proven >= sample.Snapshot.Pages.Count);
         TestContext.Current.TestOutputHelper?.WriteLine($"Native structure comparison: {proven} proven, {unproven} denied; {sample.Functions.Count(f => f.Page is null)} page-less functions inventoried.");
 
-        async Task CompareAsync(string designation, PropertyTarget target)
+        async Task CompareAsync(string designation, PropertyTarget target, (int Id, string Marker)[] properties)
         {
-            List<PropertyReadRow> rows = await LiveProperties.ReadAsync(bridge, LivePropertyObjects.Args(eplan, target, [.. _properties.Select(p => p.Id)]));
-            Assert.Equal(_properties.Select(p => p.Id), rows.Select(r => r.PropertyId));
-            Assert.All(rows, r => Assert.True(r.Status is "value" or "empty" or "not_applicable", $"Structure property {r.PropertyId}: {r.Status}."));
+            List<PropertyReadRow> rows = await LiveProperties.ReadAsync(bridge, LivePropertyObjects.Args(eplan, target, [.. properties.Select(p => p.Id)]));
+            Assert.Equal(properties.Select(p => p.Id), rows.Select(r => r.PropertyId));
+            Assert.All(rows, r => Assert.True(r.Status is "value" or "empty" or "not_applicable", $"Structure property {r.PropertyId}: {r.Status} ({r.Reason})."));
             IReadOnlyDictionary<string, string>? segments = CabinetScopeResolver.ParseDesignation(designation);
             if (segments is null)
             {
@@ -65,7 +67,7 @@ public sealed class CabinetScopeTests(LiveEplan eplan)
             for (int i = 0; i < rows.Count; i++)
             {
                 string? expected = rows[i].Status == "value" ? rows[i].Value?.Text ?? rows[i].Display : null;
-                Assert.Equal(string.IsNullOrEmpty(expected) ? null : expected, segments.GetValueOrDefault(_properties[i].Marker));
+                Assert.Equal(string.IsNullOrEmpty(expected) ? null : expected, segments.GetValueOrDefault(properties[i].Marker));
             }
 
             string? location = rows[1].Status == "value" ? rows[1].Value?.Text ?? rows[1].Display : null;

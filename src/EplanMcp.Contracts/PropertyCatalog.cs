@@ -17,13 +17,43 @@ public static class PropertyCatalog
     private static readonly Dictionary<(string, string), PropertyDictionaryEntry> _byName = Entries
         .ToDictionary(e => (e.ObjectType, e.PropertyName));
 
-    /// <summary>Exact object/ID lookup; matching an ID on another object type grants nothing.</summary>
+    /// <summary>Looks up an ID on the object's property list, then its catalog-declared base lists.</summary>
     public static PropertyDictionaryEntry? Find(string objectType, int propertyId) =>
-        _byId.TryGetValue((objectType, propertyId), out PropertyDictionaryEntry? entry) ? entry : null;
+        Find(objectType, propertyId, _byId);
 
-    /// <summary>Exact, case-sensitive formal-name lookup; no localized, fuzzy or custom identifiers.</summary>
+    /// <summary>Case-sensitive formal-name lookup through base property lists; no localized, fuzzy or custom identifiers.</summary>
     public static PropertyDictionaryEntry? Find(string objectType, string propertyName) =>
-        _byName.TryGetValue((objectType, propertyName), out PropertyDictionaryEntry? entry) ? entry : null;
+        Find(objectType, propertyName, _byName);
+
+    /// <summary>Public-ID rows from the object's property list and its bases, preferring the nearest declaration.</summary>
+    public static IEnumerable<PropertyDictionaryEntry> ForType(string objectType) => ObjectTypes(objectType)
+        .SelectMany(type => Entries.Where(e => e.ObjectType == type && e.PropertyId.HasValue))
+        .GroupBy(e => e.PropertyId).Select(g => g.First());
+
+    private static PropertyDictionaryEntry? Find<T>(string objectType, T key,
+        Dictionary<(string, T), PropertyDictionaryEntry> entries)
+    {
+        foreach (string type in ObjectTypes(objectType))
+        {
+            if (entries.TryGetValue((type, key), out PropertyDictionaryEntry? entry))
+            {
+                return entry;
+            }
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> ObjectTypes(string objectType)
+    {
+        // A60: object kinds resolve to their property list; inheritance comes from catalog/types.jsonl.
+        for (string? type = objectType; type is not null;)
+        {
+            yield return type;
+            string dictionary = ObjectReadTypes.DictionaryType(type);
+            type = ObjectReadTypes.BaseDictionaryType(type) ?? (dictionary == type ? null : dictionary);
+        }
+    }
 
     /// <summary>Call before any value getter, including display/texts/schema-instance reads. Unknown IDs fail closed.</summary>
     public static string? ReadRefusal(string objectType, int propertyId) => propertyId == 2000

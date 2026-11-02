@@ -47,7 +47,7 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
             Detailed = args.Detailed,
             SelectorOffset = args.Offset,
             IndexOffset = args.IndexOffset,
-            Properties = PropertyCatalog.Entries.Where(e => e.ObjectType == ObjectReadTypes.DictionaryType(args.ObjectType) && e.PropertyId.HasValue)
+            Properties = PropertyCatalog.ForType(ObjectReadTypes.DictionaryType(args.ObjectType))
                 .OrderBy(e => e.PropertyId).Select(e => new PropertySelector(propertyId: e.PropertyId)).ToList(),
         };
         if (args.Offset >= read.Properties.Count)

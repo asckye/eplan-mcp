@@ -7,6 +7,19 @@ namespace EplanMcp.Coverage.Tests;
 public sealed class ObjectKindGeneratorTests
 {
     private const string Prefix = "Eplan.EplApi.DataModel.";
+
+    [Fact]
+    public void PropertyListBases_UsesCatalogListInheritanceAndStableOrdering()
+    {
+        JsonElement[] types = [Type("Function", "StorableObject"), Type("FunctionPropertyList", "FunctionBasePropertyList"),
+            Type("FunctionBasePropertyList", "SymbolReferencePropertyList"), Type("PagePropertyList", "DocumentBasePropertyList"),
+            Type("StorableObjectPropertyList", "UniversalPropertyList"), Type("EObjects.CablePropertyListComplete", "EObjects.CablePropertyList")];
+
+        string result = ObjectKindGenerator.PropertyListBases(types);
+
+        Assert.Equal(result, ObjectKindGenerator.PropertyListBases(types.Reverse()));
+        Assert.Equal("\"FunctionBase\" => \"SymbolReference\", \"Function\" => \"FunctionBase\", \"Page\" => \"DocumentBase\",", result);
+    }
     [Fact]
     public void LifecycleEnumerationUnionsSourcesOnceAndUsesOneCanonicalKindPerNativeType()
     {

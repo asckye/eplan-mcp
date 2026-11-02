@@ -33,8 +33,19 @@ public sealed class SymbolSearchTests(LiveEplan eplan)
         } while (cursor is not null);
         Assert.Equal([0, 1, 2, 3], variants);
 
-        JsonElement coil = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = eplan.ProjectPath, ["library"] = "IEC_symbol", ["name_contains"] = "K", ["kind"] = "function" });
-        Assert.Contains(coil.GetProperty("symbols").EnumerateArray(), symbol => symbol.GetProperty("name").GetString() == "K");
+        // Since 2026-10-30 the text filter also matches descriptions, so the plain K coil may be on a later page.
+        var coils = new List<string>();
+        string? next = null;
+        do
+        {
+            var args = new Dictionary<string, object?> { ["project"] = eplan.ProjectPath, ["library"] = "IEC_symbol", ["name_contains"] = "K", ["kind"] = "function", ["limit"] = 200 };
+            if (next is not null)
+            { args["cursor"] = next; }
+            JsonElement page = await eplan.CallAsync("eplan_symbol_search", args);
+            coils.AddRange(page.GetProperty("symbols").EnumerateArray().Select(s => s.GetProperty("name").GetString()!));
+            next = page.GetProperty("nextCursor").GetString();
+        } while (next is not null);
+        Assert.Contains("K", coils);
         JsonElement empty = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = eplan.ProjectPath, ["library"] = "missing-library" });
         Assert.Empty(empty.GetProperty("symbols").EnumerateArray());
         Assert.Equal(before.OrderBy(p => p.Key, StringComparer.Ordinal), NoSideEffectTests.ProjectFiles(eplan.ProjectPath, withUserData: true).OrderBy(p => p.Key, StringComparer.Ordinal));

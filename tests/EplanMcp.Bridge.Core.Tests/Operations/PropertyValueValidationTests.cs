@@ -13,6 +13,19 @@ public sealed class PropertyValueValidationTests
     private const string At = "/changes/3";
     private const string ValuePath = At + "/value";
 
+    [Theory]
+    [InlineData("Function", 1140)]
+    [InlineData("Page", 1540)]
+    public void ShippedEntry_ReadableStructureProperty_DoesNotGrantWritePermission(string objectType, int id)
+    {
+        var violations = new List<PropertyViolation>();
+        Assert.Null(PropertyCatalog.ReadRefusal(objectType, id));
+
+        Assert.Null(PropertyValueValidation.ShippedEntry(2026, objectType, id, "", At, violations));
+
+        Assert.Equal(ErrorReason.PolicyDenied, Assert.Single(violations).Reason);
+    }
+
     private static PropertyWriteEntry Entry(string type = "text") => new()
     {
         EplanMajorVersion = 2026,

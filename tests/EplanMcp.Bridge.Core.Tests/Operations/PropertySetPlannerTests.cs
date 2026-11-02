@@ -8,6 +8,19 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class PropertySetPlannerTests
 {
     internal const string Project = "resolved-project";
+
+    [Fact]
+    public void Plan_ReadableInheritedProperty_RemainsOutsideWriteCandidates()
+    {
+        FakePropertyReadAdapter adapter = Adapter();
+        PropertySetChange change = Change();
+        change.Property = new PropertySelector(propertyId: 1140);
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Plan(adapter, change));
+
+        Assert.Equal(ErrorReason.PolicyDenied, error.Error.Reason);
+        Assert.Equal(0, adapter.Opens);
+    }
     internal static SnapshotObject Function(long oid = 1, bool main = true) => new()
     {
         Kind = "function",

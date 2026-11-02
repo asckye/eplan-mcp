@@ -7,6 +7,66 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class PropertyReadOperationTests
 {
+    [Theory]
+    [InlineData("Function")]
+    [InlineData("Page")]
+    public void Read_SampleStructurePropertyBatch_ReadsDeclaredAndInheritedIds(string objectType)
+    {
+        int[] ids = [1140, 1240, 1540, 1340, 1740, 1640];
+        var adapter = new FakePropertyReadAdapter { ObjectType = objectType };
+        foreach (int id in ids)
+        {
+            adapter.Properties.Add(id, new FakeProperty { Stored = "=GAA" });
+        }
+
+        PropertyReadArgs args = Args(ids);
+        args.Target = objectType == "Page" ? new PropertyTarget(page: "=GAA/1") : new PropertyTarget(locator: new ObjectLocator
+        {
+            Project = args.ProjectPath,
+            Kind = "function",
+            Type = 17,
+            Oid = 42,
+            Name = "=GAA+A1-FC1",
+        });
+
+        PropertyReadData data = Read(adapter, args);
+
+        Assert.Equal(ids, data.Items.Select(r => r.PropertyId));
+        foreach (PropertyReadRow row in data.Items)
+        {
+            if (objectType == "Function" && row.PropertyId == 1540)
+            {
+                Assert.Equal("read_refused", row.Status);
+                Assert.Equal("unreviewed", row.Reason);
+                Assert.DoesNotContain(adapter.ValueRequests, r => r.Id == 1540);
+            }
+            else
+            {
+                Assert.Equal("value", row.Status);
+                Assert.Null(row.Reason);
+                Assert.Equal("=GAA", row.Value!.Text);
+            }
+        }
+
+        adapter.AssertDisposed();
+    }
+
+    [Theory]
+    [InlineData("Function")]
+    [InlineData("Page")]
+    public void Read_UnknownId_StaysUnreviewedWithoutOpeningProperty(string objectType)
+    {
+        var adapter = new FakePropertyReadAdapter { ObjectType = objectType };
+        adapter.Properties.Add(int.MaxValue, new FakeProperty());
+
+        PropertyReadRow row = Assert.Single(Read(adapter, Args(int.MaxValue)).Items);
+
+        Assert.Equal("read_refused", row.Status);
+        Assert.Equal("unreviewed", row.Reason);
+        Assert.Equal(0, adapter.PropertyOpens);
+        adapter.AssertDisposed();
+    }
+
     internal static PropertyReadArgs Args(params int[] ids) => new()
     {
         ProjectPath = "resolved-project",
