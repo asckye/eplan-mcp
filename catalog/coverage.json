@@ -66,12 +66,12 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 1259,
-      "byTools": 1251,
-      "partial": 89,
-      "automatedTest": 1251,
+      "implemented": 1340,
+      "byTools": 1332,
+      "partial": 170,
+      "automatedTest": 1332,
       "liveVerified": 171,
-      "envBlocked": 76,
+      "envBlocked": 72,
       "undocumented": 134
     },
     "operation.method": {
@@ -102,12 +102,12 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 788,
-      "byTools": 787,
-      "partial": 9,
-      "automatedTest": 787,
+      "implemented": 869,
+      "byTools": 868,
+      "partial": 90,
+      "automatedTest": 868,
       "liveVerified": 95,
-      "envBlocked": 43,
+      "envBlocked": 39,
       "undocumented": 68
     }
   },
@@ -139,13 +139,13 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 509,
+      "implemented": 541,
       "liveVerified": 91
     },
     {
       "scope": "Eplan.EplApi.DataModel.E3D",
       "denominator": 368,
-      "implemented": 127,
+      "implemented": 148,
       "liveVerified": 0
     },
     {
@@ -157,7 +157,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 227,
+      "implemented": 245,
       "liveVerified": 10
     },
     {
@@ -169,13 +169,13 @@
     {
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
-      "implemented": 34,
+      "implemented": 38,
       "liveVerified": 8
     },
     {
       "scope": "Eplan.EplApi.DataModel.Planning",
       "denominator": 122,
-      "implemented": 46,
+      "implemented": 50,
       "liveVerified": 0
     },
     {
@@ -187,7 +187,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Topology",
       "denominator": 17,
-      "implemented": 7,
+      "implemented": 9,
       "liveVerified": 0
     },
     {
@@ -1730,8 +1730,8 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 380,
-      "operationGroups": 218,
+      "apiIds": 461,
+      "operationGroups": 299,
       "dataDictionary": 63,
       "dependencies": 160,
       "actions": 0,
@@ -2452,8 +2452,8 @@
         "project.get",
         "property.read"
       ],
-      "apiIds": 380,
-      "operationGroups": 218,
+      "apiIds": 381,
+      "operationGroups": 219,
       "dataDictionary": 1,
       "dependencies": 160,
       "actions": 0,
@@ -4796,6 +4796,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ArticlePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ArticleReference.Count",
       "layer": "operation",
       "status": "live_verified",
@@ -4891,6 +4900,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.BlockPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -5310,6 +5328,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionPointPosition.AdditionalLength",
       "layer": "operation",
       "status": "automated_test",
@@ -5562,6 +5589,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -6288,6 +6324,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DeviceGroup.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -6297,6 +6342,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DeviceGroupPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -6322,6 +6376,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DimensionGroup.DimensionType",
       "layer": "operation",
       "status": "automated_test",
@@ -6343,6 +6406,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DimensionGroupPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DocumentBase.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -6352,6 +6424,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.DocumentBasePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -6493,6 +6574,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DynamicConnectionLinePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Area.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -6502,6 +6592,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.AreaPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -6526,6 +6625,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.AuxiliaryLinePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.BarBase.Length",
       "layer": "operation",
       "status": "automated_test",
@@ -6544,6 +6652,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.BarBasePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -6676,6 +6793,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.BusBarSystem.BarCount",
       "layer": "operation",
       "status": "automated_test",
@@ -6724,6 +6850,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.BusBarSystemPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Cabinet.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -6736,6 +6871,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.CabinetPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Component.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -6745,6 +6889,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.ComponentPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -6841,6 +6994,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.CopperBundle.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -6859,6 +7021,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -6928,6 +7099,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.DrillingPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Duct.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -6937,6 +7117,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.DuctPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -7039,6 +7228,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -7169,6 +7367,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.MountingPanel.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -7178,6 +7385,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.MountingPanelPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -7199,6 +7415,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.MountingRailPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -7505,6 +7730,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.PlacementArea.MoveRelative",
       "layer": "operation",
       "status": "automated_test",
@@ -7616,6 +7850,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.PlanePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingAccessory.Diameter",
       "layer": "operation",
       "status": "automated_test",
@@ -7637,6 +7880,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingAccessoryPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingHose.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -7646,6 +7898,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingHosePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -7688,6 +7949,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingSegmentPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingSpline.GeometricalLength",
       "layer": "operation",
       "status": "automated_test",
@@ -7706,6 +7976,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingSplinePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -8755,6 +9034,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.FunctionDefinition.ConnectionPoints",
       "layer": "operation",
       "status": "automated_test",
@@ -9112,6 +9400,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Comment.Answer",
       "layer": "operation",
       "status": "automated_test",
@@ -9345,6 +9642,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.DimensionCalculated",
       "layer": "operation",
       "status": "automated_test",
@@ -9543,6 +9849,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -9788,6 +10103,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLink.Comment",
       "layer": "operation",
       "status": "automated_test",
@@ -9815,6 +10139,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -9890,6 +10223,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -9976,6 +10318,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.LockedMountingArea.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -9985,6 +10336,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.LockedMountingAreaPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -10266,6 +10626,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLine.Closed",
       "layer": "operation",
       "status": "automated_test",
@@ -10329,6 +10698,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLinePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -10480,6 +10858,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Rectangle.Angle",
       "layer": "operation",
       "status": "automated_test",
@@ -10593,6 +10980,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Shielding.Height",
       "layer": "operation",
       "status": "automated_test",
@@ -10632,6 +11028,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ShieldingPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Spline.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -10641,6 +11046,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.SplinePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -11036,6 +11450,24 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.TopologyLine.IsDirectLine",
       "layer": "operation",
       "status": "automated_test",
@@ -11054,6 +11486,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.TopologyLinePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -11204,6 +11645,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Group.DeepUnGroup",
       "layer": "operation",
       "status": "automated_test",
@@ -11293,6 +11743,15 @@
       "partial": true,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.GroupPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -11511,6 +11970,24 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.LocationBoxPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.LocationPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MacroBox.AddReference",
       "layer": "operation",
       "status": "automated_test",
@@ -11631,6 +12108,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MacroBoxPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MacroEntry.MacroName",
       "layer": "operation",
       "status": "automated_test",
@@ -11712,6 +12198,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibraryPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.PlotFrame.Name",
       "layer": "operation",
       "status": "live_verified",
@@ -11769,6 +12264,15 @@
         "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.PlotFramePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -11894,6 +12398,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolLibraryPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolPropertyList.Exists",
       "layer": "operation",
       "status": "automated_test",
@@ -11985,6 +12498,15 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolVariantPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -12138,6 +12660,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MergedConnection.FirstWinner",
       "layer": "operation",
       "status": "automated_test",
@@ -12228,6 +12759,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.NetDefinitionPointPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Option.Active",
       "layer": "operation",
       "status": "automated_test",
@@ -12309,6 +12849,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.OptionFragmentPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.OptionGroup.AddOption",
       "layer": "operation",
       "status": "automated_test",
@@ -12336,6 +12885,24 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.OptionGroupPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.OptionPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -13032,6 +13599,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PipingDefinitionPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.PlaceHolderText.ActionName",
       "layer": "operation",
       "status": "automated_test",
@@ -13086,6 +13662,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PlaceHolderTextPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -13241,6 +13826,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PlacementPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -13481,6 +14075,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentDefinition.GetWriteProtectionFlagSet",
       "layer": "operation",
       "status": "automated_test",
@@ -13556,6 +14159,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentPlacement.HasPolylineAsLogicalArea",
       "layer": "operation",
       "status": "automated_test",
@@ -13592,6 +14204,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -13658,6 +14279,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentTemplatePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -13733,6 +14363,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PlcIOPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.PotentialDefinition.PotentialName",
       "layer": "operation",
       "status": "automated_test",
@@ -13760,6 +14399,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -14642,6 +15290,16 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get",
+        "eplan_property_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ProjectSchemeSetting.Init",
       "layer": "operation",
       "status": "live_verified",
@@ -15195,6 +15853,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ReportBlock.Action",
       "layer": "operation",
       "status": "automated_test",
@@ -15342,6 +16009,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ReportBlockReferencePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -15785,6 +16461,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.StrandInterConnector.Properties",
       "layer": "operation",
       "status": "automated_test",
@@ -15794,6 +16479,15 @@
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.StrandInterConnectorPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -16022,6 +16716,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReferencePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Topology.RoutedConnection.ClearRoutingPath",
       "layer": "operation",
       "status": "automated_test",
@@ -16061,6 +16764,15 @@
       ]
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
+      ]
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Topology.Segment.EndSymbolReference",
       "layer": "operation",
       "status": "automated_test",
@@ -16091,6 +16803,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -16460,6 +17181,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ViewPartPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_object_get"
       ]
     },
     {
@@ -18239,6 +18969,981 @@
       "status": "env_blocked",
       "condition": "开发机授权中 Preplanning 不可用",
       "source": "api-notes A24"
+    }
+  ],
+  "reachedByTool": [
+    {
+      "match": "O:Eplan.EplApi.DataModel.ArticlePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.ArticlePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:258"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.BlockPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.BlockPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:261"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:276"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:277"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:281"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.DeviceGroupPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.DeviceGroupPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:282"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:283"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.DimensionGroupPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.DimensionGroupPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:285"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.DocumentBasePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.DocumentBasePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:287"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.DynamicConnectionLinePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.DynamicConnectionLinePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:290"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.AreaPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.AreaPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:257"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.AuxiliaryLinePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.AuxiliaryLinePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:259"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.BarBasePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.BarBasePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:260"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:263"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.BusBarSystemPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.BusBarSystemPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:264"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.CabinetPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.CabinetPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:266"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.ComponentPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.ComponentPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:273"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:275"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:279"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.DrillingPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.DrillingPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:288"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.DuctPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.DuctPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:289"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:292"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:302"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.MountingPanelPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.MountingPanelPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:313"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.MountingRailPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.MountingRailPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:314"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:330"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.PlanePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.PlanePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:331"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.RoutingAccessoryPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.RoutingAccessoryPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:347"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.RoutingHosePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.RoutingHosePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:348"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.RoutingSegmentPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.RoutingSegmentPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:349"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.E3D.RoutingSplinePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.E3D.RoutingSplinePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:350"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.FunctionBasePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:293"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:256"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:284"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:286"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:278"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:300"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:301"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:304"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.LockedMountingAreaPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.LockedMountingAreaPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:307"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:326"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.PolyLinePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.PolyLinePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:338"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:342"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:343"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.ShieldingPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.ShieldingPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:356"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.SplinePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.SplinePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:357"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:369"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:368"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.TopologyLinePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.TopologyLinePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:370"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:373"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.GroupPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.GroupPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:297"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.LocationBoxPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.LocationBoxPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:306"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.LocationPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.LocationPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:305"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.MacroBoxPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.MacroBoxPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:308"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibraryPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibraryPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:295"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.MasterData.PlotFramePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.MasterData.PlotFramePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:335"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.MasterData.SymbolLibraryPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolLibraryPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:363"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.MasterData.SymbolVariantPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.MasterData.SymbolVariantPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:365"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:310"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.NetDefinitionPointPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.NetDefinitionPointPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:315"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.OptionFragmentPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.OptionFragmentPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:318"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.OptionGroupPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.OptionGroupPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:319"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.OptionPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.OptionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:316"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.PipingDefinitionPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.PipingDefinitionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:325"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.PlaceHolderTextPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.PlaceHolderTextPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:328"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.PlacementPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.PlacementPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:329"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:333"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:352"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:353"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Planning.SegmentTemplatePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Planning.SegmentTemplatePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:354"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.PlcIOPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.PlcIOPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:334"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:339"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.ProjectPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.ProjectPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get",
+        "eplan_property_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:340"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:341"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.ReportBlockReferencePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.ReportBlockReferencePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:345"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:359"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.StrandInterConnectorPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.StrandInterConnectorPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:360"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.SymbolReferencePropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.SymbolReferencePropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:364"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:346"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:351"
+    },
+    {
+      "match": "O:Eplan.EplApi.DataModel.ViewPartPropertyList.Property",
+      "members": [
+        "P:Eplan.EplApi.DataModel.ViewPartPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"
+      ],
+      "tools": [
+        "eplan_object_get"
+      ],
+      "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
+      "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
+      "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:372"
     }
   ],
   "availability": [

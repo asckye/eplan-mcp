@@ -8,6 +8,7 @@
 - C 级方法选择：read 124 组，write 202 组；排除（按签名）：lifecycle_or_creation 313，external_path_parameter 170，catalog:internal 168，unsupported_return 109，settings_write 92，unsupported_parameter 79，settings_or_scheme_parameter 72，catalog:banned_symbol 62，masterdata_or_parts_management 52，no_public_default_constructor 47，array_or_params 42，shared_interactive_state 39，catalog:deprecated 38，printer_parameter 32，generic_or_collection_parameter 30，abstract_service 29，static_or_nonpublic 24，catalog:not_applicable 14，catalog:deprecated: obsolete_attribute 14，entry_type_excluded 10，external_or_application_effect 6，application_or_session_state 5，unsupported_settings_read 5，ref_out 4，unscoped_object_identifier 4，static_not_project_scoped 4，database_parameter 4，external_destination 3，catalog:internal: native_signature 1，owns_transaction 1。
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
 - 通用读取计数：数据字典类型的 kind 在 ObjectReadTypes 中 supported 时，也经 eplan_object_find / eplan_object_get 计为 implemented；通用路径有 Small/Medium 测试时计为 automated_test；该路径的 live_verified 仅限生成器中按 api-notes A60/A62 明确列出的已读 kind，不由支持范围推定，未支持类型保留原原因。
+- 扫描漏记的可执行别名仅按 overlay 的 `reached-by-tool` 逐组、逐重载补入；必须列出工具、实际调用和接收列表的代码位置，以及扫描已识别的等价组。本轮只补各列表打开父值必经的按 ID getter，不向每个列表推定带索引重载、命名属性 ID、枚举 getter、转换 getter 或 setter。核对说明见 [操作层映射复核](operation-mapping-review.md)。
 - 状态（设计文档第 4 节），每一级都包含更高的级别：implemented 表示 Bridge 中有代码到达它，经 MCP 工具，或只经插件的基础设施（启动、调度、授权检查）；automated_test 表示到达它的某个工具有 Small 或 Medium 测试，或它的 Bridge 操作有 Bridge.Core 测试（这些测试用假的 EPLAN，不执行 EPLAN 成员）；live_verified 表示这个工具还在 overlay 中有写明工具名、结果通过的实机记录（api-notes、规格或 Large 测试 README，带日期和版本）。另有 env_blocked（overlay 标为被环境挡住且没有实现）、excluded（目录的机械规则或 overlay 排除，不进入分母）、部分重载（重载组中只用到一部分重载）和无文档（不在 IntelliSense 中，仍在分母里，Q2）。
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
@@ -36,15 +37,15 @@ Bridge 共用到 2629 个 ID（方法 613，属性 843，类型 324，字段和�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 1259 / 4014（31.4%） | 1251 | 89 | 1251 / 4014（31.2%） | 171 / 4014（4.3%） | 76 | 134 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 1340 / 4014（33.4%） | 1332 | 170 | 1332 / 4014（33.2%） | 171 / 4014（4.3%） | 72 | 134 |
 | 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 471 / 1799（26.2%） | 464 | 80 | 464 / 1799（25.8%） | 76 / 1799（4.2%） | 33 | 66 |
-| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 788 / 2215（35.6%） | 787 | 9 | 787 / 2215（35.5%） | 95 / 2215（4.3%） | 43 | 68 |
+| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 869 / 2215（39.2%） | 868 | 90 | 868 / 2215（39.2%） | 95 / 2215（4.3%） | 39 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 63 / 68（92.6%） | 63 | 0 | 63 / 68（92.6%） | 16 / 68（23.5%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 7 / 137（5.1%） | 7 | 0 | 7 / 137（5.1%） | 1 / 137（0.7%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 7 / 97（7.2%） | 7 | 0 | 7 / 97（7.2%） | 1 / 97（1.0%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
-- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 1259 / 4342（29.0%）。
+- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 1340 / 4342（30.9%）。
 - 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 471 / 1799（26.2%），live_verified 76 / 1799（4.2%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 52 个，未过时的共 8585 个。
 - 依赖层：Bridge 用到 1235 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
@@ -57,15 +58,15 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 |---|---:|---:|---:|
 | `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 2 |
 | `Eplan.EplApi.Base` | 268 | 69 / 268（25.7%） | 17 |
-| `Eplan.EplApi.DataModel` | 1247 | 509 / 1247（40.8%） | 91 |
-| `Eplan.EplApi.DataModel.E3D` | 368 | 127 / 368（34.5%） | 0 |
+| `Eplan.EplApi.DataModel` | 1247 | 541 / 1247（43.4%） | 91 |
+| `Eplan.EplApi.DataModel.E3D` | 368 | 148 / 368（40.2%） | 0 |
 | `Eplan.EplApi.DataModel.EObjects` | 83 | 45 / 83（54.2%） | 6 |
-| `Eplan.EplApi.DataModel.Graphics` | 414 | 227 / 414（54.8%） | 10 |
+| `Eplan.EplApi.DataModel.Graphics` | 414 | 245 / 414（59.2%） | 10 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 |
-| `Eplan.EplApi.DataModel.MasterData` | 121 | 34 / 121（28.1%） | 8 |
-| `Eplan.EplApi.DataModel.Planning` | 122 | 46 / 122（37.7%） | 0 |
+| `Eplan.EplApi.DataModel.MasterData` | 121 | 38 / 121（31.4%） | 8 |
+| `Eplan.EplApi.DataModel.Planning` | 122 | 50 / 122（41.0%） | 0 |
 | `Eplan.EplApi.DataModel.Revisions` | 20 | 14 / 20（70.0%） | 0 |
-| `Eplan.EplApi.DataModel.Topology` | 17 | 7 / 17（41.2%） | 0 |
+| `Eplan.EplApi.DataModel.Topology` | 17 | 9 / 17（52.9%） | 0 |
 | `Eplan.EplApi.EServices` | 127 | 12 / 127（9.4%） | 6 |
 | `Eplan.EplApi.EServices.Ged` | 90 | 4 / 90（4.4%） | 0 |
 | `Eplan.EplApi.HEServices` | 417 | 132 / 417（31.7%） | 17 |
@@ -198,7 +199,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 1/0/4 | A4 | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
 | eplan_object_find | read | object.find<br>object.get<br>project.get | 380 | 218 | 63 | 160 | 0 | 2/1/6 | A57 A60 | — |
-| eplan_object_get | read | object.find<br>object.get<br>project.get | 380 | 218 | 63 | 160 | 0 | 1/1/2 | — | — |
+| eplan_object_get | read | object.find<br>object.get<br>project.get | 461 | 299 | 63 | 160 | 0 | 1/1/2 | — | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 0/3/0 | — | — |
 | eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_pack_import | write | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A35 | — |
@@ -228,7 +229,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_project_get | read | project.get | 56 | 30 | 0 | 26 | 0 | 5/3/6 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/8 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 79 | 36 | 2 | 41 | 0 | 0/1/1 | A11 A14 A25 A28 | — |
-| eplan_property_get | read | project.get<br>property.read | 380 | 218 | 1 | 160 | 0 | 2/2/2 | A36 A44 | — |
+| eplan_property_get | read | project.get<br>property.read | 381 | 219 | 1 | 160 | 0 | 2/2/2 | A36 A44 | — |
 | eplan_property_schema | read | — | 0 | 0 | 0 | 0 | 0 | 3/1/0 | — | — |
 | eplan_property_set | write | project.get<br>property.set.execute<br>property.set.plan | 419 | 236 | 1 | 180 | 0 | 2/1/1 | A36 A44 A48 | — |
 | eplan_report_update | write | report.update.execute<br>report.update.plan | 56 | 26 | 0 | 30 | 0 | 0/1/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
@@ -267,3 +268,90 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | `N:Eplan.EplApi.Gui` | excluded | gui | 负责人决定 Q3（2026-10-21） |
 | `N:Eplan.EplApi.Scripting` | excluded | unsafe | ADR-0005；负责人决定 Q3（2026-10-21） |
 | `N:Eplan.EplApi.DataModel.Planning` | env_blocked | 开发机授权中 Preplanning 不可用 | api-notes A24 |
+
+### 扫描漏记、已有工具执行的等价重载
+共 81 组、81 个读取重载；完整成员 ID 在 overlay 的 members 中。下表的 via 是扫描已识别的组；source 是调用，receiver 是具体列表的取得位置。此表不增加实机验证证据。
+
+| 组 | 工具 | via | source | receiver |
+|---|---|---|---|---|
+| `O:Eplan.EplApi.DataModel.ArticlePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:258 |
+| `O:Eplan.EplApi.DataModel.BlockPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:261 |
+| `O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:276 |
+| `O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:277 |
+| `O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:281 |
+| `O:Eplan.EplApi.DataModel.DeviceGroupPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:282 |
+| `O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:283 |
+| `O:Eplan.EplApi.DataModel.DimensionGroupPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:285 |
+| `O:Eplan.EplApi.DataModel.DocumentBasePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:287 |
+| `O:Eplan.EplApi.DataModel.DynamicConnectionLinePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:290 |
+| `O:Eplan.EplApi.DataModel.E3D.AreaPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:257 |
+| `O:Eplan.EplApi.DataModel.E3D.AuxiliaryLinePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:259 |
+| `O:Eplan.EplApi.DataModel.E3D.BarBasePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:260 |
+| `O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:263 |
+| `O:Eplan.EplApi.DataModel.E3D.BusBarSystemPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:264 |
+| `O:Eplan.EplApi.DataModel.E3D.CabinetPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:266 |
+| `O:Eplan.EplApi.DataModel.E3D.ComponentPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:273 |
+| `O:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:275 |
+| `O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:279 |
+| `O:Eplan.EplApi.DataModel.E3D.DrillingPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:288 |
+| `O:Eplan.EplApi.DataModel.E3D.DuctPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:289 |
+| `O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:292 |
+| `O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:302 |
+| `O:Eplan.EplApi.DataModel.E3D.MountingPanelPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:313 |
+| `O:Eplan.EplApi.DataModel.E3D.MountingRailPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:314 |
+| `O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:330 |
+| `O:Eplan.EplApi.DataModel.E3D.PlanePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:331 |
+| `O:Eplan.EplApi.DataModel.E3D.RoutingAccessoryPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:347 |
+| `O:Eplan.EplApi.DataModel.E3D.RoutingHosePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:348 |
+| `O:Eplan.EplApi.DataModel.E3D.RoutingSegmentPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:349 |
+| `O:Eplan.EplApi.DataModel.E3D.RoutingSplinePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:350 |
+| `O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:293 |
+| `O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:256 |
+| `O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:284 |
+| `O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:286 |
+| `O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:278 |
+| `O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:300 |
+| `O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:301 |
+| `O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:304 |
+| `O:Eplan.EplApi.DataModel.Graphics.LockedMountingAreaPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:307 |
+| `O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:326 |
+| `O:Eplan.EplApi.DataModel.Graphics.PolyLinePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:338 |
+| `O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:342 |
+| `O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:343 |
+| `O:Eplan.EplApi.DataModel.Graphics.ShieldingPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:356 |
+| `O:Eplan.EplApi.DataModel.Graphics.SplinePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:357 |
+| `O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:369 |
+| `O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:368 |
+| `O:Eplan.EplApi.DataModel.Graphics.TopologyLinePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:370 |
+| `O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:373 |
+| `O:Eplan.EplApi.DataModel.GroupPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:297 |
+| `O:Eplan.EplApi.DataModel.LocationBoxPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:306 |
+| `O:Eplan.EplApi.DataModel.LocationPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:305 |
+| `O:Eplan.EplApi.DataModel.MacroBoxPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:308 |
+| `O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibraryPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:295 |
+| `O:Eplan.EplApi.DataModel.MasterData.PlotFramePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:335 |
+| `O:Eplan.EplApi.DataModel.MasterData.SymbolLibraryPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:363 |
+| `O:Eplan.EplApi.DataModel.MasterData.SymbolVariantPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:365 |
+| `O:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:310 |
+| `O:Eplan.EplApi.DataModel.NetDefinitionPointPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:315 |
+| `O:Eplan.EplApi.DataModel.OptionFragmentPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:318 |
+| `O:Eplan.EplApi.DataModel.OptionGroupPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:319 |
+| `O:Eplan.EplApi.DataModel.OptionPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:316 |
+| `O:Eplan.EplApi.DataModel.PipingDefinitionPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:325 |
+| `O:Eplan.EplApi.DataModel.PlaceHolderTextPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:328 |
+| `O:Eplan.EplApi.DataModel.PlacementPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:329 |
+| `O:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:333 |
+| `O:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:352 |
+| `O:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:353 |
+| `O:Eplan.EplApi.DataModel.Planning.SegmentTemplatePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:354 |
+| `O:Eplan.EplApi.DataModel.PlcIOPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:334 |
+| `O:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:339 |
+| `O:Eplan.EplApi.DataModel.ProjectPropertyList.Property` | eplan_object_get、eplan_property_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:340 |
+| `O:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:341 |
+| `O:Eplan.EplApi.DataModel.ReportBlockReferencePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:345 |
+| `O:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:359 |
+| `O:Eplan.EplApi.DataModel.StrandInterConnectorPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:360 |
+| `O:Eplan.EplApi.DataModel.SymbolReferencePropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:364 |
+| `O:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:346 |
+| `O:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:351 |
+| `O:Eplan.EplApi.DataModel.ViewPartPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:372 |
