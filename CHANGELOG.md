@@ -5,9 +5,6 @@
 
 ## [Unreleased]
 
-### Fixed
-- `doctor --offline` 在没有安装 EPLAN 的机器上（CI 运行器、冒烟检查）对 EPLAN 安装检查只给警告，不再以失败退出；普通 `doctor` 仍报失败。
-
 ## [0.4.1] - 2026-11-02
 
 - 按 A77 拒绝三个已使 EPLAN 崩溃的 API 写侧，保留 4014 分母并单列 `refused_unsafe`；批量验证跳过这些侧，失联时停止并暂停写入，导入时丢弃未实际观察的后续结果。
@@ -15,6 +12,7 @@
 - 修复 `eplan_api_try` 链式句柄分发覆盖设置文本的回归：以 Project 定位器读取 `Project.Settings` 仍返回字符串 `PROJECT`，设置列表和属性入口保持既有文本，其他类型的句柄与集合元素继续可用；补实际分发路径的 Small 回归，修复后 Large 待验。
 - 原生调用前检查只读与页上下文；全项目对象枚举跳过无效项并记录数量，写事务内捕获原生异常时记录带 correlation id 的 Warning。审批、暂停与回滚行为保持；2026-11-01 实机通过（`ApiTryTests` 10/10、`DevicePlaceTests` 8/8）。
 ### Fixed
+- `doctor --offline` 在没有安装 EPLAN 的机器上（CI 运行器、冒烟检查）对 EPLAN 安装检查只给警告，不再以失败退出；普通 `doctor` 仍报失败。
 - 读取属性时沿属性列表的继承链查找（例如 Function → FunctionBase），恢复设备结构标识（=、+、== 等）的读取；校验与写入规划使用同一分类，写入白名单不变。2026-11-02 实机通过（`CabinetScopeTests`、`ObjectReadTests` 14/14、属性读取 22 项）。
 - 带电缆定义的 `eplan_connection_create` 时限放宽到 180 秒（密集页面上一批电缆需 6 次提交和多次整页读回，实测 66.5 秒）；布局警告最多保留 20 条并注明其余数量，避免把芯线读回等核对字段挤出结果。
 - 布局读取与 R2 排除 DynamicConnectionLine 的符号身份，修复 BAT 引脚接在线端时因外框交叠被误拒绝；保留真实符号重叠拒绝及已有 R3/R4 线段检查；2026-11-02 实机通过（`PageReviewTests` 8 项通过）。
