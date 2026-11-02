@@ -34,10 +34,13 @@ internal sealed partial class EplanConnectionCreator
 #pragma warning restore CA2000
                 cable.Create(target, variant, new PointD(points[0][0], points[0][1]), new PointD(points[1][0], points[1][1]));
                 cable.Name = (string?)definition["name"] ?? (string)definition["designation"]!;
+                EplanVisibleNames.Adjust(target, cable);
                 using FunctionPropertyList properties = cable.Properties;
                 properties[(Properties.Function)20040] = (string)definition["type_text"]!;
                 properties[(Properties.Function)20042] = (string)definition["core_count"]!;
                 properties[(Properties.Function)20043] = (string)definition["cross_section_mm2"]!;
+                if ((string?)definition["voltage"] is { } voltage)
+                { properties[(Properties.Function)20044] = voltage; }
             }
         };
     }
@@ -58,10 +61,10 @@ internal sealed partial class EplanConnectionCreator
             double[] expectedPoints = [Math.Min(points[0][0], points[1][0]), Math.Min(points[0][1], points[1][1]), Math.Max(points[0][0], points[1][0]), Math.Max(points[0][1], points[1][1])];
             Check(actualPoints.SequenceEqual(expectedPoints), $"definition line points: expected {new JArray(expectedPoints)}; actual {new JArray(actualPoints)}");
             using FunctionPropertyList properties = cable.Properties;
-            foreach (int id in new[] { 20040, 20042, 20043 })
+            foreach (int id in definition["voltage"] is null ? new[] { 20040, 20042, 20043 } : [20040, 20042, 20043, 20044])
             {
                 using PropertyValue value = properties[(Properties.Function)id];
-                string field = id == 20040 ? "type_text" : id == 20042 ? "core_count" : "cross_section_mm2";
+                string field = id switch { 20040 => "type_text", 20042 => "core_count", 20043 => "cross_section_mm2", _ => "voltage" };
                 string? actual = value.IsEmpty ? null : value.ToString();
                 Check(id == 20043 ? SameSection(actual, (double)definition[field]!) : actual == (string)definition[field]!, $"{field}: expected '{definition[field]}'; actual '{actual ?? "<empty>"}'");
             }

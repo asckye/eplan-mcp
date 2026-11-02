@@ -85,6 +85,17 @@ public sealed class DevicePlaceInputTests
     }
 
     [Fact]
+    public void ConnectionDescriptions_NeedASymbolSourceAndBoundedText()
+    {
+        Assert.Contains(DevicePlaceInputs.Check(new DevicePlaceArgs { Project = "Line1", Part = "P", ConnectionDescriptions = ["DI a.0"] }, null), p => p.StartsWith("/connection_descriptions:", StringComparison.Ordinal));
+        var args = Symbol();
+        args.ConnectionDescriptions = ["A\n1"];
+        Assert.StartsWith("/connection_descriptions:", Assert.Single(DevicePlaceInputs.Check(args, null)), StringComparison.Ordinal);
+        args.ConnectionDescriptions = ["DI a.0"];
+        Assert.Empty(DevicePlaceInputs.Check(args, null));
+    }
+
+    [Fact]
     public void ConnectionDesignations_AreBoundedPlainText()
     {
         foreach (string? value in new[] { null, "", " ", "A\n1", new string('a', 65) })

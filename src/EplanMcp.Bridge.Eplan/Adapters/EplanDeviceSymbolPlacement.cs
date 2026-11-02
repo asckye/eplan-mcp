@@ -68,12 +68,19 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
             Require(function.IsMainFunction);
         }
         function.Location = new PointD(DrawingCoordinates.MillimetresToApi(args.X), DrawingCoordinates.MillimetresToApi(args.Y));
+        // A PLC point's default 20010 row shows the card ("-KF1"); ordinary devices show their tag through display_properties.
+        if (args.PlcConnectionPoint is not null)
+        { EplanVisibleNames.Adjust(page, function); }
         // A55: the only cached list is released while unwinding Place, BEFORE TransactionRunner can Abort.
         using FunctionPropertyList properties = function.Properties;
         WritePlcPoint(properties, args);
         string[]? requested = args.ConnectionDesignations;
         for (int i = 0; i < (requested?.Length ?? 0); i++)
         { properties[(Properties.Function)20022, i + 1] = requested![i]; }
+        // Customer redraw: a PLC point's first table row (20029, read-only) shows these descriptions.
+        string[]? descriptions = args.ConnectionDescriptions;
+        for (int i = 0; i < (descriptions?.Length ?? 0); i++)
+        { properties[(Properties.Function)20023, i + 1] = descriptions![i]; }
         // A78: local placements are independent of the symbol variant (documentation only).
         if (args.PlcConnectionPoint is not null && args.DisplayProperties is { Count: > 0 })
         { function.SwitchLocalPropertyPlacements(true); Require(function.UseLocalPropertyPlacements); }
@@ -115,6 +122,11 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         {
             using PropertyValue value = properties[(Properties.Function)20022, i + 1];
             Require(!value.IsEmpty && value.ToString() == requested![i] && pins[i].Name == requested[i]);
+        }
+        for (int i = 0; i < (descriptions?.Length ?? 0); i++)
+        {
+            using PropertyValue value = properties[(Properties.Function)20023, i + 1];
+            Require(!value.IsEmpty && value.ToString() == descriptions![i]);
         }
         PlcChannel? plc = args.PlcConnectionPoint is null ? null : EplanPlcReader.Channel((Terminal)function, new TextLanguage(ISOCode.Language.L___, false), properties);
         _placedFunctionId = function.ObjectIdentifier;

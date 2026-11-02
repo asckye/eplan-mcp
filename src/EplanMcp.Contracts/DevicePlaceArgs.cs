@@ -25,6 +25,8 @@ public sealed class DevicePlaceArgs
     public List<DeviceDisplayProperty>? DisplayProperties { get; set; }
     /// <summary>One designation per connection point in native array order (A55).</summary>
     public string[]? ConnectionDesignations { get; set; }
+    /// <summary>One description per connection point in native array order (20023); a PLC point shows it as 20029.</summary>
+    public string[]? ConnectionDescriptions { get; set; }
     /// <summary>Exclusive location-box source: a literal location identifier such as +P1 (A55).</summary>
     public string? LocationBox { get; set; }
     /// <summary>Opposite corner x in millimetres; required only for LocationBox.</summary>

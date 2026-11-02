@@ -87,6 +87,24 @@ public sealed partial class DeviceSymbolPlanTests
     }
 
     [Fact]
+    public void Plc_ConnectionDescription_IsOnePerPinAndPlannedAs20023()
+    {
+        // Customer redraw: the PLC table's first row (20029) shows the description written to 20023.
+        PlcSymbol();
+        DevicePlaceArgs args = Args();
+        args.Tag = "-KF1";
+        args.Symbol = "PLC_DI";
+        args.PlcConnectionPoint = "2";
+        args.PlcAddress = "I0.0";
+        args.PlcSymbolicAddress = "Start";
+        args.PlcText = "Start input";
+        args.ConnectionDescriptions = ["DI a.0", "extra"];
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
+        args.ConnectionDescriptions = ["DI a.0"];
+        Assert.Contains(Plan(args).Changes, c => c.Property == "20023[1]" && c.NewValue == "DI a.0");
+    }
+
+    [Fact]
     public async Task Plc_PreviewListsAddressTextAndExtraRepresentation_ThenCommitsAndRejectsDuplicate()
     {
         PlcSymbol();

@@ -86,7 +86,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.DoesNotContain(ConnectionCreateTools.Tool, ToolProfiles.Core);
         Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.InRange(tool.Description!.Length, 1, 600);
-        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5200);
+        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5300);
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
         JsonElement itemBranches = tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf");
@@ -432,7 +432,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.InRange(review.InputSchema.GetRawText().Length, 1, 3500);
         Tool connection = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
         Assert.InRange(connection.Description!.Length + Descriptions(connection.InputSchema), 1, 1000);
-        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 5200);
+        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 5300); // +cable voltage, customer redraw 2026-11-02
         Tool move = Tools.Single(t => t.Name == PlacementUpdateTools.Tool);
         Assert.InRange(move.Description!.Length, 1, 600);
         Assert.InRange(move.Description.Length + Descriptions(move.InputSchema), 1, 1000);

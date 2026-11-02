@@ -51,6 +51,9 @@ internal static class DeviceSymbolPlan
         { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Select an ordinary function, verified SPECIAL/SC location box or IEC_symbol/X terminal.", metadata: new Dictionary<string, string> { ["missing"] = box ? "device.place.location_box" : terminal ? "device.place.terminal" : "device.place.symbol.function" }); }
         if (args.ConnectionDesignations is { } pins && pins.Length != symbol.ConnectionPoints.Count)
         { throw WriteArguments.Invalid(["/connection_designations: supply exactly one designation per symbol connection point."]); }
+        if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Length != symbol.ConnectionPoints.Count
+            || descriptions.Any(p => string.IsNullOrWhiteSpace(p) || p.Length > 64 || p.Any(char.IsControl))))
+        { throw WriteArguments.Invalid(["/connection_descriptions: supply a symbol source and one nonempty description (at most 64 characters) per symbol connection point."]); }
         var changes = new List<PlannedChange>
         {
             new() { Action = "create", Kind = box ? "location_box" : "function", Name = request.Page.Name, NewValue = box
@@ -69,6 +72,8 @@ internal static class DeviceSymbolPlan
         }
         for (int i = 0; i < (args.ConnectionDesignations?.Length ?? 0); i++)
         { changes.Add(new() { Action = "update", Kind = "pin", Name = request.Tag, Property = "20022[" + (i + 1).ToString(CultureInfo.InvariantCulture) + "]", NewValue = args.ConnectionDesignations![i] }); }
+        for (int i = 0; i < (args.ConnectionDescriptions?.Length ?? 0); i++)
+        { changes.Add(new() { Action = "update", Kind = "pin", Name = request.Tag, Property = "20023[" + (i + 1).ToString(CultureInfo.InvariantCulture) + "]", NewValue = args.ConnectionDescriptions![i] }); }
         TerminalPlacementData? terminalData = terminal ? DeviceTerminalPlan.Describe(args, request, changes) : null;
         DevicePlcPlan.Describe(args, request, changes);
         request.CheckLayout(args);

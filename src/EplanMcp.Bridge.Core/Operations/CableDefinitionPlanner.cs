@@ -132,7 +132,7 @@ public static class CableDefinitionPlanner
             if ((string?)item["kind"] != "cable_definition")
             { continue; }
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
-            Members(item, at, "kind points designation type_text core_count cross_section_mm2 cores", "");
+            Members(item, at, "kind points designation type_text core_count cross_section_mm2 cores", "voltage");
             Require(item["points"] is JArray { Count: 2 }, at + "/points", "Supply the definition line's two points.");
             double[][] line = item["points"]!.Select((p, n) => point(p, at + "/points/" + n.ToString(CultureInfo.InvariantCulture))).ToArray();
             Require((line[0][0] == line[1][0]) != (line[0][1] == line[1][1]), at + "/points", "Supply a nonzero orthogonal definition line.");
@@ -141,6 +141,8 @@ public static class CableDefinitionPlanner
             Require(designation[0] is '-' or '=' or '+' && separator >= 0 && separator + 1 < designation.Length && char.IsLetterOrDigit(designation[separator + 1]) && designation.All(c => char.IsLetterOrDigit(c) || "=+-_.".Contains(c)), at + "/designation", "Use an explicit literal cable designation, for example -W3.");
             Require(!names.Any(n => SameName(n, designation, scene.Page.Page) || SameName(designation, n, scene.Page.Page)) && names.Add(designation), at + "/designation", "Do not create the same cable twice.");
             Text(item["type_text"], at + "/type_text", 200);
+            if (item["voltage"] is not null)
+            { Text(item["voltage"], at + "/voltage", 64); }
             Require(item["core_count"]?.Type == JTokenType.Integer && (double)item["core_count"]! is >= 1 and <= 50, at + "/core_count", "Supply a declared count in 1..50.");
             Require(item["cross_section_mm2"]?.Type is JTokenType.Integer or JTokenType.Float && (double)item["cross_section_mm2"]! > 0, at + "/cross_section_mm2", "Supply a positive finite cross-section in mm2.");
             Require(item["cores"] is JArray { Count: >= 1 and <= 50 } cores && cores.Count <= (int)item["core_count"]!, at + "/cores", "Supply 1..50 cores without exceeding the declared count.");

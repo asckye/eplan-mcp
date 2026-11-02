@@ -59,8 +59,8 @@ internal sealed class DevicePlaceRequest
         DevicePlcPlan.Check(args);
         DeviceTerminalPlan.Check(args);
         DeviceSymbolPlan.CheckBox(args);
-        if (!box && !terminal && args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null))
-        { throw WriteArguments.Invalid(["/library: symbol, display properties and pin designations require a complete symbol source."]); }
+        if (!box && !terminal && args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
+        { throw WriteArguments.Invalid(["/library: symbol, display properties and pin designations or descriptions require a complete symbol source."]); }
         var violations = new List<string>();
         WriteArguments.RequireProject(args.Project, violations);
         string tag = terminal ? args.TerminalStrip! : args.Tag?.Trim() ?? string.Empty;

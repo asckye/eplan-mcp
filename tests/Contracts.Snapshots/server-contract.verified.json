@@ -4581,6 +4581,11 @@
                       },
                       "minItems": 1,
                       "maxItems": 50
+                    },
+                    "voltage": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
                     }
                   },
                   "required": [
@@ -6092,6 +6097,17 @@
               "maxLength": 64
             }
           },
+          "connection_descriptions": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            }
+          },
           "location_box": {
             "type": [
               "string",
@@ -6216,6 +6232,7 @@
                   "symbol_variant",
                   "display_properties",
                   "connection_designations",
+                  "connection_descriptions",
                   "location_box",
                   "corner_x",
                   "corner_y"
@@ -6266,7 +6283,8 @@
                   "symbol",
                   "symbol_variant",
                   "display_properties",
-                  "connection_designations"
+                  "connection_designations",
+                  "connection_descriptions"
                 ]
               }
             }
@@ -6288,7 +6306,8 @@
                   "corner_x",
                   "corner_y",
                   "display_properties",
-                  "connection_designations"
+                  "connection_designations",
+                  "connection_descriptions"
                 ]
               }
             }

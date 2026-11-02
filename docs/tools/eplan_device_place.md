@@ -28,6 +28,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `variant` | string | 否 | `"1"`，部件没有变体 1 而只有一个变体时取那一个 | 部件的变体 |
 | `library`、`symbol`、`symbol_variant` | string、string、integer | 库符号来源三项必填 | — | 与 `part,variant` 互斥；项目已有库、完整符号名、非负原生变体号，来自 `eplan_symbol_search`；先精确匹配，无精确匹配时仅接受唯一的不区分大小写匹配；首批限普通 `Function`，专用元素留后续任务 |
 | `display_properties` | object[] | 否 | 不新增显示属性 | 最多 8 项；严格成员 `{property_id,offset_x_mm,offset_y_mm}`，ID 封闭为 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301；偏移为有限数，可为负，是相对父符号的位置，不是页坐标 |
+| `connection_descriptions` | string[] | 否 | 不写 | 每个连接点的描述，按连接点数组顺序，数量必须相等；每项非空、最多 64 字符；写一基索引的 20023，PLC 点以只读的 20029 显示（例如 `DI a.0`）。只用于库符号来源 |
 | `connection_designations` | string[] | 否 | 保留默认代号 | 按 T1 连接点数组顺序，每引脚一项，数量必须相等；每项非空、无控制字符且最多 64 字符；T2b 写入带一基索引的 20022，不使用汇总属性 20038 或 `Pin.Designation` |
 | `location_box` | string | 位置框来源 | — | 与部件、库符号、tag、显示属性和引脚代号互斥；如 `+P1`，`+` 后 1–64 个字母、数字、下划线或点；不含通配、空白、设备段或页名 |
 | `corner_x`、`corner_y` | number | 位置框必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；其余来源禁止 |
@@ -102,6 +103,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
   - 改名与 `CreateDevice` 在同一个 `SafetyPoint` 中一起回滚、一起撤销；
   - 插入点与图上位置的关系（S20 的线圈在 (80, 160) 附近）。
 
+- **显示标识**：位置框和 PLC 点创建后由 EPLAN 按完整标识计算显示标识（`NameService.AdjustVisibleName`），符号自带的标识文字因此显示 `+P1`、`-KF1`；普通器件仍只通过 `display_properties` 显示标识。
 - **位置框规划/执行（A55/S43）**：同页同位置标识（忽略大小写）返回 `ALREADY_EXISTS`；允许包围既有器件。页面边界未知、非有限或两角越界则拒绝。指纹覆盖两角、虚线、库变体、页对象/尺寸、同页框结构和全项目设备名称；审批后变化返回 `PLAN_STALE`。沿同一 `FunctionTransactionScope` 用 `SymbolReference.Create` 取得真实 `LocationBox`，`SetLogicalArea` 后通过 `NameParts.DESIGNATION_LOCATION` 设置位置。递归设置 `GetGraphics` 的笔型 `StyleId=1`，核对实际外框不越页、逻辑两角、结构和变体，并逐对象核对全项目既有功能名称完全不变；不是通过重命名实现结构。缺图形、读回不符或取消即 Abort，缓存列表先释放，不关闭空撤销步；成功只 Commit/CloseUndo 一次。模型说明和审批均明确受影响设备为零。
 
 ## 6. 写操作专项

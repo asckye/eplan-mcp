@@ -135,8 +135,9 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs; supply the exact full name."); }
                 }
                 placed.Location = new PointD((double)item.Row["position"]![0]!, (double)item.Row["position"]![1]!);
-                if (placed is InterruptionPoint)
+                if (placed is InterruptionPoint shown)
                 {
+                    EplanVisibleNames.Adjust(target, shown);
                     using AnyPropertyId id = 24300;
 #pragma warning disable CA2000 // A39/A55: EPLAN owns the native property placement, also on Abort.
                     var display = new PropertyPlacement();

@@ -24,6 +24,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         box.SetLogicalArea(new PointD(args.X, args.Y), new PointD(args.CornerX!.Value, args.CornerY!.Value));
         using (var parts = new FunctionBasePropertyList())
         { parts.DESIGNATION_LOCATION = args.LocationBox!.Substring(1); box.NameParts = parts; }
+        EplanVisibleNames.Adjust(page, box);
         GraphicalPlacement[] graphics = [.. BoxGraphics(box.GetGraphics())];
         Check(graphics.Length > 0, "the box exposes no graphics");
         foreach (GraphicalPlacement graphic in graphics)

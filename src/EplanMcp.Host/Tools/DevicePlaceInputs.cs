@@ -12,10 +12,10 @@ internal static partial class DevicePlaceInputs
     {
         ((JsonArray)schema["required"]!).Remove("tag");
         schema["oneOf"] = JsonNode.Parse("""
-            [{"required":["part","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","library","symbol","symbol_variant","display_properties","connection_designations","location_box","corner_x","corner_y"]}}},
+            [{"required":["part","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","library","symbol","symbol_variant","display_properties","connection_designations","connection_descriptions","location_box","corner_x","corner_y"]}}},
              {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","part","variant","location_box","corner_x","corner_y"]}}},
-             {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","tag","part","variant","library","symbol","symbol_variant","display_properties","connection_designations"]}}},
-             {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"enum":["tag","part","variant","library","symbol","location_box","corner_x","corner_y","display_properties","connection_designations"]}}}]
+             {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","tag","part","variant","library","symbol","symbol_variant","display_properties","connection_designations","connection_descriptions"]}}},
+             {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"enum":["tag","part","variant","library","symbol","location_box","corner_x","corner_y","display_properties","connection_designations","connection_descriptions"]}}}]
             """);
         schema["properties"]!["display_properties"] = JsonNode.Parse("""
             {"type":["array","null"],"maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["property_id","offset_x_mm","offset_y_mm"],"properties":{
@@ -35,6 +35,7 @@ internal static partial class DevicePlaceInputs
         schema["dependentRequired"]!["terminal_strip_position"] = JsonNode.Parse("""["terminal_strip","terminal_strip_text"]""");
         schema["properties"]!["symbol_variant"]!["minimum"] = 0;
         schema["properties"]!["connection_designations"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
+        schema["properties"]!["connection_descriptions"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
         foreach (JsonObject property in schema["properties"]!.AsObject().Select(p => p.Value).OfType<JsonObject>())
         { if (property["default"] is null) { property.Remove("default"); } }
     }
@@ -42,6 +43,8 @@ internal static partial class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Any(s => string.IsNullOrWhiteSpace(s) || s.Length > 64 || s.Any(char.IsControl))))
+        { problems.Add("/connection_descriptions: require a symbol source and nonempty text of at most 64 characters without controls per pin."); }
         if (args.TerminalStripPosition is { } position && (args.TerminalStrip is null || args.TerminalStripText is null || position.Length != 2 || position.Any(n => !double.IsFinite(n) || n is < 0 or > 10000)))
         { problems.Add("/terminal_strip_position: require a terminal source, new strip text and two finite page coordinates 0..10000 mm."); }
         if (args.PlcPlugDesignation is { } plug && (args.PlcConnectionPoint is null || string.IsNullOrWhiteSpace(plug) || plug.Length > 64 || plug.Any(char.IsControl)))

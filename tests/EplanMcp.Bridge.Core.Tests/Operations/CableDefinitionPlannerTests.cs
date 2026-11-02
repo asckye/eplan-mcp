@@ -86,6 +86,15 @@ public sealed class CableDefinitionPlannerTests
     }
 
     [Fact]
+    public void Voltage_IsOptional_AndTravelsWithTheDefinition()
+    {
+        // Customer redraw: the definition line's default texts include the voltage (20044, "300/500 V").
+        var f = new CableDefinitionFixture();
+        f.Cable["voltage"] = "300/500 V";
+        Assert.Equal("300/500 V", (string?)Assert.Single((JArray)f.Plan()["cableDefinitions"]!)["voltage"]);
+    }
+
+    [Fact]
     public void SameCallWire_ForwardReference_PredictsExplicitCoreWithoutWriting()
     {
         var f = new CableDefinitionFixture();
@@ -125,6 +134,8 @@ public sealed class CableDefinitionPlannerTests
     [InlineData("points", "[[16,4],[20,12]]", "/points")]
     [InlineData("type_text", "null", "/type_text")]
     [InlineData("type_text", "\"bad\\ntext\"", "/type_text")]
+    [InlineData("voltage", "\"\"", "/voltage")]
+    [InlineData("voltage", "300", "/voltage")]
     [InlineData("designation", "\"-W3/1\"", "/designation")]
     [InlineData("designation", "\"-\"", "/designation")]
     [InlineData("designation", "\"--W3\"", "/designation")]

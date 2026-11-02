@@ -25,6 +25,7 @@ internal static class ConnectionCreateSchema
         JsonObject reference = new() { ["oneOf"] = new JsonArray(Object(new() { ["locator"] = Locator() }), Object(new() { ["item_index"] = Integer(0, 49) })) };
         JsonObject core = Object(new() { ["connection"] = reference, ["label"] = Text(32), ["colour"] = new JsonObject { ["enum"] = new JsonArray("BK", "BN", "RD", "OG", "YE", "GN", "BU", "VT", "GY", "WH", "PK", "TQ", "GNYE") } });
         JsonObject cable = Object(new() { ["kind"] = Kind("cable_definition"), ["points"] = Array(Point(), 2, 2), ["designation"] = Text(128), ["type_text"] = Text(), ["core_count"] = Integer(1, 50), ["cross_section_mm2"] = new JsonObject { ["type"] = "number", ["exclusiveMinimum"] = 0 }, ["cores"] = Array(core, 1, 50) });
+        cable["properties"]!["voltage"] = Text(64);
         return Array(new() { ["oneOf"] = new JsonArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable) }, 1, 50);
     }
 }
