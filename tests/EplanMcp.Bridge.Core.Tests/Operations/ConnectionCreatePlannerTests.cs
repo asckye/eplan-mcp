@@ -70,6 +70,24 @@ public sealed class ConnectionCreatePlannerTests
         Invalid(fixture, "/items/0/variant");
     }
 
+    [Fact]
+    public void TNode_OffsetTargetPin_LineLeavesFromThatPin_NotThroughTheNode()
+    {
+        // Live 2026-11-02 (D1): TOUR variant 0 with A above and C to the right was refused by R4; the line to C starts at the offset pin.
+        var fixture = new ConnectionCreateFixture();
+        fixture.Scene.Pins.Clear();
+        fixture.Scene.Page.Placements.Clear();
+        fixture.Symbols.Clear();
+        fixture.Symbols.Add(ConnectionCreateFixture.Variant("TOUR", "TNodeRight", 0, "Down", "Up", "Right"));
+        fixture.Symbols[0].ConnectionPoints[2].Location = [2, 0];
+        fixture.AddPin(1, [40, 60], "Down", [38, 60, 42, 64]);
+        fixture.AddPin(2, [60, 40], "Left", [60, 38, 64, 42]);
+        fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("t_node", [40, 40], "Down", "Up", "Right"));
+        fixture.Request["items"]![0]!["variant"] = 0;
+
+        Assert.Equal(0, (int)Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!["variant"]!);
+    }
+
     private static ConnectionCreateFixture TNodeVariants()
     {
         var fixture = new ConnectionCreateFixture();

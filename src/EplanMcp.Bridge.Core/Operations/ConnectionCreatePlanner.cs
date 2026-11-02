@@ -198,6 +198,8 @@ public static class ConnectionCreatePlanner
             splits.Add((existing[0], node.Point));
         }
         List<SymbolSearchItem> variants = reader.Read(scene.Project.Path, new() { Library = "SPECIAL" });
+        // A64: a node variant may offset one pin; the drawn line leaves from that pin, not from the node point.
+        var nodePins = new Dictionary<string, double[]>(StringComparer.Ordinal);
         foreach (var node in nodes.Values)
         {
             SymbolSearchItem[] matches = variants.Where(s => s.Library == "SPECIAL" && (node.Kind switch
@@ -222,6 +224,8 @@ public static class ConnectionCreatePlanner
             SymbolSearchItem symbol = matches.Length == 1 ? matches[0] : throw Missing("Select a verified SPECIAL variant with the requested cardinal pins using eplan_symbol_search.");
             double[] offset = symbol.ConnectionPoints[0].Location;
             double[] position = [node.Point[0] - offset[0], node.Point[1] - offset[1]];
+            foreach (SymbolConnectionPoint pin in symbol.ConnectionPoints)
+            { nodePins[Key(node.Point) + "/" + pin.Direction] = [position[0] + pin.Location[0], position[1] + pin.Location[1]]; }
             string key = FormattableString.Invariant($"{symbol.Name}/{symbol.Variant}");
             double[] bounds = scene.SymbolBounds.TryGetValue(key, out double[]? found) && DrawingCoordinates.ValidBounds(found) ? found : [0, 0, 0, 0];
             double[] outline = [bounds[0] + position[0], bounds[1] + position[1], bounds[2] + position[0], bounds[3] + position[1]];
@@ -331,7 +335,8 @@ public static class ConnectionCreatePlanner
         layout.Lines = layout.Lines.Where(l => !splits.Any(s => SegmentKey(s.Segment) == SegmentKey(l.Points))).ToList();
         foreach (LayoutGuard.Segment line in layout.Lines)
         { line.Net = Net(line.Points); }
-        layout.Lines.AddRange(segments.Select((s, i) => new LayoutGuard.Segment { Points = s, Changed = true, Net = Net(s), Locator = new() { Oid = -i - 1000 } }));
+        double[] Drawn(double[] end, double[] other) => nodePins.TryGetValue(Key(end) + "/" + Direction(end, other), out double[]? pin) ? pin : end;
+        layout.Lines.AddRange(segments.Select((s, i) => new LayoutGuard.Segment { Points = [Drawn(s[0], s[1]), Drawn(s[1], s[0])], Changed = true, Net = Net(s), Locator = new() { Oid = -i - 1000 } }));
         DrawingPlacement[] proposed = resolved.Select((p, i) => LayoutGuard.Proposed("SymbolReference", p["position"]!.ToObject<double[]>()!, p["bounds"]!.ToObject<double[]>()!, i)).ToArray();
         for (int i = 0; i < proposed.Length; i++)
         { foreach (SymbolConnectionPoint pin in resolved[i]["symbol"]!["connectionPoints"]!.ToObject<List<SymbolConnectionPoint>>()!) { layout.Pins.Add(FormattableString.Invariant($"0/{proposed[i].Locator.Oid}/{layout.Pins.Count}"), new() { Direction = pin.Direction, Location = pin.Location.Zip(proposed[i].Location, (a, b) => a + b).ToArray() }); } }
