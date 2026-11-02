@@ -271,12 +271,14 @@ internal sealed class AcceptanceRedrawDriver(
                 Check(() => Assert.Equal(point.GetProperty("function_text").GetString(), channel.GetProperty("text").GetString()));
                 Check(() => Assert.False(string.IsNullOrWhiteSpace(channel.GetProperty("symbolicAddress").GetString())));
                 Check(() => Assert.Equal(1, channel.GetProperty("parentlessRepresentations").GetInt32()));
+                // plc_get omits unset optional fields (eplan_plc_get.md): an absent field reads as empty.
+                static string Optional(JsonElement row, string name) => row.TryGetProperty(name, out JsonElement value) ? value.GetString() ?? string.Empty : string.Empty;
                 if (point.TryGetProperty("plug_designation", out JsonElement expectedPlug))
-                { Check(() => Assert.Equal(expectedPlug.GetString(), channel.GetProperty("plugDesignation").GetString())); }
+                { Check(() => Assert.Equal(expectedPlug.GetString(), Optional(channel, "plugDesignation"))); }
                 if (point.TryGetProperty("main_reference_contains", out JsonElement reference))
-                { Check(() => Assert.Contains(Expand(reference.GetString()!), channel.GetProperty("mainReference").GetString(), StringComparison.Ordinal)); }
+                { Check(() => Assert.Contains(Expand(reference.GetString()!), Optional(channel, "mainReference"), StringComparison.Ordinal)); }
                 if (point.TryGetProperty("main_reference", out JsonElement exactReference))
-                { Check(() => Assert.Equal(Expand(exactReference.GetString()!), channel.GetProperty("mainReference").GetString() ?? string.Empty)); }
+                { Check(() => Assert.Equal(Expand(exactReference.GetString()!), Optional(channel, "mainReference"))); }
 
             }, Id(point));
         }
