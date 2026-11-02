@@ -26,13 +26,13 @@ public sealed class AcceptanceReviewTests
     [InlineData("error")]
     [InlineData("position")]
     [InlineData("object")]
-    public void FictionalDrawing_ExactlyFiveSparePinsAndTwentyEnvelopeOverlaps_NoOtherProblems(string? change)
+    public void FictionalDrawing_ExactlyFiveSparePinsAndNineteenEnvelopeOverlaps_NoOtherProblems(string? change)
     {
         JsonElement list = AcceptanceDrawingList.Read(AcceptanceDrawingListTests.Fixture());
         const string Page = "=GAA+A1&EFS1/3";
         JsonElement[] expected = list.GetProperty("expected_review_warnings").EnumerateArray().ToArray();
         Assert.Equal(5, expected.Count(w => w.GetProperty("code").GetString() == "unconnected_pin"));
-        Assert.Equal(20, expected.Count(w => w.GetProperty("code").GetString() == "overlap"));
+        Assert.Equal(19, expected.Count(w => w.GetProperty("code").GetString() == "overlap")); // d3: the PLC card box sits on the counterpart page
         var drawings = new Dictionary<string, JsonObject>(StringComparer.Ordinal);
         var issues = new List<JsonObject>();
         foreach (JsonElement warning in expected)
