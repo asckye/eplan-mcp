@@ -1,8 +1,8 @@
 extern alias host;
 using System.Runtime.Versioning;
 using System.Text.Json;
-using EplanMcp.Coverage.Reporting;
 using EplanMcp.Coverage.Mapping;
+using EplanMcp.Coverage.Reporting;
 using host::EplanMcp.Host.Bridge;
 using host::EplanMcp.Host.Tools;
 

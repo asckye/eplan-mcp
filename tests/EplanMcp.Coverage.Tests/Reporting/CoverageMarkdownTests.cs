@@ -1,5 +1,5 @@
-using EplanMcp.Coverage.Reporting;
 using EplanMcp.Coverage.Mapping;
+using EplanMcp.Coverage.Reporting;
 
 namespace EplanMcp.Coverage.Tests.Reporting;
 
