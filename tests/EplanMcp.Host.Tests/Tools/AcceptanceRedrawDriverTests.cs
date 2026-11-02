@@ -75,7 +75,7 @@ public sealed class AcceptanceRedrawDriverTests
         JsonElement[] textUpdates = fake.Requests.Where(r => r.Tool == "eplan_placement_update").Select(r => r.Args).ToArray();
         Assert.Equal(2, textUpdates.Length);
         JsonElement[] textMoves = textUpdates.SelectMany(a => a.GetProperty("property_moves").EnumerateArray()).ToArray();
-        Assert.Equal([(64d, 156d), (68d, 156d), (260d, 88d), (264d, 88d)], textMoves.Select(m => (m.GetProperty("x_mm").GetDouble(), m.GetProperty("y_mm").GetDouble())));
+        Assert.Equal([(64d, 156d), (68d, 156d), (260d, 116d), (264d, 116d)], textMoves.Select(m => (m.GetProperty("x_mm").GetDouble(), m.GetProperty("y_mm").GetDouble())));
         Assert.Equal([20214, 20040, 20214, 20040], textMoves.Select(m => m.GetProperty("property_id").GetInt32()));
         Assert.Equal([0, 1, 0, 1], textMoves.Select(m => m.GetProperty("property_index").GetInt32()));
         Assert.All(textMoves, m => Assert.Equal(90, m.GetProperty("angle_deg").GetInt32()));
