@@ -85,11 +85,13 @@
 
 - 2026-11-02 实机（Electric P8，LargeWrite scratch）：SPECIAL 的四个 T 节点符号（TLRO/TLRU/TOUL/TOUR）各有变体 0、1、2、3、8。变体 8 三个引脚都在插入点，画成点，即上面观察到星形的那种；变体 0–3 是官方说的目标变体，第 2 目标（斜线）的引脚离插入点 2 mm。TLRU 变体 0（左、下在插入点，右在 (2,0)）：A 在左、B 在下、C 在右时生成 A→B、B→C，即链式，经过源一侧那段的只有 A→B 一条连接。客户页母线的 T 节点按变体 0 画，第 1 列就只属于 -X6:1 到第一个开关的连接，RD 芯线可以单独分配（D1）。— Large `CableBusStarSpikeTests`。
 - 2026-11-02 实机（同上，`VerticalTNode_EachTargetVariant_RecordsLogicalEndpoints`）：TOUR 只有上方 A、右方 C 两个设备时，变体 1、2、3 放置并生成 A–C；变体 0（引脚顺序 Down、Up、Right）生成后**没有**连接：第一个目标（Down）为空时，链式连接源→目标 1→目标 2 断开。规划仍按整组预测 A–C，因此该探测以"读回不符"撤销；客户页上节点放置时三端都已存在，不受影响。连线偏移引脚：读回的自动连接线端点是"符号位置 + 引脚偏移"，规划的 `graphicalAutoconnect` 与布局检查按此预测。
+- 2026-11-02 客户页重绘：本项目的中断点范围只读取器件（Function）的引脚，节点符号（SymbolReference）的引脚不在其中；以前节点各引脚在同一点，连线在该点相接，变体 0 偏移一个引脚后网络在节点处断开。现在范围数据按页列出节点各引脚位置，规划时连成一组。
 ### A65. 同名中断点的配对（D2 实验，同上）
 - 同名中断点先按页在项目中的顺序、再按页内位置从左到右排序，相邻两两配对（第 1 与第 2、第 3 与第 4……）；与创建顺序无关（正序、倒序创建结果相同）。
 - 两页时（A、C 在第一页，B、D 在第二页）：两个同名 A、B → A–B；三个同名 A、C、B → **A–C**（同页的两个先配成一对），B 落单、没有连接；四个 → A–C、B–D。
 - 同页时（从左到右 A、B、C、D）：两个 → A–B；三个 → A–B，C 落单；四个 → A–B、C–D。
 - 落单的中断点不产生逻辑连接，生成连接时不报错。
+- 2026-11-02 客户页（原图第 13 页）：I2（第 1 列）与 I5（第 7 列）同名 `-HMT-13S1`，交叉引用分别显示对方的列号（13.7、13.1），即同页两点互配，无需排序码，也不需要对端页的点。重画时两点各自放置、生成后 EPLAN 计算互指引用（本例 /3.8、/3.2，列号随本项目图框），并经该对连接 X6:1 与 +HMT-13S1:13。
 - 对重画的影响：同页同名中断点（如客户页的 I2/I5）要按页内从左到右的位置安排，使相邻两个正好是要连接的一对。— Large `InterruptionPairingSpikeTests`。
 - 2026-11-02 官方文档补充：上述为未指定排序码的观察；[INTERRUPTIONPOINT_SORT_CODE](https://www.eplan.help/en-us/infoportal/content/api/2022/Eplan.EplApi.DataModelu~Eplan.EplApi.DataModel.InterruptionPointPropertyList~INTERRUPTIONPOINT_SORT_CODE.html)（24809）定义中断点排序次序，本机 2026.0.3 `Eplan.EplApi.DataModelu.xml` 同名属性确认值为 Int64。D2 待验输入为两页 L/R、P1/P2，默认无排序码，再设 L=1、P2=2、R=3、P1=4，打印原生对端；目标 L–P2、R–P1 尚未实机验证。本次不运行 EPLAN。
 
