@@ -39,16 +39,16 @@ Bridge 共用到 2629 个 ID（方法 613，属性 843，类型 324，字段和�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 1340 / 4014（33.4%） | 1332 | 170 | 1332 / 4014（33.2%） | 171 / 4014（4.3%） | 72 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 471 / 1799（26.2%） | 464 | 80 | 464 / 1799（25.8%） | 76 / 1799（4.2%） | 33 | 66 |
-| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 869 / 2215（39.2%） | 868 | 90 | 868 / 2215（39.2%） | 95 / 2215（4.3%） | 39 | 68 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 1340 / 4014（33.4%） | 1332 | 170 | 1332 / 4014（33.2%） | 228 / 4014（5.7%） | 72 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 471 / 1799（26.2%） | 464 | 80 | 464 / 1799（25.8%） | 80 / 1799（4.4%） | 33 | 66 |
+| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 869 / 2215（39.2%） | 868 | 90 | 868 / 2215（39.2%） | 148 / 2215（6.7%） | 39 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 63 / 68（92.6%） | 63 | 0 | 63 / 68（92.6%） | 16 / 68（23.5%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 7 / 137（5.1%） | 7 | 0 | 7 / 137（5.1%） | 1 / 137（0.7%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 7 / 97（7.2%） | 7 | 0 | 7 / 97（7.2%） | 1 / 97（1.0%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
 - 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 1340 / 4342（30.9%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 471 / 1799（26.2%），live_verified 76 / 1799（4.2%）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 471 / 1799（26.2%），live_verified 80 / 1799（4.4%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 52 个，未过时的共 8585 个。
 - 依赖层：Bridge 用到 1235 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 名称：Bridge 用到 7 个，没有整个排除的 action 共 64 个。
@@ -60,10 +60,10 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 |---|---:|---:|---:|
 | `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 2 |
 | `Eplan.EplApi.Base` | 268 | 69 / 268（25.7%） | 17 |
-| `Eplan.EplApi.DataModel` | 1247 | 541 / 1247（43.4%） | 91 |
+| `Eplan.EplApi.DataModel` | 1247 | 541 / 1247（43.4%） | 141 |
 | `Eplan.EplApi.DataModel.E3D` | 368 | 148 / 368（40.2%） | 0 |
-| `Eplan.EplApi.DataModel.EObjects` | 83 | 45 / 83（54.2%） | 6 |
-| `Eplan.EplApi.DataModel.Graphics` | 414 | 245 / 414（59.2%） | 10 |
+| `Eplan.EplApi.DataModel.EObjects` | 83 | 45 / 83（54.2%） | 11 |
+| `Eplan.EplApi.DataModel.Graphics` | 414 | 245 / 414（59.2%） | 12 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 |
 | `Eplan.EplApi.DataModel.MasterData` | 121 | 38 / 121（31.4%） | 8 |
 | `Eplan.EplApi.DataModel.Planning` | 122 | 50 / 122（41.0%） | 0 |
@@ -97,6 +97,17 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | `Eplan.EplApi.MasterData` | 39 | 0 |
 
 ## 4. 实机验证
+
+### 批量验证（按条目，最新导入结果）
+只读通过要求未观察到变更；写入通过要求一步撤销恢复。rolled_back 归入失败；failed:needs_context 单列，表示需要选择或特定窗口；modal/timeout/outcome_unknown 归入未知；未运行不冒充跳过或环境阻塞。晋级候选见 `catalog/mapping/verified-whitelist.yaml`，仅为数据，不改变运行时白名单。
+
+| kind | 通过且撤销恢复 | 只读通过 | 失败 | 未知 | 跳过 | 需要上下文 |
+|---|---:|---:|---:|---:|---:|---:|
+| api-read | 0 | 65 | 0 | 0 | 6 | 0 |
+| api-write | 27 | 0 | 10 | 9 | 13 | 0 |
+| action | 0 | 0 | 0 | 1 | 0 | 0 |
+
+### 既有工具记录
 有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 96（31.3%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
@@ -157,10 +168,10 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_catalog_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/1/1 | — | — |
 | eplan_action_catalog_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/1 | — | — |
 | eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 132 | 70 | 2 | 55 | 0 | 1/1/0 | A11 A25 A30 A39 A40 | — |
-| eplan_action_try | destructive | action.try.execute<br>action.try.plan | 268 | 88 | 2 | 173 | 0 | 3/2/1 | A9 A40 | — |
+| eplan_action_try | destructive | action.try.execute<br>action.try.plan | 268 | 88 | 2 | 173 | 0 | 3/2/2 | A9 A40 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 4/4/0 | — | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 7/2/1 | A39 A56 A67 A68 A76 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 2118 | 964 | 5 | 1082 | 0 | 7/2/2 | A39 A56 A67 A68 A76 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
