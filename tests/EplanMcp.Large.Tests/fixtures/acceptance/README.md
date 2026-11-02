@@ -26,10 +26,13 @@ UTF-8 JSON，最大 256 KiB、深度 32，成员封闭；拒绝重复键、未�
 | interruption_points | `{id,name,position,direction,counterpart_position,counterpart_direction,line_to?}`；在两页创建同名原生中断点，counterpart_pages 只指向清单的另一页；可选 line_to 为主页该点必须接到的图形端点，驱动以实际线段双向比较。link1 在 (280,136) 向下接 terminal7 的空闲上侧引脚 (280,122)，对端无设备，必须无新增逻辑连接且保留图形 |
 | texts | `{id,position,text,height_mm}`；写语言无关 `??_??`，避免未设置显示语言时不显示；不与其他语言混写 |
 | expected_connections | 完整预期连接多重集：`{from:{item,pin},to:{item,pin}}`；同一对端点的重复连接也计数，不只核对连通集合；忽略起止方向，名称按 A55 容忍空结构段及未使用的功能结构段 |
+| expected_review_warnings | 可选精确警告多重集：`{code,position,objects:[{kind,name,position}]}`，仅允许 unconnected_pin/overlap；name 可含 `{run}`。没有该字段时要求零警告。禁止 error，分页读取全部 issues，按位置及真实定位器映射对象后逐项比较，不按总数或代码白名单放行 |
 
 驱动从最新 `eplan_page_get include_drawings` 分页取实际放置 locator、位置；引脚索引取独立 `device_get` 读回的实际代号，局部几何取放置返回的已验证符号变体。PLC 盒先用 SPECIAL/PLCC 放置，连接点使用读回的父盒标识及 plc_connection_point/plc_address/plc_symbolic_address/plc_text；提交后从父盒的 functions 独立核对引脚，再用 plc_get 核对所属、地址、手动符号地址和语言无关功能文本。通道按带连接点的名称计数，排除 A55 的额外器件级端子。端子使用 terminal_strip/terminal_number，仅首次传 terminal_strip_text；提交后读回原生排成员、顺序与排功能文本，不能用事务内尚为空的 owner 代替。锚点只替换端点坐标，不生成拐弯；解析后每段必须正交。每轴位置容差严格为当前页半格；不扩大容差、不模糊匹配 pin。读取覆盖必须完整；截断无续页时失败。
 
 D5 失败日志中的缺线为 (252,256)→(252,212)：该轴上没有器件引脚，原 line_to 误认为它是 switch6 上侧引脚；实读为 (248,216)，且已接供电母线。改接 terminal7 的空闲上侧，不切断既有供电连接，不添加辅助器件。端子上侧相对插入点偏移 +2 mm，依据 A55 和失败日志中 (280,122) 的实际端点；Small 假工具按已放置引脚的位置及方向计算线段，不再返回硬编码的预期线段。整页实机复验仍待进行。
+
+整页审查保留 A72 的逐项精确警告核对，并采用 main 的 D5 中断点绘法：不创建辅助器件，link1 接到 terminal7 上侧引脚。相应移除旧基线中 terminal7、link1 和辅助器件的三条空引脚警告，当前清单预期 5 个空引脚和 20 个外框交叠（含 40 mm 宽、相距 32 mm 的 DI 通道），不能要求默认审查为 clean。`expected_review_warnings` 逐项记录这些明确的布局结果；`clean=false` 和每条警告都必须读回一致，任何新增、漏报、位置/对象错配及 error 均失败。连接多重集、芯线、属性和 skipped 状态仍独立断言；该基线不表示图纸已经消除全部布局问题。旧基线证据见 api-notes A72；本次合并后基线仍须实机复验，不能据此宣称通过。
 
 ## 运行与证据
 

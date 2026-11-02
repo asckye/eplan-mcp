@@ -47,6 +47,7 @@ internal interface IPropertyPlacementsContainer
 internal class SymbolReference(long oid) : Placement(oid, 17)
 {
     public BoxSymbolVariant SymbolVariant { get; } = new();
+    public PinBase[] GraphicalConnectionPoints { get; set; } = [];
     public PropertyPlacement[] PropertyPlacements { get; set; } = [];
     public bool UseLocalPropertyPlacements { get; set; } = true;
     public int LocalCopies { get; private set; }
@@ -66,6 +67,15 @@ internal class SymbolReference(long oid) : Placement(oid, 17)
         LocalCopies++;
     }
     public static SymbolReference Create(object variant, Page page) => LocationBox.CreateBox(variant, page);
+}
+
+internal sealed class DynamicConnectionLine(long oid) : SymbolReference(oid);
+
+internal sealed class PinBase
+{
+    public int Index { get; set; }
+    public PointD Location { get; set; }
+    public string Direction { get; set; } = "Right";
 }
 
 internal class FunctionBase(long oid) : SymbolReference(oid)

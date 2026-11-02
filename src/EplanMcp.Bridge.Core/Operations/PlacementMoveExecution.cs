@@ -79,6 +79,15 @@ public static class PlacementMoveExecution
                     if (found.Parent is not null && want.Parent is not null)
                     { found.Parent.Digest = want.Parent.Digest; }
                 }
+                bool computed = IsFollowingBlockValue(want, found);
+                if (computed)
+                {
+                    // A72: EPLAN recomputes the read-only block value on the other members of a moved interruption group.
+                    foreach (string key in new[] { "text", "display" })
+                    { if (want.Properties.TryGetValue(key, out string? value) && found.Properties.ContainsKey(key)) { found.Properties[key] = value; } }
+                }
+                if (computed)
+                { found.Locator.Digest = want.Locator.Digest; if (found.Parent is not null && want.Parent is not null) { found.Parent.Digest = want.Parent.Digest; } }
             }
             if (!actual.Complete || actual.PageType != scene.PageType)
             { throw Mismatch("page inventory"); }
@@ -113,6 +122,19 @@ public static class PlacementMoveExecution
         plan["execution"] = ExecutionState.Committed;
         plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], result.Warning]);
         return plan;
+
+        bool IsFollowingBlockValue(DrawingPlacement want, DrawingPlacement found)
+        {
+            if (want.Kind != "PropertyPlacement" || found.Kind != want.Kind || want.Parent is null || found.Parent is null
+                || !want.Properties.TryGetValue("displayed_property_id", out string? id) || id != "20201"
+                || !found.Properties.TryGetValue("displayed_property_id", out string? actualId) || actualId != id)
+            { return false; }
+            DrawingPlacement? owner = scene.Page.Placements.FirstOrDefault(p => p.Parent is null && p.Kind == "InterruptionPoint"
+                && p.Locator.Type == want.Parent.Type && p.Locator.Oid == want.Parent.Oid);
+            return owner?.Properties.TryGetValue("name", out string? name) == true && scene.Page.Placements.Any(p => p.Parent is null && p.Kind == "InterruptionPoint"
+                && p.Properties.TryGetValue("name", out string? movedName) && movedName == name
+                && rows.Any(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, p.Locator) && !JToken.DeepEquals(r["before"], r["after"])));
+        }
     }
     private static BridgeErrorException Mismatch(string what) => new(ErrorReason.EplanOperationFailed, "Placement closure, following text, pins or connections differ from the approved move (" + what + ").");
 }

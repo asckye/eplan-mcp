@@ -11553,6 +11553,543 @@
       }
     },
     {
+      "name": "eplan_page_review",
+      "title": "Review a drawn EPLAN page",
+      "description": "Reviews a completed page for wiring, geometry, pairing, cable and stored check issues; optionally compares targets. Read only; no check run or editor navigation. Coordinates: mm, origin bottom left, y up. See usage for targets and the review/fix loop. Example: {\"project\":\"Line1\",\"page\":\"=F+A1/1\"}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "dangling_ends",
+                "unconnected_pins",
+                "overlaps",
+                "off_grid",
+                "unintended_junctions",
+                "interruption_pairing",
+                "cable_cores",
+                "eplan_messages",
+                "expected"
+              ]
+            }
+          },
+          "expected": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [],
+            "properties": {
+              "devices": {
+                "type": "array",
+                "maxItems": 500,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "tag",
+                    "position"
+                  ],
+                  "properties": {
+                    "tag": {
+                      "type": "string"
+                    },
+                    "position": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "library": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "symbol_variant": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "connections": {
+                "type": "array",
+                "maxItems": 500,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "from",
+                    "to"
+                  ],
+                  "properties": {
+                    "from": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "device",
+                        "pin"
+                      ],
+                      "properties": {
+                        "device": {
+                          "type": "string"
+                        },
+                        "pin": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "to": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "device",
+                        "pin"
+                      ],
+                      "properties": {
+                        "device": {
+                          "type": "string"
+                        },
+                        "pin": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "cables": {
+                "type": "array",
+                "maxItems": 500,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "designation",
+                    "cores"
+                  ],
+                  "properties": {
+                    "designation": {
+                      "type": "string"
+                    },
+                    "cores": {
+                      "type": "array",
+                      "maxItems": 500,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "from",
+                          "to",
+                          "label",
+                          "colour"
+                        ],
+                        "properties": {
+                          "from": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "device",
+                              "pin"
+                            ],
+                            "properties": {
+                              "device": {
+                                "type": "string"
+                              },
+                              "pin": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "to": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "device",
+                              "pin"
+                            ],
+                            "properties": {
+                              "device": {
+                                "type": "string"
+                              },
+                              "pin": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "colour": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "interruptions": {
+                "type": "array",
+                "maxItems": 500,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "name",
+                    "position"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "position": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "counterpart": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "page",
+                        "position"
+                      ],
+                      "properties": {
+                        "page": {
+                          "type": "string"
+                        },
+                        "position": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "items": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "texts": {
+                "type": "array",
+                "maxItems": 500,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "text",
+                    "position"
+                  ],
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "position": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "angle": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tolerance_mm": {
+            "type": "number",
+            "default": 0.5,
+            "minimum": 0,
+            "maximum": 100
+          },
+          "include_image": {
+            "type": "boolean",
+            "default": false
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 200
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "response_format": {
+            "type": "string",
+            "default": "concise",
+            "enum": [
+              "concise",
+              "detailed"
+            ]
+          }
+        },
+        "required": [
+          "project",
+          "page"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "summary",
+          "issues",
+          "cursor",
+          "total",
+          "truncated"
+        ],
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "errors",
+              "warnings",
+              "infos",
+              "clean"
+            ],
+            "properties": {
+              "errors": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "warnings": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "infos": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "clean": {
+                "type": "boolean"
+              }
+            }
+          },
+          "issues": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "severity",
+                "page",
+                "position",
+                "objects",
+                "message",
+                "fix"
+              ],
+              "properties": {
+                "code": {
+                  "enum": [
+                    "dangling_end",
+                    "unconnected_pin",
+                    "overlap",
+                    "off_grid",
+                    "unintended_junction",
+                    "interruption_pairing",
+                    "cable_core_segment",
+                    "eplan_message",
+                    "expected_missing",
+                    "expected_extra",
+                    "expected_mismatched"
+                  ]
+                },
+                "severity": {
+                  "enum": [
+                    "error",
+                    "warning",
+                    "info"
+                  ]
+                },
+                "page": {
+                  "type": "string"
+                },
+                "position": {
+                  "type": [
+                    "array",
+                    "null"
+                  ],
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "objects": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/locator"
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "fix": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "tool",
+                    "args"
+                  ],
+                  "properties": {
+                    "tool": {
+                      "type": "string"
+                    },
+                    "args": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "difference": {
+                  "$ref": "#/$defs/difference"
+                },
+                "readback": {
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "expected": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "missing",
+              "extra",
+              "mismatched"
+            ],
+            "properties": {
+              "missing": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/difference"
+                }
+              },
+              "extra": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/difference"
+                }
+              },
+              "mismatched": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/difference"
+                }
+              }
+            }
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "$defs": {
+          "locator": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "page",
+              "type",
+              "oid",
+              "digest"
+            ],
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "page": {
+                "type": "string"
+              },
+              "type": {
+                "type": "integer"
+              },
+              "oid": {
+                "type": "integer"
+              },
+              "digest": {
+                "type": "string"
+              }
+            }
+          },
+          "difference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "path",
+              "target",
+              "actual"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "missing",
+                  "extra",
+                  "mismatched"
+                ]
+              },
+              "path": {
+                "type": "string"
+              },
+              "target": {},
+              "actual": {}
+            }
+          }
+        }
+      },
+      "annotations": {
+        "title": "Review a drawn EPLAN page",
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
       "name": "eplan_page_text_replace",
       "title": "Replace page free texts",
       "description": "Replaces literals in page/group free texts; excludes frames and other text types. One Ctrl+Z undoes it. Outside scratch needs approval; denial: APPROVAL_DENIED. Example: {\"project\":\"Line1\",\"pages\":[\"=F+A2&EFA1/2\"],\"find\":\"Motor\",\"replace\":\"Drive\",\"language\":\"en_US\"}.",
@@ -18671,6 +19208,7 @@
               "eplan_page_list",
               "eplan_page_open",
               "eplan_page_renumber",
+              "eplan_page_review",
               "eplan_page_text_replace",
               "eplan_page_update",
               "eplan_part_export",

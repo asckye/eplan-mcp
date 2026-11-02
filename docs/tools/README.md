@@ -1,6 +1,6 @@
 # 已注册工具索引
 
-以 [server-contract.verified.json](../../tests/Contracts.Snapshots/server-contract.verified.json) 的 96 个工具及 `readOnlyHint` 为准；Profile 按 [ToolProfiles.Core](../../src/EplanMcp.Host/Tools/ToolProfiles.cs) 补齐（快照不含 Profile 字段）。`full` 包含全部登记工具，默认关闭的工具仍须配置启用。
+以 [server-contract.verified.json](../../tests/Contracts.Snapshots/server-contract.verified.json) 的 97 个工具及 `readOnlyHint` 为准；Profile 按 [ToolProfiles.Core](../../src/EplanMcp.Host/Tools/ToolProfiles.cs) 补齐（快照不含 Profile 字段）。`full` 包含全部登记工具，默认关闭的工具仍须配置启用。
 
 “写入”表示 `readOnlyHint: false`，包含项目写入、本地数据和导出文件；具体安全级别、审批及验证边界见规格。规格状态括号记录首次发布版本，标签中尚无该工具时记 `Unreleased`；Implemented 不代表已经通过实机验收。未注册规格不列入此表，里程碑状态见[路线图](../roadmap.md)。
 
@@ -34,7 +34,7 @@
 | `eplan_device_place` | full | 写入 | [eplan_device_place.md](eplan_device_place.md) |
 | `eplan_device_renumber` | full | 写入 | [eplan_device_renumber.md](eplan_device_renumber.md) |
 | `eplan_device_update` | core、full | 写入 | [eplan_device_update.md](eplan_device_update.md) |
-| `eplan_export_dxf` | core、full | 写入 | [eplan_export_dxf.md](eplan_export_dxf.md) |
+| `eplan_export_dxf` | full | 写入 | [eplan_export_dxf.md](eplan_export_dxf.md) |
 | `eplan_export_image` | core、full | 写入 | [eplan_export_image.md](eplan_export_image.md) |
 | `eplan_export_labels` | full | 写入 | [eplan_export_labels.md](eplan_export_labels.md) |
 | `eplan_export_parts` | full | 写入 | [eplan_export_parts.md](eplan_export_parts.md) |
@@ -65,6 +65,7 @@
 | `eplan_page_open` | full | 只读 | [eplan_page_open.md](eplan_page_open.md) |
 | `eplan_page_renumber` | full | 写入 | [eplan_page_renumber.md](eplan_page_renumber.md) |
 | `eplan_page_text_replace` | full | 写入 | [eplan_page_text_replace.md](eplan_page_text_replace.md) |
+| `eplan_page_review` | core、full | 只读 | [eplan_page_review.md](eplan_page_review.md) |
 | `eplan_page_update` | core、full | 写入 | [eplan_page_update.md](eplan_page_update.md) |
 | `eplan_part_export` | full | 写入 | [eplan_part_export.md](eplan_part_export.md) |
 | `eplan_part_import` | full | 写入 | [eplan_part_import.md](eplan_part_import.md) |

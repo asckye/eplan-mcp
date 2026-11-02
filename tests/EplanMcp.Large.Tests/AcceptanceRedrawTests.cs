@@ -39,6 +39,7 @@ public sealed class AcceptanceRedrawTests(LiveEplan eplan)
                 status = "preflight";
                 Assert.Skip("Preflight rehearsal only; inspect local evidence in " + artifacts);
             }
+            await driver.ReviewAsync();
             await driver.ExportAsync();
             JsonElement image = driver.Image!.Value;
             string exportRoot = image.GetProperty("directory").GetString()!;

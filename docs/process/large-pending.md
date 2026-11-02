@@ -7,6 +7,7 @@
 | 官方 action 离线导入（`feat/official-actions`，2026-11-01 负责人 brief） | `BatchVerification`、`ActionTryTests`、`ActionCatalogTests` | 待运行：批量 action 仅取官方 action/TYPE 行，按第一条官方示例准备参数；需要文件、页或选择上下文仍为 needs_context。此次禁止运行 EPLAN；审批、scratch、unknown 停止与撤销断言保留。 |
 | 崩溃成员拒绝与失联停跑（`feat/crash-refusals`，2026-11-02，负责人 brief；A77） | `BatchVerification`、`ApiTryTests` | 待运行：本次禁止运行 EPLAN；拒绝写侧、保留 MacroBox 读取、失联后停止并持久暂停需验证。崩溃成员不再试执行，原生 target/value 未提供，不宣称复现原生崩溃。 |
 | 批量验证与 main 生成表合并（`feat/batch-verify`，2026-11-01，负责人 brief） | `BatchVerification`、`ApiTryTests`、`ActionTryTests` | 进行中：2026-11-01 已落地 main 68e9f61b，首批 10-31 结果导入后实机验证计数 171 → 228；当夜两槽循环续跑（单次运行在结果未知或状态不可信的条目处按设计停止并换新副本续跑），次日汇总导入。 |
+| `feat/page-review` 变基合并与电缆分支坐标修复（2026-11-01，规格 `eplan_page_review.md`） | `PageReviewTests`、`AcceptanceRedrawTests`、`LayoutGuardTests`、`ConnectionCreateTests`、`CableDefinitionTests`、`PlacementMoveTests`、`DanglingInterruptionTests`、`NoSideEffectTests` | 待运行：负责人要求本次不启动 EPLAN。保留 main 布局守卫、T 节点穿通、Cable/定义点移动豁免及 39 步验收绘法；Small 复现 A75 三引脚 `(120,160)/(120,160)/(122,160)`，修复由路径及 Cable 定义线计算 `y=128→192`，非平行/缺失证据不给坐标。main 已连接 terminal7/link1 且不创建旧辅助器件，审查预期清单据此移除三条旧空引脚警告，25 条警告仍须完整分页实机核对，不代表已通过。需核对定义线读回、修复后芯线归属、同一步回滚与既有撤销历史；主线程耗时未测。 |
 | C1 服务入口（历史 brief/提交待补定位；security.md 第 5 节） | `ApiTryTests` | 待运行：服务读、写撤销与相关失败路径；测试已写，尚无实机结果。 |
 | C2 未验证 action（历史 brief/提交待补定位；security.md 第 5 节） | `ActionTryTests` | 待运行：scratch 限定、审批、事务、模态/unknown 等；规范注明 Large 已写待运行。 |
 | P06 功能与影响闭包（历史 brief/提交待补定位） | `PlanFunctionsTests`、`PlanImpactTests` | 待运行：Large README 明确尚未实跑；保留完整性与边界断言，缺页证据的现有拒绝行为需按当前常设规则另行评审，不在文档任务中弱化测试。 |

@@ -30,7 +30,7 @@ internal static class ToolProfiles
         MessageTools.ListTool, CheckTools.ListTool, MacroTools.ListTool, MacroTools.GetTool, UsageTools.UsageTool,
         PageWriteTools.CreateTool, PageWriteTools.UpdateTool, DeviceWriteTools.UpdateTool, MacroWriteTools.InsertTool,
         ConnectionWriteTools.GenerateTool, CheckWriteTools.RunTool, ReportWriteTools.UpdateTool, ExportTools.PdfTool,
-        ExportTools.DxfTool, ImageExportTools.ImageTool,
+        PageReviewTools.Tool, ImageExportTools.ImageTool,
     };
 
     /// <summary>

@@ -47,6 +47,16 @@ public sealed class SpikeAction : IEplAction
                     {
                         switch ((string?)request["mode"])
                         {
+                            case "review_cores":
+                                using (var reviewFinder = new DMObjectsFinder(project))
+                                {
+                                    foreach (Connection connection in reviewFinder.GetConnections(null).Where(c => c.Page?.Name == pages[0].Name && c.ConnectionDefPoints.Length > 0))
+                                    { using ConnectionPropertyList properties = connection.Properties; properties[(Properties.Connection)31011] = "1"; properties[(Properties.Connection)31004] = "RD"; }
+                                }
+                                break;
+                            case "review_setup":
+                                ReviewFixture.Create(project, pages, request);
+                                break;
                             case "define":
                                 SpikeCable.Define(project, pages[0], request);
                                 break;

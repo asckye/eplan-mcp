@@ -12,6 +12,7 @@
     <Reference Include="Eplan.EplApi.AFu"><HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Eplan.EplApi.Baseu"><HintPath>$(EplanBinPath)\Eplan.EplApi.Baseu.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Eplan.EplApi.DataModelu"><HintPath>$(EplanBinPath)\Eplan.EplApi.DataModelu.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Eplan.EplApi.EServicesu"><HintPath>$(EplanBinPath)\Eplan.EplApi.EServicesu.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Eplan.EplApi.HEServicesu"><HintPath>$(EplanBinPath)\Eplan.EplApi.HEServicesu.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
 </Project>

@@ -1,7 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
+using EplanMcp.Host.Tools;
 
 namespace EplanMcp.Large.Tests;
 
@@ -129,6 +131,31 @@ internal sealed class AcceptanceRedrawDriver(
         output("Page image: " + Image.Value.GetProperty("directory").GetString());
         if (keepGoing)
         { ThrowIfProblems(); }
+    }
+
+    internal async Task ReviewAsync()
+    {
+        JsonElement[] drawings = await DrawingsAsync(Page);
+        var issues = new List<JsonElement>();
+        int warnings = list.TryGetProperty("expected_review_warnings", out JsonElement expected) ? expected.GetArrayLength() : 0;
+        string? cursor = null;
+        do
+        {
+            var args = new Dictionary<string, object?> { ["page"] = Page, ["limit"] = 200 };
+            if (cursor is not null)
+            { args["cursor"] = cursor; }
+            JsonElement review = await ReadAsync("eplan_page_review", args);
+            JsonElement summary = review.GetProperty("summary");
+            Assert.Equal(0, summary.GetProperty("errors").GetInt32());
+            Assert.Equal(warnings, summary.GetProperty("warnings").GetInt32());
+            Assert.Equal(warnings == 0, summary.GetProperty("clean").GetBoolean());
+            issues.AddRange(review.GetProperty("issues").EnumerateArray());
+            cursor = review.GetProperty("cursor").GetString();
+            Assert.Equal(cursor is not null, review.GetProperty("truncated").GetBoolean());
+            if (cursor is null)
+            { Assert.Equal(review.GetProperty("total").GetInt32(), issues.Count); }
+        } while (cursor is not null);
+        AcceptanceReview.Verify(list, run, Page, issues.ToArray(), drawings);
     }
 
     private async Task PlaceDeviceAsync(JsonElement device, string? page = null)
@@ -705,12 +732,23 @@ internal sealed class AcceptanceRedrawDriver(
         JsonElement[] expectedConnections = Items("expected_connections");
         JsonElement[] supported = expectedConnections.Where(c => _wireBatchCommitted && _devices.ContainsKey(c.GetProperty("from").GetProperty("item").GetString()!) && _devices.ContainsKey(c.GetProperty("to").GetProperty("item").GetString()!)).ToArray();
         if (supported.Length != expectedConnections.Length)
-        { Skip("connection_set", "Some expected endpoints were skipped; compare all observable connections against the supported subset and retain incomplete whole-page status."); }
+        { Skip("connection_set", "Some expected endpoints were skipped; compare the supported subset and retain incomplete whole-page status."); }
         string[] expected = supported.Select(c => Pair(Endpoint(c.GetProperty("from")), Endpoint(c.GetProperty("to")))).Order(StringComparer.Ordinal).ToArray();
         var actualPairs = new List<string>();
         foreach (JsonElement connection in connections)
         { Check(() => actualPairs.Add(Pair(ReadEndpoint(connection.GetProperty("from")), ReadEndpoint(connection.GetProperty("to")))), "connection endpoints/" + connection.GetRawText()); }
         Check(() => Assert.Equal(expected, actualPairs.Order(StringComparer.Ordinal)));
+        JsonNode End(JsonElement endpoint)
+        {
+            string id = endpoint.GetProperty("item").GetString()!;
+            return new JsonObject { ["device"] = _actualTags[id], ["pin"] = IsTerminal(id) ? "" : endpoint.GetProperty("pin").GetString() };
+        }
+        var targets = new JsonObject { ["connections"] = new JsonArray(supported.Select(c => (JsonNode?)new JsonObject { ["from"] = End(c.GetProperty("from")), ["to"] = End(c.GetProperty("to")) }).ToArray()) };
+        var observed = new JsonObject { ["connections"] = new JsonArray(connections.Select(c => JsonNode.Parse(c.GetRawText())).ToArray()) };
+        foreach (JsonNode? row in observed["connections"]!.AsArray())
+        { foreach (string end in new[] { "from", "to" }) { if (row?[end] is JsonObject pin && pin["pin"] is null) { pin["pin"] = ""; } } }
+        Check(() => Assert.Empty(ExpectedReview.Compare(targets, observed, Page, _tolerance)));
+
     }
 
     private static bool SameSegment(JsonElement line, JsonElement a, JsonElement b) =>
@@ -868,9 +906,7 @@ internal sealed class AcceptanceRedrawDriver(
     private static string Pair(string a, string b) => JsonSerializer.Serialize(new[] { a, b }.Order(StringComparer.Ordinal));
     private void Near(double[] expected, JsonElement actual)
     {
-        Assert.Equal(expected.Length, actual.GetArrayLength());
-        for (int i = 0; i < expected.Length; i++)
-        { Check(() => Assert.InRange(Math.Abs(expected[i] - actual[i].GetDouble()), 0, _tolerance), "coordinate " + i); }
+        Check(() => Assert.True(ExpectedReview.Near(expected, actual.EnumerateArray().Select(n => n.GetDouble()), _tolerance), "Coordinates exceed drawing tolerance."));
     }
 
     private sealed record SkippedItem(string Item, string Reason);

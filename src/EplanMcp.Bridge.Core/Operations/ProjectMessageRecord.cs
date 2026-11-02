@@ -3,6 +3,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>One project message (<c>EServices.ProjectMessage</c>) as an adapter reads it, EPLAN's values unchanged.</summary>
 public sealed class ProjectMessageRecord
 {
+    /// <summary>Exact page of the native message target, when available.</summary>
+    public string? Page { get; set; }
     /// <summary><c>GetId()</c>: the message number.</summary>
     public int Id { get; set; }
 

@@ -4,6 +4,8 @@
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceDrawingList.cs" Link="Acceptance\AcceptanceDrawingList.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceListFile.cs" Link="Acceptance\AcceptanceListFile.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceRedrawDriver.cs" Link="Acceptance\AcceptanceRedrawDriver.cs" />
+    <Compile Include="..\EplanMcp.Large.Tests\AcceptanceReview.cs" Link="Acceptance\AcceptanceReview.cs" />
+    <Compile Include="..\EplanMcp.Large.Tests\PageReviewCableLayout.cs" Link="Acceptance\PageReviewCableLayout.cs" />
     <EmbeddedResource Include="..\EplanMcp.Large.Tests\fixtures\acceptance\fictional-plc-di-page.json" LogicalName="Acceptance.fictional.json" />
     <Compile Include="..\EplanMcp.Bridge.Core.Tests\Operations\ConnectionCreateFixture.cs" Link="Bridge\ConnectionCreateFixture.cs" />
     <Compile Include="..\EplanMcp.Bridge.Core.Tests\Operations\CableDefinitionFixture.cs" Link="Bridge\CableDefinitionFixture.cs" />

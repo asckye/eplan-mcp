@@ -26,9 +26,10 @@ internal sealed class EplanProjectMessageReader : IProjectMessageReader
             // S6 found only ProjectMessage elements; a BaseProjectMessage is not stored in the project (EPLAN XML docs).
             if (item is ProjectMessage message)
             {
-                (string? kind, string? name) = Target(message);
+                (string? kind, string? name, string? targetPage) = Target(message);
                 records.Add(new ProjectMessageRecord
                 {
+                    Page = targetPage,
                     Id = message.GetId(),
                     Category = message.GetCategory().ToString(),
                     Region = message.GetGroup().ToString(),
@@ -49,7 +50,7 @@ internal sealed class EplanProjectMessageReader : IProjectMessageReader
     /// null or throws). One such message must not fail the whole listing. The exception families are the DataModel
     /// ones of M2 design 4.5: BaseException, and ArgumentException or InvalidOperationException subclasses.
     /// </summary>
-    private static (string? Kind, string? Name) Target(ProjectMessage message)
+    private static (string? Kind, string? Name, string? Page) Target(ProjectMessage message)
     {
         try
         {
@@ -60,12 +61,12 @@ internal sealed class EplanProjectMessageReader : IProjectMessageReader
                 Page page => page.Name,
                 _ => null,
             };
-            return (target?.GetType().Name, name);
+            return (target?.GetType().Name, name, target is Page pageTarget ? pageTarget.Name : target is Connection connection ? EplanConnectionReader.PageOf(connection)?.Name : (target as Placement)?.Page?.Name);
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException or InvalidOperationException)
         {
             WriteExceptionDiagnostics.Report(ex);
-            return (null, null);
+            return (null, null, null);
         }
     }
 }

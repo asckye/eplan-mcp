@@ -77,7 +77,7 @@ public static class PlacementMovePlanner
             DrawingPlacement[] closure = [target.Row, .. page.Placements.Where(p => p.Parent is not null && Same(p.Parent, target.Row.Locator))];
             foreach (DrawingPlacement child in closure)
             {
-                if (!child.Properties.TryGetValue("grouped", out string? grouped) || grouped != "false" || child.Kind is not ("Function" or "SymbolReference" or "PotentialDefinition" or "Cable" or "ConnectionDefinitionPoint" or "Text" or "Line" or "Rectangle" or "PropertyPlacement"))
+                if (!child.Properties.TryGetValue("grouped", out string? grouped) || grouped != "false" || child.Kind is not ("Function" or "SymbolReference" or "PotentialDefinition" or "InterruptionPoint" or "Cable" or "ConnectionDefinitionPoint" or "Text" or "Line" or "Rectangle" or "PropertyPlacement"))
                 { throw Missing("Grouped objects, macro groups and unverified placement kinds cannot be moved."); }
                 offsets.Add(child, offset);
                 // A54: all-zero outlines have no visible ink; unknown positions do not constrain the move.

@@ -14,12 +14,24 @@ internal static class SpikeReadback
     {
         Page[] pages = names.Select(n => project.Pages.Single(p => p.Name == n)).ToArray();
         SymbolReference[] references = pages.SelectMany(p => p.AllPlacements.OfType<SymbolReference>()).ToArray();
-        var scene = new ConnectionCreatePlanner.Scene();
+        var scenes = pages.ToDictionary(p => p.Name, _ => new ConnectionCreatePlanner.Scene(), StringComparer.Ordinal);
         var segments = new JArray();
         foreach (SymbolReference reference in references)
         {
-            foreach (PinBase pin in reference.GraphicalConnectionPoints)
-            { scene.Pins[FormattableString.Invariant($"symbol/{reference.ObjectIdentifier}/{pin.Index}")] = new() { Location = At(reference, pin) }; }
+            ConnectionCreatePlanner.Scene scene = scenes[reference.Page.Name];
+            if (reference is not DynamicConnectionLine)
+            {
+                string identifier = reference.ToStringIdentifier();
+                JToken outline = Observe(() => reference.GetBoundingBox().SelectMany(p => new[] { p.X, p.Y }).ToArray());
+                scene.Page.Placements.Add(new()
+                {
+                    Kind = reference.GetType().Name,
+                    Locator = new() { Type = SnapshotCanonical.TypeOf(identifier), Oid = reference.ObjectIdentifier },
+                    Bounds = outline is JArray ? outline.ToObject<double[]>() : null,
+                });
+            }
+            foreach (PinBase pin in reference is DynamicConnectionLine ? [] : reference.GraphicalConnectionPoints)
+            { scene.Pins[FormattableString.Invariant($"{SnapshotCanonical.TypeOf(reference.ToStringIdentifier())}/{reference.ObjectIdentifier}/{pin.Index}")] = new() { Location = At(reference, pin), Direction = pin.Direction.ToString() }; }
             foreach (var line in reference.GraphicalConnections)
             {
                 var row = new JObject
@@ -48,6 +60,7 @@ internal static class SpikeReadback
             Pin? start = connection.StartPin, end = connection.EndPin;
             if (start?.ParentFunction is { } a && end?.ParentFunction is { } b && a.Page.Name == b.Page.Name)
             {
+                ConnectionCreatePlanner.Scene scene = scenes[a.Page.Name];
                 scene.Graphical = segments.Where(s => (string?)s["page"] == a.Page.Name).Select(s => new[] { s["start"]!.ToObject<double[]>()!, s["end"]!.ToObject<double[]>()! }).ToList();
                 double[][]? path = CableDefinitionPlanner.DrawnPath(scene, At(a, start), At(b, end));
                 row["drawnPath"] = path is null ? JValue.CreateNull() : JArray.FromObject(path);
@@ -61,6 +74,14 @@ internal static class SpikeReadback
             ["devices"] = new JArray(references.OfType<Function>().Where(f => f is not Cable).Select(f => new JObject
             { ["page"] = f.Page.Name, ["oid"] = f.ObjectIdentifier, ["name"] = f.Name, ["position"] = new JArray(f.Location.X, f.Location.Y) })),
             ["segments"] = segments,
+            ["dynamicLines"] = new JArray(references.OfType<DynamicConnectionLine>().Select(line => new JObject
+            {
+                ["oid"] = line.ObjectIdentifier,
+                ["position"] = new JArray(line.Location.X, line.Location.Y),
+                ["connectionPoints"] = new JArray(line.GraphicalConnectionPoints.Select(pin => new JObject { ["index"] = pin.Index, ["position"] = new JArray(At(line, pin)) })),
+                ["graphics"] = Observe(() => line.GetGraphics() is global::Eplan.EplApi.DataModel.Graphics.Line graphic
+                    ? new JObject { ["start"] = new JArray(graphic.StartPoint.X, graphic.StartPoint.Y), ["end"] = new JArray(graphic.EndPoint.X, graphic.EndPoint.Y) } : null),
+            })),
             ["connections"] = connections,
             ["cables"] = new JArray(references.OfType<Cable>().Select(c => new JObject
             {

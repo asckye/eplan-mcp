@@ -8,6 +8,29 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class PlacementMovePlannerTests
 {
+    [Theory]
+    [InlineData("InterruptionPoint", 160, 160, 400, 160)]
+    [InlineData("Cable", 80, 188, 80, 132)]
+    public void PageReviewRepairs_SymbolDerivedPlacements_KeepFullPropertyClosure(string kind, double x, double y, double xAfter, double yAfter)
+    {
+        var f = new MoveFixture();
+        f.Scene.Page.GridSize = 4;
+        f.Scene.Page.PageSize = [420, 297];
+        f.Root.Kind = kind;
+        f.Root.Location = [x, y];
+        f.Root.Bounds = [x - 1, y - 1, x + 1, y + 1];
+        DrawingPlacement child = f.Child('b', [x + 4, y]);
+        child.Bounds = [x + 3, y - 1, x + 5, y + 1];
+        f.Request["moves"] = new JArray(new JObject { ["locator"] = BridgeJson.FromObject(f.Root.Locator), ["x_mm"] = xAfter, ["y_mm"] = yAfter });
+        JObject plan = f.Plan();
+        Assert.Equal([xAfter, yAfter], plan["moves"]![0]!["after"]!.Values<double>());
+        Assert.Equal([xAfter + 4, yAfter], plan["moves"]![1]!["after"]!.Values<double>());
+        Assert.Equal(2, plan["moves"]!.Count());
+        Assert.False((bool)plan["noOp"]!);
+        f.Root.Properties["grouped"] = "true";
+        AssertError(f, ErrorReason.CapabilityMissing);
+    }
+
     [Fact]
     public void MoveInsideContainer_WithOwnDefaultTextOverlap_IsAllowed()
     {

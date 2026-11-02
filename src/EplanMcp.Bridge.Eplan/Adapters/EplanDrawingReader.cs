@@ -147,6 +147,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     ["text"] = contents?.GetAsString(),
                     ["display"] = display,
                     ["property_id"] = placement is PropertyPlacement propertyText ? DisplayedId(propertyText).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
+                    ["displayed_property_id"] = placement is PropertyPlacement displayed ? DisplayedId(displayed).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
                     ["property_index"] = slot?.Split('#')[1],
                     ["angle_deg"] = placement is PropertyPlacement ? angle : null,
                     ["docked"] = placement is PropertyPlacement docked ? docked.IsDocked.ToString().ToLowerInvariant() : null,

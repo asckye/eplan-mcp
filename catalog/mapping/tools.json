@@ -3816,6 +3816,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/CheckListToolTests.cs"
           },
           {
+            "name": "PageReviewRulesTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewRulesTests.cs"
+          },
+          {
             "name": "CheckInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/CheckInteropTests.cs"
@@ -3985,6 +3990,11 @@
             "name": "CheckAndReportTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CheckAndReportTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           }
         ],
         "operationTests": [
@@ -4331,6 +4341,11 @@
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           }
         ],
         "operationTests": [
@@ -4503,6 +4518,11 @@
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           },
           {
             "name": "PlacementEditSpikeTests",
@@ -4682,6 +4702,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -5789,6 +5814,11 @@
             "name": "LayoutGuardTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/LayoutGuardTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           },
           {
             "name": "PlacementEditSpikeTests",
@@ -9978,6 +10008,11 @@
             "file": "tests/EplanMcp.Large.Tests/PageDrawingDiscoveryTests.cs"
           },
           {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
             "name": "PlacementTextCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
@@ -10548,6 +10583,52 @@
           "verifies": true
         }
       ],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_page_review",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/PageReviewTools.cs",
+      "operations": [
+        "page.review"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_page_review.md",
+        "specStatus": "首片已实现（图片留待后续；Large 仅编写，未运行）",
+        "apiNotes": [
+          "A41",
+          "A64",
+          "A65",
+          "A72",
+          "A73"
+        ],
+        "tests": [
+          {
+            "name": "PageReviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "PageReviewContractTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewContractTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
       "dataDictionary": []
     },
     {
@@ -12552,6 +12633,7 @@
         "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A57",
+          "A72",
           "A76"
         ],
         "tests": [
@@ -12564,6 +12646,16 @@
             "name": "MoveTransactionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MoveTransactionTests.cs"
+          },
+          {
+            "name": "PageReviewCableFixTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewCableFixTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewTests.cs"
           },
           {
             "name": "PlacementMoveExecutionTests",
@@ -12599,6 +12691,11 @@
             "name": "LayoutGuardTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/LayoutGuardTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -15859,6 +15956,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "PageReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           },
           {
             "name": "SymbolDescriptionTests",

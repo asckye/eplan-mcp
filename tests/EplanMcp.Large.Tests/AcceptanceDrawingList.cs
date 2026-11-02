@@ -13,7 +13,7 @@ internal static class AcceptanceDrawingList
         using JsonDocument document = JsonDocument.Parse(json, new() { MaxDepth = 32 });
         JsonElement root = document.RootElement;
         FiniteNumbers(root, "");
-        Object(root, "", "version page counterpart_page location_boxes devices plc terminal_strip wires nodes cables interruption_points texts expected_connections", "");
+        Object(root, "", "version page counterpart_page location_boxes devices plc terminal_strip wires nodes cables interruption_points texts expected_connections", "expected_review_warnings");
         Integer(root.GetProperty("version"), "/version", 1, 1);
         Text(root, "page", "");
         Text(root, "counterpart_page", "");
@@ -204,6 +204,25 @@ internal static class AcceptanceDrawingList
             Endpoint(connection.GetProperty("from"), at + "/from");
             Endpoint(connection.GetProperty("to"), at + "/to");
         });
+        if (root.TryGetProperty("expected_review_warnings", out JsonElement warnings))
+        {
+            Array(warnings, "/expected_review_warnings", 0, 50);
+            Each(root, "expected_review_warnings", "", (warning, at) =>
+            {
+                Object(warning, at, "code position objects", "");
+                Text(warning, "code", at);
+                Require(warning.GetProperty("code").GetString() is "unconnected_pin" or "overlap", at + "/code", "must be a warning code");
+                int objectCount = warning.GetProperty("code").GetString() == "unconnected_pin" ? 1 : 2;
+                Position(warning.GetProperty("position"), at + "/position");
+                Each(warning, "objects", at, (item, pointer) =>
+                {
+                    Object(item, pointer, "kind name position", "");
+                    Text(item, "kind", pointer);
+                    Text(item, "name", pointer);
+                    Position(item.GetProperty("position"), pointer + "/position");
+                }, objectCount, objectCount);
+            });
+        }
         return root.Clone();
     }
 

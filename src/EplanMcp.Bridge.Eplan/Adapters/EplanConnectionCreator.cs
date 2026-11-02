@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>A52/S40: borrowed objects stay inside one main-thread request; discovery precedes the write wrapper.</summary>
-internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = true) : IConnectionCreator, ICableDefinitionWriter
+internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = true, bool allowReadOnly = false) : IConnectionCreator, ICableDefinitionWriter
 {
     public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => new EplanSymbolReader().Read(projectPath, args);
     private static Page Page(string project, string page)
@@ -30,7 +30,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     internal ConnectionCreatePlanner.Scene Read(string project, string page, IReadOnlyList<Placement> created)
     {
         OpenProject target = ProjectResolver.Resolve(new EplanProjectCatalog().ListOpenProjects(), project);
-        if (target.ReadOnly)
+        if (target.ReadOnly && !allowReadOnly)
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "Select a writable project."); }
         Page native = Page(target.Path, page);
         PageDrawingGeometry geometry = new EplanDrawingReader().Read(target.Path, page, created)!;
@@ -40,12 +40,8 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         {
             if (!geometry.Placements.Any(p => p.Locator.Type == SnapshotCanonical.TypeOf(placement.ToStringIdentifier()) && p.Locator.Oid == placement.ObjectIdentifier))
             { scene.Complete = false; }
-            if (placement is SymbolReference reference)
-            {
-                foreach (PinBase pin in reference.GraphicalConnectionPoints)
-                { scene.Pins.Add(Key(reference, pin.Index), new() { Location = [reference.Location.X + pin.Location.X, reference.Location.Y + pin.Location.Y], Direction = pin.Direction.ToString() }); }
-            }
         }
+        EplanConnectionScene.ReadPins(scene, EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)));
         foreach (SymbolVariant variant in readSymbolBounds ? Variants(target.Path) : [])
         { scene.SymbolBounds.Add(FormattableString.Invariant($"{variant.SymbolName}/{variant.VariantNr}"), Outline(variant)); }
         scene.Logical = Endpoints(target.Path, page).Select(p => new ConnectionRecord { StartDevice = p[0], EndDevice = p[1] }).ToList();
@@ -176,8 +172,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             if (!scene.Complete || scene.PageType != "Circuit" || scene.Page.PageSize is null || scene.Page.Placements.Count > 10000)
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Read a complete Circuit counterpart page within 10000 placements."); }
             scene.Pins.Clear();
-            foreach (Function function in EplanNativePreconditions.Valid(native.AllPlacements).OfType<Function>())
-            { foreach (PinBase pin in function.GraphicalConnectionPoints) { scene.Pins.Add(Key(function, pin.Index), new() { Location = [function.Location.X + pin.Location.X, function.Location.Y + pin.Location.Y], Direction = pin.Direction.ToString() }); } }
+            EplanConnectionScene.ReadPins(scene, EplanNativePreconditions.Valid(native.AllPlacements).OfType<Function>());
             snapshots.Add(new JObject { ["page"] = page, ["drawing"] = BridgeJson.FromObject(scene.Page), ["pins"] = BridgeJson.FromObject(scene.Pins), ["graphical"] = JArray.FromObject(scene.Graphical), ["logical"] = BridgeJson.FromObject(scene.Logical) });
             foreach (InterruptionPoint point in EplanNativePreconditions.Valid(native.AllPlacements).OfType<InterruptionPoint>())
             {

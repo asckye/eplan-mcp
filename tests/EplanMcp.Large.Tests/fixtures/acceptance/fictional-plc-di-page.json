@@ -1203,5 +1203,32 @@
         "pin": "7"
       }
     }
+  ],
+  "expected_review_warnings": [
+    {"code":"unconnected_pin","position":[296,119.25],"objects":[{"kind":"Terminal","name":"+A1-X{run}6:8","position":[296,120]}]},
+    {"code":"unconnected_pin","position":[120,256],"objects":[{"kind":"InterruptionPoint","name":"=GAA+A1-LINK{run}2","position":[120,256]}]},
+    {"code":"unconnected_pin","position":[152,256],"objects":[{"kind":"InterruptionPoint","name":"=GAA+A1-LINK{run}3","position":[152,256]}]},
+    {"code":"unconnected_pin","position":[184,256],"objects":[{"kind":"InterruptionPoint","name":"=GAA+A1-LINK{run}4","position":[184,256]}]},
+    {"code":"unconnected_pin","position":[216,256],"objects":[{"kind":"InterruptionPoint","name":"=GAA+A1-LINK{run}5","position":[216,256]}]},
+    {"code":"overlap","position":[72,232],"objects":[{"kind":"LocationBox","name":"=+P1","position":[72,232]},{"kind":"Function","name":"=GAA+P{run}-S1","position":[88,212]}]},
+    {"code":"overlap","position":[72,232],"objects":[{"kind":"LocationBox","name":"=+P1","position":[72,232]},{"kind":"Function","name":"=GAA+P{run}-S2","position":[120,212]}]},
+    {"code":"overlap","position":[72,232],"objects":[{"kind":"LocationBox","name":"=+P1","position":[72,232]},{"kind":"Function","name":"=GAA+P{run}-S3","position":[152,212]}]},
+    {"code":"overlap","position":[72,232],"objects":[{"kind":"LocationBox","name":"=+P1","position":[72,232]},{"kind":"Function","name":"=GAA+P{run}-S4","position":[184,212]}]},
+    {"code":"overlap","position":[72,232],"objects":[{"kind":"LocationBox","name":"=+P1","position":[72,232]},{"kind":"Function","name":"=GAA+P{run}-S5","position":[216,212]}]},
+    {"code":"overlap","position":[236,232],"objects":[{"kind":"LocationBox","name":"=+HMT","position":[236,232]},{"kind":"Function","name":"=GAA+HMT{run}-S6","position":[248,212]}]},
+    {"code":"overlap","position":[72,40],"objects":[{"kind":"PLC","name":"=GAA+A1-KF{run}1","position":[72,40]},{"kind":"Terminal","name":"=GAA+A1-KF{run}1:1","position":[88,64]}]},
+    {"code":"overlap","position":[88,64],"objects":[{"kind":"Terminal","name":"=GAA+A1-KF{run}1:1","position":[88,64]},{"kind":"Terminal","name":"=GAA+A1-KF{run}1:2","position":[120,64]}]},
+    {"code":"overlap","position":[120,64],"objects":[{"kind":"Terminal","name":"=GAA+A1-KF{run}1:2","position":[120,64]},{"kind":"Terminal","name":"=GAA+A1-KF{run}1:3","position":[152,64]}]},
+    {"code":"overlap","position":[152,64],"objects":[{"kind":"Terminal","name":"=GAA+A1-KF{run}1:3","position":[152,64]},{"kind":"Terminal","name":"=GAA+A1-KF{run}1:4","position":[184,64]}]},
+    {"code":"overlap","position":[184,64],"objects":[{"kind":"Terminal","name":"=GAA+A1-KF{run}1:4","position":[184,64]},{"kind":"Terminal","name":"=GAA+A1-KF{run}1:5","position":[216,64]}]},
+    {"code":"overlap","position":[216,64],"objects":[{"kind":"Terminal","name":"=GAA+A1-KF{run}1:5","position":[216,64]},{"kind":"Terminal","name":"=GAA+A1-KF{run}1:6","position":[248,64]}]},
+    {"code":"overlap","position":[248,64],"objects":[{"kind":"Terminal","name":"=GAA+A1-KF{run}1:6","position":[248,64]},{"kind":"Terminal","name":"=GAA+A1-KF{run}1:7","position":[280,64]}]},
+    {"code":"overlap","position":[76,160],"objects":[{"kind":"Cable","name":"+A1-W{run}3","position":[76,160]},{"kind":"ConnectionDefinitionPoint","name":"+A1-W{run}3","position":[88,160]}]},
+    {"code":"overlap","position":[76,160],"objects":[{"kind":"Cable","name":"+A1-W{run}3","position":[76,160]},{"kind":"ConnectionDefinitionPoint","name":"+A1-W{run}3","position":[120,160]}]},
+    {"code":"overlap","position":[76,160],"objects":[{"kind":"Cable","name":"+A1-W{run}3","position":[76,160]},{"kind":"ConnectionDefinitionPoint","name":"+A1-W{run}3","position":[152,160]}]},
+    {"code":"overlap","position":[76,160],"objects":[{"kind":"Cable","name":"+A1-W{run}3","position":[76,160]},{"kind":"ConnectionDefinitionPoint","name":"+A1-W{run}3","position":[184,160]}]},
+    {"code":"overlap","position":[76,160],"objects":[{"kind":"Cable","name":"+A1-W{run}3","position":[76,160]},{"kind":"ConnectionDefinitionPoint","name":"+A1-W{run}3","position":[216,160]}]},
+    {"code":"overlap","position":[76,160],"objects":[{"kind":"Cable","name":"+A1-W{run}3","position":[76,160]},{"kind":"ConnectionDefinitionPoint","name":"+A1-W{run}3","position":[248,160]}]},
+    {"code":"overlap","position":[272,92],"objects":[{"kind":"Cable","name":"+A1-W{run}4","position":[272,92]},{"kind":"ConnectionDefinitionPoint","name":"+A1-W{run}4","position":[280,92]}]}
   ]
 }

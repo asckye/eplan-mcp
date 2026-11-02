@@ -25,6 +25,8 @@ internal static class ToolSchemas
                     schema["properties"]!["items"] = ConnectionCreateSchema.Items();
                     tool.ProtocolTool.OutputSchema = JsonSerializer.SerializeToElement(JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project","page","execution","dryRun","undoSteps","recovered"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"execution":{"enum":["not_started","committed"]},"dryRun":{"type":"boolean"},"undoSteps":{"enum":[2,6,7,8]},"recovered":{"type":"boolean"},"pageShown":{"type":["boolean","null"]},"hint":{"type":["string","null"]},"truncated":{"type":"boolean"},"coordinates":{"type":"array"},"symbols":{"type":"array"},"graphicalAutoconnect":{"type":"array"},"logicalAfterGenerate":{"type":"array"},"actualEndpoints":{"type":"array"},"cableDefinitions":{"type":"array"},"coreImpact":{"type":"array"},"actualCores":{"type":"array"},"gridSize":{"type":"number"},"pageSize":{"type":"array"},"coverage":{"type":"string"},"logicalDuringPlacement":{"const":0},"generation":{"type":"string"},"fingerprint":{"type":"string"}}}"""));
                 }
+                if (tool.ProtocolTool.Name == PageReviewTools.Tool)
+                { PageReviewTools.Configure(tool.ProtocolTool, schema); }
                 if (tool.ProtocolTool.Name == DeviceWriteTools.PlaceTool)
                 { DevicePlaceInputs.Configure(schema); }
                 if (tool.ProtocolTool.Name == ListImportTools.ImportTool)

@@ -174,13 +174,7 @@ internal sealed class DevicePlaceRequest
     /// type, so <c>=GAA+A1&amp;EFS1/60</c> gives <c>=GAA+A1</c>. EPLAN drops parts a device does not use (A13), which
     /// the read-back finds.
     /// </summary>
-    internal static string DeviceStructureOf(string pageName)
-    {
-        string structure = PageNames.StructureOf(pageName);
-        int type = structure.IndexOf('&');
-        int end = type < 0 ? -1 : structure.IndexOf('#', type);
-        return type < 0 ? structure : structure.Substring(0, type) + (end < 0 ? string.Empty : structure.Substring(end));
-    }
+    internal static string DeviceStructureOf(string pageName) => DrawingNames.DeviceStructureOf(pageName);
 
     /// <summary>The part's variants, found by exact part number, or ignoring case when only one number matches.</summary>
     private static List<PartSearchItem> FindPart(PartsDatabaseContent database, string part)

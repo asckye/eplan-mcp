@@ -15,6 +15,8 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" Link="Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanConnectionCreator.Cables.cs" Link="Adapters\EplanConnectionCreator.Cables.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDrawingReader.cs" Link="Adapters\EplanDrawingReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanConnectionScene.cs" Link="Adapters\EplanConnectionScene.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPageReviewReader.Evidence.cs" Link="Adapters\EplanPageReviewReader.Evidence.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementTextWriter.cs" Link="Adapters\EplanPlacementTextWriter.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementMover.cs" Link="Adapters\EplanPlacementMover.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\TransactionScope.cs" Link="Adapters\TransactionScope.cs" />
