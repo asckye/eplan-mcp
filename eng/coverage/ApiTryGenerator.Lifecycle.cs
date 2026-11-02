@@ -6,6 +6,11 @@ namespace EplanMcp.Coverage;
 
 internal static partial class ApiTryGenerator
 {
+    internal static ApiTryContribution LifecycleContribution(SliceInput input) => new()
+    {
+        Members = Claims(AllMembers(input).Where(s => Lifecycle(s.Entry) || Factory(s.Member)), ApiTryClaim.Decorate),
+        DispatchFragments = { [ApiTrySlot.LifecycleReadback] = (_, _) => LifecycleReadback(input.Data.Value, input.Kinds.Value) },
+    };
     internal static bool Factory(ApiDetail member) => member.Note == "Create";
     internal static bool BannedFactory(ApiEntry entry, ApiDetail member, HashSet<string> banned) => member.Note == "Create" && banned.Contains("M:" + entry.Type[2..] + ".#ctor");
     private static readonly string[] _lifecyclePrefixes = ["Create", "Remove", "Delete", "Erase"];

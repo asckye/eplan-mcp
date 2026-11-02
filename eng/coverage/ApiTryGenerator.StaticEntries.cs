@@ -5,8 +5,22 @@ namespace EplanMcp.Coverage;
 
 internal static partial class ApiTryGenerator
 {
+    internal static ApiTryContribution EntriesContribution(SliceInput input)
+    {
+        string root = input.Root;
+        EntryModel model = input.Entries.Value;
+        var selected = EntrySelected(model);
+        return new()
+        {
+            Members = [.. SettingsOverlap(input, selected), .. EntryMembers(model).Where(s => !selected.Any(m => m.Member.Id == s.Member.Id))
+                .Select(s => new ApiTrySelection(s.Member.Signature ?? s.Member.Id, ApiTryClaim.Own, s.Reason ?? "ambiguous_parameter_names"))],
+            TableRows = { [ApiTrySlot.Catalog] = (_, _) => EntryCatalog(root) },
+            DispatchFragments = { [ApiTrySlot.Dispatch] = (_, _) => EntryDispatch(root) },
+            Templates = { [ApiTrySlot.EntryReport] = (_, original) => EntryReport(root, original) },
+        };
+    }
     internal sealed record EntryPath(string Root, string Type, string Path, string Expression, bool Key = false);
-    private sealed record EntryModel(ApiIndexData Data, Dictionary<string, string[]> Kinds, Dictionary<string, string[]> Enums, EntryPath[] Paths, Dictionary<string, JsonElement> Types);
+    internal sealed record EntryModel(ApiIndexData Data, Dictionary<string, string[]> Kinds, Dictionary<string, string[]> Enums, EntryPath[] Paths, Dictionary<string, JsonElement> Types);
     private static bool MatchEntry(string value, string pattern) => Regex.IsMatch(value, pattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
     private static bool EntryNamespace(string ns) => ns.StartsWith("Eplan.EplApi.DataModel.", StringComparison.Ordinal) || ns is "Eplan.EplApi.DataModel" or "Eplan.EplApi.HEServices" or "Eplan.EplApi.EServices" or "Eplan.EplApi.EServices.Ged" or "Eplan.EplApi.Base";
     private static bool SettingType(string type) => MatchEntry(type, "Settings|Scheme|ProjectSections");
@@ -85,15 +99,14 @@ internal static partial class ApiTryGenerator
             .Select(d => (e, d, !PublicEntryType(e.Type[2..], m.Types) ? "entry_type_excluded" : EntryExclusion(e, d, m.Enums, m.Kinds))));
     private static (ApiEntry Entry, ApiDetail Member)[] EntrySelected(EntryModel m) => [.. EntryMembers(m).Where(s => s.Reason is null)
         .GroupBy(s => (s.Entry.Row.Group, Names(s.Member))).Where(g => g.Count() == 1).Select(g => (g.Single().Entry, g.Single().Member))];
-    internal static string Catalog(string root)
+    private static string EntryCatalog(string root)
     {
-        string code = BaseCatalog(root);
         EntryModel m = EntryData(root);
         var selected = EntrySelected(m);
         string Switch(string head, IEnumerable<string> lines, string fallback = "null") => "    public static " + head + " switch { " + string.Join(" ", lines) + " _ => " + fallback + " };\n";
         string Shape(ApiEntry e, ApiDetail d) => "[" + string.Join(", ", CallShape(e, d).Select(Literal)) + "]";
         string Value(string type) => CollectionShape(type, m.Enums);
-        return code + "public static partial class ApiTryCatalog\n{\n"
+        return "public static partial class ApiTryCatalog\n{\n"
             + Switch("string[]? EntryShape(string group) => group", selected.Where(s => s.Entry.Row.Kind == "property").Select(s => Literal(s.Entry.Row.Group) + " => " + Shape(s.Entry, s.Member) + ","))
             + Switch("string[][] EntryMethods(string group) => group", selected.Where(s => s.Entry.Row.Kind == "method").GroupBy(s => s.Entry.Row.Group).Select(g => Literal(g.Key) + " => [" + string.Join(", ", g.Select(s => Shape(s.Entry, s.Member))) + "],"), "[]")
             + Switch("string[]? EntryReceiverShape(string signature) => signature", selected.Where(s => !s.Member.Static).Select(s => Literal(s.Member.Signature!) + " => [\"via\", " + Literal(s.Entry.Type[2..]) + "],"))
@@ -108,12 +121,12 @@ internal static partial class ApiTryGenerator
             + Switch("string[] ViaKinds(string type, string via) => (type, via)", m.Paths.GroupBy(p => (p.Type, p.Path)).Select(g => "(" + Literal(g.Key.Type) + ", " + Literal(g.Key.Path) + ") => [" + string.Join(", ", g.SelectMany(p => m.Kinds[p.Root["Eplan.EplApi.DataModel.".Length..]]).Distinct(StringComparer.Ordinal).Select(Literal)) + "],"), "[]") + "}\n";
     }
     internal static bool EntryWritable(ApiEntry e, ApiDetail d) => e.Row.Kind == "property" && !d.Static && !SettingType(e.Type) && !e.Type.Contains(".MasterData.", StringComparison.Ordinal) && Writable(d) && d.ReturnType != "System.Int64";
-    internal static string Dispatch(string root)
+    private static string EntryDispatch(string root)
     {
         EntryModel m = EntryData(root);
         var selected = EntrySelected(m);
         string ConvertValue(string type, string token) => m.Enums.TryGetValue(type, out string[]? values) ? "(" + token + ".Value<string>() switch { " + string.Join(", ", values.Select(v => Literal(v) + " => global::" + type + "." + v)) + ", _ => throw new System.InvalidOperationException(\"Invalid enum.\") })" : token + ".Value<" + type + ">()";
-        return BaseDispatch(root) + "internal static class ApiTryEntryDispatch\n{\n    internal static object? Invoke(string signature, object? target, JObject parameters, System.Func<JToken, string, object> resolve)\n    {\n        switch (signature)\n        {\n"
+        return "internal static class ApiTryEntryDispatch\n{\n    internal static object? Invoke(string signature, object? target, JObject parameters, System.Func<JToken, string, object> resolve)\n    {\n        switch (signature)\n        {\n"
             + string.Join("\n", selected.Select(s =>
             {
                 string receiver = s.Member.Static ? "global::" + s.Entry.Type[2..] : "((global::" + s.Entry.Type[2..] + ")target!)";

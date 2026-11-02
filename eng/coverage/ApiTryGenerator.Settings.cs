@@ -4,6 +4,18 @@ namespace EplanMcp.Coverage;
 
 internal static partial class ApiTryGenerator
 {
+    internal static ApiTryContribution SettingsContribution(SliceInput input)
+    {
+        ApiIndexData data = input.Data.Value;
+        return new()
+        {
+            Members = [.. data.Entries.Where(SettingsType).SelectMany(e => e.Details.Where(d => d.Kind == "overload")
+                .Select(d => new ApiTrySelection(d.Signature ?? d.Id, ApiTryClaim.Own, SettingsExclusion(e, d))))],
+            TableRows = { [ApiTrySlot.SettingsCatalog] = (_, _) => SettingsCatalog(data) },
+            DispatchFragments = { [ApiTrySlot.SettingsDispatch] = (_, _) => SettingsDispatch(data) },
+            Templates = { [ApiTrySlot.SettingsReport] = (_, original) => SettingsReport(data, original) },
+        };
+    }
     private static bool SettingsType(ApiEntry e) => e.Type is "T:Eplan.EplApi.Base.Settings" or "T:Eplan.EplApi.Base.SettingNode" or "T:Eplan.EplApi.Base.SchemeSetting"
         or "T:Eplan.EplApi.DataModel.ProjectSettings" or "T:Eplan.EplApi.DataModel.ProjectSettingNode" or "T:Eplan.EplApi.DataModel.ProjectSchemeSetting" or "T:Eplan.EplApi.DataModel.Project.DeviceTagSettings"
         || e.Row.Group == "O:Eplan.EplApi.DataModel.Project.Settings";

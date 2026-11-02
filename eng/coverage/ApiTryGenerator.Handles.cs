@@ -5,6 +5,13 @@ namespace EplanMcp.Coverage;
 
 internal static partial class ApiTryGenerator
 {
+    internal static ApiTryContribution HandlesContribution(SliceInput input) => new()
+    {
+        Members = SettingsOverlap(input, input.Handles.Value.Members),
+        TableRows = { [ApiTrySlot.HandleCatalog] = (_, _) => HandleCatalog(input.Root) },
+        DispatchFragments = { [ApiTrySlot.HandleDispatch] = (_, _) => HandleDispatch(input.Root) },
+        Templates = { [ApiTrySlot.HandleReport] = (_, original) => HandleReport(input.Root, original) },
+    };
     internal sealed record HandleModel(Dictionary<string, JsonElement> Types, HashSet<string> Reachable, (ApiEntry Entry, ApiDetail Member)[] Members);
     private static bool MatchHandle(string text, string pattern) => Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     internal static string? HandleRestriction(string type) => MatchHandle(type, "\\.(MasterData|PartsManagement|PartsService)(\\.|$)") ? "masterdata_copy_pending"

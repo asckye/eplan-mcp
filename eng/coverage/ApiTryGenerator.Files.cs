@@ -5,6 +5,11 @@ namespace EplanMcp.Coverage;
 
 internal static partial class ApiTryGenerator
 {
+    internal static ApiTryContribution FilesContribution(SliceInput input) => new()
+    {
+        Members = Claims(input.Methods.Value.Where(s => s.Member.Parameters!.Any(p => FileDirection(s.Entry, s.Member, p) is not null)), ApiTryClaim.Decorate),
+        TableRows = { [ApiTrySlot.FileCatalog] = (_, _) => FileCatalog(input.Methods.Value, input.Services.Value) },
+    };
     private static bool FileMatch(string text, string pattern) => Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     internal static string? FileDirection(ApiEntry entry, ApiDetail member, ApiParameter parameter)
     {

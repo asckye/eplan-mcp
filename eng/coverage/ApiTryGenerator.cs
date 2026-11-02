@@ -61,13 +61,13 @@ internal static partial class ApiTryGenerator
                     || d.Id == "P:Eplan.EplApi.DataModel.EObjects.TerminalStrip.FunctionCategory") && d.Parameters is { Length: 0 }
                 ))
             .Select(d => (e, d)));
-    internal static string Report(string root)
+    private static string BaseReport(string root, ApiTryComposer composer)
     {
         ApiIndexData data = Data(root);
         Dictionary<string, string[]> kinds = ObjectKindGenerator.Kinds(root);
         Dictionary<string, string[]> enums = Enums(root);
         Dictionary<string, ApiTryServices.Service> services = ApiTryServices.Load(root);
-        return SettingsReport(data, HandleReport(root, EntryReport(root, "group\tsignature\tstatus\treason\n" + string.Join("\n", data.Entries.Where(e => e.Row.Kind == "method" && (ObjectType(e.Type[2..], kinds) || services.ContainsKey(e.Type[2..])))
+        return composer.Render(ApiTrySlot.SettingsReport, composer.Render(ApiTrySlot.HandleReport, composer.Render(ApiTrySlot.EntryReport, "group\tsignature\tstatus\treason\n" + string.Join("\n", data.Entries.Where(e => e.Row.Kind == "method" && (ObjectType(e.Type[2..], kinds) || services.ContainsKey(e.Type[2..])))
             .SelectMany(e => e.Details.Where(d => d.Kind == "overload").Select(d => e.Row.Group + "\t" + d.Id + "\t"
                 + (Exclusion(e, d, enums, kinds, services) is { } reason ? "excluded\t" + reason : e.Details.Count(o => o.Kind == "overload" && Names(o) == Names(d) && Exclusion(e, o, enums, kinds, services) is null) != 1 ? "excluded\tambiguous_parameter_names" : Classification(e, services.ContainsKey(e.Type[2..])))))) + "\n")));
     }
@@ -80,7 +80,7 @@ internal static partial class ApiTryGenerator
         IEnumerable<(ApiEntry Entry, ApiDetail Member)> entries, IEnumerable<(ApiEntry Entry, ApiDetail Member)> handles) =>
         [.. selected.Concat(entries.Where(s => s.Entry.Row.Kind == "property")).Concat(handles.Where(s => s.Entry.Row.Kind == "property"))
             .Select(s => s.Entry.Row.Group).Distinct(StringComparer.Ordinal)];
-    private static string BaseCatalog(string root)
+    private static string BaseCatalog(string root, ApiTryComposer composer)
     {
         ApiIndexData data = Data(root);
         Dictionary<string, string[]> kinds = ObjectKindGenerator.Kinds(root);
@@ -117,23 +117,23 @@ internal static partial class ApiTryGenerator
             + "\n        _ => EntryReceiverShape(signature) ?? SettingsReceiverShape(signature),\n    };\n"
             + "    public static bool Factory(string signature) => signature switch { " + string.Join(" ", methods.Concat(handles).Where(s => Factory(s.Member)).Select(s => Literal(s.Member.Signature!) + " => true,")) + " _ => false };\n    public static string[]? ParameterShape(string signature, string name) => SettingsParameterShape(signature, name) ?? ((signature, name) switch\n    {\n"
             + string.Join("\n", methods.SelectMany(s => Inputs(s.Member).Select(p => "        (" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Shape(p.Type) + ",")))
-            + "\n        _ => EntryParameter(signature, name) ?? HandleParameterShape(signature, name),\n    });\n" + FileCatalog(methods, services) + "    public static string[]? ValueShape(string group) => group switch\n    {\n"
+            + "\n        _ => EntryParameter(signature, name) ?? HandleParameterShape(signature, name),\n    });\n" + composer.Render(ApiTrySlot.FileCatalog) + "    public static string[]? ValueShape(string group) => group switch\n    {\n"
             + string.Join("\n", selected.Where(s => PropertyWritable(s.Member, enums)).Select(s => "        " + Literal(s.Entry.Row.Group) + " => [" + string.Join(", ", (enums.TryGetValue(s.Member.ReturnType!, out string[]? values) ? _enumShape.Concat(values) : [s.Member.ReturnType!]).Select(Literal)) + "],"))
             + "\n        _ => EntryValue(group) ?? HandleValueShape(group),\n    };\n    public static bool Service(string group) => group switch { " + string.Join(" ", methods.Where(s => services.ContainsKey(s.Entry.Type[2..])).DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => true,")) + " _ => HandleService(group) };\n"
             + "    public static string[] TargetKinds(string group) => Settings(group) || Service(group) ? [\"project\"] : Kinds(Shape(group)?[0] ?? (group switch { " + string.Join(" ", methods.DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(s.Entry.Type[2..]) + ",")) + " _ => null }));\n    public static string[] Kinds(string? type) => type switch\n    {\n"
             + string.Join("\n", kinds.Select(p => "        " + Literal("Eplan.EplApi.DataModel." + p.Key) + " => [" + string.Join(", ", p.Value.Select(Literal)) + "],"))
             + "\n        _ => HandleTargetKinds(type),\n    };\n"
-            + SettingsCatalog(data)
+            + composer.Render(ApiTrySlot.SettingsCatalog)
             + "    public static bool ValidValue(string[]? shape, string kind, string text) => shape?[0] switch\n    {\n"
             + "        \"System.Boolean\" => kind == \"Boolean\",\n        \"System.String\" => kind == \"String\",\n"
             + "        \"System.Int32\" => kind == \"Integer\" && int.TryParse(text, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out _),\n"
             + "        \"System.Int64\" => kind == \"Integer\" && long.TryParse(text, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out _),\n"
             + "        \"System.Double\" => (kind == \"Integer\" || kind == \"Float\") && double.TryParse(text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double n) && !double.IsNaN(n) && !double.IsInfinity(n),\n"
             + "        \"enum\" => kind == \"String\" && System.Linq.Enumerable.Contains(System.Linq.Enumerable.Skip(shape, 1), text, System.StringComparer.Ordinal),\n"
-            + "        \"Eplan.EplApi.Base.PointD\" => kind == \"PointD\" || kind == \"handle\",\n        _ => HandleKeyValue(shape, kind, text) || shape is not null && (Kinds(shape[0]).Length > 0 && kind == \"locator\" || HandleType(shape[0]) && kind == \"handle\"),\n    };\n" + HandleCatalog(root) + ChainCatalog(root) + "}\n";
+            + "        \"Eplan.EplApi.Base.PointD\" => kind == \"PointD\" || kind == \"handle\",\n        _ => HandleKeyValue(shape, kind, text) || shape is not null && (Kinds(shape[0]).Length > 0 && kind == \"locator\" || HandleType(shape[0]) && kind == \"handle\"),\n    };\n" + composer.Render(ApiTrySlot.HandleCatalog) + composer.Render(ApiTrySlot.ChainCatalog) + "}\n";
     }
     private static string Target(ApiEntry entry) => "((global::" + entry.Type[2..] + ")target)." + entry.Name;
-    private static string BaseDispatch(string root)
+    private static string BaseDispatch(string root, ApiTryComposer composer)
     {
         Dictionary<string, string[]> enums = Enums(root);
         ApiIndexData data = Data(root);
@@ -152,6 +152,6 @@ internal static partial class ApiTryGenerator
                 : "parameters[\"value\"]!.Value<" + s.Member.ReturnType + ">()") + "; break;"))
         + "\n            default: throw new System.InvalidOperationException(\"No compiled setter for this group.\");\n        }\n    }\n    internal static object? Invoke(string signature, StorableObject target, JObject parameters, System.Func<JToken, string, object> resolve)\n    {\n        if (SettingsSignature(signature)) { return InvokeSettings(signature, (Project)target, parameters); }\n        switch (signature)\n        {\n"
         + string.Join("\n", Methods(data, enums, kinds, services).Select(s => MethodCase(s.Entry, s.Member, enums, kinds, services)))
-        + "\n            default: throw new System.InvalidOperationException(\"No compiled method for this signature.\");\n        }\n    }\n" + SettingsDispatch(data) + LifecycleReadback(data, kinds) + "}\n" + HandleDispatch(root);
+        + "\n            default: throw new System.InvalidOperationException(\"No compiled method for this signature.\");\n        }\n    }\n" + composer.Render(ApiTrySlot.SettingsDispatch) + composer.Render(ApiTrySlot.LifecycleReadback) + "}\n" + composer.Render(ApiTrySlot.HandleDispatch);
     }
 }

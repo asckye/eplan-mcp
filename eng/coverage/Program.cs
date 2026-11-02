@@ -24,6 +24,18 @@ internal static class Program
 
         switch (args)
         {
+            case ["check-api-try-ownership"]:
+                try
+                {
+                    _ = ApiTryComposer.Create(root);
+                    Console.WriteLine("api_try slice ownership is unique.");
+                    return 0;
+                }
+                catch (InvalidOperationException exception)
+                {
+                    Console.Error.WriteLine(exception.Message);
+                    return 1;
+                }
             case ["scan"]:
                 Scan(root, null);
                 return 0;

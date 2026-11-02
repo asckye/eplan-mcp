@@ -28,4 +28,7 @@
     <InternalsVisibleTo Include="EplanMcp.Coverage.Tests" />
     <Compile Include="../../src/EplanMcp.Host/Tools/ApiIndexData.cs" Link="ApiIndexData.cs" />
   </ItemGroup>
+  <Target Name="ValidateApiTryOwnership" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Exec Command="dotnet &quot;$(TargetPath)&quot; check-api-try-ownership" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
 </Project>

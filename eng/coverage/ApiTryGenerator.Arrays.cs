@@ -3,6 +3,12 @@ namespace EplanMcp.Coverage;
 
 internal static partial class ApiTryGenerator
 {
+    internal static ApiTryContribution ArraysContribution(SliceInput input) => new()
+    {
+        // Conversion and shape helpers decorate the selected signatures; the original emitters still call them.
+        Members = Claims(AllMembers(input).Where(s => Element(s.Member.ReturnType ?? "") is not null
+            || s.Member.Parameters!.Any(p => Element(ValueType(p)) is not null || Out(p) || p.Direction == "ref" || p.Type.EndsWith('@'))), ApiTryClaim.Decorate),
+    };
     internal static string? Element(string type)
     {
         if (type.EndsWith("[]", StringComparison.Ordinal))

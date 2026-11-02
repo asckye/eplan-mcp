@@ -5,6 +5,13 @@ namespace EplanMcp.Coverage;
 
 internal static partial class ApiTryGenerator
 {
+    internal static ApiTryContribution ChainsContribution(SliceInput input) => new()
+    {
+        // Handles emits these members; chains adds reachability, return/element metadata and reports.
+        Members = Claims(input.Handles.Value.Members, ApiTryClaim.Decorate),
+        TableRows = { [ApiTrySlot.ChainCatalog] = (_, _) => ChainCatalog(input.Root) },
+        Templates = { [ApiTrySlot.ChainGaps] = (_, _) => LegacyChainGapReport(input.Root), [ApiTrySlot.ChainGapsBefore] = (_, _) => LegacyChainGapReport(input.Root, true), [ApiTrySlot.ChainReachability] = (_, _) => LegacyChainReachabilityReport(input.Root) },
+    };
     private sealed record ChainAnalysis(HandleModel Model, Dictionary<string, (int Depth, string Source)> Paths);
     private static string? ElementType(string? type, Dictionary<string, JsonElement> types)
     {
@@ -142,8 +149,8 @@ internal static partial class ApiTryGenerator
             return (e, reason, receiver ? "No unique supported compiled member shape" : "No approved return chain within depth 4; see handle reachability table");
         })];
     }
-    internal static string ChainGapReport(string root, bool before = false) => "group\tnamespace\ttype\tmember_kind\treason\tdetail\n" + string.Join("", ChainGaps(root, before).Select(g => g.Entry.Row.Group + "\t" + g.Entry.Namespace + "\t" + g.Entry.Type + "\t" + g.Entry.Row.Kind + "\t" + g.Reason + "\t" + g.Detail + "\n"));
-    internal static string ChainReachabilityReport(string root)
+    private static string LegacyChainGapReport(string root, bool before = false) => "group\tnamespace\ttype\tmember_kind\treason\tdetail\n" + string.Join("", ChainGaps(root, before).Select(g => g.Entry.Row.Group + "\t" + g.Entry.Namespace + "\t" + g.Entry.Type + "\t" + g.Entry.Row.Kind + "\t" + g.Reason + "\t" + g.Detail + "\n"));
+    private static string LegacyChainReachabilityReport(string root)
     {
         var input = ChainInputs(root);
         ChainAnalysis analysis = AnalyzeChains(input.Data, input.Types, input.Kinds, input.Enums, input.Services);
