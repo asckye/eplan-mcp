@@ -24,7 +24,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
     private static readonly string[] _busDirections = ["Down", "Left", "Right"];
 
     [Fact]
-    public async Task DownBranchTNode_EachVariant_PrintsLogicalEndpoints()
+    public async Task DownBranchTNodeVariant0_ChainsSourceBranchAndContinuation()
     {
         Assert.NotNull(host);
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
@@ -50,7 +50,9 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
         } while (cursor is not null);
         JsonElement[] busVariants = nodes.Where(s => s.GetProperty("connectionPoints").GetArrayLength() == 3
             && s.GetProperty("connectionPoints").EnumerateArray().Select(p => p.GetProperty("direction").GetString())
-                .OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(_busDirections)).ToArray();
+                .OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(_busDirections)
+                // Live 2026-11-02: variant 0 (source left, target 1 down, diagonal target 2 right) chains A-B, B-C (D1).
+                && s.GetProperty("name").GetString() == "TLRU" && s.GetProperty("variant").GetInt32() == 0).ToArray();
         Assert.NotEmpty(busVariants);
         string[] pages = await session.CreatePagesAsync(busVariants.Length);
         await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
@@ -81,6 +83,9 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
             await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
             JsonElement connections = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
             TestContext.Current.TestOutputHelper!.WriteLine($"D1 bus variant={variant.ToString(CultureInfo.InvariantCulture)}, page={page}, logical endpoints: {connections}");
+            string[] pairs = [.. connections.GetProperty("connections").EnumerateArray()
+                .Select(c => c.GetProperty("from").GetProperty("device").GetString()![^1..] + c.GetProperty("to").GetProperty("device").GetString()![^1..]).Order(StringComparer.Ordinal)];
+            Assert.Equal(["AB", "BC"], pairs);
         }
     }
 

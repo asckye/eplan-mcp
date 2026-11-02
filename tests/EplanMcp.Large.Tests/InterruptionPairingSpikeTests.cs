@@ -189,6 +189,9 @@ public sealed class InterruptionPairingSpikeTests(LiveEplan eplan, WriteHost hos
         Assert.True(File.Exists(file + ".result.json"), "The native probe did not write a response.");
         string text = await File.ReadAllTextAsync(file + ".result.json", TestContext.Current.CancellationToken);
         TestContext.Current.TestOutputHelper!.WriteLine(stage + ": " + text);
+        // Passed tests drop their output and host.Home is deleted afterwards: keep the evidence (owner run 2026-11-02).
+        string evidence = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "eplanmcp-spikes")).FullName;
+        await File.WriteAllTextAsync(Path.Combine(evidence, string.Concat(stage.Select(c => char.IsLetterOrDigit(c) ? c : '-')) + ".json"), text, TestContext.Current.CancellationToken);
         using JsonDocument result = JsonDocument.Parse(text);
         return result.RootElement.Clone();
     }
