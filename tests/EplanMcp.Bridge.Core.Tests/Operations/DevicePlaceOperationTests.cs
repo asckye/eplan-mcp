@@ -76,9 +76,10 @@ public sealed class DevicePlaceOperationTests
     {
         MacroTargetPage page = LayoutFixture.Target(_placer.Pages[SamplePage])!;
         page.PredictDevice = _ => [LayoutGuard.Proposed("Function", [80, 160], null)];
-        DrawingPlacement old = LayoutGuardTests.Row("Function", 9, 100, 160);
+        // An unrelated existing text remains an obstacle to the newly placed symbol.
+        DrawingPlacement old = LayoutGuardTests.Row(kind, 9, 100, 160);
         page.Layout!.Page.Placements.Add(old);
-        LayoutGuard.Model actual = new() { Page = new() { GridSize = 4, PageSize = [420, 297], Placements = [old, LayoutGuardTests.Row(kind, 10, 100, 160)] } };
+        LayoutGuard.Model actual = new() { Page = new() { GridSize = 4, PageSize = [420, 297], Placements = [old, LayoutGuardTests.Row("Function", 10, 100, 160)] } };
         page.Layout.ReadActual = () => actual;
         DevicePlaceArgs args = Args(SamplePage, "-NEW");
         args.Fingerprint = Plan(args).Fingerprint;

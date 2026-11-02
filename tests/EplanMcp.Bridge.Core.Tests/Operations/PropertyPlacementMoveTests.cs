@@ -8,6 +8,28 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class PropertyPlacementMoveTests
 {
+    [Fact]
+    public void PropertyMove_LiveW4BoundsAcross248Wire_StillRollsBackWithChangedDigest()
+    {
+        var fake = new Mover(0) { ReadbackDigest = new string('f', 64) };
+        fake.Scene.Page.PageSize = [420, 297];
+        fake.Scene.Page.GridSize = 4;
+        fake.Scene.Graphical = [[[248, 64], [248, 120]]];
+        fake.Child.Location = [312, 92];
+        fake.Child.Bounds = [263.12, 96.28, 312, 100.56];
+        JToken move = fake.Request["property_moves"]![0]!;
+        move["x_mm"] = 272;
+        move["y_mm"] = 92;
+        string before = BridgeJson.FromObject(fake.Scene).ToString();
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Contains("R3: Text bounds conflict with a line.", error.Message, StringComparison.Ordinal);
+        Assert.Equal(before, BridgeJson.FromObject(fake.Scene).ToString());
+        Assert.DoesNotContain("Commit", fake.Transactions.Calls);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(90)]
@@ -218,6 +240,7 @@ public sealed class PropertyPlacementMoveTests
         internal string? Failure { get; init; }
         internal double[]? ReadbackBounds { get; init; }
         internal double[]? CommittedBounds { get; init; }
+        internal string? ReadbackDigest { get; init; }
         internal Mover(int angle)
         {
             var fixture = new MoveFixture();
@@ -257,6 +280,8 @@ public sealed class PropertyPlacementMoveTests
             Child.Bounds = ReadbackBounds?.ToArray() ?? moves[0]!["bounds"]!.Values<double>().ToArray();
             Child.Properties["angle_deg"] = moves[0]!["angle"]!.ToString();
             Child.Properties["docked"] = "false";
+            if (ReadbackDigest is not null)
+            { Child.Locator.Digest = ReadbackDigest; }
             if (Failure == "angle")
             { Child.Properties["angle_deg"] = "0"; }
             if (Failure == "position")

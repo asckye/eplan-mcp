@@ -22,6 +22,9 @@ public static class PlacementMoveExecution
         ConnectionCreatePlanner.Scene Read() => mover.Read(scene.Project.Path, scene.Page.Page);
         var expected = BridgeJson.FromObject(scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
         JToken[] rows = plan["moves"]!.ToArray();
+        LayoutGuard.Model beforeLayout = LayoutGuard.From(scene);
+        beforeLayout.SetsTextAttribute = LayoutGuard.TextMoveIntent(scene.Page.Placements.Where(p => (input.ContainsKey("property_moves") || p.Parent is null)
+            && rows.Any(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, p.Locator))).ToArray(), input.ContainsKey("property_moves"));
         foreach (DrawingPlacement placement in expected.Page.Placements)
         {
             JToken? row = rows.SingleOrDefault(r => DrawingLocators.Matches(r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, placement.Locator));
@@ -53,7 +56,7 @@ public static class PlacementMoveExecution
             LayoutGuard.Model actualLayout = LayoutGuard.From(actual);
             if (!committed)
             { actualLayout.Lines = expected.Graphical.Select(s => new LayoutGuard.Segment { Points = s }).ToList(); }
-            plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(LayoutGuard.From(scene), actualLayout)));
+            plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(beforeLayout, actualLayout)));
             var measuredBounds = new List<(JToken Row, double[]? Bounds)>();
             if (actual.Page.Placements.Count != expected.Page.Placements.Count)
             { throw Mismatch("placement count"); }

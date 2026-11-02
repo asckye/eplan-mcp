@@ -90,6 +90,7 @@ public static class PlacementMovePlanner
         }
         bool noOp = offsets.Values.All(d => d.All(n => n == 0));
         LayoutGuard.Model layout = LayoutGuard.From(scene);
+        layout.SetsTextAttribute = LayoutGuard.TextMoveIntent(targets.Select(t => t.Row).ToArray());
         layout.Lines.Clear();
         DrawingPlacement[] proposed = offsets.Where(p => p.Value.Any(n => n != 0)).Select(p => LayoutGuard.Shift(p.Key, p.Value)).ToArray();
         List<string> layoutWarnings = LayoutGuard.Enforce(layout, proposed, "/moves: ");

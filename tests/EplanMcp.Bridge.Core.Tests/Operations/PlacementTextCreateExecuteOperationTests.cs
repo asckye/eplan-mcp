@@ -10,6 +10,29 @@ public sealed class PlacementTextCreateExecuteOperationTests
 {
     private readonly PlacementTextStore _store = new();
 
+    [Fact]
+    public void ExplicitTextPosition_LiveW4BoundsAcross248Wire_StillRollsBack()
+    {
+        LayoutGuard.Model layout = LayoutGuardDefaultTextTests.Model();
+        layout.ReadActual = () =>
+        {
+            LayoutGuard.Model actual = LayoutGuardDefaultTextTests.Model();
+            DrawingPlacement text = LayoutGuardDefaultTextTests.CableText(actual);
+            text.Kind = "Text";
+            text.Parent = null;
+            actual.Page.Placements.RemoveAt(0);
+            return actual;
+        };
+        var op = new PlacementTextCreateExecuteOperation(new FakeCatalog(_store.Project), _store, _store.Transactions, _store, (_, _) => layout);
+        PlacementTextCreateArgs args = PlacementTextStore.Args();
+        args.Text.Position = [272, 92];
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => op.Execute(args)).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Contains("R3: Text bounds conflict with a line.", error.Message, StringComparison.Ordinal);
+        Assert.Empty(_store.Texts);
+        Assert.DoesNotContain("Commit", _store.Transactions.Calls);
+    }
+
     [Theory]
     [InlineData("angle", "45", false)]
     [InlineData("angle", "from_layer", false)]

@@ -78,7 +78,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         PageDrawingGeometry geometry = drawings?.Read(WriteArguments.Writable(catalog, args.Project).Path, args.Page)
             ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "R1/R3: read complete page bounds before creating placements."));
         LayoutGuard.Model layout = layoutReader?.Invoke(geometry.Project, args.Page) ?? new() { Page = geometry };
-        layout.SetsTextAttribute = (row, attribute) => attribute == "height_mm" && row.Kind == "Text" && row.Parent is null
+        layout.SetsTextAttribute = (row, attribute) => attribute is "height_mm" or "position" && row.Kind == "Text" && row.Parent is null
             && items.Any(p => p.Kind == "text" && p.Position.SequenceEqual(row.Location))
             && !geometry.Placements.Any(p => p.Locator.Type == row.Locator.Type && p.Locator.Oid == row.Locator.Oid);
         layout.ReadActual ??= () => new() { Page = drawings!.Read(geometry.Project, args.Page)!, Config = layout.Config, DrawingArea = layout.DrawingArea };

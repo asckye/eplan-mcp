@@ -82,6 +82,7 @@ public sealed class LayoutGuardTests
                 model.Page.Placements.Add(q);
                 break;
             case "R3":
+                model.SetsTextAttribute = (_, attribute) => attribute == "position";
                 model.Page.Placements.Add(q);
                 break;
             case "R4":

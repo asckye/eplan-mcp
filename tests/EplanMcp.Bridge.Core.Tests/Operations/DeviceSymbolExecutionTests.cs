@@ -15,6 +15,36 @@ public sealed class DeviceSymbolExecutionTests
 
     public DeviceSymbolExecutionTests() => _pages.Pages.Add(new PageSummary { Name = "=F+A1/1" });
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DisplayOffsets_TextAcrossLive248Wire_RefusesOnlyExplicitPosition(bool explicitPosition)
+    {
+        LayoutGuard.Model layout = LayoutGuardDefaultTextTests.Model();
+        DrawingPlacement text = LayoutGuardDefaultTextTests.CableText(layout);
+        text.Properties["property_id"] = "20214";
+        layout.Page.Placements.Clear();
+        DevicePlaceArgs args = Args();
+        args.X = 268;
+        args.Y = 92;
+        if (explicitPosition)
+        { args.DisplayProperties = [new() { PropertyId = 20214, OffsetXmm = 4 }]; }
+        _source.Target = LayoutFixture.Target(new() { Name = args.Page, Type = "Circuit", Layout = layout, PredictDevice = _ => [text] });
+        var operation = new DevicePlacePlanOperation(_catalog, _pages, _names, _parts, _source, _source);
+        if (explicitPosition)
+        {
+            BridgeError error = Assert.Throws<BridgeErrorException>(() => operation.Execute(args)).Error;
+            Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Reason, error.Execution));
+            Assert.Contains("R3: Text bounds conflict with a line.", error.Message, StringComparison.Ordinal);
+        }
+        else
+        {
+            var plan = Assert.IsType<WritePlan>(operation.Execute(args));
+            Assert.Contains("R3: Warning:", plan.Details!["layoutWarnings"], StringComparison.Ordinal);
+        }
+        Assert.Empty(_transactions.Calls);
+    }
+
     [Fact]
     public void Execute_PartWithPartialSymbolSource_RejectsBeforeReadingParts()
     {
@@ -83,7 +113,8 @@ public sealed class DeviceSymbolExecutionTests
 
     private sealed class Source : IDevicePlacer, ISymbolReader
     {
-        public MacroTargetPage? ReadPage(string projectPath, string pageName) => LayoutFixture.Target(new() { Name = pageName, Type = "Circuit" });
+        internal MacroTargetPage? Target { get; set; }
+        public MacroTargetPage? ReadPage(string projectPath, string pageName) => Target ?? LayoutFixture.Target(new() { Name = pageName, Type = "Circuit" });
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => [new() { Library = "IEC_symbol", Name = "K", Type = "Function", Kind = "function", ConnectionPoints = [new() { Location = [0, 0] }] }];
         public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag) => throw new NotSupportedException();
     }

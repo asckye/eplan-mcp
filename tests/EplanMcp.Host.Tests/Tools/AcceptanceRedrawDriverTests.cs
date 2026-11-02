@@ -19,7 +19,7 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.Equal(["eplan_page_create", "eplan_page_open", "eplan_page_get"], fake.Calls.Take(3));
         Assert.Equal("eplan_export_image", fake.Calls[^1]);
         Assert.DoesNotContain(fake.Calls, c => c.Contains("undo", StringComparison.OrdinalIgnoreCase) || c.Contains("delete", StringComparison.OrdinalIgnoreCase));
-        Assert.Equal(38, driver.UndoSteps);
+        Assert.Equal(39, driver.UndoSteps);
         Assert.False(driver.UndoCountIncomplete);
         JsonElement report = JsonSerializer.SerializeToElement(driver.Report);
         Assert.Equal(["pages", "location_boxes", "devices", "plc", "terminals", "generate_autoconnect", "wires_symbols_and_cables", "generate", "cables_after_generate", "cable_text_layout", "interruption_points", "texts", "verify"], report.GetProperty("stages").EnumerateArray().Select(n => n.GetString()));
@@ -72,8 +72,13 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.Equal(8, terminals.Length);
         Assert.Equal(list.GetProperty("terminal_strip").GetProperty("function_text").GetString(), terminals[0].GetProperty("terminal_strip_text").GetString());
         Assert.True(JsonElement.DeepEquals(list.GetProperty("terminal_strip").GetProperty("position"), terminals[0].GetProperty("terminal_strip_position")));
-        JsonElement textUpdate = Assert.Single(fake.Requests, r => r.Tool == "eplan_placement_update").Args;
-        Assert.All(textUpdate.GetProperty("property_moves").EnumerateArray(), m => Assert.Equal(90, m.GetProperty("angle_deg").GetInt32()));
+        JsonElement[] textUpdates = fake.Requests.Where(r => r.Tool == "eplan_placement_update").Select(r => r.Args).ToArray();
+        Assert.Equal(2, textUpdates.Length);
+        JsonElement[] textMoves = textUpdates.SelectMany(a => a.GetProperty("property_moves").EnumerateArray()).ToArray();
+        Assert.Equal([(64d, 156d), (68d, 156d), (260d, 88d), (264d, 88d)], textMoves.Select(m => (m.GetProperty("x_mm").GetDouble(), m.GetProperty("y_mm").GetDouble())));
+        Assert.Equal([20214, 20040, 20214, 20040], textMoves.Select(m => m.GetProperty("property_id").GetInt32()));
+        Assert.Equal([0, 1, 0, 1], textMoves.Select(m => m.GetProperty("property_index").GetInt32()));
+        Assert.All(textMoves, m => Assert.Equal(90, m.GetProperty("angle_deg").GetInt32()));
         Assert.All(terminals.Skip(1), a => Assert.False(a.TryGetProperty("terminal_strip_text", out _)));
         Assert.All(terminals, a => Assert.False(a.TryGetProperty("tag", out _) || a.TryGetProperty("library", out _) || a.TryGetProperty("connection_designations", out _)));
         Assert.Equal(7, skipped.Length);
@@ -87,22 +92,25 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.All(report.GetProperty("skipped").EnumerateArray(), item => Assert.False(string.IsNullOrWhiteSpace(item.GetProperty("reason").GetString())));
     }
 
-    [Fact]
-    public async Task CableText_SixSameNamedCorePoints_SelectsTheUniqueCableDefinition()
+    [Theory]
+    [InlineData("+A1-Wtest3", 6)]
+    [InlineData("+A1-Wtest4", 1)]
+    public async Task CableText_SameNamedCorePoints_SelectsTheUniqueCableDefinition(string cableName, int coreCount)
     {
         var fake = new DrawingTools { ConnectWires = true };
         var driver = Driver(fake);
         await driver.DrawAsync();
-        JsonElement move = Assert.Single(fake.Requests, r => r.Tool == "eplan_placement_update").Args.GetProperty("property_moves")[0];
         JsonElement report = JsonSerializer.SerializeToElement(driver.Report);
         JsonElement[] sameName = report.GetProperty("evidence").EnumerateArray()
             .Where(e => e.TryGetProperty("tool", out JsonElement tool) && tool.GetString() == "eplan_page_get")
             .SelectMany(e => e.GetProperty("result").GetProperty("drawings").GetProperty("items").EnumerateArray())
-            .Where(d => d.GetProperty("properties").TryGetProperty("name", out JsonElement name) && name.GetString() == "+A1-Wtest3")
+            .Where(d => d.GetProperty("properties").TryGetProperty("name", out JsonElement name) && name.GetString() == cableName)
             .DistinctBy(d => d.GetProperty("locator").GetProperty("oid").GetInt64()).ToArray();
-        Assert.Equal(7, sameName.Length);
-        Assert.Equal(6, sameName.Count(d => d.GetProperty("kind").GetString() == "ConnectionDefinitionPoint"));
+        Assert.Equal(coreCount + 1, sameName.Length);
+        Assert.Equal(coreCount, sameName.Count(d => d.GetProperty("kind").GetString() == "ConnectionDefinitionPoint"));
         JsonElement cable = Assert.Single(sameName, d => d.GetProperty("kind").GetString() == "Cable");
+        JsonElement move = Assert.Single(fake.Requests, r => r.Tool == "eplan_placement_update"
+            && JsonElement.DeepEquals(r.Args.GetProperty("property_moves")[0].GetProperty("parent"), cable.GetProperty("locator"))).Args.GetProperty("property_moves")[0];
         Assert.True(JsonElement.DeepEquals(cable.GetProperty("locator"), move.GetProperty("parent")));
     }
 

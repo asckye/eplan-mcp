@@ -131,7 +131,7 @@ internal sealed class DevicePlaceRequest
     public void CheckLayout(DevicePlaceArgs args)
     {
         LayoutGuard.Model layout = Page.Layout ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: read complete page layout before placing a device.");
-        layout.SetsTextAttribute = (row, attribute) => attribute == "height_mm" && row.Kind == "PropertyPlacement" && row.Parent is not null
+        layout.SetsTextAttribute = (row, attribute) => attribute is "height_mm" or "position" && row.Kind == "PropertyPlacement" && row.Parent is not null
             && !layout.Page.Placements.Any(p => p.Parent is null && p.Locator.Type == row.Parent.Type && p.Locator.Oid == row.Parent.Oid)
             && (args.DisplayProperties ?? []).Any(p => row.Properties.TryGetValue("property_id", out string? id) && id == p.PropertyId.ToString(CultureInfo.InvariantCulture)
                 && row.Location.SequenceEqual(new[] { args.X + p.OffsetXmm, args.Y + p.OffsetYmm }));

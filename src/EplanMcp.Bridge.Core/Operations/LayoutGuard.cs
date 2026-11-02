@@ -61,6 +61,7 @@ public static class LayoutGuard
     {
         double[] area = Area(model);
         var result = new List<Violation>();
+        var defaultTexts = new Dictionary<Violation, DrawingPlacement>();
         DrawingPlacement[] all = [.. model.Page.Placements.Where(p => !changed.Any(c => Same(c, p))), .. changed];
         void Add(string rule, DrawingPlacement p, DrawingLocator? other, string message, bool warningOnly = false)
         {
@@ -73,6 +74,17 @@ public static class LayoutGuard
                 Warning = warning,
                 Message = rule + ": " + (warning ? "Warning: " : "") + message + " " + (model.DrawingArea is null ? "Boundary fallback: Page.Size minus layout.marginMm; plot-frame usable area is unverified. " : "") + (warningOnly ? "Review the symbol's text layout." : "Choose another grid position or reroute.")
             });
+        }
+        void TextConflict(DrawingPlacement p, DrawingPlacement q, string message)
+        {
+            DrawingPlacement[] texts = new[] { p, q }.Where(t => Text(t) && changed.Any(c => Same(c, t)
+                || t.Parent is not null && !Text(c) && OwnerId(c.Locator, t.Parent))).ToArray();
+            if (texts.Length == 0 || texts.Any(t => model.SetsTextAttribute?.Invoke(t, "position") == true))
+            { Add("R3", p, q.Locator, message); return; }
+            DrawingPlacement text = texts[0], other = ReferenceEquals(text, p) ? q : p;
+            DrawingLocator owner = text.Parent ?? text.Locator;
+            Add("R3", text, other.Locator, FormattableString.Invariant($"Text {Id(text.Locator)} owned by {owner.Type}/{owner.Oid} conflicts with {other.Kind} {Id(other.Locator)}; its position was not set by this call. Adjust the text with eplan_placement_update property_moves."), true);
+            defaultTexts.Add(result[result.Count - 1], text);
         }
         foreach (DrawingPlacement p in changed)
         {
@@ -107,7 +119,7 @@ public static class LayoutGuard
                 if ((Symbol(p) || Container(p)) && (Symbol(q) || Container(q)) && (Overlaps(b, q.Bounds!, model.Config.SymbolClearanceMm) || p.Bounds is null && p.Location.SequenceEqual(q.Location)))
                 { Add("R2", p, q.Locator, "A symbol outline conflicts with another placement. A moved outline conflicts with another placement."); }
                 if ((Text(p) && (Text(q) || Symbol(q) || Container(q) || q.Kind == "Line") || Text(q) && (Symbol(p) || Container(p) || p.Kind == "Line")) && overlap)
-                { Add("R3", p, q.Locator, "Text bounds conflict with another text, symbol or line."); }
+                { TextConflict(p, q, "Text bounds conflict with another text, symbol or line."); }
                 if (q.Properties.TryGetValue("cross_reference", out string? cross) && cross == "true" && overlap)
                 { Add("R9", p, q.Locator, "Keep clear of existing cross-reference text."); }
             }
@@ -145,7 +157,7 @@ public static class LayoutGuard
                     }
                 }
                 if (Text(p) && !Related(p, row, all) && Hits(line.Points, p.Bounds!))
-                { Add("R3", p, line.Locator, "Text bounds conflict with a line."); }
+                { TextConflict(p, row, "Text bounds conflict with a line."); }
             }
             if (!line.Changed)
             { continue; }
@@ -172,6 +184,13 @@ public static class LayoutGuard
                 foreach (Violation v in result.Where(v => !v.Warning && v.Objects[0] == p.Locator))
                 { v.NearestFreePosition = free; v.Message += free is null ? " No free position found within the bounded search." : FormattableString.Invariant($" Suggested position: [{free[0]}, {free[1]}] mm."); }
             }
+            foreach (IGrouping<DrawingPlacement, KeyValuePair<Violation, DrawingPlacement>> group in defaultTexts.GroupBy(pair => pair.Value))
+            {
+                DrawingPlacement text = group.Key;
+                double[]? free = FindFree(model, text, [.. changed.Where(p => !Same(p, text)), text], measured: measured);
+                foreach (var pair in group)
+                { pair.Key.NearestFreePosition = free; pair.Key.Message += free is null ? " No free position found within the bounded search." : FormattableString.Invariant($" Suggested position for property_moves: [{free[0]}, {free[1]}] mm."); }
+            }
         }
         return result;
     }
@@ -188,7 +207,9 @@ public static class LayoutGuard
             PointRoutes = model.PointRoutes,
             PointRouteGaps = model.PointRouteGaps,
             Lines = model.Lines,
-            SetsTextAttribute = (row, attribute) => changed.Any(p => Same(p, row) && model.SetsTextAttribute?.Invoke(p, attribute) == true)
+            // A suggested text move sets its position explicitly, so the candidate must clear R3 too.
+            SetsTextAttribute = (row, attribute) => attribute == "position" && Text(item) && Same(item, row)
+                || changed.Any(p => Same(p, row) && model.SetsTextAttribute?.Invoke(p, attribute) == true)
         };
         var offsets = Enumerable.Range(-radius, 2 * radius + 1).SelectMany(x => Enumerable.Range(-radius, 2 * radius + 1).Select(y => new[] { x, y }))
             .OrderBy(p => p[0] * p[0] + p[1] * p[1]).ThenBy(p => p[0]).ThenBy(p => p[1]);
@@ -289,6 +310,12 @@ public static class LayoutGuard
     }
     private static string Id(DrawingLocator p) => FormattableString.Invariant($"{p.Type}/{p.Oid}/{p.Digest}");
     private static bool Same(DrawingPlacement p, DrawingPlacement q) => Id(p.Locator) == Id(q.Locator);
+    internal static Func<DrawingPlacement, string, bool> TextMoveIntent(IReadOnlyList<DrawingPlacement> targets, bool setsAngle = false) => (row, attribute) =>
+        (attribute == "position" || setsAngle && attribute == "angle") && Text(row) && targets.Any(p => p.Kind == row.Kind && OwnerId(p.Locator, row.Locator)
+            && (row.Kind != "PropertyPlacement" || p.Parent is not null && row.Parent is not null && OwnerId(p.Parent, row.Parent)
+                && PropertyMatches(p, row, "property_id") && PropertyMatches(p, row, "property_index")));
+    private static bool PropertyMatches(DrawingPlacement p, DrawingPlacement q, string key) => p.Properties.TryGetValue(key, out string? value)
+        && q.Properties.TryGetValue(key, out string? actual) && value == actual;
     private static bool Finite(double n) => !double.IsNaN(n) && !double.IsInfinity(n);
     private static bool Number(DrawingPlacement p, string key, out double n) { n = 0; return p.Properties.TryGetValue(key, out string? s) && double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out n) && Finite(n); }
     private static bool Height(DrawingPlacement p, out double n) => Number(p, "height_mm", out n) && n > 0;

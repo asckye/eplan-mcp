@@ -6,6 +6,8 @@
 ## [Unreleased]
 
 - 原生调用前检查只读与页上下文；全项目对象枚举跳过无效项并记录数量，写事务内捕获原生异常时记录带 correlation id 的 Warning。审批、暂停与回滚行为保持；实机待验见 native-preconditions 台账。
+### Fixed
+- 布局 R3 对本次创建或改变对象的默认文字位置冲突只给警告，列出文字归属、冲突对象及 `property_moves` 修复建议；显式定位文字仍拒绝冲突。补充 W4 精确几何回归，实机复验待运行。
 
 ### Added
 - 每周五发布 v0.4.x 预览版，首班为 2026-11-06 的 v0.4.1；新增只准备本地版本与发布说明的 `release-prep.ps1` 和无需 EPLAN 的 Host `smoke.ps1`（使用显式跳过实时 Bridge 与授权检查的 `doctor --offline`），提交、标签、推送、插件哈希交接及发布仍由维护者执行。
