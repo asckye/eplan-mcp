@@ -123,6 +123,7 @@ api:
   - { match: "O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate", status: refused, sides: [write], reason: unsafe, note: 实机试执行使 EPLAN 崩溃（0xe0434352）, source: api-notes A77 }
   - { match: "O:Eplan.EplApi.DataModel.MacroBox.RepresentationType", status: refused, sides: [write], reason: unsafe, note: 实机试执行使 EPLAN 崩溃（0xc0000409）, source: api-notes A77 }
   - { match: "O:Eplan.EplApi.DataModel.Page.ConvertToGraphics", status: refused, sides: [write], reason: unsafe, note: 实机试执行使 EPLAN 崩溃（0xc0000409）, source: api-notes A77 }
+  - { match: "O:Eplan.EplApi.DataModel.Project.ProjectName", status: refused, sides: [write], reason: unsafe, note: 实机试执行在磁盘上给打开的项目改名，撤销不恢复，之后按原名找不到项目, source: api-notes A77 }
   # The owner's decision Q3 of 2026-10-21: Remote client and server (253 groups), Gui (72) and Scripting (3).
   - { match: "N:Eplan.EplApi.RemoteClient", status: excluded, reason: not_applicable, note: 远程客户端，架构上不采用, source: ADR-0002；负责人决定 Q3（2026-10-21） }
   - { match: "N:Eplan.EplApi.RemoteServer", status: excluded, reason: not_applicable, note: 远程客户端的服务端，架构上不采用, source: ADR-0002；负责人决定 Q3（2026-10-21） }

@@ -14,7 +14,7 @@
 
 | 操作层分母 | tools | api_try | callable | refused_unsafe |
 |---:|---:|---:|---:|---:|
-| 4014 | 1340 | 1701 | 1980 | 3 |
+| 4014 | 1340 | 1701 | 1980 | 4 |
 
 - api_try 在操作层分母外还可到达 0 组，不加入可调用数或分母；原因：无。
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
@@ -72,7 +72,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 |---|---:|---:|---:|---:|---:|
 | `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 9 / 88（10.2%） | 0 | 2 |
 | `Eplan.EplApi.Base` | 268 | 69 / 268（25.7%） | 103 / 268（38.4%） | 0 | 17 |
-| `Eplan.EplApi.DataModel` | 1247 | 541 / 1247（43.4%） | 795 / 1247（63.8%） | 3 | 141 |
+| `Eplan.EplApi.DataModel` | 1247 | 541 / 1247（43.4%） | 795 / 1247（63.8%） | 4 | 141 |
 | `Eplan.EplApi.DataModel.E3D` | 368 | 148 / 368（40.2%） | 270 / 368（73.4%） | 0 | 0 |
 | `Eplan.EplApi.DataModel.EObjects` | 83 | 45 / 83（54.2%） | 72 / 83（86.7%） | 0 | 11 |
 | `Eplan.EplApi.DataModel.Graphics` | 414 | 245 / 414（59.2%） | 312 / 414（75.4%） | 0 | 12 |
@@ -289,6 +289,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | `O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate` | refused | write: unsafe; 实机试执行使 EPLAN 崩溃（0xe0434352） | api-notes A77 |
 | `O:Eplan.EplApi.DataModel.MacroBox.RepresentationType` | refused | write: unsafe; 实机试执行使 EPLAN 崩溃（0xc0000409） | api-notes A77 |
 | `O:Eplan.EplApi.DataModel.Page.ConvertToGraphics` | refused | write: unsafe; 实机试执行使 EPLAN 崩溃（0xc0000409） | api-notes A77 |
+| `O:Eplan.EplApi.DataModel.Project.ProjectName` | refused | write: unsafe; 实机试执行在磁盘上给打开的项目改名，撤销不恢复，之后按原名找不到项目 | api-notes A77 |
 | `N:Eplan.EplApi.RemoteClient` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |
 | `N:Eplan.EplApi.RemoteServer` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |
 | `N:Eplan.EplApi.Remoting` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |

@@ -195,7 +195,7 @@
 - 离线修正：带页定位器时只枚举所涉及页的 `AllPlacements`、页身份和归属这些页的连接；Project 工厂/服务锚点不扩大范围。无页对象保留全项目回退，但合并生成查询源，每个源只运行一次；按原生类型对应的规范种类与对象号去重，资源读回和字节计量仅执行一次。提交后同样按页重新查找创建对象；沿用 A55，不复用事务内原生句柄。20 秒、10,000 项、256 KiB 上限不提高；日志记录 scope/visited/objects/bytes/elapsedMs，超限错误附同一计量，计时不进入审批指纹。全项目业务快照和设计文件指纹仍保留，局部身份观测不证明全部副作用。
 - Small 使用同一工厂参数形状、同页 `Placement.Remove` 和模拟的普通示例规模，验证不会访问无关页、创建/移除证据保留、重复候选不重复描述/计费及真实超限仍被拒绝。本次不运行 EPLAN；修复后的 Large 一步撤销仍待实机复验。
 
-### A77. 批量验证中使 EPLAN 崩溃的成员（2026-11-02，EPLAN 2026.0.3.25421，仅 scratch 副本）
+### A77. 批量验证中使 EPLAN 崩溃或丢失项目的成员（2026-11-02，EPLAN 2026.0.3.25421，仅 scratch 副本）
 
 以下事实由协调人把批量实机结果（`results.json` 的停止条目与文件时间）和 Windows Application 日志中 `Application Error` 的 `EPLAN.exe` 崩溃事件逐一对照得到。
 
@@ -205,6 +205,8 @@
 | `O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate` | write | 2026-11-01 23:12:47 | B / Pro Panel | `0xe0434352`（未处理 .NET 异常） | 约 18 秒，`outcome_unknown` |
 | `O:Eplan.EplApi.DataModel.MacroBox.RepresentationType` | write | 2026-10-31 02:59:38 | B / Pro Panel | `0xc0000409`（fail-fast） | 21 秒，`outcome_unknown` |
 | `O:Eplan.EplApi.DataModel.Page.ConvertToGraphics` | write | 2026-11-01 23:45:10 | B / Pro Panel | `0xc0000409`（fail-fast） | 25.9 秒后记录 `failed`、`PROJECT_NOT_OPEN` |
+| `O:Eplan.EplApi.DataModel.Project.ProjectName` | write | 2026-11-02 约 01:20（未崩溃） | A / Electric P8 | 无 | 13.4 秒后记录 `failed`、`PROJECT_NOT_OPEN` |
 
 - `MacroBox.RepresentationType` 的 read 侧不受影响。`Page.ConvertToGraphics` 崩溃后，同轮接下来的 708 项在两个 EPLAN 实例环境下返回 `PROJECT_NOT_OPEN` 或 `SESSION_NOT_SELECTED`，实际均未试执行，不能算作失败观察。
+- `Project.ProjectName` 的 write 没有使 EPLAN 崩溃，但把打开的 scratch 副本在磁盘上改名（`LargeWrite` 变为 `LargeWrite_v`，`.elk` 与 `.edb` 都改了），撤销没有恢复；同轮之后 968 项都返回 `PROJECT_NOT_OPEN`，未实际试执行。所有写保护都按项目名和路径识别项目，所以这一侧同样拒绝。
 - 结论：以上 write 侧由 `eplan_api_try` 拒绝，并由批量验证跳过；不从覆盖分母中移除。批量记录的返回耗时不能进一步证明精确的原生崩溃延迟；原始 target/value 参数未记录在结果中，保留这一证据缺口。

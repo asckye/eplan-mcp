@@ -18961,6 +18961,16 @@
       "source": "api-notes A77"
     },
     {
+      "match": "O:Eplan.EplApi.DataModel.Project.ProjectName",
+      "status": "refused",
+      "reason": "unsafe",
+      "sides": [
+        "write"
+      ],
+      "note": "实机试执行在磁盘上给打开的项目改名，撤销不恢复，之后按原名找不到项目",
+      "source": "api-notes A77"
+    },
+    {
       "match": "N:Eplan.EplApi.RemoteClient",
       "status": "excluded",
       "reason": "not_applicable",
@@ -21369,7 +21379,7 @@
       "apiTry": 1701,
       "callable": 1980,
       "outsideDenominator": {},
-      "refused_unsafe": 3
+      "refused_unsafe": 4
     },
     "action": {
       "denominator": 137,
@@ -21390,7 +21400,7 @@
       {
         "scope": "Eplan.EplApi.DataModel",
         "callable": 795,
-        "refused_unsafe": 3
+        "refused_unsafe": 4
       },
       {
         "scope": "Eplan.EplApi.DataModel.E3D",
