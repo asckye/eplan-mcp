@@ -42,14 +42,17 @@ public sealed class PageReviewCableFixTests
         Assert.Equal(new double[][] { [120, 100], [120, 160], [122, 160], [200, 160] }, actual["connections"]![1]!["drawnPath"]!.ToObject<double[][]>());
         JToken issue = Assert.Single(PageReviewRules.Check(_scene, actual, request));
         Assert.Equal("cable_core_segment", (string?)issue["code"]);
-        Assert.Equal("eplan_placement_update", (string?)issue["fix"]!["tool"]);
+        // A73: a move drops the core assignment, so the computed position is advice and the fix is a redraw.
+        Assert.Equal("eplan_connection_create", (string?)issue["fix"]!["tool"]);
         JToken args = issue["fix"]!["args"]!;
         Assert.Equal("LargeWrite", (string?)args["project"]);
         Assert.Equal(_scene.Page.Page, (string?)args["page"]);
-        JToken move = Assert.Single(args["moves"]!);
+        Assert.Null(args["moves"]);
+        Assert.Equal([80d, 192d], issue["position"]!.Values<double>());
+        Assert.Contains("(80, 192)", (string?)issue["message"], StringComparison.Ordinal);
+        Assert.Contains("drops its core assignment", (string?)issue["message"], StringComparison.Ordinal);
+        JToken move = Assert.Single(PageReviewCableFix.Arguments(_scene.Page.GridSize, actual["cables"]![0], actual["connections"]![0], (JArray)actual["connections"]!)["moves"]!);
         Assert.True(JToken.DeepEquals(BridgeJson.FromObject(_cable), move["locator"]));
-        Assert.Equal(80, (double)move["x_mm"]!);
-        Assert.Equal(192, (double)move["y_mm"]!);
         Assert.Null(move["delta_mm"]);
         Assert.InRange(192d, 160 + 4, 220 - 4);
     }
@@ -119,7 +122,7 @@ public sealed class PageReviewCableFixTests
         else
         {
             JToken issue = Assert.Single(PageReviewRules.Check(_scene, actual, request));
-            Assert.Equal(164, (double)issue["fix"]!["args"]!["moves"]![0]!["y_mm"]!);
+            Assert.Equal(164, (double)issue["position"]![1]!);
         }
     }
 
@@ -131,9 +134,8 @@ public sealed class PageReviewCableFixTests
         { c["drawnPath"] = JArray.FromObject(c["drawnPath"]!.ToObject<double[][]>()!.Select(p => new[] { p[1], p[0] })); }
         actual["cables"]![0]!["position"] = new JArray(132, 84);
         actual["cables"]![0]!["points"] = JArray.FromObject(new double[][] { [128, 80], [128, 160] });
-        JToken move = Assert.Single(PageReviewRules.Check(_scene, actual, request))["fix"]!["args"]!["moves"]![0]!;
-        Assert.Equal(196, (double)move["x_mm"]!);
-        Assert.Equal(84, (double)move["y_mm"]!);
+        JToken issue = Assert.Single(PageReviewRules.Check(_scene, actual, request));
+        Assert.Equal([196d, 84d], issue["position"]!.Values<double>());
     }
 
     [Fact]
@@ -141,7 +143,8 @@ public sealed class PageReviewCableFixTests
     {
         var (actual, request) = Evidence();
         actual["cables"]![0]!["position"] = new JArray(81, 130);
-        JToken args = Assert.Single(PageReviewRules.Check(_scene, actual, request))["fix"]!["args"]!;
+        Assert.Equal([81d, 194d], Assert.Single(PageReviewRules.Check(_scene, actual, request))["position"]!.Values<double>());
+        JObject args = PageReviewCableFix.Arguments(_scene.Page.GridSize, actual["cables"]![0], actual["connections"]![0], (JArray)actual["connections"]!);
         Assert.False((bool)args["snap_to_grid"]!);
         Assert.Equal(81, (double)args["moves"]![0]!["x_mm"]!);
         Assert.Equal(194, (double)args["moves"]![0]!["y_mm"]!);
@@ -150,7 +153,7 @@ public sealed class PageReviewCableFixTests
     private void AssertRedraw(JObject actual, JObject request)
     {
         JToken issue = Assert.Single(PageReviewRules.Check(_scene, actual, request));
-        Assert.Equal("eplan_placement_update", (string?)issue["fix"]!["tool"]);
+        Assert.Equal("eplan_connection_create", (string?)issue["fix"]!["tool"]);
         Assert.Contains("redraw the cable across the intended branch", (string)issue["message"]!, StringComparison.Ordinal);
         Assert.Null(issue["fix"]!["args"]!["moves"]);
         Assert.DoesNotContain("delta_mm", issue["fix"]!.ToString(), StringComparison.Ordinal);

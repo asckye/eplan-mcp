@@ -176,7 +176,7 @@ public static class PlacementMovePlanner
             ["generation"] = "Logical endpoints are preserved; use eplan_connection_generate after moving to regenerate connections."
         };
         if (offsets.Any(p => p.Key.Kind == "Cable" && p.Value.Any(n => n != 0)))
-        { layoutWarnings.Add("Cable definition points are reconciled by eplan_connection_generate; run it, then eplan_page_review to confirm core membership."); }
+        { layoutWarnings.Add("Moving a cable drops its core assignment (A73): EPLAN recreates its definition points unnamed and eplan_connection_generate does not make the crossed connections cable cores again. Check the cores with eplan_page_review; undo (Ctrl+Z) restores them."); }
         result["warning"] = layoutWarnings.Count == 0 ? null : string.Join("\n", layoutWarnings.Distinct(StringComparer.Ordinal));
         string encoded = result.ToString(Formatting.None);
         Require((encoded.Count(c => c <= 127) + 3) / 4 + encoded.Count(c => c > 127) <= ((string?)input["response_format"] == "detailed" ? 20000 : 5000) - 256, "/response_format", "Use detailed or fewer moves; complete impact cannot be truncated.");

@@ -94,7 +94,7 @@ public sealed class PlacementMoveCablePointTests
         int count = mover.Scene.Page.Placements.Count;
         JObject plan = mover.Plan();
         Assert.DoesNotContain(plan["moves"]!, r => (int)r["locator"]!["type"]! == 59);
-        const string warning = "Cable definition points are reconciled by eplan_connection_generate; run it, then eplan_page_review to confirm core membership.";
+        const string warning = "Moving a cable drops its core assignment (A73): EPLAN recreates its definition points unnamed and eplan_connection_generate does not make the crossed connections cable cores again. Check the cores with eplan_page_review; undo (Ctrl+Z) restores them.";
         Assert.Contains(warning, (string?)plan["warning"], StringComparison.Ordinal);
 
         JObject result = mover.Execute();

@@ -113,11 +113,14 @@ public static class PageReviewRules
                     JToken? wire = found?["cores"]?.FirstOrDefault(w => SameEnds(core, w));
                     if (wire is null || _coreFields.Any(k => core[k] is not null && !JToken.DeepEquals(core[k], wire[k])) || actual["connections"]!.Concat(found!["cores"]!).Any(w => !SameEnds(w, core) && w["definitionPoints"]!.Values<long>().Intersect(wire["definitionPoints"]!.Values<long>()).Any() && !cable["cores"]!.Any(t => SameEnds(t, w) && _coreFields.All(k => JToken.DeepEquals(t[k], core[k])))))
                     {
-                        JObject fix = PageReviewCableFix.Arguments(scene.Page.GridSize, found, actual["connections"]!.FirstOrDefault(c => SameEnds(core, c)), (JArray)actual["connections"]!);
-                        string message = fix.ContainsKey("moves")
-                            ? "Core membership differs; an A64 trunk segment shares its definition point across branches. Move the cable to cross the intended branch at its grid-snapped middle."
+                        // A73 (live 2026-11-02): moving the cable puts it on the branch but drops its core assignment and
+                        // generation does not restore it, so the computed position is advice, never a move fix.
+                        JObject move = PageReviewCableFix.Arguments(scene.Page.GridSize, found, actual["connections"]!.FirstOrDefault(c => SameEnds(core, c)), (JArray)actual["connections"]!);
+                        double[] target = move["moves"] is JArray { Count: 1 } moves ? [(double)moves[0]!["x_mm"]!, (double)moves[0]!["y_mm"]!] : [];
+                        string message = target.Length == 2
+                            ? FormattableString.Invariant($"Core membership differs; an A64 trunk segment shares its definition point across branches. The cable should cross the intended branch with its position at ({target[0]}, {target[1]}). Moving a cable drops its core assignment (A73) and no tool reassigns cores yet: draw the cable again across that branch with eplan_connection_create.")
                             : "Core membership differs. A parallel exclusive branch and complete crossing evidence are required for coordinates; redraw the cable across the intended branch.";
-                        Add("cable_core_segment", "error", [], wire?["locator"] is JObject l ? [l.ToObject<DrawingLocator>()!] : [], message, "eplan_placement_update", fix);
+                        Add("cable_core_segment", "error", target, wire?["locator"] is JObject l ? [l.ToObject<DrawingLocator>()!] : [], message, "eplan_connection_create", new JObject());
                     }
                 }
             }
