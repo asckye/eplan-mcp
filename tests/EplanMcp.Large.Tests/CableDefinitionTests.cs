@@ -37,7 +37,9 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
                 ["response_format"] = "detailed",
                 ["items"] = JsonSerializer.SerializeToElement(new[] { new
                 {
-                    kind = "cable_definition", points = new double[][] { [15 * geometry.GridSize, 35 * geometry.GridSize], [55 * geometry.GridSize, 35 * geometry.GridSize] },
+                    // EPLAN right-aligns the designation and type texts at the left end; from x = 60 they crossed the
+                    // 10 mm margin (R1, live 2026-11-01), so the line starts where the layout guard suggested.
+                    kind = "cable_definition", points = new double[][] { [16 * geometry.GridSize, 35 * geometry.GridSize], [55 * geometry.GridSize, 35 * geometry.GridSize] },
                     designation = "-W9", type_text = "ÖLFLEX CLASSIC 100 300/500V", core_count = 3, cross_section_mm2 = 0.5,
                     cores = wires.Select((w, i) => new { connection = new { locator = w.GetProperty("locator") },
                         label = (i + 1).ToString(System.Globalization.CultureInfo.InvariantCulture), colour = colours[i] }).ToArray(),
@@ -82,7 +84,9 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
                 ["response_format"] = "detailed",
                 ["items"] = JsonSerializer.SerializeToElement(new[] { new
                 {
-                    kind = "cable_definition", points = new double[][] { [15 * geometry.GridSize, 35 * geometry.GridSize], [55 * geometry.GridSize, 35 * geometry.GridSize] },
+                    // EPLAN right-aligns the designation and type texts at the left end; from x = 60 they crossed the
+                    // 10 mm margin (R1, live 2026-11-01), so the line starts where the layout guard suggested.
+                    kind = "cable_definition", points = new double[][] { [16 * geometry.GridSize, 35 * geometry.GridSize], [55 * geometry.GridSize, 35 * geometry.GridSize] },
                     designation = "-W9", type_text = "ÖLFLEX CLASSIC 100 300/500V", core_count = 3, cross_section_mm2 = 0.5,
                     cores = wires.Select((w, i) => new { connection = new { locator = new
                     {

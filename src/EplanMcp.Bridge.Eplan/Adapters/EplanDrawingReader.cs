@@ -102,7 +102,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             using MultiLangString? contents = placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null };
             string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null;
             string? height = placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null;
-            bool isContainer = placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant.SymbolName == "PLCC"
+            // Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
+            bool isContainer = placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant?.SymbolName == "PLCC"
                 || placement.GetType().Name == "PLC" || placement is Function boxFunction && boxFunction.FunctionCategory.ToString() is "PLCBox" or "BlackBox");
             string? containerOwner = isContainer ? placement.ToStringIdentifier() : null;
             try
