@@ -1,8 +1,10 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Packs;
 using EplanMcp.Host.Safety;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
@@ -133,6 +135,7 @@ internal sealed class DeviceWriteTools
         string? plc_plug_designation = null,
         [Description("Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change.")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
+        PackLibrary? packs = null,
         CancellationToken cancellationToken = default)
     {
         var args = new DevicePlaceArgs
@@ -169,6 +172,20 @@ internal sealed class DeviceWriteTools
             error.Execution = ExecutionState.NotStarted;
             return ToolResults.Error(error);
         }
+        PluginResolution? resolution = null;
+        if (packs is not null && args.TerminalStripPosition is not null)
+        {
+            try
+            {
+                string path = Path.IsPathFullyQualified(project) ? project
+                    : (await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet, new() { Project = project }, cancellationToken).ConfigureAwait(false)).Project.Path;
+                resolution = await new PluginResolver(packs).ResolveAsync(path, cancellationToken, page: args.Page).ConfigureAwait(false);
+                args.StripDefinition = DevicePluginDefaults.Select(resolution);
+            }
+            catch (BridgeCallException ex)
+            { return ToolResults.Error(ex.Error); }
+        }
+        List<string> pluginWarnings = resolution?.Warnings.ToList() ?? [];
         var request = new WriteRequest<DevicePlaceArgs, DevicePlaceArgs>(
             PlaceTool,
             ToolTier.Write,
@@ -197,6 +214,7 @@ internal sealed class DeviceWriteTools
                 TerminalNumber = args.TerminalNumber,
                 TerminalStripText = args.TerminalStripText,
                 TerminalStripPosition = args.TerminalStripPosition,
+                StripDefinition = args.StripDefinition,
                 PlcConnectionPoint = args.PlcConnectionPoint,
                 PlcAddress = args.PlcAddress,
                 PlcSymbolicAddress = args.PlcSymbolicAddress,
@@ -206,7 +224,11 @@ internal sealed class DeviceWriteTools
             },
             dry_run,
             PageWriteTools.DefaultLimit,
-            "Placing the device");
+            "Placing the device")
+        {
+            BeforeExecute = packs is not null && resolution is not null
+                ? PluginConsumerDefaults.BeforeExecute(packs, resolution, args.StripDefinition?.Plugins ?? [], pluginWarnings) : null
+        };
         PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, args.Project, args.Page, cancellationToken).ConfigureAwait(false);
         WriteOutcome<DevicePlaceData> outcome;
         try
@@ -237,6 +259,8 @@ internal sealed class DeviceWriteTools
                 Category = ResultShaper.CleanText(data?.Category),
             },
             Terminal = terminalData,
+            Metadata = terminalData is { StripCreated: true, StripPosition: not null } && args.StripDefinition is { Plugins.Length: > 0 } used
+                ? new JsonObject { ["plugins"] = JsonSerializer.SerializeToNode(used.Plugins) } : null,
             Plc = data?.Plc,
             LocationBox = data?.LocationBox ?? (details.TryGetValue("locationBox", out string? box) ? JsonSerializer.Deserialize<LocationBoxData>(box, HostJson.Options) : null),
             Functions = data?.Functions ?? (args.LocationBox is not null ? 0 : terminalData is not null ? (terminalData.StripCreated ? 2 : 1) : args.Library is not null ? 1 : null),
@@ -247,6 +271,11 @@ internal sealed class DeviceWriteTools
             Recovered = outcome.Recovered,
             Hint = PlaceHint(outcome, details),
         };
+        if (pluginWarnings.Count > 0)
+        {
+            result.Metadata ??= new JsonObject();
+            result.Metadata["warnings"] = JsonSerializer.SerializeToNode(pluginWarnings.Select(ResultShaper.CleanText));
+        }
         if (result.Symbol is { } plannedSymbol)
         {
             plannedSymbol.Library = ResultShaper.CleanText(plannedSymbol.Library);

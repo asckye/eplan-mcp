@@ -38,6 +38,38 @@ public sealed class TerminalPlacementTests : IDisposable
     }
 
     [Fact]
+    public void PlacedDefinition_UsesRequestedSpecialSymbolAndVariant()
+    {
+        _project.SymbolLibraries[0].Symbols = [new() { Name = "TEST_DEF", Variants = [new() { SymbolLibraryName = "SPECIAL", SymbolName = "TEST_DEF", VariantNr = 3 }] }];
+        DevicePlaceArgs args = Args();
+        args.TerminalStripPosition = [72, 120];
+        args.StripDefinition = new() { Symbol = "TEST_DEF", Variant = 3 };
+        _adapter.PlaceTerminal(args, "=F+A1-X6:1");
+        TerminalStrip strip = Assert.Single(_page.AllPlacements.OfType<TerminalStrip>());
+        Assert.Equal(("SPECIAL", "TEST_DEF", 3), (strip.SymbolVariant.Library, strip.SymbolVariant.Name, strip.SymbolVariant.Variant));
+    }
+
+    [Fact]
+    public void PlacedDefinition_RefusesOtherLibraries()
+    {
+        DevicePlaceArgs args = Args();
+        args.TerminalStripPosition = [72, 120];
+        args.StripDefinition = new() { Library = "IEC_symbol" };
+        BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => _adapter.PlaceTerminal(args, "=F+A1-X6:1"));
+        Assert.Contains("only support the SPECIAL library", failure.Error.Message, StringComparison.Ordinal);
+        Assert.Empty(_page.AllPlacements);
+    }
+
+    [Fact]
+    public void UnplacedDefinition_DoesNotUsePluginSelection()
+    {
+        DevicePlaceArgs args = Args();
+        args.StripDefinition = new() { Symbol = "MISSING" };
+        Assert.True(_adapter.PlaceTerminal(args, "=F+A1-X6:1").Terminal!.StripCreated);
+        Assert.Empty(_page.AllPlacements.OfType<TerminalStrip>());
+    }
+
+    [Fact]
     public void Create_ParentPrecedesTerminal_AndNativeReadbackPreservesAssignedSortCode()
     {
         TerminalStrip? parent = null;

@@ -6380,6 +6380,24 @@
       "outputSchema": {
         "type": "object",
         "properties": {
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "plugins": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "pageShown": {
             "description": "Whether the requested page editor was opened or focused; absent when show_page is false.",
             "type": [

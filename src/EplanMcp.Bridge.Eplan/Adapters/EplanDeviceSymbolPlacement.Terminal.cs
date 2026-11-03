@@ -28,11 +28,14 @@ internal sealed partial class EplanDeviceSymbolPlacement
             // unplaced definition (Create(Project, FunctionDefinition)) is listed in the navigator only.
             if (args.TerminalStripPosition is { } position)
             {
-                // Owner 2026-11-02: EPLAN's insert command places the definition as SPECIAL TDEF ("端子排定义") with its
-                // texts; Create(Page) left only a marker.
-                SymbolVariant? definition = project.SymbolLibraries.FirstOrDefault(l => l.Name == "SPECIAL")?.Symbols.FirstOrDefault(s => s.Name == "TDEF")?.Variants.FirstOrDefault(v => v.VariantNr == 0);
-                CheckTerminal(definition is not null, "the SPECIAL/TDEF strip definition symbol is not loaded");
+                // A83: the insert command uses a SPECIAL symbol; omitted plugin selection retains TDEF/0.
+                StripDefinitionSymbol selection = args.StripDefinition ?? new();
+                CheckTerminal(selection.Library == "SPECIAL", "plugin strip definitions only support the SPECIAL library");
+                SymbolVariant? definition = project.SymbolLibraries.FirstOrDefault(l => l.Name == "SPECIAL")?.Symbols.FirstOrDefault(s => s.Name == selection.Symbol)?.Variants.FirstOrDefault(v => v.VariantNr == selection.Variant);
+                CheckTerminal(definition is not null, $"the SPECIAL/{selection.Symbol}/{selection.Variant} strip definition symbol is not loaded");
                 strip.Create(page, definition!);
+                CheckTerminal(strip.SymbolVariant.SymbolLibraryName == "SPECIAL" && strip.SymbolVariant.SymbolName == selection.Symbol
+                    && strip.SymbolVariant.VariantNr == selection.Variant, "strip definition symbol differs");
                 strip.Location = new PointD(position[0], position[1]);
             }
             else

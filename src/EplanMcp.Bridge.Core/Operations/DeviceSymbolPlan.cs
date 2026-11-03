@@ -89,7 +89,7 @@ internal static class DeviceSymbolPlan
             Project = request.Project.Name,
             ProjectPath = request.Project.Path,
             Changes = changes,
-            Fingerprint = Fingerprint.Of([request.StateFingerprint(), resolved, BridgeJson.FromObject(changes).ToString(Formatting.None)]),
+            Fingerprint = Fingerprint.Of([request.StateFingerprint(), resolved, BridgeJson.FromObject(changes).ToString(Formatting.None), BridgeJson.FromObject(args.StripDefinition).ToString(Formatting.None)]),
             Details = details,
         };
     }

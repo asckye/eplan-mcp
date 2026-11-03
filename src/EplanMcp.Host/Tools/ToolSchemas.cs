@@ -29,7 +29,7 @@ internal static class ToolSchemas
                 { PageReviewTools.Configure(tool.ProtocolTool, schema); }
                 if (tool.ProtocolTool.Name == DeviceWriteTools.PlaceTool)
                 { DevicePlaceInputs.Configure(schema); }
-                if (tool.ProtocolTool.Name == ConnectionCreateTools.Tool)
+                if (tool.ProtocolTool.Name is ConnectionCreateTools.Tool or DeviceWriteTools.PlaceTool)
                 {
                     var output = JsonNode.Parse(tool.ProtocolTool.OutputSchema!.Value.GetRawText())!.AsObject();
                     output["properties"]!["metadata"] = JsonNode.Parse("""{"type":"object","additionalProperties":false,"properties":{"plugins":{"type":"array","items":{"type":"string"}},"warnings":{"type":"array","items":{"type":"string"}}}}""");

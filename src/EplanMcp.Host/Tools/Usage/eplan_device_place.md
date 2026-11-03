@@ -22,7 +22,7 @@ PLC digital input:
 
 ## Workflow
 
-1. Choose a circuit page with eplan_page_list/create; inspect with eplan_page_get. Coordinates: finite mm, bottom left, y up, within known bounds.
+1. Choose a circuit page with eplan_page_list/create; inspect with eplan_page_get. Use finite mm inside known page bounds, origin bottom left, y up.
 2. Choose a free tag using eplan_device_list; short tags take page structure without document type. Preview with dry_run. Outside scratch needs engineer approval.
 3. eplan_part_search finds parts (hasMacro required; variant defaults to 1); eplan_symbol_search finds project library variants/pin order. Place remaining unplaced functions in EPLAN; use eplan_macro_insert for circuits.
 
@@ -33,13 +33,14 @@ PLC digital input:
 - Symbol sources: symbol (resolved variant/local pins), changes (approval lines); part/variant empty; functions=1,unplaced=0.
 - Symbol-only display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm} objects. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite offsets relative to parent; negatives allowed. 20214: EPLAN-calculated prefixed tag.
 - Symbol-only connection_designations: one nonblank pin name in search order, <=64 characters, no controls; writes indexed 20022 and verifies pin names.
-- Creation/readback are one transaction: mismatch/cancellation rolls back with no empty undo; success: one Ctrl+Z. visibleTag=null unless a prefixed tag display was requested.
+- Creation/readback share one transaction: mismatch/cancellation rolls back without empty undo; success: one Ctrl+Z. visibleTag=null without a prefixed tag display.
 - location_box: + followed by 1-64 letters/digits/underscores/dots. Omit tag and part/symbol options. Fixed SPECIAL/SC variant 0, dashed. x,y: lower-left; corner_x,corner_y: upper-right; positive area.
 - locationBox: structure, bounds [minX,minY,maxX,maxY], outline=dashed, affectedDevices=[]; predicted in preview/recovery, native on commit. Inner devices keep structure. functions/unplaced=0; device.tag/category=structure/LocationBox. Duplicate page structure refused; verify recovery with eplan_page_get include_drawings.
 
-- Terminal: terminal_strip + terminal_number; IEC_symbol/X, symbol_variant=0 default. Omit tag/other sources/options. Number: 1-64 letters/digits/underscores/dots. terminal_strip_text: 1-256 characters, no controls, plain ??_?? text, new strips only. Keep existing spelling; reject duplicate strip:number ignoring case.
-- terminal_strip_position:[x,y]: new definition independent of terminal x/y; finite 0..10000 mm, requires terminal_strip_text. First terminal only; never move/rewrite existing strips. Omit for unplaced definition. Read back stripPosition/stripText before commit.
-- terminal: strip/number/native owner/position [x,y]/assigned sortCode (20809; null if empty)/stripCreated. Preview/recovery: owner/sortCode=null. functions includes new strip. Generate logical segments separately: eplan_connection_generate (A52/A55).
+- Terminal: terminal_strip + terminal_number; defaults to IEC_symbol/X variant 0. No tag/other sources. Number: 1-64 letters/digits/_/dots. terminal_strip_text: new strips only, 1-256 chars, no controls, plain ??_??. Preserve spelling; duplicate strip:number ignores case.
+- terminal_strip_position:[x,y]: definition position; finite 0..10000 mm, requires terminal_strip_text. First terminal only; existing strips unchanged. Omit for unplaced; verify stripPosition/stripText.
+- Placed strip: defaults.strip_definition.symbol + .variant from plugins (SPECIAL), else TDEF/0. metadata.plugins: used id@version in preview/execute. Plugin changes invalidate plans.
+- terminal: strip/number/owner/position/sortCode (20809)/stripCreated. Preview/recovery: owner/sortCode=null; empty sortCode=null. functions includes new strip. Logical segments: eplan_connection_generate (A52/A55).
 
 - PLC: four plc_* fields required; tag=existing native card (create SPECIAL/PLCC first if needed). Point: 1-64 characters, no leading colon; others: 1-256; all nonblank, no controls. Discover a one-pin DI variant. Duplicate card point/address refused ignoring case.
 - NO/NC: select NoContact/NcContact; connection_designations=["13","14"] / ["11","12"].
@@ -48,7 +49,7 @@ PLC digital input:
 - PLC displays: 20213=card DT, 20406=plug, 20300=main/auxiliary, 20301=overview. References are native/read-only, may be empty; overview needs a matching representation.
 - Local PLC displays: references set 20021=2. Verify text/position/visibility before/after commit by fresh IDs (A78/A79).
 - plc: committed fields + plugDesignation/mainReference; readback failure keeps committed + warning. Verify with eplan_plc_get detailed / eplan_page_get include_drawings before retry. functions/unplaced=null; plc_get counts same-name parentlessRepresentations (A55). Use returned names.
-- show_page opens/focuses the page before drawing; UI only, no project data change.
+- show_page opens/focuses the page; UI only.
 
 ## Errors
 

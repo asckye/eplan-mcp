@@ -42,6 +42,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - 显示属性和连接点代号仅用于库符号来源；不提供任意属性写入，也不改变功能文本及其现有语言（A53）。
 
 ## 3. 输出
+- 新建并放置端子排定义时，可从项目的插件解析结果读取 `defaults.strip_definition.symbol` 与 `defaults.strip_definition.variant`（必须同时有值）。只支持 SPECIAL 库；未配置时保留 `TDEF`/0。仅实际消费插件值时，dry-run 和执行结果附 `metadata.plugins`（精确 `id@version`）；复用已有排或创建不放置的排不报告消费。内部选择与来源进入计划指纹，改变后必须重新规划。
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 ```json
 {

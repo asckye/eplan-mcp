@@ -6,6 +6,9 @@ internal static class DeviceTerminalPlan
 {
     internal static void Check(DevicePlaceArgs args)
     {
+        if (args.StripDefinition is { } definition && (definition.Library != "SPECIAL" || string.IsNullOrWhiteSpace(definition.Symbol)
+            || definition.Symbol.Any(c => char.IsControl(c) || c is '/' or '\\' or ':') || definition.Variant < 0))
+        { throw WriteArguments.Invalid(["/stripDefinition: plugin strip definitions require a SPECIAL symbol name and a nonnegative variant; other libraries are not supported."]); }
         if (args.TerminalStripPosition is { } position && (args.TerminalStrip is null || args.TerminalStripText is null || position.Length != 2
             || position.Any(n => double.IsNaN(n) || double.IsInfinity(n) || n is < 0 or > 10000)))
         { throw WriteArguments.Invalid(["/terminal_strip_position: require a terminal source, new strip text and two finite page coordinates 0..10000 mm."]); }
@@ -38,7 +41,10 @@ internal static class DeviceTerminalPlan
         { throw WriteArguments.Invalid(["/terminal_strip_text: supply text only when creating a new strip; omit it when adding another terminal."]); }
         changes[0].Kind = "terminal";
         if (create)
-        { changes.Insert(0, new() { Action = "create", Kind = "terminal_strip", Name = strip, NewValue = "main definition; function text (??_??): " + (args.TerminalStripText ?? "") + (args.TerminalStripPosition is { } point ? FormattableString.Invariant($"; page {request.Page.Name} at ({point[0]}, {point[1]})") : "; unplaced") }); }
+        {
+            string symbol = args.StripDefinition is { } definition ? FormattableString.Invariant($"; SPECIAL/{definition.Symbol}/{definition.Variant}") : "";
+            changes.Insert(0, new() { Action = "create", Kind = "terminal_strip", Name = strip, NewValue = "main definition; function text (??_??): " + (args.TerminalStripText ?? "") + (args.TerminalStripPosition is { } point ? FormattableString.Invariant($"; page {request.Page.Name} at ({point[0]}, {point[1]})") + symbol : "; unplaced") });
+        }
         if (args.TerminalStripPosition is { } xy && (request.Page.Width is not { } w || request.Page.Height is not { } h || double.IsNaN(w) || double.IsInfinity(w) || double.IsNaN(h) || double.IsInfinity(h) || w <= 0 || h <= 0 || xy[0] > w || xy[1] > h))
         { throw WriteArguments.Invalid(["/terminal_strip_position: require known page bounds and a position inside the page."]); }
         return new() { Strip = strip, Number = args.TerminalNumber!, Position = [args.X, args.Y], StripCreated = create, StripPosition = args.TerminalStripPosition, StripText = args.TerminalStripText };

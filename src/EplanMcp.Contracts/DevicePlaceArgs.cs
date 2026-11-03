@@ -42,6 +42,9 @@ public sealed class DevicePlaceArgs
     /// <summary>Optional absolute [x,y] mm for a new strip definition; requires TerminalStripText.</summary>
     public double[]? TerminalStripPosition { get; set; }
 
+    /// <summary>Internal plugin default for a new placed strip definition; never a public tool parameter.</summary>
+    public StripDefinitionSymbol? StripDefinition { get; set; }
+
     /// <summary>PLC pin designation; with an explicit plug the suffix is plug:point. Tag identifies its existing card.</summary>
     public string? PlcConnectionPoint { get; set; }
     /// <summary>PLC I/O address (20400), required with PlcConnectionPoint.</summary>
