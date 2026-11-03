@@ -57,6 +57,7 @@
 | `eplan_pack_build` | full | 写入 | [eplan_pack_build.md](eplan_pack_build.md) |
 | `eplan_pack_get` | full | 只读 | [eplan_pack_get.md](eplan_pack_get.md) |
 | `eplan_pack_import` | full | 写入 | [eplan_pack_import.md](eplan_pack_import.md) |
+| `eplan_pack_library_list` | full | 只读 | [eplan_pack_library_list.md](eplan_pack_library_list.md) |
 | `eplan_pack_list` | full | 只读 | [eplan_pack_list.md](eplan_pack_list.md) |
 | `eplan_page_create` | core、full | 写入 | [eplan_page_create.md](eplan_page_create.md) |
 | `eplan_page_delete` | full | 写入 | [eplan_page_delete.md](eplan_page_delete.md) |

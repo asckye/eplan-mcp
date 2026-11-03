@@ -5,6 +5,7 @@
 
 ## [Unreleased]
 
+- 工程包新增插件种类、提供项与标准标签，旧包保持原摘要；新增离线工具 `eplan_pack_library_list`，可浏览内置、本地及登记的只读共享库，查看已安装版本和更新候选。
 - `eplan_connection_create` 支持用 `t_node.variant` 选择同方向引脚的 SPECIAL 变体，以及用 `interruption_point.sort_code` 在放置事务中设置排序码 24809 并读回；省略参数沿用原行为。D1/D2 的变体流向及跨页配对 Spike 已补，待实机运行。
 
 ### Fixed

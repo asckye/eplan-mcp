@@ -63,6 +63,8 @@ internal static class McpServerSetup
         services.TryAddSingleton(ActionRunCatalog.Process);
         services.TryAddSingleton<ImportFiles>();
         services.TryAddSingleton<PackLibrary>();
+        services.TryAddSingleton<PluginStateStore>();
+        services.TryAddSingleton<PluginLibrarySource>();
         services.TryAddSingleton<KnowledgeReviewService>();
         services.TryAddSingleton<BindingService>();
         services.TryAddSingleton<PackInstaller>();
@@ -166,6 +168,7 @@ internal static class McpServerSetup
             .WithTools<ActionRunTools>(HostJson.Options)
             .WithTools<ActionTryTools>(HostJson.Options)
             .WithTools<PackTools>(HostJson.Options)
+            .WithTools<PluginLibraryTools>(HostJson.Options)
             .WithTools<AssetTools>(HostJson.Options)
             .WithTools<CabinetTools>(HostJson.Options)
             .WithTools<ContextTools>(HostJson.Options)

@@ -297,7 +297,7 @@ public sealed class ToolContractTests : IDisposable
     public void EveryTool_FollowsTheNamingRule()
     {
         // Explicitly approved two-word resources and PDF import category (mcp-tool-design 3.2).
-        Assert.All(Tools, t => Assert.Matches("^eplan_([a-z]+|terminal_strip|page_text|action_catalog)_([a-z]+|pdf_comments)$", t.Name));
+        Assert.All(Tools, t => Assert.Matches("^eplan_([a-z]+|terminal_strip|page_text|action_catalog|pack_library)_([a-z]+|pdf_comments)$", t.Name));
     }
 
     [Fact]
