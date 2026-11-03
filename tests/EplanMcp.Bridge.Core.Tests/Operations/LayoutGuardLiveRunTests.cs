@@ -202,18 +202,20 @@ public sealed class LayoutGuardLiveRunTests
         empty.Bounds = [0, 0, 0, 0];
         var actual = LayoutGuardTests.Model();
         actual.Page.Placements = [owner, text, empty];
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => LayoutGuard.AfterWriting(before, actual)).Error;
-        LayoutGuard.Violation failure = Assert.Single(JsonConvert.DeserializeObject<List<LayoutGuard.Violation>>(error.Metadata!["layoutViolations"])!, v => !v.Warning);
-        Assert.Equal("R1", failure.Rule);
         if (oversized)
         {
+            // ADR-0046 S2: past the page edge the write still rolls back.
+            BridgeError error = Assert.Throws<BridgeErrorException>(() => LayoutGuard.AfterWriting(before, actual)).Error;
+            LayoutGuard.Violation failure = Assert.Single(JsonConvert.DeserializeObject<List<LayoutGuard.Violation>>(error.Metadata!["layoutViolations"])!, v => !v.Warning);
+            Assert.Equal("R1", failure.Rule);
             Assert.Null(failure.NearestFreePosition);
             Assert.Contains("No free position found within the bounded search", error.Message, StringComparison.Ordinal);
         }
         else
         {
-            Assert.Equal([28d, 40d], failure.NearestFreePosition!);
-            Assert.Contains("Suggested position: [28, 40] mm", error.Message, StringComparison.Ordinal);
+            // Inside the page but outside the margin it is a committed deviation that keeps the suggestion.
+            Assert.Contains(LayoutGuard.AfterWriting(before, actual), s => s.StartsWith("Readback deviation: R1", StringComparison.Ordinal)
+                && s.Contains("Suggested position: [28, 40] mm", StringComparison.Ordinal));
             Assert.Empty(LayoutGuard.Check(actual, actual.Page.Placements.Select(p => LayoutGuard.Shift(p, [-12, 0])).ToArray(), false, true));
         }
         Assert.Equal([40d, 40d], owner.Location);

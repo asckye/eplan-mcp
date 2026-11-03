@@ -7,12 +7,8 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class ConnectionCreateExecutionTests
 {
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    public void MeasuredConflictAfterEitherCommit_RollsBackItsOpenStepAndPreservesRefusal(int commit)
+    private static void Measure(Creator fake, double[] bounds)
     {
-        var fake = new Creator { MeasureAfterCommit = commit };
         fake.Measured = LayoutGuard.From(fake.Fixture.Scene);
         fake.Measured.Page = new()
         {
@@ -20,14 +16,39 @@ public sealed class ConnectionCreateExecutionTests
             PageSize = [100, 100],
             Placements = [.. fake.Fixture.Scene.Page.Placements, new()
             {
-                Kind = "SymbolReference", Locator = new() { Type = 17, Oid = 9 }, Location = [24, 8], Bounds = [20, 6, 26, 26]
+                Kind = "SymbolReference", Locator = new() { Type = 17, Oid = 9 }, Location = [24, 8], Bounds = bounds
             }]
         };
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void MeasuredConflictAfterEitherCommit_CommitsWithADeviationWarning(int commit)
+    {
+        // ADR-0046: a measured overlap of a planned object that stays on the page is a committed deviation.
+        var fake = new Creator { MeasureAfterCommit = commit };
+        Measure(fake, [20, 6, 26, 26]);
+
+        JObject result = fake.Execute();
+
+        Assert.Contains("Readback deviation: R2", (string?)result["warning"], StringComparison.Ordinal);
+        Assert.Contains("Objects 17/9", (string?)result["warning"], StringComparison.Ordinal);
+        Assert.DoesNotContain("Rollback", fake.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void MeasuredOutlineOffThePageAfterEitherCommit_RollsBackItsOpenStepAndPreservesRefusal(int commit)
+    {
+        var fake = new Creator { MeasureAfterCommit = commit };
+        Measure(fake, [20, -2, 26, 26]);
 
         BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
 
         Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
-        Assert.Contains("R2", error.Message, StringComparison.Ordinal);
+        Assert.Contains("S2", error.Message, StringComparison.Ordinal);
         Assert.Contains("Geometry", error.Metadata!["layoutViolations"], StringComparison.Ordinal);
         Assert.Equal(0, fake.State);
         Assert.Equal(commit, fake.Transactions.Calls.Count(c => c == "Commit"));
@@ -37,30 +58,16 @@ public sealed class ConnectionCreateExecutionTests
     }
 
     [Fact]
-    public void UnknownPrediction_MeasuredOverlapRefusesAndRollsBackBeforeGeneration()
+    public void UnknownPrediction_MeasuredOverlap_CommitsAndGeneratesWithASuggestion()
     {
         var fake = new Creator();
         fake.Fixture.Scene.SymbolBounds.Clear();
-        LayoutGuard.Model actual = LayoutGuard.From(fake.Fixture.Scene);
-        actual.Page = new()
-        {
-            GridSize = 4,
-            PageSize = [100, 100],
-            Placements = [.. fake.Fixture.Scene.Page.Placements, new()
-        {
-            Kind = "SymbolReference", Locator = new() { Type = 17, Oid = 9 }, Location = [24, 8], Bounds = [20, 6, 26, 26]
-        }]
-        };
-        fake.Measured = actual;
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
-        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
-        Assert.Contains("R2", error.Message, StringComparison.Ordinal);
-        Assert.Contains("Geometry", error.Metadata!["layoutViolations"], StringComparison.Ordinal);
-        Assert.Contains("Suggested position", error.Message, StringComparison.Ordinal);
-        Assert.Equal(0, fake.State);
-        Assert.DoesNotContain("generate", fake.Events);
-        Assert.DoesNotContain("Commit", fake.Transactions.Calls);
-        Assert.Contains("Rollback", fake.Transactions.Calls);
+        Measure(fake, [20, 6, 26, 26]);
+        JObject result = fake.Execute();
+        Assert.Contains("Readback deviation: R2", (string?)result["warning"], StringComparison.Ordinal);
+        Assert.Contains("Suggested position", (string?)result["warning"], StringComparison.Ordinal);
+        Assert.Contains("generate", fake.Events);
+        Assert.DoesNotContain("Rollback", fake.Transactions.Calls);
     }
     [Theory]
     [InlineData(false)]

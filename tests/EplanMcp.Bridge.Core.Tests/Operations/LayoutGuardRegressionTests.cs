@@ -1,7 +1,6 @@
 using System.Globalization;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
-using Newtonsoft.Json;
 
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
@@ -102,7 +101,7 @@ public sealed class LayoutGuardRegressionTests
     }
 
     [Fact]
-    public void Logged69888OwnTextPair_OnlyWarns_AndUnrelatedDeviceStillRefusesWithFreePosition()
+    public void Logged69888OwnTextPair_OnlyWarns_AndUnrelatedDeviceIsADeviationWithFreePosition()
     {
         var before = Model();
         DrawingPlacement owner = LayoutGuardTests.Row("Function", 69888, 80, 208);
@@ -123,10 +122,10 @@ public sealed class LayoutGuardRegressionTests
         DrawingPlacement blocker = LayoutGuardTests.Row("Function", 7, 80, 208);
         before.Page.Placements.Add(blocker);
         actual.Page.Placements.Insert(0, blocker);
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => LayoutGuard.AfterWriting(before, actual)).Error;
-        List<LayoutGuard.Violation> violations = JsonConvert.DeserializeObject<List<LayoutGuard.Violation>>(error.Metadata!["layoutViolations"])!;
-        Assert.Contains(violations, v => v.Rule == "R2" && !v.Warning && v.NearestFreePosition is not null);
-        Assert.All(violations.Where(v => v.Rule == "R3" && v.Objects.All(o => o.Oid == 69888)), v => Assert.True(v.Warning));
+        // ADR-0046: after the write the overlap with an unrelated device is a committed deviation with a free position.
+        checks = LayoutGuard.AfterWriting(before, actual);
+        Assert.Contains(checks, s => s.StartsWith("Readback deviation: R2", StringComparison.Ordinal) && s.Contains("Suggested position", StringComparison.Ordinal));
+        Assert.DoesNotContain(checks, s => s.StartsWith("Readback deviation: R3", StringComparison.Ordinal));
     }
 
     [Fact]

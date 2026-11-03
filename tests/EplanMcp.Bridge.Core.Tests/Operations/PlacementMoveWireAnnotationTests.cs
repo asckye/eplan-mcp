@@ -74,8 +74,8 @@ public sealed class PlacementMoveWireAnnotationTests
         Assert.Empty(LayoutGuard.Check(measured, [measuredScene.Page.Placements[^1]], suggest: false, measured: true));
 
         measuredScene.Page.Placements[^1].Kind = "Function";
-        BridgeError failure = Assert.Throws<BridgeErrorException>(() => LayoutGuard.AfterWriting(before, measured)).Error;
-        Assert.Contains("R4:", failure.Metadata!["violations"], StringComparison.Ordinal);
+        // ADR-0046: a symbol crossed by a line after the write is a committed deviation.
+        Assert.Contains(LayoutGuard.AfterWriting(before, measured), s => s.StartsWith("Readback deviation: R4:", StringComparison.Ordinal));
     }
 
     [Theory]

@@ -9,7 +9,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class PropertyPlacementMoveTests
 {
     [Fact]
-    public void PropertyMove_LiveW4BoundsAcross248Wire_StillRollsBackWithChangedDigest()
+    public void PropertyMove_LiveW4BoundsAcross248Wire_CommitsWithADeviationWarning()
     {
         var fake = new Mover(0) { ReadbackDigest = new string('f', 64) };
         fake.Scene.Page.PageSize = [420, 297];
@@ -20,14 +20,11 @@ public sealed class PropertyPlacementMoveTests
         JToken move = fake.Request["property_moves"]![0]!;
         move["x_mm"] = 272;
         move["y_mm"] = 92;
-        string before = BridgeJson.FromObject(fake.Scene).ToString();
+        // ADR-0046: the measured crossing stays in the project as a reported deviation.
+        JObject result = fake.Execute();
 
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
-
-        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (error.Reason, error.Execution));
-        Assert.Contains("R3: Text bounds conflict with a line.", error.Message, StringComparison.Ordinal);
-        Assert.Equal(before, BridgeJson.FromObject(fake.Scene).ToString());
-        Assert.DoesNotContain("Commit", fake.Transactions.Calls);
+        Assert.Contains("Readback deviation: R3: Text bounds conflict with a line.", (string?)result["warning"], StringComparison.Ordinal);
+        Assert.Contains("Commit", fake.Transactions.Calls);
     }
 
     [Theory]

@@ -258,8 +258,9 @@ public static class LayoutGuard
         var previous = new HashSet<string>(before.Page.Placements.Select(Newtonsoft.Json.JsonConvert.SerializeObject), StringComparer.Ordinal);
         DrawingPlacement[] changed = actual.Page.Placements.Where(p => !previous.Contains(Newtonsoft.Json.JsonConvert.SerializeObject(p))).ToArray();
         // A54: empty property texts report all-zero bounds and have no visible ink; they are not unmeasured objects.
-        if (changed.Any(p => Positioned(p) && !DrawingCoordinates.ValidBounds(p.Bounds)))
-        { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Actual placed bounds could not be measured; roll back the write."); }
+        // ADR-0046: an outline EPLAN cannot measure is an unverified deviation, not a reason to roll back.
+        DrawingPlacement[] unmeasured = [.. changed.Where(p => Positioned(p) && !DrawingCoordinates.ValidBounds(p.Bounds))];
+        changed = [.. changed.Except(unmeasured)];
         string Point(double[] p) => string.Join(",", p.Select(n => n.ToString("R", CultureInfo.InvariantCulture)));
         string Key(Segment s) => string.Join(";", s.Points.Select(Point).OrderBy(p => p, StringComparer.Ordinal));
         actual.Lines = actual.Lines.GroupBy(Key, StringComparer.Ordinal).Select(g => g.First()).ToList();
@@ -270,8 +271,25 @@ public static class LayoutGuard
         { roots[Root(Point(s.Points[0]))] = Root(Point(s.Points[1])); }
         foreach (Segment s in actual.Lines)
         { s.Changed = !before.Lines.Any(b => Key(b) == Key(s)); s.Net = Root(Point(s.Points[0])); }
-        return Enforce(actual, changed, measured: true);
+        // ADR-0046: after a write only an outline outside Page.Size (S2) still rolls back. Other measured findings stay in
+        // the project as readback deviations, reported with their objects, measured geometry and a fix.
+        List<Violation> violations = Check(actual, changed, measured: true);
+        List<Violation> offPage = [.. violations.Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize))];
+        if (offPage.Count > 0)
+        {
+            BridgeErrorException error = WriteArguments.Invalid([.. offPage.Select(v => "S2: the new object lies outside the page. " + v.Message)]);
+            error.Error.Metadata!["layoutViolations"] = Newtonsoft.Json.JsonConvert.SerializeObject(offPage);
+            throw WriteArguments.NotStarted(error);
+        }
+        string Objects(IEnumerable<DrawingLocator> objects) => string.Join(", ", objects.Select(o => FormattableString.Invariant($"{o.Type}/{o.Oid}")));
+        return [Report(actual, true), .. new[] { Notes(actual.Page.Placements) }.Where(s => s.Length != 0),
+            .. unmeasured.Select(p => "Readback deviation (unverified): EPLAN reported no outline for " + Objects([p.Locator]) + "; check it with eplan_page_review."),
+            .. violations.Select(v => v.Warning ? v.Message : "Readback deviation: " + v.Message + " Objects " + Objects(v.Objects) + ", measured ["
+                + string.Join(", ", v.Geometry.Select(n => n.ToString("0.##", CultureInfo.InvariantCulture))) + "]; adjust with eplan_placement_update or check with eplan_page_review.")];
     }
+    // S2 (ADR-0046): without a known page size an outline outside the drawing area cannot be cleared, so it still refuses.
+    private static bool OffPage(double[] geometry, double[]? size) => size is not { Length: 2 }
+        || geometry.Where((_, i) => i % 2 == 0).Any(x => x < 0 || x > size[0]) || geometry.Where((_, i) => i % 2 == 1).Any(y => y < 0 || y > size[1]);
     public static DrawingPlacement Shift(DrawingPlacement p, double[] delta) => new()
     {
         Locator = p.Locator,
