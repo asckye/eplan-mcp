@@ -9,8 +9,8 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>
 /// Places a part's device the way spike S20 did in the dispatcher (api-notes A26):
-/// <c>new DeviceService().CreateDevice(part, variant, page, point)</c>, which inserts the part's macro and returns all the
-/// device's functions, the main one placed and the rest unplaced, tagged <c>=+-Q1</c>. Each returned function is then
+/// <c>new DeviceService().CreateDevice(part, variant, page, point)</c>, which uses the part's macro or function templates
+/// (A82) and returns the device's functions, including persistent unplaced functions. Each returned function is then
 /// given the tag by assigning <c>Function.Name</c>, the main function first, as spike S9 renamed a device (A13): the
 /// returned objects, never a name lookup, since other functions may be called <c>=+-Q1</c> too. New functions on the
 /// page are counted with <c>FunctionsFilter.Page</c>, as EplanMacroInserter counts them. Main thread; <see cref="Place"/>
@@ -58,9 +58,16 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         }
 
         Function[] ordered = [.. created.Where(f => f.IsMainFunction), .. created.Where(f => !f.IsMainFunction)];
-        foreach (Function function in ordered)
+        // A82: template-only parts create persistent unplaced functions with connection-point suffixes.
+        // A13: capture every name before renaming the main function, which can affect auxiliary functions.
+        var renamed = ordered.Select(function =>
         {
-            function.Name = tag;
+            using PropertyValue deviceTag = function.Properties.FUNC_IDENTDEVICETAG;
+            return (Function: function, Name: DeviceTags.RenameFunction(function.Name ?? string.Empty, deviceTag.IsEmpty ? string.Empty : deviceTag.ToString(), tag));
+        }).ToArray();
+        foreach (var item in renamed)
+        {
+            item.Function.Name = item.Name;
         }
 
         Function? main = ordered.FirstOrDefault(f => f.IsMainFunction);
@@ -71,6 +78,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             VisibleName = main?.VisibleName ?? string.Empty,
             Category = main?.FunctionCategory.ToString() ?? string.Empty,
             Unplaced = created.Count(f => !f.IsPlaced),
+            UnplacedFunctions = [.. ordered.Where(f => !f.IsPlaced).Select(f => f.Name ?? string.Empty)],
             OnPage = OnPage(project, page).Count(id => !before.Contains(id)),
         };
     }

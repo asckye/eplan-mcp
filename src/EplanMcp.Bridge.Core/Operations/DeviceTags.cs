@@ -10,6 +10,10 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// </summary>
 public static class DeviceTags
 {
+    /// <summary>Preserves a function's connection-point suffix when replacing its identifying device tag (A82).</summary>
+    public static string RenameFunction(string oldName, string oldDeviceTag, string tag) =>
+        oldName.StartsWith(oldDeviceTag, StringComparison.Ordinal) ? tag + oldName.Substring(oldDeviceTag.Length) : tag;
+
     /// <summary>Auxiliary functions belong to a main function's device; unnamed main functions cannot be looked up by tag.</summary>
     public static bool IsDevice(bool isMainFunction, string? name) => isMainFunction && !string.IsNullOrEmpty(name);
 

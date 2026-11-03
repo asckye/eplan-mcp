@@ -201,7 +201,7 @@ internal sealed class DevicePlaceRequest
 
     /// <summary>
     /// The variant to place: the one given, or else 1, or else the part's only one. EPLAN would silently take the first
-    /// variant for one that does not exist (EPLAN XML docs), so that is a violation here, as is a part without a macro.
+    /// variant for one that does not exist (EPLAN XML docs), so that is a violation here.
     /// </summary>
     private static PartSearchItem? ChooseVariant(List<PartSearchItem> variants, string? given, List<string> violations)
     {
@@ -216,11 +216,6 @@ internal sealed class DevicePlaceRequest
                 ? $"'variant' is required: part {number} has no variant 1; its variants are {known}."
                 : $"'variant' {given} does not exist; part {number} has the variants {known}.");
         }
-        else if (!chosen.HasMacro)
-        {
-            violations.Add($"'part' {number} has no macro in the parts database, so it cannot be placed by itself; insert a window macro with eplan_macro_insert instead.");
-        }
-
         return chosen;
     }
 

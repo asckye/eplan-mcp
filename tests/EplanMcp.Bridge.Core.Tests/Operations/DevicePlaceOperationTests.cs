@@ -201,12 +201,36 @@ public sealed class DevicePlaceOperationTests
     }
 
     [Fact]
-    public void Plan_APartWithoutAMacro_IsInvalid_AndPointsToMacroInsert()
+    public void Plan_APartWithoutAMacro_UsesItsTemplates()
     {
-        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Plan(Args(NewPage, "-XD1", part: "PXC.3209510")));
+        WritePlan plan = Plan(Args(NewPage, "-XD1", part: "PXC.3209510"));
 
-        Assert.Equal(ErrorReason.InvalidArgument, error.Error.Reason);
-        Assert.Contains("eplan_macro_insert", error.Error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Equal("PXC.3209510", plan.Details!["part"]);
+    }
+
+    [Fact]
+    public void TemplateOnlyPlcPart_PreservesItsSixFunctionNames()
+    {
+        const string plcPart = "SIE.6ES7131-4BD01-0AA0";
+        _parts.Content.Parts.Add(new PartSearchItem { PartNumber = plcPart, Variant = "1", HasMacro = false });
+        string[] suffixes = [":1", ":2", ":3", ":5", ":6", ":7"];
+        _placer.Result = tag => new PlacedDevice
+        {
+            Names = [.. suffixes.Select(suffix => tag + suffix)],
+            MainName = tag + ":1",
+            Unplaced = 5,
+            UnplacedFunctions = [.. suffixes.Skip(1).Select(suffix => tag + suffix)],
+            OnPage = 1,
+        };
+        DevicePlaceArgs args = Args(NewPage, "-KF20", part: plcPart);
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        DevicePlaceData data = Execute(args);
+
+        Assert.Equal("=GAA+A1-KF20:1", data.Tag);
+        Assert.Equal(6, data.Functions);
+        Assert.Equal(["=GAA+A1-KF20:2", "=GAA+A1-KF20:3", "=GAA+A1-KF20:5", "=GAA+A1-KF20:6", "=GAA+A1-KF20:7"], data.UnplacedFunctions);
+        Assert.Contains("Commit", _transactions.Calls);
     }
 
     [Fact]

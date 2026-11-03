@@ -265,6 +265,7 @@ internal sealed class DeviceWriteTools
             LocationBox = data?.LocationBox ?? (details.TryGetValue("locationBox", out string? box) ? JsonSerializer.Deserialize<LocationBoxData>(box, HostJson.Options) : null),
             Functions = data?.Functions ?? (args.LocationBox is not null ? 0 : terminalData is not null ? (terminalData.StripCreated ? 2 : 1) : args.Library is not null ? 1 : null),
             Unplaced = data?.Unplaced ?? (args.Library is not null || args.LocationBox is not null || args.TerminalStrip is not null ? 0 : null),
+            UnplacedFunctions = [.. (data?.UnplacedFunctions ?? []).Select(name => ResultShaper.CleanText(name))],
             Symbol = details.TryGetValue("symbol", out string? resolved) ? JsonSerializer.Deserialize<SymbolSearchItem>(resolved, HostJson.Options) : null,
             Changes = args.Library is not null || args.LocationBox is not null || args.TerminalStrip is not null ? [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), NewValue = ResultShaper.CleanText(c.NewValue) })] : null,
             Undo = committed ? "AI: " + PlaceTool : null,
@@ -324,7 +325,7 @@ internal sealed class DeviceWriteTools
         }
         else if (data is { Unplaced: > 0 } placed)
         {
-            hints.Add($"{ToolResults.Count(placed.Unplaced, "function")} of the device (such as its contacts) are on no page yet; the engineer places them in EPLAN, for example from the device navigator.");
+            hints.Add($"{ToolResults.Count(placed.Unplaced, "function")} of the device are on no page yet; use their full names in unplaced_functions with eplan_function_place.");
         }
 
         if (!(data?.PageSizeKnown ?? details.GetValueOrDefault("pageSizeKnown") == "true"))

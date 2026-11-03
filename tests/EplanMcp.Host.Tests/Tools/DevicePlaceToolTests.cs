@@ -40,6 +40,7 @@ public sealed class DevicePlaceToolTests : IDisposable
             Category = "Coil",
             Functions = 5,
             Unplaced = 4,
+            UnplacedFunctions = ["=GAA+A1-KF20", "=GAA+A1-KF20", "=GAA+A1-KF20", "=GAA+A1-KF20"],
             PageSizeKnown = true,
         };
     }
@@ -72,7 +73,8 @@ public sealed class DevicePlaceToolTests : IDisposable
         Assert.Equal(("committed", "AI: eplan_device_place", 5, 4), (data.GetProperty("execution").GetString(), data.GetProperty("undo").GetString(), data.GetProperty("functions").GetInt32(), data.GetProperty("unplaced").GetInt32()));
         JsonElement device = data.GetProperty("device");
         Assert.Equal(("=GAA+A1-KF20", "-KF20", "Coil"), (device.GetProperty("tag").GetString(), device.GetProperty("visibleTag").GetString(), device.GetProperty("category").GetString()));
-        Assert.Equal("4 functions of the device (such as its contacts) are on no page yet; the engineer places them in EPLAN, for example from the device navigator.", data.GetProperty("hint").GetString());
+        Assert.Equal("4 functions of the device are on no page yet; use their full names in unplaced_functions with eplan_function_place.", data.GetProperty("hint").GetString());
+        Assert.Equal(4, data.GetProperty("unplaced_functions").GetArrayLength());
         Assert.Equal("Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.", WriteToolHarness.Text(result, 0));
         var executed = (DevicePlaceArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.DevicePlaceExecute).Args!;
         Assert.Equal((Page, Part, "2", 80.0, 160.0, "-KF20", "f1"), (executed.Page, executed.Part, executed.Variant, executed.X, executed.Y, executed.Tag, executed.Fingerprint));

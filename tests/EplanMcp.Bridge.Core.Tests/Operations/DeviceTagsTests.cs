@@ -6,6 +6,13 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class DeviceTagsTests
 {
     [Theory]
+    [InlineData("=+-K2:2", "=+-K2", "=GAA+A1-KF20:2")]
+    [InlineData("=+-K2", "=+-K2", "=GAA+A1-KF20")]
+    [InlineData("different", "=+-K2", "=GAA+A1-KF20")]
+    public void RenameFunction_KeepsTheSuffix(string name, string deviceTag, string expected) =>
+        Assert.Equal(expected, DeviceTags.RenameFunction(name, deviceTag, "=GAA+A1-KF20"));
+
+    [Theory]
     [InlineData(true, "=GAA+A1-FC1", true)]
     [InlineData(true, "=+-CU1", true)]
     [InlineData(false, "+A1-FC2:1", false)]

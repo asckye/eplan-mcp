@@ -18,6 +18,9 @@ public sealed class PlacedDevice
     /// <summary>How many of the functions are on no page (<c>IsPlaced</c> false; S20: the 4 contacts of a contactor).</summary>
     public int Unplaced { get; set; }
 
+    /// <summary>Full names of the created functions that have no placement (A82).</summary>
+    public string[] UnplacedFunctions { get; set; } = [];
+
     /// <summary>How many functions are on the page that were not there before.</summary>
     public int OnPage { get; set; }
 }

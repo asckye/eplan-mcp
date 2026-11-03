@@ -36,6 +36,9 @@ public sealed class DevicePlaceData
     /// <summary>How many of them are on no page yet (spike S20: the contacts of a contactor).</summary>
     public int Unplaced { get; set; }
 
+    /// <summary>Full names of the created functions that are not placed; empty when none are known.</summary>
+    public string[] UnplacedFunctions { get; set; } = [];
+
     /// <summary>False when EPLAN could not read the page's size (a new, empty page), so the point was not checked against it.</summary>
     public bool PageSizeKnown { get; set; }
 

@@ -6,6 +6,16 @@ namespace EplanMcp.Contracts.Tests;
 [Trait("Size", "Small")]
 public sealed class DevicePlaceDtoTests
 {
+    [Fact]
+    public void UnplacedFunctionNames_RoundTripAcrossPipeSerializers()
+    {
+        var data = new DevicePlaceData { UnplacedFunctions = ["=GAA+A1-KF20:2", "=GAA+A1-KF20:3"] };
+        DevicePlaceData bridge = JsonConvert.DeserializeObject<DevicePlaceData>(System.Text.Json.JsonSerializer.Serialize(data, JsonSerializerOptions.Web))!;
+        DevicePlaceData host = System.Text.Json.JsonSerializer.Deserialize<DevicePlaceData>(JsonConvert.SerializeObject(bridge))!;
+        Assert.Equal(data.UnplacedFunctions, host.UnplacedFunctions);
+        Assert.Empty(new DevicePlaceData().UnplacedFunctions);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

@@ -108,6 +108,7 @@ public sealed class DevicePlaceExecuteOperation(
             Category = placed.Category,
             Functions = placed.Names.Count,
             Unplaced = placed.Unplaced,
+            UnplacedFunctions = placed.UnplacedFunctions,
             PageSizeKnown = request.Page.Width is not null,
             Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(committed.Warning)),
         };
@@ -150,10 +151,12 @@ public sealed class DevicePlaceExecuteOperation(
                 new Dictionary<string, string> { ["part"] = request.Part, ["functions"] = placed.Names.Count.ToString(CultureInfo.InvariantCulture) });
         }
 
-        string? other = placed.Names.FirstOrDefault(name => !string.Equals(name, request.Tag, StringComparison.Ordinal));
-        if (!string.Equals(placed.MainName, request.Tag, StringComparison.Ordinal) || other is not null)
+        // A82: PLC template functions carry the device tag followed by a connection-point suffix.
+        bool Belongs(string name) => string.Equals(name, request.Tag, StringComparison.Ordinal) || name.StartsWith(request.Tag + ":", StringComparison.Ordinal);
+        string? other = placed.Names.FirstOrDefault(name => !Belongs(name));
+        if (!Belongs(placed.MainName) || other is not null)
         {
-            string actual = string.Equals(placed.MainName, request.Tag, StringComparison.Ordinal) ? other! : placed.MainName;
+            string actual = Belongs(placed.MainName) ? other! : placed.MainName;
             throw new BridgeErrorException(
                 ErrorReason.InvalidArgument,
                 $"EPLAN named the device '{actual}' instead of '{request.Tag}': devices of this kind do not use every part of the tag, so nothing was placed. Use the structure that similar devices have (eplan_device_list).",
