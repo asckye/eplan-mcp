@@ -20,7 +20,9 @@ public interface IMacroReader
     /// <param name="projectPath">The resolved open project's full path.</param>
     /// <param name="macroPath">The path checked by MacroFiles.</param>
     /// <param name="defaultMultiLine">Select MultiLine variant 0 without caching when available; report the actual selection.</param>
-    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false);
+    /// <param name="representation">Select this representation when available; null keeps the default selection.</param>
+    /// <param name="variant">The variant within the selected representation.</param>
+    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false, string? representation = null, int variant = 0);
 }
 
 /// <summary>What <see cref="IMacroReader.ReadMacro"/> copies out of a window macro.</summary>

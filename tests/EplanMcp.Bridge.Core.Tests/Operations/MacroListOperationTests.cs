@@ -79,6 +79,6 @@ public sealed class MacroListOperationTests : IDisposable
     {
         public string? MacroRoot() => root;
 
-        public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false) => throw new NotSupportedException("macro.list never opens a macro");
+        public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false, string? representation = null, int variant = 0) => throw new NotSupportedException("macro.list never opens a macro");
     }
 }

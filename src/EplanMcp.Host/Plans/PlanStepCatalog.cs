@@ -39,6 +39,20 @@ internal static class PlanStepCatalog
             item["required"] = new JsonArray("name", "description");
             item.Remove("anyOf");
         }
+        if (e.Op == "macro.insert") // Workflow predictions remain limited to the original macro source and MultiLine.
+        {
+            schema.Remove("oneOf");
+            schema.Remove("dependentRequired");
+            JsonObject properties = schema["properties"]!.AsObject();
+            schema["properties"] = new JsonObject([.. new[] { "page", "macro", "x", "y", "variant", "numbering" }.Select(name => new KeyValuePair<string, JsonNode?>(name, properties[name]!.DeepClone()))]);
+            schema["properties"]!["page"]!["description"] = "Full circuit page name";
+            schema["properties"]!["macro"] = JsonNode.Parse("""{"description":"Path from eplan_macro_list","type":"string"}""");
+            foreach (string coordinate in new[] { "x", "y" })
+            { schema["properties"]![coordinate] = JsonNode.Parse("""{"description":"mm","type":"number"}"""); }
+            schema["properties"]!["variant"]!["description"] = "From eplan_macro_get";
+            schema["properties"]!["numbering"]!["description"] = "keep: the macro's tags";
+            schema["required"] = new JsonArray("page", "macro", "x", "y");
+        }
 
         return schema;
     }, StringComparer.Ordinal);

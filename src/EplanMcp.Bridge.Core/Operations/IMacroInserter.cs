@@ -14,12 +14,12 @@ public interface IMacroInserter
     public MacroTargetPage? ReadPage(string projectPath, string pageName);
 
     /// <summary>
-    /// Inserts variant <paramref name="variant"/> of the <c>MultiLine</c> representation of the window macro at
+    /// Inserts variant <paramref name="variant"/> of the selected representation of the window macro at
     /// <paramref name="macroPath"/>, a full path <see cref="MacroFiles.Resolve"/> checked, on the page, the macro
     /// outline's top left corner at (<paramref name="x"/>, <paramref name="y"/>) (A14). With <paramref name="number"/>
     /// EPLAN gives the devices tags no device has (<c>NumerationMode.Number</c>), otherwise they keep the macro's tags
     /// (<c>None</c>, S10). Returns what EPLAN inserted. Throws INVALID_ARGUMENT when EPLAN refuses to place the same
     /// symbols on top of each other ("S029181", A13).
     /// </summary>
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number);
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine");
 }

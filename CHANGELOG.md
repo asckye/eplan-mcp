@@ -5,6 +5,14 @@
 
 ## [Unreleased]
 
+- `eplan_macro_insert` accepts `representation: "Overview"` on Overview pages and reads the selected representation and macro variant for layout checks.
+
+### 0.5.0 preview-default migration (ADR-0049)
+
+| Tool | Previous omitted `dry_run` | New omitted `dry_run` | Execute |
+|---|---|---|---|
+| `eplan_macro_insert` | Approval and execution | Preview with changes and fingerprint; no approval or write | Pass `dry_run: false` |
+
 - Host 审计记录通过共享规则去除敏感键值、认证凭据、URL 用户信息及 PEM 块；审批指纹继续绑定原始参数，审计链基于去敏后的记录计算。
 - Host 控制台、Bridge（含离线 stderr 与启动失败后备日志）及 Workbench 文件日志在写出前复用同一凭据脱敏规则。
 - `eplan_connection_create` 中断点内置默认改为 EPLAN 插入命令使用的 `BP`，支持 SPECIAL 中含一个或多个连接点的全部中断点符号；按匹配连接点选择变体及定位，双连接点读回不再失败。可显式选择 `BPIN`、`BPOUT`、`BPF` 等符号。

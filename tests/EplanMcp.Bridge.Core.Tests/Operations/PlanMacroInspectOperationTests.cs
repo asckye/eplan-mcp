@@ -143,7 +143,7 @@ public sealed class PlanMacroInspectOperationTests : IDisposable
         public Action<string>? OnRead { get; set; }
         public string? MacroRoot() => root;
 
-        public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false)
+        public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false, string? representation = null, int variant = 0)
         {
             Project = projectPath;
             DefaultMultiLine = defaultMultiLine;

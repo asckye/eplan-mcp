@@ -10,7 +10,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>
 /// Reads the page a window macro goes on, and inserts the macro the way spike S10 did in the dispatcher (api-notes A14):
-/// <c>WindowMacro.Open</c>, then <c>Insert.WindowMacro(macro, MultiLine, variant, page, point, MoveKind.Absolute,
+/// <c>WindowMacro.Open</c>, then <c>Insert.WindowMacro(macro, representation, variant, page, point, MoveKind.Absolute,
 /// numeration)</c>. The inserted functions are those on the page that were not there before, read with
 /// <c>FunctionsFilter.Page</c> as S10 read them inside the SafetyPoint. Main thread; <see cref="Insert"/> inside the
 /// write's TransactionScope, whose SafetyPoint is the only wrapper that takes an insert back (A13).
@@ -30,20 +30,25 @@ internal sealed class EplanMacroInserter : IMacroInserter
         }
 
         PointD? size = Size(page);
+        LayoutGuard.Model? layout = null;
+        try
+        { layout = EplanLayout.Read(projectPath, pageName); }
+        catch (BridgeErrorException ex) when (ex.Error.Reason == ErrorReason.CapabilityMissing)
+        { WriteExceptionDiagnostics.Report(ex); }
         return new MacroTargetPage
         {
             Name = page.Name,
             Type = page.PageType.ToString(),
             Width = size?.X,
             Height = size?.Y,
-            Layout = EplanLayout.Read(projectPath, pageName),
+            Layout = layout,
 
             // Every placement on the page, groups resolved (EPLAN XML docs, Page.AllPlacements).
             Objects = [.. EplanNativePreconditions.Valid(page.AllPlacements).ToArray().Select(placement => placement.ToStringIdentifier())],
         };
     }
 
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number)
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine")
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
@@ -57,7 +62,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
         {
             placed = insert.WindowMacro(
                 macro,
-                WindowMacro.Enums.RepresentationType.MultiLine,
+                (WindowMacro.Enums.RepresentationType)Enum.Parse(typeof(WindowMacro.Enums.RepresentationType), representation),
                 variant,
                 page,
                 new PointD(x, y),
@@ -75,11 +80,16 @@ internal sealed class EplanMacroInserter : IMacroInserter
             throw stacked;
         }
 
-        return new PlacedMacro
+        Function[] added = [.. Functions(project, page).Where(f => !before.Contains(f.ToStringIdentifier()))];
+        return Read(added, placed.Length);
+    }
+
+    private static PlacedMacro Read(Function[] functions, int objectCount) =>
+        new()
         {
             Functions =
             [
-                .. Functions(project, page).Where(f => !before.Contains(f.ToStringIdentifier())).Select(f => new MacroFunctionRecord
+                .. functions.Select(f => new MacroFunctionRecord
                 {
                     Name = f.Name ?? string.Empty,
                     VisibleName = f.VisibleName ?? string.Empty,
@@ -87,9 +97,8 @@ internal sealed class EplanMacroInserter : IMacroInserter
                     Main = f.IsMainFunction,
                 }),
             ],
-            ObjectCount = placed.Length,
+            ObjectCount = objectCount,
         };
-    }
 
     /// <summary>The page whose full name is exactly <paramref name="pageName"/>: EPLAN's exact name filter (S6), checked ordinally.</summary>
     private static Page? Find(Project project, string pageName)

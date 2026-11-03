@@ -9,6 +9,23 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class MacroInsertRequestTests
 {
+    [Theory]
+    [InlineData("MultiLine", "Overview")]
+    [InlineData("Overview", "Circuit")]
+    public void Representation_MustMatchPageType(string representation, string pageType)
+    {
+        var content = new MacroContent { Representations = [new(representation, [0])] };
+        Assert.Contains(MacroInsertRequest.RepresentationProblems(new() { Type = pageType }, content, representation, 0), p => p.Contains("'page'", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Pxc2861250_WithoutMultiLine_ReportsAvailableOverviewRepresentation()
+    {
+        var content = new MacroContent { Representations = [new("Overview", [0])] };
+        string problem = Assert.Single(MacroInsertRequest.RepresentationProblems(new() { Type = "Circuit" }, content, "MultiLine", 0));
+        Assert.Contains("available: Overview", problem, StringComparison.Ordinal);
+    }
+
     // S10's macro, 52 x 268 mm, on S10's sample page, 420 x 297.02 mm.
     private const double Width = 52;
     private const double Height = 268;

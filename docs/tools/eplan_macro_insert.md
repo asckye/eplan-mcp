@@ -17,15 +17,15 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
-| `page` | string | 是 | — | 完整页名，如 `=GAA+A1&EFS1/60`，必须是电路图页（`Circuit`） |
+| `page` | string | 是 | — | 完整页名；MultiLine 要求 `Circuit` 页，Overview 要求 `Overview` 页 |
 | `macro` | string | 是 | — | `eplan_macro_list` 返回的 `path` |
+| `representation` | enum | 否 | `MultiLine` | `MultiLine` 或 `Overview`；宏必须具有该表达 |
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上。宏外框的左上角落在这里（A14） |
 | `variant` | integer | 否 | 0 | 宏的变体编号（`eplan_macro_get` 的 `variants`） |
 | `numbering` | enum `number` / `keep` | 否 | `number` | `number`：EPLAN 给宏中的设备分配不冲突的标识；`keep`：保留宏中的标识，结构跟随目标页，与已有设备同名时拒绝（M3b 设计 Q2） |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行传 `dry_run: false` |
 
-- **与 M3b 设计 4.2 的差别**：这一版不提供 `representation` 参数。只往电路图页上插 `MultiLine` 表达类型，宏没有 `MultiLine` 时返回 `INVALID_ARGUMENT`。其他页类型和表达类型以后再加，需要先实机验证。
 
 ## 3. 输出
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
@@ -49,6 +49,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 - `devices`：
   - 提交后，是插入后读回的设备（除连接线外的功能，按标识去重，最多 50 个）；
   - `dry_run` 时，是宏中的设备，带宏自己的占位标识，`hint` 说明插入后标识会怎样变化。
+- 预览另返回 `changes` 和 `fingerprint`，`hint` 提示再次调用并传 `dry_run: false`。
 - 带 `?` 的标识（S10：没有主功能的触点 `-?QA1`、未编号的端子 `:?1`）原样列出，`hint` 提示工程师在 EPLAN 中确认。
 - 插入后外框超出页面，或者页的幅面读不到（新建的空页，A14）时，`hint` 也会说明。
 - `undo`、`recovered`：同 `eplan_page_create`。
@@ -61,7 +62,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
-| `INVALID_ARGUMENT` | `macro` 路径不合规（SEC-19）；页不是电路图页；宏没有 `MultiLine`；`variant` 不存在；插入点或插入后的外框超出页面（幅面已知时） | `not_started` | `metadata.violations` 一次列出全部问题；超出页面时给出宏的尺寸和页的幅面 |
+| `INVALID_ARGUMENT` | `macro` 路径不合规（SEC-19）、页类型不匹配、表达或宏变体不存在、外框超出页面 | `not_started` | `metadata.violations` 列出问题；表达缺失时列出实际可用表达，越界时给出尺寸 |
 | `INVALID_ARGUMENT` | 插入位置上已有同样的符号，EPLAN 拒绝叠放（"S029181"，A13） | `rolled_back` | 提示换一个位置，可以用 `eplan_page_get` 查看页上已有的设备 |
 | `ALREADY_EXISTS` | `numbering = keep`，宏中的标识与已有设备同名，插入后出现了同名的主功能（S10） | `rolled_back` | `metadata.tags` 列出冲突的标识，提示改用 `number`，或先用 `eplan_device_update` 显式传 `dry_run: false` 给已有设备改名 |
 | `PAGE_NOT_FOUND` / `AMBIGUOUS_NAME` | 页找不到，或只差大小写的页有多个 | `not_started` | 同 `eplan_page_get` |
@@ -73,12 +74,12 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 - **Host**：走 `WritePipeline`，规划操作是 `macro.insert.plan`，执行操作是 `macro.insert.execute`。执行时限为默认的 60 秒。
 - **规划**（只读）：
   - 解析项目、页（规则同 `eplan_page_get`）和宏路径（`MacroFiles.Resolve`，SEC-19）；
-  - 打开宏（不插入，A14），确认有 `MultiLine` 和要求的 `variant`，读出外框尺寸和其中的设备；
+  - 打开宏（不插入，A14/A33），按 `representation` 和 `variant` 读取对应外框、对象和设备；
   - 读页的幅面（`Page.Size`）。读得到时，检查插入后的外框 `[x, x + 宽] × [y − 高, y]` 在页内；读不到时只检查 `x ≥ 0`、`y ≥ 0`，并在结果中提示；
   - 一条 `create` 变更：`Kind = "macro"`，`Name` 为页名，`NewValue` 为宏文件名、插入点、编号方式和设备数（`Contactor_Feedback_Control.ema at (40, 200), numbering number, 8 devices`，变体不为 0 时加 `, variant 2`）。EPLAN 中的审批对话框显示为 `Insert a macro on page =GAA+A1&EFS1/60: Contactor_Feedback_Control.ema at (40, 200), numbering number, 8 devices`，中文界面为"在页 =GAA+A1&EFS1/60 上插入宏：…"；
   - 指纹包括三部分，排序后取 SHA-256：页上全部对象的会话内标识；`keep` 时，宏中各标识在项目中的功能；宏文件的大小和修改时间。
 - **执行**：在 `TransactionScope`（`SafetyPoint` → `UndoStep` → `QuietModeStep`）中执行：
-  1. 先记下项目中主功能的标识集合，然后调用 `Insert.WindowMacro(macro, MultiLine, variant, page, new PointD(x, y), MoveKind.Absolute, numbering == number ? NumerationMode.Number : NumerationMode.None)`；
+  1. 记录主功能集合，调用 `Insert.WindowMacro` 插入指定表达及宏变体；
   2. 读回页上新增的功能。`keep` 时，若有标识在插入前已有主功能、插入后主功能变多，就抛出（`ALREADY_EXISTS`），整体回滚。按"变多"而不是"两个以上"判断，是因为一个设备本来就可能有两个同名主功能（A12：黑盒、第二种表达）。`number` 时不检查：PLC 端子在各种编号方式下都保留宏自带的结构（`=K1+A1:1.4`，A14），再次插入同一个宏时名称会重复；
   3. 通过后 `Commit()`，再 `CloseUndo()`。
 - **已验证**（S9、S10，api-notes A13、A14）：

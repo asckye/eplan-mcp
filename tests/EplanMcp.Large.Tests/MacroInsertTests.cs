@@ -75,6 +75,7 @@ public sealed class MacroInsertTests(LiveEplan eplan)
         ["x"] = 40,
         ["y"] = 280,
         ["numbering"] = numbering,
+        ["dry_run"] = false,
     };
 
     /// <summary>New circuit pages after the last numbered page of =GAA+A1&amp;EFS1 in the copy, created in one call.</summary>

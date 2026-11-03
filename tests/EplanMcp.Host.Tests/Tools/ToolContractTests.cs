@@ -69,6 +69,19 @@ public sealed class ToolContractTests : IDisposable
     private Tool[] Tools => [.. _options.ToolCollection!.Select(t => t.ProtocolTool)];
 
     [Fact]
+    public void MacroInsert_OffersOverviewAndDefaultsToPreview()
+    {
+        Tool tool = Tools.Single(t => t.Name == MacroWriteTools.InsertTool);
+        JsonElement schema = tool.InputSchema;
+        Assert.Equal(["project", "page", "macro", "x", "y"], schema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        JsonElement properties = schema.GetProperty("properties");
+        Assert.True(properties.GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.Equal("integer", properties.GetProperty("variant").GetProperty("type").GetString());
+        Assert.Equal("MultiLine", properties.GetProperty("representation").GetProperty("default").GetString());
+        Assert.Equal(["MultiLine", "Overview"], properties.GetProperty("representation").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
+    }
+
+    [Fact]
     public void PageOpen_IsReadOnlyWithTwoRequiredTargetsAndNoWriteControls()
     {
         Tool tool = Tools.Single(t => t.Name == PageOpenTools.Tool);

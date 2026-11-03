@@ -50,7 +50,7 @@ public sealed class MacroInsertExecuteOperation(
         Committed<PlacedMacro> committed = TransactionRunner.Run(transactions, Tool, () =>
         {
             PlacedMacro placed = Insert(request);
-            request.LayoutWarnings.AddRange(LayoutGuard.AfterWriting(request.Page.Layout!));
+            request.LayoutWarnings.AddRange(MacroInsertRequest.Layout(() => request.Page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.AfterWriting(request.Page.Layout)));
             return placed;
         });
         List<PageDevice> inserted = MacroInsertRequest.Devices(committed.Result.Functions);
@@ -75,7 +75,7 @@ public sealed class MacroInsertExecuteOperation(
     private PlacedMacro Insert(MacroInsertRequest request)
     {
         string[] before = request.Number ? [] : MainFunctions(request);
-        PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number);
+        PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number, request.Representation);
         List<string> merged = request.Number ? [] : MacroInsertRequest.Merged(before, MainFunctions(request));
         return merged.Count == 0
             ? placed

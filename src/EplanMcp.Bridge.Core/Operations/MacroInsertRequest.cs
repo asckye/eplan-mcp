@@ -13,12 +13,10 @@ internal sealed class MacroInsertRequest
     /// <summary>The most devices a result lists (tool spec 3).</summary>
     public const int MaxDevices = MacroGetOperation.MaxDevices;
 
-    /// <summary>The one representation this version inserts, and only on circuit pages (tool spec 2).</summary>
+    /// <summary>The default representation, inserted on circuit pages.</summary>
     public const string MultiLine = "MultiLine";
 
-    private const string Circuit = "Circuit";
-
-    private MacroInsertRequest(OpenProject project, MacroTargetPage page, string macroPath, MacroContent content, MacroInsertArgs args, bool number)
+    private MacroInsertRequest(OpenProject project, MacroTargetPage page, string macroPath, MacroContent content, MacroInsertArgs args, bool number, string representation)
     {
         Project = project;
         Page = page;
@@ -29,6 +27,7 @@ internal sealed class MacroInsertRequest
         Y = args.Y;
         Variant = args.Variant;
         Number = number;
+        Representation = representation;
     }
 
     public OpenProject Project { get; }
@@ -51,6 +50,7 @@ internal sealed class MacroInsertRequest
 
     /// <summary>True for numbering <c>number</c>, false for <c>keep</c>.</summary>
     public bool Number { get; }
+    public string Representation { get; }
 
     /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the macro.</summary>
     public static MacroInsertRequest Check(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter)
@@ -59,8 +59,11 @@ internal sealed class MacroInsertRequest
         WriteArguments.RequireProject(args.Project, violations);
         string numbering = string.IsNullOrWhiteSpace(args.Numbering) ? "number" : args.Numbering!.Trim();
         bool number = string.Equals(numbering, "number", StringComparison.OrdinalIgnoreCase);
+        string representation = string.IsNullOrWhiteSpace(args.Representation) ? MultiLine : args.Representation!.Trim();
+        representation = representation.Equals("Overview", StringComparison.OrdinalIgnoreCase) ? "Overview" : representation.Equals(MultiLine, StringComparison.OrdinalIgnoreCase) ? MultiLine : representation;
         AddIf(violations, string.IsNullOrEmpty(args.Page), "'page' is required: a full page name such as =GAA+A1&EFS1/60, as eplan_page_list returns it.");
         AddIf(violations, string.IsNullOrWhiteSpace(args.Macro), "'macro' is required: a path that eplan_macro_list returned.");
+        AddIf(violations, representation is not MultiLine and not "Overview", "'representation' must be MultiLine or Overview.");
         AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
         AddIf(violations, args.Variant < 0, "'variant' must be 0 or more: a variant number that eplan_macro_get lists.");
         AddIf(violations, !number && !string.Equals(numbering, "keep", StringComparison.OrdinalIgnoreCase), "'numbering' must be number or keep.");
@@ -75,20 +78,27 @@ internal sealed class MacroInsertRequest
             ? resolved
             : throw new BridgeErrorException(ErrorReason.EplanOperationFailed, MacroListOperation.NoMacroDirectory);
         string path = MacroFiles.Resolve(root, args.Macro);
-        var request = new MacroInsertRequest(project, page, path, macros.ReadMacro(project.Path, path), args, number);
+        var request = new MacroInsertRequest(project, page, path, macros.ReadMacro(project.Path, path, representation: representation, variant: args.Variant), args, number, representation);
         violations.AddRange(request.Problems());
         if (violations.Count == 0)
-        { request.LayoutWarnings = LayoutGuard.Enforce(page.Layout ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: read complete page layout before inserting a macro."), [LayoutGuard.Proposed("Macro", [args.X, args.Y], [args.X, args.Y - request.Content.Height, args.X + request.Content.Width, args.Y])]); }
+        { request.LayoutWarnings = Layout(() => page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [args.X, args.Y], [args.X, args.Y - request.Content.Height, args.X + request.Content.Width, args.Y])])); }
         return violations.Count > 0 ? throw WriteArguments.Invalid(violations) : request;
     }
     public List<string> LayoutWarnings { get; private set; } = [];
+    internal static List<string> Layout(Func<List<string>> read)
+    {
+        try
+        { return read(); }
+        catch (BridgeErrorException error) when (error.Error.Reason == ErrorReason.CapabilityMissing)
+        { return ["Layout unverified: " + error.Error.Message]; }
+    }
 
     /// <summary>The macro's functions other than wires, one per tag, with the macro's own tags.</summary>
     public List<PageDevice> MacroDevices() => Devices(Content.Functions);
 
     /// <summary>The one change, for the dry run, the approval form and the audit (tool spec 5).</summary>
     public PlannedChange Change(int devices) =>
-        new() { Action = "create", Kind = "macro", Name = Page.Name, NewValue = Describe(Macro, X, Y, Variant, Number, devices) };
+        new() { Action = "create", Kind = "macro", Name = Page.Name, NewValue = Describe(Macro, X, Y, Variant, Number, devices) + (Representation == MultiLine ? "" : ", representation " + Representation) };
 
     /// <summary>The change's value as the tool spec words it: <c>Contactor_Feedback_Control.ema at (40, 200), numbering number, 8 devices</c>.</summary>
     internal static string Describe(string macro, double x, double y, int variant, bool number, int devices) => string.Format(
@@ -110,7 +120,8 @@ internal sealed class MacroInsertRequest
     {
         var file = new FileInfo(MacroPath);
         IEnumerable<string> lines = Page.Objects.Select(id => "object\t" + id)
-            .Append(Protocol.BridgeJson.FromObject(Page.Layout!).ToString())
+            .Append(Page.Layout is null ? "layout unavailable" : Protocol.BridgeJson.FromObject(Page.Layout).ToString())
+            .Append("source\t" + Macro + "\t" + Representation + "\t" + Variant)
             .Append("macro\t" + file.Length.ToString(CultureInfo.InvariantCulture) + "\t" + file.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture));
         if (!Number)
         {
@@ -215,25 +226,25 @@ internal sealed class MacroInsertRequest
     /// <summary>What the page and the macro rule out: the page type, the representation, the variant and the outline.</summary>
     private IEnumerable<string> Problems()
     {
-        if (!string.Equals(Page.Type, Circuit, StringComparison.Ordinal))
-        {
-            yield return $"'page' must be a circuit page (Circuit), but '{Page.Name}' is {Page.Type}; this version inserts macros on circuit pages only.";
-        }
-
-        List<int>? variants = Content.Representations.FirstOrDefault(r => r.Key == MultiLine).Value;
+        foreach (string problem in RepresentationProblems(Page, Content, Representation, Variant))
+        { yield return problem; }
+        if (Page.Width is { } width && Page.Height is { } height && Outside(X, Y, Content.Width, Content.Height, width, height) is { } outside)
+        { yield return outside; }
+    }
+    internal static IEnumerable<string> RepresentationProblems(MacroTargetPage page, MacroContent content, string representation, int variant)
+    {
+        string pageType = representation == "Overview" ? "Overview" : "Circuit";
+        if (page.Type != pageType)
+        { yield return $"'page' must be {pageType} for {representation}, but '{page.Name}' is {page.Type}."; }
+        List<int>? variants = content.Representations.FirstOrDefault(r => r.Key == representation).Value;
         if (variants is null)
         {
-            string types = Content.Representations.Count == 0 ? "none" : string.Join(", ", Content.Representations.Select(r => r.Key));
-            yield return $"'macro' has no MultiLine representation, which circuit pages need (it has {types}); choose another macro, eplan_macro_get shows a macro's representations.";
+            string types = content.Representations.Count == 0 ? "none" : string.Join(", ", content.Representations.Select(r => r.Key));
+            yield return $"'macro' has no {representation} representation (available: {types}); choose another macro.";
         }
-        else if (!variants.Contains(Variant))
+        else if (!variants.Contains(variant))
         {
-            yield return $"'variant' {Variant.ToString(CultureInfo.InvariantCulture)} does not exist; the macro's MultiLine variants are {string.Join(", ", variants.Select(v => v.ToString(CultureInfo.InvariantCulture)))}.";
-        }
-
-        if (Page.Width is { } width && Page.Height is { } height && Outside(X, Y, Content.Width, Content.Height, width, height) is { } outside)
-        {
-            yield return outside;
+            yield return $"'variant' {variant.ToString(CultureInfo.InvariantCulture)} does not exist; the macro's {representation} variants are {string.Join(", ", variants.Select(v => v.ToString(CultureInfo.InvariantCulture)))}.";
         }
     }
 }

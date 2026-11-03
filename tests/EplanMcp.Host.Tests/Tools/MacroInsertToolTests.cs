@@ -54,6 +54,36 @@ public sealed class MacroInsertToolTests : IDisposable
     public void Dispose() => _harness.Dispose();
 
     [Fact]
+    public async Task OmittedDryRun_PreviewsWithoutApprovalAndReturnsPlan()
+    {
+        _harness.ProjectPath = Path.Combine(_harness.Locations.Root, "Projects", "Line1");
+        JsonElement data = WriteToolHarness.Structured(await MacroWriteTools.MacroInsertAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", Page, Macro, 40, 280,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("not_started", data.GetProperty("execution").GetString());
+        Assert.True(data.GetProperty("dryRun").GetBoolean());
+        Assert.Equal("f1", data.GetProperty("fingerprint").GetString());
+        Assert.Equal("create", Assert.Single(data.GetProperty("changes").EnumerateArray()).GetProperty("action").GetString());
+        Assert.Contains("dry_run: false", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.Empty(_harness.Bridge.Writes);
+    }
+
+    [Fact]
+    public async Task Preview_IncompleteLayoutWarningIsPreserved()
+    {
+        var original = _harness.Bridge.Handlers[OperationNames.MacroInsertPlan];
+        _harness.Bridge.Handlers[OperationNames.MacroInsertPlan] = args =>
+        {
+            var plan = (WritePlan)original(args);
+            plan.Details!["layoutWarnings"] = "Layout unverified: page geometry is unavailable.";
+            return plan;
+        };
+        JsonElement data = WriteToolHarness.Structured(await Insert(dryRun: true));
+        Assert.Contains("Layout unverified", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ADryRun_ShowsTheMacroDevicesAndHowTheirTagsChange()
     {
         CallToolResult result = await Insert(dryRun: true);

@@ -29,7 +29,7 @@ internal sealed class MacroWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(MacroInsertResult))]
     [Description(
-        "Inserts a window macro on a circuit page, its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. x, y: mm " +
+        "Inserts a window macro (MultiLine on Circuit pages, Overview on Overview pages), its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. x, y: mm " +
         "from the page's bottom left (y up) to the macro's top left corner. Omit dry_run to preview; false executes. Outside scratch it needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.")]
     public static async Task<CallToolResult> MacroInsertAsync(
@@ -44,6 +44,7 @@ internal sealed class MacroWriteTools
         [Description("keep: the macro's tags")][AllowedValues("number", "keep")] string numbering = "number",
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
+        [AllowedValues("MultiLine", "Overview")] string representation = "MultiLine",
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -53,14 +54,14 @@ internal sealed class MacroWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering };
+        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering, Representation = representation };
         var request = new WriteRequest<MacroInsertArgs, MacroInsertArgs>(
             InsertTool,
             ToolTier.Write,
             OperationNames.MacroInsertPlan,
             OperationNames.MacroInsertExecute,
             args,
-            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Fingerprint = plan.Fingerprint },
+            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Representation = args.Representation, Fingerprint = plan.Fingerprint },
             dry_run,
             PageWriteTools.DefaultLimit,
             "Inserting the macro");
@@ -131,7 +132,7 @@ internal sealed class MacroWriteTools
             hints.Add($"Only the first {listed.ToString(CultureInfo.InvariantCulture)} of {devices.ToString(CultureInfo.InvariantCulture)} devices are listed.");
         }
 
-        if (ResultShaper.CleanText(data?.Warning) is { } warning)
+        if (ResultShaper.CleanText(data?.Warning ?? details.GetValueOrDefault("layoutWarnings")) is { Length: > 0 } warning)
         {
             hints.Add(warning);
         }

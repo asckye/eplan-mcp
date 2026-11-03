@@ -384,10 +384,14 @@ internal sealed class FakeMacroReader(string root) : IMacroReader
 
     public string? MacroRoot() => root;
 
-    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false)
+    public Func<string?, int, MacroContent>? ReadSelection { get; set; }
+    public (string? Representation, int Variant) Selection { get; private set; }
+
+    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false, string? representation = null, int variant = 0)
     {
         (OpenedIn, Opened) = (projectPath, macroPath);
-        return Content;
+        Selection = (representation, variant);
+        return ReadSelection?.Invoke(representation, variant) ?? Content;
     }
 }
 
@@ -404,13 +408,15 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
     public Func<bool, List<MacroFunctionRecord>> Placed { get; set; } = _ => [];
 
     public bool Stacked { get; set; }
+    public string Representation { get; private set; } = string.Empty;
 
     public List<(string Page, string Macro, int Variant, double X, double Y, bool Number)> Inserts { get; } = [];
 
     public MacroTargetPage? ReadPage(string projectPath, string pageName) => LayoutFixture.Target(Pages.GetValueOrDefault(pageName));
 
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number)
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine")
     {
+        Representation = representation;
         Inserts.Add((pageName, macroPath, variant, x, y, number));
         if (Stacked)
         {

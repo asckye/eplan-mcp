@@ -21,7 +21,7 @@ internal sealed class EplanMacroReader : IMacroReader
         return string.IsNullOrWhiteSpace(resolved) || resolved.Contains("$(") ? null : resolved;
     }
 
-    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false)
+    public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false, string? representation = null, int variant = 0)
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
@@ -38,9 +38,10 @@ internal sealed class EplanMacroReader : IMacroReader
         }
         List<KeyValuePair<string, List<int>>> representations = [.. macro.RepresentationTypes
             .Select(t => new KeyValuePair<string, List<int>>(t.ToString(), [.. macro.GetVariants(t)]))];
-        if (defaultMultiLine && representations.Any(r => r.Key == "MultiLine" && r.Value.Contains(0)))
+        string? selected = representation ?? (defaultMultiLine ? "MultiLine" : null);
+        if (selected is not null && representations.Any(r => r.Key == selected && r.Value.Contains(variant)))
         {
-            macro.Open(macroPath, project, WindowMacro.Enums.RepresentationType.MultiLine, 0, false);
+            macro.Open(macroPath, project, (WindowMacro.Enums.RepresentationType)Enum.Parse(typeof(WindowMacro.Enums.RepresentationType), selected), variant, false);
         }
         Placement[] objects = macro.Objects;
         PointD size = macro.Size;

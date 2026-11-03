@@ -47,6 +47,24 @@ public sealed class PlanArgumentsTests
     }
 
     [Theory]
+    [InlineData("representation", "Overview")]
+    public void MacroSteps_RejectRepresentationExtension(string field, string value)
+    {
+        PlanArgumentCheck result = Check(Step("macro.insert", new Dictionary<string, object>
+        { ["page"] = "+A/1", ["macro"] = "Motor.ema", ["x"] = 20, ["y"] = 20, [field] = value }));
+        Assert.Equal(ErrorReason.InvalidArgument, result.Reason);
+        Assert.Equal("/steps/0/args/" + field, Assert.Single(result.Violations).Pointer);
+    }
+
+    [Fact]
+    public void MacroSteps_RequireTheOriginalMacroSource()
+    {
+        PlanArgumentCheck result = Check(Step("macro.insert", new { page = "+A/1", x = 20, y = 20 }));
+        Assert.Equal(ErrorReason.InvalidArgument, result.Reason);
+        Assert.Contains(result.Violations, v => v.Pointer == "/steps/0/args/macro");
+    }
+
+    [Theory]
     [InlineData("module.insert")]
     [InlineData("placeholder.apply")]
     [InlineData("project.create")]

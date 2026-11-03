@@ -123,7 +123,7 @@ public sealed class MacroInsertOperationTests : IDisposable
 
         string[] violations = error.Metadata!["violations"].Split('\n');
         Assert.Equal(
-            ["'page' must be a circuit page (Circuit), but '=GAA+A1&EFS2/1' is Overview; this version inserts macros on circuit pages only.", "'macro' has no MultiLine representation, which circuit pages need (it has ArticlePlacement); choose another macro, eplan_macro_get shows a macro's representations."],
+            ["'page' must be Circuit for MultiLine, but '=GAA+A1&EFS2/1' is Overview.", "'macro' has no MultiLine representation (available: ArticlePlacement); choose another macro."],
             violations);
     }
 
@@ -136,6 +136,55 @@ public sealed class MacroInsertOperationTests : IDisposable
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
 
         Assert.Equal("'variant' 6 does not exist; the macro's MultiLine variants are 0, 1, 2, 3, 4, 5.", error.Metadata!["violations"]);
+    }
+
+    [Fact]
+    public void Overview_UsesTheSelectedRepresentationAndVariantForLayoutAndInsertion()
+    {
+        MacroInsertArgs args = Args("=GAA+A1&EFS2/1", 40, 200);
+        args.Representation = "Overview";
+        args.Variant = 2;
+        _macros.ReadSelection = (representation, variant) => new MacroContent
+        {
+            Representations = [new("MultiLine", [0]), new("Overview", [2])],
+            Width = representation == "Overview" && variant == 2 ? 20 : 1000,
+            Height = 20,
+            ObjectCount = 196,
+        };
+
+        WritePlan plan = Plan(args);
+        Assert.Equal(("Overview", 2), _macros.Selection);
+        Assert.Equal("196", plan.Details!["objectCount"]);
+        Assert.Contains("representation Overview", plan.Changes[0].NewValue, StringComparison.Ordinal);
+        args.Fingerprint = plan.Fingerprint;
+        Execute(args);
+        Assert.Equal("Overview", _inserter.Representation);
+    }
+
+    [Theory]
+    [InlineData("ArticlePlacement3D")]
+    [InlineData("Bogus")]
+    public void Plan_UnsupportedRepresentation_IsInvalidArgument(string representation)
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Representation = representation;
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
+        Assert.Null(_macros.Opened);
+    }
+
+    [Fact]
+    public void MissingLayoutMeasurements_WarnWithoutRefusingTheInsertion()
+    {
+        MacroTargetPage page = LayoutFixture.Target(_inserter.Pages[NewPage])!;
+        page.Layout!.DrawingArea = null;
+        page.Layout.Page.PageSize = null;
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+
+        WritePlan plan = Plan(args);
+        Assert.Contains("Layout unverified", plan.Details!["layoutWarnings"], StringComparison.Ordinal);
+        args.Fingerprint = plan.Fingerprint;
+        Assert.Contains("Layout unverified", Execute(args).Warning, StringComparison.Ordinal);
+        Assert.Contains("Commit", _transactions.Calls);
     }
 
     [Fact]
