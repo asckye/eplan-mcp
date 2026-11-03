@@ -5,15 +5,9 @@
 
 ## [Unreleased]
 
-- `eplan_macro_insert` accepts `representation: "Overview"` on Overview pages and reads the selected representation and macro variant for layout checks.
-- `eplan_macro_insert` accepts `part` / `part_variant` instead of `macro`, resolves the read-only group symbol macro, adds missing main-function part references in the same transaction, and reads them back after commit.
-- `eplan_macro_insert` only warns when a macro's declared outline leaves the drawing area but stays on a page of known size (part overview macros fill the A3 page); the inserted objects are still measured after the write.
-
-### 0.5.0 preview-default migration (ADR-0049)
-
-| Tool | Previous omitted `dry_run` | New omitted `dry_run` | Execute |
-|---|---|---|---|
-| `eplan_macro_insert` | Approval and execution | Preview with changes and fingerprint; no approval or write | Pass `dry_run: false` |
+- `eplan_macro_insert` 新增 `representation`：可在总览页插入宏的 `Overview` 表达；布局检查按所选表达和宏变体读取外框。
+- `eplan_macro_insert` 可用 `part` / `part_variant` 代替 `macro`：插入部件的组符号宏，在同一事务中给主功能补上部件引用，提交后读回。
+- `eplan_macro_insert`：宏的声明外框超出可绘制区但仍在已知幅面的页内时只给警告（部件总览宏铺满 A3 页）；插入的对象仍在写入后实测检查。
 
 - Host 审计记录通过共享规则去除敏感键值、认证凭据、URL 用户信息及 PEM 块；审批指纹继续绑定原始参数，审计链基于去敏后的记录计算。
 - Host 控制台、Bridge（含离线 stderr 与启动失败后备日志）及 Workbench 文件日志在写出前复用同一凭据脱敏规则。
