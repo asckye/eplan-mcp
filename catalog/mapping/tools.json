@@ -233,6 +233,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionRunContractTests.cs"
           },
           {
+            "name": "ActionRunToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionRunToolTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -550,6 +555,11 @@
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
+          },
+          {
+            "name": "ActionTryToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionTryTests.cs"
           },
           {
             "name": "ApiProtocolTests",
@@ -2867,6 +2877,11 @@
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
+          },
+          {
+            "name": "ApiTryToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ApiTryToolTests.cs"
           },
           {
             "name": "TaskSetTests",
@@ -7555,6 +7570,11 @@
         ],
         "operationTests": [
           {
+            "name": "ImportPxfPreviewTargetTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ImportPxfPreviewTargetTests.cs"
+          },
+          {
             "name": "ImportPxfOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ImportPxfOperationTests.cs"
@@ -8006,6 +8026,11 @@
           "A14"
         ],
         "tests": [
+          {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
           {
             "name": "DevicePlaceOperationTests",
             "size": "Small",
@@ -9768,6 +9793,11 @@
             "file": "tests/EplanMcp.Host.Tests/Doctor/DoctorCheckIdTests.cs"
           },
           {
+            "name": "P02PagePreviewTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/P02PagePreviewTests.cs"
+          },
+          {
             "name": "PageCreateInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/PageCreateInteropTests.cs"
@@ -10011,6 +10041,11 @@
             "name": "PageDeleteToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDeleteToolTests.cs"
+          },
+          {
+            "name": "PageDestructivePreviewTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDestructivePreviewTests.cs"
           },
           {
             "name": "TrayAndExitTests",
@@ -10899,6 +10934,11 @@
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanLocalScopeRulesTests.cs"
           },
           {
+            "name": "PageDestructivePreviewTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDestructivePreviewTests.cs"
+          },
+          {
             "name": "PageRenumberToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageRenumberToolTests.cs"
@@ -11092,6 +11132,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
+            "name": "P02PagePreviewTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/P02PagePreviewTests.cs"
+          },
+          {
             "name": "PageTextReplaceProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageTextReplaceProtocolTests.cs"
@@ -11240,6 +11285,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "P02PagePreviewTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/P02PagePreviewTests.cs"
           },
           {
             "name": "PageUpdateFrameProtocolTests",
@@ -12713,6 +12763,11 @@
         "apiNotes": [],
         "tests": [
           {
+            "name": "AcceptanceRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
             "name": "PlacementMoveExecutionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementMoveExecutionTests.cs"
@@ -12721,6 +12776,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "PageDisplayToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
             "name": "PlacementEditProtocolTests",

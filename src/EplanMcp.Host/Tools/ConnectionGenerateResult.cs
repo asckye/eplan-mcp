@@ -1,6 +1,6 @@
 using System.ComponentModel;
-using EplanMcp.Contracts;
 using System.Text.Json.Serialization;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Tools;
 

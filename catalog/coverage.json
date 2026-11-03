@@ -733,7 +733,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_action_run.md",
       "small": 1,
-      "medium": 1,
+      "medium": 2,
       "large": 0,
       "apiNotes": [
         "A11",
@@ -757,7 +757,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_action_try.md",
       "small": 3,
-      "medium": 2,
+      "medium": 3,
       "large": 2,
       "apiNotes": [
         "A9",
@@ -811,7 +811,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
       "small": 7,
-      "medium": 2,
+      "medium": 3,
       "large": 3,
       "apiNotes": [
         "A39",
@@ -1650,7 +1650,7 @@
       "dependencies": 49,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
-      "small": 4,
+      "small": 5,
       "medium": 2,
       "large": 2,
       "apiNotes": [
@@ -1870,7 +1870,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
       "small": 11,
-      "medium": 16,
+      "medium": 17,
       "large": 7,
       "apiNotes": [
         "A7",
@@ -1902,7 +1902,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_delete.md",
       "small": 3,
-      "medium": 9,
+      "medium": 10,
       "large": 1,
       "apiNotes": [
         "A15",
@@ -1996,7 +1996,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_renumber.md",
       "small": 2,
-      "medium": 1,
+      "medium": 2,
       "large": 2,
       "apiNotes": [
         "A18",
@@ -2050,7 +2050,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_text_replace.md",
       "small": 1,
-      "medium": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A41"
@@ -2070,7 +2070,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_update.md",
       "small": 3,
-      "medium": 4,
+      "medium": 5,
       "large": 5,
       "apiNotes": [
         "A7",
@@ -2333,8 +2333,8 @@
       "dependencies": 61,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_edit.md",
-      "small": 2,
-      "medium": 1,
+      "small": 3,
+      "medium": 2,
       "large": 1,
       "apiNotes": []
     },
