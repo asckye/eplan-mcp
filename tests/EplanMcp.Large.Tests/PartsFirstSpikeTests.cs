@@ -229,23 +229,8 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
                 PrintRenameVerdict("pushbutton", renamed);
             }
 
-            if (plc is not null)
-            {
-                JsonElement placed = await ProbeAsync(new
-                {
-                    project = session.Project,
-                    page,
-                    mode = "place-renamed-remove",
-                    part = plc.Part,
-                    variant = plc.Variant,
-                    x = 340,
-                    y = 300,
-                    tag = "=GAA+A1-KT" + suffix,
-                    strategy = "rename-device",
-                    placement = new { x = 380, y = 300 }
-                }, "place-renamed-remove", evidence, suffix);
-                PrintPlacementVerdict(placed);
-            }
+            // Live 2026-11-03: "place-renamed-remove" (RenameDevice, then PlaceAt with PLC_CBOX on an unplaced PLC function and
+            // Remove of the original) crashed EPLAN (0xc0000374) before a result was written; like "create-named" it stays out of this run.
 
             var exported = await eplan.CallOrErrorAsync("eplan_export_image", new() { ["project"] = session.Project, ["pages"] = new[] { page }, ["format"] = "png" });
             Print("export", exported.Result);
@@ -355,7 +340,7 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
         string tag = Text(result, "tag");
         bool complete = Flag(result, "committed") == true && Flag(result, "readbackComplete") == true;
         bool? renamed = complete ? CompareFunctions(before, after, (original, actual) => Renamed(original, actual, tag)) : null;
-        int count = before.Count(original => after.Any(actual => ObjectId(original) is { } id && ObjectId(actual) == id && Renamed(original, actual, tag) == true));
+        int count = before.Count(original => after.Any(actual => FunctionSuffix(original) is { } id && FunctionSuffix(actual) == id && Renamed(original, actual, tag) == true));
         JsonElement[] unplaced = before.Where(function => Flag(function, "isPlaced") == false).ToArray();
         bool? kept = complete && before.All(function => Flag(function, "isPlaced") is not null) && Field(result, "oldDeviceFunctions").ValueKind == JsonValueKind.Array
             ? CompareFunctions(unplaced, after, (original, actual) => Renamed(original, actual, tag) is { } matches
@@ -368,40 +353,6 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
             + $"20022 unchanged: {Verdict(SameProperty("20022"))}, 20023 unchanged: {Verdict(SameProperty("20023"))}, part kept: {Verdict(Same("articleReferences"))}");
     }
 
-    private static void PrintPlacementVerdict(JsonElement result)
-    {
-        JsonElement[] before = Observations(result, "before");
-        JsonElement[] after = Observations(result, "after");
-        JsonElement placement = Field(result, "placement");
-        JsonElement original = Field(placement, "original");
-        JsonElement copy = Field(placement, "copy");
-        JsonElement[] copies = after.Where(function => ObjectId(copy) is { } id && ObjectId(function) == id).ToArray();
-        JsonElement actual = copies.Length == 1 ? copies[0] : default;
-        JsonElement[] device = Observations(result, "newDeviceFunctions");
-        JsonElement connection = Field(Field(original, "properties"), "20022");
-        bool complete = Flag(result, "committed") == true && Flag(result, "readbackComplete") == true;
-        bool readable = complete && Readable(original) && Readable(actual);
-        bool connectionReadable = readable && connection.ValueKind == JsonValueKind.Object && connection.EnumerateObject().Any()
-            && device.Length > 0 && device.All(function => Readable(function) && Field(Field(function, "properties"), "20022").ValueKind == JsonValueKind.Object);
-        bool? unique = connectionReadable && ObjectId(original) is { } originalId && Flag(placement, "removeOriginal") is { } removed
-            ? AllKnown(removed, !after.Any(function => ObjectId(function) == originalId),
-                device.Count(function => SameField(Field(original, "properties"), Field(function, "properties"), "20022") == true) == 1,
-                SameField(Field(original, "properties"), Field(actual, "properties"), "20022"), Flag(actual, "isPlaced"))
-            : null;
-        bool? named = readable ? AllKnown(SameField(original, actual, "name"),
-            Field(actual, "deviceTag").ValueKind == JsonValueKind.String && Field(result, "tag").ValueKind == JsonValueKind.String
-                ? Text(actual, "deviceTag") == Text(result, "tag") : null) : null;
-        bool? described = readable ? SameField(Field(original, "properties"), Field(actual, "properties"), "20023") : null;
-        bool? mainKept = complete ? CompareFunctions(before.Where(function => Flag(function, "isMainFunction") == true).ToArray(), after,
-            (oldMain, newMain) => AllKnown(Renamed(oldMain, newMain, Text(result, "tag")), Flag(newMain, "isMainFunction"),
-                SameField(oldMain, newMain, "isPlaced"), SameField(oldMain, newMain, "page"),
-                SameField(oldMain, newMain, "location"),
-                SameField(oldMain, newMain, "properties"), SameField(oldMain, newMain, "articleReferences"))) : null;
-        Print("Q2 plc", $"one placed function for connection: {Verdict(unique)}, name correct: {Verdict(named)}, "
-            + $"20023 unchanged: {Verdict(described)}, main unchanged: {Verdict(mainKept)}");
-        Print("Q2 plc functions", new { newDeviceFunctions = Observations(result, "newDeviceFunctions"), oldDeviceFunctions = Observations(result, "oldDeviceFunctions") });
-    }
-
     private static bool? CompareFunctions(JsonElement[] before, JsonElement[] after, Func<JsonElement, JsonElement, bool?> compare)
     {
         if (before.Length == 0)
@@ -409,9 +360,9 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
         bool? result = true;
         foreach (JsonElement original in before)
         {
-            if (!Readable(original) || ObjectId(original) is not { } id)
+            if (!Readable(original) || FunctionSuffix(original) is not { } id)
             { result = result == false ? false : null; continue; }
-            JsonElement[] matches = after.Where(actual => ObjectId(actual) == id).ToArray();
+            JsonElement[] matches = after.Where(actual => FunctionSuffix(actual) == id).ToArray();
             bool? equal = matches.Length == 0 ? false : matches.Length == 1 && Readable(matches[0]) ? compare(original, matches[0]) : null;
             result = result == false || equal == false ? false : result is null || equal is null ? null : true;
         }
@@ -430,6 +381,8 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
 
     private static JsonElement Field(JsonElement value, string name) => value.ValueKind == JsonValueKind.Object && value.TryGetProperty(name, out JsonElement field) ? field : default;
     private static JsonElement[] Observations(JsonElement value, string name) => Field(value, name) is { ValueKind: JsonValueKind.Array } array ? array.EnumerateArray().ToArray() : [];
+    // Live 2026-11-03: unplaced functions carry in-transaction IDs (…/n/1) that change at commit, so pair them by the ':n' suffix.
+    private static string? FunctionSuffix(JsonElement value) => Text(value, "name") is { } name && name.LastIndexOf(':') is var colon and >= 0 ? name[colon..] : null;
     private static long? ObjectId(JsonElement value) => Field(value, "objectIdentifier") is { ValueKind: JsonValueKind.Number } id && id.TryGetInt64(out long number) ? number : null;
     private static bool? Flag(JsonElement value, string name) => Field(value, name).ValueKind switch { JsonValueKind.True => true, JsonValueKind.False => false, _ => null };
     private static bool Readable(JsonElement value) => Field(value, "warnings") is { ValueKind: JsonValueKind.Array } warnings && warnings.GetArrayLength() == 0;
