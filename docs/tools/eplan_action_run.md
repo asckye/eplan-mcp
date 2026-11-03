@@ -18,7 +18,7 @@
 
 ```text
 Run action; fingerprints.
-Prefer task tools. Write: dry_run, approval outside scratch; APPROVAL_DENIED.
+Prefer task tools. Omit/true previews; false executes. Write: approval outside scratch; APPROVAL_DENIED.
 full/actionRun:on. eplan_tool_usage.
 Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"EXPORTFILE":"layers.elc"}}
 ```
@@ -30,7 +30,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 | `entry` | string，`enum` 为下表精确的 15 个值 | 是 | — | ADR §8 的 action/TYPE 名称；无 TYPE 时只写 action 名，区分大小写 |
 | `project` | string，非空 | 项目条目是；系统条目不给 | — | 项目名或 `eplan_project_list` 返回的 `path`，不隐式采用当前项目 |
 | `arguments` | object，值均为 string，按 `entry` 校验 | 是 | — | 只允许相应条目表中的参数；参数名保持 EPLAN 大小写 |
-| `dry_run` | boolean | 否 | false | 所有条目可用，Write 必须支持；true 只返回处理后的调用、级别和已知副作用，不审批、不执行、不创建输出目录 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不执行、不创建输出目录；执行须显式 false |
 
 按本规格的输入形态，`entry` 封装 [ADR §1][adr1] 的 `action` + `type` 组合，`arguments` 对应其 `parameters`；不接受独立的 `action`、`type` 或命令行。公开 schema 只含上述四个参数及完整的 15 项枚举；`arguments.additionalProperties` 为 string，不生成逐条 `oneOf` 或条件分支。Host 按嵌入白名单校验全部逐条规则，包括必填、允许的参数名、单值数量及格式；`INVALID_ARGUMENT` 一次列出全部问题、该条允许的参数名，并提示调用 `eplan_tool_usage` 的相应 topic。每条的参数表、副作用及示例由 usage 提供。Bridge 的大小写敏感参数名作为 `ActionParameter` 列表的 `Name` 数据传输，不改变共享 IPC 序列化规则。
 
@@ -102,13 +102,15 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 
 ## 3. 输出
 
+省略或传 `dry_run: true` 返回已有变更清单 `changes`、计划指纹 `fingerprint` 和 `execution: not_started`；按相同参数再次传 `dry_run: false` 执行。导出与写入仍使用原有流程。
+
 以下为成功结果 `outputSchema` 的草案（**未验证**，实现时纳入契约快照）；`entry` 使用输入的同一枚举。返回 `structuredContent`、同内容 JSON 文本块和一行英文摘要。Write 的错误结果见[当前错误参考](error-reference.md)，不用成功 schema 表示失败（[ADR §3–4][adr4]）。
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object", "additionalProperties": false,
-  "required": ["entry","tier","project","target","action","type","parameters","dryRun","before","after","readback","directory","files","fileCount","totalBytes","entryDisabled","eplanMessages","truncated","hint"],
+  "required": ["entry","tier","project","target","action","type","parameters","dryRun","fingerprint","changes","before","after","readback","directory","files","fileCount","totalBytes","entryDisabled","eplanMessages","truncated","hint"],
   "properties": {
     "entry": {"enum":["backup/MASTERDATA","changelayer","graphicallayertable/EXPORT","partsmanagementapi/EXPORTPARTS","partsmanagementapi/EXPORTMANUFACTURERS","partsmanagementapi/EXPORTCONSTRUCTIONS","partsmanagementapi/EXPORTCONNECTIONPATTERNS","partsmanagementapi/EXPORTACCESSORYLISTS","partsmanagementapi/EXPORTACCESSORYPLACEMENTS","plcservice/BUSDATAEXPORT","projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS","XEsUserPropertiesExportAction","SwitchProjectType","synchronize/MULTILINE","synchronize/OVERVIEW"]},
     "tier": {"enum":["export","write"]},
@@ -117,6 +119,8 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
     "action": {"type":"string"}, "type": {"type":["string","null"]},
     "parameters": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["name","value"],"properties":{"name":{"type":"string"},"value":{"type":"string"}}}},
     "dryRun": {"type":"boolean"},
+    "fingerprint": {"type":"string"},
+    "changes": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["action","kind","name","property","oldValue","newValue"],"properties":{"action":{"type":"string"},"kind":{"type":"string"},"name":{"type":"string"},"property":{"type":["string","null"]},"oldValue":{"type":["string","null"]},"newValue":{"type":["string","null"]}}}},
     "execution": {"enum":["not_started","committed"]},
     "recovered": {"type":"boolean"}, "undo": {"type":"null"},
     "before": {"anyOf":[{"$ref":"#/$defs/fingerprint"},{"type":"null"}]},
@@ -129,7 +133,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
     "eplanMessages": {"type":"array","maxItems":20,"items":{"type":"string"}},
     "truncated": {"type":"boolean"}, "hint": {"type":["string","null"]}
   },
-  "allOf": [{"if":{"properties":{"tier":{"const":"write"}}},"then":{"required":["execution","recovered","undo"]},"else":{"properties":{"execution":false,"recovered":false,"undo":false}}}],
+  "allOf": [{"if":{"properties":{"tier":{"const":"write"}}},"then":{"required":["execution","recovered","undo"]},"else":{"properties":{"recovered":false,"undo":false},"if":{"properties":{"dryRun":{"const":true}}},"then":{"required":["execution"],"properties":{"execution":{"const":"not_started"}}},"else":{"properties":{"execution":false}}}}],
   "$defs": {
     "fingerprint": {
       "type":"object","additionalProperties":false,"required":["counts","dataFiles","fileCount","truncated"],
@@ -151,7 +155,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 - `readback="fingerprint"` 时固定提示：`Changes have not been checked item by item; use read tools to verify objects you care about.` 已知副作用与未验证项也写入 `hint`。Write 提交时 `execution=committed`，dry-run 为 `not_started`、`after=null`、`readback=not_executed`。`undo=null`，提示“提交后一步 Ctrl+Z 未验证”，验证通过前不承诺撤销记录（[ADR §1、§4、§8][adr8]）。
 - 导出结果的 `directory` 是本次目录完整路径，`files` 递归列出文件相对路径、字节数和 **SHA-256**；`fileCount`、`totalBytes` 是完整合计。Write 无文件，`directory=null`、`files=[]`、合计为 0；dry-run 同样不产文件（[ADR §2–4][adr3]，导出清单增加哈希的产品行为**未验证**）。
 - 不分页，不提供 `response_format`。文件最多 50 项，指纹文件明细各最多 20 项，预算约 5k token、硬上限 20k；计算与比较使用完整集合，显示截断不影响判断。超限设置 `truncated=true` 和提示，计数及文件总数仍保留；项目自由文本只在数据字段，按 ResultShaper 清洗（[手册 MCP 条款](../standards/engineering-handbook.html#mcp-large)，[ADR §4][adr4]；此产品整形**未验证**）。
-- 摘要：`Ran graphicallayertable/EXPORT; produced 1 file in a new folder; see 'directory'.` / `Ran changelayer; committed; fingerprint readback only.` Read 不带 `execution`。Read 出现未记录的项目指纹变化时，结果与审计如实报告并置 `entryDisabled=true`，本次 Host 进程停用该条目，doctor / 日志提示重新验证；不把 AML 尚未解释的变化直接登记为无害例外（[ADR §4][adr4]）。
+- 摘要：`Ran graphicallayertable/EXPORT; produced 1 file in a new folder; see 'directory'.` / `Ran changelayer; committed; fingerprint readback only.` 显式执行的 Read 不带 `execution`；Read 预览返回 `execution=not_started`。Read 出现未记录的项目指纹变化时，结果与审计如实报告并置 `entryDisabled=true`，本次 Host 进程停用该条目，doctor / 日志提示重新验证；不把 AML 尚未解释的变化直接登记为无害例外（[ADR §4][adr4]）。
 
 ## 4. 错误
 

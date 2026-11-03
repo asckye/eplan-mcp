@@ -25,7 +25,7 @@ internal static class ActionRunUsage
                     "| " + (p.Key.EndsWith('1') ? p.Key[..^1] : p.Key.TrimEnd('?')) + " | " + (p.Key.EndsWith('?') ? "no" : "yes") + " | " + p.Value!.GetValue<string>().Replace("|", " / ", StringComparison.Ordinal) + " |")) +
                 "\nFixed: " + rule["fixed"]!.ToJsonString() + "; project paths and destinations are supplied by the server.\n" + ActionRunCatalog.Text(rule, "effects") +
                 (rule["extension"] is null ? "" : "\nOutput: exactly one non-empty " + rule["extension"] + " file; backup extension follows MDTYPE, PLC extension follows CONVERTERID.") +
-                "\nExample: " + Example(rule).ToJsonString() + "\n" + ToolUsageCatalog.Usage[ActionRunTools.Tool][ToolUsageCatalog.Fields]
+                "\nExecution requires dry_run: false; omission or true only previews.\nExample: " + Example(rule).ToJsonString() + "\n" + ToolUsageCatalog.Usage[ActionRunTools.Tool][ToolUsageCatalog.Fields]
         });
     }
     internal static JsonObject Example(JsonObject rule)
@@ -37,7 +37,7 @@ internal static class ActionRunUsage
             fields[key.EndsWith('1') ? key[..^1] : key] = key == "VISIBLE1" ? "0" : key == "LAYER1" ? "EPLAN100" : key == "PROPERTYVALUE1" ? RecordExample(rule)
                 : value == "file" ? "export" + rule["extension"]!.GetValue<string>().Split('|')[0] : value == "archive" ? "LibraryBackup" : value == "text" ? "Phoenix1" : value;
         }
-        var example = new JsonObject { ["entry"] = ActionRunCatalog.Text(rule, "entry"), ["arguments"] = fields };
+        var example = new JsonObject { ["entry"] = ActionRunCatalog.Text(rule, "entry"), ["arguments"] = fields, ["dry_run"] = false };
         if (ActionRunCatalog.Text(rule, "scope") == "project")
         {
             example["project"] = "Line1";

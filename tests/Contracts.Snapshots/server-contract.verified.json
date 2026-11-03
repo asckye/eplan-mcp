@@ -363,7 +363,7 @@
     {
       "name": "eplan_action_run",
       "title": "Run a whitelisted EPLAN action",
-      "description": "Run a whitelisted EPLAN task; fingerprint checks only.\nPrefer task tools. dry_run; approval outside scratch.\nfull + actionRun:on. Details: eplan_tool_usage.\nExample: {\"entry\":\"graphicallayertable/EXPORT\",\"arguments\":{\"EXPORTFILE\":\"layers.elc\"}}",
+      "description": "Run a whitelisted EPLAN task; fingerprint checks only.\nOmit/true previews; false executes. Approval outside scratch.\nfull + actionRun:on. Details: eplan_tool_usage.\nExample: {\"entry\":\"graphicallayertable/EXPORT\",\"arguments\":{\"EXPORTFILE\":\"layers.elc\"}}",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -397,7 +397,7 @@
           },
           "dry_run": {
             "type": "boolean",
-            "default": false
+            "default": true
           }
         },
         "required": [
@@ -419,6 +419,8 @@
           "type",
           "parameters",
           "dryRun",
+          "fingerprint",
+          "changes",
           "before",
           "after",
           "readback",
@@ -496,6 +498,53 @@
           },
           "dryRun": {
             "type": "boolean"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "action",
+                "kind",
+                "name",
+                "property",
+                "oldValue",
+                "newValue"
+              ],
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           },
           "execution": {
             "enum": [
@@ -613,9 +662,30 @@
             },
             "else": {
               "properties": {
-                "execution": false,
                 "recovered": false,
                 "undo": false
+              },
+              "if": {
+                "properties": {
+                  "dryRun": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "execution"
+                ],
+                "properties": {
+                  "execution": {
+                    "const": "not_started"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "execution": false
+                }
               }
             }
           }

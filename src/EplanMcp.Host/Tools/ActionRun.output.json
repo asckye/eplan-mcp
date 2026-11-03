@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object", "additionalProperties": false,
-  "required": ["entry","tier","project","target","action","type","parameters","dryRun","before","after","readback","directory","files","fileCount","totalBytes","entryDisabled","eplanMessages","truncated","hint"],
+  "required": ["entry","tier","project","target","action","type","parameters","dryRun","fingerprint","changes","before","after","readback","directory","files","fileCount","totalBytes","entryDisabled","eplanMessages","truncated","hint"],
   "properties": {
     "entry": {"enum":["backup/MASTERDATA","changelayer","graphicallayertable/EXPORT","partsmanagementapi/EXPORTPARTS","partsmanagementapi/EXPORTMANUFACTURERS","partsmanagementapi/EXPORTCONSTRUCTIONS","partsmanagementapi/EXPORTCONNECTIONPATTERNS","partsmanagementapi/EXPORTACCESSORYLISTS","partsmanagementapi/EXPORTACCESSORYPLACEMENTS","plcservice/BUSDATAEXPORT","projectmanagement/EXPORTPROPERTYPLACEMENTSSCHEMAS","XEsUserPropertiesExportAction","SwitchProjectType","synchronize/MULTILINE","synchronize/OVERVIEW"]},
     "tier": {"enum":["export","write"]},
@@ -10,6 +10,8 @@
     "action": {"type":"string"}, "type": {"type":["string","null"]},
     "parameters": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["name","value"],"properties":{"name":{"type":"string"},"value":{"type":"string"}}}},
     "dryRun": {"type":"boolean"},
+    "fingerprint": {"type":"string"},
+    "changes": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["action","kind","name","property","oldValue","newValue"],"properties":{"action":{"type":"string"},"kind":{"type":"string"},"name":{"type":"string"},"property":{"type":["string","null"]},"oldValue":{"type":["string","null"]},"newValue":{"type":["string","null"]}}}},
     "execution": {"enum":["not_started","committed"]},
     "recovered": {"type":"boolean"}, "undo": {"type":"null"},
     "before": {"anyOf":[{"$ref":"#/$defs/fingerprint"},{"type":"null"}]},
@@ -22,7 +24,7 @@
     "eplanMessages": {"type":"array","maxItems":20,"items":{"type":"string"}},
     "truncated": {"type":"boolean"}, "hint": {"type":["string","null"]}
   },
-  "allOf": [{"if":{"properties":{"tier":{"const":"write"}}},"then":{"required":["execution","recovered","undo"]},"else":{"properties":{"execution":false,"recovered":false,"undo":false}}}],
+  "allOf": [{"if":{"properties":{"tier":{"const":"write"}}},"then":{"required":["execution","recovered","undo"]},"else":{"properties":{"recovered":false,"undo":false},"if":{"properties":{"dryRun":{"const":true}}},"then":{"required":["execution"],"properties":{"execution":{"const":"not_started"}}},"else":{"properties":{"execution":false}}}}],
   "$defs": {
     "fingerprint": {
       "type":"object","additionalProperties":false,"required":["counts","dataFiles","fileCount","truncated"],

@@ -7,12 +7,14 @@ using EplanMcp.Host.Exports;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class ActionRunToolTests : IDisposable
 {
     private readonly WriteToolHarness _harness;
@@ -60,6 +62,59 @@ public sealed class ActionRunToolTests : IDisposable
         HostConfig.Defaults(_harness.Locations) with { ActionRun = enabled }, new AuditLog(_harness.Locations.Audit, TimeProvider.System), TimeProvider.System, NullLoggerFactory.Instance);
     private Task<CallToolResult> Run(string entry = "graphicallayertable/EXPORT", string arguments = "{\"EXPORTFILE\":\"layers\"}", string? project = "Line1", bool dry = false) => Tool().RunAsync(_progress, entry, Json(arguments), project, dry, TestContext.Current.CancellationToken);
     private static JsonElement Json(string text) => JsonDocument.Parse(text).RootElement;
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task OmittedAndTruePreview_ExplicitFalsePreservesExportAndWriteFlows(bool write)
+    {
+        if (write)
+        { _harness.ProjectPath = Path.Combine(_harness.Locations.Root, "real", "Line1"); }
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            CancellationToken token = TestContext.Current.CancellationToken;
+            var schema = (await client.ListToolsAsync(cancellationToken: token)).Single(t => t.Name == ActionRunTools.Tool).ProtocolTool.InputSchema;
+            Assert.True(schema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+            var arguments = new Dictionary<string, object?>
+            {
+                ["entry"] = write ? "changelayer" : "graphicallayertable/EXPORT",
+                ["project"] = "Line1",
+                ["arguments"] = write ? Json("{\"LAYER\":\"EPLAN100\",\"VISIBLE\":\"0\"}") : Json("{\"EXPORTFILE\":\"layers\"}"),
+            };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync(ActionRunTools.Tool, arguments, cancellationToken: token));
+            arguments["dry_run"] = true;
+            JsonElement preview = WriteToolHarness.Structured(await client.CallToolAsync(ActionRunTools.Tool, arguments, cancellationToken: token));
+            Assert.Equal(omitted.GetRawText(), preview.GetRawText());
+            Assert.True(preview.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("not_started", preview.GetProperty("execution").GetString());
+            Assert.Equal("f1", preview.GetProperty("fingerprint").GetString());
+            Assert.NotEmpty(preview.GetProperty("changes").EnumerateArray());
+            Assert.Contains("dry_run: false", preview.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.All(_harness.Bridge.Calls, c => Assert.Equal(OperationNames.ActionRunPlan, c.Operation));
+            Assert.Empty(_harness.Bridge.Writes);
+            Assert.Empty(_dialog.Questions);
+            Assert.False(Directory.Exists(_harness.Locations.Exports));
+            arguments["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync(ActionRunTools.Tool, arguments, cancellationToken: token));
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal(preview.GetProperty("fingerprint").GetString(), executed.GetProperty("fingerprint").GetString());
+            Assert.Equal(preview.GetProperty("changes").GetRawText(), executed.GetProperty("changes").GetRawText());
+            Assert.Equal(write ? 1 : 0, _dialog.Questions.Count);
+            Assert.Equal(write ? 1 : 0, _harness.Bridge.Writes.Count);
+            if (write)
+            { Assert.Equal("committed", executed.GetProperty("execution").GetString()); }
+            else
+            {
+                Assert.False(executed.TryGetProperty("execution", out _));
+                Assert.Equal(1, executed.GetProperty("fileCount").GetInt32());
+                Assert.True(Directory.Exists(_harness.Locations.Exports));
+            }
+        }, services =>
+        {
+            services.AddSingleton(HostConfig.Defaults(_harness.Locations) with { ActionRun = ActionRunSwitch.On });
+            services.AddSingleton(_catalog);
+        });
+    }
 
     [Fact]
     public async Task Export_UsesExistingFolderFlow_HashesOneFile_AndNeverAsksApproval()

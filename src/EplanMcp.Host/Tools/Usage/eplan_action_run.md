@@ -1,7 +1,7 @@
 ## Examples
 
 ```json
-{"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"EXPORTFILE":"layers.elc"}}
+{"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"EXPORTFILE":"layers.elc"},"dry_run":false}
 ```
 
 ```json
@@ -13,12 +13,12 @@
 ```
 
 ```json
-{"entry":"SwitchProjectType","project":"LargeWrite","arguments":{"PROJECTTYPE":"2"}}
+{"entry":"SwitchProjectType","project":"LargeWrite","arguments":{"PROJECTTYPE":"2"},"dry_run":false}
 ```
 
 ## Workflow
 
-Requires full profile and `actionRun: on` in config.json; default off. Prefer task tools, including eplan_export_parts and eplan_part_export. Request topic `<action>/<TYPE>` (or the action name without TYPE) for that entry's parameters and evidence. Exports need no approval; Write outside scratch requires the engineer's approval. dry_run creates no folder and executes nothing.
+Requires full profile and `actionRun: on` in config.json; default off. Prefer task tools, including eplan_export_parts and eplan_part_export. Request topic `<action>/<TYPE>` (or the action name without TYPE) for that entry's parameters and evidence. Exports need no approval; Write outside scratch requires the engineer's approval. Omitted or true dry_run returns changes, the plan fingerprint and execution:not_started, creates no folder and executes nothing. Call again with the same arguments and dry_run:false to execute.
 
 ## Fields
 

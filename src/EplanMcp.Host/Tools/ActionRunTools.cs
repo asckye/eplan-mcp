@@ -20,8 +20,8 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
 {
     public const string Tool = "eplan_action_run";
     [McpServerTool(Name = Tool, Title = "Run a whitelisted EPLAN action", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(JsonObject))]
-    [Description("Run a whitelisted EPLAN task; fingerprint checks only.\nPrefer task tools. dry_run; approval outside scratch.\nfull + actionRun:on. Details: eplan_tool_usage.\nExample: {\"entry\":\"graphicallayertable/EXPORT\",\"arguments\":{\"EXPORTFILE\":\"layers.elc\"}}")]
-    public async Task<CallToolResult> RunAsync(IProgress<ProgressNotificationValue> progress, string entry, JsonElement arguments, string? project = null, bool dry_run = false, CancellationToken cancellationToken = default)
+    [Description("Run a whitelisted EPLAN task; fingerprint checks only.\nOmit/true previews; false executes. Approval outside scratch.\nfull + actionRun:on. Details: eplan_tool_usage.\nExample: {\"entry\":\"graphicallayertable/EXPORT\",\"arguments\":{\"EXPORTFILE\":\"layers.elc\"}}")]
+    public async Task<CallToolResult> RunAsync(IProgress<ProgressNotificationValue> progress, string entry, JsonElement arguments, string? project = null, bool dry_run = WriteToolDefaults.Preview, CancellationToken cancellationToken = default)
     {
         ActionRunData? data = null;
         ExportOutcome? exported = null;
@@ -142,6 +142,8 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
             ["type"] = rule["fixed"]?["TYPE"]?.DeepClone(),
             ["parameters"] = new JsonArray([.. data.Parameters.Select(p => (JsonNode)new JsonObject { ["name"] = p.Name, ["value"] = Display(p, plan.Project, locations) })]),
             ["dryRun"] = dry,
+            ["fingerprint"] = plan.Fingerprint,
+            ["changes"] = JsonSerializer.SerializeToNode(plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) }), HostJson.Options),
             ["before"] = Fingerprint(data.Before),
             ["after"] = data.After is null ? null : Fingerprint(data.After),
             ["readback"] = data.After is null ? "not_executed" : "fingerprint",
@@ -156,13 +158,18 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
                 + (data.After is not null && data.Before.TryGetValue("layer:visible", out string? visible) ? $" Layer visibility: {visible} -> {data.After.GetValueOrDefault("layer:visible")}." : string.Empty)
                 + (data.After is not null && data.Before.TryGetValue("project:type", out string? type) && args.Entry == "SwitchProjectType"
                     ? $" Project type: {type} -> {data.After.GetValueOrDefault("project:type")}." : string.Empty)
-                + (recovered ? " Execution was recovered; unreadable post-action state is not inferred." : string.Empty) + (disabled ? " Entry disabled; ask the engineer to reverify it." : string.Empty),
+                + (recovered ? " Execution was recovered; unreadable post-action state is not inferred." : string.Empty) + (disabled ? " Entry disabled; ask the engineer to reverify it." : string.Empty)
+                + (dry ? " " + WriteToolDefaults.ExecutionHint : string.Empty),
         };
         if (execution is not null)
         {
             result["execution"] = execution;
             result["recovered"] = recovered;
             result["undo"] = null;
+        }
+        else if (dry)
+        {
+            result["execution"] = ExecutionState.NotStarted;
         }
         return result;
     }

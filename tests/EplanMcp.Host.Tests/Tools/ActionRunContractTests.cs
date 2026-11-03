@@ -87,6 +87,7 @@ public sealed class ActionRunContractTests
         Assert.Equal((false, true, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.Equal(ActionRunCatalog.Entries.Keys, tool.InputSchema.GetProperty("properties").GetProperty("entry").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
         Assert.Equal(15, tool.OutputSchema!.Value.GetProperty("properties").GetProperty("entry").GetProperty("enum").GetArrayLength());
+        Assert.True(tool.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.Equal(["entry", "project", "arguments", "dry_run"], tool.InputSchema.GetProperty("properties").EnumerateObject().Select(p => p.Name));
         Assert.Equal("string", tool.InputSchema.GetProperty("properties").GetProperty("arguments").GetProperty("additionalProperties").GetProperty("type").GetString());
         Assert.False(tool.InputSchema.TryGetProperty("oneOf", out _));
@@ -109,6 +110,7 @@ public sealed class ActionRunContractTests
             string text = usage.StructuredContent!.Value.GetProperty("text").GetString()!;
             Assert.Contains(name, text, StringComparison.Ordinal);
             Assert.Contains("Example:", text, StringComparison.Ordinal);
+            Assert.Contains("dry_run: false", text, StringComparison.Ordinal);
             Assert.Contains("Fixed:", text, StringComparison.Ordinal);
             Assert.Contains("| Name | Required | Allowed value |", text, StringComparison.Ordinal);
             Assert.Contains(ActionRunCatalog.Text(ActionRunCatalog.Entries[name], "effects"), text, StringComparison.Ordinal);
@@ -122,6 +124,7 @@ public sealed class ActionRunContractTests
         foreach ((string name, JsonObject rule) in ActionRunCatalog.Entries)
         {
             JsonObject example = ActionRunUsage.Example(rule);
+            Assert.False(example["dry_run"]!.GetValue<bool>());
             var checkedArgs = catalog.Check(name, example["project"]?.GetValue<string>(), JsonSerializer.SerializeToElement(example["arguments"])).Args;
             Assert.All(checkedArgs.Parameters, p => Assert.False(p.Name is "LAYER" or "VISIBLE" or "PROPERTYID" or "PROPERTYVALUE"));
         }

@@ -23,7 +23,7 @@ internal static class ActionRunSchema
         }
         else
         {
-            var schema = JsonNode.Parse("""{"type":"object","properties":{"entry":{},"project":{"type":"string"},"arguments":{"type":"object","additionalProperties":{"type":"string"}},"dry_run":{"type":"boolean","default":false}},"required":["entry","arguments"],"additionalProperties":false}""")!;
+            var schema = JsonNode.Parse("""{"type":"object","properties":{"entry":{},"project":{"type":"string"},"arguments":{"type":"object","additionalProperties":{"type":"string"}},"dry_run":{"type":"boolean","default":true}},"required":["entry","arguments"],"additionalProperties":false}""")!;
             schema["properties"]!["entry"]!["enum"] = JsonSerializer.SerializeToNode(ActionRunCatalog.Entries.Keys);
             tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);
             using Stream output = typeof(ActionRunSchema).Assembly.GetManifestResourceStream("EplanMcp.Host.Tools.ActionRun.output.json")!;
