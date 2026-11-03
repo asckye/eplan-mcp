@@ -6,6 +6,7 @@ using EplanMcp.Host.Bridge;
 using EplanMcp.Host.ClientConfig;
 using EplanMcp.Host.Doctor;
 using EplanMcp.Host.Http;
+using EplanMcp.Host.Logging;
 using EplanMcp.Host.Packs;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
@@ -126,11 +127,8 @@ internal static class Program
     internal static void ConfigureLogging(ILoggingBuilder logging, IServiceCollection services)
     {
         logging.ClearProviders();
-        logging.AddSimpleConsole(options =>
-        {
-            options.SingleLine = true;
-            options.ColorBehavior = LoggerColorBehavior.Disabled;
-        });
+        logging.AddConsole(options => options.FormatterName = RedactingConsoleFormatter.FormatterName)
+            .AddConsoleFormatter<RedactingConsoleFormatter, ConsoleFormatterOptions>();
         services.Configure<ConsoleLoggerOptions>(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
     }
 }
