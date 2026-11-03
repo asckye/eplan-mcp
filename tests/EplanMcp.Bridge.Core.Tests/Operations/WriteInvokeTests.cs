@@ -51,9 +51,9 @@ public sealed class WriteInvokeTests
     }
 
     [Fact]
-    public void AWrite_ThatFails_IsRolledBackUnlessItSaysOtherwise()
+    public void AWrite_WithExecutionEvidence_PreservesItsClassification()
     {
-        OperationRouter failing = Router(new InlineDispatcher(), new FakeWrite(() => throw new InvalidOperationException("boom")));
+        OperationRouter failing = Router(new InlineDispatcher(), new FakeWrite(() => throw Error(ErrorReason.Internal, ExecutionState.RolledBack)));
         OperationRouter early = Router(new InlineDispatcher(), new FakeWrite(() => throw Error(ErrorReason.ProjectNotOpen, ExecutionState.NotStarted)));
         OperationRouter unknown = Router(new InlineDispatcher(), new FakeWrite(() => throw Error(ErrorReason.OutcomeUnknown, ExecutionState.Unknown)));
 
@@ -61,6 +61,86 @@ public sealed class WriteInvokeTests
         Assert.Equal((ErrorReason.ProjectNotOpen, ExecutionState.NotStarted), Failure(early));
         Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), Failure(unknown));
         Assert.Equal([OutcomeStatus.RolledBack, OutcomeStatus.NotStarted, OutcomeStatus.Unknown], new[] { failing, early, unknown }.Select(r => Outcome(r, "r1")["status"]!.ToString()));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AWrite_WithoutExecutionEvidence_IsUnknownAndNeverReplayed(bool businessError)
+    {
+        // FAST-04, ERR-01: no transaction or readback has proved that this write was rolled back.
+        Exception failure = businessError ? new BridgeErrorException(ErrorReason.LockFailed, "locked", retryable: true)
+            : new InvalidOperationException("synthetic failure after a possible write");
+        var write = new FakeWrite(() => throw failure);
+        OperationRouter router = Router(new InlineDispatcher(), write);
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => router.Invoke(ExecuteOperation, null, "r1")).Error;
+
+        Assert.NotEqual(ExecutionState.RolledBack, error.Execution);
+        Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown, false), (error.Reason, error.Execution, error.Retryable));
+        Assert.Contains("Do not", error.Message, StringComparison.Ordinal);
+        // ERR-07, ERR-10: the same request can be queried but must never execute again.
+        Assert.Equal((OutcomeStatus.Unknown, ErrorReason.OutcomeUnknown),
+            ((string?)Outcome(router, "r1")["status"], (string?)Outcome(router, "r1")["reason"]));
+        Assert.Throws<BridgeErrorException>(() => router.Invoke(ExecuteOperation, null, "r1"));
+        Assert.Equal(1, write.Runs);
+        Assert.Equal(OutcomeStatus.Unknown, (string?)Outcome(router, "r1")["status"]);
+    }
+
+    [Theory]
+    [InlineData(null, ErrorReason.OutcomeUnknown, ExecutionState.Unknown, false)]
+    [InlineData(ExecutionState.NotStarted, ErrorReason.LockFailed, ExecutionState.NotStarted, true)]
+    [InlineData(ExecutionState.RolledBack, ErrorReason.LockFailed, ExecutionState.RolledBack, true)]
+    public void AWrite_WithMappedFailure_PreservesOnlyExplicitEvidence(string? mappedExecution, string reason, string execution, bool retryable)
+    {
+        var mapper = new FixedMapper(new BridgeError
+        {
+            Reason = ErrorReason.LockFailed,
+            Message = "locked",
+            Retryable = true,
+            Execution = mappedExecution,
+        });
+        var router = new OperationRouter([new FakeWrite(() => throw new InvalidOperationException("native"))],
+            new InlineDispatcher(), mapper, _log, TimeSpan.FromSeconds(10));
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => router.Invoke(ExecuteOperation, null, "r1")).Error;
+
+        Assert.Equal((reason, execution, retryable), (error.Reason, error.Execution, error.Retryable));
+        Assert.Equal(execution, (string?)Outcome(router, "r1")["status"]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AWrite_WithCompletedRollback_PreservesNativeFailureClassification(bool mapped)
+    {
+        var transactions = new FakeTransactions();
+        var mapper = mapped ? new FixedMapper(new BridgeError { Reason = ErrorReason.LockFailed, Message = "locked", Retryable = true }) : null;
+        var router = new OperationRouter([new FakeWrite(() => TransactionRunner.Run<int>(transactions, "eplan_page_create",
+            () => throw new InvalidOperationException("native")))], new InlineDispatcher(), mapper, _log, TimeSpan.FromSeconds(10));
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => router.Invoke(ExecuteOperation, null, "r1")).Error;
+
+        Assert.Equal((mapped ? ErrorReason.LockFailed : ErrorReason.Internal, ExecutionState.RolledBack, mapped),
+            (error.Reason, error.Execution, error.Retryable));
+        Assert.Contains("Rollback", transactions.Calls);
+        Assert.Equal(OutcomeStatus.RolledBack, (string?)Outcome(router, "r1")["status"]);
+    }
+
+    [Fact]
+    public void AWrite_RollbackEvidence_DoesNotLeakIntoAnotherRequest()
+    {
+        var failure = new InvalidOperationException("reused native exception");
+        bool inTransaction = true;
+        var transactions = new FakeTransactions();
+        OperationRouter router = Router(new InlineDispatcher(), new FakeWrite(() => inTransaction
+            ? TransactionRunner.Run<int>(transactions, "eplan_page_create", () => throw failure)
+            : throw failure));
+
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => router.Invoke(ExecuteOperation, null, "r1")).Error.Execution);
+        inTransaction = false;
+
+        Assert.Equal(ExecutionState.Unknown, Assert.Throws<BridgeErrorException>(() => router.Invoke(ExecuteOperation, null, "r2")).Error.Execution);
     }
 
     [Fact]

@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 待运行：本次禁止 EPLAN；需验证写入未知结果、真实回滚及原有写入安全回归。Small 假对象覆盖未分类异常、回滚证据、结果查询与不重放；未改 Large 断言，不宣称实机通过。 |
 | SPECIAL 中断点与 BP 默认（2026-11-02，负责人 brief；A81/A83） | `ConnectionCreateTests`、`DanglingInterruptionTests` | 待运行：本次禁止运行 EPLAN。待核验默认 BP 双连接点、显式 BPIN/BPOUT/BPF 的符号名与变体、两端各自实际接线，以及既有配对、完整图形和单步撤销断言；辅助原生读回已支持多连接点。 |
 | parts-first drawing spike（2026-11-02，负责人 brief；A82） | `PartsFirstSpikeTests` | 待运行：本次禁止运行 EPLAN。待在 LargeWrite 新 Circuit 页观察部件检索、模板回滚、PLC/按钮功能放置、既有功能赋部件和图片导出；只收集原生事实，不改变产品契约，不写部件库。新增 `templates-place` 步骤记录 PLC 主功能创建、模板放置前后状态、逐次放置结果和重复功能，并对照匹配引脚名称的赋部件结果。第三轮新增 `place-unplaced` 与 `device-list`，待观察未放置功能的 `Place` 返回对象身份、设备清单模板的 `PlaceAt` 放置及两条路径提交后的功能与重复项读回。第四轮新增 `rename-unplaced`，待对照 `name` 与 `properties` 策略在事务内及提交后对主功能和未放置功能的改名结果与器件归属。第五轮新增 `create-named`，待观察按最终名称创建和放置功能、迁移主功能标志并移除原件，以及提交后重复名称、部件引用与剩余四个未放置辅助功能的器件归属。 |
 | plugin libraries P1 C8（2026-11-02 brief） | `ConnectionCreateTests`、`DanglingInterruptionTests`、`DevicePlaceTests` | 待运行：本次禁止 EPLAN；验证插件默认中断点与新端子排定义、显式参数优先、计划过期、读回及原有撤销断言。Small/Medium 仅覆盖假 Bridge 与纯逻辑，不代替实机。 |

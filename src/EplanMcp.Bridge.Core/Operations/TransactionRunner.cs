@@ -36,6 +36,8 @@ public static class TransactionRunner
         {
             WriteExceptionDiagnostics.Report(failure);
             Abandon(scope, tool, closeUndo: shouldCommit is null, verifyRollback);
+            // P-05, ERR-01: retain completed rollback evidence without replacing the original exception.
+            OperationContext.RecordRollback(failure);
             if (failure is BridgeErrorException known)
             {
                 known.Error.Execution = ExecutionState.RolledBack;

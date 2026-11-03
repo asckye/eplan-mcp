@@ -38,6 +38,17 @@ public sealed class OperationContext
     /// <summary>The request ID (<c>correlationId</c>) of the invoke.</summary>
     public string RequestId { get; }
 
+    // ERR-01: rollback evidence belongs to this invocation, never to a reused exception or another request.
+    internal Exception? RolledBackFailure { get; private set; }
+
+    internal static void RecordRollback(Exception failure)
+    {
+        if (_current is not null)
+        {
+            _current.RolledBackFailure = failure;
+        }
+    }
+
     /// <summary>Reports a diagnostic without changing the operation's result or safety state.</summary>
     public void Warn(string message, Exception? exception = null) => _log?.Write(BridgeLogLevel.Warning, $"[{RequestId}] {message}", exception);
 

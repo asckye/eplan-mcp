@@ -142,7 +142,23 @@ public sealed class OperationRouter
                 throw Stamped(Busy(outcome.BusyReason), ExecutionState.NotStarted);
             default:
                 BridgeErrorException failure = Failure(outcome.Exception!, operation.Name, requestId);
-                string execution = failure.Error.Execution ?? ExecutionState.RolledBack;
+                string? execution = failure.Error.Execution;
+                if (execution is null && ReferenceEquals(context.RolledBackFailure, outcome.Exception))
+                {
+                    execution = ExecutionState.RolledBack;
+                }
+
+                if (execution is null)
+                {
+                    // ERR-01, P-05: an unclassified write failure is not proof that the project was restored.
+                    failure = new BridgeErrorException(
+                        ErrorReason.OutcomeUnknown,
+                        $"The outcome of the write is unknown (correlation ID {requestId}). Do not repeat it; ask the engineer to check the project in EPLAN.",
+                        retryable: false,
+                        failure.Error.Metadata);
+                    execution = ExecutionState.Unknown;
+                }
+
                 _outcomes.Update(requestId, execution, failure.Error.Reason);
                 throw Stamped(failure, execution);
         }
@@ -191,7 +207,8 @@ public sealed class OperationRouter
         if (mapped is not null)
         {
             _log.Write(BridgeLogLevel.Warning, $"[{correlationId}] {operationName} failed: {mapped.Reason}", exception);
-            return new BridgeErrorException(mapped.Reason, mapped.Message, mapped.Retryable, mapped.Metadata);
+            return new BridgeErrorException(mapped.Reason, mapped.Message, mapped.Retryable, mapped.Metadata)
+            { Error = { Execution = mapped.Execution } };
         }
 
         _log.Write(BridgeLogLevel.Error, $"[{correlationId}] {operationName} failed unexpectedly", exception);

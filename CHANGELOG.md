@@ -14,6 +14,7 @@
 - `eplan_connection_create` 支持用 `t_node.variant` 选择同方向引脚的 SPECIAL 变体，以及用 `interruption_point.sort_code` 在放置事务中设置排序码 24809 并读回；省略参数沿用原行为。D1/D2 的变体流向及跨页配对 Spike 已补，待实机运行。
 
 ### Fixed
+- 写操作异常缺少执行状态且没有回滚证据时，报告 `OUTCOME_UNKNOWN` / `unknown`，保留已证实回滚的结果，避免误报为已回滚并引发重试。
 - 带偏移引脚的 T 节点变体（TLRO/TLRU/TOUL/TOUR 变体 0–3）：预测连线从真实引脚出发，不再被布局 R4 误判穿过自身外框；连线与中断点规划都把这类节点识别为节点并连通其各引脚。同页两个同名中断点按 EPLAN 规则互相配对，不再拒绝。提交后读回失败时，错误信息附带原因。2026-11-02 客户页重绘实机通过（`AcceptanceRedrawTests`，客户清单）。
 
 ## [0.4.1] - 2026-11-02
