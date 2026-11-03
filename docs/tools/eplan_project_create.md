@@ -9,7 +9,7 @@
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-“从基本项目新建一个目标项目”“把示例项目备份还原成 scratch 副本”。这是 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.16“一个完整任务”的起点，也覆盖 ADR-0005 预留的 `eplan_scratch_create` 用途（M6 Q2）。EPJ/PXF 文件继续用 `eplan_import_pxf`。
+“从基本项目新建一个目标项目”“把示例项目备份还原成 scratch 副本”。这是 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.16“一个完整任务”的起点，也覆盖 ADR-0005 预留的 `eplan_scratch_create` 用途（M6 Q2）。EPJ/PXF 文件继续用 `eplan_import_pxf`；省略参数只预览，执行需显式传 `dry_run: false`。
 
 本版的 `basic_project`、`backup` 两种模式均可执行，不以归档版本预检为前提。Host 只接受不存在的目标，由 Bridge 执行时创建目录。🔴 `restore /TYPE:PROJECT` 会无提示地覆盖已有项目（[api-notes A31](../eplan/api-notes/reads-and-snapshots.md#a31-新建项目还原项目判断项目版本spike-s272026-10-21eplan-20260325421electric-p8在调度器中)），**任何已有目标都拒绝，包括已有空目录**；工具调用之后新项目处于关闭状态（A34 最新补充，见第 5 节）。
 

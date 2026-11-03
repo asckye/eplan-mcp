@@ -355,7 +355,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.False(tool.Annotations.IdempotentHint);
         Assert.Equal(["project", "file", "converter"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
         Assert.Equal([PlcImportTools.Pbf, PlcImportTools.Aml], Enum(tool.InputSchema.GetProperty("properties").GetProperty("converter")));
-        Assert.False(tool.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.True(tool.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.Contains("unverified", tool.Description, StringComparison.Ordinal);
     }
 
@@ -411,7 +411,9 @@ public sealed class ToolContractTests : IDisposable
         Assert.True(tool.Annotations!.DestructiveHint);
         Assert.False(tool.Annotations.ReadOnlyHint);
         Assert.False(tool.Annotations.IdempotentHint);
-        Assert.Equal(16, tool.OutputSchema!.Value.GetProperty("required").GetArrayLength());
+        Assert.Equal(18, tool.OutputSchema!.Value.GetProperty("required").GetArrayLength());
+        Assert.Contains("fingerprint", tool.OutputSchema.Value.GetProperty("required").EnumerateArray().Select(p => p.GetString()));
+        Assert.Contains("changes", tool.OutputSchema.Value.GetProperty("required").EnumerateArray().Select(p => p.GetString()));
     }
 
     [Fact]

@@ -22,14 +22,14 @@ internal sealed class ListImportTools
 
     [McpServerTool(Name = ImportTool, Title = "Import a project list", ReadOnly = false, Destructive = true, Idempotent = false,
         OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ImportListResult))]
-    [Description("Imports device or project parts lists from imports. Always needs approval and a project backup, in scratch too. Parts may take over a minute; undo is unverified. Example: {\"project\":\"Line1\",\"kind\":\"devices\",\"file\":\"incoming/devices.xml\",\"dry_run\":true}.")]
+    [Description("Imports device or project parts lists from imports. Omit/true previews; false executes with approval and a project backup, in scratch too. Parts may take over a minute; undo is unverified. Example: {\"project\":\"Line1\",\"kind\":\"devices\",\"file\":\"incoming/devices.xml\",\"dry_run\":true}.")]
     public static async Task<CallToolResult> ImportListAsync(
         WritePipeline pipeline, ImportFiles files,
         [MinLength(1)] string project,
         [AllowedValues("devices", "parts")] string kind,
         [StringLength(260, MinimumLength = 1)] string file,
         [AllowedValues("xml", "csv")] string format = "xml",
-        bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -117,6 +117,8 @@ internal sealed class ListImportTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Kind = kind,
             File = ResultShaper.CleanText(source.Path),
             Bytes = source.Bytes,
@@ -133,6 +135,11 @@ internal sealed class ListImportTools
         if (data is not null && data.Before.DeviceListEntries == data.After.DeviceListEntries && data.Before.ProjectParts == data.After.ProjectParts && data.Before.ArticleReferences == data.After.ArticleReferences)
         {
             hint += " No count changes were observed; this does not establish unchanged fields.";
+        }
+
+        if (dryRun)
+        {
+            hint += " " + WriteToolDefaults.ExecutionHint;
         }
 
         int total = Math.Max(data?.EplanMessageCount ?? 0, data?.EplanMessages.Count ?? 0);

@@ -76,8 +76,8 @@ public sealed class ImportPxfOperationTests : IDisposable
 
     [Theory]
     [InlineData("Other")]
-    [InlineData("missing\\Line1_imported")]
-    public void Plan_ATargetThatIsNotTheNameInAnExistingFolder_IsInvalid(string target)
+    [InlineData("missing\\Other")]
+    public void Plan_ATargetThatDoesNotEndWithTheName_IsInvalid(string target)
     {
         ImportPxfArgs args = Args("Line1_imported");
         args.Target = Path.Combine(_imported, target);

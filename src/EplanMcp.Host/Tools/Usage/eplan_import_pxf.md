@@ -6,9 +6,11 @@ An EPJ file someone sent, imported as a new project to look at, first as a dry r
 
 The same file under another name, since the first one is taken:
 
-    {"file": "incoming/Line1.epj", "name": "Line1_review2"}
+    {"file": "incoming/Line1.epj", "name": "Line1_review2", "dry_run": false}
 
 ## Workflow
+
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
 
 1. The file must be in the `imports` folder in EplanMcp's data folder (next to `exports`), put there by the engineer or by you; `file` is its path below that folder, with `/` between folders. Only `.epj` and `.pxf` files of at most 2 GB; links and junctions are not followed. eplan_export_pxf makes such a file from an open project.
 2. Choose a `name` no project in the scratch folder's `imported` folder has: a name only, without a dot or a folder. The new project goes there, never anywhere else, and no open project is changed, so no approval is needed.

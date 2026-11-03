@@ -32,9 +32,9 @@ public sealed class ImportPxfTests(WriteHost host) : IClassFixture<WriteHost>
         Assert.False(File.Exists(target + ".elk"));
 
         var clock = Stopwatch.StartNew();
-        JsonElement imported = await host.CallAsync("eplan_import_pxf", new() { ["file"] = file, ["name"] = name });
+        JsonElement imported = await host.CallAsync("eplan_import_pxf", new() { ["dry_run"] = false, ["file"] = file, ["name"] = name });
         double seconds = clock.Elapsed.TotalSeconds;
-        JsonElement again = await host.ErrorAsync("eplan_import_pxf", new() { ["file"] = file, ["name"] = name });
+        JsonElement again = await host.ErrorAsync("eplan_import_pxf", new() { ["dry_run"] = false, ["file"] = file, ["name"] = name });
 
         // S22 (A29): the target is the project's path without extension; EPLAN makes the .elk and the .edb, and does not
         // open the project.
@@ -57,8 +57,8 @@ public sealed class ImportPxfTests(WriteHost host) : IClassFixture<WriteHost>
     [Fact]
     public async Task AMissingFile_AndANameWithADot_ImportNothing()
     {
-        JsonElement missing = await host.ErrorAsync("eplan_import_pxf", new() { ["file"] = "large/missing.epj", ["name"] = NamePrefix + "missing" });
-        JsonElement dotted = await host.ErrorAsync("eplan_import_pxf", new() { ["file"] = "large/missing.epj", ["name"] = NamePrefix + "v1.2" });
+        JsonElement missing = await host.ErrorAsync("eplan_import_pxf", new() { ["dry_run"] = false, ["file"] = "large/missing.epj", ["name"] = NamePrefix + "missing" });
+        JsonElement dotted = await host.ErrorAsync("eplan_import_pxf", new() { ["dry_run"] = false, ["file"] = "large/missing.epj", ["name"] = NamePrefix + "v1.2" });
 
         Assert.Equal((ErrorReason.FileNotFound, ExecutionState.NotStarted), (missing.GetProperty("reason").GetString(), missing.GetProperty("execution").GetString()));
         Assert.Equal(ErrorReason.InvalidArgument, dotted.GetProperty("reason").GetString());

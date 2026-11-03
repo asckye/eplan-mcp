@@ -6,9 +6,11 @@ Check a standard exchange file first:
 
 Import an AML file into a project without those devices:
 
-    {"project":"Line1","file":"plc/Phoenix1.aml","converter":"PlcDcAMLExchangerGeneral"}
+    {"project":"Line1","file":"plc/Phoenix1.aml","converter":"PlcDcAMLExchangerGeneral", "dry_run": false}
 
 ## Workflow
+
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
 
 1. Put the file below `imports` in EplanMcp's data folder. Only nonempty files up to 100 MB: `.pbf` with `PlcDcXMLExchangerUniversal`, `.aml` with `PlcDcAMLExchangerGeneral`. No absolute paths, links or junctions.
 2. XML syntax, DTD and external XML references are checked. Name extraction is unverified, so `preflight.complete` is always false: this does not mean there are no conflicts.

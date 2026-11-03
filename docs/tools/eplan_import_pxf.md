@@ -16,13 +16,14 @@
 |---|---|---|---|---|
 | `file` | string | 是 | — | 导入目录中的相对路径，如 `incoming/Line1.epj`；扩展名只能是 `.epj`、`.pxf` |
 | `name` | string，1–60 个字符 | 是 | — | 新项目的名称，只是名称，规则同 `eplan_export_pdf` 的 `file_name`，另外不能含 `.`；scratch 中已有同名项目时拒绝 |
-| `dry_run` | boolean | 否 | false | 为 true 时只校验并返回新项目的位置，不导入 |
+| `dry_run` | boolean | 否 | true | 为 true 时只校验并返回新项目的位置，不导入 |
 
-- 没有 `project` 参数：导入不针对已打开的项目。
+- 没有 `project` 参数：导入不针对已打开的项目。预览只计算完整目标路径，父目录尚未存在也不创建；显式执行时 Host 才创建目录，Bridge 仍复核目录已存在。
 - `name` 不能含 `.`（实现时加）：S22 只试过不带点的名称（A29），EPLAN 是否把点后面的部分当作扩展名没有验证。
 - 导入目录和 `file` 的规则同 `eplan_import_dxf`；文件上限 2 GB（S25：示例项目的 EPJ 有 598 MB）。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 ```json
 {
   "execution": "committed",

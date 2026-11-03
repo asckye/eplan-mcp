@@ -37,7 +37,7 @@ public sealed class ImportPlcTests : IClassFixture<DestructiveHost>
         string imports = new HostDataLocations(_host.Home).Imports;
         Directory.CreateDirectory(imports);
         File.Copy(source, Path.Combine(imports, "Phoenix1.pbf"));
-        Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["file"] = "Phoenix1.pbf", ["converter"] = "PlcDcXMLExchangerUniversal" };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["file"] = "Phoenix1.pbf", ["converter"] = "PlcDcXMLExchangerUniversal" };
 
         JsonElement planned = await _host.CallAsync(Tool, new(args) { ["dry_run"] = true });
         Assert.False(planned.GetProperty("preflight").GetProperty("complete").GetBoolean());

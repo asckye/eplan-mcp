@@ -14,7 +14,7 @@
 与相近工具的区别：
 - `eplan_part_export` 是反方向；
 - `eplan_part_sync` 把项目中的部件加入部件库，不需要文件；
-- 导入到项目的部件清单是第三批的 `eplan_import_list`。
+- 导入到项目的部件清单用 `eplan_import_list`；省略参数只预览，执行需显式传 `dry_run: false`。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |

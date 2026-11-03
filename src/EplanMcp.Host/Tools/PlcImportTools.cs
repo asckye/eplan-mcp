@@ -24,12 +24,12 @@ internal sealed class PlcImportTools
     private static readonly string[] _errorFields = ["name", "text", "number"];
 
     [McpServerTool(Name = Tool, Title = "Import PLC bus data", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ImportPlcResult))]
-    [Description("Imports PLC bus data from the imports folder into a project without those devices. Always needs approval and a project backup. File preflight is incomplete; newly imported names already in the project roll the import back. Undo after commit is unverified. Example: {\"project\":\"Line1\",\"file\":\"plc/Phoenix1.pbf\",\"converter\":\"PlcDcXMLExchangerUniversal\",\"dry_run\":true}.")]
+    [Description("Imports PLC bus data from the imports folder into a project without those devices. Omit/true previews; false executes with approval and a project backup. File preflight is incomplete; newly imported names already in the project roll the import back. Undo after commit is unverified. Example: {\"project\":\"Line1\",\"file\":\"plc/Phoenix1.pbf\",\"converter\":\"PlcDcXMLExchangerUniversal\",\"dry_run\":true}.")]
     public static async Task<CallToolResult> ImportPlcAsync(WritePipeline pipeline, ImportFiles files,
         [Description("From eplan_project_list")] string project,
         [Description("Path below imports; at most 100 MB")] string file,
         [AllowedValues(Pbf, Aml)] string converter,
-        bool dry_run = false, IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview, IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
@@ -73,6 +73,8 @@ internal sealed class PlcImportTools
                 Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
                 Execution = outcome.Execution,
                 DryRun = dry_run,
+                Fingerprint = outcome.Plan.Fingerprint,
+                Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
                 File = ResultShaper.CleanText(source.Path),
                 Bytes = source.Bytes,
                 Sha256 = source.Sha256,
@@ -86,7 +88,7 @@ internal sealed class PlcImportTools
                 Recovered = outcome.Recovered,
                 EplanMessages = [.. (data?.EplanMessages ?? []).Take(20).Select(m => new SystemMessage { Level = m.Level, Number = ResultShaper.CleanText(m.Number), Text = ResultShaper.CleanText(m.Text), Occurrences = m.Occurrences })],
                 Truncated = data?.EplanMessageCount > 20,
-                Hint = Incomplete + (outcome.Recovered ? " The response was lost; EPLAN reported a commit. Check the project before doing anything else." : string.Empty) + " " + ResultShaper.CleanText(data?.Warning),
+                Hint = Incomplete + (outcome.Recovered ? " The response was lost; EPLAN reported a commit. Check the project before doing anything else." : string.Empty) + " " + ResultShaper.CleanText(data?.Warning) + (dry_run ? " " + WriteToolDefaults.ExecutionHint : string.Empty),
             };
             int omitted = ResultShaper.FitItems(result, result.EplanMessages, ResultShaper.DefaultTokenBudget - 200);
             if (result.Truncated || omitted > 0)

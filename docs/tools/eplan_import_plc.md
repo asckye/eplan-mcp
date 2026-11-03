@@ -19,7 +19,7 @@
 | `project` | string，非空 | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path` |
 | `file` | string，1–260 字符 | 是 | — | 固定导入目录中的相对路径，如 `plc/Phoenix1.pbf` |
 | `converter` | enum，见 schema | 是 | — | `.pbf` 用标准交换转换器，`.aml` 用通用 AML 转换器 |
-| `dry_run` | boolean | 否 | false | 只读预检并列出同名设备风险，不审批、不备份、不导入 |
+| `dry_run` | boolean | 否 | true | 只读预检并列出同名设备风险，不审批、不备份、不导入 |
 
 输入 schema（JSON Schema 2020-12；扩展名配对由 Host 不区分大小写校验）：
 ```json
@@ -29,7 +29,7 @@
     "project": { "type": "string", "minLength": 1 },
     "file": { "type": "string", "minLength": 1, "maxLength": 260 },
     "converter": { "type": "string", "enum": ["PlcDcXMLExchangerUniversal", "PlcDcAMLExchangerGeneral"] },
-    "dry_run": { "type": "boolean", "default": false }
+    "dry_run": { "type": "boolean", "default": true }
   }
 }
 ```
@@ -38,6 +38,7 @@
 - 示例：`{"project":"Line1","file":"plc/Phoenix1.aml","converter":"PlcDcAMLExchangerGeneral","dry_run":true}`。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 `outputSchema`（文件预检可以不完整；成功提交必须通过事务内重复检查）：
 ```json
 {

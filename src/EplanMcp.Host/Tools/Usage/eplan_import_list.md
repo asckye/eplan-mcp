@@ -6,9 +6,11 @@ Inspect a device list before importing it:
 
 Import a project parts list:
 
-    {"project":"Line1","kind":"parts","file":"incoming/parts.xml"}
+    {"project":"Line1","kind":"parts","file":"incoming/parts.xml", "dry_run": false}
 
 ## Workflow
+
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
 
 1. Put a nonempty file of at most 100 MB in the data folder's `imports` folder. Give its relative path; links and junctions are refused. Devices accept XML or CSV; parts accept XML only. XML cannot contain a DTD or external entities.
 2. Use `dry_run` to inspect the converter, file size, SHA-256 and current business counts. It asks nobody, makes no backup and runs no import. Exact row-level merging effects are known only afterwards.

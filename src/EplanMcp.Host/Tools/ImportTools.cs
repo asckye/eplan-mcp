@@ -155,14 +155,14 @@ internal sealed class ImportTools
     [Description(
         "Imports an EPJ (PXF) file from the 'imports' folder in EplanMcp's data folder as a new project in the scratch " +
         "folder's 'imported' folder, without opening it; no other project changes. May take over a minute. 'file' is " +
-        "its path below that folder. Example: {\"file\": \"incoming/Line1.epj\", \"name\": \"Line1_imported\"}.")]
+        "its path below that folder. Omit/true previews; false executes. Example: {\"file\": \"incoming/Line1.epj\", \"name\": \"Line1_imported\"}.")]
     public static async Task<CallToolResult> ImportPxfAsync(
         WritePipeline pipeline,
         ImportFiles files,
         HostConfig config,
         [Description("Path below the imports folder")] string file,
         [Description("New project name")] string name,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -187,7 +187,7 @@ internal sealed class ImportTools
         try
         {
             source = await files.ResolveAsync("file", file, MaxProjectBytes, cancellationToken).ConfigureAwait(false);
-            folder = ImportedFolder(config);
+            folder = ImportedFolder(config, create: !dry_run);
         }
         catch (ImportFileException ex)
         {
@@ -221,6 +221,8 @@ internal sealed class ImportTools
         {
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             File = source.Path,
             Sha256 = source.Sha256,
             Bytes = source.Bytes,
@@ -232,7 +234,7 @@ internal sealed class ImportTools
             },
             Seconds = outcome.Data?.Seconds,
             Recovered = outcome.Recovered,
-            Hint = committed ? "The project is not opened; open it in EPLAN to work on it." : null,
+            Hint = dry_run ? WriteToolDefaults.ExecutionHint : committed ? "The project is not opened; open it in EPLAN to work on it." : null,
         };
         return ToolResults.Success(
             committed ? "Imported the EPJ file as a new project in scratch; it is not opened yet." : "Dry run: would import the EPJ file as a new project in scratch. Nothing was changed.",
@@ -255,11 +257,11 @@ internal sealed class ImportTools
     }
 
     /// <summary>
-    /// The folder new projects go to (M4c design Q5): <c>imported</c> below the first scratch root, made when missing.
+    /// The folder new projects go to (M4c design Q5): <c>imported</c> below the first scratch root, made only for execution when missing.
     /// It must not be a symbolic link or junction, so the project lands in scratch (SEC-05); the scratch root itself may
     /// be one.
     /// </summary>
-    internal static string ImportedFolder(HostConfig config)
+    internal static string ImportedFolder(HostConfig config, bool create)
     {
         string root = config.ScratchRoots.Count > 0
             ? config.ScratchRoots[0]
@@ -267,14 +269,17 @@ internal sealed class ImportTools
         string folder = Path.Combine(Path.GetFullPath(root), ImportedFolderName);
         try
         {
-            Directory.CreateDirectory(folder);
+            if (create)
+            {
+                Directory.CreateDirectory(folder);
+            }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             throw new ImportFileException(ErrorReason.EplanOperationFailed, "The scratch folder's 'imported' folder cannot be created. Ask the engineer to check the scratch folder.", "name", string.Empty);
         }
 
-        return (new DirectoryInfo(folder).Attributes & FileAttributes.ReparsePoint) == 0
+        return !Directory.Exists(folder) || (new DirectoryInfo(folder).Attributes & FileAttributes.ReparsePoint) == 0
             ? folder
             : throw new ImportFileException(ErrorReason.PolicyDenied, "The scratch folder's 'imported' folder is a symbolic link or junction, which imports never write through. Ask the engineer to make it a plain folder.", "name", string.Empty);
     }

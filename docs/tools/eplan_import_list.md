@@ -20,7 +20,7 @@
 | `kind` | enum `devices` / `parts` | 是 | — | 设备清单条目 / 项目部件清单 |
 | `file` | string，1–260 字符 | 是 | — | 固定导入目录下的相对路径，如 `incoming/devices.xml` |
 | `format` | enum `xml` / `csv` | 否 | `xml` | `devices` 支持两者；`parts` 只接受 `xml`，扩展名必须对应 |
-| `dry_run` | boolean | 否 | false | 只返回导入范围和现状，不审批、不备份、不执行 action |
+| `dry_run` | boolean | 否 | true | 只返回导入范围和现状，不审批、不备份、不执行 action |
 
 输入 schema（JSON Schema 2020-12；参数说明采用上表）：
 ```json
@@ -31,7 +31,7 @@
     "kind": { "type": "string", "enum": ["devices", "parts"] },
     "file": { "type": "string", "minLength": 1, "maxLength": 260 },
     "format": { "type": "string", "enum": ["xml", "csv"], "default": "xml" },
-    "dry_run": { "type": "boolean", "default": false }
+    "dry_run": { "type": "boolean", "default": true }
   },
   "allOf": [{ "if": { "properties": { "kind": { "const": "parts" } } }, "then": { "properties": { "format": { "const": "xml" } } } }]
 }
@@ -42,6 +42,7 @@
 - 示例：`{"project":"Line1","kind":"devices","file":"incoming/devices.csv","format":"csv","dry_run":true}`。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 `outputSchema`（业务计数不等于“成功导入行数”）：
 ```json
 {

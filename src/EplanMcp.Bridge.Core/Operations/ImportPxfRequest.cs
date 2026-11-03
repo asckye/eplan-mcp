@@ -42,7 +42,7 @@ internal sealed class ImportPxfRequest
     public string DataFolder => Target + ".edb";
 
     /// <summary>Every argument problem at once (engineering-handbook.html#pa), then a project of that name, then the file.</summary>
-    public static ImportPxfRequest Check(ImportPxfArgs args)
+    public static ImportPxfRequest Check(ImportPxfArgs args, bool requireTargetDirectory = true)
     {
         var violations = new List<string>();
         ImportSource? source = ImportSource.Check(args.File, args.FilePath, args.Sha256, Extensions, violations);
@@ -52,7 +52,7 @@ internal sealed class ImportPxfRequest
         {
             violations.Add("'name' is required: the new project's name.");
         }
-        else if (!Path.IsPathRooted(target) || !string.Equals(Path.GetFileName(target), name, StringComparison.Ordinal) || !Directory.Exists(Path.GetDirectoryName(target)))
+        else if (!Path.IsPathRooted(target) || !string.Equals(Path.GetFileName(target), name, StringComparison.Ordinal) || (requireTargetDirectory && !Directory.Exists(Path.GetDirectoryName(target))))
         {
             violations.Add("'target' must be the new project's full path without extension, ending with its name, in a folder that exists: the one the Host chose in its scratch folder.");
         }

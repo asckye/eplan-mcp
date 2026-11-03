@@ -13,7 +13,7 @@ public sealed class ImportPxfPlanOperation : Operation<ImportPxfArgs, WritePlan>
 
     protected override WritePlan Execute(ImportPxfArgs args)
     {
-        var request = ImportPxfRequest.Check(args);
+        var request = ImportPxfRequest.Check(args, requireTargetDirectory: false);
         return new WritePlan
         {
             Project = request.Name,

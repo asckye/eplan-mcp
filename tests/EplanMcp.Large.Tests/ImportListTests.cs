@@ -39,7 +39,7 @@ public sealed class ImportListTests : IClassFixture<DestructiveHost>
     {
         string sample = Path.Combine(AppContext.BaseDirectory, "fixtures", "s34-devices." + format);
         string file = ImportCopy(sample, "devices." + format);
-        Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["kind"] = "devices", ["file"] = file, ["format"] = format };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["kind"] = "devices", ["file"] = file, ["format"] = format };
         JsonElement dryRun = await _host.CallAsync(Tool, new(args) { ["dry_run"] = true });
         Assert.Equal(converter, dryRun.GetProperty("converter").GetString());
         Approve(dryRun);
@@ -59,7 +59,7 @@ public sealed class ImportListTests : IClassFixture<DestructiveHost>
         JsonElement exported = await _host.CallAsync("eplan_export_parts", new() { ["project"] = _host.Writable, ["file_name"] = "S34Parts" });
         string source = Path.Combine(exported.GetProperty("directory").GetString()!, Assert.Single(exported.GetProperty("files").EnumerateArray()).GetProperty("path").GetString()!);
         string file = ImportCopy(source, "parts.xml"); // Exports have their own fixed root; stage the file under imports.
-        Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["kind"] = "parts", ["file"] = file };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["kind"] = "parts", ["file"] = file };
         JsonElement projectBefore = await _host.CallAsync("eplan_project_get", new() { ["project"] = _host.Writable });
         JsonElement functionsBefore = await _host.CallAsync("eplan_device_list", new() { ["project"] = _host.Writable, ["include_auxiliary"] = true, ["limit"] = 1 });
         int asked = _host.Approvals.Questions.Count;
