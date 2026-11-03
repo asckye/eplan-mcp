@@ -331,6 +331,22 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
+    public void ReportCreate_ExposesVerifiedTypesAndDefaultsToPreview()
+    {
+        Tool tool = Tools.Single(t => t.Name == ReportCreateTools.Tool);
+        JsonElement schema = tool.InputSchema;
+        JsonElement properties = schema.GetProperty("properties");
+        Assert.Equal(["project", "type", "form", "first_page"], schema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
+        Assert.Equal(["TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview"], Enum(properties.GetProperty("type")));
+        Assert.True(properties.GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.False(properties.TryGetProperty("device_tag", out _));
+        Assert.False(tool.Annotations!.ReadOnlyHint);
+        Assert.False(tool.Annotations.DestructiveHint);
+        Assert.False(tool.Annotations.IdempotentHint);
+        Assert.True(tool.OutputSchema!.Value.GetProperty("properties").TryGetProperty("new_pages", out _));
+    }
+
+    [Fact]
     public void PlcImport_IsDestructive_WithOnlyTheVerifiedConvertersAndNoExtraArguments()
     {
         Tool tool = Tools.Single(t => t.Name == PlcImportTools.Tool);

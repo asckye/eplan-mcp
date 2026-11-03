@@ -1926,11 +1926,12 @@
       "spec": "docs/tools/eplan_page_get.md",
       "small": 7,
       "medium": 6,
-      "large": 22,
+      "large": 24,
       "apiNotes": [
         "A11",
         "A12",
-        "A57"
+        "A57",
+        "A80"
       ]
     },
     {
@@ -1946,8 +1947,8 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_list.md",
       "small": 15,
-      "medium": 4,
-      "large": 12,
+      "medium": 5,
+      "large": 13,
       "apiNotes": [
         "A11"
       ],
@@ -1976,7 +1977,7 @@
       "spec": "docs/tools/eplan_page_open.md",
       "small": 4,
       "medium": 2,
-      "large": 4,
+      "large": 5,
       "apiNotes": [
         "A54"
       ]
@@ -2581,6 +2582,26 @@
         "A36",
         "A44",
         "A48"
+      ]
+    },
+    {
+      "name": "eplan_report_create",
+      "safety": "write",
+      "operations": [
+        "report.create.execute",
+        "report.create.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_report_create.md",
+      "small": 2,
+      "medium": 1,
+      "large": 1,
+      "apiNotes": [
+        "A84"
       ]
     },
     {

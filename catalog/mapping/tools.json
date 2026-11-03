@@ -10184,7 +10184,8 @@
         "apiNotes": [
           "A11",
           "A12",
-          "A57"
+          "A57",
+          "A80"
         ],
         "tests": [
           {
@@ -10351,6 +10352,16 @@
             "name": "ProjectTranslateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectTranslateTests.cs"
+          },
+          {
+            "name": "ReportCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReportCreateTests.cs"
+          },
+          {
+            "name": "ReportReadTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReportReadTests.cs"
           },
           {
             "name": "SampleProjectInventorySpikeTests",
@@ -10554,6 +10565,11 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
           },
           {
+            "name": "ReportCreateToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ReportCreateToolTests.cs"
+          },
+          {
             "name": "ReportUpdateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ReportUpdateToolTests.cs"
@@ -10612,6 +10628,11 @@
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
+          },
+          {
+            "name": "ReportBlockSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReportBlockSpikeTests.cs"
           },
           {
             "name": "SampleProjectInventorySpikeTests",
@@ -10747,6 +10768,11 @@
             "name": "PlcDisplaySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
+            "name": "ReportBlockSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReportBlockSpikeTests.cs"
           },
           {
             "name": "SelectionSpikeTests",
@@ -15086,6 +15112,49 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_report_create",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ReportCreateTools.cs",
+      "operations": [
+        "report.create.execute",
+        "report.create.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_report_create.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A84"
+        ],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "ReportCreateToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ReportCreateToolTests.cs"
+          },
+          {
+            "name": "ReportCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReportCreateTests.cs"
+          }
+        ],
+        "operationTests": []
       },
       "live": [],
       "dataDictionary": []
