@@ -92,6 +92,9 @@ public sealed partial class ApiTryContractTests
         Assert.Equal((false, true, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.Equal(["group", "project", "parameters"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(n => n.GetString()));
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
+        Assert.True(tool.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.Contains("fingerprint", tool.OutputSchema!.Value.GetProperty("properties").EnumerateObject().Select(p => p.Name));
+        Assert.Contains("plannedChanges", tool.OutputSchema.Value.GetProperty("properties").EnumerateObject().Select(p => p.Name));
         JsonElement shapes = tool.InputSchema.GetProperty("properties").GetProperty("parameters").GetProperty("additionalProperties").GetProperty("oneOf");
         JsonElement point = Assert.Single(shapes.EnumerateArray(), s => s.TryGetProperty("properties", out JsonElement p) && p.TryGetProperty("x", out _));
         Assert.Equal(["x", "y"], point.GetProperty("required").EnumerateArray().Select(n => n.GetString()));

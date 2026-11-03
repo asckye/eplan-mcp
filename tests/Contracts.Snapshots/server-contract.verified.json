@@ -1431,7 +1431,7 @@
     {
       "name": "eplan_api_try",
       "title": "Try an unverified EPLAN API group",
-      "description": "Try scratch APIs, including create/remove; per-call approval, full + apiTry:on. Remove uses destructive approval; undo is unverified. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. Follow returned handles/collection locators across calls (type depth <=4); indexed properties are read-only. See eplan_tool_usage for examples.",
+      "description": "Try scratch APIs, including create/remove; execution needs per-call approval, full + apiTry:on. Remove uses destructive approval; undo is unverified. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. Follow returned handles/collection locators across calls (type depth <=4); indexed properties are read-only. See eplan_tool_usage for examples. Omit/true previews; false executes.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -1606,7 +1606,7 @@
           },
           "dry_run": {
             "type": "boolean",
-            "default": false
+            "default": true
           },
           "result_cursor": {
             "type": [
@@ -2314,6 +2314,47 @@
               "boolean",
               "null"
             ]
+          },
+          "fingerprint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "plannedChanges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           }
         },
         "required": [
@@ -2331,7 +2372,9 @@
           "truncated",
           "hint",
           "files",
-          "undoExpected"
+          "undoExpected",
+          "fingerprint",
+          "plannedChanges"
         ]
       },
       "annotations": {

@@ -93,6 +93,8 @@ public sealed class CallTemplateTests
         Assert.Null(ApiTryCatalog.ExclusionReason(entry.Row.Group));
         Assert.NotEmpty(templates);
         Assert.All(templates, t => Assert.Equal(access, t["access"]!.GetValue<string>()));
+        Assert.All(templates, t => Assert.True(t["arguments"]!["dry_run"]!["default"]!.GetValue<bool>()));
+        Assert.All(templates, t => Assert.True(t["example"]!["dry_run"]!.GetValue<bool>()));
         Assert.All(templates, t => Assert.NotNull(t["arguments"]!["parameters"]!["properties"]![parameter]));
         Assert.All(templates, t => Assert.True(ApiTryTools.MethodParameters(entry.Row.Group, JsonSerializer.SerializeToElement(t["example"]!["parameters"])), t.ToJsonString()));
         if (name.EndsWith(".Create", StringComparison.Ordinal))

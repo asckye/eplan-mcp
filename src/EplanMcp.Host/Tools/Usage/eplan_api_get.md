@@ -9,7 +9,7 @@ Describe all overloads of a method:
     {"id":"O:Eplan.EplApi.HEServices.Translate.TranslateObjects","limit":10}
 
 ## Workflow
-Templates precede overloads and evidence: each try_template contains access, exact argument names, kinds, required flags, allowed enum names, discovery/handle sources and a full example. Non-dispatchable groups include the generated exclusion_reason and mapped alternatives. Templates are paginated with the remaining details.
+Templates precede overloads and evidence: each try_template contains access, exact argument names, kinds, required flags, allowed enum names, discovery/handle sources and a full example. Non-dispatchable groups include the generated exclusion_reason and mapped alternatives. Templates are paginated with the remaining details. dry_run defaults to true and examples preview; repeat the same arguments with dry_run:false to execute.
 
 Use eplan_api_search to discover exact IDs. Pass nextCursor as cursor with the same id and limit until it is null: overloads precede evidence. partial means only some counted overloads are reached. Evidence describes tool-level coverage bounds. Property counts include obsolete IDs; eplan_property_schema describes restrictions and eplan_property_get reads supported targets. Unknown IDs return RESOURCE_NOT_FOUND; invalid cursors return INVALID_ARGUMENT and require restarting without cursor.
 

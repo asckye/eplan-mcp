@@ -155,7 +155,7 @@ public sealed class BatchVerification(LiveEplan eplan)
         bool propertyWrite = entry.Kind == "api-write" && !entry.Method;
         if (propertyWrite)
         {
-            JsonElement read = Data(await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(parameters), cancellationToken: cancellationToken));
+            JsonElement read = Data(await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(parameters), dry_run: false, cancellationToken: cancellationToken));
             originalValue = read.GetProperty("value").GetString();
             object? next = BatchValues.Next(entry.ValueShape![0], originalValue, entry.ValueShape[1..]);
             if (next is null)
@@ -169,7 +169,7 @@ public sealed class BatchVerification(LiveEplan eplan)
         int questionsBefore = approvals.Questions.Count;
         CallToolResult call = entry.Kind == "action"
             ? await ActivatorUtilities.CreateInstance<ActionTryTools>(provider).TryAsync(project, entry.Action!.Name, entry.Action.Type, JsonSerializer.SerializeToElement(parameters), dry_run: false, cancellationToken: cancellationToken)
-            : await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(parameters), cancellationToken: cancellationToken);
+            : await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(parameters), dry_run: false, cancellationToken: cancellationToken);
         if (entry.Destructive)
         {
             // Keep the production destructive pipeline, including backup and its bound per-call approval.
@@ -206,7 +206,7 @@ public sealed class BatchVerification(LiveEplan eplan)
             var readParameters = new Dictionary<string, object?>(parameters);
             readParameters.Remove("value");
             readParameters["target"] = await LocatorAsync(bridge, project, entry.ObjectKinds!, cancellationToken);
-            JsonElement readback = Data(await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(readParameters), cancellationToken: cancellationToken));
+            JsonElement readback = Data(await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(readParameters), dry_run: false, cancellationToken: cancellationToken));
             string? actual = readback.GetProperty("value").GetString();
             writeMatches = actual == Convert.ToString(parameters["value"], CultureInfo.InvariantCulture);
             if (actual == originalValue && !result.Changed)
@@ -222,7 +222,7 @@ public sealed class BatchVerification(LiveEplan eplan)
             {
                 parameters.Remove("value");
                 parameters["target"] = await LocatorAsync(bridge, project, entry.ObjectKinds!, cancellationToken);
-                JsonElement restored = Data(await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(parameters), cancellationToken: cancellationToken));
+                JsonElement restored = Data(await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(parameters), dry_run: false, cancellationToken: cancellationToken));
                 result.UndoRestores &= originalValue == restored.GetProperty("value").GetString();
             }
             else

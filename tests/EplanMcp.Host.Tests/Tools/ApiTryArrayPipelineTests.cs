@@ -51,7 +51,7 @@ public sealed partial class ApiTryToolTests
             plan.Details = new() { ["status"] = "dispatchable", ["unverified"] = "true" };
             return plan;
         };
-        JsonElement result = WriteToolHarness.Structured(await Tool().TryAsync(_progress, Rotate, "Line1", parameters, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement result = WriteToolHarness.Structured(await Tool().TryAsync(_progress, Rotate, "Line1", parameters, dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
         var write = Assert.Single(_harness.Bridge.Writes);
@@ -71,7 +71,7 @@ public sealed partial class ApiTryToolTests
         };
         ApiTryTools tool = Tool();
         JsonElement parameters = JsonSerializer.SerializeToElement(new { target = Target() });
-        JsonElement first = WriteToolHarness.Structured(await tool.TryAsync(_progress, Group, "Line1", parameters, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement first = WriteToolHarness.Structured(await tool.TryAsync(_progress, Group, "Line1", parameters, dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
         string cursor = first.GetProperty("value").GetProperty("nextCursor").GetString()!;
         Assert.False(string.IsNullOrEmpty(cursor));
         int calls = _harness.Bridge.Calls.Count;
@@ -81,6 +81,8 @@ public sealed partial class ApiTryToolTests
         Assert.Equal(ExecutionState.NotStarted, next.GetProperty("execution").GetString());
         Assert.NotEmpty(next.GetProperty("value").GetProperty("items").EnumerateArray());
         Assert.Equal(calls, _harness.Bridge.Calls.Count);
+        Assert.Equal(JsonValueKind.Null, next.GetProperty("fingerprint").ValueKind);
+        Assert.Empty(next.GetProperty("plannedChanges").EnumerateArray());
         Assert.Single(_approval.Questions);
     }
 }

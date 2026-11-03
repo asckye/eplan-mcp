@@ -100,10 +100,10 @@ internal static class ApiCallTemplates
                 ["group"] = new JsonObject { ["kind"] = "string", ["required"] = true, ["const"] = group },
                 ["project"] = new JsonObject { ["kind"] = "string", ["required"] = true },
                 ["parameters"] = new JsonObject { ["required"] = true, ["kind"] = "object", ["properties"] = parameters },
-                ["dry_run"] = new JsonObject { ["kind"] = "bool", ["required"] = false, ["default"] = false }
+                ["dry_run"] = new JsonObject { ["kind"] = "bool", ["required"] = false, ["default"] = WriteToolDefaults.Preview }
             },
             ["example"] = new JsonObject { ["group"] = group, ["project"] = "<scratch project>", ["parameters"] = example, ["dry_run"] = true },
-            ["note"] = "Replace complete locator/handle/path placeholders with fresh confined values. Requires full profile, apiTry:on and per-call approval."
+            ["note"] = "Replace complete locator/handle/path placeholders with fresh confined values. Requires full profile and apiTry:on. Omit/true previews; false executes with per-call approval."
         };
     }
 

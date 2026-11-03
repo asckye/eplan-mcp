@@ -4,11 +4,13 @@ using EplanMcp.Contracts;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
+using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed partial class ApiTryToolTests : IDisposable
 {
     private readonly FakeApprovalChannel _approval;
@@ -44,6 +46,88 @@ public sealed partial class ApiTryToolTests : IDisposable
         return JsonSerializer.Serialize(parameters);
     }
     private Task<CallToolResult> Call(bool dry = false, string? parameters = null, string group = Group) => Tool().TryAsync(_progress, group, "Line1", JsonDocument.Parse(parameters ?? Parameters()).RootElement, dry, cancellationToken: TestContext.Current.CancellationToken);
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task McpReadAndWritePreviewByDefault_OnlyExplicitFalseExecutes(bool write)
+    {
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            CancellationToken token = TestContext.Current.CancellationToken;
+            var arguments = new Dictionary<string, object?>
+            {
+                ["group"] = Group,
+                ["project"] = "Line1",
+                ["parameters"] = JsonSerializer.Deserialize<JsonElement>(Parameters(write ? "new name" : null)),
+            };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync(ApiTryTools.Tool, arguments, cancellationToken: token));
+            arguments["dry_run"] = true;
+            JsonElement preview = WriteToolHarness.Structured(await client.CallToolAsync(ApiTryTools.Tool, arguments, cancellationToken: token));
+            Assert.True(JsonElement.DeepEquals(omitted, preview));
+            Assert.Equal(ExecutionState.NotStarted, omitted.GetProperty("execution").GetString());
+            Assert.Equal("f1", omitted.GetProperty("fingerprint").GetString());
+            Assert.NotEmpty(omitted.GetProperty("plannedChanges").EnumerateArray());
+            Assert.Empty(_approval.Questions);
+            Assert.Empty(_harness.Bridge.Writes);
+            Assert.False(Directory.Exists(_harness.Locations.Exports));
+            arguments["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync(ApiTryTools.Tool, arguments, cancellationToken: token));
+            Assert.Equal(ExecutionState.Committed, executed.GetProperty("execution").GetString());
+            Assert.Equal(omitted.GetProperty("fingerprint").GetString(), executed.GetProperty("fingerprint").GetString());
+            Assert.Single(_approval.Questions);
+            Assert.Single(_harness.Bridge.Writes);
+        }, services => services.AddSingleton(HostConfig.Defaults(_harness.Locations) with { ApiTry = ActionRunSwitch.On }));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task OmittedAndTruePreviewTheSamePlan_ExplicitFalseExecutes(bool write)
+    {
+        JsonElement parameters = JsonSerializer.SerializeToElement(write
+            ? new Dictionary<string, object> { ["target"] = Target(), ["value"] = "new name" }
+            : new Dictionary<string, object> { ["target"] = Target() });
+        ApiTryTools tool = Tool();
+        JsonElement omitted = WriteToolHarness.Structured(await tool.TryAsync(_progress, Group, "Line1", parameters, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement preview = WriteToolHarness.Structured(await tool.TryAsync(_progress, Group, "Line1", parameters, dry_run: true, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(omitted.GetRawText(), preview.GetRawText());
+        Assert.Equal(ExecutionState.NotStarted, omitted.GetProperty("execution").GetString());
+        Assert.Equal("f1", omitted.GetProperty("fingerprint").GetString());
+        JsonElement change = Assert.Single(omitted.GetProperty("plannedChanges").EnumerateArray());
+        Assert.Equal(write ? "write" : "read", change.GetProperty("action").GetString());
+        Assert.Empty(omitted.GetProperty("changes").EnumerateArray());
+        Assert.Contains("dry_run: false", omitted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.Empty(_approval.Questions);
+        Assert.Empty(_harness.Bridge.Writes);
+        Assert.False(Directory.Exists(_harness.Locations.Exports));
+        JsonElement executed = WriteToolHarness.Structured(await tool.TryAsync(_progress, Group, "Line1", parameters, dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(ExecutionState.Committed, executed.GetProperty("execution").GetString());
+        Assert.Equal(omitted.GetProperty("plannedChanges").GetRawText(), executed.GetProperty("plannedChanges").GetRawText());
+        Assert.Equal(omitted.GetProperty("fingerprint").GetString(), executed.GetProperty("fingerprint").GetString());
+        Assert.Single(_approval.Questions);
+        Assert.Single(_harness.Bridge.Writes);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task StaticAndFileTrialsAlsoDefaultToPreview(bool file)
+    {
+        string group = file ? FileGroup : "O:Eplan.EplApi.DataModel.DocumentTypeManager.IsLogicalPageDocType";
+        JsonElement parameters = file ? JsonDocument.Parse(FileParameters("definitions.xml")).RootElement : JsonSerializer.SerializeToElement(new { nPageType = "Circuit" });
+        ApiTryTools tool = Tool();
+        JsonElement omitted = WriteToolHarness.Structured(await tool.TryAsync(_progress, group, "Line1", parameters, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement preview = WriteToolHarness.Structured(await tool.TryAsync(_progress, group, "Line1", parameters, dry_run: true, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(omitted.GetRawText(), preview.GetRawText());
+        Assert.Equal(ExecutionState.NotStarted, omitted.GetProperty("execution").GetString());
+        Assert.Equal("f1", omitted.GetProperty("fingerprint").GetString());
+        Assert.NotEmpty(omitted.GetProperty("plannedChanges").EnumerateArray());
+        Assert.Empty(omitted.GetProperty("files").EnumerateArray());
+        Assert.Empty(_approval.Questions);
+        Assert.Empty(_harness.Bridge.Writes);
+        Assert.False(Directory.Exists(_harness.Locations.Exports));
+    }
 
     [Fact]
     public async Task RemovalUsesDestructiveApprovalAndDenialNeverExecutes()
