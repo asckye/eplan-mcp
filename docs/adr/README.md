@@ -52,4 +52,4 @@
 | [0043](0043-licensing-operations.md) | 对授权 API 采用只读优先、隔离占用与凭据禁止边界 | Accepted | 单向门 |
 | [0044](0044-network-operations.md) | 对网络调用采用隔离端点、数据清单与不可撤回审批 | Accepted | 单向门 |
 | [0045](0045-printing-operations.md) | 对打印调用采用虚拟队列优先与物理输出逐次确认 | Accepted | 单向门 |
-| [0046](0046-readback-deviation-warnings.md) | 对绘图写入后的非安全读回偏差采用提交加警告，不再整体撤销 | Proposed | 单向门 |
+| [0046](0046-readback-deviation-warnings.md) | 对绘图写入后的非安全读回偏差采用提交加警告，不再整体撤销 | Accepted | 单向门 |
