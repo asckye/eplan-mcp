@@ -54,3 +54,4 @@
 | [0045](0045-printing-operations.md) | 对打印调用采用虚拟队列优先与物理输出逐次确认 | Accepted | 单向门 |
 | [0046](0046-readback-deviation-warnings.md) | 对绘图写入后的非安全读回偏差采用提交加警告，不再整体撤销 | Accepted | 单向门 |
 | [0047](0047-plugin-libraries.md) | 采用按种类组织的工程包作为插件，从内置库和登记的本地或共享目录库安装，按全局、项目、柜体作用域启用 | Proposed | 单向门 |
+| [0048](0048-local-gate-is-the-merge-gate.md) | 采用本地关卡作为权威合并门，直接推送 main，CI 非阻塞 | Accepted | 双向门 |
