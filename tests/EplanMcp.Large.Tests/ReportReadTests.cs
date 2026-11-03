@@ -7,12 +7,14 @@ namespace EplanMcp.Large.Tests;
 public sealed class ReportReadTests(LiveEplan eplan)
 {
     [Fact]
-    public async Task SampleTableOfContents_ExposesReportBlockWithoutSchemeData()
+    public async Task SampleTableOfContents_ExposesReportBlockWithSchemeData()
     {
         JsonElement page = await eplan.CallAsync("eplan_page_get", new() { ["project"] = eplan.ProjectPath, ["page"] = "&AAB1/1" });
         JsonElement report = page.GetProperty("report");
         Assert.Equal("TableOfContents", report.GetProperty("type").GetString());
         Assert.Equal("F06_002", report.GetProperty("form").GetString());
-        Assert.All(report.EnumerateObject(), field => Assert.DoesNotContain("data", field.Name, StringComparison.OrdinalIgnoreCase));
+        // A84: scheme names are project settings, so report_create needs the scheme data read here (the table of contents has none).
+        foreach (string field in new[] { "filter_scheme_data", "sort_scheme_data", "function_filter_scheme_data", "function_sort_scheme_data" })
+        { Assert.Equal(string.Empty, report.GetProperty(field).GetString()); }
     }
 }
