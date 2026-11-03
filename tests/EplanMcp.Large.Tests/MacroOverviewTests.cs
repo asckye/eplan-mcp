@@ -132,20 +132,35 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
             OperationNames.PageDrawingGet, new() { Project = session.Project, Page = name }, TestContext.Current.CancellationToken);
         static bool Fits(PageDrawingGeometry geometry) => geometry.PageSize is { Length: 2 } size && size[0] >= 460 && size[1] >= 316;
 
-        if (Fits(await Geometry(page)))
+        static string Size(PageDrawingGeometry geometry) => geometry.PageSize is { Length: 2 } size
+            ? FormattableString.Invariant($"{size[0]} x {size[1]} mm") : "unreadable";
+        async Task<Dictionary<string, PagePlotFrameState>> Frames(string[] names) => await bridge.InvokeAsync<ProjectSnapshotArgs, Dictionary<string, PagePlotFrameState>>(
+            OperationNames.PagePlotFrameInspect, new() { Project = session.Project, Pages = [.. names] }, TestContext.Current.CancellationToken);
+        static void Print(string message) => TestContext.Current.TestOutputHelper!.WriteLine("Overview frame: " + message);
+
+        PageDrawingGeometry own = await Geometry(page);
+        if (Fits(own))
         {
             return false;
         }
+        string? current = (await Frames([page]))[page].Effective;
+        Print($"new page {page} uses frame {current ?? "none"}, size {Size(own)}");
         string[] pages = [.. (await session.SnapshotAsync()).Pages.Select(p => p.Name)];
         foreach (string[] batch in pages.Chunk(50))
         {
-            Dictionary<string, PagePlotFrameState> frames = await bridge.InvokeAsync<ProjectSnapshotArgs, Dictionary<string, PagePlotFrameState>>(
-                OperationNames.PagePlotFrameInspect, new() { Project = session.Project, Pages = [.. batch] }, TestContext.Current.CancellationToken);
-            foreach ((string name, PagePlotFrameState frame) in frames)
+            foreach ((string name, PagePlotFrameState frame) in await Frames([.. batch]))
             {
-                if (frame.Effective is null || !Fits(await Geometry(name)))
+                PageDrawingGeometry geometry;
+                if (frame.Effective is null || !Fits(geometry = await Geometry(name)))
                 {
                     continue;
+                }
+                Print($"candidate {name} uses frame {frame.Effective}, size {Size(geometry)}");
+                if (frame.Effective == current)
+                {
+                    // A new empty page has no readable Page.Size (api-notes, writes-and-placement: S063136). It already uses a
+                    // frame that fits on another page, so there is nothing to change; macro_insert checks the outline itself.
+                    return false;
                 }
                 await writeAsync("eplan_page_update", new()
                 {
@@ -153,7 +168,9 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
                     ["pages"] = new[] { new { name = page, plot_frame = frame.Effective } },
                     ["dry_run"] = false,
                 });
-                Assert.True(Fits(await Geometry(page)), "The selected existing frame must provide room for the measured Overview macro.");
+                PageDrawingGeometry after = await Geometry(page);
+                Print($"after the frame change {page} has size {Size(after)}");
+                Assert.True(after.PageSize is null || Fits(after), "The selected existing frame must provide room for the measured Overview macro.");
                 return true;
             }
         }
