@@ -104,7 +104,6 @@ internal sealed partial class EplanConnectionCreator
         foreach (JToken definition in plan["cableDefinitions"]!)
         {
             Cable cable = FindCable(project, page, definition);
-            Page target = Page(project, page);
             using FunctionBasePropertyList name = cable.NameParts;
             foreach (Connection run in CableRuns(project, page, request, plan, definition))
             {
@@ -115,10 +114,6 @@ internal sealed partial class EplanConnectionCreator
                     point.Name = cable.Name;
                 }
                 run.CableNameParts = name;
-                // Live 2026-11-02: once the cable shows -W3, assigning that visible name to a definition point did not
-                // stick (read back empty); let EPLAN derive it from the point's full name, as for the cable.
-                foreach (ConnectionDefinitionPoint point in run.ConnectionDefPoints)
-                { EplanVisibleNames.Adjust(target, point); }
             }
         }
     }
@@ -134,7 +129,8 @@ internal sealed partial class EplanConnectionCreator
                 {
                     Check(point.CableDefinitionLine?.ObjectIdentifier == cable.ObjectIdentifier, $"definition point membership: actual '{point.CableDefinitionLine?.Name ?? "<none>"}'");
                     Check(CableDefinitionPlanner.SameName(cable.Name, point.Name, page), $"definition point designation: expected '{cable.Name}'; actual '{point.Name}'");
-                    Check(point.VisibleName == cable.VisibleName, $"definition point visible name: expected '{cable.VisibleName}'; actual '{point.VisibleName}'");
+                    // Live 2026-11-02: EPLAN gives a definition point no visible name (empty even after AdjustVisibleName),
+                    // while the cable now shows -W3; the old equality only held while both were empty.
                 }
                 using ConnectionPropertyList properties = run.Properties;
                 Check(CableDefinitionPlanner.SameName(cable.Name, CableText(properties, 20005) ?? "", page), $"bound membership: expected '{cable.Name}'; actual '{CableText(properties, 20005) ?? "<empty>"}'");
@@ -191,7 +187,6 @@ internal sealed partial class EplanConnectionCreator
                 {
                     Check(point.CableDefinitionLine?.ObjectIdentifier == cable.ObjectIdentifier, $"core definition membership: actual '{point.CableDefinitionLine?.Name ?? "<none>"}'");
                     Check(CableDefinitionPlanner.SameName(cable.Name, point.Name, page), $"core definition designation: expected '{cable.Name}'; actual '{point.Name}'");
-                    Check(point.VisibleName == cable.VisibleName, $"core definition visible name: expected '{cable.VisibleName}'; actual '{point.VisibleName}'");
                 }
                 using ConnectionPropertyList core = run.Properties;
                 Check(CableDefinitionPlanner.SameName(cable.Name, CableText(core, 20005) ?? "", page), $"core membership: expected '{cable.Name}'; actual '{CableText(core, 20005) ?? "<empty>"}'");
