@@ -191,6 +191,28 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
                     tag = "=GAA+A1-KP" + suffix,
                     strategy = "properties"
                 }, "rename-properties", evidence, suffix);
+
+                string? category = Functions(templates, plc)
+                    .Where(function => function.TryGetProperty("isMainFunction", out JsonElement main) && main.ValueKind == JsonValueKind.True)
+                    .Select(function => Text(function, "category")).FirstOrDefault(value => value.Length > 0);
+                if (category is not null)
+                {
+                    // Rounds 4/5: unplaced names revert at commit, so create with the final tag.
+                    await ProbeAsync(new
+                    {
+                        project = session.Project,
+                        page,
+                        mode = "create-named",
+                        part = plc.Part,
+                        variant = plc.Variant,
+                        tag = "=GAA+A1-KC" + suffix,
+                        category,
+                        main = new { x = 280, y = 60 },
+                        aux = new { x = 320, y = 60 }
+                    }, "create-named", evidence, suffix);
+                }
+                else
+                { Print("create-named warning", "The PLC template has no readable main function category; the probe is skipped."); }
             }
 
             var exported = await eplan.CallOrErrorAsync("eplan_export_image", new() { ["project"] = session.Project, ["pages"] = new[] { page }, ["format"] = "png" });

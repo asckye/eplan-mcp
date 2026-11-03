@@ -58,6 +58,9 @@ public sealed class PartsSpikeAction : IEplAction
                 case "rename-unplaced":
                     RenameUnplaced(project, input, result);
                     break;
+                case "create-named":
+                    CreateNamed(project, input, result);
+                    break;
                 case "device-list":
                     DeviceList(project, input, result);
                     break;
@@ -248,6 +251,203 @@ public sealed class PartsSpikeAction : IEplAction
         var readbackWarnings = new JArray();
         result["functions"] = ReadDevice(project, name, readbackWarnings);
         result["readbackWarnings"] = readbackWarnings;
+    }
+
+    private static void CreateNamed(Project project, JObject input, JObject result)
+    {
+        string tag = (string)input["tag"]!;
+        string part = (string)input["part"]!;
+        string variant = (string?)input["variant"] ?? "";
+        var warnings = new JArray();
+        var steps = new JObject();
+        string[] remainingNames = [];
+        result["warnings"] = warnings;
+        result["steps"] = steps;
+        result["committed"] = false;
+        using (var scope = new TransactionScope("Parts named creation spike"))
+        {
+            try
+            {
+                Page? page = null;
+                Observe(steps, "page", () => (page = project.Pages.Single(candidate => candidate.Name == (string)input["page"]!)).Name, warnings, stopOnError: true);
+                using var service = new DeviceService();
+                using var properties = new FunctionPropertyList();
+                using var additional = new FunctionPropertyList();
+                // Round 1 / A82: create with the parsed final name; unplaced renames revert in rounds 4/5.
+                Observe(steps, "parseNameAndProps", () =>
+                {
+                    var category = (FunctionCategory)Enum.Parse(typeof(FunctionCategory), (string)input["category"]!, false);
+                    project.ParseNameAndProps((int)category, tag, properties, additional);
+                    return ReadNameProperties(properties, warnings);
+                }, warnings, stopOnError: true);
+                var functions = new List<IFunctionBase>();
+                Observe(steps, "createDevice", () =>
+                {
+                    service.CreateDevice(project, part, variant, properties, ref functions);
+                    return functions.Count;
+                }, warnings, stopOnError: true);
+                JObject[] created;
+                // A79/A80: release cached properties before removing originals or rolling back.
+                using (var propertyScope = new FunctionObservationScope())
+                { created = functions.Select((function, index) => ReadNamedFunction(function, index, propertyScope)).ToArray(); }
+                result["created"] = new JArray(created);
+                int mainIndex = Array.FindIndex(created, function => (bool?)function["isMainFunction"] == true && (bool?)function["isPlaced"] == false);
+                int auxIndex = Array.FindIndex(created, function => (string?)function["category"] == "PLCTerminal"
+                    && (bool?)function["isMainFunction"] == false && (bool?)function["isPlaced"] == false);
+                if (mainIndex < 0 || auxIndex < 0 || functions[mainIndex] is not Function main || functions[auxIndex] is not Function auxiliary)
+                {
+                    warnings.Add("No readable unplaced main and auxiliary PLCTerminal pair was returned; the sequence was rolled back.");
+                    Observe(steps, "rollback", () => { scope.Rollback(); return true; }, warnings, stopOnError: true);
+                    return;
+                }
+                remainingNames = created.Where((_, index) => index != mainIndex && index != auxIndex)
+                    .Select(function => (string?)function["name"]).OfType<string>().ToArray();
+                result["remainingAuxiliaryNames"] = new JArray(remainingNames);
+                Function copy = PlaceNamedCopy(main, page!, (JObject)input["main"]!, steps, "main", warnings);
+                // DataModel XML: move IsMainFunction before Remove; 20476 otherwise deletes unplaced auxiliaries.
+                Observe(steps, "copyIsMainFunction", () => { copy.IsMainFunction = true; return copy.IsMainFunction; }, warnings, stopOnError: true);
+                Observe(steps, "originalIsMainFunction", () => { main.IsMainFunction = false; return main.IsMainFunction; }, warnings, stopOnError: true);
+                Observe(steps, "copyArticleReferenceCount", () => copy.ArticleReferences.Length, warnings);
+                if (steps["copyArticleReferenceCount"]?.Type != JTokenType.Integer)
+                {
+                    warnings.Add("The copy's article references are unreadable; the sequence was rolled back.");
+                    Observe(steps, "rollback", () => { scope.Rollback(); return true; }, warnings, stopOnError: true);
+                    return;
+                }
+                if ((int)steps["copyArticleReferenceCount"]! == 0)
+                {
+                    Observe(steps, "addArticleReference", () =>
+                    {
+                        copy.AddArticleReference(part, variant, 1);
+                        return true;
+                    }, warnings, stopOnError: true);
+                }
+                Observe(steps, "removeMainOriginal", () => { main.Remove(); return true; }, warnings, stopOnError: true);
+                PlaceNamedCopy(auxiliary, page!, (JObject)input["aux"]!, steps, "aux", warnings);
+                Observe(steps, "removeAuxOriginal", () => { auxiliary.Remove(); return true; }, warnings, stopOnError: true);
+                Observe(steps, "commit", () => { scope.Commit(); return true; }, warnings, stopOnError: true);
+                Observe(steps, "closeUndo", () => { scope.CloseUndo(); return true; }, warnings, stopOnError: true);
+                result["committed"] = true;
+            }
+            catch
+            {
+                Observe(steps, "rollback", () => { scope.Rollback(); return true; }, warnings);
+                throw;
+            }
+        }
+        // A79: only managed names cross the committed scope; both sources supply fresh wrappers.
+        ReadNamedDevice(project, (string)input["page"]!, tag, remainingNames, result);
+    }
+
+    private static Function PlaceNamedCopy(Function original, Page page, JObject point, JObject steps, string stage, JArray warnings)
+    {
+        var observation = new JObject();
+        steps[stage] = observation;
+        var before = new HashSet<long>();
+        Observe(observation, "before", () =>
+        {
+            before.UnionWith(page.AllPlacements.OfType<Function>().Select(function => function.ObjectIdentifier));
+            return before.ToArray();
+        }, warnings, stopOnError: true);
+        string? name = null;
+        Observe(observation, "name", () => name = original.Name, warnings, stopOnError: true);
+        // Round 1 / A82: PlaceAt creates a same-name copy of an instantiated function.
+        Observe(observation, "placeAt", () =>
+        {
+            original.PlaceAt(page, new PointD((double)point["x"]!, (double)point["y"]!), DocumentTypeManager.DocumentType.Circuit, original.SymbolVariant);
+            return true;
+        }, warnings, stopOnError: true);
+        Function? copy = null;
+        Observe(observation, "copy", () =>
+        {
+            copy = page.AllPlacements.OfType<Function>().Single(function => !before.Contains(function.ObjectIdentifier) && function.IsPlaced && function.Name == name);
+            return new JObject { ["name"] = copy.Name, ["objectIdentifier"] = copy.ObjectIdentifier, ["isMainFunction"] = copy.IsMainFunction };
+        }, warnings, stopOnError: true);
+        return copy!;
+    }
+
+    private static JObject ReadNamedFunction(object item, int? index, FunctionObservationScope propertyScope)
+    {
+        JObject result = ReadFunction(item, index, propertyScope: propertyScope);
+        if (item is not Function function)
+        { return result; }
+        var warnings = (JArray)result["warnings"]!;
+        if ((bool?)result["isMainFunction"] == true)
+        {
+            Observe(result, "20476", () =>
+            {
+                using PropertyValue value = propertyScope.GetProperties(function).FUNC_MANAGE_FUNCTIONS;
+                return value.IsEmpty ? null : value.ToString();
+            }, warnings);
+        }
+        Observe(result, "articleReferences", () => new JArray(function.ArticleReferences.Select(article =>
+        {
+            var reference = new JObject();
+            Observe(reference, "part", () => article.PartNr, warnings);
+            Observe(reference, "variant", () => article.VariantNr, warnings);
+            Observe(reference, "count", () => article.Count, warnings);
+            return reference;
+        })), warnings);
+        GC.KeepAlive(function);
+        return result;
+    }
+
+    private static void ReadNamedDevice(Project project, string pageName, string tag, string[] remainingNames, JObject result)
+    {
+        var warnings = new JArray();
+        var functions = new JArray();
+        var seen = new HashSet<long>();
+        bool namesReadable = true;
+        result["readbackWarnings"] = warnings;
+        using var propertyScope = new FunctionObservationScope();
+        void ReadCandidates(IEnumerable<Function> candidates)
+        {
+            foreach (Function function in candidates)
+            {
+                var identity = new JObject();
+                Observe(identity, "objectIdentifier", () => function.ObjectIdentifier, warnings);
+                if (identity["objectIdentifier"]?.Type != JTokenType.Integer)
+                { namesReadable = false; continue; }
+                if (!seen.Add((long)identity["objectIdentifier"]!))
+                { continue; }
+                Observe(identity, "name", () => function.Name, warnings);
+                if ((string?)identity["name"] is not { } name)
+                { namesReadable = false; continue; }
+                if (name.StartsWith(tag, StringComparison.Ordinal))
+                { functions.Add(ReadNamedFunction(function, null, propertyScope)); }
+            }
+        }
+        Observe(result, "finderRead", () =>
+        {
+            using var finder = new DMObjectsFinder(project);
+            ReadCandidates(finder.GetFunctions(null));
+            return true;
+        }, warnings);
+        Observe(result, "pageRead", () =>
+        {
+            ReadCandidates(project.Pages.Single(page => page.Name == pageName).AllPlacements.OfType<Function>());
+            return true;
+        }, warnings);
+        result["functions"] = functions;
+        result["duplicates"] = ReadDuplicates(functions);
+        bool complete = (bool?)result["finderRead"] == true && (bool?)result["pageRead"] == true && namesReadable;
+        var remaining = new JArray(remainingNames.Select(name =>
+        {
+            JObject[] matches = functions.OfType<JObject>().Where(function => (string?)function["name"] == name).ToArray();
+            bool readable = complete && matches.All(function => function["isPlaced"]?.Type == JTokenType.Boolean && function["deviceTag"]?.Type == JTokenType.String);
+            return new JObject
+            {
+                ["name"] = name,
+                ["existsUnplacedWithSameDeviceTag"] = readable
+                    ? matches.Any(function => (bool?)function["isPlaced"] == false && (string?)function["deviceTag"] == tag) : (bool?)null
+            };
+        }));
+        result["remainingAuxiliaries"] = remaining;
+        bool allReadable = complete && remainingNames.Length == 4 && remaining.All(item => item["existsUnplacedWithSameDeviceTag"]?.Type == JTokenType.Boolean);
+        result["remainingFourAuxiliariesUnplacedWithSameDeviceTag"] = allReadable
+            ? remaining.All(item => (bool?)item["existsUnplacedWithSameDeviceTag"] == true) : (bool?)null;
+        if (!allReadable)
+        { warnings.Add("The four remaining auxiliaries cannot be fully checked from the readable inventory."); }
     }
 
     private static void TemplatesPlace(Project project, JObject input, JObject result)
@@ -1095,11 +1295,17 @@ public sealed class PartsSpikeAction : IEplAction
         return result;
     }
 
-    private static void Observe(JObject result, string field, Func<object?> read, JArray warnings)
+    private static void Observe(JObject result, string field, Func<object?> read, JArray warnings, bool stopOnError = false)
     {
         try
         { object? value = read(); result[field] = value is null ? null : JToken.FromObject(value); }
-        catch (Exception error) { result[field] = null; Warn(warnings, field, error); }
+        catch (Exception error)
+        {
+            result[field] = null;
+            Warn(warnings, field, error);
+            if (stopOnError)
+            { throw; }
+        }
     }
 
     private sealed class FunctionObservationScope : IDisposable
