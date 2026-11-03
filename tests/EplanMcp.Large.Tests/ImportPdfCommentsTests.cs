@@ -29,7 +29,7 @@ public sealed class ImportPdfCommentsTests(WriteHost host) : IClassFixture<Write
         string file = "pdf-comments-" + Guid.NewGuid().ToString("N") + ".pdf";
         string imports = Directory.CreateDirectory(Path.Combine(host.Home, "imports")).FullName;
         File.Copy(source, Path.Combine(imports, file));
-        Dictionary<string, object?> args = new() { ["project"] = host.Writable, ["file"] = file };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = host.Writable, ["file"] = file };
         JsonElement dryRun = await host.CallAsync("eplan_import_pdf_comments", new(args) { ["dry_run"] = true });
         Assert.Equal("not_started", dryRun.GetProperty("execution").GetString());
         Assert.Equal(JsonValueKind.Null, dryRun.GetProperty("added").ValueKind);

@@ -6,13 +6,15 @@ A cabinet drawing from the imports folder on a new page, scaled to the page and 
 
 A DWG file in its own size at the page's lower left corner:
 
-    {"project": "Line1", "page": "=GAA+A1&EFS1/93", "file": "drawings/plate.dwg", "scale": "none", "position": "lower_left"}
+    {"project": "Line1", "page": "=GAA+A1&EFS1/93", "file": "drawings/plate.dwg", "scale": "none", "position": "lower_left", "dry_run": false}
 
 ## Workflow
 
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
+
 1. The file must be in the `imports` folder in EplanMcp's data folder (next to `exports`), put there by the engineer or by you; `file` is its path below that folder, with `/` between folders. Only `.dxf` and `.dwg` files of at most 100 MB; links and junctions are not followed.
 2. The page must exist: make a new one with eplan_page_create. The drawing is added to what is on the page; nothing is replaced. Pass `dry_run: false` when executing that page write.
-3. Call with `dry_run: true` to see the file's size and SHA-256 when unsure, then without it. The import is one step: one Ctrl+Z in EPLAN removes the drawing.
+3. Call with `dry_run: true` to see the file's size and SHA-256 when unsure, then with `dry_run: false`. The import is one step: one Ctrl+Z in EPLAN removes the drawing.
 4. The call is not idempotent: repeated, it adds the drawing a second time. Never repeat a call that ended in OUTCOME_UNKNOWN; check the page in EPLAN, or export it with eplan_export_image.
 
 ## Fields

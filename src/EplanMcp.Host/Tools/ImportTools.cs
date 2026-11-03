@@ -53,7 +53,7 @@ internal sealed class ImportTools
     [Description(
         "Imports a DXF or DWG drawing from the 'imports' folder in EplanMcp's data folder onto an existing page, as " +
         "graphics only; one Ctrl+Z in EPLAN undoes it. Put the file there first; 'file' is its path below that folder. " +
-        "Outside scratch it needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/92\", \"file\": \"drawings/4685200F.DXF\"}.")]
+        "Omit/true previews; false executes. Outside scratch it needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/92\", \"file\": \"drawings/4685200F.DXF\"}.")]
     public static async Task<CallToolResult> ImportDxfAsync(
         WritePipeline pipeline,
         IBridgeClient bridge,
@@ -63,7 +63,7 @@ internal sealed class ImportTools
         [Description("Path below the imports folder")] string file,
         [Description("fit: to the page; none: own size")][AllowedValues("fit", "none")] string scale = "fit",
         [AllowedValues("center", "lower_left")] string position = "center",
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -124,6 +124,8 @@ internal sealed class ImportTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Page = ResultShaper.CleanText(data?.Page ?? outcome.Plan.Changes.FirstOrDefault()?.Name ?? args.Page),
             File = source.Path,
             Sha256 = source.Sha256,
@@ -131,7 +133,7 @@ internal sealed class ImportTools
             ObjectsAdded = data?.ObjectsAdded,
             Undo = committed ? "AI: " + DxfTool : null,
             Recovered = outcome.Recovered,
-            Hint = outcome.Recovered
+            Hint = dry_run ? WriteToolDefaults.ExecutionHint : outcome.Recovered
                 ? "The response was lost, but EPLAN reported the drawing as imported; check the page in EPLAN, or export it with eplan_export_image."
                 : ResultShaper.CleanText(data?.Warning),
         };

@@ -15,11 +15,12 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | `eplan_project_list` 返回的名称或路径 |
 | `file` | string | 是 | — | Host 数据根目录 `imports` 下的 PDF 相对名称，如 `review.pdf`；沿用 DXF/PXF 文件接收规则，可含子目录 |
-| `dry_run` | bool | 否 | false | 只校验文件、项目并统计现有注释，不审批、不导入 |
+| `dry_run` | bool | 否 | true | 只校验文件、项目并统计现有注释，不审批、不导入 |
 
 SEC-31：仅 `.pdf`，不超过 100 MiB；拒绝绝对路径、UNC、驱动器号、`.`/`..`、保留名、链接和联接点。Host 算出 SHA-256；Bridge 在规划、执行时复核大小、修改时间和哈希。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 `project`、`execution`、`dryRun`、`file`、`bytes`、`sha256`、`before`、`after`、`added`、`comments`、`eplanMessages`（最多 20 条本次消息）、`eplanMessageCount`、`truncated`、`undo`、`recovered`、`hint`。
 - 规划只知道 `before`，**无法预知新增数量**；`after`、`added` 为 null，`comments` 为空。
 - 执行对比前后 Comment 标识；`added` 为实际新增总数，最多返回前 200 条，Host 再按双份 JSON 的 5k token 预算裁剪，`truncated` 表示清单不完整。工程师在 EPLAN 检查剩余条目；不为取回余项重复导入。

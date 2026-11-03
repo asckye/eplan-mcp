@@ -4,9 +4,11 @@ Validate an EPLAN-exported PDF annotated in Adobe Acrobat/Reader, then import it
 
     {"project":"Line1","file":"review.pdf","dry_run":true}
 
-    {"project":"Line1","file":"review.pdf"}
+    {"project":"Line1","file":"review.pdf", "dry_run": false}
 
 ## Workflow
+
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
 
 1. Export the PDF from the target project in EPLAN (eplan_export_pdf). Add sticky-note (Text) annotations in Adobe Acrobat/Reader and save. Carets, underlines and other annotation types are ignored. Do not rewrite the PDF with a PDF library: EPLAN may reject it.
 2. Put it in EplanMcp's data folder under `imports`; `file` is the relative name, optionally in a subfolder. Only `.pdf`, at most 100 MiB; no links, junctions, absolute paths, UNC, drives, reserved names or `.`/`..` components.

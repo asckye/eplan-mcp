@@ -28,7 +28,7 @@ public sealed class ImportDxfTests(LiveEplan eplan, WriteHost host) : IClassFixt
     {
         string file = WriteImport("large/rectangle.dxf", Encoding.ASCII.GetBytes(SmallDxf()));
         string page = await NewPageAsync();
-        Dictionary<string, object?> args = new() { ["project"] = host.Writable, ["page"] = page, ["file"] = file };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = host.Writable, ["page"] = page, ["file"] = file };
 
         JsonElement dryRun = await host.CallAsync("eplan_import_dxf", new(args) { ["dry_run"] = true });
         JsonElement imported = await host.CallAsync("eplan_import_dxf", args);
@@ -55,9 +55,9 @@ public sealed class ImportDxfTests(LiveEplan eplan, WriteHost host) : IClassFixt
         string file = WriteImport("rittal/4685200F.DXF", File.ReadAllBytes(_rittal!));
         string fit = await NewPageAsync();
 
-        JsonElement centred = await host.CallAsync("eplan_import_dxf", new() { ["project"] = host.Writable, ["page"] = fit, ["file"] = file });
+        JsonElement centred = await host.CallAsync("eplan_import_dxf", new() { ["dry_run"] = false, ["project"] = host.Writable, ["page"] = fit, ["file"] = file });
         string own = await NewPageAsync();
-        JsonElement lowerLeft = await host.CallAsync("eplan_import_dxf", new() { ["project"] = host.Writable, ["page"] = own, ["file"] = file, ["scale"] = "none", ["position"] = "lower_left" });
+        JsonElement lowerLeft = await host.CallAsync("eplan_import_dxf", new() { ["dry_run"] = false, ["project"] = host.Writable, ["page"] = own, ["file"] = file, ["scale"] = "none", ["position"] = "lower_left" });
 
         // S22 (A29): ScalingMode.Automatic, PositionMode.Center gave the page 227 objects.
         Assert.Equal(227, centred.GetProperty("objectsAdded").GetInt32());
@@ -72,9 +72,9 @@ public sealed class ImportDxfTests(LiveEplan eplan, WriteHost host) : IClassFixt
         WriteImport("large/notes.txt", [1]);
         string page = Prefix + "1";
 
-        JsonElement missing = await host.ErrorAsync("eplan_import_dxf", new() { ["project"] = host.Writable, ["page"] = page, ["file"] = "large/missing.dxf" });
-        JsonElement outside = await host.ErrorAsync("eplan_import_dxf", new() { ["project"] = host.Writable, ["page"] = page, ["file"] = "../config.dxf" });
-        JsonElement other = await host.ErrorAsync("eplan_import_dxf", new() { ["project"] = host.Writable, ["page"] = page, ["file"] = "large/notes.txt" });
+        JsonElement missing = await host.ErrorAsync("eplan_import_dxf", new() { ["dry_run"] = false, ["project"] = host.Writable, ["page"] = page, ["file"] = "large/missing.dxf" });
+        JsonElement outside = await host.ErrorAsync("eplan_import_dxf", new() { ["dry_run"] = false, ["project"] = host.Writable, ["page"] = page, ["file"] = "../config.dxf" });
+        JsonElement other = await host.ErrorAsync("eplan_import_dxf", new() { ["dry_run"] = false, ["project"] = host.Writable, ["page"] = page, ["file"] = "large/notes.txt" });
 
         Assert.Equal((ErrorReason.FileNotFound, ExecutionState.NotStarted), (missing.GetProperty("reason").GetString(), missing.GetProperty("execution").GetString()));
         Assert.Equal(ErrorReason.InvalidArgument, outside.GetProperty("reason").GetString());
@@ -87,7 +87,7 @@ public sealed class ImportDxfTests(LiveEplan eplan, WriteHost host) : IClassFixt
     {
         string file = WriteImport("large/rectangle.dxf", Encoding.ASCII.GetBytes(SmallDxf()));
 
-        JsonElement error = await host.ErrorAsync("eplan_import_dxf", new() { ["project"] = host.Outside, ["page"] = Prefix + "1", ["file"] = file });
+        JsonElement error = await host.ErrorAsync("eplan_import_dxf", new() { ["dry_run"] = false, ["project"] = host.Outside, ["page"] = Prefix + "1", ["file"] = file });
 
         Assert.Equal((ErrorReason.PolicyDenied, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
     }
@@ -190,7 +190,7 @@ public sealed class ImportDxfTests(LiveEplan eplan, WriteHost host) : IClassFixt
         string? cursor = null;
         do
         {
-            Dictionary<string, object?> args = new() { ["project"] = host.Writable, ["name_prefix"] = Prefix, ["limit"] = 200 };
+            Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = host.Writable, ["name_prefix"] = Prefix, ["limit"] = 200 };
             if (cursor is not null)
             {
                 args["cursor"] = cursor;
