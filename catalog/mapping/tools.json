@@ -4353,6 +4353,11 @@
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
           },
           {
+            "name": "InterruptionVariantSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionVariantSpikeTests.cs"
+          },
+          {
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
@@ -6348,6 +6353,11 @@
             "name": "ImportDxfTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportDxfTests.cs"
+          },
+          {
+            "name": "InterruptionVariantSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionVariantSpikeTests.cs"
           },
           {
             "name": "PlcDisplaySpikeTests",
@@ -10046,6 +10056,11 @@
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
+          },
+          {
+            "name": "InterruptionVariantSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionVariantSpikeTests.cs"
           },
           {
             "name": "MacroInsertTests",
@@ -16041,6 +16056,11 @@
             "name": "CableBusStarSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
+          },
+          {
+            "name": "InterruptionVariantSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionVariantSpikeTests.cs"
           },
           {
             "name": "PageReviewTests",
