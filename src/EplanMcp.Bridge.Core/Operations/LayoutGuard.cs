@@ -57,12 +57,13 @@ public static class LayoutGuard
         return DrawingCoordinates.ValidBounds(area) && area![0] < area[2] && area[1] < area[3] ? area
             : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: reliable drawing area unavailable; read page geometry before drawing.");
     }
-    public static List<Violation> Check(Model model, IReadOnlyList<DrawingPlacement> changed, bool suggest = true, bool measured = false, bool searchViolations = true)
+    public static List<Violation> Check(Model model, IReadOnlyList<DrawingPlacement> changed, bool suggest = true, bool measured = false, bool searchViolations = true, TimeSpan? searchBudget = null)
     {
         double[] area = Area(model);
         var result = new List<Violation>();
         var defaultTexts = new Dictionary<Violation, DrawingPlacement>();
-        DrawingPlacement[] all = [.. model.Page.Placements.Where(p => !changed.Any(c => Same(c, p))), .. changed];
+        var changedIds = new HashSet<string>(changed.Select(c => Id(c.Locator)), StringComparer.Ordinal);
+        DrawingPlacement[] all = [.. model.Page.Placements.Where(p => !changedIds.Contains(Id(p.Locator))), .. changed];
         void Add(string rule, DrawingPlacement p, DrawingLocator? other, string message, bool warningOnly = false)
         {
             bool warning = warningOnly || !model.Config.Strict && rule is "R6" or "R7" or "R9";
@@ -177,24 +178,29 @@ public static class LayoutGuard
         }
         if (suggest)
         {
+            var searchTimer = searchBudget.HasValue ? System.Diagnostics.Stopwatch.StartNew() : null;
+            bool searchExpired = false;
+            bool Expired() => searchExpired |= searchTimer is not null && searchTimer.Elapsed >= searchBudget!.Value;
+            string NoPosition() => searchExpired ? " Free-position search stopped at the time limit; check the page with eplan_page_review."
+                : " No free position found within the bounded search.";
             foreach (DrawingPlacement p in changed.Where(p => searchViolations && result.Any(v => !v.Warning && v.Objects[0] == p.Locator)))
             {
                 DrawingPlacement owner = GroupOwner(p, changed);
-                double[]? free = FindFree(model, owner, changed, measured: measured);
+                double[]? free = Expired() ? null : FindFree(model, owner, changed, measured: measured, expired: Expired);
                 foreach (Violation v in result.Where(v => !v.Warning && v.Objects[0] == p.Locator))
-                { v.NearestFreePosition = free; v.Message += free is null ? " No free position found within the bounded search." : FormattableString.Invariant($" Suggested position: [{free[0]}, {free[1]}] mm."); }
+                { v.NearestFreePosition = free; v.Message += free is null ? NoPosition() : FormattableString.Invariant($" Suggested position: [{free[0]}, {free[1]}] mm."); }
             }
             foreach (IGrouping<DrawingPlacement, KeyValuePair<Violation, DrawingPlacement>> group in defaultTexts.GroupBy(pair => pair.Value))
             {
                 DrawingPlacement text = group.Key;
-                double[]? free = FindFree(model, text, [.. changed.Where(p => !Same(p, text)), text], measured: measured);
+                double[]? free = Expired() ? null : FindFree(model, text, [.. changed.Where(p => !Same(p, text)), text], measured: measured, expired: Expired);
                 foreach (var pair in group)
-                { pair.Key.NearestFreePosition = free; pair.Key.Message += free is null ? " No free position found within the bounded search." : FormattableString.Invariant($" Suggested position for property_moves: [{free[0]}, {free[1]}] mm."); }
+                { pair.Key.NearestFreePosition = free; pair.Key.Message += free is null ? NoPosition() : FormattableString.Invariant($" Suggested position for property_moves: [{free[0]}, {free[1]}] mm."); }
             }
         }
         return result;
     }
-    public static double[]? FindFree(Model model, DrawingPlacement item, IReadOnlyList<DrawingPlacement> changed, int radius = 12, bool measured = false)
+    public static double[]? FindFree(Model model, DrawingPlacement item, IReadOnlyList<DrawingPlacement> changed, int radius = 12, bool measured = false, Func<bool>? expired = null)
     {
         radius = Math.Min(12, Math.Max(0, radius));
         double g = model.Page.GridSize;
@@ -216,6 +222,8 @@ public static class LayoutGuard
         DrawingPlacement[] closure = changed.Where(p => Same(p, item) || Same(GroupOwner(p, changed), item)).ToArray();
         foreach (int[] offset in offsets)
         {
+            if (expired?.Invoke() == true)
+            { return null; }
             double[] point = item.Location.Select((n, i) => Math.Round(n / g, MidpointRounding.AwayFromZero) * g + offset[i] * g).ToArray();
             double[] delta = point.Zip(item.Location, (a, b) => a - b).ToArray();
             DrawingPlacement[] trial = changed.Except(closure).Concat(closure.Select(p => Shift(p, delta))).ToArray();
@@ -241,6 +249,7 @@ public static class LayoutGuard
         : "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. ")
         + (model.DrawingArea is null ? "Boundary fallback: Page.Size minus layout.marginMm." : "Boundary: plot-frame drawing area.");
     internal const int SummaryLines = 20;
+    internal static readonly TimeSpan AfterWritingSearchBudget = TimeSpan.FromSeconds(2);
     public static string Summary(IEnumerable<string?> messages)
     {
         string[] lines = [.. messages.Where(s => !string.IsNullOrEmpty(s)).SelectMany(s => s!.Split('\n'))
@@ -275,13 +284,15 @@ public static class LayoutGuard
         // the project as readback deviations, reported with their objects, measured geometry and a fix. Live 2026-11-02:
         // searching a free position for every committed deviation ran past the write limit, so only a refusal searches;
         // default texts keep their property_moves suggestion as before.
+        // Live 2026-11-03: 167 objects and 646 findings kept the main thread busy for minutes on default-text searches;
+        // after-write suggestions share a time budget.
         var timer = System.Diagnostics.Stopwatch.StartNew();
-        List<Violation> violations = Check(actual, changed, measured: true, searchViolations: false);
+        List<Violation> violations = Check(actual, changed, measured: true, searchViolations: false, searchBudget: AfterWritingSearchBudget);
         if (timer.ElapsedMilliseconds > 2000)
         { OperationContext.Current.Warn(FormattableString.Invariant($"layout after write took {timer.ElapsedMilliseconds} ms for {changed.Length} changed objects and {violations.Count} findings")); }
         if (violations.Any(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize)))
         {
-            List<Violation> offPage = [.. Check(actual, changed, measured: true).Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize))];
+            List<Violation> offPage = [.. Check(actual, changed, measured: true, searchBudget: AfterWritingSearchBudget).Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize))];
             BridgeErrorException error = WriteArguments.Invalid([.. offPage.Select(v => "S2: the new object lies outside the page. " + v.Message)]);
             error.Error.Metadata!["layoutViolations"] = Newtonsoft.Json.JsonConvert.SerializeObject(offPage);
             throw WriteArguments.NotStarted(error);
