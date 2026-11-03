@@ -459,7 +459,8 @@ public sealed class PartsSpikeAction : IEplAction
                         changes.Add(change);
                         try
                         {
-                            if (strategy == "name")
+                            // Round 4: Name works for the placed main function (A13); "properties" keeps Name only for placed functions.
+                            if (strategy == "name" || (bool?)before[index]["isPlaced"] == true)
                             {
                                 string? oldName = (string?)before[index]["name"];
                                 string? oldTag = (string?)before[index]["deviceTag"];
@@ -565,7 +566,8 @@ public sealed class PartsSpikeAction : IEplAction
                     Observe(write, "value", () => value.IsEmpty ? null : value.ToString(), warnings);
                     try
                     { target[id] = value; write["success"] = true; }
-                    catch (Exception error) { write["error"] = error.ToString(); throw; }
+                    // Round 4: a placed function refuses 1100 (S063113); record each refused property and keep writing the others.
+                    catch (Exception error) { write["error"] = error.ToString(); }
                 }
                 finally { value?.Dispose(); }
             }
