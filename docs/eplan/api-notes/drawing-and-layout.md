@@ -130,3 +130,13 @@
   - `PLCCP`（连接点）、`PLCCPOV`（连接点，总览）、`PLCCPP`（连接点，带插头）：各 8 个变体，PLC 输入定义均为 `1/2`。
   - 连接点离原点的距离：`PLCCP` 为 2–4 mm，`PLCCPOV` 为 6–8 mm，`PLCCPP` 为 4 mm。
 — Large `InterruptionVariantSpikeTests`（枚举 SPECIAL 库的全部符号）与 `AcceptanceRedrawTests`，2026-11-02 各轮的插件日志与导出图。
+
+### A84. 报表块读取与按报表块生成报表页（2026-11-03，EPLAN 2026.0.3.25421，Electric P8；示例项目夹具只读，生成只在 scratch 副本 LargeWrite）
+- `Page.ReportBlock` 能读出报表页当初的生成设置（`Type`、`FormName`、筛选/排序方案名称与数据、`DeviceTag`、`DeviceTagNameParts`、页描述设置）。示例项目 7 页的读数：
+  封面 TitlePage（17）`F26_004_Sample project`；目录 TableOfContents（14）`F06_002`；PLC 图表 `F19_001`，器件 `=K1+A2-KE1`/`-KE2`（各 1 组名称部分）；
+  端子图 TerminalDiagram（9）`F13_008`，筛选 `Location designation_A3`，器件 `+A1-XD1`（名称部分 1200=A1、20013=XD、20014=1）；部件汇总表 `F02_006`，筛选 `Connections_A3`；
+  电缆总览 `F10_003`，筛选 `Location designation_A3`、排序 `DT (full)`。读取后夹具文件没有变化。
+- `ReportBlock.DeviceTag` 只读，可写的是 `DeviceTagNameParts`（`FunctionBasePropertyList[]`）；`InvalidScheme` 在方案名无效且方案数据为空时抛出（本机 XML）。
+- `ReportBlock.Create(project)` 设置上述字段后 `Reports.CreateReport(block, 首页名)` 在一个事务内生成并提交：目录用 `F06_002` 生成 12 页（`&AAB1/102` 起）；
+  端子图用 `F13_008` 与原筛选方案生成。按 `DeviceTagNameParts` 限定到 LargeWrite 的一个端子排（1200=A1、20013=FC、20014=2）**没有起作用**，生成了项目中全部端子排的端子图（26 页）。限定方式待查，产品首版按项目范围生成。
+— Large `ReportBlockSpikeTests`（证据 `%TEMP%\eplanmcp-spikeseport-blocks-*.json`）。
