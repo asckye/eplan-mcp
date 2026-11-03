@@ -1,6 +1,5 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
-using EplanMcp.Bridge.Core.Operations;
 
 #pragma warning disable CA1822 // Fake signatures match the native instance methods.
 
@@ -25,11 +24,6 @@ namespace Eplan.EplApi.HEServices
 
 namespace EplanMcp.Bridge.Eplan.Adapters
 {
-    internal sealed class EplanMacroInserter
-    {
-        public MacroTargetPage? ReadPage(string project, string page) => null;
-    }
-
     internal static class EplanConnectionGenerator
     {
         public static string ForModel(string message) => message;
