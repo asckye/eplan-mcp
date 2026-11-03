@@ -1,7 +1,7 @@
 id: page-renumber
 set: dev
 fixture: copy
-prompt: 在项目 {project} 的 =GAA+A1 下新建 EFS1 的第 90、91、92 页多线原理图，再把这三页改成从 200 开始、步长 10 的页号。完成后告诉我这三页现在的页名。
+prompt: 在项目 {project} 的 =GAA+A1 下新建 EFS1 的第 90、91、92 页多线原理图，再把这三页改成从 200 开始、步长 10 的页号。完成后告诉我这三页现在的页名。 直接调用 eplan_page_create 执行时显式传 dry_run:false，预览保持 true；已编译计划步骤参数保持原样。
 answer:
   type: object
   required: [pages]

@@ -20,13 +20,15 @@
 | `pages[].description` | string，最长 500 个字符 | 否 | 不修改 | `language` 下的新页描述；空串表示清除这种语言的描述 |
 | `pages[].plot_frame` | string | 否 | 不修改 | 项目中已被页面使用的图框名称，Ordinal 精确匹配；不接受空白或导入文件路径 |
 | `language` | string | 否 | EPLAN 界面语言 | 要修改的语言，如 `zh_CN`、`en_US`。**其他语言的描述保持不变** |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要进行的修改，不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false，不改变审批、读回和撤销规则 |
 
 - 页名的查找规则与 `eplan_page_get` 相同：先精确匹配；找不到时，再做不区分大小写的比较，只有唯一一个匹配时才采用。
 - 同一次调用中，同一页出现两次时返回 `INVALID_ARGUMENT`。
 - 每项至少提供 `description`、`plot_frame` 之一；null 按省略处理。描述专用调用保留原来的匹配、语言、指纹、摘要和响应字段。
 
 ## 3. 输出
+
+预览返回 `fingerprint`、已有变更清单及 `execution: not_started`；`hint` 提示以相同参数并传 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",

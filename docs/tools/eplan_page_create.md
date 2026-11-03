@@ -20,7 +20,7 @@
 | `pages[].page_type` | enum `Circuit` / `CircuitSingleLine` / `Overview` / `Graphics` | 否 | `Circuit` | 页类型 |
 | `pages[].description` | string，最长 500 个字符 | 否 | — | 页描述 |
 | `language` | string | 否 | EPLAN 界面语言 | 页描述的语言，如 `zh_CN`、`en_US` |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要新建的页，不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false，不改变审批、读回和撤销规则 |
 
 - **页名的格式**：`[=<值>][+<值>][&<值>]/<页号>`。
   - 只支持这四种前缀：`=` 对应 `DESIGNATION_PLANT`，`+` 对应 `DESIGNATION_LOCATION`，`&` 对应 `DESIGNATION_DOCTYPE`，`/` 对应 `PAGE_COUNTER`（api-notes A13）。
@@ -31,6 +31,8 @@
 - `page_type` 只开放四种可以交互编辑的页类型。S9 只验证过 `Circuit`，其余三种由 Large 测试逐个验证，未通过的从 `enum` 中去掉。
 
 ## 3. 输出
+
+预览返回 `fingerprint`、已有变更清单及 `execution: not_started`；`hint` 提示以相同参数并传 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",

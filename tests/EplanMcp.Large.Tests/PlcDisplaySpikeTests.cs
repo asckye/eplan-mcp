@@ -114,7 +114,7 @@ public sealed class PlcDisplaySpikeTests(LiveEplan eplan)
             cursor = pages.GetProperty("nextCursor").GetString();
         } while (cursor is not null);
         string page = Prefix + (last + 1).ToString(CultureInfo.InvariantCulture), cardPage = Prefix + (last + 2).ToString(CultureInfo.InvariantCulture);
-        await eplan.CallAsync("eplan_page_create", new() { ["project"] = project, ["pages"] = new[] { new { name = page }, new { name = cardPage } } });
+        await eplan.CallAsync("eplan_page_create", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = new[] { new { name = page }, new { name = cardPage } } });
         await eplan.CallAsync("eplan_page_open", new() { ["project"] = project, ["page"] = page });
         JsonElement card = await eplan.CallAsync("eplan_device_place", new() { ["dry_run"] = false, ["project"] = project, ["page"] = cardPage, ["library"] = "SPECIAL", ["symbol"] = "PLCC", ["symbol_variant"] = 0, ["tag"] = "-D3KF" + (last + 1).ToString(CultureInfo.InvariantCulture), ["x"] = 80, ["y"] = 180 });
         do

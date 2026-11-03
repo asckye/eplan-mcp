@@ -11,7 +11,7 @@ A DWG file in its own size at the page's lower left corner:
 ## Workflow
 
 1. The file must be in the `imports` folder in EplanMcp's data folder (next to `exports`), put there by the engineer or by you; `file` is its path below that folder, with `/` between folders. Only `.dxf` and `.dwg` files of at most 100 MB; links and junctions are not followed.
-2. The page must exist: make a new one with eplan_page_create. The drawing is added to what is on the page; nothing is replaced.
+2. The page must exist: make a new one with eplan_page_create. The drawing is added to what is on the page; nothing is replaced. Pass `dry_run: false` when executing that page write.
 3. Call with `dry_run: true` to see the file's size and SHA-256 when unsure, then without it. The import is one step: one Ctrl+Z in EPLAN removes the drawing.
 4. The call is not idempotent: repeated, it adds the drawing a second time. Never repeat a call that ended in OUTCOME_UNKNOWN; check the page in EPLAN, or export it with eplan_export_image.
 

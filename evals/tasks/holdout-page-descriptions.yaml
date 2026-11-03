@@ -1,7 +1,7 @@
 id: holdout-page-descriptions
 set: holdout
 fixture: copy
-prompt: 项目 {project} 中，把 =GAA+A1&EFS1/2 和 =EA+A1&EFS1/1 两页的中文页描述分别改为"控制电源"和"主回路"，英文描述不要动。改完告诉我。
+prompt: 项目 {project} 中，把 =GAA+A1&EFS1/2 和 =EA+A1&EFS1/1 两页的中文页描述分别改为"控制电源"和"主回路"，英文描述不要动。改完告诉我。 直接调用 eplan_page_update 执行时显式传 dry_run:false，预览保持 true；已编译计划步骤参数保持原样。
 answer:
   type: object
   required: [done]

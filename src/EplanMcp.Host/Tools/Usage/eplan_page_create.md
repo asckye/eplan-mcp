@@ -6,13 +6,15 @@ Two circuit diagram pages with English descriptions, first as a dry run:
 
 An overview page and a graphics page, descriptions left empty:
 
-    {"project": "Line1", "pages": [{"name": "=GAA+A1&EFS1/62", "page_type": "Overview"}, {"name": "=GAA+A1&EFS1/63", "page_type": "Graphics"}]}
+    {"project": "Line1", "pages": [{"name": "=GAA+A1&EFS1/62", "page_type": "Overview"}, {"name": "=GAA+A1&EFS1/63", "page_type": "Graphics"}], "dry_run": false}
 
 ## Workflow
 
+Omitting `dry_run` or passing true only previews; pass `dry_run: false` with the same arguments to execute. Previews return `fingerprint`, the planned changes, and `execution: not_started` without approval or writes.
+
 1. List the existing pages with eplan_page_list (`name_prefix` such as `=GAA+A1&EFS1/`) and copy their structure: the parts before the page number must be the ones the project uses.
 2. Pick page numbers that are not in use. Names are `[=plant][+location][&document type]/number`, in this order; `==`, `++` and `#` are not supported.
-3. Call with `dry_run: true` to see the plan when unsure, then without it. All pages are created in one step: one Ctrl+Z in EPLAN removes them all, and a failure on any page creates none.
+3. Call with `dry_run: true` to see the plan when unsure, then with `dry_run: false` to execute. All pages are created in one step: one Ctrl+Z in EPLAN removes them all, and a failure on any page creates none.
 4. Never repeat a call that ended in OUTCOME_UNKNOWN; check with eplan_page_list instead.
 
 ## Fields

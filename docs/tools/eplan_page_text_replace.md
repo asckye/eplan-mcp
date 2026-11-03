@@ -25,7 +25,7 @@
 | `language` | string | 是 | — | 明确给出 EPLAN 语言代码，或 `all` 表示全部已存语言；`??_??` 表示语言无关文本 |
 | `case_sensitive` | boolean | 否 | true | true 使用 Ordinal，false 使用 OrdinalIgnoreCase，不依赖界面区域设置 |
 | `max_changes` | integer，1–500 | 否 | 500 | 可修改的“对象 × 语言”条目上限；超过即整体拒绝，不执行前若干条 |
-| `dry_run` | boolean | 否 | false | 只返回计划，不请求审批、不写入 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false，不改变审批、读回和撤销规则 |
 
 所有对象 schema 设置 `additionalProperties: false`；默认值、数组数量和数值范围进入 schema，并在 Host 和 Bridge 校验。页名使用与 `eplan_page_list` 一致的完整业务名称，不要求输入 oid。
 
@@ -34,6 +34,8 @@
 每段文本从左到右替换所有不重叠的匹配，不再扫描新写入的替换串。只把 before 与 after 不同的条目计入变更；完全相同的 `find` / `replace` 拒绝。大小写不敏感替换仍可改变大小写，例如 Motor → MOTOR。替换串包含查找串时再次调用可能继续改变内容，因此不声明幂等。
 
 ## 3. 输出
+
+预览返回 `fingerprint`、已有变更清单及 `execution: not_started`；`hint` 提示以相同参数并传 `dry_run: false` 执行。
 
 输出 schema 由 Host 结果类型生成，使用以下字段；成功结果同时返回结构化数据、兼容 JSON 文本块和只含计数的一行摘要。
 

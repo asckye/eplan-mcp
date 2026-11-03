@@ -174,7 +174,7 @@ public sealed class DestructiveHost : IAsyncLifetime
         while (cursor is not null);
 
         string[] names = [.. Enumerable.Range(last + 1, count).Select(n => Prefix + n.ToString(CultureInfo.InvariantCulture))];
-        await CallAsync("eplan_page_create", new() { ["project"] = Writable, ["pages"] = Json(names.Select(name => new { name })) });
+        await CallAsync("eplan_page_create", new() { ["dry_run"] = false, ["project"] = Writable, ["pages"] = Json(names.Select(name => new { name })) });
         return names;
     }
 

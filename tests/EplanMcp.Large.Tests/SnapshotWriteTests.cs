@@ -23,7 +23,7 @@ public sealed class SnapshotWriteTests(LiveEplan eplan, WriteHost host) : IClass
         LiveSnapshots.Snapshot before = await LiveSnapshots.TakeAsync(bridge, new ProjectSnapshotArgs { Project = host.Writable });
         string stamp = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff", CultureInfo.InvariantCulture);
 
-        await host.CallAsync("eplan_page_update", new() { ["project"] = host.Writable, ["pages"] = JsonSerializer.SerializeToElement(new[] { new { name = Page, description = "Snapshot " + stamp } }), ["language"] = "zh_CN" });
+        await host.CallAsync("eplan_page_update", new() { ["dry_run"] = false, ["project"] = host.Writable, ["pages"] = JsonSerializer.SerializeToElement(new[] { new { name = Page, description = "Snapshot " + stamp } }), ["language"] = "zh_CN" });
         LiveSnapshots.Snapshot after = await LiveSnapshots.TakeAsync(bridge, new ProjectSnapshotArgs { Project = host.Writable });
         LiveSnapshots.Snapshot alone = await LiveSnapshots.TakeAsync(bridge, new ProjectSnapshotArgs { Project = host.Writable, Pages = [Page] });
 

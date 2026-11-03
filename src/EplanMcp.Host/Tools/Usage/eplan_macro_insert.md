@@ -12,7 +12,7 @@ The same macro's variant 2, keeping the macro's own tags:
 Omitting dry_run (or true) previews only: no approval, no project/file writes, execution=not_started. Call again with dry_run:false to execute; preview hint explains this step.
 
 1. Find the macro with eplan_macro_list and check it with eplan_macro_get: it needs a `MultiLine` representation, and `size` tells how much room it takes.
-2. Choose a circuit page (eplan_page_list, or a new one from eplan_page_create) and a free area; eplan_page_get shows the devices already on it.
+2. Choose a circuit page (eplan_page_list, or a new one from eplan_page_create) and a free area; eplan_page_get shows the devices already on it. Pass `dry_run: false` when executing that page write.
 3. `x` and `y` are millimetres from the page's bottom left corner, y up, and put the macro's top left corner there, so the macro takes `[x, x + width]` across and `[y - height, y]` up. On a page whose size EPLAN can tell, the macro must lie within it; on a new, empty page only `x >= 0` and `y >= 0` are checked.
 4. Keep the default `numbering: "number"`: EPLAN gives the devices tags no device has, in the page's structure. With `keep` the devices keep the macro's tags, and the insert is refused when that merges them with existing devices. To get particular tags, insert with `number` and rename with eplan_device_update.
 5. Omit `dry_run` to preview the macro's devices, then pass `dry_run: false` to execute. The insert is one step: one Ctrl+Z in EPLAN removes it.

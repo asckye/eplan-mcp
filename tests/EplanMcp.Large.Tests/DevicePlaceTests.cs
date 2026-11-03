@@ -201,7 +201,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
         while (cursor is not null);
 
         string name = Prefix + (last + 1).ToString(CultureInfo.InvariantCulture);
-        await eplan.CallAsync("eplan_page_create", new() { ["project"] = project, ["pages"] = JsonSerializer.SerializeToElement(new[] { new { name } }) });
+        await eplan.CallAsync("eplan_page_create", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = JsonSerializer.SerializeToElement(new[] { new { name } }) });
         return name;
     }
 

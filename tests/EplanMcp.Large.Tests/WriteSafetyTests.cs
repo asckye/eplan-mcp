@@ -24,8 +24,8 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
 
         JsonElement[] errors =
         [
-            await host.ErrorAsync("eplan_page_create", new() { ["project"] = project, ["pages"] = Json("""[{"name": "=GAA+A1&EFS1/60", "description": "Q1"}]"""), ["language"] = "zh_CN" }),
-            await host.ErrorAsync("eplan_page_update", new() { ["project"] = project, ["pages"] = Json("""[{"name": "=GAA+A1&EFS1/1", "description": "Q1"}]"""), ["language"] = "zh_CN" }),
+            await host.ErrorAsync("eplan_page_create", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = Json("""[{"name": "=GAA+A1&EFS1/60", "description": "Q1"}]"""), ["language"] = "zh_CN" }),
+            await host.ErrorAsync("eplan_page_update", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = Json("""[{"name": "=GAA+A1&EFS1/1", "description": "Q1"}]"""), ["language"] = "zh_CN" }),
             await host.ErrorAsync("eplan_device_update", new() { ["project"] = project, ["tag"] = "=F+A2-KF1", ["new_tag"] = "=F+A2-KF19" }),
         ];
 
@@ -68,7 +68,7 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
         WritePlan plan = await bridge.InvokeAsync<PageCreateArgs, WritePlan>(OperationNames.PageCreatePlan, args, TestContext.Current.CancellationToken);
 
         // Someone else adds a page where the planned one goes: here this test's eplanmcp, on the same scratch copy.
-        await host.CallAsync("eplan_page_create", new() { ["project"] = project, ["pages"] = Json($$"""[{"name": "{{Page(number + 1)}}"}]""") });
+        await host.CallAsync("eplan_page_create", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = Json($$"""[{"name": "{{Page(number + 1)}}"}]""") });
         BridgeCallException stale = await Assert.ThrowsAsync<BridgeCallException>(() => bridge.InvokeWriteAsync<PageCreateArgs, PageCreateData>(
             OperationNames.PageCreateExecute,
             new PageCreateArgs { Project = args.Project, Pages = args.Pages, Fingerprint = plan.Fingerprint },
@@ -93,7 +93,7 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
         var args = new PageUpdateArgs { Project = project, Pages = [new PageUpdateItem { Name = "=GAA+A1&EFS1/1", Description = "Q6 plan " + stamp }], Language = "zh_CN" };
         WritePlan plan = await bridge.InvokeAsync<PageUpdateArgs, WritePlan>(OperationNames.PageUpdatePlan, args, TestContext.Current.CancellationToken);
 
-        await host.CallAsync("eplan_page_update", new() { ["project"] = project, ["pages"] = Json($$"""[{"name": "=GAA+A1&EFS1/1", "description": "Q6 between {{stamp}}"}]"""), ["language"] = "zh_CN" });
+        await host.CallAsync("eplan_page_update", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = Json($$"""[{"name": "=GAA+A1&EFS1/1", "description": "Q6 between {{stamp}}"}]"""), ["language"] = "zh_CN" });
         BridgeCallException stale = await Assert.ThrowsAsync<BridgeCallException>(() => bridge.InvokeWriteAsync<PageUpdateArgs, PageUpdateData>(
             OperationNames.PageUpdateExecute,
             new PageUpdateArgs { Project = args.Project, Pages = args.Pages, Language = args.Language, Fingerprint = plan.Fingerprint },

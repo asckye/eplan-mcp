@@ -210,7 +210,7 @@ public sealed class ImportDxfTests(LiveEplan eplan, WriteHost host) : IClassFixt
         while (cursor is not null);
 
         string name = Prefix + (last + 1).ToString(CultureInfo.InvariantCulture);
-        await host.CallAsync("eplan_page_create", new() { ["project"] = host.Writable, ["pages"] = JsonSerializer.SerializeToElement(new[] { new { name } }) });
+        await host.CallAsync("eplan_page_create", new() { ["dry_run"] = false, ["project"] = host.Writable, ["pages"] = JsonSerializer.SerializeToElement(new[] { new { name } }) });
         return name;
     }
 }

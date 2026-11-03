@@ -15,7 +15,7 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
-| `page` | string | 是 | — | 完整页名，页必须已经存在（用 `eplan_page_create` 新建） |
+| `page` | string | 是 | — | 完整页名，页必须已经存在（用 `eplan_page_create` 并显式传 `dry_run: false` 新建） |
 | `file` | string | 是 | — | 导入目录中的相对路径，如 `drawings/4685200F.DXF`；扩展名只能是 `.dxf`、`.dwg` |
 | `scale` | enum `fit` / `none` | 否 | `fit` | `fit`：按页面缩放；`none`：保持原尺寸 |
 | `position` | enum `center` / `lower_left` | 否 | `center` | 图形放在页的中央，或左下角 |

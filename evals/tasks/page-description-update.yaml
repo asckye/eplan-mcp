@@ -1,7 +1,7 @@
 id: page-description-update
 set: dev
 fixture: copy
-prompt: 把项目 {project} 中 =GAA+A1&EFS1/1 这一页的英文页描述改为 Main power supply，其他语言的描述保持不变。完成后告诉我结果。
+prompt: 把项目 {project} 中 =GAA+A1&EFS1/1 这一页的英文页描述改为 Main power supply，其他语言的描述保持不变。完成后告诉我结果。 直接执行页面写入工具时显式传 dry_run:false；预览保持 true，编译计划步骤不变。
 answer:
   type: object
   required: [done]

@@ -18,9 +18,7 @@ internal sealed class PageTextReplaceTools
 
     [McpServerTool(Name = Tool, Title = "Replace page free texts", ReadOnly = false, Destructive = false,
         Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(PageTextReplaceResult))]
-    [Description("Replaces literals in page/group free texts; excludes frames and other text types. One Ctrl+Z undoes it. " +
-        "Outside scratch needs approval; denial: APPROVAL_DENIED. " +
-        "Example: {\"project\":\"Line1\",\"pages\":[\"=F+A2&EFA1/2\"],\"find\":\"Motor\",\"replace\":\"Drive\",\"language\":\"en_US\"}.")]
+    [Description("Replaces literals in page/group free texts, excluding frames and other text types. Omit/true previews; false executes. Outside scratch needs approval; one Ctrl+Z undoes the batch. See usage.")]
     public static async Task<CallToolResult> ReplaceAsync(
         WritePipeline pipeline,
         [Description("Project name/path")] string project,
@@ -30,7 +28,7 @@ internal sealed class PageTextReplaceTools
         [Description("Code, ??_?? or all")] string language,
         bool case_sensitive = true,
         [Range(1, 500)] int max_changes = 500,
-        bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -88,6 +86,7 @@ internal sealed class PageTextReplaceTools
             Project = ResultShaper.CleanText(outcome.Data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
             TotalChanges = raw.Count,
             TotalOccurrences = raw.Sum(c => (long)c.Occurrences),
             Undo = committed ? "AI: " + Tool : null,
@@ -120,6 +119,9 @@ internal sealed class PageTextReplaceTools
         {
             result.Hint = warning;
         }
+
+        if (dry_run)
+        { result.Hint = string.Join(" ", new[] { result.Hint, WriteToolDefaults.ExecutionHint }.Where(h => !string.IsNullOrWhiteSpace(h))); }
 
         string count = string.Create(CultureInfo.InvariantCulture, $"{result.TotalChanges} text-language {(result.TotalChanges == 1 ? "entry" : "entries")} ({result.TotalOccurrences} {(result.TotalOccurrences == 1 ? "occurrence" : "occurrences")})");
         return ToolResults.Success(committed ? $"Changed {count}; Ctrl+Z in EPLAN undoes this step." : $"Dry run: would change {count}. Nothing was changed.", result);

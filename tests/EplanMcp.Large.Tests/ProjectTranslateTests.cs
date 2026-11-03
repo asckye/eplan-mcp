@@ -103,6 +103,7 @@ public sealed class ProjectTranslateTests : IClassFixture<DestructiveHost>
 
     private Task<JsonElement> DescribeAsync(string page, string language, string text) => _host.CallAsync("eplan_page_update", new()
     {
+        ["dry_run"] = false,
         ["project"] = _host.Writable,
         ["language"] = language,
         ["pages"] = DestructiveHost.Json(new[] { new { name = page, description = text } }),

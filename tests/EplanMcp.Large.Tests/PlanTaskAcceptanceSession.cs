@@ -128,6 +128,7 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
 
     public Task<JsonElement> CreatePageAsync(string page) => WriteAsync("eplan_page_create", new()
     {
+        ["dry_run"] = false,
         ["project"] = Project,
         ["pages"] = new[] { new { name = page, description = "P25 setup" } },
         ["language"] = "en_US"

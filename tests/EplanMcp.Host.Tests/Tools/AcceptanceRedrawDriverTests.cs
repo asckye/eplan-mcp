@@ -19,7 +19,7 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.Equal(["eplan_page_create", "eplan_page_open", "eplan_page_get"], fake.Calls.Take(3));
         Assert.Equal("eplan_export_image", fake.Calls[^1]);
         Assert.DoesNotContain(fake.Calls, c => c.Contains("undo", StringComparison.OrdinalIgnoreCase) || c.Contains("delete", StringComparison.OrdinalIgnoreCase));
-        Assert.All(fake.Requests.Where(r => r.Tool is "eplan_device_place" or "eplan_connection_create" or "eplan_placement_create" or "eplan_placement_update" or "eplan_placement_edit" or "eplan_macro_insert"),
+        Assert.All(fake.Requests.Where(r => r.Tool is "eplan_page_create" or "eplan_device_place" or "eplan_connection_create" or "eplan_placement_create" or "eplan_placement_update" or "eplan_placement_edit" or "eplan_macro_insert"),
             request => Assert.False(request.Args.GetProperty("dry_run").GetBoolean()));
         Assert.Equal(39, driver.UndoSteps);
         Assert.False(driver.UndoCountIncomplete);

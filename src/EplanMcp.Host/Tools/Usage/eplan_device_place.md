@@ -23,7 +23,7 @@ PLC digital input:
 ## Workflow
 Omitted/true dry_run previews: no approval/writes (execution=not_started). Execute with dry_run:false; see hint.
 
-1. Choose a Circuit page via eplan_page_list/create; inspect via eplan_page_get. Use finite mm within page bounds: bottom left, y up.
+1. Use eplan_page_list/get for a Circuit page, or eplan_page_create with dry_run:false. Finite mm inside page bounds; bottom-left origin, y up.
 2. Choose a free tag using eplan_device_list; short tags take page structure without document type. Outside scratch requires approval.
 3. Find parts via eplan_part_search (hasMacro; variant default 1), or variants/pins via eplan_symbol_search. Place unplaced functions in EPLAN; use eplan_macro_insert for circuits.
 

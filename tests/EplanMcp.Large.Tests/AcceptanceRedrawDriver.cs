@@ -74,7 +74,7 @@ internal sealed class AcceptanceRedrawDriver(
 
     private async Task PagesAsync()
     {
-        await WriteAsync("eplan_page_create", new() { ["pages"] = new[] { new { name = Page }, new { name = CounterpartPage } } }, ["pages"]);
+        await WriteAsync("eplan_page_create", new() { ["dry_run"] = false, ["pages"] = new[] { new { name = Page }, new { name = CounterpartPage } } }, ["pages"]);
         // A54: opening the editor selects LargeWrite and lets the engineer watch all subsequent batches.
         JsonElement opened = await ReadAsync("eplan_page_open", new() { ["page"] = Page });
         Check(() => Assert.True(opened.GetProperty("editor_opened").GetBoolean()));

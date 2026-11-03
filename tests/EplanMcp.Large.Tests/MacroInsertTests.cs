@@ -103,7 +103,7 @@ public sealed class MacroInsertTests(LiveEplan eplan)
         while (cursor is not null);
 
         string[] names = [.. Enumerable.Range(last + 1, count).Select(n => Prefix + n.ToString(CultureInfo.InvariantCulture))];
-        await eplan.CallAsync("eplan_page_create", new() { ["project"] = project, ["pages"] = JsonSerializer.SerializeToElement(names.Select(name => new { name })) });
+        await eplan.CallAsync("eplan_page_create", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = JsonSerializer.SerializeToElement(names.Select(name => new { name })) });
         return names;
     }
 

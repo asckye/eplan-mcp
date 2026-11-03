@@ -2,6 +2,7 @@ id: plan-loop-approval
 set: dev
 fixture: copy
 prompt: |
+  直接调用 eplan_page_create 执行时显式传 dry_run:false，预览保持 true；已编译计划步骤参数保持原样。
   在项目 {project} 中，先新建一个待删除的空白页 =GAA+A1&EFS1/90。
   然后把以下修改放进同一份可审阅的计划：新建 =GAA+A1&EFS1/91，
   再把它的英文页描述设为 Plan loop verified，最后删除刚才的空白页 /90。

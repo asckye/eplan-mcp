@@ -31,6 +31,7 @@ public sealed class PlanDependencyPredictionTests(LiveEplan eplan)
 
         var createArgs = JsonSerializer.Deserialize<Dictionary<string, object?>>(create.Args.GetRawText())!;
         createArgs["project"] = project;
+        createArgs["dry_run"] = false;
         Assert.Equal("committed", (await eplan.CallAsync("eplan_page_create", createArgs)).GetProperty("execution").GetString());
         var macroArgs = new MacroInsertArgs
         {

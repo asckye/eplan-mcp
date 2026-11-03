@@ -26,16 +26,20 @@ public sealed class PageUpdateToolTests : IDisposable
 
     public void Dispose() => _harness.Dispose();
 
-    [Fact]
-    public async Task ADryRun_ListsThePlannedChangesWithTheirLanguage()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(null)]
+    public async Task ADryRun_ListsThePlannedChangesWithTheirLanguage(bool? dryRun)
     {
-        CallToolResult result = await Update(dryRun: true);
+        CallToolResult result = await (dryRun is null ? PageWriteTools.PageUpdateAsync(_harness.Pipeline, "Line1", [new() { Name = "=GAA+A1&EFS1/3", Description = "主回路" }, new() { Name = "=GAA+A1&EFS1/4", Description = string.Empty }], cancellationToken: TestContext.Current.CancellationToken) : Update(dryRun: true));
 
         JsonElement data = WriteToolHarness.Structured(result);
         Assert.Equal(("not_started", "zh_CN", 1), (data.GetProperty("execution").GetString(), data.GetProperty("language").GetString(), data.GetProperty("unchanged").GetInt32()));
         JsonElement page = data.GetProperty("pages")[0];
         Assert.Equal(("主回路", "电源"), (page.GetProperty("description").GetString(), page.GetProperty("previous").GetString()));
         Assert.Equal("Dry run: would update 1 page. Nothing was changed.", WriteToolHarness.Text(result, 0));
+        Assert.Equal("f1", data.GetProperty("fingerprint").GetString());
+        Assert.Contains("dry_run: false", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
         Assert.Empty(_harness.Bridge.Writes);
     }
 

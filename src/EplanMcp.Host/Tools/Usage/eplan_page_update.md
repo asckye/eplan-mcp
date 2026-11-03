@@ -6,13 +6,15 @@ New English descriptions for two pages, first as a dry run:
 
 Clear the German description of one page, keeping the other languages:
 
-    {"project": "Line1", "pages": [{"name": "=GAA+A1&EFS1/3", "description": ""}], "language": "de_DE"}
+    {"project": "Line1", "pages": [{"name": "=GAA+A1&EFS1/3", "description": ""}], "language": "de_DE", "dry_run": false}
 
 Preview a switch to a frame already used by a page in the project:
 
     {"project":"Line1","pages":[{"name":"=GAA+A1&EFS1/3","plot_frame":"FN1_015"}],"dry_run":true}
 
 ## Workflow
+
+Omitting `dry_run` or passing true only previews; pass `dry_run: false` with the same arguments to execute. Previews return `fingerprint`, the planned changes, and `execution: not_started` without approval or writes.
 
 1. Find the pages with eplan_page_list (`name_prefix`, `text`) and read the current descriptions with eplan_page_get in the same `language`.
 2. Call with the full page names and the new texts. Only the given `language` changes; every other language of each description stays as it is. An empty `description` removes that language's text.

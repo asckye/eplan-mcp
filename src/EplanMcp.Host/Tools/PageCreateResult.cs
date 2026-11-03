@@ -14,6 +14,9 @@ internal sealed class PageCreateResult
     [Description("True when only the plan was returned.")]
     public bool DryRun { get; set; }
 
+    [Description("Fingerprint of the previewed plan.")]
+    public string Fingerprint { get; set; } = string.Empty;
+
     [Description("The pages as EPLAN read them back; for a dry run or when 'recovered', as planned.")]
     public List<PageEntry> Pages { get; set; } = [];
 

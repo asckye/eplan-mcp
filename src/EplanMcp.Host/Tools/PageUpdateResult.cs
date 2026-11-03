@@ -15,6 +15,9 @@ internal sealed class PageUpdateResult
     [Description("True when only the plan was returned.")]
     public bool DryRun { get; set; }
 
+    [Description("Fingerprint of the previewed plan.")]
+    public string Fingerprint { get; set; } = string.Empty;
+
     [Description("The language whose descriptions change, e.g. zh_CN; null when nothing changes and none was given.")]
     public string? Language { get; set; }
 

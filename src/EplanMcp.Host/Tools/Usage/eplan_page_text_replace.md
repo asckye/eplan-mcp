@@ -6,12 +6,14 @@ Preview English free-text replacements on an explicitly named page:
 
 Replace without case sensitivity in every stored language, including independent text:
 
-    {"project":"Line1","pages":["=F+A2&EFA1/2"],"find":"Motor","replace":"Drive","language":"all","case_sensitive":false,"max_changes":100}
+    {"project":"Line1","pages":["=F+A2&EFA1/2"],"find":"Motor","replace":"Drive","language":"all","case_sensitive":false,"max_changes":100, "dry_run": false}
 
 ## Workflow
 
+Omitting `dry_run` or passing true only previews; pass `dry_run: false` with the same arguments to execute. Previews return `fingerprint`, the planned changes, and `execution: not_started` without approval or writes.
+
 1. Use eplan_page_list for exact full names. Specify 1-50 distinct pages and an explicit language code, `??_??` for independent text, or `all` for all stored languages. Missing translations are skipped without fallback or creation.
-2. Preview with `dry_run: true`; then execute the same arguments without it. Only page free texts and those in groups change. Plot frames, property placements, function texts and path texts are excluded. Page descriptions use eplan_page_update.
+2. Preview with `dry_run: true`; then execute the same arguments with `dry_run: false`. Only page free texts and those in groups change. Plot frames, property placements, function texts and path texts are excluded. Page descriptions use eplan_page_update.
 3. Matching is literal, ordinal and case-sensitive by default. Replace all nonoverlapping original occurrences; replacement text is not rescanned. Empty `replace` removes matches. The cap counts changed object-language entries, not substring occurrences; exceeding it refuses the whole batch.
 4. Scratch writes are automatically allowed. Elsewhere policy may refuse or require engineer approval. One Ctrl+Z in EPLAN undoes the call. Repeating a replacement may change text again, especially when the replacement contains the search text.
 

@@ -10,7 +10,7 @@ Renumber two pages from 5, turning their subpages into main pages:
 
 ## Workflow
 
-1. Find the exact full page names with eplan_page_list; names match exactly, letter case included. To change only a page's description, use eplan_page_update instead.
+1. Find the exact full page names with eplan_page_list; names match exactly, letter case included. To change only a page's description, use eplan_page_update instead. Pass `dry_run: false` when executing that page write.
 2. EPLAN numbers the pages within their structure (the name before the last '/'), from `start` in steps of `step`. Its rules decide the names, so they are known only after running; a dry run asks nobody and changes nothing.
 3. Choose a `start` whose numbers are free in the structure: eplan_page_list with `name_prefix` shows the numbers in use. A number already in use is refused with ALREADY_EXISTS and nothing changes.
 4. Without `dry_run`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is renumbered (BACKUP_FAILED).

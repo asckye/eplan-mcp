@@ -50,17 +50,24 @@ public sealed class PageTextReplaceProtocolTests : IDisposable
         });
     }
 
-    [Fact]
-    public async Task DryRun_RealMcp_ReturnsEveryMatchWithoutApprovalAuditOrExecution()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(null)]
+    public async Task DryRun_RealMcp_ReturnsEveryMatchWithoutApprovalAuditOrExecution(bool? dryRun)
     {
         await WithClient(async client =>
         {
-            CallToolResult result = await Call(client, dryRun: true);
+            Dictionary<string, object?> args = Args(true);
+            if (dryRun is null)
+            { args.Remove("dry_run"); }
+            CallToolResult result = await client.CallToolAsync(PageTextReplaceTools.Tool, args, cancellationToken: Token);
             JsonElement data = Data(result);
             Assert.Equal(("not_started", 3, 4), (data.GetProperty("execution").GetString(), data.GetProperty("totalChanges").GetInt32(), data.GetProperty("totalOccurrences").GetInt32()));
             Assert.Equal("Motor Motor", data.GetProperty("changes")[0].GetProperty("before").GetString());
             Assert.Equal("Drive Drive", data.GetProperty("changes")[0].GetProperty("after").GetString());
             Assert.Equal("Dry run: would change 3 text-language entries (4 occurrences). Nothing was changed.", ((TextContentBlock)result.Content[0]).Text);
+            Assert.Equal(64, data.GetProperty("fingerprint").GetString()!.Length);
+            Assert.Contains("dry_run: false", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
             Assert.Empty(_store.Writes);
             Assert.Empty(_harness.Bridge.Writes);
             Assert.False(Directory.Exists(_harness.Locations.Audit));

@@ -53,6 +53,7 @@ public sealed class PlanStepGuardWriteTests(LiveEplan eplan, WriteHost host) : I
 
     private Task<JsonElement> UpdateAsync(string? description) => host.CallAsync("eplan_page_update", new()
     {
+        ["dry_run"] = false,
         ["project"] = host.Writable,
         ["pages"] = JsonSerializer.SerializeToElement(new[] { new { name = PlanStepGuardTests.Page, description } }),
         ["language"] = "zh_CN",

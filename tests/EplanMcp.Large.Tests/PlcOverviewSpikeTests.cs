@@ -31,6 +31,7 @@ public sealed class PlcOverviewSpikeTests(LiveEplan eplan, WriteHost host) : ICl
                 string circuitPage = session.NextPage, overviewPage = session.NextPage;
                 await host.CallAsync("eplan_page_create", new()
                 {
+                    ["dry_run"] = false,
                     ["project"] = session.Project,
                     ["pages"] = new[] { new { name = circuitPage, page_type = "Circuit" }, new { name = overviewPage, page_type = "Overview" } },
                 });

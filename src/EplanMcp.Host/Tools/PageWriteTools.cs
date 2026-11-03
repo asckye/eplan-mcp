@@ -34,16 +34,13 @@ internal sealed class PageWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageCreateResult))]
-    [Description(
-        "Creates pages in an EPLAN project; one Ctrl+Z in EPLAN undoes them all. Reuse the name structure eplan_page_list " +
-        "shows. Outside scratch it needs the engineer's approval. Example: {\"project\": " +
-        "\"Line1\", \"pages\": [{\"name\": \"=GAA+A1&EFS1/5\", \"description\": \"Power\"}]}.")]
+    [Description("Creates 1-50 pages using names from eplan_page_list. Omit/true previews; false executes. Outside scratch needs approval; one Ctrl+Z undoes the batch. See usage.")]
     public static async Task<CallToolResult> PageCreateAsync(
         WritePipeline pipeline,
         [Description("Name or path from eplan_project_list")] string project,
         [Description("1-50, created in order")] NewPage[] pages,
         [Description("e.g. zh_CN; default: EPLAN UI")] string? language = null,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -84,6 +81,7 @@ internal sealed class PageWriteTools
             Project = ResultShaper.CleanText(outcome.Data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
             Pages = outcome.Data is { } data
                 ? [.. data.Pages.Select(p => Entry(p.Name, p.Type, p.Description))]
                 : [.. args.Pages.Select(p => Entry(p.Name, p.PageType ?? _pageTypes[0], p.Description))],
@@ -91,7 +89,7 @@ internal sealed class PageWriteTools
             Recovered = outcome.Recovered,
             Hint = outcome.Recovered
                 ? "The response was lost, but EPLAN reported the pages as created; check them with eplan_page_list."
-                : ResultShaper.CleanText(outcome.Data?.Warning),
+                : dry_run ? WriteToolDefaults.ExecutionHint : ResultShaper.CleanText(outcome.Data?.Warning),
         };
         string count = ToolResults.Count(result.Pages.Count, "page");
         return ToolResults.Success(
@@ -108,15 +106,13 @@ internal sealed class PageWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageUpdateResult))]
-    [Description(
-        "Updates page descriptions or existing plot frames; one Ctrl+Z undoes it. Outside scratch needs approval. " +
-        "Example: {\"project\":\"Line1\",\"pages\":[{\"name\":\"=F/1\",\"plot_frame\":\"FN1_015\"}]}.")]
+    [Description("Updates descriptions or existing plot frames on named pages. Omit/true previews; false executes. Outside scratch needs approval; one Ctrl+Z undoes the batch. See usage.")]
     public static async Task<CallToolResult> PageUpdateAsync(
         WritePipeline pipeline,
         [Description("Name or path from eplan_project_list")] string project,
         [Description("1-50 pages")] PageText[] pages,
         [Description("The one language to change; default: EPLAN UI")] string? language = null,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -157,6 +153,7 @@ internal sealed class PageWriteTools
             Project = ResultShaper.CleanText(outcome.Data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
             Language = outcome.Data?.Language ?? LanguageOf(outcome.Plan) ?? args.Language,
             Pages = outcome.Data is { } data
                 ? [.. data.Pages.Select(p => Change(p.Name, p.Description, p.Previous, p.PlotFrame, p.PreviousPlotFrame))]
@@ -171,7 +168,7 @@ internal sealed class PageWriteTools
             Recovered = outcome.Recovered,
             Hint = outcome.Recovered
                 ? "The response was lost, but EPLAN reported the change as committed; check the descriptions with eplan_page_get."
-                : ResultShaper.CleanText(outcome.Data?.Warning),
+                : dry_run ? WriteToolDefaults.ExecutionHint : ResultShaper.CleanText(outcome.Data?.Warning),
         };
         string count = ToolResults.Count(result.Pages.Count, "page");
         string summary = committed ? $"Updated the descriptions of {count}; Ctrl+Z in EPLAN undoes this step."

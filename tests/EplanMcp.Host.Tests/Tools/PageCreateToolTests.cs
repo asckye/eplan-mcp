@@ -56,16 +56,20 @@ public sealed class PageCreateToolTests : IDisposable
 
     public void Dispose() => Directory.Delete(_locations.Root, recursive: true);
 
-    [Fact]
-    public async Task ADryRun_ListsThePlannedPagesAndNeverExecutes()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(null)]
+    public async Task ADryRun_ListsThePlannedPagesAndNeverExecutes(bool? dryRun)
     {
-        CallToolResult result = await Create([Page("=GAA+A1&EFS1/5", "overview", "电源")], dryRun: true);
+        CallToolResult result = await (dryRun is null ? PageWriteTools.PageCreateAsync(_pipeline, "Line1", [Page("=GAA+A1&EFS1/5", "overview", "电源")], cancellationToken: TestContext.Current.CancellationToken) : Create([Page("=GAA+A1&EFS1/5", "overview", "电源")], dryRun: true));
 
         JsonElement data = result.StructuredContent!.Value;
         Assert.Equal(("not_started", true, JsonValueKind.Null), (data.GetProperty("execution").GetString(), data.GetProperty("dryRun").GetBoolean(), data.GetProperty("undo").ValueKind));
         JsonElement page = data.GetProperty("pages")[0];
         Assert.Equal(("=GAA+A1&EFS1/5", "Overview", "电源"), (page.GetProperty("name").GetString(), page.GetProperty("type").GetString(), page.GetProperty("description").GetString()));
         Assert.Equal("Dry run: would create 1 page. Nothing was changed.", Text(result, 0));
+        Assert.Equal("f1", data.GetProperty("fingerprint").GetString());
+        Assert.Contains("dry_run: false", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
         Assert.Empty(_bridge.Writes);
     }
 
