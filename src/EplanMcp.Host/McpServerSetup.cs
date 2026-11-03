@@ -169,6 +169,7 @@ internal static class McpServerSetup
             .WithTools<ActionTryTools>(HostJson.Options)
             .WithTools<PackTools>(HostJson.Options)
             .WithTools<PluginLibraryTools>(HostJson.Options)
+            .WithTools<PluginInstallTools>(HostJson.Options)
             .WithTools<AssetTools>(HostJson.Options)
             .WithTools<CabinetTools>(HostJson.Options)
             .WithTools<ContextTools>(HostJson.Options)

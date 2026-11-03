@@ -10,6 +10,8 @@ namespace EplanMcp.Host.Packs;
 internal sealed record PackInstallInfo(
     string File, string Id, string Version, string? Author, string Digest, long Bytes, IReadOnlyList<string> NativeFiles, IReadOnlyList<string> Capabilities, int Referenced)
 {
+    public PluginLibraryReadResult? Library { get; init; }
+
     /// <summary>The EPLAN files the dialog names at most; the rest are counted.</summary>
     public const int MaxNamed = 20;
 

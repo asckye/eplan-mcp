@@ -111,12 +111,15 @@ internal static class ApprovalTexts
         string size = Exports.ByteSize.Format(install.Bytes);
         string capabilities = install.Capabilities.Count == 0 ? (zh ? "无" : "none") : Value(string.Join(", ", install.Capabilities), zh);
         int more = install.NativeFiles.Count - Packs.PackInstallInfo.MaxNamed;
+        string origin = install.Library is not { } library ? string.Empty : zh
+            ? $"\n插件库：{Value(library.Name, zh)}\n来源类型：{library.SourceType}\n来源目录：{Value(library.Folder, zh)}"
+            : $"\nLibrary: {Value(library.Name, zh)}\nSource type: {library.SourceType}\nSource folder: {Value(library.Folder, zh)}";
         return new ApprovalAskArgs
         {
             Title = zh ? "安装别人的工程包？" : "Install someone else's engineering pack?",
-            Summary = zh
+            Summary = (zh
                 ? $"工具：{tool}\n文件：{Value(install.File, zh)}（{size}）\n工程包：{Value(install.Id, zh)} {Value(install.Version, zh)}\n作者（清单中写的，没有签名，未核实）：{author}\n摘要：{install.Digest}\n能力要求：{capabilities}\n引用包外的资源：{install.Referenced} 个\n其中的 EPLAN 文件（共 {install.NativeFiles.Count} 个）："
-                : $"Tool: {tool}\nFile: {Value(install.File, zh)} ({size})\nPack: {Value(install.Id, zh)} {Value(install.Version, zh)}\nAuthor (as the manifest says; unsigned, not checked): {author}\nDigest: {install.Digest}\nRequires: {capabilities}\nResources referenced outside the pack: {install.Referenced}\nIts EPLAN files ({install.NativeFiles.Count}):",
+                : $"Tool: {tool}\nFile: {Value(install.File, zh)} ({size})\nPack: {Value(install.Id, zh)} {Value(install.Version, zh)}\nAuthor (as the manifest says; unsigned, not checked): {author}\nDigest: {install.Digest}\nRequires: {capabilities}\nResources referenced outside the pack: {install.Referenced}\nIts EPLAN files ({install.NativeFiles.Count}):") + origin,
             Changes = [.. install.NativeFiles.Take(Packs.PackInstallInfo.MaxNamed).Select(f => Value(f, zh)), .. more > 0 ? [zh ? $"……另有 {more} 个" : $"... and {more} more"] : Array.Empty<string>()],
             Note = zh
                 ? "工程包只含数据，EplanMcp 从不执行其中的内容。安装后不可变，不会改变任何项目的锁定；EPLAN 只会在 scratch 副本中打开其中的项目。只安装你信任的来源。"
