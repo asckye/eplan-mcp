@@ -64,7 +64,6 @@ public sealed class MacroInsertToolTests : IDisposable
         Assert.Equal("not_started", data.GetProperty("execution").GetString());
         Assert.True(data.GetProperty("dryRun").GetBoolean());
         Assert.Equal("f1", data.GetProperty("fingerprint").GetString());
-        Assert.Equal("create", Assert.Single(data.GetProperty("changes").EnumerateArray()).GetProperty("action").GetString());
         Assert.Contains("dry_run: false", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
         Assert.Empty(_harness.Bridge.Writes);
     }

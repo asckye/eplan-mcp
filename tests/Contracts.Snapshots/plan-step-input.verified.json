@@ -259,9 +259,9 @@
                     "type": "number"
                   },
                   "variant": {
-                    "description": "From eplan_macro_get",
                     "type": "integer",
                     "default": 0,
+                    "description": "From eplan_macro_get",
                     "const": 0
                   },
                   "numbering": {

@@ -9837,7 +9837,6 @@
         "type": "object",
         "properties": {
           "project": {
-            "description": "From eplan_project_list",
             "type": "string"
           },
           "page": {
@@ -9845,24 +9844,21 @@
             "type": "string"
           },
           "x": {
-            "description": "mm",
             "type": "number"
           },
           "y": {
-            "description": "mm",
             "type": "number"
           },
           "macro": {
-            "description": "Path from eplan_macro_list; omit with part",
+            "description": "From eplan_macro_list",
             "type": "string"
           },
           "variant": {
-            "description": "From eplan_macro_get",
             "type": "integer",
             "default": 0
           },
           "numbering": {
-            "description": "keep: the macro's tags",
+            "description": "keep: macro tags",
             "type": "string",
             "default": "number",
             "enum": [
@@ -9892,7 +9888,7 @@
             "type": "string"
           },
           "part_variant": {
-            "description": "Part variant: 1 or unique",
+            "description": "Default 1",
             "type": "string"
           }
         },
@@ -21739,9 +21735,9 @@
                           "type": "number"
                         },
                         "variant": {
-                          "description": "From eplan_macro_get",
                           "type": "integer",
                           "default": 0,
+                          "description": "From eplan_macro_get",
                           "const": 0
                         },
                         "numbering": {
