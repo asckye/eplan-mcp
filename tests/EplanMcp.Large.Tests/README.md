@@ -230,6 +230,8 @@ src\EplanMcp.Bridge.Offline\bin\Release\net481\EplanMcp.Bridge.Offline.exe --var
 
 `BatchVerification` 的 trait 是 `Size=Large`、`Batch=Verification`，通过 `EPLANMCP_BATCH_VERIFY=1` 启用。使用 `eval-fixture.ps1 -WriteCopies -Force` 准备的新 `LargeWrite`；`PlanStepLiveSession` 只关闭已知夹具副本并核对它是唯一打开的 scratch 项目。Remote Client 的 `EPLREMOTE_HOST`（本机 IPv4）、`EPLREMOTE_PORT`（默认 49152）和可选 `EPLANMCP_EPLREMOTE` 见 [api-notes A41](../../docs/eplan/api-notes.md)。`TrialApprovals` 只逐次批准 API/action 试运行，拒绝解除写入暂停。
 
+读取方法优先选择满足既有前置条件且参数可由配方构造的重载，再按参数数量和签名排序。读取参数由 `fixtures/batch-read-recipes.json` 配置：Project 使用批次项目定位符，Page 使用页列表返回的第一个 Circuit 页定位符，需显式页的对象从同页发现，普通枚举使用目录首成员；已知配方取不到参数值记为 `skipped:no_context_value`。
+
 ```powershell
 $env:EPLANMCP_BATCH_VERIFY = '1'
 $env:EPLANMCP_BATCH_MINUTES = '120'

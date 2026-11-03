@@ -2,6 +2,10 @@
   <ItemGroup>
     <Compile Include="..\Shared\PlacementEditFixture.cs" Link="PlacementEditFixture.cs" />
     <Compile Include="..\Shared\SmallProjectInventory.cs" Link="SmallProjectInventory.cs" />
+    <Compile Include="..\EplanMcp.Large.Tests\BatchVerificationData.cs" Link="BatchVerificationData.cs" />
+    <Compile Include="..\EplanMcp.Large.Tests\BatchReadRecipes.cs" Link="BatchReadRecipes.cs" />
+    <Compile Include="..\EplanMcp.Large.Tests\BatchReadDiscovery.cs" Link="BatchReadDiscovery.cs" />
+    <EmbeddedResource Include="..\EplanMcp.Large.Tests\fixtures\batch-read-recipes.json" LogicalName="BatchReadRecipes.json" />
     <Compile Include="..\EplanMcp.Large.Tests\LiveFixtureProjects.cs" Link="Acceptance\LiveFixtureProjects.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceDrawingList.cs" Link="Acceptance\AcceptanceDrawingList.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceListFile.cs" Link="Acceptance\AcceptanceListFile.cs" />

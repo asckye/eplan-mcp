@@ -71,8 +71,9 @@ internal static class BatchValues
         foreach (string group in ApiTryCatalog.MethodGroups)
         {
             // Trial one overload per group, preferring the fewest required arguments.
-            string[] method = ApiTryCatalog.Methods(group).OrderBy(m => m.Length).ThenBy(m => m[1], StringComparer.Ordinal).First();
             bool write = ApiTryCatalog.MethodAccess(group) == "write";
+            string[] method = write ? ApiTryCatalog.Methods(group).OrderBy(m => m.Length).ThenBy(m => m[1], StringComparer.Ordinal).First()
+                : BatchReadRecipes.Default.SelectMethod(group);
             entries.Add(new(group + (write ? "#write" : ""), write ? "api-write" : "api-read", ReceiverKinds(method[1]),
                 Parameters: method.Skip(2).ToDictionary(n => n, n => ApiTryCatalog.ParameterShape(method[1], n)!, StringComparer.Ordinal), Method: true, Signature: method[1]));
         }
@@ -80,7 +81,7 @@ internal static class BatchValues
     }
     // Static and factory calls omit target; services retain main's Project locator anchor.
     internal static string[]? ObjectKinds(string group) => ApiTryCatalog.Shape(group) is { } shape ? ReceiverKinds(shape[1]) : [];
-    private static string[]? ReceiverKinds(string signature) => ApiTryCatalog.ReceiverShape(signature) is { } shape
+    internal static string[]? ReceiverKinds(string signature) => ApiTryCatalog.ReceiverShape(signature) is { } shape
         ? shape[0] is "handle" or "via" ? [] : DiscoveryKinds(ApiTryCatalog.Kinds(shape[0])) : null;
     private static string[] DiscoveryKinds(string[] kinds) => [.. ObjectReadTypes.Types.Where(ObjectReadTypes.Supported)
         .Where(name => kinds.Contains(name, StringComparer.OrdinalIgnoreCase))];

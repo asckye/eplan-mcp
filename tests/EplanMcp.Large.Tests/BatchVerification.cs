@@ -133,7 +133,7 @@ public sealed class BatchVerification(LiveEplan eplan)
             result.Detail = "Writes remain suspended; resume does not authorize releasing a previous unknown outcome.";
             return;
         }
-        if (entry.NeedsContext)
+        if (entry.Kind != "api-read" && entry.NeedsContext)
         { result.Outcome = "failed:needs_context"; return; }
         if (entry.Kind == "action")
         {
@@ -141,14 +141,20 @@ public sealed class BatchVerification(LiveEplan eplan)
             // Same operation as eplan_page_open, with the entry's cancellation token (A61).
             await bridge.InvokeAsync<PageOpenArgs, PageOpenData>(OperationNames.PageOpen, new() { Project = project, Page = page }, cancellationToken);
         }
-        Dictionary<string, object?>? parameters = await BatchValues.ArgumentsAsync(entry, kinds => LocatorAsync(bridge, project, kinds, cancellationToken));
+        BatchArguments arguments = entry.Kind == "api-read"
+            ? await new BatchReadDiscovery(bridge, project).ArgumentsAsync(entry, cancellationToken)
+            : new(await BatchValues.ArgumentsAsync(entry, kinds => LocatorAsync(bridge, project, kinds, cancellationToken)));
+        Dictionary<string, object?>? parameters = arguments.Values;
         if (parameters is null)
-        { result.Outcome = "failed:needs_context"; return; }
-        JsonElement? target = entry.ObjectKinds is null ? null : await LocatorAsync(bridge, project, entry.ObjectKinds, cancellationToken);
-        if (entry.ObjectKinds is not null && target is null)
-        { result.Outcome = "skipped:no_object"; return; }
-        if (target is not null)
-        { parameters["target"] = target; }
+        { result.Outcome = arguments.Outcome ?? "failed:needs_context"; result.Detail = arguments.Detail; return; }
+        if (entry.Kind != "api-read")
+        {
+            JsonElement? target = entry.ObjectKinds is null ? null : await LocatorAsync(bridge, project, entry.ObjectKinds, cancellationToken);
+            if (entry.ObjectKinds is not null && target is null)
+            { result.Outcome = "skipped:no_object"; return; }
+            if (target is not null)
+            { parameters["target"] = target; }
+        }
         string group = entry.Group;
         var api = ActivatorUtilities.CreateInstance<ApiTryTools>(provider);
         string? originalValue = null;

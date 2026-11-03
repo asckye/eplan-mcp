@@ -18,6 +18,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <!-- Input files the import tests copy below the imports root (S34's device list exports of the sample project). -->
     <None Include="fixtures\**" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="fixtures\batch-read-recipes.json" LogicalName="BatchReadRecipes.json" />
   </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">

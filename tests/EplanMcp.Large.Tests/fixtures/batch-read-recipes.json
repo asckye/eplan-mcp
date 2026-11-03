@@ -1,0 +1,12 @@
+{
+  "enum": "enum",
+  "Eplan.EplApi.DataModel.Project": "project",
+  "Eplan.EplApi.DataModel.Page": "circuit-page",
+  "Eplan.EplApi.DataModel.Function": "locator",
+  "Eplan.EplApi.DataModel.FunctionBase": "locator",
+  "Eplan.EplApi.DataModel.Placement": "locator",
+  "Eplan.EplApi.DataModel.StorableObject": "locator",
+  "Eplan.EplApi.DataModel.Connection": "locator",
+  "Eplan.EplApi.DataModel.E3D.Placement3D": "locator",
+  "Eplan.EplApi.DataModel.MasterData.SymbolLibrary": "locator"
+}
