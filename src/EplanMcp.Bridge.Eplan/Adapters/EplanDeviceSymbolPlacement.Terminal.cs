@@ -2,7 +2,6 @@ using Eplan.EplApi.Base;
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
-using Eplan.EplApi.DataModel.Graphics;
 using Eplan.EplApi.DataModel.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
@@ -40,6 +39,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         terminal.Create(strip, page, variant);
         terminal.Name = tag;
         terminal.Location = new PointD(args.X, args.Y);
+        EplanVisibleNames.Adjust(page, terminal);
         if (args.TerminalStripText is { } text)
         {
             CheckTerminal(create, "strip text is only set on a new strip");
@@ -52,27 +52,12 @@ internal sealed partial class EplanDeviceSymbolPlacement
             using MultiLangString actual = value.ToMultiLangString();
             CheckTerminal(actual.GetStringToDisplay(ISOCode.Language.L___) == text, "strip text reads back as '" + actual.GetStringToDisplay(ISOCode.Language.L___) + "'");
         }
+        // Customer redraw 2026-11-02: the strip definition keeps its symbol's default property arrangement ("-X6 =
+        // text"); it only lacked a visible name. Creating or undocking texts switched it to a user-defined arrangement.
         if (args.TerminalStripPosition is { } expected)
         {
             CheckTerminal(create && strip.IsPlaced && strip.Page.Name == page.Name && strip.Location.X == expected[0] && strip.Location.Y == expected[1], "strip definition page or position differs");
-            foreach (int numberId in new[] { 20214, 20011 })
-            {
-                PropertyPlacement? display = strip.PropertyPlacements.FirstOrDefault(p => { using AnyPropertyId id = p.DisplayedProperty; return id.AsInt == numberId; });
-                if (display is null)
-                {
-#pragma warning disable CA2000 // A39/A57: EPLAN owns context property placements, also after Abort.
-                    display = new PropertyPlacement();
-#pragma warning restore CA2000
-                    using AnyPropertyId id = numberId;
-                    display.Create(strip, id);
-                }
-                if (display.IsDocked)
-                { display.UndockText(); }
-                display.Location = new PointD(0, numberId == 20214 ? 0 : -4);
-                display.Height = 2.5;
-                display.IsVisible = true;
-                CheckTerminal(numberId == 20011 ? display.GetDisplayString() == args.TerminalStripText : display.GetDisplayString().EndsWith(name.Substring(name.LastIndexOf('-')), StringComparison.Ordinal), "strip displayed text differs");
-            }
+            EplanVisibleNames.Adjust(page, strip);
         }
         // A55: release the cached list before TransactionRunner can Abort; never access these objects afterwards.
         using FunctionPropertyList values = terminal.Properties;

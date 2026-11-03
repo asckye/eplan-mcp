@@ -24,7 +24,7 @@ public sealed class TerminalPlacementTests : IDisposable
     public void Dispose() => Terminal.OnCreate = null;
 
     [Fact]
-    public void PlacedDefinition_SetsIndependentPositionTextAndNativeDisplays()
+    public void PlacedDefinition_SetsIndependentPositionAndText_KeepsTheDefaultArrangement()
     {
         DevicePlaceArgs args = Args();
         args.TerminalStripPosition = [72, 120];
@@ -32,8 +32,8 @@ public sealed class TerminalPlacementTests : IDisposable
         TerminalStrip strip = Assert.Single(_page.AllPlacements.OfType<TerminalStrip>());
         Assert.Equal([72d, 120d], result.Terminal!.StripPosition!);
         Assert.Equal("Control box", result.Terminal.StripText);
-        Assert.Equal([20214, 20011], strip.PropertyPlacements.Select(p => p.DisplayedId));
-        Assert.All(strip.PropertyPlacements, p => Assert.True(p.IsVisible));
+        // Customer redraw 2026-11-02: no texts are created or undocked, so the symbol's own arrangement stays in use.
+        Assert.Empty(strip.PropertyPlacements);
     }
 
     [Fact]

@@ -68,9 +68,9 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
             Require(function.IsMainFunction);
         }
         function.Location = new PointD(DrawingCoordinates.MillimetresToApi(args.X), DrawingCoordinates.MillimetresToApi(args.Y));
-        // A PLC point's default 20010 row shows the card ("-KF1"); ordinary devices show their tag through display_properties.
-        if (args.PlcConnectionPoint is not null)
-        { EplanVisibleNames.Adjust(page, function); }
+        // Customer redraw 2026-11-02: with a visible name the symbol's default property arrangement shows the tag where the
+        // editor would (left of a contact); display_properties stay optional extras and switch to a user-defined arrangement.
+        EplanVisibleNames.Adjust(page, function);
         // A55: the only cached list is released while unwinding Place, BEFORE TransactionRunner can Abort.
         using FunctionPropertyList properties = function.Properties;
         WritePlcPoint(properties, args);
