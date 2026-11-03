@@ -43,7 +43,7 @@
 - `scheme`：使用的方案。省略时回显 EPLAN 当前方案的名称（`SchemeSetting.GetLastUsed`）。
 - 页名、方案名是项目或设置中的数据，经过 ResultShaper。
 - 一行摘要：`Exported 3 pages to 1 PDF file (204 KB) in a new folder; see 'directory'.`
-- 结果不带 `execution`（Read 级，mcp-tool-design 6.2）。
+- 结果不带 `execution`（Read 级，engineering-handbook.html#pa）。
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |

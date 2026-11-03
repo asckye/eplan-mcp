@@ -5,7 +5,7 @@ using DiffEngine;
 
 namespace EplanMcp.Host.Tests;
 
-/// <summary>Verify settings for every snapshot test in this assembly (docs/standards/testing.md 3).</summary>
+/// <summary>Verify settings for every snapshot test in this assembly (docs/standards/engineering-handbook.html#testing).</summary>
 internal static class SnapshotDefaults
 {
     /// <summary>

@@ -242,3 +242,11 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
 ### 方案 6：白名单可以在 `config.json` 中补充
 - 优点：工程师不必等新版本就能用某个 action。
 - 缺点：本地条目没有验证记录，也不经评审；模型可能说服工程师加入条目（T12 的变体）。需要时另写 ADR。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../process/development-workflow.md` → [手册开发流程条款](../standards/engineering-handbook.html#review)。
+- 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。
+- 原引用 `../standards/mcp-tool-design.md` → [手册 MCP 条款](../standards/engineering-handbook.html#pa)。

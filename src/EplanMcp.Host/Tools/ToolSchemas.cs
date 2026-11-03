@@ -6,7 +6,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// Post-processing of the schemas the SDK generates. The SDK omits <c>additionalProperties: false</c> (spike S4,
-/// api-notes C), which mcp-tool-design 5 requires so a misspelled argument is rejected instead of ignored.
+/// api-notes C), which engineering-handbook.html#pa requires so a misspelled argument is rejected instead of ignored.
 /// </summary>
 internal static class ToolSchemas
 {

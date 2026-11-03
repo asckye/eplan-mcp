@@ -3,7 +3,7 @@ using EplanMcp.Evals.Scoring;
 
 namespace EplanMcp.Evals.Tasks;
 
-/// <summary>The development set improves the tool descriptions; the holdout set only measures them (testing.md 5).</summary>
+/// <summary>The development set improves the tool descriptions; the holdout set only measures them (evals/README.md).</summary>
 internal enum TaskSet
 {
     Dev,

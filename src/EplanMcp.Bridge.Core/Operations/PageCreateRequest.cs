@@ -28,7 +28,7 @@ internal sealed class PageCreateRequest
 
     public string? Language { get; }
 
-    /// <summary>Every argument problem at once (mcp-tool-design 6.2) as INVALID_ARGUMENT, then the project.</summary>
+    /// <summary>Every argument problem at once (engineering-handbook.html#pa) as INVALID_ARGUMENT, then the project.</summary>
     public static PageCreateRequest Check(PageCreateArgs args, IProjectCatalog catalog, IPageWriter writer)
     {
         var violations = new List<string>();

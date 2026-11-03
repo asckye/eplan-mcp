@@ -7,7 +7,7 @@ using EplanMcp.Workbench.Localization;
 namespace EplanMcp.Workbench.Tests.Localization;
 
 /// <summary>
-/// The catalogue (workbench-ui LOC-*): one table of (key, English, Chinese), so a key cannot miss a language; what can
+/// The catalogue (docs/design/2026-10-20-m5-operability.md#workbench-implementation): one table of (key, English, Chinese), so a key cannot miss a language; what can
 /// still go wrong is a key declared twice, a blank or untranslated text, placeholders that differ between the two
 /// languages (a FormatException when the text is shown), or a key the views use that the table lacks.
 /// </summary>

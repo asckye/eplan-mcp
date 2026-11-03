@@ -29,7 +29,7 @@ internal sealed class ImportFiles(HostDataLocations locations)
     /// <summary>
     /// What is wrong with the form of <paramref name="file"/>, the tool argument <paramref name="argument"/>, as one
     /// violation; null when it is fine. Reads nothing, so a tool reports it with its other argument problems at once
-    /// (mcp-tool-design 6.2). <paramref name="extensions"/> are the tool's, with the dot, such as <c>.dxf</c>.
+    /// (engineering-handbook.html#pa). <paramref name="extensions"/> are the tool's, with the dot, such as <c>.dxf</c>.
     /// </summary>
     public static string? Problem(string argument, string? file, IReadOnlyList<string> extensions)
     {

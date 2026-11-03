@@ -65,7 +65,7 @@
   - `new DMObjectsFinder(project).GetPlaceholdersWithFilterScheme(null)`：不加筛选，列出项目中的全部占位符（示例项目 2 个，不到 0.01 秒）；按页过滤在 Bridge.Core 中按 `Placement.Page.Name` 做；
   - 名称、值集数和变量名由**生成的读取代码**读出：`catalog/wrappers.yaml` 选中 `PlaceHolder` 的 `Name`、`NumberOfRecords`、`NumberOfVariables`、`VariableNames`，生成器写出 `PlaceHolderProperties`（Contracts）和 `PlaceHolderApi.Read`（Bridge）；
   - 手写的部分：值集名 `get_NameOfRecord(i)`（带参数的属性，C# 中调用访问器方法，S29）、`AssignedObjects.Length`、`Page?.Name`；
-  - 变量的值：`GetValue(值集, 变量)` 返回 `MultiLangString`，用 `GetStringToDisplay(语言)` 读，回退语言按原始串 `get_Value(值集, 变量)` 找（同 `EplanText`，编码规范 9.5 第 13a 条）。S29 只用 `get_Value` 读过原始串（`de_DE@…;en_US@…;`）；**`GetValue` 返回同一份值是文档的说法，待 Large 测试确认**；
+  - 变量的值：`GetValue(值集, 变量)` 返回 `MultiLangString`，用 `GetStringToDisplay(语言)` 读，回退语言按原始串 `get_Value(值集, 变量)` 找（同 `EplanText`；[api-notes A11](../eplan/api-notes/reads-and-snapshots.md#a11-只读-api-的实机验证spike-s62026-10-19electric-p8在-action-中)）。S29 只用 `get_Value` 读过原始串（`de_DE@…;en_US@…;`）；**`GetValue` 返回同一份值是文档的说法，待 Large 测试确认**；
   - 当前值：`GetAllCurrentValues()` 返回 `PropertyValue[]`，按 `EplanText.ReadWithLanguage` 读，元素为 null 时为 null。S29 在 `SafetyPoint` 中读取，不能据此推断事务外也可读；2026-10-22 写副本上的 Large 测试确认，未锁定时会抛 `LockingException`。`concise` 不调用它；`detailed` 尝试读取，适配层仅捕获这个异常并标记不可用（DTO 中 `currentValues = null`），Bridge.Core 用 `CurrentValuesUnavailable` 统计本页结果中的数量，Host 据此生成提示。
 - 读出后立即复制到 DTO，不跨请求持有 EPLAN 对象。
 - **未验证**：`GetPlaceholdersWithFilterScheme(null)` 两次调用的顺序是否稳定（分页依赖排序，同页同名时依赖 EPLAN 的顺序）；读取是否改动项目文件（A14：调度器中的读取不改写项目文件，但没有对占位符核对过），由 Large 测试核对。

@@ -11,7 +11,7 @@ using TiaOpenness.Gui.Themes;
 namespace EplanMcp.Workbench.Tests.Themes;
 
 /// <summary>
-/// Contrast and colour (workbench-ui A11Y-06, A11Y-07, COL-01, COL-04, COL-05): every text the Workbench draws reaches
+/// Contrast and colour (docs/design/2026-10-20-m5-operability.md#workbench-implementation): every text the Workbench draws reaches
 /// 4.5:1 on its surface and every graphic that carries meaning 3:1, in the light, dark and high contrast palettes; the
 /// palettes have the same keys; colours live only in the palettes, and high contrast only follows the system colours.
 /// </summary>

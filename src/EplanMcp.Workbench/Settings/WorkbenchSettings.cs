@@ -7,7 +7,7 @@ using TiaOpenness.Gui.Themes;
 namespace EplanMcp.Workbench.Settings;
 
 /// <summary>
-/// What the engineer chose in the settings drawer (workbench-ui section 7), kept in <c>workbench\settings.json</c> of
+/// What the engineer chose in the settings drawer (docs/design/2026-10-20-m5-operability.md#workbench-implementation), kept in <c>workbench\settings.json</c> of
 /// the data root. Nothing here changes how approvals work (APR-16): the deadline and the channels are the Host's.
 /// </summary>
 /// <param name="Language">The interface language; null follows the system's (LOC-10).</param>

@@ -30,3 +30,11 @@ CI 继续在推送后运行，作为非阻塞检查；失败在 `main` 上向前
 - 合并前的权威检查使用本机环境；有 EPLAN API 时可包含插件构建。
 - 维护者负责执行本地关卡，CI 失败可能在变更已进入 `main` 后发现，须及时补修复变更。
 - EPLAN 实机验证仍按[实机验证文档](../process/live-verification.md)记录证据与待验项。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../process/development-workflow.md#2-工作项生命周期` → [手册开发流程条款](../standards/engineering-handbook.html#review-flow)。
+- 原引用 `../process/development-workflow.md#5-分支与提交` → [手册开发流程条款](../standards/engineering-handbook.html#review-git)。
+- 原引用 `../process/development-workflow.md#7-本地关卡与-ci` → [手册开发流程条款](../standards/engineering-handbook.html#build-tiers)。

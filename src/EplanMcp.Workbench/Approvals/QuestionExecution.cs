@@ -1,7 +1,7 @@
 namespace EplanMcp.Workbench.Approvals;
 
 /// <summary>
-/// What became of an approved write (workbench-ui APR-12), from <c>approval.outcome</c>. It only changes what the
+/// What became of an approved write (docs/design/2026-10-20-m5-operability.md#workbench-implementation), from <c>approval.outcome</c>. It only changes what the
 /// answered group shows: it decides nothing and enables nothing.
 /// </summary>
 public enum QuestionExecution

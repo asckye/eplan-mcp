@@ -3,7 +3,7 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Bridge;
 
-/// <summary>The Host-side errors about reaching EPLAN. Messages tell the model what to do next (mcp-tool-design 6).</summary>
+/// <summary>The Host-side errors about reaching EPLAN. Messages tell the model what to do next (engineering-handbook.html#pa).</summary>
 internal static class BridgeErrors
 {
     public static BridgeError NotConnected() => new()

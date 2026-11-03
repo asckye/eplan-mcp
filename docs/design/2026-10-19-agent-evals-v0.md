@@ -5,11 +5,11 @@
 | 状态 | Implemented |
 | 作者 | asckye |
 | 关联 Issue | — |
-| 相关文档 | [M2 设计](2026-10-18-m2-read-core.md) 第 7 节与 Q1；[测试规范第 5 节](../standards/testing.md#5-agent-评测)；[工具设计规范第 2 节](../standards/mcp-tool-design.md#2-设计流程) |
+| 相关文档 | [M2 设计](2026-10-18-m2-read-core.md) 第 7 节与 Q1；[Agent 评测说明](../../evals/README.md)；[手册 MCP 条款](../standards/engineering-handbook.html#mcp-contract) |
 | 最后更新 | 2026-10-19 |
 
 ## 1. 背景
-M2 的完成标准是"只读任务的 Agent 评测成功率 ≥ 90%"。13 个只读工具都已实现，但还没有评测框架。单元测试证明工具"能工作"，评测要回答的是模型"会不会用"：选对工具、一次传对参数、读懂结果、出错后能自行纠正（[测试规范第 5 节](../standards/testing.md#5-agent-评测)）。
+M2 的完成标准是"只读任务的 Agent 评测成功率 ≥ 90%"。13 个只读工具都已实现，但还没有评测框架。单元测试证明工具"能工作"，评测要回答的是模型"会不会用"：选对工具、一次传对参数、读懂结果、出错后能自行纠正（[Agent 评测说明](../../evals/README.md)）。
 
 M2 设计 Q1 已经决定：用 Claude Code 的无界面模式 `claude -p` 驱动模型，沿用现有登录。对本机 Claude Code 2.1.299 的核查（2026-10-19）：
 - 可用的开关：`--json-schema`（结构化输出）、`--mcp-config` 与 `--strict-mcp-config`、`--allowedTools`、`--output-format stream-json`、`--no-session-persistence`、`--restricted`、`--tools`、`--disable-slash-commands`、`--model`、`--max-budget-usd`、`--max-turns`（`--help` 中没有列出，[CLI 参考](https://code.claude.com/docs/en/cli-reference)中有）。
@@ -24,7 +24,7 @@ M2 设计 Q1 已经决定：用 Claude Code 的无界面模式 `claude -p` 驱�
 
 **非目标**
 - 写操作的评测（M3）。
-- 在 CI 中跑评测：需要 EPLAN 授权、登录态，会计费（[开发流程第 7 节](../process/development-workflow.md#7-ci-关卡)：自托管 runner、发布前运行）。
+- 在 CI 中跑评测：需要 EPLAN 授权、登录态，会计费；原自托管 runner 设想已由 [ADR-0020](../adr/0020-no-self-hosted-runner.md) 的开发机手动运行取代。
 - 用模型给答案打分（LLM 判分）：v0 只用程序判分，结果可复现。
 - 比较不同模型或客户端：v0 固定一个模型。
 
@@ -47,7 +47,7 @@ flowchart LR
 ## 4. 详细设计
 
 ### 4.1 任务文件
-放在 `evals/tasks/<id>.yaml`，在[测试规范第 5 节](../standards/testing.md#5-agent-评测)格式的基础上细化：
+放在 `evals/tasks/<id>.yaml`，在[Agent 评测说明](../../evals/README.md)格式的基础上细化：
 
 ```yaml
 id: device-pages
@@ -73,7 +73,7 @@ budget: { max_tool_calls: 12, max_minutes: 4 }
 - `pick` 和 `answer` 用 JSONPath 的一个小子集：`$`、`.字段`、`[n]`、`[*]`。运行器自己实现，不引入 JSONPath 库。
 - 比较方式：`equals`（数字按数值，字符串按原文）、`equals_ignore_case`、`set_equals`（数组，不计顺序、去重）、`contains`（数组包含、或字符串包含）、`at_least` / `at_most`（数字）。期望值可以是 `oracle.<名>` 或字面量。
 - 任务加载时校验：`id` 与文件名一致、`set` 合法、`answer` 是对象 schema、每个检查引用的 `oracle` 都已定义、工具名已注册。校验失败的任务不运行，报告中列出。
-- 文件格式用 YAML，与测试规范一致。解析用 `YamlDotNet`（MIT，只用于评测运行器，不随产品分发）。
+- 文件格式用 YAML，现有格式见 [evals 使用说明](../../evals/README.md#任务文件)。解析用 `YamlDotNet`（MIT，只用于评测运行器，不随产品分发）。
 
 ### 4.2 运行一次任务
 1. **预检**（每次运行一次）：
@@ -107,9 +107,9 @@ budget: { max_tool_calls: 12, max_minutes: 4 }
 每次运行生成 `.local/evals/<yyyyMMdd-HHmmss>/`：
 - `report.json`：全部数据；
 - `report.md`：中文摘要，按开发集和保留集分别给出成功率、调用次数和 token 的中位数，列出失败任务和失败原因；
-- `<任务>/transcript.jsonl`：原始轨迹，**失败的轨迹是改进工具描述的第一手材料**（[工具设计规范第 2 节](../standards/mcp-tool-design.md#2-设计流程)）。
+- `<任务>/transcript.jsonl`：原始轨迹，**失败的轨迹是改进工具描述的第一手材料**（[手册 MCP 条款](../standards/engineering-handbook.html#mcp-contract)）。
 
-`.local/` 不进仓库（轨迹中有夹具项目的数据）。发布前的评测结果按[开发流程第 8 节](../process/development-workflow.md#8-版本与发布)摘要写入发布说明。
+`.local/` 不进仓库（轨迹中有夹具项目的数据）。发布前的评测结果按[手册开发流程条款](../standards/engineering-handbook.html#build-release)摘要写入发布说明。
 
 ### 4.4 命令行
 ```
@@ -134,7 +134,7 @@ dotnet run --project evals/EplanMcp.Evals -- check     # 只校验任务文件�
 | 多语言 | "用英文列出 =GAA+A1&EFS1/1 的页描述" | `language` 参数 |
 | 超出能力 | 题目要求修改项目（例如"把 -FC1 改名"） | 只有只读工具时，应说明做不到，不应声称已完成；用结构化答案中的 `done: false` 判定 |
 
-开发集用来改进工具描述；保留集只在验收时运行，不据此调整描述（[测试规范第 5 节](../standards/testing.md#5-agent-评测)）。具体题目在任务集的 PR 中给出，每题都在夹具上人工核对过一次标准调用的结果。
+开发集用来改进工具描述；保留集只在验收时运行，不据此调整描述（[Agent 评测说明](../../evals/README.md)）。具体题目在任务集的 PR 中给出，每题都在夹具上人工核对过一次标准调用的结果。
 
 ### 4.6 代码结构
 ```
@@ -156,7 +156,7 @@ tests/EplanMcp.Evals.Tests/   Small：任务校验、JSONPath 子集、各比较
 1. **在任务文件中写死夹具的答案**（例如"321 页"）：简单，但夹具或 EPLAN 版本一变就要逐个改题，而且答案的出处不清楚。否决，改用标准调用。
 2. **Anthropic API 或 Claude Agent SDK 直接驱动**：需要单独的 API 密钥和计费，且评测的不是工程师实际使用的客户端。M2 设计 Q1 已决定用 `claude -p`。
 3. **用模型判分**：能评判开放式回答，但结果有波动、难以复现。v0 不用；需要评判解释类回答时再考虑。
-4. **任务用 JSON 而不是 YAML**：不需要新依赖，但多行中文提示写起来不便，也与测试规范不一致。
+4. **任务用 JSON 而不是 YAML**：不需要新依赖，但多行中文提示写起来不便，与当时选择的 YAML 任务格式不同。
 
 ## 7. 测试与验证
 - **Small**（进 CI）：任务文件的校验（各种错误一次列出）；JSONPath 子集；每种比较方式的边界（数值与字符串、大小写、空数组）；stream-json 解析（工具调用计数、工具错误后的纠正、结构化答案、usage）；预算判定；报告汇总。

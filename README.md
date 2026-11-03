@@ -103,12 +103,12 @@ node eng/scripts/apply-archify-font.mjs
 | 系统怎么设计、为什么这样设计 | [架构](docs/architecture/architecture.md) · [ADR](docs/adr/README.md) |
 | CLI JSON 输出与安装验收 | [CLI 参考](docs/reference/cli.md) · [发布流程](docs/process/release.md#安装验收清单m5-发布前逐项通过) |
 | EPLAN API 的已验证事实，以及计划覆盖哪些 API | [api-notes 主题索引](docs/eplan/api-notes.md) · [API 覆盖矩阵](docs/eplan/api-coverage.md) |
-| 工具怎么设计 | [MCP 工具设计规范](docs/standards/mcp-tool-design.md) |
-| 代码怎么写 | [编码规范](docs/standards/coding-standards.md) |
-| 怎么测试 | [测试策略](docs/standards/testing.md) |
-| Workbench 界面怎么做 | [Workbench 界面规范](docs/standards/workbench-ui.md) |
-| 安全 | [安全标准与威胁模型](docs/standards/security.md) · [SECURITY.md](SECURITY.md) |
-| 怎么协作、怎么发布 | [开发流程](docs/process/development-workflow.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [预览版发布流程](docs/process/release.md) |
+| 工具怎么设计 | [手册 MCP 条款](docs/standards/engineering-handbook.html#pa) |
+| 代码怎么写 | [手册第 3 章](docs/standards/engineering-handbook.html#code) |
+| 怎么测试 | [手册第 12 章](docs/standards/engineering-handbook.html#testing) |
+| Workbench 界面怎么做 | [手册界面条款](docs/standards/engineering-handbook.html#ui) · [Workbench 实现记录](docs/design/2026-10-20-m5-operability.md#workbench-implementation) |
+| 安全 | [项目威胁模型](docs/architecture/architecture.md#13-威胁模型) · [SECURITY.md](SECURITY.md) |
+| 怎么协作、怎么发布 | [手册开发流程条款](docs/standards/engineering-handbook.html#review) · [CONTRIBUTING.md](CONTRIBUTING.md) · [预览版发布流程](docs/process/release.md) |
 | 借鉴了哪些业界实践 | [参考资料与落地对照](docs/references.md) |
 | 模板 | [设计文档](docs/templates/design-doc.md) · [工具规格](docs/templates/tool-spec.md) · [ADR](docs/adr/template.md) |
 

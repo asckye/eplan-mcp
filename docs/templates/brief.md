@@ -23,4 +23,4 @@
 
 ## 边界
 
-本次包含/不包含的范围、依赖、未验证事项、风险与回退。估计生产代码和文档行数，目标 200 行、超过 400 行按 [流程第 1 节](../process/development-workflow.md#1-五条基本原则) 拆成独立 brief 与关卡。
+本次范围、依赖、未验证事项、风险与回退；变更规模采用[手册快速交付条款](../standards/engineering-handbook.html#fast)。

@@ -1,5 +1,5 @@
 # Code style is enforced at build time (EnforceCodeStyleInBuild=true in Directory.Build.props).
-# Rationale for each rule: docs/standards/coding-standards.md
+# Rationale for each rule: docs/standards/engineering-handbook.html#code
 root = true
 
 [*]

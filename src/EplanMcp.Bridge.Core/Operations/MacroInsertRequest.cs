@@ -52,7 +52,7 @@ internal sealed class MacroInsertRequest
     /// <summary>True for numbering <c>number</c>, false for <c>keep</c>.</summary>
     public bool Number { get; }
 
-    /// <summary>Every argument problem at once (mcp-tool-design 6.2), then the project, the page and the macro.</summary>
+    /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the macro.</summary>
     public static MacroInsertRequest Check(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter)
     {
         var violations = new List<string>();

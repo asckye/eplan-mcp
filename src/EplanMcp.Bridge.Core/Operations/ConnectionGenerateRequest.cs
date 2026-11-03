@@ -23,7 +23,7 @@ internal sealed class ConnectionGenerateRequest
     /// <summary>The pages' full names as EPLAN has them, in the order given.</summary>
     public IReadOnlyList<string> Pages { get; }
 
-    /// <summary>Every argument problem at once (mcp-tool-design 6.2) as INVALID_ARGUMENT, then the project and every missing page.</summary>
+    /// <summary>Every argument problem at once (engineering-handbook.html#pa) as INVALID_ARGUMENT, then the project and every missing page.</summary>
     public static ConnectionGenerateRequest Check(ConnectionGenerateArgs args, IProjectCatalog catalog, IPageReader reader)
     {
         var violations = new List<string>();

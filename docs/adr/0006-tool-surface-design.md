@@ -36,3 +36,10 @@ Anthropic 的工程实践指出：整合工作流的少量工具优于一对一�
 - **好的**：模型选工具更准，token 更省，单个任务需要的调用次数更少；契约稳定，容易测试。
 - **代价**：每个任务型工具内部要组合多个 EPLAN 操作，实现更复杂；覆盖面增长得比"全包装"方式慢。
 - **兜底**：在需要 EPLAN 的长尾功能时，提供受控的 `eplan_action_run`（只允许执行白名单中、已标定级别的 action）作为通用逃生口。它不是任意代码执行。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../process/development-workflow.md#8-版本与发布` → [手册开发流程条款](../standards/engineering-handbook.html#build-release)。
+- 原引用 `../standards/mcp-tool-design.md` → [手册 MCP 条款](../standards/engineering-handbook.html#pa)。

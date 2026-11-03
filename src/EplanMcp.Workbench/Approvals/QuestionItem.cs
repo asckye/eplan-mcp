@@ -8,7 +8,7 @@ using TiaOpenness.Gui.ViewModels;
 namespace EplanMcp.Workbench.Approvals;
 
 /// <summary>
-/// A question as the approval queue shows it (workbench-ui APR-06, APR-07, APR-09 to APR-12): every label from the
+/// A question as the approval queue shows it (docs/design/2026-10-20-m5-operability.md#workbench-implementation): every label from the
 /// catalogue in the current language, every text from the Host made plain first (APR-08), the countdown as of now.
 /// <see cref="Refresh"/> re-reads all of it after the question, the language or the clock moved.
 /// </summary>

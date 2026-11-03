@@ -12,7 +12,15 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 
 <a id="硬性规则违反任何一条都不能合并"></a>
 
-原五条硬性规则对应手册 AI-10、GIT-04、G-05（含 18.3）、GIT-07、ARC-12，见[逐项对照表](docs/standards/README.md#原规则--手册条款)。
+## 硬性规则（违反任何一条都不能合并）
+
+原五条硬性规则采用以下手册条款，含义见[逐项对照表](docs/standards/README.md#原规则--手册条款)：
+
+1. [AI-10](docs/standards/engineering-handbook.html#ai-machine)
+2. [GIT-04](docs/standards/engineering-handbook.html#review-git)
+3. [G-05 与 18.3](docs/standards/engineering-handbook.html#review-rfc)
+4. [GIT-07](docs/standards/engineering-handbook.html#review-git)
+5. [ARC-12](docs/standards/engineering-handbook.html#arch)
 
 ## 本机环境注意事项
 - 开发机装有 EPLAN 2026.0.3（`C:\Program Files\EPLAN\Platform\2026.0.3\Bin`），通常以 `/Variant:"Pro Panel"` 启动。

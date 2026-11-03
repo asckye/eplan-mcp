@@ -42,7 +42,7 @@
   </ItemGroup>
 
   <!--
-    Maple Mono CN (SIL OFL 1.1, workbench-ui TYP-01) is never committed: eng\scripts\get-fonts.ps1 downloads it on
+    Maple Mono CN (docs/design/2026-10-20-m5-operability.md#workbench-implementation) is never committed: eng\scripts\get-fonts.ps1 downloads it on
     request into the git-ignored .local\fonts. When the two weights of the type ramp are there (or in WorkbenchFontDir),
     they and the licence are copied to Fonts\ next to the exe; without them the Workbench uses the system fallbacks.
   -->

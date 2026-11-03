@@ -43,7 +43,7 @@ internal sealed class ImportDxfRequest
     /// <summary>True for the middle of the page (<c>PositionMode.Center</c>), false for its lower left corner.</summary>
     public bool Centered => Position == Center;
 
-    /// <summary>Every argument problem at once (mcp-tool-design 6.2), then the project, the page and the file.</summary>
+    /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the file.</summary>
     public static ImportDxfRequest Check(ImportDxfArgs args, IProjectCatalog catalog, IPageReader pages, IDrawingImporter importer)
     {
         var violations = new List<string>();

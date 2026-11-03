@@ -7,7 +7,7 @@ using EplanMcp.Workbench.Shell;
 namespace EplanMcp.Workbench.Tests.Shell;
 
 /// <summary>
-/// The font tokens (workbench-ui TYP-01) and the ligatures (TYP-11). Maple Mono CN itself is not in the repository or
+/// The font tokens (docs/design/2026-10-20-m5-operability.md#workbench-implementation) and the ligatures (TYP-11). Maple Mono CN itself is not in the repository or
 /// on CI; with it the tokens name it first (checked by hand, see the PR), without it they name the fallbacks.
 /// </summary>
 [Collection(WpfTestGroup.Name)]

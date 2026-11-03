@@ -32,7 +32,7 @@
     <EmbeddedResource Include="..\..\CLAUDE.md" LogicalName="AgentRules.CLAUDE.md" />
     <EmbeddedResource Include="..\Contracts.Snapshots\server-contract.verified.json" LogicalName="Contracts.server-contract.verified.json" />
     <!-- Embed documentation so Small tests validate repository files without runtime file-system access. -->
-    <EmbeddedResource Include="..\..\docs\standards\security.md" LogicalName="SecurityDocs.security.md" />
+    <EmbeddedResource Include="..\..\docs\architecture\architecture.md" LogicalName="SecurityDocs.architecture.md" />
     <EmbeddedResource Include="..\..\docs\tools\README.md" LogicalName="ToolDocs.README.md" />
     <EmbeddedResource Include="..\..\docs\tools\eplan_*.md" LogicalName="ToolDocs.%(Filename)%(Extension)" />
     <!-- Embed release sources so Small tests validate the shipped content without file-system access. -->

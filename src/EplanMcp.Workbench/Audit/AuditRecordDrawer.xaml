@@ -5,9 +5,9 @@
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
     Focusable="False">
   <!--
-    One audit record (M5 design 4.4 item 2; workbench-ui 3.1: 520 epx from the right; DLG-10: a modal pane, Tab stays
-    inside, Esc closes). Every field as the file has it: the name as a technical identifier (TYP-08), the value as plain
-    text that can be selected and copied (CTL-12, CTL-13). Nothing here changes the record (NAV-10).
+    One audit record (docs/design/2026-10-20-m5-operability.md#workbench-implementation, M5 design 4.4 item 2): a 520 epx modal pane from the right,
+    with Tab contained and Esc closing it. Field names are technical identifiers; values are selectable plain text.
+    Nothing here changes the record.
   -->
   <Border Width="520" Margin="{StaticResource Ui.Gap.Drawer}" HorizontalAlignment="Right" Style="{StaticResource Primer.Drawer}"
           AutomationProperties.IsDialog="True" AutomationProperties.Name="{l:Tr Audit.Record}"

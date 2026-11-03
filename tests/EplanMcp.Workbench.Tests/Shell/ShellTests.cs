@@ -10,7 +10,7 @@ using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 namespace EplanMcp.Workbench.Tests.Shell;
 
 /// <summary>
-/// The shell (workbench-ui 3.1, section 7, NAV-*, KEY-07): one way to change the page, where focus goes, the window
+/// The shell (docs/design/2026-10-20-m5-operability.md#workbench-implementation): one way to change the page, where focus goes, the window
 /// title, the Sider's breakpoint, the menu as one group, and the minimum size.
 /// </summary>
 [Collection(WpfTestGroup.Name)]

@@ -11,7 +11,7 @@ using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 namespace EplanMcp.Workbench.Tests.Settings;
 
 /// <summary>
-/// The settings drawer (workbench-ui DLG-10, LOC-08, COL-09): a modal pane with its title focused, Tab kept inside, Esc
+/// The settings drawer (docs/design/2026-10-20-m5-operability.md#workbench-implementation): a modal pane with its title focused, Tab kept inside, Esc
 /// and the scrim closing it with focus back on the opener; language and theme apply at once.
 /// </summary>
 [Collection(WpfTestGroup.Name)]

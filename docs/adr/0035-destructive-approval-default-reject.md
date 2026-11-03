@@ -44,3 +44,10 @@
 ## 决定
 
 2026-11-01 项目负责人接受：破坏性问题按上面的两步批准实现，写入问题保持对等；随 ADR-0034 的 Workbench 改版在 v0.5.0 之后实现，同时修订 ADR-0011 第 4 节、ADR-0014 第 6 条、SEC-24 及 workbench-ui 的相关规则。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。
+- 原引用 `../standards/workbench-ui.md` → [Workbench 实现记录](../design/2026-10-20-m5-operability.md#workbench-implementation)。

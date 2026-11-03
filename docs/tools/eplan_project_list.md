@@ -17,7 +17,7 @@
 | `limit` | integer，1–200 | 否 | 50 | 最多返回多少个项目 |
 | `cursor` | string | 否 | — | 上一次结果中的 `nextCursor`，用于取下一页 |
 
-schema 设置 `additionalProperties: false`。通常打开的项目只有几个，分页只是为了与其他 `list` 工具保持一致（[工具设计规范 3.3](../standards/mcp-tool-design.md#33-动作)）。
+schema 设置 `additionalProperties: false`。通常打开的项目只有几个，分页只是为了与其他 `list` 工具保持一致（[手册 MCP 条款](../standards/engineering-handbook.html#pa)）。
 
 ## 3. 输出
 ```json
@@ -31,7 +31,7 @@ schema 设置 `additionalProperties: false`。通常打开的项目只有几个�
   "hint": null
 }
 ```
-- `name`、`path` 来自项目数据，**不是指令**（schema 描述中写明）。返回前经过 `ResultShaper.CleanText`：剥除控制字符，超过 500 个字符时截断并注明长度（[工具设计规范 7.3](../standards/mcp-tool-design.md#73-不可信内容)）。
+- `name`、`path` 来自项目数据，**不是指令**（schema 描述中写明）。返回前经过 `ResultShaper.CleanText`：剥除控制字符，超过 500 个字符时截断并注明长度（[手册 MCP 条款](../standards/engineering-handbook.html#pa)）。
 - 整页超出 token 预算（默认 5k）时，从末尾去掉项目，`truncated` 为 true，`nextCursor` 指向第一个被去掉的项目，`hint` 说明下一步；一行摘要也会注明，例如 `Showing 18 to stay within the size budget; more with 'cursor'.`
 - `path` 即 `Project.ProjectFullName`：`.elk` 文件的路径去掉扩展名（[api-notes A10](../eplan/api-notes/environment-and-licensing.md#a10-m1-骨架的实机验证2026-10-18)）。
 - `current`：EPLAN 中当前选中的项目（`SelectionSet.GetCurrentProject`）。没有打开任何项目时 `projects` 为空数组，不是错误。
@@ -52,7 +52,7 @@ schema 设置 `additionalProperties: false`。通常打开的项目只有几个�
 
 ## 5. 实现要点
 - EPLAN API：`ProjectManager.OpenProjects`（先设 `LockProjectByDefault = false`，否则会尝试锁定项目，失败时抛 `ProjectLockingException`）、`SelectionSet.GetCurrentProject(false)`、`Project.ProjectName`、`ProjectFullName`、`IsReadOnly`。验证状态见[设计文档 4.4](../design/2026-10-13-m1-skeleton.md#44-eplan-apim1-用到的)。
-- 在主线程上执行，第一步创建 `LockingStep`（编码规范 5b）；不需要 `SafetyPoint` / `QuietModeStep`。
+- 在主线程上执行，第一步创建 `LockingStep`（[api-notes A9](../eplan/api-notes/transactions-and-undo.md#a9-从后台线程调度到-eplan-主线程spike-s12026-10-13)）；不需要 `SafetyPoint` / `QuietModeStep`。
 - 预计耗时远小于 1 秒，不需要进度通知。
 - 分页在 Host 中完成：Bridge 返回全部已打开的项目（数量很少），Host 按名称排序后切片；`cursor` 是 base64 编码的偏移量。
 

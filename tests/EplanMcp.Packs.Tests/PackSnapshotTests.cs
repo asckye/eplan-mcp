@@ -6,7 +6,7 @@ namespace EplanMcp.Packs.Tests;
 
 /// <summary>
 /// A canonical <c>pack.json</c> and <c>pack.lock.json</c> as reviewed snapshots in tests/Contracts.Snapshots, as the
-/// server contract is (testing.md 3): a change of the file formats fails here until the new snapshot is reviewed and
+/// server contract is (tests/EplanMcp.Host.Tests/README.md#契约快照): a change of the file formats fails here until the new snapshot is reviewed and
 /// committed, with a new schemaVersion or lockVersion when old readers could not read the new files. Medium: the
 /// snapshots are files.
 /// </summary>

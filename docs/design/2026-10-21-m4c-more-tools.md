@@ -36,7 +36,7 @@
 - **目标**
   - 五组能力都有面向任务的工具（ADR-0006），按 4.1 分四批交付。每批都有：spike 的结论（记入 api-notes）、工具规格、scratch 副本上的 Large 测试、Agent 评测任务。
   - 所有写入走现有的流水线。新增两种安全面：导入的输入文件（4.5，SEC-31）和系统主数据（4.8，ADR-0019）。
-  - 工具数将从 28 增加到约 55，所以实现 Profile（[工具设计规范](../standards/mcp-tool-design.md)第 10 节，4.2）。
+  - 工具数将从 28 增加到约 55，所以实现 Profile（[手册 MCP 条款](../standards/engineering-handbook.html#pa)第 10 节，4.2）。
 - **非目标**
   - 预规划数据的导入：等授权（Q6）。
   - 受控 action 白名单（M4 设计 Q5 仍然有效）。
@@ -95,7 +95,7 @@ flowchart LR
 | 4 | `eplan_translation_export` | 导出 | 从翻译库导出到文件：制表符文本或 XML（[规格](../tools/eplan_translation_export.md)） |
 
 ### 4.2 Profile
-- 工具设计规范第 10 节已经规定：`core` 不超过 25 个工具，覆盖最常见的任务；`full` 包含全部非 Code 级工具。目前没有实现。
+- 当时的 Profile 设计取 `core` 最多 25 个常用工具、`full` 包含全部非 Code 级工具；本节初稿时尚未实现。当前集合与默认值见 [CLI 参考](../reference/cli.md#工具发现与日志)，发现策略采用[手册 MCP-34](../standards/engineering-handbook.html#mcp-catalog)。
 - 选择方式：`eplanmcp serve --profile core|full`。`client-config` 按客户端写入：对工具数有上限的客户端写 `core`，其他写 `full`（Q7）。
 - `tools/list` 只返回所选 Profile 中的工具；`eplan_tool_usage` 的 `tool` 枚举也只列出它们，模型不会被引向调用不了的工具。
 - `core` 是全部 Read、Write 工具和导出工具（M4 时共 25 个），Destructive 工具只在 `full` 中；M4c 的新工具默认只在 `full` 中。

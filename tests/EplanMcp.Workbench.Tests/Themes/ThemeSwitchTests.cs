@@ -6,7 +6,7 @@ using TiaOpenness.Gui.Themes;
 namespace EplanMcp.Workbench.Tests.Themes;
 
 /// <summary>
-/// Light, dark and high contrast (workbench-ui COL-02, COL-09): the vendored ThemeManager swaps the palette in the
+/// Light, dark and high contrast (docs/design/2026-10-20-m5-operability.md#workbench-implementation): the vendored ThemeManager swaps the palette in the
 /// application's resources in place, and high contrast wins over the chosen theme.
 /// </summary>
 [Collection(WpfTestGroup.Name)]

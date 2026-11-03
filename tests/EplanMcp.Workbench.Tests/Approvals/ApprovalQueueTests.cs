@@ -5,7 +5,7 @@ using EplanMcp.Workbench.Protocol;
 namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
-/// The queue (workbench-ui APR-11 to APR-13, ADR-0014 decision 3): at most 50 waiting questions however many Hosts
+/// The queue (docs/design/2026-10-20-m5-operability.md#workbench-implementation): at most 50 waiting questions however many Hosts
 /// connect, each question its own whatever its request ID, the first ending wins, and an outcome only ever changes what
 /// is shown.
 /// </summary>

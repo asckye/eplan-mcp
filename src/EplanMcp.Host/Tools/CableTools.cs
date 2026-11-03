@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// The cable tools (docs/tools/eplan_cable_get.md). eplan_device_list with category Cable lists the cables, so there is
-/// no list tool (tool spec 1). Parameter names are snake_case as the SDK publishes them (mcp-tool-design 5).
+/// no list tool (tool spec 1). Parameter names are snake_case as the SDK publishes them (engineering-handbook.html#pa).
 /// </summary>
 [McpServerToolType]
 internal sealed class CableTools

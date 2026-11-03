@@ -106,3 +106,56 @@
 | `eplan_translation_export` | full | 写入 | [eplan_translation_export.md](eplan_translation_export.md) |
 | `eplan_translation_import` | full | 写入 | [eplan_translation_import.md](eplan_translation_import.md) |
 | `eplan_workflow_plan` | full | 只读 | [eplan_workflow_plan.md](eplan_workflow_plan.md) |
+
+
+## 工具名称与 EPLAN 概念
+
+下表解释现有工具名中的资源词。实际已注册名称、参数、默认值、分页字段和注解来自上面的契约快照；规划中的工具留在相应设计与路线图，表中不据此新增名称规则。
+
+| 资源 | 含义 | EPLAN 对应概念 |
+|---|---|---|
+| `session` | 连接的 EPLAN 实例 | 进程、Remote 端口 |
+| `project` | 项目 | `Project` |
+| `revision` | 项目的修订（变更跟踪）：状态、修订记录 | 链接文件扩展名 `.elk`/`.ell`/`.elr`、`PROJ_REVISION_LOG_*`、`HEServices.Revision` |
+| `page` | 页面 | `Page` |
+| `page_text` | 页面自由文本（含组内文本，不含图框） | `Graphics.Text` |
+| `placement` | 页上的二维放置对象；创建自由文本、图形线和矩形，以及同页绝对移动 | `Placement`、`Graphics.Text/Line/Rectangle`；图形线不是导线 |
+| `device` | 设备，即带标识的一组功能 | `Function`（主功能和辅助功能） |
+| `connection` | 逻辑连接、连线 | `Connection` |
+| `cable` | 电缆 | `Cable` |
+| `terminal` | 端子 | `Terminal` |
+| `terminal_strip` | 端子排（如 `eplan_terminal_strip_list`） | `TerminalStrip` |
+| `plc` | PLC 卡、地址 | `PLC` 相关功能 |
+| `part` | 部件（物料）；也指系统部件库本身（`eplan_part_export`） | 部件库 `MDPart`、`MDPartsDatabase` |
+| `macro` | 宏 | 窗口宏、页面宏 |
+| `placeholder` | 占位符对象：值集、变量和当前值（宏插入后随之进入项目） | `Graphics.PlaceHolder` |
+| `symbol` | 符号 | `SymbolLibrary`、`SymbolVariant` |
+| `property` | 属性 | `PropertyValue` |
+| `object` | 数据字典对象，只读通用查找与属性读取 | `StorableObject` 及具体对象类型 |
+| `selection` | 当前窗口的对象选择与当前页；设置只改变 UI 状态，沿用 page_open 的 Read 注解 | `HEServices.SelectionSet`、`Edit.SelectObjects` |
+| `report` | 报表 | 报表页、报表模板 |
+| `check` | 检查 | 检查运行、消息管理 |
+| `export` | 导出 | PDF、DXF、图片…… |
+| `import` | 导入到项目，用法同 `export`：动作的位置放格式或交换数据类别（`eplan_import_dxf`、`eplan_import_pxf`、`eplan_import_list`、`eplan_import_plc`） | DXF、PXF、项目清单、PLC 总线交换数据 |
+| `language` | 项目的语言：显示语言、翻译语言 | `Translate.SetDisplayedLanguages`、`AddProjectLanguage` |
+| `translation` | 系统翻译库（所有项目共用） | `Translate.TranslateDatabase` |
+| `scratch` | 沙箱项目 | 本项目的概念 |
+| `message` | EPLAN 系统消息 | 系统消息树 |
+| `action` | EPLAN 的 action，受控的 `eplan_action_run` 只执行白名单条目（[ADR-0021](../adr/0021-action-run-whitelist.md)） | `ActionManager`、`ActionCallingContext` |
+| `action_catalog` | 官方与本机 UI action 的只读目录（[ADR-0030](../adr/0030-action-catalog-tiers.md)），查询不授予执行权限 | 官方 actions 及本机功能区/菜单定义 |
+| `tool` | 本服务器的工具，只用于元工具 `eplan_tool_usage` | 本项目的概念 |
+| `api` | ADR-0032 B 级离线能力目录，搜索重载组及查询签名、状态与证据 | 已提交的 API 目录与覆盖映射 |
+| `pack` | 工程包：开发目录 `packs-dev\`、已安装的版本 `packs\`（M6 设计 4.1） | 本项目的概念；包中的原生文件是 EPLAN 的宏、项目等 |
+| `pack_library` | 内置、本地和共享的插件库及其只读索引 | 本项目的概念；安装前的发现来源 |
+| `asset` | 工程包中的一个资源：原生文件，或 EplanMcp 生成的知识文档（候选、模块、缺口等，M6 设计 4.1.3） | 本项目的概念 |
+| `cabinet`、`rule` | 柜与配置绑定、规则（M6 设计 4.5.1） | 本项目的概念 |
+| `context` | 按范围取得的工程上下文及来源；当前默认柜 | Host 聚合包索引与规范快照 |
+| `workflow` | 工程任务的步骤定义；内联步骤和包内工作流的当前形态见相应工具 | 本项目的编译输入，不是 EPLAN action |
+| `plan` | 编译后的有序计划及执行、校验、差异结果 | Host 计划模型，步骤映射到封闭的 Bridge 操作目录 |
+| `task` | 长任务的状态与结果引用；当前同一 Host 内存查询 | Host 任务，不是 EPLAN 对象或 Bridge 请求 ID |
+
+已发布动作的具体语义见相应工具：`replace` 是页面自由文本的字面替换，`set`/`remove` 用于项目语言等集合操作，`try` 是目录条目的未验证试执行，`open` 是编辑器页面聚焦。`eplan_export_<格式>` 与 `eplan_import_<格式或类别>` 使用格式/类别作为末段，其中 `eplan_import_list` 的 `list` 是交换清单类别。`schema` 返回定义，`find` 按数据字典类型、页面和名称查找对象。命名背景见 [ADR-0006](../adr/0006-tool-surface-design.md)，现有安全分类决定见 [ADR-0005](../adr/0005-safety-model.md)。
+
+## 共享结果与模型用法
+
+[共享结果契约](error-reference.md)记录现有错误 reason、`execution` 四值和对应阶段；[eplan_tool_usage](eplan_tool_usage.md)记录按 Profile/开关生成的工具枚举与用法资源。项目页名采用 EPLAN 完整名称（如 `=AP+ST1/3`），设备可用短标识（如 `-K1`）或工具接受的完整标识；几何工具的毫米单位、左下原点和 y 向上坐标见各工具参数。实际任务评测入口在 [evals/README.md](../../evals/README.md)。

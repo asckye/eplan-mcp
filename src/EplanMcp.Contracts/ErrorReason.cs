@@ -1,7 +1,7 @@
 namespace EplanMcp.Contracts;
 
 /// <summary>
-/// Error reasons shared by the Bridge and the Host, as listed in docs/standards/mcp-tool-design.md, section 6.3.
+/// Error reasons shared by the Bridge and the Host, as listed in docs/tools/error-reference.md.
 /// Add a reason there before adding it here; never use string literals for reasons elsewhere in the code.
 /// </summary>
 public static class ErrorReason

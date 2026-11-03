@@ -19,6 +19,14 @@ M8 T7a 增加原生位置框：框内设备保留自己的结构，不继承框�
 
 M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿既有写入策略、审批和审计，按部件调用保持兼容。产品 Large 验收代码已补，尚未运行。
 
+当前库符号参数示例来自 [Usage 的 Examples](../../src/EplanMcp.Host/Tools/Usage/eplan_device_place.md)：
+
+```json
+{"project":"Line1","page":"=GAA+A1&EFS1/60","library":"IEC_symbol","symbol":"K","symbol_variant":0,"x":80,"y":160,"tag":"-K2","display_properties":[{"property_id":20214,"offset_x_mm":4,"offset_y_mm":4}],"connection_designations":["A1","A2"],"dry_run":true}
+```
+
+注册参数使用 `x`/`y` 和必填库变体 `symbol_variant`；坐标单位为毫米，原点在页左下角，y 向上。该示例由 Host 的用法示例测试校验参数形状；原生放置的实机状态见本页第 7 节与[待验台账](../process/large-pending.md)。
+
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|

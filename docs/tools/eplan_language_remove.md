@@ -45,7 +45,7 @@
 | `INVALID_ARGUMENT` | `languages` 为空、重复或形式不对；有语言不是项目的翻译语言；是源语言 | `not_started` | `metadata.violations` 列出全部问题；`metadata.candidates` 列出项目的翻译语言 |
 | `BACKUP_FAILED` | 同 `eplan_page_delete` | `not_started` | 同 `eplan_page_delete` |
 | `EPLAN_OPERATION_FAILED` | EPLAN 删除时报错，或读回时语言仍在翻译语言中（`metadata.notRemoved`） | `rolled_back` | 见第 5 节：回滚之后还要写回语言设置；附带 EPLAN 的消息 |
-| `OUTCOME_UNKNOWN` | 写回语言设置失败，或写回后读回与原值不同；提交或回滚本身失败 | `unknown` | 不要重复调用；`metadata.translation`、`metadata.display` 给出原值，`metadata.backup` 给出备份，请工程师在项目设置中恢复或打开备份。原规格写的是 `EPLAN_OPERATION_FAILED` 加 `unknown`，按工具设计规范 6.2 的不变式（`unknown` 当且仅当 `OUTCOME_UNKNOWN`）改为这一行 |
+| `OUTCOME_UNKNOWN` | 写回语言设置失败，或写回后读回与原值不同；提交或回滚本身失败 | `unknown` | 不要重复调用；`metadata.translation`、`metadata.display` 给出原值，`metadata.backup` 给出备份，请工程师在项目设置中恢复或打开备份。原规格写的是 `EPLAN_OPERATION_FAILED` 加 `unknown`，按[现有错误契约](error-reference.md)（`unknown` 当且仅当 `OUTCOME_UNKNOWN`）改为这一行 |
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_delete` | 同 `eplan_page_delete` | 同 `eplan_page_delete` |
 
 ## 5. 实现要点

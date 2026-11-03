@@ -7,7 +7,7 @@ using ModelContextProtocol.Protocol;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// The two result shapes every tool returns (mcp-tool-design 6 and 7): success = one-line summary + the same data
+/// The two result shapes every tool returns (engineering-handbook.html#pa): success = one-line summary + the same data
 /// as JSON text + <c>structuredContent</c>; error = <c>isError</c> with <c>{"error": …}</c> as text and no
 /// structured content, so a client validating <c>outputSchema</c> is never handed an error object.
 /// </summary>
@@ -43,7 +43,7 @@ internal static class ToolResults
     public static string Count(int count, string noun) =>
         count.ToString(CultureInfo.InvariantCulture) + " " + noun + (count == 1 ? string.Empty : "s");
 
-    /// <summary>Argument problems, all at once (mcp-tool-design 6.2), as INVALID_ARGUMENT.</summary>
+    /// <summary>Argument problems, all at once (engineering-handbook.html#pa), as INVALID_ARGUMENT.</summary>
     public static CallToolResult InvalidArguments(IReadOnlyList<string> violations) => Error(InvalidArgumentError(violations));
 
     /// <summary>The INVALID_ARGUMENT error of <see cref="InvalidArguments"/>.</summary>

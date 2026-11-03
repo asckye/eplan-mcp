@@ -35,7 +35,7 @@ internal sealed class NewProjectRequest
 
     public string DataFolder => Target + ".edb";
 
-    /// <summary>Every argument problem at once (mcp-tool-design 6.2), then a folder that is not empty, then the file.</summary>
+    /// <summary>Every argument problem at once (engineering-handbook.html#pa), then a folder that is not empty, then the file.</summary>
     public static NewProjectRequest Check(NewProjectArgs args, string extension)
     {
         var violations = new List<string>();

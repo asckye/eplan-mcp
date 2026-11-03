@@ -6,9 +6,8 @@
     xmlns:commands="clr-namespace:EplanMcp.Workbench.Commands"
     Focusable="False">
   <!--
-    The status page (M5 design 4.4 item 4, workbench-ui section 7): the checks of doctor in groups, each line with its
-    severity in an icon and in words (ERR-07), the Host's text as plain text (CTL-12); write suspensions also in a Banner
-    (STS-06); doctor runs when the page opens and on Refresh (F5), never on its own.
+    The status page (docs/design/2026-10-20-m5-operability.md#workbench-implementation, M5 design 4.4 item 4): doctor checks in groups,
+    with their status and explanation shown together.
   -->
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Primer.PageHead}">

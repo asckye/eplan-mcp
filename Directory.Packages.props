@@ -2,7 +2,7 @@
   <!--
     Central Package Management: every NuGet version is declared here exactly once.
     Projects reference packages without a Version attribute.
-    Adding a dependency needs a reason in the commit body (see docs/process/development-workflow.md).
+    Adding a dependency needs a reason in the commit body (see docs/standards/engineering-handbook.html#review).
   -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
@@ -58,7 +58,7 @@
     <!-- Apache-2.0. Runs on Microsoft.Testing.Platform, which global.json selects for `dotnet test`. -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
     <!--
-      MIT. Tool contract snapshots (docs/standards/testing.md 3), test projects only. From 33.0 the Verify core package
+      MIT. Tool contract snapshots (docs/standards/engineering-handbook.html#testing), test projects only. From 33.0 the Verify core package
       ships under the Open Source Maintenance Fee EULA (a fee for revenue-generating users) instead of MIT, so Verify is
       pinned to 32.x: moving to 33 is the project owner's decision, and this pin makes restore fail until it is taken.
       32.0.1 is built against xunit.v3 3.2 and runs on 4.x.

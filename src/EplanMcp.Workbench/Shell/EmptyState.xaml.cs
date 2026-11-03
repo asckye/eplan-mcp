@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace EplanMcp.Workbench.Shell;
 
-/// <summary>The one empty-state component (workbench-ui ERR-05): a title and a sentence, both from the catalogue.</summary>
+/// <summary>The one empty-state component (docs/design/2026-10-20-m5-operability.md#workbench-implementation): a title and a sentence, both from the catalogue.</summary>
 public partial class EmptyState : UserControl
 {
     public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(nameof(Title), typeof(string), typeof(EmptyState), new PropertyMetadata(string.Empty));

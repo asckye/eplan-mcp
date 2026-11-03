@@ -6,9 +6,8 @@
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
     Focusable="False">
   <!--
-    The approval queue (workbench-ui section 11, M5 design 4.6): the waiting or the answered questions on the left, the
-    shown one on the right, or below them in a narrow window (APR-06, LAY-03). Answering has one path, the two buttons of
-    the shown question (APR-01, APR-02).
+    The approval queue (docs/design/2026-10-20-m5-operability.md#workbench-implementation, M5 design 4.6): waiting and answered questions on the left,
+    the shown question on the right or below in a narrow window. Its two buttons are the only answer path.
   -->
   <DockPanel>
     <!-- The page head of 3.4, as every page draws it: the title is level 1, focusable, not a Tab stop. -->

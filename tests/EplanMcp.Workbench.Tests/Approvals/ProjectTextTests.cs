@@ -3,7 +3,7 @@ using EplanMcp.Workbench.Approvals;
 namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
-/// Project text as shown (workbench-ui APR-08, SEC-23, T20): nothing in it can reorder what is shown, hide characters,
+/// Project text as shown (docs/design/2026-10-20-m5-operability.md#workbench-implementation): nothing in it can reorder what is shown, hide characters,
 /// fake lines, or push the rest of the list out of view; what it says stays as it is.
 /// </summary>
 [Trait("Size", "Small")]

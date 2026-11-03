@@ -7,7 +7,7 @@
 | 图 | 内容 | 文字版（权威来源） |
 |---|---|---|
 | [系统架构](system-architecture/system-architecture.html) | 工程师、MCP 客户端、Host、Bridge、EPLAN 之间的关系；策略与审批、审计；Bridge 运行在 EPLAN 进程内 | [架构文档第 3、5 节](../architecture/architecture.md#3-系统上下文) |
-| [开发工作流程](development-workflow/development-workflow.html) | 从 Issue 到合并：变更分级、设计与 ADR、实现与评审、CI 和实机测试 | [开发流程第 2、3 节](../process/development-workflow.md#2-工作项生命周期) |
+| [开发工作流程](development-workflow/development-workflow.html) | 从 Issue 到合并：变更分级、设计与 ADR、实现与评审、CI 和实机测试 | [手册开发流程条款](../standards/engineering-handbook.html#review-flow) |
 | [只读调用的时序](read-call-sequence/read-call-sequence.html) | 一次只读工具调用经过 Host、Bridge、EPLAN 主线程再返回 | [架构文档 6.2 节](../architecture/architecture.md#62-只读调用) |
 | [写调用：审批与事务的时序](write-call-sequence/write-call-sequence.html) | dry-run、MCP 多轮请求审批、事务执行、审计 | [架构文档 6.3 节](../architecture/architecture.md#63-写调用审批与事务) |
 

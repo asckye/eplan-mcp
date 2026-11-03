@@ -3,7 +3,7 @@
     Runs the CI gates locally and, with -Push, pushes the current branch straight to main.
 
 .DESCRIPTION
-    The local gate replaces waiting for CI before changes reach main (development-workflow.md section 7, project owner
+    The local gate replaces waiting for CI before changes reach main (engineering-handbook.html#review, project owner
     2026-10-30). It runs the same steps as .github\workflows\build.yml and commit-rules.yml on the committed state:
 
       1. the working tree must be clean, including untracked files, so nothing that exists only on this machine can
@@ -19,7 +19,7 @@
 
     CI still runs every test assembly on every push to main as a non-blocking check; a red run is fixed with a
     follow-up commit.
-    Large tests are not part of the gate: they need EPLAN and are run by hand (testing.md).
+    Large tests are not part of the gate: they need EPLAN and are run by hand (engineering-handbook.html#testing).
 
 .PARAMETER Push
     Rebase onto origin/main before the gate and push HEAD to main after it passes.

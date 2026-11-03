@@ -15,7 +15,7 @@ using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 namespace EplanMcp.Workbench.Tests.Audit;
 
 /// <summary>
-/// An audit record's details (M5 design 4.4 item 2, workbench-ui 3.1, DLG-10, CTL-04, CTL-12, CTL-13): Enter on a row
+/// An audit record's details (docs/design/2026-10-20-m5-operability.md#workbench-implementation): Enter on a row
 /// opens every field of the record in a modal pane, focus on its title; Esc gives focus back to the row.
 /// </summary>
 [Collection(WpfTestGroup.Name)]

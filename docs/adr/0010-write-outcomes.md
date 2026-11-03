@@ -111,3 +111,12 @@ Write、Destructive（以及启用后的 Code）级工具的结果和错误都�
 ## 修订（2026-10-20，ADR-0011 与 spike S8）
 - 第 3 节"解除"中的渠道顺序由 [ADR-0011](0011-approval-out-of-band.md) 取代：确认只经工程师独立操作的窗口（Workbench 运行时优先，否则 EPLAN 内的对话框），不用 MCP elicitation；都不可用时返回 `WRITES_SUSPENDED`。
 - spike S8（api-notes A15）表明，EPLAN 在写入途中被结束时，事务中已做的修改留在项目里，撤销历史随进程消失。所以确认表单不再建议"用 Ctrl+Z 撤销"，而是说明项目中可能只有部分修改，请工程师对照变更清单检查、手工删除半成品或恢复副本（M3 设计 4.6）。B3 因此不可行。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../standards/mcp-tool-design.md#63-错误码表` → [项目错误契约](../tools/error-reference.md)。
+- 原引用 `../process/development-workflow.md#8-版本与发布` → [手册开发流程条款](../standards/engineering-handbook.html#build-release)。
+- 原引用 `../standards/mcp-tool-design.md` → [手册 MCP 条款](../standards/engineering-handbook.html#pa)。
+- 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。

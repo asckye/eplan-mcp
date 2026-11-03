@@ -7,7 +7,7 @@ using TiaOpenness.Gui.Localization;
 namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
-/// The approval queue page's logic (workbench-ui APR-03 to APR-12, T21): earliest deadline first, the shown question kept
+/// The approval queue page's logic (docs/design/2026-10-20-m5-operability.md#workbench-implementation): earliest deadline first, the shown question kept
 /// as that very question, the next one after an answer, no answer before the guard opens or after the question ended,
 /// and the ended questions with their results and outcomes. Wired to the queue as the app wires it, on the WPF thread:
 /// each change is taken in there, later than it happened.

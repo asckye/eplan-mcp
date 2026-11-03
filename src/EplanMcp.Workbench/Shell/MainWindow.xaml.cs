@@ -20,7 +20,7 @@ using TiaOpenness.Gui.Localization;
 namespace EplanMcp.Workbench.Shell;
 
 /// <summary>
-/// The Workbench window (workbench-ui 3.1): Sider, Header and the pages. Every page change goes through
+/// The Workbench window (docs/design/2026-10-20-m5-operability.md#workbench-implementation): Sider, Header and the pages. Every page change goes through
 /// <see cref="Navigate"/> (NAV-02), so the focus rules live in one place.
 /// </summary>
 public partial class MainWindow : Window

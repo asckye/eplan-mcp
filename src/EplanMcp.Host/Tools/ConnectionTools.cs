@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// The connection tools (docs/tools/eplan_connection_list.md). Parameter names are snake_case because the SDK publishes
-/// them as written (mcp-tool-design 5); the class is internal, so CA1707 does not apply.
+/// them as written (engineering-handbook.html#pa); the class is internal, so CA1707 does not apply.
 /// </summary>
 [McpServerToolType]
 internal sealed class ConnectionTools

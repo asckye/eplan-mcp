@@ -14,7 +14,7 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
-/// Examples and tool names in model-facing text match the registered tools (mcp-tool-design 10): every example in a
+/// Examples and tool names in model-facing text match the registered tools (engineering-handbook.html#pa): every example in a
 /// tool's description and in the Examples section of its usage file is a valid argument object for that tool, and no
 /// text names an <c>eplan_*</c> tool that is not registered. That every tool has a usage file is checked in
 /// <see cref="ToolContractTests"/>.
@@ -271,7 +271,7 @@ public sealed partial class ToolUsageExampleTests : IDisposable
         _ => throw new NotSupportedException($"JSON Schema type '{type}'"),
     };
 
-    /// <summary>A tool name as mcp-tool-design 3 forms it: eplan_ plus at least two lower-case words.</summary>
+    /// <summary>Published names (docs/tools/README.md#工具名称与-eplan-概念): eplan_ plus at least two lower-case words.</summary>
     [GeneratedRegex(@"\beplan_[a-z]+(?:_[a-z]+)+\b")]
     private static partial Regex ToolName();
 }

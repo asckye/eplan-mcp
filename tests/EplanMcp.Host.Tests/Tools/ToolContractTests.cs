@@ -10,7 +10,7 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
-/// The rules of mcp-tool-design 12 that can be checked mechanically, on the tools exactly as <c>serve</c> registers
+/// The rules of engineering-handbook.html#pa that can be checked mechanically, on the tools exactly as <c>serve</c> registers
 /// them. The full contract is snapshotted in <see cref="ToolContractSnapshotTests"/>.
 /// </summary>
 [Trait("Size", "Small")]
@@ -296,14 +296,14 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void EveryTool_FollowsTheNamingRule()
     {
-        // Explicitly approved two-word resources and PDF import category (mcp-tool-design 3.2).
+        // Published two-word resources and PDF import category (docs/tools/README.md#工具名称与-eplan-概念).
         Assert.All(Tools, t => Assert.Matches("^eplan_([a-z]+|terminal_strip|page_text|action_catalog|pack_library)_([a-z]+|pdf_comments)$", t.Name));
     }
 
     [Fact]
     public void EveryArgumentName_IsSnakeCase()
     {
-        // mcp-tool-design 5: response_format, name_prefix; the C# parameter names become the schema names as they are.
+        // engineering-handbook.html#pa: response_format, name_prefix; the C# parameter names become the schema names as they are.
         Assert.All(Tools, t => Assert.All(
             t.InputSchema.GetProperty("properties").EnumerateObject(),
             p => Assert.Matches("^[a-z]+(_[a-z]+)*$", p.Name)));
@@ -401,8 +401,8 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void Descriptions_StayWithinTheBudget()
     {
-        // ~250 tokens for description plus parameters (mcp-tool-design 4.2); 4 characters per token is a fair English estimate.
-        // eplan_tool_usage's list of tool names grows with every tool, so it is not counted (4.2).
+        // ~250 tokens for description plus parameters (engineering-handbook.html#pa); 4 characters per token is a fair English estimate.
+        // eplan_tool_usage's list of names grows with the registered set (docs/tools/eplan_tool_usage.md), so it is not counted.
         // P24's specified nested scope includes the complete ObjectLocator contract; keep its larger schema bounded too.
         // P11 publishes seven existing argument schemas as one closed union; bound that required catalog separately.
         // Property tools share closed target/selector schemas; budget their prose and structural schema separately.
@@ -472,7 +472,7 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void EveryTool_HasUsageWithAllFourTopics()
     {
-        // A tool without usage text, or a usage file without a tool, fails here (mcp-tool-design 10).
+        // A tool without usage text, or a usage file without a tool, fails here (engineering-handbook.html#pa).
         Assert.Equal(Tools.Select(t => t.Name).Order(StringComparer.Ordinal), ToolUsageCatalog.Usage.Keys.Order(StringComparer.Ordinal));
         Assert.All(ToolUsageCatalog.Usage.Values, sections => Assert.Equal(ToolUsageCatalog.Topics.Order(StringComparer.Ordinal), sections.Keys.Order(StringComparer.Ordinal)));
     }

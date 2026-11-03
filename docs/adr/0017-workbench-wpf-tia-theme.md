@@ -77,3 +77,9 @@ TIA 的 Workbench（2026-10-20 只读查阅其仓库）：
   - M5 设计 4.5 的观感规则改为引用 `docs/standards/workbench-ui.md`（已完成）；
   - 写 [`docs/standards/workbench-ui.md`](../standards/workbench-ui.md)（已完成）；
   - 第三方声明增加 TIA 的主题。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../standards/workbench-ui.md` → [Workbench 实现记录](../design/2026-10-20-m5-operability.md#workbench-implementation)。

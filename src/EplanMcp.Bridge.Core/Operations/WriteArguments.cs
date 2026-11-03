@@ -5,7 +5,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Checks every write operation makes before it plans or executes.</summary>
 public static class WriteArguments
 {
-    /// <summary>Writes never fall back to the project selected in EPLAN (mcp-tool-design 5).</summary>
+    /// <summary>Writes never fall back to the project selected in EPLAN (engineering-handbook.html#pa).</summary>
     public static void RequireProject(string? project, List<string> violations)
     {
         if (string.IsNullOrWhiteSpace(project))
@@ -14,7 +14,7 @@ public static class WriteArguments
         }
     }
 
-    /// <summary>All argument problems at once as INVALID_ARGUMENT, in the shape of the Host's own (mcp-tool-design 6.2).</summary>
+    /// <summary>All argument problems at once as INVALID_ARGUMENT, in the shape of the Host's own (engineering-handbook.html#pa).</summary>
     public static BridgeErrorException Invalid(IReadOnlyList<string> violations) => new(
         ErrorReason.InvalidArgument,
         "Invalid arguments: " + string.Join(" ", violations),

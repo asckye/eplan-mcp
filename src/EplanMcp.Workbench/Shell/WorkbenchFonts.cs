@@ -5,7 +5,7 @@ using System.Windows.Media;
 namespace EplanMcp.Workbench.Shell;
 
 /// <summary>
-/// The two font tokens, <c>Ui.Font</c> and <c>Ui.FontMono</c> (workbench-ui TYP-01): Maple Mono CN from the
+/// The two font tokens, <c>Ui.Font</c> and <c>Ui.FontMono</c> (docs/design/2026-10-20-m5-operability.md#workbench-implementation): Maple Mono CN from the
 /// <c>Fonts\</c> folder next to the exe when it is there, never installed; else, and for any character it lacks, the
 /// spec's system fallbacks. Set on the application's own resources, which win over the vendored Primer.xaml.
 /// </summary>

@@ -3,7 +3,7 @@ using EplanMcp.Workbench.Protocol;
 namespace EplanMcp.Workbench.Approvals;
 
 /// <summary>
-/// The questions of every connection (workbench-ui APR-13): the waiting ones and, for this run only, the ones that ended
+/// The questions of every connection (docs/design/2026-10-20-m5-operability.md#workbench-implementation): the waiting ones and, for this run only, the ones that ended
 /// (APR-11). Owner of each question's state, behind one lock: the pipe connections add questions and end them (deadline,
 /// cancel, disconnect, quit), the engineer answers them, and the first of these wins. <see cref="Changed"/> follows each
 /// change, outside the lock, on the thread that made it. The Host still judges whether an answer counts (SEC-06).

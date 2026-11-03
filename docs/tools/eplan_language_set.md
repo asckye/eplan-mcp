@@ -59,7 +59,7 @@
   3. `source` 与现值不同时：`ProjectSettings.SetStringSetting("TRANSLATEGUI.SOURCE_LANGUAGE", 代码, 0)`，`##_##` 也这样写（S23 r2 用它设 `de_DE`、写回 `##_##`，A28）；
   4. `display`：`new Translate().SetDisplayedLanguages(project, string.Join(",", display))`。**用逗号分隔**：分号或结尾分号都抛 `ArgumentException`（S23 r1，A28）。`["##_##"]` 时 `SetDisplayedLanguages` 不接受（`"##_##;"` 抛异常，A28），改为按存储形式写 `DISPLAYED_LANGUAGES = "##_##;"`，与写回用同一个方法；
   5. 读回三项设置，与请求不同就写回原值并抛出；EPLAN 抛异常时同样写回原值。比较：翻译语言是原有的加上新加的（不比顺序，EPLAN 怎样排序未验证）；显示语言只在给了 `display` 时比较，按顺序；源语言只在给了 `source` 时比较。没给 `display` 时 EPLAN 自己改了显示语言（删除语言时会这样，A28），不算失败，在 `after` 中如实列出。
-  - 写回在回滚之后进行，与 `eplan_language_remove` 相同（取消在提交前的最后一个安全点才被发现，那时已经不在变更之中）：`ProjectSettings.SetStringSetting("TRANSLATEGUI.TRANSLATE_LANGUAGES" / "TRANSLATEGUI.DISPLAYED_LANGUAGES", 原样的存储值, 0)`，源语言只在与原值不同时才写，在 `QuietModeStep` 中，不在 `SafetyPoint` 中（它不回滚设置，A28）；写回后读回核对，不同或写回抛异常时为 `OUTCOME_UNKNOWN`（`execution` 为 `unknown` 当且仅当 reason 为 `OUTCOME_UNKNOWN`，工具设计规范 6.2）。
+  - 写回在回滚之后进行，与 `eplan_language_remove` 相同（取消在提交前的最后一个安全点才被发现，那时已经不在变更之中）：`ProjectSettings.SetStringSetting("TRANSLATEGUI.TRANSLATE_LANGUAGES" / "TRANSLATEGUI.DISPLAYED_LANGUAGES", 原样的存储值, 0)`，源语言只在与原值不同时才写，在 `QuietModeStep` 中，不在 `SafetyPoint` 中（它不回滚设置，A28）；写回后读回核对，不同或写回抛异常时为 `OUTCOME_UNKNOWN`（`execution` 为 `unknown` 当且仅当 reason 为 `OUTCOME_UNKNOWN`，见[现有错误契约](error-reference.md)）。
   6. 包在 `TransactionScope` 中照常提交，但不依赖它回滚设置：项目设置不被 `SafetyPoint` 回滚（A28）。
 - **已验证**（S23 r1，A28）：`"en_US"` 和 `"en_US,zh_CN"` 被接受，存为 `en_US;` 和 `en_US;zh_CN;`。S23 r2：用 `SetStringSetting` 把源语言设为 `de_DE`、再写回 `##_##`，都生效。
 - **待 Large 测试确认**：`AddProjectLanguage` 的效果（S23 没有试）；显示语言改变后图上文本的变化；`ProjectSettings.SetStringSetting` 写入语言设置的效果（写回和清除显示语言都用它），写回原值能把 `##_##` 恢复。

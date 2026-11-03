@@ -38,7 +38,7 @@ internal sealed class PageRenumberRequest
     public string Numbering =>
         $"from {Number(Start)}, step {Number(Step)}, per structure, subpages: {Subpages}, keep text: {(KeepText ? "yes" : "no")}";
 
-    /// <summary>Every argument problem at once as INVALID_ARGUMENT (mcp-tool-design 6.2), then the project.</summary>
+    /// <summary>Every argument problem at once as INVALID_ARGUMENT (engineering-handbook.html#pa), then the project.</summary>
     public static PageRenumberRequest Check(PageRenumberArgs args, IProjectCatalog catalog)
     {
         var violations = new List<string>();

@@ -2,7 +2,7 @@ namespace EplanMcp.Contracts;
 
 /// <summary>
 /// A business error from the Bridge, carried as <c>error.data</c> of a JSON-RPC error with code
-/// <see cref="BridgeProtocol.BusinessErrorCode"/>. Mirrors the tool error shape (mcp-tool-design 6.2).
+/// <see cref="BridgeProtocol.BusinessErrorCode"/>. Mirrors the tool error shape (engineering-handbook.html#pa).
 /// </summary>
 public sealed class BridgeError
 {

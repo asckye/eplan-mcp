@@ -11,7 +11,7 @@
 - 审计记录可以被绕过或篡改而不留痕迹；
 - 日志、审计或错误信息泄露授权信息、凭据或项目数据到预期之外的位置。
 
-威胁模型和对应的防护措施见 [docs/standards/security.md](docs/standards/security.md)。
+威胁模型和对应的防护措施见 [项目威胁模型](docs/architecture/architecture.md#13-威胁模型)。
 
 ## 支持的版本
 只有最新的次版本会收到安全修复。

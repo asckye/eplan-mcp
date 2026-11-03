@@ -45,8 +45,8 @@
 | 连接与授权类错误 | 同 `eplan_project_list` | 同 `eplan_project_list` |
 
 ## 5. 实现要点
-- 🔴 **同一时间只使用一个 `Base.SysMessagesCollection`**（api-notes A11，编码规范 9.5 第 15 条）：新建第二个集合后再读第一个集合中消息的文本，会触发 EPLAN 内部的访问冲突。实现方式：每次调用只新建一个集合，**一次遍历**把需要的字段复制到 DTO，之后不再访问任何 `BaseException` 对象；倒序和过滤都在 DTO 上完成。
-- 这条规则也约束"操作前后系统消息差异"的收集（编码规范第 15 条）：本工具和差异收集**不能在同一次调度中各自新建集合**。
+- 🔴 **同一时间只使用一个 `Base.SysMessagesCollection`**（[api-notes A11](../eplan/api-notes/reads-and-snapshots.md#a11-只读-api-的实机验证spike-s62026-10-19electric-p8在-action-中)）：新建第二个集合后再读第一个集合中消息的文本，会触发 EPLAN 内部的访问冲突。实现方式：每次调用只新建一个集合，**一次遍历**把需要的字段复制到 DTO，之后不再访问任何 `BaseException` 对象；倒序和过滤都在 DTO 上完成。
+- 同一集合的生命周期也适用于"操作前后系统消息差异"的收集（同 A11）：本工具和差异收集**不能在同一次调度中各自新建集合**。
 - 游标指纹包含 `min_level`。两次调用之间 EPLAN 可能产生新消息，最新在前的顺序会让页错位；工具描述中说明。
 - 实现（`EplanSystemMessageReader` → `MessageListOperation`）：适配层用**无参构造**的 `SysMessagesCollection()`（S6 验证过它包含整个会话的消息、正向遍历和读取全部 490 条都正常），在一次 `foreach` 中复制 `MessageLevel`（按整数，保留枚举外的值）、`GetMessageIndex()`、`GetMessageText()`、`NumberOfOccurrences`；集合本身不是 `IDisposable`，它的枚举器是，由 `foreach` 释放；消息对象属于 EPLAN，不释放也不保留。级别过滤、倒序和切片都在 Bridge.Core 中对记录完成。不使用 `SysMessagesCollection(书签, 级别)`：其级别参数是"最低级别"还是"精确级别"尚未验证（M2 设计 4.5）。整个插件中只有这一处创建系统消息集合。
 - **未验证、需在 Large 测试中确认**：正向遍历的顺序是否为从旧到新（"最新在前"依赖这一点）；在调度器中（不在 action 中）读取是否同样正常；连续调用两次是否不出现访问冲突（每次调用新建一个集合，旧集合不再访问）。

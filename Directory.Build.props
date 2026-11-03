@@ -1,7 +1,7 @@
 <Project>
   <!--
     Repository-wide build rules. These are the coding standard made executable:
-    docs/standards/coding-standards.md explains each choice; change both together.
+    Project build configuration is described in CONTRIBUTING.md (Build configuration).
   -->
   <PropertyGroup>
     <Product>EplanMcp</Product>

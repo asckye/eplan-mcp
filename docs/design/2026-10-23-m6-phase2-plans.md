@@ -214,7 +214,7 @@ BridgeError.Metadata 仍是 string 字典：新的 guard/inspect 操作只在固
 
 `PlanToolResults` 的 outputSchema 显式声明终态/任务回执/失败结果分支；失败 `isError=true` 同时保留计划摘要和 error 的 structuredContent 及同内容文本，不更改共享 ToolResults。Read 查询错误不带 execution；找到失败任务/计划时 isError=false。
 
-实现时同步 `Contracts/ErrorReason.cs`、标准 mcp-tool-design 6.2/6.3/8、schema/往返/ExecutionInvariants 和工具契约快照；扩展的是计划五值校验器，不把 partially_committed 加入单步 ExecutionState。五工具在 McpServerSetup、ToolProfiles(full)、ToolUsageCatalog/Usage 注册；不增加 core 条目，逻辑归 workflow 工具集，不顺带实现 ADR-0022 全套动态发现。apply 四注解固定 false/true/false/false，运行时 tier 仍取步骤最高级；CI 显式登记这个计划例外。
+实现时同步 `Contracts/ErrorReason.cs`、标准 engineering-handbook.html#pa/6.3/8、schema/往返/ExecutionInvariants 和工具契约快照；扩展的是计划五值校验器，不把 partially_committed 加入单步 ExecutionState。五工具在 McpServerSetup、ToolProfiles(full)、ToolUsageCatalog/Usage 注册；不增加 core 条目，逻辑归 workflow 工具集，不顺带实现 ADR-0022 全套动态发现。apply 四注解固定 false/true/false/false，运行时 tier 仍取步骤最高级；CI 显式登记这个计划例外。
 
 ## 5. 安全与审批通道
 
@@ -269,7 +269,7 @@ EPLAN 的 ApprovalAskArgs 已有 Title/Summary/Changes/Note，可显示相同元
 | P24 | 最小 context 聚合与工具（200） | P05/P06 | Small：预算/稳定排序/来源去重；Medium：缺配置/绑定/多柜拒绝；Large：按页哈希与来源一致 |
 | P25 | 完整任务验收与使用文档（140） | P23/P24 | Medium：4.17 场景 3/4/5/7/8；Large+Agent：新建后打开、真实修改、手工改动 PLAN_STALE、选择改变、等待审批、缺能力 |
 
-Large 全用示例材料的 scratch 副本，按 testing.md 在相关写工具/Bridge PR 合并前实跑，结果附 PR；无 EPLAN 的检查必须用 Small/Medium，不能以测试代码存在代替实测。不得在本设计步骤运行 EPLAN。
+Large 全用示例材料的 scratch 副本，按 手册第 12 章 在相关写工具/Bridge PR 合并前实跑，结果附 PR；无 EPLAN 的检查必须用 Small/Medium，不能以测试代码存在代替实测。不得在本设计步骤运行 EPLAN。
 
 ## 8. 发布与兼容性
 

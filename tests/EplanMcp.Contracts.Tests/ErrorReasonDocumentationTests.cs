@@ -3,18 +3,18 @@ using System.Reflection;
 namespace EplanMcp.Contracts.Tests;
 
 /// <summary>
-/// ErrorReason says "add a reason to mcp-tool-design 6.3 before adding it here", and ADR-0010's execution states are
-/// listed in 6.2: these tests hold the code to the documented contract.
+/// The project error reference lists ErrorReason and ADR-0010's execution states; these tests hold the code to that
+/// documented contract.
 /// </summary>
 [Trait("Size", "Medium")]
 public sealed class ErrorReasonDocumentationTests
 {
-    private static readonly string _toolDesign = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "standards", "mcp-tool-design.md"));
+    private static readonly string _toolDesign = File.ReadAllText(Path.Combine(RepositoryRoot(), "docs", "tools", "error-reference.md"));
 
     [Fact]
     public void EveryReason_IsInTheErrorTable()
     {
-        string table = Section("### 6.3", "## 7.");
+        string table = Section("## 错误码", "## 契约来源");
 
         Assert.All(Constants(typeof(ErrorReason)), reason => Assert.Contains($"`{reason}`", table, StringComparison.Ordinal));
     }
@@ -22,7 +22,7 @@ public sealed class ErrorReasonDocumentationTests
     [Fact]
     public void EveryExecutionState_IsDocumented()
     {
-        string errors = Section("### 6.2", "### 6.3");
+        string errors = Section("## 写入执行状态", "## 错误码");
 
         Assert.Equal(["committed", "not_started", "rolled_back", "unknown"], Constants(typeof(ExecutionState)).Order(StringComparer.Ordinal));
         Assert.All(Constants(typeof(ExecutionState)), state => Assert.Contains($"| `{state}` |", errors, StringComparison.Ordinal));
@@ -35,7 +35,7 @@ public sealed class ErrorReasonDocumentationTests
     {
         int from = _toolDesign.IndexOf(start, StringComparison.Ordinal);
         int to = _toolDesign.IndexOf(end, from, StringComparison.Ordinal);
-        Assert.True(from >= 0 && to > from, $"mcp-tool-design.md has no section between '{start}' and '{end}'.");
+        Assert.True(from >= 0 && to > from, $"error-reference.md has no section between '{start}' and '{end}'.");
         return _toolDesign[from..to];
     }
 

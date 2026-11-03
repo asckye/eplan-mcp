@@ -2,7 +2,7 @@ using EplanMcp.Workbench.Approvals;
 
 namespace EplanMcp.Workbench.Tests.Approvals;
 
-/// <summary>The countdown (workbench-ui APR-10): the EPLAN dialog's format, the last 20 seconds, 30 and 10 seconds told.</summary>
+/// <summary>The countdown (docs/design/2026-10-20-m5-operability.md#workbench-implementation): the EPLAN dialog's format, the last 20 seconds, 30 and 10 seconds told.</summary>
 [Trait("Size", "Small")]
 public sealed class CountdownTests
 {

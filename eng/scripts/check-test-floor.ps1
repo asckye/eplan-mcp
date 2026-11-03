@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     A wrong filter or a broken discovery passes with few or no tests run: every test assembly must pass at least its
-    floor in tests\test-suites.json, and every assembly that ran must be listed there (testing.md section 7). Run by
+    floor in tests\test-suites.json, and every assembly that ran must be listed there (tests/test-suites.json). Run by
     CI (.github\workflows\build.yml) and by eng\scripts\local-gate.ps1 on the TRX files of one test run.
     A floor below 80% of that run's passed count also fails; update it to floor(90% of passed).
 

@@ -1,5 +1,7 @@
 # Large 测试：工具的实机测试
 
+运行环境为 Windows、受支持的 EPLAN 及 API 扩展授权；EPLAN 启动和原生项目读写是本程序集与本机 Small / Medium 测试的区别。scratch 默认位置为 `%USERPROFILE%\EplanMcp\scratch\`。测试层含义见[手册 12.1](../../docs/standards/engineering-handbook.html#testing-layers)，当前无自托管 runner 的决定见 [ADR-0020](../../docs/adr/0020-no-self-hosted-runner.md)。
+
 `AcceptanceRedrawTests` 按[整页重绘清单 v1](fixtures/acceptance/README.md)在 `LargeWrite` 新页分批绘制，先打开编辑器供观看，保留页面、PNG 和逐项验收报告，不自动撤销；支持仓库外本地 `EPLANMCP_ACCEPTANCE_LIST`。默认夹具为独立虚构 PLC DI 页。生产工具缺口逐项记 skipped，不能当整页通过；本次仅编写，不运行 EPLAN。
 
 `FullPropertyReadTests`（只读，可用离线宿主）每轮读页 `=GAA+A1&EFS1/1` 及其上全部设备的全量属性（`response_format: detailed`），20 轮都须与第一轮相同。只在启动离线宿主或 EPLAN 的进程环境中设 `COMPlus_GCgen0size=0x10000`（不设为用户或系统环境变量），GC 频繁发生，可以复现 api-notes A80 的终结器竞争：修复前电缆的计算属性在某一轮整组缺失。
@@ -13,7 +15,7 @@
 
 `ProjectCreateToolTests` 验收 `eplan_project_create` 的两种模式：自动寻找唯一 `GB_bas001.zw9`（或 `EPLANMCP_LARGE_BASIC_PROJECT`），备份用 `EPLANMCP_LARGE_ZW1` 指定非客户示例文件；材料缺失跳过。源复制进测试 Host 的 imports，核对源 SHA-256 不变、兼容性 `IsCompatible/18.0`、结束后关闭、重复目标及已有空目录拒绝、审计；保留 `User.eod/eox`。尚未运行，不代表跨版本兼容性验证。
 
-这里的测试通过 `eplanmcp` 连接**正在运行的 EPLAN**（只读测试也可以改用离线宿主，见下文"离线宿主"）：用夹具项目的已知数据核对每个只读工具（[M2 设计第 7 节](../../docs/design/2026-10-18-m2-read-core.md)），写工具的测试只写夹具之外的副本（见下文"写测试"），并在其中两份副本上验证写工具的质量场景 Q1、Q2、Q6（[M3 设计第 7 节](../../docs/design/2026-10-19-m3-safe-writes.md)，[测试规范第 4 节](../../docs/standards/testing.md#4-large-测试实机)），以及 Destructive 工具（[M4 设计第 7 节](../../docs/design/2026-10-20-m4-workflows.md)，见下文"Destructive 工具"）。全部标为 `Size=Large`，CI 中不运行。
+这里的测试通过 `eplanmcp` 连接**正在运行的 EPLAN**（只读测试也可以改用离线宿主，见下文"离线宿主"）：用夹具项目的已知数据核对每个只读工具（[M2 设计第 7 节](../../docs/design/2026-10-18-m2-read-core.md)），写工具的测试只写夹具之外的副本（见下文"写测试"），并在其中两份副本上验证写工具的质量场景 Q1、Q2、Q6（[M3 设计第 7 节](../../docs/design/2026-10-19-m3-safe-writes.md)，[Large 测试说明](README.md)），以及 Destructive 工具（[M4 设计第 7 节](../../docs/design/2026-10-20-m4-workflows.md)，见下文"Destructive 工具"）。全部标为 `Size=Large`，CI 中不运行。
 
 ## P25 完整任务验收
 
@@ -216,3 +218,33 @@ src\EplanMcp.Bridge.Offline\bin\Release\net481\EplanMcp.Bridge.Offline.exe --var
 ## 绘图几何（T0a）
 
 `DrawingGeometryTests` 标为 Large，本次不运行。先用 `dotnet build tests/EplanMcp.Large.DrawingHelper -c Release` 构建，设置 `EPLANMCP_DRAWING_VARIANT_BIN` 为变体 Bin，再按本文件的夹具流程运行。测试在独立 scratch 副本上通过仅测试使用的离线辅助程序调用生产读取器，读取 Circuit 页的栅格、页/图框尺寸及放置外框；不新增工具或 Bridge 操作。无图框空页、未知外框及属性相对位置由假 Bridge 的 Medium 覆盖，实际空页/图框几何仍须维护者补验。
+
+## 夹具与读回检查入口
+
+当前只读测试共用 `eval-fixture.ps1` 复制的示例项目，写测试使用上述独立副本。`ProjectCreateTests` 从 `.zw9` 基本项目创建最小项目；`ProjectRestoreTests` 从 `EPLANMCP_LARGE_ZW1` 指定的 `.zw1` 还原到 scratch。旧资料提到的 `tests/fixtures/projects/` 当前未建立；现有仓库夹具在本程序集的 `fixtures/`，例如[虚构验收页](fixtures/acceptance/README.md)，没有把厂商示例项目存入仓库。
+
+导出用例的实际检查见上表与 `ProjectExportTests`、`PartExportTests`、`TranslationExportTests`：包括文件集合、页数、格式、字节数及导出前后源数据摘要。规范化快照由 `SnapshotTests`、`NoSideEffectTests` 和各验收夹具说明描述；数值阈值仍以对应测试源码为准。未实机验证的用例及条件见[待验台账](../../docs/process/large-pending.md)。
+
+## 批量实机验证
+
+`BatchVerification` 的 trait 是 `Size=Large`、`Batch=Verification`，通过 `EPLANMCP_BATCH_VERIFY=1` 启用。使用 `eval-fixture.ps1 -WriteCopies -Force` 准备的新 `LargeWrite`；`PlanStepLiveSession` 只关闭已知夹具副本并核对它是唯一打开的 scratch 项目。Remote Client 的 `EPLREMOTE_HOST`（本机 IPv4）、`EPLREMOTE_PORT`（默认 49152）和可选 `EPLANMCP_EPLREMOTE` 见 [api-notes A41](../../docs/eplan/api-notes.md)。`TrialApprovals` 只逐次批准 API/action 试运行，拒绝解除写入暂停。
+
+```powershell
+$env:EPLANMCP_BATCH_VERIFY = '1'
+$env:EPLANMCP_BATCH_MINUTES = '120'
+# 可选：包含指定起点；与 EPLANMCP_BATCH_AFTER 二选一
+# $env:EPLANMCP_BATCH_FROM = 'O:Eplan.EplApi.DataModel.Page.Name'
+# 可选：跳过指定起点，从下一项继续
+# $env:EPLANMCP_BATCH_AFTER = 'O:Eplan.EplApi.DataModel.Page.Name'
+dotnet test --project tests/EplanMcp.Large.Tests -- --filter-trait 'Batch=Verification'
+```
+
+当前每个 API 写入或 action 上限 90 秒，只读上限 30 秒；整轮默认 120 分钟，可设大于 0 且不超过 1440。每完成 25 项输出数量、耗时和当前 ID。条目来自生成的 `ApiTryCatalog.PropertyGroups`、`MethodGroups`、`Methods(group)` 及官方 action 目录；完整 expected 数量在 FROM/AFTER 筛选之前记录，不使用历史固定计数。
+
+接收器使用生成的 `ReceiverShape`：服务保留 Project 定位器，静态调用与 Create 工厂省略 target；Remove 仍经 destructive 审批和执行前备份（ADR-0035）。对象参数来自 `ObjectReadTypes` 与同一副本的 `eplan_object_find`；数组使用非空的已发现定位器。无法构造的参数记录 `failed:needs_context`，无接收对象记录 `skipped:no_object`，拒绝的成员记录其拒绝原因。action 参数取官方示例；文件、页或选择上下文缺失仍记录为需要上下文。
+
+结果在 `<scratch>/batch-verification/<运行 ID>/results.json`，路径在测试开始时输出，每项后原子保存；包含日期、EPLAN 版本、完整 expected 数量、停止位置及条目的 `id/kind/outcome/seconds/changed/undo_restores/eplan_messages/detail`。API 写入 ID 以 `#write` 结尾，action ID 为 `A:<名称>`。
+
+属性写值从原值推导：布尔取反、整数加 1、浮点加 0.5、字符串加 `_v`、枚举取下一成员。写后一次 `XEsUndoAction`，核对原值与页快照；action 的恢复还核对设计文件哈希（不含 User/锁文件）。现有快照覆盖范围有限，相等不证明所有副作用都不存在。只读改变设计、撤销不恢复、未知结果、模态或超时会记录当前项并持久暂停，不再清理或切换项目；失联也停止。FROM/AFTER 仅选择续跑起点，不解除暂停或自动重试未知项。
+
+结果导入命令和合并语义见 [eng/coverage 使用说明](../../eng/coverage/README.md#导入批量实机证据)；证据条件与历史结果在 [api-notes](../../docs/eplan/api-notes.md)，待验状态在[待验台账](../../docs/process/large-pending.md)。

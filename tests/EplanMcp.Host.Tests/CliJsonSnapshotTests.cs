@@ -11,7 +11,7 @@ namespace EplanMcp.Host.Tests;
 /// <summary>
 /// The JSON of <c>doctor</c>, <c>audit verify</c>, <c>client-config</c>, <c>install-addin</c> and <c>uninstall-addin</c> with <c>--format json</c> (architecture 5.2) as reviewed
 /// snapshots: the Workbench parses it, so a change of shape fails here until the new snapshot in
-/// tests/Contracts.Snapshots is reviewed and committed with a new schemaVersion (testing.md 3). The checks and results
+/// tests/Contracts.Snapshots is reviewed and committed with a new schemaVersion (tests/EplanMcp.Host.Tests/README.md#契约快照). The checks and results
 /// are fixed, so only the shape is pinned, not doctor's texts. Medium: the snapshots are files.
 /// </summary>
 [Trait("Size", "Medium")]

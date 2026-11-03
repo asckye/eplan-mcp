@@ -14,7 +14,7 @@
 
 “导出项目图层表”“导出制造商 ABB 的记录”“隐藏 scratch 项目的某个图层”。代理运行随产品发布、经验证的长尾 action 条目，得到处理后的调用、前后指纹及导出文件清单。有任务工具时用任务工具：它们在审批前列出每一项变化、执行后逐项核对；本工具只比较指纹，不逐项核对（[ADR §1][adr1]、[§4][adr4]）。项目部件清单用 `eplan_export_parts`，系统部件导出用 `eplan_part_export`。
 
-工具描述的英文草案如下；描述加参数说明遵守约 250 token 的预算，15 项枚举也计入预算。每条的参数表、副作用、示例移入 `eplan_tool_usage(tool: "eplan_action_run", topic: "<action>/<TYPE>")`；无 TYPE 的 topic 就是 action 名。不增加对任意 action 的发现或执行入口（[ADR §1][adr1]）。这是 usage 的专用 topic 扩展，产品实现及预算检查**未验证**，不改变其他工具的四种 topic。
+工具描述的英文草案如下；当前描述和输入 schema 的大小检查入口为 Host 的 `ToolContractTests.Descriptions_StayWithinTheBudget`，检查注册结果，不从本草案推定通过。每条的参数表、副作用、示例移入 `eplan_tool_usage(tool: "eplan_action_run", topic: "<action>/<TYPE>")`；无 TYPE 的 topic 就是 action 名。不增加对任意 action 的发现或执行入口（[ADR §1][adr1]）。这是 usage 的专用 topic 扩展，产品实现及预算检查**未验证**，不改变其他工具的四种 topic。
 
 ```text
 Run action; fingerprints.
@@ -102,7 +102,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 
 ## 3. 输出
 
-以下为成功结果 `outputSchema` 的草案（**未验证**，实现时纳入契约快照）；`entry` 使用输入的同一枚举。返回 `structuredContent`、同内容 JSON 文本块和一行英文摘要。Write 的错误结果另沿用工具设计规范 6.2，不用成功 schema 表示失败（[ADR §3–4][adr4]）。
+以下为成功结果 `outputSchema` 的草案（**未验证**，实现时纳入契约快照）；`entry` 使用输入的同一枚举。返回 `structuredContent`、同内容 JSON 文本块和一行英文摘要。Write 的错误结果见[当前错误参考](error-reference.md)，不用成功 schema 表示失败（[ADR §3–4][adr4]）。
 
 ```json
 {
@@ -150,12 +150,12 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 - 项目指纹另含 `projectType`；同步保留 Bridge 内完整的功能文本证据，结果公开 `functionTextHash` 和非空文本数 `function_texts`、项目部件数 `project_parts`（另含 `part_references`）。A50 的计数可不变而文本改变；摘要用于观察效果，不作为逐项正确性保证。类型切换的 hint 追加 `Project type: Schematic -> Macro.`。
 - `readback="fingerprint"` 时固定提示：`Changes have not been checked item by item; use read tools to verify objects you care about.` 已知副作用与未验证项也写入 `hint`。Write 提交时 `execution=committed`，dry-run 为 `not_started`、`after=null`、`readback=not_executed`。`undo=null`，提示“提交后一步 Ctrl+Z 未验证”，验证通过前不承诺撤销记录（[ADR §1、§4、§8][adr8]）。
 - 导出结果的 `directory` 是本次目录完整路径，`files` 递归列出文件相对路径、字节数和 **SHA-256**；`fileCount`、`totalBytes` 是完整合计。Write 无文件，`directory=null`、`files=[]`、合计为 0；dry-run 同样不产文件（[ADR §2–4][adr3]，导出清单增加哈希的产品行为**未验证**）。
-- 不分页，不提供 `response_format`。文件最多 50 项，指纹文件明细各最多 20 项，预算约 5k token、硬上限 20k；计算与比较使用完整集合，显示截断不影响判断。超限设置 `truncated=true` 和提示，计数及文件总数仍保留；项目自由文本只在数据字段，按 ResultShaper 清洗（[工具设计规范 §7](../standards/mcp-tool-design.md#7-输出)，[ADR §4][adr4]；此产品整形**未验证**）。
+- 不分页，不提供 `response_format`。文件最多 50 项，指纹文件明细各最多 20 项，预算约 5k token、硬上限 20k；计算与比较使用完整集合，显示截断不影响判断。超限设置 `truncated=true` 和提示，计数及文件总数仍保留；项目自由文本只在数据字段，按 ResultShaper 清洗（[手册 MCP 条款](../standards/engineering-handbook.html#mcp-large)，[ADR §4][adr4]；此产品整形**未验证**）。
 - 摘要：`Ran graphicallayertable/EXPORT; produced 1 file in a new folder; see 'directory'.` / `Ran changelayer; committed; fingerprint readback only.` Read 不带 `execution`。Read 出现未记录的项目指纹变化时，结果与审计如实报告并置 `entryDisabled=true`，本次 Host 进程停用该条目，doctor / 日志提示重新验证；不把 AML 尚未解释的变化直接登记为无害例外（[ADR §4][adr4]）。
 
 ## 4. 错误
 
-全部业务/参数错误为 `isError: true`，带标准 `error`（reason、英文 message、retryable、metadata、eplanMessages、correlationId）；权限先于对象检查，参数问题一次列齐。下表的 `execution` 仅在 Write 调用中存在，Read 不添加；产品错误映射**未验证**（[ADR §1–4][adr3]、[§6][adr6]，工具设计规范 §6）。
+全部业务/参数错误为 `isError: true`，带标准 `error`（reason、英文 message、retryable、metadata、eplanMessages、correlationId）；权限先于对象检查，参数问题一次列齐。下表的 `execution` 仅在 Write 调用中存在，Read 不添加；产品错误映射**未验证**（[ADR §1–4][adr3]、[§6][adr6]、[当前错误参考](error-reference.md)）。
 
 | reason | 发生条件 / retryable | Write 的 `execution` | 模型下一步 |
 |---|---|---|---|
@@ -170,7 +170,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 | `CANCELLED` | 安全点收到取消；否；仅最终结果恢复与审计可见 | 执行前 `not_started`；回滚后 `rolled_back` | MCP 不回复已取消请求；提交后取消不撤回已提交修改 |
 | `INTERNAL` | 导出根目录无法创建/不可写、Host 缺陷；否 | 按阶段 `not_started` / `rolled_back` / `committed` | 提供 correlationId，请工程师运行 doctor；不泄露本机路径 |
 
-连接、授权、锁定与协议类错误沿用 [工具设计规范错误表](../standards/mcp-tool-design.md#63-错误码表)。`retryable=true` 的写错误只可能 `not_started` / `rolled_back`；`unknown` 当且仅当 `OUTCOME_UNKNOWN`。提交后的读回或收尾问题按 ADR-0010 如实报告，不伪称回滚（[ADR §6][adr6]）。
+连接、授权、锁定与协议类错误沿用 [项目错误契约](error-reference.md)。`retryable=true` 的写错误只可能 `not_started` / `rolled_back`；`unknown` 当且仅当 `OUTCOME_UNKNOWN`。提交后的读回或收尾问题按 ADR-0010 如实报告，不伪称回滚（[ADR §6][adr6]）。
 
 ## 5. 实现要点
 
@@ -213,7 +213,7 @@ Write 走现有 WritePipeline：只读规划/指纹 → 策略与审批 → 再�
 | `SwitchProjectType` | S26 r3：135 ms，Schematic → Macro 并回滚 | 60 秒 |
 | `synchronize/MULTILINE`、`synchronize/OVERVIEW` | S26 r3：功能文本有变化并回滚；Large：提交后一次撤销恢复 | 每条 120 秒 |
 
-预计超过 2 秒的 PLC 导出支持进度和取消；共用等待 Bridge 的 5 秒心跳、等待审批 15 秒心跳，提供 progressToken 时发送，数值单调递增，不虚构 action 内部百分比。取消在安全点检查，原生 Execute 中途能否打断**未验证**，不强杀 EPLAN；返回后才完成取消/清理。Write 发出执行请求后中断，先 `outcome.get`，从不重发（[ADR §3、§6][adr6]，工具设计规范 §9）。
+预计超过 2 秒的 PLC 导出支持进度和取消；共用等待 Bridge 的 5 秒心跳、等待审批 15 秒心跳，提供 progressToken 时发送，数值单调递增，不虚构 action 内部百分比。取消在安全点检查，原生 Execute 中途能否打断**未验证**，不强杀 EPLAN；返回后才完成取消/清理。Write 发出执行请求后中断，先 `outcome.get`，从不重发（[ADR §3、§6][adr6]、[当前进度实现](../architecture/architecture.md#83-并发超时与取消)）。
 
 ## 6. 写操作专项
 
@@ -227,7 +227,7 @@ Write 走现有 WritePipeline：只读规划/指纹 → 策略与审批 → 再�
 
 ## 7. 测试
 
-以下为实现验收要求，**均未执行、未验证产品实现**；本次文档工作不连接 EPLAN。规模遵守 [testing.md](../standards/testing.md)：Small 不用磁盘，Medium 使用临时目录/Fake Bridge，Large 只用 scratch 副本（[ADR 后续行动][adr]）。
+以下为实现验收要求，**均未执行、未验证产品实现**；本次文档工作不连接 EPLAN。规模遵守 [手册第 12 章](../standards/engineering-handbook.html#testing)：Small 不用磁盘，Medium 使用临时目录/Fake Bridge，Large 只用 scratch 副本（[ADR 后续行动][adr]）。
 
 ### 7.1 Small
 
@@ -274,7 +274,7 @@ Q1 默认关闭、Q2 不通过移到以后、Q3 按验证主版本、Q4 与任�
 | changelayer 提交后一次 Ctrl+Z 及历史？ | **未验证**：S26 从未 Commit；须按产品包装提交后验一步撤销及历史，不将回滚等同撤销（ADR §2、§8） |
 | 当前项目与包装差异？ | **未验证**：省略 PROJECTNAME 的隔离探针；去掉 S26 导出探针事务包装后的真实行为；其他主版本、变体/补丁及更大数据预算均需相应证据（ADR §2、§3、§6） |
 | 三个“以后”用法何时补齐？ | **未验证**：EXPORTADDRESSOVERVIEW 需可读且匹配的配置项目/站/CPU 元组；两个外部编辑导出需各自已核实节点和可读方案名；A25 空值地址输出不算验证通过（ADR §8、Q2） |
-| 完整 schema 如何符合描述预算？ | **未验证**：15 个长 entry 名及逐条 arguments 分支须在实现时按 `Descriptions_StayWithinTheBudget` 实测并压缩；不能套用仅属于 usage 工具名枚举的预算豁免。若无法同时满足，先报告契约约束冲突，不自行删 enum、放宽校验或新增预算例外（ADR §1–2，工具设计规范 §4.2） |
+| 当前描述和 schema 如何检查？ | `ToolContractTests.Descriptions_StayWithinTheBudget` 检查实际注册工具的描述及输入 schema；action 工具使用该测试中的默认字符上限，`eplan_tool_usage` 的工具名枚举另行计算。检查与快照入口见 [Host 测试说明](../../tests/EplanMcp.Host.Tests/README.md#契约快照)；本草案没有独立的通过证据 |
 
 `plcservice/EXPORTADDRESSOVERVIEW`、`XMActionDCCommonExport`、`XMExportDCArticleDataAction` **不在 enum**。以后每个条目都按 [ADR §2][adr2]、[§8][adr8] 单独 spike，在 scratch 示例副本/复制测试库中验证参数、级别、副作用、指纹、回滚/撤销和 ShowNoDialogs，写入 api-notes，提交引用证据的 PR 经负责人审批后随产品发布；文档之外的 action 还必须由负责人明确提出需要，并在 PR 明确批准。不能在 config.json、本地 JSON 或工具调用中临时加条目。任务工具后来覆盖了某条用途，在同一个 PR 删除条目并按契约变更记录 CHANGELOG（[ADR §1–2][adr1]）。
 

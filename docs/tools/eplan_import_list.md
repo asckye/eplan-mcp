@@ -66,7 +66,7 @@
 - 摘要：`Imported a list into the project. A project backup was made first (see 'backup').`；dry-run：`Dry run: would import a list into the project; row-level effects are known only after running. Nothing was changed.`
 
 ## 4. 错误
-复用现有错误码，不新增；错误也带 `execution`，结构和英文提示规则同工具设计规范 6.2。
+复用现有错误码，不新增；错误也带 `execution`，当前结构与提示见[错误参考](error-reference.md)。
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
 | `INVALID_ARGUMENT` | 路径、大小、扩展名、枚举不合规，`parts + csv`，XML 语法非法 | `not_started` | `metadata.violations` 一次列全；提示使用相应格式和数据根目录下的 imports |

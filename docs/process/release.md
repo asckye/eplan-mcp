@@ -1,8 +1,10 @@
 # 0.x 预览版发布
 
-依据 [发布清单](development-workflow.md#8-版本与发布)、[ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md)、[ADR-0020](../adr/0020-no-self-hosted-runner.md) 和 [M5 设计](../design/2026-10-20-m5-operability.md)。只交付 ZIP，0.x 程序不签名；附 SHA-256、CycloneDX SBOM、GitHub 来源证明。全程保留草稿，最后由维护者手动发布。
+依据 [手册开发流程条款](../standards/engineering-handbook.html#build-release)、[ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md)、[ADR-0020](../adr/0020-no-self-hosted-runner.md) 和 [M5 设计](../design/2026-10-20-m5-operability.md)。只交付 ZIP，0.x 程序不签名；附 SHA-256、CycloneDX SBOM、GitHub 来源证明。全程保留草稿，最后由维护者手动发布。
 
 ## 每周预览版（发布列车）
+
+当前 MCP SDK 固定版本、协议 revision 及客户端兼容注释以 [`Directory.Packages.props`](../../Directory.Packages.props) 为来源；运行时绑定见[架构协议说明](../architecture/architecture.md)。
 
 负责人于 2026-11-01 决定：每周五从 main 发布预览版，首班为 **2026-11-06 的 v0.4.1**，此后按 0.4.x 递增 patch，直到里程碑版 **v0.5.0**；里程碑验收目标保持不变。发布列车不引入破坏性契约变化，此类变化仍归 v0.5.0。`release.yml` 的 `tags: ['v*']` 和 `^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$` 校验均接受 v0.4.1、v0.4.2 等标签；无需改 workflow，也不增加定时发布。
 

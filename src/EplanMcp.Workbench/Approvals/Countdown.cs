@@ -3,7 +3,7 @@ using System.Globalization;
 namespace EplanMcp.Workbench.Approvals;
 
 /// <summary>
-/// The countdown of a waiting question (workbench-ui APR-10): the time left as the EPLAN dialog writes it, the share
+/// The countdown of a waiting question (docs/design/2026-10-20-m5-operability.md#workbench-implementation): the time left as the EPLAN dialog writes it, the share
 /// left for the progress bar, the warning in the last 20 seconds, and the two moments a screen reader is told, 30 and
 /// 10 seconds before the end, never every second. The deadline is the Host's and cannot be extended here.
 /// </summary>

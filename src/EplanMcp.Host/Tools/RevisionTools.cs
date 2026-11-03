@@ -94,7 +94,7 @@ internal sealed class RevisionTools
 
     /// <summary>
     /// "Revision in progress (change tracking on); 1 revision recorded, the last on 2026-10-21." (tool spec 3). No
-    /// project text: names and users stay in the data fields (mcp-tool-design 7.3); the date is the Bridge's own format.
+    /// project text: names and users stay in the data fields (engineering-handbook.html#pa); the date is the Bridge's own format.
     /// </summary>
     private static string Summary(RevisionListResult result, RevisionListResult.RevisionEntry? last)
     {

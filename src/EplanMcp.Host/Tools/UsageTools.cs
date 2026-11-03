@@ -9,7 +9,7 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// The meta tool of mcp-tool-design 10: detailed usage on demand keeps every tool description within its budget.
+/// The meta tool of engineering-handbook.html#pa: detailed usage on demand keeps every tool description within its budget.
 /// Answers from <see cref="ToolUsageCatalog"/> only; never calls EPLAN.
 /// </summary>
 [McpServerToolType]

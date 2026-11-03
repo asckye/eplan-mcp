@@ -20,7 +20,7 @@ v0.4.0 于 **2026-10-27** 发布（标签日期）。v0.5.0 推迟：先补齐�
 | M10 能力扩展：吸收 Canary 有益功能，约 1050 个 action 按 A/B/C 分级 | 计划中（部分目录与试执行已提前接入） | v0.5.0 之后，版本待定 | [M10](design/2026-10-30-m10-capability-expansion.md) | [0030](adr/0030-action-catalog-tiers.md)、[0031](adr/0031-private-extension-modules.md) |
 | M12 国家规则包：IEC 60204-1 + IEC 81346 → GB/T 5226.1 → NFPA 79，另有公司默认包；每包经工程师签核，不复制标准正文 | 计划中 | v0.5.0 之后，版本待定 | [M12](design/2026-10-31-m12-review-and-generation.md) | [0005](adr/0005-safety-model.md)、[0024](adr/0024-pack-trust-and-container.md)、[0029](adr/0029-phase3-engineering-records.md) |
 | M11 PDF 图纸集转 EPLAN 项目：在 M9/M10 之后 | 计划中 | v0.5.0 之后，版本待定 | [M8 绘图基础](design/2026-10-27-m8-drawing.md)（独立设计待写） | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |
-| Workbench 改版：现在做 mock-ups，v0.5.0 后实施 | 进行中（mock-ups）；实施计划中 | v0.5.0 之后，版本待定 | [M5 界面设计](design/2026-10-20-m5-operability.md#45-界面技术fluent-2-的实现方式q1adr-0015)、[界面规范](standards/workbench-ui.md) | [0017](adr/0017-workbench-wpf-tia-theme.md)（2026-10-20 Accepted）；[0027](adr/0027-workbench-plan-review.md) 仍为 Proposed |
+| Workbench 改版：现在做 mock-ups，v0.5.0 后实施 | 进行中（mock-ups）；实施计划中 | v0.5.0 之后，版本待定 | [M5 界面设计](design/2026-10-20-m5-operability.md#45-界面技术fluent-2-的实现方式q1adr-0015)、[Workbench 实现记录](design/2026-10-20-m5-operability.md#workbench-implementation) | [0017](adr/0017-workbench-wpf-tia-theme.md)（2026-10-20 Accepted）；[0027](adr/0027-workbench-plan-review.md) 仍为 Proposed |
 
 | 基础里程碑与其余计划 | 状态 | 发布 | 设计依据 | ADR |
 |---|---|---|---|---|

@@ -9,7 +9,7 @@ using ModelContextProtocol.Server;
 
 namespace EplanMcp.Host.Tests.Tools;
 
-/// <summary>The tool profiles of mcp-tool-design 10, on the tools exactly as <c>serve</c> registers them.</summary>
+/// <summary>The tool profiles of engineering-handbook.html#pa, on the tools exactly as <c>serve</c> registers them.</summary>
 [Trait("Size", "Small")]
 [Collection(typeof(ToolBuildIsolation))]
 public sealed class ToolProfileTests

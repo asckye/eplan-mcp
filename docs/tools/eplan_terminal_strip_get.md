@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_terminal_strip_get` |
-| 所属分组 / Profile | `terminal` / `full`（M4c 的新工具默认只在 `full` 中，工具设计规范第 10 节） |
+| 所属分组 / Profile | `terminal` / `full`（当前注册在 `full` 中，见[工具索引](README.md)） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
 | 状态 | Implemented (v0.1.0) |

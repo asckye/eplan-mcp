@@ -46,7 +46,7 @@
 | `ALREADY_EXISTS` | scratch 的 `imported\` 中已有同名项目：`<name>.elk`、`<name>.ell`（修订中的项目，A28）或 `<name>.edb` | `not_started` | 提示换一个 `name`；`metadata.existing` 列出已有的文件 |
 | `EPLAN_OPERATION_FAILED` | EPLAN 导入时报错，或导入结束后 `<name>.elk`、`<name>.edb` 不在 | `rolled_back` | 附带 EPLAN 的消息（`metadata.eplanMessage`，去掉路径）；说明本次新建的文件已删除 |
 | `OUTCOME_UNKNOWN` | 导入失败或被取消，而本次新建的文件没能全部删除（例如 EPLAN 还占着） | `unknown` | 说明 scratch 的 `imported\` 中可能留下不完整的项目，不要用同一个名称再调用，请工程师删除（实现时加）。写入随之按新项目的路径暂停（ADR-0010） |
-| `OUTCOME_UNKNOWN` | 超过 300 秒（实现时由 `TIMEOUT` 改：执行请求发出之后超时，流水线按 ADR-0010 取回结果，取不到就是 `OUTCOME_UNKNOWN`，`execution` 为 `unknown` 时只能是它，mcp-tool-design 6.2） | `unknown` | 说明导入可能仍在进行；Host 不删除可能还在写的文件 |
+| `OUTCOME_UNKNOWN` | 超过 300 秒（实现时由 `TIMEOUT` 改：执行请求发出之后超时，流水线按 ADR-0010 取回结果，取不到就是 `OUTCOME_UNKNOWN`，`execution` 为 `unknown` 时只能是它，engineering-handbook.html#pa） | `unknown` | 说明导入可能仍在进行；Host 不删除可能还在写的文件 |
 | 连接与授权类错误 | 同 `eplan_project_list` | — | 同 `eplan_project_list` |
 
 ## 5. 实现要点

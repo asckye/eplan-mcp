@@ -17,7 +17,7 @@ using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
-/// The approval queue page in a real window (workbench-ui APR-02 to APR-14): the two buttons, the guard, where focus
+/// The approval queue page in a real window (docs/design/2026-10-20-m5-operability.md#workbench-implementation): the two buttons, the guard, where focus
 /// goes and where it never goes, the change list as project data, the Destructive banner, the answered group, the narrow
 /// layout, the window coming back, the reminders and F6.
 /// </summary>

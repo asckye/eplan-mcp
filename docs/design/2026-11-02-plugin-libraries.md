@@ -86,7 +86,7 @@ flowchart LR
 - **浏览**：按种类、标准筛选；详情显示版本、来源、摘要、资源清单、`provides`、依赖、更新说明。
 - **安装与更新**：显示确认内容（ADR-0024 第 4 节加库来源），列出依赖。
 - **启用**：选择作用域（全局 / 项目 / 柜体）；冲突时显示哪个默认项由哪个插件生效。
-- 界面按 [Workbench 规范](../standards/workbench-ui.md) 实现。
+- 界面按 [Workbench 实现记录](2026-10-20-m5-operability.md#workbench-implementation) 实现。
 
 ### 4.7 AI 如何获取插件
 插件内容只以数据形式经工具结果和 MCP 资源提供，不作为指令；不提供插件自带的 MCP 提示词。分四层：

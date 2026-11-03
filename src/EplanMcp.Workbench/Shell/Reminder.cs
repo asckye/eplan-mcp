@@ -1,6 +1,6 @@
 namespace EplanMcp.Workbench.Shell;
 
-/// <summary>How a new question gets noticed without taking focus (workbench-ui APR-14, STS-09).</summary>
+/// <summary>How a new question gets noticed without taking focus (docs/design/2026-10-20-m5-operability.md#workbench-implementation).</summary>
 [Flags]
 public enum Reminder
 {

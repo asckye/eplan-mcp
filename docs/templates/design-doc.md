@@ -1,7 +1,7 @@
 # 设计文档：<标题>
 
 > 结构参考 Google 的设计文档实践。篇幅以能说清楚为准，通常 2 到 6 页。
-> 用于 L2/L3 变更（见 [development-workflow.md](../process/development-workflow.md#3-变更分级与设计产物)）。
+> 用于 L2/L3 变更（见 [手册开发流程条款](../standards/engineering-handbook.html#review-rfc)）。
 > 复制本文件到 `docs/design/<yyyy-mm-dd>-<slug>.md` 后填写，删掉所有引导语。
 
 | 项 | 内容 |
@@ -34,7 +34,7 @@
 - 新能力的安全级别（Read / Write / Destructive / Code），以及对应的审批策略
 - 失败时项目会处于什么状态，靠什么回滚（SafetyPoint、备份、撤销）
 - 来自项目数据的文本返回给模型时，如何防范提示注入
-- 本设计对 [威胁模型](../standards/security.md) 的影响
+- 本设计对 [项目威胁模型](../architecture/architecture.md#13-威胁模型) 的影响
 
 ## 6. 备选方案
 至少列一个被否决的方案和否决理由。"什么都不做"也算一个备选。

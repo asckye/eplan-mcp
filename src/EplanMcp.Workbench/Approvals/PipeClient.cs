@@ -8,7 +8,7 @@ namespace EplanMcp.Workbench.Approvals;
 /// <summary>
 /// Who is at the other end of a server pipe (ADR-0014 decision 2): its process and whether that process runs the
 /// expected image. A guard against a mismatched build or another program, not authentication: a program of the same
-/// user is outside what this protects (security.md section 2).
+/// user is outside what this protects (architecture.md section 13.2).
 /// </summary>
 internal static class PipeClient
 {

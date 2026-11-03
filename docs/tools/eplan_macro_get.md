@@ -63,8 +63,8 @@
   - 从根目录逐级往下检查：每一级（文件夹和文件）都必须存在，并且不是重解析点（链接、联接点），与 `eplan_macro_list` 的规则相同（SEC-19）；
   - 扩展名必须是 `.ema`。
 - **读取**：`new WindowMacro().Open(path, project)`，然后读 `RepresentationTypes`、`GetVariants(type)`、`Size`、`Objects`。S10 证实打开宏不改动项目，项目文件和功能数都不变（A14）。
-- 读完立即释放 `WindowMacro`，结果复制到 DTO（编码规范 9.5）。
-- `MACRO_NOT_FOUND` 已在错误码表（mcp-tool-design 6.3）中，但 Contracts 的 `ErrorReason` 中还没有，实现时补上。
+- 当前 [`EplanMacroReader`](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs) 用 `using` 管理 `WindowMacro`，读取结果复制到 DTO。
+- `MACRO_NOT_FOUND` 已在错误码表（engineering-handbook.html#pa）中，但 Contracts 的 `ErrorReason` 中还没有，实现时补上。
 - **耗时**：S10 中打开并读取示例宏约 0.4 秒（含 Remote Client 往返），由 Large 测试测量。
 
 ## 6. 写操作专项

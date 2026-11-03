@@ -1,6 +1,6 @@
 namespace EplanMcp.Workbench.Approvals;
 
-/// <summary>How a question ended (workbench-ui APR-11).</summary>
+/// <summary>How a question ended (docs/design/2026-10-20-m5-operability.md#workbench-implementation).</summary>
 public enum QuestionEnd
 {
     /// <summary>The engineer approved, or confirmed the release of a suspension.</summary>

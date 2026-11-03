@@ -4,7 +4,7 @@ using EplanMcp.Workbench.Approvals;
 namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
-/// The 500 ms guard (workbench-ui APR-04, SEC-24, T21): closed from the moment something new is to show until 500 ms
+/// The 500 ms guard (docs/design/2026-10-20-m5-operability.md#workbench-implementation): closed from the moment something new is to show until 500 ms
 /// after it rendered; a new arming always starts over, and a stale timer never opens it.
 /// </summary>
 [Trait("Size", "Small")]

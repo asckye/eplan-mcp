@@ -1,6 +1,6 @@
 # Agent 评测
 
-评测运行器（`EplanMcp.Evals`）用真实任务检验模型会不会用 eplanmcp 的工具：用 `claude -p` 让模型作答，再按程序规则判分。设计见 [Agent 评测 v0](../docs/design/2026-10-19-agent-evals-v0.md)，规则见[测试规范第 5 节](../docs/standards/testing.md#5-agent-评测)。
+评测运行器（`EplanMcp.Evals`）用真实任务检验模型会不会用 eplanmcp 的工具：用 `claude -p` 让模型作答，再按程序规则判分。设计见 [Agent 评测 v0](../docs/design/2026-10-19-agent-evals-v0.md)，评测规则见[手册 MCP-41](../docs/standards/engineering-handbook.html#mcp-contract)。
 
 运行器和任务集 v0 已经完成（设计第 8 节实施顺序的第 2 至 5 步）；第一次真实运行（第 6 步）需要先登录 Claude Code。
 
@@ -85,11 +85,21 @@ Destructive 工具（删页、页面重编号、设备编号，以及 M4c 的端
 - M4 第一批：运行检查（只检查一次整个项目）、更新全部报表，在副本上；导出 PDF、PNG 图片、DXF，在共享夹具上，核对导出的文件；端到端的 `workflow-contactor-feedback`（M4 设计第 7 节）：新建页、插入接触器反馈控制回路、生成连接、检查、更新报表、导出这一页的 PDF，报告的错误数和文件名与事后查到的一致；
 - 超出能力或不被允许的请求：页改名（没有这样的工具，也不能拿新建的空页顶替）、删页、改 scratch 之外的项目（策略拒绝）：答案中的 `done` 必须是 `false`，项目不变。
 
-改进工具描述时只看开发集的结果；保留集只在验收时运行，不据此调整描述（[测试规范第 5 节](../docs/standards/testing.md#5-agent-评测)）。每道题的标准调用都在夹具上核对过一次：值与另行查到的数据一致。新增题目时也要先这样核对；写入题还要在一份副本上手工做一遍题目要求的修改，核对事后调用取到的值。少数题目用字面量作期望值，例如连接的对端设备，路径子集无法表达"另一端"；字面量来自同一次核对。M4 第一批的 6 题（`check-run`、`report-update`、`export-pdf`、`export-image`、`holdout-export-dxf`、`workflow-contactor-feedback`）中的字面量和预期的结果来自 api-notes A16、A19、A20 的实机验证，题目本身还没有在夹具和副本上运行过：第一次运行时按上面的办法核对。
+开发集与保留集的用途见[手册 MCP-41](../docs/standards/engineering-handbook.html#mcp-contract)。已有题目的标准调用曾在夹具上核对，部分题目用连接对端设备等字面量表达路径子集无法表达的期望值。M4 第一批的 6 题（`check-run`、`report-update`、`export-pdf`、`export-image`、`holdout-export-dxf`、`workflow-contactor-feedback`）中的字面量和预期结果来自 api-notes A16、A19、A20 的实机验证；原记录注明题目本身尚未在夹具和副本上运行，不据此宣称评测通过。
 
 `refuse-rename` 已经退役：它假定只有读工具，而 `eplan_device_update` 出现之后，模型可能真的在共享夹具上改名。改名改由 `device-rename` 在副本上考察。
 
 ## 任务文件
+
+[API 覆盖矩阵的需求信号](../docs/eplan/api-coverage.md#4-国内工程师的高频任务需求信号)与现有任务文件的对应入口如下。它们只是现有覆盖定位，不代表矩阵中的整项需求均已验收。
+
+| 需求信号 | 已有任务入口 | 覆盖边界 |
+|---|---|---|
+| 建页、页描述 | `tasks/page-create.yaml`、`tasks/page-description-update.yaml`、`tasks/holdout-page-descriptions.yaml` | 不覆盖 Excel 粘贴创建 20 页的完整场景 |
+| 按规则命名与线号 | `tasks/device-rename.yaml`、`tasks-attended/connection-number.yaml`、`tasks-attended/page-renumber.yaml` | 编号任务在 attended 集，不等同于全部属性替换 |
+| 部件检索 | `tasks/siemens-part-count.yaml`、`tasks/part-description.yaml` | 不覆盖批量部件生成或 EDZ 包选择导入 |
+| 组合工程任务 | `tasks/workflow-contactor-feedback.yaml` | 原理图流程；不覆盖 Pro Panel 图例重排与 3D 布线 |
+
 每个任务一个文件 `evals/tasks/<id>.yaml`：
 
 | 键 | 必填 | 内容 |

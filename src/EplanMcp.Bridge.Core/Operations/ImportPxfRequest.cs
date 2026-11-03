@@ -41,7 +41,7 @@ internal sealed class ImportPxfRequest
     /// <summary>The new project's data folder.</summary>
     public string DataFolder => Target + ".edb";
 
-    /// <summary>Every argument problem at once (mcp-tool-design 6.2), then a project of that name, then the file.</summary>
+    /// <summary>Every argument problem at once (engineering-handbook.html#pa), then a project of that name, then the file.</summary>
     public static ImportPxfRequest Check(ImportPxfArgs args)
     {
         var violations = new List<string>();

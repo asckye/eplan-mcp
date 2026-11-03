@@ -113,3 +113,10 @@
 ### D3 把部分完成归为 `unknown`
 - 优点：不改变取值。
 - 缺点：结果其实是确定的；`unknown` 会触发写入暂停，让工程师多做一次不必要的确认。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../standards/mcp-tool-design.md` → [手册 MCP 条款](../standards/engineering-handbook.html#pa)。
+- 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。

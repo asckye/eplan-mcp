@@ -6,9 +6,8 @@
     xmlns:vm="clr-namespace:EplanMcp.Workbench.Vm"
     Focusable="False">
   <!--
-    The client configuration wizard (M5 design 4.4 item 3, workbench-ui section 7, DLG-12): the clients as cards that are
-    check boxes (CTL-07), each saying whether this computer has it; the chosen ones are previewed, then written or
-    removed after the engineer confirms (PRI-01). Claude Code is recommended the plugin, with its two commands (CTL-13).
+    The client configuration wizard (docs/design/2026-10-20-m5-operability.md#workbench-implementation, M5 design 4.4 item 3): client cards,
+    the command preview and the result of the selected configuration action.
   -->
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Primer.PageHead}">

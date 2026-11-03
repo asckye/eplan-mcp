@@ -4,7 +4,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// Argument rules shared by the read tools. Every check adds to the caller's list instead of returning early, so a
-/// tool reports all problems at once (mcp-tool-design 6.2). EPLAN-specific checks (does EPLAN know this language or
+/// tool reports all problems at once (engineering-handbook.html#pa). EPLAN-specific checks (does EPLAN know this language or
 /// page type) happen in the Bridge.
 /// </summary>
 internal static partial class ToolArguments

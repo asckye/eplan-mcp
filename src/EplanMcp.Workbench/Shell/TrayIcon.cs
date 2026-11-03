@@ -9,7 +9,7 @@ using TiaOpenness.Gui.Themes;
 namespace EplanMcp.Workbench.Shell;
 
 /// <summary>
-/// The tray icon (workbench-ui STS-09, NAV-09), WinForms' NotifyIcon as in TIA (ADR-0017 decision 1). The icon carries
+/// The tray icon (docs/design/2026-10-20-m5-operability.md#workbench-implementation), WinForms' NotifyIcon as in TIA (ADR-0017 decision 1). The icon carries
 /// the number of waiting questions as a badge and its tip says it in words; the menu opens the window or exits. It
 /// names a count only, never project text (T20). Its colours are the palette's tokens (COL-01).
 /// </summary>

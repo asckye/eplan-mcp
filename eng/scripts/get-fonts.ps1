@@ -3,7 +3,7 @@
     Development only: downloads Maple Mono CN v7.9 for the Workbench into the git-ignored .local folder.
 
 .DESCRIPTION
-    The Workbench draws all text in Maple Mono CN (ADR-0017 decision 4, workbench-ui TYP-01). The font files are about
+    The Workbench draws all text in Maple Mono CN (docs/design/2026-10-20-m5-operability.md#workbench-implementation). The font files are about
     18 MB each and are never committed; the build copies them to Fonts\ next to EplanMcp.Workbench.exe when they are
     in .local\fonts\maple-mono-cn-v7.9\fonts (EplanMcp.Workbench.csproj, WorkbenchFontDir). Without them the Workbench
     falls back to system fonts.

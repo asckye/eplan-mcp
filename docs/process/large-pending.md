@@ -12,8 +12,8 @@
 | 崩溃成员拒绝与失联停跑（`feat/crash-refusals`，2026-11-02，负责人 brief；A77） | `BatchVerification`、`ApiTryTests` | 待运行：本次禁止运行 EPLAN；拒绝写侧、保留 MacroBox 读取、失联后停止并持久暂停需验证。崩溃成员不再试执行，原生 target/value 未提供，不宣称复现原生崩溃。 |
 | 批量验证与 main 生成表合并（`feat/batch-verify`，2026-11-01，负责人 brief） | `BatchVerification`、`ApiTryTests`、`ActionTryTests` | 进行中：2026-11-01 已落地 main 68e9f61b，首批 10-31 结果导入后实机验证计数 171 → 228；当夜两槽循环续跑（单次运行在结果未知或状态不可信的条目处按设计停止并换新副本续跑），次日汇总导入。 |
 | 移动后重新分配电缆芯线（后续，2026-11-02 A73） | `PageReviewTests`（cable 场景） | 待设计：移动电缆会丢失芯线归属且生成不恢复；先做一次探测（产品建的带芯线模板电缆，移动、生成后试原生绑定与重新分配导线），确认后再定修复工具。当前 cable 场景只验证检测与目标坐标，修复步骤跳过。 |
-| C1 服务入口（历史 brief/提交待补定位；security.md 第 5 节） | `ApiTryTests` | 待运行：服务读、写撤销与相关失败路径；测试已写，尚无实机结果。 |
-| C2 未验证 action（历史 brief/提交待补定位；security.md 第 5 节） | `ActionTryTests` | 待运行：scratch 限定、审批、事务、模态/unknown 等；规范注明 Large 已写待运行。 |
+| C1 服务入口（历史 brief/提交待补定位；架构第 14 节的安全机制记录） | `ApiTryTests` | 待运行：服务读、写撤销与相关失败路径；测试已写，尚无实机结果。 |
+| C2 未验证 action（历史 brief/提交待补定位；架构第 14 节的安全机制记录） | `ActionTryTests` | 待运行：scratch 限定、审批、事务、模态/unknown 等；规范注明 Large 已写待运行。 |
 | P06 功能与影响闭包（历史 brief/提交待补定位） | `PlanFunctionsTests`、`PlanImpactTests` | 待运行：Large README 明确尚未实跑；保留完整性与边界断言，缺页证据的现有拒绝行为需按当前常设规则另行评审，不在文档任务中弱化测试。 |
 | D1 电缆星形（历史 brief/提交待补定位；2026-11-02 客户 D1/D2 brief） | `CableBusStarSpikeTests`、`ConnectionCreateTests` | 待运行：新增 SPECIAL 全部 T 变体/引脚枚举及 Down 分支、Left/Right 主干各变体的逻辑端点输出；产品可选 variant 仍需实机回归。Spike 只断言搭建成功，不能代替产品验收；本次禁止 EPLAN。 |
 | D2 中断点配对（历史 brief/提交待补定位；2026-11-02 客户 D1/D2 brief） | `InterruptionPairingSpikeTests`、`DanglingInterruptionTests`、`ConnectionCreateTests` | 待运行：两页 L/R、P1/P2 默认及排序码 L=1、P2=2、R=3、P1=4 的原生对端输出，24809 放置事务写入/读回回归；配对规则须以实机证据回填 api-notes，本次禁止 EPLAN。 |
@@ -25,6 +25,17 @@
 | M9 `eplan_part_build`（负责人 2026-11-01 决定） | 专用 Large 类待补定位（当前检出未找到同名类） | 受阻：实现已完成，实机验证延后；EDZ 导入另待负责人样本，不宣称已通过。 |
 
 每项通过后保留本行，补日期、源码/插件版本、命令、结果与证据链接。部分通过继续列出未完成用例。发布范围内待验项须完成后才能发布。
+
+## Workbench 人工验证缺口
+
+以下记录来自原界面文档，属于桌面人工验证，未计为 EPLAN Large 通过。本次未运行界面或 EPLAN。
+
+| 范围 | 状态与现有证据 |
+|---|---|
+| 字体与文字缩放 | 待核对：S18 未验证 Windows“文本大小”缩放以及 Maple Mono CN 在真实 WPF 中的 `->`、`!=`、`==` 字形/连字效果；见 [S18](../../spikes/S18-workbench-ui/README.md)。 |
+| 通知与无障碍 | 待运行：AI4W FastPass、讲述人对新问题/倒计时/结束/状态的播报，以及托盘通知；原 S16 仅提供检查方向，本工作区未找到同名 spike 目录，见 [M5 验证入口](../design/2026-10-20-m5-operability.md#workbench-evidence)。 |
+| DPI 与对比主题 | 待运行：100–200% 与混合 DPI、1366×768@100%、1920×1080@150%、文本大小 150%，以及 Aquatic/Desert/Dusk/Night sky 四套系统对比主题。 |
+| 高对比资源差异 | 2026-11-01 原表与 `Tia/Themes/Palette.HighContrast.xaml` 对 `Primer.cardSel`、`Primer.textFaint` 的映射不同；项目包装 `Themes/Palette.HighContrast.xaml` 已覆盖 `cardSel`、`selectedText`、`textFaint`。保留原始差异及包装事实，整体符合性仍待人工验证。 |
 
 ## 最近移出（已实机通过）
 

@@ -6,7 +6,7 @@ namespace EplanMcp.Workbench.Approvals;
 internal sealed record CleanList(IReadOnlyList<string> Lines, int MoreLines);
 
 /// <summary>
-/// Project and client text made plain before it is shown (workbench-ui APR-08, CTL-12, SEC-23, T20), by the Host's
+/// Project and client text made plain before it is shown (docs/design/2026-10-20-m5-operability.md#workbench-implementation), by the Host's
 /// rules and a few more. Removed: C0, DEL and C1 control characters, the bidirectional embedding, override and isolate
 /// controls (U+202A to U+202E, U+2066 to U+2069) and marks (U+200E, U+200F, U+061C), and half a surrogate pair. A line
 /// break inside one entry shows as a visible mark and a tab as a space, so one entry stays one line. Lines and the list

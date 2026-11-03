@@ -6,9 +6,8 @@
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
     Focusable="False">
   <!--
-    The audit page (M5 design 4.4 item 2, workbench-ui 3.4, NAV-10): read only. The head with its commands, the result
-    of verifying the chain and why the log could not be read (Banners, ERR-04), the filters, then the records as a table
-    (CTL-06) or the empty state (ERR-05). Every value from the log is plain text (CTL-12).
+    The read-only audit page (docs/design/2026-10-20-m5-operability.md#workbench-implementation, M5 design 4.4 item 2): the head with its commands,
+    the result list and the selected record's details.
   -->
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Primer.PageHead}">

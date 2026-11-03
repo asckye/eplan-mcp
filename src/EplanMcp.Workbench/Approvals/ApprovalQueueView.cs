@@ -6,7 +6,7 @@ using TiaOpenness.Gui.Localization;
 namespace EplanMcp.Workbench.Approvals;
 
 /// <summary>
-/// The approval queue page without its window (workbench-ui section 11, M5 design 4.6): the waiting questions, earliest
+/// The approval queue page without its window (docs/design/2026-10-20-m5-operability.md#workbench-implementation): the waiting questions, earliest
 /// deadline first; the ended ones, latest first, as many as the queue keeps; the question shown, kept as that very
 /// question so an arrival never replaces it (APR-05), not by request ID, which a write's releases and approval share;
 /// the 500 ms guard (APR-04); and the one way to answer, the shown question's two buttons (APR-01, APR-06).

@@ -67,7 +67,7 @@
 - 摘要：`Dry run: PLC import is blocked by duplicate device names. Nothing was changed.` / `Dry run: file preflight is incomplete. New object names will be checked against pre-import full names inside the transaction; any match rolls the import back. Nothing was changed.` / `Imported PLC bus data into the project. A project backup was made first (see 'backup').` 不宣称“已更新已有 PLC”。
 
 ## 4. 错误
-全部复用现有错误码；英文错误提示、数据清洗和错误外层 `execution` 同工具设计规范 6.2。
+全部复用现有错误码；英文错误提示、数据清洗和错误外层 `execution` 见[错误参考](error-reference.md)。
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
 | `INVALID_ARGUMENT` | 路径/大小/转换器与扩展名不匹配；XML 非法、含 DTD 或外部实体/引用 | `not_started` | `metadata.violations` 列全；提示修正文件。未知格式版本、命名空间或名称映射不完整本身不报此错 |

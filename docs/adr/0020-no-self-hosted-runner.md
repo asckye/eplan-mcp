@@ -51,3 +51,10 @@
 - **后续行动**：
   - M5 设计（G5、4.9、4.10、Q8、第 8 节步骤 13）、开发流程第 7、8 节、testing.md 第 4 节、security.md（TB5、T23、SEC-16、SEC-26）、架构第 11 节按本 ADR 修改；
   - 实现 `release-addin.ps1` 和发布工作流中下载、比对插件的步骤（M5 第 14 步）。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../standards/testing.md` → [手册第 12 章](../standards/engineering-handbook.html#testing)。
+- 原文提及 `security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。

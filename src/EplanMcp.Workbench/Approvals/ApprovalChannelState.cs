@@ -1,6 +1,6 @@
 namespace EplanMcp.Workbench.Approvals;
 
-/// <summary>Whether the Workbench takes approval questions now (workbench-ui STS-11).</summary>
+/// <summary>Whether the Workbench takes approval questions now (docs/design/2026-10-20-m5-operability.md#workbench-implementation).</summary>
 public enum ApprovalChannelState
 {
     /// <summary>The pipe is served and there is room for a question.</summary>

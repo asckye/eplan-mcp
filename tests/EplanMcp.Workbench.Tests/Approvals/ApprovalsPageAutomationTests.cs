@@ -15,9 +15,8 @@ using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 namespace EplanMcp.Workbench.Tests.Approvals;
 
 /// <summary>
-/// The UIA tree of the window with the approval queue open (workbench-ui 15.1: A11Y-01, A11Y-02, A11Y-10, A11Y-13,
-/// APR-02), walked through the automation peers as a screen reader sees it, in both languages, with a write, a
-/// Destructive write and a release waiting.
+/// The approval queue UIA tree (docs/design/2026-10-20-m5-operability.md#workbench-implementation), walked through
+/// automation peers as a screen reader sees it, in both languages, with a write, a Destructive write and a release waiting.
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Medium")]

@@ -180,12 +180,20 @@ CLI 的 JSON 输出契约、版本与退出码见 [CLI 参考](../reference/cli.
 |---|---|
 | `AddIn` | 实现 `IEplAddIn`（每个程序集只能有一个），以 `bLoadOnStart = true` 注册。在 `OnInitGui` 中：在主线程上取得调度器、检查授权、启动管道服务器（管道名带固定前缀，供 Host 枚举发现，见 ADR-0008）；在 `OnExit` 中清理 |
 | `PipeServer`（Bridge.Core） | 管道监听、帧读写、JSON-RPC 分发、握手校验。不引用 EPLAN |
-| `MainThreadDispatcher` | 使用主线程的 WPF `Dispatcher`（在 `OnInitGui` 中取 `Dispatcher.CurrentDispatcher`；2026 上它就是 EPLAN 预设的那个，S1；不用 `EplanMainThreadDispatcher`，2024 及更早没有，ADR-0009），通过带超时的 `Invoke` 调度，延迟约 0.3 ms。四条硬规则（S1）：① 委托在内部捕获全部异常，否则 EPLAN 进程终止；② 第一步创建 `LockingStep`；③ 执行前检查 EPLAN 主窗口是否被禁用，被禁用（有模态对话框）则返回 `EPLAN_BUSY`，否则会在对话框中被重入执行；④ 等待进入主线程超时（默认 10 s）返回 `EPLAN_BUSY`，超时的调度事后不会再执行 |
+| `EplanDispatcher`（实现 `IMainThreadDispatcher`） | 在 `OnInitGui` 捕获 `Dispatcher.CurrentDispatcher`，通过带超时的 `Dispatcher.Invoke` 调度；委托内捕获异常、先检查主窗口禁用状态和重入标志，再创建 `LockingStep`。等待超时或模态/重入返回 `EPLAN_BUSY`；API 证据见 A9（S1）及 ADR-0009 |
 | `Operations` | 按资源划分的操作处理器（Project、Page、Device、Connection、Part、Report、Export、Check……），只依赖适配层的接口 |
-| `TransactionScope` | 每个写操作的固定包装，顺序为：`LockingStep`（调度器中的代码不在 action 内，必须显式创建）→ `SafetyPoint`（不提交即回滚）→ `UndoStep`（**在 SafetyPoint 内创建**，描述写明"AI: <工具名>"，让 Ctrl+Z 一次撤销整个操作）→ `QuietModeStep(ShowNoDialogs)`。成功时先 `Commit()` 再 `CloseUndo()`。**UndoStep 放在 SafetyPoint 外面会让回滚静默失效**（spike S2） |
-| `Adapters` | **唯一引用 `Eplan.EplApi.*` 的地方**。负责 EPLAN 对象与 DTO 之间的转换、多语言文本、单位 |
+| `TransactionScope` | 调度器的 `LockingStep` 内依次创建 `SafetyPoint`、`UndoStep`、`QuietModeStep(ShowNoDialogs)`；结束静默作用域后 Commit，再 CloseUndo。`Function.Create` 使用 `FunctionTransactionScope`；精确顺序与生命周期证据见 [实现证据索引](../eplan/api-notes.md#实现证据索引) |
+| `Adapters` | EPLAN 对象与 DTO 的转换、多语言文本及单位在此处理。插件、Offline 启动入口和 Large 的 RevisionHelper 也直接接触厂商入口；借用句柄表的生命周期见 ADR-0033 |
 | `MessageCapture` | 记录操作前后 EPLAN 系统消息的差异，一并返回。这是实机测试得到的教训：EPLAN 的很多失败只出现在系统消息里 |
 | JSON | 使用 EPLAN 自带的 `Newtonsoft.Json 13`：编译时引用，运行时不随插件分发。与 Host 端的 `System.Text.Json` 之间的兼容性由契约测试保证 |
+
+### 5.3.1 错误、契约与测试接缝
+
+共享的 `BridgeError`、`ErrorReason` 和 `ExecutionState` 位于 `EplanMcp.Contracts`。`EplanExceptionMapper` 将 `LockingException` / `ProjectLockingException` 映射为 `LOCK_FAILED`，前者附 `lockedObjects`；含 `API License missing` 的异常映射为 `LICENCE_MISSING`。未映射异常（包括 `NoLockingStepException`）由路由边界转换为 `INTERNAL`。`BridgeErrorException` 经 Bridge JSON-RPC 的 `error.data` 传给 Host，再转换成 MCP 工具错误；各工具的 reason 含义见[工具参考](../tools/README.md)。
+
+Contracts 的 XML 注释说明 DTO 字段。当前模型描述来自 Host 工具/参数上的 `Description` 特性，schema 由 `McpServerSetup` 的 SDK 注册及各契约定义生成；两者在[Host 契约快照](../../tests/EplanMcp.Host.Tests/README.md)中一起检查。没有独立的 Contracts XML 注释加载步骤。
+
+Host 通过 `IBridgeClient` 接收真实或 Fake Bridge；测试可脚本化结果与通信故障，并在支持时间注入的组件使用 `TimeProvider`。具体接缝和用例见 [Host](../../tests/EplanMcp.Host.Tests/README.md)、[Bridge.Core](../../tests/EplanMcp.Bridge.Core.Tests/README.md) 和 [Workbench](../../tests/EplanMcp.Workbench.Tests/README.md) 测试说明。
 
 ### 5.4 同一套 Bridge，两种宿主
 
@@ -204,6 +212,8 @@ Host 只认管道协议，不关心对面是插件还是离线进程。离线宿
 
 ### 5.5 代码仓库结构
 
+根命名空间为 `EplanMcp`，各组件使用 `EplanMcp.<组件>`；当前项目和测试入口如下。
+
 ```
 src/
   EplanMcp.Contracts/          netstandard2.0   共享 DTO、操作名、错误码、协议版本
@@ -211,6 +221,7 @@ src/
   EplanMcp.Bridge.Core/        netstandard2.0   管道服务器、协议、调度抽象、操作路由（不引用 EPLAN）
   EplanMcp.Bridge.Eplan/       net481           适配层 + 插件入口；-p:EplanBinPath 指定引用的 EPLAN Bin，构建时校验它属于 EplanVersion（默认 2026）
   EplanMcp.Bridge.Offline/     net481 (M5)      离线宿主（同插件一样需要本机的 EPLAN，不在 EplanMcp.Ci.slnf 中）
+  EplanMcp.Packs/              net10.0          工程包格式、校验与安装
   EplanMcp.Workbench/          net10.0-windows (M5)
   EplanMcp.Workbench.Protocol/ net10.0 (M5)     Host 与 Workbench 之间的管道协议：管道名、帧、消息（ADR-0014）
 tests/
@@ -380,14 +391,22 @@ sequenceDiagram
 
 ### 8.2 错误模型
 - 协议错误（未知工具、请求格式错误）走 JSON-RPC 错误。**参数校验错误和业务错误一律以 `isError: true` 的工具结果返回**，让模型可以自行纠正。
-- 错误结构借鉴 Google AIP-193：`reason`（大写下划线形式，如 `PAGE_NOT_FOUND`）、给模型看的 `message`（说明下一步怎么做）、`retryable`、`metadata`。先检查权限，再检查对象是否存在。完整列表见 [mcp-tool-design.md](../standards/mcp-tool-design.md#6-错误)。
+- 错误结构借鉴 Google AIP-193：`reason`（大写下划线形式，如 `PAGE_NOT_FOUND`）、给模型看的 `message`（说明下一步怎么做）、`retryable`、`metadata`。先检查权限，再检查对象是否存在。当前错误码由 `EplanMcp.Contracts/ErrorReason.cs`、契约快照及各工具参考记录。
 - 写工具的结果和错误都带执行状态 `execution`（`not_started`、`rolled_back`、`committed`、`unknown`），见 [ADR-0010](../adr/0010-write-outcomes.md)。
+
+
+
+当前工具错误的 `error` 包含 `reason`、`message`、`retryable`、`metadata`、`eplanMessages`、`correlationId`。SDK 处理未知工具/请求格式错误，Host 用 `McpException` 绑定参数和业务错误为工具错误结果。写结果的 `execution` 为 `not_started`、`rolled_back`、`committed`、`unknown`；当前契约检查 `retryable=true` 只出现在前两种状态，`unknown` 对应 `OUTCOME_UNKNOWN`（ADR-0010）。
 
 ### 8.3 并发、超时与取消
 - EPLAN 主线程是串行的，所以 **Host 对每个 EPLAN 实例只维护一个串行队列**，读操作也不例外。
 - 两段超时：等待进入主线程（默认 10 秒，超时返回 `EPLAN_BUSY`）；执行时间（按工具单独设置）。
 - 写操作的执行请求发出后，等待超时或管道断开都不直接返回可重试的错误：Host 重连同一个 Bridge，用 `outcome.get` 取回结果；Bridge 按请求 ID 去重，同一请求不会执行两次（[ADR-0010](../adr/0010-write-outcomes.md)）。
 - 取消：请求还在队列中时直接移除；已在主线程上执行的，只在操作内部的安全点检查取消（例如处理每一页之前）。已经提交的修改不会被撤回，审计如实记录。
+
+
+
+`CallProgress` 将各阶段的进度值及 total 接到前一阶段的最大值之后。`WriteRequest.Activity` 提供 EPLAN 阶段的短语；`BridgeProgress` 每 5 秒发心跳，以秒数为进度，Bridge 的分步消息作为文字转发。审批等待默认 120 秒，有 progress token 时每 15 秒通知；各工具的具体取消边界见工具参考。
 
 ### 8.4 事务与可回退性
 每个写操作逐层提供保护：
@@ -405,13 +424,17 @@ sequenceDiagram
 - 剥除控制字符，对超长文本截断。
 - 最重要的防线不靠模型：**写操作必须经过策略和审批**，即使模型被诱导，也不能悄悄写入。
 
+
+
+`ResultShaper.CleanText` 移除控制字符（保留换行、制表）以及 U+202A–U+202E、U+2066–U+2069。清洗后超过 500 个 UTF-16 字符的字段截断为 500 字符以内，并保留完整代理对，后附 ` … [truncated, <N> characters in total]`；N 是清洗后长度。结果预算默认约 5k token、上限 20k，结构化结果与兼容 JSON 文本各计一次。支持 `concise/detailed` 的具体工具在 schema 中声明；计划查询保留全文并按 Unicode 标量边界分片，计划哈希使用原内容，见 [M6 设计](../design/2026-10-21-m6-engineering-packs.md)及 [eplan_plan_get](../tools/eplan_plan_get.md)。
+
 ### 8.6 多语言与单位
 - 多语言文本返回时注明语言代码；默认使用项目的主语言，可以通过参数指定。
 - 坐标和尺寸单位一律是毫米，参数名带单位（`x_mm`）。坐标原点在页面左下角，y 轴向上（实机验证）。
 - 数字一律按区域无关的格式处理。
 
 ### 8.7 日志与追踪
-- 日志使用 `Microsoft.Extensions.Logging`，以 JSON 格式写入文件，并输出到 stderr。stdout 只给 MCP 协议使用。不使用已废弃的 MCP 日志通知。
+- Host 日志使用 `Microsoft.Extensions.Logging` 的 `AddSimpleConsole`，单行输出到 stderr；Bridge 与离线宿主写入各自日志文件，位置见 [CLI 说明](../reference/cli.md#工具发现与日志)。stdio 的 stdout 用于 MCP 协议，不使用 MCP 日志通知。
 - 每次调用的追踪上下文（`traceparent`，按新规范放在 `_meta` 中）从客户端经 Host 传到 Bridge。
 - OpenTelemetry 作为可选项（M5），遵循 MCP 语义约定（目前处于 Development 状态）：span 名为 `{mcp.method.name} {target}`，属性包括 `gen_ai.tool.name`、`mcp.protocol.version` 等。**工具参数和结果默认不记录到遥测中**。
 
@@ -462,7 +485,7 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | # | 风险 | 影响 | 应对 | 何时消除 |
 |---|---|---|---|---|
 | **R0** | **授权与分发**：未签名插件只能在开发者授权下加载，可能限制项目不超过 5 页；要让其他人使用，可能需要 EADN 签名和运行时授权 | 项目能否用于真实项目、能否开源分发 | **S0 已完成**：开发机授权下，未签名插件可以读写 321 页的项目。其他授权未知，按 [ADR-0007](../adr/0007-licensing-and-distribution.md)（已接受）处理：0.x 发布未签名插件，`doctor` 提供授权自检，预留签名开关 | 本机已消除；其他授权待用户反馈 |
-| R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | **S1 已完成**：可行。EPLAN 预设了调度器，超时可以干净地放弃。另外发现两个必须防范的问题：委托中漏出的异常会让 EPLAN 崩溃；模态对话框打开时会被重入执行。两者都已写成硬规则（编码规范 5a–5c） | 已消除（启动时加载的情况在打通骨架时确认） |
+| R1 | 主线程调度：`EplanMainThreadDispatcher` 在插件中是否已就绪，带超时的调度是否可靠 | 核心路径 | **S1 已完成**：可行。EPLAN 预设了调度器，超时可以干净地放弃。另外发现两个必须防范的问题：委托中漏出的异常会让 EPLAN 崩溃；模态对话框打开时会被重入执行。现有调度封装处理异常和模态检查，证据见 [api-notes A9](../eplan/api-notes/transactions-and-undo.md#a9-从后台线程调度到-eplan-主线程spike-s12026-10-13) | 已消除（启动时加载的情况在打通骨架时确认） |
 | R2 | `SafetyPoint`、`UndoStep`、`LockingStep` 组合使用时的实际语义 | 回滚承诺可能无法兑现 | **S2 已完成**：S0 中没有回滚的原因是 UndoStep 套在了 SafetyPoint 外面。改为在 SafetyPoint 内创建 UndoStep 后，回滚和 Ctrl+Z 都可用，撤销历史也完整（ADR-0005 已加修订说明）。**剩余**：在主线程调度器中复核（S1） | action 中已消除；调度器中待 S1 |
 | R3 | 与 EPLAN 自带的程序集冲突 | 插件加载失败，或 EPLAN 不稳定 | Bridge 不带第三方依赖；JSON 使用 EPLAN 自带的 Newtonsoft 13；spike S3 验证 | M1 |
 | R4 | 客户端对 MCP 2026-07-28 的支持程度（MRTR elicitation、Tasks） | 无法在客户端内审批；耗时操作无法以任务方式运行 | **S4 协议层已完成**：Claude Code 2.1.295 使用 2026-07-28，并声明 `elicitation: {form, url}`；SDK 2.x 的 `InputRequiredException` 一条代码路径覆盖 2026-07-28 和 2025-11-25，`requestState` 都能带回（api-notes C）。**ADR-0011 之后审批不经客户端**，表单界面的人工确认不再需要。**剩余**：Tasks 未测 | 审批部分已消除（ADR-0011）；Tasks 待定 |
@@ -493,3 +516,129 @@ Host 与 Bridge 之间的协议版本是一个整数。握手时双方交换版�
 | dry-run / 计划 | 只计算将要发生的变化、不修改项目的执行方式 |
 | MRTR | Multi Round-Trip Request，MCP 2026-07-28 中服务器向用户请求输入的方式 |
 | EADN | EPLAN Application Developer Network，EPLAN 的开发者计划，提供 API 程序签名服务 |
+
+## 13. 威胁模型
+
+本节保留既有资产、信任边界与威胁分析；机制事实见相应 ADR、工具契约和下节实现记录。
+
+### 13.1 资产
+
+| 资产 | 为什么重要 |
+|---|---|
+| 工程师的 EPLAN 项目 | 工程交付物，写坏的代价很高，而且可能在很久之后才被发现 |
+| 主数据（部件库、符号、宏、表格） | 被整个团队共享，影响面比单个项目更大 |
+| EPLAN 设置和插件注册 | 持久化的系统级状态 |
+| 审计记录 | 事后追溯的唯一依据 |
+| 授权 | 有成本；借用或网络授权可能被占用或耗尽 |
+| 项目中的商业信息 | 客户名称、设备清单等，日志或遥测泄露会暴露客户信息 |
+
+### 13.2 信任边界
+
+```mermaid
+flowchart LR
+    subgraph user["当前 Windows 用户的信任域"]
+        model(["模型输出<br/>(不可信)"])
+        client["MCP 客户端"]
+        host["Host"]
+        wb["Workbench（M5）"]
+        files[("配置 / 审计 / 日志<br/>实例发现 / scratch<br/>导出 / 备份")]
+        subgraph eplan["EPLAN 进程"]
+            bridge["Bridge"]
+            data[("项目数据<br/>(不可信内容)")]
+        end
+    end
+    other["本机其他用户、其他会话"]
+    lan["局域网中的其他机器<br/>宿主机上的浏览器"]
+    supply["依赖、构建、发布渠道"]
+
+    model -. TB1 .-> client -- stdio --> host
+    client -- "TB7 HTTP（M5，虚拟机）" --> host
+    lan -. "TB7" .-> host
+    host -- "TB2 命名管道" --> bridge
+    data -. "TB3" .-> bridge
+    host --- files
+    host -- "TB6 命名管道" --> wb
+    other -. "TB2 / TB4 / TB6" .-> host
+    supply -. "TB5" .-> host
+```
+
+| 边界 | 说明 |
+|---|---|
+| **TB1** 模型 → Host | 工具调用由模型生成。模型可能出错，也可能被注入的内容操纵。Host 将参数作为不可信输入处理 |
+| **TB2** Host ↔ Bridge | 本机命名管道。同一台机器上的其他用户和其他进程可能尝试连接 |
+| **TB3** 项目数据 → 模型 | 项目中的文本经工具结果进入模型上下文，可能携带注入指令 |
+| **TB4** 磁盘文件 | 配置、审计、日志可能被篡改或被其他用户读取。M4 起数据根目录中还有导出文件和项目备份：目录由 Host 新建，模型不能选择位置（T17、T18） |
+| **TB5** 供应链 | 依赖包、构建环境、发布产物、插件注册；M5 起还有安装包，以及维护者在开发机上构建的插件（T22、T23，ADR-0020） |
+| **TB6** Host ↔ Workbench（M5） | 本机命名管道，Workbench 是服务器，Host 每次审批连接一次（[ADR-0014](../adr/0014-workbench-approval-channel.md)）。其他程序可能抢先占用管道名；Workbench 把项目中的文本展示给工程师，这些文本可能误导人（T19–T21） |
+| **TB7** 宿主机上的客户端 → 虚拟机中的 Host（M5） | EPLAN 在虚拟机中时，Host 以 HTTP 在虚拟机的一个 IPv4 地址上提供 MCP（[ADR-0018](../adr/0018-vm-http-transport.md)）。局域网中的其他机器、宿主机上的浏览器可能尝试访问；传输是明文 |
+
+**不在防护范围内**：以当前用户身份运行的恶意程序。它本来就可以直接修改项目文件，也可以控制 EPLAN。同样，stdio 下的客户端和服务器处于同一信任域，stdio 不是沙箱（MCP 本地服务器安全指南）。这也包括代理经客户端的 shell 工具执行的命令：它们以当前用户身份运行，可以用 UI Automation 操作任一个审批窗口（spike S8 的驱动程序就这样回答过 EPLAN 的对话框，[api-notes](../eplan/api-notes/transactions-and-undo.md#a15-写操作中断spike-s82026-10-20eplan-20260325421electric-p8在调度器中) A15），也可以替换按用户安装目录中的文件。审批渠道（ADR-0011、ADR-0014）防的是客户端自己回答或被配置为自动回答，不防这类程序；入门指南提醒工程师保留客户端对 shell 命令的确认（[M5 设计](../design/2026-10-20-m5-operability.md) Q9）。
+
+### 13.3 STRIDE 分析
+
+| # | 类别 | 威胁 | 位置 | 措施 |
+|---|---|---|---|---|
+| T1 | 冒充（S） | 其他用户的进程冒充 Host 连接 Bridge，或者冒充 Bridge 接收 Host 的请求 | TB2 | [管道](../adr/0008-data-locations-and-instance-discovery.md) |
+| T2 | 篡改（T） | 篡改等待审批的计划，或者让一个批准用在别的请求上（伪造、重放、迟到的回答），使工程师批准的内容和实际执行的不同 | TB1 | [审批绑定](../adr/0011-approval-out-of-band.md) |
+| T3 | 篡改（T） | 审批之后、执行之前，项目被修改，导致批准的变更作用在不同的状态上 | TB3 | [执行指纹](#84-事务与可回退性) |
+| T4 | 篡改（T） | 篡改或删除审计记录，掩盖发生过的修改 | TB4 | [审计](#88-审计) |
+| T5 | 篡改（T） | 通过路径技巧（`..`、符号链接、短文件名）让真实项目被误判为 scratch 项目 | TB1 | [scratch](../adr/0005-safety-model.md) |
+| T6 | 抵赖（R） | 无法证明某次修改是谁、经谁批准的 | 全部 | [审计](#88-审计) |
+| T7 | 信息泄露（I） | 项目内容、客户名称、授权信息写入日志、遥测或错误信息 | TB4 | [日志](#87-日志与追踪)、[授权证据](../eplan/api-notes/environment-and-licensing.md#a2-授权eplaneplapiapplicationframeworklicense) |
+| T8 | 信息泄露（I） | 错误信息暴露对象是否存在、本机路径或内部结构 | TB1 | [错误](#82-错误模型) |
+| T9 | 拒绝服务（D） | 模型在循环中反复调用耗时的工具，导致 EPLAN 长时间被占用，工程师无法工作 | TB1 | [并发](#83-并发超时与取消) |
+| T10 | 拒绝服务（D） | Bridge 的缺陷导致 EPLAN 崩溃或挂起 | TB2 | [调度](#53-bridge-组件) |
+| T11 | 权限提升（E） | 模型被项目中的注入文本诱导，执行写操作、删除操作或执行代码 | TB3 | [审批](../adr/0011-approval-out-of-band.md)、[配置](#89-配置)、[结果清洗](#85-不可信内容) |
+| T12 | 权限提升（E） | 模型通过工具修改安全配置（扩大 scratch 范围、启用 Code 级工具），自己给自己提权 | TB1 | [配置](#89-配置) |
+| T13 | 权限提升（E） | 恶意的依赖包或被篡改的发布产物进入 EPLAN 进程 | TB5 | [包配置](../../Directory.Packages.props)、[发布](../adr/0020-no-self-hosted-runner.md) |
+| T14 | 篡改（T） | 工具描述被悄悄更改（"rug pull"），或者描述中夹带影响模型行为的指令 | TB5 | [契约快照](../../tests/EplanMcp.Host.Tests/README.md) |
+| T15 | 篡改（T） | 写操作的结果未知（超时、管道断开、EPLAN 崩溃）时，模型重试，同一修改被执行两次，例如同一页建两次 | TB2 | [写结果](../adr/0010-write-outcomes.md) |
+| T16 | 信息泄露（I） | 工具参数中的文件路径（第一个是 `eplan_macro_insert` 的 `macro`）指向 UNC 共享或任意文件：EPLAN 访问共享时会发送当前用户的凭据哈希，任意文件可能触发 EPLAN 的解析缺陷，或者把不该用的文件当作宏插入项目 | TB1 | [宏路径](../design/2026-10-20-m3b-placement.md) |
+| T17 | 篡改（T） | 导出工具（M4）把文件写到允许的目录之外，或者覆盖已有文件：模型给的文件名带路径或 `..`，EPLAN 方案中配置的目录、子目录和文件名格式，目录中的链接或联接点；写到 UNC 共享时，EPLAN 还会发送当前用户的凭据哈希（同 T16） | TB1 | [导出](../adr/0012-export-tier.md) |
+| T18 | 篡改（T） | Destructive 操作（M4 的删页、重编号）造成难以恢复的损失：模型出错或被诱导，或者结果与预期不同（删页会留下没有主功能的辅助功能，重编号后可能仍有带 `?` 的标识，api-notes A18）；EPLAN 在途中崩溃时，事务中已做的修改留在项目里，撤销历史随进程消失（A15） | TB1 | [审批](../adr/0011-approval-out-of-band.md)、[备份](../adr/0013-destructive-backup.md) |
+| T19 | 冒充（S） | 其他程序冒充 Workbench 回答审批：抢先占用 Workbench 的管道名，或开发构建与安装的版本错配；或者冒充 Host 在 Workbench 中提问 | TB6 | [Workbench管道](../adr/0014-workbench-approval-channel.md) |
+| T20 | 篡改（T） | 审批界面中的项目文本误导工程师：变更清单中的文字冒充界面说明（如"已预先批准"），双向文字控制符改变显示顺序，换行伪造出多行，超长文本把关键的行挤出视野 | TB6 | [项目文本](../adr/0014-workbench-approval-channel.md) |
+| T21 | 篡改（T） | 回答落到别的问题上：回答完一个问题后下一个顶上来，或多个 Host 同时提问时误点；同一问题同时出现在 Workbench 和 EPLAN 对话框中，两处都能回答 | TB6 | [审批队列](../adr/0014-workbench-approval-channel.md)、[审批绑定](../adr/0011-approval-out-of-band.md) |
+| T22 | 篡改（T） | 安装与升级：下载的安装包被替换；安装程序要管理员权限、修改 PATH 或 EPLAN 目录；在 MSIX 客户端内注册插件，注册落到重定向的目录中；升级或卸载删除审计、备份等数据 | TB5 | [安装发布](../process/release.md)、[发布](../adr/0020-no-self-hosted-runner.md) |
+| T23 | 篡改（T） | 维护者开发机上构建的插件被替换或带入本地修改：插件不由 CI 构建，来源证明只能证明发布工作流收到的就是上传的文件（ADR-0020） | TB5 | [本机插件发布](../adr/0020-no-self-hosted-runner.md) |
+| T24 | 冒充（S）、信息泄露（I） | 网络上的其他机器不带或猜测密钥调用工具；截获明文传输中的密钥和项目数据，再冒充客户端 | TB7 | [HTTP](../adr/0018-vm-http-transport.md)、[HTTP明文边界](../adr/0018-vm-http-transport.md) |
+| T25 | 拒绝服务（D） | 大量请求或暴力猜测密钥，拖住 Host 和 EPLAN | TB7 | [HTTP](../adr/0018-vm-http-transport.md) |
+| T26 | 冒充（S） | 宿主机上的网页借 DNS 重绑定或跨站请求访问虚拟机中的服务 | TB7 | [HTTP来源](../adr/0018-vm-http-transport.md) |
+| T27 | 信息泄露（I）、权限提升（E） | 服务暴露到预期以外的网络：监听所有接口、防火墙规则过宽或在公用网络中生效、服务在无人看管时一直运行；宿主机客户端配置文件中的明文密钥被分享 | TB7 | [HTTP监听](../adr/0018-vm-http-transport.md)、[HTTP明文边界](../adr/0018-vm-http-transport.md) |
+| T28 | 篡改（T）、信息泄露（I） | 导入工具（M4c）的文件参数指向导入根目录之外：绝对路径、UNC 共享（EPLAN 访问共享时会发送当前用户的凭据哈希，同 T16）、驱动器号、`..`、导入目录中的链接或联接点；审批之后、执行之前文件被换掉，工程师批准的不是实际导入的文件；EPLAN 解析恶意构造的文件 | TB1 | [导入](../design/2026-10-21-m4c-more-tools.md) |
+| T29 | 篡改（T）、拒绝服务（D） | （[ADR-0019](../adr/0019-master-data-writes.md)）写系统主数据（部件库）影响所有项目：模型出错或被诱导导入、同步错误的部件；写入途中失败时没有回滚（`SafetyPoint`、Ctrl+Z 和部件库 API 的事务都撤不回导入，S24）；写到团队共用的 SQL Server 库，影响其他人；改掉 EPLAN 配置的库；工程师不知道改的是所有项目共用的库 | TB1 | [主数据写入](../adr/0019-master-data-writes.md)、[审批](../adr/0011-approval-out-of-band.md)、[配置](#89-配置) |
+| T30 | 权限提升（E）、篡改（T） | （[ADR-0021](../adr/0021-action-run-whitelist.md)）经 `eplan_action_run` 越过白名单：给出白名单之外的 action、TYPE 或参数；参数值中夹带额外的参数（以 `/` 开头、带引号）；借会再执行别的 action 的 action（`ProjectAction`）转一道；不带项目参数的 action 作用在 EPLAN 的当前项目，而不是指定的项目；路径参数逃出允许的根目录或指向 UNC（同 T16、T17）；改白名单给自己加条目（同 T12）；项目中的注入文本诱导模型用它绕开任务工具的变更清单（同 T11） | TB1 | [action目录](../adr/0021-action-run-whitelist.md)、[审批](../adr/0011-approval-out-of-band.md)、[配置](#89-配置)、[结果清洗](#85-不可信内容) |
+| T31 | 篡改（T）、拒绝服务（D） | （ADR-0021）白名单中的 action 有没记录的副作用：改了文档没写的数据（设置、"上次使用"的方案、主数据、其他项目），不建撤销步骤而清空工程师的撤销历史（api-notes B7），弹出对话框或长时间占住主线程，让 EPLAN 崩溃（A25：部件清单 CSV 导出后 EPLAN 关闭了全部项目），或在别的 EPLAN 版本中行为不同；读回只比较指纹，看不到逐项的变化 | TB2 | [action副作用](../adr/0021-action-run-whitelist.md) |
+| T32 | 篡改（T）、权限提升（E）、拒绝服务（D） | （[ADR-0024](../adr/0024-pack-trust-and-container.md)）恶意或损坏的工程包：条目名路径穿越、解压炸弹、夹带脚本或可执行文件、伪造来源，包中的说明和规则消息夹带注入文字；安装后被悄悄改动，项目锁定的版本不再是批准时的内容；`.eplanpack` 不经工程师确认就被安装 | TB1、TB4 | [工程包](../adr/0024-pack-trust-and-container.md)、[结果清洗](#85-不可信内容) |
+| T33 | 篡改（T）、信息泄露（I） | （ADR-0024）就地引用的企业资源（`referenced`，如网络共享上的参考项目）事后被替换；清单记下本机路径或用户名，随包流出；引用的根目录由模型指定 | TB1、TB4 | [引用资源](../adr/0024-pack-trust-and-container.md)、[配置](#89-配置) |
+
+| T34 | 篡改（T） | 计划记录、完整变更文本或证据被替换，或读取到半份状态（ADR-0028，P03） | TB4 | [计划存储](../adr/0028-plan-record-format.md) |
+| T35 | 篡改（T） | 预测或执行超出工程师批准范围 | TB1、TB2 | [计划审批](../adr/0028-plan-record-format.md)、[审批绑定](../adr/0011-approval-out-of-band.md) |
+| T36 | 权限提升（E）、篡改（T）、拒绝服务（D） | 方法组试执行：模型可能把目录当作任意反射入口、传入伪造对象或借未验证调用修改真实项目、弹窗阻塞 | TB1、TB2 | [方法试执行](../tools/eplan_api_try.md) |
+
+
+## 14. 安全机制实现记录
+
+以下是现有实现和既有决定的索引；测试名称表示覆盖入口，实机状态以[待验台账](../process/large-pending.md)和 API 证据为准。
+
+| 原记录 | 实现事实与出处 | 原威胁对应关系 |
+|---|---|---|
+| SEC-01、02、05–07 | `PolicyEngine` 按工具级别和配置处理请求，安全配置没有写入工具；scratch 使用规范化完整路径判定。Host 保存计划、生成请求 ID，并按请求、参数摘要、计划指纹、期限和一次性回答绑定审批。执行前指纹变化返回 `PLAN_STALE`。独立审批窗口决定见 [ADR-0005](../adr/0005-safety-model.md)、[ADR-0011](../adr/0011-approval-out-of-band.md)。 | SEC-01：T11、T18、T29、T30；SEC-02：T11、T12、T29、T30、T33；SEC-05：T5；SEC-06：T2、T21、T35；SEC-07：T3 |
+| SEC-03、已撤销 SEC-04 | Host–Bridge 以当前用户 ACL、`PipeOptions.CurrentUserOnly` 和随机管道名隔离；实例发现文件中的一次性密钥方案已撤销，见 [ADR-0008](../adr/0008-data-locations-and-instance-discovery.md)。 | SEC-03：T1 |
+| SEC-08、10–12、17 | `ResultShaper` 清洗返回的数据字段；Host 默认日志不包含项目内容，错误映射去除堆栈、本机路径及内部类型，授权诊断只报告模块及可用性；工具描述与 schema 进入契约快照。 | SEC-08：T11、T30、T32；SEC-10：T7；SEC-11：T7；SEC-12：T8；SEC-17：T14 |
+| SEC-09 | 审计采用哈希链；审计写入失败会阻止写执行，`audit verify` 检查链完整性。覆盖入口包括审计篡改、不可写和写入失败测试。 | SEC-09：T4、T6 |
+| SEC-13、14 | 每个 EPLAN 实例的请求经过有长度上限的串行队列、超时与取消；主线程经调度器调用并捕获异常。Bridge 与原生 API 的实现及依赖边界见第 5 节；原生崩溃或模态窗口仍是风险，不能由异常捕获保证消除。 | SEC-13：T9；SEC-14：T10 |
+| SEC-15、16、26 | 包版本与锁文件由构建配置记录；发布产物的 SHA-256、SBOM 和来源证明及维护者按标签构建插件的安排见 [ADR-0020](../adr/0020-no-self-hosted-runner.md)、[发布操作](../process/release.md)。验证声明不代表本次已执行发布或 Large。 | SEC-15：T13；SEC-16：T13、T22；SEC-26：T23 |
+| SEC-18 | `WritePipeline` 在超时或断线后取回原请求结果，Bridge 按请求 ID 去重；`unknown` 以项目和实例暂停写入，由工程师经审批渠道核对后解除。四值结果及恢复链见 [ADR-0010](../adr/0010-write-outcomes.md)。 | SEC-18：T15 |
+| SEC-19 | 宏相对路径由 Bridge 解析到 `$(MD_MACROS)`；拒绝绝对路径、UNC、驱动器号、`..` 和根目录下的重解析点，根目录本身可为链接或网络路径；宏扩展名为 `.ema`，错误不回传根目录本机路径。见 [宏插入](../tools/eplan_macro_insert.md)和 M3b 设计。 | SEC-19：T16 |
+| SEC-20 | 导出目标由 Host 创建为 `exports/<项目名>/<UTC 时间>-<随机后缀>/`；工具不接受目录，PDF 可给受限文件名。Bridge 接收已有空目录；Host 检查导出文件是否越界或为链接，失败/取消清理本次目录。行为见 [ADR-0012](../adr/0012-export-tier.md)与各导出工具。 | SEC-20：T17 |
+| SEC-21 | Destructive 流水线审批后，以 `ProjectManager.CopyProject(..., CopyMode.Snapshot)` 备份到 `backups/<项目名>/<UTC 时间>/`；复制失败、超时或页数不符返回 `BACKUP_FAILED/not_started`。备份路径进入审计及结果，保留已有备份，见 [ADR-0013](../adr/0013-destructive-backup.md)。 | SEC-21：T18 |
+| SEC-22–24 | Workbench 管道名绑定 SID/数据根目录，以首实例及当前用户 ACL 创建、拒绝网络登录；双方核对同一安装的可执行文件路径。协议拒绝未知/重复字段和超过 1 MiB 帧。项目文本以等宽纯文本清洗显示，换行可见，长度截断带计数；客户端名称标记未验证。送达后断开按取消处理；逐问题回答，切换问题/显示窗口后 500 ms 防误触，破坏性批准使用动作及确认值，倒计时不重置。机制见 [ADR-0014](../adr/0014-workbench-approval-channel.md)、[ADR-0035](../adr/0035-destructive-approval-default-reject.md)及 Workbench 设计。 | SEC-22：T19；SEC-23：T20；SEC-24：T21 |
+| SEC-25 | 按用户安装，插件通过 `EplApiModuleAction` 注册；`install-addin` 不强制结束 EPLAN，并检测其他用户安装的插件；MSIX 中可注册插件而 `client-config` 拒绝执行。升级不强制结束进程；卸载撤销注册并保留数据目录。见 [ADR-0016](../adr/0016-per-user-installer.md)、M5 与 S14。 | SEC-25：T22 |
+| SEC-27–30 | VM HTTP 使用 Workbench 生成的 256 位随机密钥、当前用户 DPAPI 存储及每请求 Bearer 验证；恒定时间比较，失败 401，单来源每分钟 10 次失败后 429 一分钟，重生成使旧钥失效。唯一端点 `/mcp`，默认空 Origin 允许表；绑定所选 VM IPv4，防火墙限宿主 IPv4/程序/域和专用网络。服务随 Workbench 退出，`doctor` 报告状态；审计记录来源地址，审批显示网络来源。明文是 2026-10-20 已接受的剩余风险，见 [ADR-0018](../adr/0018-vm-http-transport.md)。 | SEC-27：T24、T25；SEC-28：T26；SEC-29：T27；SEC-30：T24、T27 |
+| SEC-31 | Host 导入固定在 `imports/`，只收相对路径；校验设备名、扩展名、大小和子级重解析点。文件相对路径、大小与 SHA-256 进入审批/审计，导入计划指纹另含修改时间；执行前变化返回 `PLAN_STALE`。EPLAN 对恶意文件的解析缺陷仍在现有防护范围外。见 M4c 和各导入工具。 | SEC-31：T28 |
+| SEC-32 | 主数据计划记录库类型、EPLAN 配置路径及展开路径；`masterDataWrites=deny` 或 SQL Server 库返回 `POLICY_DENIED`。该配置仅来自文件，`doctor` 显示；Workbench v1 不带主数据字段，审批走 EPLAN 对话框。执行前在 `backups/masterdata/<UTC 时间>/` 用 `backup /TYPE:MASTERDATA` 备份指定库，要求恰好一个非空 7z；变化为 `PLAN_STALE`、备份失败为 `BACKUP_FAILED`。结果未知按库路径及实例暂停。`PartsService.PartsDatabase` 位于禁用符号表，导入/同步 API 在专用适配器调用。见 [ADR-0019](../adr/0019-master-data-writes.md)。 | SEC-32：T29 |
+| SEC-33、34 | `actionRun` 默认 off；白名单 action/TYPE 嵌入程序集，参数逐条校验，项目/固定参数由 Host 注入。Bridge 经 `FindAction().Execute()` 与逐项 `AddParameter` 调用，执行前复核 action、TYPE、参数名；无项目参数的条目复核当前项目。条目按 EPLAN 主版本及记录的级别执行流水线，比较页数、对象数、设计文件和系统消息指纹；Read 条目出现项目变化时在本 Host 停用。实机记录引用 S26/A40 等，不把指纹相等当逐项验证。见 [ADR-0021](../adr/0021-action-run-whitelist.md)。 | SEC-33：T30；SEC-34：T31 |
+| SEC-35、36 | `.eplanpack` 校验条目路径、类型、数量、大小、压缩比、哈希及完整清单后移到 `packs/<ID>/<版本>/`，版本不可覆盖；XLSX/PDF/DOCX 仅保存，SVG 校验脚本/外部引用，导入构建安装写 `pack_change`。外部资源通过 `packSources` 名称和相对路径定位，使用前校验 SHA-256，原生文件本机路径作为缺口保留。内置库位于程序目录 `plugin-libraries/builtin`，本地库位于数据目录 `plugin-libraries/<名称>`，共享库由 `state/plugins.json` 登记；索引只读，安装核对 PackDigest/索引摘要，非内置安装更新经过审批。见 [ADR-0024](../adr/0024-pack-trust-and-container.md)。 | SEC-35：T32；SEC-36：T33 |
+| SEC-37、38 | 计划存储使用严格 schema、定义哈希、内容摘要、拒绝链接、审计先行和 revision CAS 原子替换；执行核对 Host 内存的归属、编译摘要与审计。SHA-256 不是文件认证。批准绑定 planHash/独立步指纹，封闭预测器、步内 guard、逐步审计限定执行；P15 v1 Changes 展示限制与完整清单路径、核对 changesDigest，超长路径/帧拒绝。计划不发四值 `approval.outcome`，以 `eplan_plan_get` 查询，不实施 Proposed ADR-0027。见 [ADR-0028](../adr/0028-plan-record-format.md)和 M6 设计。 | SEC-37：T34；SEC-38：T35 |
+| SEC-39 与短期句柄 | `apiTry` 默认 off，启用后只接受生成的精确形状并经编译分发；同项目/类型/摘要校验、逐次审批、单撤销写事务及 unknown 暂停见 [试执行工具](../tools/eplan_api_try.md)。短期句柄在插件内存按 Host 会话/EPLAN 进程隔离，每次调用清理，闲置 10 分钟过期，每会话最多 500 个、淘汰最早创建项；项目关闭清空，重启失效。128 位随机标识使用时复核类型、有效性和项目归属；审计仅元数据，设置句柄只读，主数据句柄为 `masterdata_copy_pending`。见 [ADR-0033](../adr/0033-api-try-object-handles.md)；历史 14 类定位器已由工具参考中的当前生成表替代，保留历史验证状态不宣称新实测。 | SEC-39：T36 |

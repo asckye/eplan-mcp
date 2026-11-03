@@ -416,7 +416,7 @@ B3 路径适配仅指可将输入限制为 imports、输出限制为新建 expor
 
 ## 证据、复算与验收
 
-静态证据：[类型与成员目录](../../catalog/eplan-2026.0.3/)、[生成器](../../eng/coverage/ApiTryGenerator.cs)、[禁用符号](../../src/EplanMcp.Bridge.Eplan/BannedSymbols.txt)、[api-notes](api-notes.md) A2/A30/A57/A62/A63；安全依据为 ADR-0005/0011/0019/0032/0033 与 [security.md](../standards/security.md)。除已明确引用的既有记录外，本次没有新增 EPLAN 行为事实，也没有新增 live_verified。
+静态证据：[类型与成员目录](../../catalog/eplan-2026.0.3/)、[生成器](../../eng/coverage/ApiTryGenerator.cs)、[禁用符号](../../src/EplanMcp.Bridge.Eplan/BannedSymbols.txt)、[api-notes](api-notes.md) A2/A30/A57/A62/A63；安全依据为 ADR-0005/0011/0019/0032/0033 与 [项目威胁模型](../architecture/architecture.md#13-威胁模型)。除已明确引用的既有记录外，本次没有新增 EPLAN 行为事实，也没有新增 live_verified。
 
 以下是本次读取内容的 SHA-256（完整值），工作树名是相对标识，不是本机绝对路径；工作树含未提交改动时 HEAD 不能代替文件哈希。六树输入的本地只读副本、复算脚本与检查结果保存在忽略目录 `.local/operation-gap-inputs/` 及 `.local/`。
 

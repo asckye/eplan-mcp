@@ -185,7 +185,7 @@ public sealed class UsageToolsTests
     public void UsageTexts_StayWithinTheBudget()
     {
         // The result carries the text twice (structured and JSON text block); ~1.5k tokens per tool keeps all four
-        // topics well within the ~5k token default budget (mcp-tool-design 7.2).
+        // topics well within the ~5k token default budget (engineering-handbook.html#pa).
         Assert.All(ToolUsageCatalog.Usage, usage => Assert.InRange(usage.Value.Values.Sum(section => section.Length), 1, 6000));
     }
 

@@ -72,3 +72,10 @@ ADR-0011 规定审批只经工程师独立操作的窗口：Workbench 正在运�
 ### 方案 4：Host 启动审批窗口
 - 优点：工程师不必事先打开 Workbench。
 - 缺点：由 MSIX 客户端启动的 Host，其子进程继承文件重定向（A6）；无人值守运行时也会在桌面上弹出窗口；每个 Host 一个窗口，就不是队列了。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../process/development-workflow.md#3-变更分级与设计产物` → [手册开发流程条款](../standards/engineering-handbook.html#review-rfc)。
+- 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。

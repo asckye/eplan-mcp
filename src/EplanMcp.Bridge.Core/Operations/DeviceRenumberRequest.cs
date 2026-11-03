@@ -37,7 +37,7 @@ internal sealed class DeviceRenumberRequest
 
     public int Step { get; }
 
-    /// <summary>Every argument problem at once as INVALID_ARGUMENT (mcp-tool-design 6.2), then the project.</summary>
+    /// <summary>Every argument problem at once as INVALID_ARGUMENT (engineering-handbook.html#pa), then the project.</summary>
     public static DeviceRenumberRequest Check(DeviceRenumberArgs args, IProjectCatalog catalog)
     {
         var violations = new List<string>();

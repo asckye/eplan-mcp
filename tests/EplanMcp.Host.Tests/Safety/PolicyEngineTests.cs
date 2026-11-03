@@ -115,7 +115,7 @@ public sealed class PolicyEngineTests
         string outside = PolicyEngine.Decide(ToolTier.Write, inScratch: false, config).Message!;
         string code = PolicyEngine.Decide(ToolTier.Code, inScratch: true, config).Message!;
 
-        // mcp-tool-design 6.3: POLICY_DENIED names the policy and never how to get around it.
+        // engineering-handbook.html#pa: POLICY_DENIED names the policy and never how to get around it.
         Assert.All([outside, code, PolicyEngine.MasterDataDenied, PolicyEngine.MasterDataServerDenied], m => Assert.Contains("safety policy", m, StringComparison.Ordinal));
         Assert.All([outside, code, PolicyEngine.MasterDataDenied, PolicyEngine.MasterDataServerDenied], m => Assert.DoesNotContain("config", m, StringComparison.OrdinalIgnoreCase));
     }

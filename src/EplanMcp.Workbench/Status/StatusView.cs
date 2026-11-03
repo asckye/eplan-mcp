@@ -48,7 +48,7 @@ internal sealed class VariantChoice(string name)
 }
 
 /// <summary>
-/// The status page without its window (M5 design 4.4 item 4, workbench-ui section 7): <c>eplanmcp doctor</c>, run when
+/// The status page without its window (docs/design/2026-10-20-m5-operability.md#workbench-implementation): <c>eplanmcp doctor</c>, run when
 /// the page opens and on "Refresh", never polled, its checks grouped by their stable IDs (architecture 5.2); write
 /// suspensions also as a Banner (STS-06); and which channel the next approval goes to, which this Workbench knows itself.
 /// </summary>

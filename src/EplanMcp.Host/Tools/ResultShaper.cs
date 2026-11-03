@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace EplanMcp.Host.Tools;
 
 /// <summary>
-/// Keeps tool results within the token budget and project text inert (mcp-tool-design 7.2 and 7.3, M2 design 4.4).
+/// Keeps tool results within the token budget and project text inert (engineering-handbook.html#pa, M2 design 4.4).
 /// Every string read from a project goes through <see cref="CleanText"/>, every list page through
 /// <see cref="FitPage"/>. Only the Host shapes results; the Bridge returns project data as EPLAN gives it.
 /// </summary>

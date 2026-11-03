@@ -1,6 +1,6 @@
 name: commit-rules
 
-# Enforces docs/process/development-workflow.md section 5:
+# Enforces docs/standards/engineering-handbook.html#review:
 # Conventional Commits PR titles and no AI attribution in titles, descriptions or commits.
 on:
   pull_request:

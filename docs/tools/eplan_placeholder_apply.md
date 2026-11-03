@@ -62,7 +62,7 @@
 - **规划**（只读）：按 `eplan_placeholder_list` 的方式读出这一页上的占位符，选出目标；不调用 `GetAllCurrentValues()`，它在事务外、占位符未锁定时会抛 `LockingException`（A33，2026-10-22）。一条变更 `Action = "update"`、`Kind = "placeholder"`、`Name = "<页名> <名称>"`、`Property = "value set"`、`OldValue = null`（EPLAN 不给出"当前是哪个值集"）、`NewValue = 值集名`；`Details`：`page`、`placeholder`、`values`（`变量 TAB 值`，每行一个）、`assignedObjects`，不含当前值。审批表单写成"在页 … 上给占位符 … 应用值集 …"，下面列出各变量的值。指纹：项目路径、页名、占位符名称、值集名、变量名、全部存储值的原始串，取 SHA-256；不含当前值，因此审批期间当前值变化本身不会使计划过期。
 - **执行**：
   1. 重读并重算指纹，不同就返回 `PLAN_STALE`；
-  2. 在 `TransactionScope` 中（`LockingStep → SafetyPoint → UndoStep → QuietModeStep`，编码规范 9.3）重新找到目标占位符，先读出当前值作为 `currentValuesBefore`，再调用**生成的重载表** `PlaceHolderApi.ApplyRecord(holder, 值集)`，即 `PlaceHolder.ApplyRecord(string)`；带 `bApplyPageAndProjectData` 的另一个重载也在重载表中生成，但没有验证，本工具不调用它，覆盖报告因此把这个重载组记为部分重载；
+  2. 在 `TransactionScope` 中（`LockingStep → SafetyPoint → UndoStep → QuietModeStep`，见 [api-notes B7](../eplan/api-notes/transactions-and-undo.md#b7-事务锁定撤销静默模式eplaneplapidatamodel除非另行注明)）重新找到目标占位符，先读出当前值作为 `currentValuesBefore`，再调用**生成的重载表** `PlaceHolderApi.ApplyRecord(holder, 值集)`，即 `PlaceHolder.ApplyRecord(string)`；带 `bApplyPageAndProjectData` 的另一个重载也在重载表中生成，但没有验证，本工具不调用它，覆盖报告因此把这个重载组记为部分重载；
   3. 读回：重新找到这个占位符（同页、同名、同值集），它的值集和变量与执行前相同；不同就抛出，整体回滚；
   4. 仍在事务内读出执行后的当前值作为 `currentValuesAfter`，与执行前比较得出 `currentValuesChanged`；读取失败会回滚。当前值不变不算失败：值集可能本来就已应用，S29 也没有逐项比较 `Cable_Sensor` 这类改布尔属性的值集；结果如实报告；
   5. 通过后 `Commit()`，再 `CloseUndo()`。

@@ -32,7 +32,7 @@
 - `markedPageCount`：带修订标记的页数（`PAGE_INSTANCE_WITH_REVISIONMARKER`，来自项目比较）；
 - `hint`：`completed` 时说明写工具会失败；`tracking` 而 `uncompletedPages` 为空时说明这不等于没有修改。
 
-一行摘要：`Revision in progress (change tracking on); 1 revision recorded, the last on 2026-10-21.` 只有状态、数目和日期：项目名、修订名、用户都是项目数据，只放在数据字段中（工具设计规范 7.3，2026-10-21 实现时改；原来的示例 `EPLAN_Sample_Project: …, last 'S23-3' by ASCKYE …` 把它们写进了摘要）。最后一条只在本页含有它时给出日期；有下一页时摘要说明 `(more: cursor)`。
+一行摘要：`Revision in progress (change tracking on); 1 revision recorded, the last on 2026-10-21.` 只有状态、数目和日期：项目名、修订名、用户都是项目数据，只放在数据字段中（[当前结果整形](../architecture/architecture.md#85-不可信内容)，2026-10-21 实现时改；原来的示例 `EPLAN_Sample_Project: …, last 'S23-3' by ASCKYE …` 把它们写进了摘要）。最后一条只在本页含有它时给出日期；有下一页时摘要说明 `(more: cursor)`。
 
 工具描述写明：`completed` 的项目是写保护的，写工具会失败；要改它，工程师需在 EPLAN 中处理。
 
@@ -44,7 +44,7 @@
 - **修订记录**：项目的带索引属性 `PROJ_REVISION_LOG_NAME`、`_DESCRIPTION`、`_USER`、`_DATE`，`i` 从 1 起，读到名称为空为止，最多 1000：
   - `DATE` 读出为 Unix 秒数的字符串（S23 r3），转换为 UTC；转换失败时原样放进 `dateRaw`；
   - `DESCRIPTION` 是多语言文本，按读工具的语言回退取一种；
-  - 未设置的属性不能调用 `ToString()`（编码规范 9.5 第 13 条），先查 `IsEmpty`。
+  - 未设置的属性不能调用 `ToString()`（[api-notes A7](../eplan/api-notes/transactions-and-undo.md#a7-回滚与撤销spike-s22026-10-13均在插件-action-中执行)），先查 `IsEmpty`。
 - **未完成的页**：`new Revision().GetUncompletedPages(project)`；XML 文档说明从未"完成项目"时总是空数组，S23 r3 也是空的，所以结果为空时不等于"没有修改"，提示中写明。
 - **带修订标记的页**：遍历页读 `PAGE_INSTANCE_WITH_REVISIONMARKER`。示例项目有几百页，耗时由 Large 测试记录；目前总是读（工具没有 `response_format`），超过 2 秒时再加 `response_format` 并只在 `detailed` 中给出。
 - 在调度器中只读执行，套 `LockingStep`；不打开、不新建任何项目。

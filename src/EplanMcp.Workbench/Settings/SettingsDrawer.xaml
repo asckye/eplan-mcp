@@ -6,9 +6,8 @@
     xmlns:themes="clr-namespace:TiaOpenness.Gui.Themes"
     Focusable="False">
   <!--
-    The settings drawer (workbench-ui 3.1: 400 epx from the right; DLG-10: a modal pane, Tab stays inside, Esc closes):
-    language, theme and start at login, which apply at once (LOC-08, COL-09, CMD-08), and config.json read only, with a
-    way to open it in its own program (NAV-10). Nothing here changes approvals (APR-16) or the Host's settings.
+    The settings drawer (docs/design/2026-10-20-m5-operability.md#workbench-implementation): a 400 epx modal pane from the right,
+    with Tab contained and Esc closing it.
   -->
   <Border Width="400" Margin="{StaticResource Ui.Gap.Drawer}" HorizontalAlignment="Right" Style="{StaticResource Primer.Drawer}"
           AutomationProperties.IsDialog="True" AutomationProperties.Name="{l:Tr Settings.Title}"

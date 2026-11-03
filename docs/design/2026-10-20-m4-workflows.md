@@ -94,7 +94,7 @@ flowchart LR
   - `inline`：最多 4 页，把图片作为 MCP image 内容一并返回，让模型能"看"页面（S13 验证客户端能否转交给模型）。
   - 图片逐页导出，每页之后报告进度、检查取消；PDF、DXF 是一次 EPLAN 调用。
   - 时限 300 秒。
-- **命名**：导出工具沿用覆盖矩阵规划的 `eplan_export_<格式>`。资源 `export` 已在词表中，动作位置放的是格式；实现前在[工具设计规范](../standards/mcp-tool-design.md) 3.3 节补一句。
+- **命名**：导出工具沿用 `eplan_export_<格式>`，动作位置放的是格式；现有资源词及导入/导出命名记录在[工具目录](../tools/README.md#工具名称与-eplan-概念)。
 
 ### 4.2 第二批：Destructive 工具
 | 工具 | 参数要点 | API | 状态 |

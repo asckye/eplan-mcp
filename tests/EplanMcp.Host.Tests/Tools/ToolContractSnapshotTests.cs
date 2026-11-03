@@ -11,9 +11,9 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
-/// The tool contract (mcp-tool-design 11) as a reviewed snapshot: the server instructions and every tool exactly as
+/// The tool contract (engineering-handbook.html#pa) as a reviewed snapshot: the server instructions and every tool exactly as
 /// <c>tools/list</c> sends it, on the tools as <c>serve</c> registers them. Any change fails this test until the new
-/// snapshot in tests/Contracts.Snapshots is reviewed and committed (testing.md 3). Medium: the snapshot is a file.
+/// snapshot in tests/Contracts.Snapshots is reviewed and committed (tests/EplanMcp.Host.Tests/README.md#契约快照). Medium: the snapshot is a file.
 /// </summary>
 [Trait("Size", "Medium")]
 [Collection(typeof(ToolBuildIsolation))]

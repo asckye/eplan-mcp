@@ -65,7 +65,7 @@ flowchart LR
 
 ### 4.1 版本、引用与落盘边界
 
-本节所有新增字段/版本是 **ADR-0029 的提案合同**，不是已接受决定。[开发流程](../process/development-workflow.md#3-变更分级与设计产物)将落盘格式列为 L3；不能仅递增 compilerVersion 绕过 ADR。
+本节所有新增字段/版本是 **ADR-0029 的提案合同**，不是已接受决定。[手册开发流程条款](../standards/engineering-handbook.html#review-rfc)将落盘格式列为 L3；不能仅递增 compilerVersion 绕过 ADR。
 
 | 记录 | 提案及兼容 |
 |---|---|

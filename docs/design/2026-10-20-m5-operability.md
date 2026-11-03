@@ -8,6 +8,71 @@
 | 相关 ADR | ADR-0002（进程模型）、ADR-0004（运行时）、ADR-0007（授权与分发）、ADR-0008（数据目录）、ADR-0011（审批渠道）；本文提议的 [ADR-0014](../adr/0014-workbench-approval-channel.md)（Workbench 进程与审批管道，已接受）、[ADR-0015](../adr/0015-workbench-ui-stack.md)（Workbench 界面技术，已接受）、[ADR-0016](../adr/0016-per-user-installer.md)（安装与分发，已接受） |
 | 最后更新 | 2026-10-22：按项目负责人决定改为 ZIP；原安装器与固定目录方案由 ADR-0016 修订取代 |
 
+<a id="workbench-implementation"></a>
+
+## Workbench 实现与来源
+
+以下记录截至 2026-11-03 的实现、历史选型和证据入口；后文保留 M5 原设计时间线。界面规范直接采用[手册第 21 节](../standards/engineering-handbook.html#ui)及[领域 D](../standards/engineering-handbook.html#pd)。当前视觉方向见 [ADR-0034](../adr/0034-workbench-visual-apple-principles.md)；负责人 2026-11-01 确认重设计暂为 mock-ups，实现排在 v0.5.0 之后。
+
+### 范围、进程与页面
+
+当前 `EplanMcp.Workbench` 使用 WPF、`net10.0-windows`。已实现外框、设置抽屉、托盘、审批队列、审计及记录详情、状态、MCP 与客户端配置向导，以及 VM 的地址、密钥、网络权限、实例选择和服务启停。宿主机向导有“同一台电脑 / 虚拟机 ↔ 宿主机”选择、密码框、连接测试和 `eplan-vm` 配置的预览/写入/移除；VM 侧面板在页底独立显示。当前没有 AI 控制 Workbench 界面的通道、共享会话、审批开关或期限设置。
+
+| 页面或区域 | 当前入口与行为 |
+|---|---|
+| 审批队列 | 默认页面，`Ctrl+1`；等待和本次运行中已回答的问题 |
+| 审计 | `Ctrl+2`；日期、工具、项目、决定和结果筛选，详情抽屉、打开目录、`audit verify --format json` |
+| 状态 | `Ctrl+3`；打开或刷新时调用 `doctor --format json`，不自动轮询 |
+| MCP 与客户端 | `Ctrl+4`；客户端卡片多选，`client-config --dry-run --format json` 预览，再确认写入；Claude Code 插件命令、VM 连接设置 |
+| 设置抽屉 | 语言、主题、登录时启动，`config.json` 只读及用默认程序打开 |
+
+`Shell/MainWindow.xaml` 中还绑定 `Ctrl+Tab` / `Ctrl+Shift+Tab` 切页、`Ctrl+F` 定位审计筛选、`F5` 刷新、`F6` / `Shift+F6` 切换主要区域。Esc 关闭临时界面；审批回答没有快捷键或访问键。再次启动会显示已有窗口；关闭主窗口缩到托盘，托盘退出处理等待中的问题。新问题不切页、不激活窗口，提醒来自托盘和任务栏；这些交互源自 [ADR-0014](../adr/0014-workbench-approval-channel.md)。
+
+Host 子命令由参数列表启动，结果以带 `schemaVersion` 的 JSON 解析。`HostOutput` 遇到非 JSON、不支持的版本或字段不符时返回错误，不展示部分结果；诊断包括命令、退出码、schemaVersion 和 `logs/workbench-*.log`。VM 的“网络权限”调用提权入口，密钥默认遮罩，具有显示/复制操作；换密钥确认与服务生命周期见 4.12 和 [ADR-0018](../adr/0018-vm-http-transport.md)。
+
+### 布局与资源
+
+现有外框是 Sider、Header、页头、主体和可选右侧栏。`Shell/MainWindow.xaml` 的初始尺寸为 1200 × 780、最小 960 × 640；Sider 为 216，在宽度小于 992 时收为 56，Header 的最小高度为 56。设置/审计详情抽屉分别为 400/520，旧布局记录的 toast 为 320、对话框为 420–548、右侧栏为 280–320。这些是旧实现值，不是新界面的设计标准。本文尺寸单位 epx 指 WPF 设备无关单位，100% 缩放时对应物理像素；`app.manifest` 含 Per-Monitor V2 声明。
+
+原生 WPF 控件套用 `Tia/Themes/Primer.xaml`；模态窗口为 `Shell/WorkbenchDialog`，侧栏菜单用单选项，开关用 `ToggleButton`，不确定进度用 `ProgressBar.IsIndeterminate`。全局焦点样式位于 `Primer.xaml` 的 `SystemParameters.FocusVisualStyleKey`，访问键用 `AccessText`，标题/对话框使用 WPF Automation 属性，`AccessibleStatus` 通过 `LiveRegionChanged` 提供状态播报。托盘使用 WinForms `NotifyIcon`。
+
+资源事实入口：
+
+| 资源 | 当前映射 |
+|---|---|
+| `Themes/Palette.Light.xaml`、`Palette.Dark.xaml`、`Palette.HighContrast.xaml` | 包装原始 `Tia/Themes/Palette.*.xaml`，将 `Primer.*` / `Ant.*` 颜色映射到 `Surface.*`、`Text.*`、`Border.*`、`Accent.*`、`State.*` 别名 |
+| `Tia/Themes/ThemeManager.cs` | 替换包装调色板，支持跟随系统、浅色、深色和系统高对比 |
+| `Themes/Layout.xaml` | `Ui.Gap.*`、`Ui.Inset.*` 为 `Thickness`，`Ui.IconSize.*` 为 `Double`；原有 `Ui.Space.*` 是 `Double`，`Ui.Padding.*` 为 `Thickness` |
+| `Tia/Themes/Primer.xaml` | `Ui.Space.XXS/XS/SM/默认/MD/LG/XL` 当前为 4/8/12/16/20/24/32；`Ui.ControlHeight` 为 32，Small/Large 为 24/40；`Ui.Radius` 为 6，Small/XS/Large 为 4/2/8 |
+| 字体层级 | Caption/Body/Section/Title 当前字号 12/14/16/20；`Ui.LineHeight.Small/默认/Large` 为 20/22/24；`Ui.Text.BodyStrong` 是 14、SemiBold |
+| `Tia/Themes/Icons.xaml` | `Icon.*` 命名几何；随包的 MapleMono-CN 不是 Nerd Font 图标版本 |
+
+颜色和值以这些资源文件为事实源。包装层中例如 `Surface.Window → Primer.bg`、`Surface.Selected → Primer.cardSel`、`Text.Secondary → Primer.textMuted`、`Text.Faint → Primer.textFaint`、`Accent.Graphic → Ant.colorPrimary`；高对比包装覆盖 `Primer.cardSel`、`Primer.selectedText`、`Primer.textFaint` 为 Highlight、HighlightText、WindowText。阴影资源为 `Ant.boxShadowKey/Umbra/Ambient`，模板以分层边框实现；不复制一份手写调色板标准。
+
+### 字体、文本和审批显示
+
+`Shell/WorkbenchFonts.cs` 从程序旁 `Fonts/` 私有加载 Maple Mono CN（Regular、SemiBold，SIL OFL 1.1，不安装到系统）；`Ui.Font` / `Ui.FontMono` 都先用它，回退分别是 Segoe UI Variable Text、Segoe UI、Microsoft YaHei UI，以及 Cascadia Mono、Consolas、Microsoft YaHei UI。字体来源、随包约定见 [ADR-0017](../adr/0017-workbench-wpf-tia-theme.md) 与 [第三方说明](../../THIRD-PARTY-NOTICES.md)。
+
+S18 记录了以 `Fonts/` 为基准 URI 加载同族字重的方式，`pack://siteoforigin` 和仅写家族名未达到相同效果；没有显式 Microsoft YaHei UI 且界面为 en-US 时出现 Yu Gothic UI 的日文字形。旧布局按等宽字体调整过标题、路径和变更清单换行；连字的真实 WPF 显示效果和 Windows“文本大小”缩放仍是待验项。
+
+`Localization/Catalogue.cs` 与 `Tia/Localization/Strings.cs` 提供中英文文字。`StringsTests` 检查覆盖，界面切换语言会更新本地标签和 UIA 名称。`ApprovalAskParams.Changes` 则由 Host 按系统 UI 语言组织，与 EPLAN 对话框共用文本，Workbench 原样显示而不随自身语言重写。当前产品术语见[术语表](../reference/glossary.md)。
+
+审批协议和连接事实见 4.6、[ADR-0011](../adr/0011-approval-out-of-band.md)、[ADR-0014](../adr/0014-workbench-approval-channel.md) 和 [ADR-0010](../adr/0010-write-outcomes.md)：问题带工具、项目、EPLAN 实例、客户端自报名称、参数摘要哈希和变更清单，没有完整参数。队列默认容量 50，Host 默认期限 120 秒；不同连接各自处理取消、断开和结果。回答后连接保持到写入结束，`approval.outcome` 更新显示的执行状态，不改变回答。已回答记录只在本次运行保存，队列满时 Host 回退到 EPLAN 对话框；解除暂停也经相同审批渠道，暂停机制见 ADR-0010；破坏性审批的后续决定见 [ADR-0035](../adr/0035-destructive-approval-default-reject.md)。
+
+旧界面使用同样式的两个审批按钮、不设默认答案；`ResponseGuard` 在问题变化、窗口重新可见及切回队列后提供 500 毫秒保护。倒计时按 Host 期限显示，最后 20 秒使用警告状态，30 秒/10 秒是原记录中的播报检查点。这些保留为已有实现/设计事实，不构成手册例外。
+
+<a id="workbench-evidence"></a>
+
+### 来源、无障碍适用性与验证入口
+
+历史界面规则参考过 TIA `docs/development/design-spec/workbench-ui.md` v0.2、提交 `38ca2883`（MIT）；当前迁入主题源码的提交与修改列在[第三方说明](../../THIRD-PARTY-NOTICES.md)及文件头。历史参考包括 [Windows 应用设计指南](https://learn.microsoft.com/windows/apps/design/)、[WCAG 2.2](https://www.w3.org/TR/WCAG22/) 和 [WCAG2ICT](https://www.w3.org/TR/wcag2ict-22/)；外部页面沿用原记录，本次未重新核验，链接本身不是实现已通过的证据。
+
+旧适用性记录中的产品事实是：没有音视频或运动手势，不收集个人资料，没有单字符快捷键；审批期限来自 Host。旧记录对非 Web 准则及文字间距的适用性判断仍需按手册和上述来源核对，不能据此宣称豁免或已通过。
+
+自动化入口为 [Workbench 测试说明](../../tests/EplanMcp.Workbench.Tests/README.md)：UIA 树以 `UIElementAutomationPeer.CreatePeerForElement` 递归遍历，检查名称、标签、状态和标题；`ThemeTokenTests` 检查间距/图标尺寸、画刷别名和三套调色板完整性；`ThemeContrastTests` 检查颜色对比。旧文提到移植 TIA `ThemeSurfaceTests`，当前类名为 `ThemeContrastTests`，不把旧名称当成已运行测试。
+
+S16 窗口/提醒及 S18 WPF/字体的入口见 [api-notes](../eplan/api-notes.md)和 [S18 记录](../../spikes/S18-workbench-ui/README.md)。人工检查入口仍为 Accessibility Insights for Windows FastPass、讲述人、键盘全流程、四种系统高对比主题以及 DPI/文本大小；本次没有运行这些检查。原始 TIA 高对比字典的 `cardSel=Window`、`textFaint=GrayText` 与旧表不同，包装层有相应覆盖；实际渲染与手册的符合性仍待验证，状态见[待验台账](../process/large-pending.md)。
+
 ## 1. 背景
 [架构第 11 节](../architecture/architecture.md#11-里程碑)给 M5 的范围是：按用户安装的安装包；Workbench（客户端配置向导、审批队列、审计浏览，中英双语）；Claude Code 插件形式的交付包（一键安装，附中文入门指南）；离线宿主与 CI 实机测试；发布流水线（SBOM、来源证明，视情况加 EADN 签名）。完成标准是：在一台干净的机器上，非开发人员按中文入门指南安装成功；[安装验收清单](../process/release.md#安装验收清单m5-发布前逐项通过) I1–I10 全部通过。
 
@@ -15,8 +80,8 @@
 - 安装只有开发脚本：`eng\scripts\eplan-addin.ps1` 用 `EPLAN.exe /Variant:"…" EplApiModuleAction /register:"<dll>"` 注册插件（会启动 EPLAN），README 用 `claude mcp add` 配置客户端。`install-addin`、`client-config` 两个子命令还没有实现（[M1 设计](2026-10-13-m1-skeleton.md)第 2 节）。
 - 审批：`ApprovalService` 按注册顺序询问渠道，渠道返回 null 表示"现在不能问"，换下一个；只有 `EplanDialogChannel` 一种渠道，它经 Bridge 的 `approval.ask` 在 EPLAN 中弹出模态对话框，等待期间占住 Host 到这个 EPLAN 的队列。
 - 数据根目录 `%USERPROFILE%\EplanMcp\`（ADR-0008）：`config.json`、`audit\`、`logs\`、`scratch\`、`state\`、`exports\`、`backups\`。
-- Large 测试在开发机上手工运行，没有自托管 runner（[testing.md](../standards/testing.md) 第 4 节，风险 R9）。CI 用 `EplanMcp.Ci.slnf`，不构建插件：插件编译时要引用本机 EPLAN 的 API 程序集。
-- 发布清单（[开发流程第 8 节](../process/development-workflow.md#8-版本与发布)、SEC-16）要求 CI 构建、SHA-256、CycloneDX SBOM、构建来源证明，不发布本地构建的二进制。
+- Large 测试在开发机上手工运行，没有自托管 runner（[Large 测试说明](../../tests/EplanMcp.Large.Tests/README.md)，风险 R9）。CI 用 `EplanMcp.Ci.slnf`，不构建插件：插件编译时要引用本机 EPLAN 的 API 程序集。
+- 发布清单（[手册开发流程条款](../standards/engineering-handbook.html#build-release)、SEC-16）要求 CI 构建、SHA-256、CycloneDX SBOM、构建来源证明，不发布本地构建的二进制。
 - 架构 5.1 写的 Workbench 是 .NET 10 WPF、字体 Maple Mono CN。**项目负责人 2026-10-20 决定：Workbench 的界面按 Microsoft Fluent UI（Fluent 2）及其组件库设计。** 选哪一种 Fluent 实现由 4.5 比较，作为 Q1 请项目负责人决定。
 - 项目负责人的 TIA_Portal_Openness_MCP 项目（下称 TIA）已有 WPF Workbench 和管道审批，ADR-0011 借鉴过它。本文的 Workbench 管道沿用它的做法，下文注明出处。
 
@@ -143,7 +208,7 @@ flowchart LR
 
 ### 4.5 界面技术：Fluent 2 的实现方式（Q1，ADR-0015）
 
-> 本节 WinUI 3 / Fluent 2 方案为历史记录，已由 [ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)（2026-10-20 Accepted：WPF + TIA 主题）取代；原 Inno Setup 安装与 `app\` 布局由 [ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md#2026-10-22-修订只提供-zip)取代。当前界面与交付分别遵循[界面规范](../standards/workbench-ui.md)和[发布流程](../process/release.md)。
+> 本节 WinUI 3 / Fluent 2 方案为历史记录，已由 [ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)（2026-10-20 Accepted：WPF + TIA 主题）取代；原 Inno Setup 安装与 `app\` 布局由 [ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md#2026-10-22-修订只提供-zip)取代。当前界面与交付分别遵循[Workbench 实现记录](2026-10-20-m5-operability.md#workbench-implementation)和[发布流程](../process/release.md)。
 
 项目负责人已决定用 Fluent 2。适合"在 EPLAN 旁边运行的 Windows 桌面工具"的实现有下面几种（2026-10-20 查阅的官方文档，出处见 ADR-0015）：
 
@@ -165,7 +230,7 @@ flowchart LR
 
 项目负责人 2026-10-20 还问过 Fluent UI 与苹果的设计风格（Apple Human Interface Guidelines）哪个更合适。建议 Fluent UI：苹果的规范和组件只面向苹果平台，Windows 上没有官方实现，每个控件都要自己画，讲述人、高对比度和键盘焦点也要自己保证；Workbench 放在 EPLAN 和 Windows 的对话框旁边使用，用 Windows 自己的设计语言，工程师不必面对两套交互习惯。
 
-**2026-10-20 改定**：项目负责人决定视觉与 TIA 的 Workbench 一致（Ant Design v5），改用 WPF 并复用 TIA 的主题，字体仍用 Maple Mono CN（[ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)，2026-10-20 接受）。下面的 A（WinUI 3）和观感规则已由它取代，界面规则见 [Workbench 界面规范](../standards/workbench-ui.md)。
+**2026-10-20 改定**：项目负责人决定视觉与 TIA 的 Workbench 一致（Ant Design v5），改用 WPF 并复用 TIA 的主题，字体仍用 Maple Mono CN（[ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)，2026-10-20 接受）。下面的 A（WinUI 3）和观感规则已由它取代，界面规则见 [Workbench 实现记录](2026-10-20-m5-operability.md#workbench-implementation)。
 
 **观感**（项目负责人 2026-10-20：喜欢苹果的观感）：控件仍用 WinUI 3 原生的，只通过主题资源调整观感（轻量样式），不重新绘制控件，这样无障碍和高对比度不受影响：
 1. **留白**：间距以 8 px 为单位，页面边距 24–32 px；分组之间靠留白区分，少用分隔线。
@@ -239,7 +304,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 - **CI**：~~自托管 runner 与 `live.yml`~~ 取消（ADR-0020）。Large 测试和 Agent 评测由维护者在开发机上手动运行：合并写入类工具或 Bridge 的改动之前、每次发布之前；能在离线宿主上运行的测试类按 `[Trait("Host", "Offline")]` 运行。
 
 ### 4.10 发布流水线
-在 `main` 上打 `vX.Y.Z` 标签后运行 `release.yml`（[开发流程第 8 节](../process/development-workflow.md#8-版本与发布)），三个作业：
+在 `main` 上打 `vX.Y.Z` 标签后运行 `release.yml`（[手册开发流程条款](../standards/engineering-handbook.html#build-release)），三个作业：
 1. **构建**（GitHub 托管的 runner）：Host（自包含单文件，win-x64）、Workbench（自包含）；Small、Medium 测试；CI 中设 `ContinuousIntegrationBuild=true`，带 Source Link；用 CycloneDX 的 .NET 工具（`dotnet-CycloneDX`，Apache-2.0）生成 SBOM。
 2. **插件**（ADR-0020）：维护者在开发机上运行 `eng/scripts/release-addin.ps1 -Tag vX.Y.Z`：从标签的干净检出构建 Release 版插件（`EplanSign=false`，ADR-0007），在离线宿主上运行 Large 测试，把插件和 SHA-256 上传到草稿发布。发布工作流下载插件并比对 SHA-256，不一致就失败。
 3. **打包**（托管 runner）：将暂存 `app\` 内容打成 `EplanMcp-<version>.zip`，唯一顶层目录为 `EplanMcp-<version>\`；附逐文件清单、SHA-256、合并 SBOM，并为 ZIP 和其中每个文件生成来源证明，为 ZIP 绑定 SBOM 证明。只更新已有草稿，不自动发布；ADR-0020 的插件交接不变。
@@ -286,7 +351,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 - JSON 的 `schemaVersion` 为 1；成功为 `server: { name, version }`、`toolCount` 和 `failure: null`，失败为 `server: null`、`toolCount: null` 和单个 `failure` 代码。快照固定成功与全部失败形状。响应和异常正文不输出，服务器标识中的密钥及显示控制字符被清理。
 - 只在宿主机与虚拟机之间的私有网络使用；后续写入的客户端配置含明文密钥，不要分享这些文件（SEC-30）。
 
-**宿主机向导（3e）**：在客户端页选择“虚拟机 ↔ 宿主机”，填写 VM IPv4、端口（默认 8766）及密码框中的密钥。密钥只在当前模式的内存中保留，离开模式即清空；不写设置、不进入参数或环境变量。测试、预览和写入经子进程 stdin 传入密钥，返回的输出先脱敏，错误诊断不保留原始正文或异常链；VM 运行严格读取各自的 JSON schema，本机配置仍为 schema 1，远程配置为 schema 2。移除仅针对勾选客户端的 `eplan-vm`，无需地址或密钥；Claude 桌面版与本机插件操作在此模式隐藏。写入、移除复用原来的差异确认和逐卡片结果，并显示不要分享含明文密钥的客户端配置的提示。按界面规范第 7 节，VM 侧的密钥、网络权限和服务面板继续在页底独立显示。
+**宿主机向导（3e）**：在客户端页选择“虚拟机 ↔ 宿主机”，填写 VM IPv4、端口（默认 8766）及密码框中的密钥。密钥只在当前模式的内存中保留，离开模式即清空；不写设置、不进入参数或环境变量。测试、预览和写入经子进程 stdin 传入密钥，返回的输出先脱敏，错误诊断不保留原始正文或异常链；VM 运行严格读取各自的 JSON schema，本机配置仍为 schema 1，远程配置为 schema 2。移除仅针对勾选客户端的 `eplan-vm`，无需地址或密钥；Claude 桌面版与本机插件操作在此模式隐藏。写入、移除复用原来的差异确认和逐卡片结果，并显示不要分享含明文密钥的客户端配置的提示。VM 侧的密钥、网络权限和服务面板继续在页底独立显示，见[当前实现记录](#workbench-implementation)。
 
 项目负责人 2026-10-20 要求"和TIA mcp一样加入虚拟机连接的系统"：EPLAN 在虚拟机中、AI 客户端在宿主机上时也能用。做法与 TIA 相同，并把防火墙限制到宿主机 IP（[ADR-0018](../adr/0018-vm-http-transport.md)，2026-10-21 接受）：
 - **虚拟机中**：Workbench 的"MCP 与客户端"页选择"虚拟机 ↔ 宿主机"，填写虚拟机的 IPv4 和端口（默认 8766），生成密钥。
@@ -294,7 +359,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
   - "启动服务"以子进程运行 `eplanmcp serve --http`，Workbench 退出时一起停止；
   - Host、Bridge、审批、审计、scratch 都在虚拟机中，与 stdio 方式相同。
 - **宿主机上**：同样选择"虚拟机 ↔ 宿主机"，填写虚拟机地址、端口和同一把密钥，选择客户端，"测试连接"后写入名为 `eplan-vm` 的远程服务器配置（4.11 的表中能发送请求头的客户端）。
-- **安全**：TB7、T24–T27、SEC-27–30（[security.md](../standards/security.md)）：
+- **安全**：TB7、T24–T27、SEC-27–30（[项目威胁模型](../architecture/architecture.md#13-威胁模型)）：
   - 每个请求都要密钥，用恒定时间比较；
   - 带不允许的 `Origin` 头的请求一律拒绝；
   - 只绑定所选地址；
@@ -307,8 +372,8 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
   - 按会话保存状态的改法。
 
 ## 5. 安全与数据完整性
-- **新的信任边界**：Host ↔ Workbench 的管道，Workbench ↔ 工程师的界面，安装包与 CI runner。威胁模型增加 T19–T23 和 SEC-22–26（[security.md](../standards/security.md)，单独的 PR）。
-- **冒充 Workbench**：管道只允许当前用户，拒绝网络登录；第一个实例独占管道名；Host 核对管道服务器进程的映像路径是本安装中的 Workbench，Workbench 同样核对连接方是本安装中的 `eplanmcp.exe`。这一项和 TIA 一样只防"错配"（开发构建连上安装的版本、别的程序占了名字），**不能防同一用户的恶意程序**（security.md 第 2 节）。
+- **新的信任边界**：Host ↔ Workbench 的管道，Workbench ↔ 工程师的界面，安装包与 CI runner。威胁模型增加 T19–T23 和 SEC-22–26（[项目威胁模型](../architecture/architecture.md#13-威胁模型)，单独的 PR）。
+- **冒充 Workbench**：管道只允许当前用户，拒绝网络登录；第一个实例独占管道名；Host 核对管道服务器进程的映像路径是本安装中的 Workbench，Workbench 同样核对连接方是本安装中的 `eplanmcp.exe`。这一项和 TIA 一样只防"错配"（开发构建连上安装的版本、别的程序占了名字），**不能防同一用户的恶意程序**（架构第 13 节的剩余风险）。
 - **剩余风险**（Q9）：同一用户的程序，包括代理经客户端的 shell 工具执行的命令，可以用 UI Automation 操作任一个审批窗口（S8 的驱动程序就这样回答过 EPLAN 的对话框，A15），也可以替换按用户安装目录中的文件。ADR-0011 防的是客户端自己回答或被配置为自动回答，不是同一用户下的恶意程序。入门指南提醒工程师保留客户端对 shell 命令的确认。
 - **审批界面中的项目文本**：变更清单只作为纯文本显示在等宽的数据区中，标注"来自项目的数据"；剥除控制字符和双向文字控制符（如 U+202E），把换行显示为可见的符号，每行和整个清单都有长度上限，超出时注明"还有 N 行"。界面元素不由项目文本生成。Workbench 的日志不记录变更清单（SEC-10）。
 - **安装包**：只发布 CI 构建的产物；不需要管理员权限，不写 PATH、EPLAN 目录和 EPLAN 的注册表；注册插件只经 `EplApiModuleAction`；卸载不删数据。
@@ -326,7 +391,7 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 ## 7. 测试与验证
 - **Small**：队列的排序、倒计时和到期；防误触的状态机（显示新问题、窗口重新可见、500 毫秒内的点击）；变更清单的清洗（控制字符、U+202E、换行、长度）；Workbench 协议的消息往返和严格解析（未知字段、超长帧）；`WorkbenchChannel` 的各种结果（不在运行、映像路径不符、送达后断开、绑定不符由 `ApprovalService` 拒绝）；`install-addin` 拼出的命令行；`client-config` 的合并、差异和移除；`doctor --format json` 的快照。
 - **Medium**：Host 与假的 Workbench 管道服务器：批准、拒绝、到期、取消、断开；映像路径不符时改用 EPLAN 对话框；名字被别的程序先占用；多个 Host 同时提问；客户端取消调用后 Workbench 移除问题。
-- **手工与实机**：S14–S18；发布前的 Workbench 冒烟清单（[testing.md](../standards/testing.md) 第 2 节）：讲述人、高对比度、200% 缩放、中英文切换、键盘操作；4.8 的干净机器验收；CI 中离线宿主上的 Large 测试。
+- **手工与实机**：S14–S18；发布前的 Workbench 冒烟清单（[手册第 12 章](../standards/engineering-handbook.html#testing) 第 2 节）：讲述人、高对比度、200% 缩放、中英文切换、键盘操作；4.8 的干净机器验收；CI 中离线宿主上的 Large 测试。
 - **Agent 评测**：不新增题目。插件中的服务器与评测用的配置相同，`tools/list` 一致即可（S17 中核对）。
 
 ## 8. 发布与兼容性

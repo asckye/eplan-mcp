@@ -5,7 +5,7 @@ namespace EplanMcp.Evals.Run;
 
 /// <summary>
 /// The options of <c>run</c> (agent evals design 4.4). <see cref="Set"/> is <c>dev</c>, <c>holdout</c>, <c>all</c> or
-/// null when not given; the holdout set is meant for acceptance runs only (testing.md 5). <see cref="Template"/> is the
+/// null when not given; the holdout set is meant for acceptance runs only (evals/README.md). <see cref="Template"/> is the
 /// .elk file tasks on a copy copy, by default EPLAN's sample project (<see cref="ProjectCopies.FindTemplate"/>).
 /// </summary>
 internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int Repeat, string Model, string? Claude, string? Eplanmcp, string? Template = null)

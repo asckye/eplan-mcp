@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Validates a commit message (or PR title/body) against the repository rules in
-# docs/process/development-workflow.md, section 5:
+# docs/standards/engineering-handbook.html#review:
 #   1. no AI attribution of any kind (co-author trailers, "generated with" markers);
 #   2. optionally, the first line follows Conventional Commits.
 #

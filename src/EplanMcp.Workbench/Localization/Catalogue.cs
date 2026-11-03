@@ -1,7 +1,7 @@
 namespace EplanMcp.Workbench.Localization;
 
 /// <summary>
-/// Every text the Workbench shows or reads out (workbench-ui LOC-01), as one table of (key, English, Chinese): a key
+/// Every text the Workbench shows or reads out (docs/design/2026-10-20-m5-operability.md#workbench-implementation), as one table of (key, English, Chinese): a key
 /// cannot exist in one language only. StringsTests checks the rest: no key twice, nothing blank, the same placeholders
 /// in both languages. The vendored Loc reads it through TIA's <c>Strings</c> (TiaStubs\Strings.cs).
 /// </summary>
@@ -91,7 +91,7 @@ internal static class Catalogue
         ("Clients.GenerateConfirm", "_Generate marketplace", "生成市场(_G)"),
         ("Clients.PluginReady", "Marketplace generated. Run the two commands below in a terminal, then reopen Claude Code.", "市场已生成。在终端执行下方两条命令，再重新打开 Claude Code。"),
 
-        // Shell: Sider, Header, window (workbench-ui 3.1, NAV-03).
+        // Shell: Sider, Header, window (docs/design/2026-10-20-m5-operability.md#workbench-implementation).
         ("Shell.WindowTitle", "{0} – EplanMcp Workbench", "{0} – EplanMcp Workbench"),
         ("Shell.Breadcrumb", "Workbench", "Workbench"),
         ("Shell.Shortcut", "{0} ({1})", "{0}（{1}）"),
@@ -143,7 +143,7 @@ internal static class Catalogue
         ("Settings.ConfigUnreadable", "config.json cannot be read: {0}", "无法读取 config.json：{0}"),
         ("Settings.HighContrast", "While Windows uses a contrast theme, the Workbench uses its colours.", "Windows 使用对比主题时，Workbench 使用对比主题的颜色。"),
 
-        // Pages (workbench-ui section 7), their captions and the placeholders of the pages still to come (ERR-05).
+        // Pages (docs/design/2026-10-20-m5-operability.md#workbench-implementation), their captions and the placeholders of the pages still to come (ERR-05).
         ("Page.Approvals", "Approvals", "审批队列"),
         ("Page.Audit", "Audit", "审计"),
         ("Page.Status", "Status", "状态"),

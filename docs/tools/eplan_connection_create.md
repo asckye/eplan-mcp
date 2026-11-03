@@ -60,7 +60,7 @@ D5：含中断点的调用允许仅有图形线、无逻辑连接，孤立点也
 
 ## 7. 测试
 P1 Small 覆盖显式值优先、仅补中断点、无默认值保留旧行为；Medium 用真实解析器和假 Bridge 覆盖 dry-run/执行一致、实际来源 metadata，以及规划与执行之间更换插件时旧指纹失效。
-Small 覆盖严格参数与预测、两次提交顺序、读回不符/取消/生成失败补偿、补偿失败 unknown、stale 零写入。Medium fake Bridge 覆盖成功、rolled_back、stale、dry-run 和审批；快照按[测试规范](../standards/testing.md#更新快照)生成审阅后接收。
+Small 覆盖严格参数与预测、两次提交顺序、读回不符/取消/生成失败补偿、补偿失败 unknown、stale 零写入。Medium fake Bridge 覆盖成功、rolled_back、stale、dry-run 和审批；快照按[手册第 12 章](../standards/engineering-handbook.html#testing)生成审阅后接收。
 Large 在 write copy 的新页逐方向核验角/T/电位点、实际 StartPin/EndPin、图像导出和两次撤销恢复快照哈希；T 夹具使用 BAT 两端器件，将相反方向的一臂经同批角连接折转，放置前检查无自动连线，并断言三个真实端点均进入预测。Small 复用夹具布局验证全部 12 个方向组合，覆盖自身端点外框、其他/中间穿越、PCP 四向偏移和镜像选择。此次修复不运行 EPLAN，12 例须重跑；真实生成故障尚无可重复触发方式，失败路径由 fake 注入覆盖。实测前先构建 tests/EplanMcp.Large.ConnectionHelper；辅助程序集每个 EPLAN 进程只加载一次，更新后须重启 EPLAN，不以注销代替重载。
 T7b 新增 Small 严格参数/范围/歧义/stale/双向引用与提交后补偿、Medium fake Bridge 审批/透传/失败不重发，以及 Large 两个新 LargeWrite 页的同名配对、双向原生计算引用和逐次撤销恢复；本次按任务约束不运行 EPLAN，Large 待维护者实测。
 T8b 新增 Small 空结构段及非空结构/设备标识区分比较，Medium fake 多阶段提交、定义线提交后不符时撤销该提交及五个属性放置、绑定/逐芯提交后读回不符补偿、Abort 留下新对象时 unknown 且不再读取、补偿失败 unknown、非法分配零写入，以及 Large 新 LargeWrite 页三根竖线、-W9、ÖLFLEX CLASSIC 100 300/500V、3×0.5、BK/BU/GNYE 的 cable_get 与撤销恢复测试；本次不运行 EPLAN，最终生成的撤销行为仍须实机确认。

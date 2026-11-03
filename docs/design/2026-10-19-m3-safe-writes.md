@@ -87,7 +87,7 @@ flowchart TD
 ### 4.2 Bridge
 - **写操作接口** `IWriteOperation`：
   - `Plan(args)` 在主线程上只读执行，与现有读操作相同。
-  - `Execute(args, plan)` 在 `TransactionScope` 中执行：在调度器已有的 `LockingStep` 内，创建 `SafetyPoint`，再在其内创建 `UndoStep`（描述为 "AI: <工具名>"），最后是 `QuietModeStep(ShowNoDialogs)`（编码规范 9.3）。
+  - `Execute(args, plan)` 在 `TransactionScope` 中执行：在调度器已有的 `LockingStep` 内，创建 `SafetyPoint`，再在其内创建 `UndoStep`（描述为 "AI: <工具名>"），最后是 `QuietModeStep(ShowNoDialogs)`（[api-notes B7](../eplan/api-notes/transactions-and-undo.md#b7-事务锁定撤销静默模式eplaneplapidatamodel除非另行注明)）。
   - 执行完先读回校验，通过后才 `Commit()`，然后 `CloseUndo()`。任何异常都 `Rollback()`。
 - **状态指纹**：计划涉及的对象在规划时的状态，取 SHA-256。例如：
   - 建页：目标结构下已有页名的集合；

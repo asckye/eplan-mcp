@@ -18,7 +18,7 @@ internal enum AuditState
 internal sealed record FilterOption(string? Value, string Text);
 
 /// <summary>
-/// The audit page without its window (M5 design 4.4 item 2, workbench-ui NAV-10): the log read as the Host reads it, the
+/// The audit page without its window (docs/design/2026-10-20-m5-operability.md#workbench-implementation): the log read as the Host reads it, the
 /// filters by day, tool, project, decision and execution, and "verify integrity" through <c>audit verify</c>. Read only:
 /// nothing here writes. Used on the UI thread; reading runs on a pool thread meanwhile (STS-03).
 /// </summary>

@@ -19,3 +19,9 @@
   - `problem` 为 `{code, zh, en}` 或 `null`，`code` 取 `addin_not_found`、`no_eplan`、`variant_not_found`、`unblock_failed`、`invalid_record`、`eplan_running`、`other_user`、`start_failed`、`eplan_exited`、`not_loaded`、`path_mismatch`（EPLAN 从另一个位置加载了插件，或者加载的是不报告路径的旧版插件，这次的注册没有生效或看不出是否生效）、`handshake_failed`（插件没有回应握手，看不出加载的是哪一个注册）、`record_failed`；顶层的 `problem` 表示什么都没有做，这时 `results` 为空。任何一处有 `problem` 时退出码为 1。
 - `pack`（M6，暂不给 Workbench 用，结构随 M6 设计可能变化）：`{schemaVersion: 1, command, ok, …}`，`ok` 为 false 时退出码为 1。`scan` 另有 `resources`、`facts`、`findings: [{severity, code, subject, message}]`（`severity` 取 `error`、`warning`、`gap`），给了 `--id`/`--name`/`--version` 时有 `manifest` 和 `problems`，写出后有 `written`；`check` 有 `id`、`version`、`resources`（个数）、`problems: [{location, message}]`；`export` 有 `file`、`bytes`；`install` 有 `outcome`（`installed`、`already_installed`、`refused`）、`id`、`version`、`folder`。
 
+
+## 工具发现与日志
+
+`eplanmcp serve --profile core|full` 的默认值为 `full`；`core` 集合由 `ToolProfiles.Core` 定义，注册工具按组和名称排序。`eplan_tool_usage` 的 `tool` 枚举取自本次 Profile 与开关筛选后的注册集合，详见[用法工具](../tools/eplan_tool_usage.md)。
+
+Host 使用 `Microsoft.Extensions.Logging` 的 `AddSimpleConsole`，单行日志写到 stderr；Bridge 日志为数据目录中的 `logs/bridge-*.log`，离线宿主为 `logs/bridge-offline-*.log`，插件启动异常另写 `bridge-startup-error.log`。默认数据目录与环境变量见 [CLAUDE.md](../../CLAUDE.md#常用命令)和[数据位置决定](../adr/0008-data-locations-and-instance-discovery.md)。

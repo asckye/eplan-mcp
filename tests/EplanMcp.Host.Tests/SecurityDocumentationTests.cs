@@ -8,7 +8,7 @@ public sealed partial class SecurityDocumentationTests
     [Fact]
     public void EveryNamedThreat_HasStrideRowAndReferencingSecurityMeasure()
     {
-        using Stream stream = typeof(SecurityDocumentationTests).Assembly.GetManifestResourceStream("SecurityDocs.security.md")
+        using Stream stream = typeof(SecurityDocumentationTests).Assembly.GetManifestResourceStream("SecurityDocs.architecture.md")
             ?? throw new InvalidOperationException("Missing security documentation resource.");
         using var reader = new StreamReader(stream);
 

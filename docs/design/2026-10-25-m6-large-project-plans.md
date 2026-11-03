@@ -232,7 +232,7 @@ Read 编译与 Write/Destructive 分级不变；一次整体审批、临时指�
 | Large 观察边界 | 远页只改描述：名称筛查可通过但coverage必须列未观察；已知关联页改内容产生outside_scope并停止；两步间改名为external_between_steps；只读完整审计快照用于测试oracle，放在被测计时/证据之外，证明实际改动仅获批范围 |
 | Large 回归/Agent | 小夹具重编号最后步/限额/仍带?报告；大夹具重编号提前缺能力并给单次工具提示；原七项备份/事务/按步Ctrl+Z与失败恢复；Agent运行建页→插宏、远处冲突后重新编译，不重复apply |
 
-性能运行与破坏性故障注入分开；固定计划与输入、报告全部失败，不靠重跑挑结果。每个涉及 Bridge/写路径 PR 合并前按 [testing.md](../standards/testing.md) 在支持的真实 EPLAN 上跑相关 Large，并将版本、夹具摘要、原始计时和结果附 PR；Small/Medium 不能替代实机。首次核心验收至少每规模完成一轮正确性和计时，完整冷/热分布按4.7补齐后才发布该规模性能承诺。
+性能运行与破坏性故障注入分开；固定计划与输入、报告全部失败，不靠重跑挑结果。每个涉及 Bridge/写路径 PR 合并前按 [手册第 12 章](../standards/engineering-handbook.html#testing) 在支持的真实 EPLAN 上跑相关 Large，并将版本、夹具摘要、原始计时和结果附 PR；Small/Medium 不能替代实机。首次核心验收至少每规模完成一轮正确性和计时，完整冷/热分布按4.7补齐后才发布该规模性能承诺。
 
 ## 8. 发布与兼容性
 

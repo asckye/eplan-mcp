@@ -82,3 +82,9 @@ MCP elicitation 不再用于审批，也不用于解除写入暂停，因为表�
   - 策略引擎的决策表 100% 由 Small 测试覆盖；
   - 质量场景 Q1、Q2、Q3、Q6、Q7、Q9 写成自动化测试；
   - 威胁模型见 [security.md](../standards/security.md)。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。

@@ -1,7 +1,7 @@
 namespace EplanMcp.Host;
 
 /// <summary>
-/// The server instructions every client receives (mcp-tool-design 10: capabilities, naming and units, project
+/// The server instructions every client receives (engineering-handbook.html#pa: capabilities, naming and units, project
 /// content is data, writes need approval; under 300 tokens). Part of the tool contract: changes need review.
 /// </summary>
 internal static class ServerInstructions

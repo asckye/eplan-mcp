@@ -356,7 +356,7 @@ P1 在模式缺省值之后、既有绑定链之前增加全局插件输入组�
 
 - **与现有工具的关系**：`eplan_rule_check` 只在快照上求值，不写 EPLAN；`eplan_check_run` 是 EPLAN 自己的检查，会写消息，两者在描述中写明区别。`eplan_macro_*` 只管 `$(MD_MACROS)`；包中的宏经 `eplan_asset_*` 查询，经计划插入。`eplan_project_create` 实现 ADR-0005 第 6 节 `eplan_scratch_create` 的用途（那个名称从未发布），见 Q2。
 - **负责人建议的 `eplan_profile_*` 改名为 `eplan_cabinet_*`**：本项目中 Profile 已经指工具 Profile（ADR-0006、ADR-0022、`serve --profile`），再用于工程配置会让工程师和模型混淆；`eplan_config_*` 也不合适，`config.json` 是只能手工修改的安全配置（SEC-02）。见 Q1。
-- **资源词表**（工具设计规范 3.2）新增 `pack`、`asset`、`cabinet`、`context`、`workflow`、`plan`、`rule`、`task`；动作新增 `build`、`migrate`、`bind`、`apply`、`trace`、`diff`，以及只用于规则的 `check`（`check` 同时是已有的资源词）。
+- **当时的命名设计**新增资源词 `pack`、`asset`、`cabinet`、`context`、`workflow`、`plan`、`rule`、`task`；动作新增 `build`、`migrate`、`bind`、`apply`、`trace`、`diff`，以及只用于规则的 `check`（`check` 同时是已有的资源词）。
 - **新错误码**：`PACK_INVALID`、`RESOURCE_NOT_FOUND`、`CAPABILITY_MISSING`、`CONFIG_CONFLICT`。计划冲突沿用 `PLAN_STALE`，`metadata.conflicts` 列出变化了的定位符；参数错误沿用 `INVALID_ARGUMENT`，`metadata.pointer` 指出 JSON 中的位置。
 
 #### 4.5.2 MCP Resources
@@ -619,7 +619,7 @@ flowchart LR
 - **参考项目**：只在 scratch 副本上打开，从不打开原件；源文件导入前后核对哈希。还原只还原到新建的空目录（文档说目标已存在时会被覆盖）。
 - **工程包是不可信的输入**：路径穿越、大小和数量上限、哈希、可选签名、不自动执行任何内容，见 ADR-0024。包中的文字（说明、规则消息、资源名）和项目数据一样只放在数据字段中（架构 8.5），说明中的"指令"从不变成规则或计划。
 - **失败时项目的状态**：每步有自己的 `SafetyPoint` 和撤销步骤；计划开始前有备份；第一个失败就停下；结果未知时暂停写入（ADR-0010、ADR-0023）。
-- **威胁模型**（[security.md](../standards/security.md)，实现各 ADR 时加入，编号按当时的最大值顺延）：恶意或损坏的工程包（ADR-0024）；计划文件在审批和执行之间被改（`planHash` 绑定，4.8.1）；插件代码（ADR-0025）；推送通道上的事件洪泛或伪造（ADR-0026）；AI 冒充公司把候选写成正式规则（4.2）。
+- **威胁模型**（[项目威胁模型](../architecture/architecture.md#13-威胁模型)，实现各 ADR 时加入，编号按当时的最大值顺延）：恶意或损坏的工程包（ADR-0024）；计划文件在审批和执行之间被改（`planHash` 绑定，4.8.1）；插件代码（ADR-0025）；推送通道上的事件洪泛或伪造（ADR-0026）；AI 冒充公司把候选写成正式规则（4.2）。
 
 ## 6. 备选方案
 - **什么都不做，让模型自己串工具**：现状。模型每次都要重新理解参考项目，没有可追溯的配置，多步修改没有整体的审批和备份。否决。

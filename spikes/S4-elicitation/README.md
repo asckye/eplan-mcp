@@ -54,7 +54,7 @@ spikes/S4-elicitation/bin/Release/net10.0/EplanMcp.Spikes.S4.exe selftest
 随后是 `subscriptions/listen`（订阅 `toolsListChanged`）、`server/discover`、`tools/list`，全部是 2026-07-28 的形式。无界面模式下这个可执行文件没有登录态（桌面版通过自己的通道传递认证），所以在 `tools/list` 之后退出，没有发出 `tools/call`。
 
 ### 附带发现
-- SDK 生成的 `inputSchema` **不含 `additionalProperties: false`**，而[工具设计规范](../../docs/standards/mcp-tool-design.md)第 5 节要求必须有。Host 需要在注册工具时补上（并由契约快照测试守住）。
+- SDK 生成的 `inputSchema` **不含 `additionalProperties: false`**，而[手册 MCP 条款](../../docs/standards/engineering-handbook.html#pa)第 5 节要求必须有。Host 需要在注册工具时补上（并由契约快照测试守住）。
 - SDK 生成的工具注解会把 `title` 同时写进 `annotations.title`，四个提示（`readOnlyHint` 等）在特性中显式设置后全部出现在 `tools/list` 中。
 - 桌面版自带的 Claude Code 文件同时出现在 `%APPDATA%\Claude\claude-code\` 和 MSIX 包的 `LocalCache\Roaming\Claude\claude-code\` 下，与 api-notes A6 的文件重定向现象一致。
 

@@ -47,3 +47,9 @@
 ## 决定
 
 2026-11-01 项目负责人接受：v0.5.0 之后按 v2 设计实现，并修订 workbench-ui.md。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../standards/workbench-ui.md` → [Workbench 实现记录](../design/2026-10-20-m5-operability.md#workbench-implementation)。

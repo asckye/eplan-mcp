@@ -1,6 +1,6 @@
 namespace EplanMcp.Workbench.Shell;
 
-/// <summary>What opened a page; it decides where keyboard focus goes (workbench-ui NAV-07).</summary>
+/// <summary>What opened a page; it decides where keyboard focus goes (docs/design/2026-10-20-m5-operability.md#workbench-implementation).</summary>
 public enum NavigationOrigin
 {
     /// <summary>The window opened: focus goes to the page heading.</summary>

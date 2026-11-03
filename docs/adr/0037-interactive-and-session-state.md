@@ -50,3 +50,9 @@ Small 覆盖窗口匹配、拒绝审批代答、回调状态机；Medium 模拟�
 本次仅离线文档盘点，以上机制均为待验证提议，未运行 EPLAN，也不宣称备份、恢复或看门狗已实现。实现前把精确 API 行为的官方/获准 scratch 证据写入 [api-notes](../eplan/api-notes.md)，新增 Large 待验记入[台账](../process/large-pending.md)。缺失或不可读数据只给警告和证据缺口，不据此判违规；独立成立的写保护、审批、权限及恢复前提仍有效。
 
 依据：[ADR-0005](0005-safety-model.md)、[0010](0010-write-outcomes.md)、[0011](0011-approval-out-of-band.md)、[0019](0019-master-data-writes.md)、[0032](0032-generic-api-layer.md)、[0033](0033-api-try-object-handles.md)、[security.md](../standards/security.md)；精确签名与排除来自已提交的 `catalog/eplan-2026.0.3`、`BannedSymbols.txt` 及六树输入快照（哈希见缺口清单）。
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。

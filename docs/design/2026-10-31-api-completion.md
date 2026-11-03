@@ -20,7 +20,7 @@
   - 客户验收页的 6 处差异全部由工具解决，重画结果与原图一致（第 4.5 节）。
   - 每一批都有 Small/Medium 测试与 scratch 上的 Large 测试，批量验证结果写回覆盖报告。
 - **非目标**
-  - 不为每个重载组单独注册 MCP 工具（工具设计规范第 10 节）。
+  - 不为每个重载组单独注册 MCP 工具（发现策略见[手册 MCP-34](../standards/engineering-handbook.html#mcp-catalog)）。
   - 不提供基于字符串的任意反射调用（ADR-0032）。
   - 不在 scratch 之外执行未验证能力；不改变已发布工具的契约。
   - 不分发 EPLAN 安装文件或整理出的界面 action 清单（ADR-0030）。
@@ -101,10 +101,21 @@ flowchart LR
 - C 级只作用于 scratch 根目录下的项目，scratch 外 `POLICY_DENIED`，不提供绕过；每次审批，审批内容显示条目、参数原文、"未验证"标记；默认关闭，`config.json` 显式开启。
 - C 级执行前后快照对比、超时与模态对话框检测、审计标记沿用 ADR-0010 / ADR-0030 的机制。
 - A 级专用工具沿用写入流水线：审批、事务、读回、一步撤销。
-- security.md 在 C1 发布前补充"方法组试执行"的威胁说明。
+- 方法组试执行的威胁与机制见[架构威胁模型](../architecture/architecture.md#13-威胁模型)。
+
+### 5.1 已有 C1/C2 入口与证据边界
+
+以下记录现有分发表和适配器的范围，签名清单以 [api-try.g.tsv](../../catalog/api-try.g.tsv) 为准；实机状态见[待验台账](../process/large-pending.md)和 [eplan_api_try](../tools/eplan_api_try.md)。
+
+- **文件入口**：方向明确的字符串文件参数可解除 `external_path_parameter`，输入落在 Host `imports`、输出落在新建 `exports` 子目录。Host/Bridge 校验 UNC、路径穿越、保留名、重解析点和大小；输入 SHA-256/大小与目标目录身份绑定审批，执行前重算。输出清单在单撤销事务提交前核对大小/哈希。外部文件不随项目撤销（A56），失败或 `unknown` 可能留下文件；目录、打印/发送、主数据、设置及隐式目的地仍被排除。
+- **静态和属性入口**：静态调用没有 `target`，仅生成目录公开类型的编译分支；可能写入的调用带同项目对象参数。`via` 来自公开 getter 的闭合路径表，深度最多 2；父定位器、参数和返回对象核对 scratch 项目，规划不跟随 getter，路径/图层选择器参与审批和指纹。ProjectSettings/方案当前只读，`settings_write` 没有写分支；生命周期、文件、网络、授权、应用/会话状态和主数据按各自排除表处理。
+- **设置读取**：scratch Project 定位器绑定项目，USER/STATION/PROJECT 节点和叶设置逐段枚举，规划和执行时复核；`offset`/`limit` 与索引有界。方案绑定已枚举节点，不切换方案或写 LastUsed。设置 setter、修改方法及 COMPANY/INSTALL 根被排除。读取逐次审批，不创建撤销步；前后快照不覆盖 USER/STATION 设置库，因而不代表全局无副作用。`ref` 容器局限于封闭适配器。
+- **生命周期入口**：`Create*`/`Remove*`/`Delete*`/`Erase*` 与公开构造工厂目前仅在 scratch 中逐次批准为 write，审批显示 creates/removes 和撤销未验证；移除采用 [ADR-0035](../adr/0035-destructive-approval-default-reject.md) 的默认拒绝及执行前备份。单撤销事务提交后记录 `undoExpected`，不是撤销实测。对象/资源清单前后独立读回，提交后重新查找创建定位器；读回失败为 `unknown` 并暂停。`Project.Remove`、transient 创建、销毁/初始化/会话锁和文件/主数据/设置仍被排除。
+- **服务入口**：目录生成公开无参服务构造和编译调用，`IDisposable` 服务以 `using` 释放，借用对象不释放。Project 定位器锚定 scratch，对象参数和返回定位器核对同项目；无对象形参的入口还核对当前项目。路径、流、数据库、主数据、部件管理、设置/方案、打印机、URL、授权/退出、隐式外部目的地及自建事务按签名排除，理由记录在生成清单。其余按无副作用参数的读前缀或单撤销写事务分类。服务读取和写入撤销的 Large 用例已编写，原记录尚未运行。
+- **C2 action**：未验证 action 可能越出项目、弹窗或启动外部程序。`eplan_action_try` 默认关闭且仅在 full 中，Host 校验同一目录行参数，Host/Bridge 同时检查随包禁止表和目标覆盖。执行时目标 scratch 项目单独打开且为当前项目，逐次审批标明 unverified，规划后和执行前复核目标；审计写 `unverified=true`。超时或模态窗口按 `unknown` 暂停项目和实例。禁止表不证明第三方 action 安全，文件指纹不覆盖用户/工作站设置，C 级结果不作为已验证证据。Small/Medium 有失败场景入口，Large 已编写，原记录待运行。
 
 ## 6. 备选方案
-- 每个重载组一个 MCP 工具：被否决，工具数量超出模型可选范围（工具设计规范第 10 节）。
+- 每个重载组一个 MCP 工具：被否决，工具数量超出模型可选范围；当前发现策略见[手册 MCP-34](../standards/engineering-handbook.html#mcp-catalog)。
 - 只提供 C 级任意执行、不做专用工具：被否决，无法逐项读回核对，不满足"和原版一模一样"的验收。
 - 先修客户页 6 处差异、再补 API：负责人 2026-10-30 否决，要求先系统补齐。
 

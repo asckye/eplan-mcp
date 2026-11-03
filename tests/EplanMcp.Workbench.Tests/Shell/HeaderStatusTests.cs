@@ -10,7 +10,7 @@ using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 namespace EplanMcp.Workbench.Tests.Shell;
 
 /// <summary>
-/// The Header's status (workbench-ui STS-10, STS-11): whether approvals are taken, always in words, with the reason and
+/// The Header's status (docs/design/2026-10-20-m5-operability.md#workbench-implementation): whether approvals are taken, always in words, with the reason and
 /// where questions go instead when not; the waiting count, named in full, which opens the queue.
 /// </summary>
 [Collection(WpfTestGroup.Name)]

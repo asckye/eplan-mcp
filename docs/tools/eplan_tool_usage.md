@@ -9,9 +9,7 @@
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-代理在某个工具的描述不够用时调用它：不清楚参数怎么填、前后该调用哪个工具、结果字段是什么意思、某个错误该怎么处理。它返回该工具的详细用法。这样每个工具的描述可以保持在约 250 token 的预算内（[工具设计规范 4.2](../standards/mcp-tool-design.md#42-规则)），详细内容按需获取，不占用每次 `tools/list` 的上下文（[第 10 节](../standards/mcp-tool-design.md#10-profile-与发现)）。
-
-名称由工具设计规范第 10 节规定；资源词 `tool` 和动作 `usage` 只用于这个元工具，已加入第 3.2、3.3 节的词表。
+代理在某个工具的描述不够用时调用它：不清楚参数怎么填、前后该调用哪个工具、结果字段是什么意思、某个错误该怎么处理。它返回该工具的详细用法，详细内容按需获取，不占用每次 `tools/list` 的上下文。当前注册名称为 `eplan_tool_usage`，资源词 `tool` 和动作 `usage` 用于此元工具。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
@@ -42,10 +40,8 @@
 ## 5. 实现要点
 - 内容放在 `src/EplanMcp.Host/Tools/Usage/<工具名>.md`，作为嵌入资源编译进 `eplanmcp.exe`，运行时不读磁盘；第一次调用时加载并解析全部文件，之后只读。不调用 Bridge，耗时可以忽略。
 - 文件格式：恰好四个 `## ` 节，依次为 Examples、Workflow、Fields、Errors（与 `topic` 的值不区分大小写地对应），第一个标题之前没有文字，每节都有内容；节内可以用 `###`。
-- 每节写什么：Examples 是完整的参数对象；Workflow 是与其他工具的典型调用顺序；Fields 是结果字段的含义，并指出哪些是项目数据；Errors 只列这个工具实际会返回的 reason（对照代码和[错误码表](../standards/mcp-tool-design.md#63-错误码表)）以及每种情况下该做什么。
-- 说明文字是工具契约的一部分，修改时和描述一样评审。
-- **新增工具时**：同一个 PR 中添加工具规格和说明文件，并审查、接受契约快照测试生成的 `.received.json`；无需维护另一份工具名列表或数量。
-- 描述预算：`tool` 的 `enum` 每多一个工具约增加 20–25 个字符。目前描述加 schema 约 700 个字符；M2 的 13 个工具都加入后约 950 个字符，接近 `Descriptions_StayWithinTheBudget` 的 1000 字符上限，届时可能需要缩短描述。
+- 四节分别存放完整参数示例、典型调用顺序、结果字段和错误处理；当前 reason 定义见 [共享结果契约](error-reference.md)。`ModelTextTests`、`ToolUsageExampleTests` 与契约快照的检查入口见 [Host 测试说明](../../tests/EplanMcp.Host.Tests/README.md)。
+- `serve --profile core|full` 默认 `full`；`core` 集合来自 [`ToolProfiles.Core`](../../src/EplanMcp.Host/Tools/ToolProfiles.cs)。工具枚举先按 Profile 与配置开关筛选，再由当前注册集合生成；`tools/list` 按分组和名称排序。
 
 ## 6. 写操作专项
 不适用。

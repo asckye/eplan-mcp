@@ -113,3 +113,11 @@
 | Q2 | 是否提供 `dynamic` 模式？ | **已决定**（2026-10-21，按建议）：**提供**，但默认不用，先做客户端支持的 spike |
 | Q3 | 动态模式下是否允许卸载工具集？ | **已决定**（2026-10-21，按建议）：**不允许** |
 | Q4 | 工具集的初步划分是否可以？ | **已决定**（2026-10-21，按建议）：**按第 1 节**，实现时按评测调整 |
+
+## 2026-11-03 文档引用修订
+
+原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
+
+- 原引用 `../process/development-workflow.md` → [手册开发流程条款](../standards/engineering-handbook.html#review)。
+- 原引用 `../standards/mcp-tool-design.md` → [手册 MCP 条款](../standards/engineering-handbook.html#pa)。
+- 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。

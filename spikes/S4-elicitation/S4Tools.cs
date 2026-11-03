@@ -101,7 +101,7 @@ public sealed class S4Tools
 
     private static string Key(int round) => "approval" + round.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-    /// <summary>What a real approval form will carry (mcp-tool-design 8): tool, project, the change list, whether it can be undone.</summary>
+    /// <summary>What a real approval form will carry (engineering-handbook.html#pa): tool, project, the change list, whether it can be undone.</summary>
     private static ElicitRequestParams ApprovalForm(string form, int round, int rounds)
     {
         var message = new StringBuilder()

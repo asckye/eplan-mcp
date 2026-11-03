@@ -3,7 +3,7 @@
     <Compile Include="..\Shared\ModuleInspectionEvidence.cs" Link="ModuleInspectionEvidence.cs" />
     <EmbeddedResource Include="Fixtures\**\*.json" />
     <ProjectReference Include="..\..\src\EplanMcp.Packs\EplanMcp.Packs.csproj" />
-    <!-- Reviewed snapshots of the pack file formats in tests/Contracts.Snapshots (testing.md 3). -->
+    <!-- Reviewed snapshots of the pack file formats in tests/Contracts.Snapshots (tests/EplanMcp.Host.Tests/README.md#契约快照). -->
     <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
   <ItemGroup>

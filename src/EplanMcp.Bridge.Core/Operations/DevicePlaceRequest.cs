@@ -51,7 +51,7 @@ internal sealed class DevicePlaceRequest
 
     internal string[] Existing { get; }
 
-    /// <summary>Every argument problem at once (mcp-tool-design 6.2), then the project, the page and the part.</summary>
+    /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the part.</summary>
     public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, IPlcReader? plc = null)
     {
         bool box = args.LocationBox is not null;

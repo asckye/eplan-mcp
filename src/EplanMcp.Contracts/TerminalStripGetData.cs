@@ -3,7 +3,7 @@ namespace EplanMcp.Contracts;
 /// <summary>Result data of <see cref="OperationNames.TerminalStripGet"/>.</summary>
 public sealed class TerminalStripGetData
 {
-    /// <summary>The name of the project actually used, so the tool can echo it (mcp-tool-design 7.1).</summary>
+    /// <summary>The name of the project actually used, so the tool can echo it (engineering-handbook.html#pa).</summary>
     public string Project { get; set; } = string.Empty;
 
     /// <summary>The strip with its counts.</summary>
