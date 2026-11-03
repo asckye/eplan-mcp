@@ -6158,6 +6158,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "SpecialObjectsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SpecialObjectsSpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -7822,6 +7827,11 @@
             "name": "SelectionSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
+          },
+          {
+            "name": "SpecialObjectsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SpecialObjectsSpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -12614,6 +12624,11 @@
             "name": "SampleProjectInventorySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SampleProjectInventorySpikeTests.cs"
+          },
+          {
+            "name": "SpecialObjectsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SpecialObjectsSpikeTests.cs"
           },
           {
             "name": "WriteSafetyTests",
@@ -19157,6 +19172,11 @@
             "name": "PlcOverviewSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
+          },
+          {
+            "name": "SpecialObjectsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SpecialObjectsSpikeTests.cs"
           },
           {
             "name": "SymbolDescriptionTests",
