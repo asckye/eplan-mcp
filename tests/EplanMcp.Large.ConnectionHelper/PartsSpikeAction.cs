@@ -264,6 +264,10 @@ public sealed class PartsSpikeAction : IEplAction
         result["warnings"] = warnings;
         result["steps"] = steps;
         result["committed"] = false;
+        // A52: resolve symbol library objects before entering SafetyPoint; a function's own SymbolVariant wrapper failed in PlaceAt (round 5).
+        var variants = project.SymbolLibraries.Where(library => library.Name == "IEC_symbol").SelectMany(library => library.Symbols)
+            .Where(symbol => symbol.Name is "PLC_CBOX_LEFT_PLUG" or "PLC_CBOX_CON").SelectMany(symbol => symbol.Variants)
+            .Where(variant => variant.VariantNr == 0).ToDictionary(variant => variant.SymbolName, StringComparer.Ordinal);
         using (var scope = new TransactionScope("Parts named creation spike"))
         {
             try
@@ -303,7 +307,7 @@ public sealed class PartsSpikeAction : IEplAction
                 remainingNames = created.Where((_, index) => index != mainIndex && index != auxIndex)
                     .Select(function => (string?)function["name"]).OfType<string>().ToArray();
                 result["remainingAuxiliaryNames"] = new JArray(remainingNames);
-                Function copy = PlaceNamedCopy(main, page!, (JObject)input["main"]!, steps, "main", warnings);
+                Function copy = PlaceNamedCopy(main, page!, (JObject)input["main"]!, steps, "main", warnings, variants);
                 // DataModel XML: move IsMainFunction before Remove; 20476 otherwise deletes unplaced auxiliaries.
                 Observe(steps, "copyIsMainFunction", () => { copy.IsMainFunction = true; return copy.IsMainFunction; }, warnings, stopOnError: true);
                 Observe(steps, "originalIsMainFunction", () => { main.IsMainFunction = false; return main.IsMainFunction; }, warnings, stopOnError: true);
@@ -323,7 +327,7 @@ public sealed class PartsSpikeAction : IEplAction
                     }, warnings, stopOnError: true);
                 }
                 Observe(steps, "removeMainOriginal", () => { main.Remove(); return true; }, warnings, stopOnError: true);
-                PlaceNamedCopy(auxiliary, page!, (JObject)input["aux"]!, steps, "aux", warnings);
+                PlaceNamedCopy(auxiliary, page!, (JObject)input["aux"]!, steps, "aux", warnings, variants);
                 Observe(steps, "removeAuxOriginal", () => { auxiliary.Remove(); return true; }, warnings, stopOnError: true);
                 Observe(steps, "commit", () => { scope.Commit(); return true; }, warnings, stopOnError: true);
                 Observe(steps, "closeUndo", () => { scope.CloseUndo(); return true; }, warnings, stopOnError: true);
@@ -339,7 +343,7 @@ public sealed class PartsSpikeAction : IEplAction
         ReadNamedDevice(project, (string)input["page"]!, tag, remainingNames, result);
     }
 
-    private static Function PlaceNamedCopy(Function original, Page page, JObject point, JObject steps, string stage, JArray warnings)
+    private static Function PlaceNamedCopy(Function original, Page page, JObject point, JObject steps, string stage, JArray warnings, IReadOnlyDictionary<string, SymbolVariant> variants)
     {
         var observation = new JObject();
         steps[stage] = observation;
@@ -354,7 +358,7 @@ public sealed class PartsSpikeAction : IEplAction
         // Round 1 / A82: PlaceAt creates a same-name copy of an instantiated function.
         Observe(observation, "placeAt", () =>
         {
-            original.PlaceAt(page, new PointD((double)point["x"]!, (double)point["y"]!), DocumentTypeManager.DocumentType.Circuit, original.SymbolVariant);
+            original.PlaceAt(page, new PointD((double)point["x"]!, (double)point["y"]!), DocumentTypeManager.DocumentType.Circuit, variants[original.SymbolVariant.SymbolName]);
             return true;
         }, warnings, stopOnError: true);
         Function? copy = null;
