@@ -12,7 +12,7 @@
       { "name": "BPOUT", "description": "中断点，连接在首端", "variantCount": 8 },
       { "name": "BPF", "description": "中断点（流体）", "variantCount": 4 },
       { "name": "TDEF", "description": "端子排定义，无连接点", "variantCount": 1 },
-      { "name": "PLCC", "description": "PLC 盒子", "variantCount": null, "warning": "api-notes A83 未记录变体数" },
+      { "name": "PLCC", "description": "PLC 盒子", "variantCount": 1 },
       { "name": "PLCCP", "description": "PLC 连接点", "variantCount": 8 },
       { "name": "PLCCPOV", "description": "PLC 连接点，总览", "variantCount": 8 },
       { "name": "PLCCPP", "description": "PLC 连接点，带插头", "variantCount": 8 }

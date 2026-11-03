@@ -34,10 +34,10 @@ public sealed class BuiltinPluginContentTests
         Assert.Equal(3, schema.GetProperty("items").EnumerateObject().Count());
         Assert.Equal("text", schema.GetProperty("items").GetProperty("defaults.interruption.symbol").GetProperty("type").GetString());
         JsonElement settings = (await SpecAsync(extracted, "config_layer", "defaults")).GetProperty("settings");
-        Assert.Equal(2, settings.EnumerateObject().Count());
+        Assert.Equal(3, settings.EnumerateObject().Count());
         Assert.Equal("TDEF", settings.GetProperty("defaults.strip_definition.symbol").GetProperty("default").GetString());
         Assert.Equal(0, settings.GetProperty("defaults.strip_definition.variant").GetProperty("default").GetInt32());
-        Assert.False(settings.TryGetProperty("defaults.interruption.symbol", out _));
+        Assert.Equal("BP", settings.GetProperty("defaults.interruption.symbol").GetProperty("default").GetString());
 
         JsonElement facts = await SpecAsync(extracted, "fact_set", "symbols");
         Assert.Equal("api-notes A83", facts.GetProperty("evidence").GetString());

@@ -44,9 +44,7 @@ public sealed class BuiltinPluginLibraryTests
             Assert.Equal("TDEF", resolved.Values.EnumerateArray().Single(value => value.GetProperty("key").GetString() == "defaults.strip_definition.symbol").GetProperty("value").GetString());
             Assert.Equal(0, resolved.Values.EnumerateArray().Single(value => value.GetProperty("key").GetString() == "defaults.strip_definition.variant").GetProperty("value").GetInt32());
             var interruption = Assert.Single(resolved.Values.EnumerateArray(), value => value.GetProperty("key").GetString() == "defaults.interruption.symbol");
-            Assert.Equal(System.Text.Json.JsonValueKind.Null, interruption.GetProperty("value").ValueKind);
-            Assert.Equal(System.Text.Json.JsonValueKind.Null, interruption.GetProperty("winner").ValueKind);
-            Assert.DoesNotContain(interruption.GetProperty("trace").EnumerateArray(), source => source.GetProperty("kind").GetString() == "default");
+            Assert.Equal("BP", interruption.GetProperty("value").GetString());
         }
         finally
         {

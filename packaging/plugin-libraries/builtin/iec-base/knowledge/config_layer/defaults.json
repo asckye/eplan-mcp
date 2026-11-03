@@ -2,11 +2,12 @@
   "apiVersion": "eplanmcp.pack/v2",
   "kind": "config_layer",
   "metadata": { "name": "defaults" },
-  "origin": { "note": "api-notes A83" },
+  "origin": { "note": "api-notes A83 (BP: EPLAN insert-command default, owner screenshot 2026-11-02)" },
   "spec": {
     "layer": "company",
     "schema": "config_schema/defaults",
     "settings": {
+      "defaults.interruption.symbol": { "default": "BP" },
       "defaults.strip_definition.symbol": { "default": "TDEF" },
       "defaults.strip_definition.variant": { "default": 0 }
     }
