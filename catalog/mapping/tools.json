@@ -13856,6 +13856,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/OperationRouterTests.cs"
           },
           {
+            "name": "RequestFrameTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Server/RequestFrameTests.cs"
+          },
+          {
             "name": "WriteInvokeTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/WriteInvokeTests.cs"
