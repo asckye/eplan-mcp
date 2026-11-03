@@ -59,6 +59,7 @@
 | `eplan_action_try` | 执行 | 预览 | `dry_run: false` |
 | `eplan_api_try` | 执行（含读取 API） | 预览 | `dry_run: false` |
 | `eplan_project_create` | 执行 | 预览 | `dry_run: false` |
+| `eplan_cabinet_bind` | 执行 | 预览 | `dry_run: false` |
 
 ### Fixed
 - 写操作异常缺少执行状态且没有回滚证据时，报告 `OUTCOME_UNKNOWN` / `unknown`，保留已证实回滚的结果，避免误报为已回滚并引发重试。

@@ -5,6 +5,7 @@
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
 | S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 待运行：本次禁止 EPLAN；需验证写入未知结果、真实回滚及原有写入安全回归。Small 假对象覆盖未分类异常、回滚证据、结果查询与不重放；未改 Large 断言，不宣称实机通过。 |
+| ADR-0049 P17 本地柜绑定默认预览（2026-11-03，手册 T.4） | 无新增 EPLAN 写入 Large；`rule-fix-plan` attended Agent 场景 | 待运行：本次禁止 EPLAN。绑定执行调用明确传 `dry_run: false`，保留工程对象前后相同的评测断言；CAS、换锁确认、审计和原子发布由既有 Medium 回归覆盖。 |
 | ADR-0049 P16 创建项目默认预览（2026-11-03，手册 T.4） | `ProjectCreateToolTests`、`PlanTaskAcceptanceScenariosTests` | 待运行：本次禁止 EPLAN。创建夹具明确传 `dry_run: false`，原兼容性、关闭状态、材料哈希、审批、恢复、回滚与文件保护断言保留；project-create Agent 评测同步待验。 |
 | ADR-0049 P15 API 试运行默认预览（2026-11-03，手册 T.4） | `ApiTryTests`、`BatchVerification`、`PlcDisplaySpikeTests` | 待运行：本次禁止 EPLAN。实际 API 读取、写入与读回均显式传 `dry_run:false`，缓存游标继续不调用 API；原审批、快照、回滚、读回和单步撤销断言保留。 |
 | ADR-0049 P14 action 试运行 默认预览（2026-11-03，手册 T.4） | `ActionTryTests`、`BatchVerification` | 待运行：本次禁止 EPLAN。执行调用显式传 `dry_run: false`，预览保持 true；原审批、读回、失败、备份和撤销断言保留。 |

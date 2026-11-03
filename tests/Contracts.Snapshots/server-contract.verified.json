@@ -2909,7 +2909,7 @@
     {
       "name": "eplan_cabinet_bind",
       "title": "Bind cabinet configurations",
-      "description": "Replaces all cabinets, project values and exact pack roots in local data. dry_run previews without writing. Only changed locks need engineer confirmation; refusal returns APPROVAL_DENIED. Example: {\"project\":\"Line1\",\"expected_revision\":0,\"cabinets\":[],\"project_values\":{},\"pack_roots\":[],\"dry_run\":true}.",
+      "description": "Replaces all cabinets, project values and exact pack roots in local data. Omit/true previews; false executes. Only changed locks need engineer confirmation; refusal returns APPROVAL_DENIED. Example: {\"project\":\"Line1\",\"expected_revision\":0,\"cabinets\":[],\"project_values\":{},\"pack_roots\":[],\"dry_run\":true}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -2951,8 +2951,9 @@
             }
           },
           "dry_run": {
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
-            "default": false
+            "default": true
           }
         },
         "required": [
@@ -3126,7 +3127,10 @@
         "required": [
           "binding",
           "changes",
-          "dryRun"
+          "dryRun",
+          "fingerprint",
+          "execution",
+          "hint"
         ],
         "properties": {
           "binding": {
@@ -3152,6 +3156,22 @@
           },
           "dryRun": {
             "type": "boolean"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "execution": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "committed"
+            ]
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },

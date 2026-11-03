@@ -56,9 +56,9 @@ internal sealed class CabinetTools
         }
     });
     [McpServerTool(Name = BindTool, Title = "Bind cabinet configurations", ReadOnly = false, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Replaces all cabinets, project values and exact pack roots in local data. dry_run previews without writing. Only changed locks need engineer confirmation; refusal returns APPROVAL_DENIED. Example: {\"project\":\"Line1\",\"expected_revision\":0,\"cabinets\":[],\"project_values\":{},\"pack_roots\":[],\"dry_run\":true}.")]
+    [Description("Replaces all cabinets, project values and exact pack roots in local data. " + WriteToolDefaults.Description + " Only changed locks need engineer confirmation; refusal returns APPROVAL_DENIED. Example: {\"project\":\"Line1\",\"expected_revision\":0,\"cabinets\":[],\"project_values\":{},\"pack_roots\":[],\"dry_run\":true}.")]
     public static Task<CallToolResult> BindAsync(PackLibrary packs, IBridgeClient bridge, BindingService bindings, string project, [Range(0, int.MaxValue - 1)] int expected_revision,
-        JsonElement cabinets, JsonElement project_values, JsonElement pack_roots, bool dry_run = false,
+        JsonElement cabinets, JsonElement project_values, JsonElement pack_roots, [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default) => RunAsync(async () =>
     {
         if (expected_revision is < 0 or int.MaxValue)
@@ -67,7 +67,15 @@ internal sealed class CabinetTools
         string key = await ProjectAsync(bridge, project, cancellationToken).ConfigureAwait(false);
         ProjectBinding proposal = PackJson.ReadBinding(PackJson.Serialize(new { BindingVersion = 2, Project = key, Revision = expected_revision, Cabinets = cabinets, ProjectValues = project_values, PackRoots = pack_roots, Locks = Array.Empty<PackReference>() }));
         ProjectBinding? before = await ContextBuilder.ReadBindingAsync(packs, key, cancellationToken).ConfigureAwait(false);
-        JsonObject Result(ProjectBinding binding) => ContextBuilder.Node(new { Binding = JsonSerializer.SerializeToElement(binding, PackJson.Options), Changes = new { Before = JsonSerializer.SerializeToElement(before, PackJson.Options), After = JsonSerializer.SerializeToElement(binding, PackJson.Options) }, DryRun = dry_run });
+        JsonObject Result(ProjectBinding binding) => ContextBuilder.Node(new
+        {
+            Binding = JsonSerializer.SerializeToElement(binding, PackJson.Options),
+            Changes = new { Before = JsonSerializer.SerializeToElement(before, PackJson.Options), After = JsonSerializer.SerializeToElement(binding, PackJson.Options) },
+            DryRun = dry_run,
+            Fingerprint = PlanStore.Hash(PackJson.Serialize(binding)),
+            Execution = dry_run || binding.Revision == expected_revision ? "not_started" : "committed",
+            Hint = dry_run ? WriteToolDefaults.ExecutionHint : null,
+        });
         async Task ValidateAsync(ProjectBinding binding, CancellationToken token)
         {
             foreach (CabinetBinding cabinet in binding.Cabinets)
@@ -101,7 +109,7 @@ internal sealed class CabinetTools
         input["properties"]!["project_values"] = JsonNode.Parse("""{"$ref":"#/$defs/settings"}""");
         input["properties"]!["pack_roots"] = JsonNode.Parse("""{"type":"array","uniqueItems":true,"items":{"type":"object","additionalProperties":false,"required":["id","version"],"properties":{"id":{"type":"string"},"version":{"type":"string"}}}}""");
         bind.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(input);
-        bind.ProtocolTool.OutputSchema = JsonDocument.Parse("""{"type":"object","additionalProperties":false,"required":["binding","changes","dryRun"],"properties":{"binding":{"type":"object"},"changes":{"type":"object","required":["before","after"],"properties":{"before":{"type":["object","null"]},"after":{"type":"object"}}},"dryRun":{"type":"boolean"}}}""").RootElement.Clone();
+        bind.ProtocolTool.OutputSchema = JsonDocument.Parse("""{"type":"object","additionalProperties":false,"required":["binding","changes","dryRun","fingerprint","execution","hint"],"properties":{"binding":{"type":"object"},"changes":{"type":"object","required":["before","after"],"properties":{"before":{"type":["object","null"]},"after":{"type":"object"}}},"dryRun":{"type":"boolean"},"fingerprint":{"type":"string"},"execution":{"type":"string","enum":["not_started","committed"]},"hint":{"type":["string","null"]}}}""").RootElement.Clone();
         tools.Single(t => t.ProtocolTool.Name == CabinetTools.ListTool).ProtocolTool.OutputSchema = JsonDocument.Parse("""{"type":"object","additionalProperties":false,"required":["project","revision","locks","cabinets","total","nextCursor","truncated","hint","budget"],"properties":{"project":{"type":"string"},"revision":{"type":"integer"},"locks":{"type":"array","items":{"type":"object"}},"cabinets":{"type":"array","items":{"type":"object","required":["id","title","structure","layers","config"],"properties":{"id":{"type":"string"},"title":{"type":["string","null"]},"structure":{"type":["object","null"]},"layers":{"type":["array","null"],"items":{"type":"string"}},"config":{"type":"array","items":{"type":"object"}}}}},"total":{"type":"integer"},"nextCursor":{"type":["string","null"]},"truncated":{"type":"boolean"},"hint":{"type":["string","null"]},"budget":{"type":"integer"}}}""").RootElement.Clone();
     }
 }

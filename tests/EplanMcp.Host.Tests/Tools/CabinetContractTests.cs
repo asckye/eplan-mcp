@@ -55,6 +55,18 @@ public sealed class CabinetContractTests
         Assert.Equal(1, input.GetProperty("max_tokens").GetProperty("minimum").GetInt32());
     }
 
+    [Fact]
+    public void Bind_DefaultsToPreviewAndReportsLocalExecutionEvidence()
+    {
+        Tool tool = Assert.Single(Tools(ToolProfile.Full), t => t.Name == CabinetTools.BindTool);
+        Assert.True(tool.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.DoesNotContain("dry_run", tool.InputSchema.GetProperty("required").EnumerateArray().Select(p => p.GetString()));
+        JsonElement output = tool.OutputSchema!.Value;
+        foreach (string name in new[] { "fingerprint", "execution", "hint" })
+        { Assert.Contains(name, output.GetProperty("required").EnumerateArray().Select(p => p.GetString())); }
+        Assert.Equal(["not_started", "committed"], output.GetProperty("properties").GetProperty("execution").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
+    }
+
     private static Tool[] Tools(ToolProfile profile)
     {
         var services = new ServiceCollection();

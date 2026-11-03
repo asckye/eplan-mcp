@@ -121,14 +121,22 @@ public sealed class CabinetToolTests : IDisposable
     }
 
     [Fact]
-    public async Task DryRun_ValidatesLocksAndConfigurationWithoutConfirmationOrFiles()
+    public async Task OmittedAndTrue_ValidateSameBindingWithoutConfirmationOrFiles()
     {
         ProjectBinding proposal = Proposal();
         JsonElement result = Data(await Bind(proposal, dryRun: true));
+        JsonElement omitted = Data(await CabinetTools.BindAsync(Packs, _bridge, Service(), Project, proposal.Revision,
+            JsonSerializer.SerializeToElement(proposal.Cabinets, PackJson.Options), JsonSerializer.SerializeToElement(proposal.ProjectValues, PackJson.Options),
+            JsonSerializer.SerializeToElement(proposal.PackRoots, PackJson.Options), cancellationToken: Token));
+        Assert.True(JsonElement.DeepEquals(result, omitted));
         Assert.True(result.GetProperty("dryRun").GetBoolean());
+        Assert.Equal("not_started", result.GetProperty("execution").GetString());
+        Assert.Equal(PlanStore.Hash(PackJson.Serialize(ReadBinding(result))), result.GetProperty("fingerprint").GetString());
+        Assert.Contains("dry_run: false", result.GetProperty("hint").GetString(), StringComparison.Ordinal);
         Assert.Equal(1, result.GetProperty("binding").GetProperty("revision").GetInt32());
         Assert.Empty(_channel.Questions);
         Assert.Empty(Directory.EnumerateFileSystemEntries(_locations.Root));
+        Assert.Empty(_bridge.Writes);
     }
 
     [Theory]
@@ -160,7 +168,9 @@ public sealed class CabinetToolTests : IDisposable
         ProjectBinding second = ReadBinding(Data(await Bind(updated)));
         Assert.Equal(2, second.Revision);
         Assert.Single(_channel.Questions);
-        Assert.Equal(2, ReadBinding(Data(await Bind(second))).Revision);
+        JsonElement unchanged = Data(await Bind(second));
+        Assert.Equal(2, ReadBinding(unchanged).Revision);
+        Assert.Equal("not_started", unchanged.GetProperty("execution").GetString());
         Assert.Single(_channel.Questions);
         ProjectBinding removed = second with { PackRoots = [], Cabinets = [ContextBuilder.VirtualCabinet] };
         Assert.Empty(ReadBinding(Data(await Bind(removed))).Locks);
@@ -229,6 +239,59 @@ public sealed class CabinetToolTests : IDisposable
             }, cancellationToken: Token);
             Assert.True(Data(preview).GetProperty("dryRun").GetBoolean());
             Assert.Empty(_channel.Questions);
+        }
+        finally { await host.StopAsync(CancellationToken.None); }
+    }
+
+    [Fact]
+    public async Task McpBinding_OmittedAndTrueOnlyPreview_FalseConfirmsAndPublishes()
+    {
+        PackReference pin = Pack("one", "one-only");
+        ProjectBinding proposal = Proposal() with { PackRoots = [new() { Id = pin.Id, Version = pin.Version }] };
+        string[] filesBefore = [.. Directory.EnumerateFileSystemEntries(_locations.Root, "*", SearchOption.AllDirectories).Order(StringComparer.Ordinal)];
+        var incoming = new Pipe();
+        var outgoing = new Pipe();
+        HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { Args = [], DisableDefaults = true });
+        builder.Logging.ClearProviders();
+        builder.Services.AddSingleton(_locations);
+        builder.Services.AddEplanMcp().WithStreamServerTransport(incoming.Reader.AsStream(), outgoing.Writer.AsStream());
+        builder.Services.AddSingleton<IBridgeClient>(_bridge);
+        builder.Services.AddSingleton(Service());
+        using IHost host = builder.Build();
+        await host.StartAsync(Token);
+        try
+        {
+            await using McpClient client = await McpClient.CreateAsync(new StreamClientTransport(incoming.Writer.AsStream(), outgoing.Reader.AsStream()), cancellationToken: Token);
+            var args = new Dictionary<string, object?>
+            {
+                ["project"] = "Line1",
+                ["expected_revision"] = proposal.Revision,
+                ["cabinets"] = JsonSerializer.SerializeToElement(proposal.Cabinets, PackJson.Options),
+                ["project_values"] = proposal.ProjectValues,
+                ["pack_roots"] = JsonSerializer.SerializeToElement(proposal.PackRoots, PackJson.Options),
+            };
+            JsonElement omitted = Data(await client.CallToolAsync(CabinetTools.BindTool, args, cancellationToken: Token));
+            args["dry_run"] = true;
+            JsonElement preview = Data(await client.CallToolAsync(CabinetTools.BindTool, args, cancellationToken: Token));
+            Assert.True(JsonElement.DeepEquals(omitted, preview));
+            Assert.True(omitted.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+            Assert.Equal(PlanStore.Hash(PackJson.Serialize(ReadBinding(omitted))), omitted.GetProperty("fingerprint").GetString());
+            Assert.Contains("dry_run: false", omitted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.Empty(_channel.Questions);
+            Assert.Equal(filesBefore, Directory.EnumerateFileSystemEntries(_locations.Root, "*", SearchOption.AllDirectories).Order(StringComparer.Ordinal));
+            Assert.Empty(_bridge.Writes);
+            args["dry_run"] = false;
+            JsonElement executed = Data(await client.CallToolAsync(CabinetTools.BindTool, args, cancellationToken: Token));
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.Equal(omitted.GetProperty("fingerprint").GetString(), executed.GetProperty("fingerprint").GetString());
+            Assert.True(JsonElement.DeepEquals(omitted.GetProperty("changes"), executed.GetProperty("changes")));
+            Assert.Single(_channel.Questions);
+            Assert.Equal(executed.GetProperty("fingerprint").GetString(), _channel.Questions[0].Plan.Fingerprint);
+            Assert.Equal(PackJson.Serialize(ReadBinding(executed)), File.ReadAllBytes(BindingFile));
+            Assert.NotEmpty(Directory.GetFiles(_locations.Audit, "*.jsonl"));
+            Assert.Empty(_bridge.Writes);
         }
         finally { await host.StopAsync(CancellationToken.None); }
     }
