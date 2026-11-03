@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A86、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A87、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -312,3 +312,17 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - **崩溃**：同一事务中 `CreateDevice` → `RenameDevice` → 对一个未放置的 PLC 功能 `PlaceAt(page, point, Circuit, IEC_symbol/PLC_CBOX 变体 0)`
   → 对原未放置功能 `Remove()`，EPLAN 进程崩溃（0xc0000374，堆损坏），没有写出结果，崩溃前系统日志无相关记录；未区分是 `PlaceAt` 还是 `Remove` 引起。
   产品不使用这条路径；非 PLC 部件的同一路径未测。— 实测
+
+### A86. 示例页上的 SPECIAL 对象：连接定义点、电位定义点、黑盒、母线定义（2026-11-03，EPLAN 2026.0.3.25421，Electric P8）
+实机：scratch 副本 LargeWrite 的新页，`SpecialObjectsSpikeTests` 一次运行，每个对象单独一个事务。SPECIAL 库符号类型见 A83 枚举（`D7-special-symbols.json`）。
+- 连接定义点：`new Function().Create(page, SPECIAL/CDP 变体 0)` 建出 `ConnectionDefinitionPoint`（`FunctionCategory` 为 Wire，名称 `+`），
+  放在已有导线上的点。对它写 31004（`CONNECTION_WIRENUMBER`，颜色/编号）= `RD` 与截面（`CONNECTION_WIRECROSSSECTION`）= `1.5`，
+  再执行 `Generate.Connections`，这条连接读回相同的颜色和截面。`SPECIAL/CDPNG`（不显示图形）同样能建，不在导线上也能建。— 实测
+- 电位定义点：`new Function().Create(page, SPECIAL/PDP 变体 0)` 抛出 `ObjectCreationException`（S063085，无法创建），事务回滚。专门的创建方式未测。— 实测
+- 黑盒：`new BoxedDevice { SymbolVariant = SPECIAL/DC 变体 0 }.Create(page)` 建出 `BoxedDevice`（类别 Blackbox，主功能）；
+  `SymbolReference.SetLogicalArea(左下, 右上)` 设外框，读回 `GetLogicalArea` 为 60 × 40。框内用 `Function.Create(page, SPECIAL/DCP)` 建的设备连接点
+  给与黑盒相同的标识后，与黑盒同属一个器件（黑盒的框内功能列表包含它）。— 实测
+- 母线：`Function.Create(page, SPECIAL/BBDEF)`（TextFunction）与 `SPECIAL/BCP`（类别 Busbar）给同一标识后属于同一器件。— 实测
+- 对 CDP、CDPNG 的 `SymbolReference.GetLogicalArea()` 抛出 `NotImplementedException`；黑盒上可用。— 实测
+- 现有工具（同一运行）：`eplan_device_place` 放置 `SPECIAL/BCP` 和 PLC 点 `IEC_symbol/PLC_CBOX_PCON_PLUG` 成功；端子路线不接受
+  `library`/`symbol`（`X2_2`、`XTR1`、`XFD`、`GRAPHICS/KA1_PE` 均被参数校验拒绝）；`SPECIAL/DCP` 的 `tag` 不能带 `:` 后缀（后缀由 EPLAN 分配）。— 实测
