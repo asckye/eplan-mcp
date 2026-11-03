@@ -10957,6 +10957,11 @@
         ],
         "tests": [
           {
+            "name": "LayoutGuardSearchBudgetTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/LayoutGuardSearchBudgetTests.cs"
+          },
+          {
             "name": "PageReviewTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewTests.cs"
