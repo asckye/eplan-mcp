@@ -949,6 +949,13 @@ internal sealed class AcceptanceRedrawDriver(
     private async Task<JsonElement> ReadAsync(string tool, Dictionary<string, object?> args)
     {
         (bool succeeded, JsonElement result) = await InvokeAsync(tool, args);
+        // Customer run 2026-11-02: a dialog EPLAN showed briefly made the verify read fail; EPLAN_BUSY says retryable.
+        for (int attempt = 0; !succeeded && attempt < 10 && result.TryGetProperty("reason", out JsonElement reason) && reason.GetString() == "EPLAN_BUSY"
+            && result.TryGetProperty("retryable", out JsonElement retryable) && retryable.ValueKind == JsonValueKind.True; attempt++)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(3));
+            (succeeded, result) = await InvokeAsync(tool, args);
+        }
         Assert.True(succeeded, tool + ": " + result.GetRawText());
         return result;
     }
