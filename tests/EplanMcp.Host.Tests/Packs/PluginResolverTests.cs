@@ -8,7 +8,7 @@ using EplanMcp.Packs;
 namespace EplanMcp.Host.Tests.Packs;
 
 [Trait("Size", "Medium")]
-public sealed class PluginResolverTests : IDisposable
+public sealed partial class PluginResolverTests : IDisposable
 {
     private const string SchemaPath = "knowledge/config_schema/defaults.json";
     private const string LayerPath = "knowledge/config_layer/defaults.json";
@@ -194,12 +194,12 @@ public sealed class PluginResolverTests : IDisposable
         await State.WriteAsync(new(1, enabled, []), revision, Cancel);
     }
 
-    private void WritePack(string id, string version, int value, bool unreferencedLayer = false)
+    private void WritePack(string id, string version, int value, bool unreferencedLayer = false, string key = "key")
     {
         string folder = Path.Combine(_locations.Packs, id, version);
         var resources = new List<PackResource>();
-        Add(SchemaPath, ResourceKind.ConfigSchema, Schema);
-        Add(LayerPath, ResourceKind.ConfigLayer, Layer(value));
+        Add(SchemaPath, ResourceKind.ConfigSchema, Schema.Replace("\"key\"", $"\"{key}\"", StringComparison.Ordinal));
+        Add(LayerPath, ResourceKind.ConfigLayer, Layer(value).Replace("\"key\"", $"\"{key}\"", StringComparison.Ordinal));
         if (unreferencedLayer)
         { Add("knowledge/config_layer/unreferenced.json", ResourceKind.ConfigLayer, Layer(99)); }
         var manifest = new PackManifest

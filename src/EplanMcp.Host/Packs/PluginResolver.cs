@@ -5,7 +5,7 @@ using EplanMcp.Packs;
 namespace EplanMcp.Host.Packs;
 
 /// <summary>One fresh state snapshot per resolution; binding documents remain resolved by the existing caller.</summary>
-internal sealed class PluginResolver(PackLibrary packs)
+internal sealed partial class PluginResolver(PackLibrary packs)
 {
     public Task<PluginResolution> ResolveAsync(CancellationToken cancellationToken) => ResolveAsync([], [], new ProjectBinding
     {
@@ -23,12 +23,14 @@ internal sealed class PluginResolver(PackLibrary packs)
         cancellationToken.ThrowIfCancellationRequested();
         var warnings = new List<string>();
         var plugins = new List<string>();
+        var enabled = new List<PluginDescriptor>();
         var globalSchemas = new List<ConfigDocument>();
         var globalLayers = new List<ConfigDocument>();
         var skipped = new JsonArray();
         PluginState state = PluginState.Empty;
+        string? revision = null;
         try
-        { (state, _) = await new PluginStateStore(packs.Locations).ReadAsync(cancellationToken).ConfigureAwait(false); }
+        { (state, revision) = await new PluginStateStore(packs.Locations).ReadAsync(cancellationToken).ConfigureAwait(false); }
         catch (Exception ex) when (PluginConfigurationReader.Unreadable(ex))
         { warnings.Add("Plugin state is unreadable or invalid; global plugins are unavailable for this resolution."); }
         foreach (PluginIdentity plugin in state.Enabled)
@@ -39,11 +41,14 @@ internal sealed class PluginResolver(PackLibrary packs)
             {
                 string warning = $"{identity}: the project binding locks this plugin; its global configuration was skipped.";
                 warnings.Add(warning);
+                var skippedPlugin = await new PluginConfigurationReader(packs).ReadAsync(plugin, cancellationToken).ConfigureAwait(false);
+                enabled.Add(new(plugin.Id, plugin.Version, "global", skippedPlugin.Manifest, [warning]));
                 skipped.Add(new JsonObject { ["layer"] = "global", ["scope"] = "global", ["plugin"] = identity, ["kind"] = "warning", ["value"] = warning });
                 continue;
             }
             var read = await new PluginConfigurationReader(packs).ReadAsync(plugin, cancellationToken).ConfigureAwait(false);
             warnings.AddRange(read.Warnings);
+            enabled.Add(new(plugin.Id, plugin.Version, "global", read.Manifest, read.Warnings));
             globalSchemas.AddRange(read.Schemas);
             globalLayers.AddRange(read.Layers);
             if (read.Schemas.Count > 0 || read.Layers.Count > 0)
@@ -62,6 +67,7 @@ internal sealed class PluginResolver(PackLibrary packs)
         var trace = JsonNode.Parse(merged.Trace.GetRawText())!.AsArray();
         foreach (JsonNode? warning in skipped)
         { trace.Add(warning?.DeepClone()); }
-        return new(JsonSerializer.SerializeToElement(values, PackJson.Options), plugins, warnings, JsonSerializer.SerializeToElement(trace, PackJson.Options));
+        return new(JsonSerializer.SerializeToElement(values, PackJson.Options), plugins, warnings, JsonSerializer.SerializeToElement(trace, PackJson.Options))
+        { StateRevision = revision, Enabled = enabled };
     }
 }

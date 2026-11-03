@@ -8,19 +8,21 @@ namespace EplanMcp.Host.Packs;
 /// <summary>Reads only explicitly configured resources of an exact installed plugin; gaps remain warnings.</summary>
 internal sealed class PluginConfigurationReader(PackLibrary packs)
 {
-    public async Task<(IReadOnlyList<ConfigDocument> Schemas, IReadOnlyList<ConfigDocument> Layers, IReadOnlyList<string> Warnings)> ReadAsync(
+    public async Task<(IReadOnlyList<ConfigDocument> Schemas, IReadOnlyList<ConfigDocument> Layers, IReadOnlyList<string> Warnings, PackManifest? Manifest)> ReadAsync(
         PluginIdentity plugin, CancellationToken cancellationToken)
     {
         var schemas = new Dictionary<string, ConfigDocument>(StringComparer.Ordinal);
         var layers = new List<ConfigDocument>();
         var warnings = new List<string>();
         string identity = $"{plugin.Id}@{plugin.Version}";
+        PackManifest? available = null;
         try
         {
             string folder = new PlanPaths(packs.Locations.Root).Check(packs.Installed.FolderOf(plugin.Id, plugin.Version));
             (PackManifest? manifest, _, IReadOnlyList<PackProblem> problems) = await PackVerifier.ReadManifestAsync(folder, cancellationToken).ConfigureAwait(false);
             if (manifest is null || problems.Count > 0 || manifest.Id != plugin.Id || manifest.Version != plugin.Version)
             { throw new PackFormatException("The exact installed manifest is unavailable or invalid."); }
+            available = manifest;
             var loaded = new Dictionary<string, ConfigDocument?>(StringComparer.Ordinal);
             IEnumerable<string> references = (manifest.Configuration.Base?.Resources ?? []).Concat(manifest.Configuration.Company?.Resources ?? [])
                 .Concat(manifest.Configuration.CabinetTypes.SelectMany(scope => scope.Resources));
@@ -71,7 +73,7 @@ internal sealed class PluginConfigurationReader(PackLibrary packs)
         }
         catch (Exception ex) when (Unreadable(ex))
         { warnings.Add($"{identity}: exact installed plugin data is missing, unreadable or invalid."); }
-        return ([.. schemas.Values], layers, warnings);
+        return ([.. schemas.Values], layers, warnings, available);
     }
 
     internal static bool Unreadable(Exception ex) => ex is IOException or UnauthorizedAccessException or SecurityException or PackFormatException;
