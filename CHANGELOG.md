@@ -18,7 +18,7 @@
 
 ### 破坏性变化
 
-0.5.0 按 ADR-0049 / MIG-02 分组迁移写入默认值；本批省略或传 `dry_run: true` 均只预览，不请求审批、不修改项目或文件，返回 `execution: not_started` 与执行提示。执行须显式传 `dry_run: false`，审批、读回和撤销规则不变；尚未迁移的工具暂保留原默认值，`eplan_plan_apply` 输入已审阅计划，保持现有执行语义。
+0.5.0 按 ADR-0049 / MIG-02 完成下表 38 个工具的默认值迁移；省略或传 `dry_run: true` 均只预览，不请求审批、不修改项目或文件，返回 `execution: not_started` 与执行提示。执行须显式传 `dry_run: false`，审批、读回和撤销规则不变；`eplan_plan_apply` 输入已审阅计划，作为例外，保持现有执行语义。
 
 | 工具 | 旧：省略 `dry_run` | 新：省略 `dry_run` | 执行方式 |
 |---|---|---|---|
@@ -60,6 +60,7 @@
 | `eplan_api_try` | 执行（含读取 API） | 预览 | `dry_run: false` |
 | `eplan_project_create` | 执行 | 预览 | `dry_run: false` |
 | `eplan_cabinet_bind` | 执行 | 预览 | `dry_run: false` |
+| `eplan_plan_apply` | 申请执行已审计划 | 保持申请执行已审计划（例外） | 省略或 `dry_run: false`；true 仅重核预览 |
 
 ### Fixed
 - 写操作异常缺少执行状态且没有回滚证据时，报告 `OUTCOME_UNKNOWN` / `unknown`，保留已证实回滚的结果，避免误报为已回滚并引发重试。

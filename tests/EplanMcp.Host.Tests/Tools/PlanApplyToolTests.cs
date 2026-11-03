@@ -30,6 +30,7 @@ public sealed class PlanApplyToolTests
         Tool apply = options.ToolCollection!.Single(t => t.ProtocolTool.Name == PlanApplyTools.ApplyTool).ProtocolTool;
         Assert.Equal((false, true, false, false), (apply.Annotations!.ReadOnlyHint, apply.Annotations.DestructiveHint, apply.Annotations.IdempotentHint, apply.Annotations.OpenWorldHint));
         Assert.Equal("Apply plan", apply.Title);
+        Assert.False(apply.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
         PlanArgumentCheck input = PlanArguments.Check(JsonSerializer.SerializeToElement(new
         {
             project = "Line1",

@@ -17,7 +17,7 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `plan_id` | string，非空 | 是 | — | 编译返回的 ID；目标项目已显式固定，不使用当前项目或当前选择 |
-| `dry_run` | boolean | 否 | false | 重新核对并返回变更预览；不审批、不备份、不创建目录、不消耗计划 |
+| `dry_run` | boolean | 否 | false | ADR-0049 例外：输入已审阅计划，省略仍申请执行；true 仅重新核对并返回变更预览，不审批、不备份、不创建目录、不消耗计划 |
 | `wait_seconds` | integer，0–110 | 否 | 90 | 非 dry-run 时等待终态的窗口；到时未完成返回任务 ID，任务继续；0 立即返回任务回执 |
 
 schema 为对象，`additionalProperties: false`，范围/默认值写入 schema。不接收 planHash、步骤、审批回答、目标路径或 backup 路径替换；本期不提供 `resume`，传入即 INVALID_ARGUMENT，剩余意图须重新编译、重新审批（D05）。
