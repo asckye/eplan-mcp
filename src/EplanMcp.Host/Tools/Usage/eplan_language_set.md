@@ -6,21 +6,23 @@ Read the project's languages without changing anything:
 
 Show English and Chinese on the pages, English first:
 
-    {"project": "Line1", "display": ["en_US", "zh_CN"]}
+    {"project": "Line1", "display": ["en_US", "zh_CN"], "dry_run": false}
 
 Add Swedish to the translation languages and show it:
 
-    {"project": "Line1", "add": ["sv_SE"], "display": ["sv_SE"]}
+    {"project": "Line1", "add": ["sv_SE"], "display": ["sv_SE"], "dry_run": false}
 
 Set the source language to German, the language the texts are written in:
 
-    {"project": "Line1", "source": "de_DE"}
+    {"project": "Line1", "source": "de_DE", "dry_run": false}
 
 Set the displayed languages back to not set, as `before` showed them:
 
-    {"project": "Line1", "display": ["##_##"]}
+    {"project": "Line1", "display": ["##_##"], "dry_run": false}
 
 ## Workflow
+
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
 
 1. Language codes have the form `xx_YY`, as EPLAN writes them: `de_DE`, `en_US`, `zh_CN`. A dry run returns the translation languages, the displayed languages and the source language now in `before`.
 2. `display` sets which languages the pages show, in order; each must be a translation language of the project or in `add`. `["##_##"]` alone clears them.
@@ -28,7 +30,7 @@ Set the displayed languages back to not set, as `before` showed them:
 4. `source` sets the source language, the one the project's texts are written in; it must be a translation language of the project or in `add`, and `##_##` clears it. EPLAN translates nothing while the source language is not set.
 5. Give at least one of them. The languages are added first, then the source language is set, then the displayed languages.
 6. The tool translates nothing; texts show a new language once they have a translation in it.
-7. Ctrl+Z in EPLAN does not undo language settings. To restore them, call this tool again with `display` set to `before.display` and `source` to `before.source`. A language added with `add` is taken out only by eplan_language_remove, which also deletes its translations.
+7. Ctrl+Z in EPLAN does not undo language settings. To restore them, call this tool again with `display` set to `before.display`, `source` to `before.source`, and `dry_run: false`. A language added with `add` is taken out only by eplan_language_remove, which also deletes its translations.
 8. Repeating a call changes nothing more; when the settings are already as asked, nothing is changed and no approval is asked.
 
 ## Fields

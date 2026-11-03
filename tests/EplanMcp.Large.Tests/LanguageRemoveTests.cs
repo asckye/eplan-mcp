@@ -41,8 +41,8 @@ public sealed class LanguageRemoveTests : IClassFixture<DestructiveHost>
         List<string> display = Codes(before, "display");
         string? language = _toAdd.FirstOrDefault(code => !translation.Contains(code));
         Assert.SkipWhen(language is null, "Every candidate language is a translation language of the copy already; copy it again (README.md).");
-        await _host.CallAsync("eplan_language_set", new() { ["project"] = _host.Writable, ["add"] = DestructiveHost.Json(new[] { language! }) });
-        Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["languages"] = DestructiveHost.Json(new[] { language! }) };
+        await _host.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = _host.Writable, ["add"] = DestructiveHost.Json(new[] { language! }) });
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["languages"] = DestructiveHost.Json(new[] { language! }) };
 
         JsonElement dryRun = await _host.CallAsync(Tool, new(args) { ["dry_run"] = true });
         Assert.Equal(("not_started", 0, JsonValueKind.Null), (dryRun.GetProperty("execution").GetString(), dryRun.GetProperty("textsAffected").GetInt32(), dryRun.GetProperty("backup").ValueKind));
@@ -62,7 +62,7 @@ public sealed class LanguageRemoveTests : IClassFixture<DestructiveHost>
         // Leave the copy as it was: EPLAN may have changed the displayed languages (A28).
         if (!displayAfter.SequenceEqual(display))
         {
-            await _host.CallAsync("eplan_language_set", new() { ["project"] = _host.Writable, ["display"] = DestructiveHost.Json(display.ToArray()) });
+            await _host.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = _host.Writable, ["display"] = DestructiveHost.Json(display.ToArray()) });
         }
     }
 
@@ -72,7 +72,7 @@ public sealed class LanguageRemoveTests : IClassFixture<DestructiveHost>
         JsonElement before = await SettingsAsync();
         List<string> translation = Codes(before, "translation");
         Assert.SkipWhen(!translation.Contains("sv_SE"), "sv_SE was removed from this copy by an earlier run; copy the sample project again to run this test (README.md).");
-        Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["languages"] = DestructiveHost.Json(_swedish) };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["languages"] = DestructiveHost.Json(_swedish) };
         int texts = (await _host.CallAsync(Tool, new(args) { ["dry_run"] = true })).GetProperty("textsAffected").GetInt32();
 
         // S23 counted 460 on the sample project. Other write tests change the count: inserted macros add texts, and

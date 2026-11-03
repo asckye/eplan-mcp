@@ -34,14 +34,14 @@ internal sealed class LanguageDestructiveTools
         OutputSchemaType = typeof(LanguageRemoveResult))]
     [Description(
         "Removes translation languages from an EPLAN project with all their translations in its texts; EPLAN may change " +
-        "the displayed languages too. Always needs the engineer's approval, in scratch too; the project is backed up " +
+        "the displayed languages too. Omit/true previews; false needs the engineer's approval, in scratch too; the project is backed up " +
         "first. Example: {\"project\": \"Line1\", \"languages\": [\"sv_SE\"]}. Setting languages is eplan_language_set.")]
     public static async Task<CallToolResult> LanguageRemoveAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
         [Description("From eplan_project_list")] string project,
         [Description("1-10 codes, e.g. sv_SE")] string[] languages,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         // The codes, and that each is a translation language and not the source language, are checked by the Bridge.
@@ -96,6 +96,10 @@ internal sealed class LanguageDestructiveTools
         LanguageSetResult.LanguagesEntry before = data is null ? LanguageWriteTools.Entry(details, "translation", "display", "source") : LanguageWriteTools.Entry(data.Before);
         LanguageSetResult.LanguagesEntry? after = data is null ? null : LanguageWriteTools.Entry(data.After);
         var hints = new List<string>();
+        if (dryRun)
+        {
+            hints.Add(WriteToolDefaults.ExecutionHint);
+        }
         if (after is not null && !after.Display.SequenceEqual(before.Display, StringComparer.Ordinal))
         {
             hints.Add($"EPLAN also changed the displayed languages to {string.Join(", ", after.Display)}; use eplan_language_set to change them back.");
@@ -121,6 +125,8 @@ internal sealed class LanguageDestructiveTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Removed = removed,
             TextsAffected = texts,
             Before = before,

@@ -20,11 +20,12 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array of string，1–200 项 | 否 | 整个项目 | 只翻译这些页上的对象，页名同 `eplan_page_list` 的 `name` |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回规划（源语言、翻译语言、可能被补全的文本数），不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 为 true 时只返回规划（源语言、翻译语言、可能被补全的文本数），不请求审批，也不修改项目 |
 
-- 译进哪些语言由项目的翻译语言决定，不能另选：`Translate.TranslateObjects` 没有语言参数。要加语言，先用 `eplan_language_set` 的 `add`。
+- 译进哪些语言由项目的翻译语言决定，不能另选：`Translate.TranslateObjects` 没有语言参数。要加语言，先用 `eplan_language_set` 的 `add`，并显式传 `dry_run: false` 执行。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 `structuredContent`：
 - `source`：项目的源语言；`languages`：项目的翻译语言；
 - `textsChecked`：检查过的文本数；`textsMissing`：规划时有源语言文本、缺少翻译语言的文本数（"可能被补全"的）；`textsChanged`：被改动的文本数（读回时存储值变了的）；

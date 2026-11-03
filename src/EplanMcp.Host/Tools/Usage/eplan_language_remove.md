@@ -6,18 +6,20 @@ See first how many texts have Swedish translations:
 
 Then remove Swedish:
 
-    {"project": "Line1", "languages": ["sv_SE"]}
+    {"project": "Line1", "languages": ["sv_SE"], "dry_run": false}
 
 Remove two languages at once:
 
-    {"project": "Line1", "languages": ["sv_SE", "fi_FI"]}
+    {"project": "Line1", "languages": ["sv_SE", "fi_FI"], "dry_run": false}
 
 ## Workflow
 
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
+
 1. Language codes have the form `xx_YY`, e.g. `sv_SE`. Each must be a translation language of the project and not its source language; eplan_language_set with `dry_run: true` shows the translation languages in `before`.
 2. Call with `dry_run: true` when unsure: it gives `textsAffected`, the function texts and page descriptions with a translation in these languages, without asking anybody or changing anything.
-3. Without `dry_run`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is removed (BACKUP_FAILED).
-4. Every translation in these languages is deleted, and EPLAN may change the displayed languages as well: check `after.display`, and set them again with eplan_language_set.
+3. With `dry_run: false`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is removed (BACKUP_FAILED).
+4. Every translation in these languages is deleted, and EPLAN may change the displayed languages as well: check `after.display`, and set them again with eplan_language_set and `dry_run: false`.
 5. Ctrl+Z in EPLAN may bring the translations back without the language settings; the backup copy has both and can be opened in EPLAN.
 6. The call is not idempotent: repeated, the languages are gone and it returns INVALID_ARGUMENT. Never repeat a call that ended in OUTCOME_UNKNOWN.
 

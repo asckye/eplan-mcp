@@ -36,7 +36,7 @@ internal sealed class ProjectDestructiveTools
         OutputSchemaType = typeof(ProjectTranslateResult))]
     [Description(
         "Translates the texts of an EPLAN project, or of some pages, from its source language into all its translation " +
-        "languages with EPLAN's translation database. Needs a source language: set it with eplan_language_set. Always " +
+        "languages with EPLAN's translation database. Needs a source language: set it with eplan_language_set. Omit/true previews; false " +
         "needs the engineer's approval, in scratch too; the project is backed up first. Example: {\"project\": \"Line1\", " +
         "\"pages\": [\"=GAA+A1&EFS1/1\"]}.")]
     public static async Task<CallToolResult> ProjectTranslateAsync(
@@ -44,7 +44,7 @@ internal sealed class ProjectDestructiveTools
         IProgress<ProgressNotificationValue> progress,
         [Description("From eplan_project_list")] string project,
         [Description("1-200 full page names; default: all")] string[]? pages = null,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         // The page names and the languages are checked by the Bridge, all at once.
@@ -101,6 +101,8 @@ internal sealed class ProjectDestructiveTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = unchanged ? ExecutionState.NotStarted : outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Source = ResultShaper.CleanText(data?.Source ?? details.GetValueOrDefault("source")) ?? string.Empty,
             Languages = data is null ? Lines(details.GetValueOrDefault("languages")) : ResultShaper.CleanTexts(data.Languages),
             TextsChecked = data?.TextsChecked ?? Number(details.GetValueOrDefault("textsChecked")),
@@ -131,6 +133,10 @@ internal sealed class ProjectDestructiveTools
     private static string? Hint(WriteOutcome<ProjectTranslateData> outcome, ProjectTranslateResult result)
     {
         var hints = new List<string>();
+        if (result.DryRun)
+        {
+            hints.Add(WriteToolDefaults.ExecutionHint);
+        }
         if (outcome.Plan.Changes.Count == 0)
         {
             hints.Add("Every text with a text in the source language has all the translation languages. To translate into another language, add it with eplan_language_set.");

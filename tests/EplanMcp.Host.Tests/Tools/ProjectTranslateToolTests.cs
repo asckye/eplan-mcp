@@ -15,6 +15,7 @@ namespace EplanMcp.Host.Tests.Tools;
 /// differs, the approval and the backup; S23 r2 translated the German "Motor" into 19 languages (api-notes A28).
 /// </summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class ProjectTranslateToolTests : IDisposable
 {
     private const string Scope = "the project: 37 of 497 texts miss a translation language; from de_DE into 2 languages";
@@ -75,6 +76,84 @@ public sealed class ProjectTranslateToolTests : IDisposable
         Assert.Equal("Dry run: would translate from de_DE into the project's 3 languages; 37 of 497 texts miss a translation language. Nothing was changed.", WriteToolHarness.Text(result, 0));
         Assert.Empty(_dialog.Questions);
         Assert.Empty(_harness.Bridge.Writes);
+    }
+
+    [Fact]
+    public async Task McpDefaultAndTruePreview_FalsePreservesExecution()
+    {
+        Func<object?, object> originalPlan = _harness.Bridge.Handlers[OperationNames.ProjectTranslatePlan];
+        _harness.Bridge.Handlers[OperationNames.ProjectTranslatePlan] = input =>
+        {
+            WritePlan result = Assert.IsType<WritePlan>(originalPlan(input));
+            foreach (PlannedChange change in result.Changes)
+            {
+                change.Name += "\u0007\u202e";
+                change.Property = change.Property is null ? null : change.Property + "\u0007\u202e";
+                change.OldValue = change.OldValue is null ? null : change.OldValue + "\u0007\u202e";
+                change.NewValue = change.NewValue is null ? null : change.NewValue + "\u0007\u202e";
+            }
+
+            return result;
+        };
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            Tool definition = Assert.Single(await client.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken), item => item.Name == ProjectDestructiveTools.TranslateTool).ProtocolTool;
+            Assert.True(definition.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+            JsonElement? omitted = null;
+            foreach (bool? dryRun in new bool?[] { null, true, false })
+            {
+                _harness.Bridge.Calls.Clear();
+                _harness.Bridge.Writes.Clear();
+                _dialog.Questions.Clear();
+                var args = new Dictionary<string, object?> { ["project"] = "Line1" };
+                if (dryRun.HasValue)
+                {
+                    args["dry_run"] = dryRun.Value;
+                }
+
+                JsonElement actual = WriteToolHarness.Structured(await client.CallToolAsync(ProjectDestructiveTools.TranslateTool, args, cancellationToken: TestContext.Current.CancellationToken));
+                bool preview = dryRun != false;
+                Assert.Equal(preview, actual.GetProperty("dryRun").GetBoolean());
+                Assert.Equal(preview ? ExecutionState.NotStarted : ExecutionState.Committed, actual.GetProperty("execution").GetString());
+                Assert.Equal("f1", actual.GetProperty("fingerprint").GetString());
+                Assert.NotEmpty(actual.GetProperty("changes").EnumerateArray());
+                Assert.InRange(ResultShaper.ResultTokens(actual.GetRawText()), 1, ResultShaper.DefaultTokenBudget);
+                foreach (JsonElement change in actual.GetProperty("changes").EnumerateArray())
+                {
+                    foreach (JsonProperty field in change.EnumerateObject())
+                    {
+                        if (field.Value.ValueKind == JsonValueKind.String)
+                        {
+                            Assert.DoesNotContain('\u0007', field.Value.GetString()!);
+                            Assert.DoesNotContain('\u202e', field.Value.GetString()!);
+                        }
+                    }
+                }
+
+                if (preview)
+                {
+                    Assert.Empty(_dialog.Questions);
+                    Assert.Empty(_harness.Bridge.Writes);
+                    Assert.DoesNotContain(_harness.Bridge.Calls, call => call.Operation == OperationNames.ProjectTranslateExecute);
+                    Assert.False(Directory.Exists(_harness.Locations.Audit));
+                    Assert.False(Directory.Exists(_harness.Locations.Backups));
+                    Assert.Contains("dry_run: false", actual.GetProperty("hint").GetString(), StringComparison.Ordinal);
+                    if (omitted.HasValue)
+                    {
+                        Assert.Equal(omitted.Value.GetRawText(), actual.GetRawText());
+                    }
+
+                    omitted = actual.Clone();
+                }
+                else
+                {
+                    Assert.Single(_dialog.Questions);
+                    Assert.Single(_harness.Bridge.Writes);
+                    Assert.Contains(_harness.Bridge.Calls, call => call.Operation == OperationNames.ProjectTranslateExecute);
+                    Assert.Equal(37, actual.GetProperty("textsChanged").GetInt32());
+                }
+            }
+        });
     }
 
     [Fact]

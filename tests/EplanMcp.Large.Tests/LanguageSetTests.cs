@@ -31,15 +31,15 @@ public sealed class LanguageSetTests(LiveEplan eplan)
         if (display.SequenceEqual(["en_US", "zh_CN"]))
         {
             // An earlier run stopped halfway: clear them first, so the change below is one.
-            await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["display"] = Json(["##_##"]) });
+            await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["display"] = Json(["##_##"]) });
             display = ["##_##"];
         }
 
         var clock = Stopwatch.StartNew();
-        JsonElement set = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["display"] = Json(["en_US", "zh_CN"]) });
+        JsonElement set = await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["display"] = Json(["en_US", "zh_CN"]) });
         double seconds = clock.Elapsed.TotalSeconds;
-        JsonElement again = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["display"] = Json(["en_US", "zh_CN"]) });
-        JsonElement restored = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["display"] = Json([.. display]) });
+        JsonElement again = await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["display"] = Json(["en_US", "zh_CN"]) });
+        JsonElement restored = await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["display"] = Json([.. display]) });
         JsonElement after = await Settings(project);
 
         Assert.Equal(("committed", JsonValueKind.Null), (set.GetProperty("execution").GetString(), set.GetProperty("undo").ValueKind));
@@ -62,8 +62,8 @@ public sealed class LanguageSetTests(LiveEplan eplan)
         string? language = _toAdd.FirstOrDefault(code => !translation.Contains(code));
         Assert.SkipWhen(language is null, "Every candidate language is a translation language of the copy already; copy it again (README.md).");
 
-        JsonElement added = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["add"] = Json([language!]) });
-        JsonElement again = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["add"] = Json([language!]) });
+        JsonElement added = await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["add"] = Json([language!]) });
+        JsonElement again = await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["add"] = Json([language!]) });
 
         Assert.Equal("committed", added.GetProperty("execution").GetString());
         Assert.Equal(translation.Append(language!).Order(StringComparer.Ordinal), Codes(added.GetProperty("after"), "translation").Order(StringComparer.Ordinal));
@@ -84,15 +84,15 @@ public sealed class LanguageSetTests(LiveEplan eplan)
         if (source == "de_DE")
         {
             // An earlier run stopped halfway: clear it first, so the change below is one.
-            await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["source"] = "##_##" });
+            await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["source"] = "##_##" });
             source = "##_##";
         }
 
         var clock = Stopwatch.StartNew();
-        JsonElement set = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["source"] = "de_DE" });
+        JsonElement set = await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["source"] = "de_DE" });
         double seconds = clock.Elapsed.TotalSeconds;
-        JsonElement again = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["source"] = "de_DE" });
-        JsonElement restored = await eplan.CallAsync("eplan_language_set", new() { ["project"] = project, ["source"] = source });
+        JsonElement again = await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["source"] = "de_DE" });
+        JsonElement restored = await eplan.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["source"] = source });
         JsonElement after = await Settings(project);
 
         // S23 r2 set de_DE and wrote ##_## back with SetStringSetting (api-notes A28); the other settings stay.
@@ -111,7 +111,7 @@ public sealed class LanguageSetTests(LiveEplan eplan)
         List<string> translation = Codes(await Settings(project), "translation");
         string missing = _notTranslated.First(code => !translation.Contains(code));
 
-        JsonElement error = await eplan.ErrorAsync("eplan_language_set", new() { ["project"] = project, ["display"] = Json([missing]) });
+        JsonElement error = await eplan.ErrorAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = project, ["display"] = Json([missing]) });
 
         Assert.Equal(("INVALID_ARGUMENT", "not_started"), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
         Assert.Equal(translation, error.GetProperty("metadata").GetProperty("candidates").GetString()!.Split('\n'));

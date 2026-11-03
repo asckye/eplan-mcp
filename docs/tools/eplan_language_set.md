@@ -18,7 +18,7 @@
 | `display` | array of string，1–10 项 | 否 | — | 图上显示的语言，按顺序，如 `["en_US", "zh_CN"]`；每种都必须是项目的翻译语言。只给 `["##_##"]` 时清除显示语言（恢复为未设置） |
 | `add` | array of string，1–10 项 | 否 | — | 加入翻译语言的语言，如 `["en_US"]`；已有的语言忽略 |
 | `source` | string | 否 | — | 项目的源语言，即文本原本所用的语言，如 `de_DE`；必须是项目的翻译语言。给 `##_##` 时清除。**不设源语言，`eplan_project_translate` 什么也不会翻译**（S23 r2） |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回前后的语言设置，不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 为 true 时只返回前后的语言设置，不请求审批，也不修改项目 |
 
 - `display`、`add`、`source` 至少给一个；先加语言，再设源语言，最后设显示语言。
 - `source`（2026-10-21 补充，S23 r2）：写项目设置 `TRANSLATEGUI.SOURCE_LANGUAGE`（`ProjectSettings.SetStringSetting`），与显示语言一样不被 `SafetyPoint` 回滚，失败时由工具写回原值。2026-10-21 已实现，待实机验证。
@@ -26,6 +26,7 @@
 - `["##_##"]` 是为了能用 `before` 的值恢复原样：示例项目的显示语言就是 `##_##`（A28），没有它，这个工具无法把显示语言改回未设置。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 ```json
 {
   "project": "Line1",

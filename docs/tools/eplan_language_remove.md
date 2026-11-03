@@ -16,9 +16,10 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `languages` | array of string，1–10 项 | 是 | — | 要删除的语言，如 `["sv_SE"]`；必须是项目的翻译语言，不能是源语言 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要删除的语言和受影响的文本数，不请求审批，不备份，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 为 true 时只返回将要删除的语言和受影响的文本数，不请求审批，不备份，也不修改项目 |
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 ```json
 {
   "project": "Line1",

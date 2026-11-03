@@ -26,7 +26,7 @@ internal sealed class LanguageWriteTools
 
     private const string Unset = "##_##";
 
-    private const string RestoreHint = "Language settings are not undone by Ctrl+Z; call this tool again with the 'before' values to restore them.";
+    private const string RestoreHint = "Language settings are not undone by Ctrl+Z; call this tool again with the 'before' values and dry_run: false to restore them.";
 
     [McpServerTool(
         Name = SetTool,
@@ -38,10 +38,9 @@ internal sealed class LanguageWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(LanguageSetResult))]
     [Description(
-        "Sets the languages an EPLAN project's pages show, adds translation languages, or sets the source language its " +
-        "texts are in; translates nothing. Ctrl+Z does not undo it: call again with the 'before' values. Outside scratch " +
-        "the engineer approves it. Example: {\"project\": \"Line1\", \"display\": [\"en_US\", \"zh_CN\"]}. Removing a " +
-        "language: eplan_language_remove.")]
+        "Sets displayed or source languages and adds translation languages; translates no text. " +
+        "Omit/true previews; false executes, with approval outside scratch. Ctrl+Z does not undo settings; restore with before values and dry_run:false. " +
+        "Example: {\"project\":\"Line1\",\"display\":[\"en_US\",\"zh_CN\"]}. Remove: eplan_language_remove.")]
     public static async Task<CallToolResult> LanguageSetAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
@@ -49,7 +48,7 @@ internal sealed class LanguageWriteTools
         [Description("1-10 codes to show, in order; ##_## alone clears")] string[]? display = null,
         [Description("1-10 codes to add, e.g. en_US")] string[]? add = null,
         [Description("Source language, e.g. de_DE; ##_## clears")] string? source = null,
-        [Description("Only return before and after")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         // The codes, and that the displayed and source ones are translation languages, are checked by the Bridge, all at once.
@@ -122,6 +121,10 @@ internal sealed class LanguageWriteTools
         bool nothing = outcome.Plan.Changes.Count == 0;
         List<string> added = [.. after.Translation.Except(before.Translation, StringComparer.Ordinal)];
         var hints = new List<string>();
+        if (dryRun)
+        {
+            hints.Add(WriteToolDefaults.ExecutionHint);
+        }
         if (nothing)
         {
             hints.Add("The project already has these language settings.");
@@ -156,6 +159,8 @@ internal sealed class LanguageWriteTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Before = before,
             After = after,
             Recovered = outcome.Recovered,

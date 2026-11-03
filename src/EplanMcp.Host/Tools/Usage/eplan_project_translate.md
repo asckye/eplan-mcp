@@ -6,14 +6,16 @@ See what translating the whole project would do, without asking or changing anyt
 
 Translate two pages and the functions on them:
 
-    {"project": "Line1", "pages": ["=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2"]}
+    {"project": "Line1", "pages": ["=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2"], "dry_run": false}
 
 ## Workflow
 
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
+
 1. Read the languages first with eplan_language_set and `dry_run: true`: `before.source` is the source language, the one the texts are written in, and `before.translation` the languages translated into.
-2. EPLAN translates nothing while the source language is `##_##`. Set it with eplan_language_set `source`, e.g. `de_DE`; add the languages to translate into with its `add`. This tool translates into all of them; it cannot pick one.
+2. EPLAN translates nothing while the source language is `##_##`. Set it with eplan_language_set `source`, e.g. `de_DE`; add the languages to translate into with its `add` and `dry_run: false`. This tool translates into all of them; it cannot pick one.
 3. Call with `dry_run: true`: `textsMissing` counts the texts with a text in the source language that miss a translation language. When none does, nothing is asked or changed.
-4. Call without `dry_run`. The engineer approves every call, in scratch too, and the project is backed up first (`backup`). Existing translations may be rewritten from the translation database too.
+4. Call with `dry_run: false`. The engineer approves every call, in scratch too, and the project is backed up first (`backup`). Existing translations may be rewritten from the translation database too.
 5. `stillMissing` counts the texts the translation database has no entry for. Export them with eplan_export_untranslated for the engineer to translate, then translate again once the database has them.
 
 ## Fields

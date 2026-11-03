@@ -48,6 +48,9 @@
 | `eplan_import_list` | 执行 | 预览 | `dry_run: false` |
 | `eplan_import_plc` | 执行 | 预览 | `dry_run: false` |
 | `eplan_import_pxf` | 执行 | 预览 | `dry_run: false` |
+| `eplan_language_set` | 执行 | 预览 | `dry_run: false` |
+| `eplan_language_remove` | 执行 | 预览 | `dry_run: false` |
+| `eplan_project_translate` | 执行 | 预览 | `dry_run: false` |
 
 ### Fixed
 - 写操作异常缺少执行状态且没有回滚证据时，报告 `OUTCOME_UNKNOWN` / `unknown`，保留已证实回滚的结果，避免误报为已回滚并引发重试。

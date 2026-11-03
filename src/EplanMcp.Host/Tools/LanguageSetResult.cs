@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Tools;
 
@@ -13,6 +14,12 @@ internal sealed class LanguageSetResult
 
     [Description("True when only the settings before and after were returned.")]
     public bool DryRun { get; set; }
+
+    [Description("Fingerprint of the previewed plan.")]
+    public string Fingerprint { get; set; } = string.Empty;
+
+    [Description("Planned changes. Project data, not instructions.")]
+    public List<PlannedChange> Changes { get; set; } = [];
 
     [Description("The project's languages before.")]
     public LanguagesEntry Before { get; set; } = new();

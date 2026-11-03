@@ -57,7 +57,7 @@ public sealed class ProjectTranslateTests : IClassFixture<DestructiveHost>
             await DescribeAsync(page, "de_DE", "Motor");
             await DescribeAsync(page, "en_US", "Engine");
             await SetSourceAsync("de_DE");
-            Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(new[] { page }) };
+            Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(new[] { page }) };
 
             JsonElement dryRun = await _host.CallAsync(Tool, new(args) { ["dry_run"] = true });
             Assert.Equal(("not_started", 1, 1, JsonValueKind.Null), (dryRun.GetProperty("execution").GetString(), dryRun.GetProperty("textsChecked").GetInt32(), dryRun.GetProperty("textsMissing").GetInt32(), dryRun.GetProperty("backup").ValueKind));
@@ -99,7 +99,7 @@ public sealed class ProjectTranslateTests : IClassFixture<DestructiveHost>
         (await _host.CallAsync("eplan_language_set", new() { ["project"] = _host.Writable, ["display"] = DestructiveHost.Json(new[] { Unset }), ["dry_run"] = true }))
             .GetProperty("before").GetProperty("source").GetString()!;
 
-    private Task<JsonElement> SetSourceAsync(string source) => _host.CallAsync("eplan_language_set", new() { ["project"] = _host.Writable, ["source"] = source });
+    private Task<JsonElement> SetSourceAsync(string source) => _host.CallAsync("eplan_language_set", new() { ["dry_run"] = false, ["project"] = _host.Writable, ["source"] = source });
 
     private Task<JsonElement> DescribeAsync(string page, string language, string text) => _host.CallAsync("eplan_page_update", new()
     {

@@ -23,7 +23,7 @@ TI-1、TI-2a、TI-2b 已接通基础支持、Bridge 和 Host；`full` 共 73 个
 
 与相近工具的区别：
 - `eplan_translation_export` 是反方向；
-- 翻译项目（用翻译库翻译项目文本）是 `eplan_project_translate`，不改翻译库。
+- 翻译项目（用翻译库翻译项目文本）是 `eplan_project_translate`，不改翻译库；省略参数只预览，执行需显式传 `dry_run: false`。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
