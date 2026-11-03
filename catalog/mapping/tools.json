@@ -5448,6 +5448,11 @@
             "name": "PlcTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcTests.cs"
+          },
+          {
+            "name": "SampleProjectInventorySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SampleProjectInventorySpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -5864,6 +5869,11 @@
             "name": "PlcDisplaySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
+            "name": "PlcOverviewSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
           },
           {
             "name": "SelectionSpikeTests",
@@ -6363,6 +6373,11 @@
             "name": "PlcDisplaySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
+            "name": "PlcOverviewSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -9603,6 +9618,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
+            "name": "PlcOverviewSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
+          },
+          {
             "name": "WriteSafetyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/WriteSafetyTests.cs"
@@ -10123,6 +10143,11 @@
             "file": "tests/EplanMcp.Large.Tests/ProjectTranslateTests.cs"
           },
           {
+            "name": "SampleProjectInventorySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SampleProjectInventorySpikeTests.cs"
+          },
+          {
             "name": "WriteSafetyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/WriteSafetyTests.cs"
@@ -10377,6 +10402,11 @@
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
+          },
+          {
+            "name": "SampleProjectInventorySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SampleProjectInventorySpikeTests.cs"
           },
           {
             "name": "WriteSafetyTests",
@@ -11393,6 +11423,11 @@
             "name": "PartAndMessageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PartAndMessageTests.cs"
+          },
+          {
+            "name": "SampleProjectInventorySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SampleProjectInventorySpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -13433,6 +13468,11 @@
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
+          },
+          {
+            "name": "SampleProjectInventorySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SampleProjectInventorySpikeTests.cs"
           }
         ],
         "operationTests": [
@@ -16073,6 +16113,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
+            "name": "PlcOverviewSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
+          },
+          {
             "name": "SymbolDescriptionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SymbolDescriptionTests.cs"
@@ -16441,6 +16486,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "SampleProjectInventorySpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SampleProjectInventorySpikeTests.cs"
           },
           {
             "name": "TerminalTests",
