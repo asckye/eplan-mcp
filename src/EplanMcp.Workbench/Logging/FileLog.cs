@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using EplanMcp.Contracts.Security;
 using Microsoft.Extensions.Logging;
 
 namespace EplanMcp.Workbench.Logging;
@@ -29,7 +30,7 @@ internal sealed class FileLog(string folder, TimeProvider clock) : ILoggerProvid
 
         DateTimeOffset now = clock.GetUtcNow();
         string message = formatter(state, exception) + (exception is null ? string.Empty : $" | {exception.GetType().Name}: {exception.Message}");
-        string line = string.Create(CultureInfo.InvariantCulture, $"{now:yyyy-MM-ddTHH:mm:ss.fffZ} {logLevel} {message.ReplaceLineEndings(" ")}{Environment.NewLine}");
+        string line = string.Create(CultureInfo.InvariantCulture, $"{now:yyyy-MM-ddTHH:mm:ss.fffZ} {logLevel} {SecretRedactor.Redact(message.ReplaceLineEndings(" "))}{Environment.NewLine}");
         try
         {
             lock (_lock)

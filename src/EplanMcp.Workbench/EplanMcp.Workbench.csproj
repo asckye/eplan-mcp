@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\EplanMcp.Contracts\Security\SecretRedactor.cs" Link="Logging\SecretRedactor.cs" />
     <ProjectReference Include="..\EplanMcp.Workbench.Protocol\EplanMcp.Workbench.Protocol.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
