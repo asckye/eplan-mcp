@@ -188,7 +188,6 @@ public sealed class DestructiveHost : IAsyncLifetime
         ["project"] = Writable,
         ["page"] = page,
         ["macro"] = MacroTests.FeedbackControl,
-        ["dry_run"] = false,
         ["x"] = 40,
         ["y"] = 280,
         ["numbering"] = "number",
