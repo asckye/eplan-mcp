@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using EplanMcp.Bridge.Core.Diagnostics;
+using EplanMcp.Contracts.Security;
 
 namespace EplanMcp.Bridge.Eplan.Hosting;
 
@@ -19,10 +20,10 @@ internal sealed class FileBridgeLog(string directory, string fileNamePrefix = "b
             var line = new StringBuilder()
                 .Append(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture))
                 .Append(" [").Append(level.ToString()).Append("] ")
-                .Append(message);
+                .Append(SecretRedactor.Redact(message));
             if (exception is not null)
             {
-                line.Append(Environment.NewLine).Append(exception);
+                line.Append(Environment.NewLine).Append(SecretRedactor.Redact(exception.ToString()));
             }
 
             line.Append(Environment.NewLine);

@@ -4,6 +4,7 @@ using Eplan.EplApi.Starter;
 using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Bridge.Core.Hosting;
 using EplanMcp.Bridge.Eplan.Hosting;
+using EplanMcp.Contracts.Security;
 
 namespace EplanMcp.Bridge.Offline;
 
@@ -29,8 +30,8 @@ internal static class Program
 
         if (problem is not null)
         {
-            Console.Error.WriteLine(problem);
-            Console.Error.WriteLine(OfflineHostOptions.Usage);
+            Console.Error.WriteLine(SecretRedactor.Redact(problem));
+            Console.Error.WriteLine(SecretRedactor.Redact(OfflineHostOptions.Usage));
             return 2;
         }
 
@@ -49,9 +50,9 @@ internal static class Program
         catch (Exception ex)
         {
             // Types and messages only: before the resolver was in place, Exception.ToString() itself failed (S15).
-            string failure = Describe(ex);
-            log.Write(BridgeLogLevel.Error, "The offline host failed: " + failure);
-            Console.Error.WriteLine("The offline host failed: " + failure);
+            string failure = SecretRedactor.Redact("The offline host failed: " + Describe(ex));
+            log.Write(BridgeLogLevel.Error, failure);
+            Console.Error.WriteLine(failure);
             return 1;
         }
     }

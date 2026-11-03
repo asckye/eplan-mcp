@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Hosting\DataLocations.cs" Link="Hosting\DataLocations.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Hosting\FileBridgeLog.cs" Link="Hosting\FileBridgeLog.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Hosting\StartupFailureLog.cs" Link="Hosting\StartupFailureLog.cs" />
     <Compile Include="..\Shared\PlacementEditFixture.cs" Link="PlacementEditFixture.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanNativePreconditions.cs" Link="Adapters\EplanNativePreconditions.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceRenamer.cs" Link="Adapters\EplanDeviceRenamer.cs" />
