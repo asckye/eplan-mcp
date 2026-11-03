@@ -2,7 +2,7 @@
 
 > **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-11-01 按 Bridge 源码 f49baa25 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
 
-**操作层 4014 组：可调用 1980（工具 1340，api_try 1701），实机验证 228**
+**操作层 4014 组：可调用 1980（工具 1340，api_try 1700），实机验证 228**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-01 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 f49baa25）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
@@ -14,7 +14,7 @@
 
 | 操作层分母 | tools | api_try | callable | refused_unsafe |
 |---:|---:|---:|---:|---:|
-| 4014 | 1340 | 1701 | 1980 | 4 |
+| 4014 | 1340 | 1700 | 1980 | 5 |
 
 - api_try 在操作层分母外还可到达 0 组，不加入可调用数或分母；原因：无。
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
@@ -73,7 +73,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 9 / 88（10.2%） | 0 | 2 |
 | `Eplan.EplApi.Base` | 268 | 69 / 268（25.7%） | 103 / 268（38.4%） | 0 | 17 |
 | `Eplan.EplApi.DataModel` | 1247 | 541 / 1247（43.4%） | 795 / 1247（63.8%） | 4 | 141 |
-| `Eplan.EplApi.DataModel.E3D` | 368 | 148 / 368（40.2%） | 270 / 368（73.4%） | 0 | 0 |
+| `Eplan.EplApi.DataModel.E3D` | 368 | 148 / 368（40.2%） | 270 / 368（73.4%） | 1 | 0 |
 | `Eplan.EplApi.DataModel.EObjects` | 83 | 45 / 83（54.2%） | 72 / 83（86.7%） | 0 | 11 |
 | `Eplan.EplApi.DataModel.Graphics` | 414 | 245 / 414（59.2%） | 312 / 414（75.4%） | 0 | 12 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
@@ -295,6 +295,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | `O:Eplan.EplApi.DataModel.MacroBox.RepresentationType` | refused | write: unsafe; 实机试执行使 EPLAN 崩溃（0xc0000409） | api-notes A77 |
 | `O:Eplan.EplApi.DataModel.Page.ConvertToGraphics` | refused | write: unsafe; 实机试执行使 EPLAN 崩溃（0xc0000409） | api-notes A77 |
 | `O:Eplan.EplApi.DataModel.Project.ProjectName` | refused | write: unsafe; 实机试执行在磁盘上给打开的项目改名，撤销不恢复，之后按原名找不到项目 | api-notes A77 |
+| `O:Eplan.EplApi.DataModel.E3D.BusBar.BarDistance` | refused | read: unsafe; 实机批量读取时 EPLAN 崩溃（0xc0000409） | api-notes A77 |
 | `N:Eplan.EplApi.RemoteClient` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |
 | `N:Eplan.EplApi.RemoteServer` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |
 | `N:Eplan.EplApi.Remoting` | excluded | not_applicable | ADR-0002；负责人决定 Q3（2026-10-21） |

@@ -225,10 +225,11 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 | `O:Eplan.EplApi.DataModel.MacroBox.RepresentationType` | write | 2026-10-31 02:59:38 | B / Pro Panel | `0xc0000409`（fail-fast） | 21 秒，`outcome_unknown` |
 | `O:Eplan.EplApi.DataModel.Page.ConvertToGraphics` | write | 2026-11-01 23:45:10 | B / Pro Panel | `0xc0000409`（fail-fast） | 25.9 秒后记录 `failed`、`PROJECT_NOT_OPEN` |
 | `O:Eplan.EplApi.DataModel.Project.ProjectName` | write | 2026-11-02 约 01:20（未崩溃） | A / Electric P8 | 无 | 13.4 秒后记录 `failed`、`PROJECT_NOT_OPEN` |
+| `O:Eplan.EplApi.DataModel.E3D.BusBar.BarDistance` | read | 2026-11-03 04:11:52 | B / Pro Panel | `0xc0000409`（fail-fast） | 批量第 3 轮停在该条目，`eplan_lost`（读取上下文配方首轮） |
 
 - `MacroBox.RepresentationType` 的 read 侧不受影响。`Page.ConvertToGraphics` 崩溃后，同轮接下来的 708 项在两个 EPLAN 实例环境下返回 `PROJECT_NOT_OPEN` 或 `SESSION_NOT_SELECTED`，实际均未试执行，不能算作失败观察。
 - `Project.ProjectName` 的 write 没有使 EPLAN 崩溃，但把打开的 scratch 副本在磁盘上改名（`LargeWrite` 变为 `LargeWrite_v`，`.elk` 与 `.edb` 都改了），撤销没有恢复；同轮之后 968 项都返回 `PROJECT_NOT_OPEN`，未实际试执行。所有写保护都按项目名和路径识别项目，所以这一侧同样拒绝。
-- 结论：以上 write 侧由 `eplan_api_try` 拒绝，并由批量验证跳过；不从覆盖分母中移除。批量记录的返回耗时不能进一步证明精确的原生崩溃延迟；原始 target/value 参数未记录在结果中，保留这一证据缺口。
+- 结论：以上 write 侧（`BusBar.BarDistance` 为 read 侧）由 `eplan_api_try` 拒绝，并由批量验证跳过；不从覆盖分母中移除。批量记录的返回耗时不能进一步证明精确的原生崩溃延迟；原始 target/value 参数未记录在结果中，保留这一证据缺口。
 
 ### A71. 页面审查 Large 失败记录（2026-11-01，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite scratch 副本）
 - **只含一条悬空 `DynamicConnectionLine` 的新页触发共享连接读取器的重复键异常。** `review_setup/dangling` 在 `(30×grid,40×grid)` 到 `(50×grid,40×grid)` 建线，随后 `page.review` 在 `EplanConnectionCreator.Read` 的字典插入中抛 `ArgumentException`，关联 ID `55086094318d4af5b9eb75c952646346`。结合夹具和代码路径，冲突来自把动态线当成普通 `SymbolReference` 按“对象身份/PinBase.Index”收集引脚；动态线应作为待检查的边，不能把它自身的端点当成终结该边的器件引脚，否则还会漏报悬空端。读取器与 `eplan_connection_create`、移动规划共享，因此这类页也会阻断后续绘图。修复在共享读取路径排除动态线的引脚，并按符号身份去重；Small 用重复索引的动态线和真实器件引脚复现。日志没有打印原生索引数值，Small 的索引值仅为复现输入。— PageReviewTests 日志（`../../.local/failures/q-review-PageReviewTests.log`，本工作区未提供该日志）、插件异常堆栈（`../../.local/failures/bridge-errors.log`，本工作区未提供该日志）；`ReviewFixture.Create`。

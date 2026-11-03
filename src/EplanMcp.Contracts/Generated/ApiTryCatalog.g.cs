@@ -6,6 +6,7 @@ public static partial class ApiTryCatalog
     public const string RefusalMessage = "This member crashed EPLAN in a live trial (api-notes A77) and is refused to protect open projects; nothing changed.";
     public static string? Refused(string group, string side) => (group, side) switch
     {
+        ("O:Eplan.EplApi.DataModel.E3D.BusBar.BarDistance", "read") => "\u5B9E\u673A\u6279\u91CF\u8BFB\u53D6\u65F6 EPLAN \u5D29\u6E83\uFF080xc0000409\uFF09",
         ("O:Eplan.EplApi.DataModel.Function.UpdateLocalTemplate", "write") => "\u5B9E\u673A\u8BD5\u6267\u884C\u4F7F EPLAN \u5D29\u6E83\uFF080xe0434352\uFF09",
         ("O:Eplan.EplApi.DataModel.MacroBox.RepresentationType", "write") => "\u5B9E\u673A\u8BD5\u6267\u884C\u4F7F EPLAN \u5D29\u6E83\uFF080xc0000409\uFF09",
         ("O:Eplan.EplApi.DataModel.Page.ConvertToGraphics", "write") => "\u5B9E\u673A\u8BD5\u6267\u884C\u4F7F EPLAN \u5D29\u6E83\uFF080xc0000409\uFF09",

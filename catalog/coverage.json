@@ -19086,6 +19086,16 @@
       "source": "api-notes A77"
     },
     {
+      "match": "O:Eplan.EplApi.DataModel.E3D.BusBar.BarDistance",
+      "status": "refused",
+      "reason": "unsafe",
+      "sides": [
+        "read"
+      ],
+      "note": "实机批量读取时 EPLAN 崩溃（0xc0000409）",
+      "source": "api-notes A77"
+    },
+    {
       "match": "N:Eplan.EplApi.RemoteClient",
       "status": "excluded",
       "reason": "not_applicable",
@@ -21491,10 +21501,10 @@
     "operation": {
       "denominator": 4014,
       "tools": 1340,
-      "apiTry": 1701,
+      "apiTry": 1700,
       "callable": 1980,
       "outsideDenominator": {},
-      "refused_unsafe": 4
+      "refused_unsafe": 5
     },
     "action": {
       "denominator": 137,
@@ -21520,7 +21530,7 @@
       {
         "scope": "Eplan.EplApi.DataModel.E3D",
         "callable": 270,
-        "refused_unsafe": 0
+        "refused_unsafe": 1
       },
       {
         "scope": "Eplan.EplApi.DataModel.EObjects",
