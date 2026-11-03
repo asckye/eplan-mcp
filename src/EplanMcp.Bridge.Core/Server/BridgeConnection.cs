@@ -38,7 +38,8 @@ internal sealed class BridgeConnection
             }
             catch (ProtocolException ex)
             {
-                _log.Write(BridgeLogLevel.Warning, "Closing a connection that broke the framing: " + ex.Message);
+                string diagnosticId = Guid.NewGuid().ToString("N");
+                _log.Write(BridgeLogLevel.Warning, $"Closing a connection that broke the framing. Diagnostic ID: {diagnosticId}. " + ex.Message);
                 return;
             }
             catch (IOException)
@@ -111,7 +112,14 @@ internal sealed class BridgeConnection
         JObject request;
         try
         {
-            request = BridgeJson.Parse(frame) as JObject ?? throw new JsonReaderException("not an object");
+            request = BridgeJson.ParseRequest(frame);
+        }
+        catch (RpcException ex)
+        {
+            string diagnosticId = Guid.NewGuid().ToString("N");
+            string message = ex.Message + $" Diagnostic ID: {diagnosticId}.";
+            _log.Write(BridgeLogLevel.Warning, message);
+            return Error(JValue.CreateNull(), ex.Code, message, new JObject { ["diagnosticId"] = diagnosticId });
         }
         catch (JsonException)
         {

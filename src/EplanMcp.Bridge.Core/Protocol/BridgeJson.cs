@@ -30,6 +30,33 @@ public static class BridgeJson
         return reader.Read() ? throw new JsonReaderException("Additional content after the JSON value.") : token;
     }
 
+    internal static JObject ParseRequest(byte[] utf8)
+    {
+        JObject request = Parse(utf8) as JObject ?? throw new JsonReaderException("not an object");
+        using var reader = new JsonTextReader(new StringReader(Encoding.UTF8.GetString(utf8)))
+        {
+            DateParseHandling = DateParseHandling.None,
+            MaxDepth = 64,
+        };
+        var members = new HashSet<string>(StringComparer.Ordinal);
+        while (reader.Read())
+        {
+            // JObject replaces duplicates, so check the original wire names; params retain their own rules.
+            if (reader.TokenType != JsonToken.PropertyName || reader.Depth != 1)
+            {
+                continue;
+            }
+
+            string name = (string)reader.Value!;
+            if (name is not ("jsonrpc" or "id" or "method" or "params") || !members.Add(name))
+            {
+                throw new RpcException(RpcException.InvalidRequest, "Invalid request: duplicate or unknown envelope member.");
+            }
+        }
+
+        return request;
+    }
+
     public static byte[] ToUtf8(JToken token) => Encoding.UTF8.GetBytes(token.ToString(Formatting.None));
 
     public static JToken FromObject(object? value) => value is null ? JValue.CreateNull() : JToken.FromObject(value, Serializer);
