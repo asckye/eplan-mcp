@@ -5,6 +5,7 @@
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
 | S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 待运行：本次禁止 EPLAN；需验证写入未知结果、真实回滚及原有写入安全回归。Small 假对象覆盖未分类异常、回滚证据、结果查询与不重放；未改 Large 断言，不宣称实机通过。 |
+| ADR-0049 P11 翻译主数据 默认预览（2026-11-03，手册 T.4） | `TranslationImportTests` | 待运行：本次禁止 EPLAN。执行调用显式传 `dry_run: false`，预览保持 true；原审批、读回、失败、备份和撤销断言保留。 |
 | ADR-0049 P10 部件主数据 默认预览（2026-11-03，手册 T.4） | `PartImportTests`、`PartSyncTests` | 待运行：本次禁止 EPLAN。执行调用显式传 `dry_run: false`，预览保持 true；原审批、读回、失败、备份和撤销断言保留。 |
 | ADR-0049 P09 项目语言 默认预览（2026-11-03，手册 T.4） | `LanguageSetTests`、`LanguageRemoveTests`、`ProjectTranslateTests` | 待运行：本次禁止 EPLAN。执行调用显式传 `dry_run: false`，预览保持 true；原审批、读回、失败、备份和撤销断言保留。 |
 | ADR-0049 P08 工程数据导入 默认预览（2026-11-03，手册 T.4） | `ImportListTests`、`ImportPlcTests`、`ImportPxfTests` | 待运行：本次禁止 EPLAN。执行调用显式传 `dry_run: false`，预览保持 true；原审批、读回、失败、备份和撤销断言保留。 |

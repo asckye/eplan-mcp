@@ -33,14 +33,14 @@ internal sealed class TranslationImportTools
     [Description(
         "Imports a UTF-16 tab-separated .txt file from the imports folder into EPLAN's translation database, shared " +
         "by every project. Adds entries and fills empty translations; existing translations are never rewritten. " +
-        "Always needs the engineer's approval, in scratch too; a .zw7 backup is made first. Cannot be undone; restore " +
+        "Omit/true previews; false needs the engineer's approval, in scratch too; a .zw7 backup is made first. Cannot be undone; restore " +
         "the backup to recover. Example: {\"file\":\"glossary.txt\",\"reference_language\":\"en_US\"}.")]
     public static async Task<CallToolResult> TranslationImportAsync(
         WritePipeline pipeline,
         ImportFiles files,
         [Description("Relative path below imports, .txt, UTF-16 with BOM, at most 50 MB")] string file,
         [Description("One language column used to match original texts, e.g. en_US")] string reference_language = "en_US",
-        [Description("Only return the validated file and its preview")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -87,6 +87,8 @@ internal sealed class TranslationImportTools
             Database = ResultShaper.CleanText(data?.Database ?? outcome.Plan.MasterData?.Database) ?? string.Empty,
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Entries = data?.Entries ?? int.Parse(details.GetValueOrDefault("entries") ?? "0", CultureInfo.InvariantCulture),
             ReferenceLanguage = ResultShaper.CleanText(data?.ReferenceLanguage ?? details.GetValueOrDefault("referenceLanguage")) ?? string.Empty,
             Added = data?.Added,
@@ -95,6 +97,7 @@ internal sealed class TranslationImportTools
             Backup = outcome.MasterDataBackup,
             AuditId = outcome.AuditId,
             Recovered = outcome.Recovered,
+            Hint = dry_run ? WriteToolDefaults.ExecutionHint : null,
             Languages = dry_run ? (details.GetValueOrDefault("languages") ?? string.Empty).Split(", ", StringSplitOptions.RemoveEmptyEntries) : null,
             Preview = dry_run ? JsonSerializer.Deserialize<List<Dictionary<string, string>>>(details.GetValueOrDefault("preview") ?? "[]", HostJson.Options) : null,
         };

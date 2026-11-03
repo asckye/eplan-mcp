@@ -6,12 +6,14 @@ Preview a glossary first:
 
 Then import it:
 
-    {"file":"glossary.txt","reference_language":"en_US"}
+    {"file":"glossary.txt","reference_language":"en_US", "dry_run": false}
 
 ## Workflow
 
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
+
 1. Available in the `full` profile. Put the file in the `imports` folder of EplanMcp's data folder and pass its relative path. Only UTF-16 (with BOM) tab-separated text up to 50 MB: the first line holds language codes, and every row needs text in the reference language column.
-2. This writes EPLAN's translation database, which every project shares. The engineer approves every call, even from a scratch project. After approval the database is backed up as `.zw7`; when the backup fails, nothing is imported. The import only adds entries and fills empty translations; existing translations are never rewritten.
+2. This writes EPLAN's translation database, which every project shares. For execution, the engineer approves every call, even from a scratch project. After approval the database is backed up as `.zw7`; when the backup fails, nothing is imported. The import only adds entries and fills empty translations; existing translations are never rewritten.
 3. `reference_language` is the column used to match existing entries (default `en_US`). The Bridge maps the file's columns onto the header of the database's own export; a language column the database does not have is refused.
 4. The database is exported before and after the import to count the result. A repeated import needs a new approval and a new backup. An import cannot be undone; only the backup restores the database.
 

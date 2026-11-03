@@ -13,7 +13,7 @@
 
 与相近工具的区别：
 - 加翻译语言、设显示语言或源语言用 `eplan_language_set`；
-- 翻译库里没有的词条，用 `eplan_export_untranslated` 导出缺失词表，交给人翻译后用 `eplan_translation_import` 导入翻译库，再用本工具翻译。
+- 翻译库里没有的词条，用 `eplan_export_untranslated` 导出缺失词表，交给人翻译后用 `eplan_translation_import` 预览，再以相同参数显式传 `dry_run: false` 导入翻译库，最后用本工具翻译。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |

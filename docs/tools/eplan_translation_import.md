@@ -30,10 +30,12 @@ TI-1、TI-2a、TI-2b 已接通基础支持、Bridge 和 Host；`full` 共 73 个
 |---|---|---|---|---|
 | `file` | string，1–260 个字符 | 是 | — | 导入目录（`<数据根目录>\imports\`）下的相对路径；`.txt`，格式同 `eplan_translation_export` 的 `tab`：UTF-16，第一行是语言代码，之后每行一个词条 |
 | `reference_language` | string | 否 | `en_US` | 按哪种语言的原文匹配已有词条，如 `en_US`；必须是文件第一行中的列，词条在这一列不能为空 |
+| `dry_run` | bool | 否 | true | 省略或 true 仅预览；执行须显式 false |
 
 - 路径规则同 `eplan_part_import`；文件不超过 50 MB。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 `structuredContent`：
 - `database`：写入的翻译库（如 `$(md_translate)\Translate.db`）；
 - `entries`：文件中的词条数；`referenceLanguage`；

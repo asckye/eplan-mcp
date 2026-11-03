@@ -46,7 +46,11 @@ public sealed class TranslationImportTests
         int reference = Array.IndexOf(before.Columns, "en_US");
         Assert.True(reference >= 0);
         Assert.DoesNotContain(before.Rows, row => row[reference] == TestEntry);
-        Dictionary<string, object?> args = new() { ["file"] = FileName };
+        Dictionary<string, object?> args = new()
+        {
+            ["dry_run"] = false,
+            ["file"] = FileName
+        };
         JsonElement dryRun = await host.CallAsync(Tool, new(args) { ["dry_run"] = true });
         Assert.Equal(1, dryRun.GetProperty("entries").GetInt32());
         Assert.Equal(JsonValueKind.Null, dryRun.GetProperty("added").ValueKind);
