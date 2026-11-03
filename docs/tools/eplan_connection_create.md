@@ -16,7 +16,7 @@
 | items | 必填 object[1..50] | wire：`{kind,from,to,points}`；节点：`{kind,position,directions}`；禁止跨分支成员。from/to 是 `{locator:{project,page,type,oid,digest},pin_index}`，索引从 0 起，locator 必须与本页当前观察一致 |
 | points / position | number[2][2..32] / number[2] | `[x_mm,y_mm]`；毫米、左下原点、y 向上；有限数、0..10,000，且受 Page.Size 限制 |
 | kind / directions | enum / enum[] | wire、corner、t_node、potential_point；节点分别需 2 个垂直方向、3 个不同方向、1 个方向；方向为 Up/Down/Left/Right |
-| variant / sort_code | 可选 integer | t_node 的 variant 按已核验的方向引脚选择 SPECIAL 变体，省略沿用原行为，不存在时 INVALID_ARGUMENT 列出可用编号；interruption_point 的 sort_code ≥ 0，在放置事务中写入属性 24809 并读回；省略不写。interruption_point 可选 `symbol`（SPECIAL 库中类型为中断点的符号名，缺省 `BPF`），变体仍按方向选择 |
+| variant / sort_code | 可选 integer | t_node 的 variant 按已核验的方向引脚选择 SPECIAL 变体，省略沿用原行为，不存在时 INVALID_ARGUMENT 列出可用编号；interruption_point 的 sort_code ≥ 0，在放置事务中写入属性 24809 并读回；省略不写。interruption_point 可选 `symbol`（SPECIAL 库中类型为中断点的符号名，缺省 `BPF`（流体）；电气图的实心箭头用 `BPOUT`（连接在箭头尖端）或 `BPIN`（连接在箭尾）），变体仍按方向选择；中断点使用符号的默认属性排列，不再额外新建 24300 交叉引用文字 |
 | interruption_point | object | `{kind:"interruption_point",name,direction,position,counterpart_pages}`；name 为共享的完整业务名（1..200 字符），direction 为 Up/Down/Left/Right，position 为电气连接点坐标；counterpart_pages 必填 1..20 个不同的精确完整页名，不隐式搜索全项目 |
 | show_page | boolean，false | 绘制前打开或聚焦主参数 `page`，便于观看；仅影响界面，不修改数据，dry-run 也开页；不打开对端页 |
 | dry_run / snap_to_grid | boolean，false / true | dry_run 只规划；执行时关闭吸附仍拒绝非栅格接线 |

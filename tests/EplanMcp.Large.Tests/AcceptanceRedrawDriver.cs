@@ -707,6 +707,9 @@ internal sealed class AcceptanceRedrawDriver(
                 var point = new Dictionary<string, object?> { ["kind"] = "interruption_point", ["name"] = Expand(p.GetProperty("name").GetString()!), ["position"] = p.GetProperty(position), ["direction"] = p.GetProperty(direction).GetString(), ["counterpart_pages"] = new[] { peer } };
                 if (p.TryGetProperty(sortKey, out JsonElement sort))
                 { point["sort_code"] = sort.GetInt64(); }
+                // D7: the customer page's filled arrows are SPECIAL BPIN/BPOUT, as EPLAN's insert command draws them.
+                if (page == Page && p.TryGetProperty("symbol", out JsonElement symbol))
+                { point["symbol"] = symbol.GetString(); }
                 return (object)point;
             }).ToList();
             var args = new Dictionary<string, object?> { ["page"] = page, ["response_format"] = "detailed", ["items"] = items };

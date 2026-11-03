@@ -195,7 +195,9 @@ internal static class AcceptanceDrawingList
         var interruptionNames = new HashSet<string>(StringComparer.Ordinal);
         Each(root, "interruption_points", "", (point, at) =>
         {
-            Object(point, at, "id name position direction", "counterpart_position counterpart_direction line_to sort_code counterpart_sort_code");
+            Object(point, at, "id name position direction", "counterpart_position counterpart_direction line_to sort_code counterpart_sort_code symbol");
+            if (point.TryGetProperty("symbol", out _))
+            { Text(point, "symbol", at); }
             bool counterpart = point.TryGetProperty("counterpart_position", out _);
             Require(counterpart == point.TryGetProperty("counterpart_direction", out _), at + "/counterpart_position", "counterpart_position and counterpart_direction are given together");
             Identity(point, at);

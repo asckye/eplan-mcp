@@ -1,7 +1,6 @@
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
-using Eplan.EplApi.DataModel.Graphics;
 using Eplan.EplApi.DataModel.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
@@ -124,7 +123,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 if (item.Row["interruption"] is { } interruption)
                 {
                     if (placed is not InterruptionPoint point)
-                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "BPF did not create an interruption point."); }
+                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The interruption symbol did not create an interruption point."); }
                     point.Name = (string)interruption["name"]!;
                     if (interruption["sort_code"] is { } sortCode)
                     {
@@ -134,19 +133,9 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     if (point.Name != (string)interruption["name"]!)
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs; supply the exact full name."); }
                 }
+                // Owner 2026-11-02: the symbol's default arrangement shows the cross-reference, as after EPLAN's insert
+                // command; an extra 24300 text switched the point to a user-defined arrangement.
                 placed.Location = new PointD((double)item.Row["position"]![0]!, (double)item.Row["position"]![1]!);
-                if (placed is InterruptionPoint)
-                {
-                    using AnyPropertyId id = 24300;
-#pragma warning disable CA2000 // A39/A55: EPLAN owns the native property placement, also on Abort.
-                    var display = new PropertyPlacement();
-#pragma warning restore CA2000
-                    display.Create(placed, id);
-                    display.Location = new PointD(4 * target.GridSize, 0);
-                    display.IsVisible = true;
-                    display.Height = 2.5;
-                    display.Justification = TextBase.JustificationType.BaseLineLeft;
-                }
                 double[][] pins = placed.GraphicalConnectionPoints.Select(p => XY(p.Location)).ToArray();
                 SymbolConnectionPoint[] expected = item.Row["symbol"]!["connectionPoints"]!.ToObject<SymbolConnectionPoint[]>()!;
                 if (!XY(placed.Location).SequenceEqual(item.Row["position"]!.Values<double>()) || placed.SymbolVariant.SymbolName != item.Variant.SymbolName

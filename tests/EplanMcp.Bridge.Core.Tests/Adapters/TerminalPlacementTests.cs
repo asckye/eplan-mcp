@@ -32,7 +32,8 @@ public sealed class TerminalPlacementTests : IDisposable
         TerminalStrip strip = Assert.Single(_page.AllPlacements.OfType<TerminalStrip>());
         Assert.Equal([72d, 120d], result.Terminal!.StripPosition!);
         Assert.Equal("Control box", result.Terminal.StripText);
-        // Customer redraw 2026-11-02: no texts are created or undocked, so the symbol's own arrangement stays in use.
+        // Customer redraw 2026-11-02: placed as SPECIAL TDEF like EPLAN's insert command; no texts are created or undocked.
+        Assert.Equal(("SPECIAL", "TDEF"), (strip.SymbolVariant.Library, strip.SymbolVariant.Name));
         Assert.Empty(strip.PropertyPlacements);
     }
 

@@ -18,14 +18,18 @@ public sealed class InterruptionVariantSpikeTests(LiveEplan eplan, WriteHost hos
         Assert.NotNull(host);
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         // EPLAN's insert command (Shift+F4) may use another SPECIAL interruption symbol than BPF; list every one.
-        var variants = new List<JsonElement>();
+        // The whole SPECIAL list also shows the strip definition symbol EPLAN's insert command uses (D10).
+        var all = new List<JsonElement>();
         string? cursor = null;
         do
         {
             JsonElement found = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = session.Project, ["library"] = "SPECIAL", ["limit"] = 200, ["cursor"] = cursor });
-            variants.AddRange(found.GetProperty("symbols").EnumerateArray().Where(s => s.GetProperty("type").GetString() == "InterruptionPoint"));
+            all.AddRange(found.GetProperty("symbols").EnumerateArray());
             cursor = found.GetProperty("nextCursor").GetString();
         } while (cursor is not null);
+        string evidence = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "eplanmcp-spikes")).FullName;
+        await File.WriteAllTextAsync(Path.Combine(evidence, "D7-special-symbols.json"), JsonSerializer.Serialize(all), TestContext.Current.CancellationToken);
+        List<JsonElement> variants = [.. all.Where(s => s.GetProperty("type").GetString() == "InterruptionPoint")];
         Assert.NotEmpty(variants);
         string page = (await session.CreatePagesAsync(1))[0];
         var output = TestContext.Current.TestOutputHelper!;
@@ -33,8 +37,12 @@ public sealed class InterruptionVariantSpikeTests(LiveEplan eplan, WriteHost hos
         {
             int variant = variants[i].GetProperty("variant").GetInt32();
             string symbol = variants[i].GetProperty("name").GetString()!;
-            JsonElement pin = Assert.Single(variants[i].GetProperty("connectionPoints").EnumerateArray());
-            output.WriteLine($"D7 {symbol} variant {variant} ({variants[i].GetProperty("description").GetString()}): {pin.GetRawText()}");
+            JsonElement[] pins = [.. variants[i].GetProperty("connectionPoints").EnumerateArray()];
+            output.WriteLine($"D7 {symbol} variant {variant} ({variants[i].GetProperty("description").GetString()}): {JsonSerializer.Serialize(pins)}");
+            // Live 2026-11-02: one SPECIAL interruption symbol has two pins (Right, Left); connection_create places one-pin points.
+            if (pins.Length != 1)
+            { continue; }
+            JsonElement pin = pins[0];
             // Columns 40 mm apart, two rows, away from the frame.
             double[] position = [60 + 40 * (i % 8), 240 - 40 * (i / 8)];
             string outcome = "placed";
@@ -55,7 +63,6 @@ public sealed class InterruptionVariantSpikeTests(LiveEplan eplan, WriteHost hos
         foreach (JsonElement item in drawings.GetProperty("items").EnumerateArray().Where(d => d.GetProperty("kind").GetString() is "InterruptionPoint" or "PropertyPlacement"))
         { output.WriteLine("D7 drawing: " + item.GetRawText()); }
         JsonElement image = await eplan.CallAsync("eplan_export_image", new() { ["project"] = session.Project, ["pages"] = new[] { page }, ["format"] = "png", ["width_px"] = 2400 });
-        string evidence = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "eplanmcp-spikes")).FullName;
         string root = image.GetProperty("directory").GetString()!;
         foreach (JsonElement file in image.GetProperty("files").EnumerateArray())
         {

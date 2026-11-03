@@ -4,7 +4,7 @@ internal sealed class TerminalStrip() : Function(2)
 {
     public Terminal[] Terminals { get; set; } = [];
     public new TerminalStripPropertyListComplete Properties { get; } = new();
-    public void Create(Page page) { Page = page; IsPlaced = true; page.AllPlacements = [.. page.AllPlacements, this]; }
+    public new void Create(Page page, MasterData.SymbolVariant variant) { base.Create(page, variant); IsPlaced = true; }
     // Unplaced definition: navigator only, never a page placement.
     public Project? DefinedIn { get; private set; }
     public void Create(Project project, MasterData.FunctionDefinition definition)

@@ -27,7 +27,14 @@ internal sealed partial class EplanDeviceSymbolPlacement
             // Acceptance trial: Create(Page) placed the strip definition at the page origin, outside the frame. An
             // unplaced definition (Create(Project, FunctionDefinition)) is listed in the navigator only.
             if (args.TerminalStripPosition is { } position)
-            { strip.Create(page); strip.Location = new PointD(position[0], position[1]); }
+            {
+                // Owner 2026-11-02: EPLAN's insert command places the definition as SPECIAL TDEF ("端子排定义") with its
+                // texts; Create(Page) left only a marker.
+                SymbolVariant? definition = project.SymbolLibraries.FirstOrDefault(l => l.Name == "SPECIAL")?.Symbols.FirstOrDefault(s => s.Name == "TDEF")?.Variants.FirstOrDefault(v => v.VariantNr == 0);
+                CheckTerminal(definition is not null, "the SPECIAL/TDEF strip definition symbol is not loaded");
+                strip.Create(page, definition!);
+                strip.Location = new PointD(position[0], position[1]);
+            }
             else
             { strip.Create(project, project.FunctionDefinitionLibrary.FunctionDefinitions.First(d => d.FunctionCategory == FunctionCategory.TerminalDefText)); }
             strip.IsMainFunction = true;
