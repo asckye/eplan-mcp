@@ -49,6 +49,9 @@ public sealed class PartsSpikeAction : IEplAction
                 case "place":
                     Place(project, input, result);
                     break;
+                case "templates-place":
+                    TemplatesPlace(project, input, result);
+                    break;
                 case "assign":
                     Assign(project, input, result);
                     break;
@@ -238,6 +241,150 @@ public sealed class PartsSpikeAction : IEplAction
         result["readbackWarnings"] = readbackWarnings;
     }
 
+    private static void TemplatesPlace(Project project, JObject input, JObject result)
+    {
+        var requests = (JArray)input["templatePlacements"]!;
+        if (requests.Count > 2)
+        { throw new ArgumentException("At most two template placements are permitted."); }
+        var warnings = new JArray();
+        var attempts = new JArray();
+        result["warnings"] = warnings;
+        result["templatePlacements"] = attempts;
+        result["templatesBefore"] = new JArray();
+        result["templatesAfter"] = new JArray();
+        string? deviceTag = null;
+        using (var scope = new TransactionScope("Parts template placement spike"))
+        {
+            try
+            {
+                Page page = project.Pages.Single(candidate => candidate.Name == (string)input["page"]!);
+                using var service = new DeviceService();
+                // HEServices XML: this overload places the main function and leaves other template functions unplaced.
+                Function[] created = service.CreateDevice((string)input["part"]!, (string?)input["variant"] ?? "", page,
+                    new PointD((double)input["x"]!, (double)input["y"]!));
+                var observations = created.Select((function, index) => ReadFunction(function, index)).ToArray();
+                result["created"] = new JArray(observations);
+                int mainIndex = Array.FindIndex(observations, observation => (bool?)observation["isMainFunction"] == true);
+                if (mainIndex < 0)
+                { mainIndex = Array.FindIndex(observations, observation => (bool?)observation["isPlaced"] == true); }
+                result["main"] = mainIndex < 0 ? null : observations[mainIndex]["name"]?.DeepClone();
+                if (mainIndex >= 0)
+                {
+                    Function main = created[mainIndex];
+                    deviceTag = (string?)observations[mainIndex]["deviceTag"];
+                    // DataModel XML: the main function exposes transient device templates through FunctionTemplates.
+                    StorableObject[] templates = ReadTemplates(main, result, "templatesBefore", warnings);
+                    JArray? before = result["templatesBefore"] as JArray;
+                    int placementIndex = 0;
+                    for (int index = 0; index < templates.Length && placementIndex < requests.Count; index++)
+                    {
+                        if (templates[index] is not Function template || before?[index] is not JObject observation
+                            || (bool?)observation["isTemplate"] != true || (bool?)observation["isCoveredTemplate"] != false)
+                        { continue; }
+                        var request = (JObject)requests[placementIndex++]!;
+                        var attemptWarnings = new JArray();
+                        var attempt = new JObject { ["index"] = index, ["request"] = request.DeepClone(), ["success"] = false, ["error"] = null, ["warnings"] = attemptWarnings };
+                        attempts.Add(attempt);
+                        SymbolVariant? symbol = null;
+                        Observe(attempt, "symbol", () => ReadSymbol(symbol = template.SymbolVariant), attemptWarnings);
+                        Observe(attempt, "symbolIsValid", () => symbol is not null && symbol.IsValid, attemptWarnings);
+                        if ((bool?)attempt["symbolIsValid"] != true)
+                        {
+                            attempt["error"] = "The template SymbolVariant is null, invalid or unreadable; placement was skipped.";
+                            continue;
+                        }
+                        try
+                        {
+                            // DataModel XML: PlaceAt instantiates a transient template; an instantiated function would be duplicated.
+                            template.PlaceAt(page, new PointD((double)request["x"]!, (double)request["y"]!), DocumentTypeManager.DocumentType.Circuit, symbol!);
+                            attempt["success"] = true;
+                        }
+                        catch (Exception error) { attempt["error"] = error.ToString(); }
+                    }
+                    GC.KeepAlive(main);
+                }
+                else
+                { warnings.Add("CreateDevice returned no main or placed function; template placement was skipped."); }
+                scope.Commit();
+                scope.CloseUndo();
+            }
+            catch { scope.Rollback(); throw; }
+        }
+        // A79: retain only the device tag across the scope and obtain fresh function wrappers for read-back.
+        var readbackWarnings = new JArray();
+        result["readbackWarnings"] = readbackWarnings;
+        JArray functions = ReadDeviceByTag(project, deviceTag, readbackWarnings);
+        result["functions"] = functions;
+        ReadMainTemplates(project, deviceTag, result, readbackWarnings);
+        result["duplicates"] = new JArray(functions.OfType<JObject>().Where(function => function["name"]?.Type == JTokenType.String)
+            .GroupBy(function => (string)function["name"]!, StringComparer.Ordinal).Where(group => group.Count() > 1)
+            .Select(group => new JObject { ["name"] = group.Key, ["isPlaced"] = new JArray(group.Select(function => function["isPlaced"]?.DeepClone())) }));
+    }
+
+    private static StorableObject[] ReadTemplates(Function function, JObject result, string field, JArray warnings)
+    {
+        StorableObject[] templates = [];
+        Observe(result, field, () =>
+        {
+            templates = function.FunctionTemplates ?? [];
+            return new JArray(templates.Select((template, index) => ReadFunction(template, index)));
+        }, warnings);
+        GC.KeepAlive(function);
+        return templates;
+    }
+
+    private static void ReadMainTemplates(Project project, string? deviceTag, JObject result, JArray warnings)
+    {
+        if (string.IsNullOrEmpty(deviceTag))
+        { return; }
+        try
+        {
+            using var finder = new DMObjectsFinder(project);
+            Function? placed = null;
+            foreach (Function function in finder.GetFunctions(null))
+            {
+                var identity = new JObject();
+                Observe(identity, "deviceTag", () => ReadDeviceTag(function), warnings);
+                if ((string?)identity["deviceTag"] != deviceTag)
+                { continue; }
+                Observe(identity, "isMainFunction", () => function.IsMainFunction, warnings);
+                if ((bool?)identity["isMainFunction"] == true)
+                {
+                    // DataModel XML: previously collected template wrappers do not receive another wrapper's coverage updates.
+                    ReadTemplates(function, result, "templatesAfter", warnings);
+                    return;
+                }
+                Observe(identity, "isPlaced", () => function.IsPlaced, warnings);
+                if ((bool?)identity["isPlaced"] == true)
+                { placed ??= function; }
+            }
+            if (placed is not null)
+            { ReadTemplates(placed, result, "templatesAfter", warnings); }
+            else
+            { warnings.Add("No fresh main or placed function was found for template read-back."); }
+        }
+        catch (Exception error) { Warn(warnings, "templatesAfter", error); }
+    }
+
+    private static string? ReadDeviceTag(Function function)
+    {
+        try
+        {
+            using FunctionPropertyList properties = function.Properties;
+            using PropertyValue device = properties.FUNC_IDENTDEVICETAG;
+            return device.IsEmpty ? null : device.ToString();
+        }
+        finally { GC.KeepAlive(function); }
+    }
+
+    private static JArray ReadDeviceByTag(Project project, string? deviceTag, JArray warnings)
+    {
+        if (!string.IsNullOrEmpty(deviceTag))
+        { return ReadDevice(project, deviceTag!, warnings, deviceTagOnly: true); }
+        warnings.Add("The device tag is empty or unreadable; device read-back is unavailable.");
+        return new JArray();
+    }
+
     private static void Assign(Project project, JObject input, JObject result)
     {
         string name = (string)input["name"]!;
@@ -256,43 +403,104 @@ public sealed class PartsSpikeAction : IEplAction
             }
             catch { scope.Rollback(); throw; }
         }
-        using var readback = new DMObjectsFinder(project);
-        Function actual = readback.GetFunctions(null).Single(function => function.IsPlaced && function.Name == name);
-        result["articleReferences"] = new JArray(actual.ArticleReferences.Select(article => new JObject { ["part"] = article.PartNr, ["variant"] = article.VariantNr, ["count"] = article.Count }));
+        var warnings = new JArray();
+        result["readbackWarnings"] = warnings;
+        result["articleReferences"] = null;
+        result["isCoveredTemplate"] = null;
+        result["templatesAfter"] = new JArray();
+        string? deviceTag = null;
+        bool found = false;
+        try
+        {
+            using var readback = new DMObjectsFinder(project);
+            foreach (Function actual in readback.GetFunctions(null))
+            {
+                var identity = new JObject();
+                Observe(identity, "isPlaced", () => actual.IsPlaced, warnings);
+                Observe(identity, "name", () => actual.Name, warnings);
+                if ((bool?)identity["isPlaced"] != true || (string?)identity["name"] != name)
+                { continue; }
+                found = true;
+                Observe(result, "articleReferences", () => new JArray(actual.ArticleReferences.Select(article =>
+                {
+                    var reference = new JObject();
+                    Observe(reference, "part", () => article.PartNr, warnings);
+                    Observe(reference, "variant", () => article.VariantNr, warnings);
+                    Observe(reference, "count", () => article.Count, warnings);
+                    return reference;
+                })), warnings);
+                Observe(result, "isCoveredTemplate", () => actual.IsCoveredTemplate, warnings);
+                Observe(identity, "deviceTag", () => ReadDeviceTag(actual), warnings);
+                deviceTag = (string?)identity["deviceTag"];
+                // DataModel XML: AddArticleReference assigns the part; coverage and generated templates are observations.
+                ReadTemplates(actual, result, "templatesAfter", warnings);
+                GC.KeepAlive(actual);
+                break;
+            }
+        }
+        catch (Exception error) { Warn(warnings, "assignedFunction", error); }
+        if (!found)
+        { warnings.Add("The assigned function could not be found for read-back."); }
+        result["functions"] = ReadDeviceByTag(project, deviceTag, warnings);
     }
 
-    private static JArray ReadDevice(Project project, string name, JArray warnings)
+    private static JArray ReadDevice(Project project, string name, JArray warnings, bool deviceTagOnly = false)
     {
         var result = new JArray();
-        using var finder = new DMObjectsFinder(project);
-        foreach (Function function in finder.GetFunctions(null))
+        try
         {
-            try
+            using var finder = new DMObjectsFinder(project);
+            foreach (Function function in finder.GetFunctions(null))
             {
-                using FunctionPropertyList properties = function.Properties;
-                using PropertyValue device = properties.FUNC_IDENTDEVICETAG;
-                if (function.Name == name || !device.IsEmpty && device.ToString() == name)
-                { result.Add(ReadFunction(function, null, properties)); }
+                FunctionPropertyList? properties = null;
+                try
+                {
+                    var identity = new JObject();
+                    Observe(identity, "name", () => function.Name, warnings);
+                    Observe(identity, "deviceTag", () =>
+                    {
+                        properties = function.Properties;
+                        using PropertyValue device = properties.FUNC_IDENTDEVICETAG;
+                        return device.IsEmpty ? null : device.ToString();
+                    }, warnings);
+                    if ((string?)identity["deviceTag"] == name || !deviceTagOnly && (string?)identity["name"] == name)
+                    { result.Add(ReadFunction(function, null, properties)); }
+                }
+                catch (Exception error) { Warn(warnings, "deviceMembership", error); }
+                finally
+                {
+                    properties?.Dispose();
+                    GC.KeepAlive(function);
+                }
             }
-            catch (Exception error) { Warn(warnings, "deviceMembership", error); }
-            finally { GC.KeepAlive(function); }
         }
+        catch (Exception error) { Warn(warnings, "functions", error); }
         return result;
     }
 
-    private static JObject ReadFunction(IFunctionBase item, int? index, FunctionPropertyList? borrowedProperties = null)
+    private static JObject ReadFunction(object? item, int? index, FunctionPropertyList? borrowedProperties = null)
     {
         var warnings = new JArray();
-        var result = new JObject { ["index"] = index, ["type"] = item.GetType().FullName, ["warnings"] = warnings };
-        Observe(result, "name", () => item.Name, warnings);
+        var result = new JObject { ["index"] = index, ["type"] = item?.GetType().FullName, ["warnings"] = warnings };
+        if (item is IFunctionBase functionBase)
+        { Observe(result, "name", () => functionBase.Name, warnings); }
         if (item is not Function function)
         {
+            if (item is Connection connection)
+            {
+                // DataModel XML: FunctionTemplates may also contain transient Connection objects.
+                Observe(result, "isTemplate", () => connection.IsTemplate, warnings);
+                Observe(result, "isCoveredTemplate", () => connection.IsCoveredTemplate, warnings);
+            }
             warnings.Add("The returned object has no two-dimensional Function members.");
+            GC.KeepAlive(item);
             return result;
         }
         Observe(result, "category", () => function.FunctionCategory.ToString(), warnings);
         Observe(result, "isMainFunction", () => function.IsMainFunction, warnings);
         Observe(result, "isPlaced", () => function.IsPlaced, warnings);
+        Observe(result, "isTemplate", () => function.IsTemplate, warnings);
+        Observe(result, "isCoveredTemplate", () => function.IsCoveredTemplate, warnings);
         Observe(result, "page", () => function.Page?.Name, warnings);
         Observe(result, "location", () => new JArray(function.Location.X, function.Location.Y), warnings);
         Observe(result, "symbol", () => ReadSymbol(function.SymbolVariant), warnings);
@@ -301,7 +509,14 @@ public sealed class PartsSpikeAction : IEplAction
         {
             FunctionPropertyList properties = borrowedProperties ?? function.Properties;
             try
-            { result["properties"] = ReadProperties(properties, warnings); }
+            {
+                Observe(result, "deviceTag", () =>
+                {
+                    using PropertyValue device = properties.FUNC_IDENTDEVICETAG;
+                    return device.IsEmpty ? null : device.ToString();
+                }, warnings);
+                result["properties"] = ReadProperties(properties, warnings);
+            }
             finally { if (borrowedProperties is null) { properties.Dispose(); } }
         }
         catch (Exception error) { Warn(warnings, "properties", error); }

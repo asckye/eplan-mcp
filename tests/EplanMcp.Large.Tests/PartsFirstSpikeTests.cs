@@ -96,7 +96,7 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
                 }, "pushbutton-place", evidence, suffix);
             }
 
-            var bare = await eplan.CallOrErrorAsync("eplan_device_place", new()
+            var bareArguments = new Dictionary<string, object?>
             {
                 ["project"] = session.Project,
                 ["page"] = page,
@@ -106,13 +106,43 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
                 ["tag"] = "-P1S" + suffix,
                 ["x"] = 280,
                 ["y"] = 180,
-            });
+            };
+            if (pushbutton is not null)
+            {
+                JsonElement first = Functions(templates, pushbutton).FirstOrDefault();
+                if (first.ValueKind == JsonValueKind.Object && first.TryGetProperty("pins", out JsonElement pins) && pins.ValueKind == JsonValueKind.Array)
+                {
+                    string[] pinNames = pins.EnumerateArray().Select(pin => pin.ValueKind == JsonValueKind.Object ? Text(pin, "name") : "").ToArray();
+                    if (pinNames.Length > 0 && pinNames.All(name => name.Length > 0))
+                    { bareArguments["connection_designations"] = pinNames; }
+                    else if (pinNames.Length > 0)
+                    { Print("bare device warning", "A template pin name could not be read; connection designations are omitted."); }
+                }
+                else
+                { Print("bare device warning", "The first pushbutton template has no readable pin inventory; connection designations are omitted."); }
+            }
+            var bare = await eplan.CallOrErrorAsync("eplan_device_place", bareArguments);
             Print("bare device", bare.Result);
             if (pushbutton is not null && bare.Succeeded)
             {
                 string name = bare.Result.GetProperty("device").GetProperty("tag").GetString()!;
                 await ProbeAsync(new { project = session.Project, page, mode = "assign", name, part = pushbutton.Part, variant = pushbutton.Variant },
                     "assign", evidence, suffix);
+            }
+
+            if (plc is not null)
+            {
+                await ProbeAsync(new
+                {
+                    project = session.Project,
+                    page,
+                    mode = "templates-place",
+                    part = plc.Part,
+                    variant = plc.Variant,
+                    x = 60,
+                    y = 240,
+                    templatePlacements = new[] { new { x = 100, y = 240 }, new { x = 140, y = 240 } }
+                }, "templates-place", evidence, suffix);
             }
 
             var exported = await eplan.CallOrErrorAsync("eplan_export_image", new() { ["project"] = session.Project, ["pages"] = new[] { page }, ["format"] = "png" });
