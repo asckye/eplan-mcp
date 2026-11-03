@@ -7,6 +7,7 @@ internal static class WriteChangeLines
 {
     public static IEnumerable<string> For(WritePlan plan) => plan.Changes.Select(c => c.Action switch
     {
+        "add" when c.Kind == "part" => ApprovalTexts.Change(c, zh: false, plan.Details),
         _ when c.Kind == "unverified API" => ApprovalTexts.Change(c, zh: false, plan.Details),
         "run" when c.Kind == "action" => ApprovalTexts.Change(c, zh: false, plan.Details),
         _ when c.Property == "list" => $"import {c.Kind} list into project {c.Name} from {plan.Details?.GetValueOrDefault("file")} ({plan.Details?.GetValueOrDefault("bytes")} bytes, SHA-256 {plan.Details?.GetValueOrDefault("sha256")}); converter {plan.Details?.GetValueOrDefault("converter")}; before {plan.Details?.GetValueOrDefault("before")}",

@@ -31,6 +31,14 @@ internal static class PlanStepCatalog
         schema["properties"]!.AsObject().Remove("dry_run");
         schema["properties"]!.AsObject().Remove("show_page");
         schema["required"]!.AsArray().Remove(schema["required"]!.AsArray().Single(n => n!.GetValue<string>() == "project"));
+        if (e.Op == "device.update") // Workflow predictions cover renaming only.
+        {
+            schema["properties"]!.AsObject().Remove("part");
+            schema["properties"]!.AsObject().Remove("variant");
+            schema["properties"]!["new_tag"]!["type"] = "string";
+            schema["properties"]!["new_tag"]!.AsObject().Remove("default");
+            schema["required"]!.AsArray().Add("new_tag");
+        }
         if (e.Op == "page.update") // Workflow predictions currently cover descriptions only.
         {
             JsonObject item = schema["properties"]!["pages"]!["items"]!.AsObject();

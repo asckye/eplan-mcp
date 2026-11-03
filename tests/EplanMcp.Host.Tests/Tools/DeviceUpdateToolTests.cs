@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
+using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
@@ -133,4 +134,81 @@ public sealed class DeviceUpdateToolTests : IDisposable
 
     private Task<CallToolResult> Update(bool dryRun = false) =>
         DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=F+A2-KF1", "-KF19", dryRun, cancellationToken: TestContext.Current.CancellationToken);
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PartAssignmentFlowsThroughThePipeline(bool dryRun)
+    {
+        _harness.Bridge.Handlers[OperationNames.DeviceUpdatePlan] = _ =>
+        {
+            WritePlan plan = _harness.Plan([new PlannedChange { Action = "add", Kind = "part", Name = "=GAA+A1-SF91", Property = "1", NewValue = "SIE.3SB3400-0B" }]);
+            plan.Details = new Dictionary<string, string>
+            { ["tag"] = "=GAA+A1-SF91", ["previousTag"] = "=GAA+A1-SF91", ["part"] = "SIE.3SB3400-0B", ["variant"] = "1", ["functions"] = "1" };
+            return plan;
+        };
+        _harness.Bridge.Handlers[OperationNames.DeviceUpdateExecute] = _ => new DeviceUpdateData
+        { Project = "Line1", Tag = "=GAA+A1-SF91", PreviousTag = "=GAA+A1-SF91", Part = "SIE.3SB3400-0B", Variant = "1", Functions = 1 };
+
+        CallToolResult result = await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=GAA+A1-SF91", dry_run: dryRun,
+            part: "SIE.3SB3400-0B", variant: "1", cancellationToken: TestContext.Current.CancellationToken);
+
+        JsonElement data = WriteToolHarness.Structured(result);
+        JsonElement device = data.GetProperty("device");
+        Assert.Equal(("=GAA+A1-SF91", "=GAA+A1-SF91", "SIE.3SB3400-0B", "1"),
+            (device.GetProperty("tag").GetString(), device.GetProperty("previousTag").GetString(), device.GetProperty("part").GetString(), device.GetProperty("variant").GetString()));
+        Assert.Equal(dryRun ? "not_started" : "committed", data.GetProperty("execution").GetString());
+        if (dryRun)
+        { Assert.Empty(_harness.Bridge.Writes); }
+        else
+        {
+            var args = (DeviceUpdateArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.DeviceUpdateExecute).Args!;
+            Assert.Equal((string.Empty, "SIE.3SB3400-0B", "1", "f1"), (args.NewTag, args.Part, args.Variant, args.Fingerprint));
+        }
+    }
+
+    [Fact]
+    public async Task RenameAndPartArgumentsArePreservedTogether()
+    {
+        await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=F+A2-KF1", "-KF19", part: "SIE.3SB3400-0B", cancellationToken: TestContext.Current.CancellationToken);
+        var args = (DeviceUpdateArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.DeviceUpdateExecute).Args!;
+        Assert.Equal(("-KF19", "SIE.3SB3400-0B", (string?)null), (args.NewTag, args.Part, args.Variant));
+    }
+
+    [Fact]
+    public async Task LegacyPositionalProgressAndCancellationStillWork()
+    {
+        CallToolResult result = await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=F+A2-KF1", "-KF19",
+            false, null, TestContext.Current.CancellationToken);
+        Assert.Equal("committed", WriteToolHarness.Structured(result).GetProperty("execution").GetString());
+    }
+
+    [Fact]
+    public async Task PartPlanningFailureDoesNotWrite()
+    {
+        _harness.Bridge.Handlers[OperationNames.DeviceUpdatePlan] = _ => throw new BridgeCallException(
+            new BridgeError { Reason = ErrorReason.PartNotFound, Message = "Use eplan_part_search." });
+        JsonElement error = WriteToolHarness.Error(await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=GAA+A1-SF91",
+            part: "missing", cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(ErrorReason.PartNotFound, error.GetProperty("reason").GetString());
+        Assert.Empty(_harness.Bridge.Writes);
+    }
+
+    [Fact]
+    public async Task PartOnlyPreview_PreservesTheMainFunctionsActualFullName()
+    {
+        const string main = "=GAA+A1-KF91:1";
+        _harness.Bridge.Handlers[OperationNames.DeviceUpdatePlan] = _ =>
+        {
+            WritePlan plan = _harness.Plan([new() { Action = "add", Kind = "part", Name = main, Property = "1", NewValue = "SIE.6ES7131-4BD01-0AA0" }]);
+            plan.Details = new() { ["tag"] = main, ["previousTag"] = main, ["part"] = "SIE.6ES7131-4BD01-0AA0", ["variant"] = "1", ["functions"] = "1", ["pages"] = "=GAA+A1&EFS1/60" };
+            return plan;
+        };
+        JsonElement data = WriteToolHarness.Structured(await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=GAA+A1-KF91", dry_run: true,
+            part: "SIE.6ES7131-4BD01-0AA0", cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement device = data.GetProperty("device");
+        Assert.Equal((main, main, 1), (device.GetProperty("tag").GetString(), device.GetProperty("previousTag").GetString(), device.GetProperty("functions").GetInt32()));
+        Assert.Equal(["=GAA+A1&EFS1/60"], device.GetProperty("pages").EnumerateArray().Select(v => v.GetString()));
+        Assert.Empty(_harness.Bridge.Writes);
+    }
 }

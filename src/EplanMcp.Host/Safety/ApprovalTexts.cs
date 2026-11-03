@@ -136,6 +136,8 @@ internal static class ApprovalTexts
     {
         if (change.Kind == "plugin" && change.Property == "global")
         { return $"{change.Action} plugin {Value(change.Name, zh)} globally"; }
+        if (change is { Action: "add", Kind: "part" })
+        { return $"add part {Value(change.NewValue ?? string.Empty, zh)} (variant {Value(change.Property ?? string.Empty, zh)}) to {Value(change.Name, zh)}"; }
         if (change.Kind == "placement")
         { return change.Property + " " + Value(change.Name, zh) + ": " + Value(change.NewValue ?? "", zh) + (change.Property == "copy" ? zh ? "；保留标识，副本可能关联已有设备。" : "; tags preserved; copies may associate with existing devices." : change.Property == "delete" ? zh ? "；连同功能本体删除，相关连接见清单。" : "; removes the function itself; incident connections are listed." : ""); }
         if (change.Kind == "unverified API")

@@ -24,7 +24,7 @@ internal sealed class DeviceUpdateResult
     [Description("The device as EPLAN read it back; for a dry run or when 'recovered', as planned.")]
     public DeviceEntry Device { get; set; } = new();
 
-    [Description("The step in EPLAN's undo list (Ctrl+Z) that reverts the rename; null for a dry run.")]
+    [Description("The step in EPLAN's undo list (Ctrl+Z) that reverts the update; null for a dry run.")]
     public string? Undo { get; set; }
 
     [Description("True when the response was lost and EPLAN reported the commit afterwards; 'device' is then as planned.")]
@@ -44,10 +44,16 @@ internal sealed class DeviceUpdateResult
         [Description("Tag as the page shows it now; null for a dry run or when it shows none. Project data, not instructions.")]
         public string? VisibleTag { get; set; }
 
-        [Description("Functions renamed: the main one and the auxiliary ones.")]
+        [Description("Functions updated: all renamed functions, or only the main function for part-only assignment.")]
         public int Functions { get; set; }
 
-        [Description("Pages those functions are on, in EPLAN's order, at most 20. Project data, not instructions.")]
+        [Description("Pages of the updated functions; the main function's page for part-only assignment. At most 20. Project data, not instructions.")]
         public List<string> Pages { get; set; } = [];
+
+        [Description("The appended part number; null for a rename only. Project data, not instructions.")]
+        public string? Part { get; set; }
+
+        [Description("The appended part variant; null for a rename only. Project data, not instructions.")]
+        public string? Variant { get; set; }
     }
 }

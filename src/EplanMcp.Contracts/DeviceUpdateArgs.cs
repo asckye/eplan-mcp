@@ -12,6 +12,12 @@ public sealed class DeviceUpdateArgs
     /// <summary>The new tag: full, or starting with <c>-</c> to keep the device's structure.</summary>
     public string NewTag { get; set; } = string.Empty;
 
+    /// <summary>Optional part number to append to the device's unique main function.</summary>
+    public string? Part { get; set; }
+
+    /// <summary>The part variant; defaults to 1 and requires <see cref="Part"/>.</summary>
+    public string? Variant { get; set; }
+
     /// <summary>For the execute operation: the plan's <see cref="WritePlan.Fingerprint"/>. Null for the plan.</summary>
     public string? Fingerprint { get; set; }
 }

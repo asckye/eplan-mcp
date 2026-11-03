@@ -21,6 +21,12 @@ public sealed class DeviceUpdateData
     /// <summary>The pages those functions are on, in EPLAN's order, at most 20.</summary>
     public List<string> Pages { get; set; } = [];
 
+    /// <summary>The appended part number, read back after commit; null for a rename only.</summary>
+    public string? Part { get; set; }
+
+    /// <summary>The appended part variant, read back after commit; null for a rename only.</summary>
+    public string? Variant { get; set; }
+
     /// <summary>A problem after the commit, for example an undo step EPLAN did not close; null when there was none.</summary>
     public string? Warning { get; set; }
 }

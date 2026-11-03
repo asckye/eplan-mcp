@@ -9,18 +9,20 @@
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-"把 `-KF1` 改成 `-KF10`""把 `=GAA+A1-FC1` 挪到 `=GAB1` 下"。代理给出设备的现有标识和新标识，工具把整个设备改名：主功能和全部辅助功能（包括其他页上的触点，即交叉引用）一起改，设备保持完整。这一版只改设备标识，设备属性在 M3b 加入（M3 设计 4.4）。
+"把 `-KF1` 改成 `-KF10`""把 `=GAA+A1-FC1` 挪到 `=GAB1` 下"。代理给出设备的现有标识和新标识，工具把整个设备改名：主功能和全部辅助功能（包括其他页上的触点，即交叉引用）一起改，设备保持完整。还可给现有设备的唯一主功能追加部件引用；部件来自当前部件库，不会替换原有引用。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `tag` | string | 是 | — | 现有的设备标识。完整标识（如 `=GAA+A1-KF1`）总是唯一；短标识（如 `-KF1`）在多个结构下出现时返回 `AMBIGUOUS_NAME` |
-| `new_tag` | string | 是 | — | 新标识：完整标识（如 `=GAA+A1-KF10`）；或以 `-` 开头的短标识（如 `-KF10`），表示保留设备现在的结构 |
+| `new_tag` | string | 否 | — | 新标识：完整标识（如 `=GAA+A1-KF10`）；或以 `-` 开头的短标识（如 `-KF10`），表示保留设备现在的结构 |
+| `part` | string | 否 | — | 要追加的部件号；与 `new_tag` 至少一个；按部件库精确或唯一不区分大小写匹配 |
+| `variant` | string | 否 | "1" | 部件变体；只能随 `part` 提供，必须在库中存在 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - `tag` 的查找规则与 `eplan_device_get` 相同。
-- `new_tag` 不能为空，不能含空白和控制字符，必须含有 `-` 开头的设备部分；与现有标识相同时返回 `INVALID_ARGUMENT`。只改大小写（`-kf1` → `-KF1`）是允许的。
+- 给出 `new_tag` 时不能为空，不能含空白和控制字符，必须含有 `-` 开头的设备部分；与现有标识相同时返回 `INVALID_ARGUMENT`。只改大小写（`-kf1` → `-KF1`）是允许的。
 
 ## 3. 输出
 省略或 `dry_run: true` 返回设备变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
@@ -41,7 +43,7 @@
   "hint": null
 }
 ```
-- `device.functions`：改名的功能数（主功能加辅助功能）。`device.pages`：这些功能所在的页，最多 20 个，按 EPLAN 的顺序列出。
+- `device.functions`：改名时为全部改名功能数；只赋值部件时为唯一主功能的 1。`device.pages`：这些受影响功能所在的页，最多 20 个，按 EPLAN 的顺序列出；只赋值部件时只列主功能所在页，未放置则为空。
 - 提交后是读回的值；`dry_run` 时是将要得到的值，`visibleTag` 为 `null`。
 - `undo`、`recovered`：同 `eplan_page_create`。
 - 标识按项目数据处理，经过 ResultShaper。
@@ -53,7 +55,7 @@
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
-| `INVALID_ARGUMENT` | `new_tag` 不合法，或与现有标识相同；`new_tag` 以 `-` 开头但拼不出现在的结构；设备有带后缀的功能（见第 5 节） | `not_started` | `metadata.violations` 列出全部问题。带后缀的情况："This version renames only devices whose functions all carry the device tag itself; '<tag>' has functions with their own suffixes (such as '<tag>:1')." |
+| `INVALID_ARGUMENT` | `new_tag` 不合法，或与现有标识相同；部件、变体、唯一主功能或重复引用检查失败；`new_tag` 以 `-` 开头但拼不出现在的结构；设备有带后缀的功能（见第 5 节） | `not_started` | `metadata.violations` 列出全部问题。带后缀的情况："This version renames only devices whose functions all carry the device tag itself; '<tag>' has functions with their own suffixes (such as '<tag>:1')." |
 | `INVALID_ARGUMENT` | 读回的标识与请求不同（项目结构对这类设备不用新标识中的某一部分，EPLAN 把它丢掉了），或者改名后仍有功能带着旧标识 | `rolled_back` | `metadata.requested`、`metadata.actual`；提示参照同类设备的标识（`eplan_device_list`） |
 | `DEVICE_NOT_FOUND` / `AMBIGUOUS_NAME` | `tag` 找不到，或短标识对应多个设备 | `not_started` | 同 `eplan_device_get` |
 | `ALREADY_EXISTS` | 新标识已被其他设备使用（不区分大小写） | `not_started` | "'<new_tag>' is already used by another device; giving this device the same tag would merge the two devices in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use." |
@@ -107,3 +109,12 @@
   - 用 `-` 开头的短标识，结构保持不变；
   - 选一个辅助功能带后缀的设备（端子排），返回 `INVALID_ARGUMENT`。
 - **Agent 评测**："把 scratch 项目中的 `=F+A2-KF1` 改名为 `=F+A2-KF19`"，作答后用 `eplan_device_get` 核对辅助功能也跟着改了名。
+
+### 部件赋值（FP3）
+- 例如 `{"project":"Line1","tag":"=GAA+A1-SF91","part":"SIE.3SB3400-0B","variant":"1"}`；`new_tag` 可同时提供。
+- 规划按 `FUNC_IDENTDEVICETAG` 查找唯一主功能（已放置或未放置），数量不为 1 时返回 `INVALID_ARGUMENT` 并报告数量；只赋值部件时允许功能名称带连接点后缀。已引用相同部件和变体时拒绝 `nothing to change`。
+- 变更清单增加 `add part <part> (variant <v>) to <tag>`；指纹包含主功能身份、现有部件引用和所选库部件，执行前重新核对。
+- 同一事务内先执行请求的改名，再以 `Function.AddArticleReference(part, variant, 1)` 追加引用（A82）。提交后按设备标识重新获取主功能及 `ArticleReferences`（A79）；缺少新引用时回滚。原有引用保持不变。
+- `device.part`、`device.variant` 返回本次赋值的部件和变体；只改名时为 null。只赋值部件时，`tag` 与 `previousTag` 都返回主功能的实际完整名称（可能带 `:1` 等连接点后缀），可直接交给 `eplan_device_get`；`functions=1`，`pages` 只含主功能所在页。
+- 主线程目标为 2 秒，端到端默认时限 60 秒；部件库较大时可能超过目标，支持既有进度与取消。
+- Small 覆盖参数、默认变体、唯一主功能、重复引用、指纹和提交后读回；Medium 覆盖假 Bridge 的 part-only、同时改名、dry-run 与失败。Large 在 `FunctionPlaceTests` 放置 `IEC_symbol/SSD/0`、赋值 `SIE.3SB3400-0B/1` 并读回；仅编写，交由维护者运行。

@@ -1306,12 +1306,13 @@
       "spec": "docs/tools/eplan_device_update.md",
       "small": 2,
       "medium": 1,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A3",
         "A11",
         "A12",
-        "A13"
+        "A13",
+        "A79"
       ],
       "latestLive": {
         "date": "2026-10-20",

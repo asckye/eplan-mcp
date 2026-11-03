@@ -19,6 +19,10 @@
 - 新增 `eplan_pack_enable`：经现有 EPLAN 审批全局启停已安装的精确插件版本，保留启用顺序，以 revision 校验防止覆盖并发变更。
 - 新增 `eplan_pack_install`：从插件库安装精确版本，核对索引摘要；内置库免审批，其它来源沿用安装审批，相同内容重复安装不变更。
 - 工程包新增插件种类、提供项与标准标签，旧包保持原摘要；新增离线工具 `eplan_pack_library_list`，可浏览内置、本地及登记的只读共享库，查看已安装版本和更新候选。
+- `eplan_device_update` 可向现有设备的唯一主功能追加部件引用，支持与改名一起执行；规划核对部件与变体，提交后重新读取引用。
+
+- 新增 `eplan_function_place`：放置部件的未放置辅助功能，或增加功能的概览表达；保留设备身份和连接点数据，复用审批、布局守卫、提交后读回和单步撤销。
+
 - `eplan_device_place` 支持没有宏、通过功能模板绘制的部件；保留 PLC 连接点名称后缀，并返回 `unplaced_functions` 供后续放置。
 
 - `eplan_connection_create` 支持用 `t_node.variant` 选择同方向引脚的 SPECIAL 变体，以及用 `interruption_point.sort_code` 在放置事务中设置排序码 24809 并读回；省略参数沿用原行为。D1/D2 的变体流向及跨页配对 Spike 已补，待实机运行。

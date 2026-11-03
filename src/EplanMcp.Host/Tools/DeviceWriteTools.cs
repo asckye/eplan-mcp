@@ -25,20 +25,22 @@ internal sealed class DeviceWriteTools
 
     [McpServerTool(
         Name = UpdateTool,
-        Title = "Rename a device in an EPLAN project",
+        Title = "Update a device in an EPLAN project",
         ReadOnly = false,
         Destructive = false,
         Idempotent = false,
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(DeviceUpdateResult))]
-    [Description("Renames a device and all auxiliary functions in one undoable step. Omit/true dry_run previews; false executes. Outside scratch needs engineer approval. See usage.")]
+    [Description("Renames a device or appends a part to its unique main function. Give new_tag, part, or both. One Ctrl+Z undoes the update. Omit/true dry_run previews; false executes. Outside scratch needs engineer approval. See usage.")]
     public static async Task<CallToolResult> DeviceUpdateAsync(
         WritePipeline pipeline,
         [Description("Name or path from eplan_project_list")] string project,
         [Description("Current tag, full or as shown, e.g. -KF1")] string tag,
-        [Description("Full new tag, or from '-' to keep the structure")] string new_tag,
+        [Description("Full new tag, or from '-' to keep the structure")] string? new_tag = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
+        [Description("Part number to append to the unique main function")] string? part = null,
+        [Description("Part variant; requires part, defaults to 1")] string? variant = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -48,17 +50,17 @@ internal sealed class DeviceWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new DeviceUpdateArgs { Project = project, Tag = tag ?? string.Empty, NewTag = new_tag ?? string.Empty };
+        var args = new DeviceUpdateArgs { Project = project, Tag = tag ?? string.Empty, NewTag = new_tag ?? string.Empty, Part = part, Variant = variant };
         var request = new WriteRequest<DeviceUpdateArgs, DeviceUpdateArgs>(
             UpdateTool,
             ToolTier.Write,
             OperationNames.DeviceUpdatePlan,
             OperationNames.DeviceUpdateExecute,
             args,
-            plan => new DeviceUpdateArgs { Project = args.Project, Tag = args.Tag, NewTag = args.NewTag, Fingerprint = plan.Fingerprint },
+            plan => new DeviceUpdateArgs { Project = args.Project, Tag = args.Tag, NewTag = args.NewTag, Part = args.Part, Variant = args.Variant, Fingerprint = plan.Fingerprint },
             dry_run,
             PageWriteTools.DefaultLimit,
-            "Renaming the device");
+            "Updating the device");
         WriteOutcome<DeviceUpdateData> outcome;
         try
         {
@@ -81,14 +83,19 @@ internal sealed class DeviceWriteTools
             Undo = committed ? "AI: " + UpdateTool : null,
             Recovered = outcome.Recovered,
             Hint = dry_run ? WriteToolDefaults.ExecutionHint : outcome.Recovered
-                ? "The response was lost, but EPLAN reported the rename as committed; check the device with eplan_device_get."
+                ? "The response was lost, but EPLAN reported the update as committed; check the device with eplan_device_get."
                 : ResultShaper.CleanText(outcome.Data?.Warning),
         };
         string what = $"a device and its {ToolResults.Count(Math.Max(0, result.Device.Functions - 1), "auxiliary function")}";
         return ToolResults.Success(
-            committed ? $"Renamed {what}; Ctrl+Z in EPLAN undoes this step." : $"Dry run: would rename {what}. Nothing was changed.",
+            part is not null ? committed ? "Updated one device and appended one part reference; Ctrl+Z in EPLAN undoes this step." : "Dry run: would update one device and append one part reference. Nothing was changed."
+                : committed ? $"Renamed {what}; Ctrl+Z in EPLAN undoes this step." : $"Dry run: would rename {what}. Nothing was changed.",
             result);
     }
+
+    internal static Task<CallToolResult> DeviceUpdateAsync(WritePipeline pipeline, string project, string tag, string? newTag,
+        bool dryRun, IProgress<ProgressNotificationValue>? legacyProgress, CancellationToken cancellationToken) =>
+        DeviceUpdateAsync(pipeline, project, tag, newTag, dryRun, progress: legacyProgress, cancellationToken: cancellationToken);
 
     [McpServerTool(
         Name = PlaceTool,
@@ -348,6 +355,8 @@ internal sealed class DeviceWriteTools
         VisibleTag = ResultShaper.CleanText(data.VisibleTag),
         Functions = data.Functions,
         Pages = [.. data.Pages.Select(p => ResultShaper.CleanText(p))],
+        Part = ResultShaper.CleanText(data.Part),
+        Variant = ResultShaper.CleanText(data.Variant),
     };
 
     /// <summary>The device as the plan has it: the change and the details device.update.plan adds.</summary>
@@ -357,10 +366,12 @@ internal sealed class DeviceWriteTools
         Dictionary<string, string> details = plan.Details ?? [];
         return new DeviceUpdateResult.DeviceEntry
         {
-            Tag = ResultShaper.CleanText(change?.NewValue ?? string.Empty),
-            PreviousTag = ResultShaper.CleanText(change?.OldValue ?? string.Empty),
+            Tag = ResultShaper.CleanText(details.GetValueOrDefault("tag") ?? change?.NewValue ?? string.Empty),
+            PreviousTag = ResultShaper.CleanText(details.GetValueOrDefault("previousTag") ?? change?.OldValue ?? string.Empty),
             Functions = int.TryParse(details.GetValueOrDefault("functions"), NumberStyles.None, CultureInfo.InvariantCulture, out int functions) ? functions : 0,
             Pages = details.GetValueOrDefault("pages") is { Length: > 0 } pages ? [.. pages.Split('\n').Select(p => ResultShaper.CleanText(p))] : [],
+            Part = ResultShaper.CleanText(details.GetValueOrDefault("part")) is { Length: > 0 } part ? part : null,
+            Variant = ResultShaper.CleanText(details.GetValueOrDefault("variant")) is { Length: > 0 } variant ? variant : null,
         };
     }
 }
