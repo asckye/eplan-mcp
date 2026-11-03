@@ -21,7 +21,7 @@ internal sealed record ToolProfileChoice(ToolProfile Profile);
 /// </summary>
 internal static class ToolProfiles
 {
-    public const int CoreLimit = 26;
+    public const int CoreLimit = 25;
 
     public static readonly IReadOnlySet<string> Core = new HashSet<string>(StringComparer.Ordinal)
     {
@@ -29,7 +29,7 @@ internal static class ToolProfiles
         PageTools.GetTool, DeviceTools.ListTool, DeviceTools.GetTool, ConnectionTools.ListTool, PartTools.ListTool,
         MessageTools.ListTool, CheckTools.ListTool, MacroTools.ListTool, MacroTools.GetTool, UsageTools.UsageTool,
         PageWriteTools.CreateTool, PageWriteTools.UpdateTool, DeviceWriteTools.UpdateTool, MacroWriteTools.InsertTool,
-        ConnectionWriteTools.GenerateTool, CheckWriteTools.RunTool, ReportWriteTools.UpdateTool, ReportCreateTools.Tool, ExportTools.PdfTool,
+        ConnectionWriteTools.GenerateTool, CheckWriteTools.RunTool, ReportWriteTools.UpdateTool, ExportTools.PdfTool,
         PageReviewTools.Tool, ImageExportTools.ImageTool,
     };
 

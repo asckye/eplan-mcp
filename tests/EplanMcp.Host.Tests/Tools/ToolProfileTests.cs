@@ -29,13 +29,13 @@ public sealed class ToolProfileTests
         Assert.InRange(options.ServerInstructions.Length, 1, 1200);
     }
     [Fact]
-    public void Core_HoldsAtMost26ToolsThatAllExist()
+    public void Core_HoldsAtMost25ToolsThatAllExist()
     {
         string[] all = [.. Tools(ToolProfile.Full).Select(t => t.Name)];
 
         Assert.InRange(ToolProfiles.Core.Count, 1, ToolProfiles.CoreLimit);
         Assert.All(ToolProfiles.Core, name => Assert.Contains(name, all));
-        Assert.Contains(ReportCreateTools.Tool, ToolProfiles.Core);
+        Assert.DoesNotContain(ReportCreateTools.Tool, ToolProfiles.Core);
     }
 
     [Fact]

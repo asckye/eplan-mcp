@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_report_create` |
-| 分组 / Profile | `report` / `core` |
+| 分组 / Profile | `report` / `full`（core 保持 25 个工具） |
 | 安全 / 注解 | Write；readOnly=false、destructive=false、idempotent=false、openWorld=false |
 | 状态 | Implemented (Unreleased) |
 

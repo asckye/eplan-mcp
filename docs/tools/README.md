@@ -90,7 +90,7 @@
 | `eplan_property_get` | full | 只读 | [eplan_property_get.md](eplan_property_get.md) |
 | `eplan_property_schema` | full | 只读 | [eplan_property_schema.md](eplan_property_schema.md) |
 | `eplan_property_set` | full | 写入 | [eplan_property_set.md](eplan_property_set.md) |
-| `eplan_report_create` | core、full | 写入 | [eplan_report_create.md](eplan_report_create.md) |
+| `eplan_report_create` | full | 写入 | [eplan_report_create.md](eplan_report_create.md) |
 | `eplan_report_update` | core、full | 写入 | [eplan_report_update.md](eplan_report_update.md) |
 | `eplan_revision_list` | full | 只读 | [eplan_revision_list.md](eplan_revision_list.md) |
 | `eplan_rule_check` | full | 只读 | [eplan_rule_check.md](eplan_rule_check.md) |
