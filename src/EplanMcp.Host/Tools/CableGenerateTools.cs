@@ -19,7 +19,7 @@ internal sealed class CableGenerateTools
 
     [McpServerTool(Name = GenerateTool, Title = "Generate automatic cables", ReadOnly = false, Destructive = true,
         Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(CableGenerateResult))]
-    [Description("Generates or updates automatic cables using three project schemes, preserving existing names. Always needs the engineer's approval, in scratch too, and a project backup first. New cables and selection effects are known only afterwards; undo is unverified. Example: {\"project\":\"Line1\",\"creation_scheme\":\"Standard\",\"numbering_scheme\":\"Standard\",\"selection_scheme\":\"Standard\"}.")]
+    [Description("Generates automatic cables using three schemes and preserves existing names. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. Undo is unverified. See usage.")]
     public static async Task<CallToolResult> CableGenerateAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
@@ -27,7 +27,7 @@ internal sealed class CableGenerateTools
         [Description("Cable creation scheme")][MinLength(1)] string creation_scheme,
         [Description("New cable numbering scheme")][MinLength(1)] string numbering_scheme,
         [Description("Automatic cable selection scheme")][MinLength(1)] string selection_scheme,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
@@ -69,6 +69,8 @@ internal sealed class CableGenerateTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            PlannedChanges = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Scope = new()
             {
                 CreationScheme = ResultShaper.CleanText(details.GetValueOrDefault("creationScheme") ?? args.CreationScheme!),
@@ -89,7 +91,7 @@ internal sealed class CableGenerateTools
             Hint = string.Join(" ", new[]
             {
                 outcome.Recovered ? "The response was lost, but EPLAN reported the commit. Read the current cables; do not repeat generation." : null,
-                dryRun ? "New cables and selection results are known only after running. Nothing was changed." : "Undo after commit has not been verified.",
+                dryRun ? WriteToolDefaults.ExecutionHint + " New cables and selection results are known only after running. Nothing was changed." : "Undo after commit has not been verified.",
                 ResultShaper.CleanText(data?.Hint), ResultShaper.CleanText(data?.Warning),
                 data is null ? null : $"Changes: {ToolResults.Count(data.ChangedCount, "record")}; inspect omitted changes with eplan_device_list (category Cable) or eplan_cable_get, without repeating generation.",
                 data?.EplanMessageCount > 0 ? $"EPLAN messages: {ToolResults.Count(data.EplanMessageCount, "message")}; the list is limited by count and size budget." : null,

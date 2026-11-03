@@ -1,7 +1,7 @@
 id: check-run
 set: dev
 fixture: copy
-prompt: 检查一下项目 {project}，告诉我检查出几条错误、几条警告、几条提示。
+prompt: 检查一下项目 {project}，告诉我检查出几条错误、几条警告、几条提示。 实际执行 `eplan_check_run` 时显式传 `dry_run:false`；省略或 true 只预览。
 answer:
   type: object
   required: [errors, warnings, hints]

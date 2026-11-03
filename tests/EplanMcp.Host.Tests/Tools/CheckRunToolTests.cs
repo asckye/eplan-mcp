@@ -13,6 +13,7 @@ namespace EplanMcp.Host.Tests.Tools;
 /// 4, 6 and 7). The sample project has 321 pages and no check messages; a check finds 6 warnings and 14 hints (S6, S11).
 /// </summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class CheckRunToolTests : IDisposable
 {
     private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
@@ -35,6 +36,45 @@ public sealed class CheckRunToolTests : IDisposable
     }
 
     public void Dispose() => _harness.Dispose();
+
+    [Fact]
+    public async Task McpOmittedTrueAndFalse_UsePreviewAndExecutionPaths()
+    {
+        var channel = new FakeApprovalChannel("test", ApprovalDecision.Granted);
+        using var harness = new WriteToolHarness(OutsideScratchWrites.Approve, channel);
+        harness.ProjectPath = Path.Combine(harness.Locations.Root, "outside", "Line1");
+        _harness.ProjectPath = harness.ProjectPath;
+        harness.Bridge.Handlers[OperationNames.CheckRunPlan] = _harness.Bridge.Handlers[OperationNames.CheckRunPlan];
+        harness.Bridge.Handlers[OperationNames.CheckRunExecute] = _harness.Bridge.Handlers[OperationNames.CheckRunExecute];
+        await PreviewProtocolHarness.RunAsync(harness, async client =>
+        {
+            Dictionary<string, object?> args = new() { ["project"] = "Line1" };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync("eplan_check_run", args, cancellationToken: TestContext.Current.CancellationToken));
+            args["dry_run"] = true;
+            JsonElement explicitPreview = WriteToolHarness.Structured(await client.CallToolAsync("eplan_check_run", args, cancellationToken: TestContext.Current.CancellationToken));
+
+            Assert.True(JsonElement.DeepEquals(omitted, explicitPreview));
+            Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+            Assert.True(omitted.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", omitted.GetProperty("fingerprint").GetString());
+            Assert.NotEmpty(omitted.GetProperty("changes").EnumerateArray());
+            Assert.Contains("dry_run: false", omitted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.Empty(harness.Bridge.Writes);
+            Assert.Empty(channel.Questions);
+            Assert.DoesNotContain(harness.Bridge.Calls, call => call.Operation == OperationNames.CheckRunExecute);
+            Assert.False(Directory.Exists(harness.Locations.Audit));
+
+            args["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync("eplan_check_run", args, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", executed.GetProperty("fingerprint").GetString());
+            Assert.Single(harness.Bridge.Writes);
+            Assert.Single(channel.Questions);
+            Assert.Contains(harness.Bridge.Calls, call => call.Operation == OperationNames.CheckRunExecute);
+            Assert.Equal(6, executed.GetProperty("counts").GetProperty("warning").GetInt32());
+        });
+    }
 
     [Fact]
     public async Task ADryRun_GivesTheScopeAndTheMessagesNow_AndNeverExecutes()

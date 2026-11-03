@@ -31,18 +31,14 @@ internal sealed class CheckWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(CheckRunResult))]
-    [Description(
-        "Runs EPLAN's check on a project or some of its pages and returns the counts per severity and the first 20 " +
-        "messages. EPLAN replaces earlier messages, adds its summary hints, and for pages drops messages of other objects; " +
-        "one Ctrl+Z in EPLAN undoes it. Takes seconds; EPLAN does not " +
-        "respond meanwhile. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\"}.")]
+    [Description("Runs a project/page check and returns message counts. It replaces earlier messages and adds summary hints. Omit/true dry_run previews; false executes. One Ctrl+Z undoes it. Outside scratch needs engineer approval. See usage.")]
     public static async Task<CallToolResult> CheckRunAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
         [Description("Name or path from eplan_project_list")] string project,
         [Description("1-50 full page names; omit for all")] string[]? pages = null,
         [Description("Check scheme; omit for EPLAN's current")] string? scheme = null,
-        [Description("Only count the messages now")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         // The page names are checked by the Bridge, all at once (check.run.plan).
@@ -83,15 +79,17 @@ internal sealed class CheckWriteTools
             return ToolResults.Error(ex.Error);
         }
 
-        return outcome.Data is { } data ? Checked(data, pages is not null) : Planned(outcome, dry_run);
+        return outcome.Data is { } data ? Checked(data, pages is not null, outcome.Plan) : Planned(outcome, dry_run);
     }
 
     /// <summary>A commit that answered in time: the messages read back, the first 20 listed (tool spec 3).</summary>
-    private static CallToolResult Checked(CheckRunData data, bool somePages)
+    private static CallToolResult Checked(CheckRunData data, bool somePages, WritePlan plan)
     {
         var result = new CheckRunResult
         {
             Project = ResultShaper.CleanText(data.Project),
+            Fingerprint = plan.Fingerprint,
+            Changes = [.. plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Execution = ExecutionState.Committed,
             PageCount = data.PageCount,
             Scheme = ResultShaper.CleanText(data.Scheme),
@@ -150,6 +148,8 @@ internal sealed class CheckWriteTools
             Project = ResultShaper.CleanText(outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             PageCount = Number(details.GetValueOrDefault("pageCount")),
             Scheme = ResultShaper.CleanText(details.GetValueOrDefault("scheme")),
             Before = Number(change?.OldValue),
@@ -159,6 +159,8 @@ internal sealed class CheckWriteTools
                 ? "The response was lost, but EPLAN reported the check as committed; read the messages with eplan_check_list."
                 : "The new messages are known only after running; eplan_check_list lists the ones now.",
         };
+        if (dryRun)
+        { result.Hint = WriteToolDefaults.ExecutionHint + " " + result.Hint; }
         string pages = ToolResults.Count(result.PageCount, "page");
         return ToolResults.Success(
             committed

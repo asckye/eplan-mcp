@@ -996,6 +996,7 @@ public sealed class AcceptanceRedrawDriverTests
                     result = new { drawings = new { gridSize = 4, pageSize = new[] { 420, 297 }, items = drawings.Skip(offset).Take(count), nextCursor = next, truncated = next is not null } };
                     break;
                 case "eplan_connection_generate":
+                    Assert.False(Assert.IsType<bool>(args["dry_run"]));
                     int before = _connections.Count;
                     if (ConnectWires)
                     {

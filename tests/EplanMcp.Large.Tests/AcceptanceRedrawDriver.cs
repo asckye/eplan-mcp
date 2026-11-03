@@ -59,10 +59,10 @@ internal sealed class AcceptanceRedrawDriver(
         // Acceptance trial: aligned pins are joined by autoconnect lines as soon as they are placed; generate them first so
         // connection_create predicts only its own items (otherwise its generation adds these and rolls back).
         await StageAsync("generate_autoconnect", async () =>
-            await WriteAsync("eplan_connection_generate", new() { ["pages"] = new[] { Page } }, ["autoconnect"]));
+            await WriteAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["pages"] = new[] { Page } }, ["autoconnect"]));
         await StageAsync("wires_symbols_and_cables", () => WiresAsync());
         await StageAsync("generate", async () =>
-            await WriteAsync("eplan_connection_generate", new() { ["pages"] = new[] { Page } }, ["generate"]));
+            await WriteAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["pages"] = new[] { Page } }, ["generate"]));
         await ObserveAsync("cables_after_generate", GeneratedCablesAsync);
         await StageAsync("cable_text_layout", CableTextLayoutAsync);
         await StageAsync("interruption_points", () => InterruptionsAsync());

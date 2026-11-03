@@ -252,7 +252,7 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
             new { kind = "text", position = (int[])[100, 200], height_mm = 3.5, contents = new Dictionary<string, string> { ["??_??"] = "Mirror note" } },
             new { kind = "line", points = (int[][])[[160, 200], [170, 210]] }, new { kind = "rectangle", corners = (int[][])[[220, 200], [230, 210]] } }
         });
-        await host.CallAsync("eplan_connection_generate", new() { ["project"] = host.Writable, ["pages"] = new[] { page } });
+        await host.CallAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = host.Writable, ["pages"] = new[] { page } });
     }
     private async Task<JsonElement> Probe(object request)
     {

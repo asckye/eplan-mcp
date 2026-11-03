@@ -41,7 +41,7 @@ public sealed class PlacementMoveTests(LiveEplan eplan, WriteHost host) : IClass
                 new { kind = "rectangle", corners = (int[][])[[200, 200], [220, 220]] } },
         });
         var target = new Dictionary<string, object?> { ["project"] = host.Writable, ["pages"] = new[] { page } };
-        await host.CallAsync("eplan_connection_generate", target);
+        await host.CallAsync("eplan_connection_generate", new(target) { ["dry_run"] = false });
         JsonElement connectionsBefore = await host.CallAsync("eplan_connection_list", new() { ["project"] = host.Writable, ["page"] = page });
         Assert.NotEmpty(connectionsBefore.GetProperty("connections").EnumerateArray());
         await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(host.ProcessId);
@@ -73,7 +73,7 @@ public sealed class PlacementMoveTests(LiveEplan eplan, WriteHost host) : IClass
         // closure as one ordered sequence instead of looking each row up.
         bool Outside(DrawingPlacement p) => p.Locator.Oid != coil.Locator.Oid && p.Locator.Oid != text.Locator.Oid && p.Parent?.Oid != coil.Locator.Oid;
         Assert.Equal(JsonSerializer.Serialize(before.Placements.Where(Outside)), JsonSerializer.Serialize(after.Placements.Where(Outside)));
-        JsonElement generated = await host.CallAsync("eplan_connection_generate", target);
+        JsonElement generated = await host.CallAsync("eplan_connection_generate", new(target) { ["dry_run"] = false });
         // Alignment and endpoint identities are retained; regeneration must not leave an empty step (A19).
         Assert.Equal(ExecutionState.NotStarted, generated.GetProperty("execution").GetString());
         JsonElement connectionsAfter = await host.CallAsync("eplan_connection_list", new() { ["project"] = host.Writable, ["page"] = page });

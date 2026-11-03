@@ -20,7 +20,7 @@ S34 的示例项目没有自动电缆：上述模式无名称变化，不是正�
 | `creation_scheme` | string，非空 | 是 | — | 电缆创建方案；示例项目只有 `Standard` |
 | `numbering_scheme` | string，非空 | 是 | — | 为新自动电缆编号的方案，不能借此重编号旧电缆 |
 | `selection_scheme` | string，非空 | 是 | — | 自动电缆选型方案；示例项目只有 `Standard` |
-| `dry_run` | boolean | 否 | false | 只列方案、现有电缆与连接范围，不审批、不备份、不生成 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 输入 schema（JSON Schema 2020-12）：
 ```json
@@ -29,7 +29,7 @@ S34 的示例项目没有自动电缆：上述模式无名称变化，不是正�
   "properties": {
     "project": { "type": "string", "minLength": 1 }, "creation_scheme": { "type": "string", "minLength": 1 },
     "numbering_scheme": { "type": "string", "minLength": 1 }, "selection_scheme": { "type": "string", "minLength": 1 },
-    "dry_run": { "type": "boolean", "default": false }
+    "dry_run": { "type": "boolean", "default": true }
   }
 }
 ```
@@ -37,6 +37,7 @@ S34 的示例项目没有自动电缆：上述模式无名称变化，不是正�
 - 另外固定 `STARTVALUE=1`、`STEPVALUE=1`，不提供起始值和步长。样例：`{"project":"Line1","creation_scheme":"Standard","numbering_scheme":"Standard","selection_scheme":"Standard","dry_run":true}`。
 
 ## 3. 输出
+省略或 `dry_run: true` 返回计划范围变更清单 `plannedChanges`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 `outputSchema`（变化名单的名称属于项目数据，经过 ResultShaper）：
 ```json
 {

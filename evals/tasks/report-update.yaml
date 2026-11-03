@@ -1,7 +1,7 @@
 id: report-update
 set: dev
 fixture: copy
-prompt: 更新项目 {project} 的全部报表，告诉我新增和删除了哪些报表页。
+prompt: 更新项目 {project} 的全部报表，告诉我新增和删除了哪些报表页。 实际执行 `eplan_report_update` 时显式传 `dry_run:false`；省略或 true 只预览。
 answer:
   type: object
   required: [added, removed]

@@ -6,13 +6,15 @@ See the scope and the messages now first, as a dry run:
 
 Check the whole project with the scheme EPLAN uses now:
 
-    {"project": "Line1"}
+    {"project": "Line1", "dry_run": false}
 
 Check two pages only:
 
-    {"project": "Line1", "pages": ["=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2"]}
+    {"project": "Line1", "pages": ["=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2"], "dry_run": false}
 
 ## Workflow
+
+Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. Call it after changing a project (placing macros, generating connections, renaming devices) to find errors before the engineer reviews the drawings.
 2. Omit `pages` to check the whole project, or give up to 50 full page names, as eplan_page_list returns them. Omit `scheme` to use the check scheme EPLAN uses now; a scheme EPLAN does not know fails with INVALID_ARGUMENT.

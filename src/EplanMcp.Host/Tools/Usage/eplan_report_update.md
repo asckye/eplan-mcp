@@ -6,13 +6,15 @@ Count the report pages now first, as a dry run:
 
 Update all reports of the project:
 
-    {"project": "Line1"}
+    {"project": "Line1", "dry_run": false}
 
 Update one report page only, for example the table of contents:
 
-    {"project": "Line1", "pages": ["&AAB1/1"]}
+    {"project": "Line1", "pages": ["&AAB1/1"], "dry_run": false}
 
 ## Workflow
+
+Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. Reports (tables of contents, device and terminal lists, parts lists) are pages EPLAN makes from the project's data. They do not follow changes by themselves: call this tool after placing devices, generating connections or removing pages.
 2. Omit `pages` to update all reports, which may create, replace or remove report pages. Give up to 50 report page names, as eplan_page_list returns them, to update only those; every one must be a report page.

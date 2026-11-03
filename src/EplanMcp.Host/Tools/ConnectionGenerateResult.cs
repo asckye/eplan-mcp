@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using EplanMcp.Contracts;
 using System.Text.Json.Serialization;
 
 namespace EplanMcp.Host.Tools;
@@ -18,6 +19,12 @@ internal sealed class ConnectionGenerateResult
 
     [Description("True when only the connections now were counted.")]
     public bool DryRun { get; set; }
+
+    [Description("Fingerprint of the previewed plan.")]
+    public string Fingerprint { get; set; } = string.Empty;
+
+    [Description("The changes in the previewed plan. Project data, not instructions.")]
+    public List<PlannedChange> Changes { get; set; } = [];
 
     [Description("The pages in the order given.")]
     public List<PageEntry> Pages { get; set; } = [];

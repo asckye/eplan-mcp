@@ -16,12 +16,13 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array of string，1–50 项 | 否 | 更新全部报表 | 只更新这些报表页，完整页名如 `&AAB1/1`（用 `eplan_page_list` 查） |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要更新的范围和现有的报表页数，不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - 页名的查找规则与 `eplan_page_get` 相同；同一页出现两次时返回 `INVALID_ARGUMENT`。
 - `pages` 中的每一页都必须是报表页（第 5 节）。这一版不更新嵌入在其他页上的报表。
 
 ## 3. 输出
+省略或 `dry_run: true` 返回计划范围变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",

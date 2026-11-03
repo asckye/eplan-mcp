@@ -6,9 +6,11 @@ Count the connections on a new page first, as a dry run:
 
 Generate the connections on two pages at once:
 
-    {"project": "Line1", "pages": ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/61"]}
+    {"project": "Line1", "pages": ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/61"], "dry_run": false}
 
 ## Workflow
+
+Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. A line drawn between two connection points is not a connection until EPLAN generates it: wire lists, terminal diagrams and eplan_connection_list do not show it. Call this tool after placing macros or devices on a page.
 2. Give the full page names, as eplan_page_list returns them; at most 50 pages per call. The tool updates the connections of these pages only, never of the whole project, and never rebuilds them all.

@@ -19,7 +19,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         try
         {
             await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:Split");
-            await eplan.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
+            await eplan.CallAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = new[] { page } });
             await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
             PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
                 new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);

@@ -15,6 +15,12 @@ internal sealed class CableGenerateResult
 
     public bool DryRun { get; set; }
 
+    [Description("Fingerprint of the previewed plan.")]
+    public string Fingerprint { get; set; } = string.Empty;
+
+    [Description("The changes in the previewed plan. Project data, not instructions.")]
+    public List<PlannedChange> PlannedChanges { get; set; } = [];
+
     public ScopeEntry Scope { get; set; } = new();
 
     public CableGenerateCounts Before { get; set; } = new();

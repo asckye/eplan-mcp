@@ -82,7 +82,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
             });
             Assert.Equal(ExecutionState.Committed, placed.GetProperty("execution").GetString());
             await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "C", [60 * grid, 40 * grid], "Left");
-            await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
+            await host.CallAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = new[] { page } });
             JsonElement connections = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
             TestContext.Current.TestOutputHelper!.WriteLine($"D1 bus variant={variant.ToString(CultureInfo.InvariantCulture)}, page={page}, logical endpoints: {connections}");
             string[] pairs = [.. connections.GetProperty("connections").EnumerateArray()
@@ -136,7 +136,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
             if (placed)
             {
                 await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "B", [40 * grid, 20 * grid], "Up");
-                await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
+                await host.CallAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = new[] { page } });
                 connections = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
             }
             await File.WriteAllTextAsync(Path.Combine(evidence, FormattableString.Invariant($"D1-tour-variant-{variant}.json")),
@@ -164,7 +164,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
         await PlacePinAsync(session.Project, pages[0], symbols.Items, grid, "-D1" + suffix + "B", [30 * grid, 25 * grid], "Up");
         await PlacePinAsync(session.Project, pages[0], symbols.Items, grid, "-D1" + suffix + "C", [50 * grid, 40 * grid], "Left");
         // A55: first generate the initial A-B autoconnect; the product then splits it with one T and adds C.
-        await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { pages[0] } });
+        await host.CallAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = new[] { pages[0] } });
         JsonElement node = await host.CallAsync("eplan_connection_create", new()
         {
             ["dry_run"] = false,
@@ -183,7 +183,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
             await PlacePinAsync(session.Project, pages[1], symbols.Items, grid, FormattableString.Invariant($"-D1{suffix}S{i}A"), [(20 + 15 * i) * grid, 45 * grid], "Down");
             await PlacePinAsync(session.Project, pages[1], symbols.Items, grid, FormattableString.Invariant($"-D1{suffix}S{i}B"), [(20 + 15 * i) * grid, 25 * grid], "Up");
         }
-        await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { pages[1] } });
+        await host.CallAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = new[] { pages[1] } });
         JsonElement seeds = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = pages[1] });
         Assert.Equal(3, seeds.GetProperty("connections").GetArrayLength());
         string side = beforeNode ? "before-node" : "after-node";
@@ -206,7 +206,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
             {
                 if (mode == "read")
                 {
-                    var generated = await eplan.CallOrErrorAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { pages[0] } });
+                    var generated = await eplan.CallOrErrorAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = new[] { pages[0] } });
                     TestContext.Current.TestOutputHelper!.WriteLine($"D1 {side} generate before {stage}: {generated.Result}");
                     if (!generated.Succeeded)
                     { return; }

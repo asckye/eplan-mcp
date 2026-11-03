@@ -2,6 +2,7 @@ using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
 using ModelContextProtocol.Protocol;
 
@@ -13,6 +14,7 @@ namespace EplanMcp.Host.Tests.Tools;
 /// generates (S10); page /1 has 40 already.
 /// </summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class ConnectionGenerateToolTests : IDisposable
 {
     private const string NewPage = "=GAA+A1&EFS1/60";
@@ -30,6 +32,45 @@ public sealed class ConnectionGenerateToolTests : IDisposable
     }
 
     public void Dispose() => _harness.Dispose();
+
+    [Fact]
+    public async Task McpOmittedTrueAndFalse_UsePreviewAndExecutionPaths()
+    {
+        var channel = new FakeApprovalChannel("test", ApprovalDecision.Granted);
+        using var harness = new WriteToolHarness(OutsideScratchWrites.Approve, channel);
+        harness.ProjectPath = Path.Combine(harness.Locations.Root, "outside", "Line1");
+        _harness.ProjectPath = harness.ProjectPath;
+        harness.Bridge.Handlers[OperationNames.ConnectionGeneratePlan] = _harness.Bridge.Handlers[OperationNames.ConnectionGeneratePlan];
+        harness.Bridge.Handlers[OperationNames.ConnectionGenerateExecute] = _harness.Bridge.Handlers[OperationNames.ConnectionGenerateExecute];
+        await PreviewProtocolHarness.RunAsync(harness, async client =>
+        {
+            Dictionary<string, object?> args = new() { ["project"] = "Line1", ["pages"] = new[] { NewPage } };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync("eplan_connection_generate", args, cancellationToken: TestContext.Current.CancellationToken));
+            args["dry_run"] = true;
+            JsonElement explicitPreview = WriteToolHarness.Structured(await client.CallToolAsync("eplan_connection_generate", args, cancellationToken: TestContext.Current.CancellationToken));
+
+            Assert.True(JsonElement.DeepEquals(omitted, explicitPreview));
+            Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+            Assert.True(omitted.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", omitted.GetProperty("fingerprint").GetString());
+            Assert.NotEmpty(omitted.GetProperty("changes").EnumerateArray());
+            Assert.Contains("dry_run: false", omitted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.Empty(harness.Bridge.Writes);
+            Assert.Empty(channel.Questions);
+            Assert.DoesNotContain(harness.Bridge.Calls, call => call.Operation == OperationNames.ConnectionGenerateExecute);
+            Assert.False(Directory.Exists(harness.Locations.Audit));
+
+            args["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync("eplan_connection_generate", args, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", executed.GetProperty("fingerprint").GetString());
+            Assert.Single(harness.Bridge.Writes);
+            Assert.Single(channel.Questions);
+            Assert.Contains(harness.Bridge.Calls, call => call.Operation == OperationNames.ConnectionGenerateExecute);
+            Assert.Equal(9, executed.GetProperty("pages")[0].GetProperty("after").GetInt32());
+        });
+    }
 
     [Fact]
     public async Task ADryRun_CountsTheConnectionsNowAndNeverExecutes()

@@ -11,6 +11,7 @@ namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>The real Destructive pipeline with a fake Bridge; no EPLAN or project files (tool spec 7).</summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class CableGenerateToolTests : IDisposable
 {
     private static readonly string[] _dryUnknown = ["after", "changes", "changedCount", "backup", "undo"];
@@ -41,6 +42,36 @@ public sealed class CableGenerateToolTests : IDisposable
     }
 
     public void Dispose() => _harness.Dispose();
+
+    [Fact]
+    public async Task McpOmittedTrueAndFalse_UsePreviewAndExecutionPaths()
+    {
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            Dictionary<string, object?> args = new() { ["project"] = "Line1", ["creation_scheme"] = "Standard", ["numbering_scheme"] = "Standard", ["selection_scheme"] = "Standard" };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync("eplan_cable_generate", args, cancellationToken: TestContext.Current.CancellationToken));
+            args["dry_run"] = true;
+            JsonElement explicitPreview = WriteToolHarness.Structured(await client.CallToolAsync("eplan_cable_generate", args, cancellationToken: TestContext.Current.CancellationToken));
+
+            Assert.True(JsonElement.DeepEquals(omitted, explicitPreview));
+            Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+            Assert.True(omitted.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", omitted.GetProperty("fingerprint").GetString());
+            Assert.NotEmpty(omitted.GetProperty("plannedChanges").EnumerateArray());
+            Assert.Contains("dry_run: false", omitted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.Empty(_harness.Bridge.Writes);
+            Assert.False(Directory.Exists(_harness.Locations.Audit));
+            Assert.Empty(_dialog.Questions);
+            args["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync("eplan_cable_generate", args, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", executed.GetProperty("fingerprint").GetString());
+            Assert.Single(_harness.Bridge.Writes);
+            Assert.Single(_dialog.Questions);
+            Assert.Equal(0, executed.GetProperty("changedCount").GetInt32());
+        });
+    }
 
     [Fact]
     public async Task DryRun_ShowsOnlyKnownScopeAndCounts_WithoutApprovalBackupOrExecution()

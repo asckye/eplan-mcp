@@ -1,7 +1,7 @@
 id: workflow-contactor-feedback
 set: dev
 fixture: copy
-prompt: 在项目 {project} 的新页 =GAA+A1&EFS1/60 上放一个接触器反馈控制回路并生成连接，更新报表，然后检查整个项目，导出这一页的 PDF，报告检查发现的错误数和 PDF 的文件名。 绘图工具省略 dry_run 只预览；检查预览后，用同样参数并显式传 dry_run:false 执行。 直接调用 eplan_page_create 执行时显式传 dry_run:false，预览保持 true；已编译计划步骤参数保持原样。
+prompt: 在项目 {project} 的新页 =GAA+A1&EFS1/60 上放一个接触器反馈控制回路并生成连接，更新报表，然后检查整个项目，导出这一页的 PDF，报告检查发现的错误数和 PDF 的文件名。 绘图工具省略 dry_run 只预览；检查预览后，用同样参数并显式传 dry_run:false 执行。 直接调用 eplan_page_create 执行时显式传 dry_run:false，预览保持 true；已编译计划步骤参数保持原样。 实际执行 `eplan_connection_generate`、`eplan_check_run`、`eplan_report_update` 时显式传 `dry_run:false`；省略或 true 只预览。
 answer:
   type: object
   required: [errors, file]

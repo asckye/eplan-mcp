@@ -92,7 +92,7 @@ public sealed class PageReviewTests(LiveEplan eplan, WriteHost host) : IClassFix
             switch (scenario)
             {
                 case "message":
-                    await host.CallAsync("eplan_check_run", new() { ["project"] = session.Project, ["pages"] = pages });
+                    await host.CallAsync("eplan_check_run", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = pages });
                     break;
                 case "dangling":
                     JsonElement available = await host.CallAsync("eplan_symbol_search", new() { ["project"] = session.Project, ["library"] = "IEC_symbol", ["name_contains"] = "BAT", ["limit"] = 200 });
@@ -137,7 +137,7 @@ public sealed class PageReviewTests(LiveEplan eplan, WriteHost host) : IClassFix
             Assert.True(after.GetProperty("summary").GetProperty("clean").GetBoolean(), after.GetRawText());
             Assert.Empty(after.GetProperty("issues").EnumerateArray());
 
-            async Task Generate() => await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = pages });
+            async Task Generate() => await host.CallAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = pages });
             async Task<JsonElement> Drawing() => (await host.CallAsync("eplan_page_get", new() { ["project"] = session.Project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" })).GetProperty("drawings");
             async Task<JsonElement> ReadConnections() => await host.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed", ["limit"] = 200 });
             async Task<JsonElement> Review() => await host.CallAsync("eplan_page_review", new() { ["project"] = session.Project, ["page"] = page, ["checks"] = new[] { check }, ["expected"] = expected, ["response_format"] = "detailed" });

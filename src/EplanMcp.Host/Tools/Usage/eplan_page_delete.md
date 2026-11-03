@@ -16,7 +16,7 @@ Omitted/true dry_run previews: no approval/writes (execution=not_started). Execu
 2. Call with `dry_run: true` when unsure: it lists the pages and the devices that would lose their main function, without asking anybody or changing anything.
 3. With `dry_run: false`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is deleted (BACKUP_FAILED).
 4. All pages go in one step: one Ctrl+Z in EPLAN brings them back. The backup copy stays and can be opened in EPLAN.
-5. Deleting pages does not update the reports: call eplan_report_update afterwards. Devices in `orphaned` keep functions (for example a cable's cores) on other pages without their main function; tell the engineer about them.
+5. Deleting pages does not update the reports: call eplan_report_update with dry_run:false afterwards. Devices in `orphaned` keep functions (for example a cable's cores) on other pages without their main function; tell the engineer about them.
 6. The call is not idempotent: repeated, the pages are gone and it returns PAGE_NOT_FOUND. Never repeat a call that ended in OUTCOME_UNKNOWN; check with eplan_page_list instead.
 
 ## Fields

@@ -17,12 +17,13 @@
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array of string，1–50 项 | 否 | 整个项目 | 只检查这些页，完整页名如 `=GAA+A1&EFS1/60`（用 `eplan_page_list` 查） |
 | `scheme` | string | 否 | EPLAN 当前的检查方案 | 检查方案的名称 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回检查的范围和现有的消息数，不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - 页名的查找规则与 `eplan_page_get` 相同；同一页出现两次时返回 `INVALID_ARGUMENT`。
 - 不提供"只复查已处理的消息"：`VerifyProject` 的第三个参数固定为 false。
 
 ## 3. 输出
+省略或 `dry_run: true` 返回计划范围变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",

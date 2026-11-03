@@ -66,7 +66,7 @@ public sealed class InterruptionPairingSpikeTests(LiveEplan eplan, WriteHost hos
                     ? await ProbeAsync(new { project = session.Project, pages, mode = "rename", name = sharedName, oids = ids, sort_codes = _crossPageSortCodes }, "D2 " + scenario + " setup")
                     : await ProbeAsync(new { project = session.Project, pages, mode = "rename", name = sharedName, oids = ids }, "D2 " + scenario + " setup");
                 Assert.True(changed.GetProperty("success").GetBoolean(), "Four-point setup failed; inspect the printed native error.");
-                var generated = await eplan.CallOrErrorAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = pages });
+                var generated = await eplan.CallOrErrorAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = pages });
                 TestContext.Current.TestOutputHelper!.WriteLine($"D2 {scenario} generate: {generated.Result}");
                 Assert.True(generated.Succeeded, "Generation setup failed; inspect the printed native error.");
                 await ProbeAsync(new { project = session.Project, pages, mode = "read" }, "D2 " + scenario + " native counterparts");
@@ -148,7 +148,7 @@ public sealed class InterruptionPairingSpikeTests(LiveEplan eplan, WriteHost hos
                 JsonElement renamed = await ProbeAsync(new { project = session.Project, pages, mode = "rename", name = sharedName, oids = ids.Take(count).ToArray() },
                     "D2 " + scenario + " " + stage + " rename-committed");
                 Assert.True(renamed.GetProperty("success").GetBoolean(), "Same-name setup failed; inspect the printed native error.");
-                var generated = await eplan.CallOrErrorAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = pages });
+                var generated = await eplan.CallOrErrorAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = pages });
                 TestContext.Current.TestOutputHelper!.WriteLine($"D2 {scenario} {stage} generate: {generated.Result}");
                 await ProbeAsync(new { project = session.Project, pages, mode = "read" }, "D2 " + scenario + " " + stage);
                 if (!generated.Succeeded)

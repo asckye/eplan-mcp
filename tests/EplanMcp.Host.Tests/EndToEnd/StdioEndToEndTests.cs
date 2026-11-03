@@ -377,6 +377,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     {
         CallToolResult result = await Call("eplan_cable_generate", new()
         {
+            ["dry_run"] = false,
             ["project"] = "Line1",
             ["creation_scheme"] = "Standard",
             ["numbering_scheme"] = "Standard",

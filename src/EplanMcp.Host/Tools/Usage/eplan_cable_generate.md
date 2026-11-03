@@ -6,9 +6,11 @@ Generate automatic cables using three explicit project schemes, first as a dry r
 
 Run after reviewing the scope:
 
-    {"project":"Line1","creation_scheme":"Standard","numbering_scheme":"Standard","selection_scheme":"Standard"}
+    {"project":"Line1","creation_scheme":"Standard","numbering_scheme":"Standard","selection_scheme":"Standard", "dry_run": false}
 
 ## Workflow
+
+Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. Use eplan_project_list to find the project. All three scheme names are required; INVALID_ARGUMENT lists candidates for each kind. The sample project offers Standard for each.
 2. A dry run lists the current scope and counts without approval, backup or generation. Even zero existing automatic cables may leave connections from which new cables can be generated.

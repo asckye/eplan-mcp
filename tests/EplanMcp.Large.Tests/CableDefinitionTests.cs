@@ -18,7 +18,7 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
         try
         {
             await PlanStepLiveSession.ActionAsync("EplanMcpLargeConnectionSetup /PAGE:\"" + page + "\" /DIRECTIONS:Cable");
-            await eplan.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page } });
+            await eplan.CallAsync("eplan_connection_generate", new() { ["dry_run"] = false, ["project"] = session.Project, ["pages"] = new[] { page } });
             string before = (await session.SnapshotAsync()).Hash;
             JsonElement listed = await eplan.CallAsync("eplan_connection_list", new()
             { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });

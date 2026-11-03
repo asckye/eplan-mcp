@@ -62,7 +62,7 @@ public sealed partial class DevicePlaceTests
             }
         }
         var generate = new Dictionary<string, object?> { ["project"] = project, ["pages"] = JsonSerializer.SerializeToElement(new[] { page }) };
-        await eplan.CallAsync("eplan_connection_generate", generate);
+        await eplan.CallAsync("eplan_connection_generate", new(generate) { ["dry_run"] = false });
         var snapshots = new List<string> { (await selection.SnapshotAsync()).Hash };
         Dictionary<string, object?> Args(int number) => new()
         {
@@ -101,7 +101,7 @@ public sealed partial class DevicePlaceTests
         JsonElement duplicate = await eplan.ErrorAsync("eplan_device_place", new(Args(3)) { ["dry_run"] = false, ["terminal_strip"] = strip.ToLowerInvariant() });
         Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.NotStarted), (duplicate.GetProperty("reason").GetString(), duplicate.GetProperty("execution").GetString()));
         Assert.Equal(snapshots[^1], (await selection.SnapshotAsync()).Hash);
-        await eplan.CallAsync("eplan_connection_generate", generate); // A52: a separate commit from all placements.
+        await eplan.CallAsync("eplan_connection_generate", new(generate) { ["dry_run"] = false }); // A52: a separate commit from all placements.
         JsonElement connections = await eplan.CallAsync("eplan_connection_list", new() { ["project"] = project, ["page"] = page, ["limit"] = 200 });
         string[] actual = connections.GetProperty("connections").EnumerateArray().Select(c => string.Join("|", new[]
         {

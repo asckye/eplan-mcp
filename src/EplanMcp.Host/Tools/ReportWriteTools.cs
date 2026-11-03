@@ -30,16 +30,13 @@ internal sealed class ReportWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(ReportUpdateResult))]
-    [Description(
-        "Updates the reports of an EPLAN project, all of them or given report pages, after devices, connections or pages " +
-        "changed; lists the report pages added and removed. One Ctrl+Z in EPLAN undoes it. Takes seconds; EPLAN does not " +
-        "respond meanwhile. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\"}.")]
+    [Description("Updates all reports or given report pages and lists added/removed pages. Omit/true dry_run previews; false executes. One Ctrl+Z undoes it. Outside scratch needs engineer approval. See usage.")]
     public static async Task<CallToolResult> ReportUpdateAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
         [Description("Name or path from eplan_project_list")] string project,
         [Description("1-50 report page names; omit for all")] string[]? pages = null,
-        [Description("Only count the report pages now")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         // The page names, and that they are report pages, are checked by the Bridge, all at once (report.update.plan).
@@ -80,17 +77,19 @@ internal sealed class ReportWriteTools
             return ToolResults.Error(ex.Error);
         }
 
-        return outcome.Data is { } data ? Updated(data, args) : Planned(outcome, args, dry_run);
+        return outcome.Data is { } data ? Updated(data, args, outcome.Plan) : Planned(outcome, args, dry_run);
     }
 
     /// <summary>A commit that answered in time: the report pages added and removed, at most 100 listed (tool spec 3).</summary>
-    private static CallToolResult Updated(ReportUpdateData data, ReportUpdateArgs args)
+    private static CallToolResult Updated(ReportUpdateData data, ReportUpdateArgs args, WritePlan plan)
     {
         int listed = data.Added.Count + data.Removed.Count;
         int changed = data.AddedCount + data.RemovedCount;
         var result = new ReportUpdateResult
         {
             Project = ResultShaper.CleanText(data.Project),
+            Fingerprint = plan.Fingerprint,
+            Changes = [.. plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Execution = ExecutionState.Committed,
             Scope = data.Scope,
             ReportPages = new ReportUpdateResult.ReportPagesEntry { Before = data.Before, After = data.After },
@@ -124,6 +123,8 @@ internal sealed class ReportWriteTools
             Project = ResultShaper.CleanText(outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Scope = scope,
             ReportPages = new ReportUpdateResult.ReportPagesEntry { Before = before },
             Undo = committed ? "AI: " + UpdateTool : null,
@@ -132,6 +133,8 @@ internal sealed class ReportWriteTools
                 ? "The response was lost, but EPLAN reported the reports as updated; eplan_page_list shows the project's pages."
                 : "Which report pages EPLAN creates or removes is known only after running, so 'after', 'added' and 'removed' are null.",
         };
+        if (dryRun)
+        { result.Hint = WriteToolDefaults.ExecutionHint + " " + result.Hint; }
         string what = Scope(args);
         return ToolResults.Success(
             committed

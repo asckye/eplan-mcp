@@ -27,16 +27,13 @@ internal sealed class ConnectionWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(ConnectionGenerateResult))]
-    [Description(
-        "Generates connections on pages of an EPLAN project: lines drawn between connection points, for example after a " +
-        "macro was placed, become connections that wire lists and reports show. Updates only; one Ctrl+Z in EPLAN undoes " +
-        "it. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\", \"pages\": [\"=GAA+A1&EFS1/60\"]}.")]
+    [Description("Generates or updates logical connections on given pages after drawing. Omit/true dry_run previews; false executes. One Ctrl+Z undoes it. Outside scratch needs engineer approval. See usage.")]
     public static async Task<CallToolResult> ConnectionGenerateAsync(
         WritePipeline pipeline,
         IBridgeClient bridge,
         [Description("Name or path from eplan_project_list")] string project,
         [Description("1-50 full page names")] string[] pages,
-        [Description("Only count the connections now")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -80,11 +77,11 @@ internal sealed class ConnectionWriteTools
             return display.Apply(ToolResults.Error(ex.Error));
         }
 
-        return display.Apply(outcome.Data is { } data ? Generated(data) : Planned(outcome, dry_run));
+        return display.Apply(outcome.Data is { } data ? Generated(data, outcome.Plan) : Planned(outcome, dry_run));
     }
 
     /// <summary>A commit that answered in time: the pages as read back, at most 100 connections listed (tool spec 3).</summary>
-    private static CallToolResult Generated(ConnectionGenerateData data)
+    private static CallToolResult Generated(ConnectionGenerateData data, WritePlan plan)
     {
         int added = data.Pages.Sum(p => p.AddedCount);
         int removed = data.Pages.Sum(p => p.RemovedCount);
@@ -92,6 +89,8 @@ internal sealed class ConnectionWriteTools
         var result = new ConnectionGenerateResult
         {
             Project = ResultShaper.CleanText(data.Project),
+            Fingerprint = plan.Fingerprint,
+            Changes = [.. plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             // Nothing added or removed is no change (ADR-0010 section 1); EPLAN then keeps no undo step (live check, A19).
             Execution = added + removed == 0 ? ExecutionState.NotStarted : ExecutionState.Committed,
             Pages =
@@ -133,6 +132,8 @@ internal sealed class ConnectionWriteTools
             Project = ResultShaper.CleanText(outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Pages =
             [
                 .. outcome.Plan.Changes.Select(c => new ConnectionGenerateResult.PageEntry
@@ -147,6 +148,8 @@ internal sealed class ConnectionWriteTools
                 ? "The response was lost, but EPLAN reported the connections as generated; check them with eplan_connection_list and 'page'."
                 : "Which connections EPLAN adds or removes is known only after running, so 'after', 'added' and 'removed' are null.",
         };
+        if (dryRun)
+        { result.Hint = WriteToolDefaults.ExecutionHint + " " + result.Hint; }
         string pages = ToolResults.Count(result.Pages.Count, "page");
         return ToolResults.Success(
             committed

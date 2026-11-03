@@ -21,7 +21,7 @@ PLC digital input:
     {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_DI","symbol_variant":0,"tag":"-KF1","plc_connection_point":"2","plc_plug_designation":"-X10","plc_address":"I0.0","plc_symbolic_address":"Start","plc_text":"Start input","x":80,"y":160,"display_properties":[{"property_id":20300,"offset_x_mm":0,"offset_y_mm":-16}],"dry_run":true}
 
 ## Workflow
-Omitted/true dry_run previews: no approval/writes (execution=not_started). Execute with dry_run:false; see hint.
+Omit/true dry_run: no approval/writes, execution=not_started. Execute with dry_run:false.
 
 1. Use eplan_page_list/get for a Circuit page, or eplan_page_create with dry_run:false. Finite mm inside page bounds; bottom-left origin, y up.
 2. Choose a free tag using eplan_device_list; short tags take page structure without document type. Outside scratch requires approval.
@@ -41,7 +41,7 @@ Omitted/true dry_run previews: no approval/writes (execution=not_started). Execu
 - Terminal: terminal_strip + terminal_number; defaults to IEC_symbol/X variant 0. No tag/other sources. Number: 1-64 letters/digits/_/dots. terminal_strip_text: new strips only, 1-256 chars, no controls, plain ??_??. Preserve spelling; duplicate strip:number ignores case.
 - terminal_strip_position:[x,y]: definition position; finite 0..10000 mm, requires terminal_strip_text. First terminal only; existing strips unchanged. Omit for unplaced; verify stripPosition/stripText.
 - Placed strip: defaults.strip_definition.symbol + .variant from plugins (SPECIAL), else TDEF/0. metadata.plugins: used id@version in preview/execute. Plugin changes invalidate plans.
-- terminal: strip/number/owner/position/sortCode (20809)/stripCreated. Preview/recovery: owner/sortCode=null; empty sortCode=null. functions includes new strip. Logical segments: eplan_connection_generate (A52/A55).
+- terminal: strip/number/owner/position/sortCode (20809)/stripCreated. Preview/recovery: owner/sortCode=null; empty sortCode=null. functions includes new strip. Segments: eplan_connection_generate dry_run:false (A52/A55).
 
 - PLC: four plc_* fields required; tag=existing native card (create SPECIAL/PLCC first if needed). Point: 1-64 characters, no leading colon; others: 1-256; all nonblank, no controls. Discover a one-pin DI variant. Duplicate card point/address refused ignoring case.
 - NO/NC: select NoContact/NcContact; connection_designations=["13","14"] / ["11","12"].

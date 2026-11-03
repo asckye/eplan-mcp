@@ -42,7 +42,7 @@ public sealed class CableGenerateTests : IClassFixture<DestructiveHost>
 
         _host.Approvals.Approve(Tool, _host.Writable,
             ["Generate or update automatic cables in this project using creation Standard, numbering Standard, selection Standard. Existing cable names will be preserved; existing cable renumbering is outside this operation. New cables and selection effects cannot be predicted in advance. A project backup will be made first. Undo after commit has not been verified."]);
-        JsonElement result = TerminalRenumberTests.Answered(await _host.CallAsync(Tool, args));
+        JsonElement result = TerminalRenumberTests.Answered(await _host.CallAsync(Tool, new(args) { ["dry_run"] = false }));
         string[] after = await CableTagsAsync();
         Assert.Equal(before.Length, after.Length);
         Assert.Equal(before.Order(StringComparer.Ordinal), after.Order(StringComparer.Ordinal));
