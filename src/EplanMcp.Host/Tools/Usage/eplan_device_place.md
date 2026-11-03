@@ -21,10 +21,11 @@ PLC digital input:
     {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_DI","symbol_variant":0,"tag":"-KF1","plc_connection_point":"2","plc_plug_designation":"-X10","plc_address":"I0.0","plc_symbolic_address":"Start","plc_text":"Start input","x":80,"y":160,"display_properties":[{"property_id":20300,"offset_x_mm":0,"offset_y_mm":-16}],"dry_run":true}
 
 ## Workflow
+Omitted/true dry_run previews: no approval/writes (execution=not_started). Execute with dry_run:false; see hint.
 
-1. Choose a circuit page with eplan_page_list/create; inspect with eplan_page_get. Use finite mm inside known page bounds, origin bottom left, y up.
-2. Choose a free tag using eplan_device_list; short tags take page structure without document type. Preview with dry_run. Outside scratch needs engineer approval.
-3. eplan_part_search finds parts (hasMacro required; variant defaults to 1); eplan_symbol_search finds project library variants/pin order. Place remaining unplaced functions in EPLAN; use eplan_macro_insert for circuits.
+1. Choose a Circuit page via eplan_page_list/create; inspect via eplan_page_get. Use finite mm within page bounds: bottom left, y up.
+2. Choose a free tag using eplan_device_list; short tags take page structure without document type. Outside scratch requires approval.
+3. Find parts via eplan_part_search (hasMacro; variant default 1), or variants/pins via eplan_symbol_search. Place unplaced functions in EPLAN; use eplan_macro_insert for circuits.
 
 ## Fields
 

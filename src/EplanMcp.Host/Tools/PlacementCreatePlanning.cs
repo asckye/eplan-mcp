@@ -18,7 +18,7 @@ internal static class PlacementCreatePlanning
         List<string> problems = Validate(input);
         if (problems.Count > 0)
         { return Invalid(problems); }
-        if (!input.TryGetProperty("dry_run", out JsonElement dry) || !dry.GetBoolean())
+        if (!WriteToolDefaults.IsPreview(input))
         { return Missing("placement.create.execute", "Execution is unavailable; use dry_run=true to preview."); }
         try
         {
@@ -166,6 +166,8 @@ internal static class PlacementCreatePlanning
         if (problems.Count > 0)
         { return Invalid(problems); }
         var result = new JsonObject { ["project"] = ResultShaper.CleanText(page.Project), ["page"] = ResultShaper.CleanText(page.Page), ["execution"] = ExecutionState.NotStarted, ["dryRun"] = true, ["gridSize"] = page.GridSize, ["boundarySource"] = "Page.Size", ["items"] = rows, ["changes"] = JsonSerializer.SerializeToNode(changes), ["connectionChanges"] = new JsonArray() };
+        result["fingerprint"] = page.Fingerprint();
+        result["hint"] = WriteToolDefaults.ExecutionHint;
         if (!string.IsNullOrEmpty(layoutWarnings))
         { result["warning"] = layoutWarnings; }
         int budget = input.TryGetProperty("response_format", out JsonElement format) && format.GetString() == "detailed" ? 20000 : 5000;

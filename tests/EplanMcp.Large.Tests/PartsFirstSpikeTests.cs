@@ -121,7 +121,7 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
                 else
                 { Print("bare device warning", "The first pushbutton template has no readable pin inventory; connection designations are omitted."); }
             }
-            var bare = await eplan.CallOrErrorAsync("eplan_device_place", bareArguments);
+            var bare = await eplan.CallOrErrorAsync("eplan_device_place", new(bareArguments) { ["dry_run"] = false });
             Print("bare device", bare.Result);
             if (pushbutton is not null && bare.Succeeded)
             {

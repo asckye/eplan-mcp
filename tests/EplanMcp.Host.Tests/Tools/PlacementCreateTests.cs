@@ -25,7 +25,7 @@ public sealed class PlacementCreateTests
         Assert.Equal(["project", "page", "items"], input.GetProperty("required").EnumerateArray().Select(n => n.GetString()));
         JsonElement fields = input.GetProperty("properties");
         Assert.True(fields.GetProperty("snap_to_grid").GetProperty("default").GetBoolean());
-        Assert.False(fields.GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.True(fields.GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.Equal((1, 50), (fields.GetProperty("items").GetProperty("minItems").GetInt32(), fields.GetProperty("items").GetProperty("maxItems").GetInt32()));
         JsonElement[] branches = [.. input.GetProperty("$defs").GetProperty("item").GetProperty("oneOf").EnumerateArray()];
         Assert.Equal(["text", "line", "rectangle"], branches.Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));

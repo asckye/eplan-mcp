@@ -5,6 +5,7 @@ using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Importing;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -106,6 +107,50 @@ public sealed class PageDisplayToolTests
         });
     }
 
+    [Theory]
+    [InlineData(DeviceWriteTools.PlaceTool)]
+    [InlineData(ConnectionCreateTools.Tool)]
+    [InlineData(PlacementCreateTools.Tool)]
+    [InlineData(PlacementUpdateTools.Tool)]
+    [InlineData(PlacementEditTools.Tool)]
+    [InlineData(MacroWriteTools.InsertTool)]
+    public async Task DrawingWrite_DefaultAndTruePreview_FalseApprovesAndExecutes(string tool)
+    {
+        var channel = new FakeApprovalChannel("test", ApprovalDecision.Granted);
+        await WithClient(async (client, harness) =>
+        {
+            foreach (bool? dryRun in new bool?[] { null, true, false })
+            {
+                harness.Bridge.Calls.Clear();
+                harness.Bridge.Writes.Clear();
+                channel.Questions.Clear();
+                Dictionary<string, object?> args = Args(tool, dryRun ?? true);
+                if (dryRun is null)
+                { args.Remove("dry_run"); }
+                JsonElement data = WriteToolHarness.Structured(await client.CallToolAsync(tool, args, cancellationToken: Token));
+                bool preview = dryRun != false;
+                Assert.Equal(preview, data.GetProperty("dryRun").GetBoolean());
+                Assert.Equal(preview ? ExecutionState.NotStarted : ExecutionState.Committed, data.GetProperty("execution").GetString());
+                if (preview)
+                {
+                    Assert.Empty(channel.Questions);
+                    Assert.Empty(harness.Bridge.Writes);
+                    Assert.DoesNotContain(harness.Bridge.Calls, c => c.Operation.EndsWith(".execute", StringComparison.Ordinal));
+                    Assert.Contains("dry_run: false", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+                    Assert.False(string.IsNullOrWhiteSpace(data.GetProperty("fingerprint").GetString()));
+                }
+                else
+                {
+                    Assert.Single(channel.Questions);
+                    Assert.Single(harness.Bridge.Writes);
+                    Assert.Contains(harness.Bridge.Calls, c => c.Operation.EndsWith(".execute", StringComparison.Ordinal));
+                }
+            }
+            Tool definition = Assert.Single(await client.ListToolsAsync(cancellationToken: Token), t => t.Name == tool).ProtocolTool;
+            Assert.True(definition.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+        }, channel, outsideScratch: true);
+    }
+
     private static Dictionary<string, object?> Args(string tool, bool dryRun)
     {
         var args = new Dictionary<string, object?> { ["project"] = "Line1", ["page"] = "P", ["dry_run"] = dryRun };
@@ -130,6 +175,11 @@ public sealed class PageDisplayToolTests
             case PlacementUpdateTools.Tool:
                 args["moves"] = JsonSerializer.SerializeToElement(new[] { new { locator = new { project = "Line1", page = "P", type = 4, oid = 1, digest = new string('a', 64) }, x_mm = 20, y_mm = 20 } });
                 break;
+            case PlacementEditTools.Tool:
+                args["operation"] = "align";
+                args["alignment"] = "left";
+                args["locators"] = JsonSerializer.SerializeToElement(new[] { new { project = "Line1", page = "P", type = 4, oid = 1, digest = new string('a', 64) } });
+                break;
             case MacroWriteTools.InsertTool:
                 args["macro"] = "Motor.ema";
                 args["x"] = 20;
@@ -142,23 +192,26 @@ public sealed class PageDisplayToolTests
         return args;
     }
 
-    private static async Task WithClient(Func<McpClient, WriteToolHarness, Task> check)
+    private static async Task WithClient(Func<McpClient, WriteToolHarness, Task> check, IApprovalChannel? channel = null, bool outsideScratch = false)
     {
-        using var harness = new WriteToolHarness(OutsideScratchWrites.Deny);
+        using var harness = new WriteToolHarness(outsideScratch ? OutsideScratchWrites.Approve : OutsideScratchWrites.Deny, channel is null ? [] : [channel]);
+        if (outsideScratch)
+        { harness.ProjectPath = Path.Combine(harness.Locations.Root, "outside", "Line1"); }
         Directory.CreateDirectory(harness.Locations.Imports);
         await File.WriteAllTextAsync(Path.Combine(harness.Locations.Imports, "drawing.dxf"), "drawing", Token);
-        foreach (string operation in new[] { OperationNames.DevicePlacePlan, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionGeneratePlan, OperationNames.MacroInsertPlan, OperationNames.ImportDxfPlan })
+        foreach (string operation in new[] { OperationNames.DevicePlacePlan, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionGeneratePlan, OperationNames.MacroInsertPlan, OperationNames.ImportDxfPlan, OperationNames.PlacementEditPlan })
         {
             harness.Bridge.Handlers[operation] = raw =>
             {
                 Assert.DoesNotContain("show_page", JsonSerializer.Serialize(raw), StringComparison.Ordinal);
                 WritePlan plan = harness.Plan([new() { Action = "create", Kind = "page", Name = "P", OldValue = "0" }]);
-                plan.Details = new() { ["preview"] = """{"project":"Line1","page":"P","undoSteps":2,"hint":"Original hint."}""" };
+                plan.Details = new() { ["preview"] = """{"project":"Line1","page":"P","undoSteps":2,"fingerprint":"f1","hint":"Original hint."}""" };
                 return plan;
             };
         }
         harness.Bridge.Handlers[OperationNames.DevicePlaceExecute] = _ => new DevicePlaceData { Project = "Line1", Page = "P", Part = "P1", Functions = 1 };
-        harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = _ => JsonNode.Parse("""{"project":"Line1","page":"P","undoSteps":2,"hint":"Original hint."}""")!;
+        harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = _ => JsonNode.Parse("""{"project":"Line1","page":"P","undoSteps":2,"fingerprint":"f1","hint":"Original hint."}""")!;
+        harness.Bridge.Handlers[OperationNames.PlacementEditExecute] = _ => JsonNode.Parse("""{"project":"Line1","page":"P","fingerprint":"f1"}""")!;
         harness.Bridge.Handlers[OperationNames.ConnectionGenerateExecute] = _ => new ConnectionGenerateData { Project = "Line1", Pages = [new() { Page = "P", After = 1, AddedCount = 1 }] };
         harness.Bridge.Handlers[OperationNames.MacroInsertExecute] = _ => new MacroInsertData { Project = "Line1", Page = "P" };
         harness.Bridge.Handlers[OperationNames.ImportDxfExecute] = _ => new ImportDxfData { Project = "Line1", Page = "P", ObjectsAdded = 1 };

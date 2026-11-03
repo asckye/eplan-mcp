@@ -37,6 +37,7 @@ public sealed class DanglingInterruptionTests(LiveEplan eplan, WriteHost host) :
         {
             JsonElement result = await host.CallAsync("eplan_device_place", new()
             {
+                ["dry_run"] = false,
                 ["project"] = session.Project,
                 ["page"] = page,
                 ["library"] = symbol.Library,
@@ -70,7 +71,7 @@ public sealed class DanglingInterruptionTests(LiveEplan eplan, WriteHost host) :
                 ["items"] = new[] { item },
             };
         }
-        JsonElement peer = await host.CallAsync("eplan_connection_create", Request(1));
+        JsonElement peer = await host.CallAsync("eplan_connection_create", new(Request(1)) { ["dry_run"] = false });
         Assert.Equal(1, peer.GetProperty("undoSteps").GetInt32());
         Assert.Empty(peer.GetProperty("actualEndpoints").EnumerateArray());
         // This older write must survive undoing the tested call.
@@ -82,7 +83,7 @@ public sealed class DanglingInterruptionTests(LiveEplan eplan, WriteHost host) :
         await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
         try
         {
-            JsonElement result = await host.CallAsync("eplan_connection_create", Request(0));
+            JsonElement result = await host.CallAsync("eplan_connection_create", new(Request(0)) { ["dry_run"] = false });
             TestContext.Current.TestOutputHelper!.WriteLine("D5 tool result: " + result);
             Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
             Assert.Equal(1, result.GetProperty("undoSteps").GetInt32());

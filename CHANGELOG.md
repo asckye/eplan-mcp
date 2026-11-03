@@ -16,6 +16,19 @@
 - 工程包新增插件种类、提供项与标准标签，旧包保持原摘要；新增离线工具 `eplan_pack_library_list`，可浏览内置、本地及登记的只读共享库，查看已安装版本和更新候选。
 - `eplan_connection_create` 支持用 `t_node.variant` 选择同方向引脚的 SPECIAL 变体，以及用 `interruption_point.sort_code` 在放置事务中设置排序码 24809 并读回；省略参数沿用原行为。D1/D2 的变体流向及跨页配对 Spike 已补，待实机运行。
 
+### 破坏性变化
+
+0.5.0 按 ADR-0049 / MIG-02 分组迁移写入默认值；本批省略或传 `dry_run: true` 均只预览，不请求审批、不修改项目或文件，返回 `execution: not_started` 与执行提示。执行须显式传 `dry_run: false`，审批、读回和撤销规则不变；尚未迁移的工具暂保留原默认值，`eplan_plan_apply` 输入已审阅计划，保持现有执行语义。
+
+| 工具 | 旧：省略 `dry_run` | 新：省略 `dry_run` | 执行方式 |
+|---|---|---|---|
+| `eplan_device_place` | 执行 | 预览 | `dry_run: false` |
+| `eplan_connection_create` | 执行 | 预览 | `dry_run: false` |
+| `eplan_placement_create` | 执行 | 预览 | `dry_run: false` |
+| `eplan_placement_update` | 执行 | 预览 | `dry_run: false` |
+| `eplan_placement_edit` | 执行 | 预览 | `dry_run: false` |
+| `eplan_macro_insert` | 执行 | 预览 | `dry_run: false` |
+
 ### Fixed
 - 写操作异常缺少执行状态且没有回滚证据时，报告 `OUTCOME_UNKNOWN` / `unknown`，保留已证实回滚的结果，避免误报为已回滚并引发重试。
 - Host 与 Bridge 双向拒绝 JSON-RPC 协议信封中的重复成员和未知成员，并附诊断编号；保持协议版本与 16 MiB 帧上限，升级时需同时更新 Host 与插件。

@@ -1,4 +1,7 @@
 # 工具规格：`eplan_placement_create`
+
+ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批、不修改项目或文件，返回 `execution: not_started`；执行须再次调用并显式传 `dry_run: false`，`hint` 会说明该步骤；预览返回 `fingerprint` 计划指纹。Small/Medium 覆盖省略、true、false 三条路径；审批、读回和撤销规则不变。
+
 | 项 | 内容 |
 |---|---|
 | 分组 / Profile / 安全级别 | `placement` / `full` / Write |
@@ -12,7 +15,7 @@
 |---|---|---|---|---|
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 
-`project,page` 显式必填；单一 `Circuit` 页；`items` 1–50 项，严格成员且拒绝重复键。`dry_run=false`、`snap_to_grid=true`、`response_format=concise`（另可 detailed）；请求≤256 KiB。
+`project,page` 显式必填；单一 `Circuit` 页；`items` 1–50 项，严格成员且拒绝重复键。`dry_run=true`、`snap_to_grid=true`、`response_format=concise`（另可 detailed）；请求≤256 KiB。
 每项 `kind=text/line/rectangle`；text 必填 `position:[x_mm,y_mm]`、`contents:{语言代码:文字}`、`height_mm`（0.5–100）；总文字≤500 字符，每种语言非空且唯一，代码如 `en_US` 或语言无关 `??_??`。A54：缺项目显示语言的文字不显示，必须提供语言无关内容或至少项目显示语言；显示语言来自可信读取，不从工具参数自报。 `??_??` 不得与具体语言混用（A54 / T4b 实测）。
 line 必填 `points:[[x1,y1],[x2,y2]]`；rectangle 必填 `corners` 同形状，可反向给角点。坐标均为有限数，0–10,000 mm，页左下角原点、y 向上；默认按页栅格吸附，中点远离零，关闭时保持原值。
 ## 3. 输出

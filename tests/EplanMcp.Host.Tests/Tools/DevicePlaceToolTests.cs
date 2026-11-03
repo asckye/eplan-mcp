@@ -54,7 +54,9 @@ public sealed class DevicePlaceToolTests : IDisposable
         JsonElement data = WriteToolHarness.Structured(result);
         Assert.Equal(("not_started", true, Page, Part, "1"), (data.GetProperty("execution").GetString(), data.GetProperty("dryRun").GetBoolean(), data.GetProperty("page").GetString(), data.GetProperty("part").GetString(), data.GetProperty("variant").GetString()));
         Assert.Equal("=GAA+A1-KF20", data.GetProperty("device").GetProperty("tag").GetString());
-        Assert.Equal((JsonValueKind.Null, JsonValueKind.Null, JsonValueKind.Null, JsonValueKind.Null), (data.GetProperty("device").GetProperty("visibleTag").ValueKind, data.GetProperty("functions").ValueKind, data.GetProperty("undo").ValueKind, data.GetProperty("hint").ValueKind));
+        Assert.Equal((JsonValueKind.Null, JsonValueKind.Null, JsonValueKind.Null), (data.GetProperty("device").GetProperty("visibleTag").ValueKind, data.GetProperty("functions").ValueKind, data.GetProperty("undo").ValueKind));
+        Assert.Contains("dry_run: false", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.Equal("f1", data.GetProperty("fingerprint").GetString());
         Assert.Equal("Dry run: would place one device. Nothing was changed.", WriteToolHarness.Text(result, 0));
         Assert.Empty(_harness.Bridge.Writes);
         Assert.False(data.TryGetProperty("symbol", out _));
@@ -148,7 +150,7 @@ public sealed class DevicePlaceToolTests : IDisposable
         harness.Bridge.Handlers[OperationNames.DevicePlacePlan] = _ => harness.Plan([new PlannedChange { Action = "create", Kind = "device", Name = Page, NewValue = "SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160)" }]);
         harness.Bridge.Handlers[OperationNames.DevicePlaceExecute] = _ => new DevicePlaceData { Project = "Line1", Page = Page, Tag = "=GAA+A1-KF20", Functions = 5, PageSizeKnown = true };
 
-        JsonElement data = WriteToolHarness.Structured(await DeviceWriteTools.DevicePlaceAsync(harness.Pipeline, harness.Bridge, "Line1", Page, 80, 160, "-KF20", Part, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement data = WriteToolHarness.Structured(await DeviceWriteTools.DevicePlaceAsync(harness.Pipeline, harness.Bridge, "Line1", Page, 80, 160, "-KF20", Part, dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("committed", data.GetProperty("execution").GetString());
         Assert.Equal("create device =GAA+A1&EFS1/60 (SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160))", Assert.Single(WritePipeline.ChangeLines(Assert.Single(channel.Questions).Plan)));

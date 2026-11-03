@@ -15,6 +15,7 @@ public sealed class LayoutGuardTests(LiveEplan eplan, WriteHost host, ITestOutpu
         string page = Assert.Single(await session.CreatePagesAsync(1));
         await host.CallAsync("eplan_device_place", new()
         {
+            ["dry_run"] = false,
             ["project"] = host.Writable,
             ["page"] = page,
             ["library"] = "IEC_symbol",
@@ -26,6 +27,7 @@ public sealed class LayoutGuardTests(LiveEplan eplan, WriteHost host, ITestOutpu
         });
         await host.CallAsync("eplan_placement_create", new()
         {
+            ["dry_run"] = false,
             ["project"] = host.Writable,
             ["page"] = page,
             ["items"] = new[] { new { kind = "text", position = (int[])[140, 100], height_mm = 3.5, contents = new Dictionary<string, string> { ["??_??"] = "Layout guard note" } } }
@@ -109,6 +111,7 @@ public sealed class LayoutGuardTests(LiveEplan eplan, WriteHost host, ITestOutpu
         double labelX = Math.Floor((page.PageSize![0] - 10) / page.GridSize) * page.GridSize - page.GridSize;
         JsonElement error = await host.ErrorAsync("eplan_device_place", new()
         {
+            ["dry_run"] = false,
             ["project"] = host.Writable,
             ["page"] = page.Page,
             ["library"] = "IEC_symbol",

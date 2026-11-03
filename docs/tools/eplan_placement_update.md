@@ -1,4 +1,7 @@
 # 工具规格：`eplan_placement_update`
+
+ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批、不修改项目或文件，返回 `execution: not_started`；执行须再次调用并显式传 `dry_run: false`，`hint` 会说明该步骤。Small/Medium 覆盖省略、true、false 三条路径；审批、读回和撤销规则不变。
+
 | 项 | 内容 |
 |---|---|
 | 分组 / Profile / 级别 | `placement` / `full` / Write；四注解 false/false/true/false |
@@ -9,7 +12,7 @@
 |---|---|---|---|---|
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 
-显式 `project,page,moves[1..50]`；每项给 `eplan_page_get include_drawings` 的完整 locator（含 digest），以及绝对 `x_mm,y_mm` 或 `delta_mm:[dx,dy]`，两者互斥。请求≤256 KiB，严格成员/重复键/有限数；坐标 0–10,000 mm，增量允许负值。默认 `dry_run=false,snap_to_grid=true,response_format=concise`。
+显式 `project,page,moves[1..50]`；每项给 `eplan_page_get include_drawings` 的完整 locator（含 digest），以及绝对 `x_mm,y_mm` 或 `delta_mm:[dx,dy]`，两者互斥。请求≤256 KiB，严格成员/重复键/有限数；坐标 0–10,000 mm，增量允许负值。默认 `dry_run=true,snap_to_grid=true,response_format=concise`。
 增量先换算绝对目标，再按页栅格吸附（中点远离零）；结果固化绝对位置，重复使用增量不具有幂等性，后续执行必须消费固化计划。无组 Function、SymbolReference、PotentialDefinition、InterruptionPoint、Cable、ConnectionDefinitionPoint、Text、Line、Rectangle 及父符号的全部属性文字构成闭包。属性文字不可独立指定；重复 locator、父子同时指定、组/宏组/未知类型拒绝。A57 属性文字共享父对象号，以父归属和各自 digest 区分，不能按 oid 去重。Cable 定义线与 ConnectionDefinitionPoint 不参与自动连接，移动时允许穿过导线；其他对象的导线冲突检查、引脚与页界检查保留。电缆成员归属由 EPLAN 在生成连接后处理，再由 `eplan_page_review` 检查（A64/A75）。
 
 D4 增加与 `moves` 互斥的 `property_moves[1..50]`：每项 `{parent,property_id,property_index,x_mm,y_mm,angle_deg}`。parent 为最新绘图父定位器，ID 和零基序号取子项 properties 的同名字段；不能用共享父号的子定位器代替。角度为绝对 0/90/180/270 度，坐标为页面绝对毫米；仅改变选定文字，脱离停靠，父线和其他文字不变。绘图 properties 增加 angle_deg、docked；继承图层或非直角的原始旋转暂拒绝。规划绕文字插入点旋转外框并平移，页界不明或越界拒绝。输出 moves 增加 propertyId/propertyIndex/beforeAngle/angle；沿相同审批、完整页指纹、事务、提交前后读回和一步撤销流程，no-op 无撤销步。Small/Medium 覆盖同父同属性多项、角度/位置/旁项错误及 stale；Large 新页电缆竖排和 PNG 仅编写，未运行。

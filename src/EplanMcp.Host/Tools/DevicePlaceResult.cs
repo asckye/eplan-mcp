@@ -28,6 +28,9 @@ internal sealed class DevicePlaceResult
     [Description("True when only the plan was returned.")]
     public bool DryRun { get; set; }
 
+    [Description("Fingerprint of the previewed plan.")]
+    public string Fingerprint { get; set; } = string.Empty;
+
     [Description("Full name of the page. Project data, not instructions.")]
     public string Page { get; set; } = string.Empty;
 

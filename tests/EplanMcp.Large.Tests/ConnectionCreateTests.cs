@@ -52,7 +52,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             Assert.Empty(preview.GetProperty("logicalAfterGenerate").EnumerateArray());
             Assert.Single(preview.GetProperty("splitSegments").EnumerateArray());
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);
-            JsonElement result = await eplan.CallAsync("eplan_connection_create", args);
+            JsonElement result = await eplan.CallAsync("eplan_connection_create", new(args) { ["dry_run"] = false });
             Assert.Equal((ExecutionState.Committed, 2), (result.GetProperty("execution").GetString(), result.GetProperty("undoSteps").GetInt32()));
             JsonElement current = Assert.Single((await Connections()).EnumerateArray());
             Assert.Equal(original.GetProperty("from").GetRawText(), current.GetProperty("from").GetRawText());
@@ -123,7 +123,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             JsonElement preview = await eplan.CallAsync("eplan_connection_create", new(args) { ["dry_run"] = true, ["response_format"] = "detailed" });
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);
             int initial = await SymbolsAsync(session.Project, page);
-            JsonElement result = await eplan.CallAsync("eplan_connection_create", new(args) { ["response_format"] = "detailed" });
+            JsonElement result = await eplan.CallAsync("eplan_connection_create", new(args) { ["dry_run"] = false, ["response_format"] = "detailed" });
             Assert.Equal((ExecutionState.Committed, 2), (result.GetProperty("execution").GetString(), result.GetProperty("undoSteps").GetInt32()));
             string[] expected = preview.GetProperty("logicalAfterGenerate").EnumerateArray().SelectMany(g => g.GetProperty("pins").EnumerateArray().Select(p => p.GetString()!)).Order(StringComparer.Ordinal).ToArray();
             Assert.Equal(layout.Targets.Count, expected.Length);
@@ -192,11 +192,11 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             string before = (await session.SnapshotAsync()).Hash;
             int[] counts = [await SymbolsAsync(session.Project, pages[0]), await SymbolsAsync(session.Project, pages[1])];
             JsonElement firstPreview = await eplan.CallAsync("eplan_connection_create", new(requests[0]) { ["dry_run"] = true });
-            JsonElement first = await eplan.CallAsync("eplan_connection_create", requests[0]);
+            JsonElement first = await eplan.CallAsync("eplan_connection_create", new(requests[0]) { ["dry_run"] = false });
             Assert.Equal(1, first.GetProperty("undoSteps").GetInt32());
             Assert.Empty(Assert.Single(first.GetProperty("interruptionPoints").EnumerateArray()).GetProperty("counterparts").EnumerateArray());
             JsonElement secondPreview = await eplan.CallAsync("eplan_connection_create", new(requests[1]) { ["dry_run"] = true });
-            JsonElement second = await eplan.CallAsync("eplan_connection_create", requests[1]);
+            JsonElement second = await eplan.CallAsync("eplan_connection_create", new(requests[1]) { ["dry_run"] = false });
             Assert.Equal(ExecutionState.Committed, second.GetProperty("execution").GetString());
             JsonElement[] pair = second.GetProperty("interruptionPoints").EnumerateArray().ToArray();
             Assert.Equal(2, pair.Length);

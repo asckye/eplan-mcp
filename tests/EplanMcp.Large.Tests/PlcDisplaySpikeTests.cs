@@ -116,7 +116,7 @@ public sealed class PlcDisplaySpikeTests(LiveEplan eplan)
         string page = Prefix + (last + 1).ToString(CultureInfo.InvariantCulture), cardPage = Prefix + (last + 2).ToString(CultureInfo.InvariantCulture);
         await eplan.CallAsync("eplan_page_create", new() { ["project"] = project, ["pages"] = new[] { new { name = page }, new { name = cardPage } } });
         await eplan.CallAsync("eplan_page_open", new() { ["project"] = project, ["page"] = page });
-        JsonElement card = await eplan.CallAsync("eplan_device_place", new() { ["project"] = project, ["page"] = cardPage, ["library"] = "SPECIAL", ["symbol"] = "PLCC", ["symbol_variant"] = 0, ["tag"] = "-D3KF" + (last + 1).ToString(CultureInfo.InvariantCulture), ["x"] = 80, ["y"] = 180 });
+        JsonElement card = await eplan.CallAsync("eplan_device_place", new() { ["dry_run"] = false, ["project"] = project, ["page"] = cardPage, ["library"] = "SPECIAL", ["symbol"] = "PLCC", ["symbol_variant"] = 0, ["tag"] = "-D3KF" + (last + 1).ToString(CultureInfo.InvariantCulture), ["x"] = 80, ["y"] = 180 });
         do
         {
             JsonElement symbols = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = project, ["kind"] = "function", ["limit"] = 200, ["cursor"] = cursor });
@@ -137,7 +137,7 @@ public sealed class PlcDisplaySpikeTests(LiveEplan eplan)
         { args["plc_plug_designation"] = plug; }
         if (displays)
         { args["display_properties"] = new[] { new { property_id = 20213, offset_x_mm = 4, offset_y_mm = 12 }, new { property_id = 20300, offset_x_mm = 4, offset_y_mm = 8 }, new { property_id = 20406, offset_x_mm = 4, offset_y_mm = 4 }, new { property_id = 20400, offset_x_mm = 4, offset_y_mm = 0 } }; }
-        (bool succeeded, JsonElement result) = await eplan.CallOrErrorAsync("eplan_device_place", args);
+        (bool succeeded, JsonElement result) = await eplan.CallOrErrorAsync("eplan_device_place", new(args) { ["dry_run"] = false });
         Print("place", new { args, succeeded, result });
         return (succeeded, result);
     }

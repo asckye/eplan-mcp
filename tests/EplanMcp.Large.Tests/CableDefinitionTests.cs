@@ -97,7 +97,7 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
             };
             JsonElement preview = await eplan.CallAsync("eplan_connection_create", new(args) { ["dry_run"] = true });
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);
-            JsonElement result = await eplan.CallAsync("eplan_connection_create", args);
+            JsonElement result = await eplan.CallAsync("eplan_connection_create", new(args) { ["dry_run"] = false });
             Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
             Assert.Equal(preview.GetProperty("undoSteps").GetInt32(), result.GetProperty("undoSteps").GetInt32());
             Assert.Equal(6, result.GetProperty("undoSteps").GetInt32());
@@ -134,7 +134,7 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
             var update = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["property_moves"] = moves, ["snap_to_grid"] = false, ["response_format"] = "detailed" };
             JsonElement planned = await eplan.CallAsync("eplan_placement_update", new(update) { ["dry_run"] = true });
             Assert.Equal(JsonSerializer.Serialize(cableBefore), JsonSerializer.Serialize(await Drawings()));
-            JsonElement changed = await eplan.CallAsync("eplan_placement_update", update);
+            JsonElement changed = await eplan.CallAsync("eplan_placement_update", new(update) { ["dry_run"] = false });
             TestContext.Current.TestOutputHelper.WriteLine("D4 approved/readback: " + changed);
             Assert.Equal(ExecutionState.Committed, changed.GetProperty("execution").GetString());
             PageDrawingGeometry after = await Drawings();
@@ -146,7 +146,7 @@ public sealed class CableDefinitionTests(LiveEplan eplan, WriteHost host) : ICla
                 Assert.Equal("90", text.Properties["angle_deg"]);
             }
             Assert.Equal(JsonSerializer.Serialize(parent), JsonSerializer.Serialize(Assert.Single(after.Placements, p => p.Parent is null && p.Locator.Oid == parent.Locator.Oid)));
-            Assert.Equal(ExecutionState.NotStarted, (await eplan.CallAsync("eplan_placement_update", update)).GetProperty("execution").GetString());
+            Assert.Equal(ExecutionState.NotStarted, (await eplan.CallAsync("eplan_placement_update", new(update) { ["dry_run"] = false })).GetProperty("execution").GetString());
             TestContext.Current.TestOutputHelper.WriteLine("D4 PNG: " + await eplan.CallAsync("eplan_export_image", new() { ["project"] = session.Project, ["pages"] = new[] { page } }));
             await session.UndoAsync();
             Assert.Equal(JsonSerializer.Serialize(cableBefore), JsonSerializer.Serialize(await Drawings()));

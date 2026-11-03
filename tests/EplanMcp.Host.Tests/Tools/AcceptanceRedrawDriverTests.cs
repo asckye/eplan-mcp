@@ -19,6 +19,8 @@ public sealed class AcceptanceRedrawDriverTests
         Assert.Equal(["eplan_page_create", "eplan_page_open", "eplan_page_get"], fake.Calls.Take(3));
         Assert.Equal("eplan_export_image", fake.Calls[^1]);
         Assert.DoesNotContain(fake.Calls, c => c.Contains("undo", StringComparison.OrdinalIgnoreCase) || c.Contains("delete", StringComparison.OrdinalIgnoreCase));
+        Assert.All(fake.Requests.Where(r => r.Tool is "eplan_device_place" or "eplan_connection_create" or "eplan_placement_create" or "eplan_placement_update" or "eplan_placement_edit" or "eplan_macro_insert"),
+            request => Assert.False(request.Args.GetProperty("dry_run").GetBoolean()));
         Assert.Equal(39, driver.UndoSteps);
         Assert.False(driver.UndoCountIncomplete);
         JsonElement report = JsonSerializer.SerializeToElement(driver.Report);
@@ -597,7 +599,7 @@ public sealed class AcceptanceRedrawDriverTests
         var fake = new DrawingTools
         {
             ConnectWires = true,
-            Refuse = (tool, args) => tool == "eplan_connection_create" && args.TryGetProperty("dry_run", out _) ? refusal : null,
+            Refuse = (tool, args) => tool == "eplan_connection_create" && args.GetProperty("dry_run").GetBoolean() ? refusal : null,
         };
         var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", ExplicitWiresList(), "test", output.Add, keepGoing: keepGoing, preflight: true);
         var error = await Assert.ThrowsAnyAsync<Xunit.Sdk.XunitException>(driver.DrawAsync);
@@ -610,7 +612,7 @@ public sealed class AcceptanceRedrawDriverTests
             Assert.Contains(output, line => line.Contains(p.GetProperty("batch").GetString()!, StringComparison.Ordinal) && line.Contains(refusal.GetRawText(), StringComparison.Ordinal));
             Assert.Contains(p.GetProperty("batch").GetString()!, error.Message, StringComparison.Ordinal);
         });
-        int lastDryRun = fake.Requests.FindLastIndex(r => r.Args.TryGetProperty("dry_run", out _));
+        int lastDryRun = fake.Requests.FindLastIndex(r => r.Args.TryGetProperty("dry_run", out JsonElement dry) && dry.GetBoolean());
         Assert.All(fake.Requests.Take(lastDryRun + 1), r =>
         {
             Assert.NotEqual("eplan_connection_generate", r.Tool);
@@ -650,8 +652,8 @@ public sealed class AcceptanceRedrawDriverTests
         var driver = new AcceptanceRedrawDriver(fake.CallAsync, "LargeWrite", list, "test", _ => { }, keepGoing: true, preflight: true);
         await driver.DrawAsync();
         Assert.Equal(0, driver.SkippedCount);
-        JsonElement[] dryRuns = fake.Requests.Where(r => r.Tool == "eplan_connection_create" && r.Args.TryGetProperty("dry_run", out _)).Select(r => r.Args).ToArray();
-        JsonElement[] writes = fake.Requests.Where(r => r.Tool == "eplan_connection_create" && !r.Args.TryGetProperty("dry_run", out _)).Select(r => r.Args).ToArray();
+        JsonElement[] dryRuns = fake.Requests.Where(r => r.Tool == "eplan_connection_create" && r.Args.GetProperty("dry_run").GetBoolean()).Select(r => r.Args).ToArray();
+        JsonElement[] writes = fake.Requests.Where(r => r.Tool == "eplan_connection_create" && !r.Args.GetProperty("dry_run").GetBoolean()).Select(r => r.Args).ToArray();
         Assert.Equal(3, dryRuns.Length);
         Assert.Equal(deferredCable ? 4 : 3, writes.Length);
         for (int i = 0; i < dryRuns.Length; i++)

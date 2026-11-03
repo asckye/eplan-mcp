@@ -25,7 +25,7 @@ internal sealed class PlacementCreateTools
         if (problems.Count > 0)
         { BridgeError error = ToolResults.InvalidArgumentError(problems); error.Execution = ExecutionState.NotStarted; return ToolResults.Error(error); }
         PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, input, cancellationToken).ConfigureAwait(false);
-        if (input.TryGetProperty("dry_run", out JsonElement dry) && dry.GetBoolean())
+        if (WriteToolDefaults.IsPreview(input))
         { return display.Apply(await PlacementCreatePlanning.PreviewAsync(bridge, input, cancellationToken: cancellationToken).ConfigureAwait(false)); }
         try
         {

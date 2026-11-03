@@ -48,6 +48,7 @@ public sealed partial class DevicePlaceTests
                 string tag = "=GAA+A1-ET" + suffix + end + i.ToString(CultureInfo.InvariantCulture);
                 await eplan.CallAsync("eplan_device_place", new()
                 {
+                    ["dry_run"] = false,
                     ["project"] = project,
                     ["page"] = page,
                     ["library"] = "IEC_symbol",
@@ -81,7 +82,7 @@ public sealed partial class DevicePlaceTests
             { args["terminal_strip_text"] = "操作控制盒"; }
             JsonElement preview = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
             Assert.Equal(snapshots[^1], (await selection.SnapshotAsync()).Hash);
-            JsonElement placed = await eplan.CallAsync("eplan_device_place", args);
+            JsonElement placed = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = false });
             JsonElement terminal = placed.GetProperty("terminal");
             Assert.Equal(("committed", "AI: eplan_device_place"), (placed.GetProperty("execution").GetString(), placed.GetProperty("undo").GetString()));
             // Live T7c: this project's structure settings drop the higher-level function (=GAA) from strip names.
@@ -97,7 +98,7 @@ public sealed partial class DevicePlaceTests
         }
         JsonElement members = await eplan.CallAsync("eplan_terminal_strip_get", new() { ["project"] = project, ["strip"] = shown });
         Assert.Equal(["1", "2", "3"], members.GetProperty("terminals").EnumerateArray().Select(t => t.GetProperty("designation").GetString()));
-        JsonElement duplicate = await eplan.ErrorAsync("eplan_device_place", new(Args(3)) { ["terminal_strip"] = strip.ToLowerInvariant() });
+        JsonElement duplicate = await eplan.ErrorAsync("eplan_device_place", new(Args(3)) { ["dry_run"] = false, ["terminal_strip"] = strip.ToLowerInvariant() });
         Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.NotStarted), (duplicate.GetProperty("reason").GetString(), duplicate.GetProperty("execution").GetString()));
         Assert.Equal(snapshots[^1], (await selection.SnapshotAsync()).Hash);
         await eplan.CallAsync("eplan_connection_generate", generate); // A52: a separate commit from all placements.

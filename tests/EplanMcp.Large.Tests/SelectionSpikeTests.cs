@@ -17,6 +17,7 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
         string[] pages = await session.CreatePagesAsync(2);
         await host.CallAsync("eplan_device_place", new()
         {
+            ["dry_run"] = false,
             ["project"] = session.Project,
             ["page"] = pages[0],
             ["library"] = "IEC_symbol",
@@ -29,6 +30,7 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
         });
         await host.CallAsync("eplan_placement_create", new()
         {
+            ["dry_run"] = false,
             ["project"] = session.Project,
             ["page"] = pages[1],
             ["snap_to_grid"] = false,
@@ -89,6 +91,7 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
         string baseline = (await session.SnapshotAsync()).Hash;
         await host.CallAsync("eplan_placement_create", new()
         {
+            ["dry_run"] = false,
             ["project"] = session.Project,
             ["page"] = page,
             ["snap_to_grid"] = false,

@@ -3,8 +3,9 @@
 
     {"project":"Line1","page":"=F+A1&EFS1/1","dry_run":true,"items":[{"kind":"interruption_point","name":"=F+A1-LINK","position":[80,120],"direction":"Up","counterpart_pages":["=F+A1&EFS1/2"]}]}
 ## Workflow
-Read exact page locators and pins first. Supply explicit orthogonal paths; no routing. Wires/nodes commit placement then generation: 2 undo steps (Ctrl+Z twice). Cables use 6-8 undo steps, shown in preview and approval. Outside scratch needs approval. The target must be current for safe compensation; failure rolls back the current stage and undoes this call's confirmed commits.
-Interruption calls use one undo step, including isolated points and lines without a counterpart device. Geometry, names, positions and native pairing are verified even when no logical connection is generated. Do not add auxiliary devices. When both sides have devices, their real pins must still connect.
+Omitted/true dry_run previews: no approval/writes (execution=not_started). Execute with dry_run:false; see hint.
+Read exact page locators/pins. Supply orthogonal paths; no routing. Wires/nodes: placement then generation, 2 undo steps (Ctrl+Z twice). Cables: 6-8, shown in preview/approval. Outside scratch needs approval. Target must be current for compensation; failure rolls back the current stage and undoes confirmed commits.
+Interruption calls use one undo step, including isolated points/lines without counterpart devices. Verify geometry, names, positions and native pairing even without logical connections. No auxiliary devices. When both sides have devices, their real pins must connect.
 ## Fields
 Plugin defaults: an omitted interruption_point.symbol takes defaults.interruption.symbol from the project's enabled plugins, else BP; explicit symbol wins. Plan and execute use the same resolved items; metadata.plugins lists consumed plugins; changed defaults make the plan stale.
 Optional: t_node.variant selects a SPECIAL variant with the requested pins; interruption_point.sort_code (integer >=0) sets native ordering (24809).

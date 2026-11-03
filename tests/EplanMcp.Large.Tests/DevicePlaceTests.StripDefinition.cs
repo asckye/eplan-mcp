@@ -29,7 +29,7 @@ public sealed partial class DevicePlaceTests
         };
         JsonElement preview = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
         Assert.Equal(before.GetRawText(), (await Drawings()).GetRawText());
-        JsonElement result = await eplan.CallAsync("eplan_device_place", args);
+        JsonElement result = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = false });
         TestContext.Current.TestOutputHelper!.WriteLine("D6 placement: " + result);
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
         Assert.Equal(preview.GetProperty("terminal").GetProperty("stripPosition").GetRawText(), result.GetProperty("terminal").GetProperty("stripPosition").GetRawText());

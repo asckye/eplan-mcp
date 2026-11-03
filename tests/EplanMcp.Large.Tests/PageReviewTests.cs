@@ -100,7 +100,7 @@ public sealed class PageReviewTests(LiveEplan eplan, WriteHost host) : IClassFix
                     {
                         JsonElement candidate = available.GetProperty("symbols").EnumerateArray().First(s => s.GetProperty("name").GetString() == "BAT" && s.GetProperty("connectionPoints").EnumerateArray().Any(p => p.GetProperty("direction").GetString() == direction));
                         JsonElement pin = candidate.GetProperty("connectionPoints").EnumerateArray().First(p => p.GetProperty("direction").GetString() == direction);
-                        await host.CallAsync("eplan_device_place", new() { ["project"] = session.Project, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "BAT", ["symbol_variant"] = candidate.GetProperty("variant").GetInt32(), ["tag"] = "-R" + page.Split('/')[^1] + direction, ["x"] = x - pin.GetProperty("location")[0].GetDouble(), ["y"] = 40 * grid - pin.GetProperty("location")[1].GetDouble() });
+                        await host.CallAsync("eplan_device_place", new() { ["dry_run"] = false, ["project"] = session.Project, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "BAT", ["symbol_variant"] = candidate.GetProperty("variant").GetInt32(), ["tag"] = "-R" + page.Split('/')[^1] + direction, ["x"] = x - pin.GetProperty("location")[0].GetDouble(), ["y"] = 40 * grid - pin.GetProperty("location")[1].GetDouble() });
                     }
                     break;
                 case "text":
@@ -127,7 +127,7 @@ public sealed class PageReviewTests(LiveEplan eplan, WriteHost host) : IClassFix
                         double x = origin[0] + pin.GetProperty("location")[0].GetDouble(), y = origin[1] + pin.GetProperty("location")[1].GetDouble();
                         return new { kind = "potential_point", position = new[] { x + (direction == "Right" ? 8 * grid : direction == "Left" ? -8 * grid : 0), y + (direction == "Up" ? 8 * grid : direction == "Down" ? -8 * grid : 0) }, directions = new[] { direction switch { "Right" => "Left", "Left" => "Right", "Up" => "Down", _ => "Up" } } };
                     }).ToArray();
-                    await host.CallAsync("eplan_connection_create", new() { ["project"] = session.Project, ["page"] = page, ["items"] = items });
+                    await host.CallAsync("eplan_connection_create", new() { ["dry_run"] = false, ["project"] = session.Project, ["page"] = page, ["items"] = items });
                     break;
             }
             JsonElement after = await Review();
@@ -141,7 +141,7 @@ public sealed class PageReviewTests(LiveEplan eplan, WriteHost host) : IClassFix
             async Task<JsonElement> Drawing() => (await host.CallAsync("eplan_page_get", new() { ["project"] = session.Project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" })).GetProperty("drawings");
             async Task<JsonElement> ReadConnections() => await host.CallAsync("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed", ["limit"] = 200 });
             async Task<JsonElement> Review() => await host.CallAsync("eplan_page_review", new() { ["project"] = session.Project, ["page"] = page, ["checks"] = new[] { check }, ["expected"] = expected, ["response_format"] = "detailed" });
-            async Task Move((JsonElement Row, double X, double Y)[] moves) => await host.CallAsync("eplan_placement_update", new() { ["project"] = session.Project, ["page"] = page, ["moves"] = moves.Select(m => new { locator = m.Row.GetProperty("locator"), x_mm = m.X, y_mm = m.Y }).ToArray() });
+            async Task Move((JsonElement Row, double X, double Y)[] moves) => await host.CallAsync("eplan_placement_update", new() { ["dry_run"] = false, ["project"] = session.Project, ["page"] = page, ["moves"] = moves.Select(m => new { locator = m.Row.GetProperty("locator"), x_mm = m.X, y_mm = m.Y }).ToArray() });
         }
         finally { await PlanStepLiveSession.ActionAsync("EplApiModuleAction /unregister:\"EplanMcp.Large.ConnectionHelper\" /Quiet"); }
     }

@@ -61,7 +61,7 @@ public sealed partial class DevicePlaceTests
         {
             await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
             Assert.Equal(snapshots[^1], (await selection.SnapshotAsync(page)).Hash);
-            JsonElement placed = await eplan.CallAsync("eplan_device_place", args);
+            JsonElement placed = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = false });
             Assert.Equal((ExecutionState.Committed, "AI: eplan_device_place"), (Text(placed, "execution"), Text(placed, "undo")));
             snapshots.Add((await selection.SnapshotAsync(page)).Hash);
             return placed;
@@ -109,7 +109,7 @@ public sealed partial class DevicePlaceTests
         {
             var duplicate = new Dictionary<string, object?>(pointArgs[0]);
             duplicate[field == "plc_address" ? "plc_connection_point" : "plc_address"] = field == "plc_address" ? "Other" : "I1.0";
-            JsonElement error = await eplan.ErrorAsync("eplan_device_place", duplicate);
+            JsonElement error = await eplan.ErrorAsync("eplan_device_place", new(duplicate) { ["dry_run"] = false });
             Assert.Equal(ErrorReason.AlreadyExists, Text(error, "reason"));
             Assert.Equal(snapshots[^1], (await selection.SnapshotAsync(page)).Hash);
         }

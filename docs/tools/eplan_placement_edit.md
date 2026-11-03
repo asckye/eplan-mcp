@@ -1,4 +1,7 @@
 # 工具规格：`eplan_placement_edit`
+
+ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批、不修改项目或文件，返回 `execution: not_started`；执行须再次调用并显式传 `dry_run: false`，`hint` 会说明该步骤。Small/Medium 覆盖省略、true、false 三条路径；审批、读回和撤销规则不变。
+
 | 模板项 | 规格 |
 |---|---|
 | 状态 | Implemented (Unreleased) |
@@ -9,7 +12,7 @@ placement / full / Implemented（Large 15/15 通过，2026-11-01）。delete 为
 ## 2. 输入参数
 | 参数 | 类型 / 必填 / 默认 | 说明 |
 |---|---|---|
-| project / page / operation / locators | string / string / enum / locator[]；必填 | 已打开项目、精确 Circuit 页、delete/copy/rotate/mirror/align/distribute；1–50 个同页无重复的 `eplan_object_find` 原样定位符；copy：offset_mm/target_mm 二选一，copies=1（1–20），多份必须 step_mm，第 k 份为初始偏移+k×step（k 从 0 起），新根最多 50；rotate：quarter_turns=±1..±3，正逆时针，pivot_mm 默认各原点；mirror：axis=horizontal/vertical，coordinate_mm 为 y/x；align：alignment=left/right/top/bottom/centre_x/centre_y，coordinate_mm 默认首对象外框；distribute：axis=horizontal 沿 x、vertical 沿 y；dry_run=false，response_format=concise/detailed |
+| project / page / operation / locators | string / string / enum / locator[]；必填 | 已打开项目、精确 Circuit 页、delete/copy/rotate/mirror/align/distribute；1–50 个同页无重复的 `eplan_object_find` 原样定位符；copy：offset_mm/target_mm 二选一，copies=1（1–20），多份必须 step_mm，第 k 份为初始偏移+k×step（k 从 0 起），新根最多 50；rotate：quarter_turns=±1..±3，正逆时针，pivot_mm 默认各原点；mirror：axis=horizontal/vertical，coordinate_mm 为 y/x；align：alignment=left/right/top/bottom/centre_x/centre_y，coordinate_mm 默认首对象外框；distribute：axis=horizontal 沿 x、vertical 沿 y；dry_run=true，response_format=concise/detailed |
 单位毫米、左下原点、y 向上；点和坐标限定 ±10000。对齐至少两项，分布至少三项，按外框等间隙且固定首尾，不吸附栅格。拒绝无关字段、非有限数、越界、重叠、组、独立属性放置与未支持种类；文字继承图层角度时拒绝旋转/镜像。
 ## 3. 输出
 结构化 project/page/operation/execution/dryRun/fingerprint/predicted/removedConnections/newLocators/noOp/recovered/backup 和可选 warning/before/after；predicted 含存在性、位置、外框、角度与子项/引脚。复制定位符仅执行后返回。文本摘要说明是否提交；不分页、不截断影响，超预算要求缩小选择或改 detailed。

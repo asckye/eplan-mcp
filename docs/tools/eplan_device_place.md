@@ -1,5 +1,7 @@
 # 工具规格：`eplan_device_place`
 
+ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批、不修改项目或文件，返回 `execution: not_started`；执行须再次调用并显式传 `dry_run: false`，`hint` 会说明该步骤；预览返回 `fingerprint` 计划指纹。Small/Medium 覆盖省略、true、false 三条路径；审批、读回和撤销规则不变。
+
 T7d 回归修复：`plc_text`、`terminal_strip_text` 均接收普通文本，固定写入语言无关 `??_??`（A54/T4b），拒绝嵌入原始多语言条目，避免与具体语言混用。读回允许显式 `language="??_??"`；核对 PLC 父关系、手工符号地址及辅助表达时使用 `eplan_plc_get` 的 `response_format="detailed"`。
 
 性能：放置计划保留全项目重名筛查，同次检查复用名称列表；PLC 辅助表达查询按卡的完整名称前缀及类别过滤，不按页裁掉无页或跨页表达。符号读取每次调用按引脚数复用 DI 定义查询结果（包括未找到），不跨请求缓存原生对象；Large 测试复用符号搜索结果、逐步快照限定测试页，保留属性、撤销及全项目孤儿核对，并比较首尾全项目快照。尚未重新运行 EPLAN，实际耗时待实机复核。
@@ -43,7 +45,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
 | `tag` | string | 设备来源必填 | — | 设备的标识：以 `-` 开头的短标识（如 `-KF20`），结构取自页（页的结构去掉 `&` 文档类型：`=GAA+A1&EFS1/60` 得到 `=GAA+A1`）；或者完整标识（如 `=GAA+A1-KF20`） |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要进行的放置，不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行传 `dry_run: false` |
 
 - 设备来源 `tag` 必填：`CreateDevice` 放置的设备标识不带页的结构、也不编号（S20：`=+-Q1`），工具总是给它一个确定的标识。规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。
 - 变体不存在时 EPLAN 会静默改用第一个变体（XML），所以规划时先确认变体存在。

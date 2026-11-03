@@ -2,6 +2,7 @@ id: terminal-definition-position
 set: dev
 fixture: copy
 prompt: |
+  绘图工具省略 dry_run 只预览；检查预览后，用同样参数并显式传 dry_run:false 执行。
   在项目 {project} 的新页 =GAA+A1&EFS1/9601 上放端子 +A1-XDE6:1，端子位置 (100,160) mm。
   同次把原生端子排定义放在 (72,120) mm，功能文本为 Fictional control box。
   不用自由文本代替端子排定义。读回后报告功能文本；此任务只使用虚构名称。

@@ -58,7 +58,7 @@ public sealed class PlanDependencyPredictionTests(LiveEplan eplan)
 
         var insertArgs = JsonSerializer.Deserialize<Dictionary<string, object?>>(predicted.Args.GetRawText())!;
         insertArgs["project"] = project;
-        JsonElement inserted = await eplan.CallAsync("eplan_macro_insert", insertArgs);
+        JsonElement inserted = await eplan.CallAsync("eplan_macro_insert", new(insertArgs) { ["dry_run"] = false });
         Assert.Equal("committed", inserted.GetProperty("execution").GetString());
         Assert.Equal(inspected.ObjectCount, inserted.GetProperty("objectCount").GetInt32());
         LiveSnapshots.Snapshot after = await LiveSnapshots.TakeAsync(bridge, new() { Project = project, Pages = [page] });

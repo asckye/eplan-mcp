@@ -34,6 +34,7 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
 
         JsonElement result = await host.CallAsync("eplan_placement_create", new()
         {
+            ["dry_run"] = false,
             ["project"] = host.Writable,
             ["page"] = page,
             ["snap_to_grid"] = false,

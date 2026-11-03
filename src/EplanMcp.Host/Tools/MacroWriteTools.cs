@@ -30,7 +30,7 @@ internal sealed class MacroWriteTools
         OutputSchemaType = typeof(MacroInsertResult))]
     [Description(
         "Inserts a window macro on a circuit page, its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. x, y: mm " +
-        "from the page's bottom left (y up) to the macro's top left corner. Outside scratch it needs approval. Example: " +
+        "from the page's bottom left (y up) to the macro's top left corner. Omit dry_run to preview; false executes. Outside scratch it needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.")]
     public static async Task<CallToolResult> MacroInsertAsync(
         WritePipeline pipeline,
@@ -42,7 +42,7 @@ internal sealed class MacroWriteTools
         [Description("mm")] double y,
         [Description("From eplan_macro_get")] int variant = 0,
         [Description("keep: the macro's tags")][AllowedValues("number", "keep")] string numbering = "number",
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -83,6 +83,7 @@ internal sealed class MacroWriteTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
             Page = ResultShaper.CleanText(data?.Page ?? outcome.Plan.Changes.FirstOrDefault()?.Name ?? args.Page),
             Macro = ResultShaper.CleanText(data?.Macro ?? details.GetValueOrDefault("macro") ?? string.Empty),
             Devices = data is null ? Planned(details) : [.. data.Devices.Select(d => Entry(d.Tag, d.VisibleTag, d.Category))],
@@ -92,6 +93,8 @@ internal sealed class MacroWriteTools
         };
         int devices = data?.DeviceCount ?? Count(details, "deviceCount");
         result.Hint = Hint(outcome, details, string.Equals(numbering, "keep", StringComparison.OrdinalIgnoreCase), result.Devices.Count, devices);
+        if (dry_run)
+        { result.Hint = WriteToolDefaults.ExecutionHint + " " + result.Hint; }
         string what = "a macro with " + ToolResults.Count(devices, "device");
         return display.Apply(ToolResults.Success(
             committed ? $"Inserted {what}; Ctrl+Z in EPLAN undoes this step." : $"Dry run: would insert {what}. Nothing was changed.",

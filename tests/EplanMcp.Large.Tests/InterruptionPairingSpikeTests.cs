@@ -39,6 +39,7 @@ public sealed class InterruptionPairingSpikeTests(LiveEplan eplan, WriteHost hos
         {
             JsonElement placed = await host.CallAsync("eplan_connection_create", new()
             {
+                ["dry_run"] = false,
                 ["project"] = session.Project,
                 ["page"] = pages[i / 2],
                 ["response_format"] = "detailed",
@@ -117,6 +118,7 @@ public sealed class InterruptionPairingSpikeTests(LiveEplan eplan, WriteHost hos
             // then change only these known point OIDs in the test-only native helper.
             JsonElement placed = await host.CallAsync("eplan_connection_create", new()
             {
+                ["dry_run"] = false,
                 ["project"] = session.Project,
                 ["page"] = point.page,
                 ["response_format"] = "detailed",
@@ -169,6 +171,7 @@ public sealed class InterruptionPairingSpikeTests(LiveEplan eplan, WriteHost hos
         SymbolConnectionPoint point = symbol.ConnectionPoints.First(p => p.Direction == direction);
         JsonElement placed = await host.CallAsync("eplan_device_place", new()
         {
+            ["dry_run"] = false,
             ["project"] = project,
             ["page"] = page,
             ["library"] = symbol.Library,

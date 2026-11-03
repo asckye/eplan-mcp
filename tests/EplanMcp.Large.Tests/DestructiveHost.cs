@@ -184,6 +184,7 @@ public sealed class DestructiveHost : IAsyncLifetime
     /// </summary>
     public Task<JsonElement> InsertMacroAsync(string page) => CallAsync("eplan_macro_insert", new()
     {
+        ["dry_run"] = false,
         ["project"] = Writable,
         ["page"] = page,
         ["macro"] = MacroTests.FeedbackControl,

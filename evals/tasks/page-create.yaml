@@ -1,7 +1,7 @@
 id: page-create
 set: dev
 fixture: copy
-prompt: 在项目 {project} 的 =GAA+A1 下新建 EFS1 的第 60、61 页多线原理图，中文页描述分别为"电源"和"控制"。在第 60 页用绘图工具放置文字“电源A”和“电源B”，初稿同放在 [40,40] 毫米。调用 eplan_page_review 审查重叠，按建议把“电源B”移到 [80,40]，再审到 clean；最多三轮，仍有问题原样报告。完成后告诉我结果。
+prompt: 在项目 {project} 的 =GAA+A1 下新建 EFS1 的第 60、61 页多线原理图，中文页描述分别为"电源"和"控制"。在第 60 页用绘图工具放置文字“电源A”和“电源B”，初稿同放在 [40,40] 毫米。调用 eplan_page_review 审查重叠，按建议把“电源B”移到 [80,40]，再审到 clean；最多三轮，仍有问题原样报告。完成后告诉我结果。 绘图工具省略 dry_run 只预览；检查预览后，用同样参数并显式传 dry_run:false 执行。
 answer:
   type: object
   required: [done]

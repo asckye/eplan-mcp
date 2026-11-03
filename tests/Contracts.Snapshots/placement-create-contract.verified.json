@@ -3,7 +3,7 @@
   "tool": {
     "name": "eplan_placement_create",
     "title": "Create text and graphics on an EPLAN page",
-    "description": "Creates text/line/rectangle on a Circuit page; mm, bottom left, y up. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
+    "description": "Creates text/line/rectangle on a Circuit page; mm, bottom left, y up. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
     "inputSchema": {
       "type": "object",
       "additionalProperties": false,
@@ -64,7 +64,8 @@
         },
         "dry_run": {
           "type": "boolean",
-          "default": false
+          "default": true,
+          "description": "Omit/true previews; false executes."
         },
         "show_page": {
           "type": "boolean",
@@ -168,6 +169,9 @@
         "connectionChanges": {
           "type": "array",
           "maxItems": 0
+        },
+        "fingerprint": {
+          "type": "string"
         },
         "pageShown": {
           "type": [
@@ -292,5 +296,5 @@
       "readOnlyHint": false
     }
   },
-  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"items\":[{\"kind\":\"text\",\"position\":[10,20],\"contents\":{\"??_??\":\"Panel\"},\"height_mm\":3},{\"kind\":\"line\",\"points\":[[10,10],[30,10]]},{\"kind\":\"rectangle\",\"corners\":[[5,5],[40,30]]}]}\n```\n## Workflow\nFull profile. Execution creates the complete batch atomically, reads every item back and supports one-step undo; outside scratch needs approval. Never repeat a committed or unknown call. A failed batch rolls back everything without an undo step.\n## Fields\nOne Circuit page, 1-50 items; coordinates in mm, bottom-left origin, y up, 0-10000. snap_to_grid defaults true; the preview reports requested and actual geometry plus full bounds. Text height is 0.5-100 mm, at most 500 characters across explicit languages. Never mix ??_?? with languages. Supply ??_?? or at least the project display language: other text is invisible (A54). Lines are graphics. No connection generation. concise/detailed budgets are 5k/20k, with complete impact lists.\n## Errors\nINVALID_ARGUMENT reports JSON Pointer violations for schema, languages or full-outline bounds. CAPABILITY_MISSING reports missing reliable page geometry or display language. Preflight failures and previews report execution=not_started; failed writes report rolled_back or unknown. Execution reports boundarySource=unverified and bounds=null: the result warning reports the page-size-minus-margin fallback and measured containment checks. Use reliable text measurements; plot-frame size and character-count estimates are not fallbacks.\nLayout preflight refuses R1-R5/R8 with a rule and, when available, a suggested grid position. R6/R7/R9 are warnings unless layout.strict is enabled. Boundary fallback uses Page.Size minus layout.marginMm. Incomplete prediction is allowed: check insertion points, known outlines and routes before writing; measure symbols and property texts in the same call before commit and roll back violations. Results report both check stages and the fallback; refusals include measured geometry and nearest free positions in metadata.layoutViolations/layoutChecks. Connection geometry available only after commit uses existing undo compensation.\n"
+  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"items\":[{\"kind\":\"text\",\"position\":[10,20],\"contents\":{\"??_??\":\"Panel\"},\"height_mm\":3},{\"kind\":\"line\",\"points\":[[10,10],[30,10]]},{\"kind\":\"rectangle\",\"corners\":[[5,5],[40,30]]}]}\n```\n## Workflow\nOmitting dry_run (or true) previews only: no approval, no project/file writes, execution=not_started. Call again with dry_run:false to execute; preview hint explains this step.\nFull profile. Execution creates the complete batch atomically, reads every item back and supports one-step undo; outside scratch needs approval. Never repeat a committed or unknown call. A failed batch rolls back everything without an undo step.\n## Fields\nOne Circuit page, 1-50 items; coordinates in mm, bottom-left origin, y up, 0-10000. snap_to_grid defaults true; the preview reports requested and actual geometry plus full bounds. Text height is 0.5-100 mm, at most 500 characters across explicit languages. Never mix ??_?? with languages. Supply ??_?? or at least the project display language: other text is invisible (A54). Lines are graphics. No connection generation. concise/detailed budgets are 5k/20k, with complete impact lists.\n## Errors\nINVALID_ARGUMENT reports JSON Pointer violations for schema, languages or full-outline bounds. CAPABILITY_MISSING reports missing reliable page geometry or display language. Preflight failures and previews report execution=not_started; failed writes report rolled_back or unknown. Execution reports boundarySource=unverified and bounds=null: the result warning reports the page-size-minus-margin fallback and measured containment checks. Use reliable text measurements; plot-frame size and character-count estimates are not fallbacks.\nLayout preflight refuses R1-R5/R8 with a rule and, when available, a suggested grid position. R6/R7/R9 are warnings unless layout.strict is enabled. Boundary fallback uses Page.Size minus layout.marginMm. Incomplete prediction is allowed: check insertion points, known outlines and routes before writing; measure symbols and property texts in the same call before commit and roll back violations. Results report both check stages and the fallback; refusals include measured geometry and nearest free positions in metadata.layoutViolations/layoutChecks. Connection geometry available only after commit uses existing undo compensation.\n"
 }

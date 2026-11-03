@@ -110,6 +110,7 @@ public sealed class PlacementCreateProtocolTests
     {
         ["project"] = "Line1",
         ["page"] = "P",
+        ["dry_run"] = false,
         ["items"] = JsonSerializer.Deserialize<JsonElement>("""
             [{"kind":"text","position":[12.5,22.5],"contents":{"??_??":"Panel"},"height_mm":3.5},
              {"kind":"line","points":[[10,10],[30,20]]},{"kind":"rectangle","corners":[[40,40],[10,10]]}]

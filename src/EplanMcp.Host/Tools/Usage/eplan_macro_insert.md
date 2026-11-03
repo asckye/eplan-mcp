@@ -6,15 +6,16 @@ A contactor feedback circuit at the top left of a new circuit page, first as a d
 
 The same macro's variant 2, keeping the macro's own tags:
 
-    {"project": "Line1", "page": "=GAA+A1&EFS1/61", "macro": "EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema", "x": 40, "y": 280, "variant": 2, "numbering": "keep"}
+    {"project": "Line1", "page": "=GAA+A1&EFS1/61", "macro": "EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema", "x": 40, "y": 280, "variant": 2, "numbering": "keep", "dry_run": false}
 
 ## Workflow
+Omitting dry_run (or true) previews only: no approval, no project/file writes, execution=not_started. Call again with dry_run:false to execute; preview hint explains this step.
 
 1. Find the macro with eplan_macro_list and check it with eplan_macro_get: it needs a `MultiLine` representation, and `size` tells how much room it takes.
 2. Choose a circuit page (eplan_page_list, or a new one from eplan_page_create) and a free area; eplan_page_get shows the devices already on it.
 3. `x` and `y` are millimetres from the page's bottom left corner, y up, and put the macro's top left corner there, so the macro takes `[x, x + width]` across and `[y - height, y]` up. On a page whose size EPLAN can tell, the macro must lie within it; on a new, empty page only `x >= 0` and `y >= 0` are checked.
 4. Keep the default `numbering: "number"`: EPLAN gives the devices tags no device has, in the page's structure. With `keep` the devices keep the macro's tags, and the insert is refused when that merges them with existing devices. To get particular tags, insert with `number` and rename with eplan_device_update.
-5. Call with `dry_run: true` to see the macro's devices when unsure, then without it. The insert is one step: one Ctrl+Z in EPLAN removes it.
+5. Omit `dry_run` to preview the macro's devices, then pass `dry_run: false` to execute. The insert is one step: one Ctrl+Z in EPLAN removes it.
 6. The call is not idempotent: repeated at the same point it is refused, elsewhere it inserts another copy. Never repeat a call that ended in OUTCOME_UNKNOWN; check with eplan_page_get instead.
 
 ## Fields

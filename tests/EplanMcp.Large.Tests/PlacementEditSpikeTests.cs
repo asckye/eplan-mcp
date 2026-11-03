@@ -176,6 +176,7 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
         string page = Assert.Single(await session.CreatePagesAsync(1));
         await host.CallAsync("eplan_placement_create", new()
         {
+            ["dry_run"] = false,
             ["project"] = session.Project,
             ["page"] = page,
             ["snap_to_grid"] = false,
@@ -226,7 +227,7 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
             host.Approvals.Approve("eplan_placement_edit", session.Project,
                 [$"update placement {page}:{locator.GetProperty("type")}/{locator.GetProperty("oid")}: delete '' -> 'position={position}; angle(rad)={angle}; tag='"]);
         }
-        JsonElement result = await host.CallAsync("eplan_placement_edit", args);
+        JsonElement result = await host.CallAsync("eplan_placement_edit", new(args) { ["dry_run"] = false });
         TestContext.Current.TestOutputHelper!.WriteLine(operation + " product: " + result);
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
         if (operation == "copy")
@@ -239,10 +240,11 @@ public sealed class PlacementEditSpikeTests(LiveEplan eplan, DestructiveHost hos
     }
     private async Task Seed(string page)
     {
-        await host.CallAsync("eplan_device_place", new() { ["project"] = host.Writable, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "K", ["symbol_variant"] = 0, ["x"] = 40, ["y"] = 200, ["tag"] = "-EDIT" + Guid.NewGuid().ToString("N")[..6], ["display_properties"] = new[] { new { property_id = 20214, offset_x_mm = 8, offset_y_mm = 8 } } });
-        await host.CallAsync("eplan_device_place", new() { ["project"] = host.Writable, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "K", ["symbol_variant"] = 0, ["x"] = 40, ["y"] = 120, ["tag"] = "-EDIT" + Guid.NewGuid().ToString("N")[..6] });
+        await host.CallAsync("eplan_device_place", new() { ["dry_run"] = false, ["project"] = host.Writable, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "K", ["symbol_variant"] = 0, ["x"] = 40, ["y"] = 200, ["tag"] = "-EDIT" + Guid.NewGuid().ToString("N")[..6], ["display_properties"] = new[] { new { property_id = 20214, offset_x_mm = 8, offset_y_mm = 8 } } });
+        await host.CallAsync("eplan_device_place", new() { ["dry_run"] = false, ["project"] = host.Writable, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "K", ["symbol_variant"] = 0, ["x"] = 40, ["y"] = 120, ["tag"] = "-EDIT" + Guid.NewGuid().ToString("N")[..6] });
         await host.CallAsync("eplan_placement_create", new()
         {
+            ["dry_run"] = false,
             ["project"] = host.Writable,
             ["page"] = page,
             ["snap_to_grid"] = false,

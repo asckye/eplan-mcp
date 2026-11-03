@@ -122,7 +122,7 @@ public sealed class ConnectionCreateToolTests
         using var harness = Setup();
         harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = _ => JsonNode.Parse("""{"project":"Line1","page":"page","undoSteps":6,"actualCores":[{"designation":"+A1-W9","type":"Fictional cable","oid":9,"pins":["17/1/0","17/2/0"],"label":"1","colour":"BK"}]}""")!;
         var call = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page",
-            [JsonSerializer.SerializeToElement(new { kind = "cable_definition" })], cancellationToken: TestContext.Current.CancellationToken);
+            [JsonSerializer.SerializeToElement(new { kind = "cable_definition" })], dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
         JsonElement result = WriteToolHarness.Structured(call);
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
         Assert.Equal(6, result.GetProperty("undoSteps").GetInt32());
@@ -138,7 +138,7 @@ public sealed class ConnectionCreateToolTests
         harness.ProjectPath = Path.Combine(harness.Locations.Root, "Outside", "Line1");
         harness.Bridge.Handlers[OperationNames.ConnectionCreatePlan] = _ => harness.Plan([new() { Action = "create", Kind = "connections", Name = "page", NewValue = "6 undo steps; cable -W9 cores 1 BK, 2 BU, 3 GNYE" }]);
         JsonElement error = WriteToolHarness.Error(await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page",
-            [JsonSerializer.SerializeToElement(new { kind = "cable_definition" })], cancellationToken: TestContext.Current.CancellationToken));
+            [JsonSerializer.SerializeToElement(new { kind = "cable_definition" })], dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Equal((ErrorReason.ApprovalDenied, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
         Assert.Contains("6 undo steps", Assert.Single(WritePipeline.ChangeLines(Assert.Single(channel.Questions).Plan)), StringComparison.Ordinal);
         Assert.Empty(harness.Bridge.Writes);

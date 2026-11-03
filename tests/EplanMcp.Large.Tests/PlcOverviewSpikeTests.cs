@@ -37,6 +37,7 @@ public sealed class PlcOverviewSpikeTests(LiveEplan eplan, WriteHost host) : ICl
                 string suffix = circuitPage.Split('/')[^1];
                 JsonElement card = await host.CallAsync("eplan_device_place", new()
                 {
+                    ["dry_run"] = false,
                     ["project"] = session.Project,
                     ["page"] = circuitPage,
                     ["library"] = "SPECIAL",
@@ -52,6 +53,7 @@ public sealed class PlcOverviewSpikeTests(LiveEplan eplan, WriteHost host) : ICl
                 {
                     JsonElement point = await host.CallAsync("eplan_device_place", new()
                     {
+                        ["dry_run"] = false,
                         ["project"] = session.Project,
                         ["page"] = circuitPage,
                         ["library"] = inputSymbol.GetProperty("library").GetString(),

@@ -3,6 +3,7 @@
 {"project":"Line1","page":"P","items":[{"kind":"text","position":[10,20],"contents":{"??_??":"Panel"},"height_mm":3},{"kind":"line","points":[[10,10],[30,10]]},{"kind":"rectangle","corners":[[5,5],[40,30]]}]}
 ```
 ## Workflow
+Omitting dry_run (or true) previews only: no approval, no project/file writes, execution=not_started. Call again with dry_run:false to execute; preview hint explains this step.
 Full profile. Execution creates the complete batch atomically, reads every item back and supports one-step undo; outside scratch needs approval. Never repeat a committed or unknown call. A failed batch rolls back everything without an undo step.
 ## Fields
 One Circuit page, 1-50 items; coordinates in mm, bottom-left origin, y up, 0-10000. snap_to_grid defaults true; the preview reports requested and actual geometry plus full bounds. Text height is 0.5-100 mm, at most 500 characters across explicit languages. Never mix ??_?? with languages. Supply ??_?? or at least the project display language: other text is invisible (A54). Lines are graphics. No connection generation. concise/detailed budgets are 5k/20k, with complete impact lists.

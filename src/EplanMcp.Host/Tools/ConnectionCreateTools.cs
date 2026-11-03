@@ -27,11 +27,11 @@ internal sealed class ConnectionCreateTools
         ? CableLimit : PageWriteTools.DefaultLimit;
 
     [McpServerTool(Name = Tool, Title = "Create connection symbols and explicit wire paths", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies geometry, endpoints and core labels/colours. Undo steps: interruption calls 1 (also for ends without counterpart devices); wires: 2 undo steps; cables: 6-8. Failure undoes this call. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
+    [Description("Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies geometry, endpoints and core labels/colours. Undo steps: interruption calls 1 (also for ends without counterpart devices); wires: 2 undo steps; cables: 6-8. Failure undoes this call. Omit dry_run to preview; false executes. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IBridgeClient bridge,
-        [Description("Project name/path")] string project, string page,
+        string project, string page,
         [Description("1-50 wire/corner/t_node/potential_point/interruption_point/cable_definition; interruptions require counterpart_pages; see usage")] JsonElement[] items,
-        bool dry_run = false, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
+        [Description("Preview; false runs")] bool dry_run = WriteToolDefaults.Preview, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
         [Description("Open this page before drawing; UI only, no data change.")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, PackLibrary? packs = null, CancellationToken cancellationToken = default)
     {
@@ -64,6 +64,8 @@ internal sealed class ConnectionCreateTools
             result["execution"] = outcome.Execution;
             result["dryRun"] = dry_run;
             result["recovered"] = outcome.Recovered;
+            if (dry_run)
+            { result["hint"] = WriteToolDefaults.ExecutionHint; }
             if (plugins.Length > 0 || warnings.Count > 0)
             {
                 JsonObject metadata = result["metadata"] as JsonObject ?? new JsonObject();

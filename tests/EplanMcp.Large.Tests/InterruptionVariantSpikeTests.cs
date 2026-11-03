@@ -50,6 +50,7 @@ public sealed class InterruptionVariantSpikeTests(LiveEplan eplan, WriteHost hos
             {
                 await host.CallAsync("eplan_connection_create", new()
                 {
+                    ["dry_run"] = false,
                     ["project"] = session.Project,
                     ["page"] = page,
                     ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind = "interruption_point", name = "=GAA+A1-D7" + symbol + variant, symbol, position, direction = pin.GetProperty("direction").GetString(), counterpart_pages = new[] { page } } }),

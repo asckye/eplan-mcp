@@ -27,6 +27,7 @@ public sealed class ActionTryTests(LiveEplan eplan, WriteHost host) : IClassFixt
             string page = Assert.Single(await alone.CreatePagesAsync(1));
             await host.CallAsync("eplan_placement_create", new()
             {
+                ["dry_run"] = false,
                 ["project"] = project,
                 ["page"] = page,
                 ["snap_to_grid"] = false,

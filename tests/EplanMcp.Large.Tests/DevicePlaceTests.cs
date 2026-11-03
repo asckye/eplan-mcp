@@ -26,6 +26,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
         string tag = "=GAA+A1-KB" + page[Prefix.Length..];
         await eplan.CallAsync("eplan_device_place", new()
         {
+            ["dry_run"] = false,
             ["project"] = project,
             ["page"] = page,
             ["library"] = "IEC_symbol",
@@ -51,7 +52,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
         JsonElement drawingsBefore = await Drawings();
         JsonElement preview = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
         Assert.Equal(drawingsBefore.GetRawText(), (await Drawings()).GetRawText());
-        JsonElement placed = await eplan.CallAsync("eplan_device_place", args);
+        JsonElement placed = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = false });
         Assert.Equal(("committed", "AI: eplan_device_place"), (placed.GetProperty("execution").GetString(), placed.GetProperty("undo").GetString()));
         JsonElement box = placed.GetProperty("locationBox");
         Assert.Equal(args["location_box"], box.GetProperty("structure").GetString());
@@ -91,7 +92,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
         };
         JsonElement preview = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
         Assert.Equal(0, await DevicesOnAsync(project, page));
-        JsonElement placed = await eplan.CallAsync("eplan_device_place", args);
+        JsonElement placed = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = false });
         Assert.Equal(("committed", 1, 0, ""), (placed.GetProperty("execution").GetString(), placed.GetProperty("functions").GetInt32(), placed.GetProperty("unplaced").GetInt32(), placed.GetProperty("part").GetString()));
         Assert.Equal(("=GAA+A1" + tag, tag, "Coil"), (placed.GetProperty("device").GetProperty("tag").GetString(), placed.GetProperty("device").GetProperty("visibleTag").GetString(), placed.GetProperty("device").GetProperty("category").GetString()));
         Assert.Equal(preview.GetProperty("symbol").GetRawText(), placed.GetProperty("symbol").GetRawText());
@@ -103,7 +104,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
         Assert.Equal([84.0, 156.0], label.GetProperty("location").EnumerateArray().Select(v => v.GetDouble()));
         foreach (string duplicate in new[] { tag, ("=GAA+A1" + tag).ToLowerInvariant() })
         {
-            JsonElement error = await eplan.ErrorAsync("eplan_device_place", new(args) { ["tag"] = duplicate });
+            JsonElement error = await eplan.ErrorAsync("eplan_device_place", new(args) { ["dry_run"] = false, ["tag"] = duplicate });
             Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
         }
         Assert.Equal(1, await DevicesOnAsync(project, page));
@@ -123,8 +124,8 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
         Dictionary<string, object?> args = new() { ["project"] = project, ["page"] = page, ["part"] = Part, ["x"] = 80, ["y"] = 160, ["tag"] = tag };
 
         JsonElement dryRun = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
-        JsonElement placed = await eplan.CallAsync("eplan_device_place", args);
-        JsonElement again = await eplan.ErrorAsync("eplan_device_place", args);
+        JsonElement placed = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = false });
+        JsonElement again = await eplan.ErrorAsync("eplan_device_place", new(args) { ["dry_run"] = false });
         JsonElement device = (await eplan.CallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = "=GAA+A1" + tag })).GetProperty("device");
 
         // The plan reads the parts database without placing anything; the tag takes the page's structure.
@@ -154,8 +155,8 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
         string page = await NewPageAsync(project);
         Dictionary<string, object?> args = new() { ["project"] = project, ["page"] = page, ["part"] = Part, ["x"] = 80, ["y"] = 160, ["tag"] = "-KF9" + page[Prefix.Length..] };
 
-        JsonElement missing = await eplan.ErrorAsync("eplan_device_place", new(args) { ["part"] = "SIE.NO-SUCH-PART-0000" });
-        JsonElement variant = await eplan.ErrorAsync("eplan_device_place", new(args) { ["variant"] = "99" });
+        JsonElement missing = await eplan.ErrorAsync("eplan_device_place", new(args) { ["dry_run"] = false, ["part"] = "SIE.NO-SUCH-PART-0000" });
+        JsonElement variant = await eplan.ErrorAsync("eplan_device_place", new(args) { ["dry_run"] = false, ["variant"] = "99" });
 
         Assert.Equal((ErrorReason.PartNotFound, ExecutionState.NotStarted), (missing.GetProperty("reason").GetString(), missing.GetProperty("execution").GetString()));
         Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (variant.GetProperty("reason").GetString(), variant.GetProperty("execution").GetString()));
@@ -168,7 +169,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
     {
         JsonElement error = await host.ErrorAsync(
             "eplan_device_place",
-            new() { ["project"] = host.Outside, ["page"] = Prefix + "1", ["part"] = Part, ["x"] = 80, ["y"] = 160, ["tag"] = "-KF9999" });
+            new() { ["dry_run"] = false, ["project"] = host.Outside, ["page"] = Prefix + "1", ["part"] = Part, ["x"] = 80, ["y"] = 160, ["tag"] = "-KF9999" });
 
         Assert.Equal((ErrorReason.PolicyDenied, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
     }

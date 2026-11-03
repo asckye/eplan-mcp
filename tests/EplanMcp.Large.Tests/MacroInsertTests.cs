@@ -21,9 +21,9 @@ public sealed class MacroInsertTests(LiveEplan eplan)
         Dictionary<string, object?> args = Args(project, page, "number");
 
         JsonElement dryRun = await eplan.CallAsync("eplan_macro_insert", new(args) { ["dry_run"] = true });
-        JsonElement inserted = await eplan.CallAsync("eplan_macro_insert", args);
+        JsonElement inserted = await eplan.CallAsync("eplan_macro_insert", new(args) { ["dry_run"] = false });
         int onPage = await DevicesOnAsync(project, page);
-        JsonElement stacked = await eplan.ErrorAsync("eplan_macro_insert", args);
+        JsonElement stacked = await eplan.ErrorAsync("eplan_macro_insert", new(args) { ["dry_run"] = false });
 
         // The plan opens the macro without inserting it (A14): its own placeholder tags, 28 objects (S9, S10).
         Assert.Equal(("not_started", 28), (dryRun.GetProperty("execution").GetString(), dryRun.GetProperty("objectCount").GetInt32()));
@@ -53,11 +53,11 @@ public sealed class MacroInsertTests(LiveEplan eplan)
         string[] pages = await NewPagesAsync(project, 2);
 
         // The first keep insert gives the project the macro's own tags (+A1-WG6, S10), unless an earlier run did.
-        (bool first, JsonElement firstResult) = await eplan.CallOrErrorAsync("eplan_macro_insert", Args(project, pages[0], "keep"));
+        (bool first, JsonElement firstResult) = await eplan.CallOrErrorAsync("eplan_macro_insert", new(Args(project, pages[0], "keep")) { ["dry_run"] = false });
         Assert.True(first || firstResult.GetProperty("reason").GetString() == "ALREADY_EXISTS", firstResult.ToString());
         (int Pages, int Devices, int Connections, int Parts) before = await CountsAsync(project);
 
-        JsonElement merged = await eplan.ErrorAsync("eplan_macro_insert", Args(project, pages[1], "keep"));
+        JsonElement merged = await eplan.ErrorAsync("eplan_macro_insert", new(Args(project, pages[1], "keep")) { ["dry_run"] = false });
 
         // S10: None gave the project a second main function +A1-WG6; the tool rolls that back (tool spec 4).
         Assert.Equal(("ALREADY_EXISTS", "rolled_back"), (merged.GetProperty("reason").GetString(), merged.GetProperty("execution").GetString()));

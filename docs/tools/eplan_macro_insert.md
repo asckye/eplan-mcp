@@ -1,5 +1,7 @@
 # 工具规格：`eplan_macro_insert`
 
+ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批、不修改项目或文件，返回 `execution: not_started`；执行须再次调用并显式传 `dry_run: false`，`hint` 会说明该步骤；预览返回 `fingerprint` 计划指纹。Small/Medium 覆盖省略、true、false 三条路径；审批、读回和撤销规则不变。
+
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_macro_insert` |
@@ -21,7 +23,7 @@
 | `variant` | integer | 否 | 0 | 宏的变体编号（`eplan_macro_get` 的 `variants`） |
 | `numbering` | enum `number` / `keep` | 否 | `number` | `number`：EPLAN 给宏中的设备分配不冲突的标识；`keep`：保留宏中的标识，结构跟随目标页，与已有设备同名时拒绝（M3b 设计 Q2） |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要进行的插入，不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行传 `dry_run: false` |
 
 - **与 M3b 设计 4.2 的差别**：这一版不提供 `representation` 参数。只往电路图页上插 `MultiLine` 表达类型，宏没有 `MultiLine` 时返回 `INVALID_ARGUMENT`。其他页类型和表达类型以后再加，需要先实机验证。
 

@@ -21,7 +21,7 @@ internal sealed class PlacementUpdateTools
     {
         JsonElement input = JsonSerializer.SerializeToElement((context.Params?.Arguments ?? new Dictionary<string, JsonElement>()).Where(p => p.Key != "show_page").ToDictionary());
         PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, input, cancellationToken).ConfigureAwait(false);
-        bool dryRun = input.TryGetProperty("dry_run", out JsonElement dry) && dry.ValueKind == JsonValueKind.True;
+        bool dryRun = WriteToolDefaults.IsPreview(input);
         try
         {
             var request = new WriteRequest<JsonElement, object>(Tool, ToolTier.Write, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionCreateExecute,
@@ -31,6 +31,8 @@ internal sealed class PlacementUpdateTools
             result["execution"] = outcome.Execution;
             result["dryRun"] = dryRun;
             result["recovered"] = outcome.Recovered;
+            if (dryRun)
+            { result["hint"] = WriteToolDefaults.ExecutionHint; }
             return display.Apply(ToolResults.Success(outcome.Execution == ExecutionState.Committed ? "Moved placements; one Ctrl+Z restores the closure." : "Nothing was changed.", ContextBuilder.Clean(result)));
         }
         catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return display.Apply(ToolResults.Error(ex.Error)); }

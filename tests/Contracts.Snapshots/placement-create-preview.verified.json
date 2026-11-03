@@ -115,5 +115,7 @@
     "create line P item 1: {\"kind\":\"line\",\"points\":[[15,25],[35,25]]} bounds [15,25,35,25]",
     "create rectangle P item 2: {\"kind\":\"rectangle\",\"corners\":[[40,40],[10,10]]} bounds [10,10,40,40]"
   ],
-  "connectionChanges": []
+  "connectionChanges": [],
+  "fingerprint": "f8a31827850b047b9ab71259cef80836d74df86674d47bb3fb36d2692bc6d6ba",
+  "hint": "Call again with dry_run: false to execute."
 }

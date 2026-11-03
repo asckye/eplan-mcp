@@ -74,6 +74,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
             await PlacePinAsync(session.Project, page, devices.Items, grid, "-D1" + suffix + "B", [40 * grid, 20 * grid], "Up");
             JsonElement placed = await host.CallAsync("eplan_connection_create", new()
             {
+                ["dry_run"] = false,
                 ["project"] = session.Project,
                 ["page"] = page,
                 ["response_format"] = "detailed",
@@ -123,6 +124,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
             {
                 node = await host.CallAsync("eplan_connection_create", new()
                 {
+                    ["dry_run"] = false,
                     ["project"] = session.Project,
                     ["page"] = page,
                     ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind = "t_node", position = new[] { 40 * grid, 40 * grid }, directions = _columnDirections, variant } }),
@@ -165,6 +167,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
         await host.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { pages[0] } });
         JsonElement node = await host.CallAsync("eplan_connection_create", new()
         {
+            ["dry_run"] = false,
             ["project"] = session.Project,
             ["page"] = pages[0],
             ["response_format"] = "detailed",
@@ -229,6 +232,7 @@ public sealed class CableBusStarSpikeTests(LiveEplan eplan, WriteHost host) : IC
         SymbolConnectionPoint point = symbol.ConnectionPoints.First(p => p.Direction == direction);
         JsonElement placed = await host.CallAsync("eplan_device_place", new()
         {
+            ["dry_run"] = false,
             ["project"] = project,
             ["page"] = page,
             ["library"] = symbol.Library,

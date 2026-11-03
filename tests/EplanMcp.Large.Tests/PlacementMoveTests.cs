@@ -19,6 +19,7 @@ public sealed class PlacementMoveTests(LiveEplan eplan, WriteHost host) : IClass
         {
             await host.CallAsync("eplan_device_place", new()
             {
+                ["dry_run"] = false,
                 ["project"] = host.Writable,
                 ["page"] = page,
                 ["library"] = "IEC_symbol",
@@ -32,6 +33,7 @@ public sealed class PlacementMoveTests(LiveEplan eplan, WriteHost host) : IClass
         }
         await host.CallAsync("eplan_placement_create", new()
         {
+            ["dry_run"] = false,
             ["project"] = host.Writable,
             ["page"] = page,
             ["snap_to_grid"] = false,
@@ -60,7 +62,7 @@ public sealed class PlacementMoveTests(LiveEplan eplan, WriteHost host) : IClass
         JsonElement preview = await host.CallAsync("eplan_placement_update", new(args) { ["dry_run"] = true });
         Assert.NotEmpty(preview.GetProperty("graphicalChanges").EnumerateArray());
         Assert.Equal(original, JsonSerializer.Serialize(await Read(bridge, page)));
-        JsonElement moved = await host.CallAsync("eplan_placement_update", args);
+        JsonElement moved = await host.CallAsync("eplan_placement_update", new(args) { ["dry_run"] = false });
         Assert.Equal(ExecutionState.Committed, moved.GetProperty("execution").GetString());
         PageDrawingGeometry after = await Read(bridge, page);
         DrawingPlacement Find(DrawingPlacement row) => Assert.Single(after.Placements, p => p.Kind == row.Kind && p.Locator.Type == row.Locator.Type && p.Locator.Oid == row.Locator.Oid && p.Properties.GetValueOrDefault("display") == row.Properties.GetValueOrDefault("display"));

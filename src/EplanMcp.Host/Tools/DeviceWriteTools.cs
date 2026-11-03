@@ -103,7 +103,7 @@ internal sealed class DeviceWriteTools
     [Description(
         "Places part devices, library symbols (including NO/NC, PLC), terminals with strips or dashed location boxes on circuit pages. " +
         "Devices inside a location box keep their own structure; no devices are renamed. x/y: mm, bottom left, y up. " +
-        "One Ctrl+Z undoes it. Engineer approval outside scratch; denial: APPROVAL_DENIED. See usage.")]
+        "One Ctrl+Z undoes it. Omit dry_run to preview; false executes. Engineer approval outside scratch; denial: APPROVAL_DENIED. See usage.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
         WritePipeline pipeline,
         IBridgeClient bridge,
@@ -114,7 +114,7 @@ internal sealed class DeviceWriteTools
         string? tag = null,
         string? part = null,
         string? variant = null,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         string? library = null,
         string? symbol = null,
         int? symbol_variant = null,
@@ -249,6 +249,7 @@ internal sealed class DeviceWriteTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
             Page = ResultShaper.CleanText(data?.Page ?? outcome.Plan.Changes.FirstOrDefault()?.Name ?? args.Page),
             Part = ResultShaper.CleanText(data?.Part ?? details.GetValueOrDefault("part") ?? part ?? string.Empty),
             Variant = ResultShaper.CleanText(data?.Variant ?? details.GetValueOrDefault("variant") ?? string.Empty),
@@ -269,7 +270,7 @@ internal sealed class DeviceWriteTools
             Changes = args.Library is not null || args.LocationBox is not null || args.TerminalStrip is not null ? [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), NewValue = ResultShaper.CleanText(c.NewValue) })] : null,
             Undo = committed ? "AI: " + PlaceTool : null,
             Recovered = outcome.Recovered,
-            Hint = PlaceHint(outcome, details),
+            Hint = dry_run ? WriteToolDefaults.ExecutionHint + " " + PlaceHint(outcome, details) : PlaceHint(outcome, details),
         };
         if (pluginWarnings.Count > 0)
         {

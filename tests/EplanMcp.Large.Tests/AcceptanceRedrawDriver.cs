@@ -918,6 +918,7 @@ internal sealed class AcceptanceRedrawDriver(
 
     private async Task<JsonElement?> WriteAsync(string tool, Dictionary<string, object?> args, string[] ids)
     {
+        args["dry_run"] = false;
         (bool succeeded, JsonElement result) = await InvokeAsync(tool, args);
         if (result.TryGetProperty("execution", out JsonElement outcome) && outcome.GetString() == ExecutionState.Unknown)
         {
