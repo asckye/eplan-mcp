@@ -23,6 +23,8 @@ One installed version, with every resource and fact listed:
 - `problems`: `location` and `message` for each: a file that does not match pack.json, a missing or extra file, an official rule without a source, a referenced resource whose pack source is not configured or whose file changed. Not an error: the result is returned anyway.
 - `gaps`: `asset` and `missing` for each open gap document.
 - `capabilities`: `requirement`, `hard`, `status` (`met`, `missing`, `unknown` when EPLAN is not connected or does not report it, `unchecked` for catalog entries that only warn), `note`; `capabilitiesMet`: false when a hard one is missing, null when one is unknown.
+- `kind`, `provides`, `standards`: manifest plugin metadata; legacy packs have kind `company`.
+- `enabled_globally`: whether this exact installed version is globally enabled. False for dev, or with a `hint` warning when plugin state is unreadable.
 - `lockedBy`: projects locking this version.
 - `resourceList`, `factList` (`response_format: detailed`): every resource and file-level fact.
 

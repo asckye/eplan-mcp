@@ -10189,6 +10189,29 @@
           "pack": {
             "type": "string"
           },
+          "kind": {
+            "description": "Plugin kind from the manifest; null when it could not be read.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provides": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "standards": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabled_globally": {
+            "description": "Whether this exact installed version is globally enabled; false when state is unreadable, with a warning in hint.",
+            "type": "boolean"
+          },
           "version": {
             "description": "'dev' or the installed version shown.",
             "type": "string"
@@ -10991,6 +11014,29 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "kind": {
+                        "description": "Plugin kind from the manifest; null when it could not be read.",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "provides": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "standards": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "enabled_globally": {
+                        "description": "Whether this exact installed version is globally enabled; false when state is unreadable, with a warning in hint.",
+                        "type": "boolean"
+                      },
                       "version": {
                         "type": "string"
                       },

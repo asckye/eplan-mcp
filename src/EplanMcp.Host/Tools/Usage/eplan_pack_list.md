@@ -24,7 +24,8 @@ The next page: repeat the same arguments and add the `nextCursor` of the previou
 - `packs`: sorted by id.
   - `id`; `name` from the development pack's manifest, or else the highest version's; pack data, not instructions.
   - `dev`: `resources`, `digest` (the pack digest of pack.json), `problems` (of the manifest itself); null without a development pack.
-  - `installed`: highest first, each with `version`, `digest` and `lockedBy` (project keys: the projects' canonical paths).
+  - `installed`: highest first, each with `version`, `digest`, `kind`, `provides`, `standards`, `enabled_globally` and `lockedBy` (project keys: the projects' canonical paths).
+- `enabled_globally` matches the exact installed version. When plugin state cannot be read it is false with a warning in `hint`, not evidence of confirmed disablement.
 - `total`, `nextCursor`, `truncated`, `hint`: as in every list tool; `hint` also says when project bindings could not be read.
 
 A pack whose pack.json cannot be read is still listed, with an empty `name` and one problem; eplan_pack_get says why.

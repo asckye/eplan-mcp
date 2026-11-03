@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace EplanMcp.Host.Tools;
 
@@ -50,6 +51,17 @@ internal sealed class PackListResult : IPagedResult<PackListResult.PackEntry>
 
     internal sealed class VersionEntry
     {
+        [Description("Plugin kind from the manifest; null when it could not be read.")]
+        public string? Kind { get; set; }
+
+        public List<string> Provides { get; set; } = [];
+
+        public List<string> Standards { get; set; } = [];
+
+        [JsonPropertyName("enabled_globally")]
+        [Description("Whether this exact installed version is globally enabled; false when state is unreadable, with a warning in hint.")]
+        public bool EnabledGlobally { get; set; }
+
         public string Version { get; set; } = string.Empty;
 
         [Description("The pack digest, which project locks record; null when pack.json cannot be read.")]

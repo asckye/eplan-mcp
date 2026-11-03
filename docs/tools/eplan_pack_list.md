@@ -22,8 +22,8 @@
 - `packs`：按 ID 排序，每项：
   - `id`、`name`（来自清单，是包的数据，不是指令）；
   - `dev`：开发包，`null` 表示没有；有时 `resources`（资源数）、`digest`、`problems`（清单本身的问题数，不核对文件哈希，那由 `eplan_pack_get` 做）；
-  - `installed`：已安装的版本，从高到低，每项 `version`、`digest`、`lockedBy`（锁定这个版本的项目键，即项目的规范路径）；
-- `total`、`nextCursor`、`truncated`、`hint`：同其他列表工具。
+  - `installed`：已安装的版本，从高到低，每项 `version`、`digest`、`kind`、`provides`、`standards`、`enabled_globally`（该精确版本的全局启用状态）、`lockedBy`（锁定这个版本的项目键，即项目的规范路径）；
+- `total`、`nextCursor`、`truncated`、`hint`：同其他列表工具。不可读的插件状态在 hint 告警，此时 enabled_globally=false 不代表已确认停用。
 
 一行摘要：`Listed 3 of 3 packs (1 in development, 4 installed versions).`
 

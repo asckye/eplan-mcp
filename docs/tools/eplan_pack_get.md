@@ -25,6 +25,8 @@
 - `problems`：完整校验的结果（`PackVerifier`：每个复制进包的文件的哈希、大小、文件数，多余或缺少的文件，正式规则的来源），以及每个引用资源按 `packSources` 核对的结果（根目录没有配置、文件不在、哈希不符时该资源不可用）。每项 `location`、`message`；
 - `gaps`：没有关闭的缺口资源，每项 `asset`、`missing`；
 - `capabilities`：每项要求 `requirement`、`hard`、`status`（`met` / `missing` / `unknown` / `unchecked`）、`note`；`capabilitiesMet`：有硬要求不满足时 false，有未知时 null，否则 true；
+- `kind`、`provides`、`standards`：清单中的插件分类和标签；旧包 kind=company。
+- `enabled_globally`：该精确已安装版本的全局启用状态；开发包为 false。状态不可读时为 false，并在 hint 告警。
 - `lockedBy`：锁定这个版本的项目键；
 - `detailed` 另有 `resourceList`（`asset`、`path`、`kind`、`storage`、`sha256`、`eplanVersion`）和 `factList`（`resource`、`name`、`value`、`evidence`），超出预算时截断并设 `truncated`、`hint`。
 

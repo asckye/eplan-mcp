@@ -196,6 +196,7 @@ internal sealed class PackTools
             return ToolResults.InvalidArguments(violations);
         }
 
+        var (plugins, _, pluginWarnings) = await PluginStateQuery.ReadAsync(new PluginStateStore(packs.Locations), cancellationToken).ConfigureAwait(false);
         (IReadOnlyList<ProjectBinding> bindings, int unreadable) = await packs.Workspaces.AllAsync(cancellationToken).ConfigureAwait(false);
         IReadOnlyList<string> dev = packs.Dev.Ids();
         List<PackListResult.PackEntry> all = [];
@@ -217,6 +218,10 @@ internal sealed class PackTools
                 entry.Installed.Add(new PackListResult.VersionEntry
                 {
                     Version = version.ToString(),
+                    Kind = manifest?.Kind.ToString().ToLowerInvariant(),
+                    Provides = ResultShaper.CleanTexts(manifest?.Provides ?? []),
+                    Standards = ResultShaper.CleanTexts(manifest?.Standards ?? []),
+                    EnabledGlobally = plugins?.Enabled.Contains(new PluginIdentity(id, version.ToString())) == true,
                     Digest = digest,
                     LockedBy = [.. bindings.Where(b => b.Locks.Any(l => l.Id == id && l.Version == version.ToString())).Select(b => b.Project).Order(StringComparer.Ordinal)],
                 });
@@ -236,6 +241,8 @@ internal sealed class PackTools
             NextCursor = offset + limit < all.Count ? PageCursor.Encode(offset + limit, fingerprint) : null,
         };
         ResultShaper.FitPage(result, offset, fingerprint);
+        if (pluginWarnings.Count != 0)
+        { result.Hint = (result.Hint is null ? string.Empty : result.Hint + " ") + string.Join(" ", pluginWarnings); }
         if (unreadable > 0)
         {
             result.Hint = (result.Hint is null ? string.Empty : result.Hint + " ") + $"{ToolResults.Count(unreadable, "project binding")} could not be read, so 'lockedBy' may miss projects.";
@@ -314,11 +321,14 @@ internal sealed class PackTools
             result.LockedBy = [.. bindings.Where(b => b.Locks.Any(l => l.Id == pack && l.Version == shown)).Select(b => b.Project).Order(StringComparer.Ordinal)];
         }
 
+        var (plugins, _, pluginWarnings) = await PluginStateQuery.ReadAsync(new PluginStateStore(packs.Locations), cancellationToken).ConfigureAwait(false);
+        result.EnabledGlobally = shown != AssetNames.Dev && plugins?.Enabled.Contains(new PluginIdentity(pack, shown)) == true;
+        result.Hint = pluginWarnings.Count == 0 ? null : string.Join(" ", pluginWarnings);
         result.Problems = [.. problems.Select(p => new PackGetResult.ProblemEntry { Location = ResultShaper.CleanText(p.Location)!, Message = ResultShaper.CleanText(p.Message)! })];
         if (!ResultShaper.Fits(result, ResultShaper.DefaultTokenBudget))
         {
             result.Truncated = true;
-            result.Hint = "Lists were cut to stay within the size budget; eplan_asset_search pages through the resources.";
+            result.Hint = (result.Hint is null ? string.Empty : result.Hint + " ") + "Lists were cut to stay within the size budget; eplan_asset_search pages through the resources.";
             ResultShaper.FitItems(result, result.FactList);
             ResultShaper.FitItems(result, result.ResourceList);
             ResultShaper.FitItems(result, result.Problems);
@@ -430,6 +440,9 @@ internal sealed class PackTools
 
     private static void Describe(PackGetResult result, PackManifest manifest, IReadOnlyList<CapabilityCheck> capabilities, bool detailed)
     {
+        result.Kind = manifest.Kind.ToString().ToLowerInvariant();
+        result.Provides = ResultShaper.CleanTexts(manifest.Provides);
+        result.Standards = ResultShaper.CleanTexts(manifest.Standards ?? []);
         result.Name = ResultShaper.CleanText(manifest.Name)!;
         result.Description = ResultShaper.CleanText(manifest.Description);
         result.Compatibility = new PackGetResult.CompatibilityEntry
