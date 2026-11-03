@@ -143,6 +143,28 @@ public sealed class PartsFirstSpikeTests(LiveEplan eplan, DestructiveHost host) 
                     y = 240,
                     templatePlacements = new[] { new { x = 100, y = 240 }, new { x = 140, y = 240 } }
                 }, "templates-place", evidence, suffix);
+
+                await ProbeAsync(new
+                {
+                    project = session.Project,
+                    page,
+                    mode = "place-unplaced",
+                    part = plc.Part,
+                    variant = plc.Variant,
+                    x = 60,
+                    y = 280,
+                    placements = new[] { new { x = 100, y = 280 }, new { x = 140, y = 280 } }
+                }, "place-unplaced", evidence, suffix);
+
+                await ProbeAsync(new
+                {
+                    project = session.Project,
+                    page,
+                    mode = "device-list",
+                    part = plc.Part,
+                    variant = plc.Variant,
+                    placements = new[] { new { x = 60, y = 320 }, new { x = 100, y = 320 }, new { x = 140, y = 320 } }
+                }, "device-list", evidence, suffix);
             }
 
             var exported = await eplan.CallOrErrorAsync("eplan_export_image", new() { ["project"] = session.Project, ["pages"] = new[] { page }, ["format"] = "png" });

@@ -52,6 +52,12 @@ public sealed class PartsSpikeAction : IEplAction
                 case "templates-place":
                     TemplatesPlace(project, input, result);
                     break;
+                case "place-unplaced":
+                    PlaceUnplaced(project, input, result);
+                    break;
+                case "device-list":
+                    DeviceList(project, input, result);
+                    break;
                 case "assign":
                     Assign(project, input, result);
                     break;
@@ -316,9 +322,255 @@ public sealed class PartsSpikeAction : IEplAction
         JArray functions = ReadDeviceByTag(project, deviceTag, readbackWarnings);
         result["functions"] = functions;
         ReadMainTemplates(project, deviceTag, result, readbackWarnings);
-        result["duplicates"] = new JArray(functions.OfType<JObject>().Where(function => function["name"]?.Type == JTokenType.String)
+        result["duplicates"] = ReadDuplicates(functions);
+    }
+
+    private static JArray ReadDuplicates(JArray functions) => new(functions.OfType<JObject>().Where(function => function["name"]?.Type == JTokenType.String)
             .GroupBy(function => (string)function["name"]!, StringComparer.Ordinal).Where(group => group.Count() > 1)
             .Select(group => new JObject { ["name"] = group.Key, ["isPlaced"] = new JArray(group.Select(function => function["isPlaced"]?.DeepClone())) }));
+
+    private static void PlaceUnplaced(Project project, JObject input, JObject result)
+    {
+        var requests = (JArray)input["placements"]!;
+        if (requests.Count > 2)
+        { throw new ArgumentException("At most two unplaced function placements are permitted."); }
+        var warnings = new JArray();
+        var attempts = new JArray();
+        result["warnings"] = warnings;
+        result["placements"] = attempts;
+        string? deviceTag = null;
+        using (var scope = new TransactionScope("Parts unplaced function spike"))
+        {
+            try
+            {
+                Page? page = null;
+                Observe(result, "page", () => (page = project.Pages.Single(candidate => candidate.Name == (string)input["page"]!)).Name, warnings);
+                if (page is null)
+                { return; }
+                using var service = new DeviceService();
+                using var propertyScope = new FunctionObservationScope();
+                // HEServices XML: this overload places the main function and leaves the other functions unplaced.
+                Function[] created = service.CreateDevice((string)input["part"]!, (string?)input["variant"] ?? "", page,
+                    new PointD((double)input["x"]!, (double)input["y"]!));
+                JObject[] observations = created.Select((function, index) => ReadFunction(function, index, propertyScope: propertyScope)).ToArray();
+                result["created"] = new JArray(observations);
+                int mainIndex = Array.FindIndex(observations, observation => (bool?)observation["isMainFunction"] == true);
+                if (mainIndex < 0)
+                { mainIndex = Array.FindIndex(observations, observation => (bool?)observation["isPlaced"] == true); }
+                result["main"] = mainIndex < 0 ? null : observations[mainIndex]["name"]?.DeepClone();
+                if (mainIndex >= 0)
+                { deviceTag = (string?)observations[mainIndex]["deviceTag"]; }
+                int placementIndex = 0;
+                for (int index = 0; index < created.Length && placementIndex < requests.Count; index++)
+                {
+                    if ((bool?)observations[index]["isPlaced"] != false)
+                    { continue; }
+                    var request = (JObject)requests[placementIndex++]!;
+                    var attemptWarnings = new JArray();
+                    var attempt = new JObject
+                    {
+                        ["index"] = index,
+                        ["request"] = request.DeepClone(),
+                        ["input"] = observations[index].DeepClone(),
+                        ["success"] = false,
+                        ["error"] = null,
+                        ["warnings"] = attemptWarnings
+                    };
+                    attempts.Add(attempt);
+                    try
+                    {
+                        Function function = created[index];
+                        // DataModel XML: Place returns a new placed function; only an uncovered template becomes persistent.
+                        Function placed = function.Place(page, new PointD((double)request["x"]!, (double)request["y"]!), true, true, true);
+                        attempt["placed"] = ReadFunction(placed, index, propertyScope: propertyScope);
+                        attempt["referenceEquals"] = ReferenceEquals(function, placed);
+                        Observe(attempt, "objectIdentifierEquals", () => function.ObjectIdentifier == placed.ObjectIdentifier, attemptWarnings);
+                        attempt["success"] = true;
+                        GC.KeepAlive(function);
+                        GC.KeepAlive(placed);
+                    }
+                    catch (Exception error) { attempt["error"] = error.ToString(); throw; }
+                }
+                if (placementIndex < requests.Count)
+                { warnings.Add("Fewer readable unplaced functions were returned than requested placements."); }
+                // A79/A80: release cached property lists before either commit or rollback.
+                propertyScope.Dispose();
+                scope.Commit();
+                scope.CloseUndo();
+            }
+            catch { scope.Rollback(); throw; }
+        }
+        // A79: only the device tag crosses the committed scope; read back through fresh wrappers.
+        var readbackWarnings = new JArray();
+        result["readbackWarnings"] = readbackWarnings;
+        JArray functions = ReadDeviceByTag(project, deviceTag, readbackWarnings);
+        result["functions"] = functions;
+        result["duplicates"] = ReadDuplicates(functions);
+    }
+
+    private static void DeviceList(Project project, JObject input, JObject result)
+    {
+        var requests = (JArray)input["placements"]!;
+        if (requests.Count > 3)
+        { throw new ArgumentException("At most three device-list template placements are permitted."); }
+        var warnings = new JArray();
+        var attempts = new JArray();
+        result["warnings"] = warnings;
+        result["placements"] = attempts;
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        var deviceTags = new HashSet<string>(StringComparer.Ordinal);
+        using (var scope = new TransactionScope("Parts device-list spike"))
+        {
+            try
+            {
+                Page? page = null;
+                Observe(result, "page", () => (page = project.Pages.Single(candidate => candidate.Name == (string)input["page"]!)).Name, warnings);
+                if (page is null)
+                { return; }
+                using var service = new DeviceService();
+                using var propertyScope = new FunctionObservationScope();
+                // HEServices XML: CreateDeviceListItem adds the part to the project's device list.
+                DeviceListEntry item = service.CreateDeviceListItem(project, (string)input["part"]!, (string?)input["variant"] ?? "");
+                var returned = new JObject { ["type"] = item?.GetType().FullName };
+                result["deviceListItem"] = returned;
+                Observe(returned, "value", () => item?.ToString(), warnings);
+                bool matched = false;
+                foreach ((JObject observation, StorableObject[] templates) in ReadDeviceList(service, project, result, "deviceList", warnings, propertyScope))
+                {
+                    if (!string.Equals((string?)observation["partNumber"], (string)input["part"]!, StringComparison.Ordinal)
+                        || !string.Equals((string?)observation["variant"], (string?)input["variant"] ?? "", StringComparison.Ordinal))
+                    { continue; }
+                    matched = true;
+                    var before = (JArray?)observation["templates"];
+                    int placementIndex = 0;
+                    foreach (int index in Enumerable.Range(0, templates.Length).OrderByDescending(index => (bool?)before?[index]?["isMainFunction"] == true))
+                    {
+                        if (placementIndex >= requests.Count)
+                        { break; }
+                        if (templates[index] is not Function template || before?[index] is not JObject templateObservation)
+                        { continue; }
+                        var request = (JObject)requests[placementIndex]!;
+                        var attemptWarnings = new JArray();
+                        var attempt = new JObject
+                        {
+                            ["index"] = index,
+                            ["request"] = request.DeepClone(),
+                            ["template"] = templateObservation.DeepClone(),
+                            ["success"] = false,
+                            ["error"] = null,
+                            ["warnings"] = attemptWarnings
+                        };
+                        attempts.Add(attempt);
+                        SymbolVariant? symbol = null;
+                        Observe(attempt, "symbol", () => ReadSymbol(symbol = template.SymbolVariant), attemptWarnings);
+                        Observe(attempt, "symbolIsValid", () => symbol is not null && symbol.IsValid, attemptWarnings);
+                        if ((bool?)attempt["symbolIsValid"] != true)
+                        {
+                            attempt["error"] = "The template SymbolVariant is null, invalid or unreadable; placement was skipped.";
+                            continue;
+                        }
+                        placementIndex++;
+                        try
+                        {
+                            // DataModel XML: PlaceAt instantiates a transient device-list template instead of copying a persistent function.
+                            template.PlaceAt(page, new PointD((double)request["x"]!, (double)request["y"]!), DocumentTypeManager.DocumentType.Circuit, symbol!);
+                            attempt["success"] = true;
+                            JObject placed = ReadFunction(template, index, propertyScope: propertyScope);
+                            attempt["placed"] = placed;
+                            if ((string?)placed["name"] is { Length: > 0 } name)
+                            { names.Add(name); }
+                            if ((string?)placed["deviceTag"] is { Length: > 0 } deviceTag)
+                            { deviceTags.Add(deviceTag); }
+                        }
+                        catch (Exception error) { attempt["error"] = error.ToString(); throw; }
+                    }
+                    if (placementIndex < requests.Count)
+                    { warnings.Add("Fewer Function templates with a readable valid SymbolVariant were available than requested placements."); }
+                    break;
+                }
+                if (!matched)
+                { warnings.Add("No device-list entry matched the requested part and variant."); }
+                GC.KeepAlive(item);
+                // A79/A80: release cached property lists before either commit or rollback.
+                propertyScope.Dispose();
+                scope.Commit();
+                scope.CloseUndo();
+            }
+            catch { scope.Rollback(); throw; }
+        }
+        // A79: keep only pre-commit identity strings and query fresh functions and device-list templates.
+        result["readbackNames"] = new JArray(names);
+        result["readbackDeviceTags"] = new JArray(deviceTags);
+        var readbackWarnings = new JArray();
+        result["readbackWarnings"] = readbackWarnings;
+        JArray functions = ReadDeviceListFunctions(project, names, deviceTags, readbackWarnings);
+        result["functions"] = functions;
+        result["duplicates"] = ReadDuplicates(functions);
+        using var readbackService = new DeviceService();
+        ReadDeviceList(readbackService, project, result, "deviceListAfter", readbackWarnings);
+    }
+
+    private static List<(JObject Observation, StorableObject[] Templates)> ReadDeviceList(DeviceService service, Project project, JObject result, string field, JArray warnings,
+        FunctionObservationScope? propertyScope = null)
+    {
+        var entries = new List<(JObject, StorableObject[])>();
+        Observe(result, field, () =>
+        {
+            var observations = new JArray();
+            // HEServices XML: each TemplatesInfo contains transient templates for a device-list part and variant.
+            foreach (DeviceService.TemplatesInfo info in service.GetTemplatesFromDeviceList(project) ?? [])
+            {
+                var entryWarnings = new JArray();
+                var observation = new JObject { ["warnings"] = entryWarnings };
+                Observe(observation, "partNumber", () => info.PartNumber, entryWarnings);
+                Observe(observation, "variant", () => info.Variant, entryWarnings);
+                StorableObject[] templates = [];
+                Observe(observation, "templates", () =>
+                {
+                    templates = info.Templates ?? [];
+                    return new JArray(templates.Select((template, index) => ReadFunction(template, index, propertyScope: propertyScope)));
+                }, entryWarnings);
+                entries.Add((observation, templates));
+                observations.Add(observation);
+            }
+            return observations;
+        }, warnings);
+        return entries;
+    }
+
+    private static JArray ReadDeviceListFunctions(Project project, HashSet<string> names, HashSet<string> deviceTags, JArray warnings)
+    {
+        var result = new JArray();
+        if (names.Count == 0 && deviceTags.Count == 0)
+        { warnings.Add("Placed templates had no readable name or device tag; function read-back is unavailable."); return result; }
+        try
+        {
+            using var finder = new DMObjectsFinder(project);
+            foreach (Function function in finder.GetFunctions(null))
+            {
+                FunctionPropertyList? properties = null;
+                try
+                {
+                    var identity = new JObject();
+                    Observe(identity, "name", () => function.Name, warnings);
+                    Observe(identity, "deviceTag", () =>
+                    {
+                        properties = function.Properties;
+                        using PropertyValue device = properties.FUNC_IDENTDEVICETAG;
+                        return device.IsEmpty ? null : device.ToString();
+                    }, warnings);
+                    if (names.Contains((string?)identity["name"] ?? "") || deviceTags.Contains((string?)identity["deviceTag"] ?? ""))
+                    { result.Add(ReadFunction(function, null, properties)); }
+                }
+                finally
+                {
+                    properties?.Dispose();
+                    GC.KeepAlive(function);
+                }
+            }
+        }
+        catch (Exception error) { Warn(warnings, "functions", error); }
+        return result;
     }
 
     private static StorableObject[] ReadTemplates(Function function, JObject result, string field, JArray warnings)
@@ -478,7 +730,7 @@ public sealed class PartsSpikeAction : IEplAction
         return result;
     }
 
-    private static JObject ReadFunction(object? item, int? index, FunctionPropertyList? borrowedProperties = null)
+    private static JObject ReadFunction(object? item, int? index, FunctionPropertyList? borrowedProperties = null, FunctionObservationScope? propertyScope = null)
     {
         var warnings = new JArray();
         var result = new JObject { ["index"] = index, ["type"] = item?.GetType().FullName, ["warnings"] = warnings };
@@ -505,21 +757,21 @@ public sealed class PartsSpikeAction : IEplAction
         Observe(result, "location", () => new JArray(function.Location.X, function.Location.Y), warnings);
         Observe(result, "symbol", () => ReadSymbol(function.SymbolVariant), warnings);
         Observe(result, "pins", () => new JArray(function.Pins.Select((pin, pinIndex) => ReadPin(pin, pinIndex))), warnings);
+        FunctionPropertyList? properties = null;
         try
         {
-            FunctionPropertyList properties = borrowedProperties ?? function.Properties;
-            try
+            Observe(result, "properties", () =>
             {
+                properties = borrowedProperties ?? propertyScope?.GetProperties(function) ?? function.Properties;
                 Observe(result, "deviceTag", () =>
                 {
                     using PropertyValue device = properties.FUNC_IDENTDEVICETAG;
                     return device.IsEmpty ? null : device.ToString();
                 }, warnings);
-                result["properties"] = ReadProperties(properties, warnings);
-            }
-            finally { if (borrowedProperties is null) { properties.Dispose(); } }
+                return ReadProperties(properties, warnings);
+            }, warnings);
         }
-        catch (Exception error) { Warn(warnings, "properties", error); }
+        finally { if (borrowedProperties is null && propertyScope is null) { properties?.Dispose(); } }
         Observe(result, "displayedProperties", () => function.Page is { } page
             ? new JArray(page.AllPlacements.OfType<PropertyPlacement>().Where(text => text.Parent?.ObjectIdentifier == function.ObjectIdentifier).Select(ReadDisplay)) : new JArray(), warnings);
         GC.KeepAlive(function);
@@ -648,6 +900,34 @@ public sealed class PartsSpikeAction : IEplAction
         try
         { object? value = read(); result[field] = value is null ? null : JToken.FromObject(value); }
         catch (Exception error) { result[field] = null; Warn(warnings, field, error); }
+    }
+
+    private sealed class FunctionObservationScope : IDisposable
+    {
+        private readonly List<(Function Function, FunctionPropertyList Properties)> _properties = [];
+
+        public FunctionPropertyList GetProperties(Function function)
+        {
+            foreach ((Function owner, FunctionPropertyList properties) in _properties)
+            {
+                if (ReferenceEquals(owner, function))
+                { return properties; }
+            }
+            FunctionPropertyList result = function.Properties;
+            _properties.Add((function, result));
+            return result;
+        }
+
+        public void Dispose()
+        {
+            foreach ((Function owner, FunctionPropertyList properties) in _properties)
+            {
+                try
+                { properties.Dispose(); }
+                finally { GC.KeepAlive(owner); }
+            }
+            _properties.Clear();
+        }
     }
 
     private static void Warn(JArray warnings, string field, Exception error) => warnings.Add(new JObject { ["field"] = field, ["error"] = error.ToString() });
