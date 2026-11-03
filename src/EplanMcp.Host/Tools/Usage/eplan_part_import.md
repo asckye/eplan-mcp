@@ -6,11 +6,13 @@ A supplier's relays, adding only the parts the database does not have yet, first
 
 The same file, also updating the parts the database has already:
 
-    {"file": "supplier/relays.xml", "mode": "update_and_append"}
+    {"file": "supplier/relays.xml", "mode": "update_and_append", "dry_run": false}
 
 ## Workflow
 
-1. This writes EPLAN's parts database, which every project shares, not a project. The engineer approves every call in EPLAN, even from a scratch project; the database is backed up first. An import cannot be undone, not even with Ctrl+Z; only the backup takes it back.
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
+
+1. This writes EPLAN's parts database, which every project shares, not a project. For execution, the engineer approves every call in EPLAN, even from a scratch project; the database is backed up first. An import cannot be undone, not even with Ctrl+Z; only the backup takes it back.
 2. The file must be in the `imports` folder in EplanMcp's data folder (next to `exports`), put there by the engineer or by you; `file` is its path below that folder, with `/` between folders. Only parts management XML files (as eplan_part_export writes them with format xml, or EPLAN's parts management exports them) of at most 50 MB; links and junctions are not followed.
 3. Call with `dry_run` first: `added`, `updated` and `skipped` show what `mode` would do. `append_new` (the default) adds only parts the database lacks and leaves the others; `update_existing` only updates; `update_and_append` does both; `replace_and_append` replaces existing parts whole and adds new ones.
 4. When the mode leaves every part as it is, nothing is asked or changed.

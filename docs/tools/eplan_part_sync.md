@@ -20,8 +20,10 @@ S24 r15 发现同步**也写项目**：被引用但没有存进项目的部件�
 |---|---|---|---|---|
 | `project` | string | 否 | EPLAN 中选中的项目 | 项目名，或 `eplan_project_list` 返回的 `path` |
 | `mode` | enum `append_new` \| `overwrite_existing` \| `overwrite_and_append` | 否 | `append_new` | `append_new`：只加部件库中没有的部件；`overwrite_existing`：用项目中的数据覆盖部件库中已有的部件（连同全部变体）；`overwrite_and_append`：两者都做 |
+| `dry_run` | bool | 否 | true | 省略或 true 仅预览；执行须显式 false |
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 `structuredContent`：
 - `project`、`database`：写入的项目和部件库；
 - `added`、`overwritten`：部件号列表，各最多 50 个，另有数量；

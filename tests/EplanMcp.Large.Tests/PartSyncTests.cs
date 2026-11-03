@@ -21,7 +21,7 @@ public sealed class PartSyncTests
         PartImportTests.SkipUnlessOptedIn();
         await using var host = new DestructiveHost();
         await host.InitializeAsync();
-        Dictionary<string, object?> args = new() { ["project"] = host.Writable };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = host.Writable };
 
         JsonElement dryRun = await host.CallAsync(Tool, new(args) { ["dry_run"] = true });
         int added = dryRun.GetProperty("addedCount").GetInt32();

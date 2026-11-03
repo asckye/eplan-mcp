@@ -49,7 +49,7 @@ public sealed class PartImportTests
         string imports = new HostDataLocations(host.Home).Imports;
         Directory.CreateDirectory(imports);
         File.WriteAllText(Path.Combine(imports, FileName), TestFile);
-        Dictionary<string, object?> args = new() { ["file"] = FileName };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["file"] = FileName };
 
         JsonElement dryRun = await host.CallAsync(Tool, new(args) { ["dry_run"] = true });
         Assert.True(Strings(dryRun, "added").SequenceEqual([TestPart]), $"The parts database has {TestPart} already: restore it from the copy made before the last run (README.md).");

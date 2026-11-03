@@ -44,7 +44,7 @@ internal sealed class PartMasterDataTools
         OutputSchemaType = typeof(PartImportResult))]
     [Description(
         "Imports a parts XML file (as eplan_part_export writes it) from the 'imports' folder in EplanMcp's data folder " +
-        "into the parts database EPLAN is configured with, which every project shares. Always needs the engineer's " +
+        "into the parts database EPLAN is configured with, which every project shares. Omit/true previews; false needs the engineer's " +
         "approval; the database is backed up first, and an import cannot be undone, only restored from that backup. " +
         "Example: {\"file\": \"supplier/relays.xml\"}.")]
     public static async Task<CallToolResult> PartImportAsync(
@@ -53,7 +53,7 @@ internal sealed class PartMasterDataTools
         [Description("Path below the imports folder, .xml")] string file,
         [Description("append_new: only parts the database lacks")][AllowedValues("append_new", "update_existing", "update_and_append", "replace_and_append")] string mode = "append_new",
         [Description("How a part counts as already there")][AllowedValues("part_number", "unique_id", "unique_id_or_part_number")] string match_by = "part_number",
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -107,6 +107,8 @@ internal sealed class PartMasterDataTools
             Database = ResultShaper.CleanText(data?.Database ?? outcome.Plan.MasterData?.Database) ?? string.Empty,
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             File = source.Path,
             Sha256 = source.Sha256,
             Bytes = source.Bytes,
@@ -136,6 +138,10 @@ internal sealed class PartMasterDataTools
     private static string? Hint(PartImportResult result, PartImportData? data, string matchBy, bool committed)
     {
         var hints = new List<string>();
+        if (result.DryRun)
+        {
+            hints.Add(WriteToolDefaults.ExecutionHint);
+        }
         if (committed)
         {
             hints.Add("Every project using this parts database sees the change. An import cannot be undone, not even with Ctrl+Z; to take it back, the engineer restores 'backup'.");
@@ -176,14 +182,14 @@ internal sealed class PartMasterDataTools
         OutputSchemaType = typeof(PartSyncResult))]
     [Description(
         "Synchronizes the parts an EPLAN project stores into the parts database EPLAN is configured with, which every " +
-        "project shares; EPLAN also stores the parts the project only references in the project. Always needs the " +
+        "project shares; EPLAN also stores the parts the project only references in the project. Omit/true previews; false needs the " +
         "engineer's approval; the database and the project are backed up first, and the database's side cannot be " +
         "undone. Example: {\"project\": \"Line1\"}.")]
     public static async Task<CallToolResult> PartSyncAsync(
         WritePipeline pipeline,
         [Description("From eplan_project_list")] string project,
         [Description("append_new: only parts the database lacks")][AllowedValues("append_new", "overwrite_existing", "overwrite_and_append")] string mode = "append_new",
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -228,6 +234,8 @@ internal sealed class PartMasterDataTools
             Database = ResultShaper.CleanText(data?.Database ?? outcome.Plan.MasterData?.Database) ?? string.Empty,
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Added = Numbers(data?.Added, details, "added"),
             AddedCount = data?.AddedCount ?? Count(details, "addedCount"),
             Overwritten = Numbers(data?.Overwritten, details, "updated"),
@@ -260,6 +268,10 @@ internal sealed class PartMasterDataTools
     private static string? SyncHint(PartSyncResult result, PartSyncData? data, bool committed)
     {
         var hints = new List<string>();
+        if (result.DryRun)
+        {
+            hints.Add(WriteToolDefaults.ExecutionHint);
+        }
         if (committed)
         {
             hints.Add("Every project using this parts database sees the change. Ctrl+Z in EPLAN undoes only the project's side ('undo'); the parts database comes back only from 'backup'.");

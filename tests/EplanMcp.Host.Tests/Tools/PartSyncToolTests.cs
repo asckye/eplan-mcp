@@ -14,6 +14,7 @@ namespace EplanMcp.Host.Tests.Tools;
 /// suspends the database and the project.
 /// </summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class PartSyncToolTests : IDisposable
 {
     private const string Database = @"$(MD_PARTS)\EPLAN_parts.alk";
@@ -118,6 +119,84 @@ public sealed class PartSyncToolTests : IDisposable
     }
 
     [Fact]
+    public async Task McpDefaultAndTruePreview_FalsePreservesExecution()
+    {
+        Func<object?, object> originalPlan = _harness.Bridge.Handlers[OperationNames.PartSyncPlan];
+        _harness.Bridge.Handlers[OperationNames.PartSyncPlan] = input =>
+        {
+            WritePlan result = Assert.IsType<WritePlan>(originalPlan(input));
+            foreach (PlannedChange change in result.Changes)
+            {
+                change.Name += "\u0007\u202e";
+                change.Property = change.Property is null ? null : change.Property + "\u0007\u202e";
+                change.OldValue = change.OldValue is null ? null : change.OldValue + "\u0007\u202e";
+                change.NewValue = change.NewValue is null ? null : change.NewValue + "\u0007\u202e";
+            }
+
+            return result;
+        };
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            Tool definition = Assert.Single(await client.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken), item => item.Name == PartMasterDataTools.SyncTool).ProtocolTool;
+            Assert.True(definition.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+            JsonElement? omitted = null;
+            foreach (bool? dryRun in new bool?[] { null, true, false })
+            {
+                _harness.Bridge.Calls.Clear();
+                _harness.Bridge.Writes.Clear();
+                _dialog.Questions.Clear();
+                var args = new Dictionary<string, object?> { ["project"] = "Line1" };
+                if (dryRun.HasValue)
+                {
+                    args["dry_run"] = dryRun.Value;
+                }
+
+                JsonElement actual = WriteToolHarness.Structured(await client.CallToolAsync(PartMasterDataTools.SyncTool, args, cancellationToken: TestContext.Current.CancellationToken));
+                bool preview = dryRun != false;
+                Assert.Equal(preview, actual.GetProperty("dryRun").GetBoolean());
+                Assert.Equal(preview ? ExecutionState.NotStarted : ExecutionState.Committed, actual.GetProperty("execution").GetString());
+                Assert.Equal("f1", actual.GetProperty("fingerprint").GetString());
+                Assert.NotEmpty(actual.GetProperty("changes").EnumerateArray());
+                Assert.InRange(ResultShaper.ResultTokens(actual.GetRawText()), 1, ResultShaper.DefaultTokenBudget);
+                foreach (JsonElement change in actual.GetProperty("changes").EnumerateArray())
+                {
+                    foreach (JsonProperty field in change.EnumerateObject())
+                    {
+                        if (field.Value.ValueKind == JsonValueKind.String)
+                        {
+                            Assert.DoesNotContain('\u0007', field.Value.GetString()!);
+                            Assert.DoesNotContain('\u202e', field.Value.GetString()!);
+                        }
+                    }
+                }
+
+                if (preview)
+                {
+                    Assert.Empty(_dialog.Questions);
+                    Assert.Empty(_harness.Bridge.Writes);
+                    Assert.DoesNotContain(_harness.Bridge.Calls, call => call.Operation == OperationNames.PartSyncExecute);
+                    Assert.False(Directory.Exists(_harness.Locations.Audit));
+                    Assert.False(Directory.Exists(_harness.Locations.Backups));
+                    Assert.Contains("dry_run: false", actual.GetProperty("hint").GetString(), StringComparison.Ordinal);
+                    if (omitted.HasValue)
+                    {
+                        Assert.Equal(omitted.Value.GetRawText(), actual.GetRawText());
+                    }
+
+                    omitted = actual.Clone();
+                }
+                else
+                {
+                    Assert.Single(_dialog.Questions);
+                    Assert.Single(_harness.Bridge.Writes);
+                    Assert.Contains(_harness.Bridge.Calls, call => call.Operation == OperationNames.PartSyncExecute);
+                    Assert.Equal(341, actual.GetProperty("projectPartsAfter").GetInt32());
+                }
+            }
+        });
+    }
+
+    [Fact]
     public async Task AProjectWithNothingToSynchronize_AsksNobody()
     {
         _nothingToDo = true;
@@ -147,7 +226,7 @@ public sealed class PartSyncToolTests : IDisposable
     [Fact]
     public async Task WithoutAProject_NothingIsAsked()
     {
-        JsonElement error = WriteToolHarness.Error(await PartMasterDataTools.PartSyncAsync(_harness.Pipeline, " ", cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await PartMasterDataTools.PartSyncAsync(_harness.Pipeline, " ", dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("INVALID_ARGUMENT", error.GetProperty("reason").GetString());
         Assert.Empty(_harness.Bridge.Calls);

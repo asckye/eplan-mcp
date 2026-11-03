@@ -22,11 +22,13 @@
 | `file` | string，1–260 个字符 | 是 | — | 导入目录（`<数据根目录>\imports\`）下的相对路径，如 `supplier\relays.xml`；只接受 `.xml`（EPLAN 部件管理的 XML，即 `eplan_part_export` 的 `xml` 格式） |
 | `mode` | enum `append_new` \| `update_existing` \| `update_and_append` \| `replace_and_append` | 否 | `append_new` | `append_new`：只加部件库中没有的部件，已有的不动；`update_existing`：只更新已有的；`update_and_append`：两者都做；`replace_and_append`：已有的整条替换，再加新的 |
 | `match_by` | enum `part_number` \| `unique_id` \| `unique_id_or_part_number` | 否 | `part_number` | 怎样判断文件中的部件"已经存在" |
+| `dry_run` | bool | 否 | true | 省略或 true 仅预览；执行须显式 false |
 
 - 导入目录和路径规则同第三批的导入工具（M4c 设计 Q4、SEC-31）：只接受导入目录下的相对路径，拒绝 `..`、绝对路径、链接和重解析点；文件不超过 50 MB。
 - 不提供 EDZ：EDZ 的导入转换器没有验证。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 `structuredContent`：
 - `database`：写入的部件库（配置中的写法，如 `$(MD_PARTS)\EPLAN_parts.alk`）；
 - `file`、`sha256`、`bytes`：读到的文件，与审计相同；

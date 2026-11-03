@@ -6,11 +6,13 @@ The project's parts the parts database does not have yet, added to it, first as 
 
 The project's data written over the parts the database has, and the missing ones added:
 
-    {"project": "Line1", "mode": "overwrite_and_append"}
+    {"project": "Line1", "mode": "overwrite_and_append", "dry_run": false}
 
 ## Workflow
 
-1. This writes EPLAN's parts database, which every project shares, and the project too: EPLAN stores the parts the project only references in the project (S24). The engineer approves every call in EPLAN, even for a scratch project; the database and the project are backed up first.
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
+
+1. This writes EPLAN's parts database, which every project shares, and the project too: EPLAN stores the parts the project only references in the project (S24). For execution, the engineer approves every call in EPLAN, even for a scratch project; the database and the project are backed up first.
 2. Call with `dry_run` first: `added` are parts the project stores and the database lacks, `overwritten` parts the database has that the project's data replaces, `storedInProject` referenced parts the project will store. `append_new` (the default) only adds; `overwrite_existing` only overwrites, with every variant; `overwrite_and_append` does both.
 3. Only parts the project stores have data to give. A part the project references that neither the project nor the database has stays without data.
 4. When nothing would change, nothing is asked or changed.
