@@ -63,7 +63,7 @@ public sealed class DevicePlaceArgs
     /// <summary>The insertion point's y, in millimetres up from the page's bottom edge.</summary>
     public double Y { get; set; }
 
-    /// <summary>The device's tag: from '-' (<c>-KF20</c>) for the page's structure, or in full (<c>=GAA+A1-KF20</c>).</summary>
+    /// <summary>Short or full device tag; required for symbols, optional for parts to retain EPLAN numbering.</summary>
     public string? Tag { get; set; }
 
     /// <summary>For the execute operation: the plan's <see cref="WritePlan.Fingerprint"/>. Null for the plan.</summary>

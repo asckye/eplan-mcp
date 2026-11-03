@@ -317,7 +317,6 @@ O:Eplan.EplApi.DataModel.Article.LoadFromMasterdata	Eplan.EplApi.DataModel	T:Epl
 O:Eplan.EplApi.DataModel.Article.RemoveModule	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.Article	method	masterdata_or_parts_management	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ArticlePropertyList.Exists	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ArticlePropertyList	method	unsupported_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ArticleReference.AddArticleReference	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ArticleReference	method	static_or_nonpublic	No unique supported compiled member shape
-O:Eplan.EplApi.DataModel.ArticleReference.GetFunctionTemplatesInternal	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ArticleReference	method	static_or_nonpublic	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ArticleReference.StoreToObject	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ArticleReference	method	catalog:banned_symbol	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Exists	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ArticleReferencePropertyList	method	unsupported_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Property	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ArticleReferencePropertyList	property	unsupported_parameter	No unique supported compiled member shape
@@ -374,11 +373,7 @@ O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Exists	Eplan.EplApi.DataM
 O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Exists	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DeviceListEntryPropertyList	method	unsupported_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.DisableConnectionUpdateStep.IsActive	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DisableConnectionUpdateStep	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.DocumentBase.Location	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentBase	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
-O:Eplan.EplApi.DataModel.DocumentTypeManager.GetFctDocTypesToMerge	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentTypeManager	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.DocumentTypeManager.GetFctDocTypesToMergeConnection	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentTypeManager	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.DataModel.DocumentTypeManager.GetFctDocTypesVisibleInNavigator	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentTypeManager	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.DataModel.DocumentTypeManager.GetLogicalFunctionsDocTypes	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentTypeManager	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.DataModel.DocumentTypeManager.GetLogicalPageDocTypes	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentTypeManager	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.DocumentTypeManager.GetPageTypesRelevantForGeneratingConnections	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentTypeManager	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.DocumentTypeManager.IsMasterDataEditorDocumentType	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentTypeManager	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.DocumentTypeManager.SupportsPageAutoconnecting	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.DocumentTypeManager	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
@@ -454,9 +449,7 @@ O:Eplan.EplApi.DataModel.E3D.MountingPointMate.Create	Eplan.EplApi.DataModel.E3D
 O:Eplan.EplApi.DataModel.E3D.MountingRail.Create	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.MountingRail	method	masterdata_or_parts_management	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.E3D.MountingRail.CreateTransient	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.MountingRail	method	transient_creation	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.CreateTransient	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.PlaceHolder3D	method	transient_creation	No unique supported compiled member shape
-O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetRecordNames	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.PlaceHolder3D	method	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetValues	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.PlaceHolder3D	method	unsupported_return	No unique supported compiled member shape
-O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetVariableNames	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.PlaceHolder3D	method	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NumberOfVariables	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.PlaceHolder3D	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.VariableNames	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.PlaceHolder3D	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3DPropertyList.Property	Eplan.EplApi.DataModel.E3D	T:Eplan.EplApi.DataModel.E3D.PlaceHolder3DPropertyList	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
@@ -542,9 +535,7 @@ O:Eplan.EplApi.DataModel.Graphics.PathTextPropertyList.Property	Eplan.EplApi.Dat
 O:Eplan.EplApi.DataModel.Graphics.Pen.ColorId	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.Pen	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Graphics.Pen.LineEndType	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.Pen	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.CreateTransient	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.PlaceHolder	method	transient_creation	No unique supported compiled member shape
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.PlaceHolder	method	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.PlaceHolder	method	unsupported_return	No unique supported compiled member shape
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.PlaceHolder	method	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.LayerId	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.PlaceHolder	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SymbolVariant	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.PlaceHolder	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Add	Eplan.EplApi.DataModel.Graphics	T:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
@@ -809,7 +800,6 @@ O:Eplan.EplApi.DataModel.Planning.SegmentTemplatePropertyList.Exists	Eplan.EplAp
 O:Eplan.EplApi.DataModel.PlanningSegmentsFilter.Name	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.PlanningSegmentsFilter	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.PlanningSegmentsFilter.ResetFilter	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.PlanningSegmentsFilter	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.PlanningSegmentsFilter.SetFilteredPropertyList	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.PlanningSegmentsFilter	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.DataModel.PlcIO.GetAll	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.PlcIO	method	static_or_nonpublic	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.PlcIOPropertyList.Exists	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.PlcIOPropertyList	method	unsupported_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.PotentialDefinition.internalSetPotentialName	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.PotentialDefinition	method	static_or_nonpublic	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.PotentialDefinition.internalSetSignalName	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.PotentialDefinition	method	static_or_nonpublic	No unique supported compiled member shape
@@ -972,7 +962,6 @@ O:Eplan.EplApi.DataModel.Relation.ToInt	Eplan.EplApi.DataModel	T:Eplan.EplApi.Da
 O:Eplan.EplApi.DataModel.ReportBlock.CreateDate	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ReportBlock	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ReportBlock.DeviceTagNameParts	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ReportBlock	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.ReportBlock.Freeze	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ReportBlock	method	lifecycle_or_creation	No unique supported compiled member shape
-O:Eplan.EplApi.DataModel.ReportBlock.ManualPageDescription	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ReportBlock	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Revisions.Comparison.DateOfComparison	Eplan.EplApi.DataModel.Revisions	T:Eplan.EplApi.DataModel.Revisions.Comparison	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.TypeIdOfComparedObject	Eplan.EplApi.DataModel.Revisions	T:Eplan.EplApi.DataModel.Revisions.ComparisonEntry	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.SafetyPoint.GetAutoLockingState	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.SafetyPoint	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
@@ -1176,6 +1165,7 @@ O:Eplan.EplApi.EServices.PrjMessagesEnumerator.CurrentProjectMessage	Eplan.EplAp
 O:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.Count	Eplan.EplApi.EServices	T:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.GetEnumerator	Eplan.EplApi.EServices	T:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection	method	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.EServices.PrjMessagesRegisteredEnumerator.Current	Eplan.EplApi.EServices	T:Eplan.EplApi.EServices.PrjMessagesRegisteredEnumerator	property	unsupported_return	No unique supported compiled member shape
+O:Eplan.EplApi.EServices.PrjMessagesRegisteredEnumerator.Init	Eplan.EplApi.EServices	T:Eplan.EplApi.EServices.PrjMessagesRegisteredEnumerator	method	lifecycle_or_creation	No unique supported compiled member shape
 O:Eplan.EplApi.EServices.ProjectMessage.GetTime	Eplan.EplApi.EServices	T:Eplan.EplApi.EServices.ProjectMessage	method	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.EServices.ProjectMessage.SetDone	Eplan.EplApi.EServices	T:Eplan.EplApi.EServices.ProjectMessage	method	catalog:banned_symbol	No unique supported compiled member shape
 O:Eplan.EplApi.EServices.SubProject.Description	Eplan.EplApi.EServices	T:Eplan.EplApi.EServices.SubProject	property	no_public_default_constructor	No unique supported compiled member shape
@@ -1241,6 +1231,8 @@ O:Eplan.EplApi.HEServices.ConnectionService3D.Import	Eplan.EplApi.HEServices	T:E
 O:Eplan.EplApi.HEServices.ConnectionService3D.ImportExcel	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ConnectionService3D.ImportText	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ConnectionService3D.ShowFillingDegree	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService3D	method	shared_interactive_state	No unique supported compiled member shape
+O:Eplan.EplApi.HEServices.DeviceService.CreateDeviceListItem	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DeviceService	method	masterdata_or_parts_management	No unique supported compiled member shape
+O:Eplan.EplApi.HEServices.DeviceService.CreateTerminalDevice	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DeviceService	method	masterdata_or_parts_management	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.DeviceService.ImportDevices	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DeviceService	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.DeviceService.ImportDevicesExcel	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DeviceService	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.DeviceService.ImportDevicesText	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DeviceService	method	external_path_parameter	No unique supported compiled member shape
@@ -1318,6 +1310,7 @@ O:Eplan.EplApi.HEServices.Masterdata.SystemEntries	Eplan.EplApi.HEServices	T:Epl
 O:Eplan.EplApi.HEServices.Masterdata.UpdateProject	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Masterdata	method	masterdata_copy_pending	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.MergeDataService.WriteBackConnectionData	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.MergeDataService	method	static_or_nonpublic	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.MergeDataService.WriteBackFunctionData	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.MergeDataService	method	static_or_nonpublic	No unique supported compiled member shape
+O:Eplan.EplApi.HEServices.MountingPanelService.CreateArticlePlacement	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.MountingPanelService	method	masterdata_or_parts_management	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.NameService.AdjustmentOfDeviceTagSeparatorIsEnabled	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.NameService	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.NameService.EvaluateAndSetAllNamesTXN	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.NameService	method	owns_transaction	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.NameService.Page	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.NameService	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape

@@ -12,7 +12,7 @@ internal static partial class DevicePlaceInputs
     {
         ((JsonArray)schema["required"]!).Remove("tag");
         schema["oneOf"] = JsonNode.Parse("""
-            [{"required":["part","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","library","symbol","symbol_variant","display_properties","connection_designations","connection_descriptions","location_box","corner_x","corner_y"]}}},
+            [{"required":["part"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","library","symbol","symbol_variant","display_properties","connection_designations","connection_descriptions","location_box","corner_x","corner_y"]}}},
              {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","part","variant","location_box","corner_x","corner_y"]}}},
              {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","tag","part","variant","library","symbol","symbol_variant","display_properties","connection_designations","connection_descriptions"]}}},
              {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"enum":["tag","part","variant","library","symbol","location_box","corner_x","corner_y","display_properties","connection_designations","connection_descriptions"]}}}]

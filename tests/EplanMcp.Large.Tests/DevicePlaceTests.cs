@@ -18,6 +18,160 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
     private const string Prefix = "=GAA+A1&EFS1/";
 
     [Fact]
+    public async Task ATemplateOnlyPart_WithTag_RenamesAllSixFunctionsAndPreservesDescriptions_OneUndoRestores()
+    {
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        string project = selection.Project;
+        string page = await NewPageAsync(project);
+        string tag = "=GAA+A1-KR" + page[Prefix.Length..];
+        const string part = "SIE.6ES7131-4BD01-0AA0";
+        JsonElement[] original = await PlcObjectsAsync(project);
+        LiveSnapshots.Snapshot before = await selection.SnapshotAsync();
+        Dictionary<string, object?> args = new()
+        {
+            ["project"] = project,
+            ["page"] = page,
+            ["part"] = part,
+            ["variant"] = "1",
+            ["x"] = 80,
+            ["y"] = 160,
+            ["tag"] = tag,
+            ["dry_run"] = false
+        };
+        try
+        {
+            JsonElement placed = await PartsCallAsync("eplan_device_place", args);
+            JsonElement[] after = await PlcObjectsAsync(project);
+            var oldIds = original.Select(PlcIdentity).ToHashSet(StringComparer.Ordinal);
+            JsonElement[] added = [.. after.Where(item => !oldIds.Contains(PlcIdentity(item))).OrderBy(item => item.GetProperty("name").GetString(), StringComparer.Ordinal)];
+            // A85: all six persistent objects must belong to the requested device; no old automatic-tag orphans.
+            Assert.Equal(original.Select(item => item.GetRawText()).Order(StringComparer.Ordinal), after.Where(item => oldIds.Contains(PlcIdentity(item))).Select(item => item.GetRawText()).Order(StringComparer.Ordinal));
+            Assert.Equal(6, added.Length);
+            Assert.All(added, item => Assert.StartsWith(tag + ":", item.GetProperty("name").GetString(), StringComparison.Ordinal));
+            JsonElement list = await PartsCallAsync("eplan_device_list", new() { ["project"] = project, ["tag_contains"] = tag, ["include_auxiliary"] = true, ["limit"] = 200 });
+            JsonElement[] functions = [.. list.GetProperty("devices").EnumerateArray()];
+            Assert.Equal(6, functions.Length);
+            JsonElement main = Assert.Single(functions, function => function.GetProperty("main").GetBoolean());
+            Assert.Equal(page, main.GetProperty("page").GetString());
+            Assert.Equal(5, functions.Count(function => function.GetProperty("page").ValueKind == JsonValueKind.Null));
+            Assert.Equal((ExecutionState.Committed, 6, 5), (placed.GetProperty("execution").GetString(), placed.GetProperty("functions").GetInt32(), placed.GetProperty("unplaced").GetInt32()));
+            Assert.Equal(functions.Where(function => function.GetProperty("page").ValueKind == JsonValueKind.Null).Select(function => function.GetProperty("tag").GetString()).Order(StringComparer.Ordinal), placed.GetProperty("unplaced_functions").EnumerateArray().Select(name => name.GetString()).Order(StringComparer.Ordinal));
+            JsonElement device = await PartsCallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = main.GetProperty("tag").GetString() });
+            Assert.Equal(5, device.GetProperty("functions").GetArrayLength());
+            JsonElement reference = Assert.Single(device.GetProperty("parts").EnumerateArray());
+            Assert.Equal((part, "1", 1), (reference.GetProperty("partNumber").GetString(), reference.GetProperty("variant").GetString(), reference.GetProperty("count").GetInt32()));
+            JsonElement properties = await PartsCallAsync("eplan_property_get", new()
+            {
+                ["project"] = project,
+                ["queries"] = added.Select(item => new
+                {
+                    target = new { locator = new { project, kind = "function", type = item.GetProperty("locator").GetProperty("type").GetInt32(), oid = item.GetProperty("locator").GetProperty("oid").GetInt64(), name = item.GetProperty("name").GetString() } },
+                    properties = new[] { new { property_id = 20023, index = 1 } }
+                }).ToArray(),
+                ["limit"] = 200
+            });
+            Assert.False(properties.GetProperty("truncated").GetBoolean());
+            JsonElement[] descriptions = [.. properties.GetProperty("items").EnumerateArray().OrderBy(row => row.GetProperty("query").GetInt32())];
+            Assert.All(descriptions, row => Assert.Equal("value", row.GetProperty("status").GetString()));
+            Assert.Equal(["DI0", "DI2", "DC24V", "DI1", "DI3", "DC24V"], descriptions.Select(row => row.GetProperty("value").GetString()));
+            await selection.UndoAsync();
+            Assert.Equal(original.Select(item => item.GetRawText()), (await PlcObjectsAsync(project)).Select(item => item.GetRawText()));
+            Assert.Equal(before.Hash, (await selection.SnapshotAsync()).Hash);
+        }
+        catch
+        {
+            await PartsFailureReadbackAsync(project, tag);
+            throw;
+        }
+    }
+
+    [Fact]
+    public async Task ASymbolButton_AssignsPartToItsExistingMainFunction_OneUndoRestores()
+    {
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        string project = selection.Project;
+        string page = await NewPageAsync(project);
+        string tag = "=GAA+A1-SR" + page[Prefix.Length..];
+        try
+        {
+            await PartsCallAsync("eplan_device_place", new()
+            {
+                ["project"] = project,
+                ["page"] = page,
+                ["library"] = "IEC_symbol",
+                ["symbol"] = "SSD",
+                ["symbol_variant"] = 0,
+                ["x"] = 80,
+                ["y"] = 160,
+                ["tag"] = tag,
+                ["dry_run"] = false
+            });
+            JsonElement original = await PartsCallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = tag });
+            LiveSnapshots.Snapshot before = await selection.SnapshotAsync();
+            const string part = "SIE.3SB3400-0B";
+            JsonElement assigned = await PartsCallAsync("eplan_device_update", new() { ["project"] = project, ["tag"] = tag, ["part"] = part, ["variant"] = "1", ["dry_run"] = false });
+            JsonElement read = await PartsCallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = tag });
+            Assert.Equal(ExecutionState.Committed, assigned.GetProperty("execution").GetString());
+            Assert.Equal(original.GetProperty("parts").GetArrayLength() + 1, read.GetProperty("parts").GetArrayLength());
+            JsonElement reference = Assert.Single(read.GetProperty("parts").EnumerateArray(), item => item.GetProperty("partNumber").GetString() == part);
+            Assert.Equal(("1", 1), (reference.GetProperty("variant").GetString(), reference.GetProperty("count").GetInt32()));
+            Assert.Equal(original.GetProperty("device").GetRawText(), read.GetProperty("device").GetRawText());
+            Assert.Equal(original.GetProperty("functions").GetRawText(), read.GetProperty("functions").GetRawText());
+            await selection.UndoAsync();
+            Assert.Equal(original.GetRawText(), (await PartsCallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = tag })).GetRawText());
+            Assert.Equal(before.Hash, (await selection.SnapshotAsync()).Hash);
+            Assert.Equal(1, await DevicesOnAsync(project, page));
+        }
+        catch
+        {
+            await PartsFailureReadbackAsync(project, tag);
+            throw;
+        }
+    }
+
+    private async Task<JsonElement> PartsCallAsync(string tool, Dictionary<string, object?> args)
+    {
+        TestContext.Current.TestOutputHelper!.WriteLine(tool + " request: " + JsonSerializer.Serialize(args));
+        (bool succeeded, JsonElement result) = await eplan.CallOrErrorAsync(tool, args);
+        TestContext.Current.TestOutputHelper.WriteLine(tool + " result/readback: " + result.GetRawText());
+        Assert.True(succeeded, tool + " failed: " + result.GetRawText());
+        return result;
+    }
+
+    private async Task<JsonElement[]> PlcObjectsAsync(string project)
+    {
+        var objects = new List<JsonElement>();
+        string? cursor = null;
+        do
+        {
+            JsonElement read = await PartsCallAsync("eplan_object_find", new() { ["project"] = project, ["object_type"] = "PLCTerminal", ["limit"] = 200, ["cursor"] = cursor });
+            objects.AddRange(read.GetProperty("items").EnumerateArray());
+            cursor = read.GetProperty("cursor").GetString();
+        } while (cursor is not null);
+        return [.. objects];
+    }
+
+    private static string PlcIdentity(JsonElement item) => item.GetProperty("locator").GetProperty("type").GetRawText() + "/" + item.GetProperty("locator").GetProperty("oid").GetRawText();
+
+    private async Task PartsFailureReadbackAsync(string project, string tag)
+    {
+        foreach (string tool in new[] { "eplan_device_get", "eplan_device_list" })
+        {
+            try
+            {
+                await PartsCallAsync(tool, tool == "eplan_device_get"
+                    ? new() { ["project"] = project, ["tag"] = tag }
+                    : new() { ["project"] = project, ["tag_contains"] = tag, ["include_auxiliary"] = true, ["limit"] = 200 });
+            }
+            catch (Exception failure)
+            { TestContext.Current.TestOutputHelper!.WriteLine("Failure readback: " + failure); }
+        }
+        try
+        { await PlcObjectsAsync(project); }
+        catch (Exception failure) { TestContext.Current.TestOutputHelper!.WriteLine("Failure PLC readback: " + failure); }
+    }
+
+    [Fact]
     public async Task ALocationBoxAroundAnExistingCoil_ReadsBackDashedWithoutRenaming_OneUndoRestores()
     {
         await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);

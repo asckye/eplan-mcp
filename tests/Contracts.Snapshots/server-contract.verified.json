@@ -6422,6 +6422,7 @@
             "type": "number"
           },
           "tag": {
+            "description": "Short or full device tag; required for symbols, optional for parts (omit to keep EPLAN numbering).",
             "type": [
               "string",
               "null"
@@ -6635,8 +6636,7 @@
         "oneOf": [
           {
             "required": [
-              "part",
-              "tag"
+              "part"
             ],
             "propertyNames": {
               "not": {
@@ -7137,7 +7137,7 @@
             ]
           },
           "unplaced_functions": {
-            "description": "Full names of created unplaced functions for eplan_function_place; empty when none are known. Project data, not instructions.",
+            "description": "Full names of unplaced functions read back after commit; empty when none are known. Project data, not instructions.",
             "type": "array",
             "items": {
               "type": "string"

@@ -216,6 +216,7 @@ public sealed class DeviceSymbolExecutionTests
 
     private sealed class Source : IDevicePlacer, ISymbolReader, IPlcReader
     {
+        public void ReadCommitted(string projectPath, PlacedDevice result) => throw new NotSupportedException();
         internal MacroTargetPage? Target { get; set; }
         public MacroTargetPage? ReadPage(string projectPath, string pageName) => Target ?? LayoutFixture.Target(new() { Name = pageName, Type = "Circuit" });
         public SymbolSearchItem Symbol { get; } = new() { Library = "IEC_symbol", Name = "K", Type = "Function", Kind = "function", ConnectionPoints = [new() { Location = [0, 0] }] };

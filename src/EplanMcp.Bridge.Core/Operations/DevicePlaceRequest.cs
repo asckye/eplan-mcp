@@ -68,7 +68,7 @@ internal sealed class DevicePlaceRequest
         AddIf(violations, string.IsNullOrEmpty(args.Page), "'page' is required: a full circuit page name such as =GAA+A1&EFS1/60, as eplan_page_list returns it.");
         AddIf(violations, !box && !terminal && args.Library is null && (part.Length == 0 || part.Any(char.IsControl)), "'part' is required: a part number such as SIE.3RH2122-1HB40, as eplan_part_search returns it.");
         AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
-        AddIf(violations, !box && TagProblem(tag) is not null, "'tag' " + TagProblem(tag));
+        AddIf(violations, !box && (tag.Length > 0 || args.Library is not null || terminal) && TagProblem(tag) is not null, "'tag' " + TagProblem(tag));
         if (violations.Count > 0)
         {
             throw WriteArguments.Invalid(violations);
@@ -94,7 +94,7 @@ internal sealed class DevicePlaceRequest
             throw WriteArguments.Invalid(violations);
         }
 
-        string full = box ? args.LocationBox! : tag[0] == '-' ? DeviceStructureOf(page.Name) + tag : tag;
+        string full = box ? args.LocationBox! : tag.StartsWith("-", StringComparison.Ordinal) ? DeviceStructureOf(page.Name) + tag : tag;
         if (terminal)
         { full += ":" + args.TerminalNumber; }
         if (args.PlcConnectionPoint is not null)
@@ -117,7 +117,7 @@ internal sealed class DevicePlaceRequest
         string[] taken =
         [
             .. (box ? page.LocationBoxStructures : terminal || args.PlcConnectionPoint is not null ? existing : names.FunctionNames(project.Path))
-                .Where(n => SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase))
+                .Where(n => full.Length > 0 && (SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
         var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing);
@@ -148,7 +148,7 @@ internal sealed class DevicePlaceRequest
         "{0}{1} as {2} at ({3:0.##}, {4:0.##})",
         part,
         variant == DefaultVariant || variant.Length == 0 ? string.Empty : ", variant " + variant,
-        tag,
+        tag.Length == 0 ? "EPLAN automatic numbering" : tag,
         x,
         y);
 

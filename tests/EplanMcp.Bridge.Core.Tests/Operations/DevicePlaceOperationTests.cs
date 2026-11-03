@@ -172,7 +172,6 @@ public sealed class DevicePlaceOperationTests
     }
 
     [Theory]
-    [InlineData("", "'tag' is required")]
     [InlineData("KF20", "'tag' needs a device part after '-'")]
     [InlineData("=GAA+A1-", "'tag' needs a device part after '-'")]
     [InlineData("-KF20:13", "'tag' must not contain ':'")]
@@ -234,6 +233,38 @@ public sealed class DevicePlaceOperationTests
     }
 
     [Fact]
+    public void TemplateOnlyPlcPart_UnplacedFunctionsRevertingAfterCommitRollsBack()
+    {
+        const string part = "SIE.6ES7131-4BD01-0AA0";
+        _parts.Content.Parts.Add(new PartSearchItem { PartNumber = part, Variant = "1", HasMacro = false });
+        string[] suffixes = [":1", ":2", ":3", ":5", ":6", ":7"];
+        _placer.Result = tag => new PlacedDevice
+        {
+            Names = [.. suffixes.Select(suffix => tag + suffix)],
+            MainName = tag + ":1",
+            Unplaced = 5,
+            OnPage = 1,
+        };
+        _placer.Committed = data =>
+        {
+            Assert.Contains("Commit", _transactions.Calls);
+            _names.Functions.RemoveAll(function => function.Name.StartsWith("=GAA+A1-KR85:", StringComparison.Ordinal) && !function.IsMain);
+            _names.Functions.AddRange(suffixes.Skip(1).Select(suffix => ("=+-K3" + suffix, "old" + suffix, false, (string?)null, "K3")));
+            data.Names = [data.MainName];
+            data.Unplaced = 0;
+            data.UnplacedFunctions = [];
+        };
+        DevicePlaceArgs args = Args(NewPage, "-KR85", part: part);
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => Execute(args));
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (failure.Error.Reason, failure.Error.Execution));
+        Assert.Contains("Rollback", _transactions.Calls);
+        Assert.DoesNotContain(_names.Functions, function => function.Name.Contains("KR85", StringComparison.Ordinal) || function.Name.StartsWith("=+-K3:", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Plan_APartNotInTheDatabase_IsPartNotFound()
     {
         BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Plan(Args(NewPage, "-KF20", part: "SIE.NOPE")));
@@ -273,6 +304,28 @@ public sealed class DevicePlaceOperationTests
         Assert.Equal((NewPage, Part, "1", 80.0, 160.0, "=GAA+A1-KF20"), Assert.Single(_placer.Places));
         Assert.Equal(["Begin AI: eplan_device_place", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
         Assert.Equal(5, _names.Functions.Count(f => f.Name == "=GAA+A1-KF20"));
+    }
+
+    [Fact]
+    public void Execute_WithoutTag_KeepsAutomaticNameAndReadsCommittedFunctions()
+    {
+        _names.Functions.Add((string.Empty, "unnamed", true, NewPage, string.Empty));
+        _placer.Result = _ => new PlacedDevice { Names = ["=GAA+A1-K3:1", "=GAA+A1-K3:2"], MainName = "=GAA+A1-K3:1", OnPage = 1 };
+        _placer.Committed = data =>
+        {
+            Assert.Contains("Commit", _transactions.Calls);
+            Assert.DoesNotContain("CloseUndo", _transactions.Calls);
+            data.Unplaced = 1;
+            data.UnplacedFunctions = ["=GAA+A1-K3:2"];
+        };
+        DevicePlaceArgs args = Args(NewPage, "");
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        DevicePlaceData result = Execute(args);
+
+        Assert.Equal(string.Empty, Assert.Single(_placer.Places).Tag);
+        Assert.Equal(("=GAA+A1-K3:1", 2, 1), (result.Tag, result.Functions, result.Unplaced));
+        Assert.Equal(["=GAA+A1-K3:2"], result.UnplacedFunctions);
     }
 
     [Fact]
@@ -367,6 +420,8 @@ public sealed class DevicePlaceOperationTests
     /// </summary>
     private sealed class Placer(FakeDeviceRenamer project) : IDevicePlacer
     {
+        public Action<PlacedDevice>? Committed { get; set; }
+        public void ReadCommitted(string projectPath, PlacedDevice result) => Committed?.Invoke(result);
         public Dictionary<string, MacroTargetPage> Pages { get; } = new(StringComparer.Ordinal);
 
         public Func<string, PlacedDevice> Result { get; set; } = tag => new PlacedDevice

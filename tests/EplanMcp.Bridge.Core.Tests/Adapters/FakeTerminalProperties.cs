@@ -3,6 +3,11 @@ namespace Eplan.EplApi.DataModel;
 internal sealed class FunctionPropertyList(FakeCableStore? store = null, Dictionary<int, string>? values = null) : NativeCableList(store)
 {
     public PropertyValue FUNC_DEVICETAG_FULLNAME { get; set; } = new("K1");
+    public PropertyValue FUNC_IDENTDEVICETAG { get; set; } = new("");
+    public PropertyValue DESIGNATION_PLANT { get; set; } = new("");
+    public PropertyValue DESIGNATION_LOCATION { get; set; } = new("");
+    public PropertyValue FUNC_CODE { get; set; } = new("");
+    public PropertyValue FUNC_COUNTER { get; set; } = new("");
     private readonly Dictionary<int, string> _values = values ?? [];
     public PropertyValue FUNC_PINORTERMINALNUMBER { get; set; } = new("");
     public PropertyValue FUNC_TERMINALSORTCODE { get; set; } = new("17");

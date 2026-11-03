@@ -13,8 +13,11 @@ public interface IDevicePlacer
     /// <summary>
     /// Places variant <paramref name="variant"/> of part <paramref name="part"/> on the page at (<paramref name="x"/>,
     /// <paramref name="y"/>) with <c>DeviceService.CreateDevice</c>, which uses the part's macro or function templates
-    /// and returns its functions (A82); replaces their device tag while preserving suffixes, the main function
-    /// first (A13), and reads back. Throws EPLAN_OPERATION_FAILED when EPLAN refuses.
+    /// and returns its functions (A82); when tag is nonempty, renames the whole device using NameService (A85).
+    /// Throws EPLAN_OPERATION_FAILED when EPLAN refuses.
     /// </summary>
     public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag);
+
+    /// <summary>Reacquires all functions by tag after commit; unplaced function IDs may change (A85).</summary>
+    public void ReadCommitted(string projectPath, PlacedDevice result);
 }

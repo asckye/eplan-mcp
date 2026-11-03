@@ -95,6 +95,13 @@ public sealed class DevicePlaceExecuteOperation(
             PlacedDevice data = Place(request);
             request.LayoutWarnings.AddRange(LayoutGuard.AfterWriting(request.Page.Layout!));
             return data;
+        }, verifyCommitted: data =>
+        {
+            int expected = data.Names.Count;
+            placer.ReadCommitted(request.Project.Path, data);
+            Verify(data, request);
+            if (data.Names.Count != expected)
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, $"Committed device has {data.Names.Count} functions instead of {expected}; its functions did not retain their device tag."); }
         });
         PlacedDevice placed = committed.Result;
         return new DevicePlaceData
@@ -142,6 +149,12 @@ public sealed class DevicePlaceExecuteOperation(
     private PlacedDevice Place(DevicePlaceRequest request)
     {
         PlacedDevice placed = placer.Place(request.Project.Path, request.Page.Name, request.Part, request.Variant, request.X, request.Y, request.Tag);
+        Verify(placed, request);
+        return placed;
+    }
+
+    private static void Verify(PlacedDevice placed, DevicePlaceRequest request)
+    {
         if (placed.Names.Count == 0 || placed.OnPage == 0)
         {
             throw new BridgeErrorException(
@@ -154,7 +167,7 @@ public sealed class DevicePlaceExecuteOperation(
         // A82: PLC template functions carry the device tag followed by a connection-point suffix.
         bool Belongs(string name) => string.Equals(name, request.Tag, StringComparison.Ordinal) || name.StartsWith(request.Tag + ":", StringComparison.Ordinal);
         string? other = placed.Names.FirstOrDefault(name => !Belongs(name));
-        if (!Belongs(placed.MainName) || other is not null)
+        if (request.Tag.Length > 0 && (!Belongs(placed.MainName) || other is not null))
         {
             string actual = Belongs(placed.MainName) ? other! : placed.MainName;
             throw new BridgeErrorException(
@@ -163,8 +176,6 @@ public sealed class DevicePlaceExecuteOperation(
                 retryable: false,
                 new Dictionary<string, string> { ["requested"] = request.Tag, ["actual"] = actual });
         }
-
-        return placed;
     }
 
 }

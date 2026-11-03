@@ -8,6 +8,7 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanMacroReader.cs" Link="Adapters\EplanMacroReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanMacroInserter.cs" Link="Adapters\EplanMacroInserter.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceRenamer.cs" Link="Adapters\EplanDeviceRenamer.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDevicePlacer.cs" Link="Adapters\EplanDevicePlacer.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.Arrays.cs" Link="Adapters\EplanApiTryDispatcher.Arrays.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.Results.cs" Link="Adapters\EplanApiTryDispatcher.Results.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.HandleChains.cs" Link="Adapters\EplanApiTryDispatcher.HandleChains.cs" />

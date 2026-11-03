@@ -464,5 +464,6 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language) => throw new NotSupportedException();
         public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language) => throw new NotSupportedException();
         public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag) => throw new NotSupportedException();
+        public void ReadCommitted(string projectPath, PlacedDevice result) { }
     }
 }

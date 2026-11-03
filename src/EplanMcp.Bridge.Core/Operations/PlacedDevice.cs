@@ -1,6 +1,6 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>What <see cref="IDevicePlacer.Place"/> reads back after the rename, inside the transaction.</summary>
+/// <summary>Managed placement values, refreshed by tag after commit without retaining native objects.</summary>
 public sealed class PlacedDevice
 {
     /// <summary>The name of every function <c>CreateDevice</c> returned, main function first; none when it placed nothing.</summary>

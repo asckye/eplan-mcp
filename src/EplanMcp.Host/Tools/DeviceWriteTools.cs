@@ -117,7 +117,7 @@ internal sealed class DeviceWriteTools
         string page,
         double x,
         double y,
-        string? tag = null,
+        [Description("Short or full device tag; required for symbols, optional for parts (omit to keep EPLAN numbering).")] string? tag = null,
         string? part = null,
         string? variant = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
@@ -332,7 +332,7 @@ internal sealed class DeviceWriteTools
         }
         else if (data is { Unplaced: > 0 } placed)
         {
-            hints.Add($"{ToolResults.Count(placed.Unplaced, "function")} of the device are on no page yet; use their full names in unplaced_functions with eplan_function_place.");
+            hints.Add($"{ToolResults.Count(placed.Unplaced, "function")} of the device remain unplaced, as with EPLAN Insert Device. For a whole PLC module, use eplan_macro_insert with part for its assembly macro. For multiple symbols, place them with the same tag, then assign part with eplan_device_update.");
         }
 
         if (!(data?.PageSizeKnown ?? details.GetValueOrDefault("pageSizeKnown") == "true"))

@@ -133,6 +133,7 @@ public sealed class ToolContractTests : IDisposable
         JsonElement input = tool.InputSchema;
         Assert.Equal(["project", "page", "x", "y"], input.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         Assert.Equal(4, input.GetProperty("oneOf").GetArrayLength());
+        Assert.Equal(["part"], input.GetProperty("oneOf")[0].GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         Assert.Contains("library", input.GetProperty("oneOf")[0].GetProperty("propertyNames").GetProperty("not").GetProperty("enum").EnumerateArray().Select(p => p.GetString()));
         Assert.Equal(64, input.GetProperty("properties").GetProperty("plc_connection_point").GetProperty("maxLength").GetInt32());
         Assert.Equal(["library", "symbol", "symbol_variant", "tag", "plc_address", "plc_symbolic_address", "plc_text"], input.GetProperty("dependentRequired").GetProperty("plc_connection_point").EnumerateArray().Select(p => p.GetString()));

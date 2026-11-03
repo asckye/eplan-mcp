@@ -1,10 +1,10 @@
 ## Examples
 
-Part device:
+Part:
 
     {"project":"Line1","page":"=GAA+A1&EFS1/60","part":"SIE.3RH2122-1HB40","x":80,"y":160,"tag":"-KF20","dry_run":true}
 
-Symbol with relative tag display:
+Symbol and tag display:
 
     {"project":"Line1","page":"=GAA+A1&EFS1/60","library":"IEC_symbol","symbol":"K","symbol_variant":0,"x":80,"y":160,"tag":"-K2","display_properties":[{"property_id":20214,"offset_x_mm":4,"offset_y_mm":4}],"connection_designations":["A1","A2"],"dry_run":true}
 
@@ -23,18 +23,18 @@ PLC digital input:
 ## Workflow
 Omit/true dry_run: no approval/writes, execution=not_started. Execute with dry_run:false.
 
-1. Use eplan_page_list/get for a Circuit page, or eplan_page_create with dry_run:false. Finite mm inside page bounds; bottom-left origin, y up.
-2. Choose a free tag using eplan_device_list; short tags take page structure without document type. Outside scratch requires approval.
-3. eplan_part_search finds parts (macro or function templates; variant defaults to 1); eplan_symbol_search finds project library variants/pin order. Place returned unplaced_functions with eplan_function_place; use eplan_macro_insert for circuits.
+1. Choose/inspect a circuit page with eplan_page_list/create/get. Coordinates: finite mm within page bounds, bottom left origin, y up.
+2. Symbols need a free tag (eplan_device_list); short tags inherit page structure without document type. For parts, omit tag for EPLAN numbering or pass it to rename all functions. Outside scratch requires approval.
+3. Parts: eplan_part_search (default variant 1). Symbols/pins: eplan_symbol_search. Other functions remain unplaced, like EPLAN Insert Device. PLC modules: eplan_macro_insert with part (assembly macro). Multiple symbols: same tag, then eplan_device_update with part.
 
 ## Fields
 
-- device: full tag/visibleTag/category (preview: tag only); functions/unplaced=total/unplaced. unplaced_functions: full unplaced names, including PLC suffixes; [] if none/unknown.
+- device: full tag/visibleTag/category (preview: requested tag); functions/unplaced=counts. unplaced_functions: committed full names, including PLC suffixes; [] if none/unknown.
 - execution=committed/not_started; dryRun=preview; undo="AI: eplan_device_place". recovered=lost response confirmed; verify with read tools. hint=further checks.
 - Symbol sources: symbol (resolved variant/local pins), changes (approval lines); part/variant empty; functions=1,unplaced=0.
 - Symbol-only display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm} objects. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite offsets relative to parent; negatives allowed. 20214: EPLAN-calculated prefixed tag.
 - Symbol-only connection_designations: one nonblank pin name in search order, <=64 characters, no controls; writes indexed 20022 and verifies pin names.
-- Creation/readback share one transaction: mismatch/cancellation rolls back without empty undo; success: one Ctrl+Z. visibleTag=null without a prefixed tag display.
+- One transaction; mismatch/cancellation rolls back. Success: one Ctrl+Z. visibleTag=null without a prefixed tag display.
 - location_box: + followed by 1-64 letters/digits/underscores/dots. Omit tag and part/symbol options. Fixed SPECIAL/SC variant 0, dashed. x,y: lower-left; corner_x,corner_y: upper-right; positive area.
 - locationBox: structure, bounds [minX,minY,maxX,maxY], outline=dashed, affectedDevices=[]; predicted in preview/recovery, native on commit. Inner devices keep structure. functions/unplaced=0; device.tag/category=structure/LocationBox. Duplicate page structure refused; verify recovery with eplan_page_get include_drawings.
 
@@ -54,5 +54,5 @@ Omit/true dry_run: no approval/writes, execution=not_started. Execute with dry_r
 
 ## Errors
 
-not_started/rolled_back: unchanged. INVALID_ARGUMENT lists violations/requested vs actual readback; correct source/coordinates/variant/structure. PART_NOT_FOUND: eplan_part_search; ALREADY_EXISTS: choose free tag/address. PAGE_NOT_FOUND/AMBIGUOUS_NAME: eplan_page_get/list. PLAN_STALE: re-plan. Policy/approval/audit/lock/connection/OUTCOME_UNKNOWN: see eplan_page_create; never retry unknown writes; inspect with read tools.
+not_started/rolled_back: unchanged. INVALID_ARGUMENT: fix reported source/coordinates/variant/structure or readback mismatch. PART_NOT_FOUND: eplan_part_search. ALREADY_EXISTS: free tag/address. PAGE_NOT_FOUND/AMBIGUOUS_NAME: eplan_page_list/get. PLAN_STALE: re-plan. For policy/approval/audit/lock/connection see eplan_page_create. Never retry OUTCOME_UNKNOWN; inspect first.
 R1-R5/R8 refuse; R6/R7/R9 warn; strict: refuse.

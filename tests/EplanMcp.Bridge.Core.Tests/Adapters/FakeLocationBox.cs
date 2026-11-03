@@ -29,6 +29,8 @@ internal sealed class FunctionBasePropertyList(Action? checkAlive = null) : IDis
     private PropertyValue _location = new("");
     public PropertyValue DESIGNATION_LOCATION { get { checkAlive?.Invoke(); return _location; } set { checkAlive?.Invoke(); _location = value; } }
     public PropertyValue DESIGNATION_PLANT { get; set; } = new("");
+    public PropertyValue FUNC_CODE { get; set; } = new("");
+    public PropertyValue FUNC_COUNTER { get; set; } = new("");
     public bool Disposed { get; private set; }
     public void Dispose() { checkAlive?.Invoke(); Disposed = true; }
 }

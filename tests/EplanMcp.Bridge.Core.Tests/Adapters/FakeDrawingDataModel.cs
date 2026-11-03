@@ -86,10 +86,11 @@ internal class FunctionBase(long oid) : SymbolReference(oid)
 {
     private string _name = "+A1-K1";
     public int NameReads { get; private set; }
+    public int NameWrites { get; private set; }
     public string Name
     {
         get { CheckNative?.Invoke(); NameReads++; return IsValid ? _name : throw new BaseException("S063001错误:无对象"); }
-        set { CheckNative?.Invoke(); _name = value; }
+        set { CheckNative?.Invoke(); NameWrites++; _name = value; }
     }
 }
 
@@ -153,6 +154,8 @@ internal sealed class Page : StorableObject, IWriteProtection, IDisposable
 
 internal sealed class Project(params Page[] pages) : StorableObject
 {
+    public Action<int, string, FunctionPropertyList, FunctionPropertyList>? ParseName { get; set; }
+    public void ParseNameAndProps(int category, string name, FunctionPropertyList parsed, FunctionPropertyList additional) => ParseName!(category, name, parsed, additional);
     public bool Locked { get; private set; }
     public void LockAllObjects() { EplanMcp.Bridge.Core.Tests.Adapters.FakeMoveNative.EndTransaction = EndTransaction; Locked = true; EplanMcp.Bridge.Core.Tests.Adapters.FakeMoveNative.Calls.Add("LockAll"); }
     public Action? EndTransaction { get; set; }

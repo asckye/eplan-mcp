@@ -34,8 +34,8 @@
 | 编号 | 缺口 | 涉及页 | 现有基础 | 做法 |
 |---|---|---|---|---|
 | G1 | 按表格生成报表页（封面、目录、PLC 图表、端子图、部件汇总表、电缆总览） | 6 页 | `eplan_report_update` 只更新已有报表 | 新工具：按 `ReportBlock`（类型、表格、筛选）调用 `Reports.CreateReport`；或按项目报表模板 `CreateReportsFromTemplates`。先核对 XML 说明，再一次实机探测 |
-| G2 | PLC 总览页：PLC 盒、总览点、总览宏 | 5 页 | `PlaceAt(Overview)` 已验证；`eplan_function_place` 的总览部分已写未落地；`eplan_macro_insert` 只支持 MultiLine | 落地总览表达；宏插入支持 Overview；`eplan_placement_create` 支持 Overview 页 |
-| G3 | 按部件作图（PLC 模块 50–90 个功能） | 电路图、总览 | A82 路线：读取部件模板 → 按符号放置并带模板数据 → `AddArticleReference`（`eplan_device_update` 指定部件，已写未落地） | 新增"部件模板"读取；放置时选模板项 |
+| G2 | PLC 总览页：PLC 盒、总览点、总览宏 | 5 页 | `PlaceAt(Overview)` 已验证；`eplan_macro_insert` 只支持 MultiLine | 落地总览表达；宏插入支持 Overview；`eplan_placement_create` 支持 Overview 页 |
+| G3 | 按部件作图（PLC 模块 50–90 个功能） | 电路图、总览 | A85 路线：`CreateDevice` 按宏或模板放置，`NameService.RenameDevice` 在同一事务内统一标识，提交后重新读回全部功能；`eplan_device_update` 可指定部件 | 其余功能保持未放置；PLC 用部件组符号宏整体放置；多个符号以同一标识放置后指定部件（A82 第 5 条） |
 | G4 | 连接定义点 `CDP` | 4 页电路图 | 电缆芯线定义点已支持 | 在连接上放置 CDP，写颜色/截面/标识 |
 | G5 | 黑盒与设备连接点 `DC`/`DCP`/`DCPP3` | 2 页 | 无 | 新增器件来源 |
 | G6 | 母线连接点 `BCP`、`BBDEF` | 3 页 | 无 | 新增 |
@@ -45,7 +45,7 @@
 | G10 | 新项目与页属性（页描述、页结构） | 全部 | `eplan_project_create`、`eplan_page_create`（Circuit/SingleLine/Overview/Graphics） | 页描述等属性写入 |
 
 ## 3. 顺序
-1. 收尾在途：`BP` 中断点、插件 C7–C9（门禁中）；`eplan_function_place` 只保留总览表达，`eplan_device_update` 指定部件，落地。
+1. 收尾在途：`BP` 中断点、插件 C7–C9（门禁中）；G3 按 A85 统一器件标识，落地 `eplan_device_update` 指定部件。
 2. G1 报表生成（6 页，收益最大）。
 3. G2 总览页 + G3 按部件作图（5 页 PLC 总览）。
 4. G4、G5、G6、G7、G8、G9（4 页电路图）。

@@ -73,14 +73,45 @@ public sealed class DevicePlaceToolTests : IDisposable
         Assert.Equal(("committed", "AI: eplan_device_place", 5, 4), (data.GetProperty("execution").GetString(), data.GetProperty("undo").GetString(), data.GetProperty("functions").GetInt32(), data.GetProperty("unplaced").GetInt32()));
         JsonElement device = data.GetProperty("device");
         Assert.Equal(("=GAA+A1-KF20", "-KF20", "Coil"), (device.GetProperty("tag").GetString(), device.GetProperty("visibleTag").GetString(), device.GetProperty("category").GetString()));
-        Assert.Equal("4 functions of the device are on no page yet; use their full names in unplaced_functions with eplan_function_place.", data.GetProperty("hint").GetString());
-        Assert.Equal(4, data.GetProperty("unplaced_functions").GetArrayLength());
+        Assert.Equal("4 functions of the device remain unplaced, as with EPLAN Insert Device. For a whole PLC module, use eplan_macro_insert with part for its assembly macro. For multiple symbols, place them with the same tag, then assign part with eplan_device_update.", data.GetProperty("hint").GetString());
+        Assert.Equal(Enumerable.Repeat("=GAA+A1-KF20", 4), data.GetProperty("unplaced_functions").EnumerateArray().Select(f => f.GetString()));
         Assert.Equal("Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.", WriteToolHarness.Text(result, 0));
         var executed = (DevicePlaceArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.DevicePlaceExecute).Args!;
         Assert.Equal((Page, Part, "2", 80.0, 160.0, "-KF20", "f1"), (executed.Page, executed.Part, executed.Variant, executed.X, executed.Y, executed.Tag, executed.Fingerprint));
         Assert.Equal(TimeSpan.FromSeconds(60), Assert.Single(_harness.Bridge.Writes).Limit);
         Assert.False(data.TryGetProperty("symbol", out _));
         Assert.False(data.TryGetProperty("changes", out _));
+    }
+
+    [Fact]
+    public async Task APartWithoutTag_PreservesEplanNumberingAndCommittedUnplacedNames()
+    {
+        const string part = "SIE.6ES7131-4BD01-0AA0";
+        const string automaticTag = "=+-A1";
+        string[] unplaced = [.. Enumerable.Range(2, 5).Select(n => automaticTag + ":" + n)];
+        _harness.Bridge.Handlers[OperationNames.DevicePlacePlan] = args =>
+        {
+            Assert.Null(((DevicePlaceArgs)args!).Tag);
+            WritePlan plan = _harness.Plan([new PlannedChange { Action = "create", Kind = "device", Name = Page, NewValue = part }]);
+            plan.Details = new Dictionary<string, string> { ["part"] = part, ["variant"] = "1", ["tag"] = "", ["pageSizeKnown"] = "true" };
+            return plan;
+        };
+        _harness.Bridge.Handlers[OperationNames.DevicePlaceExecute] = args =>
+        {
+            var request = (DevicePlaceArgs)args!;
+            Assert.Equal(part, request.Part);
+            Assert.Null(request.Tag);
+            return new DevicePlaceData { Project = "Line1", Page = Page, Part = part, Variant = "1", Tag = automaticTag + ":1", Functions = 6, Unplaced = 5, UnplacedFunctions = unplaced, PageSizeKnown = true };
+        };
+
+        JsonElement data = WriteToolHarness.Structured(await DeviceWriteTools.DevicePlaceAsync(_harness.Pipeline, _harness.Bridge,
+            "Line1", Page, 80, 160, part: part, dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(automaticTag + ":1", data.GetProperty("device").GetProperty("tag").GetString());
+        Assert.Equal(unplaced, data.GetProperty("unplaced_functions").EnumerateArray().Select(f => f.GetString()));
+        Assert.Equal(6, data.GetProperty("functions").GetInt32());
+        Assert.Equal(5, data.GetProperty("unplaced").GetInt32());
+        Assert.Single(_harness.Bridge.Writes);
     }
 
     [Fact]

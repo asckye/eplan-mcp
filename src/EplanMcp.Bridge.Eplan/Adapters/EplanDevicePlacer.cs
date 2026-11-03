@@ -10,11 +10,8 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>
 /// Places a part's device the way spike S20 did in the dispatcher (api-notes A26):
 /// <c>new DeviceService().CreateDevice(part, variant, page, point)</c>, which uses the part's macro or function templates
-/// (A82) and returns the device's functions, including persistent unplaced functions. Each returned function is then
-/// given the tag by assigning <c>Function.Name</c>, the main function first, as spike S9 renamed a device (A13): the
-/// returned objects, never a name lookup, since other functions may be called <c>=+-Q1</c> too. New functions on the
-/// page are counted with <c>FunctionsFilter.Page</c>, as EplanMacroInserter counts them. Main thread; <see cref="Place"/>
-/// inside the write's TransactionScope, whose SafetyPoint takes the placement back (S20).
+/// (A82), including persistent unplaced functions. A85 renames the whole device with NameService before commit;
+/// committed readback reacquires every function by its new tag because unplaced IDs change (A79/A80/A85).
 /// </summary>
 internal sealed class EplanDevicePlacer : IDevicePlacer
 {
@@ -57,30 +54,49 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             throw failed;
         }
 
-        Function[] ordered = [.. created.Where(f => f.IsMainFunction), .. created.Where(f => !f.IsMainFunction)];
-        // A82: template-only parts create persistent unplaced functions with connection-point suffixes.
-        // A13: capture every name before renaming the main function, which can affect auxiliary functions.
-        var renamed = ordered.Select(function =>
+        Function? main = created.FirstOrDefault(f => f.IsMainFunction);
+        if (tag.Length > 0 && main is not null)
         {
-            using PropertyValue deviceTag = function.Properties.FUNC_IDENTDEVICETAG;
-            return (Function: function, Name: DeviceTags.RenameFunction(function.Name ?? string.Empty, deviceTag.IsEmpty ? string.Empty : deviceTag.ToString(), tag));
-        }).ToArray();
-        foreach (var item in renamed)
-        {
-            item.Function.Name = item.Name;
+            using var parsed = new FunctionPropertyList();
+            using var additional = new FunctionPropertyList();
+            using var newName = new FunctionBasePropertyList();
+            project.ParseNameAndProps((int)main.FunctionCategory, tag, parsed, additional);
+            using PropertyValue plant = parsed.DESIGNATION_PLANT;
+            using PropertyValue location = parsed.DESIGNATION_LOCATION;
+            using PropertyValue code = parsed.FUNC_CODE;
+            using PropertyValue counter = parsed.FUNC_COUNTER;
+            newName.DESIGNATION_PLANT = plant;
+            newName.DESIGNATION_LOCATION = location;
+            newName.FUNC_CODE = code;
+            newName.FUNC_COUNTER = counter;
+            using var service = new NameService();
+            service.RenameDevice(main, newName, false, true);
         }
 
+        var result = new PlacedDevice { OnPage = OnPage(project, page).Count(id => !before.Contains(id)) };
+        Read(created, result);
+        return result;
+    }
+
+    public void ReadCommitted(string projectPath, PlacedDevice result)
+    {
+        MainThread.Assert();
+        string tag = result.MainName.Split(':')[0];
+        using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
+        Read([.. EplanNativePreconditions.Valid(finder.GetFunctions(null))
+            .Where(f => f.Name == tag || f.Name.StartsWith(tag + ":", StringComparison.Ordinal))], result);
+    }
+
+    private static void Read(Function[] functions, PlacedDevice result)
+    {
+        Function[] ordered = [.. functions.Where(f => f.IsMainFunction), .. functions.Where(f => !f.IsMainFunction)];
         Function? main = ordered.FirstOrDefault(f => f.IsMainFunction);
-        return new PlacedDevice
-        {
-            Names = [.. ordered.Select(f => f.Name ?? string.Empty)],
-            MainName = main?.Name ?? string.Empty,
-            VisibleName = main?.VisibleName ?? string.Empty,
-            Category = main?.FunctionCategory.ToString() ?? string.Empty,
-            Unplaced = created.Count(f => !f.IsPlaced),
-            UnplacedFunctions = [.. ordered.Where(f => !f.IsPlaced).Select(f => f.Name ?? string.Empty)],
-            OnPage = OnPage(project, page).Count(id => !before.Contains(id)),
-        };
+        result.Names = [.. ordered.Select(f => f.Name ?? string.Empty)];
+        result.MainName = main?.Name ?? string.Empty;
+        result.VisibleName = main?.VisibleName ?? string.Empty;
+        result.Category = main?.FunctionCategory.ToString() ?? string.Empty;
+        result.Unplaced = functions.Count(f => !f.IsPlaced);
+        result.UnplacedFunctions = [.. ordered.Where(f => !f.IsPlaced).Select(f => f.Name ?? string.Empty)];
     }
 
     /// <summary>The page whose full name is exactly <paramref name="pageName"/>: EPLAN's exact name filter (S6), checked ordinally.</summary>

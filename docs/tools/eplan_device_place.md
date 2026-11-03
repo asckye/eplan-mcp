@@ -15,7 +15,7 @@ T7d 回归修复：`plc_text`、`terminal_strip_text` 均接收普通文本，�
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-"在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。代理知道部件号，不必先找窗口宏：工具通过部件自带的宏或功能模板放置，图上与工程师手工放置的设备相同（标识、技术参数、连接点、触点镜像，S20），再给它目标标识。需要一组预先设计好的电路时用 `eplan_macro_insert`。
+"在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。工具通过部件自带的宏或功能模板放置；传 `tag` 时在同一事务内一次重命名器件全部功能，含未放置功能（A85），省略则保留 EPLAN 自动标识。其余功能保持未放置，与 EPLAN“插入设备”相同。PLC 模块用 `eplan_macro_insert` 的 `part` 插入部件的组符号宏；需要画成多个符号时，以同一标识放置符号，再用 `eplan_device_update` 的 `part` 指定部件（A82 第 5 条）。
 
 M8 T7a 增加原生位置框：框内设备保留自己的结构，不继承框的结构（A55）；工具不重命名任何既有设备，受影响设备恒为空。仅支持 `+` 位置标识，固定 SPECIAL/SC 变体 0 与虚线，不提供装置段或任意外观配置。Large 验收代码已补，尚未运行。
 
@@ -43,11 +43,11 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `location_box` | string | 位置框来源 | — | 与部件、库符号、tag、显示属性和引脚代号互斥；如 `+P1`，`+` 后 1–64 个字母、数字、下划线或点；不含通配、空白、设备段或页名 |
 | `corner_x`、`corner_y` | number | 位置框必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；其余来源禁止 |
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
-| `tag` | string | 设备来源必填 | — | 设备的标识：以 `-` 开头的短标识（如 `-KF20`），结构取自页（页的结构去掉 `&` 文档类型：`=GAA+A1&EFS1/60` 得到 `=GAA+A1`）；或者完整标识（如 `=GAA+A1-KF20`） |
+| `tag` | string | 库符号来源必填，部件来源可选 | EPLAN 自动标识 | 以 `-` 开头的短标识（如 `-KF20`）取页结构但去掉 `&` 文档类型；或完整标识（如 `=GAA+A1-KF20`）。部件来源指定时一起重命名全部功能 |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行传 `dry_run: false` |
 
-- 设备来源 `tag` 必填：`CreateDevice` 放置的设备标识不带页的结构、也不编号（S20：`=+-Q1`），工具总是给它一个确定的标识。规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。
+- 部件来源省略 `tag` 时保留 EPLAN 自动编号；指定时规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。库符号来源仍要求 `tag`。
 - 变体不存在时 EPLAN 会静默改用第一个变体（XML），所以规划时先确认变体存在。
 - 显示属性和连接点代号仅用于库符号来源；不提供任意属性写入，也不改变功能文本及其现有语言（A53）。
 
@@ -67,13 +67,13 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
   "unplaced_functions": ["=GAA+A1-KF20", "=GAA+A1-KF20", "=GAA+A1-KF20", "=GAA+A1-KF20"],
   "undo": "AI: eplan_device_place",
   "recovered": false,
-  "hint": "4 functions of the device are on no page yet; use their full names in unplaced_functions with eplan_function_place."
+  "hint": "4 functions of the device remain unplaced, as with EPLAN Insert Device. For a whole PLC module, use eplan_macro_insert with part for its assembly macro. For multiple symbols, place them with the same tag, then assign part with eplan_device_update."
 }
 ```
-- `unplaced_functions`：本次创建且尚未放置的功能完整名称数组；没有时或预览/恢复时为 `[]`。模板 PLC 保留 `:1/:2` 等连接点后缀；`device.tag` 沿用主功能完整名称，使用返回名称查询设备或调用 `eplan_function_place`。
+- `unplaced_functions`：提交后按器件标识重新读回的未放置功能完整名称数组；没有时或预览/恢复时为 `[]`。模板 PLC 保留 `:1/:2` 等连接点后缀；`device.tag` 沿用主功能完整名称，可用返回名称查询设备。
 - `functions`：设备的全部功能数；`unplaced`：其中没有放置的（S20：线圈放置，4 个触点未放置）。
 - `undo`、`recovered`：同 `eplan_page_create`。标识按项目数据处理，经过 ResultShaper。
-- `hint`：有未放置的功能时提示按 `unplaced_functions` 使用 `eplan_function_place`；页的幅面未知时（新建的空页，A14）说明只检查了 x、y 不小于 0。
+- `hint`：说明其余功能保持未放置，以及 PLC 组符号宏和同标识多个符号的绘制方式；页的幅面未知时（新建的空页，A14）说明只检查了 x、y 不小于 0。
 - PLC 已确认提交后，无法定位对象或完成回读核对时仍返回 `execution=committed`；`hint` 警告列明未能验证的点身份/页、卡归属、原生属性或显示布局，提示读取页面与 `eplan_plc_get` 后再决定后续操作。保留已读到的 PLC 值及撤销步骤警告，不暂停写入；只有提交本身或执行结果确实不明时才返回 `OUTCOME_UNKNOWN`。
 - 一行摘要：`Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.` / `Dry run: would place one device. Nothing was changed.`
 - 符号来源另带 `symbol`（解析后的库/符号/变体及局部引脚）和 `changes`（审批清单）；`functions=1,unplaced=0` 在 dry-run 为预测、提交后为读回，`part,variant` 为空。dry-run 不猜 `visibleTag/category`；提交后显示标识取请求的带前缀属性实际显示串，未请求时为空。20214 由 EPLAN 计算；默认空的 20029[2] 不算请求的属性。
@@ -107,8 +107,8 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - **执行**：在 `TransactionScope`（`SafetyPoint` → `UndoStep` → `QuietModeStep`）中：
   1. `new DeviceService().CreateDevice(part, variant, page, new PointD(x, y))`，返回设备的全部功能（S20：5 个）；
   2. 没有返回功能、或者页上没有新放置的功能时抛出，整体回滚；
-  3. 先保存全部功能原名称及 `FUNC_IDENTDEVICETAG`，再主功能优先替换设备标识并保留连接点后缀（A13/A82），读回核对。改名针对 `CreateDevice` 返回的对象，不按名称 `=+-Q1` 查找：项目中可能已有同名的功能；
-  4. 通过后 `Commit()`，再 `CloseUndo()`。
+  3. 指定 `tag` 时，由 `Project.ParseNameAndProps` 解析 1100、1200、20013、20014 到新的 `FunctionBasePropertyList`，对返回的主功能调用一次 `NameService.RenameDevice(main, list, false, true)`，统一修改全部功能标识并保留连接点数据（A85）；省略则不改名；
+  4. 通过后 `Commit()`，按新标识重新获取全部功能，再 `CloseUndo()`；避免跨事务保留原生对象或失效的未放置功能 ID（A79/A80/A85）。
 - **已验证**（S20，A26）：`CreateDevice` 能被 `SafetyPoint` 回滚，提交后一次 Ctrl+Z 撤销；图上显示标识、技术参数、连接点和触点镜像；标识为 `=+-Q1`。
 - **待 Large 测试确认**：
   - 改名后图上显示新标识，触点镜像跟着更新；
@@ -123,7 +123,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - **dry-run**：返回第 3 节的结果，`execution = not_started`，`functions` 为 null。
 - **审批**：项目在 scratch 之外时请求审批，表单为一行变更（第 5 节），注明可以按 Ctrl+Z 撤销"AI: eplan_device_place"。
 - **审计、回滚、各阶段失败时的 `execution`**：同 `eplan_page_create`。
-- 不是幂等的：同样的调用再来一次，因标识已被占用返回 `ALREADY_EXISTS`。
+- 不是幂等的：指定标识后重复调用返回 `ALREADY_EXISTS`；省略标识会再创建一个器件。
 
 ## 7. 测试
 - **Small**：标识的拼接与校验、变更清单的文字、摘要、schema 快照、注解。
