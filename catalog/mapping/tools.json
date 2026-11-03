@@ -5282,6 +5282,11 @@
             "file": "tests/EplanMcp.Evals.Tests/Reporting/ReportTests.cs"
           },
           {
+            "name": "SmallProjectInventoryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/SmallProjectInventoryTests.cs"
+          },
+          {
             "name": "TaskLoaderTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Tasks/TaskLoaderTests.cs"
@@ -5444,6 +5449,11 @@
             "name": "PageCursorTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageCursorTests.cs"
+          },
+          {
+            "name": "SmallProjectInventoryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/SmallProjectInventoryTests.cs"
           },
           {
             "name": "DeviceToolsInteropTests",
@@ -8614,6 +8624,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/CallTemplateTests.cs"
           },
           {
+            "name": "SmallProjectInventoryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/SmallProjectInventoryTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -9232,6 +9247,11 @@
         "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "SmallProjectInventoryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/SmallProjectInventoryTests.cs"
+          },
           {
             "name": "ToolContractTests",
             "size": "Small",
@@ -10186,6 +10206,11 @@
             "name": "PageGetToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageGetToolTests.cs"
+          },
+          {
+            "name": "SmallProjectInventoryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/SmallProjectInventoryTests.cs"
           },
           {
             "name": "ToolContractTests",
@@ -14434,6 +14459,11 @@
         ],
         "tests": [
           {
+            "name": "SmallProjectInventoryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/SmallProjectInventoryTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -16251,6 +16281,11 @@
             "name": "AcceptanceRedrawDriverTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectInventoryTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/SmallProjectInventoryTests.cs"
           },
           {
             "name": "SymbolToolTests",
