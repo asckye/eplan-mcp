@@ -7,6 +7,7 @@
 
 - `eplan_macro_insert` accepts `representation: "Overview"` on Overview pages and reads the selected representation and macro variant for layout checks.
 - `eplan_macro_insert` accepts `part` / `part_variant` instead of `macro`, resolves the read-only group symbol macro, adds missing main-function part references in the same transaction, and reads them back after commit.
+- `eplan_macro_insert` only warns when a macro's declared outline leaves the drawing area but stays on a page of known size (part overview macros fill the A3 page); the inserted objects are still measured after the write.
 
 ### 0.5.0 preview-default migration (ADR-0049)
 

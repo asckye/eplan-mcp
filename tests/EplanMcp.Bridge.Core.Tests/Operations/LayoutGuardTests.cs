@@ -156,6 +156,18 @@ public sealed class LayoutGuardTests
         Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeErrorException>(() => LayoutGuard.Check(model, [p])).Error.Reason);
     }
     [Fact]
+    public void R1_MacroOutlinePastTheDrawingArea_IsAWarning_ASymbolStillRefuses()
+    {
+        var model = Model();
+        model.DrawingArea = [10, 10, 90, 90];
+        DrawingPlacement macro = LayoutGuard.Proposed("Macro", [0, 96], [0, 4, 100, 96]);
+        LayoutGuard.Violation outline = Assert.Single(LayoutGuard.Check(model, [macro], false), v => v.Rule == "R1");
+        Assert.True(outline.Warning);
+        Assert.Contains("checked after the write", outline.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain(LayoutGuard.Enforce(model, [macro]), m => m.StartsWith("R1: Keep", StringComparison.Ordinal));
+        Assert.Contains(LayoutGuard.Check(model, [Row("Function", 1, 4, 4)], false), v => v.Rule == "R1" && !v.Warning);
+    }
+    [Fact]
     public void R2_ClearanceIsConfigurable_EdgeContactAllowedAtZero()
     {
         var model = Model();

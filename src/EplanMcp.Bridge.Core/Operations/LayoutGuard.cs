@@ -64,9 +64,9 @@ public static class LayoutGuard
         var defaultTexts = new Dictionary<Violation, DrawingPlacement>();
         var changedIds = new HashSet<string>(changed.Select(c => Id(c.Locator)), StringComparer.Ordinal);
         DrawingPlacement[] all = [.. model.Page.Placements.Where(p => !changedIds.Contains(Id(p.Locator))), .. changed];
-        void Add(string rule, DrawingPlacement p, DrawingLocator? other, string message, bool warningOnly = false)
+        void Add(string rule, DrawingPlacement p, DrawingLocator? other, string message, bool warningOnly = false, bool advisory = false)
         {
-            bool warning = warningOnly || !model.Config.Strict && rule is "R6" or "R7" or "R9";
+            bool warning = warningOnly || advisory || !model.Config.Strict && rule is "R6" or "R7" or "R9";
             result.Add(new()
             {
                 Rule = rule,
@@ -94,7 +94,13 @@ public static class LayoutGuard
             double[] b = DrawingCoordinates.ValidBounds(p.Bounds) ? p.Bounds! : [p.Location[0], p.Location[1], p.Location[0], p.Location[1]];
             if (b[0] < area[0] || b[1] < area[1] || b[2] > area[2] || b[3] > area[3]
                 || p.Location[0] < area[0] || p.Location[1] < area[1] || p.Location[0] > area[2] || p.Location[1] > area[3])
-            { Add("R1", p, null, "Keep the full outline inside the drawing area."); }
+            {
+                // A macro's declared outline is not what EPLAN draws (live 2026-11-03: part overview macros fill the A3 page, as on the
+                // sample's PLC overview pages). Inside a known page its objects are measured after the write, where only an off-page
+                // outline rolls back (ADR-0046); without a known page size the outline still refuses.
+                bool inPage = p.Kind == "Macro" && model.Page.PageSize is { Length: 2 } size && b[0] >= 0 && b[1] >= 0 && b[2] <= size[0] && b[3] <= size[1];
+                Add("R1", p, null, inPage ? "The macro's declared outline leaves the drawing area; its objects are checked after the write." : "Keep the full outline inside the drawing area.", advisory: inPage);
+            }
             if (p.Parent is null && p.Location.Any(n => !OnGrid(n, model.Page.GridSize)))
             { Add("R7", p, null, "Placement points and bends must lie on the page grid; pins are exempt."); }
             // A text whose height or angle EPLAN does not report is not a violation: only a reported bad value refuses.
