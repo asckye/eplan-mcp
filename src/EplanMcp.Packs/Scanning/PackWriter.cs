@@ -10,6 +10,7 @@ public static class PackWriter
 {
     public static async Task<PackCheckResult> WriteAsync(ScanResult scan, PackManifest manifest, string directory, CancellationToken cancellationToken)
     {
+        manifest = manifest with { SchemaVersion = PackManifest.CurrentSchemaVersion };
         if (scan.HasErrors)
         {
             throw new PackFormatException("The inputs have errors; fix them and scan again before writing a pack.");

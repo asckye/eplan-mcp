@@ -25,12 +25,12 @@ public sealed class PackJsonTests
         Assert.DoesNotContain("\r", json, StringComparison.Ordinal);
         Assert.DoesNotContain("null", json, StringComparison.Ordinal);
         Assert.EndsWith("}\n", json, StringComparison.Ordinal);
-        Assert.StartsWith("{\n  \"schemaVersion\": 1,", json, StringComparison.Ordinal);
+        Assert.StartsWith("{\n  \"schemaVersion\": 3,", json, StringComparison.Ordinal);
     }
 
     [Theory]
-    [InlineData(3, "pack.json has schemaVersion 3; this EplanMcp reads schemaVersion 1 or 2 only.")]
-    [InlineData(0, "pack.json has schemaVersion 0; this EplanMcp reads schemaVersion 1 or 2 only.")]
+    [InlineData(4, "pack.json has schemaVersion 4; this EplanMcp reads schemaVersion 1 or 2 or 3 only.")]
+    [InlineData(0, "pack.json has schemaVersion 0; this EplanMcp reads schemaVersion 1 or 2 or 3 only.")]
     public void ReadManifest_UnknownSchemaVersion_IsRefusedByItsVersion(int version, string message)
     {
         // A future version may add properties; the reader names the version, not the first unknown property.
@@ -63,7 +63,7 @@ public sealed class PackJsonTests
     {
         var ex = Assert.Throws<PackFormatException>(() => PackJson.ReadManifest(Replaced(original, replacement)));
 
-        Assert.StartsWith("pack.json is not valid for schemaVersion 1: ", ex.Message, StringComparison.Ordinal);
+        Assert.StartsWith("pack.json is not valid for schemaVersion 3: ", ex.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -98,4 +98,31 @@ public sealed class PackJsonTests
 
         Assert.StartsWith("pack.json is not valid JSON: ", ex.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void PluginManifest_RoundTripsV3()
+    {
+        PackManifest manifest = Manifests.Minimal() with
+        { Kind = PackKind.Standard, Provides = ["defaults.strip_definition.symbol"], Standards = ["IEC 60204-1:2016"] };
+        byte[] json = PackJson.Serialize(manifest);
+        PackManifest read = PackJson.ReadManifest(json);
+
+        Assert.Equal(3, read.SchemaVersion);
+        Assert.Equal(manifest.Kind, read.Kind);
+        Assert.Equal(manifest.Provides, read.Provides);
+        Assert.Equal(manifest.Standards, read.Standards);
+        Assert.Equal(json, PackJson.Serialize(read));
+        Assert.Empty(PackManifestValidator.Validate(read));
+    }
+
+    [Theory]
+    [InlineData("\"kind\": \"company\",", "")]
+    [InlineData("\"kind\": \"company\"", "\"kind\": \"unknown\"")]
+    [InlineData("\"provides\": []", "\"provides\": null")]
+    [InlineData("\"provides\": []", "\"provides\": [null]")]
+    [InlineData("\"provides\": []", "\"provides\": [], \"standards\": null")]
+    [InlineData("\"provides\": []", "\"provides\": [], \"standards\": []")]
+    [InlineData("\"kind\": \"company\"", "\"kind\": \"standard\", \"standards\": [null]")]
+    public void PluginManifest_InvalidShape_IsRejected(string original, string replacement) =>
+        Assert.Throws<PackFormatException>(() => PackJson.ReadManifest(Replaced(original, replacement)));
 }

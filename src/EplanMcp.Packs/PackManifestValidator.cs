@@ -18,10 +18,18 @@ public static partial class PackManifestValidator
         var problems = new List<PackProblem>();
         void Add(string location, string message) => problems.Add(new PackProblem(location, message));
 
-        if (manifest.SchemaVersion is not 1 and not 2)
+        if (manifest.SchemaVersion is not 1 and not 2 and not 3)
         {
-            Add("schemaVersion", "must be 1 or 2");
+            Add("schemaVersion", "must be 1, 2 or 3");
         }
+
+        if (!Enum.IsDefined(manifest.Kind))
+        { Add("kind", "must be a known plugin kind"); }
+        if (manifest.Standards is not null && manifest.Kind != PackKind.Standard)
+        { Add("standards", "is only allowed for standard plugins"); }
+        CheckPluginLabels("provides", manifest.Provides, Add);
+        if (manifest.Standards is { } standards)
+        { CheckPluginLabels("standards", standards, Add); }
 
         CheckId("id", manifest.Id, Add);
         CheckText("name", manifest.Name, required: true, Add);
@@ -273,6 +281,14 @@ public static partial class PackManifestValidator
     }
 
     private static bool IsText(string text) => text.Length is > 0 and <= MaxTextLength && !text.Any(char.IsControl);
+
+    private static void CheckPluginLabels(string location, IReadOnlyList<string> values, Action<string, string> add)
+    {
+        if (values.Count > 64)
+        { add(location, "must contain at most 64 labels"); }
+        CheckList(location, values, value => value is { Length: > 0 and <= 128 } && !value.Any(char.IsControl)
+            ? null : "must be 1 to 128 characters without control characters", add);
+    }
 
     /// <summary>Whether <paramref name="id"/> is a pack id; names of knowledge documents and pack sources follow the same rule.</summary>
     public static bool IsId(string id) => id.Length <= MaxIdLength && Id().IsMatch(id);

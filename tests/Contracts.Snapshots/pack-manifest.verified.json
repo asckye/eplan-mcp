@@ -1,8 +1,10 @@
 ﻿{
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "id": "acme.cabinet-base",
   "name": "ACME cabinet base",
   "version": "1.0.0",
+  "kind": "company",
+  "provides": [],
   "description": "Cabinets of the ACME line.",
   "compatibility": {
     "eplanVersions": ">=2026.0 <2027",

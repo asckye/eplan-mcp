@@ -168,6 +168,60 @@ public sealed class DevPackStoreTests : IDisposable
         Spec = new System.Text.Json.Nodes.JsonObject { ["text"] = text },
     };
 
+    [Fact]
+    public async Task Build_PreservesKindProvidesAndStandards()
+    {
+        _in.Write("In/guide.md", "# Guide");
+        await ImportAsync(new ScanInput(_in.PathOf("In")));
+        await SetManifestAsync(PackJson.ReadManifest(File.ReadAllBytes(Path.Combine(Pack, PackManifest.FileName))) with
+        { Kind = PackKind.Standard, Provides = ["defaults.interruption.symbol"], Standards = ["IEC 60204-1:2016"] });
+        byte[] development = File.ReadAllBytes(Path.Combine(Pack, PackManifest.FileName));
+        var installed = new PackStore(_data.PathOf("packs"));
+
+        await Store.BuildAsync("acme.panels", "1.0.0", installed, new Dictionary<string, string>(), "eplanmcp test", _now, Cancel);
+        PackManifest built = PackJson.ReadManifest(File.ReadAllBytes(Path.Combine(installed.FolderOf("acme.panels", "1.0.0"), PackManifest.FileName)));
+
+        Assert.Equal((3, PackKind.Standard), (built.SchemaVersion, built.Kind));
+        Assert.Equal(["defaults.interruption.symbol"], built.Provides);
+        Assert.Equal(["IEC 60204-1:2016"], built.Standards);
+        Assert.Equal(development, File.ReadAllBytes(Path.Combine(Pack, PackManifest.FileName)));
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task Build_NewVersionDoesNotRewriteInstalledVersion(int oldSchema)
+    {
+        _in.Write("In/guide.md", "# Guide");
+        await ImportAsync(new ScanInput(_in.PathOf("In")));
+        await SetManifestAsync(PackJson.ReadManifest(File.ReadAllBytes(Path.Combine(Pack, PackManifest.FileName))) with { SchemaVersion = oldSchema, Version = "1.0.0" });
+        var installed = new PackStore(_data.PathOf("packs"));
+        Assert.Equal(PackInstallOutcome.Installed, (await installed.InstallAsync(Pack, Cancel)).Outcome);
+        string oldPath = Path.Combine(installed.FolderOf("acme.panels", "1.0.0"), PackManifest.FileName);
+        byte[] frozen = File.ReadAllBytes(oldPath);
+        await SetManifestAsync(PackJson.ReadManifest(frozen) with { Version = DevPackStore.ManifestVersion });
+        byte[] oldDevelopment = File.ReadAllBytes(Path.Combine(Pack, PackManifest.FileName));
+
+        (PackInstallResult repeated, _) = await Store.BuildAsync("acme.panels", "1.0.0", installed, new Dictionary<string, string>(), "eplanmcp test", _now, Cancel);
+        Assert.Equal(PackInstallOutcome.AlreadyInstalled, repeated.Outcome);
+
+        await Store.BuildAsync("acme.panels", "2.0.0", installed, new Dictionary<string, string>(), "eplanmcp test", _now, Cancel);
+
+        Assert.Equal(frozen, File.ReadAllBytes(oldPath));
+        Assert.Equal(oldDevelopment, File.ReadAllBytes(Path.Combine(Pack, PackManifest.FileName)));
+        Assert.Equal(oldSchema, PackJson.ReadManifest(frozen).SchemaVersion);
+        Assert.Equal(PackKind.Company, PackJson.ReadManifest(frozen).Kind);
+        Assert.Equal(3, PackJson.ReadManifest(File.ReadAllBytes(Path.Combine(installed.FolderOf("acme.panels", "2.0.0"), PackManifest.FileName))).SchemaVersion);
+    }
+
+    private async Task SetManifestAsync(PackManifest manifest)
+    {
+        byte[] json = PackJson.Serialize(manifest);
+        await File.WriteAllBytesAsync(Path.Combine(Pack, PackManifest.FileName), json, Cancel);
+        var reference = new PackReference { Id = manifest.Id, Version = manifest.Version, Digest = PackDigest.Compute(json) };
+        await File.WriteAllBytesAsync(Path.Combine(Pack, PackManifest.LockFileName), PackJson.Serialize(PackLock.Create(reference, [])), Cancel);
+    }
+
     public void Dispose()
     {
         _in.Dispose();

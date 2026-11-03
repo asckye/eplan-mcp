@@ -36,6 +36,7 @@
 - 在 `packs-dev\` 下的临时目录中复制开发包，清单的 `version` 改为给出的版本、`provenance.createdAt` 改为现在，按已安装的包解析依赖并写 `pack.lock.json`（`PackStore.Lock`），完整校验后交给 `PackStore.InstallAsync`：它再校验一次，文件设为只读；同一版本已安装且摘要相同时为 `already_installed`，摘要不同时拒绝。
 - 引用资源（`referenced`）不复制，但构建前按 `packSources` 核对哈希：冻结一个已经不一致的哈希没有意义。
 - 开发包本身不变，可以继续整理，下次构建新的版本。
+- 新构建的清单写为 `schemaVersion: 3`，保留开发包的 `kind`、`provides` 和 `standards`；旧清单缺少 `kind` 时按 `company` 读取，已安装版本及其原始字节的摘要不变。`provides` 是声明性标签，不代替资源校验；`standards` 只允许在 `standard` 包中出现。
 - 在开发包锁内核验冻结副本：mandatory 缺来源、official 缺少匹配本机 `knowledge_review` 摘要均为 `PACK_INVALID`；手改 standing 或导入历史确认不能代替 `eplan_asset_review` 的工程师确认。
 - 不改变任何项目锁（M6 设计 4.1.5：安装新版本不改变锁）。
 

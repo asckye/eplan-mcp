@@ -5,8 +5,8 @@ namespace EplanMcp.Packs;
 [Description("The manifest of an EplanMcp engineering pack (pack.json at the pack's root). EplanMcp generates it; nobody writes it by hand.")]
 public sealed record PackManifest
 {
-    /// <summary>The default write version; readers also accept schemaVersion 2 (ADR-0029).</summary>
-    public const int CurrentSchemaVersion = 1;
+    /// <summary>The default write version; readers also accept schemaVersion 1 and 2.</summary>
+    public const int CurrentSchemaVersion = 3;
 
     public const string FileName = "pack.json";
 
@@ -27,6 +27,15 @@ public sealed record PackManifest
     [Description("The pack's version, SemVer 2.0.0. An installed version never changes; a change is a new version.")]
     [Schema(Pattern = PackPatterns.SemVer)]
     public required string Version { get; init; }
+
+    [Description("The data-only plugin category; old manifests without this field are company packs.")]
+    public PackKind Kind { get; init; } = PackKind.Company;
+
+    [Description("Declared capabilities, not proof that the corresponding resources exist. Up to 64 unique labels of 1 to 128 characters.")]
+    public IReadOnlyList<string> Provides { get; init; } = [];
+
+    [Description("Standard identifiers and editions, only for standard plugins. Up to 64 unique labels of 1 to 128 characters.")]
+    public IReadOnlyList<string>? Standards { get; init; }
 
     public string? Description { get; init; }
 

@@ -18,6 +18,7 @@ public sealed class VersionedReadModelTests
     [Theory]
     [InlineData(1)]
     [InlineData(2)]
+    [InlineData(3)]
     public void Manifest_KnownVersion_RoundTripsWithSlotsUnchanged(int version)
     {
         byte[] json = PackJson.Serialize(Manifests.Complete() with { SchemaVersion = version });
@@ -26,6 +27,23 @@ public sealed class VersionedReadModelTests
         Assert.Empty(PackManifestValidator.Validate(manifest));
         Assert.Equal(json, PackJson.Serialize(manifest));
         Assert.Equal(PackDigest.Compute(json), PackDigest.Compute(PackJson.Serialize(manifest)));
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void OldManifest_DefaultsToCompanyWithoutChangingDigest(int version)
+    {
+        byte[] original = PackJson.Serialize(Manifests.Complete() with { SchemaVersion = version });
+        string digest = PackDigest.Compute(original);
+        PackManifest read = PackJson.ReadManifest(original);
+
+        Assert.Equal(PackKind.Company, read.Kind);
+        Assert.Empty(read.Provides);
+        Assert.Null(read.Standards);
+        Assert.DoesNotContain("\"kind\": \"company\"", Encoding.UTF8.GetString(original), StringComparison.Ordinal);
+        Assert.Equal(original, PackJson.Serialize(read));
+        Assert.Equal(digest, PackDigest.Compute(original));
     }
 
     [Theory]

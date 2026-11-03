@@ -152,7 +152,7 @@ public sealed class DevPackStore(string root)
                 return (current!, PackDigest.Compute(await File.ReadAllBytesAsync(Path.Combine(folder, PackManifest.FileName), cancellationToken).ConfigureAwait(false)), false);
             }
 
-            next = next with { Provenance = next.Provenance with { CreatedBy = createdBy, CreatedAt = now.ToUniversalTime() } };
+            next = next with { SchemaVersion = PackManifest.CurrentSchemaVersion, Provenance = next.Provenance with { CreatedBy = createdBy, CreatedAt = now.ToUniversalTime() } };
             if (PackManifestValidator.Validate(next) is { Count: > 0 } invalid)
             {
                 throw new DevPackException(DevPackError.Invalid, invalid);
@@ -246,9 +246,12 @@ public sealed class DevPackStore(string root)
             if (validate is not null)
             { await validate(staging, manifest, cancellationToken).ConfigureAwait(false); }
             // A version built before keeps its maker and time, so building it again from the same pack is no change.
-            PackProvenance made = installed.InstalledDigest(id, version) is null ? manifest.Provenance with { CreatedBy = createdBy, CreatedAt = now.ToUniversalTime() }
-                : PackJson.ReadManifest(await File.ReadAllBytesAsync(Path.Combine(installed.FolderOf(id, version), PackManifest.FileName), cancellationToken).ConfigureAwait(false)).Provenance;
-            PackManifest frozen = manifest with { Version = version, Provenance = manifest.Provenance with { CreatedBy = made.CreatedBy, CreatedAt = made.CreatedAt } };
+            PackManifest? existing = installed.InstalledDigest(id, version) is null ? null
+                : PackJson.ReadManifest(await File.ReadAllBytesAsync(Path.Combine(installed.FolderOf(id, version), PackManifest.FileName), cancellationToken).ConfigureAwait(false));
+            PackProvenance made = existing?.Provenance ?? manifest.Provenance with { CreatedBy = createdBy, CreatedAt = now.ToUniversalTime() };
+            int schema = existing is { SchemaVersion: < 3 } && manifest.Kind == PackKind.Company && manifest.Provides.Count == 0 && manifest.Standards is null
+                ? existing.SchemaVersion : PackManifest.CurrentSchemaVersion;
+            PackManifest frozen = manifest with { SchemaVersion = schema, Version = version, Provenance = manifest.Provenance with { CreatedBy = made.CreatedBy, CreatedAt = made.CreatedAt } };
             byte[] json = PackJson.Serialize(frozen);
             string digest = PackDigest.Compute(json);
             (PackLock? packLock, IReadOnlyList<PackProblem> unresolved) = installed.Lock(frozen, digest);
@@ -285,7 +288,7 @@ public sealed class DevPackStore(string root)
             }
             PackResource written = await WriteDocumentAsync(staging, rule, cancellationToken).ConfigureAwait(false);
             PackManifest next = Assemble(current, [.. current.Resources, written], current.Facts, [], new HashSet<string>([path], PackPath.Comparer));
-            return next with { SchemaVersion = 2, Rules = [.. next.Rules.Select(s => s.Path == path ? s with { Standing = KnowledgeStanding.Official } : s)] };
+            return next with { Rules = [.. next.Rules.Select(s => s.Path == path ? s with { Standing = KnowledgeStanding.Official } : s)] };
         }, cancellationToken).ConfigureAwait(false);
     }
 

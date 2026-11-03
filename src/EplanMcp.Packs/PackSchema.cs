@@ -18,9 +18,22 @@ public static class PackSchema
 
     public static JsonObject Manifest()
     {
-        JsonObject schema = Generate(typeof(PackManifest), ManifestId, "EplanMcp pack manifest (pack.json), schemaVersion 1 or 2");
+        JsonObject schema = Generate(typeof(PackManifest), ManifestId, "EplanMcp pack manifest (pack.json), schemaVersion 1, 2 or 3");
         schema["properties"]!["schemaVersion"]!.AsObject().Remove("const");
-        schema["properties"]!["schemaVersion"]!["enum"] = new JsonArray(1, 2);
+        schema["properties"]!["schemaVersion"]!["enum"] = new JsonArray(1, 2, 3);
+        foreach (string name in new[] { "provides", "standards" })
+        {
+            JsonNode labels = schema["properties"]![name]!;
+            labels["maxItems"] = 64;
+            labels["uniqueItems"] = true;
+            labels["items"]!["minLength"] = 1;
+            labels["items"]!["maxLength"] = 128;
+            labels["items"]!["pattern"] = @"^[^\u0000-\u001f\u007f-\u009f]+$";
+        }
+        schema["allOf"] = JsonNode.Parse("""
+            [{"if":{"properties":{"schemaVersion":{"const":3}}},"then":{"required":["kind"]}},
+             {"if":{"not":{"properties":{"kind":{"const":"standard"}},"required":["kind"]}},"then":{"not":{"required":["standards"]}}}]
+            """);
         return schema;
     }
 

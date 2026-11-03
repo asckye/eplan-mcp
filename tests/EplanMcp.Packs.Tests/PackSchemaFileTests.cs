@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace EplanMcp.Packs.Tests;
 
@@ -45,6 +46,35 @@ public sealed class PackSchemaFileTests : IDisposable
         Assert.True(
             output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) is ["True", "False"],
             $"stdout: {output}{Environment.NewLine}stderr: {error}");
+    }
+
+    [Theory]
+    [InlineData("standard", "[]", "[\"IEC 60204-1:2016\"]", true)]
+    [InlineData("standard", "[]", "null", true)]
+    [InlineData("company", "[]", "[]", false)]
+    [InlineData("company", "[]", "null", false)]
+    [InlineData("standard", "[\"rules\",\"rules\"]", "[]", false)]
+    [InlineData("standard", "[null]", "[]", false)]
+    [InlineData("standard", "[]", "[null]", false)]
+    [InlineData("unknown", "[]", "[]", false)]
+    public async Task PluginSchema_AgreesWithTheReaderAndValidator(string kind, string provides, string standards, bool expected)
+    {
+        JsonNode node = JsonNode.Parse(PackJson.Serialize(Manifests.Minimal()))!;
+        node["kind"] = kind;
+        node["provides"] = JsonNode.Parse(provides);
+        node["standards"] = JsonNode.Parse(standards);
+        byte[] json = PackJson.Serialize(node);
+        bool actual;
+        try
+        { actual = PackManifestValidator.Validate(PackJson.ReadManifest(json)).Count == 0; }
+        catch (PackFormatException) { actual = false; }
+        Assert.Equal(expected, actual);
+        string file = Write("plugin.json", json);
+        string schema = Write("schema.json", Encoding.UTF8.GetBytes(PackSchema.Text(PackSchema.Manifest())));
+
+        (string output, string error) = await PowerShellAsync($"Test-Json -Path '{file}' -SchemaFile '{schema}'");
+
+        Assert.True(output.Trim() == (expected ? "True" : "False"), $"stdout: {output}{Environment.NewLine}stderr: {error}");
     }
 
     public void Dispose() => _directory.Delete(recursive: true);

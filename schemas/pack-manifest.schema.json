@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/asckye/eplan-mcp/schemas/pack-manifest.schema.json",
-  "title": "EplanMcp pack manifest (pack.json), schemaVersion 1 or 2",
+  "title": "EplanMcp pack manifest (pack.json), schemaVersion 1, 2 or 3",
   "type": "object",
   "properties": {
     "schemaVersion": {
@@ -9,7 +9,8 @@
       "description": "The manifest format. A reader refuses a version it does not know instead of guessing.",
       "enum": [
         1,
-        2
+        2,
+        3
       ]
     },
     "id": {
@@ -25,6 +26,43 @@
       "type": "string",
       "description": "The pack's version, SemVer 2.0.0. An installed version never changes; a change is a new version.",
       "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "kind": {
+      "enum": [
+        "standard",
+        "parts",
+        "symbols",
+        "templates",
+        "company"
+      ],
+      "description": "The data-only plugin category; old manifests without this field are company packs."
+    },
+    "provides": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$"
+      },
+      "description": "Declared capabilities, not proof that the corresponding resources exist. Up to 64 unique labels of 1 to 128 characters.",
+      "maxItems": 64,
+      "uniqueItems": true
+    },
+    "standards": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$"
+      },
+      "description": "Standard identifiers and editions, only for standard plugins. Up to 64 unique labels of 1 to 128 characters.",
+      "maxItems": 64,
+      "uniqueItems": true
     },
     "description": {
       "type": [
@@ -487,5 +525,42 @@
     "provenance"
   ],
   "additionalProperties": false,
-  "description": "The manifest of an EplanMcp engineering pack (pack.json at the pack's root). EplanMcp generates it; nobody writes it by hand."
+  "description": "The manifest of an EplanMcp engineering pack (pack.json at the pack's root). EplanMcp generates it; nobody writes it by hand.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schemaVersion": {
+            "const": 3
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "kind"
+        ]
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "kind": {
+              "const": "standard"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "standards"
+          ]
+        }
+      }
+    }
+  ]
 }

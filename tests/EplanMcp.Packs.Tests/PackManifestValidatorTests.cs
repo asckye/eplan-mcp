@@ -11,7 +11,18 @@ public sealed class PackManifestValidatorTests
 
     public static TheoryData<string, Func<PackManifest, PackManifest>> Broken => new()
     {
-        { "schemaVersion", m => m with { SchemaVersion = 3 } },
+        { "schemaVersion", m => m with { SchemaVersion = 4 } },
+        { "kind", m => m with { Kind = (PackKind)99 } },
+        { "provides[1]", m => m with { Provides = ["rules", "rules"] } },
+        { "provides[0]", m => m with { Provides = [""] } },
+        { "provides[0]", m => m with { Provides = [null!] } },
+        { "provides[0]", m => m with { Provides = ["two\nlines"] } },
+        { "provides[0]", m => m with { Provides = [new string('a', 129)] } },
+        { "provides", m => m with { Provides = [.. Enumerable.Range(0, 65).Select(i => i.ToString(System.Globalization.CultureInfo.InvariantCulture))] } },
+        { "standards", m => m with { Standards = ["IEC 60204-1:2016"] } },
+        { "standards[1]", m => m with { Kind = PackKind.Standard, Standards = ["IEC 60204-1:2016", "IEC 60204-1:2016"] } },
+        { "standards[0]", m => m with { Kind = PackKind.Standard, Standards = [new string('a', 129)] } },
+        { "standards[0]", m => m with { Kind = PackKind.Standard, Standards = [null!] } },
         { "id", m => m with { Id = "ACME" } },
         { "id", m => m with { Id = "acme..base" } },
         { "id", m => m with { Id = new string('a', 65) } },
