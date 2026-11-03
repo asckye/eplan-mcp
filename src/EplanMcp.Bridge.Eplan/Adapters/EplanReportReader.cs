@@ -8,7 +8,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>A84: reads a fresh page wrapper outside a write transaction; no scheme data or borrowed native objects escape.</summary>
 internal static class EplanReportReader
 {
-    internal static PageReport? Read(Page page) => Field("report", () =>
+    internal static PageReport? Read(Page page, Action? unreadable = null) => Field("report", () =>
     {
         using ReportBlock? block = page.ReportBlock;
         if (block is null)
@@ -39,9 +39,9 @@ internal static class EplanReportReader
             GC.KeepAlive(block);
             GC.KeepAlive(page); // A80: owners remain reachable through the final native field read.
         }
-    });
+    }, unreadable);
 
-    private static T? Field<T>(string name, Func<T> read)
+    private static T? Field<T>(string name, Func<T> read, Action? unreadable = null)
     {
         try
         {
@@ -50,6 +50,7 @@ internal static class EplanReportReader
         catch (Exception error)
         {
             OperationContext.Current.Warn("Could not read report field " + name + ".", error);
+            unreadable?.Invoke();
             return default;
         }
     }

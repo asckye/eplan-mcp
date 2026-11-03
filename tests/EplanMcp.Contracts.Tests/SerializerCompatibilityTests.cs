@@ -20,6 +20,10 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new ReportCreateArgs(),
+        new ReportCreateArgs { Project = "Line1", Type = "TerminalDiagram", Form = "F13_008", FirstPage = "+A1&EMA2/100", FilterScheme = "Location designation_A3", SortScheme = "DT (full)", PageDescription = "Terminals", Fingerprint = new string('a', 64) },
+        new ReportCreateData(),
+        new ReportCreateData { Pages = ["+A1&EMA2/100"], NewPages = ["+A1&EMA2/100"], Warning = "undo warning" },
         new ApiHandleElements(),
         new ApiHandleElements { Items = [new() { Handle = "h:" + new string('a', 32), Type = "Eplan.EplApi.DataModel.Pin" }], Collection = new() { Handle = "h:" + new string('b', 32), Type = "Eplan.EplApi.EServices.SubProjectsCollection" } },
         new ApiTryData { Elements = new() { Items = [new() { Handle = "h:" + new string('a', 32), Type = "Eplan.EplApi.DataModel.Connection" }] }, HandleSource = "O:Eplan.EplApi.DataModel.Pin.Connections" },

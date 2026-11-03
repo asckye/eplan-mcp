@@ -8,4 +8,7 @@ public sealed class ReportPageRecord
 
     /// <summary>The page's session identifier (<c>ToStringIdentifier</c>, valid in this EPLAN session only, A3).</summary>
     public string Id { get; set; } = string.Empty;
+
+    public string Type { get; set; } = string.Empty;
+    public string Form { get; set; } = string.Empty;
 }

@@ -323,6 +323,11 @@ public static class OperationNames
     /// </summary>
     public const string ReportUpdatePlan = "report.update.plan";
 
+    /// <summary>Plans report page generation.</summary>
+    public const string ReportCreatePlan = "report.create.plan";
+    /// <summary>Creates report pages.</summary>
+    public const string ReportCreateExecute = "report.create.execute";
+
     /// <summary>
     /// Updates all reports of the project, or the planned report pages one by one, in one transaction, and compares the
     /// report pages before and after. Arguments: <see cref="ReportUpdateArgs"/> with the fingerprint; data:

@@ -197,6 +197,8 @@ internal static class BridgeHost
             new CheckRunPlanOperation(catalog, pages, checker, messages),
             new CheckRunExecuteOperation(catalog, pages, checker, messages, transactions),
             new ReportUpdatePlanOperation(catalog, pages, reports),
+            new ReportCreatePlanOperation(catalog, pages, new EplanReportCreator()),
+            new ReportCreateExecuteOperation(catalog, pages, new EplanReportCreator(), transactions),
             new ReportUpdateExecuteOperation(catalog, pages, reports, transactions),
             .. new[] { ExportKind.Pdf, ExportKind.Dxf, ExportKind.Image }.SelectMany(kind => new IOperation[]
             {
