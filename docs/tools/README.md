@@ -55,6 +55,7 @@
 | `eplan_object_find` | full | 只读 | [eplan_object_find.md](eplan_object_find.md) |
 | `eplan_object_get` | full | 只读 | [eplan_object_get.md](eplan_object_get.md) |
 | `eplan_pack_build` | full | 写入 | [eplan_pack_build.md](eplan_pack_build.md) |
+| `eplan_pack_enable` | full | 写入 | [eplan_pack_enable.md](eplan_pack_enable.md) |
 | `eplan_pack_get` | full | 只读 | [eplan_pack_get.md](eplan_pack_get.md) |
 | `eplan_pack_import` | full | 写入 | [eplan_pack_import.md](eplan_pack_import.md) |
 | `eplan_pack_install` | full | 写入 | [eplan_pack_install.md](eplan_pack_install.md) |

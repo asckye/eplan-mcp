@@ -133,6 +133,8 @@ internal static class ApprovalTexts
     /// <summary>One change as one line, in the dialog's language; <paramref name="details"/> are the plan's.</summary>
     internal static string Change(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details = null)
     {
+        if (change.Kind == "plugin" && change.Property == "global")
+        { return $"{change.Action} plugin {Value(change.Name, zh)} globally"; }
         if (change.Kind == "placement")
         { return change.Property + " " + Value(change.Name, zh) + ": " + Value(change.NewValue ?? "", zh) + (change.Property == "copy" ? zh ? "；保留标识，副本可能关联已有设备。" : "; tags preserved; copies may associate with existing devices." : change.Property == "delete" ? zh ? "；连同功能本体删除，相关连接见清单。" : "; removes the function itself; incident connections are listed." : ""); }
         if (change.Kind == "unverified API")
@@ -313,6 +315,8 @@ internal static class ApprovalTexts
         ? zh ? "记录本地知识审核；提升将新建正式规则。接受候选不授予正式资格。EPLAN 的 Ctrl+Z 不能撤销。" : "Records a local knowledge review; promotion creates a new official Rule. Acceptance grants no official standing. Ctrl+Z in EPLAN cannot undo it."
         : plan.Changes.Any(c => c.Kind == "binding")
           ? zh ? "仅修改本地绑定；EPLAN 的 Ctrl+Z 不能撤销。" : "Changes only the local binding; Ctrl+Z in EPLAN cannot undo it."
+          : tool == PluginEnableTools.Tool
+          ? zh ? "仅修改全局插件启用状态；不会卸载插件。EPLAN 的 Ctrl+Z 不能撤销。" : "Changes global plugin enablement only; does not uninstall. Ctrl+Z in EPLAN cannot undo it."
           : tool == ApiTryTools.Tool
         ? plan.Changes.Any(c => c.Action == "write")
             ? zh ? "属性写入须匹配读回，方法须完成观察后，才在一个撤销步中提交；提交后单步 Ctrl+Z 尚待实机验证。" : "Property writes require matching readback and methods require observations before committing in one undo step; live single-step Ctrl+Z verification is pending."

@@ -68,6 +68,12 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
             progress,
             cancellationToken);
 
+    public Task<ApprovalResult> ConfirmPluginEnableAsync(string requestId, WritePlan plan, EplanInstanceInfo eplan,
+        IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken) =>
+        AskAsync(new ApprovalQuestion(requestId, Tools.PluginEnableTools.Tool, plan.Fingerprint, plan,
+            [.. WritePipeline.ChangeLines(plan)], clock.GetUtcNow() + Timeout)
+        { Tier = ToolTier.Write, Eplan = eplan }, progress, cancellationToken);
+
     private async Task<ApprovalResult> AskAsync(ApprovalQuestion question, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
         string requestId = question.RequestId;
@@ -84,6 +90,8 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
         using ApprovalProgress? waiting = ApprovalProgress.Start(progress, question, timeout, clock);
         foreach (IApprovalChannel channel in _channels)
         {
+            if (question.Tool == Tools.PluginEnableTools.Tool && channel.Name != EplanDialogChannel.ChannelName)
+            { continue; }
             waiting?.AskingIn(channel.Where);
             if (await channel.AskAsync(question, cancellationToken).ConfigureAwait(false) is { } answer)
             {
