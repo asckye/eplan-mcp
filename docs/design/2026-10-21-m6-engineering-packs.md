@@ -286,6 +286,8 @@ EPLAN 原生文件之外，EplanMcp 生成的结构化内容都是 JSON 文档�
 
 ### 4.3 配置分层
 
+P1 在模式缺省值之后、既有绑定链之前增加全局插件输入组；按全局启用顺序复用相同合并与约束规则，trace 标明 `scope: "global"` 和精确插件版本，项目已锁定的同 ID 插件跳过全局输入并留下警告。完整规则见[插件设计 §4.8](2026-11-02-plugin-libraries.md#48-p1-实施要点2026-11-02-维护者定)。
+
 层的顺序：`base`（通用基础）→ `company`（公司）→ `cabinet_type`（产品系列或柜型，v0 的 `cabinetTypes`）→ `project`（项目）→ `cabinet`（单个柜）。前三层是包中的 `ConfigLayer` 资源；后两层是项目自己的值，存在项目绑定 `workspaces\<项目键>\binding.json` 中，不进包。
 
 - **配置项**由包中的 `ConfigSchema` 定义：名称、类型、单位、枚举或范围、说明、哪些层可以设置。没有定义的项一律拒绝。

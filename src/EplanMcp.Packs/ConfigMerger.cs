@@ -4,7 +4,7 @@ using static EplanMcp.Packs.BindingReadModel;
 
 namespace EplanMcp.Packs;
 
-/// <summary>Pure five-layer merge of resolved specs; resource and lock resolution remain the caller's responsibility.</summary>
+/// <summary>Pure merge of resolved specs with an optional global plugin group; resource and lock resolution remain the caller's responsibility.</summary>
 public static class ConfigMerger
 {
     // Same values as EplanMcp.Contracts.ErrorReason; Packs stays free of the Contracts reference.
@@ -12,11 +12,16 @@ public static class ConfigMerger
     public const string ConfigConflict = "CONFIG_CONFLICT";
     public const string InvalidArgument = "INVALID_ARGUMENT";
 
-    public static ConfigMergeResult Merge(IReadOnlyList<ConfigDocument> schemas, IReadOnlyList<ConfigDocument> layers, ProjectBinding binding, int cabinetIndex)
+    public static ConfigMergeResult Merge(IReadOnlyList<ConfigDocument> schemas, IReadOnlyList<ConfigDocument> layers, ProjectBinding binding, int cabinetIndex) =>
+        Merge(schemas, layers, binding, cabinetIndex, []);
+
+    public static ConfigMergeResult Merge(IReadOnlyList<ConfigDocument> schemas, IReadOnlyList<ConfigDocument> layers, ProjectBinding binding, int cabinetIndex,
+        IReadOnlyList<ConfigDocument> globalLayers)
     {
         var items = new JsonObject();
         var values = new Dictionary<string, JsonObject>(StringComparer.Ordinal);
         var trace = new JsonArray();
+        var warnings = new JsonArray();
         string reason = PackInvalid;
         try
         {
@@ -63,24 +68,8 @@ public static class ConfigMerger
                 }
             }
 
-            int rank = 0;
-            var seen = new HashSet<string>(StringComparer.Ordinal);
-            foreach (ConfigDocument document in layers)
-            {
-                reason = PackInvalid;
-                JsonObject source = Source(document, "config_layer/");
-                trace = [];
-                AddTrace(trace, "pack", source, "/spec", "layer", JsonNode.Parse(document.Spec.GetRawText())!);
-                Object(document.Spec, "/spec", "layer schema settings", "");
-                string? layer = document.Spec.GetProperty("layer").ValueKind == JsonValueKind.String ? document.Spec.GetProperty("layer").GetString() : null;
-                int next = layer switch { "company" => 1, "cabinet_type" => 2, _ => 0 };
-                Require(next > 0 && next >= rank && seen.Add(document.Resource.Split(':')[0] + ":" + layer), "/spec/layer", "must follow company then cabinet_type, once per pack and layer");
-                rank = next;
-                string? reference = document.Spec.GetProperty("schema").ValueKind == JsonValueKind.String ? document.Spec.GetProperty("schema").GetString() : null;
-                ConfigDocument? schema = schemas.FirstOrDefault(s => s.Resource == reference || s.Resource == document.Resource.Split(':')[0] + ":" + reference);
-                Require(schema is not null, "/spec/schema", "must name a supplied resolved schema");
-                Apply(schema!.Spec, document.Spec.GetProperty("settings"), layer!, source, "/spec/settings");
-            }
+            ApplyLayers(globalLayers, global: true);
+            ApplyLayers(layers, global: false);
 
             reason = InvalidArgument;
             trace = [];
@@ -101,7 +90,7 @@ public static class ConfigMerger
                 Require(value["value"] is null || Contains(value["constraints"]!.AsObject(), value["value"]!), trace.LastOrDefault(t => t!["kind"]!.GetValue<string>() == "default")?["pointer"]?.GetValue<string>() ?? Child("/spec/items", key), "final default is outside the merged constraint; change the default or constraints");
             }
 
-            return new(Element(new JsonArray(values.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => (JsonNode)p.Value).ToArray())), null, null, null, Element(new JsonArray()));
+            return new(Element(new JsonArray(values.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => (JsonNode)p.Value).ToArray())), null, null, null, Element(warnings));
         }
         catch (PackFormatException ex)
         {
@@ -109,10 +98,39 @@ public static class ConfigMerger
             return new(Element(new JsonArray()), reason, ex.Message[..separator], ex.Message[(separator + 2)..], Element(trace));
         }
 
-        void Apply(JsonElement schema, JsonElement settings, string layer, JsonObject source, string at)
+        void ApplyLayers(IReadOnlyList<ConfigDocument> documents, bool global)
+        {
+            int rank = 0;
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (ConfigDocument document in documents)
+            {
+                reason = PackInvalid;
+                JsonObject source = Source(document, "config_layer/");
+                string? plugin = global ? document.Resource.Split(':')[0] : null;
+                if (global && binding.Locks.Any(pin => pin.Id == plugin!.Split('@')[0]))
+                {
+                    if (!warnings.Any(item => item!["plugin"]!.GetValue<string>() == plugin))
+                    { AddTrace(warnings, "global", source, "/spec", "warning", JsonValue.Create("The project binding locks this plugin; its global layers were skipped.")!, plugin); }
+                    continue;
+                }
+                trace = [];
+                AddTrace(trace, "pack", source, "/spec", "layer", JsonNode.Parse(document.Spec.GetRawText())!, plugin);
+                Object(document.Spec, "/spec", "layer schema settings", "");
+                string? layer = document.Spec.GetProperty("layer").ValueKind == JsonValueKind.String ? document.Spec.GetProperty("layer").GetString() : null;
+                int next = layer switch { "company" => 1, "cabinet_type" => 2, _ => 0 };
+                Require(next > 0 && (global || next >= rank) && seen.Add(document.Resource.Split(':')[0] + ":" + layer), "/spec/layer", "must follow company then cabinet_type, once per pack and layer");
+                rank = next;
+                string? reference = document.Spec.GetProperty("schema").ValueKind == JsonValueKind.String ? document.Spec.GetProperty("schema").GetString() : null;
+                ConfigDocument? schema = schemas.FirstOrDefault(s => s.Resource == reference || s.Resource == document.Resource.Split(':')[0] + ":" + reference);
+                Require(schema is not null, "/spec/schema", "must name a supplied resolved schema");
+                Apply(schema!.Spec, document.Spec.GetProperty("settings"), layer!, source, "/spec/settings", plugin);
+            }
+        }
+
+        void Apply(JsonElement schema, JsonElement settings, string layer, JsonObject source, string at, string? plugin = null)
         {
             trace = [];
-            AddTrace(trace, layer, source, at, "settings", JsonNode.Parse(settings.GetRawText())!);
+            AddTrace(trace, layer, source, at, "settings", JsonNode.Parse(settings.GetRawText())!, plugin);
             ConfigValidator.ValidateSettings(schema, settings, layer, at);
             foreach (JsonProperty entry in settings.EnumerateObject())
             {
@@ -122,7 +140,7 @@ public static class ConfigMerger
                 {
                     string pointer = Child(Child(at, entry.Name), setting.Name);
                     JsonNode content = JsonNode.Parse(setting.Value.GetRawText())!;
-                    AddTrace(trace, layer, source, pointer, setting.Name, content);
+                    AddTrace(trace, layer, source, pointer, setting.Name, content, plugin);
                     reason = ConfigConflict;
                     content = ConvertNumbers(content, schema.GetProperty("items").GetProperty(entry.Name).TryGetProperty("unit", out JsonElement unit) ? unit.GetString() : null, value["unit"]?.GetValue<string>(), pointer);
                     if (setting.Name == "default")
@@ -202,8 +220,13 @@ public static class ConfigMerger
         return new JsonObject { ["resource"] = document.Resource, ["sha256"] = document.Sha256 };
     }
 
-    private static void AddTrace(JsonArray trace, string layer, JsonObject source, string pointer, string kind, JsonNode value) =>
-        trace.Add(new JsonObject { ["layer"] = layer, ["source"] = source.DeepClone(), ["pointer"] = pointer, ["kind"] = kind, ["value"] = value.DeepClone() });
+    private static void AddTrace(JsonArray trace, string layer, JsonObject source, string pointer, string kind, JsonNode value, string? plugin = null)
+    {
+        var entry = new JsonObject { ["layer"] = layer, ["source"] = source.DeepClone(), ["pointer"] = pointer, ["kind"] = kind, ["value"] = value.DeepClone() };
+        if (plugin is not null)
+        { entry["scope"] = "global"; entry["plugin"] = plugin; }
+        trace.Add(entry);
+    }
 
     private static JsonElement Element(JsonNode node) => JsonSerializer.SerializeToElement(node, PackJson.Options);
 }
