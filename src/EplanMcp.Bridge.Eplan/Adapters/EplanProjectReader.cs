@@ -25,7 +25,7 @@ internal sealed class EplanProjectReader : IProjectReader
             Devices = functions.Count(function => DeviceTags.IsDevice(function.IsMainFunction, function.Name)),
             Connections = finder.GetConnections(null).Length,
             PartReferences = finder.GetArticleReferences(null).Length,
-            Properties = includeProperties ? EplanProperties.Read(project.Properties, textLanguage) : null,
+            Properties = includeProperties ? EplanProperties.Read(project, textLanguage) : null,
         };
     }
 }

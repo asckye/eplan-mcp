@@ -18,9 +18,14 @@ internal static class EplanProperties
     /// an index, even for <c>IsEmpty</c> (S6), so its used indexes are read one by one. Properties EPLAN marks internal
     /// are left out, as the XML docs ask. Every id, value and definition is disposed: without that, reading a project's
     /// properties twice made EPLAN run out of memory and exit (api-notes A36).
+    /// The values read the object through native handles of their own and reference neither <paramref name="owner"/> nor
+    /// its cached property list, so the owner is kept alive until they are disposed. Collected during the read, the two
+    /// released the object's handles on the finalizer thread: computed values went missing, and EPLAN crashed in such a
+    /// read (api-notes A80).
     /// </summary>
-    public static List<PropertyEntry> Read(UniversalPropertyList properties, TextLanguage language)
+    public static List<PropertyEntry> Read(StorableObject owner, TextLanguage language)
     {
+        UniversalPropertyList properties = owner.Properties;
         AnyPropertyId[] ids = [];
         PropertyValue[] values = [];
         var entries = new List<PropertyEntry>();
@@ -54,6 +59,8 @@ internal static class EplanProperties
             {
                 value.Dispose();
             }
+
+            GC.KeepAlive(owner);
         }
 
         return entries;

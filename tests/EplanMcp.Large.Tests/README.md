@@ -2,6 +2,8 @@
 
 `AcceptanceRedrawTests` 按[整页重绘清单 v1](fixtures/acceptance/README.md)在 `LargeWrite` 新页分批绘制，先打开编辑器供观看，保留页面、PNG 和逐项验收报告，不自动撤销；支持仓库外本地 `EPLANMCP_ACCEPTANCE_LIST`。默认夹具为独立虚构 PLC DI 页。生产工具缺口逐项记 skipped，不能当整页通过；本次仅编写，不运行 EPLAN。
 
+`FullPropertyReadTests`（只读，可用离线宿主）每轮读页 `=GAA+A1&EFS1/1` 及其上全部设备的全量属性（`response_format: detailed`），20 轮都须与第一轮相同。只在启动离线宿主或 EPLAN 的进程环境中设 `COMPlus_GCgen0size=0x10000`（不设为用户或系统环境变量），GC 频繁发生，可以复现 api-notes A80 的终结器竞争：修复前电缆的计算属性在某一轮整组缺失。
+
 只运行验收或 PLC 写测试时，只需打开 `writes\LargeWrite`；程序集初始化不要求只读夹具为当前项目。读取 `LiveEplan.ProjectPath` 的只读测试仍严格要求打开 `fixtures\EPLAN_Sample_Project`，按完整路径定位；依赖当前选择的测试另有自己的选择检查。来源：2026-11-01 `q-d3-AcceptanceRedrawTests.log` 的初始化失败。
 
 `ReferenceCopyTests` 覆盖示例项目关闭源的原生 Snapshot 复制、可选 `.zw1` 还原（`EPLANMCP_LARGE_ZW1`）、只读打开、版本/会话文件、GapOnly 替换后的只读提取、授权刷新、仅副本关闭及源摘要/副本设计文件不变。M0a 保持两个操作未注册，测试明确跳过，待后续接入启用；本次仅编写，未运行 EPLAN。

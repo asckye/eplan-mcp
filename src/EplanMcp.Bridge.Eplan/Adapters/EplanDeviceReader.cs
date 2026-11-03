@@ -86,13 +86,15 @@ internal sealed class EplanDeviceReader : IDeviceReader
             Main = Detail(main, textLanguage, withText: true),
             Auxiliary = [.. main.SubFunctions.Select(f => Detail(f, textLanguage, withText: false))],
             Parts = references.Length == 0 ? [] : Parts(project, references, textLanguage),
-            Properties = withProperties ? EplanProperties.Read(main.Properties, textLanguage) : null,
+            Properties = withProperties ? EplanProperties.Read(main, textLanguage) : null,
         };
     }
 
     private static FunctionDetail Detail(Function function, TextLanguage language, bool withText)
     {
-        (string? text, string? textLanguage) = withText ? EplanText.ReadWithLanguage(function.Properties.FUNC_TEXT, language) : (null, null);
+        // Disposed here rather than on the finalizer thread during the full read of the same function (api-notes A80).
+        using PropertyValue? value = withText ? function.Properties.FUNC_TEXT : null;
+        (string? text, string? textLanguage) = value is null ? (null, null) : EplanText.ReadWithLanguage(value, language);
         return new FunctionDetail
         {
             Name = function.Name ?? string.Empty,

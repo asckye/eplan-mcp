@@ -5266,6 +5266,11 @@
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
           },
           {
+            "name": "FullPropertyReadTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/FullPropertyReadTests.cs"
+          },
+          {
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
@@ -5418,6 +5423,11 @@
             "name": "DeviceAndConnectionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DeviceAndConnectionTests.cs"
+          },
+          {
+            "name": "FullPropertyReadTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/FullPropertyReadTests.cs"
           },
           {
             "name": "ImportListTests",
@@ -10028,6 +10038,11 @@
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
           },
           {
+            "name": "FullPropertyReadTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/FullPropertyReadTests.cs"
+          },
+          {
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
@@ -13378,6 +13393,11 @@
             "name": "CheckAndReportTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CheckAndReportTests.cs"
+          },
+          {
+            "name": "FullPropertyReadTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/FullPropertyReadTests.cs"
           },
           {
             "name": "ImportListTests",

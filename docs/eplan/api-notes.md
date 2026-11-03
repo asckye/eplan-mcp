@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A80、B13**（A67–A76 已由在途分支占用）。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A81、B13**（A67–A76 已由在途分支占用）。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -248,3 +248,13 @@
 ### A79. PLC 提交后原生对象生命周期与崩溃修复（2026-11-01，EPLAN 2026.0.3.25421，LargeWrite scratch 副本）
 - 🔴 2026-11-01，EPLAN 2026.0.3.25421，Electric P8，LargeWrite scratch 副本，slot A：`DevicePlaceTests.TwoPlcInputsAndNoNcContacts_ReadNativeValuesDisplaysAndRepresentations_ThenEachUndoRestores` 运行约 3 分钟，两次在输出 `plc channels: {...}`、`eplremote XEsUndoAction: ok` 后崩溃：10:49 为堆损坏 `0xc0000374`，16:17:42 为访问冲突 `0xc0000005`；main 与 feat/layout-guard 同类测试均 7/7 通过。根因是 297c4a6a 在提交后复用事务内创建的 Terminal（`_placedFunction`）和读取的 PLC card（`_plcCard`），随后撤销损坏原生内存。现已强制只跨 Commit/Dispose 保留托管身份和值：移除设备符号放置器及其 partial 的原生对象字段，显示在事务内复制成托管快照；提交后从目标页 `AllPlacements` 按 ObjectIdentifier 重取点，用 `DMObjectsFinder` 的 `PLCBox` 类别筛选按 ID 重取卡，重新取得并释放属性列表，不依赖请求名称，读回失败仍返回已提交警告。Small 假事务在 Commit/Dispose 后禁止触碰事务内原生句柄，并覆盖身份、归属、地址、符号地址、文本、插头和显示校验；**修复尚未实机验证**，本次未运行 EPLAN。
 - 2026-11-01 修复后复验（同一用例）：Pro Panel（B 槽）与 Electric P8（A 槽）各 `DevicePlaceTests` 7/7，Windows 应用程序日志无 EPLAN 崩溃事件。修复前同一变体、同一用例两次均崩溃，修复后不再崩溃，原因确认是事务内的原生对象在提交后被复用。— Large 测试 TRX 计数与应用程序日志。
+
+### A80. 全量属性读取期间所有者被终结（2026-11-02，EPLAN 2026.0.3.25421，Electric P8；IL 只读核对、离线宿主探针、A 槽 LargeWrite scratch 副本）
+- 🔴 崩溃：2026-11-02 10:23:28，A 槽，`AcceptanceRedrawTests`（默认虚构页）端子阶段放置端子后，`eplan_device_get`（detailed）读 `=GAA+A1-X6:7`，EPLAN 以 `0xe0434352` 退出；.NET Runtime 1026 为 `AccessViolationException`，堆栈 `PropertyValue.UnsafeRemoteValue ← getEPropertyValue ← ToMultiLangString ← EplanText.Display ← EplanProperties.Read ← EplanDeviceReader.ReadDevice`。此前 8 次同一步骤通过。— Windows 应用程序日志。
+- "remote" 不是一类属性。`PropertyValue.getEPropertyValue` 依次取本地值（`m_pPropValue`）、列表值（`m_pPropsList`，`UnsafeRemoteListValue`）、对象句柄值（`m_pPUH`，`UnsafeRemoteValue`）。`ExistingValues` 的值走句柄路径：每个值自带一份 `PropertyUserHandle`，不引用属性列表，也不引用对象包装器。`IsEmpty` 在这条路径上做同一个原生调用（解引用句柄，偏移 120 处的接口，虚表第 96 字节的函数）；公开成员中没有 IsRemote 之类的标志，XML 只有内部的 `UpdateRemoteValue`。所以"跳过 remote 值"等于跳过全部属性。崩溃前 `IsEmpty` 刚用同一调用成功读过这个值，状态是在两次调用之间被别的线程改变的。— 对 `Eplan.EplApi.DataModelu.dll` 的 IL 只读核对（System.Reflection.Metadata，不加载程序集），XML。
+- `StorableObject.Properties` 及各类型化的 `Properties`（`Function`、`Page`、`Project` 都派生自 `StorableObject`）把属性列表缓存在包装器字段 `properties` 中，首次访问时创建，同一包装器再访问返回同一个列表；A36 中"释放后再取 Properties 访问冲突"即因此。`!UniversalPropertyList` 释放列表的句柄和原生列表，`!StorableObject` 释放对象句柄，`!PropertyValue` 释放自己的句柄；没有显式释放时，它们由 CLR 终结器线程直接执行。— IL。
+- 原读取在 `ExistingValues` 取出之后不再引用对象包装器和它缓存的列表（Release 构建中 JIT 据此判定其已死）。读取循环中一旦发生 GC，二者的终结器就在终结器线程上释放同一对象的句柄，与主线程的读取并发。
+- 离线宿主探针（Electric P8 变体 Bin，示例项目副本，只在测试进程环境中设 `COMPlus_GCgen0size=0x10000`；`FullPropertyReadTests` 每轮读页 `=GAA+A1&EFS1/1` 及其上全部设备的全量属性，比较 20 轮）：修复前 2/2 次失败，电缆 `+A1-WD1` 的 8 个计算属性 35100–35106、35108（"电缆: 使用的连接数"等）分别在第 1、第 12 轮整组缺失，其余 141 个相同，宿主未崩溃；修复后 3/3 次 20 轮完全相同。— 测试输出。
+- 🔴 规则：通过 `PropertyValue` 读取期间，必须保持其所属对象包装器可达（它也持有缓存的列表）：全量读取接收所有者对象，在全部值释放后 `GC.KeepAlive(所有者)`。同一请求中在同一对象上先读的单个属性值（`FUNC_TEXT`、`PAGE_NOMINATIOMN`）当场 `using` 释放，不留给终结器在之后的全量读取中执行。
+- 修复后 A 槽复验（2026-11-02 15:44–16:01，LargeWrite scratch 副本与只读夹具；EPLAN 由本次运行启动，进程环境中 `COMPlus_GCgen0size=0x10000`，运行结束时 gen0 GC 计数约 150 万次）：`FullPropertyReadTests` 1/1、`DevicePlaceTests` 8/8、`AcceptanceRedrawTests` 1/1（含 `-X6` 1..8 端子的放置及其后的 detailed 读取），应用程序日志中无 EPLAN 崩溃事件。— TRX 计数、.NET CLR Memory 性能计数器、Windows 应用程序日志。
+- 未处理：上一请求留下的、同一对象的其他包装器在本次读取中被终结（例如写入后紧接的读取）。上面的复验在 GC 压力下没有出现这种问题，但不能据此排除。

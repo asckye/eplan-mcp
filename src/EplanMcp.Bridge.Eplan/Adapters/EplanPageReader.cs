@@ -96,14 +96,18 @@ internal sealed class EplanPageReader : IPageReader
                     Parts = function.ArticleReferences.Length,
                 }),
             ],
-            Properties = includeProperties ? EplanProperties.Read(page.Properties, textLanguage) : null,
+            Properties = includeProperties ? EplanProperties.Read(page, textLanguage) : null,
         };
     }
 
     /// <summary>
     /// The page description, <c>PAGE_NOMINATIOMN</c> (EPLAN's spelling), a multi-language property (S6), and the
-    /// language it was read in when that is a fallback.
+    /// language it was read in when that is a fallback. The value is disposed here, not on the finalizer thread during a
+    /// full read of the same page (api-notes A80).
     /// </summary>
-    internal static (string? Text, string? Fallback) Description(Page page, TextLanguage language) =>
-        EplanText.ReadWithLanguage(page.Properties.PAGE_NOMINATIOMN, language);
+    internal static (string? Text, string? Fallback) Description(Page page, TextLanguage language)
+    {
+        using PropertyValue description = page.Properties.PAGE_NOMINATIOMN;
+        return EplanText.ReadWithLanguage(description, language);
+    }
 }
