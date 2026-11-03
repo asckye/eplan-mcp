@@ -15,8 +15,8 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
 {
     public const string Tool = "eplan_action_try";
     [McpServerTool(Name = Tool, Title = "Try an unverified catalog action", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(JsonObject))]
-    [Description("Try an unverified catalog action in scratch (full, actionTry:on); use try_template from eplan_action_catalog_get. selection: same-page locators; [] clears. Approval per call; refusal APPROVAL_DENIED; never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}")]
-    public async Task<CallToolResult> TryAsync(string project, string action, string? type = null, JsonElement? parameters = null, bool dry_run = false,
+    [Description("Try a catalog action in scratch (full, actionTry:on). Templates: eplan_action_catalog_get. selection: same-page locators; [] clears. Omit/true previews; false needs per-call approval (APPROVAL_DENIED). Never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\"}")]
+    public async Task<CallToolResult> TryAsync(string project, string action, string? type = null, JsonElement? parameters = null, bool dry_run = WriteToolDefaults.Preview,
         List<DrawingLocator>? selection = null, IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
         ActionCatalogData? definitions = null;
@@ -44,12 +44,14 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
                 ["unverified"] = true,
                 ["execution"] = outcome.Execution,
                 ["dryRun"] = dry_run,
+                ["fingerprint"] = outcome.Plan.Fingerprint,
+                ["changes"] = JsonSerializer.SerializeToNode(outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) }), HostJson.Options),
                 ["recovered"] = outcome.Recovered,
                 ["before"] = Evidence(before.Before),
                 ["after"] = after is null ? null : Evidence(after),
                 ["changed"] = after is null ? null : !before.Before.OrderBy(p => p.Key, StringComparer.Ordinal).SequenceEqual(after.OrderBy(p => p.Key, StringComparer.Ordinal)),
                 ["truncated"] = before.Before.Count > 20 || after?.Count > 20,
-                ["hint"] = "unverified; fingerprint comparison only. Rollback and Ctrl+Z are unverified. " + ResultShaper.CleanText(outcome.Data?.Warning),
+                ["hint"] = "unverified; fingerprint comparison only. Rollback and Ctrl+Z are unverified. " + ResultShaper.CleanText(outcome.Data?.Warning) + (dry_run ? " " + WriteToolDefaults.ExecutionHint : string.Empty),
             };
             return ToolResults.Success(dry_run ? "Unverified action planned; nothing executed." : "Unverified action finished; inspect the fingerprint comparison.", result);
         }

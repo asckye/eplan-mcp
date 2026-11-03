@@ -39,7 +39,7 @@ internal static class ActionCallTemplates
                 ["action"] = new JsonObject { ["const"] = row.Name, ["required"] = true },
                 ["type"] = new JsonObject { ["const"] = row.Type, ["required"] = row.Type is not null },
                 ["parameters"] = parameters,
-                ["dry_run"] = new JsonObject { ["kind"] = "bool", ["required"] = false, ["default"] = false }
+                ["dry_run"] = new JsonObject { ["kind"] = "bool", ["required"] = false, ["default"] = true }
             },
             ["selection"] = new JsonObject
             {
@@ -50,7 +50,7 @@ internal static class ActionCallTemplates
                 ["how"] = "Discover target locators with eplan_object_find, then pass the scratch project and chosen objects to eplan_selection_set using its input schema. If it is absent from tools/list, selection cannot be set through this server."
             },
             ["example"] = new JsonObject { ["project"] = "<scratch project>", ["action"] = row.Name, ["type"] = row.Type, ["parameters"] = example, ["dry_run"] = true },
-            ["note"] = "Null required/allowed_values means not recorded. Example paths/files are scratch imports/exports placeholders and remain subject to the deny list. Parameters must be simple values without paths, quotes, control characters or target overrides. Full profile, actionTry:on and per-call approval required."
+            ["note"] = "Null required/allowed_values means not recorded. Example paths/files are scratch imports/exports placeholders and remain subject to the deny list. Parameters must be simple values without paths, quotes, control characters or target overrides. Full profile and actionTry:on required. Omitted/true dry_run only previews; false executes with per-call approval."
         };
     }
 

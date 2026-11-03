@@ -168,7 +168,7 @@ public sealed class BatchVerification(LiveEplan eplan)
         var approvals = (TrialApprovals)provider.GetRequiredService<IApprovalChannel>();
         int questionsBefore = approvals.Questions.Count;
         CallToolResult call = entry.Kind == "action"
-            ? await ActivatorUtilities.CreateInstance<ActionTryTools>(provider).TryAsync(project, entry.Action!.Name, entry.Action.Type, JsonSerializer.SerializeToElement(parameters), cancellationToken: cancellationToken)
+            ? await ActivatorUtilities.CreateInstance<ActionTryTools>(provider).TryAsync(project, entry.Action!.Name, entry.Action.Type, JsonSerializer.SerializeToElement(parameters), dry_run: false, cancellationToken: cancellationToken)
             : await api.TryAsync(_progress, group, project, JsonSerializer.SerializeToElement(parameters), cancellationToken: cancellationToken);
         if (entry.Destructive)
         {

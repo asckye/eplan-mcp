@@ -223,6 +223,8 @@ public sealed class CallTemplateTests
         ActionCatalogItem row = ActionCatalogReader.Create("XTest", "ui", null, null, null, [JsonSerializer.SerializeToElement(new { name = "Mode", values = modes, required = true }), JsonSerializer.SerializeToElement(new { name = "FILE" }), JsonSerializer.SerializeToElement(new { name = "Unknown" })], null, "test");
         JsonObject template = ActionCallTemplates.For(row);
         Assert.False(template["denied"]!.GetValue<bool>());
+        Assert.True(template["arguments"]!["dry_run"]!["default"]!.GetValue<bool>());
+        Assert.True(template["example"]!["dry_run"]!.GetValue<bool>());
         Assert.True(template["arguments"]!["parameters"]!["FILE"]!["denied"]!.GetValue<bool>());
         Assert.Null(template["arguments"]!["parameters"]!["Unknown"]!["required"]);
         Assert.Equal("A", template["example"]!["parameters"]!["Mode"]!.GetValue<string>());

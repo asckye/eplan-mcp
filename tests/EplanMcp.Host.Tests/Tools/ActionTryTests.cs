@@ -183,6 +183,7 @@ public sealed class ActionTryContractTests
 }
 
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class ActionTryToolTests : IDisposable
 {
     private readonly FakeApprovalChannel _approval;
@@ -221,6 +222,49 @@ public sealed class ActionTryToolTests : IDisposable
     }
     public void Dispose() => _harness.Dispose();
     private Task<CallToolResult> Run(bool dry = false, List<DrawingLocator>? selection = null) => _tool.TryAsync("Scratch", "XViewAction", "DETAIL", JsonSerializer.SerializeToElement(new { Factor = 1.25 }), dry, selection, cancellationToken: TestContext.Current.CancellationToken);
+
+    [Fact]
+    public async Task OmittedAndTruePreview_ExplicitFalseKeepsPerCallApproval()
+    {
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            CancellationToken token = TestContext.Current.CancellationToken;
+            var schema = (await client.ListToolsAsync(cancellationToken: token)).Single(t => t.Name == ActionTryTools.Tool).ProtocolTool.InputSchema;
+            Assert.True(schema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+            var arguments = new Dictionary<string, object?>
+            {
+                ["project"] = "Scratch",
+                ["action"] = "XViewAction",
+                ["type"] = "DETAIL",
+                ["parameters"] = new Dictionary<string, object> { ["Factor"] = 1.25 },
+            };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync(ActionTryTools.Tool, arguments, cancellationToken: token));
+            arguments["dry_run"] = true;
+            JsonElement preview = WriteToolHarness.Structured(await client.CallToolAsync(ActionTryTools.Tool, arguments, cancellationToken: token));
+            Assert.Equal(omitted.GetRawText(), preview.GetRawText());
+            Assert.True(preview.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("not_started", preview.GetProperty("execution").GetString());
+            Assert.Equal("f1", preview.GetProperty("fingerprint").GetString());
+            Assert.NotEmpty(preview.GetProperty("changes").EnumerateArray());
+            Assert.Contains("dry_run: false", preview.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.Contains("Rollback and Ctrl+Z are unverified", preview.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.All(_harness.Bridge.Calls, c => Assert.Equal(OperationNames.ActionTryPlan, c.Operation));
+            Assert.Empty(_approval.Questions);
+            Assert.Empty(_harness.Bridge.Writes);
+            arguments["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync(ActionTryTools.Tool, arguments, cancellationToken: token));
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.Equal(preview.GetProperty("fingerprint").GetString(), executed.GetProperty("fingerprint").GetString());
+            Assert.Equal(preview.GetProperty("changes").GetRawText(), executed.GetProperty("changes").GetRawText());
+            Assert.Single(_approval.Questions);
+            Assert.Single(_harness.Bridge.Writes);
+        }, services =>
+        {
+            services.AddSingleton(HostConfig.Defaults(_harness.Locations) with { ActionTry = ActionRunSwitch.On });
+            services.AddSingleton(new ActionCatalogReader(() => (Path.Combine(_harness.Locations.Root, "Bin"), "2026.0.3.25421")));
+        });
+    }
 
     [Fact]
     public async Task Selection_IsFullyShownAndAudited_AndDenialNeverSendsExecution()

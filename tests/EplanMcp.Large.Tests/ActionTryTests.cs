@@ -52,7 +52,7 @@ public sealed class ActionTryTests(LiveEplan eplan, WriteHost host) : IClassFixt
             // Zoom needs an open graphical page editor; without one EPLAN reports failure and the trial rolls back.
             await provider.GetRequiredService<IBridgeClient>().InvokeAsync<PageOpenArgs, PageOpenData>(OperationNames.PageOpen, new() { Project = project, Page = page }, TestContext.Current.CancellationToken);
             var tool = ActivatorUtilities.CreateInstance<ActionTryTools>(provider);
-            var result = await tool.TryAsync(project, zoom.Name, selection: [selected], cancellationToken: TestContext.Current.CancellationToken);
+            var result = await tool.TryAsync(project, zoom.Name, dry_run: false, selection: [selected], cancellationToken: TestContext.Current.CancellationToken);
             Assert.False(result.IsError == true, string.Join("\n", result.Content.OfType<ModelContextProtocol.Protocol.TextContentBlock>().Select(c => c.Text)));
             JsonElement data = result.StructuredContent!.Value;
             Assert.Equal("committed", data.GetProperty("execution").GetString());

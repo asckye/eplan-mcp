@@ -796,7 +796,7 @@
     {
       "name": "eplan_action_try",
       "title": "Try an unverified catalog action",
-      "description": "Try an unverified catalog action in scratch (full, actionTry:on); use try_template from eplan_action_catalog_get. selection: same-page locators; [] clears. Approval per call; refusal APPROVAL_DENIED; never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\",\"dry_run\":true}",
+      "description": "Try a catalog action in scratch (full, actionTry:on). Templates: eplan_action_catalog_get. selection: same-page locators; [] clears. Omit/true previews; false needs per-call approval (APPROVAL_DENIED). Never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\"}",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -826,7 +826,7 @@
           },
           "dry_run": {
             "type": "boolean",
-            "default": false
+            "default": true
           },
           "selection": {
             "type": "array",
@@ -880,6 +880,8 @@
           "unverified",
           "execution",
           "dryRun",
+          "fingerprint",
+          "changes",
           "recovered",
           "before",
           "after",
@@ -911,6 +913,53 @@
           },
           "dryRun": {
             "type": "boolean"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "action",
+                "kind",
+                "name",
+                "property",
+                "oldValue",
+                "newValue"
+              ],
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           },
           "recovered": {
             "type": "boolean"
