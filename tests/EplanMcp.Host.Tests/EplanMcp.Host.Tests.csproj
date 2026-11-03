@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <Compile Include="..\Shared\PlacementEditFixture.cs" Link="PlacementEditFixture.cs" />
+    <Compile Include="..\Shared\SmallProjectInventory.cs" Link="SmallProjectInventory.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\LiveFixtureProjects.cs" Link="Acceptance\LiveFixtureProjects.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceDrawingList.cs" Link="Acceptance\AcceptanceDrawingList.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceListFile.cs" Link="Acceptance\AcceptanceListFile.cs" />

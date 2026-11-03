@@ -167,6 +167,41 @@ public sealed class LiveEplan : IAsyncLifetime
             : (true, result.StructuredContent!.Value);
     }
 
+    /// <summary>Lets bounded read-only spikes cancel an in-flight MCP call without changing the fixture lifetime.</summary>
+    internal async Task<(bool Succeeded, JsonElement Result)> ReadOrErrorAsync(string tool, Dictionary<string, object?> args,
+        CancellationToken cancellationToken)
+    {
+        var requestId = new RequestId(Guid.NewGuid().ToString("N"));
+        CallToolResult result;
+        try
+        {
+            result = await _client!.SendRequestAsync<CallToolRequestParams, CallToolResult>(RequestMethods.ToolsCall,
+                new CallToolRequestParams
+                {
+                    Name = tool,
+                    Arguments = JsonSerializer.SerializeToElement(args).EnumerateObject().ToDictionary(p => p.Name, p => p.Value),
+                }, requestId: requestId, cancellationToken: cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // SDK 2.2.0 cancels only the local wait (WriteCancellationTests); notify the Host explicitly.
+            using var notificationTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            try
+            {
+                await _client!.SendNotificationAsync(NotificationMethods.CancelledNotification,
+                    new CancelledNotificationParams { RequestId = requestId }, cancellationToken: notificationTimeout.Token);
+            }
+            catch (Exception ex)
+            {
+                TestContext.Current.TestOutputHelper!.WriteLine("Read cancellation notification failed: " + ex.Message);
+            }
+            throw;
+        }
+        return result.IsError == true
+            ? (false, JsonDocument.Parse(Text(result)).RootElement.GetProperty("error"))
+            : (true, result.StructuredContent!.Value);
+    }
+
     /// <summary>
     /// The path of the project write tests change: a copy of the sample project below the scratch root's <c>writes</c>
     /// folder, open next to the fixture (README.md), so the fixture the read tests count stays as it is. The path, not
