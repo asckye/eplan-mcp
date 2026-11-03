@@ -5342,6 +5342,11 @@
             "file": "tests/EplanMcp.Large.Tests/FullPropertyReadTests.cs"
           },
           {
+            "name": "MacroOverviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
+          },
+          {
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
@@ -5910,6 +5915,11 @@
             "name": "DeviceSymbolPlanTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/DeviceSymbolPlanTests.cs"
+          },
+          {
+            "name": "MacroInsertOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MacroInsertOperationTests.cs"
           },
           {
             "name": "PageDisplayToolTests",
@@ -8023,7 +8033,9 @@
         "apiNotes": [
           "A12",
           "A13",
-          "A14"
+          "A14",
+          "A79",
+          "A82"
         ],
         "tests": [
           {
@@ -8035,6 +8047,11 @@
             "name": "DevicePlaceOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DevicePlaceOperationTests.cs"
+          },
+          {
+            "name": "MacroNativeAdapterTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MacroNativeAdapterTests.cs"
           },
           {
             "name": "PackCapabilitiesTests",
@@ -8065,6 +8082,11 @@
             "name": "MacroInsertTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroInsertTests.cs"
+          },
+          {
+            "name": "MacroOverviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
           },
           {
             "name": "PlanDependencyPredictionTests",
@@ -9843,6 +9865,11 @@
             "file": "tests/EplanMcp.Large.Tests/MacroInsertTests.cs"
           },
           {
+            "name": "MacroOverviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
+          },
+          {
             "name": "PlanDependencyPredictionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanDependencyPredictionTests.cs"
@@ -10332,6 +10359,11 @@
             "name": "MacroInsertTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroInsertTests.cs"
+          },
+          {
+            "name": "MacroOverviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
           },
           {
             "name": "NoSideEffectTests",
