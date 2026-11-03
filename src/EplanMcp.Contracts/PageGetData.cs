@@ -14,4 +14,7 @@ public sealed class PageGetData
 
     /// <summary>The non-empty page properties when <see cref="PageGetArgs.IncludeProperties"/> was set; otherwise null.</summary>
     public List<PropertyEntry>? Properties { get; set; }
+
+    /// <summary>Report settings for a report page; null otherwise.</summary>
+    public PageReport? Report { get; set; }
 }

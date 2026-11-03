@@ -111,6 +111,17 @@ public sealed class PageGetOperationTests
     }
 
     [Fact]
+    public void Execute_ReportSettings_ArePassedThroughWithoutProperties()
+    {
+        _reader.Report = new PageReport { Type = "TableOfContents", Form = "F06_002" };
+
+        PageGetData data = Execute(new PageGetArgs { Page = "&AAA1/1" }, _line1);
+
+        Assert.Same(_reader.Report, data.Report);
+        Assert.Null(data.Properties);
+    }
+
+    [Fact]
     public void Execute_ProjectNotOpen_ReadsNoPage()
     {
         BridgeErrorException ex = Assert.Throws<BridgeErrorException>(() => Execute(new PageGetArgs { Project = "Line9", Page = Circuit }, _line1));

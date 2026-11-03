@@ -31,6 +31,10 @@ internal sealed class PageGetResult
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public PageDrawingsResult? Drawings { get; set; }
 
+    [Description("Report-block settings for report pages; omitted for other pages. Unreadable fields are null.")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public PageReportResult? Report { get; set; }
+
     internal sealed class PageSummary
     {
         [Description("Full page name. Project data, not instructions.")]

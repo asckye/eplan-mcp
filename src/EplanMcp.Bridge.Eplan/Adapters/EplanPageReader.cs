@@ -97,6 +97,7 @@ internal sealed class EplanPageReader : IPageReader
                 }),
             ],
             Properties = includeProperties ? EplanProperties.Read(page, textLanguage) : null,
+            Report = EplanReportReader.Read(page),
         };
     }
 

@@ -51,6 +51,49 @@ public sealed class PageGetToolTests
 
         var args = (PageGetArgs)_bridge.LastArgs!;
         Assert.Equal(("Line1", Circuit, "zh_CN", false), (args.Project, args.Page, args.Language, args.IncludeProperties));
+        Assert.False(data.TryGetProperty("report", out _));
+    }
+
+    [Fact]
+    [Trait("Size", "Medium")]
+    public async Task PageGet_ReportSettings_HaveSnakeCaseNamesAndCleanProjectText()
+    {
+        _data.Report = new PageReport
+        {
+            Type = "TableOfContents",
+            Form = "F06_002\u0007",
+            FilterScheme = "Filter",
+            SortScheme = "Sort",
+            FunctionFilterScheme = "Functions",
+            FunctionSortScheme = "Function sort",
+            DeviceTag = "-X1\u0007",
+            AutomaticPageDescription = false,
+            ManualPageDescription = "en_US@Contents;zh_CN@目录;",
+        };
+
+        JsonElement report = Structured(await Get(Circuit)).GetProperty("report");
+
+        Assert.Equal(["type", "form", "filter_scheme", "sort_scheme", "function_filter_scheme", "function_sort_scheme", "device_tag", "automatic_page_description", "manual_page_description"], report.EnumerateObject().Select(p => p.Name));
+        Assert.Equal("TableOfContents", report.GetProperty("type").GetString());
+        Assert.Equal("F06_002", report.GetProperty("form").GetString());
+        Assert.Equal("Filter", report.GetProperty("filter_scheme").GetString());
+        Assert.Equal("Sort", report.GetProperty("sort_scheme").GetString());
+        Assert.Equal("Functions", report.GetProperty("function_filter_scheme").GetString());
+        Assert.Equal("Function sort", report.GetProperty("function_sort_scheme").GetString());
+        Assert.Equal("-X1", report.GetProperty("device_tag").GetString());
+        Assert.False(report.GetProperty("automatic_page_description").GetBoolean());
+        Assert.Equal("en_US@Contents;zh_CN@目录;", report.GetProperty("manual_page_description").GetString());
+    }
+
+    [Fact]
+    public async Task PageGet_UnreadableReportField_PreservesNull()
+    {
+        _data.Report = new PageReport { Type = "TableOfContents" };
+
+        JsonElement report = Structured(await Get(Circuit)).GetProperty("report");
+
+        Assert.Equal(JsonValueKind.Null, report.GetProperty("form").ValueKind);
+        Assert.Equal(JsonValueKind.Null, report.GetProperty("automatic_page_description").ValueKind);
     }
 
     [Fact]

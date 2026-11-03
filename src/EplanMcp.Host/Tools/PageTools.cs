@@ -202,6 +202,7 @@ internal sealed class PageTools
             ],
             DeviceCount = data.Devices.Count,
             Properties = detailed ? PropertyResult.From(data.Properties ?? []) : null,
+            Report = PageReportResult.From(data.Report),
         };
 
         var hints = new List<string>();

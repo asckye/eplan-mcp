@@ -12,4 +12,7 @@ public sealed class PageContent
 
     /// <summary>Null unless the properties were asked for.</summary>
     public List<PropertyEntry>? Properties { get; set; }
+
+    /// <summary>Detached report settings, or null for a non-report page.</summary>
+    public PageReport? Report { get; set; }
 }

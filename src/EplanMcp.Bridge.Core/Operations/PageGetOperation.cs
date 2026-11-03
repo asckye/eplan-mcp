@@ -30,6 +30,7 @@ public sealed class PageGetOperation(IProjectCatalog catalog, IPageReader reader
                     .Select(function => new PageDevice { Tag = function.Name, VisibleTag = DeviceTags.Shown(function.VisibleName), Category = function.Category }),
             ],
             Properties = args.IncludeProperties ? content.Properties ?? [] : null,
+            Report = content.Report,
         };
     }
 

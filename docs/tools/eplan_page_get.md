@@ -38,6 +38,7 @@
 - `typeName`：EPLAN 界面语言的页类型名称（S6：如"标题页/封页"）。
 - 省略 `language` 时按[语言回退设计](../design/2026-10-19-text-language-fallback.md)回退：页描述旁边有 `descriptionLanguage`，属性的值旁边有 `language`；没有回退时不出现这些字段。
 - `properties`（仅 `detailed`）：同 `eplan_project_get`（含 `index`）。
+- 报表页额外返回顶层 `report`：`type` 为 DocumentType 名称，`form` 为表格名，`filter_scheme` / `sort_scheme` / `function_filter_scheme` / `function_sort_scheme` 仅含方案名称，`device_tag` 为只读文本，`automatic_page_description` 为自动描述开关，`manual_page_description` 为原始多语言描述文本。非报表页省略 `report`；字段不可读时为 null 并记录 warning，不影响其他字段，也不输出方案数据。
 - `drawings` 仅在 `include_drawings=true` 时出现：`gridSize`、`pageSize`、独立的 `plotFrameSize`（毫米）与 `boundarySource=Page.Size/unknown`；页尺寸不可读时为 null，图框尺寸不替代页界。绝对坐标原点在左下角，y 向上（A3/A14/A54）。
 - `drawings.items` 按 T0a 发现顺序列受支持符号、属性文字、自由文字、直线、矩形，排除图框后代和部件引用；每项含 `kind/location/bounds/locator/parent/properties`。外框未知为 null；属性文字位置已换算为绝对坐标，parent 指向父符号。只读 properties 含可读的 name、原始存储多语言 text 和 display；不可用的键省略，文字是不可信工程数据。locator 沿 T0a 项目/页/类型/对象号/内容摘要，不授予移动权限。
 - 属性文字的 locator 使用父对象的 type/oid，摘要包含属性 ID、集合序号、内容与几何；去重也以父对象及序号为范围（A57）。同库默认文字在多个父对象上都保留，复制为本地文字不会仅因原生包装类型或对象号变化而变成另一项；移动仍要求独立的 parent/property_id/property_index。
@@ -59,6 +60,7 @@
 - 缺少 `page`：Host 的参数过滤器按 schema 的 `required` 在调用前返回 `INVALID_ARGUMENT`（SDK 自己只返回没有 reason 的通用错误，api-notes C）；显式传 `null` 或空串时由工具本身报告。
 - 页上的设备：`FunctionsFilter { Page = page }` 后取主功能（S6：0 ms）。不使用 `Page.Filter`（已列入 BannedSymbols）。
 - 多语言文本用 `GetStringToDisplay`；所有项目文本经过 ResultShaper。
+- 报表块依据 [A84](../eplan/api-notes/drawing-and-layout.md#a84-报表块读取与按报表块生成报表页2026-11-03eplan-20260325421electric-p8示例项目夹具只读生成只在-scratch-副本-largewrite)：在事务外从本次查询的新 Page 包装器读取 `Page.ReportBlock`，及时释放报表块与手工描述对象；字段失败独立记录警告，读取期间保持所有者存活（A80）。
 - 可选发现调用只读类型化 invoke `page.drawing.get`，在既有主线程/LockingStep 中使用 T0a 适配器，不导航、不创建事务；绘图预算包含结构化和文本两份 JSON，先裁属性和设备，再裁绘图；单条无法容纳时明确报错，不返回无法前进的游标。
 
 ## 6. 写操作专项
@@ -66,6 +68,7 @@
 
 ## 7. 测试
 - Small：参数校验、摘要、设备列表截断、旧响应逐字兼容、绘图两档预算与连续分页。
+- Small/Medium：报表字段完整传递、非报表字段省略、单字段读失败仍返回其他字段；Large `ReportReadTests` 只读示例页 `&AAB1/1` 的设置（本次不运行 EPLAN）。
 - Medium：契约、大小写回退、内容/页/项目/Bridge 改变、过期及另一 Host 游标拒绝；管道读取与握手能力登记。
 - Large：保留 S6 主功能断言；新增示例夹具页绘图全量分页与独立适配器读回对照，并比较读取前后业务快照和工程文件哈希（本 PR 未运行）。
 - Agent 评测："=GAA+A1&EFS1/1 这页上有哪些设备？"

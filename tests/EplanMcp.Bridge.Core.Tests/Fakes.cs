@@ -75,6 +75,8 @@ internal sealed class FakePageReader : IPageReader
 
     public List<PropertyEntry>? Properties { get; set; }
 
+    public PageReport? Report { get; set; }
+
     public List<(string Path, string PageName, bool IncludeProperties, string? Language)> ReadCalls { get; } = [];
 
     public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language)
@@ -97,6 +99,7 @@ internal sealed class FakePageReader : IPageReader
                 Page = new PageDetail { Name = page.Name, Type = page.Type, TypeName = page.Type + " (UI)", Description = page.Description },
                 Functions = Functions.TryGetValue(page.Name, out List<FunctionRecord>? functions) ? functions : [],
                 Properties = includeProperties ? Properties : null,
+                Report = Report,
             };
     }
 }

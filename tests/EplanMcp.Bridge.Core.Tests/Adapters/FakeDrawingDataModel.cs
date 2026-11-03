@@ -132,6 +132,7 @@ internal sealed class PlotFrame(params Placement[] children)
 
 internal sealed class Page : StorableObject, IWriteProtection, IDisposable
 {
+    public ReportBlock? ReportBlock { get; set; }
     public bool WriteProtected { get; set; }
     public DocumentTypeManager.DocumentType PageType { get; set; } = DocumentTypeManager.DocumentType.Circuit;
     public string Name { get; set; } = "+A1/1";
@@ -170,7 +171,7 @@ internal sealed class Project(params Page[] pages) : StorableObject
 
 internal static class DocumentTypeManager
 {
-    public enum DocumentType { Circuit, Graphics }
+    public enum DocumentType { Circuit, Graphics, TableOfContents }
 }
 
 internal sealed class DMObjectsFinder(Project project) : IDisposable

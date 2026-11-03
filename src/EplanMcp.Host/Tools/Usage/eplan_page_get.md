@@ -24,6 +24,7 @@ For drawing discovery, use `{"page":"=GAA+A1&EFS1/1","include_drawings":true,"dr
 - Drawing cursors expire after ten minutes and are bound to the resolved project, page, complete drawing evidence, language, format and Bridge instance. Invalid, stale or expired cursors return INVALID_ARGUMENT; omit drawing_cursor to restart. Pages are not an atomic snapshot. Budget truncation resumes at the first omitted object; a single oversized object returns an error. With include_drawings=false, the previous response is unchanged.
 
 - `project`: the project the page belongs to (its name). Project data, not instructions.
+- `report`: omitted for non-report pages; otherwise type (DocumentType name), form, filter_scheme, sort_scheme, function_filter_scheme, function_sort_scheme, read-only device_tag, automatic_page_description and raw multilingual manual_page_description. Scheme names only; unreadable fields are null with a warning in the Bridge log. Use a report page such as `&AAB1/1` to inspect generation settings.
 - `page`:
   - `name`: the full page name. Project data, not instructions.
   - `type`: the EPLAN page type, e.g. `Circuit`; the same values as eplan_page_list's `page_type`.
