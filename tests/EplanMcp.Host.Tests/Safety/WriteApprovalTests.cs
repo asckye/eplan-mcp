@@ -62,6 +62,27 @@ public sealed class WriteApprovalTests : IDisposable
         Assert.Equal((3, null), AuditVerifier.Verify(_locations.Audit));
     }
 
+    [Fact]
+    public async Task SecretArguments_AuditIsRedacted_ApprovalKeepsTheOriginalFingerprint()
+    {
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
+        var arguments = new { pages = 1, password = "synthetic-approval-secret" };
+        // SEC-20: the pre-redaction SHA-256 of the original serialized arguments remains the approval binding.
+        const string OriginalHash = "e067965909c5364070c75f874708b2dad6ebdeb05c4914a2a4f22053a427f580";
+
+        await Run([dialog], dryRun: false, arguments: arguments);
+
+        Assert.Equal(OriginalHash, Assert.Single(dialog.Questions).ArgumentsHash);
+        Assert.Equal(OriginalHash, WritePipeline.HashArguments(arguments));
+        Assert.NotEqual(OriginalHash, WritePipeline.HashArguments(new { pages = 1, password = "different-secret" }));
+        JsonObject started = Assert.Single(AuditRecords(), r => Text(r, "kind") == "execution_started");
+        Assert.Equal("[REDACTED]", started["arguments"]!["password"]!.GetValue<string>());
+        Assert.DoesNotContain("synthetic-approval-secret", string.Join("\n", AuditRecords()), StringComparison.Ordinal);
+        Assert.Same(arguments, _bridge.Calls.Single(c => c.Operation == Plan).Args);
+        Assert.Single(_bridge.Writes);
+        Assert.Equal((3, null), AuditVerifier.Verify(_locations.Audit));
+    }
+
     [Theory]
     [InlineData(nameof(ApprovalDecision.Denied), ErrorReason.ApprovalDenied, "denied")]
     [InlineData(nameof(ApprovalDecision.Cancelled), ErrorReason.ApprovalDenied, "cancelled")]
@@ -332,7 +353,7 @@ public sealed class WriteApprovalTests : IDisposable
 
     private Task<WriteOutcome<JsonObject>> Run(params IApprovalChannel[] channels) => Run(channels, dryRun: false);
 
-    private Task<WriteOutcome<JsonObject>> Run(IApprovalChannel[] channels, bool dryRun, OutsideScratchWrites outside = OutsideScratchWrites.Approve)
+    private Task<WriteOutcome<JsonObject>> Run(IApprovalChannel[] channels, bool dryRun, OutsideScratchWrites outside = OutsideScratchWrites.Approve, object? arguments = null)
     {
         var audit = new AuditLog(_locations.Audit, TimeProvider.System);
         var config = new HostConfig([_locations.DefaultScratch], outside) { ApprovalTimeout = _timeout };
@@ -346,7 +367,7 @@ public sealed class WriteApprovalTests : IDisposable
             new BackupFolders(_locations, TimeProvider.System),
             TimeProvider.System,
             NullLogger<WritePipeline>.Instance);
-        var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));
+        var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, arguments ?? new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));
         return pipeline.RunAsync<object, object, JsonObject>(request, _progress, TestContext.Current.CancellationToken);
     }
 

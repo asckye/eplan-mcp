@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using EplanMcp.Contracts.Security;
 using EplanMcp.Host.Http;
 
 namespace EplanMcp.Host.Audit;
@@ -47,7 +48,7 @@ internal sealed class AuditLog(string directory, TimeProvider clock, HttpCaller?
             var record = new JsonObject { ["time"] = now.ToString("O", System.Globalization.CultureInfo.InvariantCulture) };
             foreach ((string name, JsonNode? value) in entry)
             {
-                record[name] = value?.DeepClone();
+                record[name] = Redact(value, name);
             }
 
             if (caller?.Address is { } address)
@@ -74,6 +75,30 @@ internal sealed class AuditLog(string directory, TimeProvider clock, HttpCaller?
     /// <summary>SHA-256, lower-case hex, of the previous hash followed by the record's JSON.</summary>
     internal static string Hash(string prev, string recordJson) =>
         Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(prev + recordJson)));
+
+    // SEC-20, ARC-17: sanitize the audit copy before hashing the chain or writing any record text.
+    private static JsonNode? Redact(JsonNode? node, string? name = null)
+    {
+        if (name is not null && SecretRedactor.IsSensitiveKey(name))
+        {
+            return JsonValue.Create(SecretRedactor.Placeholder);
+        }
+        if (node is JsonObject fields)
+        {
+            var result = new JsonObject();
+            foreach ((string key, JsonNode? value) in fields)
+            {
+                result[key] = Redact(value, key);
+            }
+            return result;
+        }
+        if (node is JsonArray items)
+        {
+            return new JsonArray([.. items.Select(item => Redact(item))]);
+        }
+        return node is JsonValue scalar && scalar.TryGetValue(out string? text)
+            ? JsonValue.Create(SecretRedactor.Redact(text)) : node?.DeepClone();
+    }
 
     /// <summary>
     /// The hash of the newest record, looking back from <paramref name="file"/> (empty for the very first), and whether

@@ -36,6 +36,46 @@ public sealed class AuditLogTests : IDisposable
     }
 
     [Fact]
+    public async Task Append_RedactsNestedSecretsBeforeChaining_WithoutChangingTheEntry()
+    {
+        var entry = JsonNode.Parse("""
+            {
+              "kind": "execution_started",
+              "arguments": {
+                "password": "synthetic-password",
+                "nested": [{"AccessTOKEN": "synthetic-token", "count": 3, "enabled": true, "value": null}],
+                "clientKey": {"private": "synthetic-key"},
+                "credential": 123456,
+                "authorization": null,
+                "text": "Bearer synthetic-bearer",
+                "basic": "Basic dXNlcjpwYXNz",
+                "url": "https://synthetic-user:synthetic-pass@example.invalid/a",
+                "pem": "-----BEGIN PRIVATE KEY-----\nsynthetic-pem\n-----END PRIVATE KEY-----",
+                "assignment": "secret=synthetic-assignment; mode=normal"
+              }
+            }
+            """)!.AsObject();
+        string original = entry.ToJsonString();
+
+        await Append(entry);
+        await Append(new JsonObject { ["kind"] = "execution_result" });
+
+        string line = File.ReadLines(Path.Combine(AuditDirectory, "2026-10-20.jsonl")).First();
+        Assert.DoesNotContain("synthetic-", line, StringComparison.Ordinal);
+        Assert.DoesNotContain("dXNlcjpwYXNz", line, StringComparison.Ordinal);
+        Assert.DoesNotContain("123456", line, StringComparison.Ordinal);
+        JsonObject arguments = JsonNode.Parse(line)!["arguments"]!.AsObject();
+        Assert.Equal("[REDACTED]", arguments["clientKey"]!.GetValue<string>());
+        Assert.Equal("[REDACTED]", arguments["authorization"]!.GetValue<string>());
+        Assert.Equal(3, arguments["nested"]![0]!["count"]!.GetValue<int>());
+        Assert.True(arguments["nested"]![0]!["enabled"]!.GetValue<bool>());
+        Assert.Null(arguments["nested"]![0]!["value"]);
+        Assert.Contains("mode=normal", arguments["assignment"]!.GetValue<string>(), StringComparison.Ordinal);
+        Assert.Equal(original, entry.ToJsonString());
+        Assert.Equal((2, null), AuditVerifier.Verify(AuditDirectory));
+    }
+
+    [Fact]
     public async Task Verify_AChangedRecord_BreaksTheChainThere()
     {
         await AppendThree();

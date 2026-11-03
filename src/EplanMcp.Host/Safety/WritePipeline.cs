@@ -418,6 +418,7 @@ internal sealed partial class WritePipeline(
         "The audit log cannot be written, so writes are refused and nothing was changed. Ask the engineer to run 'eplanmcp doctor'.";
 
     /// <summary>The SHA-256 of the arguments as the tool serializes them, so the approval binds to exactly these.</summary>
+    // SEC-20: hash original arguments to preserve exact approval binding; AuditLog redacts only the stored copy.
     internal static string HashArguments<TArgs>(TArgs args) =>
         Convert.ToHexStringLower(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(args, HostJson.Options)));
 
