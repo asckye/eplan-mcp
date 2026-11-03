@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EplanMcp.Contracts\EplanMcp.Contracts.csproj" />
     <ProjectReference Include="..\EplanMcp.Packs\EplanMcp.Packs.csproj" />
+    <ProjectReference Include="..\..\eng\plugin-libraries\PluginLibraries.csproj" ReferenceOutputAssembly="false" Private="false" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained;PublishSingleFile;PublishProfileFullPath;PublishDir;OutputPath;NuGetLockFilePath" />
     <ProjectReference Include="..\EplanMcp.Workbench.Protocol\EplanMcp.Workbench.Protocol.csproj" />
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" />
@@ -39,4 +40,14 @@
       <_Parameter1>windows</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+
+  <Target Name="BuildBuiltinPluginLibrary" BeforeTargets="GetCopyToOutputDirectoryItems;GetCopyToPublishDirectoryItems" DependsOnTargets="ResolveProjectReferences" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Exec Command="dotnet &quot;$(MSBuildThisFileDirectory)..\..\eng\plugin-libraries\bin\$(Configuration)\net10.0\PluginLibraries.dll&quot; &quot;$(MSBuildThisFileDirectory)..\..\packaging\plugin-libraries\builtin&quot; &quot;$(MSBuildProjectDirectory)\$(IntermediateOutputPath)plugin-libraries\builtin&quot;" />
+    <ItemGroup>
+      <_BuiltinPluginFiles Include="$(IntermediateOutputPath)plugin-libraries\builtin\*.eplanpack;$(IntermediateOutputPath)plugin-libraries\builtin\library.json" />
+      <ContentWithTargetPath Include="@(_BuiltinPluginFiles)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true">
+        <TargetPath>plugin-libraries\builtin\%(_BuiltinPluginFiles.Filename)%(_BuiltinPluginFiles.Extension)</TargetPath>
+      </ContentWithTargetPath>
+    </ItemGroup>
+  </Target>
 </Project>

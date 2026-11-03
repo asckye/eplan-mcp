@@ -127,6 +127,12 @@ try {
             $node.CommandElements[1].Value -ceq 'packaging/zip/README.md'
     }, $true))
     if ($readmeCopy.Count -ne 1) { throw 'Publish must copy the ZIP README source exactly once.' }
+    $builtinCopy = @([scriptblock]::Create($publishStep.Children['run'].Value).Ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.CommandAst] -and $node.GetCommandName() -eq 'Copy-Item' -and
+            $node.CommandElements[1].Value -ceq '.local/host/plugin-libraries'
+    }, $true))
+    if ($builtinCopy.Count -ne 1) { throw 'Publish must stage generated plugin libraries exactly once.' }
     Push-Location (New-Item -ItemType Directory (Join-Path $testRoot 'merge'))
     try {
         foreach ($directory in 'packaging/zip', 'packaging/claude-plugin/.claude-plugin', 'packaging/claude-plugin/eplan-mcp/.claude-plugin', 'docs/getting-started', 'addin/payload/bridge/net481', 'stage/boms', 'stage/app/workbench/Fonts', 'stage/app/docs/getting-started') {
@@ -134,6 +140,10 @@ try {
         }
         Copy-Item "$repositoryRoot/packaging/zip/README.md" packaging/zip/README.md
         & ([scriptblock]::Create($readmeCopy[0].Extent.Text))
+        New-Item -ItemType Directory .local/host/plugin-libraries/builtin -Force | Out-Null
+        '{"name":"builtin","plugins":[]}' | Set-Content .local/host/plugin-libraries/builtin/library.json
+        'Fixture generated pack' | Set-Content .local/host/plugin-libraries/builtin/iec-base-1.0.0.eplanpack
+        & ([scriptblock]::Create($builtinCopy[0].Extent.Text))
         '{}' | Set-Content packaging/claude-plugin/.claude-plugin/marketplace.json
         '{"version":"0.1.0"}' | Set-Content packaging/claude-plugin/eplan-mcp/.claude-plugin/plugin.json
         '{}' | Set-Content packaging/claude-plugin/eplan-mcp/.mcp.json
@@ -192,6 +202,7 @@ try {
                 if (-not $entry.FullName.StartsWith('EplanMcp-0.1.0/', [StringComparison]::Ordinal)) { throw 'Unexpected ZIP root.' }
             }
             foreach ($required in 'README.md', 'eplanmcp.exe', 'workbench/EplanMcp.Workbench.exe', 'bridge/net481/EplanMcp.Bridge.Eplan.dll',
+                'plugin-libraries/builtin/library.json', 'plugin-libraries/builtin/iec-base-1.0.0.eplanpack',
                 'claude-plugin/.claude-plugin/marketplace.json', 'claude-plugin/eplan-mcp/.claude-plugin/plugin.json', 'claude-plugin/eplan-mcp/.mcp.json', 'docs/getting-started/zh-CN.md') {
                 if (-not $archive.GetEntry("EplanMcp-0.1.0/$required")) { throw "Missing ZIP payload: $required" }
             }

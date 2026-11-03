@@ -6,6 +6,9 @@
     <Project Path="eng/coverage/EplanMcp.Coverage.csproj">
       <Platform Project="x64" />
     </Project>
+    <Project Path="eng/plugin-libraries/PluginLibraries.csproj">
+      <Platform Project="x64" />
+    </Project>
   </Folder>
   <Folder Name="/evals/">
     <Project Path="evals/EplanMcp.Evals/EplanMcp.Evals.csproj">

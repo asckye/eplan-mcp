@@ -66,6 +66,7 @@ jobs:
           dotnet publish src/EplanMcp.Workbench -c Release -r win-x64 --self-contained true -p:NuGetLockFilePath=packages.win-x64.lock.json -p:DebugType=None -p:Version=$version -o stage/app/workbench
           New-Item -ItemType Directory stage/boms -Force | Out-Null
           Copy-Item .local/host/eplanmcp.exe stage/app
+          Copy-Item .local/host/plugin-libraries stage/app/plugin-libraries -Recurse
           Copy-Item packaging/zip/README.md stage/app/README.md
           Copy-Item docs stage/app/docs -Recurse
           Copy-Item LICENSE,THIRD-PARTY-NOTICES.md stage/app/docs

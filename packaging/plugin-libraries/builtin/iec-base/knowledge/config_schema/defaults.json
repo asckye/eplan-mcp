@@ -1,0 +1,13 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "config_schema",
+  "metadata": { "name": "defaults" },
+  "origin": { "note": "api-notes A83" },
+  "spec": {
+    "items": {
+      "defaults.interruption.symbol": { "type": "text", "required": false, "allowedLayers": ["base", "company", "cabinet_type", "project", "cabinet"] },
+      "defaults.strip_definition.symbol": { "type": "text", "required": false, "allowedLayers": ["base", "company", "cabinet_type", "project", "cabinet"] },
+      "defaults.strip_definition.variant": { "type": "number", "required": false, "allowedLayers": ["base", "company", "cabinet_type", "project", "cabinet"] }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 3,
+  "id": "iec-base",
+  "name": "IEC 基础插入符号",
+  "version": "1.0.0",
+  "kind": "standard",
+  "provides": ["defaults.strip_definition.symbol", "defaults.strip_definition.variant"],
+  "standards": ["IEC 60617", "IEC 81346-2"],
+  "description": "SPECIAL 插入符号事实与端子排定义默认值；标准编号仅作适用标签。",
+  "compatibility": {},
+  "resources": [],
+  "configuration": {
+    "company": { "id": "defaults", "resources": ["knowledge/config_layer/defaults.json"] }
+  },
+  "provenance": { "createdBy": "EplanMcp builtin library builder", "createdAt": "2026-11-02T00:00:00Z" }
+}
