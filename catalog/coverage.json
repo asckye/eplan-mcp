@@ -1869,7 +1869,7 @@
       "dependencies": 37,
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
-      "small": 10,
+      "small": 11,
       "medium": 16,
       "large": 7,
       "apiNotes": [

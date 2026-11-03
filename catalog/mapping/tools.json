@@ -9713,6 +9713,11 @@
             "file": "tests/EplanMcp.Workbench.Protocol.Tests/WorkbenchJsonTests.cs"
           },
           {
+            "name": "WriteInvokeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/WriteInvokeTests.cs"
+          },
+          {
             "name": "ApprovalDialogInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/ApprovalDialogInteropTests.cs"
