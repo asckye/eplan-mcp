@@ -69,8 +69,10 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         }
         function.Location = new PointD(DrawingCoordinates.MillimetresToApi(args.X), DrawingCoordinates.MillimetresToApi(args.Y));
         // Customer redraw 2026-11-02: with a visible name the symbol's default property arrangement shows the tag where the
-        // editor would (left of a contact); display_properties stay optional extras and switch to a user-defined arrangement.
-        EplanVisibleNames.Adjust(page, function);
+        // editor would (left of a contact). A caller that places its own tag text keeps the empty visible name, or the tag
+        // would show twice; display_properties switch to a user-defined arrangement.
+        if (args.DisplayProperties?.Any(p => p.PropertyId is 20214 or 20213 or 20211 or 20215) != true)
+        { EplanVisibleNames.Adjust(page, function); }
         // A55: the only cached list is released while unwinding Place, BEFORE TransactionRunner can Abort.
         using FunctionPropertyList properties = function.Properties;
         WritePlcPoint(properties, args);
