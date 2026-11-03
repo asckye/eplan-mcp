@@ -13,22 +13,30 @@ namespace EplanMcp.Large.Tests;
 public sealed class InterruptionVariantSpikeTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     [Fact]
-    public async Task EachBpfVariant_OnOnePage_PrintsTextsAndExportsTheImage()
+    public async Task EachSpecialInterruptionSymbol_OnOnePage_PrintsTextsAndExportsTheImage()
     {
         Assert.NotNull(host);
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
-        JsonElement found = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = session.Project, ["library"] = "SPECIAL", ["name_contains"] = "BPF", ["limit"] = 200 });
-        JsonElement[] variants = [.. found.GetProperty("symbols").EnumerateArray().Where(s => s.GetProperty("name").GetString() == "BPF").OrderBy(s => s.GetProperty("variant").GetInt32())];
+        // EPLAN's insert command (Shift+F4) may use another SPECIAL interruption symbol than BPF; list every one.
+        var variants = new List<JsonElement>();
+        string? cursor = null;
+        do
+        {
+            JsonElement found = await eplan.CallAsync("eplan_symbol_search", new() { ["project"] = session.Project, ["library"] = "SPECIAL", ["limit"] = 200, ["cursor"] = cursor });
+            variants.AddRange(found.GetProperty("symbols").EnumerateArray().Where(s => s.GetProperty("type").GetString() == "InterruptionPoint"));
+            cursor = found.GetProperty("nextCursor").GetString();
+        } while (cursor is not null);
         Assert.NotEmpty(variants);
         string page = (await session.CreatePagesAsync(1))[0];
         var output = TestContext.Current.TestOutputHelper!;
-        for (int i = 0; i < variants.Length; i++)
+        for (int i = 0; i < variants.Count; i++)
         {
             int variant = variants[i].GetProperty("variant").GetInt32();
+            string symbol = variants[i].GetProperty("name").GetString()!;
             JsonElement pin = Assert.Single(variants[i].GetProperty("connectionPoints").EnumerateArray());
-            output.WriteLine($"D7 BPF variant {variant}: {pin.GetRawText()}");
+            output.WriteLine($"D7 {symbol} variant {variant} ({variants[i].GetProperty("description").GetString()}): {pin.GetRawText()}");
             // Columns 40 mm apart, two rows, away from the frame.
-            double[] position = [60 + 40 * (i % 8), 200 - 80 * (i / 8)];
+            double[] position = [60 + 40 * (i % 8), 240 - 40 * (i / 8)];
             string outcome = "placed";
             try
             {
@@ -36,12 +44,12 @@ public sealed class InterruptionVariantSpikeTests(LiveEplan eplan, WriteHost hos
                 {
                     ["project"] = session.Project,
                     ["page"] = page,
-                    ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind = "interruption_point", name = "=GAA+A1-D7V" + variant, position, direction = pin.GetProperty("direction").GetString(), counterpart_pages = new[] { page } } }),
+                    ["items"] = JsonSerializer.SerializeToElement(new[] { new { kind = "interruption_point", name = "=GAA+A1-D7" + symbol + variant, symbol, position, direction = pin.GetProperty("direction").GetString(), counterpart_pages = new[] { page } } }),
                 });
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             { outcome = ex.Message; }
-            output.WriteLine($"D7 variant {variant} at {JsonSerializer.Serialize(position)}: {outcome}");
+            output.WriteLine($"D7 {symbol} variant {variant} at {JsonSerializer.Serialize(position)}: {outcome}");
         }
         JsonElement drawings = (await eplan.CallAsync("eplan_page_get", new() { ["project"] = session.Project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" })).GetProperty("drawings");
         foreach (JsonElement item in drawings.GetProperty("items").EnumerateArray().Where(d => d.GetProperty("kind").GetString() is "InterruptionPoint" or "PropertyPlacement"))
@@ -51,7 +59,7 @@ public sealed class InterruptionVariantSpikeTests(LiveEplan eplan, WriteHost hos
         string root = image.GetProperty("directory").GetString()!;
         foreach (JsonElement file in image.GetProperty("files").EnumerateArray())
         {
-            string target = Path.Combine(evidence, "D7-bpf-variants.png");
+            string target = Path.Combine(evidence, "D7-interruption-symbols.png");
             File.Copy(Path.Combine(root, file.GetProperty("path").GetString()!), target, overwrite: true);
             output.WriteLine("D7 image: " + target);
         }

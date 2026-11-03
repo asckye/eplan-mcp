@@ -168,12 +168,10 @@ internal sealed class AcceptanceRedrawDriver(
         args["page"] = page ?? Page;
         args["tag"] = Expand(device.GetProperty("tag").GetString()!);
         args["connection_designations"] = device.GetProperty("connection_designations");
-        if (device.GetProperty("symbol").GetString() != "PLCC")
-        {
-            // D11: the customer page shows each tag left of its contact; a list may give the offset.
-            double[] offset = device.TryGetProperty("tag_offset", out JsonElement at) ? [at[0].GetDouble(), at[1].GetDouble()] : [4, -4];
-            args["display_properties"] = new[] { new { property_id = 20214, offset_x_mm = offset[0], offset_y_mm = offset[1] } };
-        }
+        // Customer redraw 2026-11-02: with a visible name the symbol's default arrangement shows the tag, as in the
+        // original; an explicit tag text (user-defined arrangement) is added only where a list asks for it.
+        if (device.TryGetProperty("tag_offset", out JsonElement at))
+        { args["display_properties"] = new[] { new { property_id = 20214, offset_x_mm = at[0].GetDouble(), offset_y_mm = at[1].GetDouble() } }; }
         JsonElement? result = await WriteAsync("eplan_device_place", args, [Id(device)]);
         if (result is not { } placed)
         { return; }
