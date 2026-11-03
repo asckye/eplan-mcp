@@ -24,9 +24,10 @@ internal sealed partial class EplanDeviceSymbolPlacement
         box.SetLogicalArea(new PointD(args.X, args.Y), new PointD(args.CornerX!.Value, args.CornerY!.Value));
         using (var parts = new FunctionBasePropertyList())
         {
-            // Customer page: like the editor, the box takes the page's function assignment (=GAA+P1), so it shows +P1, not =+P1.
-            if (DrawingNames.FunctionAssignmentOf(page.Name) is { Length: > 0 } assignment)
-            { parts.DESIGNATION_FUNCTIONALASSIGNMENT = assignment; }
+            // Customer page: like the editor, the box takes the page's higher-level function (=GAA+P1), so it shows +P1, not
+            // =+P1. Live 2026-11-02: '=' is DESIGNATION_PLANT; DESIGNATION_FUNCTIONALASSIGNMENT is '==' and left the box =+P1.
+            if (DrawingNames.HigherLevelFunctionOf(page.Name) is { Length: > 0 } function)
+            { parts.DESIGNATION_PLANT = function; }
             parts.DESIGNATION_LOCATION = args.LocationBox!.Substring(1);
             box.NameParts = parts;
         }

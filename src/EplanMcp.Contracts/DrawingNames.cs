@@ -19,13 +19,13 @@ public static class DrawingNames
         int type = structure.IndexOf('&'), end = type < 0 ? -1 : structure.IndexOf('#', type);
         return type < 0 ? structure : structure.Substring(0, type) + (end < 0 ? string.Empty : structure.Substring(end));
     }
-    /// <summary>The page's function assignment without its '=' (GAA on =GAA+A1&amp;EFS1/3); empty when the page has none.</summary>
-    public static string FunctionAssignmentOf(string page)
+    /// <summary>The page's higher-level function without its '=' (GAA on =GAA+A1&amp;EFS1/3); empty when the page has none.</summary>
+    public static string HigherLevelFunctionOf(string page)
     {
         string structure = DeviceStructureOf(page);
         for (int i = 0; i < structure.Length; i++)
         {
-            // A single '=' starts the function assignment; '==' is the plant.
+            // A single '=' starts the higher-level function (DESIGNATION_PLANT, 1100); '==' is the functional assignment (1300).
             if (structure[i] != '=' || i + 1 < structure.Length && structure[i + 1] == '=' || i > 0 && structure[i - 1] == '=')
             { continue; }
             int end = structure.IndexOfAny(['=', '+', '&', '#', '-'], i + 1);

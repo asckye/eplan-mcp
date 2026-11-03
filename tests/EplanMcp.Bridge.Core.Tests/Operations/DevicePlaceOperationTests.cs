@@ -72,7 +72,7 @@ public sealed class DevicePlaceOperationTests
     [Theory]
     [InlineData("Function")]
     [InlineData("PropertyPlacement")]
-    public void LayoutGuard_UnknownPrediction_MeasuredConflictRollsBackWholeCall(string kind)
+    public void LayoutGuard_UnknownPrediction_MeasuredConflictCommitsWithADeviation(string kind)
     {
         MacroTargetPage page = LayoutFixture.Target(_placer.Pages[SamplePage])!;
         page.PredictDevice = _ => [LayoutGuard.Proposed("Function", [80, 160], null)];
@@ -83,17 +83,14 @@ public sealed class DevicePlaceOperationTests
         page.Layout.ReadActual = () => actual;
         DevicePlaceArgs args = Args(SamplePage, "-NEW");
         args.Fingerprint = Plan(args).Fingerprint;
-        BridgeError failure = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
-        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.RolledBack), (failure.Reason, failure.Execution));
-        Assert.Contains(kind == "Function" ? "R2" : "R3", failure.Message, StringComparison.Ordinal);
-        Assert.Contains("Suggested position", failure.Message, StringComparison.Ordinal);
-        Assert.Contains("100.0", failure.Metadata!["layoutViolations"], StringComparison.Ordinal);
-        Assert.Contains("after write", failure.Metadata["layoutChecks"], StringComparison.Ordinal);
-        Assert.Single(_placer.Places);
-        Assert.DoesNotContain(_names.Functions, f => f.Name.Contains("NEW", StringComparison.Ordinal));
-        Assert.Equal(["1/1/1/0", "1/1/2/0"], page.Objects);
-        Assert.DoesNotContain("Commit", _transactions.Calls);
-        Assert.Contains("Rollback", _transactions.Calls);
+        // ADR-0046: the measured overlap stays in the project and is reported with a free position.
+        DevicePlaceData result = Execute(args);
+        Assert.Contains("Readback deviation: " + (kind == "Function" ? "R2" : "R3"), result.Warning, StringComparison.Ordinal);
+        Assert.Contains("Suggested position", result.Warning, StringComparison.Ordinal);
+        Assert.Contains("measured [100, 160, 104, 164]", result.Warning, StringComparison.Ordinal);
+        Assert.Contains(_names.Functions, f => f.Name.Contains("NEW", StringComparison.Ordinal));
+        Assert.Equal(1, _transactions.Calls.Count(c => c == "Commit"));
+        Assert.DoesNotContain("Rollback", _transactions.Calls);
     }
 
     [Fact]
@@ -140,10 +137,10 @@ public sealed class DevicePlaceOperationTests
     [InlineData("+A1/1", "")]
     [InlineData("==F1=GAA++P1+A1&EFS1/3", "GAA")]
     [InlineData("==F1+A1&EFS1/3", "")]
-    public void FunctionAssignmentOf_IsTheSingleEqualsSegment(string page, string assignment)
+    public void HigherLevelFunctionOf_IsTheSingleEqualsSegment(string page, string function)
     {
         // Customer page: a location box takes it, so EPLAN shows +P1 rather than =+P1.
-        Assert.Equal(assignment, DrawingNames.FunctionAssignmentOf(page));
+        Assert.Equal(function, DrawingNames.HigherLevelFunctionOf(page));
     }
 
     [Fact]
