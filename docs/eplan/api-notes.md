@@ -276,3 +276,7 @@
   4. `CreateDeviceListItem` 加 `GetTemplatesFromDeviceList`：返回 6 个临时的未覆盖模板，器件标识为空（`=+`），没有符号，`IsMainFunction` 均为 false。
   5. 先放符号 `SSD`、再 `AddArticleReference(SIE.3SB3400-0B)`：部件引用写到了主功能上；部件的模板（`SSMNO`，引脚 `.3`/`.4`）仍是临时的未覆盖模板，没有生成未放置功能。连接点代号相同，但符号和功能定义不同，模板不被覆盖。
   - 结论：产品用 `CreateDevice(page)` 放主功能（与 EPLAN"插入设备"相同）；其余功能用 `PlaceAt` 加指定符号放置，然后在同一事务中删除原来的未放置功能。删除这一步待正式工具的 Large 测试验证。
+- **改名与命名创建**（2026-11-02 23:40–2026-11-03 00:40，同上环境，`PartsFirstSpikeTests` 第 4–5 轮）：
+  1. `CreateDevice(page)` 生成的未放置功能不能改名：事务内给 `Function.Name` 赋值能读到新名，提交后变回 `=+-K3:2` 等原名，并脱离已改名的主功能；对它们写 1100、1200、20013、20014 均被拒绝（S063113）。已放置的主功能写 1100 也被拒绝（高层代号来自所在页），但赋 `Name` 有效（A13）。
+  2. `ParseNameAndProps` 加 `CreateDevice(Project, …, 名称属性, ref list)` 一次建出全部功能，名称、模板符号、20023 描述、主功能上的部件引用都正确（`=GAA+A1-KC…:1…:7`）。
+  3. **在同一事务中对上述刚建出的 PLC 主功能调用 `PlaceAt`**：传入功能自带的 `SymbolVariant` 时，EPLAN 内部抛出 `NullReferenceException`（`Terminal.setHandle`）并回滚；改为传入事务前从符号库解析的变体（A52）时，**EPLAN 进程崩溃（0xc0000374，堆损坏）**。第 1 轮用其它符号（`PLC_CBOX`）放置同类功能时没有出现。产品不得使用这一路径。
