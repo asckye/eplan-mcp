@@ -195,28 +195,28 @@ public sealed class LayoutGuardLiveRunTests
         // ContextPropertyPlacement has its own digest, and the observed parent digest may differ.
         text.Locator.Digest = new string('b', 64);
         text.Parent = new() { Type = 17, Oid = 3, Digest = new string('a', 64) };
-        text.Bounds = oversized ? [80, 40, 200, 44] : [80, 40, 100, 44];
+        // Past the page edge (ADR-0046 S2) the write still rolls back, and only a refusal searches a free position.
+        text.Bounds = oversized ? [80, 40, 200, 44] : [80, 40, 104, 44];
         DrawingPlacement empty = LayoutGuardTests.Row("PropertyPlacement", 3, 40, 40);
         empty.Locator.Digest = new string('c', 64);
         empty.Parent = text.Parent;
         empty.Bounds = [0, 0, 0, 0];
         var actual = LayoutGuardTests.Model();
         actual.Page.Placements = [owner, text, empty];
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => LayoutGuard.AfterWriting(before, actual)).Error;
+        LayoutGuard.Violation failure = Assert.Single(JsonConvert.DeserializeObject<List<LayoutGuard.Violation>>(error.Metadata!["layoutViolations"])!, v => !v.Warning);
+        Assert.Equal("R1", failure.Rule);
+        Assert.Contains("S2", error.Message, StringComparison.Ordinal);
         if (oversized)
         {
-            // ADR-0046 S2: past the page edge the write still rolls back.
-            BridgeError error = Assert.Throws<BridgeErrorException>(() => LayoutGuard.AfterWriting(before, actual)).Error;
-            LayoutGuard.Violation failure = Assert.Single(JsonConvert.DeserializeObject<List<LayoutGuard.Violation>>(error.Metadata!["layoutViolations"])!, v => !v.Warning);
-            Assert.Equal("R1", failure.Rule);
             Assert.Null(failure.NearestFreePosition);
             Assert.Contains("No free position found within the bounded search", error.Message, StringComparison.Ordinal);
         }
         else
         {
-            // Inside the page but outside the margin it is a committed deviation that keeps the suggestion.
-            Assert.Contains(LayoutGuard.AfterWriting(before, actual), s => s.StartsWith("Readback deviation: R1", StringComparison.Ordinal)
-                && s.Contains("Suggested position: [28, 40] mm", StringComparison.Ordinal));
-            Assert.Empty(LayoutGuard.Check(actual, actual.Page.Placements.Select(p => LayoutGuard.Shift(p, [-12, 0])).ToArray(), false, true));
+            Assert.Equal([24d, 40d], failure.NearestFreePosition!);
+            Assert.Contains("Suggested position: [24, 40] mm", error.Message, StringComparison.Ordinal);
+            Assert.Empty(LayoutGuard.Check(actual, actual.Page.Placements.Select(p => LayoutGuard.Shift(p, [-16, 0])).ToArray(), false, true));
         }
         Assert.Equal([40d, 40d], owner.Location);
         Assert.Equal([80d, 40d], text.Location);

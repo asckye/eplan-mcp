@@ -88,10 +88,7 @@ public sealed class PlacementTextCreateExecuteOperationTests
         var data = Assert.IsType<PlacementTextCreateData>(op.Execute(PlacementTextStore.Args()));
         Assert.Contains("after write", data.Warning, StringComparison.Ordinal);
         if (conflict)
-        {
-            Assert.Contains("Readback deviation: R3", data.Warning, StringComparison.Ordinal);
-            Assert.Contains("Suggested position", data.Warning, StringComparison.Ordinal);
-        }
+        { Assert.Contains("Readback deviation: R3", data.Warning, StringComparison.Ordinal); }
         Assert.Equal(["Begin AI: eplan_placement_create", "Commit", "CloseUndo", "Dispose"], _store.Transactions.Calls);
         Assert.Equal(1, measurements);
     }

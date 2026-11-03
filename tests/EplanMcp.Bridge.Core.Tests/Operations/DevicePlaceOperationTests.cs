@@ -83,11 +83,10 @@ public sealed class DevicePlaceOperationTests
         page.Layout.ReadActual = () => actual;
         DevicePlaceArgs args = Args(SamplePage, "-NEW");
         args.Fingerprint = Plan(args).Fingerprint;
-        // ADR-0046: the measured overlap stays in the project and is reported with a free position.
+        // ADR-0046: the measured overlap stays in the project and is reported with the tool that fixes it.
         DevicePlaceData result = Execute(args);
         Assert.Contains("Readback deviation: " + (kind == "Function" ? "R2" : "R3"), result.Warning, StringComparison.Ordinal);
-        Assert.Contains("Suggested position", result.Warning, StringComparison.Ordinal);
-        Assert.Contains("measured [100, 160, 104, 164]", result.Warning, StringComparison.Ordinal);
+        Assert.Contains("measured [100, 160, 104, 164]; adjust with eplan_placement_update", result.Warning, StringComparison.Ordinal);
         Assert.Contains(_names.Functions, f => f.Name.Contains("NEW", StringComparison.Ordinal));
         Assert.Equal(1, _transactions.Calls.Count(c => c == "Commit"));
         Assert.DoesNotContain("Rollback", _transactions.Calls);

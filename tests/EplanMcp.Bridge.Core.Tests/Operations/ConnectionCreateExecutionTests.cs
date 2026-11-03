@@ -58,14 +58,15 @@ public sealed class ConnectionCreateExecutionTests
     }
 
     [Fact]
-    public void UnknownPrediction_MeasuredOverlap_CommitsAndGeneratesWithASuggestion()
+    public void UnknownPrediction_MeasuredOverlap_CommitsAndGeneratesWithAFix()
     {
         var fake = new Creator();
         fake.Fixture.Scene.SymbolBounds.Clear();
         Measure(fake, [20, 6, 26, 26]);
         JObject result = fake.Execute();
         Assert.Contains("Readback deviation: R2", (string?)result["warning"], StringComparison.Ordinal);
-        Assert.Contains("Suggested position", (string?)result["warning"], StringComparison.Ordinal);
+        Assert.Contains("adjust with eplan_placement_update", (string?)result["warning"], StringComparison.Ordinal);
+        Assert.DoesNotContain("Suggested position", (string?)result["warning"], StringComparison.Ordinal);
         Assert.Contains("generate", fake.Events);
         Assert.DoesNotContain("Rollback", fake.Transactions.Calls);
     }

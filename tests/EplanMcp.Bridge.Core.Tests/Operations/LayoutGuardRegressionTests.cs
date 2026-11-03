@@ -101,7 +101,7 @@ public sealed class LayoutGuardRegressionTests
     }
 
     [Fact]
-    public void Logged69888OwnTextPair_OnlyWarns_AndUnrelatedDeviceIsADeviationWithFreePosition()
+    public void Logged69888OwnTextPair_OnlyWarns_AndUnrelatedDeviceIsADeviation()
     {
         var before = Model();
         DrawingPlacement owner = LayoutGuardTests.Row("Function", 69888, 80, 208);
@@ -122,9 +122,9 @@ public sealed class LayoutGuardRegressionTests
         DrawingPlacement blocker = LayoutGuardTests.Row("Function", 7, 80, 208);
         before.Page.Placements.Add(blocker);
         actual.Page.Placements.Insert(0, blocker);
-        // ADR-0046: after the write the overlap with an unrelated device is a committed deviation with a free position.
+        // ADR-0046: after the write the overlap with an unrelated device is a committed deviation.
         checks = LayoutGuard.AfterWriting(before, actual);
-        Assert.Contains(checks, s => s.StartsWith("Readback deviation: R2", StringComparison.Ordinal) && s.Contains("Suggested position", StringComparison.Ordinal));
+        Assert.Contains(checks, s => s.StartsWith("Readback deviation: R2", StringComparison.Ordinal));
         Assert.DoesNotContain(checks, s => s.StartsWith("Readback deviation: R3", StringComparison.Ordinal));
     }
 

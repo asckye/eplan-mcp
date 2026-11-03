@@ -57,7 +57,7 @@ public static class LayoutGuard
         return DrawingCoordinates.ValidBounds(area) && area![0] < area[2] && area[1] < area[3] ? area
             : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: reliable drawing area unavailable; read page geometry before drawing.");
     }
-    public static List<Violation> Check(Model model, IReadOnlyList<DrawingPlacement> changed, bool suggest = true, bool measured = false)
+    public static List<Violation> Check(Model model, IReadOnlyList<DrawingPlacement> changed, bool suggest = true, bool measured = false, bool searchViolations = true)
     {
         double[] area = Area(model);
         var result = new List<Violation>();
@@ -177,7 +177,7 @@ public static class LayoutGuard
         }
         if (suggest)
         {
-            foreach (DrawingPlacement p in changed.Where(p => result.Any(v => !v.Warning && v.Objects[0] == p.Locator)))
+            foreach (DrawingPlacement p in changed.Where(p => searchViolations && result.Any(v => !v.Warning && v.Objects[0] == p.Locator)))
             {
                 DrawingPlacement owner = GroupOwner(p, changed);
                 double[]? free = FindFree(model, owner, changed, measured: measured);
@@ -272,11 +272,16 @@ public static class LayoutGuard
         foreach (Segment s in actual.Lines)
         { s.Changed = !before.Lines.Any(b => Key(b) == Key(s)); s.Net = Root(Point(s.Points[0])); }
         // ADR-0046: after a write only an outline outside Page.Size (S2) still rolls back. Other measured findings stay in
-        // the project as readback deviations, reported with their objects, measured geometry and a fix.
-        List<Violation> violations = Check(actual, changed, measured: true);
-        List<Violation> offPage = [.. violations.Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize))];
-        if (offPage.Count > 0)
+        // the project as readback deviations, reported with their objects, measured geometry and a fix. Live 2026-11-02:
+        // searching a free position for every committed deviation ran past the write limit, so only a refusal searches;
+        // default texts keep their property_moves suggestion as before.
+        var timer = System.Diagnostics.Stopwatch.StartNew();
+        List<Violation> violations = Check(actual, changed, measured: true, searchViolations: false);
+        if (timer.ElapsedMilliseconds > 2000)
+        { OperationContext.Current.Warn(FormattableString.Invariant($"layout after write took {timer.ElapsedMilliseconds} ms for {changed.Length} changed objects and {violations.Count} findings")); }
+        if (violations.Any(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize)))
         {
+            List<Violation> offPage = [.. Check(actual, changed, measured: true).Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize))];
             BridgeErrorException error = WriteArguments.Invalid([.. offPage.Select(v => "S2: the new object lies outside the page. " + v.Message)]);
             error.Error.Metadata!["layoutViolations"] = Newtonsoft.Json.JsonConvert.SerializeObject(offPage);
             throw WriteArguments.NotStarted(error);
