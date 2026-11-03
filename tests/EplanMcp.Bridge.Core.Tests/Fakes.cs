@@ -385,7 +385,9 @@ internal sealed class FakeMacroReader(string root) : IMacroReader
     public string? MacroRoot() => root;
 
     public Func<string?, int, MacroContent>? ReadSelection { get; set; }
+    public Func<string, string?, PartMacroSource>? PartSource { get; set; }
     public (string? Representation, int Variant) Selection { get; private set; }
+    public PartMacroSource ResolvePartMacro(string part, string? partVariant) => PartSource!(part, partVariant);
 
     public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false, string? representation = null, int variant = 0)
     {
@@ -408,15 +410,19 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
     public Func<bool, List<MacroFunctionRecord>> Placed { get; set; } = _ => [];
 
     public bool Stacked { get; set; }
-    public string Representation { get; private set; } = string.Empty;
+    public (string Representation, string? Part, string? PartVariant) Source { get; private set; }
+    public Func<PlacedMacro, PlacedMacro>? CommittedReadback { get; set; }
+    public List<MacroPartReference> ArticleReferences { get; set; } = [];
 
     public List<(string Page, string Macro, int Variant, double X, double Y, bool Number)> Inserts { get; } = [];
 
     public MacroTargetPage? ReadPage(string projectPath, string pageName) => LayoutFixture.Target(Pages.GetValueOrDefault(pageName));
 
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine")
+    public PlacedMacro ReadCommitted(string projectPath, string pageName, PlacedMacro placed) => CommittedReadback?.Invoke(placed) ?? placed;
+
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null)
     {
-        Representation = representation;
+        Source = (representation, part, partVariant);
         Inserts.Add((pageName, macroPath, variant, x, y, number));
         if (Stacked)
         {
@@ -426,7 +432,7 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
         List<MacroFunctionRecord> functions = Placed(number);
         project.Functions.AddRange(functions.Where(f => f.Main).Select(f => new FunctionRecord { Name = f.Name, VisibleName = f.VisibleName, IsMain = true, Category = f.Category, Page = pageName }));
         Pages[pageName].Objects.AddRange(functions.Select((f, i) => "9/9/" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/0"));
-        return new PlacedMacro { Functions = functions, ObjectCount = functions.Count + 9 };
+        return new PlacedMacro { Functions = functions, ObjectCount = functions.Count + 9, ArticleReferences = ArticleReferences };
     }
 }
 

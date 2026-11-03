@@ -29,6 +29,13 @@ internal static class ToolSchemas
                 { PageReviewTools.Configure(tool.ProtocolTool, schema); }
                 if (tool.ProtocolTool.Name == DeviceWriteTools.PlaceTool)
                 { DevicePlaceInputs.Configure(schema); }
+                if (tool.ProtocolTool.Name == MacroWriteTools.InsertTool)
+                {
+                    schema["oneOf"] = JsonNode.Parse("""[{"required":["macro"]},{"required":["part"]}]""");
+                    schema["dependentRequired"] = JsonNode.Parse("""{"part_variant":["part"]}""");
+                    foreach (string field in new[] { "macro", "part", "part_variant" })
+                    { schema["properties"]![field]!.AsObject().Remove("default"); schema["properties"]![field]!["type"] = "string"; }
+                }
                 if (tool.ProtocolTool.Name is ConnectionCreateTools.Tool or DeviceWriteTools.PlaceTool)
                 {
                     var output = JsonNode.Parse(tool.ProtocolTool.OutputSchema!.Value.GetRawText())!.AsObject();

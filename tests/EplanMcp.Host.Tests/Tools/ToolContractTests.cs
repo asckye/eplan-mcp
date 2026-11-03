@@ -69,11 +69,13 @@ public sealed class ToolContractTests : IDisposable
     private Tool[] Tools => [.. _options.ToolCollection!.Select(t => t.ProtocolTool)];
 
     [Fact]
-    public void MacroInsert_OffersOverviewAndDefaultsToPreview()
+    public void MacroInsert_OffersExclusiveSourcesAndDefaultsToPreview()
     {
         Tool tool = Tools.Single(t => t.Name == MacroWriteTools.InsertTool);
         JsonElement schema = tool.InputSchema;
-        Assert.Equal(["project", "page", "macro", "x", "y"], schema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["project", "page", "x", "y"], schema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(2, schema.GetProperty("oneOf").GetArrayLength());
+        Assert.Equal(["part"], schema.GetProperty("dependentRequired").GetProperty("part_variant").EnumerateArray().Select(v => v.GetString()));
         JsonElement properties = schema.GetProperty("properties");
         Assert.True(properties.GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.Equal("integer", properties.GetProperty("variant").GetProperty("type").GetString());

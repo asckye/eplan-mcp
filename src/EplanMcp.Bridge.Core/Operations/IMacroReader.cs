@@ -23,6 +23,17 @@ public interface IMacroReader
     /// <param name="representation">Select this representation when available; null keeps the default selection.</param>
     /// <param name="variant">The variant within the selected representation.</param>
     public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false, string? representation = null, int variant = 0);
+
+    /// <summary>Reads the configured parts database without modifying it (A82).</summary>
+    public PartMacroSource ResolvePartMacro(string part, string? partVariant);
+}
+
+/// <summary>A selected part variant and its group symbol macro path relative to the macro directory.</summary>
+public sealed class PartMacroSource
+{
+    public string Part { get; set; } = string.Empty;
+    public string PartVariant { get; set; } = string.Empty;
+    public string Macro { get; set; } = string.Empty;
 }
 
 /// <summary>What <see cref="IMacroReader.ReadMacro"/> copies out of a window macro.</summary>

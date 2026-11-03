@@ -12,6 +12,9 @@ public sealed class MacroInsertData
     /// <summary>The macro's path below the macro directory, with <c>/</c> between folders.</summary>
     public string Macro { get; set; } = string.Empty;
 
+    /// <summary>Part references read from the inserted main functions after commit.</summary>
+    public List<MacroPartReference> ArticleReferences { get; set; } = [];
+
     /// <summary>
     /// The inserted functions other than wires, one per tag, in EPLAN's order, at most
     /// <c>MacroInsertRequest.MaxDevices</c>. Tags with <c>?</c> are ones EPLAN could not number (spike S10).

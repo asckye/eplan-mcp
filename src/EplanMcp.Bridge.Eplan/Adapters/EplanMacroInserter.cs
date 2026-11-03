@@ -48,7 +48,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
         };
     }
 
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine")
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null)
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
@@ -81,12 +81,37 @@ internal sealed class EplanMacroInserter : IMacroInserter
         }
 
         Function[] added = [.. Functions(project, page).Where(f => !before.Contains(f.ToStringIdentifier()))];
+        if (part is not null)
+        {
+            // A82: retain existing macro articles; assign only to new main functions in this same transaction.
+            foreach (Function function in added.Where(f => f.IsMainFunction && f.ArticleReferences.Length == 0))
+            {
+                function.AddArticleReference(part, partVariant ?? string.Empty, 1);
+                if (!function.ArticleReferences.Any(a => a.PartNr == part && a.VariantNr == (partVariant ?? string.Empty) && a.Count == 1))
+                { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The inserted main function's part reference differs from the requested part; nothing was committed."); }
+                GC.KeepAlive(function);
+            }
+        }
         return Read(added, placed.Length);
+    }
+
+    public PlacedMacro ReadCommitted(string projectPath, string pageName, PlacedMacro placed)
+    {
+        MainThread.Assert();
+        // A79: carry only managed object IDs across Commit/Dispose, then obtain fresh native wrappers.
+        Project project = EplanProjects.ByPath(projectPath);
+        Page page = Find(project, pageName) ?? throw new InvalidOperationException("The inserted macro's page is gone.");
+        var ids = new HashSet<string>(placed.ObjectIds, StringComparer.Ordinal);
+        Function[] functions = [.. Functions(project, page).Where(f => ids.Contains(f.ToStringIdentifier()))];
+        if (functions.Length != ids.Count)
+        { throw new InvalidOperationException("Some inserted macro functions could not be read after commit."); }
+        return Read(functions, placed.ObjectCount);
     }
 
     private static PlacedMacro Read(Function[] functions, int objectCount) =>
         new()
         {
+            ObjectIds = [.. functions.Select(f => f.ToStringIdentifier())],
             Functions =
             [
                 .. functions.Select(f => new MacroFunctionRecord
@@ -97,6 +122,8 @@ internal sealed class EplanMacroInserter : IMacroInserter
                     Main = f.IsMainFunction,
                 }),
             ],
+            ArticleReferences = [.. functions.Where(f => f.IsMainFunction).SelectMany(f => f.ArticleReferences.Select(a => new MacroPartReference
+            { Tag = f.Name ?? string.Empty, PartNumber = a.PartNr ?? string.Empty, Variant = a.VariantNr ?? string.Empty, Count = a.Count }))],
             ObjectCount = objectCount,
         };
 

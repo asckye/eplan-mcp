@@ -53,7 +53,14 @@ public sealed class MacroInsertExecuteOperation(
             request.LayoutWarnings.AddRange(MacroInsertRequest.Layout(() => request.Page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.AfterWriting(request.Page.Layout)));
             return placed;
         });
-        List<PageDevice> inserted = MacroInsertRequest.Devices(committed.Result.Functions);
+        PlacedMacro readback = committed.Result;
+        try
+        { readback = inserter.ReadCommitted(request.Project.Path, request.Page.Name, readback); }
+        catch (Exception failure)
+        { WriteExceptionDiagnostics.Report(failure); request.LayoutWarnings.Add("The macro was committed, but its objects and article references could not be read back. Inspect the page before repeating the insertion."); }
+        if (request.Source is not null && readback.ArticleReferences.Count == 0)
+        { request.LayoutWarnings.Add("The macro was committed, but no main-function article reference could be read. Inspect the page before repeating the insertion."); }
+        List<PageDevice> inserted = MacroInsertRequest.Devices(readback.Functions);
         return new MacroInsertData
         {
             Project = request.Project.Name,
@@ -61,7 +68,8 @@ public sealed class MacroInsertExecuteOperation(
             Macro = request.Macro,
             Devices = [.. inserted.Take(MacroInsertRequest.MaxDevices)],
             DeviceCount = inserted.Count,
-            ObjectCount = committed.Result.ObjectCount,
+            ObjectCount = readback.ObjectCount,
+            ArticleReferences = readback.ArticleReferences,
             PageSizeKnown = request.Page.Width is not null,
             Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(committed.Warning)),
         };
@@ -75,7 +83,7 @@ public sealed class MacroInsertExecuteOperation(
     private PlacedMacro Insert(MacroInsertRequest request)
     {
         string[] before = request.Number ? [] : MainFunctions(request);
-        PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number, request.Representation);
+        PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number, request.Representation, request.Source?.Part, request.Source?.PartVariant);
         List<string> merged = request.Number ? [] : MacroInsertRequest.Merged(before, MainFunctions(request));
         return merged.Count == 0
             ? placed

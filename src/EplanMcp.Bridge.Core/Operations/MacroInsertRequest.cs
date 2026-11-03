@@ -16,11 +16,11 @@ internal sealed class MacroInsertRequest
     /// <summary>The default representation, inserted on circuit pages.</summary>
     public const string MultiLine = "MultiLine";
 
-    private MacroInsertRequest(OpenProject project, MacroTargetPage page, string macroPath, MacroContent content, MacroInsertArgs args, bool number, string representation)
+    private MacroInsertRequest(OpenProject project, MacroTargetPage page, string macro, string macroPath, MacroContent content, MacroInsertArgs args, bool number, string representation, PartMacroSource? source)
     {
         Project = project;
         Page = page;
-        Macro = MacroFiles.Normalized(args.Macro);
+        Macro = MacroFiles.Normalized(macro);
         MacroPath = macroPath;
         Content = content;
         X = args.X;
@@ -28,6 +28,7 @@ internal sealed class MacroInsertRequest
         Variant = args.Variant;
         Number = number;
         Representation = representation;
+        Source = source;
     }
 
     public OpenProject Project { get; }
@@ -51,6 +52,7 @@ internal sealed class MacroInsertRequest
     /// <summary>True for numbering <c>number</c>, false for <c>keep</c>.</summary>
     public bool Number { get; }
     public string Representation { get; }
+    public PartMacroSource? Source { get; }
 
     /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the macro.</summary>
     public static MacroInsertRequest Check(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter)
@@ -61,8 +63,11 @@ internal sealed class MacroInsertRequest
         bool number = string.Equals(numbering, "number", StringComparison.OrdinalIgnoreCase);
         string representation = string.IsNullOrWhiteSpace(args.Representation) ? MultiLine : args.Representation!.Trim();
         representation = representation.Equals("Overview", StringComparison.OrdinalIgnoreCase) ? "Overview" : representation.Equals(MultiLine, StringComparison.OrdinalIgnoreCase) ? MultiLine : representation;
+        bool hasMacro = !string.IsNullOrWhiteSpace(args.Macro), hasPart = !string.IsNullOrWhiteSpace(args.Part);
         AddIf(violations, string.IsNullOrEmpty(args.Page), "'page' is required: a full page name such as =GAA+A1&EFS1/60, as eplan_page_list returns it.");
-        AddIf(violations, string.IsNullOrWhiteSpace(args.Macro), "'macro' is required: a path that eplan_macro_list returned.");
+        AddIf(violations, hasMacro == hasPart, "'macro' is required when 'part' is omitted; supply exactly one of 'macro' and 'part'.");
+        AddIf(violations, hasPart && args.Part!.Any(char.IsControl), "'part' must be a part number without control characters.");
+        AddIf(violations, args.PartVariant is not null && !hasPart, "'part_variant' requires 'part'.");
         AddIf(violations, representation is not MultiLine and not "Overview", "'representation' must be MultiLine or Overview.");
         AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
         AddIf(violations, args.Variant < 0, "'variant' must be 0 or more: a variant number that eplan_macro_get lists.");
@@ -77,8 +82,12 @@ internal sealed class MacroInsertRequest
         string root = macros.MacroRoot() is { } resolved && Directory.Exists(resolved)
             ? resolved
             : throw new BridgeErrorException(ErrorReason.EplanOperationFailed, MacroListOperation.NoMacroDirectory);
-        string path = MacroFiles.Resolve(root, args.Macro);
-        var request = new MacroInsertRequest(project, page, path, macros.ReadMacro(project.Path, path, representation: representation, variant: args.Variant), args, number, representation);
+        PartMacroSource? source = hasPart ? macros.ResolvePartMacro(args.Part!.Trim(), args.PartVariant?.Trim() is { Length: > 0 } partVariant ? partVariant : null) : null;
+        string macro = source?.Macro ?? args.Macro!;
+        if (string.IsNullOrWhiteSpace(macro))
+        { throw WriteArguments.Invalid(["'part' has no ARTICLE_GROUPSYMBOLMACRO; use eplan_device_place when the part has a suitable device template."]); }
+        string path = MacroFiles.Resolve(root, macro);
+        var request = new MacroInsertRequest(project, page, macro, path, macros.ReadMacro(project.Path, path, representation: representation, variant: args.Variant), args, number, representation, source);
         violations.AddRange(request.Problems());
         if (violations.Count == 0)
         { request.LayoutWarnings = Layout(() => page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [args.X, args.Y], [args.X, args.Y - request.Content.Height, args.X + request.Content.Width, args.Y])])); }
@@ -98,7 +107,7 @@ internal sealed class MacroInsertRequest
 
     /// <summary>The one change, for the dry run, the approval form and the audit (tool spec 5).</summary>
     public PlannedChange Change(int devices) =>
-        new() { Action = "create", Kind = "macro", Name = Page.Name, NewValue = Describe(Macro, X, Y, Variant, Number, devices) + (Representation == MultiLine ? "" : ", representation " + Representation) };
+        new() { Action = "create", Kind = "macro", Name = Page.Name, NewValue = Describe(Macro, X, Y, Variant, Number, devices) + (Representation == MultiLine ? "" : ", representation " + Representation) + (Source is null ? "" : ", part " + Source.Part + ", part variant " + Source.PartVariant) };
 
     /// <summary>The change's value as the tool spec words it: <c>Contactor_Feedback_Control.ema at (40, 200), numbering number, 8 devices</c>.</summary>
     internal static string Describe(string macro, double x, double y, int variant, bool number, int devices) => string.Format(
@@ -121,7 +130,7 @@ internal sealed class MacroInsertRequest
         var file = new FileInfo(MacroPath);
         IEnumerable<string> lines = Page.Objects.Select(id => "object\t" + id)
             .Append(Page.Layout is null ? "layout unavailable" : Protocol.BridgeJson.FromObject(Page.Layout).ToString())
-            .Append("source\t" + Macro + "\t" + Representation + "\t" + Variant)
+            .Append("source\t" + Macro + "\t" + Representation + "\t" + Variant + "\t" + Source?.Part + "\t" + Source?.PartVariant)
             .Append("macro\t" + file.Length.ToString(CultureInfo.InvariantCulture) + "\t" + file.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture));
         if (!Number)
         {

@@ -12,6 +12,12 @@ public sealed class MacroInsertArgs
     /// <summary>The macro's path below the macro directory, as eplan_macro_list returns it.</summary>
     public string? Macro { get; set; }
 
+    /// <summary>Part number whose group symbol macro is inserted; mutually exclusive with Macro.</summary>
+    public string? Part { get; set; }
+
+    /// <summary>Part variant; defaults to 1 or the part's unique variant.</summary>
+    public string? PartVariant { get; set; }
+
     /// <summary>MultiLine (default) or Overview, matching the target page type.</summary>
     public string? Representation { get; set; }
 

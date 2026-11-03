@@ -58,7 +58,7 @@ public sealed class MacroInsertToolTests : IDisposable
     {
         _harness.ProjectPath = Path.Combine(_harness.Locations.Root, "Projects", "Line1");
         JsonElement data = WriteToolHarness.Structured(await MacroWriteTools.MacroInsertAsync(
-            _harness.Pipeline, _harness.Bridge, "Line1", Page, Macro, 40, 280,
+            _harness.Pipeline, _harness.Bridge, "Line1", Page, 40, 280, Macro,
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("not_started", data.GetProperty("execution").GetString());
@@ -81,6 +81,40 @@ public sealed class MacroInsertToolTests : IDisposable
         };
         JsonElement data = WriteToolHarness.Structured(await Insert(dryRun: true));
         Assert.Contains("Layout unverified", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task PartOverview_PassesBothVariantsThroughPlanAndExecution(bool dryRun)
+    {
+        _harness.Bridge.Handlers[OperationNames.MacroInsertExecute] = _ => new MacroInsertData
+        {
+            Project = "Line1",
+            Page = Page,
+            Macro = Macro,
+            PageSizeKnown = true,
+            ArticleReferences = [new() { Tag = "-K1\u0001", PartNumber = "PXC.2861344", Variant = "1", Count = 1 }],
+        };
+        JsonElement data = WriteToolHarness.Structured(await MacroWriteTools.MacroInsertAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", Page, 40, 280, variant: 2,
+            dry_run: dryRun, representation: "Overview", part: "PXC.2861344", part_variant: "1",
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        foreach (var call in _harness.Bridge.Calls.Where(c => c.Operation is OperationNames.MacroInsertPlan or OperationNames.MacroInsertExecute))
+        {
+            var args = Assert.IsType<MacroInsertArgs>(call.Args);
+            Assert.Null(args.Macro);
+            Assert.Equal(("PXC.2861344", "1", 2, "Overview"), (args.Part, args.PartVariant, args.Variant, args.Representation));
+        }
+        if (dryRun)
+        { Assert.Empty(_harness.Bridge.Writes); }
+        else
+        {
+            JsonElement reference = Assert.Single(data.GetProperty("articleReferences").EnumerateArray());
+            Assert.Equal(("-K1", "PXC.2861344", "1", 1), (reference.GetProperty("tag").GetString(), reference.GetProperty("partNumber").GetString(), reference.GetProperty("variant").GetString(), reference.GetProperty("count").GetInt32()));
+            Assert.Single(_harness.Bridge.Writes);
+        }
     }
 
     [Fact]
@@ -176,12 +210,12 @@ public sealed class MacroInsertToolTests : IDisposable
     [Fact]
     public async Task WithoutAProject_TheBridgeIsNotAsked()
     {
-        JsonElement error = WriteToolHarness.Error(await MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, " ", Page, Macro, 40, 280, cancellationToken: TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, " ", Page, 40, 280, Macro, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("'project' is required", error.GetProperty("message").GetString(), StringComparison.Ordinal);
         Assert.Equal(0, _harness.Bridge.Invocations);
     }
 
     private Task<CallToolResult> Insert(bool dryRun = false) =>
-        MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, "Line1", Page, Macro, 40, 280, 2, "keep", dryRun, cancellationToken: TestContext.Current.CancellationToken);
+        MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, "Line1", Page, 40, 280, Macro, 2, "keep", dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }

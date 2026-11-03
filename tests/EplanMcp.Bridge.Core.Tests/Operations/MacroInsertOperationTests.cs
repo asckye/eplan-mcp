@@ -158,7 +158,7 @@ public sealed class MacroInsertOperationTests : IDisposable
         Assert.Contains("representation Overview", plan.Changes[0].NewValue, StringComparison.Ordinal);
         args.Fingerprint = plan.Fingerprint;
         Execute(args);
-        Assert.Equal("Overview", _inserter.Representation);
+        Assert.Equal(("Overview", null, null), _inserter.Source);
     }
 
     [Theory]
@@ -170,6 +170,92 @@ public sealed class MacroInsertOperationTests : IDisposable
         args.Representation = representation;
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
         Assert.Null(_macros.Opened);
+    }
+
+    [Fact]
+    public void PartGroupMacro_ResolvesSafePathAndReadsFreshCommittedArticleReferences()
+    {
+        MacroInsertArgs args = Args("=GAA+A1&EFS2/1", 40, 280);
+        args.Macro = null;
+        args.Part = "PXC.2861344";
+        args.PartVariant = "2";
+        args.Representation = "Overview";
+        _macros.Content.Representations = [new("Overview", [0])];
+        _macros.PartSource = (part, variant) =>
+        {
+            Assert.Equal(("PXC.2861344", "2"), (part, variant));
+            return new() { Part = part, PartVariant = variant!, Macro = Macro };
+        };
+        _inserter.CommittedReadback = placed =>
+        {
+            Assert.Equal("Dispose", _transactions.Calls.Last());
+            return new() { Functions = placed.Functions, ObjectCount = 196, ArticleReferences = [new() { Tag = "+A1-A1", PartNumber = args.Part, Variant = "2", Count = 1 }] };
+        };
+
+        args.Fingerprint = Plan(args).Fingerprint;
+        MacroInsertData data = Execute(args);
+
+        Assert.Equal(("Overview", "PXC.2861344", "2"), _inserter.Source);
+        Assert.Equal(Macro, data.Macro);
+        Assert.Equal(("PXC.2861344", "2", 1), (data.ArticleReferences[0].PartNumber, data.ArticleReferences[0].Variant, data.ArticleReferences[0].Count));
+        Assert.Equal(196, data.ObjectCount);
+    }
+
+    [Theory]
+    [InlineData(null, "'part' has no ARTICLE_GROUPSYMBOLMACRO")]
+    [InlineData("../outside.ema", "'macro' must be a path")]
+    [InlineData("C:/outside.ema", "'macro' must be a path")]
+    public void PartGroupMacro_MissingOrUnsafePath_IsInvalidArgument(string? macro, string message)
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Macro = null;
+        args.Part = "PXC.2861344";
+        _macros.PartSource = (_, _) => new() { Part = args.Part, PartVariant = "1", Macro = macro ?? "" };
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains(message, error.Message, StringComparison.Ordinal);
+        if (macro is null)
+        { Assert.Contains("eplan_device_place", error.Message, StringComparison.Ordinal); }
+        Assert.Null(_macros.Opened);
+    }
+
+    [Fact]
+    public void PartAndMacroOrPartVariantWithoutPart_AreInvalidArguments()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Part = "PXC.2861344";
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
+        args.Part = null;
+        args.PartVariant = "2";
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
+    }
+
+    [Fact]
+    public void PartResolutionChange_MakesThePlanStale()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Macro = null;
+        args.Part = "PXC.2861344";
+        var source = new PartMacroSource { Part = args.Part, PartVariant = "1", Macro = Macro };
+        _macros.PartSource = (_, variant) => { Assert.Null(variant); return source; };
+        args.Fingerprint = Plan(args).Fingerprint;
+        source.PartVariant = "2";
+
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Execute(args)).Error.Reason);
+        Assert.Empty(_inserter.Inserts);
+    }
+
+    [Fact]
+    public void CommittedReadbackFailure_RemainsCommittedWithWarning()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Fingerprint = Plan(args).Fingerprint;
+        _inserter.CommittedReadback = _ => throw new InvalidOperationException("unreadable");
+
+        Assert.Contains("could not be read back", Execute(args).Warning, StringComparison.Ordinal);
+        Assert.DoesNotContain("Rollback", _transactions.Calls);
     }
 
     [Fact]

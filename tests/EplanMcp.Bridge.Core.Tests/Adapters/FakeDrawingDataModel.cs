@@ -93,7 +93,7 @@ internal class FunctionBase(long oid) : SymbolReference(oid)
     }
 }
 
-internal class Function(long oid = 1) : FunctionBase(oid)
+internal partial class Function(long oid = 1) : FunctionBase(oid)
 {
     private bool _main;
     public bool IsMainFunction { get { CheckNative?.Invoke(); return _main; } set { CheckNative?.Invoke(); _main = value; } }
@@ -118,7 +118,8 @@ internal class Function(long oid = 1) : FunctionBase(oid)
     }
     public string? VisibleName { get; set; }
     public FunctionCategory FunctionCategory { get; set; } = FunctionCategory.Terminal;
-    public ArticleReference[] ArticleReferences { get; set; } = [];
+    private ArticleReference[] _articleReferences = [];
+    public ArticleReference[] ArticleReferences { get { CheckNative?.Invoke(); return _articleReferences; } set { CheckNative?.Invoke(); _articleReferences = value; } }
     public Function[] SubFunctions { get; set; } = [];
     public Function? ParentFunction { get; set; }
     public Pin[] Pins { get; set; } = [];
@@ -171,7 +172,7 @@ internal sealed class Project(params Page[] pages) : StorableObject
 
 internal static class DocumentTypeManager
 {
-    public enum DocumentType { Circuit, Graphics, TableOfContents }
+    public enum DocumentType { Circuit, Graphics, TableOfContents, Overview }
 }
 
 internal sealed class DMObjectsFinder(Project project) : IDisposable

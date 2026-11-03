@@ -29,22 +29,25 @@ internal sealed class MacroWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(MacroInsertResult))]
     [Description(
-        "Inserts a window macro (MultiLine on Circuit pages, Overview on Overview pages), its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. x, y: mm " +
+        "Inserts a window macro or a part's group symbol macro (give macro or part; MultiLine on Circuit pages, Overview on Overview pages), " +
+        "its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. x, y: mm " +
         "from the page's bottom left (y up) to the macro's top left corner. Omit dry_run to preview; false executes. Outside scratch it needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.")]
     public static async Task<CallToolResult> MacroInsertAsync(
         WritePipeline pipeline,
         IBridgeClient bridge,
         [Description("From eplan_project_list")] string project,
-        [Description("Full circuit page name")] string page,
-        [Description("Path from eplan_macro_list")] string macro,
+        [Description("Full page name")] string page,
         [Description("mm")] double x,
         [Description("mm")] double y,
+        [Description("Path from eplan_macro_list; omit with part")] string? macro = null,
         [Description("From eplan_macro_get")] int variant = 0,
         [Description("keep: the macro's tags")][AllowedValues("number", "keep")] string numbering = "number",
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
         [AllowedValues("MultiLine", "Overview")] string representation = "MultiLine",
+        string? part = null,
+        [Description("Part variant: 1 or unique")] string? part_variant = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -54,14 +57,14 @@ internal sealed class MacroWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering, Representation = representation };
+        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering, Representation = representation, Part = part, PartVariant = part_variant };
         var request = new WriteRequest<MacroInsertArgs, MacroInsertArgs>(
             InsertTool,
             ToolTier.Write,
             OperationNames.MacroInsertPlan,
             OperationNames.MacroInsertExecute,
             args,
-            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Representation = args.Representation, Fingerprint = plan.Fingerprint },
+            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Representation = args.Representation, Part = args.Part, PartVariant = args.PartVariant, Fingerprint = plan.Fingerprint },
             dry_run,
             PageWriteTools.DefaultLimit,
             "Inserting the macro");
@@ -87,6 +90,7 @@ internal sealed class MacroWriteTools
             Fingerprint = outcome.Plan.Fingerprint,
             Page = ResultShaper.CleanText(data?.Page ?? outcome.Plan.Changes.FirstOrDefault()?.Name ?? args.Page),
             Macro = ResultShaper.CleanText(data?.Macro ?? details.GetValueOrDefault("macro") ?? string.Empty),
+            ArticleReferences = data is null ? [] : [.. data.ArticleReferences.Select(r => new MacroPartReference { Tag = ResultShaper.CleanText(r.Tag), PartNumber = ResultShaper.CleanText(r.PartNumber), Variant = ResultShaper.CleanText(r.Variant), Count = r.Count })],
             Devices = data is null ? Planned(details) : [.. data.Devices.Select(d => Entry(d.Tag, d.VisibleTag, d.Category))],
             ObjectCount = data?.ObjectCount ?? Count(details, "objectCount"),
             Undo = committed ? "AI: " + InsertTool : null,

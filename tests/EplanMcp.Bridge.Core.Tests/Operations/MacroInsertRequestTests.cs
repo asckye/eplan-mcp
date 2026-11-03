@@ -9,6 +9,15 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class MacroInsertRequestTests
 {
+    [Fact]
+    public void Pxc2861344_OverviewVariantZero_OnOverviewPage_AcceptsTheLiveGroupSymbolMacro()
+    {
+        var args = new EplanMcp.Contracts.MacroInsertArgs { Part = "PXC.2861344", Representation = "Overview", Variant = 0 };
+        var observed = new MacroContent { Representations = [new("MultiLine", [0]), new("Overview", [0])] };
+
+        Assert.Empty(MacroInsertRequest.RepresentationProblems(new() { Type = "Overview" }, observed, args.Representation, args.Variant));
+    }
+
     [Theory]
     [InlineData("MultiLine", "Overview")]
     [InlineData("Overview", "Circuit")]

@@ -1,3 +1,5 @@
+using EplanMcp.Contracts;
+
 namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>What <see cref="IMacroInserter.Insert"/> reads back, inside the transaction.</summary>
@@ -8,4 +10,7 @@ public sealed class PlacedMacro
 
     /// <summary>How many objects EPLAN inserted in all.</summary>
     public int ObjectCount { get; set; }
+
+    public List<string> ObjectIds { get; set; } = [];
+    public List<MacroPartReference> ArticleReferences { get; set; } = [];
 }

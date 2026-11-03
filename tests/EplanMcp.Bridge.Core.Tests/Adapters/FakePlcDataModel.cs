@@ -11,7 +11,7 @@ internal sealed class FunctionsFilter : IDisposable
     public void Dispose() { }
 }
 
-internal sealed class ArticleReference
+internal sealed partial class ArticleReference
 {
     public string? PartNr { get; set; }
 }

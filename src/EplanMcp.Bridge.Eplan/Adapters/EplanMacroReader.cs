@@ -2,7 +2,10 @@ using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.DataModel.MasterData;
+using Eplan.EplApi.MasterData;
+using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
@@ -19,6 +22,44 @@ internal sealed class EplanMacroReader : IMacroReader
         // A variable EPLAN cannot resolve comes back unchanged (api-notes A4: $(MD_MACROS) resolves in 2026).
         string resolved = PathMap.SubstitutePath("$(MD_MACROS)");
         return string.IsNullOrWhiteSpace(resolved) || resolved.Contains("$(") ? null : resolved;
+    }
+
+    public PartMacroSource ResolvePartMacro(string part, string? partVariant)
+    {
+        MainThread.Assert();
+        // A82: open only the configured database; never select, upgrade or modify it.
+        using MDPartsDatabase database = new MDPartsManagement().OpenDatabase();
+        try
+        {
+            MDPart[] variants = database.GetPartVariants(part) ?? [];
+            if (variants.Length == 0)
+            { variants = [.. database.Parts.Where(p => string.Equals(p.PartNr, part, StringComparison.OrdinalIgnoreCase))]; }
+            string[] numbers = [.. variants.Select(p => p.PartNr).Distinct(StringComparer.Ordinal)];
+            if (numbers.Length == 0)
+            { throw new BridgeErrorException(ErrorReason.PartNotFound, "The parts database has no such part; use eplan_part_search to find its number."); }
+            if (numbers.Length > 1)
+            { throw ProjectResolver.Ambiguous("part", part, numbers, "Several parts differ only in letter case; pass an exact part number."); }
+            MDPart? selected = partVariant is null
+                ? variants.FirstOrDefault(p => p.Variant == "1") ?? (variants.Length == 1 ? variants[0] : null)
+                : variants.FirstOrDefault(p => string.Equals(p.Variant, partVariant, StringComparison.Ordinal));
+            if (selected is null)
+            { throw WriteArguments.Invalid([$"'part_variant' must select a variant of {numbers[0]}; available variants: {string.Join(", ", variants.Select(p => p.Variant))}."]); }
+            string macro = selected.Properties.ARTICLE_GROUPSYMBOLMACRO.ToString()?.Trim() ?? string.Empty;
+            GC.KeepAlive(selected);
+            if (macro.Length > 0)
+            {
+                macro = PathMap.SubstitutePath(macro);
+                if (Path.IsPathRooted(macro))
+                {
+                    string prefix = (MacroRoot() ?? string.Empty).TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
+                    if (prefix.Length <= 1 || !macro.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    { throw WriteArguments.Invalid(["The part's group symbol macro must be inside the configured macro directory."]); }
+                    macro = macro.Substring(prefix.Length);
+                }
+            }
+            return new PartMacroSource { Part = selected.PartNr, PartVariant = selected.Variant ?? string.Empty, Macro = macro };
+        }
+        finally { database.Close(); }
     }
 
     public MacroContent ReadMacro(string projectPath, string macroPath, bool defaultMultiLine = false, string? representation = null, int variant = 0)

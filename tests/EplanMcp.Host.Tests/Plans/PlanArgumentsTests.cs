@@ -48,7 +48,9 @@ public sealed class PlanArgumentsTests
 
     [Theory]
     [InlineData("representation", "Overview")]
-    public void MacroSteps_RejectRepresentationExtension(string field, string value)
+    [InlineData("part", "PXC.2861344")]
+    [InlineData("part_variant", "1")]
+    public void MacroSteps_RejectSourceAndRepresentationExtensions(string field, string value)
     {
         PlanArgumentCheck result = Check(Step("macro.insert", new Dictionary<string, object>
         { ["page"] = "+A/1", ["macro"] = "Motor.ema", ["x"] = 20, ["y"] = 20, [field] = value }));
