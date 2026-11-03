@@ -6,14 +6,16 @@ Number the tags with '?' that a macro left on one page, first as a dry run:
 
 Renumber every device tag on two pages in the scheme "Standard", from 10 in steps of 10:
 
-    {"project": "Line1", "pages": ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/61"], "only_unnumbered": false, "scheme": "Standard", "start": 10, "step": 10}
+    {"project": "Line1", "pages": ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/61"], "only_unnumbered": false, "scheme": "Standard", "start": 10, "step": 10, "dry_run": false}
 
 ## Workflow
+
+Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. A '?' in a device tag (`=GAA+A1-?QA1`, `+A1-?XG1`) means EPLAN has not numbered it yet, for example after eplan_macro_insert. A '?' after the ':' of a connection point (`+A1-XG2:?1`) is not a device's and stays.
 2. Give the pages to number by their exact full names (eplan_page_list), or leave out `pages` for the whole project. By default only tags with '?' are numbered; `only_unnumbered: false` renumbers every device in scope.
 3. EPLAN's numbering rules decide the new tags, so they are known only after running: a dry run returns the scope and how many devices it holds, without asking anybody or changing anything.
-4. Without `dry_run`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is numbered (BACKUP_FAILED).
+4. With `dry_run: false`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is numbered (BACKUP_FAILED).
 5. The numbering is one step: one Ctrl+Z in EPLAN undoes it. Check `stillUnnumbered`: EPLAN may leave some tags with '?' (a contact without its coil); tell the engineer about them.
 6. The call is not idempotent: the result depends on the tags already in use. Never repeat a call that ended in OUTCOME_UNKNOWN; check with eplan_device_list instead.
 

@@ -1,7 +1,7 @@
 id: device-renumber
 set: dev
 fixture: copy
-prompt: 在项目 {project} 中，先把设备 =F+A2-KF1 改名为 =F+A2-?KF1，再给它的线圈所在那一页上带 ? 的设备标识编号。完成后告诉我它现在的设备标识。 实际执行 `eplan_device_update` 时显式传 `dry_run:false`；省略或 true 只预览。
+prompt: 在项目 {project} 中，先把设备 =F+A2-KF1 改名为 =F+A2-?KF1，再给它的线圈所在那一页上带 ? 的设备标识编号。完成后告诉我它现在的设备标识。 实际执行 `eplan_device_update` 时显式传 `dry_run:false`；省略或 true 只预览。 实际执行 `eplan_device_renumber` 时显式传 `dry_run:false`；省略或 true 只预览。
 answer:
   type: object
   required: [tag]

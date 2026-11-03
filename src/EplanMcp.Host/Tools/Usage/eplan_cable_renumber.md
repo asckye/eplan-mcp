@@ -6,15 +6,17 @@ Renumber every cable of the project in the scheme "Standard", first as a dry run
 
 Number only the cables with '?' among two given ones, keeping the others' tags:
 
-    {"project": "Line1", "cables": ["+A2-WD4", "-WD9"], "scheme": "Standard", "keep_existing": true}
+    {"project": "Line1", "cables": ["+A2-WD4", "-WD9"], "scheme": "Standard", "keep_existing": true, "dry_run": false}
 
 ## Workflow
+
+Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. Find the cables with eplan_device_list and `category: "Cable"`; give their full tags (`+A2-WD4`) or the tags they show (`-WD4`), or leave out `cables` for every cable of the project.
 2. `scheme` is required: a name the project offers for cable numbering, such as `Standard`. An unknown one returns the offered names in `metadata.candidates`.
 3. By default EPLAN renumbers every cable in scope, so existing tags can change, and two cables can swap their tags. `keep_existing: true` keeps the existing tags and numbers only tags with '?'.
 4. The scheme decides the new tags, so they are known only after running: a dry run returns the scope and how many cables it holds, without asking anybody or changing anything.
-5. Without `dry_run`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is numbered (BACKUP_FAILED).
+5. With `dry_run: false`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is numbered (BACKUP_FAILED).
 6. The numbering is one step: one Ctrl+Z in EPLAN undoes it. The call is not idempotent; never repeat a call that ended in OUTCOME_UNKNOWN, check with eplan_device_list instead.
 
 ## Fields

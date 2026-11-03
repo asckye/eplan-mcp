@@ -38,7 +38,7 @@ public sealed class DeviceRenumberTests : IClassFixture<DestructiveHost>
             Assert.InRange(devices, 1, 50);
 
             _host.Approvals.Approve(Tool, _host.Writable, [Line(devices, null)]);
-            JsonElement numbered = await _host.CallAsync(Tool, args);
+            JsonElement numbered = await _host.CallAsync(Tool, new(args) { ["dry_run"] = false });
             ApprovalQuestion question = _host.Approvals.Questions[^1];
             string[] planned = question.Plan.Details!["devices"].Split('\n');
 
@@ -76,7 +76,7 @@ public sealed class DeviceRenumberTests : IClassFixture<DestructiveHost>
             int devices = (await _host.CallAsync(Tool, new(args) { ["dry_run"] = true })).GetProperty("scope").GetProperty("devices").GetInt32();
             _host.Approvals.Approve(Tool, _host.Writable, [Line(devices, "Default")]);
 
-            JsonElement error = await _host.ErrorAsync(Tool, args);
+            JsonElement error = await _host.ErrorAsync(Tool, new(args) { ["dry_run"] = false });
 
             // No settings node for the schemes was found, so EPLAN checks the name only when it numbers (tool spec 5):
             // after the backup, inside the transaction. Its InvalidScheme message names the schemes (S12, A18).

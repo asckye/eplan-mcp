@@ -46,10 +46,7 @@ internal sealed class DeviceDestructiveTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(DeviceRenumberResult))]
-    [Description(
-        "Lets EPLAN number device tags on pages or the whole project, by default only tags with '?' (e.g. -?QA1 after a " +
-        "macro); the new tags are known only afterwards. Always needs the engineer's approval, in scratch too; the project " +
-        "is backed up first, and one Ctrl+Z in EPLAN undoes it. Example: {\"project\": \"Line1\", \"pages\": [\"=GAA+A1&EFS1/60\"]}.")]
+    [Description("Renumbers device tags on pages or the project; default only tags containing question marks. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. One Ctrl+Z undoes it. See usage.")]
     public static async Task<CallToolResult> DeviceRenumberAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
@@ -59,7 +56,7 @@ internal sealed class DeviceDestructiveTools
         [Description("Default: EPLAN's")] string? scheme = null,
         int start = 1,
         int step = 1,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         var violations = Violations(project, pages, start, step);
@@ -114,6 +111,8 @@ internal sealed class DeviceDestructiveTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = unchanged ? ExecutionState.NotStarted : outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Scope = scope,
             Changed = data is null ? null : [.. data.Changed.Select(c => new DeviceRenumberResult.ChangeEntry { From = ResultShaper.CleanText(c.From), To = ResultShaper.CleanText(c.To) })],
             ChangedCount = data?.ChangedCount,
@@ -123,7 +122,7 @@ internal sealed class DeviceDestructiveTools
             Recovered = outcome.Recovered,
             Truncated = data is not null && (data.ChangedCount > data.Changed.Count || data.StillUnnumberedCount > data.StillUnnumbered.Count),
         };
-        result.Hint = Hint(outcome, scope);
+        result.Hint = dryRun ? WriteToolDefaults.ExecutionHint + " " + Hint(outcome, scope) : Hint(outcome, scope);
         string where = scope.PageCount is { } count ? "on " + ToolResults.Count(count, "page") : "in the project";
         string devices = ToolResults.Count(scope.Devices, "device");
         string summary = unchanged

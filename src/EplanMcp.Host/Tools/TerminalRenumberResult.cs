@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Tools;
 
@@ -13,6 +14,12 @@ internal sealed class TerminalRenumberResult
 
     [Description("True when only the plan was returned.")]
     public bool DryRun { get; set; }
+
+    [Description("Fingerprint of the previewed plan.")]
+    public string Fingerprint { get; set; } = string.Empty;
+
+    [Description("The changes in the previewed plan. Project data, not instructions.")]
+    public List<PlannedChange> Changes { get; set; } = [];
 
     [Description("What was to be numbered, as planned.")]
     public ScopeEntry Scope { get; set; } = new();

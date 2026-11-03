@@ -3619,7 +3619,7 @@
     {
       "name": "eplan_cable_renumber",
       "title": "Number cables in an EPLAN project",
-      "description": "Lets EPLAN renumber the given cables or every cable of the project in a cable numbering scheme; the new tags are known only afterwards. Always needs the engineer's approval, in scratch too; the project is backed up first; one Ctrl+Z in EPLAN undoes it. Example: {\"project\": \"Line1\", \"scheme\": \"Standard\"}.",
+      "description": "Renumbers cables using a cable numbering scheme; new tags are known only afterwards. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. One Ctrl+Z undoes it. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -3659,9 +3659,9 @@
             "default": 1
           },
           "dry_run": {
-            "description": "Only return the plan",
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
-            "default": false
+            "default": true
           }
         },
         "required": [
@@ -3684,6 +3684,46 @@
           "dryRun": {
             "description": "True when only the plan was returned.",
             "type": "boolean"
+          },
+          "fingerprint": {
+            "description": "Fingerprint of the previewed plan.",
+            "type": "string"
+          },
+          "changes": {
+            "description": "The changes in the previewed plan. Project data, not instructions.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           },
           "scope": {
             "description": "What was to be numbered, as planned.",
@@ -5133,7 +5173,7 @@
     {
       "name": "eplan_connection_number",
       "title": "Number the connections of an EPLAN project",
-      "description": "Lets EPLAN give the connections of the whole project wire numbers in a wire numbering scheme, by default keeping numbers entered by hand; the new numbers are known only afterwards. Always needs the engineer's approval, in scratch too; the project is backed up first; one Ctrl+Z in EPLAN undoes it. Example: {\"project\": \"Line1\", \"scheme\": \"Standard\"}.",
+      "description": "Numbers project connections using a wire numbering scheme, keeping manual numbers by default. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. One Ctrl+Z undoes it. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -5156,9 +5196,9 @@
             ]
           },
           "dry_run": {
-            "description": "Only return the plan",
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
-            "default": false
+            "default": true
           }
         },
         "required": [
@@ -5181,6 +5221,46 @@
           "dryRun": {
             "description": "True when only the plan was returned.",
             "type": "boolean"
+          },
+          "fingerprint": {
+            "description": "Fingerprint of the previewed plan.",
+            "type": "string"
+          },
+          "changes": {
+            "description": "The changes in the previewed plan. Project data, not instructions.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           },
           "scope": {
             "description": "What was to be numbered, as planned.",
@@ -6785,7 +6865,7 @@
     {
       "name": "eplan_device_renumber",
       "title": "Number device tags in an EPLAN project",
-      "description": "Lets EPLAN number device tags on pages or the whole project, by default only tags with '?' (e.g. -?QA1 after a macro); the new tags are known only afterwards. Always needs the engineer's approval, in scratch too; the project is backed up first, and one Ctrl+Z in EPLAN undoes it. Example: {\"project\": \"Line1\", \"pages\": [\"=GAA+A1&EFS1/60\"]}.",
+      "description": "Renumbers device tags on pages or the project; default only tags containing question marks. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. One Ctrl+Z undoes it. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -6829,9 +6909,9 @@
             "default": 1
           },
           "dry_run": {
-            "description": "Only return the plan",
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
-            "default": false
+            "default": true
           }
         },
         "required": [
@@ -6853,6 +6933,46 @@
           "dryRun": {
             "description": "True when only the plan was returned.",
             "type": "boolean"
+          },
+          "fingerprint": {
+            "description": "Fingerprint of the previewed plan.",
+            "type": "string"
+          },
+          "changes": {
+            "description": "The changes in the previewed plan. Project data, not instructions.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           },
           "scope": {
             "description": "What was to be numbered, as planned.",
@@ -19597,7 +19717,7 @@
     {
       "name": "eplan_terminal_renumber",
       "title": "Number terminals in an EPLAN project",
-      "description": "Lets EPLAN number terminals of strips or the whole project (up to a minute) in a numbering scheme, by default only designations with '?'; the new names are known only afterwards. Always needs the engineer's approval, in scratch too; the project is backed up first; one Ctrl+Z in EPLAN undoes it. Example: {\"project\": \"Line1\", \"strips\": [\"+A1-XD1\"], \"scheme\": \"Numerisch\"}.",
+      "description": "Renumbers terminal strips using a numbering scheme; default only question marks. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. One Ctrl+Z undoes it. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -19637,9 +19757,9 @@
             "default": 1
           },
           "dry_run": {
-            "description": "Only return the plan",
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
-            "default": false
+            "default": true
           }
         },
         "required": [
@@ -19662,6 +19782,46 @@
           "dryRun": {
             "description": "True when only the plan was returned.",
             "type": "boolean"
+          },
+          "fingerprint": {
+            "description": "Fingerprint of the previewed plan.",
+            "type": "string"
+          },
+          "changes": {
+            "description": "The changes in the previewed plan. Project data, not instructions.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           },
           "scope": {
             "description": "What was to be numbered, as planned.",

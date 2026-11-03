@@ -1,7 +1,7 @@
 id: connection-number
 set: dev
 fixture: copy
-prompt: 按 Standard 方案给项目 {project} 编线号，不要覆盖手工输入的线号。完成后告诉我有多少条连接的线号变了。
+prompt: 按 Standard 方案给项目 {project} 编线号，不要覆盖手工输入的线号。完成后告诉我有多少条连接的线号变了。 实际执行 `eplan_connection_number` 时显式传 `dry_run:false`；省略或 true 只预览。
 answer:
   type: object
   required: [changed]

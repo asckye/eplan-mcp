@@ -31,17 +31,14 @@ internal sealed class ConnectionDestructiveTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(ConnectionNumberResult))]
-    [Description(
-        "Lets EPLAN give the connections of the whole project wire numbers in a wire numbering scheme, by default keeping " +
-        "numbers entered by hand; the new numbers are known only afterwards. Always needs the engineer's approval, in " +
-        "scratch too; the project is backed up first; one Ctrl+Z in EPLAN undoes it. Example: {\"project\": \"Line1\", \"scheme\": \"Standard\"}.")]
+    [Description("Numbers project connections using a wire numbering scheme, keeping manual numbers by default. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. One Ctrl+Z undoes it. See usage.")]
     public static async Task<CallToolResult> ConnectionNumberAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
         [Description("From eplan_project_list")] string project,
         [Description("E.g. Standard, Potenzialorientiert")] string scheme,
         [Description("Existing numbers to replace")][AllowedValues("except_manual", "none", "all")] string overwrite = "except_manual",
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
@@ -104,6 +101,8 @@ internal sealed class ConnectionDestructiveTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = unchanged ? ExecutionState.NotStarted : outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Scope = scope,
             Changed = data is null ? null : [.. data.Changed.Select(c => new ConnectionNumberResult.ChangeEntry { From = ResultShaper.CleanText(c.From), To = ResultShaper.CleanText(c.To), Page = ResultShaper.CleanText(c.Page) })],
             ChangedCount = data?.ChangedCount,
@@ -113,7 +112,7 @@ internal sealed class ConnectionDestructiveTools
             Recovered = outcome.Recovered,
             Truncated = data is not null && data.ChangedCount > data.Changed.Count,
         };
-        result.Hint = Hint(outcome);
+        result.Hint = dryRun ? WriteToolDefaults.ExecutionHint + " " + Hint(outcome) : Hint(outcome);
         string summary = unchanged
             ? "EPLAN changed no wire number, so nothing was changed. A backup was made first (see 'backup')."
             : committed

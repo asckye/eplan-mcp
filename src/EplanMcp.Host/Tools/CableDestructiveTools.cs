@@ -31,10 +31,7 @@ internal sealed class CableDestructiveTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(CableRenumberResult))]
-    [Description(
-        "Lets EPLAN renumber the given cables or every cable of the project in a cable numbering scheme; the new tags are " +
-        "known only afterwards. Always needs the engineer's approval, in scratch too; the project is backed up first; one " +
-        "Ctrl+Z in EPLAN undoes it. Example: {\"project\": \"Line1\", \"scheme\": \"Standard\"}.")]
+    [Description("Renumbers cables using a cable numbering scheme; new tags are known only afterwards. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. One Ctrl+Z undoes it. See usage.")]
     public static async Task<CallToolResult> CableRenumberAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
@@ -44,7 +41,7 @@ internal sealed class CableDestructiveTools
         [Description("true: number only tags with '?'")] bool keep_existing = false,
         int start = 1,
         int step = 1,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
@@ -119,6 +116,8 @@ internal sealed class CableDestructiveTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = unchanged ? ExecutionState.NotStarted : outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Scope = scope,
             Changed = data is null ? null : [.. data.Changed.Select(c => new CableRenumberResult.ChangeEntry { From = ResultShaper.CleanText(c.From), To = ResultShaper.CleanText(c.To) })],
             ChangedCount = data?.ChangedCount,
@@ -127,7 +126,7 @@ internal sealed class CableDestructiveTools
             Recovered = outcome.Recovered,
             Truncated = data is not null && data.ChangedCount > data.Changed.Count,
         };
-        result.Hint = Hint(outcome, scope);
+        result.Hint = dryRun ? WriteToolDefaults.ExecutionHint + " " + Hint(outcome, scope) : Hint(outcome, scope);
         string where = scope.CableCount is { } count ? "of the " + ToolResults.Count(count, "given cable") : "in the project";
         string cables = ToolResults.Count(scope.Cables, "cable");
         string summary = unchanged

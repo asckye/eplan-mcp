@@ -19,12 +19,13 @@
 | `scheme` | string | 是 | — | 端子编号方案的名称，如 `Numerisch`；不存在时错误中列出可用的方案 |
 | `only_unnumbered` | boolean | 否 | true | true：只给名称中带 `?` 的端子编号；false：范围内全部端子重新编号 |
 | `start`、`step` | integer，≥ 1 | 否 | 1、1 | 起始值和步长 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回编号的范围，不请求审批，不备份，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - `scheme` 必填：方案传空串时 EPLAN 用界面上次使用的方案（A24），结果会随界面状态变化。
 - 同一端子排出现两次时返回 `INVALID_ARGUMENT`。
 
 ## 3. 输出
+省略或 `dry_run: true` 返回编号范围变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 同 `eplan_device_renumber`，把"设备"换成"端子"：`scope`（`stripCount` 代替 `pageCount`，`terminals` 代替 `devices`）、`changed`（`{ "from": "+A1-XD1:2", "to": "+A1-XD1:3" }`，最多 200 条）、`changedCount`、`stillUnnumbered`、`backup`、`undo`、`recovered`、`truncated`、`hint`。
 - 一行摘要：`Numbered 4 terminals. A backup was made first (see 'backup'); Ctrl+Z in EPLAN undoes this step.`
 - 工具描述写明：整个项目可能要几十秒（S21：1331 个端子 31–43 秒）。

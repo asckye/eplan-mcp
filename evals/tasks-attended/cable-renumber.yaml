@@ -1,7 +1,7 @@
 id: cable-renumber
 set: dev
 fixture: copy
-prompt: 按 Standard 方案给项目 {project} 的电缆重新编号，告诉我哪些电缆的标识变了（编号之前的完整标识）。
+prompt: 按 Standard 方案给项目 {project} 的电缆重新编号，告诉我哪些电缆的标识变了（编号之前的完整标识）。 实际执行 `eplan_cable_renumber` 时显式传 `dry_run:false`；省略或 true 只预览。
 answer:
   type: object
   required: [changed]

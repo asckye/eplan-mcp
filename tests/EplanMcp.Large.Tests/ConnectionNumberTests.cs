@@ -47,7 +47,7 @@ public sealed class ConnectionNumberTests : IClassFixture<DestructiveHost>
         int asked = _host.Approvals.Questions.Count;
         int folders = _host.BackupFolders().Length;
 
-        JsonElement error = await _host.ErrorAsync(Tool, new() { ["project"] = _host.Writable, ["scheme"] = "Potential" });
+        JsonElement error = await _host.ErrorAsync(Tool, new() { ["dry_run"] = false, ["project"] = _host.Writable, ["scheme"] = "Potential" });
 
         // S21 found 11 schemes under the project setting WireNumberingLog.Schema (A24).
         string[] candidates = error.GetProperty("metadata").GetProperty("candidates").GetString()!.Split('\n');
@@ -69,7 +69,7 @@ public sealed class ConnectionNumberTests : IClassFixture<DestructiveHost>
         Assert.InRange(connections, 1, int.MaxValue);
 
         _host.Approvals.Approve(Tool, _host.Writable, [string.Create(CultureInfo.InvariantCulture, $"renumber wire numbers in the project ({connections} connections, {before} numbered), scheme: {Scheme}, overwrite: {overwrite.Replace('_', ' ')}")]);
-        JsonElement numbered = TerminalRenumberTests.Answered(await _host.CallAsync(Tool, args));
+        JsonElement numbered = TerminalRenumberTests.Answered(await _host.CallAsync(Tool, new(args) { ["dry_run"] = false }));
         int changed = numbered.GetProperty("changedCount").GetInt32();
         TestContext.Current.TestOutputHelper?.WriteLine(
             $"{overwrite}: {connections} connections, {before} -> {numbered.GetProperty("designatedAfter")} numbered, {changed} changed; first: "

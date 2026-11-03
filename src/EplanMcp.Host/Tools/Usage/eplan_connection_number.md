@@ -6,15 +6,17 @@ Number the project's connections in the scheme "Standard", keeping wire numbers 
 
 Renumber every connection by potential, replacing all existing wire numbers:
 
-    {"project": "Line1", "scheme": "Potenzialorientiert", "overwrite": "all"}
+    {"project": "Line1", "scheme": "Potenzialorientiert", "overwrite": "all", "dry_run": false}
 
 ## Workflow
+
+Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. This is EPLAN's connection numbering: it gives wire numbers (the connection designation) to the connections of the whole project; there is no page or connection scope.
 2. `scheme` is required: a name the project offers for wire numbering, such as `Standard`, `Potenzialorientiert` or `Verbindungsorientiert`. An unknown one returns the offered names in `metadata.candidates`.
 3. `overwrite` decides which existing wire numbers may change: `except_manual` (default) keeps those entered by hand, `none` keeps every existing one and numbers only connections without one, `all` replaces all of them.
 4. The scheme decides the new wire numbers, so they are known only after running: a dry run returns how many connections there are and how many have a wire number, without asking anybody or changing anything.
-5. Without `dry_run`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is numbered (BACKUP_FAILED).
+5. With `dry_run: false`, the engineer is always asked to approve in EPLAN, in a scratch project too. After the approval the whole project is copied to a new backup folder; if that fails, nothing is numbered (BACKUP_FAILED).
 6. One call can change hundreds of wire numbers; they are one step, and one Ctrl+Z in EPLAN undoes it. The call is not idempotent; never repeat a call that ended in OUTCOME_UNKNOWN, ask the engineer to check the project in EPLAN instead.
 
 ## Fields

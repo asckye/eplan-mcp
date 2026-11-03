@@ -19,12 +19,13 @@
 | `only_unnumbered` | boolean | 否 | true | true：只给标识中带 `?` 的设备编号；false：范围内的全部设备重新编号 |
 | `scheme` | string | 否 | EPLAN 的默认方案 | 编号方案的名称，如 `Standard` |
 | `start`、`step` | integer，≥ 1 | 否 | 1、1 | 每个标识字母的起始值和步长 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回编号的范围，不请求审批，不备份，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - 页名只做精确匹配，同 `eplan_page_delete`。同一页出现两次时返回 `INVALID_ARGUMENT`。
 - 只给设备标识编号。端子连接点名称中的 `?`（如 `:?1`）不由本工具处理（S12）。
 
 ## 3. 输出
+省略或 `dry_run: true` 返回编号范围变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",

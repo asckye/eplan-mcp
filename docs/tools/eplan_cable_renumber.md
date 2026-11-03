@@ -19,11 +19,12 @@
 | `scheme` | string | 是 | — | 电缆编号方案的名称，如 `Standard`；不存在时错误中列出可用的方案 |
 | `keep_existing` | boolean | 否 | false | true：已有标识的电缆保留原名，只给没有标识的编号 |
 | `start`、`step` | integer，≥ 1 | 否 | 1、1 | 起始值和步长 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回编号的范围，不请求审批，不备份，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - `scheme` 必填，理由同 `eplan_terminal_renumber`。
 
 ## 3. 输出
+省略或 `dry_run: true` 返回编号范围变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 同 `eplan_device_renumber`，`scope` 中是 `cableCount`，`changed` 是电缆标识（`{ "from": "+A2-WD4", "to": "+A2-WD5" }`），没有 `stillUnnumbered`。
 - 一行摘要：`Renumbered 4 cables. A backup was made first (see 'backup'); Ctrl+Z in EPLAN undoes this step.`
 

@@ -13,6 +13,7 @@ namespace EplanMcp.Host.Tests.Tools;
 /// sections 3, 4, 6 and 7), with what spike S21 found EPLAN does to the sample project (api-notes A24: 605 wire numbers).
 /// </summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class ConnectionNumberToolTests : IDisposable
 {
     private const string Line = "renumber wire numbers in the project (2060 connections, 116 numbered), scheme: Standard, overwrite: except manual";
@@ -51,6 +52,36 @@ public sealed class ConnectionNumberToolTests : IDisposable
     }
 
     public void Dispose() => _harness.Dispose();
+
+    [Fact]
+    public async Task McpOmittedTrueAndFalse_UsePreviewAndExecutionPaths()
+    {
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            Dictionary<string, object?> args = new() { ["project"] = "Line1", ["scheme"] = "Standard" };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync("eplan_connection_number", args, cancellationToken: TestContext.Current.CancellationToken));
+            args["dry_run"] = true;
+            JsonElement explicitPreview = WriteToolHarness.Structured(await client.CallToolAsync("eplan_connection_number", args, cancellationToken: TestContext.Current.CancellationToken));
+
+            Assert.True(JsonElement.DeepEquals(omitted, explicitPreview));
+            Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+            Assert.True(omitted.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", omitted.GetProperty("fingerprint").GetString());
+            Assert.NotEmpty(omitted.GetProperty("changes").EnumerateArray());
+            Assert.Contains("dry_run: false", omitted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.Empty(_harness.Bridge.Writes);
+            Assert.False(Directory.Exists(_harness.Locations.Audit));
+            Assert.Empty(_dialog.Questions);
+            args["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync("eplan_connection_number", args, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", executed.GetProperty("fingerprint").GetString());
+            Assert.Single(_harness.Bridge.Writes);
+            Assert.Single(_dialog.Questions);
+            Assert.Equal(605, executed.GetProperty("changedCount").GetInt32());
+        });
+    }
 
     [Fact]
     public async Task ADryRun_ShowsTheScopeOnly()

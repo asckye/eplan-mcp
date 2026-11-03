@@ -31,11 +31,7 @@ internal sealed class TerminalDestructiveTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(TerminalRenumberResult))]
-    [Description(
-        "Lets EPLAN number terminals of strips or the whole project (up to a minute) in a numbering scheme, by default " +
-        "only designations with '?'; the new names are known only afterwards. Always needs the " +
-        "engineer's approval, in scratch too; the project is backed up first; one Ctrl+Z in EPLAN undoes it. " +
-        "Example: {\"project\": \"Line1\", \"strips\": [\"+A1-XD1\"], \"scheme\": \"Numerisch\"}.")]
+    [Description("Renumbers terminal strips using a numbering scheme; default only question marks. Omit/true dry_run previews; false executes with engineer approval and a project backup, including scratch. One Ctrl+Z undoes it. See usage.")]
     public static async Task<CallToolResult> TerminalRenumberAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
@@ -45,7 +41,7 @@ internal sealed class TerminalDestructiveTools
         [Description("false: renumber all")] bool only_unnumbered = true,
         int start = 1,
         int step = 1,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
@@ -121,6 +117,8 @@ internal sealed class TerminalDestructiveTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = unchanged ? ExecutionState.NotStarted : outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Scope = scope,
             Changed = data is null ? null : [.. data.Changed.Select(c => new TerminalRenumberResult.ChangeEntry { From = ResultShaper.CleanText(c.From), To = ResultShaper.CleanText(c.To) })],
             ChangedCount = data?.ChangedCount,
@@ -130,7 +128,7 @@ internal sealed class TerminalDestructiveTools
             Recovered = outcome.Recovered,
             Truncated = data is not null && (data.ChangedCount > data.Changed.Count || data.StillUnnumberedCount > data.StillUnnumbered.Count),
         };
-        result.Hint = Hint(outcome, scope);
+        result.Hint = dryRun ? WriteToolDefaults.ExecutionHint + " " + Hint(outcome, scope) : Hint(outcome, scope);
         string where = scope.StripCount is { } count ? "on " + ToolResults.Count(count, "strip") : "in the project";
         string terminals = ToolResults.Count(scope.Terminals, "terminal");
         string summary = unchanged

@@ -17,12 +17,13 @@
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `scheme` | string | 是 | — | 线号方案的名称，如 `Standard`、`Potenzialorientiert`、`Verbindungsorientiert`；不存在时错误中列出可用的方案 |
 | `overwrite` | enum `none` / `except_manual` / `all` | 否 | `except_manual` | 已有线号怎样处理：都保留；只覆盖自动编的、保留手工输入的；全部覆盖 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回编号的范围，不请求审批，不备份，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - 范围总是整个项目：EPLAN 的线号按方案在全项目内分配（`DesignateConnections` 的项目重载）。按页或按连接编号以后再加，需要先验证 `ArrayList` 重载。
 - 默认 `except_manual`：不覆盖工程师手工输入的线号。
 
 ## 3. 输出
+省略或 `dry_run: true` 返回编号范围变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",

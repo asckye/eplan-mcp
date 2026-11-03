@@ -1,7 +1,7 @@
 id: terminal-renumber
 set: dev
 fixture: copy
-prompt: 在项目 {project} 中，按 Numerisch 方案把端子排 +A1-XD1 的端子按顺序重新编号。完成后告诉我有几个端子改了名称。
+prompt: 在项目 {project} 中，按 Numerisch 方案把端子排 +A1-XD1 的端子按顺序重新编号。完成后告诉我有几个端子改了名称。 实际执行 `eplan_terminal_renumber` 时显式传 `dry_run:false`；省略或 true 只预览。
 answer:
   type: object
   required: [changed]

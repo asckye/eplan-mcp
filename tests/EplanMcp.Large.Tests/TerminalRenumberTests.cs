@@ -37,7 +37,7 @@ public sealed class TerminalRenumberTests : IClassFixture<DestructiveHost>
         Assert.Equal(("not_started", 1, before.Length, JsonValueKind.Null), (dryRun.GetProperty("execution").GetString(), scope.GetProperty("stripCount").GetInt32(), scope.GetProperty("terminals").GetInt32(), dryRun.GetProperty("changed").ValueKind));
 
         _host.Approvals.Approve(Tool, _host.Writable, [$"renumber all terminal designations on 1 strip ({before.Length} terminals), scheme: {Scheme}, start 1, step 1"]);
-        JsonElement numbered = Answered(await _host.CallAsync(Tool, args));
+        JsonElement numbered = Answered(await _host.CallAsync(Tool, new(args) { ["dry_run"] = false }));
         string[] after = await NamesAsync(Strip);
         (string From, string To)[] changed = [.. numbered.GetProperty("changed").EnumerateArray().Select(c => (c.GetProperty("from").GetString()!, c.GetProperty("to").GetString()!))];
         TestContext.Current.TestOutputHelper?.WriteLine($"{Strip} before: {string.Join(", ", before)}; after: {string.Join(", ", after)}; changed: {string.Join(", ", changed.Select(c => c.From + " -> " + c.To))}.");
@@ -72,7 +72,7 @@ public sealed class TerminalRenumberTests : IClassFixture<DestructiveHost>
             Assert.InRange(terminals, 1, 200);
 
             _host.Approvals.Approve(Tool, _host.Writable, [$"renumber terminal designations containing '?' in the project ({terminals} {(terminals == 1 ? "terminal" : "terminals")}), scheme: {Scheme}, start 1, step 1"]);
-            JsonElement numbered = Answered(await _host.CallAsync(Tool, args));
+            JsonElement numbered = Answered(await _host.CallAsync(Tool, new(args) { ["dry_run"] = false }));
             TestContext.Current.TestOutputHelper?.WriteLine(numbered.ToString());
 
             // EPLAN is still there, and it renamed only terminals whose designation had '?' (tool spec 5, to be confirmed).
@@ -98,7 +98,7 @@ public sealed class TerminalRenumberTests : IClassFixture<DestructiveHost>
         int folders = _host.BackupFolders().Length;
         int asked = _host.Approvals.Questions.Count;
 
-        JsonElement error = await _host.ErrorAsync(Tool, new() { ["project"] = _host.Writable, ["strips"] = DestructiveHost.Json(new[] { Strip }), ["scheme"] = "numerisch" });
+        JsonElement error = await _host.ErrorAsync(Tool, new() { ["dry_run"] = false, ["project"] = _host.Writable, ["strips"] = DestructiveHost.Json(new[] { Strip }), ["scheme"] = "numerisch" });
 
         // S21 found Gerätedefinition, Initiatoren and Numerisch under USER.Terminal.Numbering.Scheme (A24).
         string[] candidates = error.GetProperty("metadata").GetProperty("candidates").GetString()!.Split('\n');
