@@ -20,6 +20,7 @@ internal static class ConnectionCreateSchema
         pages["uniqueItems"] = true;
         JsonObject interruption = Object(new() { ["kind"] = Kind("interruption_point"), ["name"] = Text(), ["position"] = Point(), ["direction"] = new JsonObject { ["enum"] = new JsonArray("Up", "Down", "Left", "Right") }, ["counterpart_pages"] = pages });
         interruption["properties"]!["sort_code"] = new JsonObject { ["type"] = "integer", ["minimum"] = 0 };
+        interruption["properties"]!["symbol"] = Text(64);
         JsonObject tNode = Node("t_node", 3);
         tNode["properties"]!["variant"] = new JsonObject { ["type"] = "integer" };
         JsonObject reference = new() { ["oneOf"] = new JsonArray(Object(new() { ["locator"] = Locator() }), Object(new() { ["item_index"] = Integer(0, 49) })) };

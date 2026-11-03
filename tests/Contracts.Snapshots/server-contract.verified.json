@@ -4430,6 +4430,11 @@
                     "sort_code": {
                       "type": "integer",
                       "minimum": 0
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
                     }
                   },
                   "required": [

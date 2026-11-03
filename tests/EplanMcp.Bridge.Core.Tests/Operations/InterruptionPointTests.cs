@@ -48,6 +48,21 @@ public sealed class InterruptionPointTests
     }
 
     [Fact]
+    public void Symbol_NamesAnotherSpecialInterruptionSymbol_DefaultStaysBpf()
+    {
+        // D7: EPLAN's insert command may use another SPECIAL interruption symbol than BPF.
+        var fake = new InterruptionPointFixture();
+        fake.Base.Symbols.Add(ConnectionCreateFixture.Variant("BPX", "InterruptionPoint", 3, "Up"));
+        fake.Base.Scene.SymbolBounds.Add("BPX/3", [-1, -1, 1, 1]);
+        string Planned() => (string)Assert.Single(fake.Plan()["symbols"]!, s => s["interruption"] is not null)["symbol"]!["name"]!;
+        Assert.Equal("BPF", Planned());
+        fake.Request["items"]!.Last!["symbol"] = "BPX";
+        Assert.Equal("BPX", Planned());
+        fake.Request["items"]!.Last!["symbol"] = "NONE";
+        Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeErrorException>(() => fake.Plan()).Error.Reason);
+    }
+
+    [Fact]
     public void SortCode_ReadbackMismatch_RollsBackPlacement()
     {
         var fake = new InterruptionPointFixture { Failure = "sort_code" };

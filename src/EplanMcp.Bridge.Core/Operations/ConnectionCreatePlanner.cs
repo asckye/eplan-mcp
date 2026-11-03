@@ -74,6 +74,8 @@ public static class ConnectionCreatePlanner
         var resolved = new JArray();
         var interruptions = new Dictionary<string, JObject>(StringComparer.Ordinal);
         var requestedVariants = new Dictionary<string, (int Number, string Pointer)>(StringComparer.Ordinal);
+        // D7 (customer page): EPLAN's insert command may use another SPECIAL interruption symbol than BPF (filled arrows).
+        var interruptionSymbols = new Dictionary<string, string>(StringComparer.Ordinal);
         string Key(double[] p) => FormattableString.Invariant($"{p[0]},{p[1]}");
         double[] Point(JToken? token, string at)
         {
@@ -129,7 +131,7 @@ public static class ConnectionCreatePlanner
             bool wire = (string?)item["kind"] == "wire";
             if ((string?)item["kind"] == "interruption_point")
             {
-                Members(item, at, "kind name direction position counterpart_pages", "sort_code");
+                Members(item, at, "kind name direction position counterpart_pages", "sort_code symbol");
                 Require(item["sort_code"] is null || item["sort_code"]!.Type == JTokenType.Integer
                     && long.TryParse(item["sort_code"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out _), at + "/sort_code", "Supply a nonnegative Int64 integer.");
                 Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])
@@ -139,6 +141,11 @@ public static class ConnectionCreatePlanner
                     && scope.Values<string>().Distinct(StringComparer.Ordinal).Count() == scope.Count, at + "/counterpart_pages", "Supply 1..20 distinct exact counterpart pages.");
                 double[] point = Point(item["position"], at + "/position");
                 Node(point, [(string)item["direction"]!], "interruption_point", at);
+                if (item["symbol"] is { } symbolName)
+                {
+                    Require(symbolName.Type == JTokenType.String && ((string)symbolName!).Length is >= 1 and <= 64, at + "/symbol", "Supply a SPECIAL interruption point symbol name from eplan_symbol_search.");
+                    interruptionSymbols[Key(point)] = (string)symbolName!;
+                }
                 interruptions.Add(Key(point), (JObject)item.DeepClone());
                 continue;
             }
@@ -206,7 +213,7 @@ public static class ConnectionCreatePlanner
             {
                 "corner" => s.Name == "CO" && s.Type == "Routing",
                 "t_node" => s.Type == (s.Name switch { "TLRO" => "TNodeUp", "TLRU" => "TNodeDown", "TOUL" => "TNodeLeft", "TOUR" => "TNodeRight", _ => "" }),
-                "interruption_point" => s.Name == "BPF" && s.Type == "InterruptionPoint",
+                "interruption_point" => s.Type == "InterruptionPoint" && s.Name == (interruptionSymbols.TryGetValue(Key(node.Point), out string? named) ? named : "BPF"),
                 _ => s.Name == "PCP" && s.Type == "PotentialTerminal",
             }) && s.ConnectionPoints.Count == node.Directions.Length && s.ConnectionPoints.All(p => p.Location.Length == 2
                 && p.Location.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && Math.Abs(v) <= 2 * grid)

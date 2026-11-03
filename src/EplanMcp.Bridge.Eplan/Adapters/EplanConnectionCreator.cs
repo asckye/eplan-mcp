@@ -24,7 +24,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     private static string Key(SymbolReference owner, int index) => FormattableString.Invariant($"{SnapshotCanonical.TypeOf(owner.ToStringIdentifier())}/{owner.ObjectIdentifier}/{index}");
     private static double[] XY(PointD point) => [point.X, point.Y];
     private static IEnumerable<SymbolVariant> Variants(string project) => EplanProjects.ByPath(project).SymbolLibraries.Where(l => l.Name == "SPECIAL")
-        .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP" or "BPF").SelectMany(s => s.Variants);
+        .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP" || s.Type == Symbol.SymbolType.InterruptionPoint).SelectMany(s => s.Variants);
     public ConnectionCreatePlanner.Scene Read(string project, string page) => Read(project, page, []);
     public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(new EplanConnectionCreator(false).Read(project, page));
     internal ConnectionCreatePlanner.Scene Read(string project, string page, IReadOnlyList<Placement> created)
