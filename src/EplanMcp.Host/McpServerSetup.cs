@@ -92,6 +92,7 @@ internal static class McpServerSetup
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
         {
             ToolProfiles.Apply(options.ToolCollection ?? [], choice.Profile);
+            options.ServerInstructions = ServerInstructions.Text + (options.ToolCollection?.Any(t => t.ProtocolTool.Name == ContextTools.GetTool) == true ? ServerInstructions.Plugins : string.Empty);
 
             // The pack resources belong to the pack toolset, which only the full profile offers (ADR-0022).
             if (choice.Profile != ToolProfile.Full)

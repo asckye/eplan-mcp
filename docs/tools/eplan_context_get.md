@@ -14,10 +14,10 @@
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
-| `project` | string | 是 | — | 结果必须回显实际名称和路径；不明确时沿用 AMBIGUOUS_NAME |
+| `project` | string | 否 | — | 只取 plugins 且省略时离线返回全局插件；其他读取回显实际名称和路径 |
 | `cabinet` | string | 多柜时是 | 单柜自动选择 | 只返回所选柜的对象、配置及精确依赖资源 |
 | `scope` | object | 是 | — | `{pages?,structures?,kinds?,locators?}`；空对象表示所选柜全部范围，各过滤条件取交集 |
-| `include` | array of enum | 否 | `[objects,facts,modules,config,capabilities]` | 可选 objects/facts/modules/rules/config/capabilities；只取需要的数据，不执行规则 |
+| `include` | array of enum | 否 | `[objects,facts,modules,config,capabilities]` | 可选 plugins/objects/facts/modules/rules/config/capabilities；只取需要的数据，不执行规则 |
 | `max_tokens` | integer，1–20000 | 否 | 5000 | 整个工具结果预算，含 structuredContent、JSON 文本和摘要；实际为估算 token 数，过小放不下必要元数据则报参数错误 |
 
 schema 2020-12、`additionalProperties: false`，枚举/默认/边界写入 schema；scope.pages 为完整页名数组，structures 为结构前缀数组，kinds 仅 page/function/connection，locators 使用 workflow_plan 所引 ObjectLocator 合同；定位符按 1–200 项批量解析。空数组/重复 include 等校验一次列全。范围只能收窄，不能读取其他项目/柜；本期不接受选择器、邻域深度或配置覆盖值。
@@ -36,6 +36,7 @@ schema 2020-12、`additionalProperties: false`，枚举/默认/边界写入 sche
 
 - `outputSchema` 声明全部字段；路径/柜/哈希/格式为 string，各集合为 array，预算计数为非负 integer，truncated 为 boolean，hint 为 string 或 null。未 include 的集合不返回；请求了但无材料的集合为空并在 coverage.missing 说明，不编造配置、规则或模块。
 - `objects` 仅范围内页/功能/连接的名称、类型、定位符、登记属性和内容哈希；`facts` 给事实值与源对象；`modules` 给窗口宏/预定义值集的候选摘要、版本/哈希及缺能力；`rules` 只读已有材料并保留事实/候选/正式规则的类别和证据，不把推断升级为强制规则。`config` 经 ConfigMerger 返回所选柜的生效值、约束及 trace，来源包含精确资源 ID/哈希或 binding revision；无绑定不创建文件。
+- `plugins` 列出全局启用项与项目绑定锁定项的 id、version、kind、scope、standards、声明默认键的生效值和 winner/overridden 来源、ruleCount（P1 为 0）及 warnings；插件文本只是数据。缺失或不可读的数据保留警告。插件条目优先纳入既有预算，仍按完整条目截断。离线读取的 project/cabinet 为 null，快照引用为 null，不访问 Bridge；提供项目时增加绑定范围。
 - 每项关联 `sources`：快照事实带项目键、定位符、页/对象哈希、提取格式/版本和时间；包材料带包 ID、精确版本、资源路径/URI、清单 SHA-256、origin 和原参考对象定位符；配置带来源与 JSON Pointer。参考副本与原件的同源依据为 A32/A34，不能仅凭 oid/PROJ_GUID 把不同路径混为一个项目。
 - `contextRef` 记录本次实际可取得的依据；Bridge 当前无 generation 字段则为 null，无绑定/锁为 null。完整 snapshotHash 按快照合同取得/合成，局部范围未取得整项目快照时为 null、另在 coverage.pages 给页哈希，不能冒称整项目哈希。这些字段不是 EPLAN 数据库修订号，也不能代替 apply 的重新核对。
 - structuredContent、同内容 JSON 文本及一行摘要 `Returned context for 2 pages; 3 items omitted by the token budget.`。优先保留信封、来源/哈希；超预算在完整条目间停止，置 truncated/计数/hint，不切断定位符。默认约 5k、硬上限 20k；估算、稳定排序及去重按实施设计 D14、4.7。

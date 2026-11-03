@@ -14,6 +14,20 @@ namespace EplanMcp.Host.Tests.Tools;
 [Collection(typeof(ToolBuildIsolation))]
 public sealed class ToolProfileTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Instructions_ContextFirstOnlyWhenToolIsAvailable(bool includesContext)
+    {
+        var services = new ServiceCollection();
+        services.AddLogging(logging => logging.ClearProviders());
+        services.AddSingleton(new ToolProfileChoice(includesContext ? ToolProfile.Full : ToolProfile.Core));
+        services.AddEplanMcp();
+        using ServiceProvider provider = services.BuildServiceProvider();
+        McpServerOptions options = provider.GetRequiredService<IOptions<McpServerOptions>>().Value;
+        Assert.Equal(includesContext, options.ServerInstructions!.Contains(ServerInstructions.Plugins, StringComparison.Ordinal));
+        Assert.InRange(options.ServerInstructions.Length, 1, 1200);
+    }
     [Fact]
     public void Core_HoldsAtMost25ToolsThatAllExist()
     {

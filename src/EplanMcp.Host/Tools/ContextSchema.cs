@@ -18,7 +18,7 @@ internal static class ContextSchema
         """).RootElement.Clone();
 
     private static readonly JsonElement _includeSchema = JsonDocument.Parse("""
-        {"type":"array","minItems":1,"uniqueItems":true,"default":["objects","facts","modules","config","capabilities"],"items":{"type":"string","enum":["objects","facts","modules","rules","config","capabilities"]}}
+        {"type":"array","minItems":1,"uniqueItems":true,"default":["objects","facts","modules","config","capabilities"],"items":{"type":"string","enum":["plugins","objects","facts","modules","rules","config","capabilities"]}}
         """).RootElement.Clone();
 
     internal static void Configure(IEnumerable<McpServerTool> tools)
@@ -33,9 +33,9 @@ internal static class ContextSchema
         tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(input);
         tool.ProtocolTool.OutputSchema = JsonDocument.Parse("""
             {"type":"object","additionalProperties":false,"required":["project","cabinet","scope","contextRef","sources","coverage","budget","truncated","hint"],"properties":{
-              "project":{"type":"object","required":["name","path"],"properties":{"name":{"type":"string"},"path":{"type":"string"}}},"cabinet":{"type":"string"},"scope":{"type":"object"},
+              "project":{"type":["object","null"],"required":["name","path"],"properties":{"name":{"type":"string"},"path":{"type":"string"}}},"cabinet":{"type":["string","null"]},"scope":{"type":"object"},
               "contextRef":{"type":"object","required":["snapshotHash","generation","bindingRevision","lockDigest"],"properties":{"snapshotHash":{"type":["string","null"]},"generation":{"type":"null"},"bindingRevision":{"type":["integer","null"],"minimum":0},"lockDigest":{"type":["string","null"]}}},
-              "objects":{"type":"array","items":{"type":"object"}},"facts":{"type":"array","items":{"type":"object"}},"modules":{"type":"array","items":{"type":"object"}},"rules":{"type":"array","items":{"type":"object"}},"config":{"type":"array","items":{"type":"object"}},"capabilities":{"type":"array","items":{"type":"object"}},"sources":{"type":"array","items":{"type":"object"}},
+              "plugins":{"type":"array","items":{"type":"object"}},"objects":{"type":"array","items":{"type":"object"}},"facts":{"type":"array","items":{"type":"object"}},"modules":{"type":"array","items":{"type":"object"}},"rules":{"type":"array","items":{"type":"object"}},"config":{"type":"array","items":{"type":"object"}},"capabilities":{"type":"array","items":{"type":"object"}},"sources":{"type":"array","items":{"type":"object"}},
               "coverage":{"type":"object","required":["profile","format","pages","missing"],"properties":{"profile":{"type":"string"},"format":{"type":"string"},"pages":{"type":"array","items":{"type":"object","required":["name","type","oid","hash"],"properties":{"name":{"type":"string"},"type":{"type":"integer"},"oid":{"type":"integer"},"hash":{"type":"string"}}}},"missing":{"type":"array","items":{"type":"string"}}}},
               "budget":{"type":"object","required":["requestedTokens","estimatedTokens","omittedItems"],"properties":{"requestedTokens":{"type":"integer","minimum":0},"estimatedTokens":{"type":"integer","minimum":0},"omittedItems":{"type":"integer","minimum":0}}},"truncated":{"type":"boolean"},"hint":{"type":["string","null"]}}}
             """).RootElement.Clone();

@@ -14,12 +14,14 @@ namespace EplanMcp.Host.Tools;
 /// <summary>Read-only context, fresh snapshot evidence and exact workspace locks (phase 2 design D14/D15).</summary>
 internal static class ContextBuilder
 {
-    internal static readonly string[] Sections = ["objects", "facts", "modules", "rules", "config", "capabilities"];
+    internal static readonly string[] Sections = ["plugins", "objects", "facts", "modules", "rules", "config", "capabilities"];
     internal static readonly string[] Defaults = ["objects", "facts", "modules", "config", "capabilities"];
     private static readonly string[] _gaps = ["snapshot:graphics_text_placeholders", "modules:insert_and_value_sets", "rules:execution"];
 
     public static async Task<JsonObject> ReadAsync(IBridgeClient bridge, PackLibrary packs, string? project, JsonElement scope, string[] include, int tokens, string? cabinet, CancellationToken cancellationToken)
     {
+        if (project is null && include.SequenceEqual(["plugins"]))
+        { return await PluginContextProjection.OfflineAsync(packs, scope, tokens, cancellationToken).ConfigureAwait(false); }
         string[]? Strings(string key) => scope.TryGetProperty(key, out JsonElement value) ? value.Deserialize<string[]>() : null;
         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
         if (status.Problem is not null)
@@ -79,6 +81,8 @@ internal static class ContextBuilder
             }),
         };
         var items = Sections.ToDictionary(s => s, _ => new List<(JsonObject Item, JsonObject Source)>(), StringComparer.Ordinal);
+        if (include.Contains("plugins", StringComparer.Ordinal))
+        { await PluginContextProjection.AddAsync(packs, project is null ? null : snapshot.Project.Path, selected.Id, items, result, cancellationToken).ConfigureAwait(false); }
         foreach (JsonObject value in config.OfType<JsonObject>())
         {
             JsonObject source = Node(new { snapshot.Project.Path, BindingRevision = binding!.Revision, Cabinet = selected.Id });
