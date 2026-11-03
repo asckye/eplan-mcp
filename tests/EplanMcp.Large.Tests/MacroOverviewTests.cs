@@ -1,6 +1,5 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
-using EplanMcp.Host.Bridge;
 
 namespace EplanMcp.Large.Tests;
 
@@ -14,7 +13,6 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
     public async Task PartGroupSymbol_OverviewContainsPlcBoxPointsAndPart_ThenOneUndoRestores()
     {
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
-        await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
         string original = await session.StateAsync();
         string page = session.NextPage;
         var undoStates = new Stack<string>();
@@ -71,8 +69,8 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
                 ["dry_run"] = false,
             });
 
-            // The measured Overview macro is 420 x 276 mm. Use an existing large frame, never relax layout guards.
-            bool switchedFrame = await UseLargeFrameAsync(session, bridge, page, WriteAsync);
+            // The measured Overview macro is 420 x 276 mm and fills the A3 page, as on the sample's =K1+A2&EFA1/4
+            // (objects from x 0 to 412, y up to 288.6): insert it at the same top left corner.
             string beforeInsert = await session.StateAsync();
             JsonElement result = await WriteAsync("eplan_macro_insert", new()
             {
@@ -82,8 +80,8 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
                 ["part_variant"] = "1",
                 ["representation"] = "Overview",
                 ["variant"] = 0,
-                ["x"] = 20,
-                ["y"] = 296,
+                ["x"] = 0,
+                ["y"] = 288,
                 ["dry_run"] = false,
             });
             Assert.Equal("AI: eplan_macro_insert", result.GetProperty("undo").GetString());
@@ -104,16 +102,12 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
             await UndoAsync();
             Assert.Equal(beforeInsert, await session.StateAsync());
             Assert.Empty((await session.SnapshotAsync(page)).Objects("function"));
-            if (switchedFrame)
-            {
-                await UndoAsync();
-            }
             await UndoAsync();
             Assert.Equal(original, await session.StateAsync());
         }
         finally
         {
-            // Undo confirmed writes even after failed assertions or a missing-frame skip; never retry an uncertain undo.
+            // Undo confirmed writes even after failed assertions; never retry an uncertain undo.
             if (outcomeKnown)
             {
                 while (undoStates.Count > 0)
@@ -123,59 +117,6 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
                 Assert.Equal(original, await session.StateAsync());
             }
         }
-    }
-
-    private static async Task<bool> UseLargeFrameAsync(PlanStepLiveSession session, BridgeClient bridge, string page,
-        Func<string, Dictionary<string, object?>, Task<JsonElement>> writeAsync)
-    {
-        async Task<PageDrawingGeometry> Geometry(string name) => await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(
-            OperationNames.PageDrawingGet, new() { Project = session.Project, Page = name }, TestContext.Current.CancellationToken);
-        static bool Fits(PageDrawingGeometry geometry) => geometry.PageSize is { Length: 2 } size && size[0] >= 460 && size[1] >= 316;
-
-        static string Size(PageDrawingGeometry geometry) => geometry.PageSize is { Length: 2 } size
-            ? FormattableString.Invariant($"{size[0]} x {size[1]} mm") : "unreadable";
-        async Task<Dictionary<string, PagePlotFrameState>> Frames(string[] names) => await bridge.InvokeAsync<ProjectSnapshotArgs, Dictionary<string, PagePlotFrameState>>(
-            OperationNames.PagePlotFrameInspect, new() { Project = session.Project, Pages = [.. names] }, TestContext.Current.CancellationToken);
-        static void Print(string message) => TestContext.Current.TestOutputHelper!.WriteLine("Overview frame: " + message);
-
-        PageDrawingGeometry own = await Geometry(page);
-        if (Fits(own))
-        {
-            return false;
-        }
-        string? current = (await Frames([page]))[page].Effective;
-        Print($"new page {page} uses frame {current ?? "none"}, size {Size(own)}");
-        string[] pages = [.. (await session.SnapshotAsync()).Pages.Select(p => p.Name)];
-        foreach (string[] batch in pages.Chunk(50))
-        {
-            foreach ((string name, PagePlotFrameState frame) in await Frames([.. batch]))
-            {
-                PageDrawingGeometry geometry;
-                if (frame.Effective is null || !Fits(geometry = await Geometry(name)))
-                {
-                    continue;
-                }
-                Print($"candidate {name} uses frame {frame.Effective}, size {Size(geometry)}");
-                if (frame.Effective == current)
-                {
-                    // A new empty page has no readable Page.Size (api-notes, writes-and-placement: S063136). It already uses a
-                    // frame that fits on another page, so there is nothing to change; macro_insert checks the outline itself.
-                    return false;
-                }
-                await writeAsync("eplan_page_update", new()
-                {
-                    ["project"] = session.Project,
-                    ["pages"] = new[] { new { name = page, plot_frame = frame.Effective } },
-                    ["dry_run"] = false,
-                });
-                PageDrawingGeometry after = await Geometry(page);
-                Print($"after the frame change {page} has size {Size(after)}");
-                Assert.True(after.PageSize is null || Fits(after), "The selected existing frame must provide room for the measured Overview macro.");
-                return true;
-            }
-        }
-        Assert.Skip("Prepare an existing large plot frame in LargeWrite (at least 460 x 316 mm) for the 420 x 276 mm PXC.2861344 Overview macro; layout guards remain enabled.");
-        return false;
     }
 
     private static void AssertPart(JsonElement reference)
