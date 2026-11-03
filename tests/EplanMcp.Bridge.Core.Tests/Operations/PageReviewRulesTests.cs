@@ -144,6 +144,19 @@ public sealed class PageReviewRulesTests
         if (!connected)
         { Assert.Equal("warning", (string?)issues[0]["severity"]); }
     }
+    [Theory]
+    [InlineData(true, 0)]
+    [InlineData(false, 1)]
+    public void UnconnectedPin_TwoPinInterruptionPointIsOneEnd(bool connected, int expected)
+    {
+        // Customer acceptance 2026-11-03: a BP point (two pins at one end) was reported once per pin.
+        Placement(1, kind: "InterruptionPoint", name: "=F+A1-X4:2b");
+        _scene.Pins["13/1/0"] = new() { Location = [8, 7] };
+        _scene.Pins["13/1/1"] = new() { Location = [8, 8] };
+        if (connected)
+        { _scene.Graphical.Add([[8, 8], [8, 24]]); }
+        Assert.Equal(expected, Review("unconnected_pins").Count);
+    }
     [Fact]
     public void UnconnectedPin_RequiredByTarget_IsError()
     {

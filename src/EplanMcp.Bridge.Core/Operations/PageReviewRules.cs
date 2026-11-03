@@ -44,11 +44,17 @@ public static class PageReviewRules
             if (Enabled("dangling_ends") && !scene.Pins.Values.Any(p => Equal(p.Location, end)))
             { Add("dangling_end", "error", end, [], "Wire end has no symbol pin or node.", "eplan_connection_create", new() { ["page"] = scene.Page.Page }); }
         }
+        bool Connected(double[] location) => graphical.Any(s => s.Any(p => Equal(p, location)));
+        // A83: an interruption point is one wire end even with two connection points (BP); one connected pin covers it, an open one is reported once.
+        var openInterruptions = new HashSet<string>(StringComparer.Ordinal);
         foreach (var pin in scene.Pins)
         {
             DrawingPlacement? owner = Owner(pin.Key);
-            if (Enabled("unconnected_pins") && owner?.Properties.ContainsKey("name") == true && !graphical.Any(s => s.Any(p => Equal(p, pin.Value.Location))))
+            if (Enabled("unconnected_pins") && owner?.Properties.ContainsKey("name") == true && !Connected(pin.Value.Location))
             {
+                string prefix = FormattableString.Invariant($"{owner.Locator.Type}/{owner.Locator.Oid}/");
+                if (owner.Kind == "InterruptionPoint" && (scene.Pins.Any(other => other.Key.StartsWith(prefix, StringComparison.Ordinal) && Connected(other.Value.Location)) || !openInterruptions.Add(prefix)))
+                { continue; }
                 string? designation = (string?)actual["devices"]?.FirstOrDefault(d => (long?)d["locator"]?["oid"] == owner.Locator.Oid)?["pins"]?[pin.Key.Split('/').Last()];
                 bool required = targetsByKind?["connections"]?.Any(c => new[] { c["from"], c["to"] }.Any(e => e is JObject endpoint && (string?)endpoint["device"] is { } name && DrawingNames.SameName(name, owner.Properties["name"], scene.Page.Page) && (string?)endpoint["pin"] == designation)) == true;
                 Add("unconnected_pin", required ? "error" : "warning", pin.Value.Location, [owner.Locator], "Symbol pin has no graphical connection.", "eplan_connection_create", new() { ["page"] = scene.Page.Page, ["pin_index"] = pin.Key.Split('/').Last() });
