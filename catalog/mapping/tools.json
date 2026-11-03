@@ -5856,6 +5856,11 @@
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           },
           {
+            "name": "PartsFirstSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PartsFirstSpikeTests.cs"
+          },
+          {
             "name": "PlacementEditSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
@@ -6368,6 +6373,11 @@
             "name": "InterruptionVariantSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionVariantSpikeTests.cs"
+          },
+          {
+            "name": "PartsFirstSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PartsFirstSpikeTests.cs"
           },
           {
             "name": "PlcDisplaySpikeTests",
@@ -9344,6 +9354,34 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_pack_library_list",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/PluginLibraryTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_pack_library_list.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "PluginLibraryArgumentsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PluginLibraryArgumentsTests.cs"
+          },
+          {
+            "name": "PluginLibraryToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PluginLibraryToolTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_pack_list",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PackTools.cs",
@@ -11547,6 +11585,11 @@
             "name": "PartSearchTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PartSearchTests.cs"
+          },
+          {
+            "name": "PartsFirstSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PartsFirstSpikeTests.cs"
           }
         ],
         "operationTests": [
