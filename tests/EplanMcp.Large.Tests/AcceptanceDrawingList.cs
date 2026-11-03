@@ -28,8 +28,10 @@ internal static class AcceptanceDrawingList
         }
         void Device(JsonElement item, string at, string extra = "")
         {
-            Object(item, at, "id tag library symbol variant position connection_designations" + extra, "contact_kind");
+            Object(item, at, "id tag library symbol variant position connection_designations" + extra, "contact_kind tag_offset");
             Identity(item, at);
+            if (item.TryGetProperty("tag_offset", out JsonElement offset))
+            { Require(offset.ValueKind == JsonValueKind.Array && offset.GetArrayLength() == 2 && offset.EnumerateArray().All(n => n.ValueKind == JsonValueKind.Number), at + "/tag_offset", "must be [x, y] in mm"); }
             foreach (string key in "tag library symbol".Split(' '))
             { Text(item, key, at); }
             Require(tags.Add(item.GetProperty("tag").GetString()!), at + "/tag", "duplicate tag");
