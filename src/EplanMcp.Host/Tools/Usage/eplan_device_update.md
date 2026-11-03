@@ -6,9 +6,11 @@ Give a device a new tag in the same structure, first as a dry run:
 
 Move a device to another structure with a full new tag:
 
-    {"project": "Line1", "tag": "=GAA+A1-FC1", "new_tag": "=GAB1+A1-FC1"}
+    {"project": "Line1", "tag": "=GAA+A1-FC1", "new_tag": "=GAB1+A1-FC1", "dry_run": false}
 
 ## Workflow
+
+Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. Find the device's full tag with eplan_device_list (`tag_contains`) or eplan_device_get. A shown tag such as `-KF1` works when only one device shows it.
 2. Check that the new tag is free with eplan_device_list (`tag_contains`). The tool refuses a tag another device uses, because EPLAN would merge the two devices.

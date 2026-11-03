@@ -2,12 +2,14 @@ using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
+using EplanMcp.Host.Tests.Safety;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>eplan_device_update through the real write pipeline against a fake Bridge (docs/tools/eplan_device_update.md, sections 3, 4, 7).</summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class DeviceUpdateToolTests : IDisposable
 {
     private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
@@ -34,6 +36,44 @@ public sealed class DeviceUpdateToolTests : IDisposable
     public void Dispose() => _harness.Dispose();
 
     [Fact]
+    public async Task McpOmittedTrueAndFalse_UsePreviewAndExecutionPaths()
+    {
+        var channel = new FakeApprovalChannel("test", ApprovalDecision.Granted);
+        using var harness = new WriteToolHarness(OutsideScratchWrites.Approve, channel);
+        harness.ProjectPath = Path.Combine(harness.Locations.Root, "outside", "Line1");
+        _harness.ProjectPath = harness.ProjectPath;
+        harness.Bridge.Handlers[OperationNames.DeviceUpdatePlan] = _harness.Bridge.Handlers[OperationNames.DeviceUpdatePlan];
+        harness.Bridge.Handlers[OperationNames.DeviceUpdateExecute] = _harness.Bridge.Handlers[OperationNames.DeviceUpdateExecute];
+        await PreviewProtocolHarness.RunAsync(harness, async client =>
+        {
+            Dictionary<string, object?> args = new() { ["project"] = "Line1", ["tag"] = "=F+A2-KF1", ["new_tag"] = "-KF19" };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync("eplan_device_update", args, cancellationToken: TestContext.Current.CancellationToken));
+            args["dry_run"] = true;
+            JsonElement explicitPreview = WriteToolHarness.Structured(await client.CallToolAsync("eplan_device_update", args, cancellationToken: TestContext.Current.CancellationToken));
+
+            Assert.True(JsonElement.DeepEquals(omitted, explicitPreview));
+            Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+            Assert.True(omitted.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", omitted.GetProperty("fingerprint").GetString());
+            Assert.NotEmpty(omitted.GetProperty("changes").EnumerateArray());
+            Assert.Contains("dry_run: false", omitted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.Empty(harness.Bridge.Writes);
+            Assert.Empty(channel.Questions);
+            Assert.DoesNotContain(harness.Bridge.Calls, call => call.Operation == OperationNames.DeviceUpdateExecute);
+            Assert.False(Directory.Exists(harness.Locations.Audit));
+
+            args["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync("eplan_device_update", args, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("f1", executed.GetProperty("fingerprint").GetString());
+            Assert.Single(harness.Bridge.Writes);
+            Assert.Single(channel.Questions);
+            Assert.Equal("=F+A2-KF19", executed.GetProperty("device").GetProperty("tag").GetString());
+        });
+    }
+
+    [Fact]
     public async Task ADryRun_ShowsThePlannedTagFunctionsAndPages()
     {
         CallToolResult result = await Update(dryRun: true);
@@ -56,6 +96,7 @@ public sealed class DeviceUpdateToolTests : IDisposable
         var executed = (DeviceUpdateArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.DeviceUpdateExecute).Args!;
         Assert.Equal(("=F+A2-KF1", "-KF19", "f1"), (executed.Tag, executed.NewTag, executed.Fingerprint));
         Assert.Equal(TimeSpan.FromSeconds(60), Assert.Single(_harness.Bridge.Writes).Limit);
+        Assert.Equal("f1", data.GetProperty("fingerprint").GetString());
     }
 
     [Fact]

@@ -94,7 +94,7 @@
 - **Small**：带 `?` 的判断（`:` 之后的 `?` 不算）；按设备去重的 `changed`；从 S12 的 `InvalidScheme` 消息中取出 5 个候选，消息格式不符时不给候选；变更清单与 `details` 的文字；摘要；schema 快照；注解。
 - **Medium**：在假 Bridge 上测试：`dry_run`；没有带 `?` 的设备时 `not_started` 且不审批；`InvalidScheme` 时 `rolled_back` 并带候选；`PLAN_STALE`；备份失败时不执行。
 - **Large**（示例项目的 scratch 副本，审批方式同 `eplan_page_delete`）：
-  - 用 `eplan_device_update` 把 `=F+A2-KF1`（辅助功能在另一页，S9）改名为 `=F+A2-?KF1`，再对它所在的页编号：得到不带 `?` 的标识，另一页上的辅助功能跟着改名；`backup` 能打开；
+  - 用 `eplan_device_update` 显式传 `dry_run: false` 把 `=F+A2-KF1`（辅助功能在另一页，S9）改名为 `=F+A2-?KF1`，再对它所在的页编号：得到不带 `?` 的标识，另一页上的辅助功能跟着改名；`backup` 能打开；
   - 用 `eplan_macro_insert`（`number`）在新页上插入接触器反馈控制回路，留下 `=GAA+A1-?QA1`（A14），再编号：记录 EPLAN 的行为（不变还是报错），`stillUnnumbered` 或错误提示中出现它；
   - `only_unnumbered = false` 对一页编号；方案 `Default`：`INVALID_ARGUMENT`，候选与 S12 相同。
 - **Agent 评测**："把 scratch 项目 `=GAA+A1&EFS1/60` 页上带 ? 的设备标识编号"（M4 设计第 7 节），审批方式同 `eplan_page_delete`。S12 表明宏留下的 `-?QA1` 可能编不上号，评测的判定以结果中的 `stillUnnumbered` 和工程师在 EPLAN 中的核对为准。

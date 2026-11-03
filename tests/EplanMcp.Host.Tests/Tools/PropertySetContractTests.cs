@@ -18,7 +18,7 @@ public sealed class PropertySetContractTests
         Assert.True(JsonElement.DeepEquals(PropertyGetContract.Input.GetProperty("$defs"), input.GetProperty("$defs")));
         Assert.Equal(1, fields.GetProperty("changes").GetProperty("minItems").GetInt32());
         Assert.Equal(100, fields.GetProperty("changes").GetProperty("maxItems").GetInt32());
-        Assert.False(fields.GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.True(fields.GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.Equal("concise", fields.GetProperty("response_format").GetProperty("default").GetString());
         Assert.Equal(["concise", "detailed"], fields.GetProperty("response_format").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
     }

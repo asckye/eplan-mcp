@@ -8,9 +8,9 @@ internal static class PropertySetContract
 {
     internal static JsonElement Input { get; } = CreateInput();
     internal static JsonElement Output { get; } = JsonSerializer.Deserialize<JsonElement>("""
-        {"type":"object","additionalProperties":false,"required":["project","changes","changed_count","execution","undo","warnings","dry_run","recovered"],"properties":{
+        {"type":"object","additionalProperties":false,"required":["project","changes","changed_count","execution","undo","warnings","dry_run","recovered","fingerprint","hint"],"properties":{
           "project":{"type":"string"},"changed_count":{"type":"integer","minimum":0},"execution":{"enum":["not_started","committed"]},
-          "undo":{"type":["string","null"]},"warnings":{"type":"array","items":{"type":"string"}},"dry_run":{"type":"boolean"},"recovered":{"type":"boolean"},
+          "undo":{"type":["string","null"]},"warnings":{"type":"array","items":{"type":"string"}},"dry_run":{"type":"boolean"},"recovered":{"type":"boolean"},"fingerprint":{"type":"string"},"hint":{"type":["string","null"]},
           "changes":{"type":"array","maxItems":100,"items":{"type":"object","additionalProperties":false,
             "required":["target","property_id","index","language","before","after"],"properties":{
               "target":{"type":"object","additionalProperties":false,"required":["kind","type","oid","name","page","category","pos"],"properties":{
@@ -26,7 +26,7 @@ internal static class PropertySetContract
     {
         JsonNode schema = JsonNode.Parse("""
             {"type":"object","additionalProperties":false,"required":["project","changes"],"properties":{
-              "project":{"type":"string","minLength":1},"dry_run":{"type":"boolean","default":false},
+              "project":{"type":"string","minLength":1},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},
               "response_format":{"enum":["concise","detailed"],"type":"string","default":"concise"},
               "changes":{"type":"array","minItems":1,"maxItems":100,"items":{"type":"object","additionalProperties":false,
                 "required":["target","property","value"],"properties":{"target":{"$ref":"#/$defs/target"},"property":{"$ref":"#/$defs/selector"},

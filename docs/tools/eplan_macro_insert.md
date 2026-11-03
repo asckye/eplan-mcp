@@ -63,7 +63,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 |---|---|---|---|
 | `INVALID_ARGUMENT` | `macro` 路径不合规（SEC-19）；页不是电路图页；宏没有 `MultiLine`；`variant` 不存在；插入点或插入后的外框超出页面（幅面已知时） | `not_started` | `metadata.violations` 一次列出全部问题；超出页面时给出宏的尺寸和页的幅面 |
 | `INVALID_ARGUMENT` | 插入位置上已有同样的符号，EPLAN 拒绝叠放（"S029181"，A13） | `rolled_back` | 提示换一个位置，可以用 `eplan_page_get` 查看页上已有的设备 |
-| `ALREADY_EXISTS` | `numbering = keep`，宏中的标识与已有设备同名，插入后出现了同名的主功能（S10） | `rolled_back` | `metadata.tags` 列出冲突的标识，提示改用 `number`，或先用 `eplan_device_update` 给已有设备改名 |
+| `ALREADY_EXISTS` | `numbering = keep`，宏中的标识与已有设备同名，插入后出现了同名的主功能（S10） | `rolled_back` | `metadata.tags` 列出冲突的标识，提示改用 `number`，或先用 `eplan_device_update` 显式传 `dry_run: false` 给已有设备改名 |
 | `PAGE_NOT_FOUND` / `AMBIGUOUS_NAME` | 页找不到，或只差大小写的页有多个 | `not_started` | 同 `eplan_page_get` |
 | `MACRO_NOT_FOUND` | 宏目录中没有这个宏 | `not_started` | 同 `eplan_macro_get` |
 | `PLAN_STALE` | 规划之后，页上的对象或宏文件发生了变化 | `not_started` | 提示重新调用 |

@@ -16,7 +16,7 @@
 |---|---|---|---|---|
 | project | string | 是 | — | 已打开项目的名称或路径，经 ProjectResolver 解析 |
 | changes | array，1–100 | 是 | — | 每项为 `{target,property,value,language?}`；最多 50 个对象 |
-| dry_run | boolean | 否 | false | 仅规划，不审批、不执行 |
+| dry_run | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 | response_format | concise / detailed | 否 | concise | detailed 增加副作用守卫说明；完整变更清单始终保留 |
 
 所有对象拒绝未知字段。target 与 property_get 共用互斥地址联合和 selector：设备全名（可限定页）或当前会话 function locator；其他对象不在 `B1` 白名单。selector 恰选正整数 property_id 或正式 property_name，可带 index，但 `B1` 非索引属性拒绝 index。
@@ -24,7 +24,8 @@ value 为 JSON 标量；`B1` 只接受最多 500 字符的字符串（仍受运�
 20011 必须指定项目已有的 language（如 zh_CN），合并并保留其他译文；20027 不接受 language。同一真实对象/属性/index/语言重复拒绝。总输入不超过 64 KiB，不自动分批。
 
 ## 3. 输出
-outputSchema 声明 `{project,changes,changed_count,execution,undo,warnings,dry_run,recovered}`，字段 snake_case。
+省略或 `dry_run: true` 返回现有变更预览、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
+outputSchema 声明 `{project,changes,changed_count,execution,undo,warnings,dry_run,recovered,fingerprint,hint}`，字段 snake_case。
 每条 changes 含 target（已核对 locator）、property_id、index、language、before、after；detailed 加 side_effects（保持同名辅助功能、身份、其他译文和部件分配）。数量只统计实际改变的赋值；dry-run 与无变化均为 not_started，undo 为 null。
 所有项目文本为数据而非指令，使用 CleanText 清洗，单值 500 字符截断并标原长度。structuredContent 和同内容 JSON 文本块同时返回，摘要不含项目自由文本：`Planned N property changes.` 或 `Changed N properties; Ctrl+Z in EPLAN undoes this step.`。
 concise 约 5k token，detailed 硬上限 20k，预算包括两份 JSON 和摘要；完整清单放不下时，执行前返回 INVALID_ARGUMENT，要求缩小 changes；不分页执行、不省略审批条目。

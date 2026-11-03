@@ -32,16 +32,13 @@ internal sealed class DeviceWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(DeviceUpdateResult))]
-    [Description(
-        "Renames a device in an EPLAN project: its main function and every auxiliary function, also contacts on other " +
-        "pages, get the new tag in one step that one Ctrl+Z in EPLAN undoes. Outside scratch it needs the engineer's " +
-        "approval. Example: {\"project\": \"Line1\", \"tag\": \"=F+A2-KF1\", \"new_tag\": \"-KF19\"}.")]
+    [Description("Renames a device and all auxiliary functions in one undoable step. Omit/true dry_run previews; false executes. Outside scratch needs engineer approval. See usage.")]
     public static async Task<CallToolResult> DeviceUpdateAsync(
         WritePipeline pipeline,
         [Description("Name or path from eplan_project_list")] string project,
         [Description("Current tag, full or as shown, e.g. -KF1")] string tag,
         [Description("Full new tag, or from '-' to keep the structure")] string new_tag,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -78,10 +75,12 @@ internal sealed class DeviceWriteTools
             Project = ResultShaper.CleanText(outcome.Data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Device = outcome.Data is { } data ? Device(data) : Planned(outcome.Plan),
             Undo = committed ? "AI: " + UpdateTool : null,
             Recovered = outcome.Recovered,
-            Hint = outcome.Recovered
+            Hint = dry_run ? WriteToolDefaults.ExecutionHint : outcome.Recovered
                 ? "The response was lost, but EPLAN reported the rename as committed; check the device with eplan_device_get."
                 : ResultShaper.CleanText(outcome.Data?.Warning),
         };

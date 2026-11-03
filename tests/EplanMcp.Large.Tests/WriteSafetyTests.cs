@@ -26,7 +26,7 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
         [
             await host.ErrorAsync("eplan_page_create", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = Json("""[{"name": "=GAA+A1&EFS1/60", "description": "Q1"}]"""), ["language"] = "zh_CN" }),
             await host.ErrorAsync("eplan_page_update", new() { ["dry_run"] = false, ["project"] = project, ["pages"] = Json("""[{"name": "=GAA+A1&EFS1/1", "description": "Q1"}]"""), ["language"] = "zh_CN" }),
-            await host.ErrorAsync("eplan_device_update", new() { ["project"] = project, ["tag"] = "=F+A2-KF1", ["new_tag"] = "=F+A2-KF19" }),
+            await host.ErrorAsync("eplan_device_update", new() { ["dry_run"] = false, ["project"] = project, ["tag"] = "=F+A2-KF1", ["new_tag"] = "=F+A2-KF19" }),
         ];
 
         Assert.All(errors, e => Assert.Equal((ErrorReason.PolicyDenied, ExecutionState.NotStarted), (e.GetProperty("reason").GetString(), e.GetProperty("execution").GetString())));
@@ -45,7 +45,7 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
         string[] before = Functions(await host.CallAsync("eplan_device_get", new() { ["project"] = project, ["tag"] = "+A1-WE1" }));
         int records = host.AuditRecords().Count;
 
-        JsonElement error = await host.ErrorAsync("eplan_device_update", new() { ["project"] = project, ["tag"] = "+A1-WE1", ["new_tag"] = "=F+A1-WE19" });
+        JsonElement error = await host.ErrorAsync("eplan_device_update", new() { ["dry_run"] = false, ["project"] = project, ["tag"] = "+A1-WE1", ["new_tag"] = "=F+A1-WE19" });
 
         Assert.Equal(
             (ErrorReason.InvalidArgument, ExecutionState.RolledBack, "+A1-WE19"),

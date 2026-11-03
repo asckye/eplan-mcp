@@ -28,6 +28,33 @@ public sealed class PropertySetProtocolTests : IDisposable
     private int _plans;
 
     [Fact]
+    public async Task OmittedAndTrue_PreviewTheSameCompletePlanWithoutApprovalOrWrites()
+    {
+        await WithClient(async client =>
+        {
+            Dictionary<string, object?> args = Args();
+            args.Remove("dry_run");
+            JsonElement omitted = Data(await client.CallToolAsync(PropertySetTools.Tool, args, cancellationToken: Token));
+            JsonElement explicitPreview = Data(await Call(client, dryRun: true));
+            Assert.True(JsonElement.DeepEquals(omitted, explicitPreview));
+            Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+            Assert.True(omitted.GetProperty("dry_run").GetBoolean());
+            Assert.Equal(new string('a', 64), omitted.GetProperty("fingerprint").GetString());
+            Assert.Contains("dry_run: false", omitted.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.Equal(2, omitted.GetProperty("changed_count").GetInt32());
+            Assert.Empty(_harness.Bridge.Writes);
+            Assert.False(Directory.Exists(_harness.Locations.Audit));
+            Assert.True(PropertySetContractTests.AcceptsOutput(omitted));
+            args["dry_run"] = false;
+            JsonElement executed = Data(await client.CallToolAsync(PropertySetTools.Tool, args, cancellationToken: Token));
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.False(executed.GetProperty("dry_run").GetBoolean());
+            Assert.Equal(2, executed.GetProperty("changed_count").GetInt32());
+            Assert.Single(_harness.Bridge.Writes);
+        });
+    }
+
+    [Fact]
     public async Task DryRun_ReturnsCompletePlanWithNoApprovalAuditOrExecute()
     {
         await WithClient(async client =>

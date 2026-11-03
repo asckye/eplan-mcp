@@ -18,7 +18,7 @@ internal sealed class PropertySetTools
 
     [McpServerTool(Name = Tool, Title = "Set EPLAN properties", ReadOnly = false,
         Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Sets verified Function properties. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. Example: {\"project\":\"Line1\",\"changes\":[{\"target\":{\"device_tag\":\"=AP+ST1-K1\"},\"property\":{\"property_id\":20027},\"value\":\"DC 24V\"}],\"dry_run\":true}.")]
+    [Description("Sets verified Function properties. Omit/true dry_run previews; false executes. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. See usage.")]
     public static async Task<CallToolResult> SetAsync(IBridgeClient bridge, WritePipeline pipeline,
         RequestContext<CallToolRequestParams> context, IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -26,7 +26,7 @@ internal sealed class PropertySetTools
         try
         {
             PropertySetArgs args = PropertySetRequest.Parse(context.Params?.Arguments);
-            bool dryRun = context.Params!.Arguments!.TryGetValue("dry_run", out JsonElement dry) && dry.GetBoolean();
+            bool dryRun = !context.Params!.Arguments!.TryGetValue("dry_run", out JsonElement dry) || dry.GetBoolean();
             bool detailed = context.Params.Arguments.TryGetValue("response_format", out JsonElement format) && format.GetString() == "detailed";
             BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
             if (status.Problem is { } problem)
@@ -74,6 +74,8 @@ internal sealed class PropertySetTools
                 undo = (string?)null,
                 warnings = Array.Empty<string>(),
                 dry_run = dryRun,
+                fingerprint = args.Approved.Plan.Fingerprint,
+                hint = dryRun ? WriteToolDefaults.ExecutionHint : null,
                 recovered = false,
             }, HostJson.Options)!.AsObject();
             result = ContextBuilder.Clean(result).AsObject();

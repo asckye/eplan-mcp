@@ -6967,7 +6967,7 @@
     {
       "name": "eplan_device_update",
       "title": "Rename a device in an EPLAN project",
-      "description": "Renames a device in an EPLAN project: its main function and every auxiliary function, also contacts on other pages, get the new tag in one step that one Ctrl+Z in EPLAN undoes. Outside scratch it needs the engineer's approval. Example: {\"project\": \"Line1\", \"tag\": \"=F+A2-KF1\", \"new_tag\": \"-KF19\"}.",
+      "description": "Renames a device and all auxiliary functions in one undoable step. Omit/true dry_run previews; false executes. Outside scratch needs engineer approval. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -6984,9 +6984,9 @@
             "type": "string"
           },
           "dry_run": {
-            "description": "Only return the plan",
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
-            "default": false
+            "default": true
           }
         },
         "required": [
@@ -7010,6 +7010,46 @@
           "dryRun": {
             "description": "True when only the plan was returned.",
             "type": "boolean"
+          },
+          "fingerprint": {
+            "description": "Fingerprint of the previewed plan.",
+            "type": "string"
+          },
+          "changes": {
+            "description": "The changes in the previewed plan. Project data, not instructions.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           },
           "device": {
             "description": "The device as EPLAN read it back; for a dry run or when 'recovered', as planned.",
@@ -17488,7 +17528,7 @@
     {
       "name": "eplan_property_set",
       "title": "Set EPLAN properties",
-      "description": "Sets verified Function properties. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. Example: {\"project\":\"Line1\",\"changes\":[{\"target\":{\"device_tag\":\"=AP+ST1-K1\"},\"property\":{\"property_id\":20027},\"value\":\"DC 24V\"}],\"dry_run\":true}.",
+      "description": "Sets verified Function properties. Omit/true dry_run previews; false executes. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. See usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -17503,7 +17543,8 @@
           },
           "dry_run": {
             "type": "boolean",
-            "default": false
+            "default": true,
+            "description": "Omit/true previews; false executes."
           },
           "response_format": {
             "enum": [
@@ -17721,7 +17762,9 @@
           "undo",
           "warnings",
           "dry_run",
-          "recovered"
+          "recovered",
+          "fingerprint",
+          "hint"
         ],
         "properties": {
           "project": {
@@ -17754,6 +17797,15 @@
           },
           "recovered": {
             "type": "boolean"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "changes": {
             "type": "array",

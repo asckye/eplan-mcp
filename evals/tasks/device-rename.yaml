@@ -1,7 +1,7 @@
 id: device-rename
 set: dev
 fixture: copy
-prompt: 在项目 {project} 中，把设备 =F+A2-KF1 改名为 =F+A2-KF19。完成后告诉我结果。
+prompt: 在项目 {project} 中，把设备 =F+A2-KF1 改名为 =F+A2-KF19。完成后告诉我结果。 实际执行 `eplan_device_update` 时显式传 `dry_run:false`；省略或 true 只预览。
 answer:
   type: object
   required: [done]

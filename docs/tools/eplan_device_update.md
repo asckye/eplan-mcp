@@ -17,12 +17,13 @@
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `tag` | string | 是 | — | 现有的设备标识。完整标识（如 `=GAA+A1-KF1`）总是唯一；短标识（如 `-KF1`）在多个结构下出现时返回 `AMBIGUOUS_NAME` |
 | `new_tag` | string | 是 | — | 新标识：完整标识（如 `=GAA+A1-KF10`）；或以 `-` 开头的短标识（如 `-KF10`），表示保留设备现在的结构 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要进行的修改，不请求审批，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - `tag` 的查找规则与 `eplan_device_get` 相同。
 - `new_tag` 不能为空，不能含空白和控制字符，必须含有 `-` 开头的设备部分；与现有标识相同时返回 `INVALID_ARGUMENT`。只改大小写（`-kf1` → `-KF1`）是允许的。
 
 ## 3. 输出
+省略或 `dry_run: true` 返回设备变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",
