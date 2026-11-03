@@ -149,11 +149,11 @@ public sealed class DevicePlaceExecuteOperation(
     private PlacedDevice Place(DevicePlaceRequest request)
     {
         PlacedDevice placed = placer.Place(request.Project.Path, request.Page.Name, request.Part, request.Variant, request.X, request.Y, request.Tag);
-        Verify(placed, request);
+        Verify(placed, request, committed: false);
         return placed;
     }
 
-    private static void Verify(PlacedDevice placed, DevicePlaceRequest request)
+    private static void Verify(PlacedDevice placed, DevicePlaceRequest request, bool committed = true)
     {
         if (placed.Names.Count == 0 || placed.OnPage == 0)
         {
@@ -166,7 +166,9 @@ public sealed class DevicePlaceExecuteOperation(
 
         // A82: PLC template functions carry the device tag followed by a connection-point suffix.
         bool Belongs(string name) => string.Equals(name, request.Tag, StringComparison.Ordinal) || name.StartsWith(request.Tag + ":", StringComparison.Ordinal);
-        string? other = placed.Names.FirstOrDefault(name => !Belongs(name));
+        // Live 2026-11-03 (A85): before the commit the other functions' wrappers still show the old tag; they are read again by
+        // the new tag after the commit, where every function must carry it.
+        string? other = committed ? placed.Names.FirstOrDefault(name => !Belongs(name)) : null;
         if (request.Tag.Length > 0 && (!Belongs(placed.MainName) || other is not null))
         {
             string actual = Belongs(placed.MainName) ? other! : placed.MainName;

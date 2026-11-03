@@ -405,6 +405,21 @@ public sealed class DevicePlaceOperationTests
         Assert.Equal(("=+-Q1", ExecutionState.RolledBack), (error.Error.Metadata!["actual"], error.Error.Execution));
     }
 
+    [Fact]
+    public void Execute_AuxiliaryWrappersWithTheOldTagBeforeCommit_AreReadAgainByTheNewTag()
+    {
+        // A85: before the commit only the main function's wrapper shows the new tag; the others are read again afterwards.
+        _placer.Result = tag => new PlacedDevice { Names = [tag, "=+-Q1", "=+-Q1"], MainName = tag, OnPage = 1 };
+        _placer.Committed = data => data.Names = [data.MainName, data.MainName, data.MainName];
+        DevicePlaceArgs args = Args(NewPage, "-KF20");
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        DevicePlaceData placed = Execute(args);
+
+        Assert.EndsWith("-KF20", placed.Tag, StringComparison.Ordinal);
+        Assert.Equal(3, placed.Functions);
+    }
+
     private static DevicePlaceArgs Args(string page, string tag, string part = Part, string? variant = null, double x = 80, double y = 160) =>
         new() { Project = "Line1", Page = page, Part = part, Variant = variant, X = x, Y = y, Tag = tag };
 
