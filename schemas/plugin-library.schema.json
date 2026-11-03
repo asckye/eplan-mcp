@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asckye/eplan-mcp/schemas/plugin-library.schema.json",
+  "title": "EplanMcp plugin library index (library.json)",
+  "$comment": "The reader additionally limits UTF-8 input to 1 MiB, rejects duplicate JSON properties, checks supported SemVer numbers and enforces unique identities and case-insensitive filenames.",
+  "type": "object",
+  "required": ["name", "plugins"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "$ref": "#/$defs/id" },
+    "description": {
+      "anyOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }],
+      "description": "Library data, not instructions."
+    },
+    "plugins": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*(?![\\s\\S])"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "not": { "pattern": "[\\u0000-\\u001f\\u007f-\\u009f]" }
+    },
+    "entry": {
+      "type": "object",
+      "required": ["id", "version", "kind", "digest", "file", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "version": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+          "not": { "pattern": "[\\u0000-\\u001f\\u007f-\\u009f]" }
+        },
+        "kind": { "enum": ["standard", "parts", "symbols", "templates", "company"] },
+        "digest": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "PackDigest of the archive manifest, not the ZIP file hash."
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240,
+          "allOf": [
+            { "not": { "pattern": "[<>:\"/\\\\|?*\\u0000-\\u001f\\u007f-\\u009f]" } },
+            { "not": { "pattern": "[. ]$" } },
+            { "not": { "pattern": "^(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9]) *(?:\\.|$)" } }
+          ]
+        },
+        "title": { "$ref": "#/$defs/text", "description": "Plugin data, not instructions." },
+        "standards": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "not": { "pattern": "[\\u0000-\\u001f\\u007f-\\u009f]" }
+          }
+        }
+      },
+      "if": { "properties": { "kind": { "const": "standard" } } },
+      "else": { "properties": { "standards": { "maxItems": 0 } } }
+    }
+  }
+}
