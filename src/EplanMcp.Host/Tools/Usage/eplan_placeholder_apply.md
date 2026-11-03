@@ -6,22 +6,24 @@ See what would be applied, without changing anything:
 
 Apply the value set to the only placeholder on the page that has it:
 
-    {"project": "Line1", "page": "=TM1+A1&EFS1/1", "value_set": "mA"}
+    {"project": "Line1", "page": "=TM1+A1&EFS1/1", "value_set": "mA", "dry_run": false}
 
 Choose a placeholder by its name when several on the page have the value set (an empty string for one without a name):
 
-    {"project": "Line1", "page": "=GAA+A1&EFS1/60", "placeholder": "#<Function_text>", "value_set": "PLC I/O's"}
+    {"project": "Line1", "page": "=GAA+A1&EFS1/60", "placeholder": "#<Function_text>", "value_set": "PLC I/O's", "dry_run": false}
 
 ## Workflow
 
+Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` explicitly to execute the same arguments. Preview returns `changes`, `fingerprint` and `execution: not_started`, without approval or writes.
+
 1. Call eplan_placeholder_list for the page (`response_format: "detailed"` shows each value set's values) and pick a value set from `valueSets`, spelled exactly.
-2. Call this tool with `dry_run: true` to see the values it would apply, then without it. The dry run does not read current values. Outside scratch the engineer approves in EPLAN.
+2. Call this tool with `dry_run: true` to see the values it would apply, then with `dry_run: false`. The dry run does not read current values. Outside scratch the engineer approves in EPLAN.
 3. Read `currentValuesAfter`: EPLAN does not tell which referenced object a variable sets, so the tool compares only the placeholder itself. Check objects that matter with eplan_device_get or eplan_page_get.
 4. One Ctrl+Z in EPLAN undoes the change (`undo`).
 
 ## Fields
 
-- `project`, `execution`, `dryRun`, `undo`, `recovered`, `hint`: as for eplan_page_update.
+- `project`, `execution`, `dryRun`, `undo`, `recovered`, `hint`: as for eplan_page_update. `fingerprint` and `changes` identify the plan; previews omit current values.
 - `placeholder`: `name` (empty when none) and `page`; `valueSet`: the value set applied.
 - `values`: the value set's value of each variable (`variable`, `text`).
 - `currentValuesBefore`, `currentValuesAfter` and `currentValuesChanged`: the placeholder's current values read inside the transaction, just before and after applying the value set, one per referenced property. All three are omitted for a dry run or a recovered commit without result data. EPLAN gives current values only for a locked placeholder, which the transaction provides. Unchanged values are not an error: the value set may have been applied already.

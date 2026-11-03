@@ -20,16 +20,19 @@
 | `page` | string | 是 | — | 占位符所在的页，完整页名，查找规则同 `eplan_page_get` |
 | `value_set` | string | 是 | — | 要应用的值集，`eplan_placeholder_list` 的 `valueSets` 中的名称，区分大小写 |
 | `placeholder` | string | 否 | 不限名称 | 占位符的名称，`eplan_placeholder_list` 的 `name`；没有名称的占位符传空串 |
-| `dry_run` | boolean | 否 | false | 只返回计划 |
+| `dry_run` | boolean | 否 | true | 只返回计划 |
 
 - 目标：这一页上名称相符（给了 `placeholder` 时）、并且有这个值集的占位符。恰好一个时执行；没有时返回 `INVALID_ARGUMENT`，列出这一页上的占位符和各自的值集；多于一个时返回 `AMBIGUOUS_NAME`。本版本分不开同页同名、值集也相同的占位符（同一个宏在一页上插入两次时会这样），提示在 EPLAN 中操作。
 
 ## 3. 输出
+省略或传 `dry_run: true` 仅预览，不审批、不写入；返回变更清单 `changes`、计划指纹 `fingerprint` 与 `execution: not_started`。按相同参数再次传 `dry_run: false` 执行，沿用原审批、备份、读回和撤销规则。
 ```json
 {
   "project": "Line1",
   "execution": "committed",
   "dryRun": false,
+  "fingerprint": "<plan fingerprint>",
+  "changes": [{ "action": "update", "kind": "placeholder", "name": "=TM1+A1&EFS1/1", "property": "value set", "oldValue": null, "newValue": "mA" }],
   "placeholder": { "name": "", "page": "=TM1+A1&EFS1/1" },
   "valueSet": "mA",
   "values": [ { "variable": "T1", "text": "…" }, { "variable": "T2", "text": "…" } ],

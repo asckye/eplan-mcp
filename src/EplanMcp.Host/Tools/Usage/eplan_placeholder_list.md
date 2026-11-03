@@ -16,7 +16,7 @@ Values in English, next page: repeat the same arguments and add the `nextCursor`
 
 1. Placeholders come into a project with macros that have value sets: after eplan_macro_insert, list the new page to see what it offers.
 2. Read `valueSets` to choose one, and `detailed` to see the value each value set gives each variable.
-3. To switch, call eplan_placeholder_apply with the `page`, the `name` as `placeholder` (an empty string for one without a name) and the value set.
+3. To switch, call eplan_placeholder_apply with the `page`, the `name` as `placeholder` (an empty string for one without a name) and the value set. Omit dry_run or pass true to preview; repeat the same arguments with dry_run:false to execute.
 4. The tool only reads.
 
 ## Fields

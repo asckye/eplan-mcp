@@ -19,7 +19,7 @@ public sealed class PlaceholderApplyTests(LiveEplan eplan, WriteHost host) : ICl
     public async Task ApplyingMaThenV_ChangesTheCurrentValuesToEachValueSetsValues()
     {
         string project = await eplan.WriteProjectAsync();
-        Dictionary<string, object?> mA = new() { ["project"] = project, ["page"] = Page, ["placeholder"] = string.Empty, ["value_set"] = "mA" };
+        Dictionary<string, object?> mA = new() { ["dry_run"] = false, ["project"] = project, ["page"] = Page, ["placeholder"] = string.Empty, ["value_set"] = "mA" };
 
         JsonElement dryRun = await eplan.CallAsync("eplan_placeholder_apply", new(mA) { ["dry_run"] = true });
         JsonElement appliedMa = await eplan.CallAsync("eplan_placeholder_apply", mA);
@@ -50,7 +50,7 @@ public sealed class PlaceholderApplyTests(LiveEplan eplan, WriteHost host) : ICl
     public async Task AValueSetOrANameThePageDoesNotHave_ChangesNothing()
     {
         string project = await eplan.WriteProjectAsync();
-        Dictionary<string, object?> args = new() { ["project"] = project, ["page"] = Page, ["value_set"] = "X" };
+        Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = project, ["page"] = Page, ["value_set"] = "X" };
 
         JsonElement noValueSet = await eplan.ErrorAsync("eplan_placeholder_apply", args);
         JsonElement noName = await eplan.ErrorAsync("eplan_placeholder_apply", new(args) { ["value_set"] = "mA", ["placeholder"] = "nope" });
@@ -63,7 +63,7 @@ public sealed class PlaceholderApplyTests(LiveEplan eplan, WriteHost host) : ICl
     [Fact]
     public async Task TheCopyOutsideScratch_IsPolicyDenied()
     {
-        JsonElement error = await host.ErrorAsync("eplan_placeholder_apply", new() { ["project"] = host.Outside, ["page"] = Page, ["value_set"] = "mA" });
+        JsonElement error = await host.ErrorAsync("eplan_placeholder_apply", new() { ["dry_run"] = false, ["project"] = host.Outside, ["page"] = Page, ["value_set"] = "mA" });
 
         Assert.Equal((ErrorReason.PolicyDenied, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
     }

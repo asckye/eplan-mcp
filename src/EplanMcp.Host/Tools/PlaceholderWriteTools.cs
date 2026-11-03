@@ -28,15 +28,15 @@ internal sealed class PlaceholderWriteTools
         OutputSchemaType = typeof(PlaceholderApplyResult))]
     [Description(
         "Applies one value set to a placeholder on a page, so EPLAN writes its values into the objects the placeholder " +
-        "references; one Ctrl+Z in EPLAN undoes it. Find value sets with eplan_placeholder_list. Outside scratch it needs " +
-        "approval. Example: {\"project\": \"Line1\", \"page\": \"=TM1+A1&EFS1/1\", \"value_set\": \"mA\"}.")]
+        "references; one Ctrl+Z in EPLAN undoes it. Find value sets with eplan_placeholder_list. " +
+        WriteToolDefaults.Description + " Outside scratch execution needs approval. Example: {\"project\": \"Line1\", \"page\": \"=TM1+A1&EFS1/1\", \"value_set\": \"mA\"}.")]
     public static async Task<CallToolResult> PlaceholderApplyAsync(
         WritePipeline pipeline,
         [Description("From eplan_project_list")] string project,
         [Description("Full page name")] string page,
         [Description("From valueSets, case-sensitive")] string value_set,
         [Description("Its name; \"\" for none; default: any")] string? placeholder = null,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -75,6 +75,8 @@ internal sealed class PlaceholderWriteTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Placeholder = new PlaceholderApplyResult.PlaceholderRef
             {
                 Name = ResultShaper.CleanText(data?.Placeholder ?? details.GetValueOrDefault("placeholder")) ?? string.Empty,
@@ -87,7 +89,7 @@ internal sealed class PlaceholderWriteTools
             CurrentValuesChanged = data?.CurrentValuesChanged,
             Undo = committed ? "AI: " + ApplyTool : null,
             Recovered = outcome.Recovered,
-            Hint = outcome.Recovered
+            Hint = dry_run ? WriteToolDefaults.ExecutionHint : outcome.Recovered
                 ? "The response was lost, but EPLAN reported the value set as applied; check the placeholder with eplan_placeholder_list."
                 : ResultShaper.CleanText(data?.Warning)
                     ?? (data is { CurrentValuesChanged: false } ? "The current values did not change: the value set may have been applied already. Check the referenced objects in EPLAN if it matters." : null),
