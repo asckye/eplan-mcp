@@ -23,9 +23,9 @@ PLC digital input:
 ## Workflow
 Omit/true dry_run: no approval/writes, execution=not_started. Execute with dry_run:false.
 
-1. Choose/inspect a circuit page with eplan_page_list/create/get. Coordinates: finite mm within page bounds, bottom left origin, y up.
+1. Circuit page via eplan_page_list/create/get. Finite mm within page bounds; origin bottom left, y up.
 2. Symbols need a free tag (eplan_device_list); short tags inherit page structure without document type. For parts, omit tag for EPLAN numbering or pass it to rename all functions. Outside scratch requires approval.
-3. Parts: eplan_part_search (default variant 1). Symbols/pins: eplan_symbol_search. Other functions remain unplaced, like EPLAN Insert Device. PLC modules: eplan_macro_insert with part (assembly macro). Multiple symbols: same tag, then eplan_device_update with part.
+3. Parts: eplan_part_search (variant 1). Symbols: eplan_symbol_search. Other functions stay unplaced (as EPLAN Insert Device). PLC module: eplan_macro_insert part. Several symbols: same tag, then eplan_device_update part.
 
 ## Fields
 

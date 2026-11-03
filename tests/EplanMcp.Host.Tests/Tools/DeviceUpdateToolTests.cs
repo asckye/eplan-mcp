@@ -170,7 +170,7 @@ public sealed class DeviceUpdateToolTests : IDisposable
     [Fact]
     public async Task RenameAndPartArgumentsArePreservedTogether()
     {
-        await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=F+A2-KF1", "-KF19", part: "SIE.3SB3400-0B", cancellationToken: TestContext.Current.CancellationToken);
+        await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "=F+A2-KF1", "-KF19", dry_run: false, part: "SIE.3SB3400-0B", cancellationToken: TestContext.Current.CancellationToken);
         var args = (DeviceUpdateArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.DeviceUpdateExecute).Args!;
         Assert.Equal(("-KF19", "SIE.3SB3400-0B", (string?)null), (args.NewTag, args.Part, args.Variant));
     }
