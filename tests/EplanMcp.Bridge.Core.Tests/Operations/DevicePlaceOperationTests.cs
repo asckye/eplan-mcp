@@ -135,6 +135,17 @@ public sealed class DevicePlaceOperationTests
         Assert.Equal(structure, DevicePlaceRequest.DeviceStructureOf(page));
     }
 
+    [Theory]
+    [InlineData("=GAA+A1&EFS1/3", "GAA")]
+    [InlineData("+A1/1", "")]
+    [InlineData("==F1=GAA++P1+A1&EFS1/3", "GAA")]
+    [InlineData("==F1+A1&EFS1/3", "")]
+    public void FunctionAssignmentOf_IsTheSingleEqualsSegment(string page, string assignment)
+    {
+        // Customer page: a location box takes it, so EPLAN shows +P1 rather than =+P1.
+        Assert.Equal(assignment, DrawingNames.FunctionAssignmentOf(page));
+    }
+
     [Fact]
     public void Plan_AFullTag_AVariantAndAPartInAnotherCase_AreTakenAsTheDatabaseHasThem()
     {

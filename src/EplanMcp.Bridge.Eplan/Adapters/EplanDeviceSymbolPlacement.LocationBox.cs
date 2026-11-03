@@ -23,7 +23,13 @@ internal sealed partial class EplanDeviceSymbolPlacement
         var box = (LocationBox)created;
         box.SetLogicalArea(new PointD(args.X, args.Y), new PointD(args.CornerX!.Value, args.CornerY!.Value));
         using (var parts = new FunctionBasePropertyList())
-        { parts.DESIGNATION_LOCATION = args.LocationBox!.Substring(1); box.NameParts = parts; }
+        {
+            // Customer page: like the editor, the box takes the page's function assignment (=GAA+P1), so it shows +P1, not =+P1.
+            if (DrawingNames.FunctionAssignmentOf(page.Name) is { Length: > 0 } assignment)
+            { parts.DESIGNATION_FUNCTIONALASSIGNMENT = assignment; }
+            parts.DESIGNATION_LOCATION = args.LocationBox!.Substring(1);
+            box.NameParts = parts;
+        }
         EplanVisibleNames.Adjust(page, box);
         GraphicalPlacement[] graphics = [.. BoxGraphics(box.GetGraphics())];
         Check(graphics.Length > 0, "the box exposes no graphics");

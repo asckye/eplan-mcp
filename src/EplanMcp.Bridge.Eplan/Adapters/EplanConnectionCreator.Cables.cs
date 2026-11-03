@@ -104,6 +104,7 @@ internal sealed partial class EplanConnectionCreator
         foreach (JToken definition in plan["cableDefinitions"]!)
         {
             Cable cable = FindCable(project, page, definition);
+            Page target = Page(project, page);
             using FunctionBasePropertyList name = cable.NameParts;
             foreach (Connection run in CableRuns(project, page, request, plan, definition))
             {
@@ -112,9 +113,12 @@ internal sealed partial class EplanConnectionCreator
                 {
                     Check(point.CableDefinitionLine?.ObjectIdentifier == cable.ObjectIdentifier, $"definition point membership: actual '{point.CableDefinitionLine?.Name ?? "<none>"}'");
                     point.Name = cable.Name;
-                    point.VisibleName = cable.VisibleName;
                 }
                 run.CableNameParts = name;
+                // Live 2026-11-02: once the cable shows -W3, assigning that visible name to a definition point did not
+                // stick (read back empty); let EPLAN derive it from the point's full name, as for the cable.
+                foreach (ConnectionDefinitionPoint point in run.ConnectionDefPoints)
+                { EplanVisibleNames.Adjust(target, point); }
             }
         }
     }
