@@ -9301,6 +9301,34 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_pack_enable",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/PluginEnableTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_pack_enable.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "PluginEnableArgumentsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PluginEnableArgumentsTests.cs"
+          },
+          {
+            "name": "PluginEnableServiceTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PluginEnableServiceTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_pack_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PackTools.cs",
@@ -9346,6 +9374,34 @@
             "name": "PackInstallTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/PackInstallTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_pack_install",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/PluginInstallTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_pack_install.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "PluginInstallArgumentsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PluginInstallArgumentsTests.cs"
+          },
+          {
+            "name": "PluginInstallTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Packs/PluginInstallTests.cs"
           }
         ],
         "operationTests": []
