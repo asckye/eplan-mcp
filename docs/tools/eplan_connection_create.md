@@ -16,7 +16,7 @@
 | items | 必填 object[1..50] | wire：`{kind,from,to,points}`；节点：`{kind,position,directions}`；禁止跨分支成员。from/to 是 `{locator:{project,page,type,oid,digest},pin_index}`，索引从 0 起，locator 必须与本页当前观察一致 |
 | points / position | number[2][2..32] / number[2] | `[x_mm,y_mm]`；毫米、左下原点、y 向上；有限数、0..10,000，且受 Page.Size 限制 |
 | kind / directions | enum / enum[] | wire、corner、t_node、potential_point；节点分别需 2 个垂直方向、3 个不同方向、1 个方向；方向为 Up/Down/Left/Right |
-| variant / sort_code | 可选 integer | t_node 的 variant 按已核验的方向引脚选择 SPECIAL 变体，省略沿用原行为，不存在时 INVALID_ARGUMENT 列出可用编号；interruption_point 的 sort_code ≥ 0，在放置事务中写入属性 24809 并读回；省略不写。interruption_point 可选 `symbol`（SPECIAL 库中任意 `InterruptionPoint` 符号，如 `BP`、`BPIN`、`BPOUT`、`BPF`；内置缺省 `BP`，与 EPLAN“插入 → 中断点”一致，仍保留默认值覆盖路径）；中断点使用符号的默认属性排列，不再额外新建 24300 交叉引用文字 |
+| variant / sort_code | 可选 integer | t_node 的 variant 按已核验的方向引脚选择 SPECIAL 变体，省略沿用原行为，不存在时 INVALID_ARGUMENT 列出可用编号；interruption_point 的 sort_code ≥ 0，在放置事务中写入属性 24809 并读回；省略不写。interruption_point 可选 `symbol`（SPECIAL 库中任意 `InterruptionPoint` 符号，如 `BP`、`BPIN`、`BPOUT`、`BPF`；省略时先取已启用插件的 `defaults.interruption.symbol`（内置插件 `iec-base` 为 `BP`），否则内置缺省 `BP`，与 EPLAN“插入 → 中断点”一致）；中断点使用符号的默认属性排列，不再额外新建 24300 交叉引用文字 |
 | interruption_point | object | `{kind:"interruption_point",name,direction,position,counterpart_pages}`；name 为共享的完整业务名（1..200 字符），direction 为 Up/Down/Left/Right，position 为电气连接点坐标；counterpart_pages 必填 1..20 个不同的精确完整页名，不隐式搜索全项目 |
 | show_page | boolean，false | 绘制前打开或聚焦主参数 `page`，便于观看；仅影响界面，不修改数据，dry-run 也开页；不打开对端页 |
 | dry_run / snap_to_grid | boolean，false / true | dry_run 只规划；执行时关闭吸附仍拒绝非栅格接线 |
@@ -41,6 +41,8 @@
 规划及 stale 为 execution=not_started；INVALID_ARGUMENT 带 JSON Pointer；CAPABILITY_MISSING 表示几何不完整、未选中目标项目或不支持的组合（电缆与中断点须分开调用）。普通连线第二步失败或端点不符，回滚生成并撤销放置；含中断点时撤销整个仍打开的步骤并核验恢复，返回 rolled_back；提交或补偿无法确认则返回 unknown，暂停写入且不重发。
 
 ## 5. 实现要点
+P1 插件默认：每次调用只解析一次请求项目的有效插件配置。`interruption_point` 省略 `symbol` 时使用 `defaults.interruption.symbol`，显式 `symbol` 始终优先；没有插件值时使用内置 `BP`。该值只能是 SPECIAL 库的单个符号名，不按方向推断箭头头尾。规划与执行共享补齐后的 items，所用默认值及插件来源进入指纹；插件变化使旧计划失效。只有实际补齐了字段的 dry-run/执行结果才带 `metadata.plugins: ["id@version"]`，不列未消费的启用插件；缺失或不可读的插件数据只在 `metadata.warnings` 中报告。
+
 规划复用 T1 的 ISymbolReader，在写事务之前只读查询 SPECIAL；按实际连接点方向唯一选择 CO/Routing、TLRO/TLRU/TOUL/TOUR 对应 TNodeUp/Down/Left/Right。转弯自动规划 CO，T 分支必须显式给出；二者仍只支持连接点与插入点重合的变体。PCP/PotentialTerminal 必须只有一个有限偏移引脚（每轴不超过两格），同方向选最小变体号；重复的同号候选仍拒绝。potential_point 的 position 表示吸附后的电气连接点，symbols.position 为减去库引脚偏移后的实际插入点，外框按插入点平移；插入点可以不在栅格，连接点必须在栅格。
 内部 Scene 从原生完整单页放置、外框、引脚、既有图形与逻辑连接及变体外框读取；未能覆盖原生对象即拒绝，Complete 不来自工具参数。Page.Size 缺失不以图框尺寸兜底；吸附中点远离零，端点须等于既有引脚。
 检查所有路径正交、非零、无重复或折返；拒绝斜线、未声明交叉、重叠线段、其他引脚截断、节点方向不符以及既有连线/放置冲突。只有终端线段沿所属引脚的出线方向接近、另一端在该外框之外时，才允许接触或进入该 placement 的外框；所属关系按 type/oid/pin_index 证明，不能整条路径豁免目标外框。新节点向最近的相向引脚/节点预测自动线，连带端点纳入全页预测；不能隐式覆盖已有线。全页基线、栅格/页界、所选库变体及请求进入指纹，重新规划可用 expectedFingerprint 检测 stale；不新增落盘格式（沿 ADR-0029）。
@@ -57,6 +59,7 @@ D5：含中断点的调用允许仅有图形线、无逻辑连接，孤立点也
 对端可以暂缺，后续在对端页显式创建同名点；每页同名只允许一个点，一点最多一个对端，已成对、同范围内多对端或原生配对越出显式页集合均拒绝。目标页加全部对端页最多 21 页，完整证据合计最多 10,000 个绘图对象及 1,000 个中断点；缺页、非 Circuit、闭包不能证明均拒绝。页内绘图、端点、配对及引用进入指纹/审批；变化后重新规划。生成后再读双向原生配对；24300 允许为空。返回 actualGraphicalAutoconnect（目标页全部实际线段）供验收。完整基线恢复才能报告 rolled_back。
 
 ## 7. 测试
+P1 Small 覆盖显式值优先、仅补中断点、无默认值保留旧行为；Medium 用真实解析器和假 Bridge 覆盖 dry-run/执行一致、实际来源 metadata，以及规划与执行之间更换插件时旧指纹失效。
 Small 覆盖严格参数与预测、两次提交顺序、读回不符/取消/生成失败补偿、补偿失败 unknown、stale 零写入。Medium fake Bridge 覆盖成功、rolled_back、stale、dry-run 和审批；快照按[测试规范](../standards/testing.md#更新快照)生成审阅后接收。
 Large 在 write copy 的新页逐方向核验角/T/电位点、实际 StartPin/EndPin、图像导出和两次撤销恢复快照哈希；T 夹具使用 BAT 两端器件，将相反方向的一臂经同批角连接折转，放置前检查无自动连线，并断言三个真实端点均进入预测。Small 复用夹具布局验证全部 12 个方向组合，覆盖自身端点外框、其他/中间穿越、PCP 四向偏移和镜像选择。此次修复不运行 EPLAN，12 例须重跑；真实生成故障尚无可重复触发方式，失败路径由 fake 注入覆盖。实测前先构建 tests/EplanMcp.Large.ConnectionHelper；辅助程序集每个 EPLAN 进程只加载一次，更新后须重启 EPLAN，不以注销代替重载。
 T7b 新增 Small 严格参数/范围/歧义/stale/双向引用与提交后补偿、Medium fake Bridge 审批/透传/失败不重发，以及 Large 两个新 LargeWrite 页的同名配对、双向原生计算引用和逐次撤销恢复；本次按任务约束不运行 EPLAN，Large 待维护者实测。

@@ -29,6 +29,12 @@ internal static class ToolSchemas
                 { PageReviewTools.Configure(tool.ProtocolTool, schema); }
                 if (tool.ProtocolTool.Name == DeviceWriteTools.PlaceTool)
                 { DevicePlaceInputs.Configure(schema); }
+                if (tool.ProtocolTool.Name == ConnectionCreateTools.Tool)
+                {
+                    var output = JsonNode.Parse(tool.ProtocolTool.OutputSchema!.Value.GetRawText())!.AsObject();
+                    output["properties"]!["metadata"] = JsonNode.Parse("""{"type":"object","additionalProperties":false,"properties":{"plugins":{"type":"array","items":{"type":"string"}},"warnings":{"type":"array","items":{"type":"string"}}}}""");
+                    tool.ProtocolTool.OutputSchema = JsonSerializer.SerializeToElement(output);
+                }
                 if (tool.ProtocolTool.Name == ListImportTools.ImportTool)
                 {
                     schema["allOf"] = JsonNode.Parse("""[{"if":{"properties":{"kind":{"const":"parts"}}},"then":{"properties":{"format":{"const":"xml"}}}}]""");

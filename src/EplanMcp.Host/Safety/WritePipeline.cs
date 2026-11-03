@@ -29,6 +29,7 @@ internal sealed record WriteRequest<TArgs, TExecuteArgs>(
     internal WritePlan? PreparedPlan { get; init; }
     internal object? AuditArguments { get; init; }
     internal bool Unverified { get; init; }
+    internal Func<CancellationToken, Task>? BeforeExecute { get; init; }
 
     /// <summary>A write whose execute arguments need no backup target; named like the record's own parameters.</summary>
     public WriteRequest(string Tool, ToolTier Tier, string PlanOperation, string ExecuteOperation, TArgs Args, Func<WritePlan, TExecuteArgs> ExecuteArgs, bool DryRun, TimeSpan Limit, string Activity = "Waiting for EPLAN")
@@ -245,6 +246,13 @@ internal sealed partial class WritePipeline(
         {
             if (request.Unverified && !ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots))
             { throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = "API trials are allowed only in scratch projects." }); }
+            if (request.BeforeExecute is { } beforeExecute)
+            {
+                try
+                { await beforeExecute(cancellationToken).ConfigureAwait(false); }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                { throw NotStarted(new BridgeError { Reason = ErrorReason.Cancelled, Message = "The call was cancelled before execution." }); }
+            }
             WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan, backup), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
             await RecordResultAsync(request.Tool, requestId, plan, eplan, result.Execution, null, result.Recovered, backup, masterDataBackup, result.Data).ConfigureAwait(false);
             await Show(shown, result.Execution, null).ConfigureAwait(false);

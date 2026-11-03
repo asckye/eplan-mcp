@@ -51,7 +51,9 @@ public static class ConnectionCreatePlanner
             Require(!parser.Read(), "", "Supply one JSON object.");
         }
         catch (JsonReaderException ex) { throw WriteArguments.Invalid(["/" + (ex.Path ?? "").Replace("[", "/").Replace("]", "").Replace(".", "/") + ": Supply strict JSON without duplicate members."]); }
-        Members(input, "", "project page items", "dry_run snap_to_grid response_format");
+        Members(input, "", "project page items", "dry_run snap_to_grid response_format plugin_sources");
+        Require(input["plugin_sources"] is null || input["plugin_sources"] is JArray sources
+            && sources.All(source => source.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)source)), "/plugin_sources", "Supply plugin identities as text.");
         FiniteNumbers(input, "");
         Require(input["project"]?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)input["project"]), "/project", "Specify an open project.");
         Require(input["page"]?.Type == JTokenType.String && (string?)input["page"] == scene.Page.Page, "/page", "Select the exact scene page.");

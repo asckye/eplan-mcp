@@ -4,6 +4,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Packs;
+using EplanMcp.Host.Plans;
 using EplanMcp.Host.Safety;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
@@ -31,19 +33,46 @@ internal sealed class ConnectionCreateTools
         [Description("1-50 wire/corner/t_node/potential_point/interruption_point/cable_definition; interruptions require counterpart_pages; see usage")] JsonElement[] items,
         bool dry_run = false, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
         [Description("Open this page before drawing; UI only, no data change.")] bool show_page = false,
-        IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+        IProgress<ProgressNotificationValue>? progress = null, PackLibrary? packs = null, CancellationToken cancellationToken = default)
     {
-        var args = new { project, page, items, dry_run, snap_to_grid, response_format };
         PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, project, page, cancellationToken).ConfigureAwait(false);
         try
         {
+            PluginResolution? resolution = null;
+            string[] plugins = [];
+            List<string> warnings = [];
+            JsonElement[] effective = items;
+            if (packs is not null)
+            {
+                string key = PlanSnapshotHashes.ProjectKey(Path.IsPathFullyQualified(project) ? project
+                    : (await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet, new() { Project = project }, cancellationToken).ConfigureAwait(false)).Project.Path);
+                resolution = await new PluginResolver(packs).ResolveAsync(key, cancellationToken, page: page).ConfigureAwait(false);
+                warnings.AddRange(resolution.Warnings);
+                (effective, plugins) = ConnectionPluginDefaults.Apply(items, resolution);
+            }
+            JsonObject args = JsonSerializer.SerializeToNode(new { project, page, items = effective, dry_run, snap_to_grid, response_format })!.AsObject();
+            if (plugins.Length > 0)
+            { args["plugin_sources"] = JsonSerializer.SerializeToNode(plugins); }
             var request = new WriteRequest<object, object>(Tool, ToolTier.Write, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionCreateExecute,
-                args, plan => new { request = args, fingerprint = plan.Fingerprint }, dry_run, Limit(items), "Creating connections");
+                args, plan => new { request = args, fingerprint = plan.Fingerprint }, dry_run, Limit(items), "Creating connections")
+            {
+                AuditArguments = new { requested = items, effective = args, plugins },
+                BeforeExecute = packs is not null && resolution is not null ? PluginConsumerDefaults.BeforeExecute(packs, resolution, plugins, warnings) : null,
+            };
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<object, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
             result["execution"] = outcome.Execution;
             result["dryRun"] = dry_run;
             result["recovered"] = outcome.Recovered;
+            if (plugins.Length > 0 || warnings.Count > 0)
+            {
+                JsonObject metadata = result["metadata"] as JsonObject ?? new JsonObject();
+                if (plugins.Length > 0)
+                { metadata["plugins"] = JsonSerializer.SerializeToNode(plugins); }
+                if (warnings.Count > 0)
+                { metadata["warnings"] = JsonSerializer.SerializeToNode(warnings); }
+                result["metadata"] = metadata;
+            }
             void Clean(JsonNode node)
             {
                 foreach (JsonNode child in node is JsonObject obj ? obj.Select(p => p.Value).OfType<JsonNode>().ToArray() : node is JsonArray arr ? arr.OfType<JsonNode>().ToArray() : [])

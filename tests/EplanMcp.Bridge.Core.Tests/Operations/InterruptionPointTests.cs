@@ -7,6 +7,18 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class InterruptionPointTests
 {
+    [Fact]
+    public void ChangedPluginSource_WithSameSymbol_InvalidatesFingerprint()
+    {
+        var fake = new InterruptionPointFixture();
+        fake.Request["plugin_sources"] = new JArray("standard@1.0.0");
+        string fingerprint = (string)fake.Plan()["fingerprint"]!;
+        fake.Request["plugin_sources"] = new JArray("standard@2.0.0");
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Plan(fingerprint)).Error;
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Empty(fake.Placement.Calls);
+    }
+
     [Theory]
     [InlineData(0L)]
     [InlineData(3L)]
