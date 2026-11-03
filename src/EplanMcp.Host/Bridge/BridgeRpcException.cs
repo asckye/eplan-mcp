@@ -5,6 +5,8 @@ namespace EplanMcp.Host.Bridge;
 /// <summary>A JSON-RPC error response from the Bridge. <see cref="ErrorData"/> holds a BridgeError for business errors.</summary>
 internal sealed class BridgeRpcException : Exception
 {
+    public const int InvalidRequestCode = -32600;
+
     public BridgeRpcException()
     {
     }
@@ -27,6 +29,9 @@ internal sealed class BridgeRpcException : Exception
     }
 
     public int Code { get; }
+
+    /// <summary>A locally rejected frame, or an uncorrelated error, requires a fresh connection.</summary>
+    public bool IsInvalidFrame { get; init; }
 
     /// <summary>The <c>error.data</c> member of the response.</summary>
     public JsonNode? ErrorData { get; }

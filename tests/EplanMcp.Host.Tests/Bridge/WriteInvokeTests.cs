@@ -132,6 +132,18 @@ public sealed class WriteInvokeTests
     }
 
     [Fact]
+    public async Task AWrite_WithAnInvalidResponse_RecoversRecordedCommitWithoutRepeatingTheWrite()
+    {
+        _execute = _ => throw new BridgeRpcException(BridgeRpcException.InvalidRequestCode, "Invalid response.", null) { IsInvalidFrame = true };
+        _outcomes.Enqueue(Outcome(OutcomeStatus.Committed));
+
+        WriteResult<JsonObject> result = await Write();
+
+        Assert.Equal((ExecutionState.Committed, true, null), (result.Execution, result.Recovered, result.Data));
+        Assert.Equal((1, 1), (Executes, OutcomeQuestions));
+    }
+
+    [Fact]
     public async Task AWrite_WhoseConnectionDrops_ReportsTheRecordedRollback()
     {
         _execute = Lost;

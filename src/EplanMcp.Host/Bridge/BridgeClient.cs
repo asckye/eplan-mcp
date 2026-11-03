@@ -289,7 +289,12 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
         }
         catch (BridgeRpcException ex)
         {
-            throw Map(ex, method); // the channel stays usable after an error response
+            if (ex.IsInvalidFrame)
+            {
+                await DropAsync().ConfigureAwait(false);
+            }
+
+            throw Map(ex, method);
         }
         catch (Exception ex) when (ex is IOException or ObjectDisposedException)
         {
@@ -301,7 +306,7 @@ internal sealed partial class BridgeClient : IBridgeClient, IAsyncDisposable
 
     private BridgeCallException Map(BridgeRpcException ex, string method)
     {
-        if (ex.Code == BridgeProtocol.BusinessErrorCode && ex.ErrorData is JsonObject data)
+        if (!ex.IsInvalidFrame && ex.Code == BridgeProtocol.BusinessErrorCode && ex.ErrorData is JsonObject data)
         {
             try
             {

@@ -76,6 +76,11 @@ internal sealed partial class BridgeClient
                 JsonNode? result = await _channel!.CallAsync(BridgeProtocol.InvokeMethod, Envelope(operation, requestId, args), ForRequest(requestId, progress), wait.Token).ConfigureAwait(false);
                 return new WriteResult<TData>(Committed<TData>(result, requestId), Recovered: false);
             }
+            catch (BridgeRpcException ex) when (ex.IsInvalidFrame)
+            {
+                // A rejected frame cannot establish whether the write ran; ask for its recorded outcome.
+                interruption = Map(ex, operation).Error;
+            }
             catch (BridgeRpcException ex)
             {
                 // The Bridge answered; it stamps every error of a write. One it did not stamp never reached the write.
