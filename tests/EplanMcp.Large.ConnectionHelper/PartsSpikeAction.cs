@@ -55,6 +55,9 @@ public sealed class PartsSpikeAction : IEplAction
                 case "place-unplaced":
                     PlaceUnplaced(project, input, result);
                     break;
+                case "rename-unplaced":
+                    RenameUnplaced(project, input, result);
+                    break;
                 case "device-list":
                     DeviceList(project, input, result);
                     break;
@@ -406,6 +409,201 @@ public sealed class PartsSpikeAction : IEplAction
         JArray functions = ReadDeviceByTag(project, deviceTag, readbackWarnings);
         result["functions"] = functions;
         result["duplicates"] = ReadDuplicates(functions);
+    }
+
+    private static void RenameUnplaced(Project project, JObject input, JObject result)
+    {
+        string tag = (string)input["tag"]!;
+        string strategy = (string)input["strategy"]!;
+        if (strategy is not ("name" or "properties"))
+        { throw new ArgumentException("The rename strategy must be name or properties."); }
+        var warnings = new JArray();
+        var inside = new JArray();
+        var changes = new JArray();
+        var parsedNames = new JArray();
+        var oldTags = new HashSet<string>(StringComparer.Ordinal);
+        result["tag"] = tag;
+        result["strategy"] = strategy;
+        result["warnings"] = warnings;
+        result["inside"] = inside;
+        result["changes"] = changes;
+        result["parsedNames"] = parsedNames;
+        using (var scope = new TransactionScope("Parts unplaced rename spike"))
+        {
+            try
+            {
+                Page? page = null;
+                Observe(result, "page", () => (page = project.Pages.Single(candidate => candidate.Name == (string)input["page"]!)).Name, warnings);
+                if (page is null)
+                { return; }
+                using var service = new DeviceService();
+                using var propertyScope = new FunctionObservationScope();
+                var parsed = new Dictionary<int, FunctionPropertyList>();
+                try
+                {
+                    Function[] created = service.CreateDevice((string)input["part"]!, (string?)input["variant"] ?? "", page,
+                        new PointD((double)input["x"]!, (double)input["y"]!));
+                    JObject[] before = created.Select((function, index) => ReadRenameFunction(function, index, propertyScope)).ToArray();
+                    result["before"] = new JArray(before);
+                    foreach (JObject observation in before)
+                    {
+                        if ((string?)observation["deviceTag"] is { Length: > 0 } oldTag)
+                        { oldTags.Add(oldTag); }
+                    }
+                    // A13: rename the main function first, then every returned auxiliary function.
+                    foreach (int index in Enumerable.Range(0, created.Length).OrderByDescending(index => (bool?)before[index]["isMainFunction"] == true))
+                    {
+                        Function function = created[index];
+                        var changeWarnings = new JArray();
+                        var change = new JObject { ["index"] = index, ["success"] = false, ["error"] = null, ["warnings"] = changeWarnings };
+                        changes.Add(change);
+                        try
+                        {
+                            if (strategy == "name")
+                            {
+                                string? oldName = (string?)before[index]["name"];
+                                string? oldTag = (string?)before[index]["deviceTag"];
+                                if (oldName is null || oldTag is null)
+                                { changeWarnings.Add("The old name or device tag is unreadable; this rename was skipped."); }
+                                else
+                                {
+                                    string suffix = oldTag.Length > 0 && oldName.StartsWith(oldTag, StringComparison.Ordinal) ? oldName.Substring(oldTag.Length) : "";
+                                    change["name"] = tag + suffix;
+                                    function.Name = tag + suffix;
+                                    change["success"] = true;
+                                }
+                            }
+                            else
+                            { RenameProperties(project, function, tag, parsed, parsedNames, propertyScope, change, changeWarnings); }
+                            inside.Add(ReadRenameFunction(function, index, propertyScope));
+                        }
+                        catch (Exception error) { change["error"] = error.ToString(); throw; }
+                    }
+                }
+                finally
+                {
+                    foreach (FunctionPropertyList properties in parsed.Values)
+                    { properties.Dispose(); }
+                }
+                // A79/A80: release cached property lists before either commit or rollback.
+                propertyScope.Dispose();
+                scope.Commit();
+                scope.CloseUndo();
+            }
+            catch { scope.Rollback(); throw; }
+        }
+
+        // A79: query fresh wrappers and retain old prefixes to find detached auxiliaries.
+        var after = new JArray();
+        var readbackWarnings = new JArray();
+        result["oldDeviceTags"] = new JArray(oldTags);
+        result["readbackWarnings"] = readbackWarnings;
+        bool complete = false;
+        bool namesReadable = true;
+        Observe(result, "after", () =>
+        {
+            using var finder = new DMObjectsFinder(project);
+            foreach (Function function in finder.GetFunctions(null))
+            {
+                var identity = new JObject();
+                Observe(identity, "name", () => function.Name, readbackWarnings);
+                if ((string?)identity["name"] is not { } name)
+                { namesReadable = false; continue; }
+                if (name.StartsWith(tag, StringComparison.Ordinal) || oldTags.Any(oldTag => name.StartsWith(oldTag, StringComparison.Ordinal)))
+                { after.Add(ReadRenameFunction(function, null)); }
+            }
+            complete = true;
+            return after;
+        }, readbackWarnings);
+        result["after"] = after;
+        bool known = complete && namesReadable && after.Count > 0 && after.All(function => function["deviceTag"]?.Type == JTokenType.String);
+        result["allDeviceTagsMatch"] = known ? after.All(function => string.Equals((string?)function["deviceTag"], tag, StringComparison.Ordinal)) : (bool?)null;
+        if (!known)
+        { readbackWarnings.Add("The complete device-tag comparison is unavailable from the read-back observations."); }
+    }
+
+    private static void RenameProperties(Project project, Function function, string tag, Dictionary<int, FunctionPropertyList> parsed,
+        JArray parsedNames, FunctionObservationScope propertyScope, JObject change, JArray warnings)
+    {
+        Observe(change, "category", () => (int)function.FunctionCategory, warnings);
+        if (change["category"]?.Type != JTokenType.Integer)
+        { warnings.Add("The function category is unreadable; property writes were skipped."); return; }
+        int category = (int)change["category"]!;
+        if (!parsed.TryGetValue(category, out FunctionPropertyList? properties))
+        {
+            properties = new FunctionPropertyList();
+            parsed.Add(category, properties);
+            using var additional = new FunctionPropertyList();
+            var nameInput = new JObject { ["category"] = category, ["tag"] = tag, ["error"] = null };
+            parsedNames.Add(nameInput);
+            // A82: parse once per observed category; copy identifying properties instead of assigning Name.
+            try
+            { project.ParseNameAndProps(category, tag, properties, additional); }
+            catch (Exception error) { nameInput["error"] = error.ToString(); throw; }
+        }
+        FunctionPropertyList? target = null;
+        Observe(change, "propertiesReadable", () => { target = propertyScope.GetProperties(function); return true; }, warnings);
+        if (target is null)
+        { return; }
+        AnyPropertyId[] ids = [];
+        Observe(change, "propertyCount", () => { ids = properties.ExistingIds; return ids.Length; }, warnings);
+        var writes = new JArray();
+        change["writes"] = writes;
+        try
+        {
+            foreach (AnyPropertyId id in ids)
+            {
+                var write = new JObject { ["success"] = false, ["error"] = null };
+                writes.Add(write);
+                Observe(write, "id", () => id.AsString, warnings);
+                PropertyValue? value = null;
+                try
+                {
+                    Observe(write, "valueReadable", () => { value = properties[id]; return true; }, warnings);
+                    if (value is null)
+                    { warnings.Add("A parsed property is unreadable; its write was skipped."); continue; }
+                    Observe(write, "value", () => value.IsEmpty ? null : value.ToString(), warnings);
+                    try
+                    { target[id] = value; write["success"] = true; }
+                    catch (Exception error) { write["error"] = error.ToString(); throw; }
+                }
+                finally { value?.Dispose(); }
+            }
+            change["success"] = writes.Count > 0 && writes.All(write => (bool?)write["success"] == true);
+        }
+        finally
+        {
+            foreach (AnyPropertyId id in ids)
+            { id.Dispose(); }
+            GC.KeepAlive(function);
+        }
+    }
+
+    private static JObject ReadRenameFunction(Function function, int? index, FunctionObservationScope? propertyScope = null)
+    {
+        var warnings = new JArray();
+        var result = new JObject { ["index"] = index, ["warnings"] = warnings };
+        Observe(result, "name", () => function.Name, warnings);
+        Observe(result, "isPlaced", () => function.IsPlaced, warnings);
+        Observe(result, "isMainFunction", () => function.IsMainFunction, warnings);
+        Observe(result, "page", () => function.Page?.Name, warnings);
+        FunctionPropertyList? properties = null;
+        try
+        {
+            Observe(result, "deviceTag", () =>
+            {
+                properties = propertyScope?.GetProperties(function) ?? function.Properties;
+                using PropertyValue device = properties.FUNC_IDENTDEVICETAG;
+                return device.IsEmpty ? null : device.ToString();
+            }, warnings);
+        }
+        finally
+        {
+            if (propertyScope is null)
+            { properties?.Dispose(); }
+            GC.KeepAlive(function);
+        }
+        return result;
     }
 
     private static void DeviceList(Project project, JObject input, JObject result)
