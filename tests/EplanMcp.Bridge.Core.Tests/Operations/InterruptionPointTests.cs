@@ -48,14 +48,14 @@ public sealed class InterruptionPointTests
     }
 
     [Fact]
-    public void Symbol_NamesAnotherSpecialInterruptionSymbol_DefaultStaysBpf()
+    public void Symbol_NamesAnotherSpecialInterruptionSymbol_DefaultIsBp()
     {
-        // D7: EPLAN's insert command may use another SPECIAL interruption symbol than BPF.
+        // A83: EPLAN's insert command uses BP; any SPECIAL interruption symbol remains selectable.
         var fake = new InterruptionPointFixture();
         fake.Base.Symbols.Add(ConnectionCreateFixture.Variant("BPX", "InterruptionPoint", 3, "Up"));
         fake.Base.Scene.SymbolBounds.Add("BPX/3", [-1, -1, 1, 1]);
         string Planned() => (string)Assert.Single(fake.Plan()["symbols"]!, s => s["interruption"] is not null)["symbol"]!["name"]!;
-        Assert.Equal("BPF", Planned());
+        Assert.Equal("BP", Planned());
         fake.Request["items"]!.Last!["symbol"] = "BPX";
         Assert.Equal("BPX", Planned());
         fake.Request["items"]!.Last!["symbol"] = "NONE";
@@ -77,7 +77,7 @@ public sealed class InterruptionPointTests
         var fake = new InterruptionPointFixture();
         JObject plan = fake.Plan();
         Assert.Equal([ConnectionCreateFixture.PageName, InterruptionPointFixture.PeerPage], plan["affectedPages"]!.Values<string>());
-        Assert.Contains(plan["symbols"]!, s => (string?)s["symbol"]!["name"] == "BPF");
+        Assert.Contains(plan["symbols"]!, s => (string?)s["symbol"]!["name"] == "BP");
         Assert.Equal(InterruptionPointFixture.BusinessName, (string?)plan["interruptionScope"]!["points"]![0]!["name"]);
         Assert.Empty(fake.Placement.Calls);
         Assert.Empty(fake.Generation.Calls);
@@ -265,6 +265,7 @@ public sealed class InterruptionPointTests
     public void BpfOffset_UsesElectricalPositionAndSmallestMirroredVariant()
     {
         var fake = new InterruptionPointFixture();
+        fake.Request["items"]!.Last!["symbol"] = "BPF";
         fake.Base.Symbols.Single(s => s.Name == "BPF").ConnectionPoints[0].Location = [0, 2];
         fake.Base.Symbols.Add(ConnectionCreateFixture.Variant("BPF", "InterruptionPoint", 4, "Up"));
         JToken row = Assert.Single(fake.Plan()["symbols"]!, s => s["interruption"] is not null);

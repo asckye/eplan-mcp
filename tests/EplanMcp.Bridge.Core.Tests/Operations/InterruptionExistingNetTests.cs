@@ -118,10 +118,10 @@ public sealed class InterruptionExistingNetTests
             scene.Page.Placements.Clear();
             scene.Page.PageSize = [500, 300];
             Fixture.Symbols.Clear();
-            Fixture.Symbols.Add(ConnectionCreateFixture.Variant("BPF", "InterruptionPoint", 0, "Up"));
-            Fixture.Symbols.Add(ConnectionCreateFixture.Variant("BPF", "InterruptionPoint", 1, "Down"));
+            Fixture.Symbols.AddRange(InterruptionPointFixture.BpVariants());
             Fixture.Symbols.Add(ConnectionCreateFixture.Variant("PCP", "PotentialTerminal", 2, "Down"));
-            scene.SymbolBounds["BPF/0"] = scene.SymbolBounds["BPF/1"] = [-1, -1, 1, 1];
+            foreach (SymbolSearchItem symbol in Fixture.Symbols.Where(s => s.Name == "BP"))
+            { scene.SymbolBounds[FormattableString.Invariant($"BP/{symbol.Variant}")] = [-1, -1, 1, 1]; }
             Fixture.Request["items"] = new JArray();
             Pin(69852, 0, [100, 130], "Up");
             Pin(69852, 1, [100, 127.25], "Down");
@@ -200,7 +200,15 @@ public sealed class InterruptionExistingNetTests
         public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Fixture.Scene : new() { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = [.. Fixture.Scene.Graphical, .. _added] };
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => Fixture.Read(projectPath, args);
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
-        public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => State = 1;
+        public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () =>
+        {
+            foreach (JToken row in symbols.Where(s => s["interruption"] is not null))
+            {
+                JToken point = _points.Single(p => (string?)p["name"] == (string?)row["interruption"]!["name"]);
+                point["position"] = row["position"]!.DeepClone();
+            }
+            State = 1;
+        };
         public List<string?[]> Endpoints(string project, string page) => page == ConnectionCreateFixture.PageName ? Generated : [];
         public void Generate(string projectPath, IReadOnlyList<string> pages) => State = 2;
         public void Undo(string project) { State--; Undos++; }

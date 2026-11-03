@@ -25,7 +25,7 @@ public static class InterruptionPointPlanning
             JToken item = row["interruption"]!;
             string name = (string)item["name"]!;
             // A65 (customer page 13): two same-name points on one page pair with each other; the per-name limit of two applies below.
-            projected.Add(new JObject { ["name"] = name, ["page"] = scene.Page.Page, ["position"] = row["position"]!.DeepClone(), ["pin"] = new JArray(row["position"]!.Values<double>().Zip(row["symbol"]!["connectionPoints"]![0]!["location"]!.Values<double>(), (a, b) => a + b)), ["direction"] = item["direction"]!.DeepClone() });
+            projected.Add(new JObject { ["name"] = name, ["page"] = scene.Page.Page, ["position"] = row["position"]!.DeepClone(), ["pin"] = Pin(row), ["direction"] = item["direction"]!.DeepClone() });
             JToken[] peers = projected.Where(p => (string?)p["name"] == name && (string?)p["page"] != scene.Page.Page).ToArray();
             Require(peers.Length <= 1 && peers.All(p => item["counterpart_pages"]!.Values<string>().Contains((string?)p["page"], StringComparer.Ordinal)), "Pairing is ambiguous or outside counterpart_pages; narrow or correct the explicit scope.");
             Require(peers.All(p => !p["counterparts"]!.Any()), "The counterpart is already paired; do not extend an existing pair.");
@@ -118,7 +118,7 @@ public static class InterruptionPointPlanning
             JToken[] pair = actual["points"]!.Where(p => (string?)p["name"] == name).ToArray();
             Require(pair.Length is 1 or 2, "Native pairing is missing or ambiguous.");
             JToken? placed = pair.SingleOrDefault(p => (string?)p["page"] == (string?)plan["page"] && JToken.DeepEquals(p["position"], row["position"]));
-            var pin = new JArray(row["position"]!.Values<double>().Zip(row["symbol"]!["connectionPoints"]![0]!["location"]!.Values<double>(), (a, b) => a + b));
+            JArray pin = Pin(row);
             Require(placed is not null && JToken.DeepEquals(placed["pin"], pin)
                 && (string?)placed["direction"] == (string?)row["interruption"]!["direction"], "Interruption name, position, pin or direction readback differs.");
             if (row["interruption"]!["sort_code"] is { } sortCode)
@@ -136,6 +136,10 @@ public static class InterruptionPointPlanning
         }
         return result;
     }
+    // A83: a multi-point interruption is positioned from the last pin matching the requested direction.
+    private static JArray Pin(JToken row) => new(row["position"]!.Values<double>().Zip(
+        row["symbol"]!["connectionPoints"]!.Last(p => (string?)p["direction"] == (string?)row["interruption"]!["direction"])["location"]!.Values<double>(), (a, b) => a + b));
+
     private static void Require(bool valid, string message)
     { if (!valid) { throw WriteArguments.Invalid(["/items: " + message]); } }
 }

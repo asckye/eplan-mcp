@@ -5,6 +5,7 @@
 
 ## [Unreleased]
 
+- `eplan_connection_create` 中断点内置默认改为 EPLAN 插入命令使用的 `BP`，支持 SPECIAL 中含一个或多个连接点的全部中断点符号；按匹配连接点选择变体及定位，双连接点读回不再失败。可显式选择 `BPIN`、`BPOUT`、`BPF` 等符号。
 - 全局插件配置可按启用顺序参与默认值解析，保留胜出与被覆盖来源；项目绑定锁定的插件跳过全局层，缺失数据只给告警。
 - `eplan_pack_list` / `eplan_pack_get` 显示插件分类、提供项、标准标签和每个精确版本的全局启用标记。
 - 新增 `eplan_pack_enable`：经现有 EPLAN 审批全局启停已安装的精确插件版本，保留启用顺序，以 revision 校验防止覆盖并发变更。

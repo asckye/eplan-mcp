@@ -144,7 +144,21 @@ internal static class SpikeReadback
         JObject row = Identity(point);
         using InterruptionPointPropertyList properties = point.Properties;
         row["properties"] = PropertiesOf(properties, [24300, 24301, 24351, 24000, 24020, 24021, 24809]);
-        row["direction"] = point.GraphicalConnectionPoints.Single().Direction.ToString();
+        var connected = new HashSet<int>();
+        foreach (SymbolReference.GraphicalConnection connection in point.GraphicalConnections)
+        {
+            if (connection.StartSymbolRef.ObjectIdentifier == point.ObjectIdentifier)
+            { connected.Add(connection.StartConnectionPoint.Index); }
+            if (connection.EndSymbolRef.ObjectIdentifier == point.ObjectIdentifier)
+            { connected.Add(connection.EndConnectionPoint.Index); }
+        }
+        PinBase[] pins = point.GraphicalConnectionPoints;
+        PinBase pin = pins.LastOrDefault(p => connected.Contains(p.Index)) ?? pins.Last();
+        row["direction"] = pin.Direction.ToString();
+        row["symbol"] = point.SymbolVariant.SymbolName;
+        row["variant"] = point.SymbolVariant.VariantNr;
+        row["pin"] = new JArray(At(point, pin));
+        row["connected"] = connected.Contains(pin.Index);
         row["starSource"] = point.IsStarSource;
         // The public API exposes All (StorableObject), not a primary-pair getter. Keep this reference group separate
         // from the electrical endpoints; attached devices let the reader correlate each point with those endpoints.

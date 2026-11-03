@@ -122,6 +122,7 @@
   - `BPF`"中断点（流体）"：4 个变体，见 A81。
   - EPLAN"插入 → 中断点"命令默认使用 `BP`（编号 8，变体 A，红色实心箭头）。来源：负责人 2026-11-02 提供的符号选择对话框截图。
   - `BP` 变体 v 的第 2 个连接点方向与 `BPIN` 变体 v 的连接点方向相同（v0 左、v1 下、v2 右、v3 上），即导线接在箭尾时两者朝向一致。
+  - 2026-11-02 离线查阅安装附带的 2026 API XML（`Eplan.EplApi.DataModelu.xml`）：`SymbolReference.GraphicalConnections` 列出符号的图形连接；其 `StartSymbolRef` / `EndSymbolRef` 和 `StartConnectionPoint` / `EndConnectionPoint` 分别返回两端符号与连接点；`PinBase.Index` 对图形连接点是符号内的连接点索引。因此读多连接点中断点时，按所属符号对象号和连接点索引识别已连接点；无图形连接时按本次 brief 取最后一个连接点。该读回路径的实机回归待运行，不把文档查证视为实机通过。
   - 客户页的红色实心箭头用 `BPIN`/`BPOUT` 放置后与原图一致（2026-11-02 验收导出图）。
 - 端子排定义：`TDEF`"端子排定义"，类型 `TextFunction`，只有变体 0，没有连接点。用 `Function.Create(page, variant)` 创建后，按符号的默认属性排列显示为"-X6 = 操作控制盒"。
 - PLC：

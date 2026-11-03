@@ -8,9 +8,13 @@ namespace EplanMcp.Large.Tests;
 public sealed class DanglingInterruptionTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Interruption_WithOrWithoutCounterpartDevice_GraphicsAndLogicalReadback_SingleUndoRestores(bool counterpartDevice)
+    [InlineData(false, null, "BP", 1)]
+    [InlineData(true, null, "BP", 1)]
+    [InlineData(true, "BPIN", "BPIN", 1)]
+    [InlineData(true, "BPOUT", "BPOUT", 3)]
+    [InlineData(true, "BPF", "BPF", 1)]
+    public async Task Interruption_WithOrWithoutCounterpartDevice_GraphicsAndLogicalReadback_SingleUndoRestores(
+        bool counterpartDevice, string? symbolName, string expectedSymbol, int expectedVariant)
     {
         Assert.NotNull(host);
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
@@ -46,14 +50,26 @@ public sealed class DanglingInterruptionTests(LiveEplan eplan, WriteHost host) :
         }
         string device = await PlaceDevice(pages[0], "-D5A" + suffix, pin);
         string? peerDevice = counterpartDevice ? await PlaceDevice(pages[1], "-D5B" + suffix, peerPin) : null;
-        Dictionary<string, object?> Request(int index) => new()
+        Dictionary<string, object?> Request(int index)
         {
-            ["project"] = session.Project,
-            ["page"] = pages[index],
-            ["response_format"] = "detailed",
-            ["items"] = new[] { new { kind = "interruption_point", name, position = index == 0 ? end : peerEnd,
-                direction = "Down", counterpart_pages = new[] { pages[1 - index] } } },
-        };
+            var item = new Dictionary<string, object?>
+            {
+                ["kind"] = "interruption_point",
+                ["name"] = name,
+                ["position"] = index == 0 ? end : peerEnd,
+                ["direction"] = "Down",
+                ["counterpart_pages"] = new[] { pages[1 - index] },
+            };
+            if (symbolName is not null)
+            { item["symbol"] = symbolName; }
+            return new()
+            {
+                ["project"] = session.Project,
+                ["page"] = pages[index],
+                ["response_format"] = "detailed",
+                ["items"] = new[] { item },
+            };
+        }
         JsonElement peer = await host.CallAsync("eplan_connection_create", Request(1));
         Assert.Equal(1, peer.GetProperty("undoSteps").GetInt32());
         Assert.Empty(peer.GetProperty("actualEndpoints").EnumerateArray());
@@ -90,6 +106,11 @@ public sealed class DanglingInterruptionTests(LiveEplan eplan, WriteHost host) :
             {
                 Assert.Equal(name, point.GetProperty("name").GetString());
                 Assert.Equal("Down", point.GetProperty("direction").GetString());
+                Assert.Equal(expectedSymbol, point.GetProperty("symbol").GetString());
+                Assert.Equal(expectedVariant, point.GetProperty("variant").GetInt32());
+                bool targetPage = point.GetProperty("page").GetString() == pages[0];
+                Assert.Equal(targetPage || counterpartDevice, point.GetProperty("connected").GetBoolean());
+                Assert.Equal(targetPage ? end : peerEnd, point.GetProperty("pin").EnumerateArray().Select(n => n.GetDouble()));
                 Assert.Single(point.GetProperty("counterpartsAll").EnumerateArray());
                 JsonElement expected = Assert.Single(points, p => p.GetProperty("oid").GetInt64() == point.GetProperty("oid").GetInt64());
                 Assert.Equal(expected.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()), point.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()));

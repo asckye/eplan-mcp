@@ -28,6 +28,9 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     internal JObject Request => Base.Request;
     internal InterruptionPointFixture()
     {
+        Base.Symbols.AddRange(BpVariants());
+        foreach (SymbolSearchItem symbol in Base.Symbols.Where(s => s.Name == "BP"))
+        { Base.Scene.SymbolBounds.Add(FormattableString.Invariant($"BP/{symbol.Variant}"), [-1, -1, 1, 1]); }
         Base.Symbols.Add(ConnectionCreateFixture.Variant("BPF", "InterruptionPoint", 0, "Up"));
         Base.Scene.SymbolBounds.Add("BPF/0", [-1, -1, 1, 1]);
         ((JArray)Request["items"]!).Add(new JObject
@@ -39,6 +42,19 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
             ["counterpart_pages"] = new JArray(PeerPage),
         });
         Placement.Snapshot = Generation.Snapshot = () => { int before = State; return () => State = before; };
+    }
+    // A83, exact enumerated BP geometry; variants 4..7 repeat 0..3.
+    internal static IEnumerable<SymbolSearchItem> BpVariants()
+    {
+        string[][] directions = [["Right", "Left"], ["Up", "Down"], ["Left", "Right"], ["Down", "Up"]];
+        for (int variant = 0; variant < 8; variant++)
+        {
+            SymbolSearchItem symbol = ConnectionCreateFixture.Variant("BP", "InterruptionPoint", variant, directions[variant % 4]);
+            symbol.Kind = "interruption_point";
+            symbol.ConnectionPoints[0].Location = variant % 2 == 1 ? [0, -1] : [0, 0];
+            symbol.ConnectionPoints[1].Location = variant % 4 == 1 ? [0, -1] : [0, 0];
+            yield return symbol;
+        }
     }
     internal JObject Plan(string? fingerprint = null) => ConnectionCreatePlanner.Plan(Request.ToString(), Base.Scene, this, fingerprint);
     internal JObject Arguments() => new() { ["request"] = Request.DeepClone(), ["fingerprint"] = Plan()["fingerprint"] };

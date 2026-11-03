@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| SPECIAL 中断点与 BP 默认（2026-11-02，负责人 brief；A81/A83） | `ConnectionCreateTests`、`DanglingInterruptionTests` | 待运行：本次禁止运行 EPLAN。待核验默认 BP 双连接点、显式 BPIN/BPOUT/BPF 的符号名与变体、两端各自实际接线，以及既有配对、完整图形和单步撤销断言；辅助原生读回已支持多连接点。 |
 | parts-first drawing spike（2026-11-02，负责人 brief；A82） | `PartsFirstSpikeTests` | 待运行：本次禁止运行 EPLAN。待在 LargeWrite 新 Circuit 页观察部件检索、模板回滚、PLC/按钮功能放置、既有功能赋部件和图片导出；只收集原生事实，不改变产品契约，不写部件库。新增 `templates-place` 步骤记录 PLC 主功能创建、模板放置前后状态、逐次放置结果和重复功能，并对照匹配引脚名称的赋部件结果。第三轮新增 `place-unplaced` 与 `device-list`，待观察未放置功能的 `Place` 返回对象身份、设备清单模板的 `PlaceAt` 放置及两条路径提交后的功能与重复项读回。 |
 | 官方 action 离线导入（`feat/official-actions`，2026-11-01 负责人 brief） | `BatchVerification`、`ActionTryTests`、`ActionCatalogTests` | 待运行：批量 action 仅取官方 action/TYPE 行，按第一条官方示例准备参数；需要文件、页或选择上下文仍为 needs_context。此次禁止运行 EPLAN；审批、scratch、unknown 停止与撤销断言保留。 |
 | 崩溃成员拒绝与失联停跑（`feat/crash-refusals`，2026-11-02，负责人 brief；A77） | `BatchVerification`、`ApiTryTests` | 待运行：本次禁止运行 EPLAN；拒绝写侧、保留 MacroBox 读取、失联后停止并持久暂停需验证。崩溃成员不再试执行，原生 target/value 未提供，不宣称复现原生崩溃。 |

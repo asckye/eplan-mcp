@@ -592,15 +592,7 @@
                 },
                 "name": {
                   "type": "string",
-                  "enum": [
-                    "CO",
-                    "TLRO",
-                    "TLRU",
-                    "TOUL",
-                    "TOUR",
-                    "PCP",
-                    "BPF"
-                  ]
+                  "minLength": 1
                 },
                 "variant": {
                   "type": "integer",
@@ -1353,11 +1345,18 @@
         ],
         "symbol": {
           "library": "SPECIAL",
-          "name": "BPF",
-          "variant": 0,
+          "name": "BP",
+          "variant": 3,
           "type": "InterruptionPoint",
-          "kind": "t_node",
+          "kind": "interruption_point",
           "connectionPoints": [
+            {
+              "location": [
+                0.0,
+                -1.0
+              ],
+              "direction": "Down"
+            },
             {
               "location": [
                 0.0,
@@ -1636,7 +1635,7 @@
       ],
       "preservedEndpoints": []
     },
-    "fingerprint": "111177742038ed40c6a9453813cf1288b658884490dea37dad48a79ed6e27ee9"
+    "fingerprint": "350d5a8e17d2069e63d2c830a1dbeaf950593c3176a9bd455db62ed89b386f1c"
   },
   "interruptionReadback": [
     {
@@ -1841,15 +1840,7 @@
                 },
                 "name": {
                   "type": "string",
-                  "enum": [
-                    "CO",
-                    "TLRO",
-                    "TLRU",
-                    "TOUL",
-                    "TOUR",
-                    "PCP",
-                    "BPF"
-                  ]
+                  "minLength": 1
                 },
                 "variant": {
                   "type": "integer",

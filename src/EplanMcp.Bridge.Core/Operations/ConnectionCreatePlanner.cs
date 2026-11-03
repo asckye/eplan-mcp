@@ -74,7 +74,7 @@ public static class ConnectionCreatePlanner
         var resolved = new JArray();
         var interruptions = new Dictionary<string, JObject>(StringComparer.Ordinal);
         var requestedVariants = new Dictionary<string, (int Number, string Pointer)>(StringComparer.Ordinal);
-        // D7 (customer page): EPLAN's insert command may use another SPECIAL interruption symbol than BPF (filled arrows).
+        // A83: EPLAN's insert command defaults to BP; callers may select any SPECIAL interruption symbol.
         var interruptionSymbols = new Dictionary<string, string>(StringComparer.Ordinal);
         string Key(double[] p) => FormattableString.Invariant($"{p[0]},{p[1]}");
         double[] Point(JToken? token, string at)
@@ -213,23 +213,27 @@ public static class ConnectionCreatePlanner
             {
                 "corner" => s.Name == "CO" && s.Type == "Routing",
                 "t_node" => s.Type == (s.Name switch { "TLRO" => "TNodeUp", "TLRU" => "TNodeDown", "TOUL" => "TNodeLeft", "TOUR" => "TNodeRight", _ => "" }),
-                "interruption_point" => s.Type == "InterruptionPoint" && s.Name == (interruptionSymbols.TryGetValue(Key(node.Point), out string? named) ? named : "BPF"),
+                "interruption_point" => s.Type == "InterruptionPoint" && s.Name == (interruptionSymbols.TryGetValue(Key(node.Point), out string? named) ? named : "BP"),
                 _ => s.Name == "PCP" && s.Type == "PotentialTerminal",
-            }) && s.ConnectionPoints.Count == node.Directions.Length && s.ConnectionPoints.All(p => p.Location.Length == 2
-                && p.Location.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && Math.Abs(v) <= 2 * grid)
+            }) && (node.Kind == "interruption_point" ? s.ConnectionPoints.Count > 0 : s.ConnectionPoints.Count == node.Directions.Length) && s.ConnectionPoints.All(p => p.Location.Length == 2
+                && p.Location.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && (node.Kind == "interruption_point" || Math.Abs(v) <= 2 * grid))
                 && (node.Kind is "potential_point" or "interruption_point" || requestedVariants.ContainsKey(Key(node.Point)) || p.Location.All(v => v == 0)))
-                && s.ConnectionPoints.Select(p => p.Direction).OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(node.Directions.OrderBy(d => d, StringComparer.Ordinal))).OrderBy(s => s.Variant).ToArray();
-            // A52/S40: PCP has one offset pin and mirrored variants sharing its direction.
-            if (node.Kind is "potential_point" or "interruption_point" && matches.Length > 0)
-            { matches = matches.Where(s => s.Variant == matches[0].Variant).ToArray(); }
+                && (node.Kind == "interruption_point" ? s.ConnectionPoints.Any(p => p.Direction == node.Directions[0])
+                    : s.ConnectionPoints.Select(p => p.Direction).OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(node.Directions.OrderBy(d => d, StringComparer.Ordinal))))
+                // A83: prefer BP's tail (index 1), then the lowest variant number, regardless of library enumeration order.
+                .OrderByDescending(s => node.Kind == "interruption_point" ? s.ConnectionPoints.FindLastIndex(p => p.Direction == node.Directions[0]) : -1)
+                .ThenBy(s => s.Variant).ToArray();
             if (requestedVariants.TryGetValue(Key(node.Point), out var requestedVariant))
             {
                 Require(matches.Any(s => s.Variant == requestedVariant.Number), requestedVariant.Pointer,
                     "Available variants for the requested cardinal pins: " + string.Join(", ", matches.Select(s => s.Variant.ToString(CultureInfo.InvariantCulture)).Distinct(StringComparer.Ordinal)) + ".");
                 matches = matches.Where(s => s.Variant == requestedVariant.Number).ToArray();
             }
+            // A52/S40: PCP has one offset pin and mirrored variants sharing its direction.
+            if (node.Kind is "potential_point" or "interruption_point" && matches.Length > 0)
+            { matches = matches.Where(s => s.Variant == matches[0].Variant).ToArray(); }
             SymbolSearchItem symbol = matches.Length == 1 ? matches[0] : throw Missing("Select a verified SPECIAL variant with the requested cardinal pins using eplan_symbol_search.");
-            double[] offset = symbol.ConnectionPoints[0].Location;
+            double[] offset = (node.Kind == "interruption_point" ? symbol.ConnectionPoints.Last(p => p.Direction == node.Directions[0]) : symbol.ConnectionPoints[0]).Location;
             double[] position = [node.Point[0] - offset[0], node.Point[1] - offset[1]];
             foreach (SymbolConnectionPoint pin in symbol.ConnectionPoints)
             { nodePins[Key(node.Point) + "/" + pin.Direction] = [position[0] + pin.Location[0], position[1] + pin.Location[1]]; }

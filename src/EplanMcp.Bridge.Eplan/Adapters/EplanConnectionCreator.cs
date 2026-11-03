@@ -179,7 +179,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 using InterruptionPointPropertyList properties = point.Properties;
                 using PropertyValue reference = properties[(Properties.InterruptionPoint)24300];
                 using PropertyValue sort = properties[(Properties.InterruptionPoint)24809];
-                PinBase pin = point.GraphicalConnectionPoints.Single();
+                PinBase pin = ReadInterruptionPin(point);
                 points.Add(new JObject
                 {
                     ["page"] = page,

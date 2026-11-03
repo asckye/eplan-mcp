@@ -116,6 +116,8 @@ internal sealed class ConnectionDefinitionPoint(FakeCableStore store, CableState
 
 internal sealed class GraphicalConnection
 {
-    public SymbolReference StartSymbolRef { get; } = new(1);
-    public SymbolReference EndSymbolRef { get; } = new(2);
+    public SymbolReference StartSymbolRef { get; set; } = new(1);
+    public SymbolReference EndSymbolRef { get; set; } = new(2);
+    public PinBase StartConnectionPoint { get; set; } = new();
+    public PinBase EndConnectionPoint { get; set; } = new();
 }

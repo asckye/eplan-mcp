@@ -117,7 +117,7 @@ public sealed class ConnectionCreateContractTests
         JObject symbol = Object(new()
         {
             ["library"] = Constant("SPECIAL"),
-            ["name"] = new JObject { ["type"] = "string", ["enum"] = new JArray("CO", "TLRO", "TLRU", "TOUL", "TOUR", "PCP", "BPF") },
+            ["name"] = Text(),
             ["variant"] = Integer(0),
             ["type"] = Text(),
             ["kind"] = Text(),

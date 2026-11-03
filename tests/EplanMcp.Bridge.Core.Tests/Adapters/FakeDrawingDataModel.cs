@@ -51,6 +51,7 @@ internal class SymbolReference(long oid) : Placement(oid, 17)
 {
     public BoxSymbolVariant SymbolVariant { get; } = new();
     public PinBase[] GraphicalConnectionPoints { get; set; } = [];
+    public GraphicalConnection[] GraphicalConnections { get; set; } = [];
     public PropertyPlacement[] PropertyPlacements { get; set; } = [];
     public bool UseLocalPropertyPlacements { get; set; } = true;
     public int LocalCopies { get; private set; }
