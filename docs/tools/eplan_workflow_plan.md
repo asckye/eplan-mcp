@@ -11,7 +11,7 @@
 ## 1. 这个工具解决什么任务
 “先建页，再插入一个回路，给我看完整变更和预期结果”。按 [M6 设计](../design/2026-10-21-m6-engineering-packs.md) 4.8 编译内联步骤；阶段 3 增加按柜配置展开的锁定工作流与规则，工程计划的执行重核留 W3。
 
-第 2 阶段完整任务先独立调用 [`eplan_project_create`](eplan_project_create.md)，从基本项目在 scratch 中新建目标（Write，scratch 中自动允许）；新项目按该规格返回关闭状态，按既有写工具要求打开后，调用 `eplan_workflow_plan` / `eplan_plan_apply` 在这个已有项目中从参考项目生成回路。计划不承担项目创建。
+第 2 阶段完整任务先独立调用 [`eplan_project_create`](eplan_project_create.md) 预览，再以相同参数显式传 `dry_run: false`，从基本项目在 scratch 中新建目标（Write，scratch 中自动允许）；新项目按该规格返回关闭状态，按既有写工具要求打开后，调用 `eplan_workflow_plan` / `eplan_plan_apply` 在这个已有项目中从参考项目生成回路。计划不承担项目创建。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |

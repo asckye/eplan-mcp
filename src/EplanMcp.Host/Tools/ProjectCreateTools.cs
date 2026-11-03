@@ -20,17 +20,17 @@ internal sealed class ProjectCreateTools
 
     [McpServerTool(Name = CreateTool, Title = "Create project", ReadOnly = false, Destructive = false, Idempotent = false,
         OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ProjectCreateResult))]
-    [Description("Creates a closed new project from a .zw9 basic project or restores a .zw1 backup from the imports folder. " +
-        "The destination must not exist, even as an empty folder. Defaults to scratch/projects/name; outside scratch needs " +
-        "per-call approval (APPROVAL_DENIED if refused). Checks compatibility afterwards; no automatic upgrade. " +
-        "Example: {\"mode\":\"basic_project\",\"file\":\"basics/GB_bas001.zw9\",\"name\":\"Line1\",\"dry_run\":true}.")]
+    [Description("Creates a closed project from an imports .zw9 basic project or .zw1 backup. " +
+        "Target must not exist, even empty; default scratch/projects/name. Outside scratch needs " +
+        "per-call approval (APPROVAL_DENIED). Checks compatibility; no automatic upgrade. " +
+        WriteToolDefaults.Description + " Example: {\"mode\":\"basic_project\",\"file\":\"basics/GB_bas001.zw9\",\"name\":\"Line1\",\"dry_run\":true}.")]
     public static async Task<CallToolResult> CreateAsync(
         WritePipeline pipeline, ImportFiles files, HostConfig config,
         [AllowedValues("basic_project", "backup")] string mode,
         [Description("Path below imports; at most 2 GB")][StringLength(260, MinimumLength = 1)] string file,
         [Description("New name, no path, dot or surrounding spaces")][StringLength(60, MinimumLength = 1)] string name,
         [Description("Full local path of a new folder; parent must exist")] string? destination = null,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
@@ -89,6 +89,7 @@ internal sealed class ProjectCreateTools
             {
                 Execution = outcome.Execution,
                 DryRun = dry_run,
+                Fingerprint = outcome.Plan.Fingerprint,
                 Mode = mode,
                 File = ResultShaper.CleanText(request.Args.File!),
                 Sha256 = request.Args.Sha256!,
@@ -97,7 +98,7 @@ internal sealed class ProjectCreateTools
                 ProjectGuid = ResultShaper.CleanText(outcome.Data?.ProjectGuid),
                 DatabaseVersion = ResultShaper.CleanText(outcome.Data?.DatabaseVersion),
                 Seconds = clock.Elapsed.TotalSeconds,
-                Hint = dry_run ? "Compatibility will be checked during creation or restore." : outcome.Recovered
+                Hint = dry_run ? "Compatibility will be checked during creation or restore. " + WriteToolDefaults.ExecutionHint : outcome.Recovered
                     ? "The new project is closed. The commit was recovered after a lost response; project metadata is unavailable." : "The new project is closed.",
                 Changes = dry_run ? [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), NewValue = ResultShaper.CleanText(c.NewValue) })] : null,
             };

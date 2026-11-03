@@ -271,6 +271,7 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
         {
             ["mode"] = "basic_project",
             ["file"] = "basic.zw9",
+            ["dry_run"] = false,
             ["name"] = name,
             ["destination"] = destination
         });

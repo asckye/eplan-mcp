@@ -266,10 +266,10 @@ public sealed class ToolContractTests : IDisposable
         Assert.False(tool.Annotations.IdempotentHint);
         Assert.Equal(["mode", "file", "name"], tool.InputSchema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
         Assert.Equal(["basic_project", "backup"], Enum(tool.InputSchema.GetProperty("properties").GetProperty("mode")));
-        Assert.False(tool.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.True(tool.InputSchema.GetProperty("properties").GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.False(tool.InputSchema.GetProperty("properties").TryGetProperty("project", out _));
         Assert.Equal(["not_started", "rolled_back", "committed", "unknown"], Enum(tool.OutputSchema!.Value.GetProperty("properties").GetProperty("execution")));
-        foreach (string p in new[] { "databaseVersion", "pages", "projectGuid", "seconds", "sha256", "changes" })
+        foreach (string p in new[] { "databaseVersion", "pages", "projectGuid", "seconds", "sha256", "changes", "fingerprint" })
         { Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty(p, out _)); }
     }
 

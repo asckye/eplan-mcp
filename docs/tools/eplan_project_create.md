@@ -21,7 +21,7 @@
 | `file` | string，1–260 个字符 | 是 | — | 固定导入根目录中的相对路径，如 `basics/GB_bas001.zw9`、`backups/sample.zw1` |
 | `name` | string，1–60 个字符 | 是 | — | 新项目名，不带扩展名、不含 `.`；规则同 `eplan_import_pxf`，拒绝路径、控制字符、Windows 保留名、首尾空格 |
 | `destination` | string | 否 | `<第一个 scratch 根目录>\projects\<name>` | 要新建的目录的完整本地路径；显式指定时父目录须存在，默认缺失的 `projects` 容器由 Bridge 执行时创建。scratch 外仍逐次审批；不能指向已有目录 |
-| `dry_run` | boolean | 否 | false | 只校验和返回新项目位置、源哈希、变更清单，不创建目录、不请求审批 |
+| `dry_run` | boolean | 否 | true | 省略或 true 仅返回新项目位置、源哈希、计划指纹与变更清单，不创建目录、不请求审批；执行须显式 false |
 
 - schema 为对象，`additionalProperties: false`；`mode` 写入 schema 的 `enum`。没有 `project` 参数：`name` 和目标路径显式指定新项目，不使用当前项目（同 `eplan_import_pxf`）。
 - `file` 按 [项目威胁模型](../architecture/architecture.md#13-威胁模型) 用 Host 的 `ImportFiles` 解析：根目录固定为 `<数据根目录>\imports\`；拒绝绝对路径、UNC、盘符、`.`、`..`、保留设备名和根目录以下的符号链接/联接点；根目录本身可以是链接。每个文件上限 2 GB，扩展名须与模式一致（不区分大小写）。Host 算出 SHA-256，不能让客户端提供它。
@@ -35,6 +35,7 @@
 {
   "execution": "committed",
   "dryRun": false,
+  "fingerprint": "<plan-hash>",
   "mode": "basic_project",
   "file": "basics/GB_bas001.zw9",
   "sha256": "…",
@@ -48,7 +49,7 @@
 ```
 
 - `outputSchema`：上述字段均声明；`execution` 为 ADR-0010 的四值枚举，`dryRun`、`project.opened` 为 boolean，`mode` 同输入枚举；`file`、路径和名称为 string，`sha256` 为 64 位小写十六进制；`pages` 为非负 integer 或 null，`projectGuid`、`databaseVersion`、`hint` 为 string 或 null，`seconds` 为非负数。示例中的哈希、时间是占位值。
-- `basic_project` 的 `pages`、`projectGuid` 来自同次 Bridge 创建调用；`backup` 当前的 `NewProjectData` 两字段为 null，不能捏造页数或为填字段自动打开项目。两种模式的 `databaseVersion` 均来自 Bridge execute 内的兼容性检查，通过后写入 `NewProjectData`。`dry_run` 返回 `execution: not_started`、目标路径、源哈希和 `changes[]`，这三个未读取的项目字段均为 null。响应丢失后 `outcome.get` 只恢复执行状态，没有项目元数据；此时上述字段仍为 null，hint 明示，不重做兼容性检查或执行。
+- `basic_project` 的 `pages`、`projectGuid` 来自同次 Bridge 创建调用；`backup` 当前的 `NewProjectData` 两字段为 null，不能捏造页数或为填字段自动打开项目。两种模式的 `databaseVersion` 均来自 Bridge execute 内的兼容性检查，通过后写入 `NewProjectData`。`dry_run` 返回 `execution: not_started`、计划 `fingerprint`、目标路径、源哈希和 `changes[]`，这三个未读取的项目字段均为 null。响应丢失后 `outcome.get` 只恢复执行状态，没有项目元数据；此时上述字段仍为 null，hint 明示，不重做兼容性检查或执行。
 - `projectGuid` 是原样读出的 `PROJ_GUID`，形如“名称@Unix 秒数”，不是全局唯一 GUID；还原及文件副本会沿用原值（[A34](../eplan/api-notes/reads-and-snapshots.md#a34-对象编号与项目生命周期spike-s302026-10-21eplan-20260325421electric-p8在调度器中)，S30）。对象编号也不能单独区分项目副本（A32、A34）。
 - `seconds` 为 Host 本次处理用时（不含等待人工审批）；Bridge 的 `NewProjectData.Seconds` 只测 EPLAN 阶段，不冒充整个调用用时。结果给实际目标路径；错误不泄露本机路径（SEC-12）。名称等数据经过 ResultShaper。
 - 返回 `structuredContent`、同内容 JSON 文本块和一行摘要：`Created project 'Line1' from a basic project; it is closed.`；还原时用 `Restored backup as new project 'Line1'; it is closed.`。结果很小，不分页，不设 `response_format`。
@@ -83,7 +84,7 @@
 
 ## 6. 写操作专项
 
-- **dry-run**：返回一条 `create/project/<name>` 变更，含模式、相对源路径、大小、SHA-256、规范化目标路径及“新项目，结束后关闭”；不建目标、不审批。说明兼容性将在实际创建/还原后检查，不宣称已验证源归档版本。
+- **dry-run**：缺省或 true 返回 `execution: not_started`、`fingerprint` 与提示使用相同参数并显式传 `dry_run: false` 执行；返回一条 `create/project/<name>` 变更，含模式、相对源路径、大小、SHA-256、规范化目标路径及“新项目，结束后关闭”；不建目标、不审批。说明兼容性将在实际创建/还原后检查，不宣称已验证源归档版本。
 - **审批**：默认目标在 scratch，自动允许；显式目标在 scratch 外，`writesOutsideScratch: approve` 时每次由工程师经既有独立窗口审批，`deny` 时 `POLICY_DENIED`。批准之前不在外部创建目录；批准也不允许复用或覆盖任何已有目标。展示来源、哈希、目标、不会覆盖、无 EPLAN 撤销步骤。审批渠道、绑定及期限沿用 ADR-0005 的修订，不改变审批模型。
 - **备份和计划**：单独新建没有要覆盖的项目，不因文件是 `.zw1` 就成为 Destructive，也不把它当作 ADR-0013 的“恢复原项目”入口。后续多步计划仍按 [ADR-0023](../adr/0023-plan-approval-and-backup.md) 先备份目标、逐步执行、一次计划审批；新建后如何打开供写入及如何安排计划前备份，见 Q4。本工具不返回 `partially_committed`。
 - **回滚**：新建/还原不使用 `SafetyPoint` 或 `UndoStep`，不承诺 Ctrl+Z。失败、取消或随后兼容性不通过，确认 EPLAN 已停止后，按 [eplan_import_pxf 的“失败时”](eplan_import_pxf.md) 仅删除本次创建、规划时不存在的 `.elk`（以及 `.ell`）、`.edb` 及本次新建目录；链接/联接点只删链接本身、不跟随，不删原有或别人的文件。不兼容材料清理成功返回 `INVALID_ARGUMENT/rolled_back`；检查失败清理成功返回 `EPLAN_OPERATION_FAILED/rolled_back`，即使 Bridge 创建/还原单步已完成也不直接报告工具成功。清理不完全均为 `OUTCOME_UNKNOWN/unknown`。超时后可能仍在写，Host 不能先删目录；先用原请求 ID `outcome.get` 取回结果，绝不重发执行（[ADR-0010](../adr/0010-write-outcomes.md)）。

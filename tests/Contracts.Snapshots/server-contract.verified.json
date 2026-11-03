@@ -16624,7 +16624,7 @@
     {
       "name": "eplan_project_create",
       "title": "Create project",
-      "description": "Creates a closed new project from a .zw9 basic project or restores a .zw1 backup from the imports folder. The destination must not exist, even as an empty folder. Defaults to scratch/projects/name; outside scratch needs per-call approval (APPROVAL_DENIED if refused). Checks compatibility afterwards; no automatic upgrade. Example: {\"mode\":\"basic_project\",\"file\":\"basics/GB_bas001.zw9\",\"name\":\"Line1\",\"dry_run\":true}.",
+      "description": "Creates a closed project from an imports .zw9 basic project or .zw1 backup. Target must not exist, even empty; default scratch/projects/name. Outside scratch needs per-call approval (APPROVAL_DENIED). Checks compatibility; no automatic upgrade. Omit/true previews; false executes. Example: {\"mode\":\"basic_project\",\"file\":\"basics/GB_bas001.zw9\",\"name\":\"Line1\",\"dry_run\":true}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -16656,9 +16656,9 @@
             "default": null
           },
           "dry_run": {
-            "description": "Only return the plan",
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
-            "default": false
+            "default": true
           }
         },
         "required": [
@@ -16682,6 +16682,9 @@
           },
           "dryRun": {
             "type": "boolean"
+          },
+          "fingerprint": {
+            "type": "string"
           },
           "mode": {
             "type": "string",

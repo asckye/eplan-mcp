@@ -70,7 +70,7 @@ public sealed class ProjectCreateRecoveryTests
             new ApprovalService([], config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
             new BackupFolders(harness.Locations, TimeProvider.System), TimeProvider.System, NullLogger<WritePipeline>.Instance);
 
-        var result = await ProjectCreateTools.CreateAsync(pipeline, new(harness.Locations), config, mode, "material" + extension, "Line1", cancellationToken: TestContext.Current.CancellationToken);
+        var result = await ProjectCreateTools.CreateAsync(pipeline, new(harness.Locations), config, mode, "material" + extension, "Line1", dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
         if (status == OutcomeStatus.Committed)
         {
             JsonElement data = WriteToolHarness.Structured(result);

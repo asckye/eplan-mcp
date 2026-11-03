@@ -2,19 +2,20 @@
 
     {"mode":"basic_project","file":"basics/GB_bas001.zw9","name":"Line1","dry_run":true}
 
-    {"mode":"backup","file":"backups/sample.zw1","name":"SampleCopy"}
+    {"mode":"backup","file":"backups/sample.zw1","name":"SampleCopy","dry_run":false}
 
 ## Workflow
 
 1. Put the .zw9 basic project or .zw1 backup in the imports folder in EplanMcp's data folder; give its relative path. At most 2 GB; SEC-31 rejects traversal, device names, links and junctions below imports. Pack URIs and project copies are unsupported.
 2. Choose a name of 1–60 characters without a dot, path, control character, Windows reserved name or surrounding spaces. The default destination is the first scratch root's projects/name folder. An explicit destination is a full local path with an existing parent; UNC, devices, traversal and lower-level links are refused. Existing files, folders (even empty) and links are never reused.
-3. A dry run creates no directory and asks nobody. Execution inside scratch is automatic; outside scratch the configured policy either denies it or asks the engineer for this call. Approval shows the source, SHA-256 and destination; there is no EPLAN undo step or Ctrl+Z.
+3. Omitted dry_run or true previews without creating a directory or asking anyone. Repeat the same arguments with dry_run: false to execute. Execution inside scratch is automatic; outside scratch the configured policy either denies it or asks the engineer for this call. Approval shows the source, SHA-256 and destination; there is no EPLAN undo step or Ctrl+Z.
 4. Creation has a 120-second budget; restore has 180 seconds. Progress arrives every 5 seconds while waiting for EPLAN. The Bridge makes the destination during execution, then checks the new .elk before reporting a commit, using the same IsCompatible status as project.compatibility. No cross-version upgrade is promised. The new project is closed.
 5. Failed or incompatible results are cleaned up only after EPLAN stops. Cleanup removes this call's project files and new folder, without following links. Unknown outcomes are recovered by request ID, never by resending execution. Never repeat OUTCOME_UNKNOWN; ask the engineer to inspect the destination and EPLAN.
 
 ## Fields
 
 - execution: committed on success; not_started for dry_run. Errors may report rolled_back or unknown.
+- fingerprint: the planned creation hash.
 - dryRun, mode, file, sha256: the requested mode and relative source, with its Host-computed lowercase SHA-256.
 - project: name, the actual .elk path, and opened (false).
 - pages and projectGuid: creation metadata; null for backups and dry runs. PROJ_GUID is name@Unix-seconds, not a globally unique GUID.

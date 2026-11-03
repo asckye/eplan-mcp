@@ -8,10 +8,10 @@
 
 ## 从准备到结果
 
-1. 工程师把 EPLAN 自带基本项目放到数据目录的 `imports/basics/`，例如 `IEC_bas003_sample_project.zw9`。调用 [`eplan_project_create`](../tools/eplan_project_create.md)，在 scratch 新建目标：
+1. 工程师把 EPLAN 自带基本项目放到数据目录的 `imports/basics/`，例如 `IEC_bas003_sample_project.zw9`。调用 [`eplan_project_create`](../tools/eplan_project_create.md)，先预览，再用相同参数显式传 `dry_run:false` 在 scratch 新建目标：
 
    ```json
-   {"mode":"basic_project","file":"basics/IEC_bas003_sample_project.zw9","name":"PlanDemo"}
+   {"mode":"basic_project","file":"basics/IEC_bas003_sample_project.zw9","name":"PlanDemo","dry_run":false}
    ```
 
    默认目标是 `<scratch>/projects/PlanDemo/`。成功后项目处于关闭状态，由工程师在 EPLAN 中打开；通过 `eplan_project_list` 确认路径。已有空目录也不能作为创建目标。基本项目不会随软件分发，使用本机兼容的示例材料。

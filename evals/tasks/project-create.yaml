@@ -1,7 +1,7 @@
 id: project-create
 set: dev
 fixture: shared
-prompt: 从 imports 的 basics/IEC_bas003_sample_project.zw9 在 scratch 新建一个名称未使用的项目，报告项目位置、页数、数据库版本和关闭状态。
+prompt: 先预览，再用相同参数显式传 dry_run:false 执行 eplan_project_create。从 imports 的 basics/IEC_bas003_sample_project.zw9 在 scratch 新建一个名称未使用的项目，报告项目位置、页数、数据库版本和关闭状态。
 # Engineer stages the IEC basic project in the eval Host's imports before this task; no cross-version assertion.
 answer:
   type: object

@@ -9,6 +9,7 @@ internal sealed class ProjectCreateResult
     [AllowedValues("not_started", "rolled_back", "committed", "unknown")]
     public string Execution { get; set; } = string.Empty;
     public bool DryRun { get; set; }
+    public string Fingerprint { get; set; } = string.Empty;
     [AllowedValues("basic_project", "backup")]
     public string Mode { get; set; } = string.Empty;
     public string File { get; set; } = string.Empty;

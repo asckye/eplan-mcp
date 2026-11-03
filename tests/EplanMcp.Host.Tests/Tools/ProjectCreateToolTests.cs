@@ -4,12 +4,14 @@ using EplanMcp.Contracts;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
+using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>Normal pipeline and real Bridge.Core operations, with fake EPLAN adapters; no EPLAN or pipes.</summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class ProjectCreateToolTests : IDisposable
 {
     private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
@@ -23,6 +25,42 @@ public sealed class ProjectCreateToolTests : IDisposable
         foreach (IDisposable item in _locks)
         { item.Dispose(); }
         _harness.Dispose();
+    }
+
+    [Theory]
+    [InlineData("basic_project")]
+    [InlineData("backup")]
+    public async Task McpOmissionAndTruePreview_ExplicitFalseCreatesTheSamePlan(string mode)
+    {
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            CancellationToken token = TestContext.Current.CancellationToken;
+            var arguments = new Dictionary<string, object?>
+            {
+                ["mode"] = mode,
+                ["file"] = "material" + (mode == "backup" ? ".zw1" : ".zw9"),
+                ["name"] = "Line1",
+            };
+            JsonElement omitted = WriteToolHarness.Structured(await client.CallToolAsync(ProjectCreateTools.CreateTool, arguments, cancellationToken: token));
+            arguments["dry_run"] = true;
+            JsonElement preview = WriteToolHarness.Structured(await client.CallToolAsync(ProjectCreateTools.CreateTool, arguments, cancellationToken: token));
+            Assert.True(omitted.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+            Assert.Equal(omitted.GetProperty("fingerprint").GetString(), preview.GetProperty("fingerprint").GetString());
+            Assert.True(JsonElement.DeepEquals(omitted.GetProperty("changes"), preview.GetProperty("changes")));
+            Assert.Contains("dry_run: false", preview.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            Assert.False(Directory.Exists(_harness.Locations.DefaultScratch));
+            Assert.False(Directory.Exists(_harness.Locations.Audit));
+            Assert.Empty(_harness.Bridge.Writes);
+            Assert.Empty(_adapter.Events);
+            arguments["dry_run"] = false;
+            JsonElement executed = WriteToolHarness.Structured(await client.CallToolAsync(ProjectCreateTools.CreateTool, arguments, cancellationToken: token));
+            Assert.False(executed.GetProperty("dryRun").GetBoolean());
+            Assert.Equal("committed", executed.GetProperty("execution").GetString());
+            Assert.Equal(preview.GetProperty("fingerprint").GetString(), executed.GetProperty("fingerprint").GetString());
+            Assert.Single(_harness.Bridge.Writes);
+            Assert.True(System.IO.File.Exists(Path.Combine(Target, "Line1.elk")));
+        }, services => services.AddSingleton(Config(_harness)));
     }
 
     [Theory]
@@ -58,10 +96,19 @@ public sealed class ProjectCreateToolTests : IDisposable
     [InlineData("backup")]
     public async Task DryRun_OnlyPlans_AndCreatesNoProjectOrParentDirectories(string mode)
     {
+        JsonElement omitted = WriteToolHarness.Structured(await ProjectCreateTools.CreateAsync(_harness.Pipeline, new(_harness.Locations), Config(_harness),
+            mode, "material" + (mode == "backup" ? ".zw1" : ".zw9"), "Line1", cancellationToken: TestContext.Current.CancellationToken));
         JsonElement data = WriteToolHarness.Structured(await Create(mode, dryRun: true));
+        Assert.Equal("not_started", omitted.GetProperty("execution").GetString());
+        Assert.True(omitted.GetProperty("dryRun").GetBoolean());
+        Assert.Equal(omitted.GetProperty("fingerprint").GetString(), data.GetProperty("fingerprint").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(data.GetProperty("fingerprint").GetString()));
+        Assert.True(JsonElement.DeepEquals(omitted.GetProperty("changes"), data.GetProperty("changes")));
+        Assert.Contains("dry_run: false", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.False(Directory.Exists(_harness.Locations.Audit));
         Assert.Equal("not_started", data.GetProperty("execution").GetString());
         Assert.False(Directory.Exists(_harness.Locations.DefaultScratch));
-        Assert.Equal(Plan(mode), Assert.Single(_harness.Bridge.Calls).Operation);
+        Assert.Equal(new[] { Plan(mode), Plan(mode) }, _harness.Bridge.Calls.Select(c => c.Operation));
         Assert.Empty(_harness.Bridge.Writes);
         Assert.Empty(_adapter.Events);
         foreach (string p in new[] { "pages", "projectGuid", "databaseVersion" })
@@ -284,7 +331,7 @@ public sealed class ProjectCreateToolTests : IDisposable
             reports.Report(new ProgressNotification { Message = "Finishing the project" });
         };
         WriteToolHarness.Structured(await ProjectCreateTools.CreateAsync(_harness.Pipeline, new(_harness.Locations), Config(_harness),
-            mode, "material" + (mode == "backup" ? ".zw1" : ".zw9"), "Line1", progress: progress, cancellationToken: TestContext.Current.CancellationToken));
+            mode, "material" + (mode == "backup" ? ".zw1" : ".zw9"), "Line1", dry_run: false, progress: progress, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Equal(mode == "backup" ? "Restoring the backup" : "Creating the project", progress.Values[0].Message);
         Assert.Equal(progress.Values.Select(v => v.Progress).Order(), progress.Values.Select(v => v.Progress));
         Assert.All(progress.Values, v => Assert.Null(v.Total));
