@@ -34,6 +34,9 @@ internal sealed class HostDataLocations(string root)
     /// <summary>The development packs: plain folders that only the pack tools write (M6 design 4.1.1).</summary>
     public string PacksDev => Path.Combine(Root, "packs-dev");
 
+    /// <summary>Local plugin library directories, each holding a library.json index.</summary>
+    public string PluginLibraries => Path.Combine(Root, "plugin-libraries");
+
     /// <summary>The project bindings: one folder per project with its binding.json (M6 design 3.3).</summary>
     public string Workspaces => Path.Combine(Root, "workspaces");
 
