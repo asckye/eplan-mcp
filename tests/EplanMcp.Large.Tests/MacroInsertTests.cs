@@ -41,8 +41,9 @@ public sealed class MacroInsertTests(LiveEplan eplan)
         Assert.DoesNotContain("only x >= 0 and y >= 0 were checked", inserted.GetProperty("hint").GetString() ?? string.Empty, StringComparison.Ordinal);
         Assert.InRange(onPage, 1, 50);
 
-        // The same macro at the same point: EPLAN refuses to stack the same symbols ("S029181", A13), nothing stays.
-        Assert.Equal(("INVALID_ARGUMENT", "rolled_back"), (stacked.GetProperty("reason").GetString(), stacked.GetProperty("execution").GetString()));
+        // The same macro at the same point: the layout guard now refuses the overlap before the write (live 2026-11-03),
+        // so EPLAN's own stacking refusal ("S029181", A13) is no longer reached; nothing stays either way.
+        Assert.True(("INVALID_ARGUMENT", "not_started") == (stacked.GetProperty("reason").GetString(), stacked.GetProperty("execution").GetString()), stacked.ToString());
         Assert.Equal(onPage, await DevicesOnAsync(project, page));
     }
 

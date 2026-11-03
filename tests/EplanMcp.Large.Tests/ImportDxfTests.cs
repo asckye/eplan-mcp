@@ -190,7 +190,7 @@ public sealed class ImportDxfTests(LiveEplan eplan, WriteHost host) : IClassFixt
         string? cursor = null;
         do
         {
-            Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = host.Writable, ["name_prefix"] = Prefix, ["limit"] = 200 };
+            Dictionary<string, object?> args = new() { ["project"] = host.Writable, ["name_prefix"] = Prefix, ["limit"] = 200 };
             if (cursor is not null)
             {
                 args["cursor"] = cursor;
