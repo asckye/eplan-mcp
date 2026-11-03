@@ -269,3 +269,10 @@
 - `SymbolVariant.Parent` 返回所属 `Symbol`，其 `Name` 为符号名，`Properties.SYMB_NR`（16002）为符号在库内的编号；`SymbolVariant.SymbolLibraryName`、`VariantNr` 分别为库名与变体编号。上述值仅作原始观察，不推定任一部件预先关联了符号。
 - `Graphics.PropertyPlacement.Parent` 与 `DisplayedProperty` 用于确认功能归属及属性 ID/索引。`GetDisplayString()` 的 XML 同时称返回 GUI 显示字符串、列出 `InvalidOperationException: Always thrown`，因此按请求调用并逐项记录返回值或异常，实际可用性待实机确认。读属性值期间继续遵守 A80 的所有者存活要求。
 - 仅登记、不调用的端子入口（`HEServicesu.xml`）：`CreateTerminalDevice(Project, string fullDeviceTag, string partNumber, string partVariant, string numberingPattern, bool numberByLevels)`；另一个重载在最后 bool 前增加 `int newTerminalDevicePosition, int newTerminalSortCode`。XML 说明按部件功能模板及编号模式创建端子，第一个端子为主端子并接收部件；本次不验证这一行为。
+- **实机结果**（2026-11-02 21:17–22:05，EPLAN 2026.0.3.25421，Electric P8，scratch 副本 LargeWrite 的新页，`PartsFirstSpikeTests` 三轮）：
+  1. `CreateDevice(Project, …, ref list)`：SIE.6ES7131-4BD01-0AA0 得到 6 个持久的未放置 PLC 端子（`:1` 为主功能），符号为 `PLC_CBOX_LEFT_PLUG`/`PLC_CBOX_CON`，20023 依次为 DI0、DI2、DC24V、DI1、DI3、DC24V，没有宏。对其中两个调用 `PlaceAt(Circuit, PLC_CBOX)`，另建了已放置的同名功能（非主功能），原来的未放置功能仍在，即重复。按钮 SIE.3SB3400-0B（有宏）同样如此。
+  2. `CreateDevice(part, variant, page, point)`：主功能 `:1` 放在插入点，使用模板符号 `PLC_CBOX_LEFT_PLUG`，带 20023，器件自动编号为 `-K1`、`-K2`；其余 5 个是持久的未放置功能，没有符号。主功能的 `FunctionTemplates` 返回 6 个模板，均已被覆盖，没有可以实例化的对象。
+  3. 对这些未放置功能调用 `Function.Place(page, point, true, true, true)`：另建了已放置的同名功能，没有符号（页上显示红叉），原功能仍在。
+  4. `CreateDeviceListItem` 加 `GetTemplatesFromDeviceList`：返回 6 个临时的未覆盖模板，器件标识为空（`=+`），没有符号，`IsMainFunction` 均为 false。
+  5. 先放符号 `SSD`、再 `AddArticleReference(SIE.3SB3400-0B)`：部件引用写到了主功能上；部件的模板（`SSMNO`，引脚 `.3`/`.4`）仍是临时的未覆盖模板，没有生成未放置功能。连接点代号相同，但符号和功能定义不同，模板不被覆盖。
+  - 结论：产品用 `CreateDevice(page)` 放主功能（与 EPLAN"插入设备"相同）；其余功能用 `PlaceAt` 加指定符号放置，然后在同一事务中删除原来的未放置功能。删除这一步待正式工具的 Large 测试验证。
