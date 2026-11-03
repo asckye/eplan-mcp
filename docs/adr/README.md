@@ -53,5 +53,7 @@
 | [0044](0044-network-operations.md) | 对网络调用采用隔离端点、数据清单与不可撤回审批 | Accepted | 单向门 |
 | [0045](0045-printing-operations.md) | 对打印调用采用虚拟队列优先与物理输出逐次确认 | Accepted | 单向门 |
 | [0046](0046-readback-deviation-warnings.md) | 对绘图写入后的非安全读回偏差采用提交加警告，不再整体撤销 | Accepted | 单向门 |
-| [0047](0047-plugin-libraries.md) | 采用按种类组织的工程包作为插件，从内置库和登记的本地或共享目录库安装，按全局、项目、柜体作用域启用 | Proposed | 单向门 |
+| [0047](0047-plugin-libraries.md) | 采用按种类组织的工程包作为插件，从内置库和登记的本地或共享目录库安装，按全局、项目、柜体作用域启用 | Accepted | 单向门 |
 | [0048](0048-local-gate-is-the-merge-gate.md) | 采用本地关卡作为权威合并门，直接推送 main，CI 非阻塞 | Accepted | 双向门 |
+| [0049](0049-write-tools-preview-by-default.md) | 写入工具默认只预览，执行须显式 `dry_run: false`（MCP-23） | Accepted | 单向门 |
+| [0050](0050-bridge-frames-reject-unknown-members.md) | Bridge 管道消息拒绝未知字段和重复字段（SEC-14） | Proposed | 单向门 |
