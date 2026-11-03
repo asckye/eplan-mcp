@@ -2,10 +2,10 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Draft |
+| 状态 | Accepted |
 | 作者 | 维护者 |
 | 关联 brief / 变更集 | 负责人 2026-11-02："国际标准需要提前一步加入 MCP，以插件的形式……在 GUI 上面会有添加加载这些的功能" |
-| 相关 ADR | [ADR-0047](../adr/0047-plugin-libraries.md)（Proposed）、[ADR-0024](../adr/0024-pack-trust-and-container.md)、[ADR-0025](../adr/0025-code-plugin-worker.md)、[ADR-0031](../adr/0031-private-extension-modules.md) |
+| 相关 ADR | [ADR-0047](../adr/0047-plugin-libraries.md)（Accepted）、[ADR-0024](../adr/0024-pack-trust-and-container.md)、[ADR-0025](../adr/0025-code-plugin-worker.md)、[ADR-0031](../adr/0031-private-extension-modules.md) |
 | 最后更新 | 2026-11-02 |
 
 ## 1. 背景
@@ -29,9 +29,9 @@
 flowchart LR
   B[内置库 builtin<br/>IEC / GB / NFPA] --> I
   L[本地库<br/>plugin-libraries\] --> I
-  S[共享目录库<br/>config.pluginLibraries] --> I
+  S[共享目录库<br/>state/plugins.json 登记] --> I
   I[安装<br/>校验容器、确认、不可变] --> P[packs\ 已安装插件]
-  P --> E[启用<br/>全局 enabledPlugins / 项目锁 / 柜体锁]
+  P --> E[启用<br/>全局启用列表 / 项目锁 / 柜体锁]
   E --> R[作用域解析<br/>柜体 > 项目 > 全局，含溯源]
   R --> T[MCP 工具<br/>绘图、审查、建项目]
   R --> C[eplan_context_get 溯源]
@@ -66,7 +66,7 @@ flowchart LR
 规则和参数由维护者起草，工程师审核后发布（M12 第 4.1 节）。
 
 ### 4.4 作用域与解析
-- 全局：`config.json` 的 `enabledPlugins: [{ "id", "version" }]`。
+- 全局：数据根 `state\plugins.json` 的启用列表 `enabled: [{ "id", "version" }]`（不写安全配置 `config.json`）。
 - 项目、柜体：沿用 `binding.json` 的锁（M6 4.1.5）。
 - 解析：柜体 > 项目 > 全局；同一作用域内后列出者覆盖。
 - 每个默认项记录生效来源和被覆盖的来源，供 `eplan_context_get` 和工具结果使用。
@@ -88,6 +88,24 @@ flowchart LR
 - **启用**：选择作用域（全局 / 项目 / 柜体）；冲突时显示哪个默认项由哪个插件生效。
 - 界面按 [Workbench 规范](../standards/workbench-ui.md) 实现。
 
+### 4.7 AI 如何获取插件
+插件内容只以数据形式经工具结果和 MCP 资源提供，不作为指令；不提供插件自带的 MCP 提示词。分四层：
+
+| 层 | 方式 | 说明 |
+|---|---|---|
+| 1 | 工具自动使用 | 绘图、审查等工具按当前作用域解析已启用插件，省略的参数取插件默认值；结果的 `metadata.plugins` 列出实际用到的 `插件 ID@版本`。AI 不需要先知道插件也能得到正确结果 |
+| 2 | 服务器说明和上下文 | 注册了 `eplan_context_get` 的配置下，服务器说明提示绘图前先调用它；`include: ["plugins"]` 返回简要汇总：ID、版本、种类、作用域、提供的默认项和规则数量、冲突。不给项目时只返回全局作用域，不需要 EPLAN |
+| 3 | 查询工具 | `eplan_asset_search` 增加 `plugin`、`plugin_kind`、`standard` 筛选；`eplan_asset_get` 的结果带插件标签；`eplan_tool_usage` 列出哪些省略参数会取插件默认值及其生效值和来源 |
+| 4 | MCP 资源（可选，最后做） | `eplanmcp://plugins/<id>/...`，插件安装、启用变化时发送列表变化通知 |
+
+### 4.8 P1 实施要点（2026-11-02 维护者定）
+- 插件默认值是配置层文档（`ConfigSchema` 键 + `ConfigLayer` 值），由现有 `ConfigMerger` 合并并溯源，不另建键值读取器。
+- 合并顺序：模式缺省值 → 全局启用的插件（按列表顺序）→ 现有绑定链（公司 → 柜型 → 项目值 → 柜体值）。项目和柜体作用域就是现有绑定机制（`eplan_cabinet_bind`），P1 不新增绑定字段；绑定已锁定某插件时，全局对同一插件的启用对该项目不生效。
+- 全局启用和登记的共享目录库存放在数据根的 `state\plugins.json`，不放进安全配置 `config.json`；每次解析时读取，修改后立即生效。MCP 工具只能改启用列表（需审批）；登记库只能由人在 Workbench 或命令行中操作。
+- 内置库在程序目录 `plugin-libraries\builtin`，与程序文件同等可信；安装时只核对包摘要与索引一致。
+- 首批消费者不新增公开参数：`eplan_connection_create` 中断点省略 `symbol` 时取 `defaults.interruption.symbol`；`eplan_device_place` 新建端子排定义时取 `defaults.strip_definition.symbol` 和 `.variant`。
+- `iec-base` 在 P1 只含插入符号默认值；导线颜色和 IEC 81346 字母代码需要工程师审核，放到 P2。
+
 ## 5. 安全与数据完整性
 - 只含数据，容器校验、不可变、存放位置都按 ADR-0024。
 - 内置库以外的安装和更新逐次确认；共享目录只读，安装时核对摘要。
@@ -107,9 +125,9 @@ flowchart LR
 
 | 阶段 | 内容 |
 |---|---|
-| P1 | `kind`/`provides`/`defaults.json`；本地库和内置库；`eplan_pack_library_list`、`eplan_pack_install`、`eplan_pack_enable`；全局启用与解析；Workbench 插件页（库、浏览、安装、启用）；`iec-base` |
-| P2 | M12 规则插件 `iec-60204-1`、`iec-81346`、`gb-t-5226-1`、`nfpa-79`；更新、依赖与冲突处理；共享目录库 |
+| P1 | `kind`/`provides`/`standards`；内置库、本地库和共享目录库；`eplan_pack_library_list`、`eplan_pack_install`、`eplan_pack_enable`（全局）；全局启用与解析；`eplan_context_get` 插件汇总、资料查询筛选、`eplan_tool_usage` 默认值；两个首批消费者；Workbench 插件页（库、浏览、安装、全局启用、登记共享目录）；`iec-base`（插入符号默认值） |
+| P2 | M12 规则插件 `iec-60204-1`、`iec-81346`、`gb-t-5226-1`、`nfpa-79`（含导线颜色、字母代码）；更新、依赖与冲突处理；Workbench 中的项目和柜体作用域启用；计划按插件摘要失效；MCP 资源 |
 | P3 | 部件插件（与 M9 EDZ 导入合并）、模板插件；网络源与签名（另写 ADR） |
 
 ## 9. 待定问题
-- 无。方向四项已由负责人 2026-11-02 确认，ADR-0047 待确认。
+- 无。方向四项和 ADR-0047 已由负责人 2026-11-02 确认；P1 的实施要点见第 4.8 节。

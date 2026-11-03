@@ -113,3 +113,17 @@
 - SPECIAL `BPF` 只有 4 个变体（0 左、1 下、2 右、3 上，连接点都在 (0,0)），都画成一段短线，没有箭头；客户页的红色实心箭头来自其它符号库。
 - 客户页中断点标签（如 `11.2 / X4:2b`）的格式由项目的中断点设置决定（交叉引用、对端目标的显示、分隔符，见[官方说明](https://www.eplan.help/en-us/Infoportal/Content/Plattform/2022/Content/htm/xessettingsgui_d_einstellungenprojektabbruchstellen.htm)），内容依赖对端页上的连接，单页重绘不能复现。
 — Large `AcceptanceRedrawTests`（本地客户清单）与 `InterruptionVariantSpikeTests`，2026-11-02 16:01–16:42 各轮的插件日志与报告。
+
+### A83. 插入命令所用的 SPECIAL 符号（2026-11-02，EPLAN 2026.0.3.25421，Electric P8，只读枚举 SPECIAL 库，并在 scratch 副本 LargeWrite 的新页上放置）
+- 中断点（符号类型 `InterruptionPoint`）：
+  - `BP`"中断点"：8 个变体，每个变体有两个连接点，都在原点或离原点 1 mm 处；变体 0、2、4、6 为水平方向，1、3、5、7 为竖直方向。
+  - `BPIN`"中断点，连接在尾端"：8 个变体，只有一个连接点，位于 (0,0)；变体 0–7 的连接方向依次为左、下、右、上、右、上、左、下。
+  - `BPOUT`"中断点，连接在首端"：8 个变体，只有一个连接点，位于箭头尖端，离原点 4 mm：变体 0 在 (4,0)、向右；1 在 (0,4)、向上；2 在 (-4,0)、向左；3 在 (0,-4)、向下；变体 4–7 的方向依次为左、下、右、上。
+  - `BPF`"中断点（流体）"：4 个变体，见 A81。
+  - 客户页的红色实心箭头用 `BPIN`/`BPOUT` 放置后与原图一致（2026-11-02 验收导出图）。
+- 端子排定义：`TDEF`"端子排定义"，类型 `TextFunction`，只有变体 0，没有连接点。用 `Function.Create(page, variant)` 创建后，按符号的默认属性排列显示为"-X6 = 操作控制盒"。
+- PLC：
+  - `PLCC`"PLC 盒子"，类型 `BoxFunction`。
+  - `PLCCP`（连接点）、`PLCCPOV`（连接点，总览）、`PLCCPP`（连接点，带插头）：各 8 个变体，PLC 输入定义均为 `1/2`。
+  - 连接点离原点的距离：`PLCCP` 为 2–4 mm，`PLCCPOV` 为 6–8 mm，`PLCCPP` 为 4 mm。
+— Large `InterruptionVariantSpikeTests`（枚举 SPECIAL 库的全部符号）与 `AcceptanceRedrawTests`，2026-11-02 各轮的插件日志与导出图。
