@@ -55,7 +55,8 @@ public sealed partial class ToolUsageExampleTests
                 }
             }
         }
-        Assert.All(ApiTryCatalog.PropertyGroups, g => Assert.Contains(g, seen));
+        // A77: a property whose read side is refused (it crashed EPLAN) gets no call template.
+        Assert.All(ApiTryCatalog.PropertyGroups.Where(g => ApiTryCatalog.Refused(g, "read") is null), g => Assert.Contains(g, seen));
         Assert.All(index.Data.Entries.Where(e => ApiTryCatalog.Methods(e.Row.Group).Length > 0), e =>
         {
             if (seen.Contains(e.Row.Group))
