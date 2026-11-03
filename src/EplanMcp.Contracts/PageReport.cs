@@ -7,14 +7,22 @@ public sealed class PageReport
     public string? Type { get; set; }
     /// <summary>Form name without extension.</summary>
     public string? Form { get; set; }
-    /// <summary>Report filter scheme name, without scheme data.</summary>
+    /// <summary>Report filter scheme name.</summary>
     public string? FilterScheme { get; set; }
-    /// <summary>Report sort scheme name, without scheme data.</summary>
+    /// <summary>Raw report filter scheme data.</summary>
+    public string? FilterSchemeData { get; set; }
+    /// <summary>Report sort scheme name.</summary>
     public string? SortScheme { get; set; }
-    /// <summary>Function filter scheme name, without scheme data.</summary>
+    /// <summary>Raw report sort scheme data.</summary>
+    public string? SortSchemeData { get; set; }
+    /// <summary>Function filter scheme name.</summary>
     public string? FunctionFilterScheme { get; set; }
-    /// <summary>Function sort scheme name, without scheme data.</summary>
+    /// <summary>Raw function filter scheme data.</summary>
+    public string? FunctionFilterSchemeData { get; set; }
+    /// <summary>Function sort scheme name.</summary>
     public string? FunctionSortScheme { get; set; }
+    /// <summary>Raw function sort scheme data.</summary>
+    public string? FunctionSortSchemeData { get; set; }
     /// <summary>Read-only device tag text; not a supported creation restriction.</summary>
     public string? DeviceTag { get; set; }
     /// <summary>Whether EPLAN generates the page description automatically.</summary>

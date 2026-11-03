@@ -21,7 +21,7 @@ internal sealed class PageGetResult
     [Description("Every non-empty page property for response_format 'detailed'; null otherwise.")]
     public List<PropertyResult>? Properties { get; set; }
 
-    [Description("True when devices or properties were left out.")]
+    [Description("True when devices or properties were left out, or report scheme data was truncated.")]
     public bool Truncated { get; set; }
 
     [Description("What was left out and how to get it when 'truncated' is true; null otherwise.")]

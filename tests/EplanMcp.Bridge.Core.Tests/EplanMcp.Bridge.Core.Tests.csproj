@@ -8,6 +8,7 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.HandleChains.cs" Link="Adapters\EplanApiTryDispatcher.HandleChains.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanText.cs" Link="Adapters\EplanText.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanReportReader.cs" Link="Adapters\EplanReportReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanReportCreator.Schemes.cs" Link="Adapters\EplanReportCreator.Schemes.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanTextFormat.cs" Link="Adapters\EplanTextFormat.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlcReader.cs" Link="Adapters\EplanPlcReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolReader.cs" Link="Adapters\EplanSymbolReader.cs" />

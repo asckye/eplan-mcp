@@ -63,9 +63,13 @@ public sealed class PageGetToolTests
             Type = "TableOfContents",
             Form = "F06_002\u0007",
             FilterScheme = "Filter",
+            FilterSchemeData = "<filter>\r\n\t\u0007\u202e原样</filter>",
             SortScheme = "Sort",
+            SortSchemeData = "sort\r\ndata",
             FunctionFilterScheme = "Functions",
+            FunctionFilterSchemeData = "function\tfilter",
             FunctionSortScheme = "Function sort",
+            FunctionSortSchemeData = "",
             DeviceTag = "-X1\u0007",
             AutomaticPageDescription = false,
             ManualPageDescription = "en_US@Contents;zh_CN@目录;",
@@ -73,13 +77,17 @@ public sealed class PageGetToolTests
 
         JsonElement report = Structured(await Get(Circuit)).GetProperty("report");
 
-        Assert.Equal(["type", "form", "filter_scheme", "sort_scheme", "function_filter_scheme", "function_sort_scheme", "device_tag", "automatic_page_description", "manual_page_description"], report.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(["type", "form", "filter_scheme", "filter_scheme_data", "sort_scheme", "sort_scheme_data", "function_filter_scheme", "function_filter_scheme_data", "function_sort_scheme", "function_sort_scheme_data", "device_tag", "automatic_page_description", "manual_page_description"], report.EnumerateObject().Select(p => p.Name));
         Assert.Equal("TableOfContents", report.GetProperty("type").GetString());
         Assert.Equal("F06_002", report.GetProperty("form").GetString());
         Assert.Equal("Filter", report.GetProperty("filter_scheme").GetString());
+        Assert.Equal(_data.Report.FilterSchemeData, report.GetProperty("filter_scheme_data").GetString());
         Assert.Equal("Sort", report.GetProperty("sort_scheme").GetString());
+        Assert.Equal(_data.Report.SortSchemeData, report.GetProperty("sort_scheme_data").GetString());
         Assert.Equal("Functions", report.GetProperty("function_filter_scheme").GetString());
+        Assert.Equal(_data.Report.FunctionFilterSchemeData, report.GetProperty("function_filter_scheme_data").GetString());
         Assert.Equal("Function sort", report.GetProperty("function_sort_scheme").GetString());
+        Assert.Equal(_data.Report.FunctionSortSchemeData, report.GetProperty("function_sort_scheme_data").GetString());
         Assert.Equal("-X1", report.GetProperty("device_tag").GetString());
         Assert.False(report.GetProperty("automatic_page_description").GetBoolean());
         Assert.Equal("en_US@Contents;zh_CN@目录;", report.GetProperty("manual_page_description").GetString());
@@ -93,7 +101,54 @@ public sealed class PageGetToolTests
         JsonElement report = Structured(await Get(Circuit)).GetProperty("report");
 
         Assert.Equal(JsonValueKind.Null, report.GetProperty("form").ValueKind);
+        Assert.Equal(JsonValueKind.Null, report.GetProperty("filter_scheme_data").ValueKind);
+        Assert.Equal(JsonValueKind.Null, report.GetProperty("sort_scheme_data").ValueKind);
+        Assert.Equal(JsonValueKind.Null, report.GetProperty("function_filter_scheme_data").ValueKind);
+        Assert.Equal(JsonValueKind.Null, report.GetProperty("function_sort_scheme_data").ValueKind);
         Assert.Equal(JsonValueKind.Null, report.GetProperty("automatic_page_description").ValueKind);
+    }
+
+    [Theory]
+    [InlineData("filter_scheme_data", 4000)]
+    [InlineData("filter_scheme_data", 4001)]
+    [InlineData("sort_scheme_data", 4000)]
+    [InlineData("sort_scheme_data", 4001)]
+    [InlineData("function_filter_scheme_data", 4000)]
+    [InlineData("function_filter_scheme_data", 4001)]
+    [InlineData("function_sort_scheme_data", 4000)]
+    [InlineData("function_sort_scheme_data", 4001)]
+    public async Task PageGet_SchemeDataLengthLimit_PreservesRawPrefixAndWarnsOnlyWhenTruncated(string field, int length)
+    {
+        string raw = "\r\n\t\u0007\u202e原样".PadRight(length, 'x');
+        _data.Report = new PageReport { Type = "TerminalDiagram" };
+        switch (field)
+        {
+            case "filter_scheme_data":
+                _data.Report.FilterSchemeData = raw;
+                break;
+            case "sort_scheme_data":
+                _data.Report.SortSchemeData = raw;
+                break;
+            case "function_filter_scheme_data":
+                _data.Report.FunctionFilterSchemeData = raw;
+                break;
+            case "function_sort_scheme_data":
+                _data.Report.FunctionSortSchemeData = raw;
+                break;
+        }
+
+        JsonElement data = Structured(await Get(Circuit));
+
+        Assert.Equal(raw[..4000], data.GetProperty("report").GetProperty(field).GetString());
+        Assert.Equal(length > 4000, data.GetProperty("truncated").GetBoolean());
+        if (length > 4000)
+        {
+            string hint = data.GetProperty("hint").GetString()!;
+            Assert.Contains(field, hint, StringComparison.Ordinal);
+            Assert.Contains("4000", hint, StringComparison.Ordinal);
+        }
+        else
+        { Assert.Equal(JsonValueKind.Null, data.GetProperty("hint").ValueKind); }
     }
 
     [Fact]

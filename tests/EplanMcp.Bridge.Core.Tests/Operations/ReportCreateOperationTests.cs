@@ -1,5 +1,6 @@
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
+using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
@@ -31,16 +32,50 @@ public sealed class ReportCreateOperationTests
     }
 
     [Fact]
+    public void Execute_LiveTerminalDiagramWithUnknownSchemeAndData_ForwardsDataToAdapter()
+    {
+        // 2026-11-03 LargeWrite: the target only knew "Anlage, Einbauort".
+        // The raw live scheme data was not supplied; use a nonempty opaque fixture.
+        const string schemeData = "<FilterScheme><Property id=\"1200\" value=\"A3\" /></FilterScheme>";
+        var input = new JObject
+        {
+            ["Project"] = "Line1",
+            ["Type"] = "TerminalDiagram",
+            ["Form"] = "F13_008",
+            ["FirstPage"] = "+A1&EMA2/102",
+            ["FilterScheme"] = "Location designation_A3",
+            ["FilterSchemeData"] = schemeData,
+        };
+        ReportCreateArgs args = input.ToObject<ReportCreateArgs>()!;
+        Assert.Empty(args.Validate());
+        args.Fingerprint = Plan(args).Fingerprint;
+        _creator.After = [new() { Name = args.FirstPage!, Id = "terminal", Type = args.Type!, Form = args.Form! }];
+
+        Execute(args);
+
+        JObject received = JObject.FromObject(Assert.Single(_creator.Creates));
+        Assert.Equal("Location designation_A3", received.Value<string>("FilterScheme"));
+        Assert.Equal(schemeData, received.Value<string>("FilterSchemeData"));
+    }
+
+    [Fact]
     public void Plan_DescribesTheTypeFormFirstPageAndSchemesWithoutWriting()
     {
         ReportCreateArgs args = Args();
         args.FilterScheme = "Location designation_A3";
         args.SortScheme = "DT (full)";
+        args.FilterSchemeData = "filter-data";
+        args.SortSchemeData = "sort-data";
+        args.FunctionFilterSchemeData = "function-filter-data";
+        args.FunctionSortSchemeData = string.Empty;
         WritePlan plan = Plan(args);
 
         PlannedChange change = Assert.Single(plan.Changes);
         Assert.Equal(("create", "report", First, args.Type, args.Form), (change.Action, change.Kind, change.Name, change.Property, change.NewValue));
         Assert.Equal((args.FilterScheme, args.SortScheme), (plan.Details!["filter_scheme"], plan.Details["sort_scheme"]));
+        Assert.Equal(("11", "9", "20", "0"), (plan.Details["filter_scheme_data_length"], plan.Details["sort_scheme_data_length"],
+            plan.Details["function_filter_scheme_data_length"], plan.Details["function_sort_scheme_data_length"]));
+        Assert.DoesNotContain("filter-data", string.Join(" ", plan.Details.Values), StringComparison.Ordinal);
         Assert.Equal(("Line1", _project.Path), (plan.Project, plan.ProjectPath));
         Assert.Empty(_creator.Creates);
         Assert.Empty(_transactions.Calls);

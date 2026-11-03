@@ -63,7 +63,8 @@ internal static class PageDrawingDiscovery
             }
             Continue();
             result.Truncated = true;
-            result.Hint = "Drawing objects may be paged or cut to the size budget; pass drawings.nextCursor as drawing_cursor. Other omitted entries are available with detailed or eplan_device_list.";
+            result.Hint = (result.Hint is null ? string.Empty : result.Hint + " ")
+                + "Drawing objects may be paged or cut to the size budget; pass drawings.nextCursor as drawing_cursor. Other omitted entries are available with detailed or eplan_device_list.";
             ResultShaper.FitItems(result, result.Properties, budget);
             ResultShaper.FitItems(result, result.Devices, budget);
             while (!ResultShaper.Fits(result, budget) && drawings.Items.Count > 0)

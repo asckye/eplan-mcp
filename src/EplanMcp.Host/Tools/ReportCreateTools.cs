@@ -15,23 +15,52 @@ internal sealed class ReportCreateTools
     public const string Tool = "eplan_report_create";
 
     [McpServerTool(Name = Tool, Title = "Create report pages from a report block", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ReportCreateResult))]
-    [Description("Creates project-wide report pages; previews by default. Ctrl+Z undoes it. Approval outside scratch (APPROVAL_DENIED). Example: {\"project\":\"Line1\",\"type\":\"TableOfContents\",\"form\":\"F06_002\",\"first_page\":\"&AAB1/102\"}.")]
+    [Description("Preview by default; Ctrl+Z undo. Approval outside scratch (APPROVAL_DENIED).")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IProgress<ProgressNotificationValue> progress,
         string project,
         [AllowedValues("TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview")] string type,
-        [Description("Without extension")] string form, [Description("Full name; absent or report page")] string first_page,
+        string form, string first_page,
         string? filter_scheme = null, string? sort_scheme = null,
-        [Description("Omit for automatic")] string? page_description = null,
+        string? page_description = null,
+        string? filter_scheme_data = null, string? sort_scheme_data = null,
+        string? function_filter_scheme_data = null, string? function_sort_scheme_data = null,
         bool dry_run = true, CancellationToken cancellationToken = default)
     {
-        var args = new ReportCreateArgs { Project = project, Type = type, Form = form, FirstPage = first_page, FilterScheme = filter_scheme, SortScheme = sort_scheme, PageDescription = page_description };
+        var args = new ReportCreateArgs
+        {
+            Project = project,
+            Type = type,
+            Form = form,
+            FirstPage = first_page,
+            FilterScheme = filter_scheme,
+            SortScheme = sort_scheme,
+            PageDescription = page_description,
+            FilterSchemeData = filter_scheme_data,
+            SortSchemeData = sort_scheme_data,
+            FunctionFilterSchemeData = function_filter_scheme_data,
+            FunctionSortSchemeData = function_sort_scheme_data,
+        };
         List<string> violations = args.Validate();
         if (violations.Count > 0)
         { return ToolResults.InvalidArguments(violations); }
         try
         {
             var request = new WriteRequest<ReportCreateArgs, ReportCreateArgs>(Tool, ToolTier.Write, OperationNames.ReportCreatePlan, OperationNames.ReportCreateExecute,
-                args, plan => new ReportCreateArgs { Project = project, Type = type, Form = form, FirstPage = first_page, FilterScheme = filter_scheme, SortScheme = sort_scheme, PageDescription = page_description, Fingerprint = plan.Fingerprint }, dry_run, ReportWriteTools.Limit, "Creating report pages");
+                args, plan => new ReportCreateArgs
+                {
+                    Project = project,
+                    Type = type,
+                    Form = form,
+                    FirstPage = first_page,
+                    FilterScheme = filter_scheme,
+                    SortScheme = sort_scheme,
+                    PageDescription = page_description,
+                    FilterSchemeData = filter_scheme_data,
+                    SortSchemeData = sort_scheme_data,
+                    FunctionFilterSchemeData = function_filter_scheme_data,
+                    FunctionSortSchemeData = function_sort_scheme_data,
+                    Fingerprint = plan.Fingerprint,
+                }, dry_run, ReportWriteTools.Limit, "Creating report pages");
             WriteOutcome<ReportCreateData> outcome = await pipeline.RunAsync<ReportCreateArgs, ReportCreateArgs, ReportCreateData>(request, progress, cancellationToken).ConfigureAwait(false);
             bool committed = outcome.Execution == ExecutionState.Committed;
             var result = new ReportCreateResult

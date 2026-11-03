@@ -2,13 +2,13 @@
 
     {"project":"Line1","type":"TableOfContents","form":"F06_002","first_page":"&AAB1/102","dry_run":true}
 
-    {"project":"Line1","type":"TerminalDiagram","form":"F13_008","first_page":"+A1&EMA2/102","filter_scheme":"Location designation_A3","dry_run":false}
+    {"project":"Line1","type":"TerminalDiagram","form":"F13_008","first_page":"+A1&EMA2/102","filter_scheme":"Location designation_A3","dry_run":true}
 
 Native execution of these tool examples: NOT RUN.
 
 ## Workflow
 
-Read `report.type`, `report.form` and scheme names with eplan_page_get. Generation covers the project; device restrictions are not supported. Use eplan_report_update to update existing reports. The full first page name must be absent or refer to a report page; form names have no extension. Scheme names must be nonempty and at most 500 characters; EPLAN validates their availability. Supply `page_description` for manual text or omit it for automatic descriptions. The default dry-run plans without approval or writes; pass `dry_run:false` to execute. One Ctrl+Z undoes generation.
+Read `report.type`, `report.form`, scheme names and scheme data with eplan_page_get. Pass filter_scheme, sort_scheme and the four data fields filter_scheme_data, sort_scheme_data, function_filter_scheme_data and function_sort_scheme_data unchanged from the source report. Scheme names belong to each project; when the target lacks a name, nonempty data supplies the settings. Each read data field is capped at 4000 characters; a truncation warning means it is incomplete. Generation covers the project; device restrictions are not supported. Use eplan_report_update to update existing reports. The full first page name must be absent or refer to a report page; form names have no extension. Scheme names must be nonempty and at most 500 characters; EPLAN validates the settings. Supply `page_description` for manual text or omit it for automatic descriptions. The default dry-run plans without approval or writes; after supplying the source data, pass `dry_run:false` to execute. One Ctrl+Z undoes generation. Approval lists scheme names and only the lengths of supplied data.
 
 ## Fields
 

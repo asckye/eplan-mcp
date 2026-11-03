@@ -16,6 +16,11 @@ public sealed class ReportCreateTests(LiveEplan eplan, WriteHost host) : IClassF
         string type = report.GetProperty("type").GetString()!;
         string form = report.GetProperty("form").GetString()!;
         Assert.False(string.IsNullOrWhiteSpace(form));
+        JsonElement terminalSample = await eplan.CallAsync("eplan_page_get", new() { ["project"] = eplan.ProjectPath, ["page"] = "+A1&EMA2/2" });
+        JsonElement terminalReport = terminalSample.GetProperty("report");
+        Assert.Equal(("TerminalDiagram", "F13_008", "Location designation_A3"),
+            (terminalReport.GetProperty("type").GetString(), terminalReport.GetProperty("form").GetString(), terminalReport.GetProperty("filter_scheme").GetString()));
+        Assert.False(string.IsNullOrEmpty(terminalReport.GetProperty("filter_scheme_data").GetString()));
 
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         Assert.Equal(host.Writable, session.Project);
@@ -36,15 +41,27 @@ public sealed class ReportCreateTests(LiveEplan eplan, WriteHost host) : IClassF
         await AssertGeneratedAsync(session, created, type, form, before);
 
         string[] afterDirectory = await PageNamesAsync(session);
-        JsonElement terminals = await host.CallAsync("eplan_report_create", new()
+        Dictionary<string, object?> terminalArgs = new()
         {
             ["project"] = session.Project,
             ["type"] = "TerminalDiagram",
             ["form"] = "F13_008",
             ["first_page"] = FirstFreePage(afterDirectory, "+A1&EMA2/"),
-            ["filter_scheme"] = "Location designation_A3",
             ["dry_run"] = false,
-        });
+        };
+        foreach (string name in new[] { "filter_scheme", "sort_scheme" })
+        {
+            string? value = terminalReport.GetProperty(name).GetString();
+            if (!string.IsNullOrEmpty(value))
+            {
+                terminalArgs[name] = value;
+            }
+        }
+        foreach (string name in new[] { "filter_scheme_data", "sort_scheme_data", "function_filter_scheme_data", "function_sort_scheme_data" })
+        {
+            terminalArgs[name] = terminalReport.GetProperty(name).GetString();
+        }
+        JsonElement terminals = await host.CallAsync("eplan_report_create", terminalArgs);
         await AssertGeneratedAsync(session, terminals, "TerminalDiagram", "F13_008", afterDirectory);
         await session.UndoAsync();
         Assert.Equal(afterDirectory, await PageNamesAsync(session));

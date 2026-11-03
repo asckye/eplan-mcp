@@ -16,7 +16,7 @@ internal static class WriteChangeLines
 
         // part.sync.plan: the referenced parts EPLAN stores in the project as well (S24 r15).
         _ when c.Property == "stored parts" => $"store {Parts(c.NewValue)} the project references in project {c.Name} (now {c.OldValue})",
-        "create" when c.Kind == "report" => $"create {c.Property} report ({c.NewValue}) from {c.Name}; filter: {plan.Details?.GetValueOrDefault("filter_scheme")}; sort: {plan.Details?.GetValueOrDefault("sort_scheme")}",
+        "create" when c.Kind == "report" => $"create {c.Property} report ({c.NewValue}) from {c.Name}" + ApprovalTexts.ReportSchemes(plan.Details, zh: false),
         "create" => c.NewValue is null ? $"create {c.Kind} {c.Name}" : $"create {c.Kind} {c.Name} ({c.NewValue})",
         "delete" => c.OldValue is null ? $"delete {c.Kind} {c.Name}" : $"delete {c.Kind} {c.Name} ({c.OldValue})",
         _ when c.Property == "connections" => $"generate connections on {c.Kind} {c.Name} (now {c.OldValue}; may add or remove connections)",

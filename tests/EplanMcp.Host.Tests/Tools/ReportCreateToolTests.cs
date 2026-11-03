@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Safety;
@@ -14,7 +15,7 @@ public sealed class ReportCreateToolTests : IDisposable
 
     public ReportCreateToolTests()
     {
-        _harness.Bridge.Handlers[OperationNames.ReportCreatePlan] = _ => Plan();
+        _harness.Bridge.Handlers[OperationNames.ReportCreatePlan] = args => Plan((ReportCreateArgs)args!);
         _harness.Bridge.Handlers[OperationNames.ReportCreateExecute] = _ => new ReportCreateData
         { Pages = ["&AAB1/102", "&AAB1/103"], NewPages = ["&AAB1/103"] };
     }
@@ -62,6 +63,38 @@ public sealed class ReportCreateToolTests : IDisposable
             (result.GetProperty("execution").GetString(), result.GetProperty("type").GetString(), result.GetProperty("form").GetString(), result.GetProperty("count").GetInt32(), result.GetProperty("undo").GetString()));
         Assert.Equal(TimeSpan.FromSeconds(300), Assert.Single(_harness.Bridge.Writes).Limit);
         Assert.Equal(JsonValueKind.Null, result.GetProperty("hint").ValueKind);
+    }
+
+    [Fact]
+    public async Task Execute_ForwardsOpaqueSchemeDataUnchangedToPlanAndExecution()
+    {
+        const string filterData = "<Scheme>\r\n\t\u0007\u202e原样\"&</Scheme>";
+        string sortData = new('s', 4001);
+        const string functionFilterData = "function-filter\r\nvalue";
+        const string functionSortData = "";
+
+        JsonElement result = WriteToolHarness.Structured(await ReportCreateTools.CreateAsync(_harness.Pipeline, new RecordedProgress(),
+            "Line1", "TerminalDiagram", "F13_008", "+A1&EMA2/102", "Location designation_A3", "DT (full)",
+            filter_scheme_data: filterData, sort_scheme_data: sortData,
+            function_filter_scheme_data: functionFilterData, function_sort_scheme_data: functionSortData,
+            dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("committed", result.GetProperty("execution").GetString());
+        foreach (string operation in new[] { OperationNames.ReportCreatePlan, OperationNames.ReportCreateExecute })
+        {
+            var args = (ReportCreateArgs)Assert.Single(_harness.Bridge.Calls, c => c.Operation == operation).Args!;
+            Assert.Equal(("TerminalDiagram", "F13_008", "Location designation_A3"), (args.Type, args.Form, args.FilterScheme));
+            Assert.Equal((filterData, sortData, functionFilterData, functionSortData),
+                (args.FilterSchemeData, args.SortSchemeData, args.FunctionFilterSchemeData, args.FunctionSortSchemeData));
+        }
+        string change = result.GetProperty("changes")[0].GetString()!;
+        Assert.Contains("filter_scheme_data: " + filterData.Length.ToString(CultureInfo.InvariantCulture) + " characters", change, StringComparison.Ordinal);
+        Assert.Contains("sort_scheme_data: 4001 characters", change, StringComparison.Ordinal);
+        Assert.Contains("function_filter_scheme_data: " + functionFilterData.Length.ToString(CultureInfo.InvariantCulture) + " characters", change, StringComparison.Ordinal);
+        Assert.Contains("function_sort_scheme_data: 0 characters", change, StringComparison.Ordinal);
+        Assert.DoesNotContain(filterData, change, StringComparison.Ordinal);
+        Assert.DoesNotContain(sortData, change, StringComparison.Ordinal);
+        Assert.DoesNotContain(functionFilterData, change, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -135,7 +168,8 @@ public sealed class ReportCreateToolTests : IDisposable
     [Fact]
     public async Task InvalidArguments_AreReturnedWithoutCallingBridge()
     {
-        JsonElement result = WriteToolHarness.Error(await ReportCreateTools.CreateAsync(_harness.Pipeline, new RecordedProgress(), "", "invalid", "", "&AAB1/102", " ", new string('x', 501), null, false, TestContext.Current.CancellationToken));
+        JsonElement result = WriteToolHarness.Error(await ReportCreateTools.CreateAsync(_harness.Pipeline, new RecordedProgress(), "", "invalid", "", "&AAB1/102", " ", new string('x', 501), null,
+            dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(ErrorReason.InvalidArgument, result.GetProperty("reason").GetString());
         foreach (string field in new[] { "project", "type", "form", "filter_scheme", "sort_scheme" })
@@ -143,13 +177,23 @@ public sealed class ReportCreateToolTests : IDisposable
         Assert.Equal(0, _harness.Bridge.Invocations);
     }
 
-    private WritePlan Plan()
+    private WritePlan Plan(ReportCreateArgs args)
     {
         WritePlan plan = _harness.Plan([new PlannedChange { Action = "create", Kind = "report", Name = "&AAB1/102", Property = "TableOfContents", NewValue = "F06_002" }]);
         plan.Details = new() { ["filter_scheme"] = "Location designation_A3", ["sort_scheme"] = "DT (full)" };
+        foreach ((string field, string? data) in new[]
+        {
+            ("filter_scheme_data", args.FilterSchemeData), ("sort_scheme_data", args.SortSchemeData),
+            ("function_filter_scheme_data", args.FunctionFilterSchemeData), ("function_sort_scheme_data", args.FunctionSortSchemeData),
+        })
+        {
+            if (data is not null)
+            { plan.Details[field + "_length"] = data.Length.ToString(CultureInfo.InvariantCulture); }
+        }
         return plan;
     }
 
     private Task<CallToolResult> Create(bool dryRun = false) => ReportCreateTools.CreateAsync(_harness.Pipeline, new RecordedProgress(),
-        "Line1", "TableOfContents", "F06_002", "&AAB1/102", "Location designation_A3", "DT (full)", "Directory", dryRun, TestContext.Current.CancellationToken);
+        "Line1", "TableOfContents", "F06_002", "&AAB1/102", "Location designation_A3", "DT (full)", "Directory",
+        dry_run: dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }

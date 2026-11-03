@@ -15,7 +15,7 @@ public sealed class ReportReadTests
     public void NonReportPage_HasNoSettings() => Assert.Null(EplanReportReader.Read(new Page()));
 
     [Fact]
-    public void ReportPage_ReadsNamesOnlyAndDisposesNativeValues()
+    public void ReportPage_ReadsNamesAndRawDataAndDisposesNativeValues()
     {
         var block = new ReportBlock();
         PageReport report = Assert.IsType<PageReport>(EplanReportReader.Read(new Page { ReportBlock = block }));
@@ -26,6 +26,10 @@ public sealed class ReportReadTests
         Assert.Equal("DT (full)", report.SortScheme);
         Assert.Equal("Functions", report.FunctionFilterScheme);
         Assert.Equal("Function sort", report.FunctionSortScheme);
+        Assert.Equal(block.Values["filter_scheme_data"], report.FilterSchemeData);
+        Assert.Equal(block.Values["sort_scheme_data"], report.SortSchemeData);
+        Assert.Equal(block.Values["function_filter_scheme_data"], report.FunctionFilterSchemeData);
+        Assert.Equal(block.Values["function_sort_scheme_data"], report.FunctionSortSchemeData);
         Assert.Equal("=K1+A2-KE1", report.DeviceTag);
         Assert.True(report.AutomaticPageDescription);
         Assert.Equal("en_US@Contents;zh_CN@目录;", report.ManualPageDescription);
@@ -40,6 +44,10 @@ public sealed class ReportReadTests
     [InlineData("sort_scheme", "SortScheme")]
     [InlineData("function_filter_scheme", "FunctionFilterScheme")]
     [InlineData("function_sort_scheme", "FunctionSortScheme")]
+    [InlineData("filter_scheme_data", "FilterSchemeData")]
+    [InlineData("sort_scheme_data", "SortSchemeData")]
+    [InlineData("function_filter_scheme_data", "FunctionFilterSchemeData")]
+    [InlineData("function_sort_scheme_data", "FunctionSortSchemeData")]
     [InlineData("device_tag", "DeviceTag")]
     [InlineData("automatic_page_description", "AutomaticPageDescription")]
     [InlineData("manual_page_description", "ManualPageDescription")]
@@ -52,11 +60,28 @@ public sealed class ReportReadTests
 
         JObject data = JObject.FromObject(report);
         Assert.Equal(JTokenType.Null, data[property]!.Type);
-        Assert.Equal(8, data.Properties().Count(p => p.Value.Type != JTokenType.Null));
+        Assert.Equal(12, data.Properties().Count(p => p.Value.Type != JTokenType.Null));
         var warning = Assert.Single(log.Entries);
         Assert.Equal(BridgeLogLevel.Warning, warning.Level);
         Assert.Contains(field, warning.Message, StringComparison.Ordinal);
         Assert.IsType<InvalidOperationException>(warning.Exception);
+        Assert.True(block.Disposed);
+    }
+
+    [Theory]
+    [InlineData("filter_scheme_data", "FilterSchemeData")]
+    [InlineData("sort_scheme_data", "SortSchemeData")]
+    [InlineData("function_filter_scheme_data", "FunctionFilterSchemeData")]
+    [InlineData("function_sort_scheme_data", "FunctionSortSchemeData")]
+    public void LongSchemeData_ReachesTheHostUnchangedForBoundedOutput(string field, string property)
+    {
+        string value = "\r\n" + new string('x', 4001) + "\t\u202e";
+        var block = new ReportBlock();
+        block.Values[field] = value;
+
+        PageReport report = Assert.IsType<PageReport>(EplanReportReader.Read(new Page { ReportBlock = block }));
+
+        Assert.Equal(value, JObject.FromObject(report).Value<string>(property));
         Assert.True(block.Disposed);
     }
 }

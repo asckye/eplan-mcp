@@ -180,6 +180,7 @@ internal sealed class PageTools
             return ToolResults.Error(ex.Error);
         }
 
+        var hints = new List<string>();
         var result = new PageGetResult
         {
             Project = ResultShaper.CleanText(data.Project),
@@ -202,17 +203,16 @@ internal sealed class PageTools
             ],
             DeviceCount = data.Devices.Count,
             Properties = detailed ? PropertyResult.From(data.Properties ?? []) : null,
-            Report = PageReportResult.From(data.Report),
+            Report = PageReportResult.From(data.Report, hints),
         };
 
-        var hints = new List<string>();
         if (data.Devices.Count > MaxDevices)
         {
             hints.Add($"Only the first {MaxDevices.ToString(CultureInfo.InvariantCulture)} devices are listed; eplan_device_list with 'page' lists them all.");
         }
 
         result.Truncated = hints.Count > 0;
-        result.Hint = hints.Count > 0 ? hints[0] : null;
+        result.Hint = hints.Count > 0 ? string.Join(" ", hints) : null;
         int budget = detailed ? ResultShaper.MaxTokenBudget : ResultShaper.DefaultTokenBudget;
         if (!ResultShaper.Fits(result, budget))
         {

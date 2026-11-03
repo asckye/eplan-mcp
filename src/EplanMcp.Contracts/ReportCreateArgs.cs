@@ -1,6 +1,6 @@
 namespace EplanMcp.Contracts;
 
-/// <summary>Report creation settings; scheme names only, with no device restriction (A84).</summary>
+/// <summary>Report creation settings with raw scheme data and no device restriction (A84).</summary>
 public sealed class ReportCreateArgs
 {
     /// <summary>Supported DocumentType names from the EPLAN 2026 XML.</summary>
@@ -17,6 +17,14 @@ public sealed class ReportCreateArgs
     public string? FilterScheme { get; set; }
     /// <summary>Optional sorting scheme name.</summary>
     public string? SortScheme { get; set; }
+    /// <summary>Optional raw filter scheme data, passed unchanged.</summary>
+    public string? FilterSchemeData { get; set; }
+    /// <summary>Optional raw sort scheme data, passed unchanged.</summary>
+    public string? SortSchemeData { get; set; }
+    /// <summary>Optional raw function filter scheme data, passed unchanged.</summary>
+    public string? FunctionFilterSchemeData { get; set; }
+    /// <summary>Optional raw function sort scheme data, passed unchanged.</summary>
+    public string? FunctionSortSchemeData { get; set; }
     /// <summary>Null selects automatic description; otherwise manual text.</summary>
     public string? PageDescription { get; set; }
     /// <summary>Plan state fingerprint, required for execution.</summary>

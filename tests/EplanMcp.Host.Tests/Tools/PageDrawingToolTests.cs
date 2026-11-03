@@ -95,6 +95,31 @@ public sealed class PageDrawingToolTests
         Assert.Equal(JsonValueKind.Null, drawings.GetProperty("nextCursor").ValueKind);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(2)]
+    public async Task ReportSchemeDataTruncation_WithDrawings_PreservesTheWarning(int drawingCount)
+    {
+        FakeBridgeClient bridge = Bridge(drawingCount);
+        bridge.Handlers[OperationNames.PageGet] = _ => new PageGetData
+        {
+            Project = "Line1",
+            Page = new PageDetail { Name = "P", Type = "TerminalDiagram" },
+            Report = new PageReport { Type = "TerminalDiagram", FilterSchemeData = new string('x', 4001) },
+        };
+
+        JsonElement data = Data(await Read(bridge, 1));
+
+        Assert.Equal(new string('x', 4000), data.GetProperty("report").GetProperty("filter_scheme_data").GetString());
+        Assert.True(data.GetProperty("truncated").GetBoolean());
+        string hint = data.GetProperty("hint").GetString()!;
+        Assert.Contains("report.filter_scheme_data", hint, StringComparison.Ordinal);
+        Assert.Contains("4000", hint, StringComparison.Ordinal);
+        Assert.Contains("incomplete", hint, StringComparison.Ordinal);
+        if (drawingCount > 1)
+        { Assert.Contains("drawings.nextCursor", hint, StringComparison.Ordinal); }
+    }
+
     internal static FakeBridgeClient Bridge(int count, int textLength = 0, TimeProvider? clock = null)
     {
         var bridge = new FakeBridgeClient();

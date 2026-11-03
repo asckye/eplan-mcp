@@ -24,7 +24,17 @@ public sealed class ReportCreatePlanOperation(IProjectCatalog catalog, IPageRead
             ProjectPath = project.Path,
             Changes = [new() { Action = "create", Kind = "report", Name = args.FirstPage!, Property = args.Type, NewValue = args.Form }],
             Fingerprint = Fingerprint.Of(pages.Concat(reports.Select(p => p.Name + "\t" + p.Id + "\t" + p.Type + "\t" + p.Form))),
-            Details = new() { ["filter_scheme"] = args.FilterScheme ?? string.Empty, ["sort_scheme"] = args.SortScheme ?? string.Empty },
+            Details = new()
+            {
+                ["filter_scheme"] = args.FilterScheme ?? string.Empty,
+                ["sort_scheme"] = args.SortScheme ?? string.Empty,
+                ["filter_scheme_data_length"] = Length(args.FilterSchemeData),
+                ["sort_scheme_data_length"] = Length(args.SortSchemeData),
+                ["function_filter_scheme_data_length"] = Length(args.FunctionFilterSchemeData),
+                ["function_sort_scheme_data_length"] = Length(args.FunctionSortSchemeData),
+            },
         };
     }
+
+    private static string Length(string? value) => value?.Length.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
 }

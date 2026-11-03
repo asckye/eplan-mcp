@@ -137,6 +137,8 @@
   端子图 TerminalDiagram（9）`F13_008`，筛选 `Location designation_A3`，器件 `+A1-XD1`（名称部分 1200=A1、20013=XD、20014=1）；部件汇总表 `F02_006`，筛选 `Connections_A3`；
   电缆总览 `F10_003`，筛选 `Location designation_A3`、排序 `DT (full)`。读取后夹具文件没有变化。
 - `ReportBlock.DeviceTag` 只读，可写的是 `DeviceTagNameParts`（`FunctionBasePropertyList[]`）；`InvalidScheme` 在方案名无效且方案数据为空时抛出（本机 XML）。
+- 四项方案数据为原始字符串：`FilterSchemaData`、`SortSchemaData`、`FunctionFilterSchemaData`、`FunctionSortSchemaData` 分别保存报表/功能的筛选或排序条件。名称属于各项目自己的设置，不能假定来源项目的名称在目标项目中存在。依据：本机 EPLAN 2026.0.3 的 `Eplan.EplApi.DataModelu.xml` 上述四个属性及 `Eplan.EplApi.HEServicesu.xml` 的 `Reports.CreateReport(ReportBlock, String)`；后者明确仅在方案名称无效且数据为空时抛出 `InvalidScheme`。
+- 2026-11-03 03:39，负责人提供的正式工具 Large 失败：`ReportCreateTests` 在 LargeWrite 创建目录通过；端子图输入 `type=TerminalDiagram`、`form=F13_008`、`filter_scheme=Location designation_A3`，未传方案数据，返回 `S029131 配置无效。参数名称:'esFilterSchemeName'。参数值:'Location designation_A3'。请使用下列配置中的其中一个:'Anlage, Einbauort'。`。此前探测成功时同时设置了 `FilterSchemaData`；因此正式读写工具须携带数据。此次仅核对本机 XML，不运行 EPLAN；修复后的端到端生成与撤销仍待验。
 - `ReportBlock.Create(project)` 设置上述字段后 `Reports.CreateReport(block, 首页名)` 在一个事务内生成并提交：目录用 `F06_002` 生成 12 页（`&AAB1/102` 起）；
   端子图用 `F13_008` 与原筛选方案生成。按 `DeviceTagNameParts` 限定到 LargeWrite 的一个端子排（1200=A1、20013=FC、20014=2）**没有起作用**，生成了项目中全部端子排的端子图（26 页）。限定方式待查，产品首版按项目范围生成。
 — Large `ReportBlockSpikeTests`（证据 `%TEMP%\eplanmcp-spikeseport-blocks-*.json`）。

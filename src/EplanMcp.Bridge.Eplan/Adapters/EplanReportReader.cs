@@ -5,7 +5,7 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
-/// <summary>A84: reads a fresh page wrapper outside a write transaction; no scheme data or borrowed native objects escape.</summary>
+/// <summary>A84: reads detached settings from a fresh page wrapper outside a write transaction.</summary>
 internal static class EplanReportReader
 {
     internal static PageReport? Read(Page page, Action? unreadable = null) => Field("report", () =>
@@ -25,6 +25,10 @@ internal static class EplanReportReader
                 SortScheme = Field("sort_scheme", () => block.SortSchemaName),
                 FunctionFilterScheme = Field("function_filter_scheme", () => block.FunctionFilterSchemaName),
                 FunctionSortScheme = Field("function_sort_scheme", () => block.FunctionSortSchemaName),
+                FilterSchemeData = Field("filter_scheme_data", () => block.FilterSchemaData),
+                SortSchemeData = Field("sort_scheme_data", () => block.SortSchemaData),
+                FunctionFilterSchemeData = Field("function_filter_scheme_data", () => block.FunctionFilterSchemaData),
+                FunctionSortSchemeData = Field("function_sort_scheme_data", () => block.FunctionSortSchemaData),
                 DeviceTag = Field("device_tag", () => block.DeviceTag),
                 AutomaticPageDescription = Field<bool?>("automatic_page_description", () => block.IsAutomaticPageDescription),
                 ManualPageDescription = Field("manual_page_description", () =>

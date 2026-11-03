@@ -13,6 +13,7 @@ namespace EplanMcp.Host.Safety;
 /// </summary>
 internal static class ApprovalTexts
 {
+    private static readonly string[] _reportSchemeDataFields = ["filter_scheme_data", "sort_scheme_data", "function_filter_scheme_data", "function_sort_scheme_data"];
     public const int MaxValueLength = 120;
 
     private static readonly string[] _translationFileDetails = ["file", "bytes", "sha256"];
@@ -171,7 +172,7 @@ internal static class ApprovalTexts
             // An import names the file, its size and SHA-256 (import.dxf.plan; M4c design 4.5).
             "create" when change.Kind == "drawing" => zh ? $"在页 {name} 上导入图形：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import a drawing on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             "create" when change.Kind == "PDF comments" => zh ? $"向项目 {name} 导入 PDF 便笺（其他批注忽略，新增数执行后才知道）：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import PDF sticky notes into project {name} (other annotations ignored; new count unknown until import): {Value(change.NewValue ?? string.Empty, zh)}",
-            "create" when change.Kind == "report" => (zh ? $"从 {name} 创建 {property} 报表（{Value(change.NewValue ?? string.Empty, zh)}）" : $"Create {property} report ({Value(change.NewValue ?? string.Empty, zh)}) from {name}") + $"; filter: {Value(details?.GetValueOrDefault("filter_scheme") ?? string.Empty, zh)}; sort: {Value(details?.GetValueOrDefault("sort_scheme") ?? string.Empty, zh)}",
+            "create" when change.Kind == "report" => (zh ? $"从 {name} 创建 {property} 报表（{Value(change.NewValue ?? string.Empty, zh)}）" : $"Create {property} report ({Value(change.NewValue ?? string.Empty, zh)}) from {name}") + ReportSchemes(details, zh),
             "create" when change.Kind == "project" => zh ? $"新建项目 {name}：{Value(change.NewValue ?? string.Empty, zh)}" : $"Create project {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
             "delete" => (zh ? $"删除{kind} {name}" : $"Delete {kind} {name}") + (change.OldValue is null ? string.Empty : zh ? $"（{Value(change.OldValue, zh)}）" : $" ({Value(change.OldValue, zh)})"),
@@ -207,6 +208,12 @@ internal static class ApprovalTexts
                 : $"Change {property} of {kind} {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
         };
     }
+
+    internal static string ReportSchemes(IReadOnlyDictionary<string, string>? details, bool zh) =>
+        $"; filter: {Value(details?.GetValueOrDefault("filter_scheme") ?? string.Empty, zh)}; sort: {Value(details?.GetValueOrDefault("sort_scheme") ?? string.Empty, zh)}"
+        + string.Concat(_reportSchemeDataFields
+            .Where(field => !string.IsNullOrEmpty(details?.GetValueOrDefault(field + "_length")))
+            .Select(field => $"; {field}: {Value(details![field + "_length"], zh)} characters"));
 
     private static string GenerateCables(bool zh, IReadOnlyDictionary<string, string>? details)
     {

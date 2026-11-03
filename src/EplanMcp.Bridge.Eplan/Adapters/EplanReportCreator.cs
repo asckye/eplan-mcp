@@ -8,7 +8,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>A84: fresh wrappers for every read; no transient block survives CreateReport or commit.</summary>
-internal sealed class EplanReportCreator : IReportCreator
+internal sealed partial class EplanReportCreator : IReportCreator
 {
     public IReadOnlyList<ReportPageRecord> ReportPages(string projectPath)
     {
@@ -33,10 +33,7 @@ internal sealed class EplanReportCreator : IReportCreator
             block.Create(EplanProjects.ByPath(projectPath));
             block.Type = (DocumentTypeManager.DocumentType)Enum.Parse(typeof(DocumentTypeManager.DocumentType), args.Type!);
             block.FormName = args.Form!;
-            if (args.FilterScheme is not null)
-            { block.FilterSchemaName = args.FilterScheme; }
-            if (args.SortScheme is not null)
-            { block.SortSchemaName = args.SortScheme; }
+            ApplySchemes(block, args);
             block.IsAutomaticPageDescription = args.PageDescription is null;
             if (args.PageDescription is not null)
             {
