@@ -20,12 +20,14 @@
 | `step` | integer，≥ 1 | 否 | 1 | 页号的步长 |
 | `keep_text` | boolean | 否 | false | 为 true 时保留页号中的字母部分 |
 | `subpages` | enum `retain` / `consecutive` / `to_main` | 否 | `retain` | 子页（如 `/1.2`）：原样保留；从 1 起连续编号；转成主页 |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要重新编号的页，不请求审批，不备份，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 为 true 时只返回将要重新编号的页，不请求审批，不备份，也不修改项目 |
 
 - 页名只做精确匹配，同 `eplan_page_delete`。同一页出现两次时返回 `INVALID_ARGUMENT`。
 - 固定按结构编号，不保留原有的页号间隔（`Renumber.Pages` 的第 2、5 个参数为 true、false，与 S12 相同）。
 
 ## 3. 输出
+
+省略或传 `dry_run: true` 只预览，返回 `execution: not_started`、原有计划清单、`fingerprint`；不审批、不备份、不写入。`hint` 指引以相同参数和 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",
@@ -44,7 +46,7 @@
 }
 ```
 - `changed`：页名改变的页，按 `pages` 的顺序；`unchanged`：页名没有变的页数。
-- `dry_run`：`changed` 为 `null`，变更清单中列出各页的现名。
+- `dry_run`：`changed` 为 `null`；`changes` 返回原计划变更清单，列出各页现名，不推测执行后的新页名。
 - `hint` 提示用 `eplan_report_update` 更新报表（重编号后报表是否自动更新，没有验证）。
 - `backup`：同 `eplan_page_delete`。页名是项目数据，经过 ResultShaper。`undo`、`recovered`：同 `eplan_page_create`。
 - 一行摘要：
@@ -83,7 +85,7 @@
 ## 6. 写操作专项
 - **Destructive 流水线、审计、回滚、各阶段失败时的 `execution`**：同 `eplan_page_delete` 第 6 节。
 - **dry-run**：返回第 3 节的结果，`execution = not_started`，不备份。
-- **审批**：每次都请求审批，scratch 中也一样。对话框显示每页一行的变更清单和编号参数，注明执行前会先备份，以及可以按 Ctrl+Z 撤销"AI: eplan_page_renumber"。
+- **审批**：显式 `dry_run: false` 执行时每次都请求审批，scratch 中也一样。对话框显示每页一行的变更清单和编号参数，注明执行前会先备份，以及可以按 Ctrl+Z 撤销"AI: eplan_page_renumber"。
 - 不是幂等的：再调用一次时页名已经改变，原页名返回 `PAGE_NOT_FOUND`。执行请求从不重发（ADR-0010）。
 
 ## 7. 测试

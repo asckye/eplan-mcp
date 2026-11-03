@@ -55,10 +55,8 @@ internal sealed class PageDestructiveTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageRenumberResult))]
-    [Description(
-        "Gives pages new page numbers per structure, from start in steps; EPLAN's rules decide the names. Always needs the " +
-        "engineer's approval, in scratch too; the project is backed up first, and one Ctrl+Z in EPLAN undoes it. Example: " +
-        "{\"project\": \"Line1\", \"pages\": [\"=GAA+A1&EFS1/90\", \"=GAA+A1&EFS1/91\"], \"start\": 200, \"step\": 10}.")]
+    [Description(WriteToolDefaults.Description + " " +
+        "Renumbers pages within each structure; EPLAN decides the new names. Execution always requires engineer approval, including scratch, and a project backup. One Ctrl+Z undoes it.")]
     public static async Task<CallToolResult> PageRenumberAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
@@ -68,7 +66,7 @@ internal sealed class PageDestructiveTools
         int step = 1,
         [Description("Keep letters in numbers")] bool keep_text = false,
         [AllowedValues("retain", "consecutive", "to_main")] string subpages = "retain",
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         var violations = RenumberViolations(project, pages, start, step);
@@ -116,13 +114,15 @@ internal sealed class PageDestructiveTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Changes = [.. WritePipeline.ChangeLines(outcome.Plan).Select(line => ResultShaper.CleanText(line) ?? string.Empty)],
             Scope = new PageRenumberResult.ScopeEntry { Start = start, Step = step, KeepText = keep_text, Subpages = subpages },
             Changed = data is null ? null : [.. data.Changed.Select(c => new PageRenumberResult.ChangeEntry { From = ResultShaper.CleanText(c.From), To = ResultShaper.CleanText(c.To) })],
             Unchanged = data?.Unchanged,
             Backup = committed ? outcome.Backup : null,
             Undo = committed ? "AI: " + RenumberTool : null,
             Recovered = outcome.Recovered,
-            Hint = string.Join(" ", hints),
+            Hint = string.Join(" ", hints) + (dry_run ? " " + WriteToolDefaults.ExecutionHint : string.Empty),
         };
         string from = $"from {start.ToString(CultureInfo.InvariantCulture)} in steps of {step.ToString(CultureInfo.InvariantCulture)}";
         return ToolResults.Success(
@@ -141,16 +141,14 @@ internal sealed class PageDestructiveTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageDeleteResult))]
-    [Description(
-        "Deletes pages by their exact full names. Always needs the engineer's approval, in scratch too; the project is " +
-        "backed up first, and one Ctrl+Z in EPLAN undoes it. Lists devices left without their main function. Example: " +
-        "{\"project\": \"Line1\", \"pages\": [\"=GAA+A1&EFS1/60\"]}.")]
+    [Description(WriteToolDefaults.Description + " " +
+        "Deletes exact full page names and lists devices losing their main function. Execution always requires engineer approval, including scratch, and a project backup. One Ctrl+Z undoes it.")]
     public static async Task<CallToolResult> PageDeleteAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
         [Description("From eplan_project_list")] string project,
         [Description("1-50 exact full names")] string[] pages,
-        [Description("Only return the plan")] bool dry_run = false,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
         var violations = DeleteViolations(project, pages);
@@ -217,13 +215,14 @@ internal sealed class PageDestructiveTools
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Fingerprint = outcome.Plan.Fingerprint,
             Pages = pages,
             Orphaned = orphaned,
             Backup = committed ? outcome.Backup : null,
             Undo = committed ? "AI: " + DeleteTool : null,
             Recovered = outcome.Recovered,
             Truncated = total > orphaned.Count,
-            Hint = string.Join(" ", hints),
+            Hint = string.Join(" ", hints) + (dryRun ? " " + WriteToolDefaults.ExecutionHint : string.Empty),
         };
         string count = ToolResults.Count(pages.Count, "page");
         string devices = ToolResults.Count(total, "device");

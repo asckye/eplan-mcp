@@ -1,7 +1,7 @@
 id: page-delete
 set: dev
 fixture: copy
-prompt: 删除项目 {project} 中的 =GAA+A1&EFS1/1 页，然后更新报表。完成后告诉我结果，以及删除前做的备份在哪里。
+prompt: 删除项目 {project} 中的 =GAA+A1&EFS1/1 页，然后更新报表。完成后告诉我结果，以及删除前做的备份在哪里。 eplan_page_delete 省略 dry_run 只预览；检查预览后，以相同参数和 dry_run:false 执行。
 answer:
   type: object
   required: [done, backup]

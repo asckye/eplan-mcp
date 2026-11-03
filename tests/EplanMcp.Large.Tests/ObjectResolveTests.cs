@@ -36,7 +36,7 @@ public sealed class ObjectResolveTests : IClassFixture<DestructiveHost>
             Assert.All(await ResolveAsync(bridge, locators), r => Assert.Equal(LocatorResult.Resolved, r.Status));
 
             _host.Approvals.Approve("eplan_page_renumber", _host.Writable, ["renumber page " + pages[0]]);
-            JsonElement result = await _host.CallAsync("eplan_page_renumber", new() { ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(new[] { pages[0] }), ["start"] = DestructiveHost.Number(renumbered) });
+            JsonElement result = await _host.CallAsync("eplan_page_renumber", new() { ["dry_run"] = false, ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(new[] { pages[0] }), ["start"] = DestructiveHost.Number(renumbered) });
             Assert.Equal("committed", result.GetProperty("execution").GetString());
             await _host.DeleteAsync([pages[1]]);
             List<LocatorResult> after = await ResolveAsync(bridge, locators);

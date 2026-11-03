@@ -63,7 +63,7 @@ public sealed class PageDeleteToolTests : IDisposable
         Assert.Equal((Page, "Circuit", 59), Single(data.GetProperty("pages"), p => (p.GetProperty("name").GetString(), p.GetProperty("type").GetString(), p.GetProperty("functions").GetInt32())));
         JsonElement orphan = data.GetProperty("orphaned")[0];
         Assert.Equal(("+A1-WE1", 6, "=GAA+A1&EFS1/2"), (orphan.GetProperty("tag").GetString(), orphan.GetProperty("functionsLeft").GetInt32(), orphan.GetProperty("pages")[0].GetString()));
-        Assert.Equal("Reports are not updated when pages are deleted; call eplan_report_update.", data.GetProperty("hint").GetString());
+        Assert.Equal("Reports are not updated when pages are deleted; call eplan_report_update. " + WriteToolDefaults.ExecutionHint, data.GetProperty("hint").GetString());
         Assert.Equal("Dry run: would delete 1 page (59 functions); 4 devices would keep functions on other pages without their main function. Nothing was changed.", WriteToolHarness.Text(result, 0));
         Assert.Empty(_dialog.Questions);
         Assert.False(Directory.Exists(_harness.Locations.Backups));

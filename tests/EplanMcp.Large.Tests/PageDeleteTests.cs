@@ -63,7 +63,7 @@ public sealed class PageDeleteTests : IClassFixture<DestructiveHost>
         try
         {
             await _host.InsertMacroAsync(page);
-            Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(new[] { page }) };
+            Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(new[] { page }) };
             JsonElement dryRun = await _host.CallAsync(Tool, new(args) { ["dry_run"] = true });
             JsonElement planned = Assert.Single(dryRun.GetProperty("pages").EnumerateArray());
             Assert.InRange(planned.GetProperty("functions").GetInt32(), 1, 100);
@@ -141,7 +141,7 @@ public sealed class PageDeleteTests : IClassFixture<DestructiveHost>
         int asked = _host.Approvals.Questions.Count;
         string[] folders = _host.BackupFolders();
 
-        JsonElement error = await _host.ErrorAsync(Tool, new() { ["project"] = project, ["pages"] = DestructiveHost.Json(new[] { Circuit1 }) });
+        JsonElement error = await _host.ErrorAsync(Tool, new() { ["dry_run"] = false, ["project"] = project, ["pages"] = DestructiveHost.Json(new[] { Circuit1 }) });
 
         // ADR-0005: Destructive outside scratch with writesOutsideScratch "deny" is refused before anyone is asked.
         Assert.Equal(("POLICY_DENIED", "not_started"), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));

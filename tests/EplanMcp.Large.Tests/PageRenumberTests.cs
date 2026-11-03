@@ -32,7 +32,7 @@ public sealed class PageRenumberTests : IClassFixture<DestructiveHost>
             Assert.True(
                 DestructiveHost.Number(pages[^1]) < 200,
                 $"{DestructiveHost.Prefix} of {_host.Writable} has reached page 200, so the renumbered pages would meet its own; copy the write copies again (README.md).");
-            Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(pages), ["start"] = 200, ["step"] = 10 };
+            Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(pages), ["start"] = 200, ["step"] = 10 };
 
             JsonElement dryRun = await _host.CallAsync(Tool, new(args) { ["dry_run"] = true });
             _host.Approvals.Approve(Tool, _host.Writable, pages.Select(p => "renumber page " + p));
@@ -73,7 +73,7 @@ public sealed class PageRenumberTests : IClassFixture<DestructiveHost>
         try
         {
             // Start 1 would name them /1 and /2, which the sample project has: EPLAN refuses with S029167 (A20).
-            Dictionary<string, object?> args = new() { ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(pages), ["start"] = 1 };
+            Dictionary<string, object?> args = new() { ["dry_run"] = false, ["project"] = _host.Writable, ["pages"] = DestructiveHost.Json(pages), ["start"] = 1 };
             _host.Approvals.Approve(Tool, _host.Writable, pages.Select(p => "renumber page " + p));
 
             JsonElement error = await _host.ErrorAsync(Tool, args);

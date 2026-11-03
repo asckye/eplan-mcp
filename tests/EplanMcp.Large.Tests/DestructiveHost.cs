@@ -199,7 +199,7 @@ public sealed class DestructiveHost : IAsyncLifetime
     /// </summary>
     public async Task<(JsonElement DryRun, JsonElement Deleted)> DeleteAsync(IReadOnlyCollection<string> pages)
     {
-        Dictionary<string, object?> args = new() { ["project"] = Writable, ["pages"] = Json(pages) };
+        Dictionary<string, object?> args = new() { ["project"] = Writable, ["pages"] = Json(pages), ["dry_run"] = false };
         JsonElement dryRun = await CallAsync("eplan_page_delete", new(args) { ["dry_run"] = true });
         Approvals.Approve("eplan_page_delete", Writable, dryRun.GetProperty("pages").EnumerateArray().Select(DeleteLine));
         JsonElement deleted = await CallAsync("eplan_page_delete", args);

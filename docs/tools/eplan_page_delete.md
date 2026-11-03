@@ -16,11 +16,13 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array of string，1–50 项 | 是 | — | 要删除的页，完整页名如 `=GAA+A1&EFS1/60`（用 `eplan_page_list` 查） |
-| `dry_run` | boolean | 否 | false | 为 true 时只返回将要删除的页和受影响的设备，不请求审批，不备份，也不修改项目 |
+| `dry_run` | boolean | 否 | true | 为 true 时只返回将要删除的页和受影响的设备，不请求审批，不备份，也不修改项目 |
 
 - 页名只做精确匹配，不像 `eplan_page_get` 那样在只差大小写时退而匹配唯一的一页：删除的对象必须是模型明确写出的页。同一页出现两次时返回 `INVALID_ARGUMENT`。
 
 ## 3. 输出
+
+省略或传 `dry_run: true` 只预览，返回 `execution: not_started`、原有计划清单、`fingerprint`；不审批、不备份、不写入。`hint` 指引以相同参数和 `dry_run: false` 执行。
 ```json
 {
   "project": "Line1",
@@ -84,7 +86,7 @@
   - **备份失败**：`CopyProject` 抛出异常、副本页数不符，或者备份用时超过执行时限的一半（之后的修改可能在时限之外才结束），就不修改，Bridge 记为 `not_started`，返回 `BACKUP_FAILED`。Host 把这个目录改名为 `<UTC 时间>-failed`，不删除，免得被当作可用的备份。
   - **审计**：`execution_started` 记录加上 `backup`（副本路径）；`execution_result` 记录备份是否完成。备份从不自动删除，`doctor` 报告 `backups\` 占用的空间（ADR-0013）。
 - **dry-run**：返回第 3 节的结果，`execution = not_started`，不备份。
-- **审批**：每次都请求审批，scratch 中也一样。对话框显示工具、项目、每页一行的变更清单、受影响的设备，并注明"执行前会先备份到 `<数据根目录>\backups\<项目名>\`"和"可以按 Ctrl+Z 撤销'AI: eplan_page_delete'"（ADR-0011、ADR-0013）。
+- **审批**：显式 `dry_run: false` 执行时每次都请求审批，scratch 中也一样。对话框显示工具、项目、每页一行的变更清单、受影响的设备，并注明"执行前会先备份到 `<数据根目录>\backups\<项目名>\`"和"可以按 Ctrl+Z 撤销'AI: eplan_page_delete'"（ADR-0011、ADR-0013）。
 - **回滚**：事务中失败时 `SafetyPoint` 整体回滚，备份保留；提交后可以按一次 Ctrl+Z 撤销；EPLAN 在途中崩溃时修改可能留在项目里（A15），这时用备份恢复。
 - **各阶段失败时的 `execution`**：规划、策略、审批、备份阶段 `not_started`；事务中 `rolled_back`；响应丢失后按 ADR-0010 取回结果，取不回时 `OUTCOME_UNKNOWN`（`unknown`）并暂停写入。
 - 不是幂等的：再调用一次，页已经不存在，返回 `PAGE_NOT_FOUND`。执行请求从不重发（ADR-0010）。
