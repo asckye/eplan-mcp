@@ -1,3 +1,4 @@
+using System.Globalization;
 using EplanMcp.Bridge.Core.Protocol;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
@@ -45,15 +46,17 @@ public static class PageReviewRules
             { Add("dangling_end", "error", end, [], "Wire end has no symbol pin or node.", "eplan_connection_create", new() { ["page"] = scene.Page.Page }); }
         }
         bool Connected(double[] location) => graphical.Any(s => s.Any(p => Equal(p, location)));
-        // A83: an interruption point is one wire end even with two connection points (BP); one connected pin covers it, an open one is reported once.
-        var openInterruptions = new HashSet<string>(StringComparer.Ordinal);
+        // A83: an interruption point is one wire end even with two connection points (BP); one connected pin covers it, an open one is
+        // reported once, at its tail (the highest pin index, as the planner attaches wires).
+        static int PinIndex(string key) => int.TryParse(key.Split('/').Last(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int index) ? index : -1;
         foreach (var pin in scene.Pins)
         {
             DrawingPlacement? owner = Owner(pin.Key);
             if (Enabled("unconnected_pins") && owner?.Properties.ContainsKey("name") == true && !Connected(pin.Value.Location))
             {
                 string prefix = FormattableString.Invariant($"{owner.Locator.Type}/{owner.Locator.Oid}/");
-                if (owner.Kind == "InterruptionPoint" && (scene.Pins.Any(other => other.Key.StartsWith(prefix, StringComparison.Ordinal) && Connected(other.Value.Location)) || !openInterruptions.Add(prefix)))
+                if (owner.Kind == "InterruptionPoint" && scene.Pins.Any(other => other.Key.StartsWith(prefix, StringComparison.Ordinal)
+                    && (Connected(other.Value.Location) || PinIndex(other.Key) > PinIndex(pin.Key))))
                 { continue; }
                 string? designation = (string?)actual["devices"]?.FirstOrDefault(d => (long?)d["locator"]?["oid"] == owner.Locator.Oid)?["pins"]?[pin.Key.Split('/').Last()];
                 bool required = targetsByKind?["connections"]?.Any(c => new[] { c["from"], c["to"] }.Any(e => e is JObject endpoint && (string?)endpoint["device"] is { } name && DrawingNames.SameName(name, owner.Properties["name"], scene.Page.Page) && (string?)endpoint["pin"] == designation)) == true;

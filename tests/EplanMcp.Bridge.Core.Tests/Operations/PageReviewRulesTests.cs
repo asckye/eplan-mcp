@@ -155,7 +155,10 @@ public sealed class PageReviewRulesTests
         _scene.Pins["13/1/1"] = new() { Location = [8, 8] };
         if (connected)
         { _scene.Graphical.Add([[8, 8], [8, 24]]); }
-        Assert.Equal(expected, Review("unconnected_pins").Count);
+        JArray issues = Review("unconnected_pins");
+        Assert.Equal(expected, issues.Count);
+        if (expected == 1)
+        { Assert.Equal(new double[] { 8, 8 }, issues[0]["position"]!.Values<double>()); }
     }
     [Fact]
     public void UnconnectedPin_RequiredByTarget_IsError()
