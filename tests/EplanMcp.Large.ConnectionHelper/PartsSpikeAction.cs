@@ -343,7 +343,7 @@ public sealed class PartsSpikeAction : IEplAction
         ReadNamedDevice(project, (string)input["page"]!, tag, remainingNames, result);
     }
 
-    private static Function PlaceNamedCopy(Function original, Page page, JObject point, JObject steps, string stage, JArray warnings, IReadOnlyDictionary<string, SymbolVariant> variants)
+    private static Function PlaceNamedCopy(Function original, Page page, JObject point, JObject steps, string stage, JArray warnings, Dictionary<string, SymbolVariant> variants)
     {
         var observation = new JObject();
         steps[stage] = observation;
