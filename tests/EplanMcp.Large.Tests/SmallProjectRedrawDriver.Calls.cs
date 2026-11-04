@@ -28,11 +28,15 @@ internal sealed partial class SmallProjectRedrawDriver
         args["project"] = project;
         if (write)
         { args["dry_run"] = false; }
+        if (tool is "eplan_placement_create" or "eplan_connection_create")
+        { args["layout_guard"] = "warn"; }
         if (tool is "eplan_page_get" or "eplan_page_review" or "eplan_connection_create" or "eplan_placement_create" or "eplan_placement_update")
         { args["response_format"] = "detailed"; }
         try
         {
             JObject result = await call(tool, args);
+            if (write && Text(result["error"]?["execution"] ?? result["execution"]) != "not_started")
+            { _drawingCache.Remove(page); }
             bool success = result["error"] is null;
             bool noConnections = tool == "eplan_connection_generate" && success && Text(result["execution"]) == "not_started";
             if (write && Text(result["execution"]) != "committed" && !noConnections)
@@ -49,6 +53,8 @@ internal sealed partial class SmallProjectRedrawDriver
         { throw; }
         catch (Exception error)
         {
+            if (write)
+            { _drawingCache.Remove(page); }
             report.RecordCall(page, tool, items.Select(Type), items.Select(Id), args, null, false, error.GetType().Name + ": " + error.Message);
             return null;
         }

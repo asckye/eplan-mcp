@@ -60,11 +60,11 @@ public sealed class SmallProjectRedrawDriverTests
             JObject result = Success(args);
             if (tool == "eplan_macro_insert")
             { result["devices"] = new JArray(new JObject { ["tag"] = "-K1", ["category"] = "PLCBox" }); }
-            if (tool == "eplan_page_get" && ++reads > 1)
+            if (tool == "eplan_page_get" && ++reads > 0)
             {
                 JObject actual = Drawing(box, 101);
                 actual["location"] = new JArray(212, 288);
-                result["drawings"]!["items"] = new JArray(actual);
+                result["drawings"]!["items"] = new JArray(actual, Drawing(point, 103));
             }
             return Task.FromResult(result);
         }, "ScratchTest", Path.GetTempPath(), report);
@@ -104,10 +104,12 @@ public sealed class SmallProjectRedrawDriverTests
 
         await driver.DrawPageAsync(source, [source, sameName, referenced]);
 
-        JObject connection = Assert.Single(calls, call => call.Tool == "eplan_connection_create").Args;
-        Assert.Equal(["/2", "/3"], connection["items"]![0]!["counterpart_pages"]!.Values<string>());
-        Assert.Contains(((JArray)report.ToJson()["notes"]!).OfType<JObject>(),
-            note => (string?)note["oid"] == "4" && ((string?)note["reason"])?.Contains("not placed", StringComparison.Ordinal) == true);
+        JObject[] connections = calls.Where(call => call.Tool == "eplan_connection_create").Select(call => call.Args).ToArray();
+        Assert.Equal(2, connections.Length);
+        Assert.Equal(["/2", "/3"], connections[0]["items"]![0]!["counterpart_pages"]!.Values<string>());
+        Assert.Null(connections[1]["items"]![0]!["counterpart_pages"]);
+        Assert.Equal("-ORPHAN", (string?)connections[1]["items"]![0]!["name"]);
+        Assert.All(connections, args => Assert.Equal("warn", (string?)args["layout_guard"]));
     }
 
     [Fact]
@@ -143,7 +145,7 @@ public sealed class SmallProjectRedrawDriverTests
     }
 
     [Fact]
-    public async Task Definitions_PreserveCommaCrossSectionAndReportPartOnlyPoints()
+    public async Task Definitions_PreserveCommaCrossSectionAndPlacePartOnlyPoints()
     {
         JObject point = Device(1, "ConnectionDefinitionPoint", "", "CDP", 200);
         point["properties"] = new JArray(new JObject { ["id"] = 31002, ["index"] = 0, ["value"] = "1,5" });
@@ -161,10 +163,11 @@ public sealed class SmallProjectRedrawDriverTests
         await driver.DrawPageAsync(source, [source]);
 
         JObject connection = Assert.Single(calls, call => call.Tool == "eplan_connection_create").Args;
-        JToken definition = Assert.Single((JArray)connection["items"]!);
-        Assert.Equal("1,5", (string?)definition["cross_section"]);
-        Assert.Contains(((JArray)report.ToJson()["notes"]!).OfType<JObject>(),
-            note => (string?)note["oid"] == "2" && ((string?)note["reason"])?.Contains("part references alone", StringComparison.Ordinal) == true);
+        JArray definitions = (JArray)connection["items"]!;
+        Assert.Equal(2, definitions.Count);
+        Assert.Equal("1,5", (string?)definitions[0]["cross_section"]);
+        Assert.Equal("FICTION.PART", (string?)definitions[1]["part"]);
+        Assert.Equal("warn", (string?)connection["layout_guard"]);
     }
 
     [Fact]
@@ -367,15 +370,16 @@ public sealed class SmallProjectRedrawDriverTests
     }
 
     [Fact]
-    public async Task Overview_SuccessfulMacroCoversOnlyConfirmedNewMembersOfItsSourceBlock()
+    public async Task Overview_SuccessfulMacroRetainsConfirmedGraphicsRegardlessOfOldGroupIds()
     {
         JObject box = Device(1, "PLC", "-K1", "PLCC", 10);
         box["category"] = "PLCBox";
         box["parts"] = new JArray(new JObject { ["part"] = "FICTION.PLC", ["variant"] = "1" });
         box["boundingBox"] = new JArray(Point(10, 20), Point(30, 50));
         JObject member = Line(2, 20), unrelated = Line(3, 30);
-        JObject block = new() { ["type"] = "Block", ["oid"] = 4, ["memberOids"] = new JArray(1, 2) };
-        JObject source = Page(box, member, unrelated, block);
+        member["boundingBox"] = new JArray(Point(20, 20), Point(21, 20));
+        unrelated["boundingBox"] = new JArray(Point(30, 20), Point(31, 20));
+        JObject source = Page(box, member, unrelated);
         source["pageType"] = "Overview";
         var report = new SmallProjectRedrawReport("test", "ScratchTest");
         var calls = new List<(string Tool, JObject Args)>();
@@ -386,8 +390,15 @@ public sealed class SmallProjectRedrawDriverTests
             JObject response = Success(arguments);
             if (tool == "eplan_macro_insert")
             { response["devices"] = new JArray(new JObject { ["tag"] = "-K1", ["category"] = "PLCBox" }); }
-            if (tool == "eplan_page_get" && ++reads > 1)
-            { response["drawings"]!["items"] = new JArray(Drawing(box, 101), Drawing(member, 102), Drawing(unrelated, 103)); }
+            if (tool == "eplan_page_get" && ++reads > 0)
+            {
+                JObject first = Drawing(member, 102), second = Drawing(unrelated, 103);
+                first["bounds"] = new JArray(20d, 20d, 21d, 20d);
+                second["bounds"] = new JArray(30d, 20d, 31d, 20d);
+                first["properties"]!["pen_color"] = "1";
+                second["properties"]!["pen_color"] = "1";
+                response["drawings"]!["items"] = new JArray(Drawing(box, 101), first, second);
+            }
             return Task.FromResult(response);
         }
         var driver = new SmallProjectRedrawDriver(CallAsync, "ScratchTest", Path.GetTempPath(), report);
@@ -395,11 +406,9 @@ public sealed class SmallProjectRedrawDriverTests
         await driver.DrawPageAsync(source, [source]);
 
         Assert.DoesNotContain(calls, call => call.Tool == "eplan_device_place");
-        JObject graphics = Assert.Single(calls, call => call.Tool == "eplan_placement_create").Args;
-        JToken graphic = Assert.Single((JArray)graphics["items"]!);
-        Assert.Equal(30, (double)graphic["points"]![0]![0]!);
+        Assert.DoesNotContain(calls, call => call.Tool is "eplan_placement_create" or "eplan_placement_delete");
         Assert.Contains(((JArray)report.ToJson()["notes"]!).OfType<JObject>(),
-            note => (string?)note["oid"] == "2" && ((string?)note["reason"])?.Contains("Covered", StringComparison.Ordinal) == true);
+            note => (string?)note["oid"] == "2" && ((string?)note["reason"])?.Contains("retained", StringComparison.Ordinal) == true);
     }
 
     [Fact]
@@ -423,7 +432,7 @@ public sealed class SmallProjectRedrawDriverTests
                 response["recovered"] = true;
                 response["devices"] = new JArray(new JObject { ["tag"] = "+-K?:?", ["category"] = "PLCBox" });
             }
-            if (tool == "eplan_page_get" && ++reads > 1)
+            if (tool == "eplan_page_get" && ++reads > 0)
             { response["drawings"]!["items"] = new JArray(Drawing(box, 101)); }
             return Task.FromResult(response);
         }
@@ -433,9 +442,9 @@ public sealed class SmallProjectRedrawDriverTests
 
         Assert.DoesNotContain(calls, call => call.Tool == "eplan_device_update");
         Assert.DoesNotContain(calls, call => call.Tool == "eplan_device_place");
-        Assert.Equal(2, reads);
+        Assert.True(reads >= 1);
         int macro = calls.FindIndex(call => call.Tool == "eplan_macro_insert");
-        Assert.True(calls.FindIndex(call => call.Tool == "eplan_page_get") < macro);
+        Assert.True(calls.FindIndex(call => call.Tool == "eplan_page_get") > macro);
         Assert.True(calls.FindLastIndex(call => call.Tool == "eplan_page_get") > macro);
     }
 

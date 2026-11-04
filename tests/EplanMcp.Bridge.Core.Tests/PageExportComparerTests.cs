@@ -80,6 +80,130 @@ public sealed class PageExportComparerTests
     }
 
     [Fact]
+    public void Compare_ObjectNumberString_IsIgnoredButOtherObjectPropertiesAreCompared()
+    {
+        const string source = """{"placements":[{"type":"Line","properties":[{"id":2000,"index":0,"value":"100"},{"id":19024,"index":0,"value":"Source description"}]}]}""";
+        const string target = """{"placements":[{"type":"Line","properties":[{"id":2000,"index":0,"value":"900"},{"id":19024,"index":0,"value":"Target description"}]}]}""";
+
+        PageExportFieldDifference difference = Assert.Single(Assert.Single(PageExportComparer.Compare(source, target).Types["Line"].Different).Fields);
+
+        Assert.Equal("properties[id=19024,index=0].value", difference.Field);
+        Assert.Contains(PageExportComparer.Ignored, rule => rule.Member == "2000" && rule.Reason.Contains("internal object ID", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Compare_SubsetPageFields_AreListedWithNamesAndBothValuesWithoutReducingObjectMatch()
+    {
+        JObject source = JObject.Parse(LinePage);
+        JObject target = JObject.Parse(LinePage);
+        string[] ids = ["11004", "11040", "11041", "11043", "25020", "11067"];
+        foreach (string id in ids)
+        {
+            source["properties"]![id] = "outside subset";
+            target["properties"]![id] = "subset";
+        }
+
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+
+        Assert.False(result.HasDifferences);
+        Assert.True(result.IsComplete);
+        Assert.Single(result.Types["Line"].Matched);
+        Assert.Equal(ids.Length, result.SubsetDifferenceCount);
+        Assert.Equal(ids.Select(id => "properties." + id).Order(StringComparer.Ordinal), result.SubsetDifferences.Select(item => item.Field).Order(StringComparer.Ordinal));
+        Assert.All(result.SubsetDifferences, difference =>
+        {
+            Assert.NotEmpty(difference.Name);
+            Assert.NotEmpty(difference.Reason);
+            Assert.Equal("outside subset", (string?)difference.Source);
+            Assert.Equal("subset", (string?)difference.Target);
+        });
+    }
+
+    [Fact]
+    public void Compare_SubsetIndexedPageProperties_PreserveMissingExtraAndLanguageDifferences()
+    {
+        const string source = """{"properties":[{"id":11004,"index":0,"value":"3"},{"id":11067,"index":0,"value":{"en_US":"Original"}}]}""";
+        const string target = """{"properties":[{"id":11067,"index":0,"value":{"en_US":"Subset"}},{"id":25020,"index":1,"value":"1"}]}""";
+
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+
+        Assert.Empty(result.PageDifferences);
+        Assert.Equal(3, result.SubsetDifferenceCount);
+        Assert.Equal(["properties[id=11004,index=0].value", "properties[id=11067,index=0].value.en_US", "properties[id=25020,index=1].value"],
+            result.SubsetDifferences.Select(item => item.Field));
+        Assert.Null(result.SubsetDifferences[0].Target);
+        Assert.Null(result.SubsetDifferences[2].Source);
+    }
+
+    [Fact]
+    public void Compare_MissingReportAndPagePropertyCollections_StillListEverySubsetValue()
+    {
+        const string source = """{"isReportPage":true,"properties":{"11004":"12","11040":"next"},"report":[{"type":"TableOfContents","deviceTag":"first ... last"}]}""";
+
+        PageExportComparison result = PageExportComparer.Compare(source, "{}");
+
+        Assert.Equal(3, result.SubsetDifferenceCount);
+        Assert.All(result.SubsetDifferences, difference => Assert.Null(difference.Target));
+        Assert.Equal("report[0].type", Assert.Single(result.PageDifferences).Field);
+    }
+
+    [Fact]
+    public void Compare_LiveAutomaticReportDescriptionAndDeviceRange_AreSubsetDifferences()
+    {
+        // Reduced live failure: a table-of-contents range contracts when only selected pages are redrawn.
+        const string source = """
+            {"isReportPage":true,"properties":{"11004":"12","11011":{"en_US":"Table of contents : &AAA1/1 - &EPA1/5","de_DE":"Inhaltsverzeichnis : &AAA1/1 - &EPA1/5"}},
+             "report":[{"type":"TableOfContents","isAutomaticPageDescription":true,"deviceTag":"&AAA1/1 ... &EPA1/5"}]}
+            """;
+        const string target = """
+            {"isReportPage":true,"properties":{"11004":"1","11011":{"en_US":"Table of contents : &AAA1/1 - =K1+A2&EFA1/5","de_DE":"Inhaltsverzeichnis : &AAA1/1 - =K1+A2&EFA1/5"}},
+             "report":[{"type":"TableOfContents","isAutomaticPageDescription":true,"deviceTag":"&AAA1/1 ... =K1+A2&EFA1/5"}]}
+            """;
+
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+
+        Assert.False(result.HasDifferences);
+        Assert.Equal(4, result.SubsetDifferenceCount);
+        Assert.Contains(result.SubsetDifferences, item => item.Field == "report[0].deviceTag");
+        Assert.Contains(result.SubsetDifferences, item => item.Field == "properties.11011.en_US");
+        Assert.Contains(result.SubsetDifferences, item => item.Field == "properties.11011.de_DE");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Compare_OrdinaryAndManualReportDescriptions_RemainContentDifferences(bool reportPage)
+    {
+        var source = new JObject
+        {
+            ["isReportPage"] = reportPage,
+            ["properties"] = new JObject { ["11011"] = "Source" },
+            ["report"] = reportPage ? new JArray(new JObject { ["isAutomaticPageDescription"] = false }) : new JArray(),
+        };
+        var target = (JObject)source.DeepClone();
+        target["properties"]!["11011"] = "Target";
+
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+
+        Assert.Equal("properties.11011", Assert.Single(result.PageDifferences).Field);
+        Assert.Empty(result.SubsetDifferences);
+    }
+
+    [Fact]
+    public void Compare_DongleLicense_IsIgnored_ObjectScopedPageNumber_IsNotASubsetDependency()
+    {
+        const string source = """{"properties":{"10185":"license A"},"placements":[{"type":"Line","properties":[{"id":11004,"index":0,"value":"2"}]}]}""";
+        const string target = """{"properties":{},"placements":[{"type":"Line","properties":[{"id":11004,"index":0,"value":"3"}]}]}""";
+
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+
+        Assert.Empty(result.SubsetDifferences);
+        Assert.Empty(result.PageDifferences);
+        Assert.Single(result.Types["Line"].Different);
+        Assert.DoesNotContain(PageExportComparer.SubsetFields, rule => rule.Member == "10185");
+    }
+
+    [Fact]
     public void Compare_FunctionNameAndTextFormatting_ReportContentFields()
     {
         const string source = """
@@ -344,14 +468,14 @@ public sealed class PageExportComparerTests
     {
         const string source = """
             {"placements":[
-              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2,3]},
+              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2,3],"members":[{"type":"Line","location":{"x":10,"y":0}},{"type":"Line","location":{"x":20,"y":0}}]},
               {"type":"Line","oid":2,"blockOid":1,"location":{"x":10,"y":0}},
               {"type":"Line","oid":3,"blockOid":1,"location":{"x":20,"y":0}}
             ]}
             """;
         const string target = """
             {"placements":[
-              {"type":"Block","oid":100,"location":{"x":0,"y":0},"memberOids":[300,200]},
+              {"type":"Block","oid":100,"location":{"x":0,"y":0},"memberOids":[300,200],"members":[{"type":"Line","location":{"x":20,"y":0}},{"type":"Line","location":{"x":10,"y":0}}]},
               {"type":"Line","oid":200,"blockOid":100,"location":{"x":10,"y":0}},
               {"type":"Line","oid":300,"blockOid":100,"location":{"x":20,"y":0}}
             ]}
@@ -368,8 +492,8 @@ public sealed class PageExportComparerTests
     {
         const string source = """
             {"placements":[
-              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2]},
-              {"type":"Block","oid":4,"location":{"x":30,"y":0},"memberOids":[3]},
+              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2],"members":[{"type":"Line","location":{"x":10,"y":0}}]},
+              {"type":"Block","oid":4,"location":{"x":30,"y":0},"memberOids":[3],"members":[{"type":"Line","location":{"x":20,"y":0}}]},
               {"type":"Line","oid":2,"blockOid":1,"location":{"x":10,"y":0}},
               {"type":"Line","oid":3,"blockOid":4,"location":{"x":20,"y":0}}
             ]}
@@ -377,28 +501,81 @@ public sealed class PageExportComparerTests
         JObject target = JObject.Parse(source);
         target["placements"]![0]!["memberOids"] = new JArray(3);
         target["placements"]![1]!["memberOids"] = new JArray(2);
+        target["placements"]![0]!["members"]![0]!["location"]!["x"] = 20;
+        target["placements"]![1]!["members"]![0]!["location"]!["x"] = 10;
         target["placements"]![2]!["blockOid"] = 4;
         target["placements"]![3]!["blockOid"] = 1;
         PageExportComparison result = PageExportComparer.Compare(JObject.Parse(source), target);
         Assert.True(result.IsComplete);
         Assert.Equal(2, result.Types["Block"].Different.Count);
-        Assert.All(result.Types["Block"].Different, difference => Assert.Equal("memberOids[0]", Assert.Single(difference.Fields).Field));
+        Assert.All(result.Types["Block"].Different, difference => Assert.Equal("members[0].location.x", Assert.Single(difference.Fields).Field));
         Assert.Equal(2, result.Types["Line"].Different.Count);
         Assert.All(result.Types["Line"].Different, difference => Assert.Equal("blockOid", Assert.Single(difference.Fields).Field));
     }
 
     [Fact]
-    public void Compare_UnpairedBlockMembers_PreserveEvidenceAndWarn()
+    public void Compare_BlockWithoutDetachedMembers_PreservesEvidenceAndWarns()
     {
         const string source = """{"placements":[{"type":"Block","oid":1,"memberOids":[2]}]}""";
         const string target = """{"placements":[{"type":"Block","oid":100,"memberOids":[200]}]}""";
         PageExportComparison result = PageExportComparer.Compare(source, target);
         Assert.False(result.IsComplete);
         Assert.Equal(2, result.Warnings.Count);
-        PageExportFieldDifference difference = Assert.Single(Assert.Single(result.Types["Block"].Different).Fields);
-        Assert.Equal("memberOids[0]", difference.Field);
-        Assert.Equal(2, (int)difference.Source!);
-        Assert.Equal(200, (int)difference.Target!);
+        Assert.All(result.Warnings, warning => Assert.EndsWith(".members", warning.Path, StringComparison.Ordinal));
+        PageExportObjectMatch match = Assert.Single(result.Types["Block"].Matched);
+        Assert.Equal(2, (int)match.Source["memberOids"]![0]!);
+        Assert.Equal(200, (int)match.Target["memberOids"]![0]!);
+    }
+
+    [Fact]
+    public void Compare_BlockMemberIdsAreIrrelevant_WhenDetachedMemberContentMatches()
+    {
+        const string source = """{"placements":[{"type":"Block","oid":1,"memberOids":[2],"members":[{"type":"Line","oid":2,"location":{"x":4,"y":5},"pen":{"color":3},"layer":42}]}]}""";
+        const string target = """{"placements":[{"type":"Block","oid":9,"memberOids":[999,888],"members":[{"type":"Line","oid":22,"layer":42,"pen":{"color":3},"location":{"x":4,"y":5}}]}]}""";
+
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+
+        Assert.False(result.HasDifferences);
+        Assert.True(result.IsComplete);
+    }
+
+    [Theory]
+    [InlineData("geometry", "members[0].end.x")]
+    [InlineData("pen", "members[0].pen.color")]
+    [InlineData("layer", "members[0].layer")]
+    [InlineData("text", "members[1].content.en_US")]
+    public void Compare_BlockMembers_CompareGeometryAndStyleAfterSorting(string change, string expectedField)
+    {
+        const string source = """
+            {"placements":[{"type":"Block","members":[
+              {"type":"Text","location":{"x":6,"y":7},"content":{"en_US":"Text","de_DE":"Text"},"angle":0.5},
+              {"type":"Line","location":{"x":4,"y":5},"start":{"x":4,"y":5},"end":{"x":8,"y":9},"pen":{"color":3},"layer":42}
+            ]}]}
+            """;
+        JObject target = JObject.Parse(source);
+        JArray members = (JArray)target["placements"]![0]!["members"]!;
+        target["placements"]![0]!["members"] = new JArray(members.Reverse().Select(item => item.DeepClone()));
+        members = (JArray)target["placements"]![0]!["members"]!;
+        switch (change)
+        {
+            case "geometry":
+                members[0]["end"]!["x"] = 9;
+                break;
+            case "pen":
+                members[0]["pen"]!["color"] = 4;
+                break;
+            case "layer":
+                members[0]["layer"] = 43;
+                break;
+            case "text":
+                members[1]["content"]!["en_US"] = "Changed";
+                break;
+        }
+
+        PageExportComparison result = PageExportComparer.Compare(JObject.Parse(source), target);
+
+        Assert.True(result.IsComplete);
+        Assert.Equal(expectedField, Assert.Single(Assert.Single(result.Types["Block"].Different).Fields).Field);
     }
 
     [Fact]
@@ -425,14 +602,14 @@ public sealed class PageExportComparerTests
     {
         const string source = """
             {"placements":[
-              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2,3]},
+              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2,3],"members":[]},
               {"type":"Function","oid":2,"blockOid":1,"name":"-A","location":{"x":10,"y":0}},
               {"type":"ContextPropertyPlacement","oid":3,"blockOid":1,"parentOid":2,"sourceOid":2,"propertyId":20010,"location":{"x":11,"y":1}}
             ]}
             """;
         const string target = """
             {"placements":[
-              {"type":"Block","oid":10,"location":{"x":0,"y":0},"memberOids":[30,20]},
+              {"type":"Block","oid":10,"location":{"x":0,"y":0},"memberOids":[30,20],"members":[]},
               {"type":"Function","oid":20,"blockOid":10,"name":"-A","location":{"x":10,"y":0}},
               {"type":"ContextPropertyPlacement","oid":30,"blockOid":10,"parentOid":20,"sourceOid":20,"propertyId":20010,"location":{"x":11,"y":1}}
             ]}

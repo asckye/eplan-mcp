@@ -89,23 +89,24 @@ public sealed partial class PageExportAction : IEplAction
                 using var frame = page.PlotFrame;
                 return frame is null ? null : Get<string?>(row, frame, "PlotFrame.Name", () => frame.Name);
             });
-            using (PagePropertyList? properties = Get<PagePropertyList?>(row, page, "Page.Properties", () => page.Properties))
+            // A55/A80: Properties is cached by its owner. Keep it alive; disposing it invalidates later reads.
+#pragma warning disable CA2000
+            PagePropertyList? properties = Get<PagePropertyList?>(row, page, "Page.Properties", () => page.Properties);
+#pragma warning restore CA2000
+            if (properties is not null)
             {
-                if (properties is not null)
+                row["properties"] = PropertyMap(ReadProperties(page, properties, row));
+                Read(row, "description", page, "PageProperties.PAGE_NOMINATIOMN", () =>
                 {
-                    row["properties"] = PropertyMap(ReadProperties(page, properties, row));
-                    Read(row, "description", page, "PageProperties.PAGE_NOMINATIOMN", () =>
-                    {
-                        using PropertyValue value = properties.PAGE_NOMINATIOMN;
-                        using MultiLangString text = value.ToMultiLangString();
-                        return ReadLanguages(text, row);
-                    });
-                    Read(row, "form", page, "PageProperties.PAGE_FORMULAR", () =>
-                    {
-                        using PropertyValue value = properties.PAGE_FORMULAR;
-                        return Get<string?>(row, value, "PAGE_FORMULAR.ToString", () => value.ToString());
-                    });
-                }
+                    using PropertyValue value = properties.PAGE_NOMINATIOMN;
+                    using MultiLangString text = value.ToMultiLangString();
+                    return ReadLanguages(text, row);
+                });
+                Read(row, "form", page, "PageProperties.PAGE_FORMULAR", () =>
+                {
+                    using PropertyValue value = properties.PAGE_FORMULAR;
+                    return Get<string?>(row, value, "PAGE_FORMULAR.ToString", () => value.ToString());
+                });
             }
             using (ReportBlock? block = Get<ReportBlock?>(row, page, "Page.ReportBlock", () => page.ReportBlock))
             {
@@ -161,7 +162,7 @@ public sealed partial class PageExportAction : IEplAction
             { handled = true; }
             else if (placement is Block block)
             {
-                ReadBlock(block, row);
+                ReadBlock(block, row, unhandled);
                 handled = true;
             }
             if (handled && placement is SymbolReference symbol)
@@ -172,7 +173,9 @@ public sealed partial class PageExportAction : IEplAction
             { ReadLocationBox(location, row); }
             if (handled)
             {
-                using PlacementPropertyList? properties = Get<PlacementPropertyList?>(row, placement, "Placement.Properties", () => PropertiesOf(placement));
+#pragma warning disable CA2000 // A55/A80: the owner caches this list, including when read again as a block member.
+                PlacementPropertyList? properties = Get<PlacementPropertyList?>(row, placement, "Placement.Properties", () => PropertiesOf(placement));
+#pragma warning restore CA2000
                 if (properties is not null)
                 {
                     JArray values = ReadProperties(placement, properties, row);
@@ -310,7 +313,9 @@ public sealed partial class PageExportAction : IEplAction
                 Read(row, "oid", connection, "Connection.ObjectIdentifier", () => connection.ObjectIdentifier);
                 Read(row, "start", connection, "Connection.StartPin", () => Endpoint(connection.StartPin));
                 Read(row, "end", connection, "Connection.EndPin", () => Endpoint(connection.EndPin));
-                using UniversalPropertyList? properties = Get<UniversalPropertyList?>(row, connection, "Connection.Properties", () => connection.Properties);
+#pragma warning disable CA2000 // A55/A80: do not dispose the owner's cached Properties list.
+                UniversalPropertyList? properties = Get<UniversalPropertyList?>(row, connection, "Connection.Properties", () => connection.Properties);
+#pragma warning restore CA2000
                 if (properties is not null)
                 { row["properties"] = ReadProperties(connection, properties, row, id => id >= 31000 && id < 32000); }
                 GC.KeepAlive(owner);
@@ -364,8 +369,7 @@ public sealed partial class PageExportAction : IEplAction
         row["deviceTagNameParts"] = parts;
         foreach (FunctionBasePropertyList part in Get(row, block, "ReportBlock.DeviceTagNameParts", () => block.DeviceTagNameParts, []))
         {
-            using (part)
-            { parts.Add(ReadProperties(block, part, row)); }
+            parts.Add(ReadProperties(block, part, row));
         }
         return row;
     }
@@ -408,7 +412,7 @@ public sealed partial class PageExportAction : IEplAction
             foreach (AnyPropertyId id in ids)
             { id.Dispose(); }
             GC.KeepAlive(properties);
-            // A80: native values/lists must be released before their owning wrapper becomes collectible.
+            // A80: release values before the owner becomes collectible; its cached list stays owner-managed.
             GC.KeepAlive(owner);
         }
         return values;

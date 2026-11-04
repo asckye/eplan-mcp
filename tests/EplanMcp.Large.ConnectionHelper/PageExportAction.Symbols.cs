@@ -100,17 +100,21 @@ public sealed partial class PageExportAction
         }
     }
 
-    private static void ReadBlock(Block block, JObject row)
+    private static void ReadBlock(Block block, JObject row, JObject unhandled)
     {
         Read(row, "name", block, "Block.Name", () => block.Name);
         var members = new JArray();
-        row["memberOids"] = members;
-        // DataModelu.xml: SubPlacements returns the placements combined in this block.
+        var memberOids = new JArray();
+        row["members"] = members;
+        row["memberOids"] = memberOids;
+        // SubPlacements exposes block-relative coordinates. Reuse the full row reader, including graphics styles,
+        // text languages, read errors and nested blocks; member IDs are retained only as diagnostic evidence.
         foreach (Placement member in Get(row, block, "Block.SubPlacements", () => block.SubPlacements, []))
         {
+            AddPlacement(member, members, unhandled);
             object? oid = Get<object?>(row, member, "Block.SubPlacements.ObjectIdentifier", () => member.ObjectIdentifier);
             if (oid is not null)
-            { members.Add(JToken.FromObject(oid)); }
+            { memberOids.Add(JToken.FromObject(oid)); }
             GC.KeepAlive(block);
         }
     }

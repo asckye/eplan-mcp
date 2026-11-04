@@ -6,6 +6,69 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Small")]
 public sealed class SmallProjectRedrawGraphicsTests
 {
+    [Fact]
+    public async Task LiveLineGeometry_PreservesLayerAndOmitsOnlyNativePenDefaults()
+    {
+        JObject source = new()
+        {
+            ["type"] = "Line",
+            ["oid"] = 1,
+            ["location"] = Point(192, 68),
+            ["start"] = Point(192, 68),
+            ["end"] = Point(280, 68),
+            ["layer"] = 306,
+            ["pen"] = new JObject { ["color"] = -16002, ["width"] = -16002.0, ["style"] = -16002, ["patternLength"] = 16002.0, ["lineEndType"] = 0 },
+        };
+
+        (JObject[] items, JObject report) = await DrawAsync(source);
+
+        JObject item = Assert.Single(items);
+        Assert.Equal(306, (int)item["layer"]!);
+        Assert.Equal(new JArray(new JArray(192d, 68d), new JArray(280d, 68d)), item["points"]);
+        Assert.Null(item["pen"]);
+        Assert.Empty((JArray)report["notes"]!);
+    }
+
+    [Fact]
+    public async Task Polyline_PreservesClosedAndAllNondefaultPenFields()
+    {
+        JObject source = new()
+        {
+            ["type"] = "PolyLine",
+            ["oid"] = 1,
+            ["closed"] = true,
+            ["points"] = new JArray(Point(10, 20), Point(12, 24), Point(16, 20)),
+            ["pen"] = new JObject { ["color"] = -5, ["width"] = 0.13, ["style"] = 0, ["patternLength"] = 3, ["lineEndType"] = 2 },
+        };
+
+        (JObject[] items, _) = await DrawAsync(source);
+
+        JObject item = Assert.Single(items);
+        Assert.True((bool)item["closed"]!);
+        Assert.Equal(new JObject { ["color"] = -5, ["width_mm"] = 0.13, ["style"] = 0, ["pattern_length"] = 3, ["line_end"] = 2 }, item["pen"]);
+    }
+
+    [Theory]
+    [InlineData("Text")]
+    [InlineData("PathText")]
+    [InlineData("Rectangle")]
+    public async Task SupportedRotation_ConvertsRadiansAndPreservesTextAlignment(string type)
+    {
+        JObject source = type == "Rectangle"
+            ? new JObject { ["type"] = type, ["oid"] = 1, ["lowerLeft"] = Point(10, 20), ["upperRight"] = Point(20, 30) }
+            : Text(type, new JObject { ["en_US"] = "Example" });
+        source["angle"] = Math.PI / 2;
+        if (type != "Rectangle")
+        { source["alignment"] = "MiddleCenter"; }
+
+        (JObject[] items, JObject report) = await DrawAsync(source);
+
+        JObject item = Assert.Single(items);
+        Assert.Equal(90, (double)item["angle"]!, 10);
+        Assert.Equal(type == "Rectangle" ? null : "MiddleCenter", (string?)item["alignment"]);
+        Assert.Empty((JArray)report["notes"]!);
+    }
+
     [Theory]
     [InlineData(1.43748000000004, 1.43748000000004)]
     [InlineData(4, 2)]
@@ -90,6 +153,22 @@ public sealed class SmallProjectRedrawGraphicsTests
         Assert.Equal("1", (string?)note["oid"]);
         Assert.Contains("Empty text", (string?)note["reason"], StringComparison.Ordinal);
         Assert.Empty((JArray)report["warnings"]!);
+        Assert.Equal(0, (int)report["failedToolCallCount"]!);
+    }
+
+    [Fact]
+    public async Task Graphics_UnreadableStyleIsReportedWithoutSendingNullParameters()
+    {
+        JObject source = Text("Text", new JObject { ["en_US"] = "Example" });
+        source["layer"] = JValue.CreateNull();
+        source["pen"] = new JObject { ["width"] = JValue.CreateNull(), ["color"] = 3 };
+
+        (JObject[] items, JObject report) = await DrawAsync(source);
+
+        JObject item = Assert.Single(items);
+        Assert.Null(item["layer"]);
+        Assert.True(JToken.DeepEquals(new JObject { ["color"] = 3 }, item["pen"]));
+        Assert.Equal(2, ((JArray)report["warnings"]!).Count);
         Assert.Equal(0, (int)report["failedToolCallCount"]!);
     }
 

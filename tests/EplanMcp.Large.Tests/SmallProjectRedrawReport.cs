@@ -15,6 +15,9 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
     private readonly List<JObject> _warnings = [];
     private readonly List<JObject> _pages = [];
     private readonly List<JObject> _infrastructureErrors = [];
+    private readonly Dictionary<string, double> _pageElapsed = new(StringComparer.Ordinal);
+
+    internal void RecordPageElapsed(string page, TimeSpan elapsed) => _pageElapsed[page] = elapsed.TotalMilliseconds;
 
     internal void RecordCall(string page, string tool, IEnumerable<string> objectTypes, IEnumerable<string> objectOids,
         JObject arguments, JObject? result, bool succeeded, string? error = null)
@@ -86,6 +89,8 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
             ["totals"] = SumCounts(types.Properties().Select(property => (JObject)property.Value)),
             ["types"] = types,
             ["pageDifferences"] = new JArray(comparison.PageDifferences.Select(Field)),
+            ["subsetDifferenceCount"] = comparison.SubsetDifferenceCount,
+            ["subsetDifferences"] = new JArray(comparison.SubsetDifferences.Select(SubsetField)),
             ["readWarnings"] = new JArray(comparison.Warnings.Select(warning => new JObject
             {
                 ["path"] = warning.Path,
@@ -136,9 +141,19 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
         {
             ["run"] = run,
             ["project"] = project,
-            ["matchingRateDefinition"] = "matched / (matched + missing + extra + different); null when no native objects were compared. Report pages use the existing comparer's report-field comparison.",
+            ["matchingRateDefinition"] = "matched / (matched + missing + extra + different); null when no native objects were compared. Subset differences are listed separately and excluded. Report pages use the comparer's report-field comparison.",
             ["positionTolerance"] = PageExportComparer.PositionTolerance,
             ["ignoredFields"] = new JArray(PageExportComparer.Ignored.Select(rule => new JObject { ["field"] = rule.Member, ["reason"] = rule.Reason })),
+            ["subsetFields"] = new JArray(PageExportComparer.SubsetFields.Select(rule => new JObject { ["field"] = rule.Member, ["name"] = rule.Name, ["reason"] = rule.Reason })),
+            ["subsetDifferenceCount"] = _pages.Sum(page => (int)page["subsetDifferenceCount"]!),
+            ["subsetDifferences"] = new JArray(_pages.SelectMany(page => ((JArray)page["subsetDifferences"]!).OfType<JObject>()
+                .Select(field => new JObject { ["page"] = page["name"]!.DeepClone(), ["difference"] = field.DeepClone() }))),
+            ["pageTimings"] = new JArray(_pageElapsed.OrderBy(pair => pair.Key, StringComparer.Ordinal).Select(pair => new JObject
+            {
+                ["page"] = pair.Key,
+                ["elapsedMilliseconds"] = pair.Value,
+                ["drawingReadCalls"] = _calls.Count(call => (string?)call["page"] == pair.Key && (string?)call["tool"] == "eplan_page_get"),
+            })),
             ["totals"] = SumCounts(_pages.Select(page => (JObject)page["totals"]!)),
             ["pages"] = new JArray(_pages.Select(page => page.DeepClone())),
             ["failedToolCallCount"] = failedCalls.Length,
@@ -159,6 +174,7 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
         text.AppendLine("# Small project redraw — " + Escape(run));
         text.AppendLine();
         text.AppendLine("Object matching rate = matched / (matched + missing + extra + different). N/A means no native objects were compared. Report pages retain the existing report-field comparison.");
+        text.AppendLine("Subset-dependent differences are excluded from this rate and all listed below.");
         text.AppendLine();
         text.AppendLine("| Scope | Type | Matched | Missing | Extra | Different | Match rate |");
         text.AppendLine("| --- | --- | ---: | ---: | ---: | ---: | ---: |");
@@ -186,6 +202,23 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
                 text.AppendLine("| --- | --- | ---: | ---: | ---: | ---: | ---: |");
             }
         }
+        text.AppendLine("## Page timings");
+        text.AppendLine();
+        text.AppendLine("| Page | Milliseconds | Drawing reads |");
+        text.AppendLine("| --- | ---: | ---: |");
+        foreach (JObject timing in ((JArray)report["pageTimings"]!).OfType<JObject>())
+        { text.AppendLine("| " + Escape((string)timing["page"]!) + " | " + timing["elapsedMilliseconds"] + " | " + timing["drawingReadCalls"] + " |"); }
+        text.AppendLine();
+        text.AppendLine("## Subset differences (" + report["subsetDifferenceCount"] + ")");
+        text.AppendLine();
+        foreach (JObject item in ((JArray)report["subsetDifferences"]!).OfType<JObject>())
+        {
+            JToken field = item["difference"]!;
+            text.AppendLine("- " + Escape((string)item["page"]!) + " / " + Escape((string)field["field"]!) + " (" + Escape((string)field["name"]!)
+                + "): " + Escape(field["source"]!.ToString(Newtonsoft.Json.Formatting.None)) + " → "
+                + Escape(field["target"]!.ToString(Newtonsoft.Json.Formatting.None)) + "; " + Escape((string)field["reason"]!));
+        }
+        text.AppendLine();
         text.AppendLine("## Failed tool calls (" + report["failedToolCallCount"] + ")");
         text.AppendLine();
         text.AppendLine("| Tool | Reason | Object type | Calls |");
@@ -229,6 +262,15 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
     private static JObject Field(PageExportFieldDifference field) => new()
     {
         ["field"] = field.Field,
+        ["source"] = field.Source?.DeepClone(),
+        ["target"] = field.Target?.DeepClone(),
+    };
+
+    private static JObject SubsetField(PageExportSubsetDifference field) => new()
+    {
+        ["field"] = field.Field,
+        ["name"] = field.Name,
+        ["reason"] = field.Reason,
         ["source"] = field.Source?.DeepClone(),
         ["target"] = field.Target?.DeepClone(),
     };

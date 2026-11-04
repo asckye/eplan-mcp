@@ -1,4 +1,3 @@
-using System.Globalization;
 using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Large.Tests;
@@ -47,14 +46,16 @@ internal sealed partial class SmallProjectRedrawDriver
             case "Rectangle":
                 item["kind"] = "rectangle";
                 item["corners"] = new JArray(new JArray(Point(source["lowerLeft"])), new JArray(Point(source["upperRight"])));
-                NoteRotation(page, source);
+                CopyAngle(source, item);
                 break;
             case "PolyLine":
                 item["kind"] = "polyline";
                 item["points"] = new JArray((source["points"] as JArray ?? throw new InvalidDataException("Polyline vertices are unreadable."))
                     .Select(point => new JArray(Point(point))));
-                if ((bool?)source["closed"] == true || (source["bulges"] as JArray)?.Any(value => Number(value) != 0) == true)
-                { report.Note(page, Type(source), Id(source), "placement_create supports open straight polylines only; exported closed/bulged geometry remains a reported difference."); }
+                if (source["closed"] is not null)
+                { item["closed"] = source["closed"]!.DeepClone(); }
+                if ((source["bulges"] as JArray)?.Any(value => Number(value) != 0) == true)
+                { report.Warning(page, "PolyLine " + Id(source) + ": nonzero bulges have no mapping; straight segments retain a reported geometry difference."); }
                 break;
             case "Arc":
                 item["center"] = new JArray(Point(source["center"]));
@@ -84,9 +85,9 @@ internal sealed partial class SmallProjectRedrawDriver
                 item["contents"] = source["content"]?.DeepClone();
                 if (Type(source) != "PathText" || Number(source["height"]) != -16002)
                 { item["height_mm"] = source["height"]?.DeepClone(); }
-                NoteRotation(page, source);
+                CopyAngle(source, item);
                 if (Text(source["alignment"]) is string alignment)
-                { report.Note(page, Type(source), Id(source), "Exported text alignment " + alignment + " has no placement_create parameter."); }
+                { item["alignment"] = alignment; }
                 break;
             case "Image":
                 item["kind"] = "image";
@@ -99,13 +100,36 @@ internal sealed partial class SmallProjectRedrawDriver
                 File.Copy(file, Path.Combine(folder, name), overwrite: false);
                 item["file"] = "small-project-images/" + name;
                 item["corners"] = new JArray(new JArray(Point(source["lowerLeft"])), new JArray(Point(source["upperRight"])));
-                NoteRotation(page, source);
+                if (Number(source["angle"]) is double imageAngle && imageAngle != 0)
+                { report.Warning(page, "Image " + Id(source) + ": image rotation cannot be mapped by placement_create."); }
                 break;
             default:
                 throw new InvalidDataException("Unsupported graphic mapping.");
         }
-        if (source["layer"] is not null || source["pen"] is not null)
-        { report.Note(page, Type(source), Id(source), "Exported layer/pen attributes have no placement_create parameters and remain comparison differences."); }
+        if (source["layer"] is { Type: not JTokenType.Null } layer)
+        { item["layer"] = layer.DeepClone(); }
+        else if (source.ContainsKey("layer"))
+        { report.Warning(page, Type(source) + " " + Id(source) + ": exported layer is unreadable; the default layer remains unverified."); }
+        if (source["pen"] is JObject sourcePen)
+        {
+            var pen = new JObject();
+            foreach ((string from, string to, double defaultValue) in new[]
+            {
+                ("color", "color", -16002d), ("width", "width_mm", -16002d), ("style", "style", -16002d),
+                ("patternLength", "pattern_length", 16002d), ("lineEndType", "line_end", 0d),
+            })
+            {
+                if (sourcePen[from] is JToken value)
+                {
+                    if (Number(value) is not double number)
+                    { report.Warning(page, Type(source) + " " + Id(source) + ": exported pen." + from + " is unreadable; its default remains unverified."); }
+                    else if (number != defaultValue)
+                    { pen[to] = value.DeepClone(); }
+                }
+            }
+            if (pen.HasValues)
+            { item["pen"] = pen; }
+        }
         return item;
     }
 
@@ -113,125 +137,10 @@ internal sealed partial class SmallProjectRedrawDriver
         ? string.IsNullOrWhiteSpace(Text(content))
         : content is JObject translations && translations.Properties().All(p => p.Value.Type == JTokenType.String && string.IsNullOrWhiteSpace(Text(p.Value)));
 
-    private void NoteRotation(string page, JObject source)
+    private static void CopyAngle(JObject source, JObject item)
     {
-        if (Number(source["angle"]) is double angle && angle != 0)
-        { report.Note(page, Type(source), Id(source), "Exported rotation has no placement_create parameter: " + angle.ToString(CultureInfo.InvariantCulture)); }
-    }
-
-    private async Task MovePropertiesAsync(string page, JObject[] objects)
-    {
-        JObject[] properties = objects.Where(o => Type(o) is "ContextPropertyPlacement" or "PropertyPlacement").ToArray();
-        if (properties.Length == 0)
-        { return; }
-        foreach (IGrouping<string, JObject> group in properties.GroupBy(p => p["parentOid"]?.ToString() ?? "", StringComparer.Ordinal))
-        {
-            JObject? owner = objects.FirstOrDefault(o => Id(o) == group.Key && Type(o) is not ("PropertyPlacement" or "ContextPropertyPlacement"));
-            if (owner is null)
-            {
-                foreach (JObject item in group)
-                { report.Warning(page, Type(item) + " " + Id(item) + ": exported property parent is absent; no move can be identified."); }
-                continue;
-            }
-            JObject[] slots = group.ToArray();
-            // The exported propertyIndex is AnyPropertyId.Index, not the tool's collection slot. The default
-            // target arrangement may differ, so use only an unambiguous displayed ID and the fresh target slot.
-            foreach (int[] indexes in Enumerable.Range(0, slots.Length).Chunk(50))
-            {
-                JObject[] actual = await ReadDrawingsAsync(page, owner);
-                JObject[] parents = actual.Where(a => a["parent"]?.Type is null or JTokenType.Null && DrawingMatches(owner, a)).ToArray();
-                if (parents.Length != 1)
-                {
-                    foreach (int index in indexes)
-                    { report.Warning(page, Type(slots[index]) + " " + Id(slots[index]) + ": target parent is absent or ambiguous; no property move was guessed."); }
-                    continue;
-                }
-                JObject parent = parents[0];
-                var moves = new List<(JObject Source, JObject Move)>();
-                foreach (int index in indexes)
-                {
-                    JObject item = slots[index];
-                    await ObserveAsync(page, item, () =>
-                    {
-                        string? propertyId = item["propertyId"]?.ToString();
-                        JObject[] matches = actual.Where(a => JToken.DeepEquals(a["parent"], parent["locator"])
-                            && Text(a["properties"]?["property_id"]) == propertyId).ToArray();
-                        if (matches.Length != 1 || slots.Count(p => p["propertyId"]?.ToString() == propertyId) != 1
-                            || !int.TryParse(Text(matches[0]["properties"]?["property_index"]), NumberStyles.None, CultureInfo.InvariantCulture, out int targetSlot))
-                        { throw new InvalidDataException("Displayed property ID is absent or ambiguous, or the target collection slot is unreadable; no selector was guessed."); }
-                        double[] offset = Point(item["location"]), origin = Point(owner["location"]);
-                        double[] desired = [origin[0] + offset[0], origin[1] + offset[1]];
-                        double angle = RequiredNumber(item["angle"]) * 180 / Math.PI;
-                        int normalized = (int)Math.Round(angle) % 360;
-                        if (normalized < 0)
-                        { normalized += 360; }
-                        if (Math.Abs(angle - Math.Round(angle)) > 0.000001 || normalized is not (0 or 90 or 180 or 270))
-                        { throw new InvalidDataException("Property rotation cannot be represented by the tool's 0/90/180/270-degree contract."); }
-                        double[] current = Point(matches[0]["location"]);
-                        bool samePosition = Math.Abs(desired[0] - current[0]) <= 0.01 && Math.Abs(desired[1] - current[1]) <= 0.01;
-                        bool sameAngle = double.TryParse(Text(matches[0]["properties"]?["angle_deg"]), NumberStyles.Float, CultureInfo.InvariantCulture, out double currentAngle)
-                            && Math.Abs(normalized - currentAngle) <= 0.000001;
-                        if (!samePosition || !sameAngle)
-                        {
-                            moves.Add((item, new JObject
-                            {
-                                ["parent"] = parent["locator"]!.DeepClone(),
-                                ["property_id"] = item["propertyId"]!.DeepClone(),
-                                ["property_index"] = targetSlot,
-                                ["x_mm"] = desired[0],
-                                ["y_mm"] = desired[1],
-                                ["angle_deg"] = normalized,
-                            }));
-                        }
-                        return Task.CompletedTask;
-                    });
-                }
-                if (moves.Count > 0)
-                {
-                    await InvokeAsync(page, "eplan_placement_update", new JObject
-                    {
-                        ["page"] = page,
-                        ["snap_to_grid"] = false,
-                        ["property_moves"] = new JArray(moves.Select(m => m.Move)),
-                    }, moves.Select(m => m.Source).ToArray());
-                }
-            }
-        }
-    }
-
-    private async Task<JObject[]> ReadDrawingsAsync(string page, JObject source)
-    {
-        _lastDrawingReadComplete = true;
-        var result = new List<JObject>();
-        string? cursor = null;
-        var seen = new HashSet<string>(StringComparer.Ordinal);
-        do
-        {
-            var args = new JObject { ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["language"] = "??_??" };
-            if (cursor is not null)
-            { args["drawing_cursor"] = cursor; }
-            JObject? response = await InvokeAsync(page, "eplan_page_get", args, [source], write: false);
-            if (response is null)
-            { _lastDrawingReadComplete = false; break; }
-            JObject? drawings = response["drawings"] as JObject;
-            if (drawings is null)
-            {
-                report.Warning(page, "MCP page read returned no drawing evidence.");
-                _lastDrawingReadComplete = false;
-                break;
-            }
-            result.AddRange(Objects(drawings["items"]));
-            cursor = Text(drawings["nextCursor"]);
-            if ((bool?)drawings["truncated"] == true && cursor is null)
-            { _lastDrawingReadComplete = false; report.Warning(page, "MCP drawing evidence was truncated without a continuation cursor."); }
-            if (cursor is not null && !seen.Add(cursor))
-            {
-                report.Warning(page, "MCP drawing cursor repeated; remaining evidence is unreadable.");
-                _lastDrawingReadComplete = false;
-                break;
-            }
-        } while (cursor is not null);
-        return result.ToArray();
+        if (Number(source["angle"]) is double angle)
+        { item["angle"] = angle == -16002 ? angle : angle * 180 / Math.PI; }
     }
 
     private async Task ReviewAsync(string page, JObject source)

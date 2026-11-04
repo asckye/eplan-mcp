@@ -14,6 +14,8 @@ internal static class PageExportComparer
     internal static readonly IReadOnlyList<PageExportIgnoreRule> Ignored =
     [
         new("oid", "Native object IDs change when a page is redrawn; references are resolved through paired objects."),
+        new("2000", "Object identification is the internal object ID encoded as a string; redrawing allocates a new ID."),
+        new("10185", "Last editor's dongle license number identifies the editing session, not drawing content."),
         new("11001", "Automatic modification time belongs to the new page's edit history."),
         new("11002", "Creation time belongs to the new page's edit history."),
         new("11021", "Creation date belongs to the new page's edit history."),
@@ -32,11 +34,26 @@ internal static class PageExportComparer
         new("Modified", "Explicit export modification metadata is session-specific."),
     ];
 
+    // Names and scope verified against DataModel XML, PagePropertyList and ReportBlock.
+    internal static readonly IReadOnlyList<PageExportSubsetRule> SubsetFields =
+    [
+        new("report[].deviceTag", "Report device tags", "The report's device set can include devices on pages outside the redrawn subset."),
+        new("11004", "Number of pages per structure", "The structure can contain pages outside the redrawn subset."),
+        new("11040", "Next page", "The next page can lie outside the redrawn subset."),
+        new("11041", "Previous page", "The previous page can lie outside the redrawn subset."),
+        new("11043", "Highest page number per structure", "The highest numbered page can lie outside the redrawn subset."),
+        new("25020", "Counter page number", "The sequential page counter includes preceding pages outside the redrawn subset."),
+        new("11067", "Report: Source project", "The report source identifies the original project rather than the subset project."),
+        new("11011", "Page description (automatic report only)", "An automatic report description is generated from the report's device set, which can include omitted pages."),
+    ];
+
     private static readonly HashSet<string> _ignoredNames = new(Ignored.Select(rule => rule.Member), StringComparer.Ordinal);
     private static readonly HashSet<string> _lengthFields = new(StringComparer.Ordinal)
     {
         "x", "y", "height", "width", "radius", "firstRadius", "secondRadius", "left", "right", "top", "bottom", "gridSize",
     };
+    private static readonly string[] _memberGeometryFields =
+        ["start", "end", "center", "points", "vertices", "radius", "firstRadius", "secondRadius", "width", "height", "angle", "ellipseAngle", "startAngle", "endAngle", "closed"];
 
     internal static PageExportComparison Compare(string sourceJson, string targetJson) =>
         Compare(JObject.Parse(sourceJson), JObject.Parse(targetJson));
@@ -51,8 +68,12 @@ internal static class PageExportComparer
             ["name", "pageType", "description", "plotFrame", "size", "gridSize", "form", "report", "properties"];
         foreach (string field in pageFields)
         {
-            Differences(Normalize(source[field], field, null), Normalize(target[field], field, null), field, result.PageDifferences);
+            JToken? left = Normalize(source[field], field, null);
+            JToken? right = Normalize(target[field], field, null);
+            Differences(field == "report" ? left ?? new JArray() : left, field == "report" ? right ?? new JArray() : right,
+                field, result.PageDifferences);
         }
+        SeparateSubsetDifferences(result, source, target, reportPage);
         if (reportPage)
         {
             return result;
@@ -110,6 +131,29 @@ internal static class PageExportComparer
     private static List<JObject> Objects(JToken? value) => value is JArray array ? array.OfType<JObject>().ToList() : [];
     private static string Type(JObject value) => (string?)value["type"] ?? "Unknown";
     private static bool IsPropertyPlacement(JObject value) => Type(value) is "PropertyPlacement" or "ContextPropertyPlacement";
+
+    private static void SeparateSubsetDifferences(PageExportComparison result, JObject source, JObject target, bool reportPage)
+    {
+        bool automaticDescription = reportPage && Objects(source["report"]).Concat(Objects(target["report"]))
+            .Any(report => (bool?)report["isAutomaticPageDescription"] == true);
+        foreach (PageExportFieldDifference difference in result.PageDifferences.ToArray())
+        {
+            PageExportSubsetRule? rule = SubsetFields.FirstOrDefault(rule => rule.Member == "report[].deviceTag"
+                ? difference.Field.StartsWith("report[", StringComparison.Ordinal) && difference.Field.EndsWith("].deviceTag", StringComparison.Ordinal)
+                : (rule.Member != "11011" || automaticDescription) && IsPageProperty(difference.Field, rule.Member));
+            if (rule is null)
+            {
+                continue;
+            }
+            result.PageDifferences.Remove(difference);
+            result.SubsetDifferences.Add(new(difference.Field, rule.Name, rule.Reason, difference.Source, difference.Target));
+        }
+    }
+
+    private static bool IsPageProperty(string path, string id) => path == "properties." + id
+        || path.StartsWith("properties." + id + ".", StringComparison.Ordinal)
+        || path.StartsWith("properties." + id + "[", StringComparison.Ordinal)
+        || path.StartsWith("properties[id=" + id + ",index=", StringComparison.Ordinal);
 
     private static void PairGroups(IEnumerable<JObject> source, IEnumerable<JObject> target, PageExportComparison result,
         List<ObjectPair> pairs, Func<JObject, JObject, bool>? additionalKey)
@@ -238,9 +282,10 @@ internal static class PageExportComparer
             var normalized = new JObject();
             foreach (JProperty property in obj.Properties().OrderBy(p => p.Name, StringComparer.Ordinal))
             {
-                if (property.Name == "errors")
+                if (property.Name is "errors" or "memberOids")
                 {
-                    continue; // Reported separately as warnings; an unreadable value is not proof of equivalence.
+                    // Read errors are warnings; block membership is compared using detached member content, not unstable IDs.
+                    continue;
                 }
                 if (property.Name == "blockOid")
                 {
@@ -266,11 +311,6 @@ internal static class PageExportComparer
         }
         if (value is JArray array)
         {
-            if (member == "memberOids")
-            {
-                return new JArray(array.Select(item => NormalizeBlockReference(item, identities))
-                    .OrderBy(item => item.ToString(Formatting.None), StringComparer.Ordinal));
-            }
             IEnumerable<JToken> items = array;
             if (member == "properties")
             {
@@ -281,6 +321,14 @@ internal static class PageExportComparer
             {
                 normalized = normalized.OrderBy(item => item.ToString(Formatting.None), StringComparer.Ordinal).ToList();
             }
+            if (member == "members")
+            {
+                normalized = normalized.OrderBy(item => (string?)item["type"], StringComparer.Ordinal)
+                    .ThenBy(item => (double?)item["location"]?["x"])
+                    .ThenBy(item => (double?)item["location"]?["y"])
+                    .ThenBy(MemberGeometry, StringComparer.Ordinal)
+                    .ThenBy(item => item.ToString(Formatting.None), StringComparer.Ordinal).ToList();
+            }
             return new JArray(normalized);
         }
         return value?.DeepClone();
@@ -289,12 +337,33 @@ internal static class PageExportComparer
     private static JToken NormalizeBlockReference(JToken oid, Dictionary<string, string>? identities) =>
         identities is not null && Identity(identities, oid) is string identity ? new JValue(identity) : oid.DeepClone();
 
+    private static string MemberGeometry(JToken member) => new JObject(
+        _memberGeometryFields
+            .Where(name => member[name] is not null).Select(name => new JProperty(name, member[name]!.DeepClone())))
+        .ToString(Formatting.None);
+
     private static void Differences(JToken? source, JToken? target, string path, List<PageExportFieldDifference> differences)
     {
         string member = path[(path.LastIndexOf('.') + 1)..];
         if (member == "properties" && source is null or JArray && target is null or JArray)
         {
             PropertyDifferences(source, target, path, differences);
+            return;
+        }
+        if (member == "properties" && source is null && target is JObject targetProperties)
+        {
+            Differences(new JObject(), targetProperties, path, differences);
+            return;
+        }
+        if (member == "properties" && source is JObject sourceProperties && target is null)
+        {
+            Differences(sourceProperties, new JObject(), path, differences);
+            return;
+        }
+        if (path.StartsWith("report[", StringComparison.Ordinal) && path.IndexOf('.', StringComparison.Ordinal) < 0
+            && (source is JObject && target is null || source is null && target is JObject))
+        {
+            Differences(source ?? new JObject(), target ?? new JObject(), path, differences);
             return;
         }
         if (source is JObject sourceObject && target is JObject targetObject)
@@ -363,7 +432,7 @@ internal static class PageExportComparer
     {
         if (value is JObject obj)
         {
-            foreach (JProperty property in obj.Properties().Where(p => p.Name != "errors"))
+            foreach (JProperty property in obj.Properties().Where(p => p.Name is not "errors" and not "memberOids"))
             {
                 string propertyPath = path + "." + property.Name;
                 if (IsReference(member, property.Name) && property.Value.Type != JTokenType.Null && Identity(identities, property.Value) is null)
@@ -382,15 +451,6 @@ internal static class PageExportComparer
         {
             for (int index = 0; index < array.Count; index++)
             {
-                if (member == "memberOids" && array[index].Type != JTokenType.Null && Identity(identities, array[index]) is null)
-                {
-                    warnings.Add(new(path + "[" + index.ToString(CultureInfo.InvariantCulture) + "]", new JObject
-                    {
-                        ["member"] = member,
-                        ["error"] = "Block member is absent or could not be paired; membership equivalence is unverified.",
-                        ["oid"] = array[index].DeepClone(),
-                    }));
-                }
                 CollectReferenceWarnings(array[index], path + "[" + index.ToString(CultureInfo.InvariantCulture) + "]", member, identities, warnings);
             }
         }
@@ -410,6 +470,14 @@ internal static class PageExportComparer
     {
         if (value is JObject obj)
         {
+            if (Type(obj) == "Block" && obj["members"] is not JArray)
+            {
+                warnings.Add(new(path + ".members", new JObject
+                {
+                    ["member"] = "members",
+                    ["error"] = "Detached block members are missing or unreadable; membership equivalence is unverified.",
+                }));
+            }
             if (obj["errors"] is JArray errors)
             {
                 warnings.AddRange(errors.Select(error => new PageExportReadWarning(path, error.DeepClone())));
@@ -437,6 +505,8 @@ internal static class PageExportComparer
 }
 
 internal sealed record PageExportIgnoreRule(string Member, string Reason);
+internal sealed record PageExportSubsetRule(string Member, string Name, string Reason);
+internal sealed record PageExportSubsetDifference(string Field, string Name, string Reason, JToken? Source, JToken? Target);
 internal sealed record PageExportFieldDifference(string Field, JToken? Source, JToken? Target);
 internal sealed record PageExportReadWarning(string Path, JToken Error);
 internal sealed record PageExportObjectMatch(JObject Source, JObject Target);
@@ -454,6 +524,8 @@ internal sealed class PageExportComparison
 {
     public SortedDictionary<string, PageExportTypeComparison> Types { get; } = new(StringComparer.Ordinal);
     public List<PageExportFieldDifference> PageDifferences { get; } = [];
+    public List<PageExportSubsetDifference> SubsetDifferences { get; } = [];
+    public int SubsetDifferenceCount => SubsetDifferences.Count;
     public List<PageExportReadWarning> Warnings { get; } = [];
     public bool HasDifferences => PageDifferences.Count > 0 || Types.Values.Any(type => type.Missing.Count > 0 || type.Extra.Count > 0 || type.Different.Count > 0);
     public bool IsComplete => Warnings.Count == 0;

@@ -100,7 +100,7 @@ public sealed class SmallProjectRedrawTests(LiveEplan eplan)
                 }
             }
 
-            await SelectCurrentAsync(report, project);
+            await driver.PrepareExportAsync();
             await ExportNativeAsync(project, targetFolder, report);
             target = LoadPages(targetFolder, report);
 
@@ -204,18 +204,6 @@ public sealed class SmallProjectRedrawTests(LiveEplan eplan)
             report.RecordCall(page, tool, [type], [], arguments, result, false, error.ToString());
             return null;
         }
-    }
-
-    private async Task SelectCurrentAsync(SmallProjectRedrawReport report, string project)
-    {
-        JObject? projects = await ObserveAsync(report, "", "eplan_project_list", "Project", new JObject { ["limit"] = 200 });
-        if (projects?["projects"] is JArray open && open.OfType<JObject>().Any(item =>
-            (bool?)item["current"] == true && string.Equals((string?)item["path"], project, StringComparison.OrdinalIgnoreCase)))
-        { return; }
-        JObject? pages = await ObserveAsync(report, "", "eplan_page_list", "Page", new JObject { ["project"] = project, ["limit"] = 1 });
-        string? page = (string?)pages?["pages"]?.First?["name"];
-        if (page is null || await ObserveAsync(report, page, "eplan_page_open", "Page", new JObject { ["project"] = project, ["page"] = page }) is null)
-        { throw new InvalidOperationException("Cannot select the new scratch project for native export."); }
     }
 
     private async Task ExportImageAsync(SmallProjectRedrawReport report, string project, string page, string folder)
