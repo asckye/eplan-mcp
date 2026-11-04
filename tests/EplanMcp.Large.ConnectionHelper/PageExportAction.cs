@@ -496,8 +496,10 @@ public sealed partial class PageExportAction : IEplAction
         if (_propertyNames[key] is not null)
         { return; }
         string? name = Get<string?>(row, definition, "PropertyDefinition.Name", () => definition.Name);
+        // A read-only property is computed from a source elsewhere: the source gets fixed, never this value.
+        bool readOnly = Get(row, definition, "PropertyDefinition.IsReadOnly", () => definition.IsReadOnly, false);
         if (!string.IsNullOrEmpty(name))
-        { _propertyNames[key] = name; }
+        { _propertyNames[key] = readOnly ? name + " [read-only]" : name; }
     }
 
     private static void ReadGroups(Placement placement, JObject row)
