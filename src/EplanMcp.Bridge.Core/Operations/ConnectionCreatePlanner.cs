@@ -71,6 +71,7 @@ public static class ConnectionCreatePlanner
         if (double.IsNaN(grid) || double.IsInfinity(grid) || grid <= 0)
         { throw Missing("Read a valid page grid."); }
         var paths = new List<double[][]>();
+        var endpointPins = new HashSet<string>(StringComparer.Ordinal);
         var nodes = new Dictionary<string, (double[] Point, string[] Directions, string Kind)>(StringComparer.Ordinal);
         var requested = new JArray();
         var resolved = new JArray();
@@ -189,6 +190,8 @@ public static class ConnectionCreatePlanner
             Require(scene.Pins[from].Direction == Direction(points[0], points[1]) && scene.Pins[to].Direction == Direction(points[points.Length - 1], points[points.Length - 2]), at, "Path directions must face out of both pins.");
             if (item["definition_point"] is { } definition)
             { definitions.Add(ConnectionDefinitionPoints.Plan(definition, at + "/definition_point", points, from, to, index - 1, scene, variants ??= reader.Read(scene.Project.Path, new() { Library = "SPECIAL" }))); }
+            endpointPins.Add(from);
+            endpointPins.Add(to);
             paths.Add(points);
         }
         Require(definitions.Count == 0 || interruptions.Count == 0 && !input["items"]!.Any(i => (string?)i["kind"] == "cable_definition"), "/items", "Create definition points separately from interruption points and cable definitions to preserve one transaction and undo step.");
@@ -261,6 +264,7 @@ public static class ConnectionCreatePlanner
         }
         var segments = paths.SelectMany(p => p.Zip(p.Skip(1), (a, b) => new[] { a, b })).ToList();
         segments.AddRange(splits.SelectMany(s => s.Segment.Select(p => new[] { p, s.Point })));
+        endpointPins.UnionWith(scene.Pins.Where(p => splits.Any(s => s.Segment.Any(end => end.SequenceEqual(p.Value.Location)))).Select(p => p.Key));
         var ports = scene.Pins.Values.Select(p => (Point: p.Location, p.Direction)).Concat(nodes.Values.SelectMany(n => n.Directions.Select(d => (n.Point, Direction: d)))).ToArray();
         foreach (var node in nodes.Values)
         {
@@ -269,7 +273,10 @@ public static class ConnectionCreatePlanner
                 double[][] candidates = ports.Where(p => p.Direction == Opposite(direction) && !p.Point.SequenceEqual(node.Point) && Direction(node.Point, p.Point) == direction
                     && (p.Point[0] == node.Point[0] || p.Point[1] == node.Point[1])).Select(p => p.Point).OrderBy(p => Distance(p, node.Point)).ToArray();
                 if (candidates.Length > 0 && !segments.Any(s => On(node.Point, s) && s.Any(p => !p.SequenceEqual(node.Point) && Direction(node.Point, p) == direction)))
-                { segments.Add([node.Point, candidates[0]]); }
+                {
+                    segments.Add([node.Point, candidates[0]]);
+                    endpointPins.UnionWith(scene.Pins.Where(p => p.Value.Location.SequenceEqual(candidates[0])).Select(p => p.Key));
+                }
             }
         }
         segments = segments.SelectMany(s =>
@@ -292,7 +299,7 @@ public static class ConnectionCreatePlanner
                 && s.Any(p => p.SequenceEqual(split.Point)) && (s[0][0] == s[1][0]) != (e[0][0] == e[1][0])));
             Require(conflict is null, "/items", conflict is null ? "" : "The path " + FormatPoint(s[0]) + " -> " + FormatPoint(s[1]) + " conflicts with the existing autoconnect line "
                 + FormatPoint(conflict[0]) + " -> " + FormatPoint(conflict[1]) + "; plan an explicit replacement separately.");
-            if (scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => LayoutGuard.Crosses(s, p, scene.Pins, scene.PointRoutes)) is { } crossed)
+            if (scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => LayoutGuard.Crosses(s, p, scene.Pins, scene.PointRoutes, endpointPins)) is { } crossed)
             {
                 Require(false, "/items", FormattableString.Invariant(
                     $"The path {FormatPoint(s[0])} -> {FormatPoint(s[1])} crosses the outline of {crossed.Kind} {crossed.Locator.Type}/{crossed.Locator.Oid} [{string.Join(",", crossed.Bounds!.Select(v => v.ToString("R", CultureInfo.InvariantCulture)))}]. R4: reroute around the outline."));

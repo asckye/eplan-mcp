@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_connection_create` 允许连接的实际端点落在黑盒边缘或框内引脚上，仍拒绝真正穿越外框的路径。
+
 - `eplan_connection_create` 仅放置节点且没有逻辑连接端点时只放置、读回，跳过连接生成并返回 `undoSteps: 1`。
 
 - `eplan_device_place` 端子来源可选择库符号及变体，按 Terminal 类别校验；省略时保持 IEC_symbol/X 默认。

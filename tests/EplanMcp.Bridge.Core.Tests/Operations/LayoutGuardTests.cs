@@ -200,6 +200,23 @@ public sealed class LayoutGuardTests
         model.Pins.Clear();
         Assert.Contains(LayoutGuard.Check(model, [], false), v => v.Rule == "R4");
     }
+    [Theory]
+    [InlineData(188, true, false)]
+    [InlineData(196, true, false)]
+    [InlineData(228, true, true)]
+    [InlineData(188, false, true)]
+    [InlineData(196, false, true)]
+    public void R4_BlackBoxEndpointPin_IsContactRatherThanPassage(double endY, bool pinAtEnd, bool crosses)
+    {
+        var box = new DrawingPlacement { Kind = "BoxedDevice", Locator = new() { Type = 17, Oid = 10 },
+            Location = [184, 188], Bounds = [184, 188, 360, 220] };
+        var pins = new Dictionary<string, SymbolConnectionPoint>();
+        if (pinAtEnd)
+        { pins["17/11/0"] = new() { Location = [192, endY], Direction = "Down" }; }
+        Assert.Equal(crosses, LayoutGuard.Crosses([[192, 180], [192, endY]], box, pins));
+        Assert.Equal(crosses, LayoutGuard.Crosses([[192, endY], [192, 180]], box, pins));
+    }
+
     [Fact]
     public void R5_R6_SameNetAndEndpointContactDoNotConflict_ZeroSpacingStillRejectsOverlap()
     {

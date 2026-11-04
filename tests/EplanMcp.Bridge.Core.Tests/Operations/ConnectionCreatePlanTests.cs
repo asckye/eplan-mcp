@@ -197,6 +197,43 @@ public sealed class ConnectionCreatePlanTests : IDisposable
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Reason);
     }
 
+    [Theory]
+    [InlineData(188, false)]
+    [InlineData(196, false)]
+    [InlineData(228, true)]
+    public void BlackBoxEndpoint_FileRoundTrip_DistinguishesContactAndCrossing(double endY, bool refuses)
+    {
+        _fixture.Scene.Page.PageSize = [500, 300];
+        _fixture.Scene.Page.Placements.Clear();
+        _fixture.Scene.Pins.Clear();
+        JObject from = _fixture.AddPin(1, [192, 180], "Up", [190, 176, 194, 180]);
+        JObject to = _fixture.AddPin(2, [192, endY], "Down", [190, endY, 194, endY + 4]);
+        _fixture.Scene.Page.Placements.Add(new() { Kind = "BoxedDevice", Locator = new() { Type = 17, Oid = 10 },
+            Location = [184, 188], Bounds = [184, 188, 360, 220] });
+        _fixture.Request["items"] = new JArray(ConnectionCreateFixture.Wire(from, to, [192, 180], [192, endY]));
+        if (refuses)
+        { Assert.Contains("R4", Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Message, StringComparison.Ordinal); }
+        else
+        { Assert.Single(RoundTripPlan()["logicalAfterGenerate"]!); }
+    }
+
+    [Fact]
+    public void BlackBox_UnrelatedPinAtAnInteriorBend_DoesNotExemptCrossing()
+    {
+        _fixture.Scene.Page.PageSize = [500, 300];
+        _fixture.Scene.Page.Placements.Clear();
+        _fixture.Scene.Pins.Clear();
+        JObject from = _fixture.AddPin(1, [192, 180], "Up", [190, 176, 194, 180]);
+        JObject to = _fixture.AddPin(2, [380, 228], "Down", [378, 228, 382, 232]);
+        _fixture.AddPin(3, [192, 196], "Down", [190, 196, 194, 200]);
+        _fixture.Scene.Page.Placements.Add(new() { Kind = "BoxedDevice", Locator = new() { Type = 17, Oid = 10 },
+            Location = [184, 188], Bounds = [184, 188, 360, 220] });
+        _fixture.Symbols.Add(ConnectionCreateFixture.Variant("CO", "Routing", 1, "Down", "Right"));
+        _fixture.Scene.SymbolBounds["CO/1"] = [-1, -1, 1, 1];
+        _fixture.Request["items"] = new JArray(ConnectionCreateFixture.Wire(from, to, [192, 180], [192, 196], [380, 196], [380, 228]));
+        Assert.Contains("R4", Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void DryRun_LocatorDigestChanged_IsStaleAndNeverSubstitutesPin()
     {

@@ -439,12 +439,16 @@ public static class LayoutGuard
         _ => false
     };
     internal static bool Crosses(double[][] s, DrawingPlacement p, Dictionary<string, SymbolConnectionPoint> pins,
-        Dictionary<string, List<double[][]>>? pointRoutes = null) => Crosses(s, p, pins, pointRoutes, out _);
+        Dictionary<string, List<double[][]>>? pointRoutes = null, ISet<string>? endpointPins = null) => Crosses(s, p, pins, pointRoutes, out _, endpointPins);
     private static bool Crosses(double[][] s, DrawingPlacement p, Dictionary<string, SymbolConnectionPoint> pins,
-        Dictionary<string, List<double[][]>>? pointRoutes, out bool unverified)
+        Dictionary<string, List<double[][]>>? pointRoutes, out bool unverified, ISet<string>? endpointPins = null)
     {
         unverified = false;
-        return Hits(s, p.Bounds!) && !ConnectedPoint(s, p, pins, pointRoutes, out unverified)
+        // A black-box connection point may belong to a child function, rather than to the box itself.
+        bool endsAtBoxPin = (Container(p) || p.Kind == "BoxedDevice") && pins.Any(pin =>
+            (endpointPins is null || endpointPins.Contains(pin.Key)) && Hits([pin.Value.Location, pin.Value.Location], p.Bounds!)
+            && (s[0].SequenceEqual(pin.Value.Location) || s[s.Length - 1].SequenceEqual(pin.Value.Location)));
+        return Hits(s, p.Bounds!) && !endsAtBoxPin && !ConnectedPoint(s, p, pins, pointRoutes, out unverified)
             && (p.Kind == "ConnectionDefinitionPoint" || !pins.Any(pin => pin.Key.StartsWith(FormattableString.Invariant($"{p.Locator.Type}/{p.Locator.Oid}/"), StringComparison.Ordinal)
             && Hits([pin.Value.Location, pin.Value.Location], p.Bounds!)
             && s.Any(end => end.SequenceEqual(pin.Value.Location) && s.Any(other => !other.SequenceEqual(end) && !Hits([other, other], p.Bounds!)

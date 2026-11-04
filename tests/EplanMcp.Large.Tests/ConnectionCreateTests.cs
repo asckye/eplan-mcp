@@ -40,6 +40,77 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
     }
 
+    [Fact]
+    public async Task WireEndingOnBlackBoxEdge_ConnectsDevicePointWithoutCrossing()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = await NewPageAsync(session);
+        await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        async Task<PageDrawingGeometry> Drawing() => await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+            new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+        async Task<JsonElement> Call(string tool, Dictionary<string, object?> args)
+        {
+            TestContext.Current.TestOutputHelper!.WriteLine(tool + " request: " + JsonSerializer.Serialize(args));
+            (bool ok, JsonElement value) = await eplan.CallOrErrorAsync(tool, args);
+            TestContext.Current.TestOutputHelper.WriteLine(tool + " result: " + value.GetRawText());
+            if (!ok)
+            { TestContext.Current.TestOutputHelper.WriteLine("failure drawing readback: " + JsonSerializer.Serialize(await Drawing())); }
+            Assert.True(ok, value.GetRawText());
+            return value;
+        }
+        async Task<JsonElement[]> Symbols(string library, string name)
+        {
+            var symbols = new List<JsonElement>();
+            string? cursor = null;
+            do
+            {
+                JsonElement found = await Call("eplan_symbol_search", new()
+                { ["project"] = session.Project, ["library"] = library, ["name_contains"] = name, ["limit"] = 200, ["cursor"] = cursor });
+                symbols.AddRange(found.GetProperty("symbols").EnumerateArray().Where(v => v.GetProperty("name").GetString() == name));
+                cursor = found.TryGetProperty("nextCursor", out JsonElement next) && next.ValueKind == JsonValueKind.String ? next.GetString() : null;
+            } while (cursor is not null);
+            return symbols.ToArray();
+        }
+        static int Pin(JsonElement symbol, string direction) => Array.FindIndex(symbol.GetProperty("connectionPoints").EnumerateArray().ToArray(), p => p.GetProperty("direction").GetString() == direction);
+        JsonElement terminal = (await Symbols("IEC_symbol", "X")).First(v => Pin(v, "Right") >= 0);
+        JsonElement pointSymbol = (await Symbols("SPECIAL", "DCP")).First(v => Pin(v, "Down") >= 0);
+        int fromPin = Pin(terminal, "Right"), toPin = Pin(pointSymbol, "Down");
+        Assert.True(fromPin >= 0);
+        JsonElement fromOffset = terminal.GetProperty("connectionPoints")[fromPin].GetProperty("location");
+        JsonElement toOffset = pointSymbol.GetProperty("connectionPoints")[toPin].GetProperty("location");
+        string suffix = page[(page.LastIndexOf('/') + 1)..];
+        string boxTag = "-BR4" + suffix;
+        await Call("eplan_device_place", new()
+        {
+            ["project"] = session.Project, ["page"] = page, ["library"] = "SPECIAL", ["symbol"] = "DC", ["symbol_variant"] = 0,
+            ["tag"] = boxTag, ["x"] = 184, ["y"] = 188, ["corner_x"] = 360, ["corner_y"] = 220, ["dry_run"] = false
+        });
+        await Call("eplan_device_place", new()
+        {
+            ["project"] = session.Project, ["page"] = page, ["library"] = "SPECIAL", ["symbol"] = "DCP", ["symbol_variant"] = pointSymbol.GetProperty("variant").GetInt32(),
+            ["tag"] = boxTag, ["connection_designations"] = (string[])["1"], ["x"] = 192 - toOffset[0].GetDouble(), ["y"] = 188 - toOffset[1].GetDouble(), ["dry_run"] = false
+        });
+        await Call("eplan_device_place", new()
+        {
+            ["project"] = session.Project, ["page"] = page, ["terminal_strip"] = "-XR4" + suffix, ["terminal_number"] = "1", ["symbol_variant"] = terminal.GetProperty("variant").GetInt32(),
+            ["x"] = 176 - fromOffset[0].GetDouble(), ["y"] = 180 - fromOffset[1].GetDouble(), ["dry_run"] = false
+        });
+        PageDrawingGeometry before = await Drawing();
+        TestContext.Current.TestOutputHelper!.WriteLine("before wire drawing: " + JsonSerializer.Serialize(before));
+        DrawingPlacement from = Assert.Single(before.Placements, p => p.Kind == "Terminal");
+        DrawingPlacement to = Assert.Single(before.Placements, p => p.Kind == "DeviceConnectionPoint");
+        static object Locator(DrawingPlacement p) => new { project = p.Locator.Project, page = p.Locator.Page, type = p.Locator.Type, oid = p.Locator.Oid, digest = p.Locator.Digest };
+        JsonElement result = await Call("eplan_connection_create", new()
+        {
+            ["project"] = session.Project, ["page"] = page, ["dry_run"] = false, ["response_format"] = "detailed",
+            ["items"] = new[] { new { kind = "wire", from = new { locator = Locator(from), pin_index = fromPin }, to = new { locator = Locator(to), pin_index = toPin }, points = new double[][] { [176, 180], [192, 180], [192, 188] } } }
+        });
+        TestContext.Current.TestOutputHelper.WriteLine("wire drawing readback: " + JsonSerializer.Serialize(await Drawing()));
+        Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+        Assert.Single(result.GetProperty("actualEndpoints").EnumerateArray());
+    }
+
     [Theory]
     [InlineData("CDP")]
     [InlineData("CDPNG")]
