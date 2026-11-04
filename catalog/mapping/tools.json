@@ -12571,6 +12571,11 @@
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           },
           {
+            "name": "PlacementGraphicsCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementGraphicsCreateTests.cs"
+          },
+          {
             "name": "PlacementTextCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
@@ -14954,6 +14959,11 @@
             "name": "PlacementEditSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
+          },
+          {
+            "name": "PlacementGraphicsCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementGraphicsCreateTests.cs"
           },
           {
             "name": "PlacementMoveTests",

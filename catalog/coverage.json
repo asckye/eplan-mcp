@@ -1938,7 +1938,7 @@
       "spec": "docs/tools/eplan_page_get.md",
       "small": 7,
       "medium": 6,
-      "large": 26,
+      "large": 27,
       "apiNotes": [
         "A11",
         "A12",
@@ -2327,7 +2327,7 @@
       "spec": "docs/tools/eplan_placement_create.md",
       "small": 4,
       "medium": 3,
-      "large": 6,
+      "large": 7,
       "apiNotes": [
         "A54"
       ]
