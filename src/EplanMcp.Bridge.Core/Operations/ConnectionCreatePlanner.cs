@@ -51,7 +51,7 @@ public static class ConnectionCreatePlanner
             Require(!parser.Read(), "", "Supply one JSON object.");
         }
         catch (JsonReaderException ex) { throw WriteArguments.Invalid(["/" + (ex.Path ?? "").Replace("[", "/").Replace("]", "").Replace(".", "/") + ": Supply strict JSON without duplicate members."]); }
-        Members(input, "", "project page items", "dry_run snap_to_grid response_format plugin_sources layout_guard");
+        Members(input, "", "project page items", "dry_run snap_to_grid response_format plugin_sources layout_guard generate");
         string guard = LayoutGuard.Mode(input["layout_guard"]);
         Require(input["plugin_sources"] is null || input["plugin_sources"] is JArray sources
             && sources.All(source => source.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)source)), "/plugin_sources", "Supply plugin identities as text.");
@@ -59,11 +59,14 @@ public static class ConnectionCreatePlanner
         Require(input["project"]?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)input["project"]), "/project", "Specify an open project.");
         Require(input["page"]?.Type == JTokenType.String && (string?)input["page"] == scene.Page.Page, "/page", "Select the exact scene page.");
         Require((string?)input["project"] == scene.Project.Name || (string?)input["project"] == scene.Project.Path, "/project", "Re-read the specified project.");
-        foreach (string name in new[] { "dry_run", "snap_to_grid" })
+        foreach (string name in new[] { "dry_run", "snap_to_grid", "generate" })
         { Require(input[name] is null || input[name]!.Type == JTokenType.Boolean, "/" + name, "Supply a boolean."); }
         Require(input["response_format"] is null || input["response_format"]!.Type == JTokenType.String && (string?)input["response_format"] is "concise" or "detailed", "/response_format", "Use concise or detailed.");
         Require(input["items"] is JArray { Count: >= 1 and <= 50 }, "/items", "Supply 1..50 items.");
-        if (SceneGap(scene) is { } gap)
+        bool generate = (bool?)input["generate"] ?? true;
+        if (!generate)
+        { Require(input["items"]!.All(i => i is JObject && (string?)i["kind"] is "corner" or "t_node" or "potential_point" or "interruption_point" or "potential_definition"), "/items", "generate:false accepts only corner, t_node, potential_point, interruption_point and potential_definition."); }
+        if (SceneGap(scene, generate) is { } gap)
         { throw Missing("Read a complete Circuit page inventory with verified bounds and pin geometry: " + gap + "."); }
         bool snap = (bool?)input["snap_to_grid"] ?? true;
         double grid = scene.Page.GridSize;
@@ -202,7 +205,7 @@ public static class ConnectionCreatePlanner
             endpointPins.Add(to);
             paths.Add(points);
         }
-        Require(definitions.Count == 0 || interruptions.Count == 0 && !input["items"]!.Any(i => (string?)i["kind"] == "cable_definition"), "/items", "Create definition points separately from interruption points and cable definitions to preserve one transaction and undo step.");
+        Require(!generate || definitions.Count == 0 || interruptions.Count == 0 && !input["items"]!.Any(i => (string?)i["kind"] == "cable_definition"), "/items", "Create definition points separately from interruption points and cable definitions to preserve one transaction and undo step.");
         foreach (var path in paths)
         {
             for (int i = 1; i < path.Length - 1; i++)
@@ -214,7 +217,7 @@ public static class ConnectionCreatePlanner
             }
         }
         var splits = new List<(double[][] Segment, double[] Point)>();
-        var existingSegments = scene.Graphical.GroupBy(SegmentKey, StringComparer.Ordinal).Select(g => g.First()).ToArray();
+        var existingSegments = generate ? scene.Graphical.GroupBy(SegmentKey, StringComparer.Ordinal).Select(g => g.First()).ToArray() : [];
         foreach (var node in nodes.Values)
         {
             double[][][] existing = existingSegments.Where(s => On(node.Point, s)).ToArray();
@@ -273,8 +276,8 @@ public static class ConnectionCreatePlanner
         var segments = paths.SelectMany(p => p.Zip(p.Skip(1), (a, b) => new[] { a, b })).ToList();
         segments.AddRange(splits.SelectMany(s => s.Segment.Select(p => new[] { p, s.Point })));
         endpointPins.UnionWith(scene.Pins.Where(p => splits.Any(s => s.Segment.Any(end => end.SequenceEqual(p.Value.Location)))).Select(p => p.Key));
-        var ports = scene.Pins.Values.Select(p => (Point: p.Location, p.Direction)).Concat(nodes.Values.SelectMany(n => n.Directions.Select(d => (n.Point, Direction: d)))).ToArray();
-        foreach (var node in nodes.Values)
+        var ports = generate ? scene.Pins.Values.Select(p => (Point: p.Location, p.Direction)).Concat(nodes.Values.SelectMany(n => n.Directions.Select(d => (n.Point, Direction: d)))).ToArray() : [];
+        foreach (var node in nodes.Values.Where(_ => generate))
         {
             foreach (string direction in node.Directions)
             {
@@ -334,7 +337,7 @@ public static class ConnectionCreatePlanner
             { groups[key] = group; }
         }
         // Logical evidence also retains nets whose drawn route spans several existing nodes.
-        foreach (ConnectionRecord before in scene.Logical)
+        foreach (ConnectionRecord before in scene.Logical.Where(_ => generate))
         {
             if (before.StartDevice is null || before.EndDevice is null || !scene.Pins.TryGetValue(before.StartDevice, out SymbolConnectionPoint? a)
                 || !scene.Pins.TryGetValue(before.EndDevice, out SymbolConnectionPoint? b))
@@ -346,7 +349,7 @@ public static class ConnectionCreatePlanner
         // Acceptance trial: an existing corner or T-node's pins are not logical ends (EPLAN connects the devices through it),
         // and a point no new segment touches predicts nothing. A64: a variant's offset pin still belongs to the same node.
         HashSet<string> nodeOwners = NodeOwners(scene.Pins.Select(p => (p.Key, p.Value.Location)), scene.Page.Placements.Where(p => p.Kind == "SymbolReference").Select(p => FormattableString.Invariant($"{p.Locator.Type}/{p.Locator.Oid}")));
-        foreach (string owner in nodeOwners)
+        foreach (string owner in nodeOwners.Where(_ => generate))
         {
             var group = new HashSet<string>(scene.Pins.Where(p => Owner(p.Key) == owner).SelectMany(p => groups[Key(p.Value.Location)]), StringComparer.Ordinal);
             foreach (string key in group)
@@ -375,7 +378,7 @@ public static class ConnectionCreatePlanner
         }
         LayoutGuard.Model layout = LayoutGuard.From(scene);
         string Net(double[][] s) => groups[Key(s[0])].OrderBy(k => k, StringComparer.Ordinal).First();
-        layout.Lines = layout.Lines.Where(l => !splits.Any(s => SegmentKey(s.Segment) == SegmentKey(l.Points))).ToList();
+        layout.Lines = generate ? layout.Lines.Where(l => !splits.Any(s => SegmentKey(s.Segment) == SegmentKey(l.Points))).ToList() : [];
         foreach (LayoutGuard.Segment line in layout.Lines)
         { line.Net = Net(line.Points); }
         // Logical grouping above uses node points; drawn lines (layout, readback comparison) end at the variant's real pins.
@@ -416,10 +419,12 @@ public static class ConnectionCreatePlanner
         result["warning"] = layoutWarnings.Count == 0 ? null : LayoutGuard.Summary(layoutWarnings);
         if (splits.Count > 0)
         { result["splitSegments"] = new JArray(splits.Select(s => new JObject { ["segment"] = JArray.FromObject(s.Segment), ["position"] = new JArray(s.Point) })); }
-        if (interruptions.Values.Any(i => i["counterpart_pages"] is not null))
+        if (generate && interruptions.Values.Any(i => i["counterpart_pages"] is not null))
         { InterruptionPointPlanning.Plan(result, scene, reader as IConnectionCreator ?? throw Missing("Read explicit counterpart scope before planning interruption points.")); }
         if (definitions.Count > 0)
         { result["definitionPoints"] = definitions; result["undoSteps"] = 1; if (definitions.Any(d => (string?)d["type"] == "ConnectionDefinitionPoint") || logical.Count > 0) { result["generation"] = "Placement, definition points and connection generation share one undo step."; }; }
+        if (!generate)
+        { result["generation"] = "Deferred: place and read back objects; call eplan_connection_generate after all placements. 1 undo step."; result["undoSteps"] = 1; result["coverage"] = "placement_only"; }
         string cableFingerprint = CableDefinitionPlanner.Add(input, scene, result, Point);
         string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), .. definitions.Count > 0 ? new[] { definitions.ToString(Formatting.None) } : Array.Empty<string>(), .. (cableFingerprint == "" ? Array.Empty<string>() : new[] { cableFingerprint }), BridgeJson.FromObject(new { scene.Project, PageProject = scene.Page.Project, scene.Page.Page, scene.Page.GridSize, scene.Page.PageSize, scene.PageType, scene.Complete, scene.Layout }).ToString(Formatting.None), resolved.ToString(Formatting.None),
             .. scene.Page.Placements.Select(p => "placement:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Pins.Select(p => "pin:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)),
@@ -444,7 +449,7 @@ public static class ConnectionCreatePlanner
     internal static bool Intersects(double[][] a, double[][] b) => Box(a)[0] <= Box(b)[2] && Box(a)[2] >= Box(b)[0] && Box(a)[1] <= Box(b)[3] && Box(a)[3] >= Box(b)[1];
     internal static void Require(bool valid, string at, string message) { if (!valid) { throw WriteArguments.Invalid([at + ": " + message]); } }
     // Names the first failed scene check so the caller can tell which page object blocks drawing.
-    private static string? SceneGap(Scene scene)
+    private static string? SceneGap(Scene scene, bool checkPins = true)
     {
         if (!scene.Complete)
         { return "a page placement has no drawing record"; }
@@ -452,6 +457,8 @@ public static class ConnectionCreatePlanner
         { return "page type " + scene.PageType; }
         if (scene.Page.Project != scene.Project.Path || scene.Page.PageSize is null)
         { return "page geometry is unavailable"; }
+        if (!checkPins)
+        { return null; }
         if (scene.Pins.Count > 10000)
         { return "more than 10000 pins"; }
         if (scene.Pins.FirstOrDefault(p => p.Value.Location.Length != 2 || p.Value.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v) || v < 0 || v > 10000) || Opposite(p.Value.Direction) == ""

@@ -7,6 +7,13 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class ConnectionCreateLimitTests
 {
     [Fact]
+    public void Contract_EmptyDefinitionAndGenerateDefault_AreExplicit()
+    {
+        var generate = typeof(ConnectionCreateTools).GetMethod(nameof(ConnectionCreateTools.CreateAsync))!.GetParameters().Single(p => p.Name == "generate");
+        Assert.Equal(true, generate.DefaultValue);
+    }
+
+    [Fact]
     public void CableBatch_GetsTheLongerLimit_OtherItemsKeepTheWriteLimit()
     {
         JsonElement[] wires = JsonSerializer.SerializeToElement(new object[] { new { kind = "wire" }, new { kind = "t_node" } }).EnumerateArray().ToArray();

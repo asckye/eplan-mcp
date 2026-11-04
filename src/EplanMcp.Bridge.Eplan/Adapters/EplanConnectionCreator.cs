@@ -11,8 +11,10 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>A52/S40: borrowed objects stay inside one main-thread request; discovery precedes the write wrapper.</summary>
-internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = true, bool allowReadOnly = false) : IConnectionCreator, ICableDefinitionWriter, IConnectionDefinitionPointWriter, IPartsDatabase
+internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = true, bool allowReadOnly = false) : IConnectionCreator, ICableDefinitionWriter, IConnectionDefinitionPointWriter, IConnectionPlacementReadback, IPartsDatabase
 {
+    private readonly List<(int Type, long Oid, string Kind)> _createdSymbols = [];
+
     public PartsDatabaseContent Read(string? language) => new EplanPartsDatabase().Read(language);
     public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => new EplanSymbolReader().Read(projectPath, args);
     private static Page Page(string project, string page)
@@ -114,6 +116,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         Page target = Page(project, page);
         SymbolVariant[] variants = Variants(project).ToArray();
         var selected = symbols.Select(s => (Row: s, Variant: variants.Single(v => v.SymbolName == (string)s["symbol"]!["name"]! && v.VariantNr == (int)s["symbol"]!["variant"]!))).ToArray();
+        _createdSymbols.Clear();
         return () =>
         {
             var created = new List<Placement>();
@@ -121,6 +124,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             {
                 SymbolReference placed = SymbolReference.Create(item.Variant, target);
                 created.Add(placed);
+                _createdSymbols.Add((SnapshotCanonical.TypeOf(placed.ToStringIdentifier()), placed.ObjectIdentifier, placed.GetType().Name));
                 if (item.Row["interruption"] is { } interruption)
                 {
                     if (placed is not InterruptionPoint point)
@@ -137,21 +141,57 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 // Owner 2026-11-02: the symbol's default arrangement shows the cross-reference, as after EPLAN's insert
                 // command; an extra 24300 text switched the point to a user-defined arrangement.
                 placed.Location = new PointD((double)item.Row["position"]![0]!, (double)item.Row["position"]![1]!);
-                double[][] pins = placed.GraphicalConnectionPoints.Select(p => XY(p.Location)).ToArray();
-                SymbolConnectionPoint[] expected = item.Row["symbol"]!["connectionPoints"]!.ToObject<SymbolConnectionPoint[]>()!;
-                if (!XY(placed.Location).SequenceEqual(item.Row["position"]!.Values<double>()) || placed.SymbolVariant.SymbolName != item.Variant.SymbolName
-                    || placed.SymbolVariant.VariantNr != item.Variant.VariantNr || pins.Length != expected.Length
-                    || pins.Where((p, i) => !p.SequenceEqual(expected[i].Location)).Any()
-                    || placed.GraphicalConnectionPoints.Where((p, i) => p.Direction.ToString() != expected[i].Direction).Any()
-                    || (bool?)item.Row["boundsKnown"] != false && !OutlineMatches(placed.GetBoundingBox().SelectMany(XY).ToArray(), item.Row["bounds"]!.Values<double>().ToArray(), XY(placed.Location)))
-                {
-                    throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant(
-                        $"Placed symbol geometry differs from the plan: {item.Variant.SymbolName}/{item.Variant.VariantNr} outline {string.Join(",", placed.GetBoundingBox().SelectMany(XY))}, pins {string.Join(";", pins.Select(p => string.Join(",", p)))}."));
-                }
+                VerifySymbol(placed, item.Row);
             }
             verifyLayout?.Invoke(LayoutGuard.From(new EplanConnectionCreator(false).Read(project, page, created)));
         };
     }
+    private static void VerifySymbol(SymbolReference placed, JToken row)
+    {
+        double[][] pins = placed.GraphicalConnectionPoints.Select(p => XY(p.Location)).ToArray();
+        SymbolConnectionPoint[] expected = row["symbol"]!["connectionPoints"]!.ToObject<SymbolConnectionPoint[]>()!;
+        if (!XY(placed.Location).SequenceEqual(row["position"]!.Values<double>()) || placed.SymbolVariant.SymbolName != (string)row["symbol"]!["name"]!
+            || placed.SymbolVariant.VariantNr != (int)row["symbol"]!["variant"]! || pins.Length != expected.Length
+            || pins.Where((p, i) => !p.SequenceEqual(expected[i].Location)).Any()
+            || placed.GraphicalConnectionPoints.Where((p, i) => p.Direction.ToString() != expected[i].Direction).Any()
+            || (bool?)row["boundsKnown"] != false && !OutlineMatches(placed.GetBoundingBox().SelectMany(XY).ToArray(), row["bounds"]!.Values<double>().ToArray(), XY(placed.Location)))
+        {
+            throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant(
+                $"Placed symbol geometry differs from the plan: {row["symbol"]!["name"]}/{row["symbol"]!["variant"]} outline {string.Join(",", placed.GetBoundingBox().SelectMany(XY))}, pins {string.Join(";", pins.Select(p => string.Join(",", p)))}."));
+        }
+    }
+
+    public void VerifyCreatedSymbols(string project, string page, JArray symbols)
+    {
+        Placement[] placements = EplanNativePreconditions.Valid(Page(project, page).AllPlacements).ToArray();
+        if (_createdSymbols.Count != symbols.Count)
+        { throw SymbolMismatch("created symbol identity count changed"); }
+        for (int i = 0; i < symbols.Count; i++)
+        {
+            var id = _createdSymbols[i];
+            Placement? placement = placements.SingleOrDefault(p => p.ObjectIdentifier == id.Oid && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == id.Type);
+            if (placement is not SymbolReference symbol || placement.GetType().Name != id.Kind)
+            { throw SymbolMismatch("created symbol is missing or has a different native type"); }
+            VerifySymbol(symbol, symbols[i]);
+            if (symbol.SymbolVariant.SymbolLibraryName != (string)symbols[i]["symbol"]!["library"]!)
+            { throw SymbolMismatch("created symbol library changed"); }
+            if (symbols[i]["interruption"] is { } expected)
+            {
+                if (symbol is not InterruptionPoint point || point.Name != (string)expected["name"]!)
+                { throw SymbolMismatch("created interruption name changed"); }
+                if (expected["sort_code"] is { } sort)
+                {
+                    using InterruptionPointPropertyList properties = point.Properties;
+                    using PropertyValue actual = properties[(Properties.InterruptionPoint)24809];
+                    if (actual.IsEmpty || actual.ToString() != sort.ToString())
+                    { throw SymbolMismatch("created interruption sort code changed"); }
+                }
+            }
+        }
+    }
+
+    private static BridgeErrorException SymbolMismatch(string detail) => new(ErrorReason.EplanOperationFailed, "Created symbol readback differs: " + detail + ".");
+
     private sealed class PlacementFactory(string project, bool undoCommitted) : ITransactionScopeFactory
     { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription, undoCommitted); }
     public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => new PlacementFactory(project, undoCommitted);

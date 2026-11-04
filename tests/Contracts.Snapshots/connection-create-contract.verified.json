@@ -693,6 +693,10 @@
         "type": "boolean",
         "default": true
       },
+      "generate": {
+        "type": "boolean",
+        "default": true
+      },
       "layout_guard": {
         "type": "string",
         "enum": [
@@ -993,8 +997,10 @@
         "maxItems": 2
       },
       "coverage": {
-        "type": "string",
-        "const": "complete_page_predicted_endpoints"
+        "enum": [
+          "complete_page_predicted_endpoints",
+          "placement_only"
+        ]
       },
       "logicalDuringPlacement": {
         "const": 0
@@ -2249,8 +2255,10 @@
         "maxItems": 2
       },
       "coverage": {
-        "type": "string",
-        "const": "complete_page_predicted_endpoints"
+        "enum": [
+          "complete_page_predicted_endpoints",
+          "placement_only"
+        ]
       },
       "logicalDuringPlacement": {
         "const": 0
@@ -3031,5 +3039,101 @@
         ]
       }
     ]
+  },
+  "deferredInterruptionExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "interruption_point",
+        "name": "=F+A1-LINK",
+        "direction": "Up",
+        "position": [
+          60,
+          60
+        ]
+      }
+    ],
+    "generate": false
+  },
+  "deferredInterruptionPreview": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "execution": "not_started",
+    "dryRun": true,
+    "coordinates": [
+      {
+        "pointer": "/items/0/position",
+        "requested": [
+          60,
+          60
+        ],
+        "actual": [
+          60.0,
+          60.0
+        ]
+      }
+    ],
+    "symbols": [
+      {
+        "position": [
+          60.0,
+          60.0
+        ],
+        "symbol": {
+          "library": "SPECIAL",
+          "name": "BP",
+          "variant": 3,
+          "type": "InterruptionPoint",
+          "kind": "interruption_point",
+          "connectionPoints": [
+            {
+              "location": [
+                0.0,
+                -1.0
+              ],
+              "direction": "Down"
+            },
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Up"
+            }
+          ]
+        },
+        "bounds": [
+          59.0,
+          59.0,
+          61.0,
+          61.0
+        ],
+        "boundsKnown": true,
+        "interruption": {
+          "kind": "interruption_point",
+          "name": "=F+A1-LINK",
+          "direction": "Up",
+          "position": [
+            60,
+            60
+          ]
+        }
+      }
+    ],
+    "graphicalAutoconnect": [],
+    "logicalAfterGenerate": [],
+    "gridSize": 4.0,
+    "pageSize": [
+      100.0,
+      100.0
+    ],
+    "coverage": "placement_only",
+    "logicalDuringPlacement": 0,
+    "generation": "Deferred: place and read back objects; call eplan_connection_generate after all placements. 1 undo step.",
+    "undoSteps": 1,
+    "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
+    "fingerprint": "67c9d76bca5086b20d2c7dcf0e8ec5c8bf945fffd6b053bbfa92d673471a02d4"
   }
 }

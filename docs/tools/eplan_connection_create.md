@@ -24,6 +24,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | variant / sort_code | 可选 integer | t_node 的 variant 按已核验的方向引脚选择 SPECIAL 变体，省略沿用原行为，不存在时 INVALID_ARGUMENT 列出可用编号；interruption_point 的 sort_code ≥ 0，在放置事务中写入属性 24809 并读回；省略不写。interruption_point 可选 `symbol`（SPECIAL 库中任意 `InterruptionPoint` 符号，如 `BP`、`BPIN`、`BPOUT`、`BPF`；省略时先取已启用插件的 `defaults.interruption.symbol`（内置插件 `iec-base` 为 `BP`），否则内置缺省 `BP`，与 EPLAN“插入 → 中断点”一致）；中断点使用符号的默认属性排列，不再额外新建 24300 交叉引用文字 |
 | interruption_point | object | `{kind:"interruption_point",name,direction,position,counterpart_pages}`；name 为共享的完整业务名（1..200 字符），direction 为 Up/Down/Left/Right，position 为电气连接点坐标；counterpart_pages 可选；提供时为 1..20 个不同的精确完整页名，不隐式搜索全项目 |
 | show_page | boolean，false | 绘制前打开或聚焦主参数 `page`，便于观看；仅影响界面，不修改数据，dry-run 也开页；不打开对端页 |
+| generate | boolean，true | false 只放 corner、t_node、potential_point、interruption_point、potential_definition；跳过逻辑端点、路径/自动连线冲突与配对页检查。读回 actualPlacements，一步撤销；全部放完后自行调用 eplan_connection_generate 一次。其他 kind 返回 INVALID_ARGUMENT；默认行为不变。 |
 | dry_run / snap_to_grid | boolean，true / true | 省略 dry_run 只预览；执行传 `dry_run: false`；关闭吸附仍拒绝非栅格接线 |
 | response_format | concise / detailed，concise | Host 以 ResultShaper 清洗并限制 5k/20k token；展示裁剪不影响完整 guard |
 

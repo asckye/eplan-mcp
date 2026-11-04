@@ -13,3 +13,9 @@ public interface IConnectionCreator : ISymbolReader
     public JObject Interruptions(string project, IReadOnlyList<string> pages);
     public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false);
 }
+
+/// <summary>Reacquires this call's symbols by saved identity after commit; never reads logical endpoints or pairing.</summary>
+public interface IConnectionPlacementReadback
+{
+    public void VerifyCreatedSymbols(string project, string page, JArray symbols);
+}

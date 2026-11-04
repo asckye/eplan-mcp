@@ -14,6 +14,8 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Medium")]
 public sealed class ConnectionCreateToolTests
 {
+    private static readonly int[] _cornerPosition = [24, 16];
+    private static readonly string[] _cornerDirections = ["Left", "Up"];
     [Fact]
     public async Task DetailedConnectionList_LocatorIsAcceptedByRealCableDryRunPlanner()
     {
@@ -171,6 +173,25 @@ public sealed class ConnectionCreateToolTests
         Assert.Equal(ErrorReason.ApprovalDenied, error.GetProperty("reason").GetString());
         Assert.Contains("2 undo steps", Assert.Single(WritePipeline.ChangeLines(Assert.Single(channel.Questions).Plan)), StringComparison.Ordinal);
         Assert.Empty(harness.Bridge.Writes);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    [InlineData(null)]
+    public async Task Generate_UsesTheSameValueForPreviewAndExecution(bool? generate)
+    {
+        using var harness = Setup();
+        JsonElement[] items = [JsonSerializer.SerializeToElement(new { kind = "corner", position = _cornerPosition, directions = _cornerDirections })];
+        var call = generate is null
+            ? await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", items, dry_run: false, cancellationToken: TestContext.Current.CancellationToken)
+            : await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", items, dry_run: false, generate: generate.Value, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(call).GetProperty("execution").GetString());
+        JsonElement preview = JsonSerializer.SerializeToElement(harness.Bridge.Calls.Single(c => c.Operation == OperationNames.ConnectionCreatePlan).Args);
+        JsonElement execution = JsonSerializer.SerializeToElement(harness.Bridge.Calls.Single(c => c.Operation == OperationNames.ConnectionCreateExecute).Args);
+        Assert.Equal(generate ?? true, preview.GetProperty("generate").GetBoolean());
+        Assert.Equal(preview.GetProperty("generate").GetBoolean(), execution.GetProperty("request").GetProperty("generate").GetBoolean());
+        Assert.Single(harness.Bridge.Writes);
     }
 
     private static WriteToolHarness Setup(params IApprovalChannel[] channels)

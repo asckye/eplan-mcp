@@ -4424,7 +4424,7 @@
     {
       "name": "eplan_connection_create",
       "title": "Create connection symbols and explicit wire paths",
-      "description": "Creates SPECIAL nodes, interruptions, wires, cables, potentials and CDP/CDPNG on Circuit connections; verifies geometry/endpoints/properties. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes all. layout_guard:warn reproduces drawings; default refuse draws freely. Omit dry_run to preview; false executes. Approval outside scratch; see usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.",
+      "description": "Creates SPECIAL nodes, interruptions, wires, cables, potentials and CDP/CDPNG on Circuit connections. generate:false places nodes/potentials only; generate once after all placements. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes all. layout_guard:warn reproduces drawings; default refuse draws freely. Omit dry_run to preview; false executes. Approval outside scratch; see usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4794,6 +4794,10 @@
               "refuse",
               "warn"
             ]
+          },
+          "generate": {
+            "type": "boolean",
+            "default": true
           }
         },
         "required": [

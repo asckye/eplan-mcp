@@ -63,7 +63,14 @@ public sealed class ConnectionCreateContractTests
         var unpaired = new InterruptionPointFixture();
         ((JObject)unpaired.Request["items"]!.Last!).Remove("counterpart_pages");
         Validate(InputSchema(), unpaired.Request);
-        contract["unpairedInterruptionExample"] = unpaired.Request;
+        contract["unpairedInterruptionExample"] = unpaired.Request.DeepClone();
+        unpaired.Request["items"] = new JArray(unpaired.Request["items"]!.Last!.DeepClone());
+        unpaired.Request["generate"] = false;
+        Validate(InputSchema(), unpaired.Request);
+        JObject deferred = unpaired.Plan();
+        Validate(OutputSchema(), deferred);
+        contract["deferredInterruptionExample"] = unpaired.Request;
+        contract["deferredInterruptionPreview"] = deferred;
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
     }
@@ -146,6 +153,7 @@ public sealed class ConnectionCreateContractTests
             ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable, definition, potential) }, 1, 50),
             ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["snap_to_grid"] = new JObject { ["type"] = "boolean", ["default"] = true },
+            ["generate"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["layout_guard"] = new JObject { ["type"] = "string", ["enum"] = new JArray("refuse", "warn"), ["default"] = "refuse" },
             ["response_format"] = new JObject { ["type"] = "string", ["enum"] = new JArray("concise", "detailed"), ["default"] = "concise" },
         }, "project page items");
@@ -198,7 +206,7 @@ public sealed class ConnectionCreateContractTests
             ["logicalAfterGenerate"] = Array(Object(new() { ["pins"] = Array(Text(), 1, 10000), ["potentialStartIsNull"] = new JObject { ["type"] = "boolean" } }), 0, 10000),
             ["gridSize"] = new JObject { ["type"] = "number", ["exclusiveMinimum"] = 0 },
             ["pageSize"] = Array(new() { ["type"] = "number", ["exclusiveMinimum"] = 0 }, 2, 2),
-            ["coverage"] = Constant("complete_page_predicted_endpoints"),
+            ["coverage"] = new JObject { ["enum"] = new JArray("complete_page_predicted_endpoints", "placement_only") },
             ["logicalDuringPlacement"] = new JObject { ["const"] = 0 },
             ["generation"] = Text(),
             ["warning"] = new JObject { ["type"] = new JArray("string", "null") },

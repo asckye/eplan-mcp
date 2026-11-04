@@ -18,13 +18,15 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         ConnectionCreatePlanner.Scene scene;
         JObject plan;
         Action place;
+        bool generate = true;
         try
         {
             scene = creator.Read((string?)input["project"] ?? "", (string?)input["page"] ?? "");
             plan = ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), scene, creator, fingerprint);
+            generate = (bool?)input["generate"] ?? true;
             place = plan["cableDefinitions"] is null ? creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!, actual =>
             {
-                actual.Lines = ConnectionCreatePlanner.ExpectedGraphical(scene, plan).Select(s => new LayoutGuard.Segment { Points = s }).ToList();
+                actual.Lines = generate ? ConnectionCreatePlanner.ExpectedGraphical(scene, plan).Select(s => new LayoutGuard.Segment { Points = s }).ToList() : [];
                 plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(LayoutGuard.From(scene), actual)));
             }) : () => { };
         }
@@ -40,7 +42,9 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             foreach (string target in pages)
             {
                 LayoutGuard.Model actual = creator.Measure(project, target);
-                if (predicted && target == page)
+                if (!generate)
+                { actual.Lines = []; }
+                if (generate && predicted && target == page)
                 { actual.Lines = ConnectionCreatePlanner.ExpectedGraphical(scene, plan).Select(s => new LayoutGuard.Segment { Points = s }).ToList(); }
                 plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(layouts[target], actual)));
             }
@@ -50,6 +54,36 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             string Segments(IEnumerable<double[][]> values) => string.Join(";", values.Select(s => string.Join("|", s.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
             if (Segments(creator.Read(project, page).Graphical) is var drawn && Segments(ConnectionCreatePlanner.ExpectedGraphical(scene, plan)) is var predicted && drawn != predicted)
             { throw Mismatch("autoconnect lines after " + stage + ": " + drawn + "; predicted: " + predicted); }
+        }
+        if (!generate)
+        {
+            IConnectionDefinitionPointWriter? writer = creator as IConnectionDefinitionPointWriter;
+            JArray? points = plan["definitionPoints"] as JArray;
+            if (points is not null && writer is null)
+            { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.EplanOperationFailed, "The connection creator cannot place definition points.")); }
+            Action define = points is null ? () => { }
+            : writer!.PrepareDefinitionPoints(project, page, points);
+            Committed<bool> deferred = TransactionRunner.Run(creator.PlacementTransactions(project, undoCommitted: true), "eplan_connection_create",
+                () => { place(); define(); CheckLayout(); return true; }, _ => true,
+                _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() =>
+                {
+                    CheckLayout();
+                    PageDrawingGeometry actual = creator.Read(project, page).Page;
+                    DrawingPlacement[] created = [.. actual.Placements.Where(p => !scene.Page.Placements.Any(b => b.Locator.Type == p.Locator.Type && b.Locator.Oid == p.Locator.Oid))];
+                    if (creator is IConnectionPlacementReadback symbols)
+                    { symbols.VerifyCreatedSymbols(project, page, (JArray)plan["symbols"]!); }
+                    else if (plan["symbols"]!.Any())
+                    { throw Mismatch("committed symbol readback is unavailable"); }
+                    plan["actualPlacements"] = JArray.FromObject(created);
+                    if (points is not null)
+                    { plan["definitionPoints"] = ConnectionDefinitionPoints.Verify(points, writer!.ReadDefinitionPoints(project, page, points)); }
+                    return true;
+                }),
+                () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint)));
+            plan["execution"] = ExecutionState.Committed;
+            plan["dryRun"] = false;
+            plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], deferred.Warning]);
+            return plan;
         }
         if (plan["definitionPoints"] is JArray definitions)
         {
