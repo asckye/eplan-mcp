@@ -40,7 +40,7 @@ public sealed class PropertySetExecuteInteropTests
         Assert.Equal(ExecutionState.NotStarted, args.Approved.Execution);
         Assert.Equal(ExecutionState.Committed, data.Execution);
         Assert.Equal(2, data.Plan.Changes.Count);
-        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.Where(k => k.ApplicableCategory == "").OrderBy(k => k.PropertyId));
         Assert.All(sessions, session => session.AssertDisposed());
     }
 

@@ -24,7 +24,7 @@ public sealed class PropertySetPlanOperationTests
         Assert.Equal(2, plan.Plan.Changes.Count);
         Assert.Equal(4, plan.Guards.Count);
         Assert.Equal(0, session.Writes);
-        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.Where(k => k.ApplicableCategory == "").OrderBy(k => k.PropertyId));
         session.AssertDisposed();
     }
 

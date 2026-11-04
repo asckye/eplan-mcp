@@ -48,9 +48,11 @@ internal sealed class EplanPropertySetSession(string projectPath) : IPropertySet
         Check();
         FunctionPropertyList list = _lists[(guard.Target.Type, guard.Target.Oid)];
         using AnyPropertyId id = guard.PropertyId;
-        if (guard.PropertyId == 20027)
+        if (guard.PropertyId != 20011)
         {
-            using PropertyValue value = PropertyValueComparison.TextIn(guard.After, TextLanguages.Independent);
+            string after = PropertyValueComparison.TextIn(guard.After, TextLanguages.Independent);
+            using PropertyValue value = guard.PropertyId == 20308
+                ? (PropertyValue)checked((int)long.Parse(after, System.Globalization.CultureInfo.InvariantCulture)) : (PropertyValue)after;
             list[id] = value;
             return;
         }

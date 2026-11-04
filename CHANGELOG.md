@@ -5,6 +5,7 @@
 
 ## [Unreleased]
 
+- `eplan_property_set` 新增 B8 PLC 类别白名单，支持精确定位非主 PLC 点和类型化总线系统值；已知关联允许传播，其余直接属性受守卫保护，仍为一次事务、一步撤销。
 - `eplan_macro_insert`、`eplan_device_place` 支持 `layout_guard: "warn"`，用于复现已有图纸。
 - `eplan_macro_insert` 的外框按宏的参考点和 `WindowMacro.Location` 计算；`warn` 且不带宏框时，改由写入后实测的对象判断是否超出页面。
 - `eplan_device_place` 判断重名时，只有端子排和端子才允许省略高层代号，`=GAA+A1-FC2` 和端子排 `+A1-FC2` 不再算重名。

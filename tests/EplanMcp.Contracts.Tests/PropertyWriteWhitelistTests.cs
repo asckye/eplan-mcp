@@ -30,11 +30,27 @@ public sealed class PropertyWriteWhitelistTests
     [Fact]
     public void ShippedWhitelist_OnlyVerifiedB1Keys_CannotBeExtended()
     {
-        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.Where(k => k.ApplicableCategory == "").OrderBy(k => k.PropertyId));
         var dictionary = Assert.IsAssignableFrom<IDictionary<(int, string, int, string), PropertyWriteEntry>>(PropertyWriteWhitelist.Entries);
         Assert.True(dictionary.IsReadOnly);
         Assert.Throws<NotSupportedException>(() => dictionary.Add((2026, "Function", 20011, "Terminal"), new()));
-        Assert.Equal(2, PropertyWriteWhitelist.Entries.Count);
+        Assert.Equal(17, PropertyWriteWhitelist.Entries.Count);
+    }
+
+    [Fact]
+    public void B8_ExactCategoryKeysAndXmlTypes_ArePublished()
+    {
+        foreach (string category in new[] { "PLCBox", "PLCTerminal", "BusTerminal" })
+        {
+            int[] ids = category == "PLCBox" ? [20161, 20408, 20409, 20410, 20411, 20427, 20308] : [20400, 20402, 20407, 20011];
+            Assert.Equal(ids.Order(), PropertyWriteWhitelist.Entries.Keys.Where(k => k.ApplicableCategory == category).Select(k => k.PropertyId).Order());
+            foreach (int id in ids)
+            {
+                PropertyWriteEntry entry = PropertyWriteWhitelist.Entries[(2026, "Function", id, category)];
+                Assert.Equal(PropertyCatalog.Find("Function", id)!.PropertyName, entry.PropertyName);
+                Assert.Equal(id == 20011 ? "multi_language" : id == 20308 ? "integer" : "text", entry.Definition.ValueType);
+            }
+        }
     }
 
     [Theory]

@@ -9,6 +9,9 @@ public sealed class PropertySetPlan
     /// <summary>Every targeted and related function, including unchanged translations and auxiliary functions.</summary>
     public List<PropertySetGuard> Guards { get; set; } = [];
 
+    /// <summary>Unavailable values are reported without granting a write.</summary>
+    public List<string> Warnings { get; set; } = [];
+
     /// <summary>Planning never starts execution, including empty plans.</summary>
     public string Execution { get; } = ExecutionState.NotStarted;
 }

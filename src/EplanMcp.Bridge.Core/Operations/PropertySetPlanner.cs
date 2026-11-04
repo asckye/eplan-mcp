@@ -75,7 +75,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
             }
             else
             {
-                PropertyValueValidation.Value(new JValue(change.Value!.Text), entry, at + "/value", violations);
+                PropertyValueValidation.Value(new JValue(change.Value!.IntegerValue is { } number ? (object)number : change.Value.Text), entry, at + "/value", violations);
             }
 
             SnapshotObject obj;
@@ -92,9 +92,12 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                 continue;
             }
 
-            if (obj.Main != true || string.IsNullOrEmpty(obj.Category))
+            if (string.IsNullOrEmpty(obj.Category) || (obj.Main != true || entry.PropertyId is not (20011 or 20027))
+                && !PropertyWriteWhitelist.Entries.ContainsKey((version, "Function", entry.PropertyId, obj.Category!))
+                || obj.Main == true && entry.PropertyId is not (20011 or 20027) && obj.Category != "PLCBox"
+                || obj.Main != true && (obj.Category is not ("PLCTerminal" or "BusTerminal") || target.Locator is null))
             {
-                Add(at + "/target", "B1 assignments require a main function with a known category.", ErrorReason.PolicyDenied);
+                Add(at + "/target", "Use a supported category; non-main PLC points require an exact locator.", ErrorReason.PolicyDenied);
             }
 
             resolved.Add((obj, change, entry.PropertyId, i));
@@ -112,9 +115,11 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
         result.Plan.ProjectPath = projectPath;
         result.Plan.Project = Path.GetFileName(projectPath);
         var names = new HashSet<string?>(resolved.Select(r => r.Object.Name), StringComparer.Ordinal);
-        foreach (var item in functions.Where(f => names.Contains(f.Name))
+        bool plc = resolved.Any(r => r.Id is not (20011 or 20027) || r.Object.Main != true);
+        foreach (var item in functions.Where(f => plc || names.Contains(f.Name))
             .GroupBy(Key).Select(g => g.First()).OrderBy(Key, StringComparer.Ordinal)
-            .SelectMany(obj => resolved.Where(r => r.Object.Name == obj.Name).Select(r => r.Id).Distinct().OrderBy(id => id)
+            .SelectMany(obj => (plc ? PropertyWriteWhitelist.Entries.Values.Where(e => e.ApplicableCategory.Length == 0 || e.ApplicableCategory == obj.Category).Select(e => e.PropertyId)
+                : resolved.Where(r => r.Object.Name == obj.Name).Select(r => r.Id)).Distinct().OrderBy(id => id)
                 .Select(id => (Object: obj, PropertyId: id))))
         {
             SnapshotObject obj = item.Object;
@@ -139,12 +144,23 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
             };
             using IPropertyReadScope scope = reader.Open(projectPath, new PropertyTarget(locator: guard.Target));
             guard.ObjectType = scope.ObjectType;
+            if (scope.ObjectType != "Function" && resolved.Any(r => Key(r.Object) == Key(obj)))
+            {
+                Add("/changes", "The target runtime object type is outside the published scope.", ErrorReason.PolicyDenied);
+                Refuse(violations);
+            }
             using IPropertyReadHandle? handle = scope.ObjectType == "Function" && PropertyCatalog.ReadRefusal(scope.ObjectType, propertyId) is null
                 ? scope.OpenProperty(propertyId) : null;
             using IPropertyReadDefinition? definition = handle?.OpenDefinition();
             PropertyDefinitionMetadata? metadata = definition?.Metadata;
-            if (metadata is null || (propertyId == 20011 ? metadata.ValueType != "multi_language"
-                : metadata.ValueType != "opaque" || metadata.Format != "ValueWithUnit")
+            if (metadata is null)
+            {
+                result.Warnings.Add($"Property {propertyId} definition is unavailable on {obj.Type}/{obj.Oid}; skipped.");
+                continue;
+            }
+            if ((propertyId == 20011 ? metadata.ValueType != "multi_language"
+                : propertyId == 20027 ? metadata.ValueType != "opaque" || metadata.Format != "ValueWithUnit"
+                : metadata.ValueType != PropertyWriteWhitelist.PlanningCandidate(version, "Function", propertyId)!.Definition.ValueType)
                 || metadata.IsIndexed != false || metadata.IsInternal != false
                 || metadata.IsReadOnly != false || metadata.IsNamePart != false || metadata.IsComputed == true)
             {
@@ -162,16 +178,21 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
             using IPropertyReadValue? value = handle!.OpenValue(null);
             if (value is null)
             {
-                Add("/changes", "A related function has no readable B1 value.", ErrorReason.CapabilityMissing);
-                Refuse(violations);
+                result.Warnings.Add($"Property {propertyId} value is unavailable on {obj.Type}/{obj.Oid}; skipped.");
+                continue;
             }
 
             guard.WasEmpty = value!.IsEmpty;
             if (!guard.WasEmpty)
             {
-                if (propertyId == 20027)
+                if (propertyId != 20011)
                 {
-                    guard.Before.Add(new SnapshotText { Language = TextLanguages.Independent, Text = value.Display! });
+                    guard.Before.Add(new SnapshotText
+                    {
+                        Language = TextLanguages.Independent,
+                        Text = propertyId == 20027 ? value.Display!
+                        : propertyId == 20308 ? ((long)value.ReadStoredValue()).ToString(CultureInfo.InvariantCulture) : (string)value.ReadStoredValue()
+                    });
                 }
                 else
                 {
@@ -195,7 +216,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
             }).ToList();
             foreach (var assignment in resolved.Where(r => Key(r.Object) == Key(obj) && r.Id == propertyId))
             {
-                if (metadata.MaximumLength is { } maximum && assignment.Change.Value.Text!.Length > maximum)
+                if (metadata.MaximumLength is { } maximum && (assignment.Change.Value.Text?.Length ?? 0) > maximum)
                 {
                     Add("/changes/" + assignment.Ordinal.ToString(CultureInfo.InvariantCulture) + "/value",
                         "Text exceeds the runtime definition's length limit.");
@@ -204,7 +225,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
 
                 string language = assignment.Change.Language ?? TextLanguages.Independent;
                 string before = PropertyValueComparison.TextIn(guard.Before, language);
-                string after = assignment.Change.Value.Text!;
+                string after = assignment.Change.Value.IntegerValue?.ToString(CultureInfo.InvariantCulture) ?? assignment.Change.Value.Text!;
                 if (string.Equals(before, after, StringComparison.Ordinal))
                 {
                     continue;

@@ -16,7 +16,7 @@ public sealed class PropertySetWriteTests(LiveEplan eplan)
         HandshakeResult product = await reader.SelectAsync(eplan.ProcessId, TestContext.Current.CancellationToken);
         Assert.Contains(OperationNames.PropertySetPlan, product.Operations!);
         Assert.Contains(OperationNames.PropertySetExecute, product.Operations!);
-        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.Where(k => k.ApplicableCategory == "").OrderBy(k => k.PropertyId));
         ProjectListData opened = await reader.InvokeAsync<ProjectListArgs, ProjectListData>(OperationNames.ProjectList, new(), TestContext.Current.CancellationToken);
         string project = await eplan.WriteProjectAsync();
         Assert.Equal(Path.GetFullPath(Path.Combine(WriteHost.ScratchFolder, WriteHost.WritableName)), Path.GetFullPath(project), ignoreCase: true);

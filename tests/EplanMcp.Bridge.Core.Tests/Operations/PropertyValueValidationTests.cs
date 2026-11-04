@@ -498,7 +498,7 @@ public sealed class PropertyValueValidationTests
         PropertyViolation error = Assert.Single(violations);
         Assert.Equal(ErrorReason.PolicyDenied, error.Reason);
         Assert.Equal(At + "/property", error.Path);
-        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.OrderBy(k => k.PropertyId));
+        Assert.Equal([(2026, "Function", 20011, ""), (2026, "Function", 20027, "")], PropertyWriteWhitelist.Entries.Keys.Where(k => k.ApplicableCategory == "").OrderBy(k => k.PropertyId));
     }
 
     [Fact]

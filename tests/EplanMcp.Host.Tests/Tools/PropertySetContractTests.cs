@@ -85,6 +85,31 @@ public sealed class PropertySetContractTests
             "{\"project\":\"Line1\",\"changes\":[{\"target\":{\"device_tag\":\"K1\"},\"property\":{\"property_id\":20027},\"value\":\"" + new string('x', 501) + "\"}]}")));
     }
 
+    [Theory]
+    [InlineData(20161, "\"Line1\"", "text", null)]
+    [InlineData(20408, "\"3\"", "text", null)]
+    [InlineData(20308, "12", "integer", 12L)]
+    [InlineData(20400, "\"%IX2.0\"", "text", null)]
+    public void B8_PrimitivesPreserveTheirPublishedType(int id, string value, string type, long? number)
+    {
+        PropertySetChange parsed = Assert.Single(PropertySetRequest.Parse(Input(
+            "{\"project\":\"Line1\",\"changes\":[{\"target\":{\"device_tag\":\"K1\"},\"property\":{\"property_id\":" + id + "},\"value\":" + value + "}]}")).Changes);
+        Assert.Equal(type, parsed.Value.ValueType);
+        Assert.Equal(number, parsed.Value.IntegerValue);
+    }
+
+    [Theory]
+    [InlineData("\"12\"")]
+    [InlineData("-1")]
+    [InlineData("52")]
+    [InlineData("12.5")]
+    [InlineData("true")]
+    public void B8_BusSystemRejectsCoercionAndUndocumentedMembers(string value)
+    {
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeCallException>(() => PropertySetRequest.Parse(Input(
+            "{\"project\":\"Line1\",\"changes\":[{\"target\":{\"device_tag\":\"K1\"},\"property\":{\"property_id\":20308},\"value\":" + value + "}]}"))).Error.Reason);
+    }
+
     internal static bool AcceptsOutput(JsonElement data) => PropertyGetContractTests.Accepts(PropertySetContract.Output, data, PropertySetContract.Output);
     private static Dictionary<string, JsonElement> Input(string json) => JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)!;
 }

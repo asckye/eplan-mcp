@@ -19486,7 +19486,7 @@
     {
       "name": "eplan_property_set",
       "title": "Set EPLAN properties",
-      "description": "Sets verified Function properties. Omit/true dry_run previews; false executes. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. See usage.",
+      "description": "Sets Function text and category-scoped PLC data. Omit/true dry_run previews; false executes. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. See usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -19831,7 +19831,17 @@
                 "property_id": {
                   "enum": [
                     20011,
-                    20027
+                    20027,
+                    20161,
+                    20408,
+                    20409,
+                    20410,
+                    20411,
+                    20427,
+                    20308,
+                    20400,
+                    20402,
+                    20407
                   ]
                 },
                 "index": {

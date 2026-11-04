@@ -226,6 +226,7 @@ standard 快照之外的属性通过本步骤显式的前置条件和校验证�
 | B5 项目工程信息 | Project：10013 `PROJ_DRAWINGNUMBER`；10014 `PROJ_COMMISSION`；10901 `PROJ_SUPPLEMENTARYFIELD` | 文本及补充字段索引待核实；仅工程信息，不包括项目名、路径、结构/设置。测其他页/项目不变，项目级撤销/回滚以及重新打开后的值 |
 | B6 部件号/变体分配 | Function：20100 `FUNC_ARTICLE_PARTNR`、20101 `FUNC_ARTICLE_VARIANT`；ArticleReference：20481 `ARTICLEREF_PARTNO`、20488 `ARTICLEREF_VARIANT` | 字符串部件号+经核实的变体类型/枚举；索引指向既有分配槽，两者成组。先读后决定一条权威写路径，禁止重复写两个视图；核对数量、其他引用、功能模板和连接，证明库未改写；不能回滚/撤销则保持拒绝 |
 | B7 连接点名称 | Function：20022 `FUNC_CONNECTIONDESIGNATION` | 按定义的索引逐项文本，不能把分隔符拼接列表塞到首项；核对实际 pin 数、未改 pin、端子/PLC 特殊类别及连接。与 Connection 的 31011 分开计数 |
+| B8 PLC 工程数据 | Function/PLCBox 主功能：20161、20408、20409、20410、20411、20427、20308；非主 PLCTerminal/BusTerminal：20400、20402、20407、20011 | 静态类别键；20308 按 XML Int64 枚举 0–51，其余新增项为 String；20011 保留多语言合并。精确 locator、A90 关联、同卡直接值守卫；Large 待验 |
 
 ## 5. 安全与数据完整性
 

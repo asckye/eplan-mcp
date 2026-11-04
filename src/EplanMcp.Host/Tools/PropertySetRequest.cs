@@ -45,7 +45,8 @@ internal static class PropertySetRequest
                 {
                     throw new JsonException();
                 }
-                string? text = change["value"]?.GetValue<string>();
+                JsonNode? value = change["value"];
+                string? text = value?.GetValueKind() == JsonValueKind.String ? value.GetValue<string>() : null;
                 change["value"] = null;
                 PropertySetChange parsed = change.Deserialize<PropertySetChange>(_json)!;
                 PropertyTarget target = parsed.Target ?? throw new JsonException();
@@ -58,21 +59,22 @@ internal static class PropertySetRequest
                     violations.Add(at + "/property: use a known ID or exact formal name; consult eplan_property_schema.");
                     continue;
                 }
-                PropertyWriteEntry? entry = PropertyWriteWhitelist.Entries.Values.SingleOrDefault(e => e.EplanMajorVersion == 2026
+                PropertyWriteEntry? entry = PropertyWriteWhitelist.Entries.Values.FirstOrDefault(e => e.EplanMajorVersion == 2026
                     && e.ObjectType == "Function" && e.PropertyId == definition.PropertyId);
                 if (!function || entry is null)
                 {
-                    denied.Add(at + ": target/property is outside the shipped B1 whitelist.");
+                    denied.Add(at + ": target/property is outside the shipped whitelist.");
                     continue;
                 }
-                if (text is null || text.Length > 500 || selector.Index is not null
+                if ((entry.Definition.ValueType == "integer" ? value is not JsonValue number || !number.TryGetValue<long>(out long n) || n is < 0 or > 51 : text is null || text.Length > 500) || selector.Index is not null
                     || entry.PropertyId == 20011 && (parsed.Language is not { Length: 5 } language || language[2] != '_'
                         || language[..2].Any(c => c is < 'a' or > 'z') || language[3..].Any(c => c is < 'A' or > 'Z'))
-                    || entry.PropertyId == 20027 && parsed.Language is not null)
+                    || entry.PropertyId != 20011 && parsed.Language is not null)
                 {
                     violations.Add(at + ": supply a string up to 500 characters, no index; 20011 requires language, 20027 forbids it.");
                 }
-                parsed.Value = new PropertyTypedValue(entry.Definition.ValueType!, text: text);
+                parsed.Value = entry.Definition.ValueType == "integer" ? new("integer", integerValue: value!.GetValue<long>())
+                    : new PropertyTypedValue(entry.Definition.ValueType!, text: text);
                 args.Changes.Add(parsed);
             }
             catch (Exception ex) when (ex is JsonException or ArgumentException or InvalidOperationException)

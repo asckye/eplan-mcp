@@ -7187,6 +7187,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcModuleMergeTests.cs"
           },
           {
+            "name": "PlcPropertyB8Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcPropertyB8Tests.cs"
+          },
+          {
             "name": "WriteSafetyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/WriteSafetyTests.cs"
@@ -8278,6 +8283,11 @@
             "name": "PlcModuleMergeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcModuleMergeTests.cs"
+          },
+          {
+            "name": "PlcPropertyB8Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcPropertyB8Tests.cs"
           },
           {
             "name": "WriteSafetyTests",
@@ -10386,6 +10396,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcModuleMergeTests.cs"
           },
           {
+            "name": "PlcPropertyB8Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcPropertyB8Tests.cs"
+          },
+          {
             "name": "PlcRepresentationTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
@@ -12230,6 +12245,11 @@
             "name": "PlcOverviewSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
+          },
+          {
+            "name": "PlcPropertyB8Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcPropertyB8Tests.cs"
           },
           {
             "name": "PlcRepresentationTests",
@@ -17958,7 +17978,8 @@
         "apiNotes": [
           "A36",
           "A44",
-          "A48"
+          "A48",
+          "B13"
         ],
         "tests": [
           {
@@ -17975,6 +17996,11 @@
             "name": "PropertySetProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PropertySetProtocolTests.cs"
+          },
+          {
+            "name": "PlcPropertyB8Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcPropertyB8Tests.cs"
           },
           {
             "name": "PropertySetToolTests",

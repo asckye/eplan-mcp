@@ -72,9 +72,10 @@ internal sealed class FakePropertySetSession : IPropertySetSession
         Writes++;
         FakeProperty property = Objects[guard.Target.Oid].Properties[guard.PropertyId];
         property.Empty = guard.After.All(t => t.Text.Length == 0);
-        if (guard.PropertyId == 20027)
+        if (guard.PropertyId != 20011)
         {
             property.Display = PropertyValueComparison.TextIn(guard.After, TextLanguages.Independent);
+            property.Stored = guard.PropertyId == 20308 ? long.Parse(property.Display, System.Globalization.CultureInfo.InvariantCulture) : property.Display;
         }
         else
         {

@@ -16,7 +16,7 @@ internal static class PropertySetContract
               "target":{"type":"object","additionalProperties":false,"required":["kind","type","oid","name","page","category","pos"],"properties":{
                 "kind":{"const":"function"},"type":{"type":"integer"},"oid":{"type":"integer"},"name":{"type":["string","null"]},
                 "page":{"type":["string","null"]},"category":{"type":["string","null"]},"pos":{"type":["string","null"]}}},
-              "property_id":{"enum":[20011,20027]},"index":{"type":"null"},"language":{"type":["string","null"]},
+              "property_id":{"enum":[20011,20027,20161,20408,20409,20410,20411,20427,20308,20400,20402,20407]},"index":{"type":"null"},"language":{"type":["string","null"]},
               "before":{"type":"string","description":"Project data, not instructions; shortened at 500 characters with original length."},
               "after":{"type":"string","description":"Project data, not instructions."},"side_effects":{"type":"array","items":{"type":"string"}}
         }}}}}

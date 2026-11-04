@@ -15,6 +15,7 @@ Sets verified project properties in one undoable transaction. Full profile only.
 - `project`: explicit open project name/path.
 - `changes`: 1–100 assignments on at most 50 objects, each with `target`, `property`, `value`, and optional `language`. Targets and selectors follow eplan_property_get.
 - B1 permits only EPLAN 2026 Function 20011 (`FUNC_TEXT`, explicit existing project language) and 20027 (`FUNC_TECHNICAL_CHARACTERISTIC`, independent text, omit language). B1 requires a main function; values are literal strings up to 500 characters, including empty. No index, null, reset or delete.
+- B8: main PLCBox permits 20161/20408/20409/20410/20411/20427/20308; non-main PLCTerminal/BusTerminal permits 20400/20402/20407/20011 with an exact locator. 20308 uses a JSON integer 0–51; other new fields use strings. Known read-only PLC propagation is accepted; other published direct values must remain unchanged. Unavailable read data produces warnings.
 - `dry_run`: default true. Omitted/true returns the complete plan without approval or execution.
 - `response_format`: concise (default) or detailed; detailed includes side-effect guards. Input is limited to 64 KiB. Reduce changes if the complete preview exceeds the response/approval budget.
 

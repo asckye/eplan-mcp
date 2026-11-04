@@ -18,7 +18,7 @@ internal sealed class PropertySetTools
 
     [McpServerTool(Name = Tool, Title = "Set EPLAN properties", ReadOnly = false,
         Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Sets verified Function properties. Omit/true dry_run previews; false executes. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. See usage.")]
+    [Description("Sets Function text and category-scoped PLC data. Omit/true dry_run previews; false executes. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. See usage.")]
     public static async Task<CallToolResult> SetAsync(IBridgeClient bridge, WritePipeline pipeline,
         RequestContext<CallToolRequestParams> context, IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -72,7 +72,7 @@ internal sealed class PropertySetTools
                 changed_count = rows.Count,
                 execution = ExecutionState.NotStarted,
                 undo = (string?)null,
-                warnings = Array.Empty<string>(),
+                warnings = args.Approved.Warnings.ToArray(),
                 dry_run = dryRun,
                 fingerprint = args.Approved.Plan.Fingerprint,
                 hint = dryRun ? WriteToolDefaults.ExecutionHint : null,
@@ -115,7 +115,7 @@ internal sealed class PropertySetTools
             result["recovered"] = outcome.Recovered;
             result["warnings"] = new JsonArray([.. new[] { outcome.Data?.Warning,
                 outcome.Recovered ? "EPLAN confirmed the commit after its response was lost; changes show the original plan." : null }
-                .OfType<string>().Select(w => (JsonNode?)JsonValue.Create(ResultShaper.CleanText(w)))]);
+                .OfType<string>().Concat(args.Approved.Warnings).Select(w => (JsonNode?)JsonValue.Create(ResultShaper.CleanText(w)))]);
             string summary = outcome.Execution == ExecutionState.Committed
                 ? string.Create(CultureInfo.InvariantCulture, $"Changed {rows.Count} properties; Ctrl+Z in EPLAN undoes this step.")
                 : string.Create(CultureInfo.InvariantCulture, $"Planned {rows.Count} property changes.");

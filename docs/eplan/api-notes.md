@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A92、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A92、B14**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -379,3 +379,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 示例存在没有颜色、截面、标识及部件的连接定义点。— 负责人反馈；报告未定位到全部省略的请求；无属性 CDP 创建读回与撤销已实测。
 - 宏定位补充：`WindowMacro.ReferencePoint` 与 `macro.Objects` 内瞬态 `Function.Location` 按所选表达/变体读取，不使用项目对象定位器。负责人提供 `.ema` 的 `MacroVariant.ReferencePoint`：PXC/2861344 Overview 0 为 (0,292)，PXC/2701290 MultiLine 0 为 (16,168)；前者与插入坐标一致，`MoveKind.Absolute` 将宏参考点放到指定坐标。`location` 是宏坐标系里的绝对位置，和参考点同一坐标系：实测 PXC/2701290 的 `:+` 点 location 为 (16,168)，正好等于参考点；PXC/2861344 的盒 location 为 (212,284)，插入 (0,292) 后与示例一致。所以插入点 = 参考点 + (示例位置 − 宏内位置)。
 - PLC 点并入补充：负责人 2026-11-04 `MacroBoxSpikeTests` 实测，在 PXC.2861344 总览 PLC 盒 `=GAA+A1-A1` 已存在时，以 `NumerationMode.None` 插入多线宏，再用 `NameService.RenameDevice` 将 `=GAA+A1-A?:1.1` 等非主功能 PLCTerminal 并入该标识，后缀保留且符号为 `PLC_CBOX_PCON_PLUG`。正式工具仅对“源全为非主 PLCTerminal、目标含 PLCBox”放行；提交后重取目标功能核对迁入点及原总览点、一次撤销恢复已实测。
+
+### B13. PLC 写属性的正式名和值类型（2026-11-04，安装版 2026.0.3 XML 与字典）
+- 本机 `Eplan.EplApi.DataModelu.xml` 的 Function 属性文档与 `catalog/eplan-2026.0.3/data-dictionary.jsonl` 对照：20161 `FUNC_PLCCONFIGURATIONPROJECT`、20408 `FUNC_PLCSTATIONNAME`、20409 `FUNC_PLCSTATIONTYPE`、20410 `FUNC_PLCRACK`、20411 `FUNC_PLCSOCKET`、20427 `FUNC_PLCTHISRACK`、20400 `FUNC_PLCADDRESS`、20402 `FUNC_PLCSYMBOLICADDRESS_MANUAL`、20407 `FUNC_PLCCHANNEL_DESIGNATION_MANUAL` 返回 `System.String`。
+- 20308 `FUNC_PLC_BUSSYSTEM` 文档类型为 `System.Int64`，XML 列出 0..51（51 为 KNX）；`PropertyValue` 原生整数写入/读回入口是 Int32 隐式转换和 `ToInt()`，该范围可无损表示。以上是静态文档事实；B8 工具写入、传播和撤销尚待 Large 实测。
