@@ -29,7 +29,8 @@ public static class PlacementMovePlanner
         catch (JsonReaderException) { throw WriteArguments.Invalid(["/: Supply strict JSON without duplicate members."]); }
         if (input.ContainsKey("property_moves"))
         { return PropertyPlacementMoves.Plan(input, scene, expectedFingerprint); }
-        ConnectionCreatePlanner.Members(input, "", "project page moves", "dry_run snap_to_grid response_format");
+        ConnectionCreatePlanner.Members(input, "", "project page moves", "dry_run snap_to_grid response_format layout_guard");
+        string guard = LayoutGuard.Mode(input["layout_guard"]);
         ConnectionCreatePlanner.FiniteNumbers(input, "");
         Require(input["project"]?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)input["project"]), "/project", "Specify an open project.");
         Require(input["page"]?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)input["page"]), "/page", "Specify an exact Circuit page.");
@@ -96,7 +97,7 @@ public static class PlacementMovePlanner
         layout.SetsTextAttribute = LayoutGuard.TextMoveIntent(targets.Select(t => t.Row).ToArray());
         layout.Lines.Clear();
         DrawingPlacement[] proposed = offsets.Where(p => p.Value.Any(n => n != 0)).Select(p => LayoutGuard.Shift(p.Key, p.Value)).ToArray();
-        List<string> layoutWarnings = LayoutGuard.Enforce(layout, proposed, "/moves: ");
+        List<string> layoutWarnings = LayoutGuard.Enforce(layout, proposed, "/moves: ", mode: guard);
         double[] Box(DrawingPlacement p)
         {
             double[] d = offsets.TryGetValue(p, out double[]? o) ? o : [0, 0];
@@ -109,7 +110,7 @@ public static class PlacementMovePlanner
         foreach (DrawingPlacement moved in offsets.Keys.Where(p => LayoutGuard.Positioned(p) && offsets[p].Any(n => n != 0)))
         {
             double[] a = Box(moved);
-            Require(!page.Placements.Any(p => LayoutGuard.Positioned(p) && p != moved && !LayoutGuard.Related(Predicted(p), Predicted(moved), predicted) && Box(p) is var b
+            Require(guard == "warn" || !page.Placements.Any(p => LayoutGuard.Positioned(p) && p != moved && !LayoutGuard.Related(Predicted(p), Predicted(moved), predicted) && Box(p) is var b
                 && a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1]), "/moves", "A moved outline conflicts with another placement.");
         }
         string Owner(string pin) => string.Join("/", pin.Split('/').Take(2));
@@ -132,13 +133,13 @@ public static class PlacementMovePlanner
         Dictionary<string, double[][]> after = Autoconnect(pins);
         layout.Pins = pins;
         layout.Lines = after.Select((p, i) => new LayoutGuard.Segment { Points = p.Value, Changed = !before.TryGetValue(p.Key, out double[][]? old) || Segment(old) != Segment(p.Value), Net = p.Key, Locator = new() { Oid = -i - 1000 } }).ToList();
-        layoutWarnings.AddRange(LayoutGuard.Enforce(layout, proposed, "/moves: "));
+        layoutWarnings.AddRange(LayoutGuard.Enforce(layout, proposed, "/moves: ", mode: guard));
         Require(!pins.GroupBy(p => string.Join(",", p.Value.Location.Select(n => n.ToString("R", CultureInfo.InvariantCulture))), StringComparer.Ordinal).Any(g => g.Select(p => Owner(p.Key)).Distinct(StringComparer.Ordinal).Count() > 1), "/moves", "Pins from different placements must not coincide.");
         // A64/A75: these annotate wires; EPLAN resolves cable membership after generation, then eplan_page_review checks it.
         foreach (DrawingPlacement moved in offsets.Keys.Where(p => p.Kind is not ("Cable" or "ConnectionDefinitionPoint") && LayoutGuard.Positioned(p) && offsets[p].Any(n => n != 0)))
         {
             double[] b = Box(moved);
-            Require(!after.Any(l => !l.Key.Split('|').Any(k => Owner(k) == Id(moved.Parent ?? moved.Locator)) && Math.Min(l.Value[0][0], l.Value[1][0]) <= b[2] && Math.Max(l.Value[0][0], l.Value[1][0]) >= b[0] && Math.Min(l.Value[0][1], l.Value[1][1]) <= b[3] && Math.Max(l.Value[0][1], l.Value[1][1]) >= b[1]), "/moves", "A moved outline conflicts with an autoconnect line.");
+            Require(guard == "warn" || !after.Any(l => !l.Key.Split('|').Any(k => Owner(k) == Id(moved.Parent ?? moved.Locator)) && Math.Min(l.Value[0][0], l.Value[1][0]) <= b[2] && Math.Max(l.Value[0][0], l.Value[1][0]) >= b[0] && Math.Min(l.Value[0][1], l.Value[1][1]) <= b[3] && Math.Max(l.Value[0][1], l.Value[1][1]) >= b[1]), "/moves", "A moved outline conflicts with an autoconnect line.");
         }
         string[] changed = before.Keys.Union(after.Keys, StringComparer.Ordinal).Where(k => !before.ContainsKey(k) || !after.ContainsKey(k) || Segment(before[k]) != Segment(after[k])).ToArray();
         Require(pins.Values.All(p => p.Location.All(n => n is >= 0 and <= 10000) && DrawingCoordinates.Contains(page.PageSize, [[p.Location[0], p.Location[1], p.Location[0], p.Location[1]]])), "/moves", "Keep all following pins inside Page.Size.");
@@ -146,7 +147,7 @@ public static class PlacementMovePlanner
         {
             double[][] line = after[key];
             Require(!after.Any(l => l.Key != key && ConnectionCreatePlanner.Intersects(line, l.Value) && !l.Value.Any(a => line.Any(b => a.SequenceEqual(b)))), "/moves", "Changed autoconnect lines have an ambiguous crossing.");
-            Require(!page.Placements.Any(p => LayoutGuard.Positioned(p) && !key.Split('|').Any(k => Owner(k) == Id(p.Parent ?? p.Locator)) && Box(p) is var b
+            Require(guard == "warn" || !page.Placements.Any(p => LayoutGuard.Positioned(p) && !key.Split('|').Any(k => Owner(k) == Id(p.Parent ?? p.Locator)) && Box(p) is var b
                 && Math.Min(line[0][0], line[1][0]) <= b[2] && Math.Max(line[0][0], line[1][0]) >= b[0] && Math.Min(line[0][1], line[1][1]) <= b[3] && Math.Max(line[0][1], line[1][1]) >= b[1]), "/moves", "A changed autoconnect line conflicts with another placement.");
         }
         var affected = new HashSet<string>(changed.SelectMany(k => k.Split('|')), StringComparer.Ordinal);
@@ -177,7 +178,7 @@ public static class PlacementMovePlanner
         };
         if (offsets.Any(p => p.Key.Kind == "Cable" && p.Value.Any(n => n != 0)))
         { layoutWarnings.Add("Moving a cable drops its core assignment (A73): EPLAN recreates its definition points unnamed and eplan_connection_generate does not make the crossed connections cable cores again. Check the cores with eplan_page_review; undo (Ctrl+Z) restores them."); }
-        result["warning"] = layoutWarnings.Count == 0 ? null : string.Join("\n", layoutWarnings.Distinct(StringComparer.Ordinal));
+        result["warning"] = layoutWarnings.Count == 0 ? null : LayoutGuard.Summary(layoutWarnings);
         string encoded = result.ToString(Formatting.None);
         Require((encoded.Count(c => c <= 127) + 3) / 4 + encoded.Count(c => c > 127) <= ((string?)input["response_format"] == "detailed" ? 20000 : 5000) - 256, "/response_format", "Use detailed or fewer moves; complete impact cannot be truncated.");
         return result;

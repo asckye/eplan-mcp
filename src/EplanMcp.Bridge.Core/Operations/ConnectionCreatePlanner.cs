@@ -51,7 +51,8 @@ public static class ConnectionCreatePlanner
             Require(!parser.Read(), "", "Supply one JSON object.");
         }
         catch (JsonReaderException ex) { throw WriteArguments.Invalid(["/" + (ex.Path ?? "").Replace("[", "/").Replace("]", "").Replace(".", "/") + ": Supply strict JSON without duplicate members."]); }
-        Members(input, "", "project page items", "dry_run snap_to_grid response_format plugin_sources");
+        Members(input, "", "project page items", "dry_run snap_to_grid response_format plugin_sources layout_guard");
+        string guard = LayoutGuard.Mode(input["layout_guard"]);
         Require(input["plugin_sources"] is null || input["plugin_sources"] is JArray sources
             && sources.All(source => source.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)source)), "/plugin_sources", "Supply plugin identities as text.");
         FiniteNumbers(input, "");
@@ -306,7 +307,7 @@ public static class ConnectionCreatePlanner
                 && s.Any(p => p.SequenceEqual(split.Point)) && (s[0][0] == s[1][0]) != (e[0][0] == e[1][0])));
             Require(conflict is null, "/items", conflict is null ? "" : "The path " + FormatPoint(s[0]) + " -> " + FormatPoint(s[1]) + " conflicts with the existing autoconnect line "
                 + FormatPoint(conflict[0]) + " -> " + FormatPoint(conflict[1]) + "; plan an explicit replacement separately.");
-            if (scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => LayoutGuard.Crosses(s, p, scene.Pins, scene.PointRoutes, endpointPins)) is { } crossed)
+            if (guard != "warn" && scene.Page.Placements.Where(Obstacle).FirstOrDefault(p => LayoutGuard.Crosses(s, p, scene.Pins, scene.PointRoutes, endpointPins)) is { } crossed)
             {
                 Require(false, "/items", FormattableString.Invariant(
                     $"The path {FormatPoint(s[0])} -> {FormatPoint(s[1])} crosses the outline of {crossed.Kind} {crossed.Locator.Type}/{crossed.Locator.Oid} [{string.Join(",", crossed.Bounds!.Select(v => v.ToString("R", CultureInfo.InvariantCulture)))}]. R4: reroute around the outline."));
@@ -392,7 +393,7 @@ public static class ConnectionCreatePlanner
             layout.PointRoutes[$"0/{placed.Locator.Oid}"] = layout.Lines.Where(l => On(point, l.Points)).Select(l => l.Points).ToList();
             proposed = [.. proposed, placed];
         }
-        List<string> layoutWarnings = LayoutGuard.Enforce(layout, proposed, "/items: ");
+        List<string> layoutWarnings = LayoutGuard.Enforce(layout, proposed, "/items: ", mode: guard);
         var result = new JObject
         {
             ["project"] = scene.Project.Name,
@@ -412,7 +413,7 @@ public static class ConnectionCreatePlanner
                 : "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
             ["undoSteps"] = logical.Count == 0 && splits.Count == 0 ? 1 : 2
         };
-        result["warning"] = layoutWarnings.Count == 0 ? null : string.Join("\n", layoutWarnings.Distinct(StringComparer.Ordinal));
+        result["warning"] = layoutWarnings.Count == 0 ? null : LayoutGuard.Summary(layoutWarnings);
         if (splits.Count > 0)
         { result["splitSegments"] = new JArray(splits.Select(s => new JObject { ["segment"] = JArray.FromObject(s.Segment), ["position"] = new JArray(s.Point) })); }
         if (interruptions.Values.Any(i => i["counterpart_pages"] is not null))

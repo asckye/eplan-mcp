@@ -40,7 +40,7 @@ internal sealed class PlacementCreateTools
             { throw new BridgeCallException(ToolResults.InvalidArgumentError([PlacementCreatePlanning.AllowedPageMessage])); }
             pageArgs.Page = page.Page.Name;
             PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet, pageArgs, cancellationToken).ConfigureAwait(false);
-            var args = new PlacementTextCreateArgs { Project = project.Path, Page = pageArgs.Page, Items = [], Fingerprint = geometry.Fingerprint() };
+            var args = new PlacementTextCreateArgs { Project = project.Path, Page = pageArgs.Page, Items = [], Fingerprint = geometry.Fingerprint(), LayoutGuard = input.TryGetProperty("layout_guard", out JsonElement guard) ? guard.GetString() : null };
             bool snap = !input.TryGetProperty("snap_to_grid", out JsonElement s) || s.GetBoolean();
             var rows = new JsonArray();
             foreach (JsonElement item in input.GetProperty("items").EnumerateArray())

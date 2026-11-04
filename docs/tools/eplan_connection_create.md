@@ -1,5 +1,7 @@
 # 工具规格：`eplan_connection_create`
 
+`layout_guard` 可选 `refuse`（默认）或 `warn`：复现已有图纸时用 `warn`，将写前布局违规写入 `warning`（沿用 `LayoutGuard.Summary` 上限）；自由绘图保持默认。超出页面的 R1 仍拒绝，写后检查和 ADR-0046 不变。
+
 ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批、不修改项目或文件，返回 `execution: not_started`；执行须再次调用并显式传 `dry_run: false`，`hint` 会说明该步骤。Small/Medium 覆盖省略、true、false 三条路径；审批、读回和撤销规则不变。
 
 | 项 | 内容 |

@@ -239,9 +239,17 @@ public static class LayoutGuard
         }
         return null;
     }
-    public static List<string> Enforce(Model model, IReadOnlyList<DrawingPlacement> changed, string at = "", bool measured = false)
+    public static string Mode(Newtonsoft.Json.Linq.JToken? value) => value is null or { Type: Newtonsoft.Json.Linq.JTokenType.Null } ? "refuse"
+        : value.Type == Newtonsoft.Json.Linq.JTokenType.String && (string?)value is "refuse" or "warn" ? ((string?)value)!
+        : throw WriteArguments.Invalid(["/layout_guard: use refuse or warn."]);
+    public static List<string> Enforce(Model model, IReadOnlyList<DrawingPlacement> changed, string at = "", bool measured = false, string mode = "refuse")
     {
         List<Violation> violations = Check(model, changed, measured: measured);
+        if (mode == "warn")
+        {
+            foreach (Violation violation in violations.Where(v => v.Rule != "R1" || !OffPage(v.Geometry, model.Page.PageSize)))
+            { violation.Warning = true; }
+        }
         if (violations.Any(v => !v.Warning))
         {
             BridgeErrorException error = WriteArguments.Invalid(violations.Where(v => !v.Warning).Select(v => at + v.Message).ToList());

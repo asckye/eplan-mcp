@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R3-01 布局告警模式 | `LayoutGuardWarningTests` | NOT RUN：本次禁止 EPLAN；待验穿黑盒线 warn 成功且告警、默认拒绝、超页拒绝。 |
 | G8 可选端子符号（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 X2_2、KA1_PE 的库名、符号、变体、编号及逐次单步撤销。 |
 | G6 母线定义（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 BBDEF 主功能与两个 BCP 同属一个器件、逐次单步撤销。 |
 | G5 黑盒（2026-11-03 brief；g4probe A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 60×40 黑盒、DCP 0/2/4 同器件与框内列表、后缀及逐步单次撤销。 |

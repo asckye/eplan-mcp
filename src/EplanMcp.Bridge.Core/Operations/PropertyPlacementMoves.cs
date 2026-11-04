@@ -11,7 +11,8 @@ internal static class PropertyPlacementMoves
 {
     internal static JObject Plan(JObject input, ConnectionCreatePlanner.Scene scene, string? expected)
     {
-        ConnectionCreatePlanner.Members(input, "", "project page property_moves", "dry_run snap_to_grid response_format");
+        ConnectionCreatePlanner.Members(input, "", "project page property_moves", "dry_run snap_to_grid response_format layout_guard");
+        LayoutGuard.Mode(input["layout_guard"]);
         ConnectionCreatePlanner.FiniteNumbers(input, "");
         Require(input["project"]?.Type == JTokenType.String && ((string?)input["project"] == scene.Project.Name || ProjectResolver.SamePath((string)input["project"]!, scene.Project.Path))
             && (string?)input["page"] == scene.Page.Page, "Select this project's exact page.");

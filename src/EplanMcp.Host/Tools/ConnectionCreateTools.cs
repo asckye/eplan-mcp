@@ -27,13 +27,14 @@ internal sealed class ConnectionCreateTools
         ? CableLimit : PageWriteTools.DefaultLimit;
 
     [McpServerTool(Name = Tool, Title = "Create connection symbols and explicit wire paths", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Creates SPECIAL nodes, interruptions, wires, cables, potential definitions and CDP/CDPNG on new or existing Circuit connections. Verifies geometry, endpoints and properties. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes the call. Omit dry_run to preview; false executes. Outside scratch needs approval. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.")]
+    [Description("Creates SPECIAL nodes, interruptions, wires, cables, potentials and CDP/CDPNG on Circuit connections; verifies geometry/endpoints/properties. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes all. layout_guard:warn reproduces drawings; default refuse draws freely. Omit dry_run to preview; false executes. Approval outside scratch; see usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IBridgeClient bridge,
         string project, string page,
-        [Description("1-50 wire/corner/t_node/potential_point/interruption_point/cable_definition/definition_point/potential_definition; see usage")] JsonElement[] items,
+        [Description("1-50 connection items; see usage")] JsonElement[] items,
         bool dry_run = WriteToolDefaults.Preview, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
         [Description("Open this page before drawing; UI only, no data change.")] bool show_page = false,
-        IProgress<ProgressNotificationValue>? progress = null, PackLibrary? packs = null, CancellationToken cancellationToken = default)
+        IProgress<ProgressNotificationValue>? progress = null, PackLibrary? packs = null,
+        [AllowedValues("refuse", "warn")] string layout_guard = "refuse", CancellationToken cancellationToken = default)
     {
         PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, project, page, cancellationToken).ConfigureAwait(false);
         try
@@ -50,7 +51,7 @@ internal sealed class ConnectionCreateTools
                 warnings.AddRange(resolution.Warnings);
                 (effective, plugins) = ConnectionPluginDefaults.Apply(items, resolution);
             }
-            JsonObject args = JsonSerializer.SerializeToNode(new { project, page, items = effective, dry_run, snap_to_grid, response_format })!.AsObject();
+            JsonObject args = JsonSerializer.SerializeToNode(new { project, page, items = effective, dry_run, snap_to_grid, response_format, layout_guard })!.AsObject();
             if (plugins.Length > 0)
             { args["plugin_sources"] = JsonSerializer.SerializeToNode(plugins); }
             var request = new WriteRequest<object, object>(Tool, ToolTier.Write, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionCreateExecute,

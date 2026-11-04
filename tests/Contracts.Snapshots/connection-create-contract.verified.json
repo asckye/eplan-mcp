@@ -693,6 +693,14 @@
         "type": "boolean",
         "default": true
       },
+      "layout_guard": {
+        "type": "string",
+        "enum": [
+          "refuse",
+          "warn"
+        ],
+        "default": "refuse"
+      },
       "response_format": {
         "type": "string",
         "enum": [

@@ -31,7 +31,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             { if (obj[name] is null) { throw InvalidArgument(at + "/" + name + " is required."); } }
         }
         bool batch = (args as JObject)?["items"] is { Type: not JTokenType.Null };
-        Members(args, "", "project page", "text items fingerprint");
+        Members(args, "", "project page", "text items fingerprint layoutGuard");
+        LayoutGuard.Mode(args!["layoutGuard"]);
         foreach (string name in new[] { "project", "page" })
         { if (args![name]?.Type != JTokenType.String) { throw InvalidArgument("/" + name + " must be a string."); } }
         if (batch && (args!["items"] is not JArray list || list.Count is < 1 or > 50))
@@ -89,6 +90,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
 
     protected override PlacementTextCreateData Execute(PlacementTextCreateArgs args)
     {
+        string guard = LayoutGuard.Mode(args.LayoutGuard is null ? null : new JValue(args.LayoutGuard));
         if (args.Fingerprint is not null && drawings?.Read(WriteArguments.Writable(catalog, args.Project).Path, args.Page)?.Fingerprint() != args.Fingerprint)
         { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.PlanStale, "Page geometry changed; plan again before creating placements.")); }
         List<PlacementText> items = args.Items ?? [args.Text];
@@ -135,9 +137,9 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             DrawingPlacement row = LayoutGuard.Proposed(kind, p.Position, bounds, i);
             row.Properties = new() { ["height_mm"] = p.HeightMm.ToString("R", CultureInfo.InvariantCulture), ["angle"] = "0" };
             return row;
-        }).ToArray());
+        }).ToArray(), mode: guard);
         if (planning)
-        { return new() { Text = items[0], Items = items, Warning = string.Join("\n", warnings) }; }
+        { return new() { Text = items[0], Items = items, Warning = LayoutGuard.Summary(warnings) }; }
         Committed<List<PlacementText>> batch = TransactionRunner.Run(transactions, "eplan_placement_create", () =>
         {
             foreach (ImportSource image in images)

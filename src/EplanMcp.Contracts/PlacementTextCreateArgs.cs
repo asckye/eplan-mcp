@@ -13,4 +13,6 @@ public sealed class PlacementTextCreateArgs
     public List<PlacementText>? Items { get; set; }
     /// <summary>Optional page evidence from planning; rechecked before any mutation.</summary>
     public string? Fingerprint { get; set; }
+    /// <summary>Use warn to reproduce existing drawings; refuse is the default.</summary>
+    public string? LayoutGuard { get; set; }
 }

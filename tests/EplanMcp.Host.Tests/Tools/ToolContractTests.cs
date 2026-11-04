@@ -102,6 +102,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.InRange(tool.Description!.Length, 1, 600);
         Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5300);
+        Assert.Contains("string", tool.OutputSchema!.Value.GetProperty("properties").GetProperty("warning").GetProperty("type").ToString(), StringComparison.Ordinal);
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
         JsonElement itemBranches = tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf");
@@ -158,8 +159,8 @@ public sealed class ToolContractTests : IDisposable
         Assert.Equal("#/$defs/d", nested.GetProperty("$ref").GetString());
         Assert.Equal(nested.GetProperty("$ref").GetString(), standalone.GetProperty("$ref").GetString());
         Assert.Equal("definition_point", schema.GetProperty("$defs").GetProperty("d").GetProperty("properties").GetProperty("kind").GetProperty("const").GetString());
-        Assert.Equal("#/$defs/pin", branches[0].GetProperty("properties").GetProperty("from").GetProperty("$ref").GetString());
-        Assert.False(schema.GetProperty("$defs").GetProperty("pin").GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal("#/$defs/i", branches[0].GetProperty("properties").GetProperty("from").GetProperty("$ref").GetString());
+        Assert.False(schema.GetProperty("$defs").GetProperty("i").GetProperty("additionalProperties").GetBoolean());
     }
 
     [Fact]

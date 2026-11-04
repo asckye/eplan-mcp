@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- 绘图创建、移动与连接创建支持 `layout_guard: "warn"`，用于复现已有图纸；默认仍拒绝布局违规，超页始终拒绝。
+
 - `eplan_connection_create.interruption_point` 的 `counterpart_pages` 可省略；省略只放置中断点，提供时继续核对配对页。
 
 - `eplan_connection_create.definition_point` 支持 `part`、`part_variant`（默认 1）和 `part_count`（默认 1）；可仅设置部件，并核对定义点及连接的部件引用。

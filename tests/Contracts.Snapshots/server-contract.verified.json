@@ -4424,7 +4424,7 @@
     {
       "name": "eplan_connection_create",
       "title": "Create connection symbols and explicit wire paths",
-      "description": "Creates SPECIAL nodes, interruptions, wires, cables, potential definitions and CDP/CDPNG on new or existing Circuit connections. Verifies geometry, endpoints and properties. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes the call. Omit dry_run to preview; false executes. Outside scratch needs approval. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.",
+      "description": "Creates SPECIAL nodes, interruptions, wires, cables, potentials and CDP/CDPNG on Circuit connections; verifies geometry/endpoints/properties. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes all. layout_guard:warn reproduces drawings; default refuse draws freely. Omit dry_run to preview; false executes. Approval outside scratch; see usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4446,10 +4446,10 @@
                       "const": "wire"
                     },
                     "from": {
-                      "$ref": "#/$defs/pin"
+                      "$ref": "#/$defs/i"
                     },
                     "to": {
-                      "$ref": "#/$defs/pin"
+                      "$ref": "#/$defs/i"
                     },
                     "points": {
                       "type": "array",
@@ -4491,12 +4491,7 @@
                       "maxItems": 2,
                       "uniqueItems": true,
                       "items": {
-                        "enum": [
-                          "Up",
-                          "Down",
-                          "Left",
-                          "Right"
-                        ]
+                        "$ref": "#/$defs/r"
                       }
                     }
                   },
@@ -4522,12 +4517,7 @@
                       "maxItems": 3,
                       "uniqueItems": true,
                       "items": {
-                        "enum": [
-                          "Up",
-                          "Down",
-                          "Left",
-                          "Right"
-                        ]
+                        "$ref": "#/$defs/r"
                       }
                     },
                     "variant": {
@@ -4556,12 +4546,7 @@
                       "maxItems": 1,
                       "uniqueItems": true,
                       "items": {
-                        "enum": [
-                          "Up",
-                          "Down",
-                          "Left",
-                          "Right"
-                        ]
+                        "$ref": "#/$defs/r"
                       }
                     }
                   },
@@ -4585,12 +4570,7 @@
                       "$ref": "#/$defs/p"
                     },
                     "direction": {
-                      "enum": [
-                        "Up",
-                        "Down",
-                        "Left",
-                        "Right"
-                      ]
+                      "$ref": "#/$defs/r"
                     },
                     "counterpart_pages": {
                       "type": "array",
@@ -4665,7 +4645,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "locator": {
-                                    "$ref": "#/$defs/locator"
+                                    "$ref": "#/$defs/l"
                                   }
                                 },
                                 "required": [
@@ -4807,6 +4787,13 @@
             "description": "Open this page before drawing; UI only, no data change.",
             "type": "boolean",
             "default": false
+          },
+          "layout_guard": {
+            "default": "refuse",
+            "enum": [
+              "refuse",
+              "warn"
+            ]
           }
         },
         "required": [
@@ -4816,6 +4803,14 @@
         ],
         "additionalProperties": false,
         "$defs": {
+          "r": {
+            "enum": [
+              "Up",
+              "Down",
+              "Left",
+              "Right"
+            ]
+          },
           "d": {
             "type": "object",
             "additionalProperties": false,
@@ -4901,12 +4896,12 @@
             "minItems": 2,
             "maxItems": 2
           },
-          "pin": {
+          "i": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
               "locator": {
-                "$ref": "#/$defs/locator"
+                "$ref": "#/$defs/l"
               },
               "pin_index": {
                 "type": "integer",
@@ -4919,7 +4914,7 @@
               "pin_index"
             ]
           },
-          "locator": {
+          "l": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -4995,6 +4990,12 @@
           },
           "recovered": {
             "type": "boolean"
+          },
+          "warning": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "pageShown": {
             "type": [
@@ -8694,7 +8695,7 @@
           "bytes": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 9.223372036854776E+18
+            "maximum": 9.223372036854776e+18
           },
           "sha256": {
             "type": "string",
@@ -15145,7 +15146,7 @@
     {
       "name": "eplan_placement_create",
       "title": "Create text and graphics on an EPLAN page",
-      "description": "Creates text, line, rectangle, polyline, arc, ellipse, path_text or image on a Circuit, Overview or Graphics page; mm, bottom left, y up; angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
+      "description": "Creates text, line, rectangle, polyline, arc, ellipse, path_text or image on a Circuit, Overview or Graphics page; mm, bottom left, y up; angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -15181,18 +15182,10 @@
                     "image"
                   ]
                 },
-                "position": {
-                  "type": "array"
-                },
-                "points": {
-                  "type": "array"
-                },
-                "corners": {
-                  "type": "array"
-                },
-                "center": {
-                  "type": "array"
-                },
+                "position": {},
+                "points": {},
+                "corners": {},
+                "center": {},
                 "contents": {},
                 "height_mm": {},
                 "radius_mm": {},
@@ -15204,9 +15197,7 @@
                 "file": {
                   "type": "string"
                 },
-                "pen": {
-                  "type": "object"
-                },
+                "pen": {},
                 "layer": {
                   "type": "integer"
                 },
@@ -15221,6 +15212,13 @@
             },
             "minItems": 1,
             "maxItems": 50
+          },
+          "layout_guard": {
+            "enum": [
+              "refuse",
+              "warn"
+            ],
+            "default": "refuse"
           },
           "snap_to_grid": {
             "type": "boolean",
@@ -16158,7 +16156,7 @@
     {
       "name": "eplan_placement_update",
       "title": "Move placements on an EPLAN page",
-      "description": "Moves same-page symbols/text/lines/rectangles, or independently moves and rotates property text. Read eplan_page_get include_drawings locators. Use moves or property_moves (parent, property_id, property_index, x_mm, y_mm, angle_deg: 0/90/180/270). mm, bottom left, y up. Groups refused. Omit dry_run to preview; false executes. One undo; no-op leaves none. Approval outside scratch; denial: APPROVAL_DENIED. See usage.",
+      "description": "Moves same-page symbols/text/lines/rectangles, or independently moves and rotates property text. Read eplan_page_get include_drawings locators. Use moves or property_moves (parent, property_id, property_index, x_mm, y_mm, angle_deg: 0/90/180/270). mm, bottom left, y up. Groups refused. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; no-op leaves none. Approval outside scratch; denial: APPROVAL_DENIED. See usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -16378,12 +16376,19 @@
           "dry_run": {
             "type": "boolean",
             "default": true,
-            "description": "Omit/true previews; false executes."
+            "description": "Preview."
           },
           "show_page": {
             "type": "boolean",
             "default": false,
             "description": "Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."
+          },
+          "layout_guard": {
+            "enum": [
+              "refuse",
+              "warn"
+            ],
+            "default": "refuse"
           },
           "snap_to_grid": {
             "type": "boolean",
@@ -17550,7 +17555,7 @@
           "seconds": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1.7976931348623157E+308
+            "maximum": 1.7976931348623157e+308
           },
           "hint": {
             "type": [

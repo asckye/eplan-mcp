@@ -11,7 +11,7 @@ internal static class PlacementCreateContract
         {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{
           "project":{"type":"string","minLength":1},"page":{"type":"string","minLength":1},
           "items":{"type":"array","minItems":1,"maxItems":50,"items":{"$ref":"#/$defs/item"}},
-          "snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},"show_page":{"type":"boolean","default":false,"description":"Open page (UI)."},
+          "layout_guard":{"enum":["refuse","warn"],"default":"refuse"},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},"show_page":{"type":"boolean","default":false,"description":"Open page (UI)."},
           "response_format":{"type":"string","enum":["concise","detailed"],"default":"concise"}},"$defs":{
           "point":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number","minimum":0,"maximum":10000}},
           "points":{"type":"array","minItems":2,"items":{"$ref":"#/$defs/point"}},
@@ -45,7 +45,7 @@ internal static class PlacementCreateContract
     {
         Name = "eplan_placement_create",
         Title = "Create text and graphics on an EPLAN page",
-        Description = "Creates text, line, rectangle, polyline, arc, ellipse, path_text or image on a Circuit, Overview or Graphics page; mm, bottom left, y up; angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Omit dry_run to preview; false executes. One undo; approval outside scratch. " +
+        Description = "Creates text, line, rectangle, polyline, arc, ellipse, path_text or image on a Circuit, Overview or Graphics page; mm, bottom left, y up; angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; approval outside scratch. " +
             "Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). " +
             "Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
         InputSchema = Input,
@@ -59,7 +59,7 @@ internal static class PlacementCreateContract
         tool.Title = Definition.Title;
         tool.Description = Definition.Description;
         tool.InputSchema = JsonDocument.Parse("""
-            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","items":{"additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle","path_text","polyline","arc","ellipse","image"]},"position":{"type":"array"},"points":{"type":"array"},"corners":{"type":"array"},"center":{"type":"array"},"contents":{},"height_mm":{},"radius_mm":{},"radius_x_mm":{},"radius_y_mm":{},"angle":{},"start_angle":{},"end_angle":{},"file":{"type":"string"},"pen":{"type":"object"},"layer":{"type":"integer"},"closed":{"type":"boolean"},"alignment":{"type":"string"}},"type":"object"},"minItems":1,"maxItems":50},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true},"show_page":{"type":"boolean","default":false,"description":"Open page (UI)."},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
+            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","items":{"additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle","path_text","polyline","arc","ellipse","image"]},"position":{},"points":{},"corners":{},"center":{},"contents":{},"height_mm":{},"radius_mm":{},"radius_x_mm":{},"radius_y_mm":{},"angle":{},"start_angle":{},"end_angle":{},"file":{"type":"string"},"pen":{},"layer":{"type":"integer"},"closed":{"type":"boolean"},"alignment":{"type":"string"}},"type":"object"},"minItems":1,"maxItems":50},"layout_guard":{"enum":["refuse","warn"],"default":"refuse"},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true},"show_page":{"type":"boolean","default":false,"description":"Open page (UI)."},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
             """).RootElement.Clone();
         tool.OutputSchema = Definition.OutputSchema;
     }

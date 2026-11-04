@@ -37,7 +37,7 @@ internal static class PlacementCreatePlanning
             string? layoutWarnings = null;
             if (measureText is null)
             {
-                var preflight = new PlacementTextCreateArgs { Project = args.Project!, Page = args.Page, Items = [] };
+                var preflight = new PlacementTextCreateArgs { Project = args.Project!, Page = args.Page, Items = [], LayoutGuard = input.TryGetProperty("layout_guard", out JsonElement guard) ? guard.GetString() : null };
                 foreach (JsonElement item in input.GetProperty("items").EnumerateArray())
                 {
                     JsonNode actual = Snap(item, geometry.GridSize, !input.TryGetProperty("snap_to_grid", out JsonElement s) || s.GetBoolean(), normalizeRectangle: false);
@@ -80,13 +80,14 @@ internal static class PlacementCreatePlanning
             if (node.ValueKind == JsonValueKind.Array)
             { foreach ((JsonElement n, int i) in node.EnumerateArray().Select((n, i) => (n, i))) { Number(n, at + "/" + i.ToString(CultureInfo.InvariantCulture), 0, 10000); } }
         }
-        if (!Members(input, "", "project page items", "snap_to_grid dry_run response_format"))
+        if (!Members(input, "", "project page items", "snap_to_grid dry_run response_format layout_guard"))
         { return problems; }
         Check(Encoding.UTF8.GetByteCount(input.GetRawText()) <= 256 * 1024, "", "request exceeds 256 KiB.");
         foreach (string name in new[] { "project", "page" })
         { Check(input.TryGetProperty(name, out JsonElement s) && s.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(s.GetString()), "/" + name, "requires an explicit nonempty name."); }
         foreach (string name in new[] { "snap_to_grid", "dry_run" })
         { Check(!input.TryGetProperty(name, out JsonElement b) || b.ValueKind is JsonValueKind.True or JsonValueKind.False, "/" + name, "must be boolean."); }
+        Check(!input.TryGetProperty("layout_guard", out JsonElement guard) || guard.ValueKind == JsonValueKind.String && guard.GetString() is "refuse" or "warn", "/layout_guard", "use refuse or warn.");
         Check(!input.TryGetProperty("response_format", out JsonElement f) || f.ValueKind == JsonValueKind.String && f.GetString() is "concise" or "detailed", "/response_format", "use concise or detailed.");
         if (!input.TryGetProperty("items", out JsonElement items) || items.ValueKind != JsonValueKind.Array)
         { problems.Add("/items: requires an array."); return problems; }

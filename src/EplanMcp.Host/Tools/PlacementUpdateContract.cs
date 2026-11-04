@@ -14,7 +14,7 @@ internal static class PlacementUpdateContract
           "moves":{"type":"array","minItems":1,"maxItems":50,"items":{"oneOf":[
             {"type":"object","additionalProperties":false,"required":["locator","x_mm","y_mm"],"properties":{"locator":{"$ref":"#/$defs/locator"},"x_mm":{"type":"number","minimum":0,"maximum":10000},"y_mm":{"type":"number","minimum":0,"maximum":10000}}},
             {"type":"object","additionalProperties":false,"required":["locator","delta_mm"],"properties":{"locator":{"$ref":"#/$defs/locator"},"delta_mm":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number","minimum":-10000,"maximum":10000}}}}
-          ]}},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},"show_page":{"type":"boolean","default":false,"description":"Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."},"snap_to_grid":{"type":"boolean","default":true},"response_format":{"enum":["concise","detailed"],"default":"concise"}},
+          ]}},"dry_run":{"type":"boolean","default":true,"description":"Preview."},"show_page":{"type":"boolean","default":false,"description":"Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."},"layout_guard":{"enum":["refuse","warn"],"default":"refuse"},"snap_to_grid":{"type":"boolean","default":true},"response_format":{"enum":["concise","detailed"],"default":"concise"}},
           "$defs":{"locator":{"type":"object","additionalProperties":false,"required":["project","page","type","oid","digest"],"properties":{"project":{"type":"string","minLength":1},"page":{"type":"string","minLength":1},"type":{"type":"integer","minimum":1,"maximum":2147483647},"oid":{"type":"integer","minimum":1,"maximum":9223372036854775807},"digest":{"type":"string","pattern":"^[a-f0-9]{64}$"}}}}}
         """).RootElement.Clone());
 
@@ -22,7 +22,7 @@ internal static class PlacementUpdateContract
     {
         Name = "eplan_placement_update",
         Title = "Move placements on an EPLAN page",
-        Description = "Moves same-page symbols/text/lines/rectangles, or independently moves and rotates property text. Read eplan_page_get include_drawings locators. Use moves or property_moves (parent, property_id, property_index, x_mm, y_mm, angle_deg: 0/90/180/270). mm, bottom left, y up. Groups refused. Omit dry_run to preview; false executes. One undo; no-op leaves none. Approval outside scratch; denial: APPROVAL_DENIED. See usage.",
+        Description = "Moves same-page symbols/text/lines/rectangles, or independently moves and rotates property text. Read eplan_page_get include_drawings locators. Use moves or property_moves (parent, property_id, property_index, x_mm, y_mm, angle_deg: 0/90/180/270). mm, bottom left, y up. Groups refused. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; no-op leaves none. Approval outside scratch; denial: APPROVAL_DENIED. See usage.",
         InputSchema = Input,
         OutputSchema = Output(),
         Annotations = new() { ReadOnlyHint = false, DestructiveHint = false, IdempotentHint = true, OpenWorldHint = false },

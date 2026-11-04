@@ -146,6 +146,7 @@ public sealed class ConnectionCreateContractTests
             ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable, definition, potential) }, 1, 50),
             ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["snap_to_grid"] = new JObject { ["type"] = "boolean", ["default"] = true },
+            ["layout_guard"] = new JObject { ["type"] = "string", ["enum"] = new JArray("refuse", "warn"), ["default"] = "refuse" },
             ["response_format"] = new JObject { ["type"] = "string", ["enum"] = new JArray("concise", "detailed"), ["default"] = "concise" },
         }, "project page items");
         schema["$schema"] = "https://json-schema.org/draft/2020-12/schema";
