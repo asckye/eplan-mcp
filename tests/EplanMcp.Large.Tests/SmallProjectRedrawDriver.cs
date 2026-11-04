@@ -224,6 +224,15 @@ internal sealed partial class SmallProjectRedrawDriver(
                 if ((double?)part["count"] is double count && count != 1)
                 { report.Note(page, Type(item), Id(item), "Part reference quantity " + count.ToString(CultureInfo.InvariantCulture) + " cannot be specified by device_update."); }
             }
+            // A93: what an engineer's part selection takes over, once every part is referenced.
+            if (Objects(item["parts"]).Length > 0)
+            {
+                await InvokeAsync(page, "eplan_device_update", new JObject
+                {
+                    ["tag"] = _actualNames.GetValueOrDefault(name, name),
+                    ["update_from_parts"] = true,
+                }, [item]);
+            }
         }
     }
 
