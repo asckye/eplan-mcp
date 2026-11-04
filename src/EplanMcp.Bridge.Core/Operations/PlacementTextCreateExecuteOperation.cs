@@ -195,8 +195,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
 
     internal static bool ValidPen(string key, double value) => Finite(value) && (key switch
     {
-        "color" => value == -16002 || value is >= 0 and <= 255 && value == Math.Truncate(value),
-        "style" => value == -16002 || value is >= 0 and <= 6 && value == Math.Truncate(value),
+        "color" or "style" => value is >= short.MinValue and <= short.MaxValue && value == Math.Truncate(value),
         "line_end" => value is >= 0 and <= 2 && value == Math.Truncate(value),
         "width_mm" or "pattern_length" => true,
         _ => false

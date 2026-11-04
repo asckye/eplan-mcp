@@ -10,16 +10,22 @@ public sealed class PlacementStyleTests
     [InlineData("\"width_mm\":-16002")]
     [InlineData("\"style\":-16002")]
     [InlineData("\"pattern_length\":-16002")]
-    public void PenDefaultSentinel_IsAcceptedAndForwarded(string field)
+    public void PenDefaultSentinel_IsAcceptedAndForwarded(string field) => AssertPenForwarded(field, -16002);
+
+    [Fact]
+    public void NegativeColor_FromTheSample_IsAcceptedAndForwarded() => AssertPenForwarded("\"color\":-5", -5);
+
+    private static void AssertPenForwarded(string field, double expected)
     {
         JsonElement input = PlacementCreateTests.Input("{\"kind\":\"line\",\"points\":[[20,20],[40,40]],\"pen\":{" + field + "},\"layer\":3}");
         Assert.Empty(PlacementCreatePlanning.Validate(input));
         Assert.True(PropertyGetContractTests.Accepts(PlacementCreateContract.Input, input, PlacementCreateContract.Input));
-        Assert.Equal(-16002, Assert.Single(PlacementCreatePlanning.Request(input.GetProperty("items")[0]).Pen!).Value);
+        Assert.Equal(expected, Assert.Single(PlacementCreatePlanning.Request(input.GetProperty("items")[0]).Pen!).Value);
     }
+
     [Theory]
     [InlineData("\"pen\":{\"style_factor\":2}")]
-    [InlineData("\"pen\":{\"style\":7}")]
+    [InlineData("\"pen\":{\"style\":40000}")]
     [InlineData("\"pen\":{\"color\":1.5}")]
     [InlineData("\"pen\":{\"line_end\":3}")]
     [InlineData("\"pen\":{\"line_end\":-16002}")]

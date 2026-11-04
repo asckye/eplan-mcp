@@ -15430,31 +15430,17 @@
                     "additionalProperties": false,
                     "properties": {
                       "color": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "width_mm": {
                         "type": "number"
                       },
                       "style": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 6
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "pattern_length": {
                         "type": "number"
@@ -15538,31 +15524,17 @@
                     "additionalProperties": false,
                     "properties": {
                       "color": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "width_mm": {
                         "type": "number"
                       },
                       "style": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 6
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "pattern_length": {
                         "type": "number"
@@ -15626,31 +15598,17 @@
                     "additionalProperties": false,
                     "properties": {
                       "color": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "width_mm": {
                         "type": "number"
                       },
                       "style": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 6
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "pattern_length": {
                         "type": "number"
@@ -15687,31 +15645,17 @@
                     "additionalProperties": false,
                     "properties": {
                       "color": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "width_mm": {
                         "type": "number"
                       },
                       "style": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 6
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "pattern_length": {
                         "type": "number"
@@ -15751,31 +15695,17 @@
                     "additionalProperties": false,
                     "properties": {
                       "color": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "width_mm": {
                         "type": "number"
                       },
                       "style": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 6
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "pattern_length": {
                         "type": "number"
@@ -15830,31 +15760,17 @@
                     "additionalProperties": false,
                     "properties": {
                       "color": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "width_mm": {
                         "type": "number"
                       },
                       "style": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 6
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "pattern_length": {
                         "type": "number"
@@ -15907,31 +15823,17 @@
                     "additionalProperties": false,
                     "properties": {
                       "color": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "width_mm": {
                         "type": "number"
                       },
                       "style": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 6
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "pattern_length": {
                         "type": "number"
@@ -15973,31 +15875,17 @@
                     "additionalProperties": false,
                     "properties": {
                       "color": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 255
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "width_mm": {
                         "type": "number"
                       },
                       "style": {
-                        "oneOf": [
-                          {
-                            "const": -16002
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 6
-                          }
-                        ]
+                        "type": "integer",
+                        "minimum": -32768,
+                        "maximum": 32767
                       },
                       "pattern_length": {
                         "type": "number"
@@ -16366,31 +16254,17 @@
                   "additionalProperties": false,
                   "properties": {
                     "color": {
-                      "oneOf": [
-                        {
-                          "const": -16002
-                        },
-                        {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 255
-                        }
-                      ]
+                      "type": "integer",
+                      "minimum": -32768,
+                      "maximum": 32767
                     },
                     "width_mm": {
                       "type": "number"
                     },
                     "style": {
-                      "oneOf": [
-                        {
-                          "const": -16002
-                        },
-                        {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 6
-                        }
-                      ]
+                      "type": "integer",
+                      "minimum": -32768,
+                      "maximum": 32767
                     },
                     "pattern_length": {
                       "type": "number"
@@ -16742,31 +16616,17 @@
                       "additionalProperties": false,
                       "properties": {
                         "color": {
-                          "oneOf": [
-                            {
-                              "const": -16002
-                            },
-                            {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 255
-                            }
-                          ]
+                          "type": "integer",
+                          "minimum": -32768,
+                          "maximum": 32767
                         },
                         "width_mm": {
                           "type": "number"
                         },
                         "style": {
-                          "oneOf": [
-                            {
-                              "const": -16002
-                            },
-                            {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 6
-                            }
-                          ]
+                          "type": "integer",
+                          "minimum": -32768,
+                          "maximum": 32767
                         },
                         "pattern_length": {
                           "type": "number"

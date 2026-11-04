@@ -13,7 +13,7 @@ public interface IConnectionDefinitionPointWriter
 internal static class ConnectionDefinitionPoints
 {
     internal static JObject Plan(JToken value, string at, double[][] path, string from, string to, int index,
-        ConnectionCreatePlanner.Scene scene, List<SymbolSearchItem> variants, bool existing = false, IPartsDatabase? parts = null)
+        ConnectionCreatePlanner.Scene scene, List<SymbolSearchItem> variants, bool existing = false, Func<PartsDatabaseContent>? parts = null)
     {
         ConnectionCreatePlanner.Members(value, at, existing ? "kind position" : "", "position symbol symbol_variant color cross_section designation part part_variant part_count");
         void Require(bool condition, string field, string message) => ConnectionCreatePlanner.Require(condition, at + field, message);
@@ -34,7 +34,7 @@ internal static class ConnectionDefinitionPoints
             Require(value["part_variant"] is null || value["part_variant"]!.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)value["part_variant"]), "/part_variant", "Supply a nonempty variant.");
             Require(value["part_count"] is null || value["part_count"]!.Type == JTokenType.Integer && long.TryParse(value["part_count"]!.ToString(), out long count) && count is >= 1 and <= uint.MaxValue, "/part_count", "Supply an integer count in 1..4294967295.");
             string number = (string)part!, variantName = (string?)value["part_variant"] ?? "1";
-            var available = (parts ?? throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The parts database reader is unavailable.")).Read(null).Parts;
+            var available = (parts ?? throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The parts database reader is unavailable."))().Parts;
             var matches = available.Where(p => p.PartNumber == number).ToArray();
             if (matches.Length == 0)
             { matches = available.Where(p => string.Equals(p.PartNumber, number, StringComparison.OrdinalIgnoreCase)).ToArray(); }

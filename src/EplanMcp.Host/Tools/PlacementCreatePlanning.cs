@@ -112,7 +112,7 @@ internal static class PlacementCreatePlanning
                 {
                     Number(p.Value, at + "/pen/" + p.Name, -double.MaxValue, double.MaxValue);
                     if (p.Name is "color" or "style" or "line_end")
-                    { Check(p.Value.ValueKind == JsonValueKind.Number && p.Value.TryGetInt32(out int value) && (p.Name != "line_end" && value == -16002 || value >= 0 && value <= (p.Name == "color" ? 255 : p.Name == "style" ? 6 : 2)), at + "/pen/" + p.Name, "requires a supported integer value; line_end is 0..2."); }
+                    { Check(p.Value.ValueKind == JsonValueKind.Number && p.Value.TryGetInt32(out int value) && (p.Name == "line_end" ? value is >= 0 and <= 2 : value is >= short.MinValue and <= short.MaxValue), at + "/pen/" + p.Name, "requires a supported integer value; line_end is 0..2."); }
                 }
             }
             if (IsText(kind))
