@@ -345,7 +345,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 未定原因：2026-11-04 00:42 Pro Panel 在 `PropertyStyle` 测试收尾（工具返回 `INVALID_ARGUMENT` 之后）崩溃一次，`0xc0000409`，`ucrtbase.dll`，快速失败代码 7。修掉那次参数错误后复跑通过，没有再现，EplLog 里也没有相关记录。再次出现时先取转储。
 
 ### A88. 第三轮重绘工具：分组、删除与提交后读回（2026-11-04）
-- 依据负责人提供的 `ExactMatchSpikeTests` 实测记录：`new Block().Create(page, Placement[])` 后 Count 等于图形成员数，Name 可写可读，块外对象不变；成员坐标变为相对块且对象号改变。工具每次仅建一个块，提交后重新取得定位器；块子对象标记相对坐标，绝对 Location/Bounds 留空而不猜测变换。— 已有实测反馈；本轮 Large `BlockCreateTests` 待实测。
+- 依据负责人提供的 `ExactMatchSpikeTests` 实测记录：`new Block().Create(page, Placement[])` 后 Count 等于图形成员数，Name 可写可读，块外对象不变；成员坐标变为相对块且对象号改变。工具每次仅建一个块，提交后重新取得定位器；块子对象标记相对坐标，绝对 Location/Bounds 留空而不猜测变换。— 实测（`BlockCreateTests`）。
 - 安装版本 XML 的 Block.Create 要求至少两个成员，最多一个 SymbolReference；Block.Count 不计该 SymbolReference。前述 Count 等于成员数适用于图形成员；含符号的组合不据此推定。— 官方本地 XML 签名与说明；扩展组合待实测。
 - 多语言页描述通过单次 MultiLangString 写入并逐语言读回；PLC 盒重命名依 A85，用 NameService.RenameDevice，提交后按新标识查找，禁止沿用未放置功能 ID。— 实测（`PageDescriptionMapTests`、`MacroOverviewTests`）不变。
 - `Placement.Remove()` 用于独立 Line/Arc/PolyLine/Rectangle/Text/PathText/Image/MacroBox 的删除；A87 已验证宏框删除不删除引用内容。线和文字的工具链、一事务和单步撤销已实测（`PlacementDeleteTests`）。
