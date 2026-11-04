@@ -2,7 +2,7 @@
   "suites": [
     { "assembly": "EplanMcp.Contracts.Tests", "minPassed": 885 },
     { "assembly": "EplanMcp.Bridge.Core.Tests", "minPassed": 3763 },
-    { "assembly": "EplanMcp.Host.Tests", "minPassed": 4462 },
+    { "assembly": "EplanMcp.Host.Tests", "minPassed": 5028 },
     { "assembly": "EplanMcp.Packs.Tests", "minPassed": 978 },
     { "assembly": "EplanMcp.Evals.Tests", "minPassed": 286 },
     { "assembly": "EplanMcp.Catalog.Tests", "minPassed": 53 },
