@@ -66,7 +66,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
 
             PropertyValueValidation.Qualifiers(change.Property!.Index is { } index ? new JValue(index) : null,
                 change.Language is null ? null : new JValue(change.Language), "", entry, at, violations);
-            if (change.Language is not null && !languages.Contains(change.Language, StringComparer.Ordinal))
+            if (change.Language is not null && change.Language != TextLanguages.Independent && !languages.Contains(change.Language, StringComparer.Ordinal))
             {
                 Add(at + "/language", "Use an existing project language; planning does not add languages.");
             }

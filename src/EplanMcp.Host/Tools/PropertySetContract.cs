@@ -30,7 +30,7 @@ internal static class PropertySetContract
               "response_format":{"enum":["concise","detailed"],"type":"string","default":"concise"},
               "changes":{"type":"array","minItems":1,"maxItems":100,"items":{"type":"object","additionalProperties":false,
                 "required":["target","property","value"],"properties":{"target":{"$ref":"#/$defs/target"},"property":{"$ref":"#/$defs/selector"},
-                  "value":{"type":["string","boolean","integer","number"],"maxLength":500},"language":{"type":"string","pattern":"^[a-z]{2}_[A-Z]{2}$"}}}}}}
+                  "value":{"type":["string","boolean","integer","number"],"maxLength":500},"language":{"type":"string","pattern":"^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"}}}}}}
             """)!;
         schema["$defs"] = JsonNode.Parse(PropertyGetContract.Input.GetRawText())!["$defs"]!.DeepClone();
         return JsonSerializer.SerializeToElement(schema);

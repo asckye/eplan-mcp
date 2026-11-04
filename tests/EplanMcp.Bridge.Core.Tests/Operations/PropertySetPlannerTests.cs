@@ -116,9 +116,19 @@ public sealed class PropertySetPlannerTests
         adapter.AssertDisposed();
     }
 
+    [Fact]
+    public void Plan_LanguageIndependentText_NeedsNoProjectLanguage()
+    {
+        FakePropertyReadAdapter adapter = Adapter();
+        PropertySetPlan plan = Plan(adapter, Change("GND", "??_??"));
+
+        PlannedChange change = Assert.Single(plan.Plan.Changes);
+        Assert.Equal(("independent", "GND"), (change.OldValue, change.NewValue));
+        Assert.Equal("旧文本", PropertyValueComparison.TextIn(plan.Guards[0].After, "zh_CN"));
+    }
+
     [Theory]
     [InlineData(null)]
-    [InlineData("??_??")]
     [InlineData("en_US")]
     [InlineData("zh-CN")]
     [InlineData("de_DE;zh_CN")]

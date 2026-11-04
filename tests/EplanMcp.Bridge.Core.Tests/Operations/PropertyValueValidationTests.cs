@@ -414,7 +414,7 @@ public sealed class PropertyValueValidationTests
     [InlineData("\"zh_CN\"", true)]
     [InlineData("\"en_US\"", true)]
     [InlineData("\"de_DE\"", true)]
-    [InlineData("\"??_??\"", false)]
+    [InlineData("\"??_??\"", true)]
     [InlineData("\"en-US\"", false)]
     [InlineData("\"EN_us\"", false)]
     [InlineData("\"en_US;de_DE\"", false)]
@@ -422,7 +422,7 @@ public sealed class PropertyValueValidationTests
     [InlineData("\"\"", false)]
     [InlineData("null", false)]
     [InlineData("1", false)]
-    public void Qualifiers_MultiLanguage_RequiresSingleExplicitIsoCode(string json, bool valid)
+    public void Qualifiers_MultiLanguage_RequiresSingleIsoCodeOrIndependent(string json, bool valid)
     {
         var violations = new List<PropertyViolation>();
         PropertyValueValidation.Qualifiers(null, Json(json), "", Entry("multi_language"), At, violations);

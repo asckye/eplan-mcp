@@ -137,10 +137,10 @@ public static class PropertyValueValidation
             Add(violations, changePath + "/language", "A supported verified language mode is required.", ErrorReason.PolicyDenied);
         }
         else if (multilingual && (language?.Type != JTokenType.String
-            || !Regex.IsMatch(language.Value<string>()!, @"\A[a-z]{2}_[A-Z]{2}\z", RegexOptions.CultureInvariant))
+            || !Regex.IsMatch(language.Value<string>()!, @"\A([a-z]{2}_[A-Z]{2}|\?\?_\?\?)\z", RegexOptions.CultureInvariant))
             || !multilingual && language is not null)
         {
-            Add(violations, changePath + "/language", "Supply an explicit EPLAN ISO language only for multi-language values.");
+            Add(violations, changePath + "/language", "Supply an explicit EPLAN ISO language or ??_?? only for multi-language values.");
         }
     }
 
