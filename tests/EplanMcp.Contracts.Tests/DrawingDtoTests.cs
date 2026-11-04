@@ -8,6 +8,31 @@ namespace EplanMcp.Contracts.Tests;
 public sealed class DrawingDtoTests
 {
     [Fact]
+    public void GraphicsCreation_BothSerializers_PreserveKindSpecificGeometryAndImageSource()
+    {
+        var request = new PlacementTextCreateArgs
+        {
+            Project = "Line1",
+            Page = "P",
+            Items =
+            [
+                new() { Kind = "polyline", Position = [10, 20], Points = [[10, 20], [30, 40], [50, 20]] },
+                new() { Kind = "arc", Position = [50, 50], RadiusMm = 8, StartAngle = 30, EndAngle = 135 },
+                new() { Kind = "path_text", Position = [30, 50], HeightMm = 3.5, Contents = new() { ["??_??"] = "Motor circuit" } },
+                new() { Kind = "image", Position = [60, 60], EndPosition = [70, 70], File = "fixtures/image.png", FilePath = "resolved-image.png", Sha256 = new('a', 64) }
+            ]
+        };
+        var host = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var bridge = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
+        string json = System.Text.Json.JsonSerializer.Serialize(request, host);
+        PlacementTextCreateArgs fromHost = JsonConvert.DeserializeObject<PlacementTextCreateArgs>(json, bridge)!;
+        string bridgeJson = JsonConvert.SerializeObject(fromHost, bridge);
+        PlacementTextCreateArgs fromBridge = System.Text.Json.JsonSerializer.Deserialize<PlacementTextCreateArgs>(bridgeJson, host)!;
+        Assert.Equal(json, System.Text.Json.JsonSerializer.Serialize(fromBridge, host));
+        Assert.Equal(["polyline", "arc", "path_text", "image"], fromBridge.Items!.Select(i => i.Kind));
+    }
+
+    [Fact]
     public void TextCreation_BothSerializers_PreserveGeometryAndExactLanguageKeys()
     {
         var request = new PlacementTextCreateArgs

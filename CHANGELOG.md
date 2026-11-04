@@ -9,6 +9,7 @@
 - `eplan_macro_insert` 可用 `part` / `part_variant` 代替 `macro`：插入部件的组符号宏，在同一事务中给主功能补上部件引用，提交后读回。
 - `eplan_macro_insert`：宏的声明外框超出可绘制区但仍在已知幅面的页内时只给警告（部件总览宏铺满 A3 页）；插入的对象仍在写入后实测检查。
 
+- `eplan_placement_create` 新增折线、圆弧、路径功能文本和 imports 图片，沿用默认预览、布局守卫、批量读回与单步撤销；EPLAN 实机验证 NOT RUN。
 - Host 审计记录通过共享规则去除敏感键值、认证凭据、URL 用户信息及 PEM 块；审批指纹继续绑定原始参数，审计链基于去敏后的记录计算。
 - Host 控制台、Bridge（含离线 stderr 与启动失败后备日志）及 Workbench 文件日志在写出前复用同一凭据脱敏规则。
 - `eplan_connection_create` 中断点内置默认改为 EPLAN 插入命令使用的 `BP`，支持 SPECIAL 中含一个或多个连接点的全部中断点符号；按匹配连接点选择变体及定位，双连接点读回不再失败。可显式选择 `BPIN`、`BPOUT`、`BPF` 等符号。

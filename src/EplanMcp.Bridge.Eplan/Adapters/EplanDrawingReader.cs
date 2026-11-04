@@ -61,7 +61,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 }
 
                 DrawingPlacement? row = !excluded && (placement is SymbolReference or PropertyPlacement || placement.GetType() == typeof(Text)
-                    || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot) : null;
+                    || placement is PathText or PolyLine or Arc or Image || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot) : null;
                 if (row is not null)
                 {
                     result.Placements.Add(row);
@@ -102,6 +102,20 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             using MultiLangString? contents = placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null };
             string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null;
             string? height = placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null;
+            string? imagePath = null;
+            Dictionary<string, string?> graphics;
+            try
+            {
+                graphics = placement switch
+                {
+                    PolyLine polyline => new() { ["points"] = JsonConvert.SerializeObject(Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i)))), ["closed"] = polyline.Closed.ToString().ToLowerInvariant() },
+                    Arc arc => new() { ["radius_mm"] = Number(DrawingCoordinates.ApiToMillimetres(arc.Radius)), ["start_angle"] = Number(arc.StartAngle * (180 / Math.PI)), ["end_angle"] = Number(arc.EndAngle * (180 / Math.PI)), ["sector"] = arc.Sector.ToString().ToLowerInvariant() },
+                    Image image => new() { ["file"] = Path.GetFileName(imagePath = PathMap.SubstitutePath(image.FileName, projectPath)) },
+                    _ => [],
+                };
+            }
+            catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+            { WriteExceptionDiagnostics.Report(ex); graphics = new() { ["read_warning"] = "Graphics metadata unavailable; inspect this placement in EPLAN." }; }
             // A75 catalog: DynamicConnectionLine derives from SymbolReference (DMClassId.InternalTypeId = 33),
             // but its wire outline is neither a layout symbol nor a container.
             // Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
@@ -137,6 +151,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 visible = placement is PropertyPlacement visibleProperty ? visibleProperty.IsVisible : (bool?)null,
                 start = placement is Line line ? XY(line.StartPoint) : null,
                 end = placement is Line endLine ? XY(endLine.EndPoint) : null,
+                graphics,
+                imageFile = imagePath,
             }));
             return new DrawingPlacement
             {
@@ -159,7 +175,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     ["visible"] = placement is PropertyPlacement visible ? visible.IsVisible.ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant() : null,
                     ["height_mm"] = height
                 }
-                    .Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),
+                    .Concat(graphics).Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),
                 Kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name, // ContextPropertyPlacement too
                 Location = location,
                 Bounds = bounds,
@@ -191,6 +207,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
     }
 
     private static double[] XY(PointD point) => [DrawingCoordinates.ApiToMillimetres(point.X), DrawingCoordinates.ApiToMillimetres(point.Y)];
+    private static string Number(double value) => value.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
     private static double[]? Optional(Func<double[]?> read)
     {
         try

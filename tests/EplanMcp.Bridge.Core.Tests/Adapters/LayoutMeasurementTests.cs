@@ -15,6 +15,25 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 public sealed class LayoutMeasurementTests
 {
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void UnreadableGraphicsMetadata_WarnsAndKeepsMeasuredGeometry(bool invalidOperation)
+    {
+        var image = new Image { Location = new(40, 40), Bounds = [new(38, 38), new(42, 42)], FileNameError = invalidOperation ? new InvalidOperationException() : new BaseException() };
+        var page = new Page { AllPlacements = [image] };
+        EplanProjects.Project = new(page);
+        try
+        {
+            DrawingPlacement actual = Assert.Single(new EplanDrawingReader().Read("project", page.Name)!.Placements);
+            Assert.Equal("Image", actual.Kind);
+            Assert.Equal([38d, 38d, 42d, 42d], actual.Bounds!);
+            Assert.Contains("metadata unavailable", actual.Properties["read_warning"], StringComparison.Ordinal);
+            Assert.False(actual.Properties.ContainsKey("file"));
+        }
+        finally { EplanProjects.Project = null; }
+    }
+
+    [Theory]
     [InlineData("PLCBox", false)]
     [InlineData("PLCBox", true)]
     [InlineData("BlackBox", true)]

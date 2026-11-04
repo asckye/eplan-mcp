@@ -123,9 +123,9 @@ public static class LayoutGuard
                     { Add("R3", p, q.Locator, "Text overlaps within the same owner; symbol-default positions may need adjustment.", true); }
                     continue;
                 }
-                if ((Symbol(p) || Container(p)) && (Symbol(q) || Container(q)) && (Overlaps(b, q.Bounds!, model.Config.SymbolClearanceMm) || p.Bounds is null && p.Location.SequenceEqual(q.Location)))
+                if ((Symbol(p) || Graphic(p) || Container(p)) && (Symbol(q) || Graphic(q) || Container(q)) && (Overlaps(b, q.Bounds!, model.Config.SymbolClearanceMm) || p.Bounds is null && p.Location.SequenceEqual(q.Location)))
                 { Add("R2", p, q.Locator, "A symbol outline conflicts with another placement. A moved outline conflicts with another placement."); }
-                if ((Text(p) && (Text(q) || Symbol(q) || Container(q) || q.Kind == "Line") || Text(q) && (Symbol(p) || Container(p) || p.Kind == "Line")) && overlap)
+                if ((Text(p) && (Text(q) || Symbol(q) || Graphic(q) || Container(q) || q.Kind == "Line") || Text(q) && (Symbol(p) || Graphic(p) || Container(p) || p.Kind == "Line")) && overlap)
                 { TextConflict(p, q, "Text bounds conflict with another text, symbol or line."); }
                 if (q.Properties.TryGetValue("cross_reference", out string? cross) && cross == "true" && overlap)
                 { Add("R9", p, q.Locator, "Keep clear of existing cross-reference text."); }
@@ -324,7 +324,8 @@ public static class LayoutGuard
     public static Model From(ConnectionCreatePlanner.Scene scene) => new() { Page = scene.Page, Config = scene.Layout, Pins = new(scene.Pins), PointRoutes = scene.PointRoutes, PointRouteGaps = scene.PointRouteGaps, Lines = scene.Graphical.Select((s, i) => new Segment { Points = s, Net = null, Locator = new() { Oid = -i - 1 } }).ToList() };
     public static DrawingPlacement Proposed(string kind, double[] location, double[]? bounds, int index = 0) => new() { Kind = kind, Location = location, Bounds = bounds, Locator = new() { Oid = -index - 1 } };
     public static bool Overlaps(double[] a, double[] b, double clearance = 0) => a[0] < b[2] + clearance && a[2] + clearance > b[0] && a[1] < b[3] + clearance && a[3] + clearance > b[1];
-    private static bool Text(DrawingPlacement p) => p.Kind is "Text" or "PropertyPlacement";
+    private static bool Text(DrawingPlacement p) => p.Kind is "Text" or "PathText" or "PropertyPlacement";
+    private static bool Graphic(DrawingPlacement p) => p.Kind is "PolyLine" or "Arc" or "Image";
     private static bool Container(DrawingPlacement p) => p.Properties.TryGetValue("layout_container", out string? value) && value == "true" || p.Kind is "LocationBox" or "PLC" or "PLCBox" or "Box";
     private static bool Symbol(DrawingPlacement p) => p.Kind != "DynamicConnectionLine" && !Container(p) && (p.Kind is "Function" or "SymbolReference" or "PotentialDefinition" or "ConnectionDefinitionPoint" or "Macro" || p.Properties.ContainsKey("layout_symbol"));
     private static bool OwnerId(DrawingLocator a, DrawingLocator b) => ProjectResolver.SamePath(a.Project, b.Project) && a.Page == b.Page && a.Type == b.Type && a.Oid == b.Oid;

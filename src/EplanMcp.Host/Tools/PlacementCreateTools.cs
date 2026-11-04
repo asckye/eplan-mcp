@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Importing;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -16,7 +17,7 @@ internal sealed class PlacementCreateTools
     public const string Tool = "eplan_placement_create";
 
     [McpServerTool(Name = Tool, ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
-    public static async Task<CallToolResult> CreateAsync(IBridgeClient bridge, WritePipeline pipeline, RequestContext<CallToolRequestParams> context,
+    public static async Task<CallToolResult> CreateAsync(IBridgeClient bridge, WritePipeline pipeline, ImportFiles files, RequestContext<CallToolRequestParams> context,
         [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
@@ -26,7 +27,7 @@ internal sealed class PlacementCreateTools
         { BridgeError error = ToolResults.InvalidArgumentError(problems); error.Execution = ExecutionState.NotStarted; return ToolResults.Error(error); }
         PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, input, cancellationToken).ConfigureAwait(false);
         if (WriteToolDefaults.IsPreview(input))
-        { return display.Apply(await PlacementCreatePlanning.PreviewAsync(bridge, input, cancellationToken: cancellationToken).ConfigureAwait(false)); }
+        { return display.Apply(await PlacementCreatePlanning.PreviewAsync(bridge, input, cancellationToken: cancellationToken, files: files).ConfigureAwait(false)); }
         try
         {
             OpenProject project = (await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet,
@@ -42,20 +43,8 @@ internal sealed class PlacementCreateTools
             var rows = new JsonArray();
             foreach (JsonElement item in input.GetProperty("items").EnumerateArray())
             {
-                JsonNode actual = JsonNode.Parse(item.GetRawText())!;
-                string kind = item.GetProperty("kind").GetString()!, field = kind == "text" ? "position" : kind == "line" ? "points" : "corners";
-                double[][] points = kind == "text" ? [item.GetProperty(field).EnumerateArray().Select(n => n.GetDouble()).ToArray()]
-                    : item.GetProperty(field).EnumerateArray().Select(p => p.EnumerateArray().Select(n => n.GetDouble()).ToArray()).ToArray();
-                if (!double.IsFinite(geometry.GridSize) || geometry.GridSize <= 0)
-                { throw new BridgeCallException(new BridgeError { Reason = ErrorReason.CapabilityMissing, Message = "A reliable page grid is required." }); }
-                foreach (double[] point in points)
-                { for (int i = 0; i < 2; i++) { point[i] = snap ? Math.Round(point[i] / geometry.GridSize, MidpointRounding.AwayFromZero) * geometry.GridSize : point[i]; } }
-                if (points.SelectMany(p => p).Any(n => !double.IsFinite(n) || n is < 0 or > 10000))
-                { throw new BridgeCallException(ToolResults.InvalidArgumentError(["/items: snapped coordinates must be finite and in 0..10000 mm."])); }
-                if (kind == "rectangle")
-                { points = [[points.Min(p => p[0]), points.Min(p => p[1])], [points.Max(p => p[0]), points.Max(p => p[1])]]; }
-                actual[field] = kind == "text" ? JsonSerializer.SerializeToNode(points[0]) : JsonSerializer.SerializeToNode(points);
-                args.Items.Add(new() { Kind = kind, Position = points[0], EndPosition = kind == "text" ? [] : points[1], HeightMm = kind == "text" ? item.GetProperty("height_mm").GetDouble() : 0, Contents = kind == "text" ? item.GetProperty("contents").Deserialize<Dictionary<string, string>>()! : [] });
+                JsonNode actual = PlacementCreatePlanning.Snap(item, geometry.GridSize, snap);
+                args.Items.Add(await PlacementCreatePlanning.RequestAsync(JsonSerializer.SerializeToElement(actual), files, cancellationToken).ConfigureAwait(false));
                 rows.Add(new JsonObject { ["requested"] = JsonNode.Parse(item.GetRawText()), ["actual"] = actual, ["bounds"] = null, ["snapped"] = !JsonElement.DeepEquals(item, JsonSerializer.SerializeToElement(actual)) });
             }
             PlacementTextCreateData checkedLayout = await bridge.InvokeAsync<PlacementTextCreateArgs, PlacementTextCreateData>(OperationNames.PlacementTextCreatePlan, args, cancellationToken).ConfigureAwait(false);
@@ -73,6 +62,7 @@ internal sealed class PlacementCreateTools
             result["recovered"] = outcome.Recovered;
             return display.Apply(ToolResults.Success("Created text/graphics; one Ctrl+Z undoes the batch.", ContextBuilder.Clean(result)));
         }
+        catch (ImportFileException ex) { return display.Apply(ToolResults.Error(ex.Error)); }
         catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return display.Apply(ToolResults.Error(ex.Error)); }
     }
 }

@@ -13,13 +13,20 @@ internal static class PlacementCreateContract
           "snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},"show_page":{"type":"boolean","default":false,"description":"Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."},
           "response_format":{"type":"string","enum":["concise","detailed"],"default":"concise"}},"$defs":{
           "point":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number","minimum":0,"maximum":10000}},
+          "points":{"type":"array","minItems":2,"items":{"$ref":"#/$defs/point"}},
           "pair":{"type":"array","minItems":2,"maxItems":2,"items":{"$ref":"#/$defs/point"}},
           "item":{"oneOf":[
             {"type":"object","additionalProperties":false,"required":["kind","position","contents","height_mm"],"properties":{
               "kind":{"const":"text"},"position":{"$ref":"#/$defs/point"},"height_mm":{"type":"number","minimum":0.5,"maximum":100},
               "contents":{"type":"object","minProperties":1,"propertyNames":{"minLength":5,"maxLength":5,"pattern":"^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"},"additionalProperties":{"type":"string","minLength":1,"maxLength":500}}}},
+            {"type":"object","additionalProperties":false,"required":["kind","position","contents","height_mm"],"properties":{
+              "kind":{"const":"path_text"},"position":{"$ref":"#/$defs/point"},"height_mm":{"type":"number","minimum":0.5,"maximum":100},
+              "contents":{"type":"object","minProperties":1,"propertyNames":{"minLength":5,"maxLength":5,"pattern":"^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"},"additionalProperties":{"type":"string","minLength":1,"maxLength":500}}}},
             {"type":"object","additionalProperties":false,"required":["kind","points"],"properties":{"kind":{"const":"line"},"points":{"$ref":"#/$defs/pair"}}},
-            {"type":"object","additionalProperties":false,"required":["kind","corners"],"properties":{"kind":{"const":"rectangle"},"corners":{"$ref":"#/$defs/pair"}}}
+            {"type":"object","additionalProperties":false,"required":["kind","corners"],"properties":{"kind":{"const":"rectangle"},"corners":{"$ref":"#/$defs/pair"}}},
+            {"type":"object","additionalProperties":false,"required":["kind","points"],"properties":{"kind":{"const":"polyline"},"points":{"$ref":"#/$defs/points"}}},
+            {"type":"object","additionalProperties":false,"required":["kind","center","radius_mm","start_angle","end_angle"],"properties":{"kind":{"const":"arc"},"center":{"$ref":"#/$defs/point"},"radius_mm":{"type":"number","exclusiveMinimum":0,"maximum":10000},"start_angle":{"type":"number"},"end_angle":{"type":"number"}}},
+            {"type":"object","additionalProperties":false,"required":["kind","file","corners"],"properties":{"kind":{"const":"image"},"file":{"type":"string","minLength":1},"corners":{"$ref":"#/$defs/pair"}}}
           ]}}}
         """).RootElement.Clone();
 
@@ -36,7 +43,7 @@ internal static class PlacementCreateContract
     {
         Name = "eplan_placement_create",
         Title = "Create text and graphics on an EPLAN page",
-        Description = "Creates text/line/rectangle on a Circuit page; mm, bottom left, y up. Omit dry_run to preview; false executes. One undo; approval outside scratch. " +
+        Description = "Creates text, line, rectangle, polyline, arc, path_text or image on a Circuit page; mm, bottom left, y up; arc angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Omit dry_run to preview; false executes. One undo; approval outside scratch. " +
             "Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). " +
             "Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
         InputSchema = Input,
@@ -50,7 +57,7 @@ internal static class PlacementCreateContract
         tool.Title = Definition.Title;
         tool.Description = Definition.Description;
         tool.InputSchema = JsonDocument.Parse("""
-            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle"]},"position":{"type":"array"},"points":{"type":"array"},"corners":{"type":"array"},"contents":{"type":"object","additionalProperties":{"type":"string"}},"height_mm":{"type":"number"}}}},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},"show_page":{"type":"boolean","default":false,"description":"Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
+            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle","path_text","polyline","arc","image"]},"position":{"type":"array"},"points":{"type":"array"},"corners":{"type":"array"},"center":{"type":"array"},"contents":{"type":"object"},"height_mm":{"type":"number"},"radius_mm":{"type":"number"},"start_angle":{"type":"number"},"end_angle":{"type":"number"},"file":{"type":"string"}}}},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true},"show_page":{"type":"boolean","default":false,"description":"Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
             """).RootElement.Clone();
         tool.OutputSchema = Definition.OutputSchema;
     }

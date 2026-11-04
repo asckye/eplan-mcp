@@ -3,7 +3,7 @@
   "tool": {
     "name": "eplan_placement_create",
     "title": "Create text and graphics on an EPLAN page",
-    "description": "Creates text/line/rectangle on a Circuit page; mm, bottom left, y up. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
+    "description": "Creates text, line, rectangle, polyline, arc, path_text or image on a Circuit page; mm, bottom left, y up; arc angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
     "inputSchema": {
       "type": "object",
       "additionalProperties": false,
@@ -34,7 +34,11 @@
                 "enum": [
                   "text",
                   "line",
-                  "rectangle"
+                  "rectangle",
+                  "path_text",
+                  "polyline",
+                  "arc",
+                  "image"
                 ]
               },
               "position": {
@@ -46,14 +50,26 @@
               "corners": {
                 "type": "array"
               },
+              "center": {
+                "type": "array"
+              },
               "contents": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                }
+                "type": "object"
               },
               "height_mm": {
                 "type": "number"
+              },
+              "radius_mm": {
+                "type": "number"
+              },
+              "start_angle": {
+                "type": "number"
+              },
+              "end_angle": {
+                "type": "number"
+              },
+              "file": {
+                "type": "string"
               }
             }
           }
@@ -64,8 +80,7 @@
         },
         "dry_run": {
           "type": "boolean",
-          "default": true,
-          "description": "Omit/true previews; false executes."
+          "default": true
         },
         "show_page": {
           "type": "boolean",
@@ -206,6 +221,13 @@
             "maximum": 10000
           }
         },
+        "points": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/point"
+          }
+        },
         "pair": {
           "type": "array",
           "minItems": 2,
@@ -228,6 +250,43 @@
               "properties": {
                 "kind": {
                   "const": "text"
+                },
+                "position": {
+                  "$ref": "#/$defs/point"
+                },
+                "height_mm": {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 100
+                },
+                "contents": {
+                  "type": "object",
+                  "minProperties": 1,
+                  "propertyNames": {
+                    "minLength": 5,
+                    "maxLength": 5,
+                    "pattern": "^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"
+                  },
+                  "additionalProperties": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "position",
+                "contents",
+                "height_mm"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "path_text"
                 },
                 "position": {
                   "$ref": "#/$defs/point"
@@ -284,6 +343,73 @@
                   "$ref": "#/$defs/pair"
                 }
               }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "points"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "polyline"
+                },
+                "points": {
+                  "$ref": "#/$defs/points"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "center",
+                "radius_mm",
+                "start_angle",
+                "end_angle"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "arc"
+                },
+                "center": {
+                  "$ref": "#/$defs/point"
+                },
+                "radius_mm": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 10000
+                },
+                "start_angle": {
+                  "type": "number"
+                },
+                "end_angle": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "file",
+                "corners"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "image"
+                },
+                "file": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "corners": {
+                  "$ref": "#/$defs/pair"
+                }
+              }
             }
           ]
         }
@@ -296,5 +422,5 @@
       "readOnlyHint": false
     }
   },
-  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"items\":[{\"kind\":\"text\",\"position\":[10,20],\"contents\":{\"??_??\":\"Panel\"},\"height_mm\":3},{\"kind\":\"line\",\"points\":[[10,10],[30,10]]},{\"kind\":\"rectangle\",\"corners\":[[5,5],[40,30]]}]}\n```\n## Workflow\nOmitting dry_run (or true) previews only: no approval, no project/file writes, execution=not_started. Call again with dry_run:false to execute; preview hint explains this step.\nFull profile. Execution creates the complete batch atomically, reads every item back and supports one-step undo; outside scratch needs approval. Never repeat a committed or unknown call. A failed batch rolls back everything without an undo step.\n## Fields\nOne Circuit page, 1-50 items; coordinates in mm, bottom-left origin, y up, 0-10000. snap_to_grid defaults true; the preview reports requested and actual geometry plus full bounds. Text height is 0.5-100 mm, at most 500 characters across explicit languages. Never mix ??_?? with languages. Supply ??_?? or at least the project display language: other text is invisible (A54). Lines are graphics. No connection generation. concise/detailed budgets are 5k/20k, with complete impact lists.\n## Errors\nINVALID_ARGUMENT reports JSON Pointer violations for schema, languages or full-outline bounds. CAPABILITY_MISSING reports missing reliable page geometry or display language. Preflight failures and previews report execution=not_started; failed writes report rolled_back or unknown. Execution reports boundarySource=unverified and bounds=null: the result warning reports the page-size-minus-margin fallback and measured containment checks. Use reliable text measurements; plot-frame size and character-count estimates are not fallbacks.\nLayout preflight refuses R1-R5/R8 with a rule and, when available, a suggested grid position. R6/R7/R9 are warnings unless layout.strict is enabled. Boundary fallback uses Page.Size minus layout.marginMm. Incomplete prediction is allowed: check insertion points, known outlines and routes before writing; measure symbols and property texts in the same call before commit and roll back violations. Results report both check stages and the fallback; refusals include measured geometry and nearest free positions in metadata.layoutViolations/layoutChecks. Connection geometry available only after commit uses existing undo compensation.\n"
+  "usage": "## Examples\n```json\n{\"project\":\"Line1\",\"page\":\"P\",\"items\":[{\"kind\":\"text\",\"position\":[10,20],\"contents\":{\"??_??\":\"Panel\"},\"height_mm\":3},{\"kind\":\"line\",\"points\":[[10,10],[30,10]]},{\"kind\":\"rectangle\",\"corners\":[[5,5],[40,30]]}]}\n```\n## Workflow\nOmitting dry_run (or true) previews only: no approval, no project/file writes, execution=not_started. Call again with dry_run:false to execute; preview hint explains this step.\nFull profile. Execution creates the complete batch atomically, reads every item back and supports one-step undo; outside scratch needs approval. Never repeat a committed or unknown call. A failed batch rolls back everything without an undo step.\n## Fields\nOne Circuit page, 1-50 items; coordinates in mm, bottom-left origin, y up, 0-10000. snap_to_grid defaults true; the preview reports requested and actual geometry plus full bounds. Text height is 0.5-100 mm, at most 500 characters across explicit languages. Never mix ??_?? with languages. Supply ??_?? or at least the project display language: other text is invisible (A54). Kinds: text, line, rectangle, polyline, arc, path_text, image. Polyline points require at least two vertices and remain open. Arc uses center, positive radius_mm and start_angle/end_angle in degrees; its guarded bounds cover the full circle. Path_text is native path function text for device function descriptions and reports; it takes the same position/height_mm/contents as text. Image takes file (relative to imports, .png/.jpg/.jpeg/.bmp/.emf/.wmf) and corners (two opposite points). Absolute paths, traversal and links are rejected. Lines are graphics. No connection generation. concise/detailed budgets are 5k/20k, with complete impact lists.\n## Errors\nINVALID_ARGUMENT reports JSON Pointer violations for schema, languages or full-outline bounds. CAPABILITY_MISSING reports missing reliable page geometry or display language. Preflight failures and previews report execution=not_started; failed writes report rolled_back or unknown. Execution reports boundarySource=unverified and bounds=null: the result warning reports the page-size-minus-margin fallback and measured containment checks. Use reliable text measurements; plot-frame size and character-count estimates are not fallbacks.\nLayout preflight refuses R1-R5/R8 with a rule and, when available, a suggested grid position. R6/R7/R9 are warnings unless layout.strict is enabled. Boundary fallback uses Page.Size minus layout.marginMm. Incomplete prediction is allowed: check insertion points, known outlines and routes before writing; measure symbols and property texts in the same call before commit and roll back violations. Results report both check stages and the fallback; refusals include measured geometry and nearest free positions in metadata.layoutViolations/layoutChecks. Connection geometry available only after commit uses existing undo compensation.\n"
 }

@@ -3,7 +3,7 @@ namespace EplanMcp.Contracts;
 /// <summary>Detached primitive geometry and optional text contents, in millimetres (A3/A54).</summary>
 public sealed class PlacementText
 {
-    /// <summary>Primitive kind: text (default), line or rectangle; retained type name for the staged TEXT contract.</summary>
+    /// <summary>Primitive kind; retained type name for the staged TEXT contract.</summary>
     public string Kind { get; set; } = "text";
     /// <summary>Second endpoint or normalized upper-right corner; empty for text.</summary>
     public double[] EndPosition { get; set; } = [];
@@ -13,4 +13,18 @@ public sealed class PlacementText
     public double HeightMm { get; set; }
     /// <summary>Exact stored entries keyed by ISO language code or ??_??; project data, not instructions.</summary>
     public Dictionary<string, string> Contents { get; set; } = [];
+    /// <summary>Ordered vertices of an open polyline.</summary>
+    public double[][] Points { get; set; } = [];
+    /// <summary>Arc radius in millimetres; Position is its centre.</summary>
+    public double RadiusMm { get; set; }
+    /// <summary>Arc start angle in degrees.</summary>
+    public double StartAngle { get; set; }
+    /// <summary>Arc end angle in degrees.</summary>
+    public double EndAngle { get; set; }
+    /// <summary>Image name relative to imports.</summary>
+    public string File { get; set; } = "";
+    /// <summary>Host-resolved source path; cleared from operation results.</summary>
+    public string FilePath { get; set; } = "";
+    /// <summary>Host-observed image digest.</summary>
+    public string Sha256 { get; set; } = "";
 }

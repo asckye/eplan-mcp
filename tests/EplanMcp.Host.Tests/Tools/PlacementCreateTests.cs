@@ -28,7 +28,7 @@ public sealed class PlacementCreateTests
         Assert.True(fields.GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.Equal((1, 50), (fields.GetProperty("items").GetProperty("minItems").GetInt32(), fields.GetProperty("items").GetProperty("maxItems").GetInt32()));
         JsonElement[] branches = [.. input.GetProperty("$defs").GetProperty("item").GetProperty("oneOf").EnumerateArray()];
-        Assert.Equal(["text", "line", "rectangle"], branches.Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));
+        Assert.Equal(["text", "path_text", "line", "rectangle", "polyline", "arc", "image"], branches.Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));
         Assert.All(branches, b => Assert.False(b.GetProperty("additionalProperties").GetBoolean()));
         JsonElement height = branches[0].GetProperty("properties").GetProperty("height_mm");
         Assert.Equal((0.5, 100), (height.GetProperty("minimum").GetDouble(), height.GetProperty("maximum").GetDouble()));
@@ -155,7 +155,7 @@ public sealed class PlacementCreateTests
     [Fact]
     public async Task Bounds_RejectsFullTextOutlineEvenWithInsertionInsidePage()
     {
-        CallToolResult result = await PlacementCreatePlanning.PreviewAsync(Bridge(), Input(Text), "en_US", _ => [15, 25, 101, 30], TestContext.Current.CancellationToken);
+        CallToolResult result = await PlacementCreatePlanning.PreviewAsync(Bridge(), Input(Text), "en_US", _ => [15, 25, 101, 30], cancellationToken: TestContext.Current.CancellationToken);
         Assert.Contains("/items/0:", Error(result).GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
     }
 
@@ -196,7 +196,7 @@ public sealed class PlacementCreateTests
     {
         foreach (double[]? outline in new double[]?[] { null, [], [1, 2, double.NaN, 4], [20, 20, 10, 10] })
         {
-            CallToolResult result = await PlacementCreatePlanning.PreviewAsync(Bridge(), Input(Text), "en_US", _ => outline, TestContext.Current.CancellationToken);
+            CallToolResult result = await PlacementCreatePlanning.PreviewAsync(Bridge(), Input(Text), "en_US", _ => outline, cancellationToken: TestContext.Current.CancellationToken);
             Assert.NotEqual(true, result.IsError);
         }
     }
@@ -250,7 +250,7 @@ public sealed class PlacementCreateTests
             JsonElement p = text.GetProperty("position");
             double x = p[0].GetDouble(), y = p[1].GetDouble();
             return [x, y, x + 20, y + 5];
-        }, TestContext.Current.CancellationToken);
+        }, cancellationToken: TestContext.Current.CancellationToken);
 
     internal static JsonElement Data(CallToolResult result)
     {

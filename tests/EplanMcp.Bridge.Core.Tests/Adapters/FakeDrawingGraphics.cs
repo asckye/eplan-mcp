@@ -24,7 +24,7 @@ internal abstract class TextBase(long oid) : Placement(oid)
     public bool IsVisible { get; set; } = true;
 }
 
-internal sealed class Text(long oid = 99) : TextBase(oid)
+internal class Text(long oid = 99) : TextBase(oid)
 {
     public void Create(Page page, MultiLangString contents, double height)
     {
@@ -32,6 +32,35 @@ internal sealed class Text(long oid = 99) : TextBase(oid)
         Contents = new(contents.GetAsString());
         page.AllPlacements = [.. page.AllPlacements, this];
     }
+}
+
+internal sealed class PathText(long oid = 102) : Text(oid);
+
+internal sealed class PolyLine(long oid = 103) : Placement(oid)
+{
+    private readonly List<PointD> _points = [];
+    public int NumberOfPoints => _points.Count;
+    public bool Closed { get; set; }
+    public void Create(Page page) => page.AllPlacements = [.. page.AllPlacements, this];
+    public PointD GetPointAt(int index) => _points[index];
+    public void SetPointAt(int index, ref PointD point)
+    {
+        if (index == _points.Count)
+        { _points.Add(point); }
+        else
+        { _points[index] = point; }
+    }
+}
+
+internal sealed class Arc(long oid = 104) : Placement(oid)
+{
+    public double Radius { get; private set; }
+    public double StartAngle { get; private set; }
+    public double EndAngle { get; private set; }
+    public bool Sector { get; private set; }
+    public void Create(Page page) => page.AllPlacements = [.. page.AllPlacements, this];
+    public void SetArc(PointD center, double radius, double startAngle, double endAngle, bool asPie)
+    { Location = center; Radius = radius; StartAngle = startAngle; EndAngle = endAngle; Sector = asPie; }
 }
 
 internal class PropertyPlacement(long oid = 99, Placement? parent = null) : TextBase(oid)
@@ -76,7 +105,7 @@ internal sealed class Line(long oid = 100) : Placement(oid)
     }
 }
 
-internal sealed class Rectangle(long oid = 101) : Placement(oid)
+internal class Rectangle(long oid = 101) : Placement(oid)
 {
     public PointD LowerLeftCorner { get; private set; }
     public PointD UpperRightCorner { get; private set; }
@@ -87,6 +116,17 @@ internal sealed class Rectangle(long oid = 101) : Placement(oid)
         LowerLeftCorner = lower;
         UpperRightCorner = upper;
     }
+}
+
+internal sealed class Image(long oid = 105) : Rectangle(oid)
+{
+    private string _fileName = "";
+    public Exception? FileNameError { get; set; }
+    public string FileName { get => FileNameError is { } error ? throw error : _fileName; private set => _fileName = value; }
+    public bool CopyToProject { get; private set; }
+    public bool Overwrite { get; private set; }
+    public void Create(Page page, string fileName, PointD start, PointD end, bool copyToProject, bool overwrite)
+    { base.Create(page); SetArea(start, end); FileName = fileName; CopyToProject = copyToProject; Overwrite = overwrite; }
 }
 
 internal struct Pen

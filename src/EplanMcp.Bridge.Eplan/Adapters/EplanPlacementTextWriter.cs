@@ -15,7 +15,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         MainThread.Assert();
         if (Find(projectPath, page).PageType != DocumentTypeManager.DocumentType.Circuit)
         { throw WriteArguments.Invalid(["/page must be an exact Circuit page from eplan_page_list."]); }
-        if (text.Kind != "text")
+        if (text.Kind is not ("text" or "path_text"))
         { return; }
         foreach (string language in text.Contents.Keys)
         {
@@ -41,9 +41,34 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         OperationContext.Current.ThrowIfCancellationRequested();
         PointD Point(double[] xy) => new(DrawingCoordinates.MillimetresToApi(xy[0]), DrawingCoordinates.MillimetresToApi(xy[1]));
         double[] XY(PointD point) => [DrawingCoordinates.ApiToMillimetres(point.X), DrawingCoordinates.ApiToMillimetres(point.Y)];
-        if (text.Kind != "text")
+        if (text.Kind is not ("text" or "path_text"))
         {
 #pragma warning disable CA2000 // A39/A54/A55: placements belong to the project, including on rollback.
+            if (text.Kind == "polyline")
+            {
+                var polyline = new PolyLine();
+                polyline.Create(Find(projectPath, page));
+                for (int i = 0; i < text.Points.Length; i++)
+                { PointD point = Point(text.Points[i]); polyline.SetPointAt(i, ref point); }
+                polyline.Closed = false;
+                return () => polyline.Closed ? throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Polyline readback is closed.")
+                    : new() { Kind = "polyline", Position = XY(polyline.GetPointAt(0)), Points = Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i))).ToArray() };
+            }
+            if (text.Kind == "arc")
+            {
+                var arc = new Arc();
+                arc.Create(Find(projectPath, page));
+                // XML: equal angles modulo 2*pi close the arc; bAsPie=false requests an arc, not a pie.
+                arc.SetArc(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm), text.StartAngle * (Math.PI / 180), text.EndAngle * (Math.PI / 180), false);
+                return () => new() { Kind = "arc", Position = XY(arc.Location), RadiusMm = DrawingCoordinates.ApiToMillimetres(arc.Radius), StartAngle = arc.StartAngle * (180 / Math.PI), EndAngle = arc.EndAngle * (180 / Math.PI) };
+            }
+            if (text.Kind == "image")
+            {
+                var image = new Image();
+                // XML: reference the checked imports file; neither copy nor overwrite project files.
+                image.Create(Find(projectPath, page), text.FilePath, Point(text.Position), Point(text.EndPosition), false, false);
+                return () => new() { Kind = "image", Position = XY(image.LowerLeftCorner), EndPosition = XY(image.UpperRightCorner), File = text.File, FilePath = PathMap.SubstitutePath(image.FileName, projectPath), Sha256 = text.Sha256 };
+            }
             if (text.Kind == "line")
             {
                 var line = new Line();
@@ -63,9 +88,12 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
             content.AddString(entry.Key == "??_??" ? ISOCode.Language.L___ : code.GetNumber(), entry.Value);
         }
 #pragma warning disable CA2000 // A39/A55: created placements are project-owned; never dispose them after rollback.
-        var created = new Text();
+        Text created = text.Kind == "path_text" ? new PathText() : new Text();
 #pragma warning restore CA2000
-        created.Create(Find(projectPath, page), content, DrawingCoordinates.MillimetresToApi(text.HeightMm));
+        if (created is PathText pathText)
+        { pathText.Create(Find(projectPath, page), content, DrawingCoordinates.MillimetresToApi(text.HeightMm)); }
+        else
+        { created.Create(Find(projectPath, page), content, DrawingCoordinates.MillimetresToApi(text.HeightMm)); }
         created.Location = new PointD(DrawingCoordinates.MillimetresToApi(text.Position[0]), DrawingCoordinates.MillimetresToApi(text.Position[1]));
         return () => Read(created);
     }
@@ -77,6 +105,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         int count = stored.GetLanguageList(ref languages);
         var result = new PlacementText
         {
+            Kind = created is PathText ? "path_text" : "text",
             HeightMm = DrawingCoordinates.ApiToMillimetres(created.Height),
             Position = [DrawingCoordinates.ApiToMillimetres(created.Location.X), DrawingCoordinates.ApiToMillimetres(created.Location.Y)]
         };

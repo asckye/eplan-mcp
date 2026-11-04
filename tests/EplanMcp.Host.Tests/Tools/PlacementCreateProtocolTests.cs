@@ -106,6 +106,52 @@ public sealed class PlacementCreateProtocolTests
         });
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task NewKinds_UseAllThreeDryRunPathsAndExactBridgeRequests(bool? dryRun)
+    {
+        await WithClient(async (client, harness, store) =>
+        {
+            string folder = Directory.CreateDirectory(Path.Combine(harness.Locations.Imports, "graphics")).FullName;
+            await File.WriteAllBytesAsync(Path.Combine(folder, "test.png"), [137, 80, 78, 71], Token);
+            Dictionary<string, object?> args = Args();
+            if (dryRun.HasValue)
+            { args["dry_run"] = dryRun.Value; }
+            else
+            { args.Remove("dry_run"); }
+            args["items"] = JsonSerializer.Deserialize<JsonElement>("[" + PlacementGraphicsTests.Graphics + "]");
+            JsonElement result = WriteToolHarness.Structured(await client.CallToolAsync(PlacementCreateTools.Tool, args, cancellationToken: Token));
+            bool preview = dryRun != false;
+            Assert.Equal(preview, result.GetProperty("dryRun").GetBoolean());
+            Assert.Equal(preview ? ExecutionState.NotStarted : ExecutionState.Committed, result.GetProperty("execution").GetString());
+            PlacementTextCreateArgs request = Assert.IsType<PlacementTextCreateArgs>(harness.Bridge.Calls.Single(c => c.Operation == OperationNames.PlacementTextCreatePlan).Args);
+            Assert.Equal(["polyline", "arc", "path_text", "image"], request.Items!.Select(i => i.Kind));
+            Assert.Equal([10d, 10d], request.Items![0].Position);
+            Assert.Equal(3, request.Items![0].Points.Length);
+            Assert.Equal([20d, 15d], request.Items![0].Points[1]);
+            Assert.Equal([30d, 10d], request.Items![0].Points[2]);
+            Assert.Equal([50d, 50d], request.Items![1].Position);
+            Assert.Equal((5d, 30d, 120d), (request.Items![1].RadiusMm, request.Items![1].StartAngle, request.Items![1].EndAngle));
+            Assert.Equal([60d, 70d], request.Items![2].Position);
+            Assert.Equal(3.5, request.Items![2].HeightMm);
+            Assert.Equal("Function", request.Items![2].Contents["??_??"]);
+            Assert.Equal([70d, 10d], request.Items![3].Position);
+            Assert.Equal([80d, 20d], request.Items![3].EndPosition);
+            Assert.Equal("graphics/test.png", request.Items![3].File);
+            Assert.Equal(Path.Combine(folder, "test.png"), request.Items![3].FilePath);
+            Assert.Equal(64, request.Items![3].Sha256.Length);
+            Assert.Equal(preview ? 0 : 1, harness.Bridge.Writes.Count);
+            Assert.Equal(preview ? 0 : 4, store.Items.Count);
+            if (!preview)
+            {
+                PlacementTextCreateArgs executed = Assert.IsType<PlacementTextCreateArgs>(harness.Bridge.Calls.Single(c => c.Operation == OperationNames.PlacementTextCreateExecute).Args);
+                Assert.Equal(JsonSerializer.Serialize(request.Items), JsonSerializer.Serialize(executed.Items));
+            }
+        });
+    }
+
     private static Dictionary<string, object?> Args() => new()
     {
         ["project"] = "Line1",
