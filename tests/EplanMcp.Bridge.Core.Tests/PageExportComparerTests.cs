@@ -230,6 +230,110 @@ public sealed class PageExportComparerTests
         Assert.Equal(["parentFunction.name", "parentFunction.oid"], Assert.Single(result.Types["Function"].Different).Fields.Select(field => field.Field));
     }
 
+    [Fact]
+    public void Compare_BlockMembersAndOwners_AreRemappedThroughPairedObjects()
+    {
+        const string source = """
+            {"placements":[
+              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2,3]},
+              {"type":"Line","oid":2,"blockOid":1,"location":{"x":10,"y":0}},
+              {"type":"Line","oid":3,"blockOid":1,"location":{"x":20,"y":0}}
+            ]}
+            """;
+        const string target = """
+            {"placements":[
+              {"type":"Block","oid":100,"location":{"x":0,"y":0},"memberOids":[300,200]},
+              {"type":"Line","oid":200,"blockOid":100,"location":{"x":10,"y":0}},
+              {"type":"Line","oid":300,"blockOid":100,"location":{"x":20,"y":0}}
+            ]}
+            """;
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+        Assert.False(result.HasDifferences);
+        Assert.True(result.IsComplete);
+        Assert.Single(result.Types["Block"].Matched);
+        Assert.Equal(2, result.Types["Line"].Matched.Count);
+    }
+
+    [Fact]
+    public void Compare_BlockMembershipChange_IsNotHiddenByIdRemapping()
+    {
+        const string source = """
+            {"placements":[
+              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2]},
+              {"type":"Block","oid":4,"location":{"x":30,"y":0},"memberOids":[3]},
+              {"type":"Line","oid":2,"blockOid":1,"location":{"x":10,"y":0}},
+              {"type":"Line","oid":3,"blockOid":4,"location":{"x":20,"y":0}}
+            ]}
+            """;
+        JObject target = JObject.Parse(source);
+        target["placements"]![0]!["memberOids"] = new JArray(3);
+        target["placements"]![1]!["memberOids"] = new JArray(2);
+        target["placements"]![2]!["blockOid"] = 4;
+        target["placements"]![3]!["blockOid"] = 1;
+        PageExportComparison result = PageExportComparer.Compare(JObject.Parse(source), target);
+        Assert.True(result.IsComplete);
+        Assert.Equal(2, result.Types["Block"].Different.Count);
+        Assert.All(result.Types["Block"].Different, difference => Assert.Equal("memberOids[0]", Assert.Single(difference.Fields).Field));
+        Assert.Equal(2, result.Types["Line"].Different.Count);
+        Assert.All(result.Types["Line"].Different, difference => Assert.Equal("blockOid", Assert.Single(difference.Fields).Field));
+    }
+
+    [Fact]
+    public void Compare_UnpairedBlockMembers_PreserveEvidenceAndWarn()
+    {
+        const string source = """{"placements":[{"type":"Block","oid":1,"memberOids":[2]}]}""";
+        const string target = """{"placements":[{"type":"Block","oid":100,"memberOids":[200]}]}""";
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+        Assert.False(result.IsComplete);
+        Assert.Equal(2, result.Warnings.Count);
+        PageExportFieldDifference difference = Assert.Single(Assert.Single(result.Types["Block"].Different).Fields);
+        Assert.Equal("memberOids[0]", difference.Field);
+        Assert.Equal(2, (int)difference.Source!);
+        Assert.Equal(200, (int)difference.Target!);
+    }
+
+    [Fact]
+    public void Compare_ContextPropertyPlacement_RequiresThePairedParent()
+    {
+        const string source = """
+            {"placements":[
+              {"type":"Function","oid":1,"name":"-A","location":{"x":0,"y":0}},
+              {"type":"Function","oid":2,"name":"-B","location":{"x":5,"y":0}},
+              {"type":"ContextPropertyPlacement","oid":3,"parentOid":1,"sourceOid":1,"propertyId":20010,"location":{"x":1,"y":1}}
+            ]}
+            """;
+        JObject target = JObject.Parse(source);
+        target["placements"]![2]!["parentOid"] = 2;
+        PageExportTypeComparison result = PageExportComparer.Compare(JObject.Parse(source), target).Types["ContextPropertyPlacement"];
+        Assert.Single(result.Missing);
+        Assert.Single(result.Extra);
+        Assert.Empty(result.Matched);
+        Assert.Empty(result.Different);
+    }
+
+    [Fact]
+    public void Compare_BlockWithContextPropertyPlacement_ResolvesEveryMember()
+    {
+        const string source = """
+            {"placements":[
+              {"type":"Block","oid":1,"location":{"x":0,"y":0},"memberOids":[2,3]},
+              {"type":"Function","oid":2,"blockOid":1,"name":"-A","location":{"x":10,"y":0}},
+              {"type":"ContextPropertyPlacement","oid":3,"blockOid":1,"parentOid":2,"sourceOid":2,"propertyId":20010,"location":{"x":11,"y":1}}
+            ]}
+            """;
+        const string target = """
+            {"placements":[
+              {"type":"Block","oid":10,"location":{"x":0,"y":0},"memberOids":[30,20]},
+              {"type":"Function","oid":20,"blockOid":10,"name":"-A","location":{"x":10,"y":0}},
+              {"type":"ContextPropertyPlacement","oid":30,"blockOid":10,"parentOid":20,"sourceOid":20,"propertyId":20010,"location":{"x":11,"y":1}}
+            ]}
+            """;
+        PageExportComparison result = PageExportComparer.Compare(source, target);
+        Assert.True(result.IsComplete);
+        Assert.False(result.HasDifferences);
+        Assert.Single(result.Types["ContextPropertyPlacement"].Matched);
+    }
+
     private static string WithoutPlacements()
     {
         JObject page = JObject.Parse(LinePage);

@@ -154,8 +154,19 @@ public sealed partial class PageExportAction : IEplAction
                 Read(row, "signalName", potential, "PotentialDefinition.SignalName", () => potential.SignalName);
                 handled = true;
             }
+            else if (placement is InterruptionPoint or LocationBox || placement.GetType() == typeof(SymbolReference))
+            { handled = true; }
+            else if (placement is Block block)
+            {
+                ReadBlock(block, row);
+                handled = true;
+            }
             if (handled && placement is SymbolReference symbol)
             { ReadSymbol(symbol, row); }
+            if (placement is InterruptionPoint interruption)
+            { ReadInterruption(interruption, row); }
+            if (placement is LocationBox location)
+            { ReadLocationBox(location, row); }
             if (handled)
             {
                 using PlacementPropertyList? properties = Get<PlacementPropertyList?>(row, placement, "Placement.Properties", () => PropertiesOf(placement));
@@ -185,7 +196,10 @@ public sealed partial class PageExportAction : IEplAction
         ConnectionDefinitionPoint point => point.Properties,
         PotentialDefinition potential => potential.Properties,
         Function function => function.Properties,
+        InterruptionPoint interruption => interruption.Properties,
+        LocationBox location => location.Properties,
         SymbolReference symbol => symbol.Properties,
+        Block block => block.Properties,
         _ => placement.Properties,
     };
 
@@ -202,6 +216,11 @@ public sealed partial class PageExportAction : IEplAction
             Read(row, "variantName", variant, "SymbolVariant.VariantNr", () => ((char)('A' + variant.VariantNr)).ToString());
         }
         Read(row, "useLocalPropertyPlacements", symbol, "SymbolReference.UseLocalPropertyPlacements", () => symbol.UseLocalPropertyPlacements);
+        ReadSymbolConnections(symbol, row);
+        Block? block = Get<Block?>(row, symbol, "SymbolReference.Block", () => symbol.Block);
+        if (block is not null)
+        { Read(row, "blockOid", block, "Block.ObjectIdentifier", () => block.ObjectIdentifier); }
+        GC.KeepAlive(block);
         GC.KeepAlive(variant);
         GC.KeepAlive(symbol);
     }

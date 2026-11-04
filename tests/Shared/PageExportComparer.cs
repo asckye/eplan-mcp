@@ -63,8 +63,8 @@ internal static class PageExportComparer
         var sourceIds = new Dictionary<string, string>(StringComparer.Ordinal);
         var targetIds = new Dictionary<string, string>(StringComparer.Ordinal);
         var pairs = new List<ObjectPair>();
-        PairGroups(sourcePlacements.Where(p => Type(p) != "PropertyPlacement"),
-            targetPlacements.Where(p => Type(p) != "PropertyPlacement"), result, pairs, null);
+        PairGroups(sourcePlacements.Where(p => !IsPropertyPlacement(p)),
+            targetPlacements.Where(p => !IsPropertyPlacement(p)), result, pairs, null);
         for (int index = 0; index < pairs.Count; index++)
         {
             ObjectPair pair = pairs[index];
@@ -72,9 +72,16 @@ internal static class PageExportComparer
             AddIdentity(sourceIds, pair.Source["oid"], identity);
             AddIdentity(targetIds, pair.Target["oid"], identity);
         }
-        PairGroups(sourcePlacements.Where(p => Type(p) == "PropertyPlacement"),
-            targetPlacements.Where(p => Type(p) == "PropertyPlacement"), result, pairs,
+        int propertyPairStart = pairs.Count;
+        PairGroups(sourcePlacements.Where(IsPropertyPlacement),
+            targetPlacements.Where(IsPropertyPlacement), result, pairs,
             (left, right) => SameParent(left, right, sourceIds, targetIds));
+        for (int index = propertyPairStart; index < pairs.Count; index++)
+        {
+            string identity = "paired:" + index.ToString(CultureInfo.InvariantCulture);
+            AddIdentity(sourceIds, pairs[index].Source["oid"], identity);
+            AddIdentity(targetIds, pairs[index].Target["oid"], identity);
+        }
 
         PairGroup("Connection", Objects(source["connections"]), Objects(target["connections"]), result, pairs,
             (left, right) => SameEndpoints(left, right));
@@ -102,6 +109,7 @@ internal static class PageExportComparer
     private static bool IsReportPage(JObject page) => (bool?)page["isReportPage"] == true || page["report"] is JContainer { Count: > 0 };
     private static List<JObject> Objects(JToken? value) => value is JArray array ? array.OfType<JObject>().ToList() : [];
     private static string Type(JObject value) => (string?)value["type"] ?? "Unknown";
+    private static bool IsPropertyPlacement(JObject value) => Type(value) is "PropertyPlacement" or "ContextPropertyPlacement";
 
     private static void PairGroups(IEnumerable<JObject> source, IEnumerable<JObject> target, PageExportComparison result,
         List<ObjectPair> pairs, Func<JObject, JObject, bool>? additionalKey)
@@ -234,6 +242,11 @@ internal static class PageExportComparer
                 {
                     continue; // Reported separately as warnings; an unreadable value is not proof of equivalence.
                 }
+                if (property.Name == "blockOid")
+                {
+                    normalized[property.Name] = NormalizeBlockReference(property.Value, identities);
+                    continue;
+                }
                 if (property.Name is "oid" or "parentOid" or "sourceOid")
                 {
                     bool reference = IsReference(member, property.Name);
@@ -253,6 +266,11 @@ internal static class PageExportComparer
         }
         if (value is JArray array)
         {
+            if (member == "memberOids")
+            {
+                return new JArray(array.Select(item => NormalizeBlockReference(item, identities))
+                    .OrderBy(item => item.ToString(Formatting.None), StringComparer.Ordinal));
+            }
             IEnumerable<JToken> items = array;
             if (member == "properties")
             {
@@ -267,6 +285,9 @@ internal static class PageExportComparer
         }
         return value?.DeepClone();
     }
+
+    private static JToken NormalizeBlockReference(JToken oid, Dictionary<string, string>? identities) =>
+        identities is not null && Identity(identities, oid) is string identity ? new JValue(identity) : oid.DeepClone();
 
     private static void Differences(JToken? source, JToken? target, string path, List<PageExportFieldDifference> differences)
     {
@@ -300,7 +321,7 @@ internal static class PageExportComparer
 
     private static bool IsNumber(JToken? value) => value?.Type is JTokenType.Integer or JTokenType.Float;
 
-    private static bool IsReference(string member, string property) => property is "parentOid" or "sourceOid"
+    private static bool IsReference(string member, string property) => property is "parentOid" or "sourceOid" or "blockOid"
         || (property == "oid" && member is "start" or "end" or "parentFunction" or "functionsInside");
 
     private static void CollectReferenceWarnings(JToken? value, string path, string member, Dictionary<string, string> identities,
@@ -327,6 +348,15 @@ internal static class PageExportComparer
         {
             for (int index = 0; index < array.Count; index++)
             {
+                if (member == "memberOids" && array[index].Type != JTokenType.Null && Identity(identities, array[index]) is null)
+                {
+                    warnings.Add(new(path + "[" + index.ToString(CultureInfo.InvariantCulture) + "]", new JObject
+                    {
+                        ["member"] = member,
+                        ["error"] = "Block member is absent or could not be paired; membership equivalence is unverified.",
+                        ["oid"] = array[index].DeepClone(),
+                    }));
+                }
                 CollectReferenceWarnings(array[index], path + "[" + index.ToString(CultureInfo.InvariantCulture) + "]", member, identities, warnings);
             }
         }
