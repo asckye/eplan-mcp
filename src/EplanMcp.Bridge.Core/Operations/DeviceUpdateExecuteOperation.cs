@@ -50,7 +50,7 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             // A17: a kind that ignores a part of the tag gets a third name at once, and the open transaction can still take
             // it back. The old name alone proves nothing: wrappers can show it until the commit (A85).
             if (request.Rename && back.MainName != request.NewTag && back.MainName != request.Device.Tag
-                && !(request.MergeTarget is not null && DeviceUpdateRequest.BelongsTo(back.MainName, request.NewTag)))
+                && !(request.PointsOnly && DeviceUpdateRequest.BelongsTo(back.MainName, request.NewTag)))
             { throw Misnamed(request, back.MainName); }
             if (request.Part is { } part)
             { assigner!.AddPart(request.Project.Path, request.Main!.Id, part.PartNumber, part.Variant!); }

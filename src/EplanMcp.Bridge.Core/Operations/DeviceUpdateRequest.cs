@@ -29,6 +29,9 @@ internal sealed class DeviceUpdateRequest
 
     public bool Rename { get; private set; }
     public DeviceNames? MergeTarget { get; private set; }
+
+    /// <summary>A PLC module's points without a main function: EPLAN reports a point's name for the whole device (A89).</summary>
+    public bool PointsOnly => Device.Functions.Count > 0 && Device.Functions.All(f => !f.IsMain && f.Category == "PLCTerminal");
     public DevicePartTarget? Main { get; private set; }
     public PartSearchItem? Part { get; private set; }
     public string ResultTag => !Rename && Main is not null ? Main.Name : NewTag;

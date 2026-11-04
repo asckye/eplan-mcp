@@ -47,6 +47,20 @@ public sealed class PlcModuleMergeTests
     }
 
     [Fact]
+    public void TerminalOnlyModule_TakesATagNoCardHasYet()
+    {
+        // The sample's =F+A2-KE1: its Overview page is outside the redrawn pages, so the module's points come first.
+        _store.Functions.RemoveAll(f => f.Id is "box" or "overview");
+        DeviceUpdateArgs args = Args();
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        DeviceUpdateData result = Execute(args);
+
+        Assert.Equal((Target, Source, 2), (result.Tag, result.PreviousTag, result.Functions));
+        Assert.Equal([Target + ":1.1", Target + ":1.2"], _store.Functions.Select(f => f.Name));
+    }
+
+    [Fact]
     public void CommittedReadbackAcceptsChangedSessionIdsForSourceAndDestination()
     {
         DeviceUpdateArgs args = Args();
