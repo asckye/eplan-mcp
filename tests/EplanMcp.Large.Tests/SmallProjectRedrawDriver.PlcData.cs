@@ -7,7 +7,7 @@ internal sealed partial class SmallProjectRedrawDriver
 {
     private static readonly int[] _cardProperties = [20161, 20408, 20409, 20410, 20411, 20427];
     private static readonly int[] _pointProperties = [20400, 20402, 20407];
-    private const int MaxChangesPerCall = 40;
+    private const int MaxChangesPerCall = 20;
 
     /// <summary>The sample's texts use more languages than the basic project; adding them is the engineer's project setting.</summary>
     internal async Task PrepareLanguagesAsync(IReadOnlyList<JObject> sources)

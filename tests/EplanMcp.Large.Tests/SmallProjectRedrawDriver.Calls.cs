@@ -31,7 +31,7 @@ internal sealed partial class SmallProjectRedrawDriver
         { args["dry_run"] = false; }
         if (tool is "eplan_placement_create" or "eplan_connection_create" or "eplan_macro_insert" or "eplan_device_place")
         { args["layout_guard"] = "warn"; }
-        if (tool is "eplan_page_get" or "eplan_page_review" or "eplan_connection_create" or "eplan_placement_create" or "eplan_placement_update")
+        if (tool is "eplan_page_get" or "eplan_page_review" or "eplan_connection_create" or "eplan_placement_create" or "eplan_placement_update" or "eplan_property_set")
         { args["response_format"] = "detailed"; }
         try
         {
@@ -46,7 +46,8 @@ internal sealed partial class SmallProjectRedrawDriver
             if (write && Text(result["error"]?["execution"] ?? result["execution"]) != "not_started")
             { _drawingCache.Remove(page); }
             bool success = result["error"] is null;
-            bool noConnections = tool == "eplan_connection_generate" && success && Text(result["execution"]) == "not_started";
+            // Nothing to do is no failure: no connections to generate, or the languages are already there.
+            bool noConnections = tool is "eplan_connection_generate" or "eplan_language_set" && success && Text(result["execution"]) == "not_started";
             if (write && Text(result["execution"]) != "committed" && !noConnections)
             { success = false; }
             string? error = success ? null : (result["error"] ?? result).ToString(Newtonsoft.Json.Formatting.None);
