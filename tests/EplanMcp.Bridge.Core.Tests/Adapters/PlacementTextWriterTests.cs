@@ -83,6 +83,7 @@ public sealed class PlacementTextWriterTests
     [InlineData(0, 360, "Circle")]
     [InlineData(-90, 270, "Circle")]
     [InlineData(90, 90, "Circle")]
+    [InlineData(180, 180, "Circle")]
     [InlineData(30, 120, "Arc")]
     public void Arc_SelectsCircleOnlyForEqualAnglesModulo360(double start, double end, string expected)
     {
@@ -93,8 +94,23 @@ public sealed class PlacementTextWriterTests
         Arc native = Assert.IsType<Arc>(Assert.Single(page.AllPlacements));
         Assert.Equal(expected, native.Kind);
         Assert.Equal(8, actual.RadiusMm);
-        if (expected == "Arc")
+        if (expected == "Arc" || start == end)
         { Assert.Equal(start, actual.StartAngle, 9); Assert.Equal(end, actual.EndAngle, 9); }
+    }
+
+    [Theory]
+    [InlineData("text")]
+    [InlineData("path_text")]
+    [InlineData("rectangle")]
+    public void FromLayerRotation_PreservesNativeSentinel(string kind)
+    {
+        var page = new Page();
+        EplanProjects.Project = new(page);
+        var requested = new PlacementText { Kind = kind, Position = [20, 20], EndPosition = [30, 30], Angle = -16002, HeightMm = 3.5, Contents = kind == "rectangle" ? new() : new() { ["??_??"] = "Panel" } };
+        PlacementText actual = new EplanPlacementTextWriter().Create("project", "+A1/1", requested);
+        Placement native = Assert.Single(page.AllPlacements);
+        Assert.Equal(-16002, native is Rectangle rectangle ? rectangle.Angle : Assert.IsAssignableFrom<TextBase>(native).Rotation);
+        Assert.Equal(-16002, actual.Angle);
     }
 
     [Fact]

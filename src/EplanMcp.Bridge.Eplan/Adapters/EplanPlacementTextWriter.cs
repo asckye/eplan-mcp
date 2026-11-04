@@ -80,7 +80,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
                 bool ellipse = text.Kind == "ellipse", circle = !ellipse && DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle);
                 if (ellipse)
                 { arc.SetEllipse(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusXmm), DrawingCoordinates.MillimetresToApi(text.RadiusYmm), text.Angle * (Math.PI / 180)); }
-                else if (circle)
+                else if (circle && text.StartAngle != text.EndAngle)
                 { arc.SetCircle(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm)); }
                 else
                 { arc.SetArc(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm), text.StartAngle * (Math.PI / 180), text.EndAngle * (Math.PI / 180), false); }
@@ -118,8 +118,8 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
 #pragma warning restore CA2000
             rectangle.Create(Find(projectPath, page));
             rectangle.SetArea(Point(text.Position), Point(text.EndPosition)); // S42 r3/A54: Create then SetArea.
-            rectangle.Angle = text.Angle * Math.PI / 180;
-            return Styled(rectangle, () => new() { Kind = text.Kind, Angle = rectangle.Angle * 180 / Math.PI, Position = XY(rectangle.LowerLeftCorner), EndPosition = XY(rectangle.UpperRightCorner) });
+            rectangle.Angle = Radians(text.Angle);
+            return Styled(rectangle, () => new() { Kind = text.Kind, Angle = Degrees(rectangle.Angle), Position = XY(rectangle.LowerLeftCorner), EndPosition = XY(rectangle.UpperRightCorner) });
         }
         using var content = new MultiLangString();
         foreach (KeyValuePair<string, string> entry in text.Contents)
@@ -135,11 +135,14 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         else
         { created.Create(Find(projectPath, page), content, DrawingCoordinates.MillimetresToApi(text.HeightMm)); }
         created.Location = new PointD(DrawingCoordinates.MillimetresToApi(text.Position[0]), DrawingCoordinates.MillimetresToApi(text.Position[1]));
-        created.Rotation = text.Angle * Math.PI / 180;
+        created.Rotation = Radians(text.Angle);
         if (text.Alignment is { } alignment)
         { created.Justification = (TextBase.JustificationType)Enum.Parse(typeof(TextBase.JustificationType), alignment); }
-        return Styled(created, () => { PlacementText actual = Read(created); actual.Angle = created.Rotation * 180 / Math.PI; return actual; });
+        return Styled(created, () => { PlacementText actual = Read(created); actual.Angle = Degrees(created.Rotation); return actual; });
     }
+
+    private static double Radians(double degrees) => degrees == -16002 ? degrees : degrees * Math.PI / 180;
+    private static double Degrees(double radians) => radians == -16002 ? radians : radians * 180 / Math.PI;
 
     private static PlacementText Read(Text created)
     {

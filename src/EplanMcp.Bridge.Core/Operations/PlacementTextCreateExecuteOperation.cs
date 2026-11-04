@@ -199,7 +199,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
     /// <summary>A rotated rectangle turns about its lower left corner and reads back the turned upper right one.</summary>
     private static double[] ExpectedEnd(PlacementText text)
     {
-        if (text.Kind != "rectangle" || text.Angle == 0)
+        if (text.Kind != "rectangle" || text.Angle is 0 or -16002)
         { return text.EndPosition; }
         double radians = text.Angle * Math.PI / 180, dx = text.EndPosition[0] - text.Position[0], dy = text.EndPosition[1] - text.Position[1];
         return [text.Position[0] + dx * Math.Cos(radians) - dy * Math.Sin(radians), text.Position[1] + dx * Math.Sin(radians) + dy * Math.Cos(radians)];
@@ -207,6 +207,9 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
 
     /// <summary>EPLAN reads coordinates back with rounding noise; exported sample values have 14 decimals.</summary>
     private static bool Close(double a, double b) => Math.Abs(a - b) <= 1e-6;
+
+    private static bool SameAngle(double requested, double actual, bool fromLayer = false) => Finite(actual) &&
+        (fromLayer && (requested == -16002 || actual == -16002) ? requested == actual : Math.Abs(Math.IEEERemainder(actual - requested, 360)) <= 1e-9);
 
     private static bool Close(double[] a, double[] b) => a.Length == b.Length && a.Zip(b, Close).All(close => close);
 
@@ -229,10 +232,10 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         Expect("position", Close(actual.Position, text.Position), text.Position, actual.Position);
         Expect("points", actual.Points.Length == text.Points.Length && !actual.Points.Zip(text.Points, Close).Any(equal => !equal), text.Points, actual.Points);
         Expect("radiusMm", Close(actual.RadiusMm, text.RadiusMm), text.RadiusMm, actual.RadiusMm);
-        Expect("angles", Finite(actual.StartAngle) && Finite(actual.EndAngle) && (DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle)
-            || Math.Abs(actual.StartAngle - text.StartAngle) <= 1e-9 && Math.Abs(actual.EndAngle - text.EndAngle) <= 1e-9), new[] { text.StartAngle, text.EndAngle }, new[] { actual.StartAngle, actual.EndAngle });
+        Expect("angles", Finite(actual.StartAngle) && Finite(actual.EndAngle) && (text.StartAngle != text.EndAngle && DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle)
+            || SameAngle(text.StartAngle, actual.StartAngle) && SameAngle(text.EndAngle, actual.EndAngle)), new[] { text.StartAngle, text.EndAngle }, new[] { actual.StartAngle, actual.EndAngle });
         Expect("radii", Close(actual.RadiusXmm, text.RadiusXmm) && Close(actual.RadiusYmm, text.RadiusYmm), new[] { text.RadiusXmm, text.RadiusYmm }, new[] { actual.RadiusXmm, actual.RadiusYmm });
-        Expect("angle", Finite(actual.Angle) && Math.Abs(actual.Angle - text.Angle) <= 1e-9, text.Angle, actual.Angle);
+        Expect("angle", SameAngle(text.Angle, actual.Angle, text.Kind is "rectangle" or "text" or "path_text"), text.Angle, actual.Angle);
         Expect("file", actual.File == text.File && (text.Kind != "image" || ProjectResolver.SamePath(actual.FilePath, text.FilePath)), text.File, actual.File);
         Expect("contents", actual.Contents.Count == text.Contents.Count && text.Contents.All(p => actual.Contents.TryGetValue(p.Key, out string? value) && string.Equals(value, p.Value, StringComparison.Ordinal)), text.Contents.Keys, actual.Contents.Keys);
         if (wrong.Count > 0)

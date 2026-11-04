@@ -64,7 +64,7 @@ internal sealed class Arc(long oid = 104) : GraphicalPlacement(oid)
     public double ElipseAngle { get; private set; }
     public void Create(Page page) => page.AllPlacements = [.. page.AllPlacements, this];
     public void SetArc(PointD center, double radius, double startAngle, double endAngle, bool asPie)
-    { Location = center; Radius = radius; StartAngle = startAngle; EndAngle = endAngle; Sector = asPie; }
+    { Location = center; Radius = radius; StartAngle = startAngle; EndAngle = endAngle; Sector = asPie; Kind = startAngle == endAngle ? "Circle" : "Arc"; }
     public void SetCircle(PointD center, double radius)
     { Location = center; Radius = radius; Kind = "Circle"; }
     public void SetEllipse(PointD center, double rx, double ry, double angle)
