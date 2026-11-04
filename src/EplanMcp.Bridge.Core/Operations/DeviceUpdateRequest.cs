@@ -34,6 +34,7 @@ internal sealed class DeviceUpdateRequest
     public bool PointsOnly => Device.Functions.Count > 0 && Device.Functions.All(f => !f.IsMain && f.Category == "PLCTerminal");
     public DevicePartTarget? Main { get; private set; }
     public PartSearchItem? Part { get; private set; }
+    public bool UpdateFromParts { get; private set; }
     public string ResultTag => !Rename && Main is not null ? Main.Name : NewTag;
     public string PreviousTag => !Rename && Main is not null ? Main.Name : Device.Tag;
 
@@ -52,7 +53,8 @@ internal sealed class DeviceUpdateRequest
         string newTag = args.NewTag?.Trim() ?? string.Empty;
         string? part = args.Part?.Trim();
         AddIf(violations, tag.Length == 0, "'tag' is required: the device's tag, such as =GAA+A1-KF1 or -KF1.");
-        AddIf(violations, newTag.Length == 0 && part is null, "At least one of 'new_tag' or 'part' is required.");
+        AddIf(violations, newTag.Length == 0 && part is null && !args.UpdateFromParts, "At least one of 'new_tag', 'part' or 'update_from_parts' is required.");
+        AddIf(violations, args.UpdateFromParts && (newTag.Length > 0 || part is not null || assigner is null), "'update_from_parts' stands alone: assign the parts and rename in earlier calls.");
         AddIf(violations, newTag.Length > 0 && NewTagProblem(newTag) is not null, "'new_tag' " + NewTagProblem(newTag));
         AddIf(violations, part is not null && (part.Length == 0 || part.Any(char.IsControl)), "'part' must be a nonempty part number without control characters.");
         AddIf(violations, args.Variant is not null && (part is null || string.IsNullOrWhiteSpace(args.Variant) || args.Variant.Any(char.IsControl)), "'variant' requires 'part' and must be nonempty without control characters.");
@@ -63,7 +65,9 @@ internal sealed class DeviceUpdateRequest
         }
 
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
-        DevicePartTarget? main = part is null ? null : MainFunction(assigner!, project.Path, tag, includeTerminals: newTag.Length == 0);
+        DevicePartTarget? main = part is null && !args.UpdateFromParts ? null : MainFunction(assigner!, project.Path, tag, includeTerminals: newTag.Length == 0);
+        if (args.UpdateFromParts && main!.Parts.Count == 0)
+        { throw Invalid("'update_from_parts' needs a function that references a part; assign one with 'part' first."); }
         tag = main?.Tag ?? tag;
         DeviceNames device = newTag.Length == 0 && main is not null
             ? new DeviceNames { Tag = tag, Functions = [new() { Id = main.Id, IsMain = main.IsMain, Category = main.Category, Page = main.Page }] }
@@ -112,6 +116,7 @@ internal sealed class DeviceUpdateRequest
             Rename = newTag.Length > 0,
             Main = main,
             Part = selected,
+            UpdateFromParts = args.UpdateFromParts,
             MergeTarget = destination?.Functions.Any(f => f.Category == "PLCBox") == true ? destination : null,
         };
     }
@@ -121,7 +126,8 @@ internal sealed class DeviceUpdateRequest
         Fingerprint.Of(Device.Functions.Select(f => (f.Name.Length == 0 ? Device.Tag : f.Name) + "\t" + f.Id + "\t" + f.IsMain + "\t" + f.Category).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture))
             .Concat(MergeTarget?.Functions.Select(f => f.Name + "\t" + f.Id + "\t" + f.IsMain + "\t" + f.Category) ?? [])
             .Concat(Main is null ? [] : Main.Parts.Select(p => FormattableString.Invariant($"{p.PartNumber}\t{p.Variant}\t{p.Count}")).Append(Main.Id).Append(Main.Name))
-            .Concat(Part is null ? [] : new[] { Part.PartNumber, Part.Variant ?? string.Empty }));
+            .Concat(Part is null ? [] : new[] { Part.PartNumber, Part.Variant ?? string.Empty })
+            .Concat(UpdateFromParts ? ["update from parts"] : []));
 
     internal static string ReferencesFingerprint(IEnumerable<DevicePart> references) =>
         Fingerprint.Of(references.Select(p => FormattableString.Invariant($"{p.PartNumber}\t{p.Variant}\t{p.Count}")));

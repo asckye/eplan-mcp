@@ -21,7 +21,7 @@ internal static class ConnectionCreateSchema
         {
             ["type"] = "object",
             ["additionalProperties"] = false,
-            ["properties"] = new JsonObject { ["position"] = Point(), ["symbol"] = new JsonObject { ["enum"] = new JsonArray("CDP", "CDPNG"), ["default"] = "CDP" }, ["symbol_variant"] = new JsonObject { ["type"] = "integer", ["minimum"] = 0, ["default"] = 0 }, ["color"] = Text(), ["cross_section"] = new JsonObject { ["type"] = "string", ["pattern"] = "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$" }, ["designation"] = Text(), ["part"] = Text(), ["part_variant"] = new JsonObject { ["type"] = "string", ["minLength"] = 1, ["default"] = "1" }, ["part_count"] = new JsonObject { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = uint.MaxValue, ["default"] = 1 } },
+            ["properties"] = new JsonObject { ["position"] = Point(), ["symbol"] = new JsonObject { ["enum"] = new JsonArray("CDP", "CDPNG"), ["default"] = "CDP" }, ["symbol_variant"] = new JsonObject { ["type"] = "integer", ["minimum"] = 0, ["default"] = 0 }, ["function_definition"] = Text(), ["representation_type"] = new JsonObject { ["enum"] = new JsonArray(0, 1) }, ["type_code"] = Text(), ["color"] = Text(), ["cross_section"] = Text(), ["designation"] = Text(), ["part"] = Text(), ["part_variant"] = new JsonObject { ["type"] = "string", ["default"] = "1" }, ["part_count"] = new JsonObject { ["type"] = "integer", ["minimum"] = 1, ["default"] = 1 } },
         };
         JsonObject definitionFields = wire["properties"]!["definition_point"]!.AsObject();
         definitionFields["properties"]!["kind"] = Kind("definition_point");

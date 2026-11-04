@@ -160,6 +160,7 @@ public sealed class PotentialDefinitionTests
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => { };
         public Action PrepareDefinitionPoints(string project, string page, JArray planned) => () => { };
         public void AddDefinitionArticles(string project, string page, JArray planned) { }
+        public void WriteDefinitionSources(string project, string page, JArray planned) { }
         public JArray ReadDefinitionPoints(string project, string page, JArray planned)
         {
             var rows = (JArray)planned.DeepClone();

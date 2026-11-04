@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A93、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A94、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -350,6 +350,19 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `Placement.Remove()` 用于独立 Line/Arc/PolyLine/Rectangle/Text/PathText/Image/MacroBox 的删除；A87 已验证宏框删除不删除引用内容。线和文字的工具链、一事务和单步撤销已实测（`PlacementDeleteTests`）。
 - 写前 layout_guard=warn 仅把非 OffPage 布局违规降为警告；写后仍遵循 ADR-0046。— 实测（`LayoutGuardWarningTests`）：穿过普通符号的线默认被 R3/R4 拒绝，warn 时提交并告警，超出页面仍拒绝。线穿过黑盒外框本身不触发拒绝。
 - `ParseNameAndProps` 对不含高层代号或位置代号的标识（如 `+A1-WE1`）返回空值，把空值赋给 `FunctionBasePropertyList.DESIGNATION_PLANT` 会抛 `EmptyPropertyException`（S063111），所以只赋非空部分。`RenameDevice` 之后主功能立即显示实际名称；不使用某部分标识的器件类型（如 `BusBarDefText`）把 `=F+A1-WE19` 变成 `+A1-WE19`，要在提交前发现并回滚。提交后再撤销未能恢复原标识，所以回滚后要核对原标识还在。— 实测（`WriteSafetyTests.Q2`）
+
+### A93. 部件数据要靠 `DeviceService.UpdateDevice` 写入（2026-11-04，EPLAN 2026.0.3，LargeWrite 探针）
+- `AddArticleReference` 只写引用和零件自身的字段（20100、20101、20190、20200、20919 等），功能定义和技术数据不动。官方 XML：`UpdateDevice` 接受设备的主功能或连接，把部件数据写到主功能，函数模板写到设备的所有功能。
+- 探针结果，写入的值都和样本一致：端子 `PXC.3211813` 的 20188 由 `100/6/0` 变成 `100/6/1`，20057 变成 6；`PXC.3036563` 的 20230 变成 4；`SIE.3VA1032-2ED32-0AA0` 的 20027 变成 `In = 32A`，20022 变成连接点 1 到 6。
+- 连接定义点要更新两次，都返回 true：`UpdateDevice(connection)` 把 31048、31059 写到连接和点上；`UpdateDevice(point)` 把点的 20188 由 `4/1/1` 变成 `4/1/4`，20026、20117 随之改变。之后重新生成连接，这些值仍在。
+- 连接自身的 20188 由连线情况决定（同一端子排的相邻端子是 `4/1/7` 鞍形跳线），和点的 20188 互不影响。
+- 点的 20188、20121 可以按属性写入，读回和重新生成后不变；20121 写 0 后 19021 变成“未定义”，20470 变成 0。
+- `Function.Create(page, FunctionDefinition)` 建出的对象即使再 `SetSymbolVariant` 成 CDP，类型仍是 `Function`，不是 `ConnectionDefinitionPoint`，不能用来建定义点。
+- 撤销取决于作用域：`SafetyPoint` 提交之后再调用 `UpdateDevice`，`XEsUndoAction` 报 S328050（步骤不可用）并弹对话框，部件已在项目里时也一样；放在 `FunctionTransactionScope(undoCommitted: true)` 的撤销步骤里，一步撤销能还原（`ExistingTerminalConnection_DefinitionPointOnly_PreservesEndpoints_OneUndoRestores`，带部件）。
+- 第二个部件引用只有在 `SafetyPoint` 作用域里能加上。普通 `Transaction` 或 `FunctionTransactionScope` 里，第一个能加，第二个抛 S063074（未能添加部件），有没有先 `UpdateDevice` 都一样（端子 `PXC.3211813` 加 `PXC.3022218`）。所以 `eplan_device_update` 的 `part` 走 `SafetyPoint`，`update_from_parts` 单独一次调用，走 `FunctionTransactionScope`。
+- 🔴 连接和定义点上不要调用 `UpdateDevice`。探针和回归测试里它都正常，一步撤销也能还原；但 16 页重画中，更新完 30 个定义点后，同一页插入电位定义宏时 `Insert.WindowMacro` 抛 AccessViolationException，EPLAN 终止（0xe0434352，2026-11-04 14:47）。同样的流程不调用这两次更新（第 12 次）全程没有崩溃。只出现过一次，原因没有查清。工具改为明确写 20188、20121、31048。
+- 🔴 同一个包装对象不能取两次 `Properties` 再各释放一次。第二次取到的是已释放的列表，读出别的对象的值（定义点读回 `100/6/1`）或抛 S063109，之后 EPLAN 崩溃（0xc0000374、0xc0000005，位置不固定）。放进同一个 `using` 只读一次后不再出现。
+- 🔴 `UpdateDevice` 之后，它之前取到的包装对象已经失效：继续用会读到别的对象（2000 由 `53/59/69844/0` 变成 `53/4/26/0`），并可能让 EPLAN 崩溃（0xc0000374，探针第一次，2026-11-04 12:12）。每个事务都要重新取对象。
 
 ### A92. 第 6 轮工程数据写入的实测结果（2026-11-04，EPLAN 2026.0.3，Pro Panel，LargeWrite）
 - `eplan_property_set` 的 B8 条目写入和读回通过：盒子 20161、20408，总览点 20400，原理图点 20011，一步撤销恢复（`PlcPropertyB8Tests`）。B13 的类型由此确认。

@@ -186,6 +186,11 @@
                   "new_tag": {
                     "description": "Full new tag, or from '-' to keep the structure",
                     "type": "string"
+                  },
+                  "update_from_parts": {
+                    "description": "Alone, after the last part: parts' data",
+                    "type": "boolean",
+                    "default": false
                   }
                 },
                 "required": [

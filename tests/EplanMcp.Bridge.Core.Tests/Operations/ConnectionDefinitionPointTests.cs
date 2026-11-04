@@ -57,6 +57,11 @@ public sealed class ConnectionDefinitionPointTests
     [InlineData("{\"color\":\"RD\",\"symbol_variant\":\"0\"}", "/symbol_variant")]
     [InlineData("{\"designation\":null}", "/designation")]
     [InlineData("{\"color\":\"RD\",\"unknown\":1}", "/unknown")]
+    [InlineData("{\"function_definition\":\"100/6/1\"}", "/function_definition")]
+    [InlineData("{\"function_definition\":4}", "/function_definition")]
+    [InlineData("{\"representation_type\":2}", "/representation_type")]
+    [InlineData("{\"representation_type\":\"0\"}", "/representation_type")]
+    [InlineData("{\"type_code\":\"\"}", "/type_code")]
     public void ExistingConnection_InvalidDefinitionPoint_IsRejectedBeforeWriting(string properties, string field)
     {
         var fixture = Existing();
@@ -272,6 +277,22 @@ public sealed class ConnectionDefinitionPointTests
         Assert.Contains("Commit", creator.Transactions.Calls);
         Assert.Contains("Rollback", creator.Transactions.Calls);
         Assert.DoesNotContain("CloseUndo", creator.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("definition/function_definition")]
+    [InlineData("definition/representation_type")]
+    [InlineData("definition/type_code")]
+    public void ExistingConnection_DefinitionSourceReadbackMismatch_CommitsWithAWarning(string field)
+    {
+        var creator = new Creator(existing: true) { Mismatch = field };
+        creator.Fixture.Request["items"]![0]!["function_definition"] = "4/1/4";
+        creator.Fixture.Request["items"]![0]!["representation_type"] = 0;
+        creator.Fixture.Request["items"]![0]!["type_code"] = "H07";
+        JObject result = creator.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Contains(field.Split('/')[1] + " requested", (string?)result["warning"], StringComparison.Ordinal);
+        Assert.True(creator.Transferred);
     }
 
     [Theory]
@@ -562,6 +583,7 @@ public sealed class ConnectionDefinitionPointTests
         public ConnectionCreateFixture Fixture { get; }
         public FakeTransactions Transactions { get; } = new();
         public List<string> Events { get; } = [];
+        public bool Transferred { get; private set; }
         public string? Mismatch { get; init; }
         public string? ObservedSection { get; init; }
         public List<string?[]>? GeneratedEndpoints { get; init; }
@@ -590,6 +612,11 @@ public sealed class ConnectionDefinitionPointTests
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "generation failed"); }
         }
         public void AddDefinitionArticles(string project, string page, JArray planned) { }
+        public void WriteDefinitionSources(string project, string page, JArray planned)
+        {
+            Assert.Contains("generate", Events); // A93: the connection the type code goes to exists only after generation.
+            Transferred = true;
+        }
         public JArray ReadDefinitionPoints(string project, string page, JArray planned)
         {
             Assert.Contains("Commit", Transactions.Calls);

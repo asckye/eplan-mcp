@@ -8,4 +8,10 @@ public interface IDevicePartAssigner
 
     /// <summary>Adds one reference to the checked function identified within this EPLAN session.</summary>
     public void AddPart(string projectPath, string mainId, string part, string variant);
+
+    /// <summary>The scope whose undo step spans the commit and the data transfer after it (A93).</summary>
+    public ITransactionScopeFactory PartTransactions(string projectPath);
+
+    /// <summary>Transfers the referenced parts' data to the committed function, as EPLAN's own device update does (A93).</summary>
+    public void TransferPartData(string projectPath, string functionId);
 }

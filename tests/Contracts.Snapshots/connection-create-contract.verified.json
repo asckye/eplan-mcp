@@ -2860,10 +2860,11 @@
           "color": "RD",
           "cross_section": "1,5"
         },
+        "definition": {},
         "articles": null
       }
     ],
-    "fingerprint": "db1d1437cc61c93a840933575a0a25e9e846468e311ffdf0dc8271efd92c48fe"
+    "fingerprint": "e8bce851b51abafe728d7e808cac6964a2b2919038138d97081186713ce99e23"
   },
   "potentialDefinitionExample": {
     "project": "Line1",

@@ -100,6 +100,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                     // A52/D5: generation only sees committed placement; the undo step spans the committed transactions.
                     writer.AddDefinitionArticles(project, page, definitions);
                     plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify(definitions.Any(d => (string?)d["type"] == "ConnectionDefinitionPoint") || plan["logicalAfterGenerate"]!.Any()));
+                    writer.WriteDefinitionSources(project, page, definitions);
                     VerifyGraphical("generation");
                     CheckLayout();
                     plan["definitionPoints"] = ConnectionDefinitionPoints.Verify(definitions, writer.ReadDefinitionPoints(project, page, definitions));
@@ -108,7 +109,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint)));
             plan["execution"] = ExecutionState.Committed;
             plan["dryRun"] = false;
-            plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], result.Warning]);
+            plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], result.Warning, ConnectionDefinitionPoints.SourceDeviations(definitions, (JArray)plan["definitionPoints"]!)]);
             return plan;
         }
         if (interruptions)

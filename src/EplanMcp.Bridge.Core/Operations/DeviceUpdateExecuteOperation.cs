@@ -43,7 +43,9 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             throw WriteArguments.NotStarted(ex);
         }
 
-        Committed<RenameReadBack> committed = TransactionRunner.Run(transactions, Tool, () =>
+        // A93: UpdateDevice under the SafetyPoint scope leaves EPLAN refusing the undo (S328050); a second part needs that scope.
+        ITransactionScopeFactory scope = request.UpdateFromParts ? assigner!.PartTransactions(request.Project.Path) : transactions;
+        Committed<RenameReadBack> committed = TransactionRunner.Run(scope, Tool, () =>
         {
             RenameReadBack back = request.Rename ? renamer.Rename(request.Project.Path, request.Device.Tag, request.NewTag) : new RenameReadBack
             { MainName = request.ResultTag, VisibleName = request.Main?.VisibleName ?? string.Empty, Renamed = request.Device.Functions.Count };
@@ -59,6 +61,15 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
         {
             if (request.Rename)
             { VerifyRename(request, back); }
+            if (request.UpdateFromParts)
+            {
+                // A93: the second transaction stays inside the undo step.
+                assigner!.TransferPartData(request.Project.Path, request.Main!.Id);
+                if (DeviceUpdateRequest.ReferencesFingerprint(DeviceUpdateRequest.MainFunction(assigner, request.Project.Path, request.NewTag, includeTerminals: true).Parts)
+                    != DeviceUpdateRequest.ReferencesFingerprint(request.Main.Parts))
+                { throw InvalidArgument("EPLAN changed the part references while updating from them; the change was rolled back."); }
+                return;
+            }
             if (request.Part is not { } part)
             { return; }
             // A79/A82: reacquire the target function and its ArticleReferences after commit.

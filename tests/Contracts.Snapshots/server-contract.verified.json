@@ -4844,12 +4844,23 @@
                 "minimum": 0,
                 "default": 0
               },
+              "function_definition": {
+                "$ref": "#/$defs/t"
+              },
+              "representation_type": {
+                "enum": [
+                  0,
+                  1
+                ]
+              },
+              "type_code": {
+                "$ref": "#/$defs/t"
+              },
               "color": {
                 "$ref": "#/$defs/t"
               },
               "cross_section": {
-                "type": "string",
-                "pattern": "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$"
+                "$ref": "#/$defs/t"
               },
               "designation": {
                 "$ref": "#/$defs/t"
@@ -4859,13 +4870,11 @@
               },
               "part_variant": {
                 "type": "string",
-                "minLength": 1,
                 "default": "1"
               },
               "part_count": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 4294967295,
                 "default": 1
               },
               "kind": {
@@ -7480,7 +7489,7 @@
     {
       "name": "eplan_device_update",
       "title": "Update a device in an EPLAN project",
-      "description": "Renames a device preserving suffixes; terminal-only PLC modules may join an existing PLC box. Append a part to its unique main function, or one exact terminal without renaming. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.",
+      "description": "Renames a device; terminal-only PLC modules may join a PLC box. Appends a part to its main function or one exact terminal. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -7506,7 +7515,7 @@
             "default": true
           },
           "part": {
-            "description": "Part for one main function or exact terminal",
+            "description": "Part number",
             "type": [
               "string",
               "null"
@@ -7514,12 +7523,17 @@
             "default": null
           },
           "variant": {
-            "description": "Part variant; requires part, defaults to 1",
+            "description": "Part variant, default 1",
             "type": [
               "string",
               "null"
             ],
             "default": null
+          },
+          "update_from_parts": {
+            "description": "Alone, after the last part: parts' data",
+            "type": "boolean",
+            "default": false
           }
         },
         "required": [
@@ -22750,6 +22764,11 @@
                         "new_tag": {
                           "description": "Full new tag, or from '-' to keep the structure",
                           "type": "string"
+                        },
+                        "update_from_parts": {
+                          "description": "Alone, after the last part: parts' data",
+                          "type": "boolean",
+                          "default": false
                         }
                       },
                       "required": [

@@ -44,6 +44,15 @@ public sealed partial class DevicePlaceTests
             Assert.Equal(tag, read.GetProperty("name").GetString());
             Assert.Equal("Terminal", read.GetProperty("category").GetString());
             Assert.False(read.GetProperty("main").GetBoolean());
+            // A93: a second part needs the SafetyPoint scope; the data transfer that follows has its own undo step.
+            await PartsCallAsync("eplan_device_update", new() { ["project"] = project, ["tag"] = tag, ["part"] = "PXC.3022218", ["dry_run"] = false });
+            Assert.Equal(2, (await ReadTerminalPartsAsync(project, page, tag)).GetProperty("parts").GetArrayLength());
+            JsonElement updated = await PartsCallAsync("eplan_device_update", new() { ["project"] = project, ["tag"] = tag, ["update_from_parts"] = true, ["dry_run"] = false });
+            Assert.Equal(ExecutionState.Committed, updated.GetProperty("execution").GetString());
+            Assert.Equal(2, (await ReadTerminalPartsAsync(project, page, tag)).GetProperty("parts").GetArrayLength());
+            await session.UndoAsync();
+            Assert.Equal(2, (await ReadTerminalPartsAsync(project, page, tag)).GetProperty("parts").GetArrayLength());
+            await session.UndoAsync();
             await session.UndoAsync();
             Assert.Equal(original.GetRawText(), (await ReadTerminalPartsAsync(project, page, tag)).GetRawText());
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);

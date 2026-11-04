@@ -173,6 +173,7 @@ public sealed class DevicePartAssignmentTests
         else
         { Assert.Equal("=GAA+A1&EFS1/1", Assert.Single(data.Pages)); }
         Assert.Equal(("1", Part, "1"), Assert.Single(_store.Adds));
+        Assert.Empty(_store.Transfers);
     }
 
     [Theory]
@@ -188,6 +189,7 @@ public sealed class DevicePartAssignmentTests
         DeviceUpdateData data = Execute(args);
         Assert.Equal((Part, "1", rename ? "=GAA+A1-SF92" : Tag, Tag), (data.Part, data.Variant, data.Tag, data.PreviousTag));
         Assert.Equal(("1", Part, "1"), Assert.Single(_store.Adds));
+        Assert.Empty(_store.Transfers);
         Assert.True(_store.ReadAfterCommit);
         Assert.Equal(2, _store.Targets[0].Parts.Count);
         Assert.Equal(["Begin AI: eplan_device_update", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
@@ -323,6 +325,37 @@ public sealed class DevicePartAssignmentTests
         return new() { Project = "Line1", Tag = target.Name, Part = "PXC.3211813" };
     }
 
+    [Fact]
+    public void UpdateFromParts_TransfersAfterCommit_InsideTheUndoStep()
+    {
+        _store.Targets[0].Parts.Add(new DevicePart { PartNumber = Part, Variant = "1", Count = 1 });
+        var args = new DeviceUpdateArgs { Project = "Line1", Tag = Tag, UpdateFromParts = true };
+        PlannedChange change = Assert.Single(Plan(args).Changes);
+        Assert.Equal(("update", "part data"), (change.Action, change.Kind));
+        args.Fingerprint = Plan(args).Fingerprint;
+        Execute(args);
+        Assert.Equal("1", Assert.Single(_store.Transfers));
+        Assert.Empty(_store.Adds);
+        Assert.Equal(["Begin AI: eplan_device_update", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(null, Part)]
+    [InlineData("-SF92", null)]
+    public void UpdateFromParts_StandsAlone(string? newTag, string? part)
+    {
+        var args = new DeviceUpdateArgs { Project = "Line1", Tag = Tag, NewTag = newTag ?? string.Empty, Part = part, UpdateFromParts = true };
+        Assert.Contains("stands alone", Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void UpdateFromParts_WithoutAPart_IsRefused()
+    {
+        var args = new DeviceUpdateArgs { Project = "Line1", Tag = Tag, UpdateFromParts = true };
+        Assert.Contains("assign one", Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Empty(_transactions.Calls);
+    }
+
     private static DeviceUpdateArgs Args() => new() { Project = "Line1", Tag = Tag, Part = Part };
     private WritePlan Plan(DeviceUpdateArgs args) => (WritePlan)new DeviceUpdatePlanOperation(_catalog, _reader, _renamer, _store, _store).Execute(args)!;
     private DeviceUpdateData Execute(DeviceUpdateArgs args) => (DeviceUpdateData)new DeviceUpdateExecuteOperation(_catalog, _reader, _renamer, _transactions, _store, _store).Execute(args)!;
@@ -332,6 +365,7 @@ public sealed class DevicePartAssignmentTests
         public PartsDatabaseContent Database { get; } = new() { Parts = [new PartSearchItem { PartNumber = Part, Variant = "1" }] };
         public List<DevicePartTarget> Targets { get; } = [];
         public List<(string Id, string Part, string Variant)> Adds { get; } = [];
+        public List<string> Transfers { get; } = [];
         public int Reads { get; private set; }
         public bool ReadAfterCommit { get; private set; }
         public string? Mismatch { get; set; }
@@ -360,6 +394,13 @@ public sealed class DevicePartAssignmentTests
             Assert.DoesNotContain("Commit", transactions.Calls);
             Adds.Add((mainId, part, variant));
             Targets.Single(m => m.Id == mainId).Parts.Add(new DevicePart { PartNumber = part, Variant = variant, Count = 1 });
+        }
+        public ITransactionScopeFactory PartTransactions(string projectPath) => transactions;
+        public void TransferPartData(string projectPath, string functionId)
+        {
+            Assert.Contains("Commit", transactions.Calls); // A93: only committed references carry part data.
+            Assert.DoesNotContain("CloseUndo", transactions.Calls); // One undo step takes back the reference and its data.
+            Transfers.Add(functionId);
         }
     }
 }

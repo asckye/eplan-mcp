@@ -148,10 +148,7 @@ public sealed class ToolContractTests : IDisposable
             Assert.Equal(["CDP", "CDPNG"], properties.GetProperty("symbol").GetProperty("enum").EnumerateArray().Select(p => p.GetString()));
             Assert.Equal("CDP", properties.GetProperty("symbol").GetProperty("default").GetString());
             Assert.Equal(0, properties.GetProperty("symbol_variant").GetProperty("default").GetInt32());
-            Assert.Equal("string", properties.GetProperty("cross_section").GetProperty("type").GetString());
-            string pattern = properties.GetProperty("cross_section").GetProperty("pattern").GetString()!;
-            foreach (string number in new[] { "1.5", "0", "-1", "+1e2", ".5E-2" })
-            { Assert.Matches(pattern, number); }
+            Assert.Equal("#/$defs/t", properties.GetProperty("cross_section").GetProperty("$ref").GetString()); // The planner reads 1,5 and 1.5.
         }
         JsonElement standalone = branches.Single(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "definition_point");
         Assert.Equal(["kind", "position"], standalone.GetProperty("required").EnumerateArray().Select(p => p.GetString()));

@@ -17,8 +17,9 @@
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `tag` | string | 是 | — | 现有的设备标识。完整标识（如 `=GAA+A1-KF1`）总是唯一；短标识（如 `-KF1`）在多个结构下出现时返回 `AMBIGUOUS_NAME` |
 | `new_tag` | string | 否 | — | 新标识：完整标识（如 `=GAA+A1-KF10`）；或以 `-` 开头的短标识（如 `-KF10`），表示保留设备现在的结构 |
-| `part` | string | 否 | — | 要追加的部件号；与 `new_tag` 至少一个；按部件库精确或唯一不区分大小写匹配 |
+| `part` | string | 否 | — | 要追加的部件号；与 `new_tag`、`update_from_parts` 至少一个；按部件库精确或唯一不区分大小写匹配 |
 | `variant` | string | 否 | "1" | 部件变体；只能随 `part` 提供，必须在库中存在 |
+| `update_from_parts` | boolean | 否 | false | 把已引用部件的数据写到功能上；必须单独调用（A93） |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - `tag` 的查找规则与 `eplan_device_get` 相同；另支持全部为非主 `PLCTerminal` 的模块标识。此类模块可改名到已有 `PLCBox` 的标识，保留各点后缀。
@@ -114,6 +115,7 @@
 - 规划按 `FUNC_IDENTDEVICETAG` 查找唯一主功能（已放置或未放置），数量不为 1 时返回 `INVALID_ARGUMENT` 并报告数量；只赋值部件时允许功能名称带连接点后缀。已引用相同部件和变体时拒绝 `nothing to change`。
 - 变更清单增加 `add part <part> (variant <v>) to <tag>`；指纹包含主功能身份、现有部件引用和所选库部件，执行前重新核对。
 - 同一事务内先执行请求的改名，再以 `Function.AddArticleReference(part, variant, 1)` 追加引用（A82）。提交后按设备标识重新获取主功能及 `ArticleReferences`（A79）；缺少新引用时回滚。原有引用保持不变。
+- `{"tag":...,"update_from_parts":true}` 单独调用，放在最后一个部件之后：用 `DeviceService.UpdateDevice` 把已引用部件的功能定义、连接点数据和技术参数写到功能上，和 EPLAN 的设备更新相同（A93）。必须单独调用，不能和 `part`、`new_tag` 同时给；功能没有部件引用时拒绝。一步撤销还原这些数据。
 - `device.part`、`device.variant` 返回本次赋值的部件和变体；只改名时为 null。只赋值部件时，`tag` 与 `previousTag` 都返回主功能的实际完整名称（可能带 `:1` 等连接点后缀），主功能可直接交给 `eplan_device_get`；端子用 `eplan_terminal_strip_get` 定位；`functions=1`，`pages` 只含目标功能所在页。
 - 主线程目标为 2 秒，端到端默认时限 60 秒；部件库较大时可能超过目标，支持既有进度与取消。
 - Small 覆盖参数、默认变体、唯一主功能、重复引用、指纹和提交后读回；Medium 覆盖假 Bridge 的 part-only、同时改名、dry-run 与失败。Large 在 `FunctionPlaceTests` 放置 `IEC_symbol/SSD/0`、赋值 `SIE.3SB3400-0B/1` 并读回；仅编写，交由维护者运行。

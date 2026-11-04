@@ -206,6 +206,7 @@ public sealed class ConnectionDeferredGenerationTests
         }
         public JArray ReadDefinitionPoints(string project, string page, JArray planned) => (JArray)planned.DeepClone();
         public void AddDefinitionArticles(string project, string page, JArray planned) => throw new NotSupportedException();
+        public void WriteDefinitionSources(string project, string page, JArray planned) => throw new NotSupportedException();
         public List<string?[]> Endpoints(string project, string page) => throw new InvalidOperationException("Deferred placement must not inspect endpoints.");
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => throw new InvalidOperationException("Deferred placement must not inspect pairing.");
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => Transactions;

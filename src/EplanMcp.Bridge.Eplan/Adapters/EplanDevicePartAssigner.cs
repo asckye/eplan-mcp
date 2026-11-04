@@ -1,4 +1,6 @@
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.HEServices;
+using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 
@@ -46,6 +48,24 @@ internal sealed class EplanDevicePartAssigner : IDevicePartAssigner
         // A82: AddArticleReference appends the checked part and is read back through ArticleReferences.
         main.AddArticleReference(part, variant, 1);
         GC.KeepAlive(main);
+    }
+
+    public ITransactionScopeFactory PartTransactions(string projectPath) => new PartFactory(projectPath);
+
+    private sealed class PartFactory(string project) : ITransactionScopeFactory
+    { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription, undoCommitted: true); }
+
+    public void TransferPartData(string projectPath, string functionId)
+    {
+        MainThread.Assert();
+        Function function = Find(EplanProjects.ByPath(projectPath)).Single(f => f.ToStringIdentifier() == functionId);
+        using Transaction transaction = new TransactionManager().CreateTransaction();
+        using var devices = new DeviceService();
+        // A93: a reference alone leaves the part's definition and technical data out of the function.
+        if (!devices.UpdateDevice(function))
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN found no part reference to transfer data from."); }
+        transaction.Commit();
+        GC.KeepAlive(function);
     }
 
     private static Function[] Find(Project project)

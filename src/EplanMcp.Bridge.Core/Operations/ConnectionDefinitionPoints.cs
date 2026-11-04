@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Globalization;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
@@ -9,6 +10,8 @@ public interface IConnectionDefinitionPointWriter
     public Action PrepareDefinitionPoints(string project, string page, JArray planned);
     /// <summary>Adds the planned parts once the points are committed: EPLAN refuses them on a point still in its creating transaction.</summary>
     public void AddDefinitionArticles(string project, string page, JArray planned);
+    /// <summary>Once the connection exists: writes the requested function definition, representation and type code (A93).</summary>
+    public void WriteDefinitionSources(string project, string page, JArray planned);
     public JArray ReadDefinitionPoints(string project, string page, JArray planned);
 }
 
@@ -17,7 +20,7 @@ internal static class ConnectionDefinitionPoints
     internal static JObject Plan(JToken value, string at, double[][] path, string from, string to, int index,
         ConnectionCreatePlanner.Scene scene, List<SymbolSearchItem> variants, bool existing = false, Func<PartsDatabaseContent>? parts = null)
     {
-        ConnectionCreatePlanner.Members(value, at, existing ? "kind position" : "", "position symbol symbol_variant color cross_section designation part part_variant part_count");
+        ConnectionCreatePlanner.Members(value, at, existing ? "kind position" : "", "position symbol symbol_variant function_definition representation_type type_code color cross_section designation part part_variant part_count");
         void Require(bool condition, string field, string message) => ConnectionCreatePlanner.Require(condition, at + field, message);
         var properties = new JObject();
         foreach (string field in new[] { "color", "cross_section", "designation" })
@@ -27,6 +30,22 @@ internal static class ConnectionDefinitionPoints
             Require(text.Type == JTokenType.String && ((string)text!).Length <= 200 && !string.IsNullOrWhiteSpace((string?)text)
                 && !((string)text!).Any(char.IsControl), "/" + field, "Supply nonempty text within 200 characters.");
             properties[field] = text.DeepClone();
+        }
+        var definition = new JObject();
+        if (value["function_definition"] is { } function)
+        {
+            Require(function.Type == JTokenType.String && Regex.IsMatch((string)function!, @"\A4/[0-9]{1,4}/[0-9]{1,4}\z", RegexOptions.None, TimeSpan.FromSeconds(2)), "/function_definition", "Supply a connection function definition such as 4/1/4.");
+            definition["function_definition"] = function.DeepClone();
+        }
+        if (value["representation_type"] is { } representation)
+        {
+            Require(representation.Type == JTokenType.Integer && (long)representation is 0 or 1, "/representation_type", "Use 0 (undefined) or 1 (multi-line).");
+            definition["representation_type"] = representation.ToString();
+        }
+        if (value["type_code"] is { } typeCode)
+        {
+            Require(typeCode.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)typeCode) && ((string)typeCode!).Length <= 200 && !((string)typeCode!).Any(char.IsControl), "/type_code", "Supply nonempty text within 200 characters.");
+            definition["type_code"] = typeCode.DeepClone();
         }
         JObject? article = null;
         if (value["part"] is { } part)
@@ -87,6 +106,7 @@ internal static class ConnectionDefinitionPoints
             ["symbol"] = new JObject { ["library"] = "SPECIAL", ["name"] = name, ["variant"] = variant },
             ["position"] = new JArray(point),
             ["properties"] = properties,
+            ["definition"] = definition,
             ["articles"] = article is null ? null : new JArray(article)
         };
     }
@@ -121,6 +141,22 @@ internal static class ConnectionDefinitionPoints
         return value?.Type == JTokenType.String
             && double.TryParse(value.Value<string>()!.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out number)
             && !double.IsNaN(number) && !double.IsInfinity(number);
+    }
+
+    /// <summary>ADR-0046: a function definition or representation EPLAN keeps differently is reported; the drawing still stands.</summary>
+    internal static string? SourceDeviations(JArray planned, JArray actual)
+    {
+        var rows = new List<string>();
+        foreach (JToken row in planned.Where(r => r["definition"] is JObject))
+        {
+            JToken? found = actual.SingleOrDefault(a => JToken.DeepEquals(a["itemIndex"], row["itemIndex"]));
+            foreach (JProperty property in ((JObject)row["definition"]!).Properties())
+            {
+                if (!JToken.DeepEquals(property.Value, found?["definition"]?[property.Name]))
+                { rows.Add($"Definition point {row["itemIndex"]}: {property.Name} requested {property.Value}, actual {found?["definition"]?[property.Name]}."); }
+            }
+        }
+        return rows.Count == 0 ? null : string.Join(" ", rows);
     }
 
     internal static JArray Verify(JArray planned, JArray actual)
