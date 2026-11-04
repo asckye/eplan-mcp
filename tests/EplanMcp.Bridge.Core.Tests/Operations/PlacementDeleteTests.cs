@@ -65,8 +65,10 @@ public sealed class PlacementDeleteTests
     public void BlockMembersAndPropertyChildrenAreRefused(bool parent)
     {
         var world = new World("Line");
-        if (parent) { world.Page.Placements[0].Parent = new() { Type = 4, Oid = 99 }; }
-        else { world.Page.Placements[0].Properties["grouped"] = "true"; }
+        if (parent)
+        { world.Page.Placements[0].Parent = new() { Type = 4, Oid = 99 }; }
+        else
+        { world.Page.Placements[0].Properties["grouped"] = "true"; }
         Assert.Contains("cannot be deleted", Assert.Throws<BridgeErrorException>(() => world.Plan(world.Input())).Message, StringComparison.Ordinal);
     }
 
@@ -77,7 +79,8 @@ public sealed class PlacementDeleteTests
     [InlineData("oid")]
     public void StaleLocatorDoesNotDeleteAnything(string field)
     {
-        var world = new World("Line"); JObject input = world.Input();
+        var world = new World("Line");
+        JObject input = world.Input();
         input["items"]![0]![field] = field == "oid" ? new JValue(99) : new JValue(field == "digest" ? new string('b', 64) : "other");
         Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => world.Plan(input)).Error.Reason);
         Assert.Empty(world.Transactions.Calls);
@@ -88,7 +91,8 @@ public sealed class PlacementDeleteTests
     [InlineData(101)]
     public void InvalidBatchSizeIsRefused(int count)
     {
-        var world = new World("Line"); JObject input = world.Input();
+        var world = new World("Line");
+        JObject input = world.Input();
         input["items"] = new JArray(Enumerable.Range(0, count).Select(_ => input["items"]![0]!.DeepClone()));
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => world.Plan(input)).Error.Reason);
     }
@@ -98,7 +102,8 @@ public sealed class PlacementDeleteTests
     [InlineData("oid", "9223372036854775808")]
     public void OutOfRangeLocatorNumbersAreArgumentErrors(string field, string number)
     {
-        var world = new World("Line"); JObject input = world.Input();
+        var world = new World("Line");
+        JObject input = world.Input();
         input["items"]![0]![field] = JToken.Parse(number);
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => world.Plan(input)).Error.Reason);
         Assert.Empty(world.Transactions.Calls);
@@ -118,7 +123,9 @@ public sealed class PlacementDeleteTests
     [Fact]
     public void AChangedPageBeforeExecutionIsStale()
     {
-        var world = new World("Line"); JObject input = world.Input(); WritePlan plan = world.Plan(input);
+        var world = new World("Line");
+        JObject input = world.Input();
+        WritePlan plan = world.Plan(input);
         world.Page.Placements[1].Locator.Digest = new string('b', 64);
         Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => world.Execute(input, plan)).Error.Reason);
         Assert.Empty(world.Transactions.Calls);
@@ -127,7 +134,9 @@ public sealed class PlacementDeleteTests
     [Fact]
     public void EmptyProjectDoesNotSelectCurrentProject()
     {
-        var world = new World("Line"); JObject input = world.Input(); input["project"] = " ";
+        var world = new World("Line");
+        JObject input = world.Input();
+        input["project"] = " ";
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => world.Plan(input)).Error.Reason);
         Assert.Empty(world.Transactions.Calls);
     }
@@ -135,7 +144,9 @@ public sealed class PlacementDeleteTests
     [Fact]
     public void DisappearingPageMakesExecutionStale()
     {
-        var world = new World("Line"); JObject input = world.Input(); WritePlan plan = world.Plan(input);
+        var world = new World("Line");
+        JObject input = world.Input();
+        WritePlan plan = world.Plan(input);
         world.MissingPage = true;
         Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => world.Execute(input, plan)).Error.Reason);
         Assert.Empty(world.Transactions.Calls);
@@ -147,7 +158,8 @@ public sealed class PlacementDeleteTests
     public void PartialFailureOrUnexpectedChangeRollsBackEverything(bool unexpected)
     {
         var world = new World("Line") { Unexpected = unexpected, ThrowAfterRemove = !unexpected };
-        JObject input = world.Input(); WritePlan plan = world.Plan(input);
+        JObject input = world.Input();
+        WritePlan plan = world.Plan(input);
         BridgeError error = Assert.Throws<BridgeErrorException>(() => world.Execute(input, plan)).Error;
         Assert.Equal(ExecutionState.RolledBack, error.Execution);
         Assert.Equal(2, world.Page.Placements.Count);
@@ -171,8 +183,10 @@ public sealed class PlacementDeleteTests
         public Action Prepare(string project, string page, IReadOnlyList<DrawingLocator> items) => () =>
         {
             Page.Placements.RemoveAll(p => items.Any(l => DrawingLocators.Matches(l, p.Locator) || p.Parent is { } parent && parent.Type == l.Type && parent.Oid == l.Oid));
-            if (Unexpected) { Page.Placements[0].Locator.Digest = new string('c', 64); }
-            if (ThrowAfterRemove) { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Injected failure."); }
+            if (Unexpected)
+            { Page.Placements[0].Locator.Digest = new string('c', 64); }
+            if (ThrowAfterRemove)
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Injected failure."); }
         };
         public JObject Input(bool all = false) => new() { ["project"] = "project", ["page"] = "page", ["items"] = JArray.FromObject(Page.Placements.Take(all ? 100 : 1).Select(p => p.Locator), Bridge.Core.Protocol.BridgeJson.Serializer) };
         private PlacementDeleteOperation Operation(bool execute) => new(new FakeCatalog(new OpenProject { Name = "project", Path = "project" }), this, this, Transactions, execute, (_, _) => Backups++);

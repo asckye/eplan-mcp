@@ -225,7 +225,8 @@ internal static class PlacementCreatePlanning
     private static string Field(string kind) => IsText(kind) ? "position" : kind is "arc" or "ellipse" ? "center" : kind is "line" or "polyline" ? "points" : "corners";
     internal static JsonNode Snap(JsonElement item, double grid, bool snap, bool normalizeRectangle = true)
     {
-        if (item.GetProperty("kind").GetString() == "block") { return JsonNode.Parse(item.GetRawText())!; }
+        if (item.GetProperty("kind").GetString() == "block")
+        { return JsonNode.Parse(item.GetRawText())!; }
         if (!double.IsFinite(grid) || grid <= 0)
         { throw new BridgeCallException(new BridgeError { Reason = ErrorReason.CapabilityMissing, Message = "A reliable page grid is required." }); }
         JsonNode actual = JsonNode.Parse(item.GetRawText())!;
@@ -240,7 +241,8 @@ internal static class PlacementCreatePlanning
     internal static PlacementText Request(JsonElement item)
     {
         string kind = item.GetProperty("kind").GetString()!, field = Field(kind);
-        if (kind == "block") { return new() { Kind = kind, Name = item.TryGetProperty("name", out JsonElement name) ? name.GetString() : null, Members = item.GetProperty("members").Deserialize<List<DrawingLocator>>(_blockJson) }; }
+        if (kind == "block")
+        { return new() { Kind = kind, Name = item.TryGetProperty("name", out JsonElement name) ? name.GetString() : null, Members = item.GetProperty("members").Deserialize<List<DrawingLocator>>(_blockJson) }; }
         double[][] points = IsText(kind) || kind is "arc" or "ellipse" ? [item.GetProperty(field).Deserialize<double[]>()!] : item.GetProperty(field).Deserialize<double[][]>()!;
         return new()
         {

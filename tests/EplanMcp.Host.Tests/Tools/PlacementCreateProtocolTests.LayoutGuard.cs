@@ -18,7 +18,8 @@ public sealed partial class PlacementCreateProtocolTests
             var args = Args();
             args.Remove("dry_run");
             args["items"] = new[] { new { kind = "line", points = (double[][])[[10, 20], [30, 20]] } };
-            if (mode is not null) { args["layout_guard"] = mode; }
+            if (mode is not null)
+            { args["layout_guard"] = mode; }
             var call = await client.CallToolAsync(PlacementCreateTools.Tool, args, cancellationToken: Token);
             Assert.Equal(!allowed, call.IsError == true);
             if (allowed)

@@ -43,7 +43,8 @@ public sealed class PageDescriptionMapTests(LiveEplan eplan, WriteHost host) : I
         {
             foreach (string language in texts.Keys)
             {
-                try { TestContext.Current.TestOutputHelper!.WriteLine("failure readback: " + (await Read(page, language)).GetRawText()); }
+                try
+                { TestContext.Current.TestOutputHelper!.WriteLine("failure readback: " + (await Read(page, language)).GetRawText()); }
                 catch (Exception ex) { TestContext.Current.TestOutputHelper!.WriteLine("failure readback unavailable: " + ex.Message); }
             }
             throw;

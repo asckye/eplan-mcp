@@ -16,8 +16,13 @@ public sealed class LayoutGuardWarningModeTests
         // Exact failing geometry from sequence 337; project identity is a test fixture.
         var model = new LayoutGuard.Model
         {
-            Page = new() { Page = "=K1+A2&EFA1/1", PageSize = [420, 297], GridSize = 4,
-                Placements = [new() { Kind = "Function", Bounds = [0, 16, 420, 292], Location = [0, 16], Locator = new() { Type = 37, Oid = 1 } }] },
+            Page = new()
+            {
+                Page = "=K1+A2&EFA1/1",
+                PageSize = [420, 297],
+                GridSize = 4,
+                Placements = [new() { Kind = "Function", Bounds = [0, 16, 420, 292], Location = [0, 16], Locator = new() { Type = 37, Oid = 1 } }]
+            },
             Lines = [new() { Points = [[264, 226], [264, 178]], Changed = true }]
         };
         if (accepted)
@@ -47,8 +52,15 @@ public sealed class LayoutGuardWarningModeTests
     public void WarnMode_LeavesPostWriteOffPageRollbackUnchanged()
     {
         LayoutGuard.Model before = LayoutGuardTests.Model();
-        var actual = new LayoutGuard.Model { Page = new() { PageSize = [100, 100], GridSize = 4,
-            Placements = [LayoutGuard.Proposed("Rectangle", [100, 40], [100, 40, 104, 44])] } };
+        var actual = new LayoutGuard.Model
+        {
+            Page = new()
+            {
+                PageSize = [100, 100],
+                GridSize = 4,
+                Placements = [LayoutGuard.Proposed("Rectangle", [100, 40], [100, 40, 104, 44])]
+            }
+        };
         Assert.Throws<BridgeErrorException>(() => LayoutGuard.AfterWriting(before, actual));
     }
 
@@ -62,9 +74,12 @@ public sealed class LayoutGuardWarningModeTests
         fixture.Root.Kind = "Text";
         fixture.Scene.Page.Placements.Add(MoveFixture.Placement(2, 'b', [40, 40]));
         fixture.Request["moves"]![0]!["delta_mm"] = new JArray(20, 20);
-        if (guard is not null) { fixture.Request["layout_guard"] = guard; }
-        if (accepted) { Assert.Contains("R3", (string?)fixture.Plan()["warning"], StringComparison.Ordinal); }
-        else { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error.Reason); }
+        if (guard is not null)
+        { fixture.Request["layout_guard"] = guard; }
+        if (accepted)
+        { Assert.Contains("R3", (string?)fixture.Plan()["warning"], StringComparison.Ordinal); }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error.Reason); }
     }
 
     [Theory]
@@ -75,9 +90,12 @@ public sealed class LayoutGuardWarningModeTests
     {
         var fixture = new ConnectionCreateFixture();
         fixture.Scene.Page.Placements.Add(new() { Kind = "Function", Location = [16, 8], Bounds = [14, 6, 18, 10], Locator = new() { Type = 17, Oid = 3 } });
-        if (guard is not null) { fixture.Request["layout_guard"] = guard; }
-        if (accepted) { Assert.Contains("R4", (string?)fixture.Plan()["warning"], StringComparison.Ordinal); }
-        else { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error.Reason); }
+        if (guard is not null)
+        { fixture.Request["layout_guard"] = guard; }
+        if (accepted)
+        { Assert.Contains("R4", (string?)fixture.Plan()["warning"], StringComparison.Ordinal); }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error.Reason); }
     }
 
     [Fact]
@@ -96,15 +114,25 @@ public sealed class LayoutGuardWarningModeTests
         var store = new PlacementTextStore();
         var model = new LayoutGuard.Model
         {
-            Page = new() { PageSize = [1000, 1000], GridSize = 0.5, Placements =
-                [new() { Kind = "Function", Location = [20, 20], Bounds = [18, 18, 22, 22] }] },
+            Page = new()
+            {
+                PageSize = [1000, 1000],
+                GridSize = 0.5,
+                Placements =
+                [new() { Kind = "Function", Location = [20, 20], Bounds = [18, 18, 22, 22] }]
+            },
             Config = new() { MarginMm = 0 },
             ReadActual = () => new() { Page = store.Read("project", "P"), Config = new() { MarginMm = 0 } }
         };
         var operation = new PlacementTextCreateExecuteOperation(new FakeCatalog(store.Project), store, store.Transactions, store,
             (_, _) => model, planning: planning);
-        var args = new PlacementTextCreateArgs { Project = "Line1", Page = "P", LayoutGuard = "warn",
-            Items = [new() { Kind = "line", Position = [10, 20], EndPosition = [30, 20] }] };
+        var args = new PlacementTextCreateArgs
+        {
+            Project = "Line1",
+            Page = "P",
+            LayoutGuard = "warn",
+            Items = [new() { Kind = "line", Position = [10, 20], EndPosition = [30, 20] }]
+        };
         object parsed = operation.ParseArgs(EplanMcp.Bridge.Core.Protocol.BridgeJson.FromObject(args));
         var result = Assert.IsType<PlacementTextCreateData>(operation.Execute(parsed));
         Assert.Contains("R4", result.Warning, StringComparison.Ordinal);

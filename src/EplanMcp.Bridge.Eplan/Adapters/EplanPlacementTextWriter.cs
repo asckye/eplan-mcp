@@ -50,7 +50,8 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
             var block = new Block();
 #pragma warning restore CA2000
             block.Create(pageObject, members);
-            if (text.Name is not null) { block.Name = text.Name; }
+            if (text.Name is not null)
+            { block.Name = text.Name; }
             return () => new() { Kind = "block", Name = block.Name, Count = block.Count, Members = text.Members };
         }
         PointD Point(double[] xy) => new(DrawingCoordinates.MillimetresToApi(xy[0]), DrawingCoordinates.MillimetresToApi(xy[1]));

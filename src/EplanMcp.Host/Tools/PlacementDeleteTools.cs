@@ -7,6 +7,7 @@ using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tools;
+
 [McpServerToolType]
 internal sealed class PlacementDeleteTools
 {
@@ -19,11 +20,14 @@ internal sealed class PlacementDeleteTools
         var errors = new List<string>();
         foreach (string name in new[] { "project", "page" })
         { if (!input.TryGetProperty(name, out JsonElement text) || text.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(text.GetString())) { errors.Add("/" + name + " requires a nonempty string."); } }
-        if (input.TryGetProperty("dry_run", out JsonElement flag) && flag.ValueKind is not (JsonValueKind.True or JsonValueKind.False)) { errors.Add("/dry_run must be boolean."); }
-        if (!input.TryGetProperty("items", out JsonElement items) || items.ValueKind != JsonValueKind.Array || items.GetArrayLength() is < 1 or > 100) { errors.Add("/items requires 1..100 drawing locators."); }
+        if (input.TryGetProperty("dry_run", out JsonElement flag) && flag.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        { errors.Add("/dry_run must be boolean."); }
+        if (!input.TryGetProperty("items", out JsonElement items) || items.ValueKind != JsonValueKind.Array || items.GetArrayLength() is < 1 or > 100)
+        { errors.Add("/items requires 1..100 drawing locators."); }
         else
         { foreach (JsonElement item in items.EnumerateArray()) { if (item.ValueKind != JsonValueKind.Object || !item.TryGetProperty("type", out JsonElement type) || type.ValueKind != JsonValueKind.Number || !type.TryGetInt32(out int t) || t < 1 || !item.TryGetProperty("oid", out JsonElement oid) || oid.ValueKind != JsonValueKind.Number || !oid.TryGetInt64(out long id) || id < 1) { errors.Add("/items requires integer type/oid drawing locators."); } } }
-        if (errors.Count > 0) { BridgeError error = ToolResults.InvalidArgumentError(errors); error.Execution = ExecutionState.NotStarted; return ToolResults.Error(error); }
+        if (errors.Count > 0)
+        { BridgeError error = ToolResults.InvalidArgumentError(errors); error.Execution = ExecutionState.NotStarted; return ToolResults.Error(error); }
         bool dry = WriteToolDefaults.IsPreview(input);
         try
         {
@@ -31,8 +35,12 @@ internal sealed class PlacementDeleteTools
                 input, (plan, backup) => new { request = input, fingerprint = plan.Fingerprint, backup }, dry, PageWriteTools.DefaultLimit, "Deleting drawing placements");
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<JsonElement, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
-            result["execution"] = outcome.Execution; result["dryRun"] = dry; result["recovered"] = outcome.Recovered; result["backup"] = outcome.Backup;
-            if (dry) { result["hint"] = WriteToolDefaults.ExecutionHint; }
+            result["execution"] = outcome.Execution;
+            result["dryRun"] = dry;
+            result["recovered"] = outcome.Recovered;
+            result["backup"] = outcome.Backup;
+            if (dry)
+            { result["hint"] = WriteToolDefaults.ExecutionHint; }
             return ToolResults.Success(dry ? "Previewed drawing deletion. Nothing was changed." : "Drawing placements deleted; one Ctrl+Z restores them.", ContextBuilder.Clean(result));
         }
         catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error); }

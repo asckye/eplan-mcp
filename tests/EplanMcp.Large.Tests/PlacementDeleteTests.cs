@@ -31,7 +31,9 @@ public sealed class PlacementDeleteTests(LiveEplan eplan, DestructiveHost host) 
         await Write("eplan_page_create", new() { ["project"] = session.Project, ["pages"] = new[] { new { name = page } }, ["dry_run"] = false });
         await Write("eplan_placement_create", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["dry_run"] = false,
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["dry_run"] = false,
             ["items"] = new object[] { new { kind = "line", points = (double[][])[[20, 40], [40, 40]] },
                 new { kind = "text", position = (double[])[100, 100], contents = new Dictionary<string, string> { ["??_??"] = "delete text" }, height_mm = 3.5 } },
         });

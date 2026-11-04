@@ -4,8 +4,10 @@ internal static class PageDescriptionMap
 {
     internal static void Check(Dictionary<string, string>? texts, Func<string, bool> knowsLanguage, string at, List<string> violations)
     {
-        if (texts is null) { return; }
-        if (texts.Count == 0) { violations.Add(at + " must contain at least one language."); }
+        if (texts is null)
+        { return; }
+        if (texts.Count == 0)
+        { violations.Add(at + " must contain at least one language."); }
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var entry in texts)
         {

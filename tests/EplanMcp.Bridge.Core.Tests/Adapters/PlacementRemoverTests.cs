@@ -11,8 +11,11 @@ public sealed class PlacementRemoverTests
     [Fact]
     public void PreparedDeletionDoesNotWriteUntilInvoked()
     {
-        var page = new Page(); var line = new Line { Page = page }; var text = new Text { Page = page };
-        page.AllPlacements = [line, text]; EplanProjects.Project = new(page);
+        var page = new Page();
+        var line = new Line { Page = page };
+        var text = new Text { Page = page };
+        page.AllPlacements = [line, text];
+        EplanProjects.Project = new(page);
         Action change = new EplanPlacementRemover().Prepare("project", "+A1/1", [Locator(line)]);
         Assert.Equal(2, page.AllPlacements.Length);
         change();
@@ -22,10 +25,13 @@ public sealed class PlacementRemoverTests
     [Fact]
     public void FunctionAndGroupedLineAreRefusedNatively()
     {
-        var page = new Page(); var function = new Function { Page = page };
-        page.AllPlacements = [function]; EplanProjects.Project = new(page);
+        var page = new Page();
+        var function = new Function { Page = page };
+        page.AllPlacements = [function];
+        EplanProjects.Project = new(page);
         Assert.Contains("Function", Assert.Throws<BridgeErrorException>(() => new EplanPlacementRemover().Prepare("project", "+A1/1", [Locator(function)])).Message, StringComparison.Ordinal);
-        var line = new Line { Page = page, Group = new Group(999) }; page.AllPlacements = [line];
+        var line = new Line { Page = page, Group = new Group(999) };
+        page.AllPlacements = [line];
         Assert.Contains("members", Assert.Throws<BridgeErrorException>(() => new EplanPlacementRemover().Prepare("project", "+A1/1", [Locator(line)])).Message, StringComparison.Ordinal);
     }
     private static DrawingLocator Locator(Placement placement) => new() { Type = placement.IdentifierType, Oid = placement.ObjectIdentifier };

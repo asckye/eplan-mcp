@@ -28,13 +28,20 @@ public sealed class BlockCreationTests
     public void InvalidMembersNeverWrite(string problem, string reason)
     {
         var f = new Fixture();
-        if (problem == "stale") { f.Args.Items![0].Members![0].Digest = new string('b', 64); }
-        if (problem == "page") { f.Args.Items![0].Members![0].Page = "other"; }
-        if (problem == "group") { f.Page.Placements[0].Properties["grouped"] = "true"; }
-        if (problem == "child") { f.Page.Placements[0].Parent = new(); }
-        if (problem == "duplicate") { f.Args.Items![0].Members![1] = f.Args.Items[0].Members![0]; }
-        if (problem == "mixed") { f.Args.Items!.Add(new() { Kind = "line" }); }
-        if (problem == "short") { f.Args.Items![0].Members!.RemoveAt(0); }
+        if (problem == "stale")
+        { f.Args.Items![0].Members![0].Digest = new string('b', 64); }
+        if (problem == "page")
+        { f.Args.Items![0].Members![0].Page = "other"; }
+        if (problem == "group")
+        { f.Page.Placements[0].Properties["grouped"] = "true"; }
+        if (problem == "child")
+        { f.Page.Placements[0].Parent = new(); }
+        if (problem == "duplicate")
+        { f.Args.Items![0].Members![1] = f.Args.Items[0].Members![0]; }
+        if (problem == "mixed")
+        { f.Args.Items!.Add(new() { Kind = "line" }); }
+        if (problem == "short")
+        { f.Args.Items![0].Members!.RemoveAt(0); }
         Assert.Equal(reason, Assert.Throws<BridgeErrorException>(() => f.Run(false)).Error.Reason);
         Assert.Empty(f.Transactions.Calls);
         Assert.Equal(0, f.Writes);

@@ -15170,6 +15170,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placement_delete.md",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A87"
         ],

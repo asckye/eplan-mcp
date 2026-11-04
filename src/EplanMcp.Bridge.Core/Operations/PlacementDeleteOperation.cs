@@ -12,7 +12,10 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
     protected override JObject Execute(JObject args)
     {
         JObject input = execute ? args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["Supply request."])) : args;
-        OpenProject project; PageDrawingGeometry before; DrawingLocator[] items; Action remove;
+        OpenProject project;
+        PageDrawingGeometry before;
+        DrawingLocator[] items;
+        Action remove;
         try
         {
             if (input.Properties().Any(p => p.Name is not ("project" or "page" or "items" or "dry_run"))
@@ -37,18 +40,25 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
                 DrawingPlacement row = before.Placements.FirstOrDefault(p => DrawingLocators.Matches(item, p.Locator)) ?? throw Stale();
                 if (row.Parent is not null || row.Properties.TryGetValue("grouped", out string? group) && group == "true")
                 { throw WriteArguments.Invalid(["Block members and property text cannot be deleted separately."]); }
-                if (!Allowed(row.Kind)) { throw WriteArguments.Invalid([$"Cannot delete {row.Kind}: only independent graphical placements are allowed; devices, connections and blocks are excluded."]); }
+                if (!Allowed(row.Kind))
+                { throw WriteArguments.Invalid([$"Cannot delete {row.Kind}: only independent graphical placements are allowed; devices, connections and blocks are excluded."]); }
             }
-            if (execute && (string?)args["fingerprint"] != before.Fingerprint()) { throw Stale(); }
+            if (execute && (string?)args["fingerprint"] != before.Fingerprint())
+            { throw Stale(); }
             remove = remover.Prepare(project.Path, before.Page, items);
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         var result = new JObject { ["project"] = project.Name, ["page"] = before.Page, ["items"] = new JArray(items.Select(l => new JObject { ["type"] = l.Type, ["oid"] = l.Oid })), ["fingerprint"] = before.Fingerprint() };
         if (!execute)
         {
-            return (JObject)Bridge.Core.Protocol.BridgeJson.FromObject(new WritePlan { Project = project.Name, ProjectPath = project.Path, Fingerprint = before.Fingerprint(),
+            return (JObject)Bridge.Core.Protocol.BridgeJson.FromObject(new WritePlan
+            {
+                Project = project.Name,
+                ProjectPath = project.Path,
+                Fingerprint = before.Fingerprint(),
                 Changes = items.Select(l => new PlannedChange { Action = "delete", Kind = "drawing", Name = before.Page + ":" + l.Type + "/" + l.Oid }).ToList(),
-                Details = new() { ["preview"] = result.ToString(Formatting.None) } });
+                Details = new() { ["preview"] = result.ToString(Formatting.None) }
+            });
         }
         backup(project, args["backup"]?.ToObject<BackupTarget>());
         string unchanged = before.Fingerprint();

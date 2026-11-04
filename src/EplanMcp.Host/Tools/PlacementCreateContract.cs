@@ -72,7 +72,8 @@ internal static class PlacementCreateContract
         foreach (JsonNode? branch in schema["$defs"]!["item"]!["oneOf"]!.AsArray())
         {
             JsonNode properties = branch!["properties"]!;
-            if (properties["kind"]!["const"]!.GetValue<string>() == "block") { continue; }
+            if (properties["kind"]!["const"]!.GetValue<string>() == "block")
+            { continue; }
             PlacementStyleSchema.Add(properties);
             string kind = properties["kind"]!["const"]!.GetValue<string>();
             if (kind is "text" or "path_text" or "rectangle")

@@ -66,7 +66,8 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
     {
         OperationContext.Current.ThrowIfCancellationRequested();
         var expected = before.Entries.ToList();
-        foreach (var edit in page.Edits(request.Language)) { expected = PageDescriptionEdit.With(expected, edit.Key, edit.Value); }
+        foreach (var edit in page.Edits(request.Language))
+        { expected = PageDescriptionEdit.With(expected, edit.Key, edit.Value); }
         PageDescription after = PageUpdatePlanOperation.Changes((page, before), request.Language)
             ? descriptions.Write(request.Project.Path, page.Name, expected) : before;
         var planned = new PageDescription(null, expected);

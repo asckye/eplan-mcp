@@ -1,7 +1,7 @@
-using EplanMcp.Host.Safety;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
+using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Safety;
 namespace EplanMcp.Host.Tests.Tools;
 
@@ -22,7 +22,7 @@ public sealed class PlacementDeleteProtocolTests
             plan.Details = new() { ["preview"] = "{\"project\":\"Line1\",\"page\":\"page\",\"fingerprint\":\"f1\",\"items\":[{\"type\":4,\"oid\":1}]}" };
             return plan;
         };
-        harness.Bridge.Handlers[OperationNames.PlacementDeleteExecute] = _ => JsonNode.Parse("{\"project\":\"Line1\",\"page\":\"page\",\"fingerprint\":\"f1\",\"items\":[{\"type\":4,\"oid\":1}]}" )!.AsObject();
+        harness.Bridge.Handlers[OperationNames.PlacementDeleteExecute] = _ => JsonNode.Parse("{\"project\":\"Line1\",\"page\":\"page\",\"fingerprint\":\"f1\",\"items\":[{\"type\":4,\"oid\":1}]}")!.AsObject();
         await PreviewProtocolHarness.RunAsync(harness, async client =>
         {
             Dictionary<string, object?> args = new() { ["project"] = "Line1", ["page"] = "page", ["items"] = new[] { new { project = harness.ProjectPath, page = "page", type = 4, oid = 1, digest = new string('a', 64) } } };
@@ -39,7 +39,8 @@ public sealed class PlacementDeleteProtocolTests
             JsonElement result = denied ? WriteToolHarness.Error(response) : WriteToolHarness.Structured(response);
             Assert.Equal(denied ? "not_started" : "committed", result.GetProperty("execution").GetString());
             Assert.Single(channel.Questions);
-            if (denied) { Assert.Empty(harness.Bridge.Writes); }
+            if (denied)
+            { Assert.Empty(harness.Bridge.Writes); }
             else
             {
                 Assert.Single(harness.Bridge.Writes);

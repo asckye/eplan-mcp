@@ -4,6 +4,7 @@ using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
+
 internal sealed class EplanPlacementRemover : IPlacementRemover
 {
     public Action Prepare(string project, string page, IReadOnlyList<DrawingLocator> items)

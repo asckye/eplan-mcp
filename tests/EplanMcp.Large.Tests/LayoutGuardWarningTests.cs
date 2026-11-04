@@ -35,14 +35,23 @@ public sealed class LayoutGuardWarningTests(LiveEplan eplan, WriteHost host, ITe
         }
         await Call("eplan_device_place", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "K", ["symbol_variant"] = 0,
-            ["tag"] = "-LG" + Guid.NewGuid().ToString("N")[..8], ["x"] = 80, ["y"] = 140,
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["library"] = "IEC_symbol",
+            ["symbol"] = "K",
+            ["symbol_variant"] = 0,
+            ["tag"] = "-LG" + Guid.NewGuid().ToString("N")[..8],
+            ["x"] = 80,
+            ["y"] = 140,
             ["dry_run"] = false
         });
         PageDrawingGeometry before = await Read();
         var request = new Dictionary<string, object?>
         {
-            ["project"] = session.Project, ["page"] = page, ["dry_run"] = false, ["snap_to_grid"] = false,
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["snap_to_grid"] = false,
             ["items"] = new[] { new { kind = "line", points = (double[][])[[40, 140], [140, 140]] } }
         };
         JsonElement refused = await Call("eplan_placement_create", request, failure: true);

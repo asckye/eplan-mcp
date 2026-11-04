@@ -40,7 +40,8 @@ public sealed class BlockCreateTests(LiveEplan eplan, WriteHost host) : IClassFi
     private async Task<JsonElement> Call(string tool, object request)
     {
         Evidence("request", new { tool, request });
-        try { JsonElement result = await host.CallAsync(tool, JsonSerializer.Deserialize<Dictionary<string, object?>>(JsonSerializer.Serialize(request))!); Evidence("result", result); return result; }
+        try
+        { JsonElement result = await host.CallAsync(tool, JsonSerializer.Deserialize<Dictionary<string, object?>>(JsonSerializer.Serialize(request))!); Evidence("result", result); return result; }
         catch (Exception ex) { Evidence("failed result", ex.ToString()); throw; }
     }
     private static void Evidence(string label, object value) => TestContext.Current.TestOutputHelper?.WriteLine(label + ": " + JsonSerializer.Serialize(value));

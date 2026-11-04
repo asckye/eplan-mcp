@@ -9,7 +9,8 @@ public sealed class BlockCreateTests
 {
     private static JsonObject Item(int count = 3) => new()
     {
-        ["kind"] = "block", ["name"] = "144_268557",
+        ["kind"] = "block",
+        ["name"] = "144_268557",
         ["members"] = JsonSerializer.SerializeToNode(Enumerable.Range(1, count).Select(i => new DrawingLocator { Project = "Line1", Page = "P", Type = 4, Oid = i, Digest = new string('a', 64) }), JsonSerializerOptions.Web)
     };
 
@@ -47,8 +48,10 @@ public sealed class BlockCreateTests
     {
         JsonObject item = Item();
         JsonObject locator = item["members"]![0]!.AsObject();
-        if (field == "extra") { locator[field] = true; }
-        else { locator.Remove(field); }
+        if (field == "extra")
+        { locator[field] = true; }
+        else
+        { locator.Remove(field); }
         Assert.NotEmpty(PlacementCreatePlanning.Validate(PlacementCreateTests.Input(item.ToJsonString())));
     }
 

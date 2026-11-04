@@ -50,7 +50,8 @@ internal sealed class PageWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        if (DescriptionViolations(pages!.Select(p => p.Description)) is { Count: > 0 } descriptions) { return ToolResults.InvalidArguments(descriptions); }
+        if (DescriptionViolations(pages!.Select(p => p.Description)) is { Count: > 0 } descriptions)
+        { return ToolResults.InvalidArguments(descriptions); }
         var args = new PageCreateArgs
         {
             Project = project,
@@ -123,7 +124,8 @@ internal sealed class PageWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        if (DescriptionViolations(pages!.Select(p => p.Description)) is { Count: > 0 } descriptions) { return ToolResults.InvalidArguments(descriptions); }
+        if (DescriptionViolations(pages!.Select(p => p.Description)) is { Count: > 0 } descriptions)
+        { return ToolResults.InvalidArguments(descriptions); }
         var args = new PageUpdateArgs
         {
             Project = project,
@@ -192,7 +194,8 @@ internal sealed class PageWriteTools
         var errors = new List<string>();
         foreach ((object? value, int index) in values.Select((value, index) => (value, index)))
         {
-            try { _ = DescriptionMap(value); }
+            try
+            { _ = DescriptionMap(value); }
             catch (ArgumentException) { errors.Add($"pages[{index}].description must be text or an object of language texts."); }
         }
         return errors;
@@ -203,7 +206,8 @@ internal sealed class PageWriteTools
 
     private static Dictionary<string, string>? DescriptionMap(object? value)
     {
-        if (value is null || value is string || value is JsonElement { ValueKind: JsonValueKind.String or JsonValueKind.Null }) { return null; }
+        if (value is null || value is string || value is JsonElement { ValueKind: JsonValueKind.String or JsonValueKind.Null })
+        { return null; }
         JsonElement json = JsonSerializer.SerializeToElement(value);
         if (json.ValueKind != JsonValueKind.Object || json.EnumerateObject().Any(p => p.Value.ValueKind != JsonValueKind.String))
         { throw new ArgumentException("description must be text or an object of language texts."); }
