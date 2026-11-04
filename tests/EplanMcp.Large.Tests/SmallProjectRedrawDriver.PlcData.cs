@@ -15,8 +15,8 @@ internal sealed partial class SmallProjectRedrawDriver
         string[] languages = sources.SelectMany(source => Objects(source["placements"])).Select(item => RawProperty(item, 20011)).OfType<JObject>()
             .SelectMany(text => text.Properties().Select(language => language.Name)).Where(language => language != "??_??")
             .Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
-        if (languages.Length > 0)
-        { await InvokeAsync("", "eplan_language_set", new JObject { ["add"] = new JArray(languages) }, [new JObject { ["type"] = "Project" }]); }
+        foreach (string[] batch in languages.Chunk(10))
+        { await InvokeAsync("", "eplan_language_set", new JObject { ["add"] = new JArray(batch) }, [new JObject { ["type"] = "Project" }]); }
     }
 
     /// <summary>What an engineer fills in in the PLC navigator: card data on the box, addresses on the Overview points, text on the circuit points (A90).</summary>
