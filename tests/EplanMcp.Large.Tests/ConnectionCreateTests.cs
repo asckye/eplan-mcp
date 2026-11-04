@@ -595,8 +595,8 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
     }
 
     private async Task<int> SymbolsAsync(string project, string page) =>
-        (await eplan.CallAsync("eplan_page_get", new() { ["project"] = project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200 }))
-            .GetProperty("drawings").GetProperty("items").EnumerateArray().Count(p => p.GetProperty("kind").GetString() is not ("Function" or "PropertyPlacement")); // fixture devices are Functions
+        (await LiveDrawings.ReadAllAsync((tool, read) => eplan.CallAsync(tool, read), project, page))
+            .EnumerateArray().Count(p => p.GetProperty("kind").GetString() is not ("Function" or "PropertyPlacement")); // fixture devices are Functions
 
     [Fact]
     public async Task InterruptionPair_TwoNewLargeWritePages_NativeReferencesBothWays_UndosRestore()

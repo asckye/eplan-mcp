@@ -202,7 +202,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
             ["corner_x"] = 100,
             ["corner_y"] = 180
         };
-        async Task<JsonElement> Drawings() => (await eplan.CallAsync("eplan_page_get", new() { ["project"] = project, ["page"] = page, ["include_drawings"] = true })).GetProperty("drawings").GetProperty("items");
+        Task<JsonElement> Drawings() => LiveDrawings.ReadAllAsync((tool, read) => eplan.CallAsync(tool, read), project, page);
         JsonElement drawingsBefore = await Drawings();
         JsonElement preview = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
         Assert.Equal(drawingsBefore.GetRawText(), (await Drawings()).GetRawText());

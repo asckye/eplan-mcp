@@ -7,9 +7,9 @@ namespace EplanMcp.Large.Tests;
 public sealed class PlcRepresentationTests(LiveEplan eplan)
 {
     [Theory]
-    [InlineData("1.1", "Voltage US", "1", 104)]
-    [InlineData("RJ45", "ETHERNET", "X1", 40)]
-    public async Task OverviewThenCircuitPoint_PreservesBothRepresentationsAndOneUndo(string point, string text, string plug, int x)
+    [InlineData("PXC.2861344", "1.1", "Voltage US", "1", 104)]
+    [InlineData("PXC.2703994", "RJ45", "ETHERNET", "X1", 40)]
+    public async Task OverviewThenCircuitPoint_PreservesBothRepresentationsAndOneUndo(string part, string point, string text, string plug, int x)
     {
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         string original = await session.StateAsync();
@@ -61,7 +61,7 @@ public sealed class PlcRepresentationTests(LiveEplan eplan)
             {
                 ["project"] = session.Project,
                 ["page"] = overview,
-                ["part"] = "PXC.2861344",
+                ["part"] = part,
                 ["part_variant"] = "1",
                 ["representation"] = "Overview",
                 ["variant"] = 0,

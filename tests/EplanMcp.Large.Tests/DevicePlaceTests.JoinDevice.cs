@@ -52,9 +52,8 @@ public sealed partial class DevicePlaceTests
             Assert.All(representations, representation => Assert.Equal(tag, representation.GetProperty("tag").GetString()));
             Assert.Single(representations, representation => representation.GetProperty("main").GetBoolean());
             Assert.Single(representations, representation => !representation.GetProperty("main").GetBoolean());
-            JsonElement drawing = await PartsCallAsync("eplan_page_get", new()
-            { ["project"] = project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200 });
-            JsonElement[] symbols = [.. drawing.GetProperty("drawings").GetProperty("items").EnumerateArray()
+            JsonElement drawing = await LiveDrawings.ReadAllAsync(PartsCallAsync, project, page);
+            JsonElement[] symbols = [.. drawing.EnumerateArray()
                 .Where(item => item.GetProperty("kind").GetString() == "Function")];
             Assert.Equal(2, symbols.Length);
             Assert.All(symbols, symbol => Assert.Equal(tag, symbol.GetProperty("properties").GetProperty("name").GetString()));
