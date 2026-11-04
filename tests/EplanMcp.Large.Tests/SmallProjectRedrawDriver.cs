@@ -259,7 +259,9 @@ internal sealed partial class SmallProjectRedrawDriver(
             }
         }
         string placedTag = Text(args["tag"]) ?? name;
-        if (_placedTags.Contains(placedTag))
+        // Busbar definitions and points, device connection points and PLC points join their device by themselves.
+        if (_placedTags.Contains(placedTag) && args["terminal_strip"] is null && args["plc_connection_point"] is null && Text(item["category"]) != "PLCTerminal"
+            && symbolName is not ("BCP" or "BBDEF" or "DCP" or "DCPP3"))
         { args["join_device"] = true; }
         JObject? placed = await InvokeAsync(page, "eplan_device_place", args, [item]);
         if (placed is null)

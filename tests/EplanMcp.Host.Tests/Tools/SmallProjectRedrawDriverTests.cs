@@ -134,7 +134,7 @@ public sealed class SmallProjectRedrawDriverTests
         Assert.Equal(3, placed.Length);
         Assert.Null(placed[0]["join_device"]);
         Assert.True((bool)placed[1]["join_device"]!);
-        Assert.True((bool)placed[2]["join_device"]!);
+        Assert.Null(placed[2]["join_device"]);
         Assert.Equal("I0.1", (string?)placed[2]["plc_address"]);
         Assert.Null(placed[2]["plc_connection_point"]);
         Assert.Null(placed[2]["plc_symbolic_address"]);
