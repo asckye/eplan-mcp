@@ -28,8 +28,8 @@ internal static class BlockCreation
             { Invalid("Block members must be distinct."); }
             DrawingPlacement row = page.Placements.FirstOrDefault(p => DrawingLocators.Matches(member, p.Locator))
                 ?? throw WriteArguments.NotStarted(new(ErrorReason.PlanStale, "A member locator is stale; call eplan_page_get with include_drawings again."));
-            if (row.Parent is not null || row.Properties.TryGetValue("grouped", out string? grouped) && grouped == "true")
-            { Invalid("A block member already belongs to a block, group or property owner."); }
+            if (row.Parent is not null)
+            { Invalid("A block member already belongs to a block or property owner."); }
         }
         writer.Validate(project.Path, args.Page, block);
         if (planning)

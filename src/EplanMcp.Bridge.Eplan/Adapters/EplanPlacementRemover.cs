@@ -17,7 +17,7 @@ internal sealed class EplanPlacementRemover : IPlacementRemover
             ?? throw new BridgeErrorException(ErrorReason.PlanStale, "A placement disappeared; read the page again.")).ToArray();
         foreach (Placement placement in selected)
         {
-            if (members.Contains(placement.ToStringIdentifier()) || placement.Group is not null || placement is PropertyPlacement)
+            if (members.Contains(placement.ToStringIdentifier()) || placement is PropertyPlacement)
             { throw WriteArguments.Invalid(["Block members and property text cannot be deleted separately."]); }
             if (!PlacementDeleteOperation.Allowed(placement.GetType().Name))
             { throw WriteArguments.Invalid([$"Cannot delete {placement.GetType().Name}: devices, connections and blocks are excluded."]); }

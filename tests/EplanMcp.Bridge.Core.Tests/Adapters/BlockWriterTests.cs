@@ -5,17 +5,20 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Tests.Adapters;
 
 #pragma warning disable CA2000 // Project-owned fake placements deliberately reject disposal.
-[Trait("Size", "Small")]
+[Trait("Size", "Medium")]
 public sealed class BlockWriterTests
 {
     [Theory]
-    [InlineData("144_268557")]
-    [InlineData(null)]
-    public void CreatesBlockWithoutTouchingOutsidePlacement(string? name)
+    [InlineData("144_268557", false)]
+    [InlineData(null, false)]
+    [InlineData("144_268557", true)]
+    public void CreatesBlockWithoutTouchingOutsidePlacement(string? name, bool grouped)
     {
         var page = new Page();
         EplanProjects.Project = new(page);
         page.AllPlacements = [new Line(1), new Line(2), new Line(3), new Text(4)];
+        if (grouped)
+        { foreach (Placement placement in page.AllPlacements) { placement.Group = new Group(900); } }
         var reader = new EplanDrawingReader();
         List<DrawingLocator> members = reader.Read("project", page.Name)!.Placements.Where(p => p.Kind == "Line").Select(p => p.Locator).ToList();
         Placement outside = page.AllPlacements[3];

@@ -6,7 +6,7 @@ Read `eplan_page_get` with `include_drawings:true` and replace the example item 
 
 ## Workflow
 
-Use 1–100 distinct locators for Line, Arc, PolyLine, Rectangle, Text, PathText, Image or MacroBox. Devices, connections, property text, blocks and block members are refused with the reason. Removing a macro box keeps its referenced objects. One Ctrl+Z restores the deletion. `items` returns each approved type/oid; `execution` is `not_started` or `committed`.
+Use 1–100 distinct locators for Line, Arc, PolyLine, Rectangle, Text, PathText, Image or MacroBox, including grouped objects. Devices, connections, property text, blocks and objects with a block parent are refused. Removing a macro box keeps its referenced objects. One Ctrl+Z restores the deletion. `items` returns each approved type/oid; `execution` is `not_started` or `committed`.
 
 ## Fields
 

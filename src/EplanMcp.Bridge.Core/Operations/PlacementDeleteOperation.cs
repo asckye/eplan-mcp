@@ -38,7 +38,7 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
             foreach (DrawingLocator item in items)
             {
                 DrawingPlacement row = before.Placements.FirstOrDefault(p => DrawingLocators.Matches(item, p.Locator)) ?? throw Stale();
-                if (row.Parent is not null || row.Properties.TryGetValue("grouped", out string? group) && group == "true")
+                if (row.Parent is not null)
                 { throw WriteArguments.Invalid(["Block members and property text cannot be deleted separately."]); }
                 if (!Allowed(row.Kind))
                 { throw WriteArguments.Invalid([$"Cannot delete {row.Kind}: only independent graphical placements are allowed; devices, connections and blocks are excluded."]); }

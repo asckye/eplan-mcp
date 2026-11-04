@@ -59,17 +59,23 @@ public sealed class PlacementDeleteTests
         Assert.Equal(0, world.Backups);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void BlockMembersAndPropertyChildrenAreRefused(bool parent)
+    [Fact]
+    public void BlockMembersAndPropertyChildrenAreRefused()
     {
         var world = new World("Line");
-        if (parent)
         { world.Page.Placements[0].Parent = new() { Type = 4, Oid = 99 }; }
-        else
-        { world.Page.Placements[0].Properties["grouped"] = "true"; }
         Assert.Contains("cannot be deleted", Assert.Throws<BridgeErrorException>(() => world.Plan(world.Input())).Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void GroupedMacroLineCanBeDeletedInOneTransaction()
+    {
+        var world = new World("Line");
+        world.Page.Placements[0].Properties["grouped"] = "true";
+        JObject input = world.Input();
+        world.Execute(input, world.Plan(input));
+        Assert.Equal(2, Assert.Single(world.Page.Placements).Locator.Oid);
+        Assert.Equal(["Begin AI: eplan_placement_delete", "Commit", "CloseUndo", "Dispose"], world.Transactions.Calls);
     }
 
     [Theory]

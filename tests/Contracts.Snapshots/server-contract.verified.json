@@ -16013,7 +16013,7 @@
     {
       "name": "eplan_placement_delete",
       "title": "Delete independent drawing placements",
-      "description": "Deletes 1-100 independent graphics by eplan_page_get drawing locators. Refuses devices, connections, property text and block members. dry_run defaults true; false needs approval and backup. One undo. See eplan_tool_usage.",
+      "description": "Deletes 1-100 graphics, including grouped objects, by eplan_page_get drawing locators. Refuses devices, connections, property text and block members. dry_run defaults true; false needs approval and backup. One undo. See eplan_tool_usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,

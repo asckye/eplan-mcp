@@ -17,4 +17,4 @@ All primitives accept layer ID and pen:{color,width_mm,style,pattern_length,line
 
 Use layout_guard:"warn" to reproduce existing drawings; keep the default "refuse" for free drawing. Pre-write layout findings become warning text, bounded by LayoutGuard.Summary; R1 outside Page.Size still refuses. Post-write checks and ADR-0046 are unchanged.
 
-Block members with stale locators return PLAN_STALE; another page, duplicate or already grouped members return INVALID_ARGUMENT.
+Block members with stale locators return PLAN_STALE; another page, duplicate or block-owned members (non-null parent) return INVALID_ARGUMENT; grouped:true alone is allowed.

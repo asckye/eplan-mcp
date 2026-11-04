@@ -20,7 +20,6 @@ public sealed class BlockCreationTests
     [Theory]
     [InlineData("stale", ErrorReason.PlanStale)]
     [InlineData("page", ErrorReason.InvalidArgument)]
-    [InlineData("group", ErrorReason.InvalidArgument)]
     [InlineData("child", ErrorReason.InvalidArgument)]
     [InlineData("duplicate", ErrorReason.InvalidArgument)]
     [InlineData("mixed", ErrorReason.InvalidArgument)]
@@ -32,8 +31,6 @@ public sealed class BlockCreationTests
         { f.Args.Items![0].Members![0].Digest = new string('b', 64); }
         if (problem == "page")
         { f.Args.Items![0].Members![0].Page = "other"; }
-        if (problem == "group")
-        { f.Page.Placements[0].Properties["grouped"] = "true"; }
         if (problem == "child")
         { f.Page.Placements[0].Parent = new(); }
         if (problem == "duplicate")
@@ -45,6 +42,20 @@ public sealed class BlockCreationTests
         Assert.Equal(reason, Assert.Throws<BridgeErrorException>(() => f.Run(false)).Error.Reason);
         Assert.Empty(f.Transactions.Calls);
         Assert.Equal(0, f.Writes);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GroupedMacroLinesCanFormBlock(bool planning)
+    {
+        var f = new Fixture();
+        foreach (DrawingPlacement row in f.Page.Placements)
+        { row.Properties["grouped"] = "true"; }
+        PlacementTextCreateData result = f.Run(planning);
+        Assert.Equal("144_268557", result.Text.Name);
+        Assert.Equal(planning ? 0 : 1, f.Writes);
+        Assert.Equal(planning ? 0 : 1, f.Transactions.Calls.Count(c => c == "Commit"));
     }
 
     [Theory]
