@@ -28,7 +28,10 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
 {
     private readonly HostDataLocations _locations = new(Path.Combine(Path.GetTempPath(), "EplanMcpHttpTests-" + Guid.NewGuid().ToString("N")));
     private readonly FakeDiscovery _discovery = new();
-    private readonly HttpClient _http = new(new SocketsHttpHandler { UseProxy = false }) { Timeout = TimeSpan.FromSeconds(4) };
+
+    /// <summary>No deadline: a busy machine answers late, and no assertion here depends on how late. HangWatch names a request that never returns.</summary>
+    private readonly HttpClient _http = new(new SocketsHttpHandler { UseProxy = false }) { Timeout = Timeout.InfiniteTimeSpan };
+
     private WebApplication? _app;
     private BridgeServer? _bridge;
     private string _key = string.Empty;

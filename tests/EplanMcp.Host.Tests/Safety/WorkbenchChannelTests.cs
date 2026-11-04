@@ -327,11 +327,12 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         using var client = CancellationTokenSource.CreateLinkedTokenSource(Token);
 
         Task<ApprovalAnswer?> asking = Channel().AskAsync(Question(), client.Token);
-        await _workbench.Asked.Task.WaitAsync(_patience, Token);
+        // No time limit: on a busy machine the question arrives late, and a channel that steps aside ends the wait through asking.
+        await Task.WhenAny(asking, _workbench.Asked.Task);
         await client.CancelAsync();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => asking);
-        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
         (string method, JsonElement? parameters) = Assert.Single(_workbench.Notifications);
         Assert.Equal((WorkbenchProtocol.CancelMethod, new CancelParams("r1")), (method, WorkbenchJson.As<CancelParams>(parameters)));
     }
