@@ -46,7 +46,14 @@ internal sealed partial class EplanDeviceSymbolPlacement
         var terminal = new Terminal();
 #pragma warning restore CA2000
         CheckTerminal(!strip.Terminals.Any(t => Same(tag.ToUpperInvariant(), t.Name.ToUpperInvariant())), "the strip already has this terminal");
-        terminal.Create(strip, page, variant);
+        if (_symbol.FunctionCategory is { } category && category != "Terminal")
+        {
+            SymbolVariant plain = project.SymbolLibraries.Single(l => l.Name == "IEC_symbol").Symbols.Single(s => s.Name == "X2_2").Variants.Single(v => v.VariantNr == 0);
+            terminal.Create(strip, page, plain);
+            terminal.SetSymbolVariant(variant, false);
+        }
+        else
+        { terminal.Create(strip, page, variant); }
         terminal.Name = tag;
         terminal.Location = new PointD(args.X, args.Y);
         EplanVisibleNames.Adjust(page, terminal);

@@ -16,6 +16,13 @@ internal sealed class TerminalStrip() : Function(2)
 
 internal sealed class Terminal(long oid = 3) : Function(oid)
 {
+    public void SetSymbolVariant(MasterData.SymbolVariant variant, bool useLogicalDefinition)
+    {
+        SymbolVariant.Library = variant.SymbolLibraryName;
+        SymbolVariant.Name = variant.SymbolName;
+        SymbolVariant.Variant = variant.VariantNr;
+    }
+
     [ThreadStatic]
     public static Action<Terminal>? OnCreate;
     private TerminalStrip? _owner;

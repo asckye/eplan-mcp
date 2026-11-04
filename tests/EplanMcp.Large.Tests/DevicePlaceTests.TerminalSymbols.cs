@@ -6,6 +6,35 @@ namespace EplanMcp.Large.Tests;
 public sealed partial class DevicePlaceTests
 {
     [Fact]
+    public async Task TerminalWithForeignSymbol_KeepsATerminalAndUndoesOnce()
+    {
+        // The sample's XTR1 terminals: the symbol's own logical definition is no terminal.
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string project = session.Project;
+        string page = await NewPageAsync(project);
+        string before = (await session.SnapshotAsync()).Hash;
+        JsonElement result = await PartsCallAsync("eplan_device_place", new()
+        {
+            ["project"] = project,
+            ["page"] = page,
+            ["library"] = "IEC_symbol",
+            ["symbol"] = "XTR1",
+            ["symbol_variant"] = 1,
+            ["terminal_strip"] = "-XR" + page[Prefix.Length..],
+            ["terminal_number"] = "1",
+            ["x"] = 80,
+            ["y"] = 160,
+            ["dry_run"] = false
+        });
+        Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+        JsonElement terminal = result.GetProperty("terminal");
+        JsonElement members = await PartsCallAsync("eplan_terminal_strip_get", new() { ["project"] = project, ["strip"] = terminal.GetProperty("strip").GetString() });
+        Assert.Single(members.GetProperty("terminals").EnumerateArray(), t => t.GetProperty("designation").GetString() == "1");
+        await session.UndoAsync();
+        Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+    }
+
+    [Fact]
     public async Task ExplicitTerminalSymbols_ReadsNativeLibraryVariantAndNumbers_EachCallUndoesOnce()
     {
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
@@ -16,7 +45,7 @@ public sealed partial class DevicePlaceTests
         var snapshots = new List<string> { (await session.SnapshotAsync()).Hash };
         try
         {
-            foreach ((string library, string symbol, string number, int x) in new[] { ("IEC_symbol", "X2_2", "1", 80), ("IEC_symbol", "XTR1", "3", 40), ("GRAPHICS", "KA1_PE", "2", 140) })
+            foreach ((string library, string symbol, string number, int x) in new[] { ("IEC_symbol", "X2_2", "1", 80), ("GRAPHICS", "KA1_PE", "2", 140) })
             {
                 JsonElement result = await PartsCallAsync("eplan_device_place", new()
                 {
