@@ -1,0 +1,75 @@
+using System.Text.Json;
+using EplanMcp.Contracts;
+
+namespace EplanMcp.Large.Tests;
+
+public sealed partial class DevicePlaceTests
+{
+    [Fact]
+    public async Task ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores()
+    {
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string project = session.Project;
+        string page = await NewPageAsync(project);
+        string tag = "";
+        string helper = OfflineHost.RepositoryFile("tests", "EplanMcp.Large.ConnectionHelper", "EplanMcp.Large.ConnectionHelper.dll");
+        Assert.True(File.Exists(helper), "Build EplanMcp.Large.ConnectionHelper before running this test.");
+        await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
+        try
+        {
+            JsonElement placed = await PartsCallAsync("eplan_device_place", new()
+            {
+                ["project"] = project,
+                ["page"] = page,
+                ["library"] = "IEC_symbol",
+                ["symbol"] = "X2_2",
+                ["symbol_variant"] = 0,
+                ["terminal_strip"] = "-XR6" + page[Prefix.Length..],
+                ["terminal_number"] = "1",
+                ["x"] = 80,
+                ["y"] = 160,
+                ["dry_run"] = false
+            });
+            tag = placed.GetProperty("device").GetProperty("tag").GetString()!;
+            JsonElement original = await ReadTerminalPartsAsync(project, page, tag);
+            Assert.False(original.GetProperty("main").GetBoolean());
+            Assert.Empty(original.GetProperty("parts").EnumerateArray());
+            string before = (await session.SnapshotAsync()).Hash;
+            JsonElement assigned = await PartsCallAsync("eplan_device_update", new()
+            { ["project"] = project, ["tag"] = tag, ["part"] = "PXC.3211813", ["dry_run"] = false });
+            Assert.Equal(ExecutionState.Committed, assigned.GetProperty("execution").GetString());
+            JsonElement read = await ReadTerminalPartsAsync(project, page, tag);
+            JsonElement part = Assert.Single(read.GetProperty("parts").EnumerateArray());
+            Assert.Equal(("PXC.3211813", "1", 1), (part.GetProperty("part").GetString(), part.GetProperty("variant").GetString(), part.GetProperty("count").GetInt32()));
+            Assert.Equal(tag, read.GetProperty("name").GetString());
+            Assert.Equal("Terminal", read.GetProperty("category").GetString());
+            Assert.False(read.GetProperty("main").GetBoolean());
+            await session.UndoAsync();
+            Assert.Equal(original.GetRawText(), (await ReadTerminalPartsAsync(project, page, tag)).GetRawText());
+            Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+        }
+        catch
+        {
+            try
+            { await ReadTerminalPartsAsync(project, page, tag); }
+            catch (Exception error) { TestContext.Current.TestOutputHelper!.WriteLine("Terminal readback failed: " + error); }
+            throw;
+        }
+        finally
+        { await PlanStepLiveSession.ActionAsync("EplApiModuleAction /unregister:\"EplanMcp.Large.ConnectionHelper\" /Quiet"); }
+    }
+
+    private async Task<JsonElement> ReadTerminalPartsAsync(string project, string page, string tag)
+    {
+        string file = Path.Combine(host.Home, "terminal-parts-" + Guid.NewGuid().ToString("N") + ".json");
+        string request = JsonSerializer.Serialize(new { project, page, tag });
+        TestContext.Current.TestOutputHelper!.WriteLine("Terminal ArticleReferences request: " + request);
+        await File.WriteAllTextAsync(file, request, TestContext.Current.CancellationToken);
+        await PlanStepLiveSession.ActionAsync("EplanMcpLargeTerminalPartReadback /REQUEST:\"" + file + "\"");
+        string json = await File.ReadAllTextAsync(file + ".result.json", TestContext.Current.CancellationToken);
+        TestContext.Current.TestOutputHelper.WriteLine("Terminal ArticleReferences result/readback: " + json);
+        using JsonDocument document = JsonDocument.Parse(json);
+        Assert.True(document.RootElement.GetProperty("success").GetBoolean(), json);
+        return document.RootElement.Clone();
+    }
+}

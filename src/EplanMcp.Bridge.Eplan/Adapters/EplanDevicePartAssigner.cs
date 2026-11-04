@@ -4,27 +4,32 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
-/// <summary>Appends references to a unique main function without retaining native objects across requests or commit.</summary>
+/// <summary>Appends references to a unique part target without retaining native objects across requests or commit.</summary>
 internal sealed class EplanDevicePartAssigner : IDevicePartAssigner
 {
-    public IReadOnlyList<DevicePartTarget> ReadMainFunctions(string projectPath, string tag)
+    public IReadOnlyList<DevicePartTarget> ReadMainFunctions(string projectPath, string tag, bool includeTerminals = false)
     {
         MainThread.Assert();
         var targets = new List<DevicePartTarget>();
-        foreach (Function function in Find(EplanProjects.ByPath(projectPath)).Where(f => f.IsMainFunction))
+        foreach (Function function in Find(EplanProjects.ByPath(projectPath)).Where(f => f.IsMainFunction || (includeTerminals && f.FunctionCategory.ToString() == "Terminal" && f.Name == tag)))
         {
             // A82: a PLC main function's name can include :1; match its device tag instead.
-            string full;
-            using (PropertyValue value = function.Properties.FUNC_IDENTDEVICETAG)
-            { full = value.IsEmpty ? string.Empty : value.ToString(); }
-            if (!string.Equals(full, tag, StringComparison.Ordinal)
+            string full = function.Name;
+            if (function.IsMainFunction)
+            {
+                using PropertyValue value = function.Properties.FUNC_IDENTDEVICETAG;
+                full = value.IsEmpty ? string.Empty : value.ToString();
+            }
+            if (!(includeTerminals && function.FunctionCategory.ToString() == "Terminal" && function.Name == tag) && !string.Equals(full, tag, StringComparison.Ordinal)
                 && !string.Equals(DeviceTags.Shown(function.VisibleName), DeviceTags.Shown(tag), StringComparison.OrdinalIgnoreCase))
             { continue; }
             targets.Add(new DevicePartTarget
             {
+                IsMain = function.IsMainFunction,
+                Category = function.FunctionCategory.ToString(),
                 Id = function.ToStringIdentifier(),
                 Name = function.Name,
-                Tag = full,
+                Tag = function.IsMainFunction ? full : function.Name,
                 VisibleName = function.VisibleName,
                 Page = function.Page?.Name,
                 Parts = [.. function.ArticleReferences.Select(r => new DevicePart { PartNumber = r.PartNr ?? string.Empty, Variant = r.VariantNr, Count = r.Count })],
@@ -37,7 +42,7 @@ internal sealed class EplanDevicePartAssigner : IDevicePartAssigner
     public void AddPart(string projectPath, string mainId, string part, string variant)
     {
         MainThread.Assert();
-        Function main = Find(EplanProjects.ByPath(projectPath)).Single(f => f.IsMainFunction && f.ToStringIdentifier() == mainId);
+        Function main = Find(EplanProjects.ByPath(projectPath)).Single(f => (f.IsMainFunction || f.FunctionCategory.ToString() == "Terminal") && f.ToStringIdentifier() == mainId);
         // A82: AddArticleReference appends the checked part and is read back through ArticleReferences.
         main.AddArticleReference(part, variant, 1);
         GC.KeepAlive(main);

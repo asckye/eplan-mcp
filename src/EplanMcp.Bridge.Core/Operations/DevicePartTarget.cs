@@ -2,9 +2,11 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>A main function's managed identity and existing part references; never retains native wrappers.</summary>
+/// <summary>A part target's managed identity and existing part references; never retains native wrappers.</summary>
 public sealed class DevicePartTarget
 {
+    public bool IsMain { get; set; } = true;
+    public string Category { get; set; } = string.Empty;
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Tag { get; set; } = string.Empty;

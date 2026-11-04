@@ -63,10 +63,10 @@ internal sealed class DeviceUpdateRequest
         }
 
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
-        DevicePartTarget? main = part is null ? null : MainFunction(assigner!, project.Path, tag);
+        DevicePartTarget? main = part is null ? null : MainFunction(assigner!, project.Path, tag, includeTerminals: newTag.Length == 0);
         tag = main?.Tag ?? tag;
         DeviceNames device = newTag.Length == 0 && main is not null
-            ? new DeviceNames { Tag = tag, Functions = [new() { Id = main.Id, IsMain = true, Page = main.Page }] }
+            ? new DeviceNames { Tag = tag, Functions = [new() { Id = main.Id, IsMain = main.IsMain, Category = main.Category, Page = main.Page }] }
             : renamer.ReadDevice(project.Path, tag)
             ?? (DeviceTags.FindByShownTag(reader.ReadMainFunctionNames(project.Path), tag) is { } full ? renamer.ReadDevice(project.Path, full) : null)
             ?? throw new BridgeErrorException(
@@ -103,7 +103,7 @@ internal sealed class DeviceUpdateRequest
             selected = exact.FirstOrDefault(p => string.Equals(p.Variant, variant, StringComparison.Ordinal))
                 ?? throw Invalid($"Part '{numbers[0]}' has no variant '{variant}'; use eplan_part_search to find its variants.");
             if (main!.Parts.Any(p => p.PartNumber == selected.PartNumber && p.Variant == selected.Variant))
-            { throw Invalid("There is nothing to change: the main function already references this part and variant."); }
+            { throw Invalid("There is nothing to change: the function already references this part and variant."); }
         }
         DeviceNames? destination = taken.Length > 0 && device.Functions.Count > 0 && device.Functions.All(f => !f.IsMain && f.Category == "PLCTerminal")
             ? renamer.ReadDevice(project.Path, target) : null;
@@ -126,9 +126,13 @@ internal sealed class DeviceUpdateRequest
     internal static string ReferencesFingerprint(IEnumerable<DevicePart> references) =>
         Fingerprint.Of(references.Select(p => FormattableString.Invariant($"{p.PartNumber}\t{p.Variant}\t{p.Count}")));
 
-    internal static DevicePartTarget MainFunction(IDevicePartAssigner assigner, string path, string tag)
+    internal static DevicePartTarget MainFunction(IDevicePartAssigner assigner, string path, string tag, bool includeTerminals = false)
     {
-        IReadOnlyList<DevicePartTarget> candidates = assigner.ReadMainFunctions(path, tag);
+        IReadOnlyList<DevicePartTarget> candidates = assigner.ReadMainFunctions(path, tag, includeTerminals);
+        DevicePartTarget[] terminals = [.. candidates.Where(m => m.Category == "Terminal" && m.Name == tag)];
+        if (includeTerminals && terminals.Length > 0)
+        { return terminals.Length == 1 ? terminals[0] : throw Invalid($"Part assignment requires one exact terminal; found {terminals.Length}."); }
+        candidates = [.. candidates.Where(m => m.IsMain)];
         string? full = candidates.Any(m => m.Tag == tag) ? tag
             : DeviceTags.FindByShownTag(candidates.Select(m => new FunctionName { Name = m.Tag, VisibleName = m.VisibleName ?? string.Empty }), tag);
         DevicePartTarget[] found = [.. candidates.Where(m => m.Tag == full)];

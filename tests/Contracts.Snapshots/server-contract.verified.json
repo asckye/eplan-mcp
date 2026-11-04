@@ -7468,12 +7468,12 @@
     {
       "name": "eplan_device_update",
       "title": "Update a device in an EPLAN project",
-      "description": "Renames a device preserving suffixes; terminal-only PLC modules may join an existing PLC box. Or append a part to its unique main function. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.",
+      "description": "Renames a device preserving suffixes; terminal-only PLC modules may join an existing PLC box. Append a part to its unique main function, or one exact terminal without renaming. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "project": {
-            "description": "Name or path from eplan_project_list",
+            "description": "Open project",
             "type": "string"
           },
           "tag": {
@@ -7494,7 +7494,7 @@
             "default": true
           },
           "part": {
-            "description": "Part number to append to the unique main function",
+            "description": "Part for one main function or exact terminal",
             "type": [
               "string",
               "null"

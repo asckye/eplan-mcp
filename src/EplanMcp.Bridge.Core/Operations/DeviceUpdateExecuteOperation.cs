@@ -61,20 +61,20 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             { VerifyRename(request, back); }
             if (request.Part is not { } part)
             { return; }
-            // A79/A82: reacquire the main function and its ArticleReferences after commit.
-            DevicePartTarget main = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.NewTag);
-            if (!request.Rename && main.Id != request.Main!.Id || main.Name != request.ResultTag || DeviceUpdateRequest.ReferencesFingerprint(main.Parts)
+            // A79/A82: reacquire the target function and its ArticleReferences after commit.
+            DevicePartTarget main = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.NewTag, includeTerminals: !request.Rename);
+            if (main.IsMain != request.Main!.IsMain || main.Category != request.Main.Category || !request.Rename && main.Id != request.Main!.Id || main.Name != request.ResultTag || DeviceUpdateRequest.ReferencesFingerprint(main.Parts)
                 != DeviceUpdateRequest.ReferencesFingerprint(request.Main!.Parts.Append(new DevicePart { PartNumber = part.PartNumber, Variant = part.Variant, Count = 1 })))
-            { throw InvalidArgument("The committed main function or added part reference did not match the plan; the change was rolled back."); }
+            { throw InvalidArgument("The committed function or added part reference did not match the plan; the change was rolled back."); }
         }, verifyRollback: () =>
         {
             if (request.Rename && renamer.ReadDevice(request.Project.Path, request.Device.Tag) is null)
             { throw new InvalidOperationException("The device's original tag was not restored."); }
             if (request.Main is not { } before)
             { return; }
-            DevicePartTarget restored = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.Device.Tag);
-            if (!request.Rename && restored.Id != before.Id || restored.Name != before.Name || DeviceUpdateRequest.ReferencesFingerprint(restored.Parts) != DeviceUpdateRequest.ReferencesFingerprint(before.Parts))
-            { throw new InvalidOperationException("The original main function and part references were not restored."); }
+            DevicePartTarget restored = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.Device.Tag, includeTerminals: !request.Rename);
+            if (restored.IsMain != before.IsMain || restored.Category != before.Category || !request.Rename && restored.Id != before.Id || restored.Name != before.Name || DeviceUpdateRequest.ReferencesFingerprint(restored.Parts) != DeviceUpdateRequest.ReferencesFingerprint(before.Parts))
+            { throw new InvalidOperationException("The original function and part references were not restored."); }
         });
         return new DeviceUpdateData
         {

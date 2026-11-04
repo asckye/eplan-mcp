@@ -244,6 +244,85 @@ public sealed class DevicePartAssignmentTests
         Assert.Empty(_store.Targets[0].Parts);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ExactNonMainTerminalAcceptsPartOnlyAndPreservesIdentity(bool execute)
+    {
+        DeviceUpdateArgs args = TerminalArgs();
+        WritePlan plan = Plan(args);
+        Assert.Equal(("+A1-XD5:1", "PXC.3211813"), (Assert.Single(plan.Changes).Name, plan.Changes[0].NewValue));
+        Assert.Empty(_store.Adds);
+        if (!execute)
+        { return; }
+        args.Fingerprint = plan.Fingerprint;
+        DeviceUpdateData actual = Execute(args);
+        Assert.Equal(("+A1-XD5:1", "+A1-XD5:1", 1), (actual.Tag, actual.PreviousTag, actual.Functions));
+        Assert.Equal(("1", "PXC.3211813", "1"), Assert.Single(_store.Adds));
+        Assert.True(_store.ReadAfterCommit);
+        Assert.Empty(_renamer.Renames);
+        Assert.Equal(["Begin AI: eplan_device_update", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("PLCTerminal")]
+    [InlineData("BusTerminal")]
+    [InlineData("NOContact")]
+    public void OtherNonMainCategoriesCannotReceiveParts(string category)
+    {
+        DeviceUpdateArgs args = TerminalArgs();
+        _store.Targets[0].Category = category;
+        Assert.Throws<BridgeErrorException>(() => Plan(args));
+        Assert.Empty(_store.Adds);
+    }
+
+    [Theory]
+    [InlineData("+A1-XD5")]
+    [InlineData("+A1-XD5:2")]
+    [InlineData("+a1-xd5:1")]
+    public void TerminalPartRequiresItsExactFullName(string tag)
+    {
+        DeviceUpdateArgs args = TerminalArgs();
+        args.Tag = tag;
+        Assert.Throws<BridgeErrorException>(() => Plan(args));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void TerminalPartCannotAlsoRenameOrChooseBetweenDuplicateTerminals(bool duplicateIsMain)
+    {
+        DeviceUpdateArgs args = TerminalArgs();
+        args.NewTag = "+A1-XD6";
+        Assert.Throws<BridgeErrorException>(() => Plan(args));
+        args.NewTag = "";
+        _store.Targets.Add(new DevicePartTarget { Id = "2", Name = args.Tag, Tag = args.Tag, IsMain = duplicateIsMain, Category = "Terminal" });
+        Assert.Contains("found 2", Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("part")]
+    [InlineData("identity")]
+    [InlineData("name")]
+    public void TerminalPartReadbackMismatchRestoresOriginalReferences(string mismatch)
+    {
+        DeviceUpdateArgs args = TerminalArgs();
+        args.Fingerprint = Plan(args).Fingerprint;
+        _store.Mismatch = mismatch;
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => Execute(args)).Error.Execution);
+        Assert.Empty(_store.Targets[0].Parts);
+    }
+
+    private DeviceUpdateArgs TerminalArgs()
+    {
+        DevicePartTarget target = _store.Targets[0];
+        target.Name = target.Tag = "+A1-XD5:1";
+        target.IsMain = false;
+        target.Category = "Terminal";
+        _store.Database.Parts.Add(new PartSearchItem { PartNumber = "PXC.3211813", Variant = "1" });
+        return new() { Project = "Line1", Tag = target.Name, Part = "PXC.3211813" };
+    }
+
     private static DeviceUpdateArgs Args() => new() { Project = "Line1", Tag = Tag, Part = Part };
     private WritePlan Plan(DeviceUpdateArgs args) => (WritePlan)new DeviceUpdatePlanOperation(_catalog, _reader, _renamer, _store, _store).Execute(args)!;
     private DeviceUpdateData Execute(DeviceUpdateArgs args) => (DeviceUpdateData)new DeviceUpdateExecuteOperation(_catalog, _reader, _renamer, _transactions, _store, _store).Execute(args)!;
@@ -259,7 +338,7 @@ public sealed class DevicePartAssignmentTests
         public bool KeepPartAfterRollback { get; set; }
         public bool KeepNameAfterRollback { get; set; }
         public PartsDatabaseContent Read(string? language) => Database;
-        public IReadOnlyList<DevicePartTarget> ReadMainFunctions(string projectPath, string tag)
+        public IReadOnlyList<DevicePartTarget> ReadMainFunctions(string projectPath, string tag, bool includeTerminals = false)
         {
             Reads++;
             bool committed = transactions.Calls.Contains("Commit") && !transactions.Calls.Contains("Rollback");
@@ -268,6 +347,7 @@ public sealed class DevicePartAssignmentTests
             { return []; }
             return [.. Targets.Select(m => new DevicePartTarget
             {
+                IsMain = m.IsMain, Category = m.Category,
                 Id = committed && Mismatch == "identity" ? "wrong" : m.Id,
                 Name = committed && Mismatch == "name" ? "wrong" : renamer.Renames.Count > 0 && !transactions.Calls.Contains("Rollback") ? renamer.Renames[^1].NewTag : m.Name,
                 Tag = renamer.Renames.Count > 0 && !transactions.Calls.Contains("Rollback") ? renamer.Renames[^1].NewTag : m.Tag,

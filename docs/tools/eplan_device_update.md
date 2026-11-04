@@ -9,7 +9,7 @@
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-"把 `-KF1` 改成 `-KF10`""把 `=GAA+A1-FC1` 挪到 `=GAB1` 下"。代理给出设备的现有标识和新标识，工具把整个设备改名：主功能和全部辅助功能（包括其他页上的触点，即交叉引用）一起改，设备保持完整。还可给现有设备的唯一主功能追加部件引用；部件来自当前部件库，不会替换原有引用。
+"把 `-KF1` 改成 `-KF10`""把 `=GAA+A1-FC1` 挪到 `=GAB1` 下"。代理给出设备的现有标识和新标识，工具把整个设备改名：主功能和全部辅助功能（包括其他页上的触点，即交叉引用）一起改，设备保持完整。还可给现有设备的唯一主功能或精确匹配的单个端子追加部件引用；部件来自当前部件库，不会替换原有引用。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
@@ -43,7 +43,7 @@
   "hint": null
 }
 ```
-- `device.functions`：改名时为全部改名功能数；只赋值部件时为唯一主功能的 1。`device.pages`：这些受影响功能所在的页，最多 20 个，按 EPLAN 的顺序列出；只赋值部件时只列主功能所在页，未放置则为空。
+- `device.functions`：改名时为全部改名功能数；只赋值部件时为唯一主功能或端子的 1。`device.pages`：这些受影响功能所在的页，最多 20 个，按 EPLAN 的顺序列出；只赋值部件时只列目标功能所在页，未放置则为空。
 - 提交后是读回的值；`dry_run` 时是将要得到的值，`visibleTag` 为 `null`。
 - `undo`、`recovered`：同 `eplan_page_create`。
 - 标识按项目数据处理，经过 ResultShaper。
@@ -114,6 +114,11 @@
 - 规划按 `FUNC_IDENTDEVICETAG` 查找唯一主功能（已放置或未放置），数量不为 1 时返回 `INVALID_ARGUMENT` 并报告数量；只赋值部件时允许功能名称带连接点后缀。已引用相同部件和变体时拒绝 `nothing to change`。
 - 变更清单增加 `add part <part> (variant <v>) to <tag>`；指纹包含主功能身份、现有部件引用和所选库部件，执行前重新核对。
 - 同一事务内先执行请求的改名，再以 `Function.AddArticleReference(part, variant, 1)` 追加引用（A82）。提交后按设备标识重新获取主功能及 `ArticleReferences`（A79）；缺少新引用时回滚。原有引用保持不变。
-- `device.part`、`device.variant` 返回本次赋值的部件和变体；只改名时为 null。只赋值部件时，`tag` 与 `previousTag` 都返回主功能的实际完整名称（可能带 `:1` 等连接点后缀），可直接交给 `eplan_device_get`；`functions=1`，`pages` 只含主功能所在页。
+- `device.part`、`device.variant` 返回本次赋值的部件和变体；只改名时为 null。只赋值部件时，`tag` 与 `previousTag` 都返回主功能的实际完整名称（可能带 `:1` 等连接点后缀），主功能可直接交给 `eplan_device_get`；端子用 `eplan_terminal_strip_get` 定位；`functions=1`，`pages` 只含目标功能所在页。
 - 主线程目标为 2 秒，端到端默认时限 60 秒；部件库较大时可能超过目标，支持既有进度与取消。
 - Small 覆盖参数、默认变体、唯一主功能、重复引用、指纹和提交后读回；Medium 覆盖假 Bridge 的 part-only、同时改名、dry-run 与失败。Large 在 `FunctionPlaceTests` 放置 `IEC_symbol/SSD/0`、赋值 `SIE.3SB3400-0B/1` 并读回；仅编写，交由维护者运行。
+
+### 非主端子的部件
+- 仅 `part` 赋值且不改名时，`tag` 可为恰好一个已有 `FunctionCategory.Terminal` 的完整名称（如 `+A1-XD5:1`）；不按端子排名、前缀或短标识猜选。其他非主功能、重名端子与同时改名均拒绝。
+- 端子已由之前的放置事务提交；本次沿用 `Function.AddArticleReference(part, variant, 1)`，提交后按原完整名称重新读取身份、类别、主功能标志及 `ArticleReferences`，保留已有引用，一个撤销步骤恢复。A87 的新建连接定义点限制不扩展为本次新建对象。
+- 新增 Small/Medium 覆盖精确端子、歧义、其他类别、改名拒绝与默认预览；Large `ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores` 在 LargeWrite 放置 `IEC_symbol/X2_2/0` 后追加 `PXC.3211813`，独立读回并撤销，待实测。

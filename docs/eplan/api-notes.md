@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A92、B14**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A92、B15**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -383,3 +383,6 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 ### B13. PLC 写属性的正式名和值类型（2026-11-04，安装版 2026.0.3 XML 与字典）
 - 本机 `Eplan.EplApi.DataModelu.xml` 的 Function 属性文档与 `catalog/eplan-2026.0.3/data-dictionary.jsonl` 对照：20161 `FUNC_PLCCONFIGURATIONPROJECT`、20408 `FUNC_PLCSTATIONNAME`、20409 `FUNC_PLCSTATIONTYPE`、20410 `FUNC_PLCRACK`、20411 `FUNC_PLCSOCKET`、20427 `FUNC_PLCTHISRACK`、20400 `FUNC_PLCADDRESS`、20402 `FUNC_PLCSYMBOLICADDRESS_MANUAL`、20407 `FUNC_PLCCHANNEL_DESIGNATION_MANUAL` 返回 `System.String`。
 - 20308 `FUNC_PLC_BUSSYSTEM` 文档类型为 `System.Int64`，XML 列出 0..51（51 为 KNX）；`PropertyValue` 原生整数写入/读回入口是 Int32 隐式转换和 `ToInt()`，该范围可无损表示。以上是静态文档事实；B8 工具写入、传播和撤销尚待 Large 实测。
+
+### B14. Function.AddArticleReference 的文档范围（2026-11-04，安装版 2026.0.3 XML）
+- `M:Eplan.EplApi.DataModel.Function.AddArticleReference(System.String,System.String,System.UInt32)` 返回 `ArticleReference`，向功能增加部件引用；文档说明部件来自系统部件库/项目，明确列出的特殊限制为 ArticlePlacement 只能有一个引用，未列 Terminal 必须是主功能的限制。此事实不等于端子运行时验证；已有端子的追加、提交后读回及撤销由本轮 Large 待验。A87 的创建事务限制针对新建 ConnectionDefinitionPoint，不据此推断所有 Function。
