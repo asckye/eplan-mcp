@@ -179,6 +179,24 @@ public sealed class PageExportRoundFourTests
         Assert.Empty(comparison.SubsetDifferences);
     }
 
+    [Theory]
+    [InlineData("=GL1+A2&EFS1/1.3", 0, 1)]
+    [InlineData("=K1+A2&EFS1/2.3", 1, 0)]
+    public void Compare_ValuesFromAPointOnAnotherPage_AreSubsetDifferencesOnlyOutsideTheComparedPages(string reference, int different, int subset)
+    {
+        string Point(string partner, string text) => $$$"""
+            {"placements":[{"type":"Terminal","oid":1,"location":{"x":1,"y":1},"properties":[{"id":20301,"index":0,"value":"{{{partner}}}"},{"id":20031,"index":0,"value":"{{{text}}}"}]},
+            {"type":"ContextPropertyPlacement","oid":2,"parentOid":1,"propertyId":20031,"location":{"x":1,"y":1},"content":{"??_??":"{{{text}}}"}}]}
+            """;
+        HashSet<string> pages = ["=K1+A2&EFS1/2"];
+
+        PageExportComparison comparison = PageExportComparer.Compare(Point(reference, "Start"), Point(reference, ""), pages);
+
+        Assert.Equal(different, comparison.Types["Terminal"].Different.Count);
+        Assert.Equal(different, comparison.Types["ContextPropertyPlacement"].Different.Count);
+        Assert.Equal(subset == 0 ? 0 : 2, comparison.SubsetDifferences.Count);
+    }
+
     [Fact]
     public void Compare_Blocks_PairByNameWhateverTheirOrder()
     {

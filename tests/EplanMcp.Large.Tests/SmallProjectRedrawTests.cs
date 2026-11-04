@@ -30,7 +30,7 @@ public sealed class SmallProjectRedrawTests(LiveEplan eplan, DestructiveHost hos
         string projectName = "SmallRedraw_" + run;
         // Below the Destructive Host's scratch root: deleting macro text is the only Destructive step of this run.
         string project = Path.Combine(WriteHost.ScratchFolder, "redraw", projectName, projectName);
-        var report = new SmallProjectRedrawReport(run, project);
+        var report = new SmallProjectRedrawReport(run, project) { ComparedPages = _pages.ToHashSet(StringComparer.Ordinal) };
         Dictionary<string, (JObject Page, string File)> source = LoadPages(Path.Combine(root, "source"), report);
         Dictionary<string, (JObject Page, string File)> target = new(StringComparer.Ordinal);
         Exception? infrastructureError = null;

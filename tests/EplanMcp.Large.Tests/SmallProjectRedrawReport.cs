@@ -9,6 +9,9 @@ namespace EplanMcp.Large.Tests;
 /// <summary>Keeps every redraw attempt and the unmodified native comparison available for diagnosis.</summary>
 internal sealed class SmallProjectRedrawReport(string run, string project)
 {
+    /// <summary>The redrawn pages: a value computed from any other page is a subset difference.</summary>
+    internal IReadOnlySet<string>? ComparedPages { get; set; }
+
     private static readonly string[] _noteContextFields = ["page", "objectType", "oid", "stage"];
     private readonly List<JObject> _calls = [];
     private readonly List<JObject> _noTool = [];
@@ -96,7 +99,7 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
         }
 
         // Do not weaken or repeat the comparer's normalization, matching, or report-page rules here.
-        PageExportComparison comparison = PageExportComparer.Compare(source ?? new JObject(), target ?? new JObject());
+        PageExportComparison comparison = PageExportComparer.Compare(source ?? new JObject(), target ?? new JObject(), ComparedPages);
         var types = new JObject();
         foreach ((string type, PageExportTypeComparison value) in comparison.Types)
         {

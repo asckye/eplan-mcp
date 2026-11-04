@@ -65,10 +65,16 @@ internal static class PageExportComparer
     private static readonly Dictionary<string, string> _coordinateProperties = new(StringComparer.Ordinal)
     { ["19002"] = "x", ["19003"] = "y", ["19310"] = "x", ["19311"] = "y", ["19312"] = "x", ["19313"] = "y", ["19321"] = "x", ["19322"] = "y", ["19340"] = "x", ["19341"] = "y" };
 
-    internal static PageExportComparison Compare(string sourceJson, string targetJson) =>
-        Compare(JObject.Parse(sourceJson), JObject.Parse(targetJson));
+    internal static PageExportComparison Compare(string sourceJson, string targetJson, IReadOnlySet<string>? comparedPages = null) =>
+        Compare(JObject.Parse(sourceJson), JObject.Parse(targetJson), comparedPages);
 
-    internal static PageExportComparison Compare(JObject source, JObject target)
+    // Computed from the channel's other representation (A90). When that lives on a page outside the compared pages,
+    // these values cannot match: the owner's rule of 2026-11-03 lists them as subset differences.
+    private static readonly HashSet<string> _pairedProperties = new(StringComparer.Ordinal) { "20301", "20031", "20120", "20404", "20048", "20477", "20470" };
+    private const string PairedOutsideName = "Other representation outside the compared pages";
+    private const string PairedOutsideReason = "The value is computed from a PLC point on a page that was not redrawn.";
+
+    internal static PageExportComparison Compare(JObject source, JObject target, IReadOnlySet<string>? comparedPages = null)
     {
         var result = new PageExportComparison();
         CollectWarnings(source, "source", result.Warnings);
@@ -125,6 +131,8 @@ internal static class PageExportComparer
         {
             var differences = new List<PageExportFieldDifference>();
             Differences(Normalize(pair.Source, "", sourceIds), Normalize(pair.Target, "", targetIds), "", differences);
+            if (comparedPages is not null)
+            { SeparatePairedDifferences(pair, differences, sourcePlacements, comparedPages, result); }
             PageExportTypeComparison group = Group(result, pair.Type);
             if (differences.Count == 0)
             {
@@ -181,6 +189,34 @@ internal static class PageExportComparer
             result.PageDifferences.Remove(difference);
             result.SubsetDifferences.Add(new(difference.Field, rule.Name, rule.Reason, difference.Source, difference.Target));
         }
+    }
+
+    private static void SeparatePairedDifferences(ObjectPair pair, List<PageExportFieldDifference> differences, List<JObject> placements,
+        IReadOnlySet<string> comparedPages, PageExportComparison result)
+    {
+        bool text = IsPropertyPlacement(pair.Source);
+        JObject? owner = text ? placements.FirstOrDefault(p => p["oid"]?.ToString() == pair.Source["parentOid"]?.ToString() && !IsPropertyPlacement(p)) : pair.Source;
+        if (owner is null || !PartnerOutside(owner, comparedPages) || text && !_pairedProperties.Contains(pair.Source["propertyId"]?.ToString() ?? ""))
+        { return; }
+        foreach (PageExportFieldDifference difference in differences.ToArray())
+        {
+            bool paired = text
+                ? difference.Field.StartsWith("content", StringComparison.Ordinal) || difference.Field.StartsWith("boundingBox", StringComparison.Ordinal) || difference.Field.StartsWith("properties[id=19201,", StringComparison.Ordinal)
+                : _pairedProperties.Any(id => difference.Field.StartsWith("properties[id=" + id + ",", StringComparison.Ordinal));
+            if (paired)
+            {
+                differences.Remove(difference);
+                result.SubsetDifferences.Add(new(pair.Type + " " + pair.Source["oid"] + ": " + difference.Field, PairedOutsideName, PairedOutsideReason, difference.Source, difference.Target));
+            }
+        }
+    }
+
+    private static bool PartnerOutside(JObject function, IReadOnlySet<string> comparedPages)
+    {
+        JToken? value = Objects(function["properties"]).FirstOrDefault(p => (int?)p["id"] == 20301)?["value"];
+        string reference = value is JObject languages ? languages.Properties().FirstOrDefault()?.Value.ToString() ?? "" : value?.ToString() ?? "";
+        Match page = Regex.Match(reference, "^(.*?/\\d+)");
+        return page.Success && !comparedPages.Contains(page.Groups[1].Value);
     }
 
     private static bool IsPageProperty(string path, string id) => path == "properties." + id
