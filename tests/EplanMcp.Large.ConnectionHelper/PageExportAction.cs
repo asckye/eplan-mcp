@@ -36,6 +36,9 @@ public sealed partial class PageExportAction : IEplAction
             try
             {
                 Directory.CreateDirectory(output);
+                // A native crash cannot be caught: the last line names the member being read (live 2026-11-03: 0xc0000374).
+                using var trace = new StreamWriter(Path.Combine(output, "export-trace.log"), append: false) { AutoFlush = true };
+                _trace = trace;
                 var pages = new JArray();
                 result["pages"] = pages;
                 var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -469,8 +472,11 @@ public sealed partial class PageExportAction : IEplAction
         row[key] = value is null ? JValue.CreateNull() : value is JToken token ? token : JToken.FromObject(value);
     }
 
+    private static StreamWriter? _trace;
+
     private static T Get<T>(JObject row, object owner, string member, Func<T> read, T fallback = default!)
     {
+        _trace?.WriteLine((string?)row["type"] + " " + (string?)row["oid"] + " " + member);
         try
         { return read(); }
         catch (Exception error) { Error(row, member, error); return fallback; }
