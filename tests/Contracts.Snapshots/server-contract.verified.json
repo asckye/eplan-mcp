@@ -4424,7 +4424,7 @@
     {
       "name": "eplan_connection_create",
       "title": "Create connection symbols and explicit wire paths",
-      "description": "Creates SPECIAL nodes, interruptions, wires, cables and CDP/CDPNG on new or existing Circuit connections. Verifies geometry, endpoints and properties. Undo: interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes the call. Omit dry_run to preview; false executes. Outside scratch needs approval. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.",
+      "description": "Creates SPECIAL nodes, interruptions, wires, cables and CDP/CDPNG on new or existing Circuit connections. Verifies geometry, endpoints and properties. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes the call. Omit dry_run to preview; false executes. Outside scratch needs approval. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.",
       "inputSchema": {
         "type": "object",
         "properties": {

@@ -8,6 +8,39 @@ namespace EplanMcp.Large.Tests;
 public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     [Theory]
+    [InlineData("corner", "Left,Up")]
+    [InlineData("t_node", "Left,Right,Up")]
+    [InlineData("potential_point", "Up")]
+    public async Task IsolatedNode_NewPage_ReadsBackWithoutGenerating(string kind, string directions)
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = await NewPageAsync(session);
+        await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        async Task<PageDrawingGeometry> Drawing() => await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+            new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+        double grid = (await Drawing()).GridSize;
+        string before = (await session.SnapshotAsync(page)).Hash;
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = session.Project, ["page"] = page, ["dry_run"] = false, ["response_format"] = "detailed",
+            ["items"] = new[] { new { kind, position = new[] { 30 * grid, 30 * grid }, directions = directions.Split(',') } }
+        };
+        TestContext.Current.TestOutputHelper!.WriteLine("node request: " + JsonSerializer.Serialize(request));
+        (bool succeeded, JsonElement result) = await eplan.CallOrErrorAsync("eplan_connection_create", request);
+        TestContext.Current.TestOutputHelper.WriteLine("node result: " + result.GetRawText());
+        TestContext.Current.TestOutputHelper.WriteLine("node drawing readback: " + JsonSerializer.Serialize(await Drawing()));
+        Assert.True(succeeded, result.GetRawText());
+        Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+        Assert.Equal(1, result.GetProperty("undoSteps").GetInt32());
+        Assert.Single(result.GetProperty("symbols").EnumerateArray());
+        Assert.Empty(result.GetProperty("actualEndpoints").EnumerateArray());
+        Assert.Empty(result.GetProperty("logicalAfterGenerate").EnumerateArray());
+        await session.UndoAsync();
+        Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
+    }
+
+    [Theory]
     [InlineData("CDP")]
     [InlineData("CDPNG")]
     public async Task TerminalWire_DefinitionPoint_ReadsProperties_OneUndoRestores(string symbol)

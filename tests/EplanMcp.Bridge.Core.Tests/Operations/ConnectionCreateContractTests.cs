@@ -26,7 +26,7 @@ public sealed class ConnectionCreateContractTests
             ["title"] = "Create connection symbols and explicit wire paths",
             ["status"] = "registered_preview_contract",
             ["profile"] = "full",
-            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Interruptions or wire definition points: 1 undo; other wires/nodes: 2; cables: 6-8. Definition points set and verify colour, cross section and designation. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Isolated nodes, interruptions or wire definition points: 1 undo; wires: 2; cables: 6-8. Definition points set and verify colour, cross section and designation. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
             ["annotations"] = new JObject { ["readOnlyHint"] = false, ["destructiveHint"] = false, ["idempotentHint"] = false, ["openWorldHint"] = false },
             ["inputSchema"] = InputSchema(),
             ["outputSchema"] = OutputSchema(),

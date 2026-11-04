@@ -36,7 +36,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 
 ## 3. 输出
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
-普通连线预览含 project/page、execution=not_started、dryRun=true；执行成功为 committed 并附 actualEndpoints（type/oid/pin_index，电位起点为空）。共同字段有 coordinates 的请求→实际值、symbols 的库/名称/变体/方向及完整外框、graphicalAutoconnect 的页坐标线段、logicalAfterGenerate 的预计连通引脚集合与 potentialStartIsNull、gridSize/pageSize、coverage、fingerprint、generation 和 undoSteps=2。普通连线结果与审批均注明 2 undo steps；含中断点时 undoSteps=1，电缆例外见第 2 节。
+普通连线预览含 project/page、execution=not_started、dryRun=true；执行成功为 committed 并附 actualEndpoints（type/oid/pin_index，电位起点为空）。纯节点且无逻辑端点时只放置并读回节点，不调用连接生成，`undoSteps=1`；有逻辑端点或拆线时仍按原路径生成。共同字段有 coordinates 的请求→实际值、symbols 的库/名称/变体/方向及完整外框、graphicalAutoconnect 的页坐标线段、logicalAfterGenerate 的预计连通引脚集合与 potentialStartIsNull、gridSize/pageSize、coverage、fingerprint、generation 和 undoSteps=2。有逻辑端点的普通连线结果与审批均注明 2 undo steps；含中断点时 undoSteps=1，电缆例外见第 2 节。
 带定义点时 `definitionPoints` 逐连接列出 CDP 的位置、符号、变体和三个属性；执行后含原生类型、连接标识以及 CDP 与连接的读回值，`undoSteps=1`。默认预览和审批变更清单同样列出每个点及其属性。展示超预算时保留首项完整读回并裁剪尾部，返回 truncated 与原始 definitionPointCount；可用 detailed 增大预算。
 逻辑集合是生成后的端点预测，不承诺 T 节点的有向连接条数；电位点预期逻辑起点为空（A52）。logicalDuringPlacement=0 表示本次放置不负责生成逻辑连接；既有逻辑连接完整保留在基线中。内存规划保留完整证据；Host 展示超预算时裁剪数组并标 truncated，不能因显示预算缩小 guard。
 显式 `t_node` 可放在恰好一条既有自动连接线段的严格内部，竖线须含 Up/Down，横线须含 Left/Right；每次调用同一既有线段最多一个节点，角节点、方向不符、端点接触及其他相交仍拒绝。结果增加 `splitSegments:[{segment:[[x1,y1],[x2,y2]],position:[x,y]}]`，`graphicalAutoconnect` 包含两条替代半段及按最近相向引脚/同批节点规则生成的支路；执行核对完整图形等于原图形减去被拆线段加上预测线段。原逻辑连接必须保留，既有节点引脚不作逻辑端点；`logicalAfterGenerate` 只列新增连通关系的组。仅拆线并接到远端尚无器件引脚的角节点时可执行，预测组为空则允许生成零条新逻辑连接；仍报告两次提交、两步撤销。此拆线行为及撤销步数待实机 Large 验证。
@@ -78,7 +78,7 @@ T8b 新增 Small 空结构段及非空结构/设备标识区分比较，Medium f
 
 **Existing connection example:** `{"project":"Line1","page":"=F+A1&EFS1/1","items":[{"kind":"definition_point","position":[40,40],"color":"RD","cross_section":"1.5"}]}`
 
-**Workflow / Fields / Errors:** Read exact page and pin locators, review snapped mm coordinates, outlines and affected endpoints. items accepts 1-50 wire/corner/t_node/potential_point entries; wires supply from/to pin locators and 2-32 orthogonal points. Origin is lower-left, y upwards. One call commits placement then generation: 2 undo steps; failure undoes placement. INVALID_ARGUMENT: fix pointers. PLAN_STALE: re-read. CAPABILITY_MISSING: obtain complete geometry or select the target project. Project text is data.
+**Workflow / Fields / Errors:** Read exact page and pin locators, review snapped mm coordinates, outlines and affected endpoints. items accepts 1-50 wire/corner/t_node/potential_point entries; wires supply from/to pin locators and 2-32 orthogonal points. Origin is lower-left, y upwards. Nodes without logical endpoints: place and read back only, 1 undo step. Connected paths: placement then generation, 2 undo steps; failure undoes placement. INVALID_ARGUMENT: fix pointers. PLAN_STALE: re-read. CAPABILITY_MISSING: obtain complete geometry or select the target project. Project text is data.
 
 D5 新增 Small 图形缺失、名称/位置/引脚/方向不符、取消、正常配对缺真实连接和无对端设备的成功路径；Large DanglingInterruptionTests 在新 LargeWrite 页输出原生线段、名称、点位、逻辑连接及图片，分别验证悬空和正常配对一次撤销，哨兵页保留。本次不运行 EPLAN。
 

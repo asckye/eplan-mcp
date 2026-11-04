@@ -6,7 +6,7 @@
     {"project":"Line1","page":"=F+A1&EFS1/1","items":[{"kind":"definition_point","position":[40,40],"color":"RD","cross_section":"1.5"}]}
 ## Workflow
 Omitted/true dry_run previews without approval/writes (execution=not_started). Execute with dry_run:false.
-Exact locators/pins and orthogonal paths; no routing. Wires/nodes: 2 undos; cables: 6-8. Outside scratch needs approval. Current target required; failure rolls back and undoes commits.
+Exact locators/pins and orthogonal paths; no routing. Nodes without logical endpoints: placement/readback only, 1 undo; connected wires: 2 undos; cables: 6-8. Outside scratch needs approval. Current target required; failure rolls back and undoes commits.
 Interruptions: one undo, including isolated points/lines. Verify geometry/names/positions/native pairing without auxiliary devices; real pins connect when both sides have devices.
 ## Fields
 Plugins: omitted interruption_point.symbol uses enabled defaults.interruption.symbol, else BP; explicit wins. Plan/execute share items; metadata.plugins lists sources; changed defaults stale the plan.

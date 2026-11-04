@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_connection_create` 仅放置节点且没有逻辑连接端点时只放置、读回，跳过连接生成并返回 `undoSteps: 1`。
+
 - `eplan_device_place` 端子来源可选择库符号及变体，按 Terminal 类别校验；省略时保持 IEC_symbol/X 默认。
 
 - `eplan_device_place` 支持 SPECIAL/BBDEF 母线定义及同标识 BCP 连接点，返回原生类别与主功能标志。

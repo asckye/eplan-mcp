@@ -22,8 +22,6 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         {
             scene = creator.Read((string?)input["project"] ?? "", (string?)input["page"] ?? "");
             plan = ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), scene, creator, fingerprint);
-            if (plan["definitionPoints"] is null && plan["cableDefinitions"] is null && plan["interruptionScope"] is null && (!plan["symbols"]!.Any() || (!plan["logicalAfterGenerate"]!.Any() && plan["splitSegments"] is null)))
-            { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Supply symbols with connected logical endpoints; empty generation cannot provide 2 undo steps."); }
             place = plan["cableDefinitions"] is null ? creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!, actual =>
             {
                 actual.Lines = ConnectionCreatePlanner.ExpectedGraphical(scene, plan).Select(s => new LayoutGuard.Segment { Points = s }).ToList();
@@ -107,6 +105,24 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         try
         {
             VerifyGraphical();
+            if ((int)plan["undoSteps"]! == 1)
+            {
+                List<string?[]> actual = creator.Endpoints(project, page);
+                var remaining = actual.ToList();
+                foreach (ConnectionRecord before in scene.Logical)
+                {
+                    int index = remaining.FindIndex(p => p[0] == before.StartDevice && p[1] == before.EndDevice);
+                    if (index < 0)
+                    { throw Mismatch("existing connection " + before.StartDevice + " - " + before.EndDevice + " is gone after node placement"); }
+                    remaining.RemoveAt(index);
+                }
+                if (remaining.Count != 0)
+                { throw Mismatch("node placement added an unplanned connection"); }
+                plan["execution"] = ExecutionState.Committed;
+                plan["dryRun"] = false;
+                plan["actualEndpoints"] = JArray.FromObject(actual);
+                return plan;
+            }
             Committed<List<string?[]>> generated = TransactionRunner.Run(transactions, "eplan_connection_create", GenerateAndVerify, _ => true,
                 _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { CheckLayout(); return true; }));
             if (generated.Warning is not null)

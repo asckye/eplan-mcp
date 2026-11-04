@@ -36,6 +36,23 @@ public sealed class ConnectionCreatePlanTests : IDisposable
         Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => ConnectionCreatePlanner.Plan(_fixture.Request.ToString(), _fixture.Scene, reader, fingerprint)).Error.Reason);
     }
 
+    [Theory]
+    [InlineData("corner", "Left,Up")]
+    [InlineData("t_node", "Left,Right,Up")]
+    [InlineData("potential_point", "Up")]
+    public void NodesWithoutEndpoints_FileRoundTrip_PreviewsOneUndoStep(string kind, string directions)
+    {
+        _fixture.Scene.Pins.Clear();
+        _fixture.Scene.Page.Placements.Clear();
+        _fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node(kind, [40, 40], directions.Split(',')));
+        JObject plan = RoundTripPlan();
+        Assert.Equal(1, (int)plan["undoSteps"]!);
+        Assert.Empty(plan["logicalAfterGenerate"]!);
+        Assert.Single(plan["symbols"]!);
+        _fixture.Request["items"]![0]!["directions"] = new JArray("Diagonal");
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Reason);
+    }
+
     [Fact]
     public void DryRun_ExplicitTNode_PredictsAllThreePinEndpoints()
     {

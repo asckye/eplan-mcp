@@ -149,6 +149,92 @@ public sealed class ConnectionCreateExecutionTests
     }
 
     [Theory]
+    [InlineData("corner", "Left,Up")]
+    [InlineData("t_node", "Left,Right,Up")]
+    [InlineData("potential_point", "Up")]
+    public void NodesWithoutLogicalEndpoints_CommitOneStepWithoutGeneration(string kind, string directions)
+    {
+        var fake = new Creator { GeneratedEndpoints = [] };
+        fake.Fixture.Scene.Pins.Clear();
+        fake.Fixture.Scene.Page.Placements.Clear();
+        fake.Fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node(kind, [40, 40], directions.Split(',')));
+
+        JObject result = fake.Execute();
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(1, (int)result["undoSteps"]!);
+        Assert.Single(result["symbols"]!);
+        Assert.Empty(result["logicalAfterGenerate"]!);
+        Assert.Empty(result["actualEndpoints"]!);
+        Assert.Equal(["place"], fake.Events);
+        Assert.Equal(1, fake.Transactions.Calls.Count(c => c == "Commit"));
+    }
+
+    [Fact]
+    public void NodesWithoutEndpoints_GraphicalMismatch_UndoesPlacement()
+    {
+        var fake = new Creator { Drawn = [[[40, 40], [40, 48]]] };
+        fake.Fixture.Scene.Pins.Clear();
+        fake.Fixture.Scene.Page.Placements.Clear();
+        fake.Fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("corner", [40, 40], "Left", "Up"));
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
+
+        Assert.Equal(ExecutionState.RolledBack, error.Execution);
+        Assert.Equal(["place", "undo"], fake.Events);
+        Assert.Equal(0, fake.State);
+    }
+
+    [Theory]
+    [InlineData("preserved")]
+    [InlineData("missing")]
+    [InlineData("added")]
+    [InlineData("duplicate")]
+    public void IsolatedNode_PreservesExistingLogicalConnectionsWithoutGenerating(string outcome)
+    {
+        var fake = new Creator
+        {
+            GeneratedEndpoints = outcome switch
+            {
+                "missing" => [],
+                "added" => [["17/7/0", "17/8/0"], ["17/9/0", "17/10/0"]],
+                "duplicate" => [["17/7/0", "17/8/0"], ["17/7/0", "17/8/0"]],
+                _ => [["17/7/0", "17/8/0"]]
+            }
+        };
+        fake.Fixture.Scene.Pins.Clear();
+        fake.Fixture.Scene.Page.Placements.Clear();
+        fake.Fixture.Scene.Logical.Add(new() { StartDevice = "17/7/0", EndDevice = "17/8/0" });
+        fake.Fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("corner", [40, 40], "Left", "Up"));
+        if (outcome == "preserved")
+        {
+            JObject result = fake.Execute();
+            Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+            Assert.Single(result["actualEndpoints"]!);
+            Assert.Equal(["place"], fake.Events);
+        }
+        else
+        {
+            BridgeError error = Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error;
+            Assert.Equal(ExecutionState.RolledBack, error.Execution);
+            Assert.Equal(["place", "undo"], fake.Events);
+            Assert.Equal(0, fake.State);
+        }
+        Assert.DoesNotContain("generate", fake.Events);
+    }
+
+    [Fact]
+    public void IsolatedNodeWithAnExplicitWire_StillGeneratesWithTwoUndoSteps()
+    {
+        var fake = new Creator();
+        ((JArray)fake.Fixture.Request["items"]!).Add(ConnectionCreateFixture.Node("corner", [80, 80], "Left", "Up"));
+        JObject result = fake.Execute();
+        Assert.Equal(2, (int)result["undoSteps"]!);
+        Assert.Equal(["place", "generate"], fake.Events);
+        Assert.Single(result["actualEndpoints"]!);
+    }
+
+    [Theory]
     [InlineData("generation")]
     [InlineData("endpoints")]
     [InlineData("graphical")]

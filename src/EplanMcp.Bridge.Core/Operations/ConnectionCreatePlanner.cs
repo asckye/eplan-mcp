@@ -393,8 +393,10 @@ public static class ConnectionCreatePlanner
             ["pageSize"] = new JArray(scene.Page.PageSize!),
             ["coverage"] = "complete_page_predicted_endpoints",
             ["logicalDuringPlacement"] = 0,
-            ["generation"] = "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
-            ["undoSteps"] = 2
+            ["generation"] = logical.Count == 0 && splits.Count == 0
+                ? "No logical endpoints: place and read back nodes without connection generation; 1 undo step."
+                : "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
+            ["undoSteps"] = logical.Count == 0 && splits.Count == 0 ? 1 : 2
         };
         result["warning"] = layoutWarnings.Count == 0 ? null : string.Join("\n", layoutWarnings.Distinct(StringComparer.Ordinal));
         if (splits.Count > 0)
