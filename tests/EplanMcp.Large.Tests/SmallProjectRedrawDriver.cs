@@ -338,6 +338,8 @@ internal sealed partial class SmallProjectRedrawDriver(
                 { point["function_definition"] = definition; }
                 if (Property(item, 20121) is string representation && representation is "0" or "1")
                 { point["representation_type"] = int.Parse(representation, CultureInfo.InvariantCulture); }
+                if (Property(item, 31048) is string typeCode && !string.IsNullOrEmpty(typeCode))
+                { point["type_code"] = typeCode; }
                 foreach ((int id, string field) in new[] { (31004, "color"), (31002, "cross_section"), (31011, "designation") })
                 {
                     if (Property(item, id) is string value && !string.IsNullOrEmpty(value))
