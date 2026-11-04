@@ -7,6 +7,260 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class ConnectionDefinitionPointTests
 {
+    [Fact]
+    public void ExistingConnection_StandaloneDefinitionPoint_PreviewsWithoutSymbolsOrNewConnections()
+    {
+        var fixture = Existing();
+        JObject plan = fixture.Plan();
+        JToken point = Assert.Single(plan["definitionPoints"]!);
+        Assert.Equal([8d, 24d], point["position"]!.Values<double>());
+        Assert.Equal("CDP", (string?)point["symbol"]!["name"]);
+        Assert.Equal("RD", (string?)point["properties"]!["color"]);
+        Assert.Equal("1.5", (string?)point["properties"]!["cross_section"]);
+        Assert.Equal(["17/2/0", "17/1/0"], point["endpoints"]!.Values<string>());
+        Assert.Empty(plan["symbols"]!);
+        Assert.Empty(plan["graphicalAutoconnect"]!);
+        Assert.Empty(plan["logicalAfterGenerate"]!);
+        Assert.Equal(1, (int)plan["undoSteps"]!);
+        Assert.True((bool)plan["dryRun"]!);
+        Assert.Equal(ExecutionState.NotStarted, (string?)plan["execution"]);
+    }
+
+    [Theory]
+    [InlineData("{}", "")]
+    [InlineData("{\"color\":\"\"}", "/color")]
+    [InlineData("{\"cross_section\":\"NaN\"}", "/cross_section")]
+    [InlineData("{\"color\":\"RD\",\"symbol\":\"PDP\"}", "/symbol")]
+    [InlineData("{\"color\":\"RD\",\"symbol_variant\":9}", "/symbol_variant")]
+    [InlineData("{\"color\":\"RD\",\"symbol_variant\":\"0\"}", "/symbol_variant")]
+    [InlineData("{\"designation\":null}", "/designation")]
+    [InlineData("{\"color\":\"RD\",\"unknown\":1}", "/unknown")]
+    public void ExistingConnection_InvalidDefinitionPoint_IsRejectedBeforeWriting(string properties, string field)
+    {
+        var fixture = Existing();
+        var item = new JObject { ["kind"] = "definition_point", ["position"] = new JArray(8d, 24d) };
+        foreach (JProperty property in JObject.Parse(properties).Properties())
+        { item[property.Name] = property.Value; }
+        fixture.Request["items"] = new JArray(item);
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Contains("/items/0" + field, error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ExistingConnection_PositionIsRequired()
+    {
+        var fixture = Existing();
+        ((JObject)fixture.Request["items"]![0]!).Remove("position");
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("/items/0/position", error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("CDP")]
+    [InlineData("CDPNG")]
+    public void ExistingConnection_OffLinePosition_ReportsNearestSegment(string symbol)
+    {
+        var fixture = Existing();
+        fixture.Request["items"]![0]!["symbol"] = symbol;
+        fixture.Request["items"]![0]!["position"] = new JArray(12d, 24d);
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("/items/0/position", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Contains("nearest", error.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("40", error.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("CDP", 0, 8d)]
+    [InlineData("CDPNG", 0, 8d)]
+    [InlineData("CDP", 2, 10d)]
+    public void ExistingConnection_ExplicitSymbolVariantAndOffGridPosition_ArePreserved(string symbol, int variant, double x)
+    {
+        var fixture = Existing(x);
+        fixture.Symbols.Add(ConnectionCreateFixture.Variant("CDP", "ConnectionDefinitionPoint", 2));
+        fixture.Request["items"]![0]!["symbol"] = symbol;
+        fixture.Request["items"]![0]!["symbol_variant"] = variant;
+        fixture.Request["items"]![0]!["position"] = new JArray(x, 14.5d);
+        JToken point = Assert.Single(fixture.Plan()["definitionPoints"]!);
+        Assert.Equal([x, 14.5d], point["position"]!.Values<double>());
+        Assert.Equal((symbol, variant), ((string?)point["symbol"]!["name"], (int)point["symbol"]!["variant"]!));
+    }
+
+    [Theory]
+    [InlineData("alone")]
+    [InlineData("wire")]
+    [InlineData("node")]
+    public void ExistingConnection_PreviewCompositions_PreserveExistingAndNewDefinitionPoints(string composition)
+    {
+        var fixture = Existing();
+        fixture.Request.Remove("dry_run");
+        var items = (JArray)fixture.Request["items"]!;
+        if (composition == "wire")
+        {
+            JObject from = fixture.AddPin(3, [48, 8], "Up", [46, 4, 50, 8]);
+            JObject to = fixture.AddPin(4, [48, 40], "Down", [46, 40, 50, 44]);
+            JObject wire = ConnectionCreateFixture.Wire(from, to, [48, 8], [48, 40]);
+            wire["definition_point"] = new JObject { ["color"] = "BU" };
+            items.Add(wire);
+        }
+        if (composition == "node")
+        { items.Add(ConnectionCreateFixture.Node("corner", [64, 64], "Left", "Up")); }
+        JObject plan = fixture.Plan();
+        Assert.True((bool)plan["dryRun"]!);
+        Assert.Equal(ExecutionState.NotStarted, (string?)plan["execution"]);
+        Assert.Equal(composition == "wire" ? 2 : 1, plan["definitionPoints"]!.Count());
+        Assert.Equal(1, (int)plan["undoSteps"]!);
+        Assert.Equal([8d, 24d], plan["definitionPoints"]![0]!["position"]!.Values<double>());
+        if (composition == "wire")
+        { Assert.Equal([48d, 24d], plan["definitionPoints"]![1]!["position"]!.Values<double>()); }
+        Assert.Single(fixture.Scene.Graphical);
+        Assert.Single(fixture.Scene.Logical);
+    }
+
+    [Theory]
+    [InlineData("cable_definition")]
+    [InlineData("interruption_point")]
+    public void ExistingConnection_CableOrInterruptionMixedIn_IsRejected(string kind)
+    {
+        var fixture = Existing();
+        var other = kind == "cable_definition" ? new JObject { ["kind"] = kind } : new JObject
+        {
+            ["kind"] = kind,
+            ["name"] = "-BP1",
+            ["direction"] = "Up",
+            ["position"] = new JArray(64, 64),
+            ["counterpart_pages"] = new JArray("=F+A1&EFS1/2")
+        };
+        ((JArray)fixture.Request["items"]!).Add(other);
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("separately", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NewWire_StandalonePointCannotUseTheSameCallsNewPath()
+    {
+        var fixture = Straight();
+        ((JArray)fixture.Request["items"]!).Add(Existing().Request["items"]![0]!.DeepClone());
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("/items/1/position", error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ExistingConnection_PathThroughCornerPins_ResolvesItsLogicalEndpoints(bool offsetPins)
+    {
+        var fixture = Existing();
+        fixture.Scene.Page.Placements.Clear();
+        fixture.Scene.Pins.Clear();
+        fixture.AddPin(1, [8, 8], "Up", [6, 4, 10, 8]);
+        fixture.AddPin(2, [40, 40], "Left", [40, 38, 44, 42]);
+        fixture.AddPin(3, [8, 40], "Down", [6, 38, 12, 42]);
+        fixture.Scene.Page.Placements[^1].Kind = "SymbolReference";
+        double x = offsetPins ? 10 : 8;
+        fixture.Scene.Pins.Add("17/3/1", new() { Location = [x, 40], Direction = "Right" });
+        fixture.Scene.Graphical = [[[8, 8], [8, 40]], [[x, 40], [40, 40]]];
+        fixture.Request["items"]![0]!["position"] = new JArray(24d, 40d);
+        JToken point = Assert.Single(fixture.Plan()["definitionPoints"]!);
+        Assert.Equal(["17/2/0", "17/1/0"], point["endpoints"]!.Values<string>());
+        Assert.Equal([24d, 40d], point["position"]!.Values<double>());
+    }
+
+    [Fact]
+    public void ExistingConnection_OnlyDefinitionPoint_CommitsAndKeepsAllEndpointsInOneUndoStep()
+    {
+        var creator = new Creator(existing: true);
+        JObject result = creator.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(["place", "define", "generate", "readback"], creator.Events);
+        Assert.Equal(1, (int)result["undoSteps"]!);
+        Assert.Equal(1, creator.Transactions.Calls.Count(c => c == "Commit"));
+        Assert.Equal(1, creator.Transactions.Calls.Count(c => c == "CloseUndo"));
+        JToken pair = Assert.Single(result["actualEndpoints"]!);
+        Assert.Equal(["17/2/0", "17/1/0"], pair.Values<string>());
+        Assert.Empty(result["symbols"]!);
+        Assert.Equal("1.5", (string?)result["definitionPoints"]![0]!["connectionValues"]!["cross_section"]);
+    }
+
+    [Theory]
+    [InlineData("type")]
+    [InlineData("symbol")]
+    [InlineData("position")]
+    [InlineData("endpoints")]
+    [InlineData("properties/color")]
+    [InlineData("properties/cross_section")]
+    [InlineData("properties/designation")]
+    [InlineData("connectionValues/color")]
+    [InlineData("connectionValues/cross_section")]
+    [InlineData("connectionValues/designation")]
+    public void ExistingConnection_ReadbackMismatch_RollsBackTheCommittedPlacement(string field)
+    {
+        var creator = new Creator(existing: true) { Mismatch = field };
+        creator.Fixture.Request["items"]![0]!["designation"] = "W1";
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => creator.Execute()).Error;
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Contains("definitionPoints/0/" + field, error.Message, StringComparison.Ordinal);
+        Assert.Equal(0, creator.State);
+        Assert.Contains("Commit", creator.Transactions.Calls);
+        Assert.Contains("Rollback", creator.Transactions.Calls);
+        Assert.DoesNotContain("CloseUndo", creator.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("lost")]
+    [InlineData("added")]
+    [InlineData("duplicate")]
+    public void ExistingConnection_EndpointSetChangedAfterGeneration_RollsBack(string failure)
+    {
+        var creator = new Creator(existing: true)
+        {
+            GeneratedEndpoints = failure switch
+            {
+                "lost" => [],
+                "added" => [["17/2/0", "17/1/0"], ["17/2/0", "17/9/0"]],
+                _ => [["17/2/0", "17/1/0"], ["17/2/0", "17/1/0"]]
+            }
+        };
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => creator.Execute()).Error;
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Contains("connection", error.Message, StringComparison.Ordinal);
+        Assert.Equal(0, creator.State);
+        Assert.Contains("Rollback", creator.Transactions.Calls);
+        Assert.DoesNotContain("readback", creator.Events);
+    }
+
+    [Fact]
+    public void ExistingConnection_NewBranchCannotHideADuplicatePreservedConnection()
+    {
+        var creator = new Creator
+        {
+            GeneratedEndpoints = [["17/1/0", "17/2/0"], ["17/1/0", "17/2/0"], ["17/2/0", "17/3/0"]],
+            Drawn = [[[16, 8], [16, 24]], [[16, 24], [16, 40]], [[16, 24], [32, 24]], [[32, 24], [32, 8]]]
+        };
+        creator.Fixture.SplitLine(branchPin: true);
+        creator.Fixture.Symbols.Add(ConnectionCreateFixture.Variant("CDP", "ConnectionDefinitionPoint", 0));
+        ((JArray)creator.Fixture.Request["items"]!).Add(new JObject
+        {
+            ["kind"] = "definition_point",
+            ["position"] = new JArray(16d, 16d),
+            ["color"] = "RD"
+        });
+        JObject plan = creator.Fixture.Plan();
+        Assert.Equal(["17/1/0", "17/2/0", "17/3/0"], Assert.Single(plan["logicalAfterGenerate"]!)["pins"]!.Values<string>());
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => creator.Execute()).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Contains("connection", error.Message, StringComparison.Ordinal);
+        Assert.Equal(0, creator.State);
+        Assert.Contains("Rollback", creator.Transactions.Calls);
+        Assert.DoesNotContain("readback", creator.Events);
+    }
+
     [Theory]
     [InlineData("{}", "definition_point")]
     [InlineData("null", "definition_point")]
@@ -195,18 +449,38 @@ public sealed class ConnectionDefinitionPointTests
         fixture.Request["items"]![0]!["definition_point"] = new JObject { ["color"] = "RD", ["cross_section"] = "1.5", ["designation"] = "W1" };
         return fixture;
     }
+    private static ConnectionCreateFixture Existing(double x = 8)
+    {
+        var fixture = Straight(offGrid: x != 8);
+        fixture.Scene.Graphical = [[[x, 8], [x, 40]]];
+        fixture.Scene.Logical = [new() { StartDevice = "17/2/0", EndDevice = "17/1/0" }];
+        fixture.Request["items"] = new JArray(new JObject
+        {
+            ["kind"] = "definition_point",
+            ["position"] = new JArray(x, 24d),
+            ["color"] = "RD",
+            ["cross_section"] = "1.5"
+        });
+        return fixture;
+    }
     private sealed class Creator : IConnectionCreator, IConnectionGenerator, IConnectionDefinitionPointWriter
     {
-        public ConnectionCreateFixture Fixture { get; } = Straight();
+        public ConnectionCreateFixture Fixture { get; }
         public FakeTransactions Transactions { get; } = new();
         public List<string> Events { get; } = [];
         public string? Mismatch { get; init; }
+        public List<string?[]>? GeneratedEndpoints { get; init; }
+        public List<double[][]>? Drawn { get; init; }
         public int State { get; private set; }
-        public Creator() { Transactions.Snapshot = () => { int old = State; return () => State = old; }; }
+        public Creator(bool existing = false)
+        {
+            Fixture = existing ? Existing() : Straight();
+            Transactions.Snapshot = () => { int old = State; return () => State = old; };
+        }
         public JObject Execute() => Assert.IsType<JObject>(new OperationContext("definition-test", true, null).Run(() => new ConnectionCreateExecuteOperation(this, this, Transactions)
             .Execute(new JObject { ["request"] = Fixture.Request, ["fingerprint"] = Fixture.Plan()["fingerprint"] })));
         public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Fixture.Scene : new()
-        { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()! };
+        { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = Drawn ?? [.. Fixture.Scene.Graphical, .. Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!] };
         public List<SymbolSearchItem> Read(string project, SymbolSearchArgs args) => Fixture.Read(project, args);
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => { Events.Add("place"); State = 1; };
@@ -236,7 +510,7 @@ public sealed class ConnectionDefinitionPointTests
             }
             return rows;
         }
-        public List<string?[]> Endpoints(string project, string page) => [["17/2/0", "17/1/0"]];
+        public List<string?[]> Endpoints(string project, string page) => GeneratedEndpoints ?? [["17/2/0", "17/1/0"]];
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) { Assert.True(undoCommitted); return Transactions; }
         public void Undo(string project) => throw new NotSupportedException();
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => throw new NotSupportedException();

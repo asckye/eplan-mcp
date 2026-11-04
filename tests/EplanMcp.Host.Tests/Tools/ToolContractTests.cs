@@ -105,7 +105,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
         JsonElement itemBranches = tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf");
-        Assert.Equal(["wire", "corner", "t_node", "potential_point", "interruption_point", "cable_definition"],
+        Assert.Equal(["wire", "corner", "t_node", "potential_point", "interruption_point", "cable_definition", "definition_point"],
             itemBranches.EnumerateArray().Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));
         foreach (JsonElement branch in itemBranches.EnumerateArray())
         { Assert.False(branch.GetProperty("additionalProperties").GetBoolean()); }
@@ -150,6 +150,14 @@ public sealed class ToolContractTests : IDisposable
             foreach (string number in new[] { "1.5", "0", "-1", "+1e2", ".5E-2" })
             { Assert.Matches(pattern, number); }
         }
+        JsonElement standalone = branches.Single(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "definition_point");
+        Assert.Equal(["kind", "position"], standalone.GetProperty("required").EnumerateArray().Select(p => p.GetString()));
+        JsonElement nested = branches[0].GetProperty("properties").GetProperty("definition_point");
+        Assert.True(JsonElement.DeepEquals(nested.GetProperty("anyOf"), standalone.GetProperty("anyOf")));
+        foreach (JsonProperty property in nested.GetProperty("properties").EnumerateObject())
+        { Assert.True(JsonElement.DeepEquals(property.Value, standalone.GetProperty("properties").GetProperty(property.Name))); }
+        Assert.Equal("#/$defs/pin", branches[0].GetProperty("properties").GetProperty("from").GetProperty("$ref").GetString());
+        Assert.False(schema.GetProperty("$defs").GetProperty("pin").GetProperty("additionalProperties").GetBoolean());
     }
 
     [Fact]

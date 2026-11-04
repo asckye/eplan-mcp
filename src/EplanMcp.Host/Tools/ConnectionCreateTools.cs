@@ -27,11 +27,11 @@ internal sealed class ConnectionCreateTools
         ? CableLimit : PageWriteTools.DefaultLimit;
 
     [McpServerTool(Name = Tool, Title = "Create connection symbols and explicit wire paths", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Creates SPECIAL nodes, interruptions, wires with optional CDP/CDPNG properties, and cables on a Circuit page. Verifies geometry, endpoints and properties. Undo: interruptions or definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes this call. Omit dry_run to preview; false executes. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.")]
+    [Description("Creates SPECIAL nodes, interruptions, wires, cables and CDP/CDPNG on new or existing Circuit connections. Verifies geometry, endpoints and properties. Undo: interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes the call. Omit dry_run to preview; false executes. Outside scratch needs approval. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IBridgeClient bridge,
         string project, string page,
-        [Description("1-50 wire/corner/t_node/potential_point/interruption_point/cable_definition; interruptions require counterpart_pages; see usage")] JsonElement[] items,
-        [Description("Preview")] bool dry_run = WriteToolDefaults.Preview, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
+        [Description("1-50 wire/corner/t_node/potential_point/interruption_point/cable_definition/definition_point; see usage")] JsonElement[] items,
+        bool dry_run = WriteToolDefaults.Preview, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
         [Description("Open this page before drawing; UI only, no data change.")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, PackLibrary? packs = null, CancellationToken cancellationToken = default)
     {

@@ -131,7 +131,12 @@ public static class ConnectionCreatePlanner
             string at = "/items/" + (index++).ToString(CultureInfo.InvariantCulture);
             if (item is JObject && (string?)item["kind"] == "cable_definition")
             { continue; }
-            Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node, potential_point, interruption_point or cable_definition.");
+            Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node, potential_point, interruption_point, cable_definition or definition_point.");
+            if ((string?)item["kind"] == "definition_point")
+            {
+                definitions.Add(ConnectionDefinitionPoints.Plan(item, at, [], "", "", index - 1, scene, variants ??= reader.Read(scene.Project.Path, new() { Library = "SPECIAL" }), existing: true));
+                continue;
+            }
             bool wire = (string?)item["kind"] == "wire";
             if ((string?)item["kind"] == "interruption_point")
             {

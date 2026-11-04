@@ -147,6 +147,8 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 { throw Mismatch("existing connection " + before[0] + " - " + before[1] + " is gone after generation"); }
                 added.RemoveAt(index);
             }
+            if (plan["definitionPoints"] is not null && added.Any(p => preserved.Any(before => p[0] == before[0] && p[1] == before[1] || p[0] == before[1] && p[1] == before[0])))
+            { throw Mismatch("generation duplicated existing connection endpoints"); }
             List<HashSet<string>> groups = plan["logicalAfterGenerate"]!.Select(g => new HashSet<string>(g["pins"]!.Values<string>().Select(p => p!)
                 .Concat(g["interruptionPins"]?.Values<string>().Select(p => p!) ?? []).Concat((bool)g["potentialStartIsNull"]! ? ["<potential>"] : []), StringComparer.Ordinal)).ToList();
             // Customer rehearsal: EPLAN connects devices through interruption points, so a point whose counterpart side has

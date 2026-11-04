@@ -12,6 +12,7 @@
 - `eplan_device_place` 支持 SPECIAL/DC 黑盒及同标识 DCP/DCPP3 连接点，读回原生类型、类别、主功能、外框与框内功能。
 
 - `eplan_connection_create` 支持在导线上放置 SPECIAL `CDP` / `CDPNG` 连接定义点，写入颜色、截面和标识；预览列出属性，提交后读回核对，整次调用一步撤销。
+- `eplan_connection_create` 支持独立 item 在已有自动连线上或随新建导线放置 SPECIAL `CDP` / `CDPNG` 连接定义点，写入颜色、截面和标识；预览列出属性，提交后读回核对，整次调用一步撤销。
 - `eplan_macro_insert` 新增 `representation`：可在总览页插入宏的 `Overview` 表达；布局检查按所选表达和宏变体读取外框。
 - `eplan_macro_insert` 可用 `part` / `part_variant` 代替 `macro`：插入部件的组符号宏，在同一事务中给主功能补上部件引用，提交后读回。
 - `eplan_macro_insert`：宏的声明外框超出可绘制区但仍在已知幅面的页内时只给警告（部件总览宏铺满 A3 页）；插入的对象仍在写入后实测检查。

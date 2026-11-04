@@ -11,7 +11,8 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Medium")]
 public sealed class ConnectionDefinitionPointToolTests
 {
-    private static JsonElement Item => JsonSerializer.SerializeToElement(new
+    private static JsonElement Item => JsonSerializer.SerializeToElement(new { kind = "definition_point", position = (int[])[40, 40], color = "RD", cross_section = "1.5" });
+    private static JsonElement WireItem => JsonSerializer.SerializeToElement(new
     {
         kind = "wire",
         from = new { locator = new { oid = 1 }, pin_index = 0 },
@@ -22,15 +23,19 @@ public sealed class ConnectionDefinitionPointToolTests
     private const string Data = """{"project":"Line1","page":"page","undoSteps":1,"definitionPoints":[{"itemIndex":0,"type":"ConnectionDefinitionPoint","position":[40,40],"symbol":{"library":"SPECIAL","name":"CDP","variant":0},"properties":{"color":"RD","cross_section":"1.5"},"connectionValues":{"color":"RD","cross_section":"1.5"}}]}""";
 
     [Theory]
-    [InlineData(null)]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task PreviewAndExecute_RetainDefinitionPointsAndForwardExactRequest(bool? dry)
+    [InlineData(null, false)]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(null, true)]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public async Task PreviewAndExecute_RetainDefinitionPointsAndForwardExactRequest(bool? dry, bool existing)
     {
         using var harness = Setup();
+        JsonElement item = existing ? Item : WireItem;
         CallToolResult call = dry is null
-            ? await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [Item], cancellationToken: TestContext.Current.CancellationToken)
-            : await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [Item], dry_run: dry.Value, cancellationToken: TestContext.Current.CancellationToken);
+            ? await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [item], cancellationToken: TestContext.Current.CancellationToken)
+            : await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [item], dry_run: dry.Value, cancellationToken: TestContext.Current.CancellationToken);
         JsonElement result = WriteToolHarness.Structured(call);
         Assert.Equal(dry != false, result.GetProperty("dryRun").GetBoolean());
         Assert.Equal(dry == false ? ExecutionState.Committed : ExecutionState.NotStarted, result.GetProperty("execution").GetString());
@@ -41,10 +46,28 @@ public sealed class ConnectionDefinitionPointToolTests
         if (dry == false)
         {
             JsonElement sent = JsonSerializer.SerializeToElement(harness.Bridge.Calls.Last().Args);
-            Assert.Equal(Item.GetRawText(), sent.GetProperty("request").GetProperty("items")[0].GetRawText());
+            Assert.Equal(item.GetRawText(), sent.GetProperty("request").GetProperty("items")[0].GetRawText());
         }
         else
         { Assert.Contains("dry_run: false", result.GetProperty("hint").GetString(), StringComparison.Ordinal); }
+    }
+
+    [Fact]
+    public async Task ExistingConnection_ReadbackMismatchReportsRollbackWithoutRetry()
+    {
+        using var harness = Setup();
+        harness.Bridge.WriteFailure = new BridgeError
+        {
+            Reason = ErrorReason.EplanOperationFailed,
+            Execution = ExecutionState.RolledBack,
+            Message = "Definition point readback differs at definitionPoints/0/connectionValues/color.",
+        };
+        CallToolResult call = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [Item], dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
+        JsonElement error = WriteToolHarness.Error(call);
+        Assert.Equal(ExecutionState.RolledBack, error.GetProperty("execution").GetString());
+        Assert.Contains("connectionValues/color", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+        Assert.Null(call.StructuredContent);
+        Assert.Single(harness.Bridge.Writes);
     }
 
     [Fact]
