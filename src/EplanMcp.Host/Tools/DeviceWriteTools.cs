@@ -118,7 +118,7 @@ internal sealed class DeviceWriteTools
         string page,
         double x,
         double y,
-        [Description("Tag; symbols require it.")] string? tag = null,
+        string? tag = null,
         string? part = null,
         string? variant = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
@@ -140,10 +140,10 @@ internal sealed class DeviceWriteTools
         string? plc_symbolic_address = null,
         string? plc_text = null,
         string? plc_plug_designation = null,
-        [Description("Open/focus the page before drawing; UI only.")] bool show_page = false,
+        [Description("Open page first; UI only.")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         PackLibrary? packs = null,
-        [Description("Join an existing tag as a secondary library symbol.")] bool? join_device = null,
+        [Description("Join existing tag as secondary symbol.")] bool? join_device = null,
         [AllowedValues("refuse", "warn")] string layout_guard = "refuse",
         CancellationToken cancellationToken = default)
     {

@@ -6431,7 +6431,6 @@
             "type": "number"
           },
           "tag": {
-            "description": "Tag; symbols require it.",
             "type": [
               "string",
               "null"
@@ -6630,12 +6629,12 @@
             "maxLength": 64
           },
           "show_page": {
-            "description": "Open/focus the page before drawing; UI only.",
+            "description": "Open page first; UI only.",
             "type": "boolean",
             "default": false
           },
           "join_device": {
-            "description": "Join an existing tag as a secondary library symbol.",
+            "description": "Join existing tag as secondary symbol.",
             "type": "boolean",
             "default": false
           },
@@ -9999,7 +9998,6 @@
             "type": "number"
           },
           "macro": {
-            "description": "From eplan_macro_list",
             "type": "string"
           },
           "variant": {
@@ -10036,7 +10034,6 @@
             "type": "string"
           },
           "part_variant": {
-            "description": "Default 1",
             "type": "string"
           },
           "macro_box": {

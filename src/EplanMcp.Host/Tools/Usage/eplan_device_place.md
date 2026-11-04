@@ -13,11 +13,11 @@
 ## Workflow
 dry_run omitted/true: preview only, execution=not_started. false executes.
 
-1. Circuit page via eplan_page_list/create/get. mm within page; origin bottom left, y up.
-2. Free symbol tag: eplan_device_list; short tags inherit page structure. Parts: omit tag for native numbering, or rename all functions. Outside scratch needs approval.
+1. Circuit page: eplan_page_list/create/get. mm; origin bottom left, y up.
+2. Symbols need a free tag: eplan_device_list; short tags inherit page structure. Parts: omit tag for native numbering, or rename all functions. Outside scratch needs approval.
 3. Parts: eplan_part_search, variant 1; others unplaced. PLC module: eplan_macro_insert part. Symbols: eplan_symbol_search. More symbols: library/symbol + join_device:true, existing tag, secondary function; then eplan_device_update part.
 
-join_device defaults false; no part/terminal/PLC. Unknown tag: DEVICE_NOT_FOUND.
+join_device: no part/terminal/PLC. Unknown tag: DEVICE_NOT_FOUND.
 
 SPECIAL/DC: tag and corner_x/corner_y required; x/y lower left, corners upper right. DCP/DCPP3: same tag plus one connection_designations pin; named tag:pin. blackBox: tag/bounds/functionsInside (preview membership unknown); device.type/isMainFunction: native after commit.
 
@@ -34,7 +34,7 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - location_box: + followed by 1-64 letters/digits/underscores/dots. Omit tag and part/symbol options. Fixed SPECIAL/SC variant 0, dashed. x,y: lower-left; corner_x,corner_y: upper-right; positive area.
 - locationBox: structure, bounds [minX,minY,maxX,maxY], outline=dashed, affectedDevices=[]; predicted before commit. functions/unplaced=0; device.tag/category=structure/LocationBox. No duplicate page structure; verify recovery via eplan_page_get include_drawings.
 
-- Terminal: terminal_strip + terminal_number; defaults IEC_symbol/X/0; library+symbol must be Terminal, variant default 0. No tag/part/display/pin options. Number: 1-64 letters/digits/_/dots. terminal_strip_text: new strips only, 1-256 chars, no controls, plain ??_??. Duplicate strip:number ignores case.
+- Terminal: terminal_strip + terminal_number; defaults IEC_symbol/X/0; box symbols refused, variant default 0. No tag/part/display/pin options. Number: 1-64 letters/digits/_/dots. terminal_strip_text: new strips only, 1-256 chars, no controls, plain ??_??. Duplicate strip:number ignores case.
 - terminal_strip_position:[x,y]: finite 0..10000 mm; requires new strip text. Omit for unplaced. Read stripPosition/stripText.
 - Placed strip: defaults.strip_definition.symbol/.variant from plugins (SPECIAL), else TDEF/0. metadata.plugins=used id@version in preview/execute; plugin changes invalidate plans.
 - terminal: strip/number/owner/position/sortCode (20809)/stripCreated. Preview/recovery: owner/sortCode=null; empty sortCode=null. functions includes new strip. Segments: eplan_connection_generate dry_run:false (A52/A55).
@@ -53,4 +53,4 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 not_started/rolled_back: unchanged. INVALID_ARGUMENT: fix source/coordinates/variant/structure/readback. PART_NOT_FOUND: eplan_part_search. ALREADY_EXISTS: free tag/address. PAGE_NOT_FOUND/AMBIGUOUS_NAME: eplan_page_list/get. PLAN_STALE: re-plan. Policy/approval/audit/lock/connection: eplan_page_create. OUTCOME_UNKNOWN: inspect before retry.
 R1-R5/R8 refuse; R6/R7/R9 warn; strict: refuse.
 
-`layout_guard: "warn"` reproduces an existing drawing: layout conflicts become warnings. The default `refuse` draws freely; off-page always refuses.
+`layout_guard:"warn"`: conflicts warn; off-page refuses.

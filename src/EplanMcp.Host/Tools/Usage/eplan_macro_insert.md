@@ -51,4 +51,4 @@ Every error carries `execution`: `not_started` and `rolled_back` mean the projec
 - POLICY_DENIED, APPROVAL_DENIED, APPROVAL_EXPIRED, WRITES_SUSPENDED, AUDIT_UNAVAILABLE (`not_started`), OUTCOME_UNKNOWN (`unknown`), LOCK_FAILED, EPLAN_OPERATION_FAILED, INTERNAL, and the connection errors: as for eplan_page_create.
 Layout preflight refuses R1-R5/R8 with a rule and, when available, a suggested grid position. R6/R7/R9 are warnings unless layout.strict is enabled. Boundary fallback uses Page.Size minus layout.marginMm. Incomplete prediction is allowed: check insertion points, known outlines and routes before writing; measure symbols and property texts in the same call before commit and roll back violations. Results report both check stages and the fallback; refusals include measured geometry and nearest free positions in metadata.layoutViolations/layoutChecks. Connection geometry available only after commit uses existing undo compensation.
 
-`layout_guard: "warn"` reproduces an existing drawing: layout conflicts become warnings. The default `refuse` draws freely; off-page always refuses.
+`layout_guard:"warn"` reproduces drawings: conflicts warn; off-page refuses.
