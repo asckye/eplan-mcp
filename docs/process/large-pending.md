@@ -7,6 +7,7 @@
 | G8 可选端子符号（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 X2_2、KA1_PE 的库名、符号、变体、编号及逐次单步撤销。 |
 | G6 母线定义（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 BBDEF 主功能与两个 BCP 同属一个器件、逐次单步撤销。 |
 | G5 黑盒（2026-11-03 brief；g4probe A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 60×40 黑盒、DCP 0/2/4 同器件与框内列表、后缀及逐步单次撤销。 |
+| G4 连接定义点（2026-11-03 负责人 brief；A86） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite 新页验证两端子连接与 CDP/CDPNG 同次创建，连接颜色 RD、截面 1.5、定义点位置读回和一步撤销恢复页面快照；失败输出完整请求、结果与读回。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite Overview 页验证 PXC.2861344 的对象、PLC 盒、总览点、部件引用及撤销恢复；默认预览迁移后的旧宏断言保留。 |
 | G9 图形创建（2026-11-03，负责人 brief） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | NOT RUN：本次禁止 EPLAN。新增折线、圆弧、路径功能文本、imports 图片混合批次；待核对原生类型、全部点、角度/端点与外框、文字、图片路径和一次撤销恢复快照。XML 仅证明签名，不证明角度方向或实际图片行为。 |
 | S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 待运行：本次禁止 EPLAN；需验证写入未知结果、真实回滚及原有写入安全回归。Small 假对象覆盖未分类异常、回滚证据、结果查询与不重放；未改 Large 断言，不宣称实机通过。 |

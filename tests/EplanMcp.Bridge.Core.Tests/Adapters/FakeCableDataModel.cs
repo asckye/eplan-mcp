@@ -88,7 +88,9 @@ internal class Connection(FakeCableStore? store = null, ConnectionState? state =
     public Pin? EndPin { get { _guard(); return _endPin; } set { _guard(); _endPin = value; } }
     public bool IsTemplate { get { _guard(); return true; } }
     public ConnectionPropertyList Properties { get { _guard(); return new(store, _state.Properties); } }
+#pragma warning disable CA2000 // Returned native definition points are project-owned, as are the fake placements (A39).
     public ConnectionDefinitionPoint[] ConnectionDefPoints { get { _guard(); return store is not null && _state.Cable is { } cable ? [new(store, cable)] : []; } }
+#pragma warning restore CA2000
     public FunctionBasePropertyList CableNameParts
     {
         set { _guard(); _state.Properties[20005] = value.DESIGNATION_LOCATION.Text; }
@@ -106,7 +108,7 @@ internal sealed class Pin
     public int Index { get; set; }
 }
 
-internal sealed class ConnectionDefinitionPoint(FakeCableStore store, CableState cable)
+internal sealed class ConnectionDefinitionPoint(FakeCableStore store, CableState cable) : SymbolReference(59)
 {
     private readonly Action _guard = store.Guard();
     public Cable CableDefinitionLine { get { _guard(); return new(store, cable); } }

@@ -3,7 +3,7 @@
   "title": "Create connection symbols and explicit wire paths",
   "status": "registered_preview_contract",
   "profile": "full",
-  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Interruption calls: 1 undo, including graphical ends without counterpart devices; wires/nodes: 2; cables: 6-8 with explicit core readback and automatic undo on failure. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+  "description": "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Interruptions or wire definition points: 1 undo; other wires/nodes: 2; cables: 6-8. Definition points set and verify colour, cross section and designation. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
   "annotations": {
     "readOnlyHint": false,
     "destructiveHint": false,
@@ -142,6 +142,64 @@
                   },
                   "minItems": 2,
                   "maxItems": 32
+                },
+                "definition_point": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "position": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10000
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "symbol": {
+                      "enum": [
+                        "CDP",
+                        "CDPNG"
+                      ],
+                      "default": "CDP"
+                    },
+                    "symbol_variant": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "default": 0
+                    },
+                    "color": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "cross_section": {
+                      "type": "string",
+                      "pattern": "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$"
+                    },
+                    "designation": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [],
+                  "anyOf": [
+                    {
+                      "required": [
+                        "color"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "cross_section"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "designation"
+                      ]
+                    }
+                  ]
                 }
               },
               "required": [
@@ -485,7 +543,7 @@
       },
       "dry_run": {
         "type": "boolean",
-        "default": false
+        "default": true
       },
       "snap_to_grid": {
         "type": "boolean",
@@ -1045,6 +1103,15 @@
         },
         "minItems": 0,
         "maxItems": 100
+      },
+      "definitionPoints": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "minItems": 0,
+        "maxItems": 50
       }
     },
     "required": [
@@ -2293,6 +2360,15 @@
         "minItems": 0,
         "maxItems": 100
       },
+      "definitionPoints": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "minItems": 0,
+        "maxItems": 50
+      },
       "cableDefinitions": {
         "type": "array",
         "items": {},
@@ -2514,5 +2590,197 @@
       }
     ],
     "fingerprint": "732d1cf54726b6a052960585d0f24136287d8d1d4d0ae8435d531ffb5b4f014d"
+  },
+  "definitionPointExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "wire",
+        "from": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 1,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "to": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 2,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "points": [
+          [
+            8.0,
+            8.0
+          ],
+          [
+            24.0,
+            8.0
+          ],
+          [
+            24.0,
+            24.0
+          ]
+        ],
+        "definition_point": {
+          "color": "RD",
+          "cross_section": "1.5"
+        }
+      }
+    ]
+  },
+  "definitionPointPreview": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "execution": "not_started",
+    "dryRun": true,
+    "coordinates": [
+      {
+        "pointer": "/items/0/points/0",
+        "requested": [
+          8.0,
+          8.0
+        ],
+        "actual": [
+          8.0,
+          8.0
+        ]
+      },
+      {
+        "pointer": "/items/0/points/1",
+        "requested": [
+          24.0,
+          8.0
+        ],
+        "actual": [
+          24.0,
+          8.0
+        ]
+      },
+      {
+        "pointer": "/items/0/points/2",
+        "requested": [
+          24.0,
+          24.0
+        ],
+        "actual": [
+          24.0,
+          24.0
+        ]
+      }
+    ],
+    "symbols": [
+      {
+        "position": [
+          24.0,
+          8.0
+        ],
+        "symbol": {
+          "library": "SPECIAL",
+          "name": "CO",
+          "variant": 0,
+          "type": "Routing",
+          "kind": "routing",
+          "connectionPoints": [
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Left"
+            },
+            {
+              "location": [
+                0.0,
+                0.0
+              ],
+              "direction": "Up"
+            }
+          ]
+        },
+        "bounds": [
+          23.0,
+          7.0,
+          25.0,
+          9.0
+        ],
+        "boundsKnown": true
+      }
+    ],
+    "graphicalAutoconnect": [
+      [
+        [
+          8.0,
+          8.0
+        ],
+        [
+          24.0,
+          8.0
+        ]
+      ],
+      [
+        [
+          24.0,
+          8.0
+        ],
+        [
+          24.0,
+          24.0
+        ]
+      ]
+    ],
+    "logicalAfterGenerate": [
+      {
+        "pins": [
+          "17/1/0",
+          "17/2/0"
+        ],
+        "potentialStartIsNull": false
+      }
+    ],
+    "gridSize": 4.0,
+    "pageSize": [
+      100.0,
+      100.0
+    ],
+    "coverage": "complete_page_predicted_endpoints",
+    "logicalDuringPlacement": 0,
+    "generation": "Placement, definition points and connection generation share one undo step.",
+    "undoSteps": 1,
+    "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
+    "definitionPoints": [
+      {
+        "itemIndex": 0,
+        "endpoints": [
+          "17/1/0",
+          "17/2/0"
+        ],
+        "type": "ConnectionDefinitionPoint",
+        "symbol": {
+          "library": "SPECIAL",
+          "name": "CDP",
+          "variant": 0
+        },
+        "position": [
+          16.0,
+          8.0
+        ],
+        "properties": {
+          "color": "RD",
+          "cross_section": "1.5"
+        }
+      }
+    ],
+    "fingerprint": "b9b96859542d3db3a78670a7f5f5e8d6288f2b6bc3238b07573e51699d1248b2"
   }
 }

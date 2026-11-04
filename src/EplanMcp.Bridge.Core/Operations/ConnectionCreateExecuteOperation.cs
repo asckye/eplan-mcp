@@ -22,7 +22,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         {
             scene = creator.Read((string?)input["project"] ?? "", (string?)input["page"] ?? "");
             plan = ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), scene, creator, fingerprint);
-            if (plan["cableDefinitions"] is null && plan["interruptionScope"] is null && (!plan["symbols"]!.Any() || (!plan["logicalAfterGenerate"]!.Any() && plan["splitSegments"] is null)))
+            if (plan["definitionPoints"] is null && plan["cableDefinitions"] is null && plan["interruptionScope"] is null && (!plan["symbols"]!.Any() || (!plan["logicalAfterGenerate"]!.Any() && plan["splitSegments"] is null)))
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Supply symbols with connected logical endpoints; empty generation cannot provide 2 undo steps."); }
             place = plan["cableDefinitions"] is null ? creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!, actual =>
             {
@@ -52,6 +52,29 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             string Segments(IEnumerable<double[][]> values) => string.Join(";", values.Select(s => string.Join("|", s.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
             if (Segments(creator.Read(project, page).Graphical) is var drawn && Segments(ConnectionCreatePlanner.ExpectedGraphical(scene, plan)) is var predicted && drawn != predicted)
             { throw Mismatch("autoconnect lines after " + stage + ": " + drawn + "; predicted: " + predicted); }
+        }
+        if (plan["definitionPoints"] is JArray definitions)
+        {
+            IConnectionDefinitionPointWriter writer = creator as IConnectionDefinitionPointWriter
+                ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.EplanOperationFailed, "The connection creator cannot place definition points."));
+            Action define;
+            try
+            { define = writer.PrepareDefinitionPoints(project, page, definitions); }
+            catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
+            Committed<bool> result = TransactionRunner.Run(creator.PlacementTransactions(project, undoCommitted: true), "eplan_connection_create",
+                () => { place(); define(); plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify()); return true; }, _ => true,
+                _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() =>
+                {
+                    VerifyGraphical("generation");
+                    CheckLayout();
+                    plan["definitionPoints"] = ConnectionDefinitionPoints.Verify(definitions, writer.ReadDefinitionPoints(project, page, definitions));
+                    return true;
+                }),
+                () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint)));
+            plan["execution"] = ExecutionState.Committed;
+            plan["dryRun"] = false;
+            plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], result.Warning]);
+            return plan;
         }
         if (interruptions)
         {

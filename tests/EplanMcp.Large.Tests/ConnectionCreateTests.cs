@@ -7,6 +7,119 @@ namespace EplanMcp.Large.Tests;
 [Trait("Size", "Large")]
 public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
+    [Theory]
+    [InlineData("CDP")]
+    [InlineData("CDPNG")]
+    public async Task TerminalWire_DefinitionPoint_ReadsProperties_OneUndoRestores(string symbol)
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = await NewPageAsync(session);
+        async Task<JsonElement> Call(string tool, Dictionary<string, object?> args)
+        {
+            TestContext.Current.TestOutputHelper!.WriteLine(tool + " request: " + JsonSerializer.Serialize(args));
+            (bool succeeded, JsonElement result) = await eplan.CallOrErrorAsync(tool, args);
+            TestContext.Current.TestOutputHelper.WriteLine(tool + " result/readback: " + result.GetRawText());
+            Assert.True(succeeded, result.GetRawText());
+            return result;
+        }
+        await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        async Task<PageDrawingGeometry> Drawing() => await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+            new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+        double grid = (await Drawing()).GridSize;
+        JsonElement terminal = default;
+        string? cursor = null;
+        do
+        {
+            JsonElement found = await Call("eplan_symbol_search", new()
+            { ["project"] = session.Project, ["library"] = "IEC_symbol", ["name_contains"] = "X", ["limit"] = 200, ["cursor"] = cursor });
+            terminal = found.GetProperty("symbols").EnumerateArray().FirstOrDefault(s => s.GetProperty("name").GetString() == "X" && s.GetProperty("variant").GetInt32() == 0);
+            cursor = found.TryGetProperty("nextCursor", out JsonElement next) && next.ValueKind == JsonValueKind.String ? next.GetString() : null;
+        } while (terminal.ValueKind == JsonValueKind.Undefined && cursor is not null);
+        Assert.NotEqual(JsonValueKind.Undefined, terminal.ValueKind);
+        JsonElement[] pins = terminal.GetProperty("connectionPoints").EnumerateArray().ToArray();
+        int down = Array.FindIndex(pins, p => p.GetProperty("direction").GetString() == "Down");
+        int up = Array.FindIndex(pins, p => p.GetProperty("direction").GetString() == "Up");
+        Assert.True(down >= 0 && up >= 0);
+        double[][] positions = [[30 * grid, 45 * grid], [50 * grid, 25 * grid]];
+        var ends = new double[2][];
+        for (int i = 0; i < 2; i++)
+        {
+            JsonElement offset = pins[i == 0 ? down : up].GetProperty("location");
+            ends[i] = [positions[i][0] + offset[0].GetDouble(), positions[i][1] + offset[1].GetDouble()];
+            await Call("eplan_device_place", new()
+            {
+                ["project"] = session.Project,
+                ["page"] = page,
+                ["dry_run"] = false,
+                ["terminal_strip"] = "=GAA+A1-XG4" + page[(page.LastIndexOf('/') + 1)..],
+                ["terminal_number"] = (i + 1).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["symbol_variant"] = 0,
+                ["x"] = positions[i][0],
+                ["y"] = positions[i][1]
+            });
+        }
+        PageDrawingGeometry before = await Drawing();
+        DrawingPlacement[] terminals = before.Placements.Where(p => p.Kind == "Terminal").OrderByDescending(p => p.Location[1]).ToArray();
+        Assert.Equal(2, terminals.Length);
+        string snapshot = (await session.SnapshotAsync(page)).Hash;
+        var definition = new Dictionary<string, object?> { ["color"] = "RD", ["cross_section"] = "1.5" };
+        if (symbol != "CDP")
+        { definition["symbol"] = symbol; }
+        double[] expectedPoint = [ends[0][0], Math.Round((ends[0][1] + 35 * grid) / (2 * grid), MidpointRounding.AwayFromZero) * grid];
+        static object Locator(DrawingPlacement p) => new { project = p.Locator.Project, page = p.Locator.Page, type = p.Locator.Type, oid = p.Locator.Oid, digest = p.Locator.Digest };
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["response_format"] = "detailed",
+            ["items"] = new[] { new { kind = "wire", from = new { locator = Locator(terminals[0]), pin_index = down }, to = new { locator = Locator(terminals[1]), pin_index = up },
+                points = new double[][] { ends[0], [ends[0][0], 35 * grid], [ends[1][0], 35 * grid], ends[1] }, definition_point = definition } }
+        };
+        try
+        {
+            JsonElement result = await Call("eplan_connection_create", request);
+            Assert.Equal((ExecutionState.Committed, 1), (result.GetProperty("execution").GetString(), result.GetProperty("undoSteps").GetInt32()));
+            JsonElement point = Assert.Single(result.GetProperty("definitionPoints").EnumerateArray());
+            Assert.Equal("ConnectionDefinitionPoint", point.GetProperty("type").GetString());
+            Assert.Equal("SPECIAL", point.GetProperty("symbol").GetProperty("library").GetString());
+            Assert.Equal(symbol, point.GetProperty("symbol").GetProperty("name").GetString());
+            Assert.Equal(0, point.GetProperty("symbol").GetProperty("variant").GetInt32());
+            Assert.Equal(expectedPoint, point.GetProperty("position").EnumerateArray().Select(p => p.GetDouble()));
+            foreach (string field in new[] { "properties", "connectionValues" })
+            {
+                Assert.Equal("RD", point.GetProperty(field).GetProperty("color").GetString());
+                Assert.Equal("1.5", point.GetProperty(field).GetProperty("cross_section").GetString());
+            }
+            JsonElement connections = await Call("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
+            JsonElement connection = Assert.Single(connections.GetProperty("connections").EnumerateArray());
+            Assert.Equal("RD", connection.GetProperty("colour").GetString());
+            Assert.Equal("1.5", connection.GetProperty("crossSection").GetString()!.Replace(',', '.'));
+            Assert.Equal(connection.GetProperty("locator").GetProperty("oid").GetInt64(), point.GetProperty("connection").GetProperty("oid").GetInt64());
+            PageDrawingGeometry after = await Drawing();
+            TestContext.Current.TestOutputHelper!.WriteLine("drawing readback: " + JsonSerializer.Serialize(after));
+            DrawingPlacement placed = Assert.Single(after.Placements, p => p.Kind == "ConnectionDefinitionPoint");
+            Assert.Equal(expectedPoint, placed.Location);
+            Assert.Equal(point.GetProperty("locator").GetProperty("oid").GetInt64(), placed.Locator.Oid);
+            await session.UndoAsync();
+            Assert.Equal(snapshot, (await session.SnapshotAsync(page)).Hash);
+            Assert.Equal(JsonSerializer.Serialize(before), JsonSerializer.Serialize(await Drawing()));
+        }
+        catch
+        {
+            TestContext.Current.TestOutputHelper!.WriteLine("failed creation request: " + JsonSerializer.Serialize(request));
+            TestContext.Current.TestOutputHelper.WriteLine("page snapshot before creation: " + snapshot);
+            try
+            { await Call("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" }); }
+            catch (Exception error) { TestContext.Current.TestOutputHelper!.WriteLine("failure connection readback: " + error); }
+            try
+            { TestContext.Current.TestOutputHelper!.WriteLine("failure drawing readback: " + JsonSerializer.Serialize(await Drawing())); }
+            catch (Exception error) { TestContext.Current.TestOutputHelper!.WriteLine("failure drawing readback: " + error); }
+            throw;
+        }
+    }
+
     [Fact]
     public async Task TNodeOnGeneratedLine_OpenCornerBranch_PreservesLogicalConnection_TwoUndosRestore()
     {

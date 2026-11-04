@@ -118,12 +118,38 @@ public sealed class ToolContractTests : IDisposable
         JsonElement cores = cable.GetProperty("properties").GetProperty("cores");
         Assert.Equal(50, cores.GetProperty("maxItems").GetInt32());
         Assert.False(cores.GetProperty("items").GetProperty("additionalProperties").GetBoolean());
-        Assert.Equal(["2", "6", "7", "8"], tool.OutputSchema!.Value.GetProperty("properties").GetProperty("undoSteps").GetProperty("enum").EnumerateArray().Select(v => v.GetRawText()));
+        Assert.Equal(["1", "2", "6", "7", "8"], tool.OutputSchema!.Value.GetProperty("properties").GetProperty("undoSteps").GetProperty("enum").EnumerateArray().Select(v => v.GetRawText()));
+        Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("definitionPoints", out _));
         Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("coreImpact", out _));
         Assert.Contains("cables: 6-8", tool.Description, StringComparison.Ordinal);
         Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("actualCores", out _));
         Assert.Contains("2 undo steps", tool.Description, StringComparison.Ordinal);
         Assert.True(tool.OutputSchema.Value.GetProperty("properties").TryGetProperty("actualEndpoints", out _));
+    }
+
+    [Fact]
+    public void ConnectionDefinitionPoint_IsOptionalClosedAndRequiresAProperty()
+    {
+        JsonElement schema = Tools.Single(t => t.Name == ConnectionCreateTools.Tool).InputSchema;
+        JsonElement[] branches = schema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf").EnumerateArray().ToArray();
+        foreach (JsonElement branch in branches)
+        {
+            bool wire = branch.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "wire";
+            Assert.Equal(wire, branch.GetProperty("properties").TryGetProperty("definition_point", out JsonElement point));
+            Assert.DoesNotContain(branch.GetProperty("required").EnumerateArray(), p => p.GetString() == "definition_point");
+            if (!wire)
+            { continue; }
+            Assert.False(point.GetProperty("additionalProperties").GetBoolean());
+            Assert.Equal(["color", "cross_section", "designation"], point.GetProperty("anyOf").EnumerateArray().Select(p => p.GetProperty("required")[0].GetString()));
+            JsonElement properties = point.GetProperty("properties");
+            Assert.Equal(["CDP", "CDPNG"], properties.GetProperty("symbol").GetProperty("enum").EnumerateArray().Select(p => p.GetString()));
+            Assert.Equal("CDP", properties.GetProperty("symbol").GetProperty("default").GetString());
+            Assert.Equal(0, properties.GetProperty("symbol_variant").GetProperty("default").GetInt32());
+            Assert.Equal("string", properties.GetProperty("cross_section").GetProperty("type").GetString());
+            string pattern = properties.GetProperty("cross_section").GetProperty("pattern").GetString()!;
+            foreach (string number in new[] { "1.5", "0", "-1", "+1e2", ".5E-2" })
+            { Assert.Matches(pattern, number); }
+        }
     }
 
     [Fact]

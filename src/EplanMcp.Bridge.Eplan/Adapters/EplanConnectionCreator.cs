@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>A52/S40: borrowed objects stay inside one main-thread request; discovery precedes the write wrapper.</summary>
-internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = true, bool allowReadOnly = false) : IConnectionCreator, ICableDefinitionWriter
+internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = true, bool allowReadOnly = false) : IConnectionCreator, ICableDefinitionWriter, IConnectionDefinitionPointWriter
 {
     public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => new EplanSymbolReader().Read(projectPath, args);
     private static Page Page(string project, string page)

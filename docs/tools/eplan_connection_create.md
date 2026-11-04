@@ -16,6 +16,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 |---|---|---|
 | project、page | 必填 string | 已打开项目名称或已解析路径、精确完整 Circuit 页名；目标解析不依赖当前选择，执行前须选中目标以便安全补偿 |
 | items | 必填 object[1..50] | wire：`{kind,from,to,points}`；节点：`{kind,position,directions}`；禁止跨分支成员。from/to 是 `{locator:{project,page,type,oid,digest},pin_index}`，索引从 0 起，locator 必须与本页当前观察一致 |
+| definition_point | wire 的可选 object | `{position?,symbol?,symbol_variant?,color?,cross_section?,designation?}`；SPECIAL `CDP`（默认）或 `CDPNG`，变体默认 0 并按库实际值校验。至少提供一个非空属性；color 写 31004，数值文本 cross_section（如 `"1.5"`）写 31002，designation 写 31011。省略位置取第一段中点并吸附栅格；显式位置须位于该连接某段，否则 INVALID_ARGUMENT |
 | points / position | number[2][2..32] / number[2] | `[x_mm,y_mm]`；毫米、左下原点、y 向上；有限数、0..10,000，且受 Page.Size 限制 |
 | kind / directions | enum / enum[] | wire、corner、t_node、potential_point；节点分别需 2 个垂直方向、3 个不同方向、1 个方向；方向为 Up/Down/Left/Right |
 | variant / sort_code | 可选 integer | t_node 的 variant 按已核验的方向引脚选择 SPECIAL 变体，省略沿用原行为，不存在时 INVALID_ARGUMENT 列出可用编号；interruption_point 的 sort_code ≥ 0，在放置事务中写入属性 24809 并读回；省略不写。interruption_point 可选 `symbol`（SPECIAL 库中任意 `InterruptionPoint` 符号，如 `BP`、`BPIN`、`BPOUT`、`BPF`；省略时先取已启用插件的 `defaults.interruption.symbol`（内置插件 `iec-base` 为 `BP`），否则内置缺省 `BP`，与 EPLAN“插入 → 中断点”一致）；中断点使用符号的默认属性排列，不再额外新建 24300 交叉引用文字 |
@@ -27,13 +28,14 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 所有对象严格拒绝未知、重复、缺失和错误类型成员；数值递归检查有限性，错误附 JSON Pointer；请求上限 256 KiB。[预览快照](../../tests/Contracts.Snapshots/connection-create-contract.verified.json)与已注册 server-contract 同步维护，用法已嵌入工具目录。
 
 `cable_definition` 支持规划与执行：必填 `points`（定义线两点）、`designation`、`type_text`、`core_count`（1..50）、`cross_section_mm2`（正有限数）、`cores`；可选 `voltage`（电压文字，最多 64 字符，写 20044）。电缆创建后由 EPLAN 按完整标识计算显示标识（`-W3`），定义线的默认文字随之显示。每芯为 `{connection,label,colour}`；connection 严格二选一 `{locator:{project,page,type,oid,digest}}`（既有连接）或 `{item_index:0}`（本次 wire 的零基下标，允许前向引用）。每电缆至少一芯、不超过声明芯数，每调用合计最多 50 芯；按 designation+label 判重复，不同电缆可复用芯号，同一连接只能分配一次。数字 label 必须为声明范围内无前导零的正整数，文字标签以英文字母开头、最多 32 字符，仅含字母、数字、`_ . -`；colour 为 `BK BN RD OG YE GN BU VT GY WH PK TQ GNYE` 之一。型号文本原样作为输入，不查询或推断部件/选型，不批量重编号。
-六个 item 分支在已注册输入 schema 中封闭声明，保留中断点的显式对端页校验；沿属性/设备工具把说明文字与结构分别限额，描述及参数说明仍≤1,000 字符，结构 schema≤5,200 字符（含可选开页参数）。
+六个 item 分支在已注册输入 schema 中封闭声明，保留中断点的显式对端页校验；沿属性/设备工具把说明文字与结构分别限额，描述及参数说明仍≤1,000 字符，结构 schema≤5,300 字符（含可选开页参数），共享坐标和 locator 定义避免重复。
 预览另含 `cableDefinitions`、逐连接的 `coreImpact`（原 locator/属性、designation、label、colour、截面）和 `undoSteps`；既有导线为 6 步，同次新增路径生成另加 1 步、节点放置再加 1 步。审批列出相同步数。执行另含 `actualCores`，逐芯返回实际 designation/type、连接 oid/pins、label/colour；按 A55 允许未使用的功能结构（例如 `=GAA`）被丢弃，并在比较前去除空结构段（`+-W9`、`=+-W9` 等价于 `-W9`），非空位置段和设备标识仍须一致。
 定义线须正交、非零、在页界/栅格内，且恰好与显式芯线各相交一次；相交的其他连接、重复跨越、已归属其他电缆、分支/电位关系或跨页范围无法证明时拒绝。现有连接读取首批限可唯一证明的同页直连；同次 wire 可有转角，但生成后必须恰有两个显式端点。名称筛查覆盖全项目功能名；既有完整连接 locator、端点、几何、芯号/颜色/截面/归属与名称清单进入指纹，改变即重新规划或 stale；不新增计划落盘格式。
 
 ## 3. 输出
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 普通连线预览含 project/page、execution=not_started、dryRun=true；执行成功为 committed 并附 actualEndpoints（type/oid/pin_index，电位起点为空）。共同字段有 coordinates 的请求→实际值、symbols 的库/名称/变体/方向及完整外框、graphicalAutoconnect 的页坐标线段、logicalAfterGenerate 的预计连通引脚集合与 potentialStartIsNull、gridSize/pageSize、coverage、fingerprint、generation 和 undoSteps=2。普通连线结果与审批均注明 2 undo steps；含中断点时 undoSteps=1，电缆例外见第 2 节。
+带定义点时 `definitionPoints` 逐连接列出 CDP 的位置、符号、变体和三个属性；执行后含原生类型、连接标识以及 CDP 与连接的读回值，`undoSteps=1`。默认预览和审批变更清单同样列出每个点及其属性。展示超预算时保留首项完整读回并裁剪尾部，返回 truncated 与原始 definitionPointCount；可用 detailed 增大预算。
 逻辑集合是生成后的端点预测，不承诺 T 节点的有向连接条数；电位点预期逻辑起点为空（A52）。logicalDuringPlacement=0 表示本次放置不负责生成逻辑连接；既有逻辑连接完整保留在基线中。内存规划保留完整证据；Host 展示超预算时裁剪数组并标 truncated，不能因显示预算缩小 guard。
 显式 `t_node` 可放在恰好一条既有自动连接线段的严格内部，竖线须含 Up/Down，横线须含 Left/Right；每次调用同一既有线段最多一个节点，角节点、方向不符、端点接触及其他相交仍拒绝。结果增加 `splitSegments:[{segment:[[x1,y1],[x2,y2]],position:[x,y]}]`，`graphicalAutoconnect` 包含两条替代半段及按最近相向引脚/同批节点规则生成的支路；执行核对完整图形等于原图形减去被拆线段加上预测线段。原逻辑连接必须保留，既有节点引脚不作逻辑端点；`logicalAfterGenerate` 只列新增连通关系的组。仅拆线并接到远端尚无器件引脚的角节点时可执行，预测组为空则允许生成零条新逻辑连接；仍报告两次提交、两步撤销。此拆线行为及撤销步数待实机 Large 验证。
 中断点预览另含 affectedPages 与 interruptionScope 摘要（涉及的页名，以及图元、原生中断点和须保留连接的数量；完整基线只在 Bridge 内用于核对，不返回），执行另含 interruptionPoints：实际 name/page/oid/position/pin/direction、EPLAN 属性 24300 的 crossReference、原生 counterparts 的 name/page/oid。引用从不手写；无对端时 counterparts 为空，crossReference 按原生值返回；实测（T7b Large）提交后 24300 仍为空，配对以 counterparts 为准。连接集合通过共享名称合并显式页内的自动连线图预测。
@@ -51,6 +53,7 @@ P1 插件默认：每次调用只解析一次请求项目的有效插件配置�
 执行沿既有串行主线程 LockingStep 和 WritePipeline：规划→scratch 外审批→完整指纹重核→执行→outcome，默认 60 秒。符号发现与变体选择在写入之前完成；不显式 LockObject，不保留跨请求原生对象。
 
 ## 6. 写操作专项
+G4 定义点按 A86：沿现有连接逻辑放置，再以 `new Function().Create(page, SPECIAL变体)` 建 CDP/CDPNG、写属性并生成连接，保持同一个写事务与撤销步骤。提交后读回 CDP 与连接的 31004/31002/31011；任一请求字段不符按写后安全不符回滚，并报告具体字段。CDP 按导线上的点处理，不与所处导线算重叠；其他布局规则保持。不得对 CDP 调用 `GetLogicalArea()`。定义点批次不可混用 cable_definition 或 interruption_point，须分次调用。正式工具 Large 仍待实机验证。
 **普通连线一次调用、两次提交（负责人 O3）。** 第一步在现有 SafetyPoint→UndoStep→QuietModeStep 中用 SymbolReference.Create(variant,page) 放连接符号及路径拐角，读回位置、变体、外框后提交；对齐的连接点产生图形自动连线。第二步独立 SafetyPoint 中运行目标页 Generate.Connections，核对既有连接不变、实际 StartPin/EndPin 连通集合与预测一致，电位点起点为空，才提交。成功需 Ctrl+Z 两次。
 电缆按 S43/A55：先完成同次导线和生成，再独立提交定义线→生成→定向绑定→生成→芯线分配→生成。定义线、绑定和芯线使用 FunctionTransactionScope，生成使用既有 SafetyPoint；只对显式连接对齐定义点名称、赋 CableNameParts，并用电缆及显式模板重载 DoReassignWires，不运行全项目重分配。定义线先创建并提交，再校验名称、几何、型号/芯数/截面；绑定与芯线分配也先提交再校验，芯线模板数量/标记和逐芯内容均在提交后读取，最后生成提交后再次核对 CableConnections、每芯连接/标签/颜色和其他本页连接不变。任一步提交后读回不符，撤销该提交及本次此前全部已确认提交，并按完整业务内容核验恢复，成功才报 rolled_back；生成失败先回滚当前 SafetyPoint，再撤销本次已确认提交。原生创建调用失败/取消进入 Abort、提交不确定或撤销/恢复核验失败均报 unknown；属性列表在 Abort 前释放，Abort 后不读取可能残留的新对象。
 2026-10-30 live T8b（EPLAN 2026.0.3，LargeWrite 副本）日志确认：空位置段使 `-W9` 读回 `+-W9`；该事务 Abort 后，`(60,140)`、横向外框 `59.75..220.25` 的 Cable 及五个属性放置仍留在页上。S43 未验证这条失败路径，因此定义线补偿只依赖提交后的原生撤销，不依赖 Abort 移除新对象；本次未运行 EPLAN。

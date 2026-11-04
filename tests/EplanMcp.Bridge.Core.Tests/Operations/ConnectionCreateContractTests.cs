@@ -26,7 +26,7 @@ public sealed class ConnectionCreateContractTests
             ["title"] = "Create connection symbols and explicit wire paths",
             ["status"] = "registered_preview_contract",
             ["profile"] = "full",
-            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Interruption calls: 1 undo, including graphical ends without counterpart devices; wires/nodes: 2; cables: 6-8 with explicit core readback and automatic undo on failure. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
+            ["description"] = "Create 1-50 connection items on one Circuit page using explicit orthogonal paths and SPECIAL symbols. Coordinates are mm, origin lower-left, y upwards; snap_to_grid defaults to true. Interruptions or wire definition points: 1 undo; other wires/nodes: 2; cables: 6-8. Definition points set and verify colour, cross section and designation. Writes require approval outside scratch; refusal returns APPROVAL_DENIED.",
             ["annotations"] = new JObject { ["readOnlyHint"] = false, ["destructiveHint"] = false, ["idempotentHint"] = false, ["openWorldHint"] = false },
             ["inputSchema"] = InputSchema(),
             ["outputSchema"] = OutputSchema(),
@@ -43,6 +43,14 @@ public sealed class ConnectionCreateContractTests
         Validate(OutputSchema(cable: true), cablePlan);
         contract["cableOutputSchema"] = OutputSchema(cable: true);
         contract["cableDryRunExample"] = cablePlan;
+        var definitions = new ConnectionCreateFixture();
+        definitions.Symbols.Add(ConnectionCreateFixture.Variant("CDP", "ConnectionDefinitionPoint", 0));
+        definitions.Request["items"]![0]!["definition_point"] = new JObject { ["color"] = "RD", ["cross_section"] = "1.5" };
+        JObject definitionPlan = definitions.Plan();
+        Validate(InputSchema(), definitions.Request);
+        Validate(OutputSchema(), definitionPlan);
+        contract["definitionPointExample"] = definitions.Request;
+        contract["definitionPointPreview"] = definitionPlan;
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
     }
@@ -59,6 +67,16 @@ public sealed class ConnectionCreateContractTests
         });
         JObject pin = Object(new() { ["locator"] = locator, ["pin_index"] = Integer(0) });
         JObject wire = Object(new() { ["kind"] = Constant("wire"), ["from"] = pin, ["to"] = pin, ["points"] = Array(Point(), 2, 32) });
+        wire["properties"]!["definition_point"] = Object(new()
+        {
+            ["position"] = Point(),
+            ["symbol"] = new JObject { ["enum"] = new JArray("CDP", "CDPNG"), ["default"] = "CDP" },
+            ["symbol_variant"] = new JObject { ["type"] = "integer", ["minimum"] = 0, ["default"] = 0 },
+            ["color"] = Text(),
+            ["cross_section"] = new JObject { ["type"] = "string", ["pattern"] = "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$" },
+            ["designation"] = Text(),
+        }, "");
+        wire["properties"]!["definition_point"]!["anyOf"] = new JArray(new JObject { ["required"] = new JArray("color") }, new JObject { ["required"] = new JArray("cross_section") }, new JObject { ["required"] = new JArray("designation") });
         JObject Node(string kind, int count) => Object(new()
         {
             ["kind"] = Constant(kind),
@@ -104,7 +122,7 @@ public sealed class ConnectionCreateContractTests
             ["project"] = Text(),
             ["page"] = Text(),
             ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable) }, 1, 50),
-            ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = false },
+            ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["snap_to_grid"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["response_format"] = new JObject { ["type"] = "string", ["enum"] = new JArray("concise", "detailed"), ["default"] = "concise" },
         }, "project page items");
@@ -166,6 +184,7 @@ public sealed class ConnectionCreateContractTests
             ["affectedPages"] = Array(Text(), 1, 21),
             ["interruptionScope"] = scope,
             ["interruptionPoints"] = Array(point, 0, 100),
+            ["definitionPoints"] = Array(new() { ["type"] = "object", ["additionalProperties"] = true }, 0, 50),
         }, "project page execution dryRun coordinates symbols graphicalAutoconnect logicalAfterGenerate gridSize pageSize coverage logicalDuringPlacement generation undoSteps fingerprint");
         if (cable)
         {
@@ -183,7 +202,7 @@ public sealed class ConnectionCreateContractTests
         ["type"] = "object",
         ["additionalProperties"] = false,
         ["properties"] = properties,
-        ["required"] = required is null ? new JArray(properties.Properties().Select(p => p.Name)) : new JArray(required.Split(' ')),
+        ["required"] = required is null ? new JArray(properties.Properties().Select(p => p.Name)) : new JArray(required.Split(' ', StringSplitOptions.RemoveEmptyEntries)),
     };
     private static JObject Text() => new() { ["type"] = "string", ["minLength"] = 1 };
     private static JObject Integer(int minimum) => new() { ["type"] = "integer", ["minimum"] = minimum };

@@ -4424,7 +4424,7 @@
     {
       "name": "eplan_connection_create",
       "title": "Create connection symbols and explicit wire paths",
-      "description": "Creates SPECIAL nodes, interruption points, wires and cable definitions on a Circuit page; verifies geometry, endpoints and core labels/colours. Undo steps: interruption calls 1 (also for ends without counterpart devices); wires: 2 undo steps; cables: 6-8. Failure undoes this call. Omit dry_run to preview; false executes. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.",
+      "description": "Creates SPECIAL nodes, interruptions, wires with optional CDP/CDPNG properties, and cables on a Circuit page. Verifies geometry, endpoints and properties. Undo: interruptions or definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes this call. Omit dry_run to preview; false executes. Outside scratch needs approval; denial returns APPROVAL_DENIED. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"corner\",\"position\":[24,16],\"directions\":[\"Left\",\"Up\"]}],\"dry_run\":true}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4450,40 +4450,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "locator": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "properties": {
-                            "project": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 32768
-                            },
-                            "page": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 1024
-                            },
-                            "type": {
-                              "type": "integer",
-                              "minimum": 1,
-                              "maximum": 2147483647
-                            },
-                            "oid": {
-                              "type": "integer",
-                              "minimum": 1
-                            },
-                            "digest": {
-                              "type": "string",
-                              "pattern": "^[0-9a-f]{64}$"
-                            }
-                          },
-                          "required": [
-                            "project",
-                            "page",
-                            "type",
-                            "oid",
-                            "digest"
-                          ]
+                          "$ref": "#/properties/items/$defs/locator"
                         },
                         "pin_index": {
                           "type": "integer",
@@ -4501,40 +4468,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "locator": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "properties": {
-                            "project": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 32768
-                            },
-                            "page": {
-                              "type": "string",
-                              "minLength": 1,
-                              "maxLength": 1024
-                            },
-                            "type": {
-                              "type": "integer",
-                              "minimum": 1,
-                              "maximum": 2147483647
-                            },
-                            "oid": {
-                              "type": "integer",
-                              "minimum": 1
-                            },
-                            "digest": {
-                              "type": "string",
-                              "pattern": "^[0-9a-f]{64}$"
-                            }
-                          },
-                          "required": [
-                            "project",
-                            "page",
-                            "type",
-                            "oid",
-                            "digest"
-                          ]
+                          "$ref": "#/properties/items/$defs/locator"
                         },
                         "pin_index": {
                           "type": "integer",
@@ -4550,17 +4484,62 @@
                     "points": {
                       "type": "array",
                       "items": {
-                        "type": "array",
-                        "items": {
-                          "type": "number",
-                          "minimum": 0,
-                          "maximum": 10000
-                        },
-                        "minItems": 2,
-                        "maxItems": 2
+                        "$ref": "#/properties/items/$defs/point"
                       },
                       "minItems": 2,
                       "maxItems": 32
+                    },
+                    "definition_point": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "position": {
+                          "$ref": "#/properties/items/$defs/point"
+                        },
+                        "symbol": {
+                          "enum": [
+                            "CDP",
+                            "CDPNG"
+                          ],
+                          "default": "CDP"
+                        },
+                        "symbol_variant": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "default": 0
+                        },
+                        "color": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "cross_section": {
+                          "type": "string",
+                          "pattern": "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$"
+                        },
+                        "designation": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        }
+                      },
+                      "anyOf": [
+                        {
+                          "required": [
+                            "color"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "cross_section"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "designation"
+                          ]
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -4578,14 +4557,7 @@
                       "const": "corner"
                     },
                     "position": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0,
-                        "maximum": 10000
-                      },
-                      "minItems": 2,
-                      "maxItems": 2
+                      "$ref": "#/properties/items/$defs/point"
                     },
                     "directions": {
                       "type": "array",
@@ -4616,14 +4588,7 @@
                       "const": "t_node"
                     },
                     "position": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0,
-                        "maximum": 10000
-                      },
-                      "minItems": 2,
-                      "maxItems": 2
+                      "$ref": "#/properties/items/$defs/point"
                     },
                     "directions": {
                       "type": "array",
@@ -4657,14 +4622,7 @@
                       "const": "potential_point"
                     },
                     "position": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0,
-                        "maximum": 10000
-                      },
-                      "minItems": 2,
-                      "maxItems": 2
+                      "$ref": "#/properties/items/$defs/point"
                     },
                     "directions": {
                       "type": "array",
@@ -4700,14 +4658,7 @@
                       "maxLength": 200
                     },
                     "position": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0,
-                        "maximum": 10000
-                      },
-                      "minItems": 2,
-                      "maxItems": 2
+                      "$ref": "#/properties/items/$defs/point"
                     },
                     "direction": {
                       "enum": [
@@ -4756,14 +4707,7 @@
                     "points": {
                       "type": "array",
                       "items": {
-                        "type": "array",
-                        "items": {
-                          "type": "number",
-                          "minimum": 0,
-                          "maximum": 10000
-                        },
-                        "minItems": 2,
-                        "maxItems": 2
+                        "$ref": "#/properties/items/$defs/point"
                       },
                       "minItems": 2,
                       "maxItems": 2
@@ -4800,40 +4744,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "locator": {
-                                    "type": "object",
-                                    "additionalProperties": false,
-                                    "properties": {
-                                      "project": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "maxLength": 32768
-                                      },
-                                      "page": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "maxLength": 1024
-                                      },
-                                      "type": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "maximum": 2147483647
-                                      },
-                                      "oid": {
-                                        "type": "integer",
-                                        "minimum": 1
-                                      },
-                                      "digest": {
-                                        "type": "string",
-                                        "pattern": "^[0-9a-f]{64}$"
-                                      }
-                                    },
-                                    "required": [
-                                      "project",
-                                      "page",
-                                      "type",
-                                      "oid",
-                                      "digest"
-                                    ]
+                                    "$ref": "#/properties/items/$defs/locator"
                                   }
                                 },
                                 "required": [
@@ -4907,10 +4818,58 @@
               ]
             },
             "minItems": 1,
-            "maxItems": 50
+            "maxItems": 50,
+            "$defs": {
+              "point": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "locator": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "project": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32768
+                  },
+                  "page": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "type": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  },
+                  "oid": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                },
+                "required": [
+                  "project",
+                  "page",
+                  "type",
+                  "oid",
+                  "digest"
+                ]
+              }
+            }
           },
           "dry_run": {
-            "description": "Preview; false runs",
+            "description": "Preview",
             "type": "boolean",
             "default": true
           },
@@ -4968,6 +4927,7 @@
           },
           "undoSteps": {
             "enum": [
+              1,
               2,
               6,
               7,
@@ -5015,6 +4975,13 @@
           },
           "actualCores": {
             "type": "array"
+          },
+          "definitionPoints": {
+            "type": "array"
+          },
+          "definitionPointCount": {
+            "type": "integer",
+            "minimum": 1
           },
           "gridSize": {
             "type": "number"

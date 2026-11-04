@@ -29,6 +29,20 @@ public sealed class ConnectionSceneTests
     }
 
     [Fact]
+    public void DefinitionPoint_IsNotALogicalEndpointOrDirectedNode()
+    {
+        var point = new ConnectionDefinitionPoint(new(), new())
+        {
+            Location = new(16, 8),
+            GraphicalConnectionPoints = [new() { Index = 0 }, new() { Index = 0 }],
+        };
+        var device = new Function(2) { Location = new(24, 8), GraphicalConnectionPoints = [new() { Index = 0, Direction = "Left" }] };
+        var scene = new ConnectionCreatePlanner.Scene();
+        EplanConnectionScene.ReadPins(scene, [point, device]);
+        Assert.Equal("17/2/0", Assert.Single(scene.Pins).Key);
+    }
+
+    [Fact]
     public void DanglingFixture_DynamicWireWithRepeatedPinIndex_IsAnEdgeWithoutTerminatingPins()
     {
         var wire = new DynamicConnectionLine(1)

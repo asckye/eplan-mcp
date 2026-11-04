@@ -412,14 +412,18 @@ public static class LayoutGuard
         {
             // A75 fifth run: rebinding changes existing type 59 points even when their owning route is unreadable.
             // Unknown ownership only warns on centre passage; known perpendicular routes and outline clips still refuse.
-            double[] centre = DrawingCoordinates.ValidBounds(p.Bounds)
+            List<double[][]>? routes = null;
+            bool known = pointRoutes?.TryGetValue(owner, out routes) == true;
+            double[] insertion = [p.Location[0], p.Location[1], p.Location[0], p.Location[1]];
+            // A86 uses the insertion point on its owning wire; A75 rebound cable points can have an offset location.
+            double[] centre = known && routes!.Any(route => Hits(route, insertion)) ? p.Location : DrawingCoordinates.ValidBounds(p.Bounds)
                 ? [(p.Bounds![0] + p.Bounds[2]) / 2, (p.Bounds[1] + p.Bounds[3]) / 2] : p.Location;
             double[] box = [centre[0], centre[1], centre[0], centre[1]];
             if (!Hits(segment, box))
             { return false; }
-            if (pointRoutes?.TryGetValue(owner, out List<double[][]>? routes) != true)
+            if (!known)
             { unverified = true; return true; }
-            return routes.Any(route => Hits(route, box)
+            return routes!.Any(route => Hits(route, box)
                     && (segment[0][0] == segment[1][0] && route[0][0] == route[1][0]
                         || segment[0][1] == segment[1][1] && route[0][1] == route[1][1]));
         }
