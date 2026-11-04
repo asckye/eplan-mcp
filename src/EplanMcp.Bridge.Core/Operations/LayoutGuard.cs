@@ -59,6 +59,7 @@ public static class LayoutGuard
     }
     public static List<Violation> Check(Model model, IReadOnlyList<DrawingPlacement> changed, bool suggest = true, bool measured = false, bool searchViolations = true, TimeSpan? searchBudget = null)
     {
+        searchBudget ??= FreePositionSearchBudget;
         double[] area = Area(model);
         var result = new List<Violation>();
         var defaultTexts = new Dictionary<Violation, DrawingPlacement>();
@@ -255,7 +256,7 @@ public static class LayoutGuard
         : "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. ")
         + (model.DrawingArea is null ? "Boundary fallback: Page.Size minus layout.marginMm." : "Boundary: plot-frame drawing area.");
     internal const int SummaryLines = 20;
-    internal static readonly TimeSpan AfterWritingSearchBudget = TimeSpan.FromSeconds(2);
+    internal static readonly TimeSpan FreePositionSearchBudget = TimeSpan.FromSeconds(2);
     public static string Summary(IEnumerable<string?> messages)
     {
         string[] lines = [.. messages.Where(s => !string.IsNullOrEmpty(s)).SelectMany(s => s!.Split('\n'))
@@ -291,14 +292,14 @@ public static class LayoutGuard
         // searching a free position for every committed deviation ran past the write limit, so only a refusal searches;
         // default texts keep their property_moves suggestion as before.
         // Live 2026-11-03: 167 objects and 646 findings kept the main thread busy for minutes on default-text searches;
-        // after-write suggestions share a time budget.
+        // suggestions before and after writing share one time budget per check.
         var timer = System.Diagnostics.Stopwatch.StartNew();
-        List<Violation> violations = Check(actual, changed, measured: true, searchViolations: false, searchBudget: AfterWritingSearchBudget);
+        List<Violation> violations = Check(actual, changed, measured: true, searchViolations: false, searchBudget: FreePositionSearchBudget);
         if (timer.ElapsedMilliseconds > 2000)
         { OperationContext.Current.Warn(FormattableString.Invariant($"layout after write took {timer.ElapsedMilliseconds} ms for {changed.Length} changed objects and {violations.Count} findings")); }
         if (violations.Any(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize)))
         {
-            List<Violation> offPage = [.. Check(actual, changed, measured: true, searchBudget: AfterWritingSearchBudget).Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize))];
+            List<Violation> offPage = [.. Check(actual, changed, measured: true, searchBudget: FreePositionSearchBudget).Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize))];
             BridgeErrorException error = WriteArguments.Invalid([.. offPage.Select(v => "S2: the new object lies outside the page. " + v.Message)]);
             error.Error.Metadata!["layoutViolations"] = Newtonsoft.Json.JsonConvert.SerializeObject(offPage);
             throw WriteArguments.NotStarted(error);

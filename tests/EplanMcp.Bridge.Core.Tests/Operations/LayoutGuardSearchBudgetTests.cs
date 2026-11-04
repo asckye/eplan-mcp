@@ -8,19 +8,44 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class LayoutGuardSearchBudgetTests
 {
     [Fact]
-    public void DefaultText_ZeroBudgetStopsSearch_WithoutChangingUnlimitedSearch()
+    public void DefaultText_ZeroBudgetStopsSearch_WithoutChangingDefaultSearch()
     {
         LayoutGuard.Model model = LayoutGuardDefaultTextTests.Model();
         DrawingPlacement text = LayoutGuardDefaultTextTests.CableText(model);
 
-        LayoutGuard.Violation unlimited = Assert.Single(LayoutGuard.Check(model, [text]));
+        LayoutGuard.Violation withDefaultBudget = Assert.Single(LayoutGuard.Check(model, [text]));
         LayoutGuard.Violation timedOut = Assert.Single(LayoutGuard.Check(model, [text], searchBudget: TimeSpan.Zero));
 
-        Assert.NotNull(unlimited.NearestFreePosition);
+        Assert.NotNull(withDefaultBudget.NearestFreePosition);
         Assert.Null(timedOut.NearestFreePosition);
         Assert.Contains("time limit", timedOut.Message, StringComparison.Ordinal);
         Assert.Contains("eplan_page_review", timedOut.Message, StringComparison.Ordinal);
         Assert.DoesNotContain("No free position found", timedOut.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Conflicts_ZeroBudgetKeepsRulesObjectsGeometryAndRefusal()
+    {
+        LayoutGuard.Model model = LayoutGuardTests.Model();
+        model.Page.Placements.Add(LayoutGuardTests.Row("Function", 1));
+        DrawingPlacement[] proposed = [LayoutGuardTests.Row("Function", 2), LayoutGuardTests.Row("Function", 3)];
+
+        List<LayoutGuard.Violation> withoutSuggestions = LayoutGuard.Check(model, proposed, suggest: false);
+        List<LayoutGuard.Violation> expired = LayoutGuard.Check(model, proposed, searchBudget: TimeSpan.Zero);
+
+        Assert.NotEmpty(expired);
+        Assert.Equal(withoutSuggestions.Count, expired.Count);
+        for (int i = 0; i < expired.Count; i++)
+        {
+            Assert.Equal(withoutSuggestions[i].Rule, expired[i].Rule);
+            Assert.Equal(withoutSuggestions[i].Objects, expired[i].Objects);
+            Assert.Equal(withoutSuggestions[i].Geometry, expired[i].Geometry);
+            Assert.Equal(withoutSuggestions[i].Warning, expired[i].Warning);
+            Assert.False(expired[i].Warning);
+            Assert.Null(expired[i].NearestFreePosition);
+            Assert.StartsWith(withoutSuggestions[i].Message, expired[i].Message, StringComparison.Ordinal);
+            Assert.Contains("time limit", expired[i].Message, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
