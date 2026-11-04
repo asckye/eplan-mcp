@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A92、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A93、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -350,6 +350,12 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `Placement.Remove()` 用于独立 Line/Arc/PolyLine/Rectangle/Text/PathText/Image/MacroBox 的删除；A87 已验证宏框删除不删除引用内容。线和文字的工具链、一事务和单步撤销已实测（`PlacementDeleteTests`）。
 - 写前 layout_guard=warn 仅把非 OffPage 布局违规降为警告；写后仍遵循 ADR-0046。— 实测（`LayoutGuardWarningTests`）：穿过普通符号的线默认被 R3/R4 拒绝，warn 时提交并告警，超出页面仍拒绝。线穿过黑盒外框本身不触发拒绝。
 - `ParseNameAndProps` 对不含高层代号或位置代号的标识（如 `+A1-WE1`）返回空值，把空值赋给 `FunctionBasePropertyList.DESIGNATION_PLANT` 会抛 `EmptyPropertyException`（S063111），所以只赋非空部分。`RenameDevice` 之后主功能立即显示实际名称；不使用某部分标识的器件类型（如 `BusBarDefText`）把 `=F+A1-WE19` 变成 `+A1-WE19`，要在提交前发现并回滚。提交后再撤销未能恢复原标识，所以回滚后要核对原标识还在。— 实测（`WriteSafetyTests.Q2`）
+
+### A92. 第 6 轮工程数据写入的实测结果（2026-11-04，EPLAN 2026.0.3，Pro Panel，LargeWrite）
+- `eplan_property_set` 的 B8 条目写入和读回通过：盒子 20161、20408，总览点 20400，原理图点 20011，一步撤销恢复（`PlcPropertyB8Tests`）。B13 的类型由此确认。
+- 原生类型是 `PLC`、`Terminal`、`BusTerminal` 的对象同样用 `FunctionPropertyList` 读写，按 Function 的属性字典处理。
+- 写前快照如果覆盖全项目的 PLC 属性，在 323 页的项目上超过 30 秒。防误改检查的范围收窄到被写入的那张卡。
+- `interruption_point.symbol_variant` 能选 BP 变体 0（`InterruptionExplicitVariantTests`）；`AddArticleReference` 可以加到已有的非主端子上（`ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores`）；`Page.GridSize` 单位是毫米，新建 Overview 页写 4 后读回为 4（`PageGridWriteTests`）；电位定义点 33003、31006、31004、31002 可写（`PotentialEngineeringTests`）。以上都能一步撤销。
 
 ### A91. 第五、六轮重绘的事实（2026-11-04，EPLAN 2026.0.3，Pro Panel，scratch 项目）
 - `Insert.WindowMacro` 把宏的 `ReferencePoint` 放到给定坐标；外框由 `WindowMacro.Location`（左下角）和 `Size` 决定，`Size` 可能是宏框或选区，不一定是对象的范围。— 官方 XML + `MacroInsertTests`、第 7 次重绘。
