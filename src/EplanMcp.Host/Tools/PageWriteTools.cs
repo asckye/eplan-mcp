@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
@@ -35,12 +36,12 @@ internal sealed class PageWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageCreateResult))]
-    [Description("Creates 1-50 named pages. Omit/true previews; false executes. Approval outside scratch; one undo. See usage.")]
+    [Description("Creates pages. Omit/true previews; false executes. One undo; approval outside scratch.")]
     public static async Task<CallToolResult> PageCreateAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,
-        [Description("1-50, created in order")] NewPage[] pages,
-        [Description("e.g. zh_CN; default: EPLAN UI")] string? language = null,
+        [Description("1-50 pages")] NewPage[] pages,
+        [Description("Text language")] string? language = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -55,7 +56,7 @@ internal sealed class PageWriteTools
         var args = new PageCreateArgs
         {
             Project = project,
-            Pages = [.. pages!.Select(p => new PageCreateItem { Name = p.Name ?? string.Empty, PageType = PageType(p.PageType), Description = ToolArguments.Optional(DescriptionText(p.Description)), DescriptionTranslations = DescriptionMap(p.Description) })],
+            Pages = [.. pages!.Select(p => new PageCreateItem { Name = p.Name ?? string.Empty, PageType = PageType(p.PageType), Description = ToolArguments.Optional(DescriptionText(p.Description)), DescriptionTranslations = DescriptionMap(p.Description), GridSizeMm = p.GridSizeMm })],
             Language = ToolArguments.Optional(language),
         };
         var request = new WriteRequest<PageCreateArgs, PageCreateArgs>(
@@ -86,8 +87,8 @@ internal sealed class PageWriteTools
             DryRun = dry_run,
             Fingerprint = outcome.Plan.Fingerprint,
             Pages = outcome.Data is { } data
-                ? [.. data.Pages.Select(p => Entry(p.Name, p.Type, p.Description))]
-                : [.. args.Pages.Select(p => Entry(p.Name, p.PageType ?? _pageTypes[0], p.Description))],
+                ? [.. data.Pages.Select(p => Entry(p.Name, p.Type, p.Description, p.GridSizeMm))]
+                : [.. args.Pages.Select(p => Entry(p.Name, p.PageType ?? _pageTypes[0], p.Description, p.GridSizeMm))],
             Undo = committed ? "AI: " + CreateTool : null,
             Recovered = outcome.Recovered,
             Hint = outcome.Recovered
@@ -109,12 +110,12 @@ internal sealed class PageWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageUpdateResult))]
-    [Description("Updates descriptions or plot frames. Omit/true previews; false executes. One undo; approval outside scratch.")]
+    [Description("Updates page text, frame or grid. Omit/true previews; false executes. One undo; approval outside scratch.")]
     public static async Task<CallToolResult> PageUpdateAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,
         [Description("1-50 pages")] PageText[] pages,
-        [Description("String language")] string? language = null,
+        [Description("Language")] string? language = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -129,7 +130,7 @@ internal sealed class PageWriteTools
         var args = new PageUpdateArgs
         {
             Project = project,
-            Pages = [.. pages!.Select(p => new PageUpdateItem { Name = p.Name ?? string.Empty, Description = DescriptionText(p.Description), DescriptionTranslations = DescriptionMap(p.Description), PlotFrame = p.PlotFrame })],
+            Pages = [.. pages!.Select(p => new PageUpdateItem { Name = p.Name ?? string.Empty, Description = DescriptionText(p.Description), DescriptionTranslations = DescriptionMap(p.Description), PlotFrame = p.PlotFrame, GridSizeMm = p.GridSizeMm })],
             Language = ToolArguments.Optional(language),
         };
         var request = new WriteRequest<PageUpdateArgs, PageUpdateArgs>(
@@ -161,12 +162,14 @@ internal sealed class PageWriteTools
             Fingerprint = outcome.Plan.Fingerprint,
             Language = outcome.Data?.Language ?? LanguageOf(outcome.Plan) ?? args.Language,
             Pages = outcome.Data is { } data
-                ? [.. data.Pages.Select(p => Change(p.Name, p.Description, p.Previous, p.PlotFrame, p.PreviousPlotFrame))]
+                ? [.. data.Pages.Select(p => Change(p.Name, p.Description, p.Previous, p.PlotFrame, p.PreviousPlotFrame, p.GridSizeMm, p.PreviousGridSizeMm))]
                 : [.. outcome.Plan.Changes.GroupBy(c => c.Name).Select(group =>
                 {
-                    PlannedChange? description = group.FirstOrDefault(c => c.Property != "plot_frame");
+                    PlannedChange? description = group.FirstOrDefault(c => c.Property != "plot_frame" && c.Property != "grid_size_mm");
                     PlannedChange? frame = group.FirstOrDefault(c => c.Property == "plot_frame");
-                    return Change(group.Key, description?.NewValue, description?.OldValue, frame?.NewValue, frame?.OldValue);
+                    PlannedChange? grid = group.FirstOrDefault(c => c.Property == "grid_size_mm");
+                    return Change(group.Key, description?.NewValue, description?.OldValue, frame?.NewValue, frame?.OldValue,
+                        grid is null ? null : double.Parse(grid.NewValue!, CultureInfo.InvariantCulture), grid is null ? null : double.Parse(grid.OldValue!, CultureInfo.InvariantCulture));
                 })],
             Unchanged = outcome.Data?.Unchanged ?? (args.Pages.Count - outcome.Plan.Changes.Select(c => c.Name).Distinct(StringComparer.Ordinal).Count()),
             Undo = committed ? "AI: " + UpdateTool : null,
@@ -179,7 +182,7 @@ internal sealed class PageWriteTools
         string summary = committed ? $"Updated the descriptions of {count}; Ctrl+Z in EPLAN undoes this step."
             : result.Pages.Count == 0 ? $"Nothing to change: the {ToolResults.Count(result.Unchanged, "page")} already have these descriptions."
             : $"Dry run: would update {count}. Nothing was changed.";
-        if (args.Pages.Any(p => p.PlotFrame is not null))
+        if (args.Pages.Any(p => p.PlotFrame is not null || p.GridSizeMm is not null))
         {
             summary = committed ? $"Updated {count}; Ctrl+Z in EPLAN undoes this step."
                 : result.Pages.Count == 0 ? $"Nothing to change: requested values already match on {ToolResults.Count(result.Unchanged, "page")}."
@@ -246,30 +249,32 @@ internal sealed class PageWriteTools
         return open >= 0 && property!.EndsWith(')') ? property[(open + 1)..^1] : null;
     }
 
-    private static PageUpdateResult.PageEntry Change(string name, string? description, string? previous, string? frame = null, string? previousFrame = null) => new()
+    private static PageUpdateResult.PageEntry Change(string name, string? description, string? previous, string? frame = null, string? previousFrame = null, double? grid = null, double? previousGrid = null) => new()
     {
         Name = ResultShaper.CleanText(name),
         Description = ResultShaper.CleanText(description),
         Previous = ResultShaper.CleanText(previous),
         PlotFrame = ResultShaper.CleanText(frame),
         PreviousPlotFrame = ResultShaper.CleanText(previousFrame),
+        GridSizeMm = grid,
+        PreviousGridSizeMm = previousGrid,
     };
 
     /// <summary>A known page type in its exact spelling; anything else as given, for the Bridge to report.</summary>
     private static string? PageType(string? given) =>
         ToolArguments.Optional(given) is { } type ? _pageTypes.FirstOrDefault(t => string.Equals(t, type, StringComparison.OrdinalIgnoreCase)) ?? type : null;
 
-    private static PageCreateResult.PageEntry Entry(string name, string type, string? description) => new()
+    private static PageCreateResult.PageEntry Entry(string name, string type, string? description, double? grid = null) => new()
     {
         Name = ResultShaper.CleanText(name),
         Type = ResultShaper.CleanText(type),
+        GridSizeMm = grid,
         Description = ResultShaper.CleanText(description),
     };
 
     /// <summary>One element of <c>pages</c>.</summary>
     internal sealed class NewPage
     {
-        [Description("Full page name")]
         [Required]
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
@@ -281,12 +286,14 @@ internal sealed class PageWriteTools
         [Description("Text or language-to-text object; max 500 chars per language")]
         [JsonPropertyName("description")]
         public object? Description { get; set; }
+
+        [JsonPropertyName("grid_size_mm")]
+        public double? GridSizeMm { get; set; }
     }
 
     /// <summary>One element of eplan_page_update's <c>pages</c>.</summary>
     internal sealed class PageText
     {
-        [Description("Full page name")]
         [Required]
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
@@ -295,7 +302,9 @@ internal sealed class PageWriteTools
         [JsonPropertyName("description")]
         public object? Description { get; set; }
 
-        [Description("Existing frame name")]
+        [JsonPropertyName("grid_size_mm")]
+        public double? GridSizeMm { get; set; }
+
         [JsonPropertyName("plot_frame")]
         public string? PlotFrame { get; set; }
     }

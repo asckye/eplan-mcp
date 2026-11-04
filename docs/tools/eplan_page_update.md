@@ -17,14 +17,15 @@
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array，1–50 项 | 是 | — | 要修改的页 |
 | `pages[].name` | string | 是 | — | 完整页名，如 `=GAA+A1&EFS1/3`（用 `eplan_page_list` 查） |
-| `pages[].description` | string 或语言到文本的 object，每语言最长 500 字符 | 否 | 不修改 | `language` 下的新页描述；空串表示清除这种语言的描述 |
+| `pages[].description` | string 或语言到文本的 object，每语言最长 500 字符 | 否 | 不修改 | `pages[].grid_size_mm` | number > 0 | 否 | 不修改默认网格 | 页面网格（mm），有限正数；通过 `Page.GridSize` 写入并读回 |
+| `language` 下的新页描述；空串表示清除这种语言的描述 |
 | `pages[].plot_frame` | string | 否 | 不修改 | 项目中已被页面使用的图框名称，Ordinal 精确匹配；不接受空白或导入文件路径 |
 | `language` | string | 否 | EPLAN 界面语言 | 要修改的语言，如 `zh_CN`、`en_US`。**其他语言的描述保持不变** |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false，不改变审批、读回和撤销规则 |
 
 - 页名的查找规则与 `eplan_page_get` 相同：先精确匹配；找不到时，再做不区分大小写的比较，只有唯一一个匹配时才采用。
 - 同一次调用中，同一页出现两次时返回 `INVALID_ARGUMENT`。
-- 每项至少提供 `description`、`plot_frame` 之一；null 按省略处理。描述专用调用保留原来的匹配、语言、指纹、摘要和响应字段。
+- 每项至少提供 `description`、`plot_frame`、`grid_size_mm` 之一；null 按省略处理。描述专用调用保留原来的匹配、语言、指纹、摘要和响应字段。
 
 `description` 还接受 `{语言代码: 文本}` 对象，例如 `{"en_US":"Panel","de_DE":"Schrank","zh_CN":"面板"}`，每个文本最长 500 字符。对象键使用 EPLAN 支持的语言代码，不受项目显示语言数量限制；对象形式忽略顶层 `language` 的选字作用。一次构造并写入完整 `MultiLangString`，逐语言读回核对；有差异整批回滚。字符串形式保持原有行为。 对象仅修改列出的语言，未列出的语言保留；空串清除对应语言，计划按语言列出每项变化。
 
@@ -120,3 +121,6 @@
 - **Agent 评测**："把 scratch 项目中 `=GAA+A1&EFS1/1` 的中文页描述改成'主电源'，英文描述不要动"，作答后用 `eplan_page_get` 核对两种语言。
 - **图框 Small / Medium**：混合请求、缺少字段、1/50/51 页、重复页、未知图框及有界名称、继承图框不写、身份/11016/实际图框/集合过期、两项同改只计一页、后页失败/取消整批回滚；真实 MCP + Fake Bridge 验证 dry run、不变时不审批、scratch 自动允许、外部拒绝/审批、恢复结果、原描述响应不增加空图框字段。
 - **图框 Large**：WriteHost 只写 LargeWrite，独立 inspect 全部页，选一页和不同的已用图框；dry run 不改变状态、不写审计；切换后分别核对 11016 与有效图框，其他页完整状态不变；按 A41/A46 使用 PlanStepLiveSession 选择当前项目，一次 undo 恢复含空 11016 的原状态。finally 仅在提交和撤销结果已知时、且目标页仍是已确认的测试改动时恢复原框；结果未知不自动补偿。
+
+页面网格与同批页描述、图框在同一事务内修改；读回不一致整批回滚，Ctrl+Z 一步恢复。省略网格保持既有行为；可用 `eplan_page_get(include_drawings:true)` 查看 `drawings.gridSize`。
+网格改变时，响应 `pages[].gridSizeMm`、`previousGridSizeMm` 分别给出新旧值；未改变网格时省略。

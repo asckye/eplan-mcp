@@ -40,7 +40,10 @@ internal static class PlanStepCatalog
             schema["required"]!.AsArray().Add("new_tag");
         }
         if (e.Op is "page.create" or "page.update") // Workflow predictions retain single-language descriptions.
-        { schema["properties"]!["pages"]!["items"]!["properties"]!["description"] = JsonNode.Parse("""{"description":"Max 500 chars","type":["string","null"]}"""); }
+        {
+            schema["properties"]!["pages"]!["items"]!["properties"]!.AsObject().Remove("grid_size_mm");
+            schema["properties"]!["pages"]!["items"]!["properties"]!["description"] = JsonNode.Parse("""{"description":"Max 500 chars","type":["string","null"]}""");
+        }
         if (e.Op == "page.update") // Workflow predictions currently cover descriptions only.
         {
             JsonObject item = schema["properties"]!["pages"]!["items"]!.AsObject();

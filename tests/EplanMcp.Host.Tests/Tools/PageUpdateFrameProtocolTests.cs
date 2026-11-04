@@ -29,6 +29,40 @@ public sealed class PageUpdateFrameProtocolTests : IDisposable
     private readonly PageFrameStore _store = new();
     private Action? _beforeWrite;
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GridOnly_RealMcp_PreviewsOrCommitsAndPreservesOtherFields(bool dryRun)
+    {
+        await WithClient(async client =>
+        {
+            Dictionary<string, object?> args = Args(dryRun);
+            args["pages"] = new[] { new { name = PageFrameStore.First, grid_size_mm = 4 } };
+            JsonElement result = Data(await client.CallToolAsync(PageWriteTools.UpdateTool, args, cancellationToken: Token));
+            JsonElement page = Assert.Single(result.GetProperty("pages").EnumerateArray());
+            Assert.Equal(4, page.GetProperty("gridSizeMm").GetDouble());
+            Assert.Equal(1, page.GetProperty("previousGridSizeMm").GetDouble());
+            Assert.Equal(dryRun ? "not_started" : "committed", result.GetProperty("execution").GetString());
+            Assert.Equal(dryRun ? 1 : 4, _store.Grids[PageFrameStore.First]);
+            Assert.Empty(_store.DescriptionWrites);
+            Assert.Empty(_store.FrameWrites);
+        });
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-4)]
+    public async Task InvalidGrid_RealMcp_DoesNotWrite(double grid)
+    {
+        await WithClient(async client =>
+        {
+            Dictionary<string, object?> args = Args();
+            args["pages"] = new[] { new { name = PageFrameStore.First, grid_size_mm = grid } };
+            Assert.Equal(ErrorReason.InvalidArgument, Error(await client.CallToolAsync(PageWriteTools.UpdateTool, args, cancellationToken: Token)).GetProperty("reason").GetString());
+            Assert.Empty(_store.Calls);
+        });
+    }
+
     [Fact]
     public async Task DryRun_RealMcp_CombinesPropertiesPerPageWithoutApprovalAuditOrWrite()
     {

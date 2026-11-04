@@ -19,6 +19,7 @@
 | `pages[].name` | string | 是 | — | 完整页名，如 `=GAA+A1&EFS1/5`。结构部分参照 `eplan_page_list` 中的已有页 |
 | `pages[].page_type` | enum `Circuit` / `CircuitSingleLine` / `Overview` / `Graphics` | 否 | `Circuit` | 页类型 |
 | `pages[].description` | string 或语言到文本的 object，每语言最长 500 字符 | 否 | — | 页描述 |
+| `pages[].grid_size_mm` | number > 0 | 否 | 不修改默认网格 | 页面网格（mm），有限正数；通过 `Page.GridSize` 写入并读回 |
 | `language` | string | 否 | EPLAN 界面语言 | 页描述的语言，如 `zh_CN`、`en_US` |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false，不改变审批、读回和撤销规则 |
 
@@ -129,3 +130,6 @@
   - Q2（事务中失败后回滚）：Small 测试用假事务（回滚时恢复快照，模拟 SafetyPoint）覆盖第二页时失败、页名被改、描述被改、执行时重名，以及提交、回滚本身失败（`unknown`）；Medium 测试经真实管道走完整个工具。EPLAN 一侧，SafetyPoint 撤回新建的页和改过的属性已由 S1、S2 验证（A7、A9）。实机用自然发生的失败：`eplan_device_update` 给电缆赋带 `=` 的标识，EPLAN 丢掉这一部分（A13），读回不一致而回滚；多页中途失败只在 S8 的 spike 构建中用故障点验证。
   - Q6（规划之后项目变化）：Small 测试在规划和执行之间往目标结构中加页；Medium 测试让假读取器在两次调用之间变化。实机放在第 13 步的 Large 测试中：直接经 `BridgeClient` 调用 `page.create.plan`，在同一结构中建一页，再用旧指纹调用 `page.create.execute`，返回 `PLAN_STALE`。
 - **Agent 评测**："在 scratch 项目的 `=GAA+A1` 下新建 EFS1 的第 60、61 页电路图，页描述分别为'电源'和'控制'"，作答后用 `eplan_page_list` 核对。
+
+页面网格与同批页描述、图框在同一事务内修改；读回不一致整批回滚，Ctrl+Z 一步恢复。省略网格保持既有行为；可用 `eplan_page_get(include_drawings:true)` 查看 `drawings.gridSize`。
+指定网格时，响应 `pages[].gridSizeMm` 为预览值或提交后读回值；省略时不增加该响应字段。

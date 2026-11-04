@@ -11,8 +11,15 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// then <c>Page.Create(project, type, parts)</c>, then the description as a <see cref="MultiLangString"/> holding one
 /// language, which replaces the whole value. Main thread, inside the write's TransactionScope.
 /// </summary>
-internal sealed class EplanPageWriter : IPageWriter
+internal sealed class EplanPageWriter : IPageWriter, IPageGrid
 {
+    public double ReadGrid(string projectPath, string page) => DrawingCoordinates.ApiToMillimetres(EplanPageDescriptions.Find(projectPath, page).GridSize);
+    public double WriteGrid(string projectPath, string page, double value)
+    {
+        MainThread.Assert();
+        EplanPageDescriptions.Find(projectPath, page).GridSize = DrawingCoordinates.MillimetresToApi(value);
+        return ReadGrid(projectPath, page);
+    }
     public bool KnowsLanguage(string language)
     {
         using var iso = new ISOCode(language);

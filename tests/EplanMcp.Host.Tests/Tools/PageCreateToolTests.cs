@@ -56,6 +56,16 @@ public sealed class PageCreateToolTests : IDisposable
 
     public void Dispose() => Directory.Delete(_locations.Root, recursive: true);
 
+    [Fact]
+    public async Task OverviewGridFour_IsForwardedThroughPlanAndExecute()
+    {
+        PageWriteTools.NewPage page = Page("=GAA+A1&EFS1/999", "Overview", null);
+        page.GridSizeMm = 4;
+        var result = await Create([page], dryRun: false);
+        Assert.NotEqual(true, result.IsError);
+        Assert.All(_bridge.Calls.Where(c => c.Operation is OperationNames.PageCreatePlan or OperationNames.PageCreateExecute), c => Assert.Equal(4, ((PageCreateArgs)c.Args!).Pages[0].GridSizeMm));
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(null)]

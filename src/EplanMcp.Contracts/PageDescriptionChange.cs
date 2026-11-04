@@ -17,4 +17,7 @@ public sealed class PageDescriptionChange
 
     /// <summary>Effective plot frame before writing; null when absent or no frame was requested.</summary>
     public string? PreviousPlotFrame { get; set; }
+
+    public double? GridSizeMm { get; set; }
+    public double? PreviousGridSizeMm { get; set; }
 }

@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R6-04 页面网格（2026-11-04） | `PageGridWriteTests` | NOT RUN：仅编译；LargeWrite 新建 Overview 页，显式 grid_size_mm:4、dry_run:false；独立读取 drawings.gridSize，一次撤销恢复完整快照。 |
 | R6-03 端子部件（2026-11-04） | `DevicePlaceTests.ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores` | NOT RUN：仅编译；LargeWrite 使用 IEC_symbol/X2_2 与 PXC.3211813，独立只读 helper 核对 ArticleReferences，撤销后比较引用与快照。 |
 | R6-02 中断点变体（2026-11-04） | `InterruptionExplicitVariantTests` | NOT RUN：仅编译；LargeWrite 新页指定 BP/0、Right，含 counterpart_pages，读回实际符号和引脚，一步撤销后比较快照。 |
 | R6-01 PLC 数据写入（2026-11-04） | `PlcPropertyB8Tests` | NOT RUN：仅编译；LargeWrite 的 PXC.2861344 总览/多线宏并卡后写 20400、20011、20161、20408，输出全部 B8 PropertyDefinition，核对 A90 关联、盒子继承和一步撤销。 |

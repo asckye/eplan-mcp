@@ -17,7 +17,7 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
 
     protected override PageUpdateData Execute(PageUpdateArgs args)
     {
-        using IPagePlotFrames? session = args.Pages?.Any(p => p?.PlotFrame is not null) == true ? frames?.Invoke() : null;
+        using IPagePlotFrames? session = args.Pages?.Any(p => p?.PlotFrame is not null || p?.GridSizeMm is not null) == true ? frames?.Invoke() : null;
         IPageDescriptions texts = session ?? descriptions;
         PageUpdateRequest request;
         List<(PageUpdateRequest.Page Page, PageDescription Before)> pages;
@@ -38,7 +38,7 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
             {
                 throw new BridgeErrorException(
                     ErrorReason.PlanStale,
-                    request.Frames.Count == 0 ? "These page descriptions changed after the plan was made, so nothing was changed. Call eplan_page_update again for a new plan."
+                    request.Frames.Count == 0 && request.Grids.Count == 0 ? "These page descriptions changed after the plan was made, so nothing was changed. Call eplan_page_update again for a new plan."
                         : "These pages changed after the plan was made, so nothing was changed. Call eplan_page_update again for a new plan.",
                     retryable: false,
                     new Dictionary<string, string> { ["project"] = request.Project.Name });
@@ -49,7 +49,7 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
             throw WriteArguments.NotStarted(ex);
         }
 
-        var changing = pages.Where(p => PageUpdatePlanOperation.Changes(p, request.Language) || request.FrameChanges(p.Page)).ToList();
+        var changing = pages.Where(p => PageUpdatePlanOperation.Changes(p, request.Language) || request.FrameChanges(p.Page) || request.GridChanges(p.Page)).ToList();
         Committed<List<PageDescriptionChange>> committed = changing.Count == 0 ? new([], null)
             : TransactionRunner.Run(transactions, Tool, () => changing.Select(p => Write(request, p.Page, p.Before, texts, session)).ToList());
         return new PageUpdateData
@@ -101,9 +101,13 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
             }
         }
 
+        if (request.GridChanges(page) && ((IPageGrid)frames!).WriteGrid(request.Project.Path, page.Name, page.GridSizeMm!.Value) != page.GridSizeMm.Value)
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The page grid did not read back as planned; the entire batch was rolled back."); }
         return new PageDescriptionChange
         {
             Name = page.Name,
+            GridSizeMm = request.GridChanges(page) ? page.GridSizeMm : null,
+            PreviousGridSizeMm = request.GridChanges(page) ? request.Grids[page.Name] : null,
             Description = page.HasDescription ? after.TextIn(request.Language) : null,
             Previous = page.HasDescription ? before.TextIn(request.Language) : null,
             PlotFrame = request.FrameChanges(page) ? frame?.Effective : null,

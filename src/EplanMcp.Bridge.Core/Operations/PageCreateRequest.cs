@@ -51,8 +51,9 @@ internal sealed class PageCreateRequest
             AddIf(violations, same >= 0, $"{at}.name repeats pages[{same.ToString(CultureInfo.InvariantCulture)}].name (letter case does not count).");
             AddIf(violations, type is null, $"{at}.page_type must be one of {string.Join(", ", PageTypes)}.");
             AddIf(violations, description?.Length > MaxDescription, $"{at}.description must have at most {MaxDescription.ToString(CultureInfo.InvariantCulture)} characters.");
+            AddIf(violations, items[i].GridSizeMm is double grid && (double.IsNaN(grid) || double.IsInfinity(grid) || grid <= 0), $"{at}.grid_size_mm must be finite and positive.");
             PageDescriptionMap.Check(items[i].DescriptionTranslations, writer.KnowsLanguage, at + ".description", violations);
-            pages.Add(new Page(name ?? new PageName(items[i].Name ?? string.Empty, null, null, null, 0), type ?? PageTypes[0], description, items[i].DescriptionTranslations));
+            pages.Add(new Page(name ?? new PageName(items[i].Name ?? string.Empty, null, null, null, 0), type ?? PageTypes[0], description, items[i].DescriptionTranslations, items[i].GridSizeMm));
         }
 
         string? language = string.IsNullOrWhiteSpace(args.Language) ? null : args.Language!.Trim();
@@ -96,11 +97,12 @@ internal sealed class PageCreateRequest
     }
 
     /// <summary>One page to create, checked.</summary>
-    internal sealed class Page(PageName name, string type, string? description, Dictionary<string, string>? translations)
+    internal sealed class Page(PageName name, string type, string? description, Dictionary<string, string>? translations, double? gridSizeMm)
     {
         public PageName Name { get; } = name;
 
         public string Type { get; } = type;
+        public double? GridSizeMm { get; } = gridSizeMm;
 
         public string? Description { get; } = description;
 

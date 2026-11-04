@@ -26,7 +26,7 @@ Omitting `dry_run` or passing true only previews; pass `dry_run: false` with the
 2. Call with the full page names and the new texts. For a string, only the given `language` changes; every other language of each description stays as it is. An empty `description` removes that language's text.
 3. Pages that already have the text are counted in `unchanged` and not touched; when none changes, nothing is written and no approval is asked.
 4. All changes are one step: one Ctrl+Z in EPLAN reverts them, and a failure on any page changes none.
-5. Each page needs `description`, `plot_frame`, or both. Omitted fields stay unchanged. Frame names match exactly; only frames observed on project pages are discoverable. Unknown names return bounded `metadata.available` and complete `availableCount`; unused master data is not enumerated or imported. An already effective frame is left alone, including an inherited frame with empty 11016.
+5. Each page needs `description`, `plot_frame`, or `grid_size_mm`. Omitted fields stay unchanged. Frame names match exactly; only frames observed on project pages are discoverable. Unknown names return bounded `metadata.available` and complete `availableCount`; unused master data is not enumerated or imported. An already effective frame is left alone, including an inherited frame with empty 11016.
 
 ## Fields
 
@@ -53,3 +53,5 @@ Every error carries `execution`: `not_started` and `rolled_back` mean the projec
 - AMBIGUOUS_NAME: several pages match a name only when ignoring letter case; pass one of `metadata.candidates` exactly.
 - PLAN_STALE (`not_started`): a description changed while the call waited; call again.
 - POLICY_DENIED, APPROVAL_DENIED, APPROVAL_EXPIRED, WRITES_SUSPENDED, AUDIT_UNAVAILABLE (`not_started`), OUTCOME_UNKNOWN (`unknown`), LOCK_FAILED, EPLAN_OPERATION_FAILED, INTERNAL, and the connection errors: as for eplan_page_create.
+
+Set `pages[].grid_size_mm` to a finite positive millimetre value to set the page grid. Omit it to keep the existing/default grid. Read it with `eplan_page_get` and `include_drawings:true`; it shares the call’s transaction and undo.

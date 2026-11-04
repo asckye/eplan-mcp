@@ -29,6 +29,8 @@ internal sealed class PageUpdateRequest
 
     public Dictionary<string, PagePlotFrameState> Frames { get; } = new(StringComparer.Ordinal);
 
+    public Dictionary<string, double> Grids { get; } = new(StringComparer.Ordinal);
+
     private List<string> AvailableFrames { get; set; } = [];
 
     public static PageUpdateRequest Check(PageUpdateArgs args, IProjectCatalog catalog, IPageReader reader, IPageDescriptions descriptions, IPagePlotFrames? frames = null)
@@ -53,8 +55,9 @@ internal sealed class PageUpdateRequest
             int same = items.FindIndex(0, i, p => string.Equals(p?.Name, items[i].Name, StringComparison.OrdinalIgnoreCase));
             AddIf(violations, string.IsNullOrEmpty(items[i].Name), $"{at}.name is required: a full page name as eplan_page_list returns it.");
             AddIf(violations, same >= 0 && !string.IsNullOrEmpty(items[i].Name), $"{at}.name repeats pages[{same.ToString(CultureInfo.InvariantCulture)}].name (letter case does not count).");
-            AddIf(violations, items[i].Description is null && items[i].DescriptionTranslations is null && items[i].PlotFrame is null, $"{at}.description is required when plot_frame is omitted; an empty string clears it.");
+            AddIf(violations, items[i].Description is null && items[i].DescriptionTranslations is null && items[i].PlotFrame is null && items[i].GridSizeMm is null, $"{at}.description is required when plot_frame and grid_size_mm are omitted; an empty string clears it.");
             AddIf(violations, items[i].Description?.Length > MaxDescription, $"{at}.description must have at most {MaxDescription.ToString(CultureInfo.InvariantCulture)} characters.");
+            AddIf(violations, items[i].GridSizeMm is double grid && (double.IsNaN(grid) || double.IsInfinity(grid) || grid <= 0), $"{at}.grid_size_mm must be finite and positive.");
             PageDescriptionMap.Check(items[i].DescriptionTranslations, code => descriptions.LanguageCode(code) is not null, at + ".description", violations);
             AddIf(violations, items[i].PlotFrame is not null && string.IsNullOrWhiteSpace(items[i].PlotFrame), $"{at}.plot_frame must be a nonempty exact frame name.");
         }
@@ -80,14 +83,14 @@ internal sealed class PageUpdateRequest
             }
             else
             {
-                pages.Add(new Page(name, item.Description?.Length == 0 ? null : item.Description, item.Description is not null || item.DescriptionTranslations is not null, item.PlotFrame, item.DescriptionTranslations));
+                pages.Add(new Page(name, item.Description?.Length == 0 ? null : item.Description, item.Description is not null || item.DescriptionTranslations is not null, item.PlotFrame, item.DescriptionTranslations, item.GridSizeMm));
             }
         }
 
         if (missing.Count > 0)
         {
             throw new BridgeErrorException(
-                args.Fingerprint is not null && items.Any(p => p.PlotFrame is not null) ? ErrorReason.PlanStale : ErrorReason.PageNotFound,
+                args.Fingerprint is not null && items.Any(p => p.PlotFrame is not null || p.GridSizeMm is not null) ? ErrorReason.PlanStale : ErrorReason.PageNotFound,
                 "No page has these names, so nothing was changed. Use eplan_page_list with name_prefix to find the exact page names.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = project.Name, ["missing"] = string.Join("\n", missing) });
@@ -120,6 +123,10 @@ internal sealed class PageUpdateRequest
             }
         }
 
+        if (pages.Any(p => p.GridSizeMm is not null) && frames is not IPageGrid)
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Page grid access is unavailable; ask the engineer to update the Bridge."); }
+        foreach (Page page in pages.Where(p => p.GridSizeMm is not null))
+        { request.Grids[page.Name] = ((IPageGrid)frames!).ReadGrid(project.Path, page.Name); }
         return request;
     }
 
@@ -127,9 +134,13 @@ internal sealed class PageUpdateRequest
     public string FingerprintOf(IEnumerable<(Page Page, PageDescription Before)> pages)
     {
         string descriptions = Fingerprint.Of(pages.Select(p => p.Page.Name + "\t" + (p.Before.Raw ?? string.Empty)));
+        if (Grids.Count > 0)
+        { descriptions = Fingerprint.Of([descriptions, JsonConvert.SerializeObject(Grids.OrderBy(p => p.Key, StringComparer.Ordinal))]); }
         return Frames.Count == 0 ? descriptions : Fingerprint.Of([descriptions,
             JsonConvert.SerializeObject(new { Project.Path, Frames = Frames.OrderBy(p => p.Key, StringComparer.Ordinal), AvailableFrames })]);
     }
+
+    public bool GridChanges(Page page) => page.GridSizeMm is double grid && Grids[page.Name] != grid;
 
     public bool FrameChanges(Page page) => page.PlotFrame is not null && Frames[page.Name].Effective != page.PlotFrame;
 
@@ -156,7 +167,7 @@ internal sealed class PageUpdateRequest
     }
 
     /// <summary>One page to change: its name as EPLAN has it and the new text (null clears it).</summary>
-    internal sealed class Page(string name, string? text, bool hasDescription, string? plotFrame, Dictionary<string, string>? translations)
+    internal sealed class Page(string name, string? text, bool hasDescription, string? plotFrame, Dictionary<string, string>? translations, double? gridSizeMm)
     {
         public string Name { get; } = name;
 
@@ -165,6 +176,7 @@ internal sealed class PageUpdateRequest
         public bool HasDescription { get; } = hasDescription;
 
         public string? PlotFrame { get; } = plotFrame;
+        public double? GridSizeMm { get; } = gridSizeMm;
 
         public IEnumerable<KeyValuePair<string, string?>> Edits(string language) => translations is null
             ? [new(language, Text)] : translations.Select(t => new KeyValuePair<string, string?>(t.Key, t.Value.Length == 0 ? null : t.Value));

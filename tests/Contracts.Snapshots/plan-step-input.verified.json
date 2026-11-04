@@ -21,13 +21,12 @@
                 "type": "object",
                 "properties": {
                   "pages": {
-                    "description": "1-50, created in order",
+                    "description": "1-50 pages",
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
                         "name": {
-                          "description": "Full page name",
                           "type": "string"
                         },
                         "page_type": {
@@ -59,7 +58,7 @@
                     "maxItems": 50
                   },
                   "language": {
-                    "description": "e.g. zh_CN; default: EPLAN UI",
+                    "description": "Text language",
                     "type": [
                       "string",
                       "null"
@@ -106,7 +105,6 @@
                         "name": {
                           "oneOf": [
                             {
-                              "description": "Full page name",
                               "type": "string"
                             },
                             {

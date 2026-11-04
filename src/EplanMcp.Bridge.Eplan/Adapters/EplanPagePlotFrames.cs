@@ -5,8 +5,15 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>S38/A49 frame switch via PAGE_FORMPLOT. Discovery is limited to frames used by project pages.</summary>
-internal sealed class EplanPagePlotFrames : IPagePlotFrames
+internal sealed class EplanPagePlotFrames : IPagePlotFrames, IPageGrid
 {
+    public double ReadGrid(string projectPath, string page) => DrawingCoordinates.ApiToMillimetres(EplanPageDescriptions.Find(projectPath, page).GridSize);
+    public double WriteGrid(string projectPath, string page, double value)
+    {
+        MainThread.Assert();
+        EplanPageDescriptions.Find(projectPath, page).GridSize = DrawingCoordinates.MillimetresToApi(value);
+        return ReadGrid(projectPath, page);
+    }
     private readonly Dictionary<string, PagePropertyList> _lists = new(StringComparer.Ordinal);
     private EplanPageDescriptions Descriptions => new(Properties);
 

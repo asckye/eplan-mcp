@@ -67,7 +67,7 @@ internal static class ToolSchemas
                     }
                     if (tool.ProtocolTool.Name == PageWriteTools.UpdateTool)
                     {
-                        items["anyOf"] = JsonNode.Parse("""[{"required":["description"]},{"required":["plot_frame"]}]""");
+                        items["anyOf"] = JsonNode.Parse("""[{"required":["description"]},{"required":["plot_frame"]},{"required":["grid_size_mm"]}]""");
                     }
                 }
 

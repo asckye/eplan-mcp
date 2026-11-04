@@ -77,6 +77,13 @@ public sealed class PageCreateExecuteOperation(IProjectCatalog catalog, IPageRea
                 { throw ReadBack("EPLAN did not keep the description in " + entry.Key + ".", entry.Value, stored.TextIn(entry.Key) ?? ""); }
             }
         }
+        if (page.GridSizeMm is double grid)
+        {
+            double actual = ((IPageGrid)writer).WriteGrid(request.Project.Path, created.Name, grid);
+            created.GridSizeMm = actual;
+            if (actual != grid)
+            { throw ReadBack("EPLAN did not keep the page grid size.", grid.ToString(System.Globalization.CultureInfo.InvariantCulture), actual.ToString(System.Globalization.CultureInfo.InvariantCulture)); }
+        }
         return created;
     }
 

@@ -48,3 +48,5 @@ Every error carries `execution`: `not_started` and `rolled_back` mean the projec
 - OUTCOME_UNKNOWN (`unknown`): whether the pages exist is unknown. Do not call again; ask the engineer to check the project in EPLAN.
 - LOCK_FAILED (retryable), EPLAN_OPERATION_FAILED, INTERNAL (`rolled_back`): EPLAN failed while creating the pages and nothing was kept.
 - PROJECT_NOT_OPEN, AMBIGUOUS_NAME: as for eplan_project_get. EPLAN_NOT_CONNECTED, EPLAN_BUSY, TIMEOUT (retryable), SESSION_NOT_SELECTED, BRIDGE_INCOMPATIBLE: as for eplan_project_list.
+
+Set `pages[].grid_size_mm` to a finite positive millimetre value to set the page grid. Omit it to keep the existing/default grid. Read it with `eplan_page_get` and `include_drawings:true`; it shares the call’s transaction and undo.

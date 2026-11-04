@@ -14,4 +14,7 @@ public sealed class PageSummary
 
     /// <summary>The language the description was read in when it is not the requested one (the tool's language was omitted and EPLAN's user interface language has no text); null otherwise.</summary>
     public string? DescriptionLanguage { get; set; }
+
+    /// <summary>Verified grid size when explicitly set while creating the page.</summary>
+    public double? GridSizeMm { get; set; }
 }

@@ -12,7 +12,7 @@ public sealed class PageUpdatePlanOperation(IProjectCatalog catalog, IPageReader
 
     protected override WritePlan Execute(PageUpdateArgs args)
     {
-        using IPagePlotFrames? session = args.Pages?.Any(p => p?.PlotFrame is not null) == true ? frames?.Invoke() : null;
+        using IPagePlotFrames? session = args.Pages?.Any(p => p?.PlotFrame is not null || p?.GridSizeMm is not null) == true ? frames?.Invoke() : null;
         IPageDescriptions texts = session ?? descriptions;
         var request = PageUpdateRequest.Check(args, catalog, reader, texts, session);
         List<(PageUpdateRequest.Page Page, PageDescription Before)> pages = [.. request.Pages.Select(p =>
@@ -35,6 +35,12 @@ public sealed class PageUpdatePlanOperation(IProjectCatalog catalog, IPageReader
                     OldValue = p.Before.TextIn(t.Key),
                     NewValue = t.Value,
                 })),
+                .. pages.Where(p => request.GridChanges(p.Page)).Select(p => new PlannedChange
+                {
+                    Action = "update", Kind = "page", Name = p.Page.Name, Property = "grid_size_mm",
+                    OldValue = request.Grids[p.Page.Name].ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    NewValue = p.Page.GridSizeMm!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                }),
                 .. pages.Where(p => request.FrameChanges(p.Page)).Select(p => new PlannedChange
                 {
                     Action = "update",

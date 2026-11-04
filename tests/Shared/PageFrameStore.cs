@@ -4,7 +4,7 @@ using EplanMcp.Contracts;
 
 namespace EplanMcp.Tests;
 
-internal sealed class PageFrameStore : IProjectCatalog, IPageReader, IPageDescriptions, IPagePlotFrames, ITransactionScopeFactory
+internal sealed class PageFrameStore : IProjectCatalog, IPageReader, IPageDescriptions, IPagePlotFrames, IPageGrid, ITransactionScopeFactory
 {
     public const string First = "=F+A1&EFS1/1";
     public const string Second = "=F+A1&EFS1/2";
@@ -24,6 +24,15 @@ internal sealed class PageFrameStore : IProjectCatalog, IPageReader, IPageDescri
         [Third] = [],
     };
 
+    public Dictionary<string, double> Grids { get; } = new() { [First] = 1, [Second] = 4, [Third] = 1 };
+    public List<string> GridWrites { get; } = [];
+    public Func<double, double>? GridTamper { get; set; }
+    public double ReadGrid(string projectPath, string page) => Grids[page];
+    public double WriteGrid(string projectPath, string page, double value)
+    {
+        GridWrites.Add(page);
+        return Grids[page] = GridTamper?.Invoke(value) ?? value;
+    }
     public List<string> Calls { get; } = [];
     public List<string> FrameWrites { get; } = [];
     public List<string> DescriptionWrites { get; } = [];
@@ -83,14 +92,14 @@ internal sealed class PageFrameStore : IProjectCatalog, IPageReader, IPageDescri
     public ITransactionScope Begin(string undoDescription)
     {
         Calls.Add("Begin " + undoDescription);
-        return new Scope(this, Frames.ToDictionary(p => p.Key, p => p.Value), Descriptions.ToDictionary(p => p.Key, p => p.Value.ToList()));
+        return new Scope(this, Grids.ToDictionary(p => p.Key, p => p.Value), Frames.ToDictionary(p => p.Key, p => p.Value), Descriptions.ToDictionary(p => p.Key, p => p.Value.ToList()));
     }
 
     public static PageUpdateArgs Args(params PageUpdateItem[] pages) => new() { Project = "Line1", Language = "en_US", Pages = [.. pages] };
     public static PageUpdateItem Item(string name = First, string? frame = "Frame_B", string? description = null) =>
         new() { Name = name, PlotFrame = frame, Description = description };
 
-    private sealed class Scope(PageFrameStore store, Dictionary<string, PagePlotFrameState> frames, Dictionary<string, List<TextEntry>> descriptions) : ITransactionScope
+    private sealed class Scope(PageFrameStore store, Dictionary<string, double> grids, Dictionary<string, PagePlotFrameState> frames, Dictionary<string, List<TextEntry>> descriptions) : ITransactionScope
     {
         public void Commit() => store.Calls.Add("Commit");
         public void CloseUndo() => store.Calls.Add("CloseUndo");
@@ -99,6 +108,9 @@ internal sealed class PageFrameStore : IProjectCatalog, IPageReader, IPageDescri
         public void Rollback()
         {
             store.Calls.Add("Rollback");
+            store.Grids.Clear();
+            foreach (var grid in grids)
+            { store.Grids.Add(grid.Key, grid.Value); }
             store.Frames.Clear();
             store.Descriptions.Clear();
             foreach ((string name, PagePlotFrameState state) in frames)

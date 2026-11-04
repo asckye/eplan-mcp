@@ -12227,6 +12227,11 @@
             "file": "tests/EplanMcp.Large.Tests/PageDescriptionMapTests.cs"
           },
           {
+            "name": "PageGridWriteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageGridWriteTests.cs"
+          },
+          {
             "name": "PlacementDeleteTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
@@ -12282,6 +12287,11 @@
             "name": "PageDescriptionMapTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDescriptionMapTests.cs"
+          },
+          {
+            "name": "PageGridTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageGridTests.cs"
           },
           {
             "name": "PlanStepExecuteOperationTests",
@@ -12815,6 +12825,11 @@
             "name": "PageDrawingDiscoveryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageDrawingDiscoveryTests.cs"
+          },
+          {
+            "name": "PageGridWriteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageGridWriteTests.cs"
           },
           {
             "name": "PageReviewTests",
@@ -14016,6 +14031,11 @@
             "name": "PageDescriptionMapTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDescriptionMapTests.cs"
+          },
+          {
+            "name": "PageGridTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageGridTests.cs"
           },
           {
             "name": "PageUpdateFrameTests",
@@ -18709,6 +18729,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDescriptionMapTests.cs"
           },
           {
+            "name": "PageGridTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageGridTests.cs"
+          },
+          {
             "name": "PageUpdateFrameTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageUpdateFrameTests.cs"
@@ -20671,6 +20696,11 @@
             "name": "PageDescriptionMapTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDescriptionMapTests.cs"
+          },
+          {
+            "name": "PageGridTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageGridTests.cs"
           },
           {
             "name": "PageUpdateFrameTests",

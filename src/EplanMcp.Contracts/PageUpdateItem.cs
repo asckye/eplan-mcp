@@ -6,6 +6,9 @@ public sealed class PageUpdateItem
     /// <summary>The full page name; matched exactly, or ignoring case when that is unique.</summary>
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>Optional positive page grid size in millimetres.</summary>
+    public double? GridSizeMm { get; set; }
+
     /// <summary>The new description in <see cref="PageUpdateArgs.Language"/>; empty clears that language's text.</summary>
     public string? Description { get; set; }
 
