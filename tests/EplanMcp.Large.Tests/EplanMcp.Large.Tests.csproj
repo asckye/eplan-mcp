@@ -8,6 +8,7 @@
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --ignore-exit-code 8</TestingPlatformCommandLineArguments>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Shared\PageExportComparer.cs" Link="PageExportComparer.cs" />
     <!-- The tests start the real eplanmcp.exe, which this reference copies next to them. -->
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" />
     <!-- P6 planning tests also replay detached Bridge evidence through the pure planner. -->
