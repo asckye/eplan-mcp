@@ -18,7 +18,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 |---|---|---|
 | project、page | 必填 string | 已打开项目名称或已解析路径、精确完整 Circuit 页名；目标解析不依赖当前选择，执行前须选中目标以便安全补偿 |
 | items | 必填 object[1..50] | wire：`{kind,from,to,points}`；节点：`{kind,position,directions}`；禁止跨分支成员。from/to 是 `{locator:{project,page,type,oid,digest},pin_index}`，索引从 0 起，locator 必须与本页当前观察一致 |
-| definition_point | wire 的可选 object，或独立 item | `{position?,symbol?,symbol_variant?,color?,cross_section?,designation?}`；SPECIAL `CDP`（默认）或 `CDPNG`，变体默认 0 并按库实际值校验。至少提供一个非空属性；color 写 31004，数值文本 cross_section（如 `"1.5"`）写 31002，designation 写 31011。省略位置取第一段中点并吸附栅格；显式位置须位于该连接某段，否则 INVALID_ARGUMENT |
+| definition_point | wire 的可选 object，或独立 item | `{position?,symbol?,symbol_variant?,color?,cross_section?,designation?}`；SPECIAL `CDP`（默认）或 `CDPNG`，变体默认 0 并按库实际值校验。属性均可省略；提供时须非空。color 写 31004，数值文本 cross_section（如 `"1.5"`）写 31002，designation 写 31011。省略位置取第一段中点并吸附栅格；显式位置须位于该连接某段，否则 INVALID_ARGUMENT |
 | points / position | number[2][2..32] / number[2] | `[x_mm,y_mm]`；毫米、左下原点、y 向上；有限数、0..10,000，且受 Page.Size 限制 |
 | kind / directions | enum / enum[] | wire、corner、t_node、potential_point、definition_point；节点分别需 2 个垂直方向、3 个不同方向、1 个方向；方向为 Up/Down/Left/Right |
 | variant / sort_code | 可选 integer | t_node 的 variant 按已核验的方向引脚选择 SPECIAL 变体，省略沿用原行为，不存在时 INVALID_ARGUMENT 列出可用编号；interruption_point 的 sort_code ≥ 0，在放置事务中写入属性 24809 并读回；省略不写。interruption_point 可选 `symbol`（SPECIAL 库中任意 `InterruptionPoint` 符号，如 `BP`、`BPIN`、`BPOUT`、`BPF`；省略时先取已启用插件的 `defaults.interruption.symbol`（内置插件 `iec-base` 为 `BP`），否则内置缺省 `BP`，与 EPLAN“插入 → 中断点”一致）；中断点使用符号的默认属性排列，不再额外新建 24300 交叉引用文字 |
@@ -28,7 +28,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | dry_run / snap_to_grid | boolean，true / true | 省略 dry_run 只预览；执行传 `dry_run: false`；关闭吸附仍拒绝非栅格接线 |
 | response_format | concise / detailed，concise | Host 以 ResultShaper 清洗并限制 5k/20k token；展示裁剪不影响完整 guard |
 
-独立 `{kind:"definition_point",position:[x,y],symbol?,symbol_variant?,color?,cross_section?,designation?}` 使用相同属性规则；position 必填，须位于本页既有图形自动连线的路径上，容差与 wire 定义点相同，否则 INVALID_ARGUMENT 指明最近线段；CDPNG 同样要求在线上。可单独调用或与 wire、node 同批，同次新建线仍用 wire.definition_point；生成前后既有连接数量及端点须不变。
+独立 `{kind:"definition_point",position:[x,y],symbol?,symbol_variant?,color?,cross_section?,designation?}` 使用相同属性规则；color、cross_section、designation、part 可全部省略；position 必填，须位于本页既有图形自动连线的路径上，容差与 wire 定义点相同，否则 INVALID_ARGUMENT 指明最近线段；CDPNG 同样要求在线上。可单独调用或与 wire、node 同批，同次新建线仍用 wire.definition_point；生成前后既有连接数量及端点须不变。
 
 所有对象严格拒绝未知、重复、缺失和错误类型成员；数值递归检查有限性，错误附 JSON Pointer；请求上限 256 KiB。[预览快照](../../tests/Contracts.Snapshots/connection-create-contract.verified.json)与已注册 server-contract 同步维护，用法已嵌入工具目录。
 

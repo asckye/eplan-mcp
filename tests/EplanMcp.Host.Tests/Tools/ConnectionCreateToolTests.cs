@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Core.Tests.Operations;
 using EplanMcp.Contracts;
@@ -192,6 +193,51 @@ public sealed class ConnectionCreateToolTests
         Assert.Equal(generate ?? true, preview.GetProperty("generate").GetBoolean());
         Assert.Equal(preview.GetProperty("generate").GetBoolean(), execution.GetProperty("request").GetProperty("generate").GetBoolean());
         Assert.Single(harness.Bridge.Writes);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task NoDefinitionProperties_RealPlannerAcceptsOmissionButRejectsEmptyValue(bool emptyValue)
+    {
+        using var harness = Setup();
+        var fixture = new ConnectionCreateFixture();
+        fixture.Scene.Project.Path = harness.ProjectPath;
+        fixture.Scene.Page.Project = harness.ProjectPath;
+        fixture.Scene.Pins.Clear();
+        fixture.Scene.Page.Placements.Clear();
+        fixture.AddPin(1, [8, 8], "Up", [6, 4, 10, 8]);
+        fixture.AddPin(2, [8, 40], "Down", [6, 40, 10, 44]);
+        fixture.Scene.Graphical = [[[8, 8], [8, 40]]];
+        fixture.Scene.Logical = [new() { StartDevice = "17/1/0", EndDevice = "17/2/0" }];
+        fixture.Symbols.Add(ConnectionCreateFixture.Variant("CDP", "ConnectionDefinitionPoint", 0));
+        harness.Bridge.Handlers[OperationNames.ConnectionCreatePlan] = args =>
+        {
+            try
+            {
+                JObject preview = ConnectionCreatePlanner.Plan(JsonSerializer.Serialize(args), fixture.Scene, fixture);
+                WritePlan plan = harness.Plan([new() { Action = "create", Kind = "connections", Name = ConnectionCreateFixture.PageName }]);
+                plan.Fingerprint = (string)preview["fingerprint"]!;
+                plan.Details = new() { ["preview"] = preview.ToString() };
+                return plan;
+            }
+            catch (BridgeErrorException error)
+            { throw new EplanMcp.Host.Bridge.BridgeCallException(error.Error); }
+        };
+        var item = new Dictionary<string, object?> { ["kind"] = "definition_point", ["position"] = new[] { 8, 24 } };
+        if (emptyValue)
+        { item["color"] = ""; }
+        var call = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", ConnectionCreateFixture.PageName,
+            [JsonSerializer.SerializeToElement(item)], cancellationToken: TestContext.Current.CancellationToken);
+        if (emptyValue)
+        { Assert.Equal(ErrorReason.InvalidArgument, WriteToolHarness.Error(call).GetProperty("reason").GetString()); }
+        else
+        {
+            JsonElement result = WriteToolHarness.Structured(call);
+            Assert.True(result.GetProperty("dryRun").GetBoolean());
+            Assert.Empty(Assert.Single(result.GetProperty("definitionPoints").EnumerateArray()).GetProperty("properties").EnumerateObject());
+        }
+        Assert.Empty(harness.Bridge.Writes);
     }
 
     private static WriteToolHarness Setup(params IApprovalChannel[] channels)

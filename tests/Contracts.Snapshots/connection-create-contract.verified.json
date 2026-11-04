@@ -195,29 +195,7 @@
                       "maximum": 4294967295
                     }
                   },
-                  "required": [],
-                  "anyOf": [
-                    {
-                      "required": [
-                        "color"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "cross_section"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "designation"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "part"
-                      ]
-                    }
-                  ]
+                  "required": []
                 }
               },
               "required": [
@@ -612,28 +590,6 @@
               "required": [
                 "kind",
                 "position"
-              ],
-              "anyOf": [
-                {
-                  "required": [
-                    "color"
-                  ]
-                },
-                {
-                  "required": [
-                    "cross_section"
-                  ]
-                },
-                {
-                  "required": [
-                    "designation"
-                  ]
-                },
-                {
-                  "required": [
-                    "part"
-                  ]
-                }
               ]
             },
             {
@@ -3135,5 +3091,19 @@
     "undoSteps": 1,
     "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
     "fingerprint": "67c9d76bca5086b20d2c7dcf0e8ec5c8bf945fffd6b053bbfa92d673471a02d4"
+  },
+  "emptyDefinitionExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "definition_point",
+        "position": [
+          40,
+          40
+        ]
+      }
+    ]
   }
 }

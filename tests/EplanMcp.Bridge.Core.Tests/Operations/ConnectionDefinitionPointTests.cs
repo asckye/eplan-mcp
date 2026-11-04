@@ -7,6 +7,29 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class ConnectionDefinitionPointTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void NoProperties_StandaloneOrWire_CommitsAndPreservesReadback(bool standalone)
+    {
+        var creator = new Creator(existing: standalone);
+        if (standalone)
+        {
+            creator.Fixture.Request["items"] = JArray.Parse("[{\"kind\":\"definition_point\",\"position\":[8,24]}]");
+        }
+        else
+        { creator.Fixture.Request["items"]![0]!["definition_point"] = new JObject(); }
+        JObject result = creator.Execute();
+        JToken point = Assert.Single(result["definitionPoints"]!);
+        Assert.Empty(point["properties"]!);
+        Assert.Null((string?)point["articles"]);
+        Assert.Equal("CDP", (string?)point["symbol"]!["name"]);
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(1, (int)result["undoSteps"]!);
+        Assert.Equal(["place", "define", "generate", "readback"], creator.Events);
+        Assert.DoesNotContain("Rollback", creator.Transactions.Calls);
+    }
+
     [Fact]
     public void ExistingConnection_StandaloneDefinitionPoint_PreviewsWithoutSymbolsOrNewConnections()
     {
@@ -27,7 +50,6 @@ public sealed class ConnectionDefinitionPointTests
     }
 
     [Theory]
-    [InlineData("{}", "")]
     [InlineData("{\"color\":\"\"}", "/color")]
     [InlineData("{\"cross_section\":\"NaN\"}", "/cross_section")]
     [InlineData("{\"color\":\"RD\",\"symbol\":\"PDP\"}", "/symbol")]
@@ -304,7 +326,6 @@ public sealed class ConnectionDefinitionPointTests
     }
 
     [Theory]
-    [InlineData("{}", "definition_point")]
     [InlineData("null", "definition_point")]
     [InlineData("{\"color\":\"\"}", "color")]
     [InlineData("{\"color\":\"  \"}", "color")]

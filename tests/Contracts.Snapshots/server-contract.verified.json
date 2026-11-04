@@ -4861,29 +4861,7 @@
               "kind": {
                 "const": "definition_point"
               }
-            },
-            "anyOf": [
-              {
-                "required": [
-                  "color"
-                ]
-              },
-              {
-                "required": [
-                  "cross_section"
-                ]
-              },
-              {
-                "required": [
-                  "designation"
-                ]
-              },
-              {
-                "required": [
-                  "part"
-                ]
-              }
-            ]
+            }
           },
           "t": {
             "type": "string",

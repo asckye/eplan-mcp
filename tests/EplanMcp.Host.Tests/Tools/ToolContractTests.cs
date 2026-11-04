@@ -129,7 +129,7 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
-    public void ConnectionDefinitionPoint_IsOptionalClosedAndRequiresAProperty()
+    public void ConnectionDefinitionPoint_IsOptionalClosedAndAllowsNoProperties()
     {
         JsonElement schema = Tools.Single(t => t.Name == ConnectionCreateTools.Tool).InputSchema;
         JsonElement[] branches = schema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf").EnumerateArray().ToArray();
@@ -143,7 +143,7 @@ public sealed class ToolContractTests : IDisposable
             Assert.Equal("kind", point.GetProperty("not").GetProperty("required")[0].GetString());
             point = schema.GetProperty("$defs").GetProperty("d");
             Assert.False(point.GetProperty("additionalProperties").GetBoolean());
-            Assert.Equal(["color", "cross_section", "designation", "part"], point.GetProperty("anyOf").EnumerateArray().Select(p => p.GetProperty("required")[0].GetString()));
+            Assert.False(point.TryGetProperty("anyOf", out _));
             JsonElement properties = point.GetProperty("properties");
             Assert.Equal(["CDP", "CDPNG"], properties.GetProperty("symbol").GetProperty("enum").EnumerateArray().Select(p => p.GetString()));
             Assert.Equal("CDP", properties.GetProperty("symbol").GetProperty("default").GetString());

@@ -59,7 +59,7 @@ public sealed class ConnectionCreateContractTests
         contract["potentialDefinitionPreview"] = potentials.Plan();
         definitions.Request["items"] = JArray.Parse("[{\"kind\":\"definition_point\",\"position\":[40,40],\"part\":\"PXC.2861344\"}]");
         Validate(InputSchema(), definitions.Request);
-        contract["partOnlyDefinitionExample"] = definitions.Request;
+        contract["partOnlyDefinitionExample"] = definitions.Request.DeepClone();
         var unpaired = new InterruptionPointFixture();
         ((JObject)unpaired.Request["items"]!.Last!).Remove("counterpart_pages");
         Validate(InputSchema(), unpaired.Request);
@@ -71,6 +71,10 @@ public sealed class ConnectionCreateContractTests
         Validate(OutputSchema(), deferred);
         contract["deferredInterruptionExample"] = unpaired.Request;
         contract["deferredInterruptionPreview"] = deferred;
+        JObject emptyDefinition = (JObject)definitions.Request.DeepClone();
+        emptyDefinition["items"] = JArray.Parse("[{\"kind\":\"definition_point\",\"position\":[40,40]}]");
+        Validate(InputSchema(), emptyDefinition);
+        contract["emptyDefinitionExample"] = emptyDefinition;
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
     }
@@ -99,7 +103,6 @@ public sealed class ConnectionCreateContractTests
             ["part_variant"] = Text(),
             ["part_count"] = new JObject { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = uint.MaxValue },
         }, "");
-        wire["properties"]!["definition_point"]!["anyOf"] = new JArray(new JObject { ["required"] = new JArray("color") }, new JObject { ["required"] = new JArray("cross_section") }, new JObject { ["required"] = new JArray("designation") }, new JObject { ["required"] = new JArray("part") });
         JObject Node(string kind, int count) => Object(new()
         {
             ["kind"] = Constant(kind),

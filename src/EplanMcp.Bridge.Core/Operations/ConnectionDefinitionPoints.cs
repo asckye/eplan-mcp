@@ -28,7 +28,6 @@ internal static class ConnectionDefinitionPoints
                 && !((string)text!).Any(char.IsControl), "/" + field, "Supply nonempty text within 200 characters.");
             properties[field] = text.DeepClone();
         }
-        Require(properties.Count > 0 || value["part"] is not null, "", "Supply color, cross_section, designation or part.");
         JObject? article = null;
         if (value["part"] is { } part)
         {
