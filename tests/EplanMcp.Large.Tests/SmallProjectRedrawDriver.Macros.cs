@@ -51,7 +51,8 @@ internal sealed partial class SmallProjectRedrawDriver
                     report.Note(page, Type(instance.Members[0]), Id(instance.Members[0]), "Macro " + requested + " is unavailable; the ordinary device route will handle its functions.");
                     return;
                 }
-                JObject? description = await DescribeMacroAsync(page, instance.Members[0], path);
+                string representation = pageType == "Overview" ? "Overview" : "MultiLine";
+                JObject? description = await DescribeMacroAsync(page, instance.Members[0], path, representation, 0);
                 if (description is null && !partRoute && !replacement
                     && requested.Equals("PXC/2703981.ema", StringComparison.OrdinalIgnoreCase)
                     && part is not null)
@@ -59,18 +60,31 @@ internal sealed partial class SmallProjectRedrawDriver
                     replacement = true;
                     path = await FindPartMacroAsync(page, members.FirstOrDefault() ?? instance.Members[0], part, pageType, allPages);
                     if (path is not null)
-                    { description = await DescribeMacroAsync(page, instance.Members[0], path); }
+                    { description = await DescribeMacroAsync(page, instance.Members[0], path, representation, 0); }
                 }
                 if (description is null || path is null)
                 { return; }
-                string representation = pageType == "Overview" ? "Overview" : "MultiLine";
                 if (!Objects(description["representations"]).Any(item => Text(item["type"]) == representation
                     && (item["variants"] as JArray)?.Any(variant => (int?)variant == 0) == true))
                 {
                     report.Warning(page, "Macro " + path + ": required " + representation + " variant 0 is unavailable; no insertion was guessed.");
                     return;
                 }
-                JObject anchor = members.FirstOrDefault(item => (bool?)item["isMain"] == true) ?? instance.Members[0];
+                JObject anchor = members.FirstOrDefault(item => (bool?)item["isMain"] == true)
+                    ?? UniqueMembers(members).FirstOrDefault() ?? instance.Members[0];
+                bool module = members.All(item => Text(item["category"]) == "PLCTerminal");
+                int variant = 0;
+                foreach (int candidate in Objects(description["representations"]).Where(item => Text(item["type"]) == representation)
+                    .SelectMany(item => (item["variants"] as JArray)?.Select(value => (int?)value ?? 0) ?? []).Distinct().OrderBy(value => value))
+                {
+                    JObject? described = candidate == 0 ? description : await DescribeMacroAsync(page, instance.Members[0], path, representation, candidate);
+                    if (described is not null && VariantReproduces(anchor, members, Objects(described["devices"])))
+                    {
+                        description = described;
+                        variant = candidate;
+                        break;
+                    }
+                }
                 JObject? macroAnchor = FindMacroAnchor(anchor, Objects(description["devices"]));
                 if (macroAnchor is null || !TryPoint(description["reference_point"], out double[] reference)
                     || !TryPoint(macroAnchor["location"], out double[] origin) || !TryPoint(anchor["location"], out double[] location))
@@ -90,11 +104,14 @@ internal sealed partial class SmallProjectRedrawDriver
                 {
                     ["page"] = page,
                     ["representation"] = representation,
-                    ["variant"] = 0,
+                    ["variant"] = variant,
                     ["x"] = reference[0] + translation[0],
                     ["y"] = reference[1] + translation[1],
                     ["macro_box"] = false,
                 };
+                // A module's points get the card's tag next; numbering them first would only use up free numbers.
+                if (module)
+                { args["numbering"] = "keep"; }
                 if (partRoute)
                 {
                     args["part"] = part!["part"]!.DeepClone();
@@ -111,11 +128,11 @@ internal sealed partial class SmallProjectRedrawDriver
                 _macroPages.Add(page);
                 replacedMacro |= replacement;
                 report.Note(page, Type(anchor), Id(anchor), "Macro instance " + instance.Tag + " used " + (Text(result["macro"]) ?? path)
-                    + " at (" + args["x"] + ", " + args["y"] + "), " + representation + " variant 0" + (partRoute ? " through its source part." : "."));
+                    + " at (" + args["x"] + ", " + args["y"] + "), " + representation + " variant " + variant + (partRoute ? " through its source part." : "."));
                 if ((bool?)result["recovered"] == true)
                 { report.Note(page, Type(anchor), Id(anchor), "Recovered macro response contains template tags; fresh page drawings determine coverage without renaming those placeholders."); }
                 else
-                { await UpdateMacroDeviceAsync(page, anchor, instance.Tag, partRoute ? null : part, result); }
+                { await UpdateMacroDeviceAsync(page, anchor, instance.Tag, partRoute || module ? null : part, result); }
                 JObject[] after = await ReadDrawingsAsync(page, anchor);
                 if (!_lastDrawingReadComplete)
                 {
@@ -202,17 +219,18 @@ internal sealed partial class SmallProjectRedrawDriver
         return paths.Count == 1 ? paths.Single() : null;
     }
 
-    private async Task<JObject?> DescribeMacroAsync(string page, JObject evidence, string path)
+    private async Task<JObject?> DescribeMacroAsync(string page, JObject evidence, string path, string representation, int variant)
     {
-        if (_macroDescriptions.TryGetValue(path, out JObject? cached))
+        string key = path + "\n" + representation + "\n" + variant;
+        if (_macroDescriptions.TryGetValue(key, out JObject? cached))
         { return cached; }
-        JObject? result = await InvokeAsync(page, "eplan_macro_get", new JObject { ["macro"] = path }, [evidence], write: false);
+        JObject? result = await InvokeAsync(page, "eplan_macro_get", new JObject { ["macro"] = path, ["representation"] = representation, ["variant"] = variant }, [evidence], write: false);
         if (result?["macro"] is not JObject description)
         {
             report.Warning(page, "Macro " + path + ": metadata is unreadable; the ordinary device route remains available.");
             return null;
         }
-        _macroDescriptions[path] = description;
+        _macroDescriptions[key] = description;
         return description;
     }
 
@@ -230,24 +248,39 @@ internal sealed partial class SmallProjectRedrawDriver
     private static string FunctionSuffix(string? name) => name is not null && name.Contains(':', StringComparison.Ordinal)
         ? name[name.IndexOf(':', StringComparison.Ordinal)..] : "";
 
-    private void CheckDefaultVariant(string page, string path, JObject[] members, JObject[] devices, double[] translation)
-    {
-        bool matches = members.All(member => devices.Any(device => Text(device["category"]) == Text(member["category"])
+    // A macro lists one row per tag, so a point name that repeats (RJ45 on two plugs) cannot be compared by position.
+    private static IEnumerable<JObject> UniqueMembers(JObject[] members) => members
+        .GroupBy(member => Text(member["name"]) ?? "", StringComparer.Ordinal).Where(group => group.Count() == 1).Select(group => group.Single());
+
+    private static bool MembersMatch(JObject[] members, JObject[] devices, double[] translation) =>
+        UniqueMembers(members).All(member => devices.Any(device => Text(device["category"]) == Text(member["category"])
             && FunctionSuffix(Text(device["tag"])) == FunctionSuffix(Text(member["name"]))
             && TryPoint(device["location"], out double[] location) && TryPoint(member["location"], out double[] source)
             && Near(source[0], location[0] + translation[0]) && Near(source[1], location[1] + translation[1])));
-        if (!matches)
+
+    private static bool VariantReproduces(JObject anchor, JObject[] members, JObject[] devices) =>
+        FindMacroAnchor(anchor, devices) is { } macroAnchor && TryPoint(macroAnchor["location"], out double[] origin) && TryPoint(anchor["location"], out double[] location)
+        && MembersMatch(members, devices, [location[0] - origin[0], location[1] - origin[1]]);
+
+    private void CheckDefaultVariant(string page, string path, JObject[] members, JObject[] devices, double[] translation)
+    {
+        if (!MembersMatch(members, devices, translation))
         { report.Warning(page, "Macro " + path + ": the readable default-variant function positions do not all match. Per-variant geometry is not exposed by the agreed macro_get request; using variant 0 and retaining every readback difference."); }
     }
 
     private async Task UpdateMacroDeviceAsync(string page, JObject anchor, string wanted, JObject? part, JObject result)
     {
-        JObject[] roots = Objects(result["devices"]).Where(item => FunctionSuffix(Text(item["tag"])) == "").ToArray();
-        if (roots.Length != 1 || Text(roots[0]["tag"]) is not string inserted)
+        string[] tags = Objects(result["devices"]).Select(item => Text(item["tag"]) ?? "").Where(tag => tag.Length > 0).ToArray();
+        string[] roots = tags.Where(tag => FunctionSuffix(tag) == "").ToArray();
+        // A PLC module macro holds points only: their common prefix is the tag that joins the card.
+        if (roots.Length == 0)
+        { roots = tags.Select(DeviceName).Distinct(StringComparer.Ordinal).ToArray(); }
+        if (roots.Length != 1)
         {
             report.Warning(page, "Macro instance " + wanted + ": the inserted root tag is absent or ambiguous; no rename was guessed.");
             return;
         }
+        string inserted = roots[0];
         var args = new JObject { ["tag"] = inserted };
         if (inserted != wanted)
         { args["new_tag"] = wanted; }

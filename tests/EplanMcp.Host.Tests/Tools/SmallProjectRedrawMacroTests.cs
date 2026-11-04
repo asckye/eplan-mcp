@@ -146,6 +146,50 @@ public sealed class SmallProjectRedrawMacroTests
             ((string?)warning["reason"])!.Contains("reference_point", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public async Task PlcModuleOnCircuit_ChoosesReproducingVariantAndJoinsTheCardTag()
+    {
+        // The sample's =K1+A2&EFS1/2 points of PXC.2861344: the macro holds points only, the card lives on an Overview page.
+        JObject first = Device(1, "=K1+A2-KE4:1.1", "PLCTerminal", 304, 92, "PXC\\2861344.ema");
+        JObject second = Device(2, "=K1+A2-KE4:1.2", "PLCTerminal", 312, 92, "PXC\\2861344.ema");
+        JObject card = Device(3, "=K1+A2-KE4", "PLCBox", 212, 284, "", true);
+        card["parts"] = new JArray(new JObject { ["part"] = "PXC.2861344", ["variant"] = "1" });
+        JObject page = Page("Circuit", first, second);
+        JObject overview = Page("Overview", card);
+        var calls = new List<(string Tool, JObject Args)>();
+        var report = new SmallProjectRedrawReport("test", "ScratchTest");
+        JObject Variant(double gap)
+        {
+            JObject described = Described("MultiLine", Point(32, 80), MacroDevice(first, 132, 80), MacroDevice(second, 132 + gap, 80));
+            described["macro"]!["representations"]![0]!["variants"] = new JArray(0, 1);
+            return described;
+        }
+        var driver = Driver(calls, report, (tool, args) =>
+        {
+            if (tool == "eplan_macro_list")
+            { return Listed("PXC/2861344.ema"); }
+            if (tool == "eplan_macro_get")
+            { return Variant((int?)args["variant"] == 1 ? 8 : 20); }
+            JObject result = Success([]);
+            if (tool == "eplan_macro_insert")
+            { result["devices"] = new JArray(new JObject { ["tag"] = "=K1+A2-A?:1.1" }, new JObject { ["tag"] = "=K1+A2-A?:1.2" }); }
+            return result;
+        });
+
+        await driver.DrawPageAsync(page, [overview, page]);
+
+        Assert.All(calls.Where(call => call.Tool == "eplan_macro_get"), call => Assert.Equal("MultiLine", (string?)call.Args["representation"]));
+        JObject insert = Assert.Single(calls, call => call.Tool == "eplan_macro_insert").Args;
+        Assert.Equal(1, (int)insert["variant"]!);
+        Assert.Equal("keep", (string?)insert["numbering"]);
+        Assert.Equal(204d, (double)insert["x"]!);
+        Assert.Equal(92d, (double)insert["y"]!);
+        JObject update = Assert.Single(calls, call => call.Tool == "eplan_device_update").Args;
+        Assert.Equal("=K1+A2-A?", (string?)update["tag"]);
+        Assert.Equal("=K1+A2-KE4", (string?)update["new_tag"]);
+        Assert.Null(update["part"]);
+    }
+
     private static SmallProjectRedrawDriver Driver(List<(string Tool, JObject Args)> calls, SmallProjectRedrawReport report,
         Func<string, JObject, JObject> response) => new((tool, args) =>
         {
