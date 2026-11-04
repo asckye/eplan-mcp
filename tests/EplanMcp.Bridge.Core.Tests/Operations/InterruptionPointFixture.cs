@@ -114,6 +114,12 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
         {
             points.Add(Point(ConnectionCreateFixture.PageName, 91, [60d, 60d], "Up"));
             points.Last!["sortCode"] = Failure == "sort_code" ? "999" : PlacedSortCode?.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            if (Request["items"]!.Last!["symbol_variant"] is { } variant)
+            {
+                points.Last!["direction"] = "Left"; // BP/0's last pin; the requested Right pin is index zero.
+                points.Last!["symbol"] = new JObject { ["library"] = "SPECIAL", ["name"] = "BP", ["variant"] = variant.DeepClone() };
+                points.Last!["pins"] = new JArray(new JObject { ["position"] = new JArray(60d, 60d), ["direction"] = "Right" });
+            }
             foreach (JToken point in points)
             {
                 JToken[] others = points.Where(p => !ReferenceEquals(p, point)).ToArray();

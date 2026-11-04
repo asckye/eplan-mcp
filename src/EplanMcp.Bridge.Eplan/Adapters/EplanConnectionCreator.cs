@@ -229,6 +229,9 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     ["position"] = new JArray(XY(point.Location)),
                     ["pin"] = new JArray(point.Location.X + pin.Location.X, point.Location.Y + pin.Location.Y),
                     ["direction"] = pin.Direction.ToString(),
+                    ["symbol"] = new JObject { ["library"] = point.SymbolVariant.SymbolLibraryName, ["name"] = point.SymbolVariant.SymbolName, ["variant"] = point.SymbolVariant.VariantNr },
+                    ["pins"] = new JArray(point.GraphicalConnectionPoints.Select(p => new JObject
+                    { ["position"] = new JArray(point.Location.X + p.Location.X, point.Location.Y + p.Location.Y), ["direction"] = p.Direction.ToString() })),
                     ["crossReference"] = reference.IsEmpty ? null : reference.ToString(),
                     ["sortCode"] = sort.IsEmpty ? null : sort.ToString(),
                     // Live T7b: CrossReferencedObjectsAll includes the point itself.

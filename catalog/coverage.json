@@ -1071,8 +1071,8 @@
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 4,
-      "medium": 8,
-      "large": 10,
+      "medium": 9,
+      "large": 11,
       "apiNotes": [
         "A52",
         "A55",

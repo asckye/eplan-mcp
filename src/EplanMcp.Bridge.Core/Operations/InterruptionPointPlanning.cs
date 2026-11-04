@@ -119,8 +119,12 @@ public static class InterruptionPointPlanning
             Require(pair.Length is 1 or 2, "Native pairing is missing or ambiguous.");
             JToken? placed = pair.SingleOrDefault(p => (string?)p["page"] == (string?)plan["page"] && JToken.DeepEquals(p["position"], row["position"]));
             JArray pin = Pin(row);
-            Require(placed is not null && JToken.DeepEquals(placed["pin"], pin)
-                && (string?)placed["direction"] == (string?)row["interruption"]!["direction"], "Interruption name, position, pin or direction readback differs.");
+            bool explicitVariant = row["interruption"]!["symbol_variant"] is not null;
+            Require(placed is not null && (explicitVariant
+                ? JToken.DeepEquals(placed["symbol"], new JObject { ["library"] = row["symbol"]!["library"], ["name"] = row["symbol"]!["name"], ["variant"] = row["symbol"]!["variant"] })
+                    && placed["pins"]?.Any(p => JToken.DeepEquals(p["position"], pin) && (string?)p["direction"] == (string?)row["interruption"]!["direction"]) == true
+                : JToken.DeepEquals(placed["pin"], pin) && (string?)placed["direction"] == (string?)row["interruption"]!["direction"]),
+                "Interruption name, position, pin or direction readback differs.");
             if (row["interruption"]!["sort_code"] is { } sortCode)
             { Require((string?)placed!["sortCode"] == sortCode.ToString(), "Interruption sort code readback differs."); }
             foreach (JToken point in pair)

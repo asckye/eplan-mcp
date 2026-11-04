@@ -153,7 +153,7 @@ public static class ConnectionCreatePlanner
             bool wire = (string?)item["kind"] == "wire";
             if ((string?)item["kind"] == "interruption_point")
             {
-                Members(item, at, "kind name direction position", "counterpart_pages sort_code symbol");
+                Members(item, at, "kind name direction position", "counterpart_pages sort_code symbol symbol_variant");
                 Require(item["sort_code"] is null || item["sort_code"]!.Type == JTokenType.Integer
                     && long.TryParse(item["sort_code"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out _), at + "/sort_code", "Supply a nonnegative Int64 integer.");
                 Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])
@@ -167,6 +167,11 @@ public static class ConnectionCreatePlanner
                 {
                     Require(symbolName.Type == JTokenType.String && ((string)symbolName!).Length is >= 1 and <= 64, at + "/symbol", "Supply a SPECIAL interruption point symbol name from eplan_symbol_search.");
                     interruptionSymbols[Key(point)] = (string)symbolName!;
+                }
+                if (item["symbol_variant"] is { } explicitVariant)
+                {
+                    Require(explicitVariant.Type == JTokenType.Integer && int.TryParse(explicitVariant.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _), at + "/symbol_variant", "Supply an Int32 variant number.");
+                    requestedVariants.Add(Key(point), ((int)explicitVariant, at + "/symbol_variant"));
                 }
                 interruptions.Add(Key(point), (JObject)item.DeepClone());
                 continue;

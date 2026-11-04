@@ -4439,7 +4439,6 @@
             "items": {
               "oneOf": [
                 {
-                  "type": "object",
                   "additionalProperties": false,
                   "properties": {
                     "kind": {
@@ -4476,7 +4475,6 @@
                   ]
                 },
                 {
-                  "type": "object",
                   "additionalProperties": false,
                   "properties": {
                     "kind": {
@@ -4502,7 +4500,6 @@
                   ]
                 },
                 {
-                  "type": "object",
                   "additionalProperties": false,
                   "properties": {
                     "kind": {
@@ -4531,7 +4528,6 @@
                   ]
                 },
                 {
-                  "type": "object",
                   "additionalProperties": false,
                   "properties": {
                     "kind": {
@@ -4557,7 +4553,6 @@
                   ]
                 },
                 {
-                  "type": "object",
                   "additionalProperties": false,
                   "properties": {
                     "kind": {
@@ -4591,6 +4586,9 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 64
+                    },
+                    "symbol_variant": {
+                      "type": "integer"
                     }
                   },
                   "required": [
@@ -4601,7 +4599,6 @@
                   ]
                 },
                 {
-                  "type": "object",
                   "additionalProperties": false,
                   "properties": {
                     "kind": {
@@ -4729,7 +4726,6 @@
                   ]
                 },
                 {
-                  "type": "object",
                   "additionalProperties": false,
                   "properties": {
                     "kind": {
@@ -4762,7 +4758,9 @@
                     }
                   ]
                 }
-              ]
+              ],
+              "type": "object",
+              "additionalProperties": true
             },
             "minItems": 1,
             "maxItems": 50
@@ -4784,7 +4782,7 @@
             ]
           },
           "show_page": {
-            "description": "Open this page before drawing; UI only, no data change.",
+            "description": "Open page",
             "type": "boolean",
             "default": false
           },

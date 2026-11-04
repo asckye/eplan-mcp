@@ -30,9 +30,9 @@ internal sealed class ConnectionCreateTools
     [Description("Creates SPECIAL nodes, interruptions, wires, cables, potentials and CDP/CDPNG on Circuit connections. generate:false places nodes/potentials only; generate once after all placements. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes all. layout_guard:warn reproduces drawings; default refuse draws freely. Omit dry_run to preview; false executes. Approval outside scratch; see usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IBridgeClient bridge,
         string project, string page,
-        [Description("1-50 connection items; see usage")] JsonElement[] items,
+        [Description("See usage")] JsonElement[] items,
         bool dry_run = WriteToolDefaults.Preview, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
-        [Description("Open this page before drawing; UI only, no data change.")] bool show_page = false,
+        [Description("Open page")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, PackLibrary? packs = null,
         [AllowedValues("refuse", "warn")] string layout_guard = "refuse", bool generate = true, CancellationToken cancellationToken = default)
     {

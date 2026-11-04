@@ -195,7 +195,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 133 | 69 | 2 | 61 | 0 | 0/1/1 | A24 | 2026-10-21 pass（api-notes A24） |
 | eplan_check_list | read | check.list | 31 | 16 | 0 | 15 | 0 | 2/3/3 | A12 | 2026-10-20 pass（api-notes A20） |
 | eplan_check_run | write | check.run.execute<br>check.run.plan | 75 | 35 | 0 | 40 | 0 | 0/1/2 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
-| eplan_connection_create | write | connection.create.execute<br>connection.create.plan<br>project.get | 268 | 156 | 5 | 103 | 0 | 4/8/10 | A52 A55 A86 | — |
+| eplan_connection_create | write | connection.create.execute<br>connection.create.plan<br>project.get | 268 | 156 | 5 | 103 | 0 | 4/9/11 | A52 A55 A86 | — |
 | eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 86 | 41 | 1 | 43 | 0 | 1/2/9 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_connection_list | read | connection.list | 78 | 45 | 1 | 30 | 0 | 2/4/8 | — | 2026-10-20 pass（api-notes A19） |
 | eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 94 | 41 | 1 | 52 | 0 | 0/1/1 | A24 | — |

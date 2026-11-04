@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R6-02 中断点变体（2026-11-04） | `InterruptionExplicitVariantTests` | NOT RUN：仅编译；LargeWrite 新页指定 BP/0、Right，含 counterpart_pages，读回实际符号和引脚，一步撤销后比较快照。 |
 | R6-01 PLC 数据写入（2026-11-04） | `PlcPropertyB8Tests` | NOT RUN：仅编译；LargeWrite 的 PXC.2861344 总览/多线宏并卡后写 20400、20011、20161、20408，输出全部 B8 PropertyDefinition，核对 A90 关联、盒子继承和一步撤销。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite Overview 页验证 PXC.2861344 的对象、PLC 盒、总览点、部件引用及撤销恢复；默认预览迁移后的旧宏断言保留。 |
 | G9 图形创建（2026-11-03，负责人 brief） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | NOT RUN：本次禁止 EPLAN。新增折线、圆弧、路径功能文本、imports 图片混合批次；待核对原生类型、全部点、角度/端点与外框、文字、图片路径和一次撤销恢复快照。XML 仅证明签名，不证明角度方向或实际图片行为。 |

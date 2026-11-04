@@ -7,6 +7,7 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class ConnectionCreateLimitTests
 {
     private static readonly int[] _point = [8, 24];
+    private static readonly string[] _invalidItems = ["corner"];
     [Fact]
     public void Contract_EmptyDefinitionAndGenerateDefault_AreExplicit()
     {
@@ -19,6 +20,14 @@ public sealed class ConnectionCreateLimitTests
         JsonElement schema = JsonSerializer.SerializeToElement(items);
         Assert.True(PropertyGetContractTests.Accepts(schema, JsonSerializer.SerializeToElement(new[] { new { kind = "definition_point", position = _point } }), schema));
         Assert.False(PropertyGetContractTests.Accepts(schema, JsonSerializer.SerializeToElement(new[] { new { kind = "definition_point" } }), schema));
+    }
+
+    [Fact]
+    public void SharedObjectConstraint_PreservesClosedAlternatives()
+    {
+        JsonElement schema = JsonSerializer.SerializeToElement(ConnectionCreateSchema.Items());
+        Assert.False(PropertyGetContractTests.Accepts(schema, JsonSerializer.SerializeToElement(_invalidItems), schema));
+        Assert.False(PropertyGetContractTests.Accepts(schema, JsonSerializer.SerializeToElement(new[] { new { kind = "potential_definition", position = _point, potential_name = "N", unexpected = true } }), schema));
     }
 
     [Fact]

@@ -5,6 +5,7 @@
 
 ## [Unreleased]
 
+- `eplan_connection_create` 的中断点新增整数 `symbol_variant`，可指定 BP 变体 0 和 Right 引脚；不存在或方向不匹配返回 `INVALID_ARGUMENT`，省略时保留原选择规则。
 - `eplan_property_set` 新增 B8 PLC 类别白名单，支持精确定位非主 PLC 点和类型化总线系统值；已知关联允许传播，其余直接属性受守卫保护，仍为一次事务、一步撤销。
 - `eplan_macro_insert`、`eplan_device_place` 支持 `layout_guard: "warn"`，用于复现已有图纸。
 - `eplan_macro_insert` 的外框按宏的参考点和 `WindowMacro.Location` 计算；`warn` 且不带宏框时，改由写入后实测的对象判断是否超出页面。

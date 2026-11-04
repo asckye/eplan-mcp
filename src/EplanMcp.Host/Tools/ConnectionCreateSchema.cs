@@ -37,6 +37,7 @@ internal static class ConnectionCreateSchema
         interruption["required"] = new JsonArray("kind", "name", "position", "direction");
         interruption["properties"]!["sort_code"] = new JsonObject { ["type"] = "integer", ["minimum"] = 0 };
         interruption["properties"]!["symbol"] = Text(64);
+        interruption["properties"]!["symbol_variant"] = new JsonObject { ["type"] = "integer" };
         JsonObject tNode = Node("t_node", 3);
         tNode["properties"]!["variant"] = new JsonObject { ["type"] = "integer" };
         JsonObject reference = new() { ["oneOf"] = new JsonArray(Object(new() { ["locator"] = Locator() }), Object(new() { ["item_index"] = Integer(0, 49) })) };
@@ -44,6 +45,10 @@ internal static class ConnectionCreateSchema
         JsonObject cable = Object(new() { ["kind"] = Kind("cable_definition"), ["points"] = Array(Point(), 2, 2), ["designation"] = Text(128), ["type_text"] = Text(), ["core_count"] = Integer(1, 50), ["cross_section_mm2"] = new JsonObject { ["type"] = "number", ["exclusiveMinimum"] = 0 }, ["cores"] = Array(core, 1, 50) });
         cable["properties"]!["voltage"] = Text(64);
         JsonObject items = Array(new() { ["oneOf"] = new JsonArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable, definition, potential) }, 1, 50);
+        items["items"]!["type"] = "object";
+        items["items"]!["additionalProperties"] = true; // Each alternative below enforces its own closed member set.
+        foreach (JsonNode? branch in items["items"]!["oneOf"]!.AsArray())
+        { branch!.AsObject().Remove("type"); }
         items["$defs"] = new JsonObject { ["r"] = new JsonObject { ["enum"] = new JsonArray("Up", "Down", "Left", "Right") }, ["d"] = definitionFields, ["t"] = new JsonObject { ["type"] = "string", ["minLength"] = 1, ["maxLength"] = 200 }, ["p"] = Array(new() { ["type"] = "number", ["minimum"] = 0, ["maximum"] = 10000 }, 2, 2), ["i"] = Object(new() { ["locator"] = Locator(), ["pin_index"] = Integer(0, int.MaxValue) }), ["l"] = Object(new() { ["project"] = Text(32768), ["page"] = Text(1024), ["type"] = Integer(1, int.MaxValue), ["oid"] = new JsonObject { ["type"] = "integer", ["minimum"] = 1 }, ["digest"] = new JsonObject { ["type"] = "string", ["pattern"] = "^[0-9a-f]{64}$" } }) };
         return items;
     }

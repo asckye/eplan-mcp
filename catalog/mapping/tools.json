@@ -6136,6 +6136,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/InterruptionPointToolTests.cs"
           },
           {
+            "name": "InterruptionVariantToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/InterruptionVariantToolTests.cs"
+          },
+          {
             "name": "PageDisplayToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
@@ -6169,6 +6174,11 @@
             "name": "EmptyConnectionDefinitionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/EmptyConnectionDefinitionTests.cs"
+          },
+          {
+            "name": "InterruptionExplicitVariantTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionExplicitVariantTests.cs"
           },
           {
             "name": "InterruptionPairingSpikeTests",
