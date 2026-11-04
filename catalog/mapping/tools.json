@@ -6076,7 +6076,8 @@
         "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
           "A52",
-          "A55"
+          "A55",
+          "A86"
         ],
         "tests": [
           {
@@ -6108,6 +6109,11 @@
             "name": "ConnectionCreateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionCreateToolTests.cs"
+          },
+          {
+            "name": "ConnectionDefinitionPointToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionDefinitionPointToolTests.cs"
           },
           {
             "name": "ConnectionPluginIntegrationTests",
@@ -6170,6 +6176,11 @@
             "name": "ConnectionCreateExecutionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateExecutionTests.cs"
+          },
+          {
+            "name": "ConnectionDefinitionPointTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionDefinitionPointTests.cs"
           },
           {
             "name": "InterruptionExistingNetTests",
@@ -7777,6 +7788,11 @@
             "name": "CableBusStarSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
+          },
+          {
+            "name": "ConnectionCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
           },
           {
             "name": "DanglingInterruptionTests",
@@ -15632,6 +15648,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateExecutionTests.cs"
           },
           {
+            "name": "ConnectionDefinitionPointTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionDefinitionPointTests.cs"
+          },
+          {
             "name": "InterruptionExistingNetTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/InterruptionExistingNetTests.cs"
@@ -19172,6 +19193,11 @@
             "name": "CableBusStarSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
+          },
+          {
+            "name": "ConnectionCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
           },
           {
             "name": "InterruptionVariantSpikeTests",
