@@ -325,6 +325,10 @@ internal sealed partial class SmallProjectRedrawDriver(
                     ["symbol"] = item["symbol"]?["name"]?.DeepClone(),
                     ["symbol_variant"] = item["symbol"]?["variant"]?.DeepClone(),
                 };
+                if (Property(item, 20188) is string definition && definition.StartsWith("4/", StringComparison.Ordinal))
+                { point["function_definition"] = definition; }
+                if (Property(item, 20121) is string representation && representation is "0" or "1")
+                { point["representation_type"] = int.Parse(representation, CultureInfo.InvariantCulture); }
                 foreach ((int id, string field) in new[] { (31004, "color"), (31002, "cross_section"), (31011, "designation") })
                 {
                     if (Property(item, id) is string value && !string.IsNullOrEmpty(value))
