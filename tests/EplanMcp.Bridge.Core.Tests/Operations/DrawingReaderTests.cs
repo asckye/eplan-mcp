@@ -175,6 +175,21 @@ public sealed class DrawingReaderTests
         Assert.False(row.Properties.ContainsKey("read_warning"));
     }
 
+    [Fact]
+    public void BlockMembersSharingOneIdentifier_AreAllListedWithTheBlockAsParent()
+    {
+        // Live 2026-11-04: every member of a block reports the same identifier (the sample's memberOids are all 550).
+        var block = new Block { Name = "macro block" };
+        var page = new Page { AllPlacements = [block] };
+        block.Create(page, [new Line(550), new Line(550)]);
+
+        PageDrawingGeometry result = new FakeDrawingBridge(page).Read(page.Name)!;
+
+        DrawingPlacement row = Assert.Single(result.Placements, p => p.Kind == "Block");
+        Assert.All(result.Placements.Where(p => p.Kind == "Line"), line => Assert.Equal(row.Locator.Oid, line.Parent!.Oid));
+        Assert.Equal(2, result.Placements.Count(p => p.Kind == "Line"));
+    }
+
     private sealed class FakeDrawingBridge(params Page[] pages)
     {
         private readonly InlineDispatcher _dispatcher = new();

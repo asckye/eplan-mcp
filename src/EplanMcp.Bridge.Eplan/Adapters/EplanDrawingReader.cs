@@ -61,11 +61,17 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     { WriteExceptionDiagnostics.Report(ex); propertyId = null; }
                     slot = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}#{1}", propertyId, index++);
                 }
-                string key = slot is null ? placement.ToStringIdentifier() : FormattableString.Invariant($"{parent!.Type}/{parent.Oid}#{slot}");
+                // Live 2026-11-04: all members of a block report one identifier, so only their position tells them apart.
+                bool member = slot is null && blockChild && parent is not null;
+                string key = slot is not null ? FormattableString.Invariant($"{parent!.Type}/{parent.Oid}#{slot}")
+                    : member ? FormattableString.Invariant($"{parent!.Type}/{parent.Oid}@{index++}")
+                    : placement.ToStringIdentifier();
                 if ((placement is PropertyPlacement && parent is null && !excluded) || !seen.Add(key))
                 {
                     continue;
                 }
+                if (member)
+                { seen.Add(placement.ToStringIdentifier()); }
 
                 DrawingPlacement? row = !excluded && (placement is SymbolReference or PropertyPlacement or Block || placement.GetType() == typeof(Text)
                     || placement is PathText or PolyLine or Arc or Image || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot, blockChild) : null;
