@@ -203,6 +203,56 @@ public sealed class PropertyPlacementMoveTests
         Assert.Contains("Rollback", fake.Transactions.Calls);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PropertyStyle_AllFieldsReadBackAndHiddenReadbackException(bool visible)
+    {
+        var fake = new Mover(90) { VisibleReadback = true };
+        JObject move = (JObject)fake.Request["property_moves"]![0]!;
+        move["alignment"] = "MiddleCenter";
+        move["height_mm"] = -16002;
+        move["visible"] = visible;
+        move["layer"] = 3;
+        move["pen"] = new JObject { ["color"] = -16002, ["width_mm"] = -16002, ["style"] = -16002, ["pattern_length"] = -16002, ["line_end"] = 2 };
+        JObject result = fake.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal("MiddleCenter", fake.Child.Properties["alignment"]);
+        Assert.Equal("from_layer", fake.Child.Properties["height_mm"]);
+        Assert.Equal("-16002", fake.Child.Properties["height_raw_mm"]);
+        Assert.Equal("3", fake.Child.Properties["layer"]);
+        Assert.Equal("-16002", fake.Child.Properties["pen_pattern_length"]);
+        if (!visible)
+        { Assert.Contains("not compared", (string?)result["warning"], StringComparison.Ordinal); }
+        Assert.Equal(["Begin AI: eplan_placement_update", "Commit", "CloseUndo", "Dispose"], fake.Transactions.Calls);
+    }
+    [Theory]
+    [InlineData("alignment", "MiddleLeft")]
+    [InlineData("height_mm", 5)]
+    [InlineData("layer", 3)]
+    [InlineData("visible", true)]
+    public void PropertyStyle_WrongReadbackRollsBack(string name, object value)
+    {
+        var fake = new Mover(90) { Failure = "style" };
+        fake.Request["property_moves"]![0]![name] = JToken.FromObject(value);
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => fake.Execute()).Error.Execution);
+        Assert.Contains("Rollback", fake.Transactions.Calls);
+    }
+    [Theory]
+    [InlineData("height_mm", 0)]
+    [InlineData("height_mm", -16001)]
+    [InlineData("visible", "false")]
+    [InlineData("layer", -1)]
+    [InlineData("layer", 1.5)]
+    [InlineData("pen", "invalid")]
+    public void PropertyStyle_InvalidFieldsRefuseBeforeWrite(string field, object value)
+    {
+        var fake = new Mover(90);
+        fake.Request["property_moves"]![0]![field] = JToken.FromObject(value);
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => fake.Plan()).Error.Reason);
+        Assert.Empty(fake.Transactions.Calls);
+    }
+
     private static Mover CableText(int beforeAngle, string? failure = null)
     {
         var fake = new Mover(90) { Failure = failure, ReadbackBounds = [63.72125, 109.24, 68, 160] };
@@ -235,6 +285,7 @@ public sealed class PropertyPlacementMoveTests
         internal JObject Request { get; }
         internal FakeTransactions Transactions { get; } = new();
         internal string? Failure { get; init; }
+        internal bool? VisibleReadback { get; init; }
         internal double[]? ReadbackBounds { get; init; }
         internal double[]? CommittedBounds { get; init; }
         internal string? ReadbackDigest { get; init; }
@@ -277,6 +328,10 @@ public sealed class PropertyPlacementMoveTests
             Child.Bounds = ReadbackBounds?.ToArray() ?? moves[0]!["bounds"]!.Values<double>().ToArray();
             Child.Properties["angle_deg"] = moves[0]!["angle"]!.ToString();
             Child.Properties["docked"] = "false";
+            if (Failure != "style" && moves[0]!["style"] is JObject style)
+            { foreach (var pair in PropertyPlacementMoves.StyleValues(style)) { Child.Properties[pair.Key] = pair.Value; } }
+            if (VisibleReadback is { } visible)
+            { Child.Properties["visible"] = visible.ToString().ToLowerInvariant(); }
             if (ReadbackDigest is not null)
             { Child.Locator.Digest = ReadbackDigest; }
             if (Failure == "angle")

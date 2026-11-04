@@ -67,7 +67,8 @@ internal class SymbolReference(long oid) : GraphicalPlacement(oid, 17)
         PropertyPlacements = [.. PropertyPlacements.Select(p => new ContextPropertyPlacement(ObjectIdentifier, this)
         {
             IdentifierType = 17,
-            Location = p.Location, Bounds = p.Bounds, DisplayedId = p.DisplayedId,
+            Location = p.Location, Bounds = p is ContextPropertyPlacement ? p.Bounds : p.Bounds.Select(b => new PointD(b.X - Location.X, b.Y - Location.Y)).ToArray(), DisplayedId = p.DisplayedId,
+            Height = p.Height, Justification = p.Justification, Pen = p.Pen, Layer = p.Layer, IsVisible = p.IsVisible,
             Display = p.Display, Contents = new(p.Contents.GetAsString()), Rotation = p.Rotation, IsDocked = p.IsDocked,
         })];
         UseLocalPropertyPlacements = true;

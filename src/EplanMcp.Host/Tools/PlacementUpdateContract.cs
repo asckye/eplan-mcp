@@ -7,7 +7,7 @@ namespace EplanMcp.Host.Tools;
 /// <summary>Full-profile updates use complete locators and exclusive parent or individual-property branches.</summary>
 internal static class PlacementUpdateContract
 {
-    internal static readonly JsonElement Input = JsonDocument.Parse("""
+    internal static readonly JsonElement Input = Styled(JsonDocument.Parse("""
         {"type":"object","additionalProperties":false,"required":["project","page"],"oneOf":[{"required":["moves"],"not":{"required":["property_moves"]}},{"required":["property_moves"],"not":{"required":["moves"]}}],"properties":{
           "project":{"type":"string","minLength":1},"page":{"type":"string","minLength":1},
           "property_moves":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["parent","property_id","property_index","x_mm","y_mm","angle_deg"],"properties":{"parent":{"$ref":"#/$defs/locator"},"property_id":{"type":"integer","minimum":1,"maximum":2147483647},"property_index":{"type":"integer","minimum":0,"maximum":9999},"x_mm":{"type":"number","minimum":0,"maximum":10000},"y_mm":{"type":"number","minimum":0,"maximum":10000},"angle_deg":{"type":"integer","enum":[0,90,180,270]}}}},
@@ -16,7 +16,7 @@ internal static class PlacementUpdateContract
             {"type":"object","additionalProperties":false,"required":["locator","delta_mm"],"properties":{"locator":{"$ref":"#/$defs/locator"},"delta_mm":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"number","minimum":-10000,"maximum":10000}}}}
           ]}},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},"show_page":{"type":"boolean","default":false,"description":"Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change."},"snap_to_grid":{"type":"boolean","default":true},"response_format":{"enum":["concise","detailed"],"default":"concise"}},
           "$defs":{"locator":{"type":"object","additionalProperties":false,"required":["project","page","type","oid","digest"],"properties":{"project":{"type":"string","minLength":1},"page":{"type":"string","minLength":1},"type":{"type":"integer","minimum":1,"maximum":2147483647},"oid":{"type":"integer","minimum":1,"maximum":9223372036854775807},"digest":{"type":"string","pattern":"^[a-f0-9]{64}$"}}}}}
-        """).RootElement.Clone();
+        """).RootElement.Clone());
 
     internal static Tool Definition => new()
     {
@@ -37,6 +37,17 @@ internal static class PlacementUpdateContract
         tool.OutputSchema = Definition.OutputSchema;
     }
 
+    private static JsonElement Styled(JsonElement input)
+    {
+        JsonNode schema = JsonNode.Parse(input.GetRawText())!;
+        JsonNode properties = schema["properties"]!["property_moves"]!["items"]!["properties"]!;
+        PlacementStyleSchema.Add(properties);
+        properties["alignment"] = PlacementStyleSchema.Alignment();
+        properties["height_mm"] = JsonNode.Parse("""{"oneOf":[{"type":"number","minimum":0.5,"maximum":100},{"const":-16002}]}""");
+        properties["visible"] = JsonNode.Parse("""{"type":"boolean"}""");
+        return JsonSerializer.SerializeToElement(schema);
+    }
+
     private static JsonElement Output()
     {
         JsonNode schema = JsonNode.Parse("""
@@ -52,6 +63,10 @@ internal static class PlacementUpdateContract
         JsonNode fields = schema["properties"]!["moves"]!["items"]!["properties"]!;
         foreach (string name in new[] { "propertyId", "propertyIndex", "beforeAngle", "angle" })
         { fields[name] = JsonNode.Parse("""{"type":"number"}"""); }
+        fields["style"] = JsonNode.Parse("""{"type":"object","additionalProperties":false,"properties":{}}""");
+        JsonNode style = fields["style"]!["properties"]!;
+        foreach (string name in new[] { "alignment", "height_mm", "visible", "layer", "pen" })
+        { style[name] = JsonNode.Parse(Input.GetProperty("properties").GetProperty("property_moves").GetProperty("items").GetProperty("properties").GetProperty(name).GetRawText()); }
         return JsonSerializer.SerializeToElement(schema);
     }
 }

@@ -27,7 +27,19 @@ internal static class PropertyPlacementMoves
         var rows = new JArray();
         foreach (JToken move in input["property_moves"]!)
         {
-            ConnectionCreatePlanner.Members(move, "/property_moves", "parent property_id property_index x_mm y_mm angle_deg", "");
+            ConnectionCreatePlanner.Members(move, "/property_moves", "parent property_id property_index x_mm y_mm angle_deg", "alignment height_mm visible layer pen");
+            var style = new JObject();
+            foreach (string name in new[] { "alignment", "height_mm", "visible", "layer", "pen" })
+            { if (((JObject)move).ContainsKey(name)) { style[name] = move[name]!.DeepClone(); } }
+            Require(style["alignment"] is null || style["alignment"]!.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)style["alignment"]), "Use an EPLAN alignment name.");
+            Require(style["height_mm"] is null || style["height_mm"]!.Type is JTokenType.Integer or JTokenType.Float && ((double)style["height_mm"]! == -16002 || (double)style["height_mm"]! is >= 0.5 and <= 100), "Use height_mm 0.5..100 or -16002.");
+            Require(style["visible"] is null || style["visible"]!.Type == JTokenType.Boolean, "Use boolean visible.");
+            Require(style["layer"] is null || style["layer"]!.Type == JTokenType.Integer && int.TryParse(style["layer"]!.ToString(), out int layer) && layer >= 0, "Use an integer layer ID.");
+            if (style["pen"] is { } pen)
+            {
+                ConnectionCreatePlanner.Members(pen, "/property_moves/pen", "", "color width_mm style pattern_length line_end");
+                Require(((JObject)pen).Properties().All(p => p.Value.Type is JTokenType.Integer or JTokenType.Float && PlacementTextCreateExecuteOperation.ValidPen(p.Name, (double)p.Value)), "Use finite pen values and valid IDs, or -16002.");
+            }
             ConnectionCreatePlanner.Members(move["parent"], "/property_moves/parent", "project page type oid digest", "");
             JToken given = move["parent"]!;
             Require(given["project"]?.Type == JTokenType.String && given["page"]?.Type == JTokenType.String
@@ -73,10 +85,17 @@ internal static class PropertyPlacementMoves
                 ["snapped"] = !requested.SequenceEqual(after),
                 ["bounds"] = new JArray(bounds),
                 ["beforeAngle"] = oldAngle,
-                ["angle"] = angle
+                ["angle"] = angle,
+                ["style"] = style
             });
         }
-        bool noOp = rows.All(r => JToken.DeepEquals(r["before"], r["after"]) && (double)r["beforeAngle"]! == (double)r["angle"]! && !scene.Page.Placements.Any(p => DrawingLocators.Matches(p.Locator, r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!) && Value(p, "docked") == "true"));
+        bool noOp = rows.All(r =>
+        {
+            DrawingPlacement child = scene.Page.Placements.Single(p => DrawingLocators.Matches(p.Locator, r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!));
+            JObject style = (JObject)r["style"]!;
+            return JToken.DeepEquals(r["before"], r["after"]) && (double)r["beforeAngle"]! == (double)r["angle"]! && Value(child, "docked") != "true"
+                && (bool?)style["visible"] != false && StyleValues(style).All(p => Value(child, p.Key) == p.Value);
+        });
         var result = new JObject
         {
             ["project"] = scene.Project.Name,
@@ -90,11 +109,18 @@ internal static class PropertyPlacementMoves
             ["fingerprint"] = fingerprint,
             ["graphicalChanges"] = new JArray(),
             ["connectionChanges"] = new JArray(),
-            ["generation"] = "Property text only; connections are unchanged."
+            ["generation"] = "Property text only; connections are unchanged.",
+            ["warning"] = rows.Any(r => (bool?)r["style"]?["visible"] == false) ? "visible:false is written but not compared: EPLAN may read IsVisible=true when invisible elements are displayed." : null
         };
         Require(result.ToString(Formatting.None).Length <= ((string?)input["response_format"] == "detailed" ? 30000 : 7500), "Use detailed or fewer property moves.");
         return result;
     }
+
+    internal static Dictionary<string, string> StyleValues(JObject style) => style.Properties().SelectMany(p => p.Name == "pen"
+        ? ((JObject)p.Value).Properties().Select(v => new KeyValuePair<string, string>("pen_" + v.Name, ((double)v.Value).ToString("R", CultureInfo.InvariantCulture)))
+        : p.Name == "height_mm" ? new[] { new KeyValuePair<string, string>("height_raw_mm", ((double)p.Value).ToString("R", CultureInfo.InvariantCulture)),
+            new KeyValuePair<string, string>("height_mm", (double)p.Value == -16002 ? "from_layer" : ((double)p.Value).ToString("R", CultureInfo.InvariantCulture)) }
+        : new[] { new KeyValuePair<string, string>(p.Name, p.Value.Type == JTokenType.Boolean ? ((bool)p.Value).ToString().ToLowerInvariant() : p.Value.Type is JTokenType.Integer or JTokenType.Float ? ((double)p.Value).ToString("R", CultureInfo.InvariantCulture) : (string)p.Value!) }).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
 
     private static string? Value(DrawingPlacement row, string key) => row.Properties.TryGetValue(key, out string? value) ? value : null;
 

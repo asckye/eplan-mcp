@@ -79,7 +79,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
 
         DrawingPlacement ReadPlacement(Placement placement, DrawingLocator? parent, string? slot)
         {
-            // A53/A54: property Location is relative, GetBoundingBox(false) is absolute.
+            // A87: Location and default bounds are relative; GetBoundingBox(false) is absolute.
             double[] location = Optional(() =>
             {
                 PointD origin = placement is PropertyPlacement property && property.Parent is Placement owner ? owner.Location : new PointD(0, 0);
@@ -102,7 +102,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             { bounds = [0, 0, 0, 0]; } // A53/A54: empty property text has no visible ink.
 
             using MultiLangString? contents = placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null };
-            string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : placement is Rectangle rectangle ? EplanTextFormat.Angle(rectangle.Angle) : null;
+            string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null;
             string? height = placement is PathText { Height: -16002 } ? "-16002"
                 : placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null;
             string? imagePath = null;
@@ -131,13 +131,22 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             { WriteExceptionDiagnostics.Report(ex); graphics = new() { ["read_warning"] = "Graphics metadata unavailable; inspect this placement in EPLAN." }; }
             try
             {
+                if (placement is Rectangle rectangle)
+                { angle = EplanTextFormat.Angle(rectangle.Angle); }
                 if (placement is GraphicalPlacement graphical)
                 {
                     Pen pen = graphical.Pen;
-                    foreach (var pair in new Dictionary<string, string?> { ["layer"] = graphical.LayerId.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                        ["pen_color"] = Number(pen.ColorId), ["pen_width_mm"] = Number(pen.Width), ["pen_style"] = Number(pen.StyleId),
-                        ["pen_pattern_length"] = Number(pen.PatternLength), ["pen_line_end"] = Number(pen.LineEndType),
-                        ["alignment"] = (placement as TextBase)?.Justification.ToString() }) { graphics[pair.Key] = pair.Value; }
+                    foreach (var pair in new Dictionary<string, string?>
+                    {
+                        ["layer"] = graphical.LayerId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        ["pen_color"] = Number(pen.ColorId),
+                        ["pen_width_mm"] = Number(pen.Width),
+                        ["pen_style"] = Number(pen.StyleId),
+                        ["pen_pattern_length"] = Number(pen.PatternLength),
+                        ["pen_line_end"] = Number(pen.LineEndType),
+                        ["alignment"] = (placement as TextBase)?.Justification.ToString()
+                    })
+                    { graphics[pair.Key] = pair.Value; }
                 }
             }
             catch (Exception ex) when (ex is BaseException or InvalidOperationException)
@@ -199,7 +208,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     ["cross_reference"] = placement is PropertyPlacement crossText && DisplayedId(crossText) is 20300 or 20314 or 20304 or 20252 or 20306 or 20302 or 24300 ? "true" : null,
                     ["angle"] = angle,
                     ["visible"] = placement is PropertyPlacement visible ? visible.IsVisible.ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant() : null,
-                    ["height_mm"] = height
+                    ["height_mm"] = height,
+                    ["height_raw_mm"] = placement is PropertyPlacement rawHeight ? Number(rawHeight.Height) : null
                 }
                     .Concat(graphics).Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),
                 Kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name, // ContextPropertyPlacement too

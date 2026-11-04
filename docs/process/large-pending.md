@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R2 02-property-style（2026-11-03 brief；A87） | `PlacementMoveTests` | NOT RUN：本轮禁止 EPLAN；待验证 属性文字对齐、字高、图层、画笔及隐藏；相对外框换算、坐标语义与一次撤销恢复。 |
 | R2 01-placement-style（2026-11-03 brief；A87） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | NOT RUN：本轮禁止 EPLAN；待验证 Line、Rectangle、Text、PathText、Polyline 全样式（含 -16002）、原生角度/外框/顶点读回及撤销。 |
 | R1 07-join-device（2026-11-03 补充 brief） | `DevicePlaceTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 新页先放主符号，再用 `join_device:true` 放同标识第二个符号；输出请求、结果和读回，核对名称、非主功能及原主功能。 |
 | R1 08-placement-timeout（2026-11-03 brief） | `PlacementCreateProtocolTests`、`LayoutGuardBatchTimingTests` | 不涉及新增 Large。Medium 已测 200 个已有对象＋50 个新对象：无冲突约 80 ms、一个冲突约 519 ms；50 个同时冲突的额外压力测量超过 2 分钟后中断，本项未重构守卫。 |

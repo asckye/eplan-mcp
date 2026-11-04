@@ -202,6 +202,37 @@ public sealed class PlacementMoverTests
         finally { EplanProjects.Project = null; }
     }
 
+    [Fact]
+    public void PropertyStyle_ChangesNativeContextWithRelativeCoordinates()
+    {
+        var owner = new Function(1) { Location = new(80, 120) };
+        var child = new ContextPropertyPlacement(1, owner) { Location = new(2, 4), Bounds = [new(-3, -2), new(3, 2)] };
+        owner.PropertyPlacements = [child];
+        var page = new Page { AllPlacements = [owner] };
+        EplanProjects.Project = new(page);
+        try
+        {
+            DrawingPlacement before = new EplanDrawingReader().Read("project", page.Name)!.Placements[1];
+            Assert.Equal([82d, 124d], before.Location);
+            Assert.Equal([77d, 118d, 83d, 122d], before.Bounds!);
+            JObject row = Row(child, owner, [100, 160]);
+            row["propertyId"] = 20214;
+            row["propertyIndex"] = 0;
+            row["angle"] = 90;
+            row["style"] = new JObject { ["alignment"] = "BaseLineCenter", ["height_mm"] = -16002, ["visible"] = false, ["layer"] = 3, ["pen"] = new JObject { ["color"] = -16002, ["width_mm"] = 0.25, ["style"] = 1, ["pattern_length"] = 8, ["line_end"] = 2 } };
+            new EplanPlacementMover().Prepare(new() { Project = new() { Path = "project" }, Page = new() { Page = page.Name } }, new JArray(row))();
+            Assert.Equal(new PointD(20, 40), child.Location);
+            Assert.Equal(Math.PI / 2, child.Rotation);
+            Assert.Equal(-16002, child.Height);
+            Assert.Equal(TextBase.JustificationType.BaseLineCenter, child.Justification);
+            Assert.False(child.IsVisible);
+            Assert.Equal(3, child.LayerId);
+            Assert.Equal((-16002, 0.25, 1, 8d, 2), ((int)child.Pen.ColorId, child.Pen.Width, (int)child.Pen.StyleId, child.Pen.PatternLength, (int)child.Pen.LineEndType));
+            Assert.Equal("-16002", new EplanDrawingReader().Read("project", page.Name)!.Placements[1].Properties["height_raw_mm"]);
+        }
+        finally { EplanProjects.Project = null; }
+    }
+
     private static JObject Row(Placement placement, Placement? parent, double[] after) => new()
     {
         ["locator"] = BridgeJson.FromObject(DrawingLocators.FromIdentifier("project", "+A1/1", placement.ToStringIdentifier(), new string('a', 64))),

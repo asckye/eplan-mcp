@@ -29,12 +29,16 @@ public sealed class PlacementUpdateTests
     [InlineData("dry")]
     [InlineData("policy")]
     [InlineData("property_success")]
+    [InlineData("property_style")]
     [InlineData("property_batch")]
     [InlineData("property_stale")]
     [InlineData("property_noop")]
     [InlineData("property_dry")]
     public async Task RegisteredTool_UsesExistingWritePipelineAndAtomicMoveBranch(string scenario)
     {
+        bool style = scenario == "property_style";
+        if (style)
+        { scenario = "property_success"; }
         bool property = scenario.StartsWith("property_", StringComparison.Ordinal);
         scenario = scenario.Replace("property_", "", StringComparison.Ordinal);
         using var harness = new WriteToolHarness(OutsideScratchWrites.Deny);
@@ -73,6 +77,11 @@ public sealed class PlacementUpdateTests
                 args.Remove("moves");
                 args["property_moves"] = new[] { new { parent = fake.Scene.Page.Placements[0].Locator, property_id = 20214, property_index = 0, x_mm = scenario == "noop" ? 20 : 30, y_mm = 20, angle_deg = scenario == "noop" ? 0 : 90 } };
             }
+            if (style)
+            {
+                args["property_moves"] = new[] { new { parent = fake.Scene.Page.Placements[0].Locator, property_id = 20214, property_index = 0, x_mm = 30, y_mm = 20, angle_deg = 90,
+                    alignment = "MiddleCenter", height_mm = -16002, visible = false, layer = 3, pen = new { color = -16002, width_mm = 0.25, style = 1, pattern_length = 8, line_end = 1 } } };
+            }
             CallToolResult result = await client.CallToolAsync(PlacementUpdateTools.Tool, args, cancellationToken: Token);
             if (scenario is "batch" or "stale" or "policy")
             {
@@ -92,6 +101,13 @@ public sealed class PlacementUpdateTests
             Assert.Equal(scenario is "success" or "batch" or "stale" ? 1 : 0, harness.Bridge.Writes.Count);
             Assert.Equal(scenario is "success" or "batch" ? 1 : 0, fake.Transactions);
             Assert.Equal(scenario == "success" ? 1 : 0, fake.Closed);
+            if (style)
+            {
+                Assert.Equal("success", scenario);
+                Assert.Equal("MiddleCenter", fake.Scene.Page.Placements[1].Properties["alignment"]);
+                Assert.Equal("from_layer", fake.Scene.Page.Placements[1].Properties["height_mm"]);
+                Assert.Equal("-16002", fake.Scene.Page.Placements[1].Properties["height_raw_mm"]);
+            }
             if (property)
             { Assert.Equal([20d, 20d], fake.Scene.Page.Placements[0].Location); }
         }
@@ -132,6 +148,18 @@ public sealed class PlacementUpdateTests
             target.Bounds = moves[0]!["bounds"]!.Values<double>().ToArray();
             if (moves[0]!["angle"] is { } angle)
             { target.Properties["angle_deg"] = angle.ToString(); target.Properties["docked"] = "false"; }
+            if (moves[0]!["style"] is JObject style)
+            {
+                foreach (JProperty field in style.Properties())
+                {
+                    if (field.Name == "pen")
+                    { foreach (JProperty p in ((JObject)field.Value).Properties()) { target.Properties["pen_" + p.Name] = p.Value.ToString(); } }
+                    else if (field.Name == "height_mm")
+                    { target.Properties["height_raw_mm"] = field.Value.ToString(); target.Properties["height_mm"] = (double)field.Value == -16002 ? "from_layer" : field.Value.ToString(); }
+                    else
+                    { target.Properties[field.Name] = field.Value.Type == JTokenType.Boolean ? field.Value.ToString().ToLowerInvariant() : field.Value.ToString(); }
+                }
+            }
             if (Fail)
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Injected failure after moving the first item."); }
         };

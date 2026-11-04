@@ -6,7 +6,7 @@ internal abstract class TextBase(long oid) : GraphicalPlacement(oid)
 {
     public int UndockCalls { get; private set; }
     public double Rotation { get; set; }
-    public enum JustificationType { FromLayer, BaseLineLeft, MiddleLeft, MiddleCenter, BaseLineCenter }
+    public enum JustificationType { BaseLineLeft, FromLayer, MiddleLeft, MiddleCenter, BaseLineCenter }
     public JustificationType Justification { get; set; }
     public MultiLangString Contents { get; set; } = new("en_US@Test;");
     public double Height { get; set; } = 3;
@@ -94,7 +94,7 @@ internal class PropertyPlacement(long oid = 99, Placement? parent = null) : Text
     public PointD[] GetBoundingBox(bool relative)
     {
         Assert.False(relative);
-        return GetBoundingBox();
+        return this is ContextPropertyPlacement ? GetBoundingBox().Select(p => new PointD(p.X + Parent.Location.X, p.Y + Parent.Location.Y)).ToArray() : GetBoundingBox();
     }
 }
 

@@ -34,6 +34,8 @@ internal sealed class EplanPlacementMover : IPlacementMover
             using AnyPropertyId id = text.DisplayedProperty;
             if (id.AsInt != (int)m["propertyId"]! || text.Parent.ObjectIdentifier != owner.ObjectIdentifier)
             { throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.PlanStale, "Property placement selection changed; refresh drawings.")); }
+            if (m["style"] is JObject style)
+            { EplanPlacementStyle.Validate(EplanProjects.ByPath(scene.Project.Path), (int?)style["layer"], (string?)style["alignment"]); }
             return (Owner: owner, Row: m);
         }).ToArray();
         return () =>
@@ -55,6 +57,16 @@ internal sealed class EplanPlacementMover : IPlacementMover
                     { throw new BridgeErrorException(ErrorReason.PlanStale, "Local property placement selection changed; refresh drawings."); }
                     if (text.IsDocked)
                     { text.UndockText(); }
+                    if (item.Row["style"] is JObject style)
+                    {
+                        if (style["height_mm"] is { } height)
+                        { text.Height = (double)height; }
+                        if (style["visible"] is { } visible)
+                        { text.IsVisible = (bool)visible; }
+                        if (style["alignment"] is { } alignment)
+                        { text.Justification = (TextBase.JustificationType)Enum.Parse(typeof(TextBase.JustificationType), alignment.ToString()); }
+                        EplanPlacementStyle.Apply(text, EplanProjects.ByPath(scene.Project.Path), (int?)style["layer"], style["pen"]?.ToObject<Dictionary<string, double>>());
+                    }
                     text.Rotation = (double)item.Row["angle"]! * Math.PI / 180;
                     text.Location = new PointD((double)item.Row["after"]![0]! - owner.Location.X, (double)item.Row["after"]![1]! - owner.Location.Y);
                 }

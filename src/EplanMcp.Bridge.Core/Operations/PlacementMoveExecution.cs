@@ -35,6 +35,8 @@ public static class PlacementMoveExecution
             placement.Bounds = row["bounds"]!.Type == JTokenType.Null ? null : row["bounds"]!.Values<double>().ToArray();
             if (row["angle"] is { } angle)
             { placement.Properties["angle_deg"] = ((double)angle).ToString("R", System.Globalization.CultureInfo.InvariantCulture); placement.Properties["docked"] = "false"; if (placement.Properties.ContainsKey("angle")) { placement.Properties["angle"] = placement.Properties["angle_deg"]; } }
+            if (row["style"] is JObject style)
+            { foreach (var field in PropertyPlacementMoves.StyleValues(style)) { placement.Properties[field.Key] = field.Value; } }
             if (placement.Parent is null)
             {
                 string prefix = FormattableString.Invariant($"{placement.Locator.Type}/{placement.Locator.Oid}/");
@@ -93,6 +95,13 @@ public static class PlacementMoveExecution
                         && Math.Abs((bounds[2] - bounds[0]) - (expectedBounds[2] - expectedBounds[0])) <= 0.01
                         && Math.Abs((bounds[3] - bounds[1]) - (expectedBounds[3] - expectedBounds[1])) <= 0.01)
                     { found.Bounds = expectedBounds; }
+                    if (row["style"] is JObject style)
+                    {
+                        if ((bool?)style["visible"] == false && found.Properties.ContainsKey("visible"))
+                        { found.Properties["visible"] = "false"; }
+                        if (style["alignment"] is not null || style["height_mm"] is not null)
+                        { want.Bounds = found.Bounds; }
+                    }
                     if (found.Parent is not null && want.Parent is not null)
                     { found.Parent.Digest = want.Parent.Digest; }
                 }

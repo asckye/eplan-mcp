@@ -16341,6 +16341,90 @@
                     180,
                     270
                   ]
+                },
+                "layer": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "pen": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "color": {
+                      "oneOf": [
+                        {
+                          "const": -16002
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 255
+                        }
+                      ]
+                    },
+                    "width_mm": {
+                      "type": "number"
+                    },
+                    "style": {
+                      "oneOf": [
+                        {
+                          "const": -16002
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 6
+                        }
+                      ]
+                    },
+                    "pattern_length": {
+                      "type": "number"
+                    },
+                    "line_end": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2
+                    }
+                  }
+                },
+                "alignment": {
+                  "type": "string",
+                  "enum": [
+                    "FromLayer",
+                    "TopLeft",
+                    "TopCenter",
+                    "TopRight",
+                    "MiddleLeft",
+                    "MiddleCenter",
+                    "MiddleRight",
+                    "BottomLeft",
+                    "BottomCenter",
+                    "BottomRight",
+                    "BaseLineLeft",
+                    "BaseLineCenter",
+                    "BaseLineRight",
+                    "SpecialLeft",
+                    "SpecialCenter",
+                    "SpecialRight",
+                    "JicSpecialLeft",
+                    "JicSpecialCenter",
+                    "JicSpecialRight"
+                  ]
+                },
+                "height_mm": {
+                  "oneOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 100
+                    },
+                    {
+                      "const": -16002
+                    }
+                  ]
+                },
+                "visible": {
+                  "type": "boolean"
                 }
               }
             }
@@ -16590,6 +16674,96 @@
                 },
                 "angle": {
                   "type": "number"
+                },
+                "style": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "alignment": {
+                      "type": "string",
+                      "enum": [
+                        "FromLayer",
+                        "TopLeft",
+                        "TopCenter",
+                        "TopRight",
+                        "MiddleLeft",
+                        "MiddleCenter",
+                        "MiddleRight",
+                        "BottomLeft",
+                        "BottomCenter",
+                        "BottomRight",
+                        "BaseLineLeft",
+                        "BaseLineCenter",
+                        "BaseLineRight",
+                        "SpecialLeft",
+                        "SpecialCenter",
+                        "SpecialRight",
+                        "JicSpecialLeft",
+                        "JicSpecialCenter",
+                        "JicSpecialRight"
+                      ]
+                    },
+                    "height_mm": {
+                      "oneOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0.5,
+                          "maximum": 100
+                        },
+                        {
+                          "const": -16002
+                        }
+                      ]
+                    },
+                    "visible": {
+                      "type": "boolean"
+                    },
+                    "layer": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "pen": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "color": {
+                          "oneOf": [
+                            {
+                              "const": -16002
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 255
+                            }
+                          ]
+                        },
+                        "width_mm": {
+                          "type": "number"
+                        },
+                        "style": {
+                          "oneOf": [
+                            {
+                              "const": -16002
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 6
+                            }
+                          ]
+                        },
+                        "pattern_length": {
+                          "type": "number"
+                        },
+                        "line_end": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }

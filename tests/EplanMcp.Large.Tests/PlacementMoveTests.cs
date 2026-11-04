@@ -84,6 +84,61 @@ public sealed class PlacementMoveTests(LiveEplan eplan, WriteHost host) : IClass
         Assert.Equal(business, (await session.SnapshotAsync()).Hash);
     }
 
+    [Fact]
+    public async Task PropertyStyle_ReadsAllFieldsAndDocumentsHiddenStateException()
+    {
+        Assert.Equal(eplan.ProcessId, host.ProcessId);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        Assert.Equal(host.Writable, session.Project, ignoreCase: true);
+        string page = Assert.Single(await session.CreatePagesAsync(1));
+        await host.CallAsync("eplan_device_place", new()
+        {
+            ["project"] = host.Writable,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["library"] = "IEC_symbol",
+            ["symbol"] = "K",
+            ["symbol_variant"] = 0,
+            ["x"] = 80,
+            ["y"] = 160,
+            ["tag"] = "-STYLE",
+            ["display_properties"] = new[] { new { property_id = 20214, offset_x_mm = 8, offset_y_mm = 8 } }
+        });
+        await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(host.ProcessId);
+        PageDrawingGeometry before = await Read(bridge, page);
+        DrawingPlacement label = Assert.Single(before.Placements, p => p.Kind == "PropertyPlacement" && p.Properties.GetValueOrDefault("display") == "-STYLE");
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = host.Writable,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["snap_to_grid"] = false,
+            ["response_format"] = "detailed",
+            ["property_moves"] = new[] { new { parent = label.Parent, property_id = 20214, property_index = int.Parse(label.Properties["property_index"], System.Globalization.CultureInfo.InvariantCulture),
+                x_mm = 120, y_mm = 160, angle_deg = 90, alignment = "BaseLineCenter", height_mm = 5, visible = false, layer = 108,
+                pen = new { color = -16002, width_mm = 0.25, style = 1, pattern_length = 8, line_end = 1 } } }
+        };
+        TestContext.Current.TestOutputHelper?.WriteLine("request: " + JsonSerializer.Serialize(request));
+        JsonElement result;
+        try
+        { result = await host.CallAsync("eplan_placement_update", request); }
+        catch (Exception error) { TestContext.Current.TestOutputHelper?.WriteLine("result: " + error + "\nreadback: " + JsonSerializer.Serialize(await Read(bridge, page))); throw; }
+        TestContext.Current.TestOutputHelper?.WriteLine("result: " + result);
+        PageDrawingGeometry after = await Read(bridge, page);
+        TestContext.Current.TestOutputHelper?.WriteLine("readback: " + JsonSerializer.Serialize(after));
+        DrawingPlacement actual = Assert.Single(after.Placements, p => p.Kind == "PropertyPlacement" && p.Properties.GetValueOrDefault("display") == "-STYLE");
+        Assert.Equal([120d, 160d], actual.Location);
+        Assert.Equal("90", actual.Properties["angle_deg"]);
+        Assert.Equal("BaseLineCenter", actual.Properties["alignment"]);
+        Assert.Equal("5", actual.Properties["height_mm"]);
+        Assert.Equal("108", actual.Properties["layer"]);
+        foreach (var pair in new Dictionary<string, string> { ["color"] = "-16002", ["width_mm"] = "0.25", ["style"] = "1", ["pattern_length"] = "8", ["line_end"] = "1" })
+        { Assert.Equal(pair.Value, actual.Properties["pen_" + pair.Key]); }
+        Assert.Contains("not compared", result.GetProperty("warning").GetString(), StringComparison.Ordinal);
+        await session.UndoAsync();
+        Assert.Equal(JsonSerializer.Serialize(before), JsonSerializer.Serialize(await Read(bridge, page)));
+    }
+
     private Task<PageDrawingGeometry> Read(BridgeClient bridge, string page) => bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
         new() { Project = host.Writable, Page = page }, TestContext.Current.CancellationToken);
 }
