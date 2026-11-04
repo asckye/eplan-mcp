@@ -28,7 +28,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | dry_run / snap_to_grid | boolean，true / true | 省略 dry_run 只预览；执行传 `dry_run: false`；关闭吸附仍拒绝非栅格接线 |
 | response_format | concise / detailed，concise | Host 以 ResultShaper 清洗并限制 5k/20k token；展示裁剪不影响完整 guard |
 
-独立 `{kind:"definition_point",position:[x,y],symbol?,symbol_variant?,color?,cross_section?,designation?}` 使用相同属性规则；color、cross_section、designation、part 可全部省略；position 必填，须位于本页既有图形自动连线的路径上，容差与 wire 定义点相同，否则 INVALID_ARGUMENT 指明最近线段；CDPNG 同样要求在线上。可单独调用或与 wire、node 同批，同次新建线仍用 wire.definition_point；生成前后既有连接数量及端点须不变。
+独立 `{kind:"definition_point",position:[x,y],symbol?,symbol_variant?,color?,cross_section?,designation?}` 使用相同属性规则；线的一侧还没有设备、因而没有生成连接时（比如对端在别的页的中断点），定义点照样放在线上，`endpoints` 为 null，并写入 `warning`（A94）；color、cross_section、designation、part 可全部省略；position 必填，须位于本页既有图形自动连线的路径上，容差与 wire 定义点相同，否则 INVALID_ARGUMENT 指明最近线段；CDPNG 同样要求在线上。可单独调用或与 wire、node 同批，同次新建线仍用 wire.definition_point；生成前后既有连接数量及端点须不变。
 
 所有对象严格拒绝未知、重复、缺失和错误类型成员；数值递归检查有限性，错误附 JSON Pointer；请求上限 256 KiB。[预览快照](../../tests/Contracts.Snapshots/connection-create-contract.verified.json)与已注册 server-contract 同步维护，用法已嵌入工具目录。
 

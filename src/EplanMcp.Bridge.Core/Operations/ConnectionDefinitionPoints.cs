@@ -76,6 +76,7 @@ internal static class ConnectionDefinitionPoints
         int variant = (int?)value["symbol_variant"] ?? 0;
         Require(variants.Any(s => s.Library == "SPECIAL" && s.Name == name && s.Variant == variant), "/symbol_variant", "Select an available SPECIAL symbol variant.");
         double[] point;
+        bool unconnected = false;
         if (value["position"] is { } position)
         {
             Require(position is JArray { Count: 2 } a && a.All(n => n.Type is JTokenType.Integer or JTokenType.Float && (double)n is >= 0 and <= 10000), "/position", "Supply [x_mm,y_mm] in 0..10000 mm.");
@@ -94,14 +95,16 @@ internal static class ConnectionDefinitionPoints
                 && scene.Pins.TryGetValue(c.StartDevice, out SymbolConnectionPoint? start) && scene.Pins.TryGetValue(c.EndDevice, out SymbolConnectionPoint? end)
                 && CableDefinitionPlanner.DrawnPath(scene, start.Location, end.Location) is { } route
                 && route.Zip(route.Skip(1), (a, b) => new[] { a, b }).Any(s => ConnectionCreatePlanner.On(point, s))).ToArray();
-            Require(owners.Length == 1, "/position", "Select a point on one generated existing connection; generate existing autoconnect lines first if needed." + hint);
-            from = owners[0].StartDevice!;
-            to = owners[0].EndDevice!;
+            // A94: a line whose far side has no device yet has no connection; EPLAN keeps the point on the line by itself.
+            Require(owners.Length <= 1, "/position", "Select a point on one generated existing connection, not on a line shared by several." + hint);
+            unconnected = owners.Length == 0;
+            from = owners.FirstOrDefault()?.StartDevice ?? "";
+            to = owners.FirstOrDefault()?.EndDevice ?? "";
         }
         return new JObject
         {
             ["itemIndex"] = index,
-            ["endpoints"] = new JArray(from, to),
+            ["endpoints"] = unconnected ? JValue.CreateNull() : new JArray(from, to),
             ["type"] = "ConnectionDefinitionPoint",
             ["symbol"] = new JObject { ["library"] = "SPECIAL", ["name"] = name, ["variant"] = variant },
             ["position"] = new JArray(point),
@@ -149,6 +152,8 @@ internal static class ConnectionDefinitionPoints
         var rows = new List<string>();
         foreach (JToken row in planned.Where(r => r["definition"] is JObject))
         {
+            if (row["endpoints"] is not JArray)
+            { rows.Add($"Definition point {row["itemIndex"]} has no connection yet: a side of its line has no device."); }
             JToken? found = actual.SingleOrDefault(a => JToken.DeepEquals(a["itemIndex"], row["itemIndex"]));
             foreach (JProperty property in ((JObject)row["definition"]!).Properties())
             {
@@ -173,7 +178,8 @@ internal static class ConnectionDefinitionPoints
             JToken? found = actual.SingleOrDefault(a => JToken.DeepEquals(a["itemIndex"], row["itemIndex"]));
             foreach (string field in new[] { "type", "symbol", "position" })
             { Match(row[field], found?[field], at + "/" + field); }
-            if ((string?)row["type"] == "ConnectionDefinitionPoint")
+            bool connected = row["endpoints"] is JArray;
+            if ((string?)row["type"] == "ConnectionDefinitionPoint" && connected)
             {
                 Match(new JArray(row["endpoints"]!.Values<string>().OrderBy(p => p, StringComparer.Ordinal)),
                 found?["endpoints"] is { } ends ? new JArray(ends.Values<string>().OrderBy(p => p, StringComparer.Ordinal)) : null, at + "/endpoints");
@@ -181,13 +187,13 @@ internal static class ConnectionDefinitionPoints
             if (row["articles"] is JArray articles)
             {
                 Match(articles, found?["articles"], at + "/articles");
-                foreach (JToken article in articles)
+                foreach (JToken article in connected ? articles : [])
                 { if (found?["connectionArticles"]?.Any(a => JToken.DeepEquals(a, article)) != true) { Match(article, null, at + "/connectionArticles"); } }
             }
             foreach (JProperty property in ((JObject)row["properties"]!).Properties())
             {
                 Match(property.Value, found?["properties"]?[property.Name], at + "/properties/" + property.Name, property.Name == "cross_section");
-                if ((string?)row["type"] == "ConnectionDefinitionPoint")
+                if ((string?)row["type"] == "ConnectionDefinitionPoint" && connected)
                 { Match(property.Value, found?["connectionValues"]?[property.Name], at + "/connectionValues/" + property.Name, property.Name == "cross_section"); }
             }
         }

@@ -81,8 +81,8 @@ internal sealed partial class EplanConnectionCreator
             using Transaction transaction = new TransactionManager().CreateTransaction();
             ConnectionDefinitionPoint point = EplanNativePreconditions.Valid(Page(project, page).AllPlacements).OfType<ConnectionDefinitionPoint>().Single(p => p.ObjectIdentifier == oid);
             using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
-            Connection owner = EplanNativePreconditions.Valid(finder.GetConnections(null))
-                .Single(c => EplanConnectionReader.PageOf(c)?.Name == page && c.ConnectionDefPoints.Any(p => p.ObjectIdentifier == oid));
+            Connection? owner = EplanNativePreconditions.Valid(finder.GetConnections(null))
+                .SingleOrDefault(c => EplanConnectionReader.PageOf(c)?.Name == page && c.ConnectionDefPoints.Any(p => p.ObjectIdentifier == oid));
             using UniversalPropertyList properties = point.Properties;
             foreach (var property in _definitionSources)
             {
@@ -94,7 +94,7 @@ internal sealed partial class EplanConnectionCreator
                 else
                 { properties[id] = (string)value!; }
                 // A93: EPLAN does not pass a point's change on to its existing connection.
-                if (property.Name == "type_code")
+                if (property.Name == "type_code" && owner is not null)
                 {
                     using UniversalPropertyList connection = owner.Properties;
                     connection[id] = (string)value!;
@@ -123,12 +123,15 @@ internal sealed partial class EplanConnectionCreator
             if (point is null)
             { throw DefinitionMismatch(FormattableString.Invariant($"item {expected["itemIndex"]}: created point {oid} is missing")); }
             Connection[] owners = connections.Where(c => c.ConnectionDefPoints.Any(p => p.ObjectIdentifier == oid)).ToArray();
-            if (owners.Length != 1)
+            // A94: planned without a connection, the point may stay without one.
+            if (owners.Length > 1 || owners.Length == 0 && expected["endpoints"] is JArray)
             { throw DefinitionMismatch(FormattableString.Invariant($"item {expected["itemIndex"]}: connection membership count is {owners.Length}")); }
+            Connection? owner = owners.FirstOrDefault();
             try
             {
-                if (!wires.TryGetValue(owners[0].ObjectIdentifier, out CableDefinitionPlanner.Wire? connection))
-                { wires.Add(owners[0].ObjectIdentifier, connection = ReadCableWire(project, page, owners[0])); }
+                CableDefinitionPlanner.Wire? connection = null;
+                if (owner is not null && !wires.TryGetValue(owner.ObjectIdentifier, out connection))
+                { wires.Add(owner.ObjectIdentifier, connection = ReadCableWire(project, page, owner)); }
                 JObject values, sources;
                 // One list per wrapper: a second Properties after this release reads freed memory (A93).
                 using (UniversalPropertyList properties = point.Properties)
@@ -141,23 +144,27 @@ internal sealed partial class EplanConnectionCreator
                     ["itemIndex"] = expected["itemIndex"]!.DeepClone(),
                     ["type"] = point.GetType().Name,
                     ["position"] = new JArray(XY(point.Location)),
-                    ["endpoints"] = JArray.FromObject(CablePins(owners[0])),
+                    ["endpoints"] = owner is null ? JValue.CreateNull() : JArray.FromObject(CablePins(owner)),
                     ["symbol"] = new JObject { ["library"] = point.SymbolVariant.SymbolLibraryName, ["name"] = point.SymbolVariant.SymbolName, ["variant"] = point.SymbolVariant.VariantNr },
                     ["properties"] = values,
                     ["definition"] = sources,
-                    ["connectionValues"] = new JObject { ["color"] = connection.Colour, ["cross_section"] = connection.CrossSection, ["designation"] = connection.Label },
-                    ["connection"] = BridgeJson.FromObject(connection.Locator),
                 };
+                if (connection is not null)
+                {
+                    row["connectionValues"] = new JObject { ["color"] = connection.Colour, ["cross_section"] = connection.CrossSection, ["designation"] = connection.Label };
+                    row["connection"] = BridgeJson.FromObject(connection.Locator);
+                }
                 if (expected["articles"] is JArray)
                 {
                     static JObject Article(ArticleReference a) => new() { ["part"] = a.PartNr, ["variant"] = a.VariantNr, ["count"] = a.Count };
                     row["articles"] = new JArray(point.ArticleReferences.Select(Article));
-                    row["connectionArticles"] = new JArray(owners[0].ArticleReferences.Select(Article));
+                    if (owner is not null)
+                    { row["connectionArticles"] = new JArray(owner.ArticleReferences.Select(Article)); }
                 }
                 row["locator"] = BridgeJson.FromObject(geometry.Placements.Single(p => p.Kind == nameof(ConnectionDefinitionPoint) && p.Locator.Oid == oid).Locator);
                 result.Add(row);
             }
-            finally { GC.KeepAlive(point); GC.KeepAlive(owners[0]); }
+            finally { GC.KeepAlive(point); GC.KeepAlive(owner); }
         }
         return result;
     }

@@ -240,6 +240,18 @@ public sealed class ConnectionDefinitionPointTests
     }
 
     [Fact]
+    public void LineWithoutConnection_PlacesThePointAndWarns()
+    {
+        var creator = new Creator(existing: true) { GeneratedEndpoints = [] };
+        creator.Fixture.Scene.Logical.Clear();
+        JObject result = creator.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        JToken point = Assert.Single(result["definitionPoints"]!);
+        Assert.Equal(JTokenType.Null, point["endpoints"]!.Type);
+        Assert.Contains("has no connection yet", (string?)result["warning"], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ExistingConnection_OnlyDefinitionPoint_CommitsAndKeepsAllEndpointsInOneUndoStep()
     {
         var creator = new Creator(existing: true);
