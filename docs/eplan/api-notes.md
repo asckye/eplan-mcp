@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A91、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A92、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -350,6 +350,14 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `Placement.Remove()` 用于独立 Line/Arc/PolyLine/Rectangle/Text/PathText/Image/MacroBox 的删除；A87 已验证宏框删除不删除引用内容。线和文字的工具链、一事务和单步撤销已实测（`PlacementDeleteTests`）。
 - 写前 layout_guard=warn 仅把非 OffPage 布局违规降为警告；写后仍遵循 ADR-0046。— 实测（`LayoutGuardWarningTests`）：穿过普通符号的线默认被 R3/R4 拒绝，warn 时提交并告警，超出页面仍拒绝。线穿过黑盒外框本身不触发拒绝。
 - `ParseNameAndProps` 对不含高层代号或位置代号的标识（如 `+A1-WE1`）返回空值，把空值赋给 `FunctionBasePropertyList.DESIGNATION_PLANT` 会抛 `EmptyPropertyException`（S063111），所以只赋非空部分。`RenameDevice` 之后主功能立即显示实际名称；不使用某部分标识的器件类型（如 `BusBarDefText`）把 `=F+A1-WE19` 变成 `+A1-WE19`，要在提交前发现并回滚。提交后再撤销未能恢复原标识，所以回滚后要核对原标识还在。— 实测（`WriteSafetyTests.Q2`）
+
+### A91. 第五、六轮重绘的事实（2026-11-04，EPLAN 2026.0.3，Pro Panel，scratch 项目）
+- `Insert.WindowMacro` 把宏的 `ReferencePoint` 放到给定坐标；外框由 `WindowMacro.Location`（左下角）和 `Size` 决定，`Size` 可能是宏框或选区，不一定是对象的范围。— 官方 XML + `MacroInsertTests`、第 7 次重绘。
+- 符号 `XTR1` 自身的逻辑定义不是端子：`Terminal.Create(strip, page, variant)` 抛 `WrongCategoryException`（S063064）。示例的端子保留定义 100/6/1：先用 `X2_2` 创建，再 `SetSymbolVariant(variant, false)`。— 实测 `TerminalWithForeignSymbol_KeepsATerminalAndUndoesOnce`。
+- 块属性（`EPLAN.BlockProperties.*`，59000 起）的 ID 由项目分配：同一个值在示例项目是 59459，在从基本项目新建的项目是 59456。比较时只比值。— 第 4 次重绘报告。
+- 示例项目里端子排 `+A1-FC2` 和设备 `=GAA+A1-FC2` 同时存在。允许省略高层代号的名称规则只适用于端子排和端子。— 示例数据。
+- 库里的宏和示例项目插入时的版本可能不同：`PXC/2861344` 的原理图表达，标的位置差约 0.7 mm；`PXC/2861250`、`PXC/2861289` 总览左侧的模块图线条位置相同，但示例是一个块，库里是散的，线宽也不同；`PXC/2861344` 总览的模块图位置也不同。— 第 7 次重绘。
+- `eplan_placement_delete` 是 Destructive，无人值守运行要用脚本审批；否则弹窗等 120 秒后 `APPROVAL_EXPIRED`。— 第 7 次重绘。
 
 ### A90. PLC 同一通道的两种表达如何关联（2026-11-04，EPLAN 2026.0.3，Pro Panel，scratch 项目，`MacroBoxSpikeTests`）
 - 总览宏建立卡和总览点后，在原理图页插入同一部件的多线宏（`NumerationMode.None`，点名为 `=GAA+A1-A?:1.1`），再用 `NameService.RenameDevice` 改成卡的标识，两边立刻配对：总览点 20301 指向原理图页和路径，原理图点 20300、20301 指向自己的路径。宏已带插头代号 20406，不需要生成连接。— 实测。
