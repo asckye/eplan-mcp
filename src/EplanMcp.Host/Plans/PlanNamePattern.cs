@@ -34,5 +34,5 @@ internal static class PlanNamePattern
     }
 
     public static bool Matches(string pattern, string name) => Regex.IsMatch(name, pattern,
-        RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, TimeSpan.FromMilliseconds(100));
+        RegexOptions.CultureInvariant | RegexOptions.NonBacktracking, TimeSpan.FromSeconds(2));
 }
