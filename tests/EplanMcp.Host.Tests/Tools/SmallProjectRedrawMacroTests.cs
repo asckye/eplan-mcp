@@ -244,6 +244,29 @@ public sealed class SmallProjectRedrawMacroTests
     }
 
     [Fact]
+    public async Task PlcData_GoesToTheCardAndThePointsByExactLocator()
+    {
+        JObject card = Device(1, "=K1+A2-KE4", "PLCBox", 212, 284, "", true);
+        card["type"] = "PLC";
+        card["properties"] = new JArray(new JObject { ["id"] = 20161, ["index"] = 0, ["value"] = "Phoenix1" }, new JObject { ["id"] = 20308, ["index"] = 0, ["value"] = "6" });
+        JObject point = Device(2, "=K1+A2-KE4:1.1", "PLCTerminal", 238, 276, "");
+        point["properties"] = new JArray(new JObject { ["id"] = 20400, ["index"] = 0, ["value"] = "%IX2.4" },
+            new JObject { ["id"] = 20011, ["index"] = 0, ["value"] = new JObject { ["en_US"] = "Voltage", ["??_??"] = "skipped" } });
+        JObject page = Page("Circuit", card, point);
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = Driver(calls, new SmallProjectRedrawReport("test", "ScratchTest"), (tool, _) =>
+            tool == "eplan_page_get" ? Success([Drawing(card, 11), Drawing(point, 12)]) : Success([]));
+
+        await driver.DrawPageAsync(page, [page]);
+
+        JArray changes = (JArray)Assert.Single(calls, call => call.Tool == "eplan_property_set").Args["changes"]!;
+        Assert.Equal(["20161|Phoenix1", "20308|6", "20400|%IX2.4", "20011|Voltage"], changes.Select(c => c["property"]!["property_id"] + "|" + c["value"]));
+        Assert.Equal(6, (int)changes[1]["value"]!);
+        Assert.Equal("en_US", (string?)changes[3]["language"]);
+        Assert.Equal("function", (string?)changes[2]["target"]!["locator"]!["kind"]);
+    }
+
+    [Fact]
     public async Task PartMark_IsNeverDrawnByHand()
     {
         JObject mark = new()

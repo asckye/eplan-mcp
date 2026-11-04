@@ -55,6 +55,7 @@ internal sealed partial class SmallProjectRedrawDriver(
             if (!_covered.Contains(Key(page, item)) && !_macroOwned.Contains(Key(page, item)))
             { await ObserveAsync(page, item, () => PlaceLocationBoxAsync(page, item)); }
         }
+        await WritePlcDataAsync(page, objects);
         await PlaceNodesAsync(page, objects, allPages);
 
         await InvokeAsync(page, "eplan_connection_generate", new JObject { ["pages"] = new JArray(page) },
@@ -84,6 +85,8 @@ internal sealed partial class SmallProjectRedrawDriver(
             if (!_attemptedPages.Add(page))
             { continue; }
             var item = new JObject { ["name"] = page, ["page_type"] = source["pageType"]?.DeepClone() };
+            if (Number(source["gridSize"]) is double grid && grid > 0)
+            { item["grid_size_mm"] = grid; }
             if (source["description"] is JObject || Text(source["description"]) is not null)
             { item["description"] = source["description"]!.DeepClone(); }
             if (await InvokeAsync(page, "eplan_page_create", new JObject { ["pages"] = new JArray(item) }, [source]) is not null)
@@ -200,14 +203,15 @@ internal sealed partial class SmallProjectRedrawDriver(
         if (placed is null)
         { return; }
         // The sample shows which symbol its engineer chose for a part (FAH1 where the part's macro brings FA1): the same data as a part route.
-        report.RecordOrigin(page, item, assignParts && (bool?)item["isMain"] == true && Objects(item["parts"]).Length > 0 ? "part" : "symbol_fallback");
+        report.RecordOrigin(page, item, assignParts && Objects(item["parts"]).Length > 0 ? "part" : "symbol_fallback");
         _placedTags.Add(placedTag);
         if (Text(placed["device"]?["tag"]) is string actualTag)
         {
             _actualNames[name] = actualTag;
             _placedTags.Add(actualTag);
         }
-        if (assignParts && (bool?)item["isMain"] == true)
+        // A terminal carries its own part although it is no main function.
+        if (assignParts && ((bool?)item["isMain"] == true || Text(item["category"]) == "Terminal"))
         {
             foreach (JObject part in Objects(item["parts"]))
             {
@@ -284,6 +288,7 @@ internal sealed partial class SmallProjectRedrawDriver(
                 ["kind"] = "interruption_point",
                 ["name"] = name,
                 ["symbol"] = item["symbol"]?["name"]?.DeepClone(),
+                ["symbol_variant"] = item["symbol"]?["variant"]?.DeepClone(),
                 ["direction"] = item["direction"]?.DeepClone(),
                 ["position"] = new JArray(Point(pin?["position"] ?? item["location"])),
             };
@@ -365,6 +370,13 @@ internal sealed partial class SmallProjectRedrawDriver(
                     if (Text(item[from]) is string name && !string.IsNullOrWhiteSpace(name))
                     { point[to] = name; }
                 }
+                foreach ((int id, string field) in new[] { (33003, "potential_value"), (31004, "color"), (31002, "cross_section") })
+                {
+                    if (Property(item, id) is string value && value.Length > 0)
+                    { point[field] = value; }
+                }
+                if (Property(item, 31006) is string type && int.TryParse(type, NumberStyles.Integer, CultureInfo.InvariantCulture, out int potentialType))
+                { point["potential_type"] = potentialType; }
                 if (point["potential_name"] is null && point["signal_name"] is null)
                 { report.Warning(page, "Potential definition " + Id(item) + " has no readable nonempty potential or signal name."); }
                 else

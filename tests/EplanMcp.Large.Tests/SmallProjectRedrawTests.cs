@@ -87,6 +87,7 @@ public sealed class SmallProjectRedrawTests(LiveEplan eplan, DestructiveHost hos
             var driver = new SmallProjectRedrawDriver(CallAsync, project, imports, report);
             JObject[] ordered = [.. source.Values.Select(value => value.Page).OrderBy(IsReportPage)
                 .ThenBy(page => (string?)page["pageType"] == "Overview" ? 0 : 1)];
+            await driver.PrepareLanguagesAsync(ordered);
             await driver.CreatePagesAsync(ordered);
             foreach (JObject page in ordered)
             {
