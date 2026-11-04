@@ -40,7 +40,9 @@ internal sealed class EplanPropertySetSession(string projectPath) : IPropertySet
             _lists.Add(Key(function), list);
         }
 
-        return new EplanPropertyReadAdapter.Scope(list, function.GetType().Name, "", Check, ownsList: false);
+        // A PLC card and its points are Function subclasses with the same property list.
+        string type = function.GetType().Name is "PLC" or "Terminal" or "BusTerminal" ? "Function" : function.GetType().Name;
+        return new EplanPropertyReadAdapter.Scope(list, type, "", Check, ownsList: false);
     }
 
     public void Write(PropertySetGuard guard)

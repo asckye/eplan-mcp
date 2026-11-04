@@ -11,6 +11,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
 {
     /// <summary>Inventory and project languages are copied in the same read work unit; no native resource escapes.</summary>
+    private static string? DevicePart(string? name) => name?.Split(':')[0];
+
     public PropertySetPlan Plan(string projectPath, int version, IReadOnlyList<PropertySetChange> changes,
         IReadOnlyList<SnapshotObject> functions, IReadOnlyList<string> languages, CancellationToken cancellationToken)
     {
@@ -116,7 +118,9 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
         result.Plan.Project = Path.GetFileName(projectPath);
         var names = new HashSet<string?>(resolved.Select(r => r.Object.Name), StringComparer.Ordinal);
         bool plc = resolved.Any(r => r.Id is not (20011 or 20027) || r.Object.Main != true);
-        foreach (var item in functions.Where(f => plc || names.Contains(f.Name))
+        // A PLC write reaches its own card's functions: guarding a whole project timed out at 30 s on 323 pages.
+        var cards = new HashSet<string?>(resolved.Select(r => DevicePart(r.Object.Name)), StringComparer.Ordinal);
+        foreach (var item in functions.Where(f => plc ? cards.Contains(DevicePart(f.Name)) : names.Contains(f.Name))
             .GroupBy(Key).Select(g => g.First()).OrderBy(Key, StringComparer.Ordinal)
             .SelectMany(obj => (plc ? PropertyWriteWhitelist.Entries.Values.Where(e => e.ApplicableCategory.Length == 0 || e.ApplicableCategory == obj.Category).Select(e => e.PropertyId)
                 : resolved.Where(r => r.Object.Name == obj.Name).Select(r => r.Id)).Distinct().OrderBy(id => id)
