@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A87、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A88、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -327,3 +327,8 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 对 CDP、CDPNG 的 `SymbolReference.GetLogicalArea()` 抛出 `NotImplementedException`；黑盒上可用。— 实测
 - 现有工具（同一运行）：`eplan_device_place` 放置 `SPECIAL/BCP` 和 PLC 点 `IEC_symbol/PLC_CBOX_PCON_PLUG` 成功；端子路线不接受
   `library`/`symbol`（`X2_2`、`XTR1`、`XFD`、`GRAPHICS/KA1_PE` 均被参数校验拒绝）；`SPECIAL/DCP` 的 `tag` 不能带 `:` 后缀（后缀由 EPLAN 分配）。— 实测
+
+### A87. 完整一致重绘的样式、定义点与宏框（2026-11-03，EPLAN 2026.0.3.25421，Electric P8）
+出处：负责人本轮任务说明及 scratch 的 `ExactMatchSpikeTests` 实测；以下是既有实测事实，本轮未运行 EPLAN，正式工具回归见 Large 待验台账。
+- 图形和文字的 `Placement.Pen` 先取副本、修改 `ColorId` / `Width` / `StyleId` / `PatternLength` / `LineEndType`，再赋回；`-16002` 是取默认值标记，可用于颜色、线宽、线型和图案长度并读回；`LineEndType` 是 sbyte（0..2），无法表示该标记。`PatternLength=8` 读回 `StyleFactor=-8`，`StyleFactor=2` 读回 `PatternLength=-2`，两者联动，工具只开放 `pattern_length`。— 实测
+- 图层经 `placement.Layer = project.LayerTable.Layers.First(l => l.Id == id)` 写入，读回 `LayerId`；不存在的 ID 应报告参数错误。`Polyline.Closed=true` 不改变顶点。矩形角度和 `TextBase.Rotation` 使用弧度，工具以度换算；`TextBase.Justification` 使用原枚举名（如 `MiddleLeft`、`BaseLineLeft`、`MiddleCenter`、`BaseLineCenter`、`FromLayer`）。旋转外框以 EPLAN 读回为准。— 实测

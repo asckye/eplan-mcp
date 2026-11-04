@@ -8681,7 +8681,7 @@
           "bytes": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 9.223372036854776E+18
+            "maximum": 9.223372036854776e+18
           },
           "sha256": {
             "type": "string",
@@ -15148,10 +15148,7 @@
           },
           "items": {
             "type": "array",
-            "minItems": 1,
-            "maxItems": 50,
             "items": {
-              "type": "object",
               "additionalProperties": false,
               "required": [
                 "kind"
@@ -15181,35 +15178,34 @@
                 "center": {
                   "type": "array"
                 },
-                "contents": {
-                  "type": "object"
-                },
-                "height_mm": {
-                  "type": "number"
-                },
-                "radius_mm": {
-                  "type": "number"
-                },
-                "radius_x_mm": {
-                  "type": "number"
-                },
-                "radius_y_mm": {
-                  "type": "number"
-                },
-                "angle": {
-                  "type": "number"
-                },
-                "start_angle": {
-                  "type": "number"
-                },
-                "end_angle": {
-                  "type": "number"
-                },
+                "contents": {},
+                "height_mm": {},
+                "radius_mm": {},
+                "radius_x_mm": {},
+                "radius_y_mm": {},
+                "angle": {},
+                "start_angle": {},
+                "end_angle": {},
                 "file": {
                   "type": "string"
+                },
+                "pen": {
+                  "type": "object"
+                },
+                "layer": {
+                  "type": "integer"
+                },
+                "closed": {
+                  "type": "boolean"
+                },
+                "alignment": {
+                  "type": "string"
                 }
-              }
-            }
+              },
+              "type": "object"
+            },
+            "minItems": 1,
+            "maxItems": 50
           },
           "snap_to_grid": {
             "type": "boolean",
@@ -15409,6 +15405,78 @@
                       "minLength": 1,
                       "maxLength": 500
                     }
+                  },
+                  "layer": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pen": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "color": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          }
+                        ]
+                      },
+                      "width_mm": {
+                        "type": "number"
+                      },
+                      "style": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          }
+                        ]
+                      },
+                      "pattern_length": {
+                        "type": "number"
+                      },
+                      "line_end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    }
+                  },
+                  "angle": {
+                    "type": "number"
+                  },
+                  "alignment": {
+                    "type": "string",
+                    "enum": [
+                      "FromLayer",
+                      "TopLeft",
+                      "TopCenter",
+                      "TopRight",
+                      "MiddleLeft",
+                      "MiddleCenter",
+                      "MiddleRight",
+                      "BottomLeft",
+                      "BottomCenter",
+                      "BottomRight",
+                      "BaseLineLeft",
+                      "BaseLineCenter",
+                      "BaseLineRight",
+                      "SpecialLeft",
+                      "SpecialCenter",
+                      "SpecialRight",
+                      "JicSpecialLeft",
+                      "JicSpecialCenter",
+                      "JicSpecialRight"
+                    ]
                   }
                 }
               },
@@ -15445,6 +15513,78 @@
                       "minLength": 1,
                       "maxLength": 500
                     }
+                  },
+                  "layer": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pen": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "color": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          }
+                        ]
+                      },
+                      "width_mm": {
+                        "type": "number"
+                      },
+                      "style": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          }
+                        ]
+                      },
+                      "pattern_length": {
+                        "type": "number"
+                      },
+                      "line_end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    }
+                  },
+                  "angle": {
+                    "type": "number"
+                  },
+                  "alignment": {
+                    "type": "string",
+                    "enum": [
+                      "FromLayer",
+                      "TopLeft",
+                      "TopCenter",
+                      "TopRight",
+                      "MiddleLeft",
+                      "MiddleCenter",
+                      "MiddleRight",
+                      "BottomLeft",
+                      "BottomCenter",
+                      "BottomRight",
+                      "BaseLineLeft",
+                      "BaseLineCenter",
+                      "BaseLineRight",
+                      "SpecialLeft",
+                      "SpecialCenter",
+                      "SpecialRight",
+                      "JicSpecialLeft",
+                      "JicSpecialCenter",
+                      "JicSpecialRight"
+                    ]
                   }
                 }
               },
@@ -15461,6 +15601,51 @@
                   },
                   "points": {
                     "$ref": "#/$defs/pair"
+                  },
+                  "layer": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pen": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "color": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          }
+                        ]
+                      },
+                      "width_mm": {
+                        "type": "number"
+                      },
+                      "style": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          }
+                        ]
+                      },
+                      "pattern_length": {
+                        "type": "number"
+                      },
+                      "line_end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    }
                   }
                 }
               },
@@ -15477,6 +15662,54 @@
                   },
                   "corners": {
                     "$ref": "#/$defs/pair"
+                  },
+                  "layer": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pen": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "color": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          }
+                        ]
+                      },
+                      "width_mm": {
+                        "type": "number"
+                      },
+                      "style": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          }
+                        ]
+                      },
+                      "pattern_length": {
+                        "type": "number"
+                      },
+                      "line_end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    }
+                  },
+                  "angle": {
+                    "type": "number"
                   }
                 }
               },
@@ -15493,6 +15726,55 @@
                   },
                   "points": {
                     "$ref": "#/$defs/points"
+                  },
+                  "layer": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pen": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "color": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          }
+                        ]
+                      },
+                      "width_mm": {
+                        "type": "number"
+                      },
+                      "style": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          }
+                        ]
+                      },
+                      "pattern_length": {
+                        "type": "number"
+                      },
+                      "line_end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    }
+                  },
+                  "closed": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -15523,6 +15805,51 @@
                   },
                   "end_angle": {
                     "type": "number"
+                  },
+                  "layer": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pen": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "color": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          }
+                        ]
+                      },
+                      "width_mm": {
+                        "type": "number"
+                      },
+                      "style": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          }
+                        ]
+                      },
+                      "pattern_length": {
+                        "type": "number"
+                      },
+                      "line_end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    }
                   }
                 }
               },
@@ -15555,6 +15882,51 @@
                   "angle": {
                     "type": "number",
                     "default": 0
+                  },
+                  "layer": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pen": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "color": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          }
+                        ]
+                      },
+                      "width_mm": {
+                        "type": "number"
+                      },
+                      "style": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          }
+                        ]
+                      },
+                      "pattern_length": {
+                        "type": "number"
+                      },
+                      "line_end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    }
                   }
                 }
               },
@@ -15576,6 +15948,51 @@
                   },
                   "corners": {
                     "$ref": "#/$defs/pair"
+                  },
+                  "layer": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "pen": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "color": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 255
+                          }
+                        ]
+                      },
+                      "width_mm": {
+                        "type": "number"
+                      },
+                      "style": {
+                        "oneOf": [
+                          {
+                            "const": -16002
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 6
+                          }
+                        ]
+                      },
+                      "pattern_length": {
+                        "type": "number"
+                      },
+                      "line_end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2
+                      }
+                    }
                   }
                 }
               }
@@ -17083,7 +17500,7 @@
           "seconds": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1.7976931348623157E+308
+            "maximum": 1.7976931348623157e+308
           },
           "hint": {
             "type": [

@@ -20,7 +20,11 @@ public sealed class PlacementText
     /// <summary>Ellipse radii in millimetres.</summary>
     public double RadiusXmm { get; set; }
     public double RadiusYmm { get; set; }
-    /// <summary>Ellipse rotation in degrees.</summary>
+    public Dictionary<string, double>? Pen { get; set; }
+    public int? Layer { get; set; }
+    public string? Alignment { get; set; }
+    public bool Closed { get; set; }
+    /// <summary>Rotation in degrees.</summary>
     public double Angle { get; set; }
     /// <summary>Arc start angle in degrees.</summary>
     public double StartAngle { get; set; }

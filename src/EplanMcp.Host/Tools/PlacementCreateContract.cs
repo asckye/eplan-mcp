@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tools;
@@ -6,7 +7,7 @@ namespace EplanMcp.Host.Tools;
 /// <summary>Full-profile creation contract; raw validation enforces the closed item branches.</summary>
 internal static class PlacementCreateContract
 {
-    internal static readonly JsonElement Input = JsonDocument.Parse("""
+    internal static readonly JsonElement Input = Styled(JsonDocument.Parse("""
         {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{
           "project":{"type":"string","minLength":1},"page":{"type":"string","minLength":1},
           "items":{"type":"array","minItems":1,"maxItems":50,"items":{"$ref":"#/$defs/item"}},
@@ -29,7 +30,7 @@ internal static class PlacementCreateContract
             {"type":"object","additionalProperties":false,"required":["kind","center","radius_x_mm","radius_y_mm"],"properties":{"kind":{"const":"ellipse"},"center":{"$ref":"#/$defs/point"},"radius_x_mm":{"type":"number","exclusiveMinimum":0,"maximum":10000},"radius_y_mm":{"type":"number","exclusiveMinimum":0,"maximum":10000},"angle":{"type":"number","default":0}}},
             {"type":"object","additionalProperties":false,"required":["kind","file","corners"],"properties":{"kind":{"const":"image"},"file":{"type":"string","minLength":1},"corners":{"$ref":"#/$defs/pair"}}}
           ]}}}
-        """).RootElement.Clone();
+        """).RootElement.Clone());
 
     internal static readonly JsonElement Output = JsonDocument.Parse("""
         {"type":"object","additionalProperties":false,"required":["project","page","execution","dryRun","gridSize","boundarySource","items","changes","connectionChanges"],"properties":{
@@ -58,9 +59,27 @@ internal static class PlacementCreateContract
         tool.Title = Definition.Title;
         tool.Description = Definition.Description;
         tool.InputSchema = JsonDocument.Parse("""
-            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","minItems":1,"maxItems":50,"items":{"type":"object","additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle","path_text","polyline","arc","ellipse","image"]},"position":{"type":"array"},"points":{"type":"array"},"corners":{"type":"array"},"center":{"type":"array"},"contents":{"type":"object"},"height_mm":{"type":"number"},"radius_mm":{"type":"number"},"radius_x_mm":{"type":"number"},"radius_y_mm":{"type":"number"},"angle":{"type":"number"},"start_angle":{"type":"number"},"end_angle":{"type":"number"},"file":{"type":"string"}}}},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true},"show_page":{"type":"boolean","default":false,"description":"Open page (UI)."},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
+            {"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","items":{"additionalProperties":false,"required":["kind"],"properties":{"kind":{"enum":["text","line","rectangle","path_text","polyline","arc","ellipse","image"]},"position":{"type":"array"},"points":{"type":"array"},"corners":{"type":"array"},"center":{"type":"array"},"contents":{},"height_mm":{},"radius_mm":{},"radius_x_mm":{},"radius_y_mm":{},"angle":{},"start_angle":{},"end_angle":{},"file":{"type":"string"},"pen":{"type":"object"},"layer":{"type":"integer"},"closed":{"type":"boolean"},"alignment":{"type":"string"}},"type":"object"},"minItems":1,"maxItems":50},"snap_to_grid":{"type":"boolean","default":true},"dry_run":{"type":"boolean","default":true},"show_page":{"type":"boolean","default":false,"description":"Open page (UI)."},"response_format":{"enum":["concise","detailed"],"default":"concise"}}}
             """).RootElement.Clone();
         tool.OutputSchema = Definition.OutputSchema;
+    }
+
+    private static JsonElement Styled(JsonElement input)
+    {
+        JsonNode schema = JsonNode.Parse(input.GetRawText())!;
+        foreach (JsonNode? branch in schema["$defs"]!["item"]!["oneOf"]!.AsArray())
+        {
+            JsonNode properties = branch!["properties"]!;
+            PlacementStyleSchema.Add(properties);
+            string kind = properties["kind"]!["const"]!.GetValue<string>();
+            if (kind is "text" or "path_text" or "rectangle")
+            { properties["angle"] = JsonNode.Parse("""{"type":"number"}"""); }
+            if (kind is "text" or "path_text")
+            { properties["alignment"] = PlacementStyleSchema.Alignment(); }
+            if (kind == "polyline")
+            { properties["closed"] = JsonNode.Parse("""{"type":"boolean","default":false}"""); }
+        }
+        return JsonSerializer.SerializeToElement(schema);
     }
 
     private static JsonElement WithDefinitions()

@@ -13,6 +13,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
     public void Validate(string projectPath, string page, PlacementText text)
     {
         MainThread.Assert();
+        EplanPlacementStyle.Validate(EplanProjects.ByPath(projectPath), text.Layer, text.Alignment);
         DocumentTypeManager.DocumentType[] allowed = [DocumentTypeManager.DocumentType.Circuit, DocumentTypeManager.DocumentType.Overview, DocumentTypeManager.DocumentType.Graphics];
         if (!allowed.Contains(Find(projectPath, page).PageType))
         { throw WriteArguments.Invalid(["/page requires a Circuit, Overview or Graphics page from eplan_page_list."]); }
@@ -42,6 +43,11 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         OperationContext.Current.ThrowIfCancellationRequested();
         PointD Point(double[] xy) => new(DrawingCoordinates.MillimetresToApi(xy[0]), DrawingCoordinates.MillimetresToApi(xy[1]));
         double[] XY(PointD point) => [DrawingCoordinates.ApiToMillimetres(point.X), DrawingCoordinates.ApiToMillimetres(point.Y)];
+        Func<PlacementText> Styled(GraphicalPlacement placement, Func<PlacementText> read)
+        {
+            EplanPlacementStyle.Apply(placement, EplanProjects.ByPath(projectPath), text.Layer, text.Pen);
+            return () => EplanPlacementStyle.Read(placement, text, read());
+        }
         if (text.Kind is not ("text" or "path_text"))
         {
 #pragma warning disable CA2000 // A39/A54/A55: placements belong to the project, including on rollback.
@@ -51,9 +57,8 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
                 polyline.Create(Find(projectPath, page));
                 for (int i = 0; i < text.Points.Length; i++)
                 { PointD point = Point(text.Points[i]); polyline.SetPointAt(i, ref point); }
-                polyline.Closed = false;
-                return () => polyline.Closed ? throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Polyline readback is closed.")
-                    : new() { Kind = "polyline", Position = XY(polyline.GetPointAt(0)), Points = Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i))).ToArray() };
+                polyline.Closed = text.Closed;
+                return Styled(polyline, () => new() { Kind = "polyline", Closed = polyline.Closed, Position = XY(polyline.GetPointAt(0)), Points = Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i))).ToArray() });
             }
             if (text.Kind is "arc" or "ellipse")
             {
@@ -66,7 +71,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
                 { arc.SetCircle(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm)); }
                 else
                 { arc.SetArc(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm), text.StartAngle * (Math.PI / 180), text.EndAngle * (Math.PI / 180), false); }
-                return () =>
+                return Styled(arc, () =>
                 {
                     if ((ellipse || circle) && arc.Kind.ToString() != (ellipse ? "Ellipse" : "Circle"))
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Native arc Kind did not read back as the requested Circle or Ellipse."); }
@@ -81,26 +86,27 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
                         RadiusYmm = ellipse ? DrawingCoordinates.ApiToMillimetres(arc.SecondRadius) : 0,
                         Angle = ellipse ? arc.ElipseAngle * (180 / Math.PI) : 0
                     };
-                };
+                });
             }
             if (text.Kind == "image")
             {
                 var image = new Image();
                 // XML: reference the checked imports file; neither copy nor overwrite project files.
                 image.Create(Find(projectPath, page), text.FilePath, Point(text.Position), Point(text.EndPosition), false, false);
-                return () => new() { Kind = "image", Position = XY(image.LowerLeftCorner), EndPosition = XY(image.UpperRightCorner), File = text.File, FilePath = PathMap.SubstitutePath(image.FileName, projectPath), Sha256 = text.Sha256 };
+                return Styled(image, () => new() { Kind = "image", Position = XY(image.LowerLeftCorner), EndPosition = XY(image.UpperRightCorner), File = text.File, FilePath = PathMap.SubstitutePath(image.FileName, projectPath), Sha256 = text.Sha256 });
             }
             if (text.Kind == "line")
             {
                 var line = new Line();
                 line.Create(Find(projectPath, page), Point(text.Position), Point(text.EndPosition));
-                return () => new() { Kind = text.Kind, Position = XY(line.StartPoint), EndPosition = XY(line.EndPoint) };
+                return Styled(line, () => new() { Kind = text.Kind, Position = XY(line.StartPoint), EndPosition = XY(line.EndPoint) });
             }
             var rectangle = new Rectangle();
 #pragma warning restore CA2000
             rectangle.Create(Find(projectPath, page));
             rectangle.SetArea(Point(text.Position), Point(text.EndPosition)); // S42 r3/A54: Create then SetArea.
-            return () => new() { Kind = text.Kind, Position = XY(rectangle.LowerLeftCorner), EndPosition = XY(rectangle.UpperRightCorner) };
+            rectangle.Angle = text.Angle * Math.PI / 180;
+            return Styled(rectangle, () => new() { Kind = text.Kind, Angle = rectangle.Angle * 180 / Math.PI, Position = XY(rectangle.LowerLeftCorner), EndPosition = XY(rectangle.UpperRightCorner) });
         }
         using var content = new MultiLangString();
         foreach (KeyValuePair<string, string> entry in text.Contents)
@@ -116,7 +122,10 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         else
         { created.Create(Find(projectPath, page), content, DrawingCoordinates.MillimetresToApi(text.HeightMm)); }
         created.Location = new PointD(DrawingCoordinates.MillimetresToApi(text.Position[0]), DrawingCoordinates.MillimetresToApi(text.Position[1]));
-        return () => Read(created);
+        created.Rotation = text.Angle * Math.PI / 180;
+        if (text.Alignment is { } alignment)
+        { created.Justification = (TextBase.JustificationType)Enum.Parse(typeof(TextBase.JustificationType), alignment); }
+        return Styled(created, () => { PlacementText actual = Read(created); actual.Angle = created.Rotation * 180 / Math.PI; return actual; });
     }
 
     private static PlacementText Read(Text created)

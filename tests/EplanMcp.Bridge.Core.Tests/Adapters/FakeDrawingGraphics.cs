@@ -2,11 +2,11 @@ using Eplan.EplApi.Base;
 
 namespace Eplan.EplApi.DataModel.Graphics;
 
-internal abstract class TextBase(long oid) : Placement(oid)
+internal abstract class TextBase(long oid) : GraphicalPlacement(oid)
 {
     public int UndockCalls { get; private set; }
     public double Rotation { get; set; }
-    public enum JustificationType { BaseLineLeft }
+    public enum JustificationType { FromLayer, BaseLineLeft, MiddleLeft, MiddleCenter, BaseLineCenter }
     public JustificationType Justification { get; set; }
     public MultiLangString Contents { get; set; } = new("en_US@Test;");
     public double Height { get; set; } = 3;
@@ -36,7 +36,7 @@ internal class Text(long oid = 99) : TextBase(oid)
 
 internal sealed class PathText(long oid = 102) : Text(oid);
 
-internal sealed class PolyLine(long oid = 103) : Placement(oid)
+internal sealed class PolyLine(long oid = 103) : GraphicalPlacement(oid)
 {
     private readonly List<PointD> _points = [];
     public int NumberOfPoints => _points.Count;
@@ -52,7 +52,7 @@ internal sealed class PolyLine(long oid = 103) : Placement(oid)
     }
 }
 
-internal sealed class Arc(long oid = 104) : Placement(oid)
+internal sealed class Arc(long oid = 104) : GraphicalPlacement(oid)
 {
     public double Radius { get; private set; }
     public double StartAngle { get; private set; }
@@ -100,7 +100,7 @@ internal class PropertyPlacement(long oid = 99, Placement? parent = null) : Text
 
 internal sealed class ContextPropertyPlacement(long oid, Placement parent) : PropertyPlacement(oid, parent);
 
-internal sealed class Line(long oid = 100) : Placement(oid)
+internal sealed class Line(long oid = 100) : GraphicalPlacement(oid)
 {
     public PointD StartPoint { get; set; }
     public PointD EndPoint { get; set; }
@@ -113,8 +113,9 @@ internal sealed class Line(long oid = 100) : Placement(oid)
     }
 }
 
-internal class Rectangle(long oid = 101) : Placement(oid)
+internal class Rectangle(long oid = 101) : GraphicalPlacement(oid)
 {
+    public double Angle { get; set; }
     public PointD LowerLeftCorner { get; private set; }
     public PointD UpperRightCorner { get; private set; }
     public void Create(Page page) => page.AllPlacements = [.. page.AllPlacements, this];
@@ -139,17 +140,22 @@ internal sealed class Image(long oid = 105) : Rectangle(oid)
 
 internal struct Pen
 {
-    public int StyleId { get; set; }
+    public short ColorId { get; set; }
+    public double Width { get; set; }
+    public double PatternLength { get; set; }
+    public sbyte LineEndType { get; set; }
+    public short StyleId { get; set; }
 }
 
-internal sealed class GraphicalPlacement(long oid) : Placement(oid)
+internal class GraphicalPlacement(long oid, int type = 4) : Placement(oid, type)
 {
     private Pen _pen;
     public bool RejectStyle { get; set; }
+    public Exception? PenError { get; set; }
     public Action? OnSet { get; set; }
-    public Pen Pen
+    public override Pen Pen
     {
-        get => _pen;
+        get => PenError is { } error ? throw error : _pen;
         set { if (!RejectStyle) { _pen = value; } OnSet?.Invoke(); }
     }
 }

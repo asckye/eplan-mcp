@@ -16,10 +16,10 @@ public sealed class DrawingDtoTests
             Page = "P",
             Items =
             [
-                new() { Kind = "polyline", Position = [10, 20], Points = [[10, 20], [30, 40], [50, 20]] },
+                new() { Kind = "polyline", Position = [10, 20], Points = [[10, 20], [30, 40], [50, 20]], Closed = true, Layer = 108, Pen = new() { ["color"] = -16002, ["width_mm"] = -16002, ["style"] = -16002, ["pattern_length"] = -16002, ["line_end"] = 2 } },
                 new() { Kind = "ellipse", Position = [50, 50], RadiusXmm = 1.43748, RadiusYmm = 1.43748, Angle = 90 },
                 new() { Kind = "arc", Position = [50, 50], RadiusMm = 8, StartAngle = 30, EndAngle = 135 },
-                new() { Kind = "path_text", Position = [30, 50], HeightMm = 3.5, Contents = new() { ["??_??"] = "Motor circuit" } },
+                new() { Kind = "path_text", Position = [30, 50], HeightMm = 3.5, Angle = 90, Alignment = "BaseLineCenter", Contents = new() { ["??_??"] = "Motor circuit" } },
                 new() { Kind = "image", Position = [60, 60], EndPosition = [70, 70], File = "fixtures/image.png", FilePath = "resolved-image.png", Sha256 = new('a', 64) }
             ]
         };
@@ -31,6 +31,14 @@ public sealed class DrawingDtoTests
         PlacementTextCreateArgs fromBridge = System.Text.Json.JsonSerializer.Deserialize<PlacementTextCreateArgs>(bridgeJson, host)!;
         Assert.Equal(json, System.Text.Json.JsonSerializer.Serialize(fromBridge, host));
         Assert.Equal(["polyline", "ellipse", "arc", "path_text", "image"], fromBridge.Items!.Select(i => i.Kind));
+        Assert.True(fromBridge.Items![0].Closed);
+        Assert.Equal(108, fromBridge.Items![0].Layer);
+        Assert.Equal(-16002, fromBridge.Items![0].Pen!["pattern_length"]);
+        Assert.Equal("BaseLineCenter", fromBridge.Items![3].Alignment);
+        Assert.Equal(90, fromBridge.Items![3].Angle);
+        Assert.Null(fromBridge.Items![1].Pen);
+        Assert.Null(fromBridge.Items![1].Layer);
+        Assert.Null(fromBridge.Items![1].Alignment);
     }
 
     [Fact]

@@ -102,7 +102,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             { bounds = [0, 0, 0, 0]; } // A53/A54: empty property text has no visible ink.
 
             using MultiLangString? contents = placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null };
-            string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null;
+            string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : placement is Rectangle rectangle ? EplanTextFormat.Angle(rectangle.Angle) : null;
             string? height = placement is PathText { Height: -16002 } ? "-16002"
                 : placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null;
             string? imagePath = null;
@@ -129,6 +129,19 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             }
             catch (Exception ex) when (ex is BaseException or InvalidOperationException)
             { WriteExceptionDiagnostics.Report(ex); graphics = new() { ["read_warning"] = "Graphics metadata unavailable; inspect this placement in EPLAN." }; }
+            try
+            {
+                if (placement is GraphicalPlacement graphical)
+                {
+                    Pen pen = graphical.Pen;
+                    foreach (var pair in new Dictionary<string, string?> { ["layer"] = graphical.LayerId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        ["pen_color"] = Number(pen.ColorId), ["pen_width_mm"] = Number(pen.Width), ["pen_style"] = Number(pen.StyleId),
+                        ["pen_pattern_length"] = Number(pen.PatternLength), ["pen_line_end"] = Number(pen.LineEndType),
+                        ["alignment"] = (placement as TextBase)?.Justification.ToString() }) { graphics[pair.Key] = pair.Value; }
+                }
+            }
+            catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+            { WriteExceptionDiagnostics.Report(ex); graphics["read_warning"] = "Style metadata unavailable; inspect this placement in EPLAN."; }
             // A75 catalog: DynamicConnectionLine derives from SymbolReference (DMClassId.InternalTypeId = 33),
             // but its wire outline is neither a layout symbol nor a container.
             // Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.

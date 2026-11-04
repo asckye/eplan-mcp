@@ -95,9 +95,26 @@ internal static class PlacementCreatePlanning
         {
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
             string? kind = item.ValueKind == JsonValueKind.Object && item.TryGetProperty("kind", out JsonElement k) && k.ValueKind == JsonValueKind.String ? k.GetString() : null;
-            if (!Members(item, at, kind == "path_text" ? "kind position contents" : IsText(kind) ? "kind position contents height_mm" : kind is "line" or "polyline" ? "kind points" : kind == "ellipse" ? "kind center radius_x_mm radius_y_mm" : kind == "arc" ? "kind center radius_mm start_angle end_angle" : kind == "image" ? "kind file corners" : "kind corners", kind == "path_text" ? "height_mm" : kind == "ellipse" ? "angle" : ""))
+            if (!Members(item, at, kind == "path_text" ? "kind position contents" : IsText(kind) ? "kind position contents height_mm" : kind is "line" or "polyline" ? "kind points" : kind == "ellipse" ? "kind center radius_x_mm radius_y_mm" : kind == "arc" ? "kind center radius_mm start_angle end_angle" : kind == "image" ? "kind file corners" : "kind corners", "pen layer " + (kind == "path_text" ? "height_mm angle alignment" : kind == "text" ? "angle alignment" : kind is "ellipse" or "rectangle" ? "angle" : kind == "polyline" ? "closed" : "")))
             { continue; }
             Check(kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "ellipse" or "path_text" or "image", at + "/kind", "unsupported primitive kind.");
+            if (item.TryGetProperty("layer", out JsonElement layer))
+            { Check(layer.ValueKind == JsonValueKind.Number && layer.TryGetInt32(out int id) && id >= 0, at + "/layer", "requires an integer layer ID."); }
+            if (item.TryGetProperty("angle", out JsonElement rotation))
+            { Number(rotation, at + "/angle", -double.MaxValue, double.MaxValue); }
+            if (item.TryGetProperty("alignment", out JsonElement alignment))
+            { Check(alignment.ValueKind == JsonValueKind.String && PlacementStyleSchema.Alignments.Contains(alignment.GetString(), StringComparer.Ordinal), at + "/alignment", "requires an EPLAN alignment name."); }
+            if (item.TryGetProperty("closed", out JsonElement closed))
+            { Check(closed.ValueKind is JsonValueKind.True or JsonValueKind.False, at + "/closed", "requires a boolean."); }
+            if (item.TryGetProperty("pen", out JsonElement pen) && Members(pen, at + "/pen", "", "color width_mm style pattern_length line_end"))
+            {
+                foreach (JsonProperty p in pen.EnumerateObject())
+                {
+                    Number(p.Value, at + "/pen/" + p.Name, -double.MaxValue, double.MaxValue);
+                    if (p.Name is "color" or "style" or "line_end")
+                    { Check(p.Value.ValueKind == JsonValueKind.Number && p.Value.TryGetInt32(out int value) && (p.Name != "line_end" && value == -16002 || value >= 0 && value <= (p.Name == "color" ? 255 : p.Name == "style" ? 6 : 2)), at + "/pen/" + p.Name, "requires a supported integer value; line_end is 0..2."); }
+                }
+            }
             if (IsText(kind))
             {
                 if (item.TryGetProperty("position", out JsonElement p))
@@ -215,7 +232,11 @@ internal static class PlacementCreatePlanning
             RadiusMm = kind == "arc" ? item.GetProperty("radius_mm").GetDouble() : 0,
             RadiusXmm = kind == "ellipse" ? item.GetProperty("radius_x_mm").GetDouble() : 0,
             RadiusYmm = kind == "ellipse" ? item.GetProperty("radius_y_mm").GetDouble() : 0,
-            Angle = kind == "ellipse" && item.TryGetProperty("angle", out JsonElement angle) ? angle.GetDouble() : 0,
+            Angle = item.TryGetProperty("angle", out JsonElement angle) ? angle.GetDouble() : 0,
+            Layer = item.TryGetProperty("layer", out JsonElement layer) ? layer.GetInt32() : null,
+            Pen = item.TryGetProperty("pen", out JsonElement pen) ? pen.Deserialize<Dictionary<string, double>>() : null,
+            Alignment = item.TryGetProperty("alignment", out JsonElement alignment) ? alignment.GetString() : null,
+            Closed = item.TryGetProperty("closed", out JsonElement closed) && closed.GetBoolean(),
             StartAngle = kind == "arc" ? item.GetProperty("start_angle").GetDouble() : 0,
             EndAngle = kind == "arc" ? item.GetProperty("end_angle").GetDouble() : 0,
             File = kind == "image" ? ImportFiles.Normalized(item.GetProperty("file").GetString()!) : ""

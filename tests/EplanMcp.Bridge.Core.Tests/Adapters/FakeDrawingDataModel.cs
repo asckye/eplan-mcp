@@ -29,6 +29,9 @@ internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
     private PointD _location;
     public Exception? LocationError { get; set; }
     public PointD Location { get => LocationError is { } error ? throw error : _location; set => _location = value; }
+    public virtual Pen Pen { get; set; }
+    public Layer Layer { get; set; } = new() { Id = 0 };
+    public int LayerId => Layer.Id;
     public Group? Group { get; set; }
     public PointD[] Bounds { get; set; } = [new(0, 0), new(10, 10)];
     public Exception? BoundsError { get; set; }
@@ -47,7 +50,7 @@ internal interface IPropertyPlacementsContainer
     public PropertyPlacement[] PropertyPlacements { get; }
 }
 
-internal class SymbolReference(long oid) : Placement(oid, 17)
+internal class SymbolReference(long oid) : GraphicalPlacement(oid, 17)
 {
     public BoxSymbolVariant SymbolVariant { get; } = new();
     public PinBase[] GraphicalConnectionPoints { get; set; } = [];
@@ -152,6 +155,9 @@ internal sealed class Page : StorableObject, IWriteProtection, IDisposable
     public void Dispose() => throw new InvalidOperationException("Borrowed page must never be disposed.");
 }
 
+internal sealed class Layer { public int Id { get; set; } }
+internal sealed class LayerTable { public Layer[] Layers { get; set; } = [new() { Id = 0 }, new() { Id = 3 }]; }
+
 internal sealed class Project(params Page[] pages) : StorableObject
 {
     public Action<int, string, FunctionPropertyList, FunctionPropertyList>? ParseName { get; set; }
@@ -161,6 +167,7 @@ internal sealed class Project(params Page[] pages) : StorableObject
     public Action? EndTransaction { get; set; }
     public string ProjectFullName { get; set; } = "project";
     public Page[] Pages { get; } = pages;
+    public LayerTable LayerTable { get; } = new();
     public string Display { get; set; } = "zh_CN;";
     public Function[] UnplacedFunctions { get; set; } = [];
     public bool RejectUnfilteredFunctions { get; set; }

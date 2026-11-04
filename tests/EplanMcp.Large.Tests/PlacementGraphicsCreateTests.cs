@@ -152,6 +152,48 @@ public sealed class PlacementGraphicsCreateTests(LiveEplan eplan, WriteHost host
         Assert.Equal(8, Number(circle, "radius_mm"), 8);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task AllPrimitiveStyles_ReadBackIncludingDefaultSentinels(bool defaults)
+    {
+        Assert.Equal(eplan.ProcessId, host.ProcessId);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        Assert.Equal(host.Writable, session.Project, ignoreCase: true);
+        string page = Assert.Single(await session.CreatePagesAsync(1));
+        var pen = new { color = defaults ? -16002 : 1, width_mm = defaults ? -16002 : 0.25, style = defaults ? -16002 : 1, pattern_length = defaults ? -16002 : 8, line_end = 2 };
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = host.Writable,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["snap_to_grid"] = false,
+            ["response_format"] = "detailed",
+            ["items"] = new object[] {
+                new { kind = "line", points = (int[][])[[20, 40], [40, 40]], layer = 108, pen },
+                new { kind = "rectangle", corners = (int[][])[[60, 40], [80, 60]], angle = 90, layer = 108, pen },
+                new { kind = "text", position = (int[])[100, 80], height_mm = 3.5, contents = new Dictionary<string,string> { ["??_??"] = "Style" }, angle = 90, alignment = "MiddleLeft", layer = 108, pen },
+                new { kind = "path_text", position = (int[])[140, 80], height_mm = 3.5, contents = new Dictionary<string,string> { ["??_??"] = "Path style" }, angle = 90, alignment = "BaseLineCenter", layer = 108, pen },
+                new { kind = "polyline", points = (int[][])[[180, 40], [200, 60], [220, 40]], closed = true, layer = 108, pen } }
+        };
+        JsonElement rows = (await CreateAndReadback(request)).GetProperty("drawings").GetProperty("items");
+        foreach (string kind in new[] { "Line", "Rectangle", "Text", "PathText", "PolyLine" })
+        {
+            JsonElement properties = Assert.Single(rows.EnumerateArray(), r => r.GetProperty("kind").GetString() == kind).GetProperty("properties");
+            Assert.Equal(108, Number(properties, "layer"));
+            foreach (JsonProperty field in JsonSerializer.SerializeToElement(pen).EnumerateObject())
+            { Assert.Equal(field.Value.GetDouble(), Number(properties, "pen_" + field.Name), 7); }
+            if (kind is "Text" or "PathText" or "Rectangle")
+            { Assert.Equal(90, Number(properties, "angle"), 7); }
+            if (kind == "PolyLine")
+            { Assert.Equal("true", properties.GetProperty("closed").GetString()); }
+            if (kind == "Text")
+            { Assert.Equal("MiddleLeft", properties.GetProperty("alignment").GetString()); }
+            if (kind == "PathText")
+            { Assert.Equal("BaseLineCenter", properties.GetProperty("alignment").GetString()); }
+        }
+    }
+
     private async Task<JsonElement> CreateAndReadback(Dictionary<string, object?> request)
     {
         var read = new Dictionary<string, object?> { ["project"] = host.Writable, ["page"] = request["page"], ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };

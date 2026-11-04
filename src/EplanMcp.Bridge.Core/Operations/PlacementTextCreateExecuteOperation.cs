@@ -26,7 +26,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
                 if (!names.Contains(p.Name, StringComparer.Ordinal))
                 { throw InvalidArgument(at + "/" + p.Name.Replace("~", "~0").Replace("/", "~1") + " is unknown."); }
             }
-            foreach (string name in required.Split(' '))
+            foreach (string name in required.Split(' ').Where(n => n.Length != 0))
             { if (obj[name] is null) { throw InvalidArgument(at + "/" + name + " is required."); } }
         }
         bool batch = (args as JObject)?["items"] is { Type: not JTokenType.Null };
@@ -40,7 +40,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         foreach (JToken row in rows)
         {
             string at = batch ? "/items/" + (index++).ToString(CultureInfo.InvariantCulture) : "/text";
-            Members(row, at, "position heightMm contents", "kind endPosition points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256");
+            Members(row, at, "position heightMm contents", "kind endPosition points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256 pen layer alignment closed");
             string kind = row["kind"]?.Type == JTokenType.String ? (string)row["kind"]! : "text";
             if (row["kind"] is not null && row["kind"]!.Type != JTokenType.String || !KnownKind(kind))
             { throw InvalidArgument(at + "/kind is not a supported primitive."); }
@@ -54,6 +54,18 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             Number(row["heightMm"]!, at + "/heightMm");
             if (row["contents"] is not JObject contents || contents.Properties().Any(p => p.Value.Type != JTokenType.String))
             { throw InvalidArgument(at + "/contents requires explicit language strings."); }
+            if (row["angle"] is { Type: not JTokenType.Null } rotation)
+            { Number(rotation, at + "/angle"); }
+            if (row["layer"] is { Type: not JTokenType.Null } layer && (layer.Type != JTokenType.Integer || !int.TryParse(layer.ToString(), out int id) || id < 0)
+                || row["closed"] is { Type: not JTokenType.Null and not JTokenType.Boolean }
+                || row["alignment"] is { Type: not JTokenType.Null and not JTokenType.String })
+            { throw InvalidArgument(at + ": invalid style type."); }
+            if (row["pen"] is { Type: not JTokenType.Null } pen)
+            {
+                Members(pen, at + "/pen", "", "color width_mm style pattern_length line_end");
+                foreach (JProperty value in ((JObject)pen).Properties())
+                { Number(value.Value, at + "/pen/" + value.Name); if (!ValidPen(value.Name, (double)value.Value)) { throw InvalidArgument(at + "/pen/" + value.Name + " is out of range."); } }
+            }
             if (kind == "polyline" && (row["points"] is not JArray points || points.Count < 2 || points.Any(p => p is not JArray xy || xy.Count != 2)))
             { throw InvalidArgument(at + "/points requires at least two points."); }
             if (kind == "polyline")
@@ -99,6 +111,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
                 { image!.Read(hash: true); images.Add(image); }
                 catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
             }
+            if (!Finite(item.Angle) || item.Layer < 0 || item.Alignment is not null && !IsText(item) || item.Closed && item.Kind != "polyline" || item.Pen?.Any(p => !ValidPen(p.Key, p.Value)) == true)
+            { throw WriteArguments.NotStarted(InvalidArgument("/items: invalid style values.")); }
             Validate(new() { Project = args.Project, Page = args.Page, Text = item });
         }
         PageDrawingGeometry geometry = drawings?.Read(WriteArguments.Writable(catalog, args.Project).Path, args.Page)
@@ -165,7 +179,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
 
     private static PlacementText Verify(PlacementText text, PlacementText actual)
     {
-        if (actual.Kind != text.Kind || !Close(actual.EndPosition, text.EndPosition) || actual.HeightMm != text.HeightMm || !Close(actual.Position, text.Position) || actual.Contents.Count != text.Contents.Count
+        if (actual.Kind != text.Kind || actual.Closed != text.Closed || actual.Layer != text.Layer || actual.Alignment != text.Alignment
+            || (text.Pen is not null && (actual.Pen is null || text.Pen.Any(p => !actual.Pen.TryGetValue(p.Key, out double value) || !Close(p.Value, value)))) || !Close(actual.EndPosition, text.EndPosition) || actual.HeightMm != text.HeightMm || !Close(actual.Position, text.Position) || actual.Contents.Count != text.Contents.Count
             || actual.Points.Length != text.Points.Length || actual.Points.Zip(text.Points, Close).Any(equal => !equal)
             || !Close(actual.RadiusMm, text.RadiusMm) || !Finite(actual.StartAngle) || !Finite(actual.EndAngle)
             || !DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle) && (Math.Abs(actual.StartAngle - text.StartAngle) > 1e-9 || Math.Abs(actual.EndAngle - text.EndAngle) > 1e-9)
@@ -178,6 +193,14 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         return actual;
     }
 
+    internal static bool ValidPen(string key, double value) => Finite(value) && (key switch
+    {
+        "color" => value == -16002 || value is >= 0 and <= 255 && value == Math.Truncate(value),
+        "style" => value == -16002 || value is >= 0 and <= 6 && value == Math.Truncate(value),
+        "line_end" => value is >= 0 and <= 2 && value == Math.Truncate(value),
+        "width_mm" or "pattern_length" => true,
+        _ => false
+    });
     private static bool KnownKind(string kind) => kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "ellipse" or "path_text" or "image";
     private static bool IsText(PlacementText p) => p.Kind is "text" or "path_text";
     private static bool Finite(double n) => !double.IsNaN(n) && !double.IsInfinity(n);
