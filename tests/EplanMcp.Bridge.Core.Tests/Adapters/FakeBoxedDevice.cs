@@ -8,13 +8,31 @@ internal sealed class BoxedDevice(long oid = 40) : Function(oid)
 {
     [ThreadStatic]
     public static Action<BoxedDevice>? OnCreate;
-    public new SymbolVariant SymbolVariant { get; set; } = new();
+    private SymbolVariant _symbol = new();
+    private bool _created;
+
+    /// <summary>A86: the native setter throws S063080 on an object that has not been created.</summary>
+    public new SymbolVariant SymbolVariant
+    {
+        get => _symbol;
+        set
+        {
+            if (!_created)
+            { throw new InvalidOperationException("S063080: the object has not been created."); }
+            _symbol = value;
+            base.SymbolVariant.Library = value.SymbolLibraryName;
+            base.SymbolVariant.Name = value.SymbolName;
+            base.SymbolVariant.Variant = value.VariantNr;
+        }
+    }
+
     public bool WrongArea { get; set; }
     private RectangleD _area;
 
     public void Create(Page page)
     {
-        base.Create(page, SymbolVariant);
+        base.Create(page, _symbol);
+        _created = true;
         IsMainFunction = true;
         FunctionCategory = FunctionCategory.Blackbox;
         OnCreate?.Invoke(this);

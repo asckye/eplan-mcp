@@ -73,7 +73,16 @@ internal sealed partial class EplanDeviceSymbolPlacement
         using FunctionPropertyList values = terminal.Properties;
         values.FUNC_PINORTERMINALNUMBER = args.TerminalNumber!;
         using PropertyValue number = values.FUNC_PINORTERMINALNUMBER;
-        using PropertyValue sort = values.FUNC_TERMINALSORTCODE;
+        string? sortCode = null;
+        try
+        {
+            using PropertyValue sort = values.FUNC_TERMINALSORTCODE;
+            sortCode = sort.IsEmpty ? null : sort.ToString();
+        }
+        catch (PropertyNotFoundException)
+        {
+            // Live 2026-11-03: GRAPHICS/KA1_PE terminals have no sort code property (S063109); the result only reports it.
+        }
         TerminalStrip? owner = terminal.TerminalStrip;
         CheckTerminal(Same(name, strip.Name) && strip.IsMainFunction, $"strip reads back as '{strip.Name}', main function {strip.IsMainFunction}");
         CheckTerminal(Same(tag, terminal.Name), $"terminal name reads back as '{terminal.Name}'");
@@ -101,7 +110,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
                 Number = number.ToString(),
                 Owner = owner?.Name,
                 Position = [terminal.Location.X, terminal.Location.Y],
-                SortCode = sort.IsEmpty ? null : sort.ToString(),
+                SortCode = sortCode,
                 StripCreated = create,
                 StripPosition = args.TerminalStripPosition is null ? null : [strip.Location.X, strip.Location.Y],
                 StripText = args.TerminalStripText

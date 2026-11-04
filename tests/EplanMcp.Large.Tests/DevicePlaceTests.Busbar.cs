@@ -28,7 +28,8 @@ public sealed partial class DevicePlaceTests
                 ["dry_run"] = false
             });
             Assert.Equal(ExecutionState.Committed, definition.GetProperty("execution").GetString());
-            Assert.Equal("TextFunction", definition.GetProperty("device").GetProperty("type").GetString());
+            // A86: TextFunction is the symbol type in the library; the object itself reads back as Function.
+            Assert.Equal("Function", definition.GetProperty("device").GetProperty("type").GetString());
             Assert.Equal("BusBarDefText", definition.GetProperty("device").GetProperty("category").GetString());
             Assert.True(definition.GetProperty("device").GetProperty("isMainFunction").GetBoolean());
             snapshots.Add((await session.SnapshotAsync()).Hash);

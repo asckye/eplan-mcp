@@ -1,5 +1,7 @@
 namespace Eplan.EplApi.DataModel;
 
+internal sealed class PropertyNotFoundException : Exception;
+
 internal sealed class FunctionPropertyList(FakeCableStore? store = null, Dictionary<int, string>? values = null) : NativeCableList(store)
 {
     public PropertyValue FUNC_DEVICETAG_FULLNAME { get; set; } = new("K1");

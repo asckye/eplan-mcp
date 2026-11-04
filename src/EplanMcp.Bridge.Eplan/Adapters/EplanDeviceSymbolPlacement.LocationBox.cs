@@ -71,9 +71,11 @@ internal sealed partial class EplanDeviceSymbolPlacement
     private DevicePlaceData CreateBlackBox(DevicePlaceArgs args, string tag, Page page, SymbolVariant variant)
     {
 #pragma warning disable CA2000 // A86: persistent boxes belong to EPLAN, including on Abort.
-        var box = new BoxedDevice { SymbolVariant = variant };
+        var box = new BoxedDevice();
 #pragma warning restore CA2000
+        // A86: the symbol can only be set on a created object (S063080 before Create).
         box.Create(page);
+        box.SymbolVariant = variant;
         box.Name = tag;
         box.SetLogicalArea(new PointD(args.X, args.Y), new PointD(args.CornerX!.Value, args.CornerY!.Value));
         var category = box.FunctionCategory;
@@ -97,7 +99,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         Require(placed.IsPlaced && placed.Page.Name == data.Page && placed.SymbolVariant.SymbolLibraryName == _symbol.Library
             && placed.SymbolVariant.SymbolName == _symbol.Name && placed.SymbolVariant.VariantNr == _symbol.Variant && data.Category == _symbol.FunctionCategory);
         if (DeviceSymbolPlan.BusBarDefinition(args))
-        { Require(data.Type == "TextFunction" && data.IsMainFunction == true && data.Category == "BusBarDefText"); }
+        { Require(data.IsMainFunction == true && data.Category == "BusBarDefText"); }
         BoxedDevice? box = placed as BoxedDevice ?? functions.OfType<BoxedDevice>().FirstOrDefault(b => b.FunctionsInside.Any(f => f.ObjectIdentifier == placed.ObjectIdentifier));
         if (box is null)
         { return; }

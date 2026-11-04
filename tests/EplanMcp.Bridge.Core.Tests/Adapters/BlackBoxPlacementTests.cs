@@ -18,8 +18,9 @@ public sealed class BlackBoxPlacementTests
         var page = new Page { Name = "=GAA+A1&EFS1/1" };
         EplanProjects.Project = new Project(page);
 #pragma warning disable CA2000 // Native test placements are borrowed from the page and must never be disposed.
-        var box = new BoxedDevice { SymbolVariant = new() { SymbolLibraryName = "SPECIAL", SymbolName = "DC" } };
+        var box = new BoxedDevice();
         box.Create(page);
+        box.SymbolVariant = new() { SymbolLibraryName = "SPECIAL", SymbolName = "DC" };
         box.Name = tag;
         box.SetLogicalArea(new(60, 80), new(120, 120));
         var point = new Function(41)
