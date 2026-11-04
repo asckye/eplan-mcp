@@ -47,16 +47,28 @@ internal sealed partial class EplanConnectionCreator
                         using AnyPropertyId id = property.Id;
                         properties[id] = (string)value!;
                     }
-                    if (row["articles"] is JArray articles)
-                    {
-                        foreach (JToken article in articles)
-                        { point.AddArticleReference((string)article["part"]!, (string)article["variant"]!, (uint)article["count"]!); }
-                    }
                     _definitionPointIds.Add((int)row["itemIndex"]!, point.ObjectIdentifier);
                 }
                 finally { GC.KeepAlive(point); }
             }
         };
+    }
+
+    public void AddDefinitionArticles(string project, string page, JArray planned)
+    {
+        JToken[] rows = [.. planned.Where(r => r["articles"] is JArray)];
+        if (rows.Length == 0)
+        { return; }
+        Placement[] placements = EplanNativePreconditions.Valid(Page(project, page).AllPlacements).ToArray();
+        using Transaction transaction = new TransactionManager().CreateTransaction();
+        foreach (JToken row in rows)
+        {
+            long oid = _definitionPointIds[(int)row["itemIndex"]!];
+            ConnectionDefinitionPoint point = placements.OfType<ConnectionDefinitionPoint>().Single(p => p.ObjectIdentifier == oid);
+            foreach (JToken article in (JArray)row["articles"]!)
+            { point.AddArticleReference((string)article["part"]!, (string)article["variant"]!, (uint)article["count"]!); }
+        }
+        transaction.Commit();
     }
 
     public JArray ReadDefinitionPoints(string project, string page, JArray planned)

@@ -64,6 +64,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() =>
                 {
                     // A52/D5: generation only sees committed placement; the undo step spans the committed transactions.
+                    writer.AddDefinitionArticles(project, page, definitions);
                     plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify(definitions.Any(d => (string?)d["type"] == "ConnectionDefinitionPoint") || plan["logicalAfterGenerate"]!.Any()));
                     VerifyGraphical("generation");
                     CheckLayout();

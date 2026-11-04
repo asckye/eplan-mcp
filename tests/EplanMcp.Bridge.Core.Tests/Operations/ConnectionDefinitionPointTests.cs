@@ -568,6 +568,7 @@ public sealed class ConnectionDefinitionPointTests
             if (Mismatch == "generate")
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "generation failed"); }
         }
+        public void AddDefinitionArticles(string project, string page, JArray planned) { }
         public JArray ReadDefinitionPoints(string project, string page, JArray planned)
         {
             Assert.Contains("Commit", Transactions.Calls);

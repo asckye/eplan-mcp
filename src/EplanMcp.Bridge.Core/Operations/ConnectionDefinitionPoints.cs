@@ -7,6 +7,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 public interface IConnectionDefinitionPointWriter
 {
     public Action PrepareDefinitionPoints(string project, string page, JArray planned);
+    /// <summary>Adds the planned parts once the points are committed: EPLAN refuses them on a point still in its creating transaction.</summary>
+    public void AddDefinitionArticles(string project, string page, JArray planned);
     public JArray ReadDefinitionPoints(string project, string page, JArray planned);
 }
 
