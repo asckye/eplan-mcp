@@ -34,6 +34,7 @@ internal static class ConnectionCreateSchema
         JsonObject pages = Array(Text(1024), 1, 20);
         pages["uniqueItems"] = true;
         JsonObject interruption = Object(new() { ["kind"] = Kind("interruption_point"), ["name"] = Text(), ["position"] = Point(), ["direction"] = new JsonObject { ["enum"] = new JsonArray("Up", "Down", "Left", "Right") }, ["counterpart_pages"] = pages });
+        interruption["required"] = new JsonArray("kind", "name", "position", "direction");
         interruption["properties"]!["sort_code"] = new JsonObject { ["type"] = "integer", ["minimum"] = 0 };
         interruption["properties"]!["symbol"] = Text(64);
         JsonObject tNode = Node("t_node", 3);

@@ -60,6 +60,10 @@ public sealed class ConnectionCreateContractTests
         definitions.Request["items"] = JArray.Parse("[{\"kind\":\"definition_point\",\"position\":[40,40],\"part\":\"PXC.2861344\"}]");
         Validate(InputSchema(), definitions.Request);
         contract["partOnlyDefinitionExample"] = definitions.Request;
+        var unpaired = new InterruptionPointFixture();
+        ((JObject)unpaired.Request["items"]!.Last!).Remove("counterpart_pages");
+        Validate(InputSchema(), unpaired.Request);
+        contract["unpairedInterruptionExample"] = unpaired.Request;
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
     }
@@ -110,6 +114,7 @@ public sealed class ConnectionCreateContractTests
             ["direction"] = new JObject { ["type"] = "string", ["enum"] = new JArray("Up", "Down", "Left", "Right") },
             ["counterpart_pages"] = Array(Text(), 1, 20),
         });
+        interruption["required"] = new JArray("kind", "name", "position", "direction");
         interruption["properties"]!["counterpart_pages"]!["uniqueItems"] = true;
         interruption["properties"]!["sort_code"] = new JObject { ["type"] = "integer", ["minimum"] = 0 };
         JObject tNode = Node("t_node", 3);

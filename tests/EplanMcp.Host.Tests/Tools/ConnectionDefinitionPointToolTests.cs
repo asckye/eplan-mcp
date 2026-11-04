@@ -57,15 +57,36 @@ public sealed class ConnectionDefinitionPointToolTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public async Task UnpairedInterruption_ForwardsOmittedScopeAndFailures(bool fail)
+    {
+        using var harness = Setup();
+        if (fail)
+        { harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.InvalidArgument, Execution = ExecutionState.NotStarted, Message = "invalid direction" }; }
+        JsonElement item = JsonSerializer.SerializeToElement(new { kind = "interruption_point", position = _position40, name = "-OUTSIDE", direction = "Up" });
+        CallToolResult result = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [item], dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Single(harness.Bridge.Writes);
+        if (fail)
+        { Assert.Equal(ErrorReason.InvalidArgument, WriteToolHarness.Error(result).GetProperty("reason").GetString()); }
+        else
+        { Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
+        Assert.Equal(item.GetRawText(), JsonSerializer.SerializeToElement(harness.Bridge.Calls.Last().Args).GetProperty("request").GetProperty("items")[0].GetRawText());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public async Task PartOnlyDefinition_ForwardsExactFieldsAndFailure(bool fail)
     {
         using var harness = Setup();
-        if (fail) { harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.PartNotFound, Execution = ExecutionState.NotStarted, Message = "missing part" }; }
+        if (fail)
+        { harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.PartNotFound, Execution = ExecutionState.NotStarted, Message = "missing part" }; }
         JsonElement item = JsonSerializer.SerializeToElement(new { kind = "definition_point", position = _position40, part = "PXC.2861344", part_variant = "1", part_count = 2 });
         CallToolResult result = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [item], dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
         Assert.Single(harness.Bridge.Writes);
-        if (fail) { Assert.Equal(ErrorReason.PartNotFound, WriteToolHarness.Error(result).GetProperty("reason").GetString()); }
-        else { Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
+        if (fail)
+        { Assert.Equal(ErrorReason.PartNotFound, WriteToolHarness.Error(result).GetProperty("reason").GetString()); }
+        else
+        { Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
         Assert.Equal(item.GetRawText(), JsonSerializer.SerializeToElement(harness.Bridge.Calls.Last().Args).GetProperty("request").GetProperty("items")[0].GetRawText());
     }
 
@@ -75,12 +96,15 @@ public sealed class ConnectionDefinitionPointToolTests
     public async Task PotentialDefinition_ForwardsNamesAndReportsWriteFailure(bool fail)
     {
         using var harness = Setup();
-        if (fail) { harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.EplanOperationFailed, Execution = ExecutionState.RolledBack, Message = "potential readback" }; }
+        if (fail)
+        { harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.EplanOperationFailed, Execution = ExecutionState.RolledBack, Message = "potential readback" }; }
         JsonElement item = JsonSerializer.SerializeToElement(new { kind = "potential_definition", position = _position100, potential_name = "N", signal_name = "S" });
         CallToolResult result = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [item], dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
         Assert.Single(harness.Bridge.Writes);
-        if (fail) { Assert.Equal(ExecutionState.RolledBack, WriteToolHarness.Error(result).GetProperty("execution").GetString()); }
-        else { Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
+        if (fail)
+        { Assert.Equal(ExecutionState.RolledBack, WriteToolHarness.Error(result).GetProperty("execution").GetString()); }
+        else
+        { Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
         JsonElement sent = JsonSerializer.SerializeToElement(harness.Bridge.Calls.Last().Args);
         Assert.Equal(item.GetRawText(), sent.GetProperty("request").GetProperty("items")[0].GetRawText());
     }

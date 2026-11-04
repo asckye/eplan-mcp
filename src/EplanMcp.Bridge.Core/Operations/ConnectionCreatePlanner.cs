@@ -146,13 +146,13 @@ public static class ConnectionCreatePlanner
             bool wire = (string?)item["kind"] == "wire";
             if ((string?)item["kind"] == "interruption_point")
             {
-                Members(item, at, "kind name direction position counterpart_pages", "sort_code symbol");
+                Members(item, at, "kind name direction position", "counterpart_pages sort_code symbol");
                 Require(item["sort_code"] is null || item["sort_code"]!.Type == JTokenType.Integer
                     && long.TryParse(item["sort_code"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out _), at + "/sort_code", "Supply a nonnegative Int64 integer.");
                 Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])
                     && !((string)item["name"]!).Any(char.IsControl), at + "/name", "Supply the exact shared full business name (1..200 characters).");
                 Require(item["direction"]?.Type == JTokenType.String, at + "/direction", "Supply Up, Down, Left or Right.");
-                Require(item["counterpart_pages"] is JArray { Count: >= 1 and <= 20 } scope && scope.All(p => p.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)p))
+                Require(item["counterpart_pages"] is null || item["counterpart_pages"] is JArray { Count: >= 1 and <= 20 } scope && scope.All(p => p.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)p))
                     && scope.Values<string>().Distinct(StringComparer.Ordinal).Count() == scope.Count, at + "/counterpart_pages", "Supply 1..20 distinct exact counterpart pages.");
                 double[] point = Point(item["position"], at + "/position");
                 Node(point, [(string)item["direction"]!], "interruption_point", at);
@@ -413,7 +413,7 @@ public static class ConnectionCreatePlanner
         result["warning"] = layoutWarnings.Count == 0 ? null : string.Join("\n", layoutWarnings.Distinct(StringComparer.Ordinal));
         if (splits.Count > 0)
         { result["splitSegments"] = new JArray(splits.Select(s => new JObject { ["segment"] = JArray.FromObject(s.Segment), ["position"] = new JArray(s.Point) })); }
-        if (interruptions.Count > 0)
+        if (interruptions.Values.Any(i => i["counterpart_pages"] is not null))
         { InterruptionPointPlanning.Plan(result, scene, reader as IConnectionCreator ?? throw Missing("Read explicit counterpart scope before planning interruption points.")); }
         if (definitions.Count > 0)
         { result["definitionPoints"] = definitions; result["undoSteps"] = 1; if (definitions.Any(d => (string?)d["type"] == "ConnectionDefinitionPoint") || logical.Count > 0) { result["generation"] = "Placement, definition points and connection generation share one undo step."; }; }

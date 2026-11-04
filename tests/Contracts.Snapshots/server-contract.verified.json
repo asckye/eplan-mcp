@@ -4617,8 +4617,7 @@
                     "kind",
                     "name",
                     "position",
-                    "direction",
-                    "counterpart_pages"
+                    "direction"
                   ]
                 },
                 {
@@ -8695,7 +8694,7 @@
           "bytes": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 9.223372036854776e+18
+            "maximum": 9.223372036854776E+18
           },
           "sha256": {
             "type": "string",
@@ -17690,7 +17689,7 @@
           "seconds": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1.7976931348623157e+308
+            "maximum": 1.7976931348623157E+308
           },
           "hint": {
             "type": [
@@ -22585,8 +22584,8 @@
                         "page": {
                           "oneOf": [
                             {
-                              "description": "Full circuit page name",
-                              "type": "string"
+                              "type": "string",
+                              "description": "Full circuit page name"
                             },
                             {
                               "type": "object",
@@ -22626,13 +22625,13 @@
                           "const": 0
                         },
                         "numbering": {
-                          "description": "keep: the macro's tags",
                           "type": "string",
                           "default": "keep",
                           "enum": [
                             "number",
                             "keep"
                           ],
+                          "description": "keep: the macro's tags",
                           "const": "keep"
                         }
                       },

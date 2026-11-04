@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_connection_create.interruption_point` 的 `counterpart_pages` 可省略；省略只放置中断点，提供时继续核对配对页。
+
 - `eplan_connection_create.definition_point` 支持 `part`、`part_variant`（默认 1）和 `part_count`（默认 1）；可仅设置部件，并核对定义点及连接的部件引用。
 
 - `eplan_connection_create` 新增 `potential_definition`，经内嵌窗口宏创建电位定义点，可设置电位名和信号名；仅放置时不生成连接并一步撤销。

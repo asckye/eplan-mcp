@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R2 06-unpaired-interruption（2026-11-03 brief；A87） | `ConnectionCreateTests` | NOT RUN：本轮禁止 EPLAN；待验证 省略 counterpart_pages 的孤立中断点及原有显式配对页校验。 |
 | R2 05-definition-part（2026-11-03 brief；A87） | `ConnectionCreateTests` | NOT RUN：本轮禁止 EPLAN；待验证 已生成连接上仅带部件的连接定义点、ArticleReferences 读回及一次撤销。 |
 | R2 04-potential-definition（2026-11-03 brief；A87） | `ConnectionCreateTests` | NOT RUN：本轮禁止 EPLAN；待验证 电位名/信号名、原生类型与位置、无逻辑端点的一步撤销，以及已有连接上的定义点路径。 |
 | R2 03-macro-box（2026-11-03 brief；A87） | `MacroOverviewTests` | NOT RUN：本轮禁止 EPLAN；待验证 PXC.2861344、variant 0、(0,292) 的无宏框总览宏；PLC 盒及总览点保留、对象计数和一次撤销恢复。 |

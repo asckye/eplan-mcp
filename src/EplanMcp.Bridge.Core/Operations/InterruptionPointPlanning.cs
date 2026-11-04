@@ -11,7 +11,7 @@ public static class InterruptionPointPlanning
     public static string[] Pages(JObject plan) => plan["affectedPages"]!.Values<string>().Select(p => p!).ToArray();
     public static void Plan(JObject plan, ConnectionCreatePlanner.Scene scene, IConnectionCreator reader)
     {
-        JToken[] requested = plan["symbols"]!.Where(s => s["interruption"] is not null).ToArray();
+        JToken[] requested = plan["symbols"]!.Where(s => s["interruption"]?["counterpart_pages"] is not null).ToArray();
         string[] pages = requested.SelectMany(s => s["interruption"]!["counterpart_pages"]!.Values<string>()).Select(p => p!).Append(scene.Page.Page).Distinct(StringComparer.Ordinal).OrderBy(p => p, StringComparer.Ordinal).ToArray();
         Require(pages.Length <= 21, "Keep the combined counterpart scope within 20 pages plus the target page.");
         plan["affectedPages"] = new JArray(pages);
@@ -112,7 +112,7 @@ public static class InterruptionPointPlanning
             JToken? found = actual["points"]!.SingleOrDefault(p => (long?)p["oid"] == (long?)point["oid"]);
             Require(found is not null && _identity.All(k => JToken.DeepEquals(found[k], point[k])), "An existing counterpart changed identity, name or geometry.");
         }
-        foreach (JToken row in plan["symbols"]!.Where(s => s["interruption"] is not null))
+        foreach (JToken row in plan["symbols"]!.Where(s => s["interruption"]?["counterpart_pages"] is not null))
         {
             string name = (string)row["interruption"]!["name"]!;
             JToken[] pair = actual["points"]!.Where(p => (string?)p["name"] == name).ToArray();

@@ -401,8 +401,7 @@
                 "kind",
                 "name",
                 "position",
-                "direction",
-                "counterpart_pages"
+                "direction"
               ]
             },
             {
@@ -2969,6 +2968,59 @@
           40
         ],
         "part": "PXC.2861344"
+      }
+    ]
+  },
+  "unpairedInterruptionExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "wire",
+        "from": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 1,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "to": {
+          "locator": {
+            "project": "scratch-project",
+            "page": "=F+A1&EFS1/1",
+            "type": 17,
+            "oid": 2,
+            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "pin_index": 0
+        },
+        "points": [
+          [
+            8.0,
+            8.0
+          ],
+          [
+            24.0,
+            8.0
+          ],
+          [
+            24.0,
+            24.0
+          ]
+        ]
+      },
+      {
+        "kind": "interruption_point",
+        "name": "=F+A1-LINK",
+        "direction": "Up",
+        "position": [
+          60,
+          60
+        ]
       }
     ]
   }

@@ -110,7 +110,7 @@ public sealed class ToolContractTests : IDisposable
         foreach (JsonElement branch in itemBranches.EnumerateArray())
         { Assert.False((branch.TryGetProperty("$ref", out _) ? tool.InputSchema.GetProperty("$defs").GetProperty("d") : branch).GetProperty("additionalProperties").GetBoolean()); }
         JsonElement interruption = itemBranches.EnumerateArray().Single(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "interruption_point");
-        Assert.Equal(["kind", "name", "position", "direction", "counterpart_pages"], interruption.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["kind", "name", "position", "direction"], interruption.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         Assert.True(interruption.GetProperty("properties").GetProperty("counterpart_pages").GetProperty("uniqueItems").GetBoolean());
         Assert.Equal(20, interruption.GetProperty("properties").GetProperty("counterpart_pages").GetProperty("maxItems").GetInt32());
         JsonElement cable = itemBranches.EnumerateArray().Single(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "cable_definition");

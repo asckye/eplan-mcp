@@ -46,6 +46,36 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
     }
 
     [Fact]
+    public async Task UnpairedInterruption_OmittedCounterpartPages_OneUndoRestores()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = await NewPageAsync(session);
+        await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        async Task<PageDrawingGeometry> Drawing() => await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+            new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+        string before = (await session.SnapshotAsync(page)).Hash;
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["items"] = new[] { new { kind = "interruption_point", position = _point100, name = "=GAA+A1-R2OUT", direction = "Up" } }
+        };
+        TestContext.Current.TestOutputHelper!.WriteLine("request: " + JsonSerializer.Serialize(request));
+        (bool ok, JsonElement result) = await eplan.CallOrErrorAsync("eplan_connection_create", request);
+        TestContext.Current.TestOutputHelper.WriteLine("result: " + result.GetRawText());
+        PageDrawingGeometry readback = await Drawing();
+        TestContext.Current.TestOutputHelper.WriteLine("readback: " + JsonSerializer.Serialize(readback));
+        Assert.True(ok, result.GetRawText());
+        Assert.Equal(1, result.GetProperty("undoSteps").GetInt32());
+        Assert.Single(readback.Placements, p => p.Kind == "InterruptionPoint");
+        Assert.Empty(result.GetProperty("actualEndpoints").EnumerateArray());
+        await session.UndoAsync();
+        Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
+    }
+
+    [Fact]
     public async Task PotentialDefinition_NamesAndLocation_OneUndoRestores()
     {
         Assert.NotNull(host);
@@ -55,8 +85,13 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         async Task<PageDrawingGeometry> Drawing() => await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
             new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
         string before = (await session.SnapshotAsync(page)).Hash;
-        var request = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["dry_run"] = false,
-            ["items"] = new[] { new { kind = "potential_definition", position = _point100, potential_name = "N", signal_name = "S" } } };
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["items"] = new[] { new { kind = "potential_definition", position = _point100, potential_name = "N", signal_name = "S" } }
+        };
         TestContext.Current.TestOutputHelper!.WriteLine("request: " + JsonSerializer.Serialize(request));
         (bool ok, JsonElement result) = await eplan.CallOrErrorAsync("eplan_connection_create", request);
         TestContext.Current.TestOutputHelper.WriteLine("result: " + result.GetRawText());
@@ -72,7 +107,8 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         JsonElement frames = await eplan.CallAsync("eplan_object_find", new() { ["project"] = session.Project, ["page"] = page, ["object_type"] = "MacroBox" });
         TestContext.Current.TestOutputHelper.WriteLine("macro box readback: " + frames.GetRawText());
         Assert.Empty(frames.GetProperty("items").EnumerateArray());
-        await session.UndoAsync(); Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
+        await session.UndoAsync();
+        Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
     }
 
     [Fact]
