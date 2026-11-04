@@ -175,7 +175,7 @@
                     },
                     "cross_section": {
                       "type": "string",
-                      "pattern": "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$"
+                      "pattern": "^ *[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)(?:[eE][+-]?[0-9]+)? *$"
                     },
                     "designation": {
                       "type": "string",
@@ -2634,7 +2634,7 @@
         ],
         "definition_point": {
           "color": "RD",
-          "cross_section": "1.5"
+          "cross_section": "1,5"
         }
       }
     ]
@@ -2777,10 +2777,10 @@
         ],
         "properties": {
           "color": "RD",
-          "cross_section": "1.5"
+          "cross_section": "1,5"
         }
       }
     ],
-    "fingerprint": "b9b96859542d3db3a78670a7f5f5e8d6288f2b6bc3238b07573e51699d1248b2"
+    "fingerprint": "3e0975fd0f462a949b93556971fc4d74ddcba71775f4fd793a86bb01dfa77497"
   }
 }

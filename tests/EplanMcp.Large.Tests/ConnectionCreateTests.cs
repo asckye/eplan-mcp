@@ -112,9 +112,10 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
     }
 
     [Theory]
-    [InlineData("CDP")]
-    [InlineData("CDPNG")]
-    public async Task TerminalWire_DefinitionPoint_ReadsProperties_OneUndoRestores(string symbol)
+    [InlineData("CDP", "1.5")]
+    [InlineData("CDPNG", "1.5")]
+    [InlineData("CDP", "1,5")]
+    public async Task TerminalWire_DefinitionPoint_ReadsProperties_OneUndoRestores(string symbol, string section)
     {
         Assert.NotNull(host);
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
@@ -167,7 +168,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         DrawingPlacement[] terminals = before.Placements.Where(p => p.Kind == "Terminal").OrderByDescending(p => p.Location[1]).ToArray();
         Assert.Equal(2, terminals.Length);
         string snapshot = (await session.SnapshotAsync(page)).Hash;
-        var definition = new Dictionary<string, object?> { ["color"] = "RD", ["cross_section"] = "1.5" };
+        var definition = new Dictionary<string, object?> { ["color"] = "RD", ["cross_section"] = section };
         if (symbol != "CDP")
         { definition["symbol"] = symbol; }
         double[] expectedPoint = [ends[0][0], Math.Round((ends[0][1] + 35 * grid) / (2 * grid), MidpointRounding.AwayFromZero) * grid];
@@ -194,7 +195,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             foreach (string field in new[] { "properties", "connectionValues" })
             {
                 Assert.Equal("RD", point.GetProperty(field).GetProperty("color").GetString());
-                Assert.Equal("1.5", point.GetProperty(field).GetProperty("cross_section").GetString());
+                Assert.Equal(1.5, double.Parse(point.GetProperty(field).GetProperty("cross_section").GetString()!.Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture));
             }
             JsonElement connections = await Call("eplan_connection_list", new() { ["project"] = session.Project, ["page"] = page, ["response_format"] = "detailed" });
             JsonElement connection = Assert.Single(connections.GetProperty("connections").EnumerateArray());

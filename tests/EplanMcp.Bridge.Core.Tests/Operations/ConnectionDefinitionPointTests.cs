@@ -269,6 +269,8 @@ public sealed class ConnectionDefinitionPointTests
     [InlineData("{\"color\":7}", "color")]
     [InlineData("{\"designation\":null}", "designation")]
     [InlineData("{\"cross_section\":\"abc\"}", "cross_section")]
+    [InlineData("{\"cross_section\":\"1,2,3\"}", "cross_section")]
+    [InlineData("{\"cross_section\":\"1.2,3\"}", "cross_section")]
     [InlineData("{\"cross_section\":\"NaN\"}", "cross_section")]
     [InlineData("{\"cross_section\":\"Infinity\"}", "cross_section")]
     [InlineData("{\"cross_section\":\"1e999\"}", "cross_section")]
@@ -295,11 +297,40 @@ public sealed class ConnectionDefinitionPointTests
     [InlineData(" 1.5 ")]
     [InlineData("+1.5")]
     [InlineData(".5")]
+    [InlineData("1,5")]
+    [InlineData(",5")]
     public void CrossSection_FiniteNumericText_IsPreserved(string value)
     {
         var fixture = Fixture();
         fixture.Request["items"]![0]!["definition_point"]!["cross_section"] = value;
         Assert.Equal(value, (string?)Assert.Single(fixture.Plan()["definitionPoints"]!)["properties"]!["cross_section"]);
+    }
+
+    [Theory]
+    [InlineData("1,5", "1.5")]
+    [InlineData("1.5", "1,5")]
+    [InlineData("1,50", "1.500")]
+    public void CrossSection_DecimalSeparators_ReadBackAsTheSameNumber(string requested, string observed)
+    {
+        var creator = new Creator { ObservedSection = observed };
+        creator.Fixture.Request["items"]![0]!["definition_point"]!["cross_section"] = requested;
+        JObject result = creator.Execute();
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(observed, (string?)result["definitionPoints"]![0]!["connectionValues"]!["cross_section"]);
+        Assert.DoesNotContain("Rollback", creator.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("1,6")]
+    [InlineData("not numeric")]
+    [InlineData("1,2,3")]
+    public void CrossSection_DifferentOrInvalidReadback_RollsBack(string observed)
+    {
+        var creator = new Creator { ObservedSection = observed };
+        creator.Fixture.Request["items"]![0]!["definition_point"]!["cross_section"] = "1,5";
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => creator.Execute()).Error;
+        Assert.Equal(ExecutionState.RolledBack, error.Execution);
+        Assert.Contains("cross_section", error.Message, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -469,6 +500,7 @@ public sealed class ConnectionDefinitionPointTests
         public FakeTransactions Transactions { get; } = new();
         public List<string> Events { get; } = [];
         public string? Mismatch { get; init; }
+        public string? ObservedSection { get; init; }
         public List<string?[]>? GeneratedEndpoints { get; init; }
         public List<double[][]>? Drawn { get; init; }
         public int State { get; private set; }
@@ -499,7 +531,11 @@ public sealed class ConnectionDefinitionPointTests
             Events.Add("readback");
             var rows = (JArray)planned.DeepClone();
             foreach (JToken row in rows)
-            { row["connectionValues"] = row["properties"]!.DeepClone(); }
+            {
+                row["connectionValues"] = row["properties"]!.DeepClone();
+                if (ObservedSection is { } section)
+                { row["properties"]!["cross_section"] = section; row["connectionValues"]!["cross_section"] = section; }
+            }
             if (Mismatch == "missing")
             { rows.Clear(); return rows; }
             if (Mismatch is { } field)

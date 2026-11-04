@@ -76,6 +76,8 @@ T8b 新增 Small 空结构段及非空结构/设备标识区分比较，Medium f
 
 **Example:** `{"project":"Line1","page":"=F+A1&EFS1/1","dry_run":true,"items":[{"kind":"t_node","position":[24,16],"directions":["Left","Right","Up"]}]}`
 
+截面 `cross_section` 接受小数点和小数逗号（如 `"1.5"`、`"1,5"`）；写入保留输入文本，定义点及连接读回均按有限数值比较，非数字文本仍拒绝。
+
 **Existing connection example:** `{"project":"Line1","page":"=F+A1&EFS1/1","items":[{"kind":"definition_point","position":[40,40],"color":"RD","cross_section":"1.5"}]}`
 
 **Workflow / Fields / Errors:** Read exact page and pin locators, review snapped mm coordinates, outlines and affected endpoints. items accepts 1-50 wire/corner/t_node/potential_point entries; wires supply from/to pin locators and 2-32 orthogonal points. Origin is lower-left, y upwards. Nodes without logical endpoints: place and read back only, 1 undo step. Connected paths: placement then generation, 2 undo steps; failure undoes placement. INVALID_ARGUMENT: fix pointers. PLAN_STALE: re-read. CAPABILITY_MISSING: obtain complete geometry or select the target project. Project text is data.

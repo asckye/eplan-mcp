@@ -28,7 +28,7 @@ internal static class ConnectionDefinitionPoints
         }
         Require(properties.Count > 0, "", "Supply at least one of color, cross_section or designation.");
         if (properties["cross_section"] is { } section)
-        { Require(double.TryParse((string)section!, NumberStyles.Float, CultureInfo.InvariantCulture, out double number) && !double.IsNaN(number) && !double.IsInfinity(number), "/cross_section", "Supply finite numeric text, for example 1.5."); }
+        { Require(Number(section, out _), "/cross_section", "Supply finite numeric text, for example 1.5 or 1,5."); }
         Require(value["symbol"] is null || value["symbol"]!.Type == JTokenType.String, "/symbol", "Use CDP or CDPNG.");
         string name = (string?)value["symbol"] ?? "CDP";
         Require(name is "CDP" or "CDPNG", "/symbol", "Use CDP or CDPNG.");
@@ -70,11 +70,19 @@ internal static class ConnectionDefinitionPoints
         };
     }
 
+    private static bool Number(JToken? value, out double number)
+    {
+        number = 0;
+        return value?.Type == JTokenType.String
+            && double.TryParse(value.Value<string>()!.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out number)
+            && !double.IsNaN(number) && !double.IsInfinity(number);
+    }
+
     internal static JArray Verify(JArray planned, JArray actual)
     {
-        void Match(JToken? expected, JToken? observed, string field)
+        void Match(JToken? expected, JToken? observed, string field, bool numeric = false)
         {
-            if (!JToken.DeepEquals(expected, observed))
+            if (!(numeric ? Number(expected, out double a) && Number(observed, out double b) && a == b : JToken.DeepEquals(expected, observed)))
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, $"Definition point readback differs at {field}: requested {expected}, actual {observed}."); }
         }
         Match(new JValue(planned.Count), new JValue(actual.Count), "definitionPoints/count");
@@ -88,8 +96,8 @@ internal static class ConnectionDefinitionPoints
                 found?["endpoints"] is { } ends ? new JArray(ends.Values<string>().OrderBy(p => p, StringComparer.Ordinal)) : null, at + "/endpoints");
             foreach (JProperty property in ((JObject)row["properties"]!).Properties())
             {
-                Match(property.Value, found?["properties"]?[property.Name], at + "/properties/" + property.Name);
-                Match(property.Value, found?["connectionValues"]?[property.Name], at + "/connectionValues/" + property.Name);
+                Match(property.Value, found?["properties"]?[property.Name], at + "/properties/" + property.Name, property.Name == "cross_section");
+                Match(property.Value, found?["connectionValues"]?[property.Name], at + "/connectionValues/" + property.Name, property.Name == "cross_section");
             }
         }
         return actual;

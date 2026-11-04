@@ -45,7 +45,7 @@ public sealed class ConnectionCreateContractTests
         contract["cableDryRunExample"] = cablePlan;
         var definitions = new ConnectionCreateFixture();
         definitions.Symbols.Add(ConnectionCreateFixture.Variant("CDP", "ConnectionDefinitionPoint", 0));
-        definitions.Request["items"]![0]!["definition_point"] = new JObject { ["color"] = "RD", ["cross_section"] = "1.5" };
+        definitions.Request["items"]![0]!["definition_point"] = new JObject { ["color"] = "RD", ["cross_section"] = "1,5" };
         JObject definitionPlan = definitions.Plan();
         Validate(InputSchema(), definitions.Request);
         Validate(OutputSchema(), definitionPlan);
@@ -73,7 +73,7 @@ public sealed class ConnectionCreateContractTests
             ["symbol"] = new JObject { ["enum"] = new JArray("CDP", "CDPNG"), ["default"] = "CDP" },
             ["symbol_variant"] = new JObject { ["type"] = "integer", ["minimum"] = 0, ["default"] = 0 },
             ["color"] = Text(),
-            ["cross_section"] = new JObject { ["type"] = "string", ["pattern"] = "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$" },
+            ["cross_section"] = new JObject { ["type"] = "string", ["pattern"] = "^ *[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)(?:[eE][+-]?[0-9]+)? *$" },
             ["designation"] = Text(),
         }, "");
         wire["properties"]!["definition_point"]!["anyOf"] = new JArray(new JObject { ["required"] = new JArray("color") }, new JObject { ["required"] = new JArray("cross_section") }, new JObject { ["required"] = new JArray("designation") });

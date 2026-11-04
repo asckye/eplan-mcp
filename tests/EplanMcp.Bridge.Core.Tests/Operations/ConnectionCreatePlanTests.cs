@@ -234,6 +234,24 @@ public sealed class ConnectionCreatePlanTests : IDisposable
         Assert.Contains("R4", Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Message, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("1,5", true)]
+    [InlineData("1,5 mm2", false)]
+    public void DecimalComma_FileRoundTrip_ValidatesNumericText(string section, bool valid)
+    {
+        _fixture.Symbols.Add(ConnectionCreateFixture.Variant("CDP", "ConnectionDefinitionPoint", 0));
+        _fixture.Request["items"]![0]!["definition_point"] = new JObject { ["cross_section"] = section };
+        if (!valid)
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Reason); return; }
+        JArray planned = (JArray)RoundTripPlan()["definitionPoints"]!;
+        string file = Path.Combine(_root, "readback.json");
+        JArray readback = (JArray)planned.DeepClone();
+        readback[0]!["properties"]!["cross_section"] = "1.5";
+        readback[0]!["connectionValues"] = new JObject { ["cross_section"] = "1.50" };
+        File.WriteAllText(file, readback.ToString());
+        Assert.Single(ConnectionDefinitionPoints.Verify(planned, JArray.Parse(File.ReadAllText(file))));
+    }
+
     [Fact]
     public void DryRun_LocatorDigestChanged_IsStaleAndNeverSubstitutesPin()
     {
