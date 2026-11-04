@@ -1,11 +1,5 @@
 namespace Eplan.EplApi.Base;
 
-internal static class PathMap
-{
-    public static string SubstitutePath(string path) => path;
-    public static string SubstitutePath(string path, string projectPath) => path;
-}
-
 // Test-only API surface: a linked production adapter runs against borrowed objects whose disposal fails.
 internal readonly record struct PointD(double X, double Y);
 

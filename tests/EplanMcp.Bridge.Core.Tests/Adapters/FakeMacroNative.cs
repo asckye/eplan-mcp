@@ -10,6 +10,7 @@ namespace Eplan.EplApi.Base
     {
         [ThreadStatic] public static string? MacroDirectory;
         public static string SubstitutePath(string value) => value.Replace("$(MD_MACROS)", MacroDirectory ?? "", StringComparison.Ordinal);
+        public static string SubstitutePath(string path, string projectPath) => path;
     }
 }
 
