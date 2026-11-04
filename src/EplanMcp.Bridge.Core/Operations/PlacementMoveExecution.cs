@@ -34,7 +34,7 @@ public static class PlacementMoveExecution
             placement.Location = row["after"]!.Values<double>().ToArray();
             placement.Bounds = row["bounds"]!.Type == JTokenType.Null ? null : row["bounds"]!.Values<double>().ToArray();
             if (row["angle"] is { } angle)
-            { placement.Properties["angle_deg"] = ((double)angle).ToString("R", System.Globalization.CultureInfo.InvariantCulture); placement.Properties["docked"] = "false"; if (placement.Properties.ContainsKey("angle")) { placement.Properties["angle"] = placement.Properties["angle_deg"]; } }
+            { placement.Properties["angle_deg"] = (double)angle == PropertyPlacementMoves.FromLayerAngle ? "from_layer" : ((double)angle).ToString("R", System.Globalization.CultureInfo.InvariantCulture); placement.Properties["docked"] = "false"; if (placement.Properties.ContainsKey("angle")) { placement.Properties["angle"] = placement.Properties["angle_deg"]; } }
             if (row["style"] is JObject style)
             { foreach (var field in PropertyPlacementMoves.StyleValues(style)) { placement.Properties[field.Key] = field.Value; } }
             if (placement.Parent is null)

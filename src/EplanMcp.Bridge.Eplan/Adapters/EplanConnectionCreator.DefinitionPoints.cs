@@ -49,9 +49,8 @@ internal sealed partial class EplanConnectionCreator
                     }
                     if (row["articles"] is JArray articles)
                     {
-                        ConnectionDefinitionPoint native = target.AllPlacements.OfType<ConnectionDefinitionPoint>().Single(p => p.ObjectIdentifier == point.ObjectIdentifier);
                         foreach (JToken article in articles)
-                        { native.AddArticleReference((string)article["part"]!, (string)article["variant"]!, (uint)article["count"]!); }
+                        { point.AddArticleReference((string)article["part"]!, (string)article["variant"]!, (uint)article["count"]!); }
                     }
                     _definitionPointIds.Add((int)row["itemIndex"]!, point.ObjectIdentifier);
                 }

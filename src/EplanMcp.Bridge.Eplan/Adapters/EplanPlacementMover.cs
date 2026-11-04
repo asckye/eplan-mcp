@@ -67,7 +67,7 @@ internal sealed class EplanPlacementMover : IPlacementMover
                         { text.Justification = (TextBase.JustificationType)Enum.Parse(typeof(TextBase.JustificationType), alignment.ToString()); }
                         EplanPlacementStyle.Apply(text, EplanProjects.ByPath(scene.Project.Path), (int?)style["layer"], style["pen"]?.ToObject<Dictionary<string, double>>());
                     }
-                    text.Rotation = (double)item.Row["angle"]! * Math.PI / 180;
+                    text.Rotation = (double)item.Row["angle"]! == PropertyPlacementMoves.FromLayerAngle ? PropertyPlacementMoves.FromLayerAngle : (double)item.Row["angle"]! * Math.PI / 180;
                     text.Location = new PointD((double)item.Row["after"]![0]! - owner.Location.X, (double)item.Row["after"]![1]! - owner.Location.Y);
                 }
             }

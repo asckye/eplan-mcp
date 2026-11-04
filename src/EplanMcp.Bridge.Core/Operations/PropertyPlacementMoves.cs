@@ -52,14 +52,14 @@ internal static class PropertyPlacementMoves
             { throw new BridgeErrorException(ErrorReason.PlanStale, "Parent locator changed; read eplan_page_get include_drawings again."); }
             Require(move["property_id"]?.Type == JTokenType.Integer && move["property_index"]?.Type == JTokenType.Integer
                 && int.TryParse(move["property_id"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out int id) && id > 0 && int.TryParse(move["property_index"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out int index) && index is >= 0 and <= 9999
-                && move["angle_deg"]?.Type == JTokenType.Integer && move["angle_deg"]!.ToString() is "0" or "90" or "180" or "270", "Use integer property selectors and angle_deg 0/90/180/270.");
+                && move["angle_deg"]?.Type == JTokenType.Integer && move["angle_deg"]!.ToString() is "0" or "90" or "180" or "270" or "-16002", "Use integer property selectors and angle_deg 0/90/180/270, or -16002 for the layer's rotation.");
             DrawingPlacement? child = scene.Page.Placements.SingleOrDefault(p => p.Kind == "PropertyPlacement" && p.Parent is not null && DrawingLocators.Matches(parent, p.Parent)
                 && Value(p, "property_id") == move["property_id"]!.ToString() && Value(p, "property_index") == move["property_index"]!.ToString());
             if (child is null)
             { throw new BridgeErrorException(ErrorReason.PlanStale, "Property selector changed; refresh the parent's property placements."); }
             Require(Value(owner, "grouped") == "false" && Value(child, "grouped") == "false"
                 && child.Location.Length == 2 && DrawingCoordinates.ValidBounds(child.Bounds)
-                && double.TryParse(Value(child, "angle_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out double before) && before is 0 or 90 or 180 or 270,
+                && (Value(child, "angle_deg") == "from_layer" || double.TryParse(Value(child, "angle_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out double before) && before is 0 or 90 or 180 or 270),
                 "Require ungrouped text with known bounds and a right-angle rotation.");
             Require(!rows.Any(r => DrawingLocators.Matches(child.Locator, r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!)), "Remove duplicate property targets.");
             JToken[] coordinates = [move["x_mm"]!, move["y_mm"]!];
@@ -67,8 +67,9 @@ internal static class PropertyPlacementMoves
             double[] requested = coordinates.Select(n => (double)n).ToArray();
             double[] after = requested.SequenceEqual(child.Location) ? requested : requested.Select(n => DrawingCoordinates.Snap(n, scene.Page.GridSize, (bool?)input["snap_to_grid"] ?? true)).ToArray();
             double angle = (double)move["angle_deg"]!;
-            double oldAngle = double.Parse(child.Properties["angle_deg"], CultureInfo.InvariantCulture);
-            int turns = ((int)(angle - oldAngle) + 360) / 90 % 4;
+            // The layer's rotation reads from_layer and turns the text like 0 degrees.
+            double oldAngle = child.Properties["angle_deg"] == "from_layer" ? FromLayerAngle : double.Parse(child.Properties["angle_deg"], CultureInfo.InvariantCulture);
+            int turns = ((int)((angle == FromLayerAngle ? 0 : angle) - (oldAngle == FromLayerAngle ? 0 : oldAngle)) + 360) / 90 % 4;
             double[][] corners = new[] { new[] { child.Bounds![0], child.Bounds[1] }, [child.Bounds[2], child.Bounds[1]], [child.Bounds[2], child.Bounds[3]], [child.Bounds[0], child.Bounds[3]] }
                 .Select(p => { double x = p[0] - child.Location[0], y = p[1] - child.Location[1]; for (int i = 0; i < turns; i++) { (x, y) = (-y, x); } return new[] { x + after[0], y + after[1] }; }).ToArray();
             double[] bounds = child.Bounds!.All(n => n == 0) ? [0, 0, 0, 0] : [corners.Min(p => p[0]), corners.Min(p => p[1]), corners.Max(p => p[0]), corners.Max(p => p[1])];
@@ -115,6 +116,8 @@ internal static class PropertyPlacementMoves
         Require(result.ToString(Formatting.None).Length <= ((string?)input["response_format"] == "detailed" ? 30000 : 7500), "Use detailed or fewer property moves.");
         return result;
     }
+
+    internal const double FromLayerAngle = -16002;
 
     internal static Dictionary<string, string> StyleValues(JObject style) => style.Properties().SelectMany(p => p.Name == "pen"
         ? ((JObject)p.Value).Properties().Select(v => new KeyValuePair<string, string>("pen_" + v.Name, ((double)v.Value).ToString("R", CultureInfo.InvariantCulture)))

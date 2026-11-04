@@ -75,7 +75,6 @@ public sealed class PropertyPlacementMoveTests
     [InlineData("duplicate")]
     [InlineData("mixed")]
     [InlineData("bounds")]
-    [InlineData("layer")]
     [InlineData("nan")]
     public void InvalidOrStaleInputs_NeverStartATransaction(string invalid)
     {
@@ -106,9 +105,6 @@ public sealed class PropertyPlacementMoveTests
                 break;
             case "bounds":
                 move["x_mm"] = 0;
-                break;
-            case "layer":
-                fake.Child.Properties["angle_deg"] = "from_layer";
                 break;
             case "nan":
                 move["x_mm"] = double.NaN;
@@ -201,6 +197,17 @@ public sealed class PropertyPlacementMoveTests
         Assert.Equal(before, BridgeJson.FromObject(fake.Scene).ToString());
         Assert.DoesNotContain("CloseUndo", fake.Transactions.Calls);
         Assert.Contains("Rollback", fake.Transactions.Calls);
+    }
+
+    [Fact]
+    public void TextOnTheLayersRotation_CanBeTurned()
+    {
+        var fake = new Mover(90);
+        fake.Child.Properties["angle_deg"] = "from_layer";
+
+        fake.Execute();
+
+        Assert.Equal("90", fake.Child.Properties["angle_deg"]);
     }
 
     [Theory]

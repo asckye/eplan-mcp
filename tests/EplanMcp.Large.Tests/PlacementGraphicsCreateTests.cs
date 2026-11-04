@@ -161,7 +161,7 @@ public sealed class PlacementGraphicsCreateTests(LiveEplan eplan, WriteHost host
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         Assert.Equal(host.Writable, session.Project, ignoreCase: true);
         string page = Assert.Single(await session.CreatePagesAsync(1));
-        var pen = new { color = defaults ? -16002 : 1, width_mm = defaults ? -16002 : 0.25, style = defaults ? -16002 : 1, pattern_length = defaults ? -16002 : 8, line_end = 2 };
+        var pen = new { color = defaults ? -16002 : 1, width_mm = defaults ? -16002 : 0.25, style = defaults ? -16002 : 1, pattern_length = defaults ? 16002 : 8, line_end = 2 };
         var request = new Dictionary<string, object?>
         {
             ["project"] = host.Writable,
