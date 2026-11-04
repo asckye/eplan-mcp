@@ -4,20 +4,6 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| R1 07-join-device（2026-11-03 补充 brief） | `DevicePlaceTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 新页先放主符号，再用 `join_device:true` 放同标识第二个符号；输出请求、结果和读回，核对名称、非主功能及原主功能。 |
-| R1 08-placement-timeout（2026-11-03 brief） | `PlacementCreateProtocolTests`、`LayoutGuardBatchTimingTests` | 不涉及新增 Large。Medium 已测 200 个已有对象＋50 个新对象：无冲突约 80 ms、一个冲突约 519 ms；50 个同时冲突的额外压力测量超过 2 分钟后中断，本项未重构守卫。 |
-| R1 09-ellipse-circle（2026-11-03 brief） | `PlacementGraphicsCreateTests` | NOT RUN：本次禁止 EPLAN。Circuit 新页创建旋转椭圆和 0..360 arc；验证 Kind、FirstRadius、SecondRadius、ElipseAngle（弧度），不一致时停止。 |
-| R1 08-placement-timeout（2026-11-03 brief） | `PlacementCreateProtocolTests`、`LayoutGuardBatchTimingTests` | 不涉及新增 Large。Medium 已测 200 个已有对象＋50 个新对象：无冲突约 80 ms、一个冲突约 519 ms；50 个同时冲突的额外压力测量超过 2 分钟后中断，本项未重构守卫。 |
-| R1 06-path-text-default（2026-11-03 brief） | `PlacementTextCreateTests` | NOT RUN：本次禁止 EPLAN。省略 path_text 高度后 PathText.Create 接受且读回仍为 -16002；拒绝或不一致时停止。 |
-| R1 05-cross-section（2026-11-03 brief） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。以 `cross_section: "1,5"` 放置连接定义点，读回数值、端点与一步撤销；保留点号输入用例。 |
-| R1 09-ellipse-circle（2026-11-03 brief） | `PlacementGraphicsCreateTests` | NOT RUN：本次禁止 EPLAN。Circuit 新页创建旋转椭圆和 0..360 arc；验证 Kind、FirstRadius、SecondRadius、ElipseAngle（弧度），不一致时停止。 |
-| R1 08-placement-timeout（2026-11-03 brief） | `PlacementCreateProtocolTests`、`LayoutGuardBatchTimingTests` | 不涉及新增 Large。Medium 已测 200 个已有对象＋50 个新对象：无冲突约 80 ms、一个冲突约 519 ms；50 个同时冲突的额外压力测量超过 2 分钟后中断，本项未重构守卫。 |
-| R1 06-path-text-default（2026-11-03 brief） | `PlacementTextCreateTests` | NOT RUN：本次禁止 EPLAN。省略 path_text 高度后 PathText.Create 接受且读回仍为 -16002；拒绝或不一致时停止。 |
-| R1 05-cross-section（2026-11-03 brief） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。以 `cross_section: "1,5"` 放置连接定义点，读回数值、端点与一步撤销；保留点号输入用例。 |
-| R1 04-plc-optional（2026-11-03 brief） | `DevicePlaceTests` | NOT RUN：本次禁止 EPLAN。只提供连接点代号和文字的 PLC 点读回，地址字段为空；已有带地址测试保留。 |
-| R1 03-graphics-pages（2026-11-03 brief） | `PlacementGraphicsCreateTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 新建 Overview 页上的 line、text 读回。 |
-| R1 02-box-endpoints（2026-11-03 brief） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。黑盒框边 DCP 连接及逻辑端点、图形路径读回；Small/Medium 同时覆盖框内引脚、穿越与无关拐点引脚。 |
-| R1 01-nodes（2026-11-03 brief） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。独立 corner、t_node、potential_point 的读回及一步撤销恢复；混合导线仍保留两步撤销。 |
 | G8 可选端子符号（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 X2_2、KA1_PE 的库名、符号、变体、编号及逐次单步撤销。 |
 | G6 母线定义（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 BBDEF 主功能与两个 BCP 同属一个器件、逐次单步撤销。 |
 | G5 黑盒（2026-11-03 brief；g4probe A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 60×40 黑盒、DCP 0/2/4 同器件与框内列表、后缀及逐步单次撤销。 |

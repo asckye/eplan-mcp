@@ -44,8 +44,8 @@ public sealed partial class DevicePlaceTests
             { ["project"] = project, ["plc"] = tag, ["language"] = "??_??", ["response_format"] = "detailed" });
             JsonElement channel = Assert.Single(read.GetProperty("channels").EnumerateArray(), c => c.GetProperty("name").GetString()!.EndsWith(":2", StringComparison.Ordinal));
             Assert.Equal("Start input", channel.GetProperty("text").GetString());
-            Assert.True(string.IsNullOrEmpty(channel.GetProperty("address").GetString()));
-            Assert.True(string.IsNullOrEmpty(channel.GetProperty("manualSymbolicAddress").GetString()));
+            Assert.True(string.IsNullOrEmpty(channel.TryGetProperty("address", out JsonElement address) ? address.GetString() : null));
+            Assert.True(string.IsNullOrEmpty(channel.TryGetProperty("manualSymbolicAddress", out JsonElement symbolic) ? symbolic.GetString() : null));
         }
         catch
         {

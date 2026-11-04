@@ -99,7 +99,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         PageDrawingGeometry before = await Drawing();
         TestContext.Current.TestOutputHelper!.WriteLine("before wire drawing: " + JsonSerializer.Serialize(before));
         DrawingPlacement from = Assert.Single(before.Placements, p => p.Kind == "Terminal");
-        DrawingPlacement to = Assert.Single(before.Placements, p => p.Kind == "DeviceConnectionPoint");
+        DrawingPlacement to = Assert.Single(before.Placements, p => p.Kind == "Function"); // the drawing read has no kind of its own for SPECIAL/DCP
         static object Locator(DrawingPlacement p) => new { project = p.Locator.Project, page = p.Locator.Page, type = p.Locator.Type, oid = p.Locator.Oid, digest = p.Locator.Digest };
         JsonElement result = await Call("eplan_connection_create", new()
         {
