@@ -11,6 +11,7 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Medium")]
 public sealed class ConnectionDefinitionPointToolTests
 {
+    private static readonly int[] _position40 = [40, 40];
     private static readonly int[] _position100 = [100, 100];
     private static JsonElement Item => JsonSerializer.SerializeToElement(new { kind = "definition_point", position = (int[])[40, 40], color = "RD", cross_section = "1.5" });
     private static JsonElement WireItem => JsonSerializer.SerializeToElement(new
@@ -51,6 +52,21 @@ public sealed class ConnectionDefinitionPointToolTests
         }
         else
         { Assert.Contains("dry_run: false", result.GetProperty("hint").GetString(), StringComparison.Ordinal); }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task PartOnlyDefinition_ForwardsExactFieldsAndFailure(bool fail)
+    {
+        using var harness = Setup();
+        if (fail) { harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.PartNotFound, Execution = ExecutionState.NotStarted, Message = "missing part" }; }
+        JsonElement item = JsonSerializer.SerializeToElement(new { kind = "definition_point", position = _position40, part = "PXC.2861344", part_variant = "1", part_count = 2 });
+        CallToolResult result = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [item], dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Single(harness.Bridge.Writes);
+        if (fail) { Assert.Equal(ErrorReason.PartNotFound, WriteToolHarness.Error(result).GetProperty("reason").GetString()); }
+        else { Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
+        Assert.Equal(item.GetRawText(), JsonSerializer.SerializeToElement(harness.Bridge.Calls.Last().Args).GetProperty("request").GetProperty("items")[0].GetRawText());
     }
 
     [Theory]

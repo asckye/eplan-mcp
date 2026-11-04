@@ -140,7 +140,7 @@ public static class ConnectionCreatePlanner
             }
             if ((string?)item["kind"] == "definition_point")
             {
-                definitions.Add(ConnectionDefinitionPoints.Plan(item, at, [], "", "", index - 1, scene, variants ??= reader.Read(scene.Project.Path, new() { Library = "SPECIAL" }), existing: true));
+                definitions.Add(ConnectionDefinitionPoints.Plan(item, at, [], "", "", index - 1, scene, variants ??= reader.Read(scene.Project.Path, new() { Library = "SPECIAL" }), existing: true, parts: reader as IPartsDatabase));
                 continue;
             }
             bool wire = (string?)item["kind"] == "wire";
@@ -194,7 +194,7 @@ public static class ConnectionCreatePlanner
             Require(scene.Pins[from].Location.SequenceEqual(points[0]) && scene.Pins[to].Location.SequenceEqual(points[points.Length - 1]), at, "Path endpoints must equal the located pins; pins are never moved.");
             Require(scene.Pins[from].Direction == Direction(points[0], points[1]) && scene.Pins[to].Direction == Direction(points[points.Length - 1], points[points.Length - 2]), at, "Path directions must face out of both pins.");
             if (item["definition_point"] is { } definition)
-            { definitions.Add(ConnectionDefinitionPoints.Plan(definition, at + "/definition_point", points, from, to, index - 1, scene, variants ??= reader.Read(scene.Project.Path, new() { Library = "SPECIAL" }))); }
+            { definitions.Add(ConnectionDefinitionPoints.Plan(definition, at + "/definition_point", points, from, to, index - 1, scene, variants ??= reader.Read(scene.Project.Path, new() { Library = "SPECIAL" }), parts: reader as IPartsDatabase)); }
             endpointPins.Add(from);
             endpointPins.Add(to);
             paths.Add(points);

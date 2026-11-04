@@ -336,3 +336,4 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `ContextPropertyPlacement.Location` 和默认的 `GetBoundingBox()` 均相对所属对象；加所属对象位置与绝对坐标一致（`relativePlusOwnerMatchesAbsolute:true`）。显式 `GetBoundingBox(false)` 返回绝对坐标，不能再次加所属对象位置。`property_moves.x_mm/y_mm` 继续表示页面绝对坐标，适配器负责换算。— 实测
 - `Insert.WindowMacro` 返回的 `MacroBox` 可在同一插入事务内调用 `Placement.Remove()`；总览宏移除框后 195 个被引用对象全部保留，其余对象数量不变，一次撤销仍移除整个插入。`macro_box:true` 沿用 `InsertMacroBox.FromProjectSettings`。— 实测
 - `PotentialDefinition` 没有可用的 Create（见 A86）；净化窗口宏可经 `Insert.WindowMacro(path, RepresentationType.MultiLine, 0, page, new PointD(x,y), Insert.MoveKind.Absolute, NumerationMode.None)` 插入，同一事务删除返回的宏框并设置 `PotentialName` / `SignalName`。宏参考点为对象中心；插到 (100,100) 的外框为 98.75..101.25。资源写临时文件供调用，用后删除。— 实测
+- `ConnectionDefinitionPoint.AddArticleReference(string, string, uint)` 可写入部件；`ArticleReferences` 实测可读，与 XML 所称“始终抛异常”不符。只有部件而无颜色、截面、标识的连接定义点有效，示例 76 个定义点中存在此类对象。— 实测

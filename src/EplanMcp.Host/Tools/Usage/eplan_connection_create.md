@@ -21,3 +21,5 @@ INVALID_ARGUMENT: fix JSON Pointers. PLAN_STALE: re-read/re-plan. CAPABILITY_MIS
 Layout: R1-R5/R8 refuse with rule/suggested grid position when available; R6/R7/R9 warn unless layout.strict. Fallback: Page.Size minus layout.marginMm. Incomplete prediction checks known points/outlines/routes; measured symbols/texts are checked before commit, or undone if available only after commit. metadata.layoutViolations/layoutChecks reports geometry/nearest free positions and both stages/fallback.
 
 potential_definition: {kind,position,potential_name?,signal_name?}; at least one nonempty name. Embedded macro insertion removes its box in the same transaction; reads type/position/names. Standalone: no connection generation, one undo; may annotate an existing connection.
+
+definition_point also accepts part, part_variant (default "1"), part_count (default 1, positive uint); part alone is valid. Missing database part: PART_NOT_FOUND. articles/connectionArticles verify point and generated connection references.

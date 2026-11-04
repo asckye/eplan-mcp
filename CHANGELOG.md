@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_connection_create.definition_point` 支持 `part`、`part_variant`（默认 1）和 `part_count`（默认 1）；可仅设置部件，并核对定义点及连接的部件引用。
+
 - `eplan_connection_create` 新增 `potential_definition`，经内嵌窗口宏创建电位定义点，可设置电位名和信号名；仅放置时不生成连接并一步撤销。
 
 - `eplan_macro_insert` 新增 `macro_box`（默认 true）；false 在插入事务内移除宏框，返回对象数不含被移除的框，内容和一次撤销语义保留。

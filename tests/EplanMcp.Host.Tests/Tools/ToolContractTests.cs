@@ -142,7 +142,7 @@ public sealed class ToolContractTests : IDisposable
             Assert.Equal("kind", point.GetProperty("not").GetProperty("required")[0].GetString());
             point = schema.GetProperty("$defs").GetProperty("d");
             Assert.False(point.GetProperty("additionalProperties").GetBoolean());
-            Assert.Equal(["color", "cross_section", "designation"], point.GetProperty("anyOf").EnumerateArray().Select(p => p.GetProperty("required")[0].GetString()));
+            Assert.Equal(["color", "cross_section", "designation", "part"], point.GetProperty("anyOf").EnumerateArray().Select(p => p.GetProperty("required")[0].GetString()));
             JsonElement properties = point.GetProperty("properties");
             Assert.Equal(["CDP", "CDPNG"], properties.GetProperty("symbol").GetProperty("enum").EnumerateArray().Select(p => p.GetString()));
             Assert.Equal("CDP", properties.GetProperty("symbol").GetProperty("default").GetString());

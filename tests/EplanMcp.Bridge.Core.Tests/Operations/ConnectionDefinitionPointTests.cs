@@ -48,6 +48,48 @@ public sealed class ConnectionDefinitionPointTests
     }
 
     [Fact]
+    public void ExistingConnection_PartOnly_UsesDefaults()
+    {
+        var fixture = Existing();
+        fixture.Request["items"] = JArray.Parse("[{\"kind\":\"definition_point\",\"position\":[8,24],\"part\":\"PXC.2861344\"}]");
+        JToken point = Assert.Single(fixture.Plan()["definitionPoints"]!);
+        Assert.Empty(point["properties"]!);
+        Assert.Equal("PXC.2861344", (string?)point["articles"]![0]!["part"]);
+        Assert.Equal("1", (string?)point["articles"]![0]!["variant"]);
+        Assert.Equal(1u, (uint)point["articles"]![0]!["count"]!);
+    }
+
+    [Theory]
+    [InlineData("{\"part\":\"missing\"}", ErrorReason.PartNotFound)]
+    [InlineData("{\"part\":\"PXC.2861344\",\"part_variant\":\"2\"}", ErrorReason.InvalidArgument)]
+    [InlineData("{\"part\":\"PXC.2861344\",\"part_count\":0}", ErrorReason.InvalidArgument)]
+    [InlineData("{\"part\":\"PXC.2861344\",\"part_count\":1.5}", ErrorReason.InvalidArgument)]
+    [InlineData("{\"part\":\"PXC.2861344\",\"part_count\":4294967296}", ErrorReason.InvalidArgument)]
+    [InlineData("{\"part_count\":2}", ErrorReason.InvalidArgument)]
+    public void InvalidPart_UsesExistingErrorCodes(string fields, string reason)
+    {
+        var fixture = Existing();
+        foreach (JProperty property in JObject.Parse(fields).Properties())
+        { fixture.Request["items"]![0]![property.Name] = property.Value; }
+        Assert.Equal(reason, Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error.Reason);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("articles")]
+    [InlineData("connectionArticles")]
+    public void PartReferences_ReadBackOnPointAndConnection(string? mismatch)
+    {
+        var creator = new Creator(existing: true) { Mismatch = mismatch };
+        creator.Fixture.Request["items"]![0]!["part"] = "PXC.2861344";
+        creator.Fixture.Request["items"]![0]!["part_count"] = 2;
+        if (mismatch is not null)
+        { Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => creator.Execute()).Error.Execution); }
+        else
+        { Assert.Equal(2u, (uint)creator.Execute()["definitionPoints"]![0]!["connectionArticles"]![0]!["count"]!); }
+    }
+
+    [Fact]
     public void ExistingConnection_PositionIsRequired()
     {
         var fixture = Existing();
@@ -494,7 +536,7 @@ public sealed class ConnectionDefinitionPointTests
         });
         return fixture;
     }
-    private sealed class Creator : IConnectionCreator, IConnectionGenerator, IConnectionDefinitionPointWriter
+    private sealed class Creator : IConnectionCreator, IConnectionGenerator, IConnectionDefinitionPointWriter, IPartsDatabase
     {
         public ConnectionCreateFixture Fixture { get; }
         public FakeTransactions Transactions { get; } = new();
@@ -513,6 +555,7 @@ public sealed class ConnectionDefinitionPointTests
             .Execute(new JObject { ["request"] = Fixture.Request, ["fingerprint"] = Fixture.Plan()["fingerprint"] })));
         public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Fixture.Scene : new()
         { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = Drawn ?? [.. Fixture.Scene.Graphical, .. Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!] };
+        public PartsDatabaseContent Read(string? language) => Fixture.Read(language);
         public List<SymbolSearchItem> Read(string project, SymbolSearchArgs args) => Fixture.Read(project, args);
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => { Events.Add("place"); State = 1; };
@@ -533,6 +576,8 @@ public sealed class ConnectionDefinitionPointTests
             foreach (JToken row in rows)
             {
                 row["connectionValues"] = row["properties"]!.DeepClone();
+                if (row["articles"] is JArray articles)
+                { row["connectionArticles"] = articles.DeepClone(); }
                 if (ObservedSection is { } section)
                 { row["properties"]!["cross_section"] = section; row["connectionValues"]!["cross_section"] = section; }
             }

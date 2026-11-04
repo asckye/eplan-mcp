@@ -5,8 +5,9 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
-internal sealed class ConnectionCreateFixture : ISymbolReader
+internal sealed class ConnectionCreateFixture : ISymbolReader, IPartsDatabase
 {
+    public PartsDatabaseContent Read(string? language) => new() { Parts = [new() { PartNumber = "PXC.2861344", Variant = "1" }] };
     internal const string PageName = "=F+A1&EFS1/1";
     internal ConnectionCreatePlanner.Scene Scene { get; } = new()
     {

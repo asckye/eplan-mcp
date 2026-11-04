@@ -47,6 +47,12 @@ internal sealed partial class EplanConnectionCreator
                         using AnyPropertyId id = property.Id;
                         properties[id] = (string)value!;
                     }
+                    if (row["articles"] is JArray articles)
+                    {
+                        ConnectionDefinitionPoint native = target.AllPlacements.OfType<ConnectionDefinitionPoint>().Single(p => p.ObjectIdentifier == point.ObjectIdentifier);
+                        foreach (JToken article in articles)
+                        { native.AddArticleReference((string)article["part"]!, (string)article["variant"]!, (uint)article["count"]!); }
+                    }
                     _definitionPointIds.Add((int)row["itemIndex"]!, point.ObjectIdentifier);
                 }
                 finally { GC.KeepAlive(point); }
@@ -91,6 +97,12 @@ internal sealed partial class EplanConnectionCreator
                     ["connectionValues"] = new JObject { ["color"] = connection.Colour, ["cross_section"] = connection.CrossSection, ["designation"] = connection.Label },
                     ["connection"] = BridgeJson.FromObject(connection.Locator),
                 };
+                if (expected["articles"] is JArray)
+                {
+                    static JObject Article(ArticleReference a) => new() { ["part"] = a.PartNr, ["variant"] = a.VariantNr, ["count"] = a.Count };
+                    row["articles"] = new JArray(point.ArticleReferences.Select(Article));
+                    row["connectionArticles"] = new JArray(owners[0].ArticleReferences.Select(Article));
+                }
                 row["locator"] = BridgeJson.FromObject(geometry.Placements.Single(p => p.Kind == nameof(ConnectionDefinitionPoint) && p.Locator.Oid == oid).Locator);
                 result.Add(row);
             }

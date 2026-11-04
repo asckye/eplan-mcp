@@ -57,6 +57,9 @@ public sealed class ConnectionCreateContractTests
         Validate(OutputSchema(), potentials.Plan());
         contract["potentialDefinitionExample"] = potentials.Request;
         contract["potentialDefinitionPreview"] = potentials.Plan();
+        definitions.Request["items"] = JArray.Parse("[{\"kind\":\"definition_point\",\"position\":[40,40],\"part\":\"PXC.2861344\"}]");
+        Validate(InputSchema(), definitions.Request);
+        contract["partOnlyDefinitionExample"] = definitions.Request;
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
     }
@@ -81,8 +84,11 @@ public sealed class ConnectionCreateContractTests
             ["color"] = Text(),
             ["cross_section"] = new JObject { ["type"] = "string", ["pattern"] = "^ *[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)(?:[eE][+-]?[0-9]+)? *$" },
             ["designation"] = Text(),
+            ["part"] = Text(),
+            ["part_variant"] = Text(),
+            ["part_count"] = new JObject { ["type"] = "integer", ["minimum"] = 1, ["maximum"] = uint.MaxValue },
         }, "");
-        wire["properties"]!["definition_point"]!["anyOf"] = new JArray(new JObject { ["required"] = new JArray("color") }, new JObject { ["required"] = new JArray("cross_section") }, new JObject { ["required"] = new JArray("designation") });
+        wire["properties"]!["definition_point"]!["anyOf"] = new JArray(new JObject { ["required"] = new JArray("color") }, new JObject { ["required"] = new JArray("cross_section") }, new JObject { ["required"] = new JArray("designation") }, new JObject { ["required"] = new JArray("part") });
         JObject Node(string kind, int count) => Object(new()
         {
             ["kind"] = Constant(kind),

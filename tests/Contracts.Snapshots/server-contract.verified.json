@@ -4846,6 +4846,20 @@
               "designation": {
                 "$ref": "#/$defs/t"
               },
+              "part": {
+                "$ref": "#/$defs/t"
+              },
+              "part_variant": {
+                "type": "string",
+                "minLength": 1,
+                "default": "1"
+              },
+              "part_count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4294967295,
+                "default": 1
+              },
               "kind": {
                 "const": "definition_point"
               }
@@ -4864,6 +4878,11 @@
               {
                 "required": [
                   "designation"
+                ]
+              },
+              {
+                "required": [
+                  "part"
                 ]
               }
             ]

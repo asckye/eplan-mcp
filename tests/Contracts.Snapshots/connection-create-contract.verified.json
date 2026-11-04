@@ -180,6 +180,19 @@
                     "designation": {
                       "type": "string",
                       "minLength": 1
+                    },
+                    "part": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "part_variant": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "part_count": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 4294967295
                     }
                   },
                   "required": [],
@@ -197,6 +210,11 @@
                     {
                       "required": [
                         "designation"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "part"
                       ]
                     }
                   ]
@@ -574,6 +592,19 @@
                   "type": "string",
                   "minLength": 1
                 },
+                "part": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "part_variant": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "part_count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 4294967295
+                },
                 "kind": {
                   "type": "string",
                   "const": "definition_point"
@@ -597,6 +628,11 @@
                 {
                   "required": [
                     "designation"
+                  ]
+                },
+                {
+                  "required": [
+                    "part"
                   ]
                 }
               ]
@@ -2920,5 +2956,20 @@
       }
     ],
     "fingerprint": "8597f196d3a72cd68db2e37d61c2da5f2ab319d72f126c465632ed9289d1b105"
+  },
+  "partOnlyDefinitionExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "definition_point",
+        "position": [
+          40,
+          40
+        ],
+        "part": "PXC.2861344"
+      }
+    ]
   }
 }

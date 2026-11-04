@@ -286,8 +286,10 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         }
     }
 
-    [Fact]
-    public async Task ExistingTerminalConnection_DefinitionPointOnly_PreservesEndpoints_OneUndoRestores()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExistingTerminalConnection_DefinitionPointOnly_PreservesEndpoints_OneUndoRestores(bool withPart)
     {
         Assert.NotNull(host);
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
@@ -350,6 +352,10 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             ["response_format"] = "detailed",
             ["items"] = new[] { new { kind = "definition_point", position = expectedPoint, color = "RD", cross_section = "1.5" } }
         };
+        if (withPart)
+        {
+            request["items"] = new[] { new { kind = "definition_point", position = expectedPoint, color = "RD", cross_section = "1.5", part = "PXC.2861344", part_variant = "1", part_count = 2 } };
+        }
         try
         {
             JsonElement result = await Call("eplan_connection_create", request);
@@ -364,6 +370,16 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             {
                 Assert.Equal("RD", point.GetProperty(field).GetProperty("color").GetString());
                 Assert.Equal("1.5", point.GetProperty(field).GetProperty("cross_section").GetString());
+            }
+            if (withPart)
+            {
+                foreach (string field in new[] { "articles", "connectionArticles" })
+                {
+                    JsonElement article = Assert.Single(point.GetProperty(field).EnumerateArray());
+                    Assert.Equal("PXC.2861344", article.GetProperty("part").GetString());
+                    Assert.Equal("1", article.GetProperty("variant").GetString());
+                    Assert.Equal(2u, article.GetProperty("count").GetUInt32());
+                }
             }
             JsonElement currentConnections = await Connections();
             Assert.Equal(originalConnections.GetArrayLength(), currentConnections.GetArrayLength());
