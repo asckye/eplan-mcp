@@ -28,11 +28,17 @@ public sealed class PlacementCreateTests
         Assert.True(fields.GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.Equal((1, 50), (fields.GetProperty("items").GetProperty("minItems").GetInt32(), fields.GetProperty("items").GetProperty("maxItems").GetInt32()));
         JsonElement[] branches = [.. input.GetProperty("$defs").GetProperty("item").GetProperty("oneOf").EnumerateArray()];
-        Assert.Equal(["text", "path_text", "line", "rectangle", "polyline", "arc", "ellipse", "image"], branches.Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));
+        Assert.Equal(["text", "path_text", "line", "rectangle", "polyline", "arc", "ellipse", "image", "block"], branches.Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));
         Assert.All(branches, b => Assert.False(b.GetProperty("additionalProperties").GetBoolean()));
         JsonElement height = branches[0].GetProperty("properties").GetProperty("height_mm");
         Assert.Equal((0.5, 100), (height.GetProperty("minimum").GetDouble(), height.GetProperty("maximum").GetDouble()));
-        Assert.True(JsonElement.DeepEquals(input.GetProperty("$defs"), tool.OutputSchema!.Value.GetProperty("$defs")));
+        JsonNode inputDefinitions = JsonNode.Parse(input.GetProperty("$defs").GetRawText())!;
+        JsonNode outputDefinitions = JsonNode.Parse(tool.OutputSchema!.Value.GetProperty("$defs").GetRawText())!;
+        JsonArray inputKinds = inputDefinitions["item"]!["oneOf"]!.AsArray(), outputKinds = outputDefinitions["item"]!["oneOf"]!.AsArray();
+        Assert.Equal("[\"kind\",\"count\"]", outputKinds.Last()!["required"]!.ToJsonString());
+        inputKinds.RemoveAt(inputKinds.Count - 1);
+        outputKinds.RemoveAt(outputKinds.Count - 1);
+        Assert.True(JsonNode.DeepEquals(inputDefinitions, outputDefinitions));
     }
 
     [Theory]

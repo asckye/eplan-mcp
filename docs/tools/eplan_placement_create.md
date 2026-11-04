@@ -42,3 +42,5 @@ Large 仅编写：LargeWrite 新页经 Host 创建混合批次，由 `eplan_page
 写前布局检查每次调用的建议位置搜索共享 2 秒预算；耗尽后不再给出建议位置，违规规则、对象与拒绝结果保持不变。写后检查沿用同一预算机制。
 
 所有图形和文字可选 `layer` 整数 ID、`pen:{color,width_mm,style,pattern_length,line_end}`；画笔各字段可省略；color/width_mm/style/pattern_length 的 `-16002` 取 EPLAN 默认，line_end 仅 0–2。仅开放 pattern_length，StyleFactor 与它联动。rectangle/text/path_text 可选 angle（度），文字可选 alignment（原枚举名，如 MiddleLeft、BaseLineLeft、FromLayer）。样式写后逐项读回，旋转外框按 EPLAN 实测，布局规则不变。
+
+`kind:"block"`：一次调用仅含一个块，`members` 为本页 2–1000 个最新绘图定位器，`name` 可选。按 A88 创建并核对 Count/Name；成员过期返回 PLAN_STALE，异页、重复、已有归属返回 INVALID_ARGUMENT。预览只读，结果以名称和数量汇总，提交后重新取得定位器（成员坐标与对象号可能改变），一次撤销恢复。Large `BlockCreateTests` 待实测。

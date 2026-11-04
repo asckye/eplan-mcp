@@ -5,6 +5,9 @@ public sealed class PlacementText
 {
     /// <summary>Primitive kind; retained type name for the staged TEXT contract.</summary>
     public string Kind { get; set; } = "text";
+    public List<DrawingLocator>? Members { get; set; }
+    public string? Name { get; set; }
+    public int? Count { get; set; }
     /// <summary>Second endpoint or normalized upper-right corner; empty for text.</summary>
     public double[] EndPosition { get; set; } = [];
     /// <summary>Absolute [x,y], lower-left origin, y upwards.</summary>

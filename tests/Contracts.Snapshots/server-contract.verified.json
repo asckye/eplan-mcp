@@ -15176,7 +15176,7 @@
     {
       "name": "eplan_placement_create",
       "title": "Create text and graphics on an EPLAN page",
-      "description": "Creates text, line, rectangle, polyline, arc, ellipse, path_text or image on a Circuit, Overview or Graphics page; mm, bottom left, y up; angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
+      "description": "Creates text, graphics or a named block of 2..1000 drawing locators (block alone per call) on a Circuit, Overview or Graphics page; mm, bottom left, y up; angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -15209,7 +15209,8 @@
                     "polyline",
                     "arc",
                     "ellipse",
-                    "image"
+                    "image",
+                    "block"
                   ]
                 },
                 "position": {},
@@ -15227,16 +15228,16 @@
                 "file": {
                   "type": "string"
                 },
-                "pen": {},
-                "layer": {
-                  "type": "integer"
+                "members": {},
+                "name": {
+                  "type": "string"
                 },
+                "pen": {},
+                "layer": {},
                 "closed": {
                   "type": "boolean"
                 },
-                "alignment": {
-                  "type": "string"
-                }
+                "alignment": {}
               },
               "type": "object"
             },
@@ -15926,8 +15927,75 @@
                     }
                   }
                 }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "count"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "block"
+                  },
+                  "members": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 1000,
+                    "items": {
+                      "$ref": "#/$defs/locator"
+                    }
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 1000
+                  }
+                }
               }
             ]
+          },
+          "locator": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "page",
+              "type",
+              "oid",
+              "digest"
+            ],
+            "properties": {
+              "project": {
+                "type": "string",
+                "minLength": 1
+              },
+              "page": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "oid": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
           }
         }
       },

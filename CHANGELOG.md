@@ -8,6 +8,7 @@
 - 绘图创建、移动与连接创建支持 `layout_guard: "warn"`，用于复现已有图纸；默认仍拒绝布局违规，超页始终拒绝。
 - 页面创建和更新的 `description` 支持语言代码到文本的对象，一次写入多语言并逐项读回，字符串行为保持不变。
 - 器件改名改用 NameService，保留 PLC 等功能后缀，提交后按新标识读回；已占用标识仍拒绝。
+- 图形创建支持 `kind: "block"`，将 2–1000 个同页定位器组成命名块，一次撤销恢复。
 
 - `eplan_connection_create.interruption_point` 的 `counterpart_pages` 可省略；省略只放置中断点，提供时继续核对配对页。
 

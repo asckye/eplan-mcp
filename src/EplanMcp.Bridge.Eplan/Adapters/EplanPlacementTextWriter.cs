@@ -41,6 +41,18 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
     {
         MainThread.Assert();
         OperationContext.Current.ThrowIfCancellationRequested();
+        if (text.Kind == "block")
+        {
+            Page pageObject = Find(projectPath, page);
+            Placement[] all = pageObject.AllPlacements;
+            Placement[] members = text.Members!.Select(l => all.Single(p => p.ObjectIdentifier == l.Oid && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == l.Type)).ToArray();
+#pragma warning disable CA2000 // Project-owned block; never dispose after rollback (A55).
+            var block = new Block();
+#pragma warning restore CA2000
+            block.Create(pageObject, members);
+            if (text.Name is not null) { block.Name = text.Name; }
+            return () => new() { Kind = "block", Name = block.Name, Count = block.Count, Members = text.Members };
+        }
         PointD Point(double[] xy) => new(DrawingCoordinates.MillimetresToApi(xy[0]), DrawingCoordinates.MillimetresToApi(xy[1]));
         double[] XY(PointD point) => [DrawingCoordinates.ApiToMillimetres(point.X), DrawingCoordinates.ApiToMillimetres(point.Y)];
         Func<PlacementText> Styled(GraphicalPlacement placement, Func<PlacementText> read)

@@ -43,7 +43,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             { /* Unreadable membership grants no collision exemption. */ }
         }
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        void Walk(IEnumerable<Placement> placements, bool excluded, DrawingLocator? parent = null)
+        void Walk(IEnumerable<Placement> placements, bool excluded, DrawingLocator? parent = null, bool blockChild = false)
         {
             int index = 0;
             foreach (Placement placement in placements)
@@ -60,8 +60,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     continue;
                 }
 
-                DrawingPlacement? row = !excluded && (placement is SymbolReference or PropertyPlacement || placement.GetType() == typeof(Text)
-                    || placement is PathText or PolyLine or Arc or Image || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot) : null;
+                DrawingPlacement? row = !excluded && (placement is SymbolReference or PropertyPlacement or Block || placement.GetType() == typeof(Text)
+                    || placement is PathText or PolyLine or Arc or Image || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot, blockChild) : null;
                 if (row is not null)
                 {
                     result.Placements.Add(row);
@@ -70,14 +70,15 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 Walk(placement switch
                 {
                     Group group => group.SubPlacements,
+                    Block block => block.SubPlacements,
                     SymbolReference symbol => symbol.PropertyPlacements,
                     IPropertyPlacementsContainer container => container.PropertyPlacements,
                     _ => [],
-                }, excluded, row?.Locator);
+                }, excluded, row?.Locator, blockChild || placement is Block);
             }
         }
 
-        DrawingPlacement ReadPlacement(Placement placement, DrawingLocator? parent, string? slot)
+        DrawingPlacement ReadPlacement(Placement placement, DrawingLocator? parent, string? slot, bool blockChild)
         {
             // A87: Location and default bounds are relative; GetBoundingBox(false) is absolute.
             double[] location = Optional(() =>
@@ -181,7 +182,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 content = contents?.GetAsString(),
                 height,
                 angle,
-                name = (placement as FunctionBase)?.Name,
+                name = placement is Block namedBlock ? namedBlock.Name : (placement as FunctionBase)?.Name,
+                count = placement is Block countedBlock ? countedBlock.Count : (int?)null,
                 display,
                 visible = placement is PropertyPlacement visibleProperty ? visibleProperty.IsVisible : (bool?)null,
                 start = placement is Line line ? XY(line.StartPoint) : null,
@@ -193,11 +195,13 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             {
                 Properties = new Dictionary<string, string?>
                 {
+                    ["coordinate_space"] = blockChild ? "block-relative; absolute geometry unverified" : null,
                     ["layout_symbol"] = placement is SymbolReference && placement.GetType().Name is not ("LocationBox" or "Cable" or "DynamicConnectionLine") ? "true" : null,
                     ["layout_container_owner"] = containerOwner,
                     ["layout_container"] = isContainer ? "true" : null,
                     ["grouped"] = (placement.Group is not null).ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant(),
-                    ["name"] = (placement as FunctionBase)?.Name,
+                    ["name"] = placement is Block blockName ? blockName.Name : (placement as FunctionBase)?.Name,
+                    ["count"] = placement is Block blockCount ? Number(blockCount.Count) : null,
                     ["text"] = contents?.GetAsString(),
                     ["display"] = display,
                     ["property_id"] = placement is PropertyPlacement propertyText ? DisplayedId(propertyText).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
@@ -213,8 +217,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 }
                     .Concat(graphics).Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),
                 Kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name, // ContextPropertyPlacement too
-                Location = location,
-                Bounds = bounds,
+                Location = blockChild ? [] : location,
+                Bounds = blockChild ? null : bounds,
                 Parent = parent,
                 // A57: default library texts become local context copies when edited. Identify both by
                 // their parent and slot/content digest so copying does not change the drawing identity.
@@ -232,7 +236,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         catch (Exception ex) when (ex is BaseException or InvalidOperationException)
         { /* A49: unavailable frame geometry uses the page-size boundary fallback. */ }
 
-        Walk(EplanNativePreconditions.Valid(native).ToArray(), excluded: false); // A13: include returned objects which are not yet visible to page enumeration.
+        Walk(EplanNativePreconditions.Valid(native).OrderByDescending(p => p is Block).ToArray(), excluded: false); // A13: include returned objects which are not yet visible to page enumeration.
         return result;
     }
 

@@ -42,6 +42,25 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         foreach (JToken row in rows)
         {
             string at = batch ? "/items/" + (index++).ToString(CultureInfo.InvariantCulture) : "/text";
+            if (row is JObject blockRow && (string?)blockRow["kind"] == "block")
+            {
+                Members(row, at, "kind members", "name position endPosition heightMm contents points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256 pen layer alignment closed count");
+                if (row["members"] is not JArray { Count: >= 2 and <= 1000 } members || row["name"] is { Type: not JTokenType.Null and not JTokenType.String })
+                { throw InvalidArgument(at + "/members requires 2..1000 locators and an optional name."); }
+                foreach (JToken member in members)
+                {
+                    Members(member, at + "/members", "project page type oid digest");
+                    if (member["project"]?.Type != JTokenType.String || member["page"]?.Type != JTokenType.String || member["type"]?.Type != JTokenType.Integer || member["oid"]?.Type != JTokenType.Integer || member["digest"]?.Type != JTokenType.String
+                        || !long.TryParse(member["type"]?.ToString(), out long type) || type is < 1 or > int.MaxValue || !long.TryParse(member["oid"]?.ToString(), out long oid) || oid < 1)
+                    { throw InvalidArgument(at + "/members requires uncoerced drawing locators."); }
+                }
+                continue;
+            }
+            if (row is JObject primitive)
+            {
+                foreach (string field in new[] { "members", "name", "count" })
+                { if (primitive[field]?.Type == JTokenType.Null) { primitive.Remove(field); } }
+            }
             Members(row, at, "position heightMm contents", "kind endPosition points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256 pen layer alignment closed");
             string kind = row["kind"]?.Type == JTokenType.String ? (string)row["kind"]! : "text";
             if (row["kind"] is not null && row["kind"]!.Type != JTokenType.String || !KnownKind(kind))
@@ -96,6 +115,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         List<PlacementText> items = args.Items ?? [args.Text];
         if (items.Count is < 1 or > 50)
         { throw WriteArguments.NotStarted(InvalidArgument("/items requires 1..50 items.")); }
+        if (items.Any(item => item?.Kind == "block"))
+        { return BlockCreation.Run(args, catalog, drawings, writer, transactions, planning); }
         var images = new List<ImportSource>();
         foreach (PlacementText item in items)
         {

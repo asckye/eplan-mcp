@@ -96,6 +96,18 @@ internal static class PlacementCreatePlanning
         {
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
             string? kind = item.ValueKind == JsonValueKind.Object && item.TryGetProperty("kind", out JsonElement k) && k.ValueKind == JsonValueKind.String ? k.GetString() : null;
+            if (kind == "block")
+            {
+                Check(items.GetArrayLength() == 1, "/items", "a block must be the only item in its call.");
+                if (Members(item, at, "kind members", "name"))
+                {
+                    Check(!item.TryGetProperty("name", out JsonElement name) || name.ValueKind == JsonValueKind.String, at + "/name", "must be a string.");
+                    Check(item.TryGetProperty("members", out JsonElement members) && members.ValueKind == JsonValueKind.Array && members.GetArrayLength() is >= 2 and <= 1000, at + "/members", "requires 2..1000 drawing locators.");
+                    if (members.ValueKind == JsonValueKind.Array)
+                    { foreach (JsonElement member in members.EnumerateArray()) { Check(ValidLocator(member), at + "/members", "requires complete drawing locators."); } }
+                }
+                continue;
+            }
             if (!Members(item, at, kind == "path_text" ? "kind position contents" : IsText(kind) ? "kind position contents height_mm" : kind is "line" or "polyline" ? "kind points" : kind == "ellipse" ? "kind center radius_x_mm radius_y_mm" : kind == "arc" ? "kind center radius_mm start_angle end_angle" : kind == "image" ? "kind file corners" : "kind corners", "pen layer " + (kind == "path_text" ? "height_mm angle alignment" : kind == "text" ? "angle alignment" : kind is "ellipse" or "rectangle" ? "angle" : kind == "polyline" ? "closed" : "")))
             { continue; }
             Check(kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "ellipse" or "path_text" or "image", at + "/kind", "unsupported primitive kind.");
@@ -168,6 +180,12 @@ internal static class PlacementCreatePlanning
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
             string kind = item.GetProperty("kind").GetString()!;
             JsonNode actual = Snap(item, page.GridSize, snap, normalizeRectangle: false);
+            if (kind == "block")
+            {
+                rows.Add(new JsonObject { ["requested"] = BlockSummary(item), ["actual"] = BlockSummary(item), ["bounds"] = null, ["snapped"] = false });
+                changes.Add("create block with " + item.GetProperty("members").GetArrayLength().ToString(CultureInfo.InvariantCulture) + " members");
+                continue;
+            }
             string field = Field(kind);
             JsonArray[] points = IsText(kind) || kind is "arc" or "ellipse" ? [actual[field]!.AsArray()] : [.. actual[field]!.AsArray().Select(p => p!.AsArray())];
             if (points.SelectMany(p => p).Any(n => !double.IsFinite(n!.GetValue<double>()) || n.GetValue<double>() is < 0 or > 10000))
@@ -207,6 +225,7 @@ internal static class PlacementCreatePlanning
     private static string Field(string kind) => IsText(kind) ? "position" : kind is "arc" or "ellipse" ? "center" : kind is "line" or "polyline" ? "points" : "corners";
     internal static JsonNode Snap(JsonElement item, double grid, bool snap, bool normalizeRectangle = true)
     {
+        if (item.GetProperty("kind").GetString() == "block") { return JsonNode.Parse(item.GetRawText())!; }
         if (!double.IsFinite(grid) || grid <= 0)
         { throw new BridgeCallException(new BridgeError { Reason = ErrorReason.CapabilityMissing, Message = "A reliable page grid is required." }); }
         JsonNode actual = JsonNode.Parse(item.GetRawText())!;
@@ -221,6 +240,7 @@ internal static class PlacementCreatePlanning
     internal static PlacementText Request(JsonElement item)
     {
         string kind = item.GetProperty("kind").GetString()!, field = Field(kind);
+        if (kind == "block") { return new() { Kind = kind, Name = item.TryGetProperty("name", out JsonElement name) ? name.GetString() : null, Members = item.GetProperty("members").Deserialize<List<DrawingLocator>>(_blockJson) }; }
         double[][] points = IsText(kind) || kind is "arc" or "ellipse" ? [item.GetProperty(field).Deserialize<double[]>()!] : item.GetProperty(field).Deserialize<double[][]>()!;
         return new()
         {
@@ -257,6 +277,16 @@ internal static class PlacementCreatePlanning
         }
         return request;
     }
+
+    internal static JsonObject BlockSummary(JsonElement item) => new() { ["kind"] = "block", ["name"] = item.TryGetProperty("name", out JsonElement name) ? name.GetString() : null, ["count"] = item.GetProperty("members").GetArrayLength() };
+
+    private static readonly JsonSerializerOptions _blockJson = new(JsonSerializerDefaults.Web);
+    private static readonly string[] _locatorStrings = ["project", "page", "digest"];
+    private static readonly string[] _locatorNumbers = ["type", "oid"];
+    private static bool ValidLocator(JsonElement locator) => locator.ValueKind == JsonValueKind.Object
+        && locator.EnumerateObject().Count() == 5 && _locatorStrings.All(n => locator.TryGetProperty(n, out JsonElement p) && p.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(p.GetString()))
+        && _locatorNumbers.All(n => locator.TryGetProperty(n, out JsonElement p) && p.ValueKind == JsonValueKind.Number && p.TryGetInt64(out long v) && v > 0 && (n != "type" || v <= int.MaxValue))
+        && locator.GetProperty("digest").GetString() is { Length: 64 } digest && digest.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');
 
     private static string Child(string at, string name) => at + "/" + name.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
     private static CallToolResult Invalid(IReadOnlyList<string> problems)

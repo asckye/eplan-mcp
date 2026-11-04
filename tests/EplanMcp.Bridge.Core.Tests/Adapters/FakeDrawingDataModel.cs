@@ -40,6 +40,19 @@ internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
     public void Dispose() => throw new InvalidOperationException("Borrowed placement must never be disposed.");
 }
 
+internal sealed class Block() : Placement(901)
+{
+    public string Name { get; set; } = "";
+    public int Count => SubPlacements.Length;
+    public Placement[] SubPlacements { get; private set; } = [];
+    public void Create(Page page, Placement[] members)
+    {
+        Page = page;
+        SubPlacements = members;
+        page.AllPlacements = [.. page.AllPlacements.Except(members), this];
+    }
+}
+
 internal sealed class Group(long oid, params Placement[] children) : Placement(oid)
 {
     public Placement[] SubPlacements { get; } = children;

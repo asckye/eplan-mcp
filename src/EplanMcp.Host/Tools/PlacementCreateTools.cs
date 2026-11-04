@@ -47,7 +47,8 @@ internal sealed class PlacementCreateTools
             {
                 JsonNode actual = PlacementCreatePlanning.Snap(item, geometry.GridSize, snap);
                 args.Items.Add(await PlacementCreatePlanning.RequestAsync(JsonSerializer.SerializeToElement(actual), files, cancellationToken).ConfigureAwait(false));
-                rows.Add(new JsonObject { ["requested"] = JsonNode.Parse(item.GetRawText()), ["actual"] = actual, ["bounds"] = null, ["snapped"] = !JsonElement.DeepEquals(item, JsonSerializer.SerializeToElement(actual)) });
+                bool block = item.GetProperty("kind").GetString() == "block";
+                rows.Add(new JsonObject { ["requested"] = block ? PlacementCreatePlanning.BlockSummary(item) : JsonNode.Parse(item.GetRawText()), ["actual"] = block ? PlacementCreatePlanning.BlockSummary(item) : actual, ["bounds"] = null, ["snapped"] = !block && !JsonElement.DeepEquals(item, JsonSerializer.SerializeToElement(actual)) });
             }
             PlacementTextCreateData checkedLayout = await bridge.InvokeAsync<PlacementTextCreateArgs, PlacementTextCreateData>(OperationNames.PlacementTextCreatePlan, args, CallLimit, null, cancellationToken).ConfigureAwait(false);
             var plan = new WritePlan { Project = project.Name, ProjectPath = project.Path, Fingerprint = args.Fingerprint, Details = new() { ["layoutWarnings"] = checkedLayout.Warning ?? "" }, Changes = rows.Select(row => new PlannedChange { Action = "create", Kind = "placement", Name = args.Page, NewValue = row!["actual"]!.ToJsonString() }).ToList() };
@@ -59,6 +60,8 @@ internal sealed class PlacementCreateTools
                 OperationNames.PlacementTextCreateExecute, args, _ => args, false, CallLimit, "Creating text and graphics")
             { PreparedPlan = plan };
             WriteOutcome<PlacementTextCreateData> outcome = await pipeline.RunAsync<PlacementTextCreateArgs, PlacementTextCreateArgs, PlacementTextCreateData>(request, progress, cancellationToken).ConfigureAwait(false);
+            if (args.Items[0].Kind == "block" && outcome.Data?.Items?[0] is { } blockResult)
+            { rows[0]!["actual"]!["name"] = blockResult.Name; rows[0]!["actual"]!["count"] = blockResult.Count; }
             result["execution"] = outcome.Execution;
             result["warning"] = ResultShaper.CleanText(outcome.Data?.Warning);
             result["recovered"] = outcome.Recovered;
