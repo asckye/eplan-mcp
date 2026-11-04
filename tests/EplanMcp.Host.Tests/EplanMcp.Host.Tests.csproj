@@ -10,6 +10,9 @@
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceDrawingList.cs" Link="Acceptance\AcceptanceDrawingList.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceListFile.cs" Link="Acceptance\AcceptanceListFile.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceRedrawDriver.cs" Link="Acceptance\AcceptanceRedrawDriver.cs" />
+    <Compile Include="..\EplanMcp.Large.Tests\SmallProjectRedrawDriver*.cs" Link="Acceptance\%(Filename)%(Extension)" />
+    <Compile Include="..\EplanMcp.Large.Tests\SmallProjectRedrawReport.cs" Link="Acceptance\SmallProjectRedrawReport.cs" />
+    <Compile Include="..\Shared\PageExportComparer.cs" Link="PageExportComparer.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\AcceptanceReview.cs" Link="Acceptance\AcceptanceReview.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\PageReviewCableLayout.cs" Link="Acceptance\PageReviewCableLayout.cs" />
     <EmbeddedResource Include="..\EplanMcp.Large.Tests\fixtures\acceptance\fictional-plc-di-page.json" LogicalName="Acceptance.fictional.json" />
