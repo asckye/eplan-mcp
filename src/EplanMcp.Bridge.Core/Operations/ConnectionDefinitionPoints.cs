@@ -93,9 +93,9 @@ internal static class ConnectionDefinitionPoints
 
     internal static JObject PlanPotential(JToken value, string at, double[] position, int index)
     {
-        ConnectionCreatePlanner.Members(value, at, "kind position", "potential_name signal_name");
+        ConnectionCreatePlanner.Members(value, at, "kind position", "potential_name signal_name potential_value potential_type color cross_section");
         var properties = new JObject();
-        foreach (string field in new[] { "potential_name", "signal_name" })
+        foreach (string field in new[] { "potential_name", "signal_name", "potential_value", "color", "cross_section" })
         {
             if (value[field] is not { } name)
             { continue; }
@@ -103,7 +103,15 @@ internal static class ConnectionDefinitionPoints
                 && ((string)name!).Length <= 200 && !((string)name!).Any(char.IsControl), at + "/" + field, "Supply nonempty text within 200 characters.");
             properties[field] = name.DeepClone();
         }
-        ConnectionCreatePlanner.Require(properties.Count > 0, at, "Supply potential_name or signal_name.");
+        if (value["potential_type"] is { } type)
+        {
+            ConnectionCreatePlanner.Require(type.Type == JTokenType.Integer && int.TryParse(type.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _),
+                at + "/potential_type", "Supply an integer supported by the native PropertyValue Int32 accessor.");
+            properties["potential_type"] = type.DeepClone();
+        }
+        if (properties["cross_section"] is { } section)
+        { ConnectionCreatePlanner.Require(Number(section, out _), at + "/cross_section", "Supply finite numeric text, for example 1.5 or 1,5."); }
+        ConnectionCreatePlanner.Require(properties.ContainsKey("potential_name") || properties.ContainsKey("signal_name"), at, "Supply potential_name or signal_name.");
         return new JObject { ["itemIndex"] = index, ["type"] = "PotentialDefinition", ["position"] = new JArray(position), ["properties"] = properties };
     }
 

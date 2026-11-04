@@ -1071,8 +1071,8 @@
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 4,
-      "medium": 9,
-      "large": 11,
+      "medium": 10,
+      "large": 12,
       "apiNotes": [
         "A52",
         "A55",
@@ -1737,7 +1737,7 @@
       "spec": "docs/tools/eplan_object_find.md",
       "small": 3,
       "medium": 1,
-      "large": 10,
+      "large": 11,
       "apiNotes": [
         "A57",
         "A60"
@@ -1759,7 +1759,7 @@
       "spec": "docs/tools/eplan_object_get.md",
       "small": 2,
       "medium": 1,
-      "large": 3,
+      "large": 4,
       "apiNotes": []
     },
     {

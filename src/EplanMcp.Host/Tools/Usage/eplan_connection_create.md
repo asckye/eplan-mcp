@@ -21,7 +21,7 @@ items: 1-50 wire {kind,from,to,points} or node {kind,position,directions}; from/
 INVALID_ARGUMENT: fix JSON Pointers. PLAN_STALE: re-read/re-plan. CAPABILITY_MISSING: obtain verified geometry or select target. APPROVAL_DENIED: ask engineer. rolled_back: no partial result. OUTCOME_UNKNOWN: inspect EPLAN; do not retry.
 Layout: R1-R5/R8 refuse; R6/R7/R9 warn unless strict. Page.Size minus marginMm is fallback. Known points/outlines/routes are predicted; measured symbols/texts read back. metadata.layoutViolations/layoutChecks reports details.
 
-potential_definition: {kind,position,potential_name?,signal_name?}; at least one nonempty name. Embedded macro insertion removes its box in the same transaction; reads type/position/names. Standalone: no generation, one undo; may annotate existing connections.
+potential_definition: {kind,position,potential_name?,signal_name?}; at least one nonempty name. Optional text: potential_value (33003), color (31004), cross_section (31002, finite numeric text); potential_type (31006): Int32 integer. Same-transaction write/readback; mismatch rolls back. Embedded macro insertion removes its box in the same transaction; reads type/position/names. Standalone: no generation, one undo; may annotate existing connections.
 
 articles/connectionArticles verify point and generated connection references.
 

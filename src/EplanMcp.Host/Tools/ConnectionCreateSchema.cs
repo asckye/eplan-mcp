@@ -30,6 +30,10 @@ internal static class ConnectionCreateSchema
         JsonObject potential = Object(new() { ["kind"] = Kind("potential_definition"), ["position"] = Point() });
         potential["properties"]!["potential_name"] = Text();
         potential["properties"]!["signal_name"] = Text();
+        potential["properties"]!["potential_value"] = Text();
+        potential["properties"]!["potential_type"] = new JsonObject { ["type"] = "integer" };
+        potential["properties"]!["color"] = Text();
+        potential["properties"]!["cross_section"] = Text();
         potential["anyOf"] = new JsonArray(new JsonObject { ["required"] = new JsonArray("potential_name") }, new JsonObject { ["required"] = new JsonArray("signal_name") });
         JsonObject pages = Array(Text(1024), 1, 20);
         pages["uniqueItems"] = true;

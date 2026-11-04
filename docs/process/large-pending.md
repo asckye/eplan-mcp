@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R6-05 电位定义点属性（2026-11-04） | `PotentialEngineeringTests` | NOT RUN：仅编译；LargeWrite 写 33003/31006/31004/31002，独立 object_get 读回四字段，失败输出请求/结果/读回，一次撤销恢复快照。 |
 | R6-04 页面网格（2026-11-04） | `PageGridWriteTests` | NOT RUN：仅编译；LargeWrite 新建 Overview 页，显式 grid_size_mm:4、dry_run:false；独立读取 drawings.gridSize，一次撤销恢复完整快照。 |
 | R6-03 端子部件（2026-11-04） | `DevicePlaceTests.ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores` | NOT RUN：仅编译；LargeWrite 使用 IEC_symbol/X2_2 与 PXC.3211813，独立只读 helper 核对 ArticleReferences，撤销后比较引用与快照。 |
 | R6-02 中断点变体（2026-11-04） | `InterruptionExplicitVariantTests` | NOT RUN：仅编译；LargeWrite 新页指定 BP/0、Right，含 counterpart_pages，读回实际符号和引脚，一步撤销后比较快照。 |

@@ -5,6 +5,7 @@
 
 ## [Unreleased]
 
+- `eplan_connection_create` 的电位定义点新增电位值、电位类型、颜色和截面字段；按字符串或原生整数类型写入，并与名称在同一事务读回校验。
 - `eplan_page_create`、`eplan_page_update` 新增 `pages[].grid_size_mm` 有限正数参数，通过 `Page.GridSize` 写入并读回；省略时行为不变，批量仍一次撤销。
 - `eplan_device_update` 支持按完整名称为唯一已有非主端子追加部件；不改名，提交后核对 `ArticleReferences`，保留一步撤销。
 - `eplan_connection_create` 的中断点新增整数 `symbol_variant`，可指定 BP 变体 0 和 Right 引脚；不存在或方向不匹配返回 `INVALID_ARGUMENT`，省略时保留原选择规则。

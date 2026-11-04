@@ -89,7 +89,7 @@ D5 新增 Small 图形缺失、名称/位置/引脚/方向不符、取消、正�
 
 共享布局守卫：R1–R5、R8 拒绝并给出规则与可用时的空位建议；R6/R7/R9 默认警告，layout.strict 时拒绝。图框可用区无法读取时继续使用页尺寸减 layout.marginMm 回退并在结果中说明。预测未知不拒绝：写前校验插入点、已知外框及路由；写后在原事务内测量符号与属性文字外框，再校验 R1–R9：按 [ADR-0046](../adr/0046-readback-deviation-warnings.md)，只有新对象超出页面（S2）才整次回滚；其余违规照常提交，warning 中逐条给出 `Readback deviation: …`（规则、对象、实测外框和修复工具；偏差不搜索空位，回滚时才给最近空位），外框无法测量记为未验证。warning/hint 报告写前与写后检查；拒绝的 metadata.layoutViolations/layoutChecks 提供几何和阶段。连接提交后才生效的几何沿用原撤销补偿。参数与限制见 [布局守卫设计](../design/2026-11-01-layout-guard.md)。
 
-电位定义点：`{kind:"potential_definition",position:[x,y],potential_name?:"N",signal_name?:"S"}`，至少一个非空名称。嵌入窗口宏在同一事务插入并删框，核对类型、中心位置和名称；孤立点不生成连接，已有连接上的点沿用定义点布局规则，一步撤销。
+电位定义点：`{kind:"potential_definition",position:[x,y],potential_name?:"N",signal_name?:"S"}`，至少一个非空名称。另可写 `potential_value`（33003 `POTENTIAL_VALUE`）、`color`（31004 `CONNECTION_WIRENUMBER`）、`cross_section`（31002 `CONNECTION_WIRECROSSSECTION`）：非空字符串，截面按有限数值文本比较；`potential_type`（31006 `POTENTIAL_TYPE`）为整数，受原生 PropertyValue Int32 访问器范围限制。全部字段在同一事务写入并逐项读回，差异回滚。嵌入窗口宏在同一事务插入并删框，核对类型、中心位置和名称；孤立点不生成连接，已有连接上的点沿用定义点布局规则，一步撤销。
 
 连接定义点可选 `part`、`part_variant`（默认 `"1"`）、`part_count`（默认 1，正 uint）；仅部件也合法。部件须在配置的部件库中存在，缺失返回 PART_NOT_FOUND；读回定义点 `articles` 与生成连接 `connectionArticles`，不一致回滚。
 

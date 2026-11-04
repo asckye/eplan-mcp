@@ -36,6 +36,42 @@ public sealed class PotentialDefinitionTests
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => f.Plan()).Error.Reason);
     }
 
+    [Theory]
+    [InlineData("potential_value", "null")]
+    [InlineData("potential_value", "3")]
+    [InlineData("color", "true")]
+    [InlineData("cross_section", "\"wide\"")]
+    [InlineData("potential_type", "\"2\"")]
+    [InlineData("potential_type", "2.5")]
+    [InlineData("potential_type", "2147483648")]
+    public void EngineeringFields_RejectInvalidTypesBeforeWriting(string field, string json)
+    {
+        var f = Fixture();
+        f.Request["items"]![0]!["potential_name"] = "N";
+        f.Request["items"]![0]![field] = JToken.Parse(json);
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => f.Plan()).Error;
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("/items/0/" + field, error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EngineeringFields_PreserveTypedValuesAndCommaCrossSection()
+    {
+        var f = Fixture();
+        JObject row = (JObject)f.Request["items"]![0]!;
+        row["potential_name"] = "PE";
+        row["potential_value"] = "PE";
+        row["potential_type"] = 4;
+        row["color"] = "GNYE";
+        row["cross_section"] = "1,5";
+        JToken properties = f.Plan()["definitionPoints"]![0]!["properties"]!;
+        Assert.Equal("PE", (string?)properties["potential_value"]);
+        Assert.Equal(JTokenType.Integer, properties["potential_type"]!.Type);
+        Assert.Equal(4, (int)properties["potential_type"]!);
+        Assert.Equal("GNYE", (string?)properties["color"]);
+        Assert.Equal("1,5", (string?)properties["cross_section"]);
+    }
+
     [Fact]
     public void EmbeddedMacro_ContainsNoMachineOrExampleProjectData()
     {
@@ -75,6 +111,10 @@ public sealed class PotentialDefinitionTests
     [InlineData("type")]
     [InlineData("properties/potential_name")]
     [InlineData("properties/signal_name")]
+    [InlineData("properties/potential_value")]
+    [InlineData("properties/potential_type")]
+    [InlineData("properties/color")]
+    [InlineData("properties/cross_section")]
     public void Execute_OneTransaction_NoGeneration_AndMismatchRollsBack(string? mismatch)
     {
         var creator = new Creator { Mismatch = mismatch };
@@ -99,6 +139,10 @@ public sealed class PotentialDefinitionTests
         {
             _fixture.Request["items"]![0]!["potential_name"] = "N";
             _fixture.Request["items"]![0]!["signal_name"] = "S";
+            _fixture.Request["items"]![0]!["potential_value"] = "N";
+            _fixture.Request["items"]![0]!["potential_type"] = 2;
+            _fixture.Request["items"]![0]!["color"] = "BU";
+            _fixture.Request["items"]![0]!["cross_section"] = "1.5";
             if (existing)
             {
                 _fixture.Scene.Page.Placements.Clear();

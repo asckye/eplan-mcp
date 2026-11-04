@@ -6146,6 +6146,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
+            "name": "PotentialEngineeringToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PotentialEngineeringToolTests.cs"
+          },
+          {
             "name": "CableBusStarSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
@@ -6194,6 +6199,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PotentialEngineeringTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PotentialEngineeringTests.cs"
           },
           {
             "name": "SpecialObjectsSpikeTests",
@@ -11054,6 +11064,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
+            "name": "PotentialEngineeringTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PotentialEngineeringTests.cs"
+          },
+          {
             "name": "SelectionSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
@@ -11662,6 +11677,11 @@
             "name": "PlcDisplaySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
+            "name": "PotentialEngineeringTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PotentialEngineeringTests.cs"
           }
         ],
         "operationTests": [

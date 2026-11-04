@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A92、B16**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A92、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -389,3 +389,6 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 
 ### B15. Page.GridSize 可读写与单位线索（2026-11-04，安装版 2026.0.3 XML）
 - `P:Eplan.EplApi.DataModel.Page.GridSize` 的文档为可读写页网格，签名为 `double`；该 member 未直接标单位。同版本 `Eplan.EplApi.Baseu.xml` 的 `P:Eplan.EplApi.Base.ParserParameter.GridSize` 明确标为 millimeters。实现沿既有 Page.GridSize 绘图读取及 A3 的 1:1 毫米转换；这不是 Page setter 单位的实测证明，网格 4 的新建/读回/撤销仍待 Large 验证。
+
+### B16. 电位定义点四字段类型（2026-11-04，安装版 2026.0.3 XML 与字典）
+- `PotentialDefinitionPropertyList` 与字典一致：33003 `POTENTIAL_VALUE`、31004 `CONNECTION_WIRENUMBER`（Connection color / number）、31002 `CONNECTION_WIRECROSSSECTION` 返回 `System.String`；31006 `POTENTIAL_TYPE` 返回 `System.Int64`。`PropertyValue` 文档仅提供 Int32 整数隐式写入和 `ToInt()` 读回，故整数输入限制于该原生入口可表示范围，不经字符串写入。文档未给 31006 枚举值映射，本轮不推测数字对应的电位语义；四字段持久化和撤销仍待 Large 实测。
