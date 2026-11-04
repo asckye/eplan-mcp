@@ -71,6 +71,7 @@ internal sealed class DevicePlaceRequest
         AddIf(violations, !box && !terminal && args.Library is null && (part.Length == 0 || part.Any(char.IsControl)), "'part' is required: a part number such as SIE.3RH2122-1HB40, as eplan_part_search returns it.");
         AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
         AddIf(violations, !box && (tag.Length > 0 || args.Library is not null || terminal) && TagProblem(tag) is not null, "'tag' " + TagProblem(tag));
+        AddIf(violations, DeviceSymbolPlan.ConnectionPoint(args) && args.ConnectionDesignations is not { Length: 1 }, "/connection_designations: a device connection point needs its one pin designation; EPLAN names it tag:pin, such as -PF1:1.");
         if (violations.Count > 0)
         {
             throw WriteArguments.Invalid(violations);
@@ -101,6 +102,9 @@ internal sealed class DevicePlaceRequest
         { full += ":" + args.TerminalNumber; }
         if (args.PlcConnectionPoint is not null)
         { full += ":" + DevicePlcPlan.Suffix(args); }
+        // The sample names device connection points after their pin (-PF1:1 has pin 1); A86 joins them to the black box by that name.
+        if (DeviceSymbolPlan.ConnectionPoint(args) && args.ConnectionDesignations is { Length: > 0 } pins)
+        { full += ":" + pins[0]; }
         string[] existing = terminal || args.PlcConnectionPoint is not null ? [.. names.FunctionNames(project.Path)] : box ? [.. names.FunctionNames(project.Path), FormattableString.Invariant($"bounds:{page.Width},{page.Height}")] : [];
         if (terminal && existing.FirstOrDefault(n => SameName(full.Substring(0, full.LastIndexOf(':')), n, ignoreCase: true)) is { } canonical)
         { full = canonical + ":" + args.TerminalNumber; }
@@ -122,7 +126,7 @@ internal sealed class DevicePlaceRequest
                 .Where(n => full.Length > 0 && (SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
-        var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing) { _joinsDevice = DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args) };
+        var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing) { _joinsDevice = DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args) };
         if (args.Fingerprint is null)
         { request.CheckFree(); }
         if (args.Library is null && args.LocationBox is null && args.TerminalStrip is null)

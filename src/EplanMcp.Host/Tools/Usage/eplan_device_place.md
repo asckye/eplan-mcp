@@ -17,7 +17,7 @@ dry_run omitted/true: preview only, execution=not_started. false executes.
 2. Free symbol tag: eplan_device_list; short tags inherit page structure. Parts: omit tag for native numbering, or rename all functions. Outside scratch needs approval.
 3. Parts: eplan_part_search (variant 1). Symbols: eplan_symbol_search. Other functions stay unplaced (as EPLAN Insert Device). PLC module: eplan_macro_insert part. Several symbols: same tag, then eplan_device_update part.
 
-SPECIAL/DC: tag and corner_x/corner_y required; x/y lower left, corners upper right. DCP/DCPP3: same tag, no colon; native suffix/ownership even outside box. blackBox: tag/bounds/functionsInside (preview membership unknown); device.type/isMainFunction: native after commit.
+SPECIAL/DC: tag and corner_x/corner_y required; x/y lower left, corners upper right. DCP/DCPP3: same tag plus one connection_designations pin; named tag:pin. blackBox: tag/bounds/functionsInside (preview membership unknown); device.type/isMainFunction: native after commit.
 
 SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag joins device.
 

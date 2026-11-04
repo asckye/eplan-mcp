@@ -11,7 +11,8 @@ public sealed partial class DevicePlaceTests
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         string project = session.Project;
         string page = await NewPageAsync(project);
-        const string tag = "=GAA+A1-WE9";
+        // As on the sample (+A1-WE1): EPLAN keeps only the location designation of a busbar device.
+        const string tag = "+A1-WE9";
         var snapshots = new List<string> { (await session.SnapshotAsync()).Hash };
         try
         {

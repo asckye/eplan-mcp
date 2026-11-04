@@ -47,6 +47,7 @@ public sealed partial class DevicePlaceTests
                     ["symbol"] = "DCP",
                     ["symbol_variant"] = variant,
                     ["tag"] = "-PF9",
+                    ["connection_designations"] = new[] { number.ToString(System.Globalization.CultureInfo.InvariantCulture) },
                     ["x"] = x,
                     ["y"] = 140,
                     ["dry_run"] = false

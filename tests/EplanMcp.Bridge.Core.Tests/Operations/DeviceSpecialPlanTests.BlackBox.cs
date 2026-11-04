@@ -48,15 +48,29 @@ public sealed partial class DeviceSpecialPlanTests
         SetSymbol("SPECIAL", name, variant, "Function", "function", "DeviceConnectionPoint");
         DevicePlaceArgs args = SymbolArgs(name, "-PF9");
         args.SymbolVariant = variant;
+        args.ConnectionDesignations = ["2"];
         args.X = x;
         args.Y = y;
 
         WritePlan plan = Plan(args);
 
-        Assert.Equal("=GAA+A1-PF9", plan.Details!["tag"]);
+        Assert.Equal("=GAA+A1-PF9:2", plan.Details!["tag"]);
         Assert.Equal("-PF9", args.Tag);
         Assert.Contains("SPECIAL/" + name, Assert.Single(plan.Changes).NewValue, StringComparison.Ordinal);
         Assert.Empty(_parts.Reads);
+    }
+
+    [Fact]
+    public void DeviceConnectionPoint_NeedsOneNewPinDesignation()
+    {
+        _names.Functions.Add(("=GAA+A1-PF9", "1/1/1/0", true, Page, "PF9"));
+        _names.Functions.Add(("=GAA+A1-PF9:1", "1/1/2/0", false, Page, "PF9:1"));
+        SetSymbol("SPECIAL", "DCP", 0, "Function", "function", "DeviceConnectionPoint");
+        DevicePlaceArgs missing = SymbolArgs("DCP", "-PF9");
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(missing)).Error.Reason);
+        DevicePlaceArgs repeated = SymbolArgs("DCP", "-PF9");
+        repeated.ConnectionDesignations = ["1"];
+        Assert.Equal(ErrorReason.AlreadyExists, Assert.Throws<BridgeErrorException>(() => Plan(repeated)).Error.Reason);
     }
 
     [Fact]
@@ -118,7 +132,7 @@ public sealed partial class DeviceSpecialPlanTests
         new DevicePlacePlanOperation(_catalog, _pages, _names, _parts, _source, _source).Execute(args));
 
     private void SetSymbol(string library, string name, int variant, string type, string kind, string? category) =>
-        _source.Symbol = new() { Library = library, Name = name, Variant = variant, Type = type, Kind = kind, FunctionCategory = category };
+        _source.Symbol = new() { Library = library, Name = name, Variant = variant, Type = type, Kind = kind, FunctionCategory = category, ConnectionPoints = name.StartsWith("DCP", StringComparison.Ordinal) ? [new() { Location = [0, 3], Direction = "Up" }] : [] };
 
     private static DevicePlaceArgs SymbolArgs(string symbol, string? tag) => new()
     { Project = "Line1", Page = Page, Library = "SPECIAL", Symbol = symbol, SymbolVariant = 0, Tag = tag, X = 80, Y = 140 };

@@ -51,7 +51,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - 变体不存在时 EPLAN 会静默改用第一个变体（XML），所以规划时先确认变体存在。
 - 显示属性和连接点代号仅用于库符号来源；不提供任意属性写入，也不改变功能文本及其现有语言（A53）。
 
-SPECIAL/DC 黑盒要求 `tag`、`corner_x/corner_y`（x/y 左下、corner 右上）。提交后 `device.type/category/isMainFunction` 与 `blackBox.bounds/functionsInside` 为原生读回。DCP/DCPP3 用同标识、不带冒号；EPLAN 分配后缀，框外也按原生结果返回。见 [A86](../eplan/api-notes.md)。
+SPECIAL/DC 黑盒要求 `tag`、`corner_x/corner_y`（x/y 左下、corner 右上）。提交后 `device.type/category/isMainFunction` 与 `blackBox.bounds/functionsInside` 为原生读回。DCP/DCPP3 用同标识（不带冒号）并必须给一个 `connection_designations`，名称为"标识:代号"（如示例的 `-PF1:1`），代号重复时返回 `ALREADY_EXISTS`；框外也按原生结果返回。见 [A86](../eplan/api-notes.md)。
 
 SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功能），tag 必填；同标识 SPECIAL/BCP 同属一个器件。提交后 device.type/category/isMainFunction 为原生读回。依据 A86；Large 已补，尚未运行。
 
