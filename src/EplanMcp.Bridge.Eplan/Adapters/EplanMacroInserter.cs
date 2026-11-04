@@ -48,7 +48,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
         };
     }
 
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null)
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null, bool macroBox = true)
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
@@ -80,6 +80,12 @@ internal sealed class EplanMacroInserter : IMacroInserter
             throw stacked;
         }
 
+        int removed = 0;
+        if (!macroBox)
+        {
+            foreach (MacroBox box in placed.OfType<MacroBox>())
+            { box.Remove(); removed++; }
+        }
         Function[] added = [.. Functions(project, page).Where(f => !before.Contains(f.ToStringIdentifier()))];
         if (part is not null)
         {
@@ -92,7 +98,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
                 GC.KeepAlive(function);
             }
         }
-        return Read(added, placed.Length);
+        return Read(added, placed.Length - removed);
     }
 
     public PlacedMacro ReadCommitted(string projectPath, string pageName, PlacedMacro placed)

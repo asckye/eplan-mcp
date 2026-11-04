@@ -224,8 +224,8 @@
                   "page": {
                     "oneOf": [
                       {
-                        "description": "Full circuit page name",
-                        "type": "string"
+                        "type": "string",
+                        "description": "Full circuit page name"
                       },
                       {
                         "type": "object",
@@ -265,13 +265,13 @@
                     "const": 0
                   },
                   "numbering": {
-                    "description": "keep: the macro's tags",
                     "type": "string",
                     "default": "keep",
                     "enum": [
                       "number",
                       "keep"
                     ],
+                    "description": "keep: the macro's tags",
                     "const": "keep"
                   }
                 },

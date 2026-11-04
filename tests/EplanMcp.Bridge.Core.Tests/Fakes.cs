@@ -410,6 +410,7 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
     public Func<bool, List<MacroFunctionRecord>> Placed { get; set; } = _ => [];
 
     public bool Stacked { get; set; }
+    public bool MacroBox { get; private set; }
     public (string Representation, string? Part, string? PartVariant) Source { get; private set; }
     public Func<PlacedMacro, PlacedMacro>? CommittedReadback { get; set; }
     public List<MacroPartReference> ArticleReferences { get; set; } = [];
@@ -420,9 +421,10 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
 
     public PlacedMacro ReadCommitted(string projectPath, string pageName, PlacedMacro placed) => CommittedReadback?.Invoke(placed) ?? placed;
 
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null)
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null, bool macroBox = true)
     {
         Source = (representation, part, partVariant);
+        MacroBox = macroBox;
         Inserts.Add((pageName, macroPath, variant, x, y, number));
         if (Stacked)
         {

@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R2 03-macro-box（2026-11-03 brief；A87） | `MacroOverviewTests` | NOT RUN：本轮禁止 EPLAN；待验证 PXC.2861344、variant 0、(0,292) 的无宏框总览宏；PLC 盒及总览点保留、对象计数和一次撤销恢复。 |
 | R2 02-property-style（2026-11-03 brief；A87） | `PlacementMoveTests` | NOT RUN：本轮禁止 EPLAN；待验证 属性文字对齐、字高、图层、画笔及隐藏；相对外框换算、坐标语义与一次撤销恢复。 |
 | R2 01-placement-style（2026-11-03 brief；A87） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | NOT RUN：本轮禁止 EPLAN；待验证 Line、Rectangle、Text、PathText、Polyline 全样式（含 -16002）、原生角度/外框/顶点读回及撤销。 |
 | R1 07-join-device（2026-11-03 补充 brief） | `DevicePlaceTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 新页先放主符号，再用 `join_device:true` 放同标识第二个符号；输出请求、结果和读回，核对名称、非主功能及原主功能。 |

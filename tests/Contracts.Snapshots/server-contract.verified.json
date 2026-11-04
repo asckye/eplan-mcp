@@ -9943,7 +9943,7 @@
     {
       "name": "eplan_macro_insert",
       "title": "Insert a window macro on an EPLAN page",
-      "description": "Inserts a window macro or a part's group symbol macro (give macro or part; MultiLine on Circuit pages, Overview on Overview pages), its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. x, y: mm from the page's bottom left (y up) to the macro's top left corner. Omit dry_run to preview; false executes. Outside scratch it needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.",
+      "description": "Inserts a window macro or a part's group symbol macro (give macro or part; MultiLine on Circuit pages, Overview on Overview pages), its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. macro_box:false removes boxes; true uses project settings. x, y: mm from the page's bottom left (y up) to the macro's top left corner. Omit dry_run to preview; false executes. Outside scratch it needs approval. Example: {\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -9951,7 +9951,6 @@
             "type": "string"
           },
           "page": {
-            "description": "Full page name",
             "type": "string"
           },
           "x": {
@@ -9969,7 +9968,6 @@
             "default": 0
           },
           "numbering": {
-            "description": "keep: macro tags",
             "type": "string",
             "default": "number",
             "enum": [
@@ -10001,6 +9999,10 @@
           "part_variant": {
             "description": "Default 1",
             "type": "string"
+          },
+          "macro_box": {
+            "type": "boolean",
+            "default": true
           }
         },
         "required": [

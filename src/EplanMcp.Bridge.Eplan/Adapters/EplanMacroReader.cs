@@ -107,6 +107,7 @@ internal sealed class EplanMacroReader : IMacroReader
                 }),
             ],
             ObjectCount = objects.Length,
+            MacroBoxCount = objects.OfType<MacroBox>().Count(),
         };
     }
 }

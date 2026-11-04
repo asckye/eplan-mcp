@@ -36,6 +36,9 @@ public sealed class MacroInsertArgs
     /// </summary>
     public string? Numbering { get; set; }
 
+    /// <summary>Retain the macro box according to project settings; false removes inserted boxes in the same transaction.</summary>
+    public bool MacroBox { get; set; } = true;
+
     /// <summary>For the execute operation: the plan's <see cref="WritePlan.Fingerprint"/>. Null for the plan.</summary>
     public string? Fingerprint { get; set; }
 }

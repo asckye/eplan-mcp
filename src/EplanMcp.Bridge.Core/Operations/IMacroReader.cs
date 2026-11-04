@@ -66,6 +66,9 @@ public sealed class MacroContent
 
     /// <summary>How many objects the macro holds in all.</summary>
     public int ObjectCount { get; set; }
+
+    /// <summary>Macro boxes among the selected representation's objects.</summary>
+    public int MacroBoxCount { get; set; }
 }
 
 /// <summary>A function in a macro, as plain strings.</summary>

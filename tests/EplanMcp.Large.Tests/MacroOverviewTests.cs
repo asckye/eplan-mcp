@@ -9,8 +9,10 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
 {
     private const string Part = "PXC.2861344";
 
-    [Fact]
-    public async Task PartGroupSymbol_OverviewContainsPlcBoxPointsAndPart_ThenOneUndoRestores()
+    [Theory]
+    [InlineData(true, 288)]
+    [InlineData(false, 292)]
+    public async Task PartGroupSymbol_OverviewContainsPlcBoxPointsAndPart_ThenOneUndoRestores(bool macroBox, double y)
     {
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         string original = await session.StateAsync();
@@ -20,17 +22,20 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
         async Task<JsonElement> WriteAsync(string tool, Dictionary<string, object?> args)
         {
             string before = await session.StateAsync();
+            TestContext.Current.TestOutputHelper!.WriteLine(tool + " request: " + JsonSerializer.Serialize(args));
             (bool success, JsonElement result) response;
             try
             {
                 response = await eplan.CallOrErrorAsync(tool, args);
             }
-            catch
+            catch (Exception error)
             {
+                TestContext.Current.TestOutputHelper!.WriteLine(error.ToString());
                 outcomeKnown = false;
                 session.PauseCleanup();
                 throw;
             }
+            TestContext.Current.TestOutputHelper!.WriteLine(tool + " result: " + response.result.GetRawText());
             string? execution = response.result.TryGetProperty("execution", out JsonElement state) ? state.GetString() : null;
             if (execution is not ("committed" or "not_started" or "rolled_back"))
             {
@@ -40,6 +45,20 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
             if (execution == "committed")
             {
                 undoStates.Push(before);
+            }
+            if (tool == "eplan_macro_insert")
+            {
+                string? cursor = null;
+                do
+                {
+                    var readArgs = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };
+                    if (cursor is not null)
+                    { readArgs["drawing_cursor"] = cursor; }
+                    JsonElement readback = await eplan.CallAsync("eplan_page_get", readArgs);
+                    TestContext.Current.TestOutputHelper.WriteLine("page readback: " + readback.GetRawText());
+                    cursor = readback.GetProperty("drawings").GetProperty("nextCursor").GetString();
+                } while (cursor is not null);
+                TestContext.Current.TestOutputHelper.WriteLine("macro box readback: " + (await eplan.CallAsync("eplan_object_find", new() { ["project"] = session.Project, ["page"] = page, ["object_type"] = "MacroBox", ["limit"] = 200 })).GetRawText());
             }
             Assert.True(response.success, tool + ": " + response.result);
             Assert.Equal("committed", execution);
@@ -53,8 +72,9 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
                 Assert.Equal(undoStates.Peek(), await session.StateAsync());
                 undoStates.Pop();
             }
-            catch
+            catch (Exception error)
             {
+                TestContext.Current.TestOutputHelper!.WriteLine(error.ToString());
                 outcomeKnown = false;
                 session.PauseCleanup();
                 throw;
@@ -81,11 +101,19 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
                 ["representation"] = "Overview",
                 ["variant"] = 0,
                 ["x"] = 0,
-                ["y"] = 288,
+                ["y"] = y,
+                ["macro_box"] = macroBox,
                 ["dry_run"] = false,
             });
             Assert.Equal("AI: eplan_macro_insert", result.GetProperty("undo").GetString());
             Assert.True(result.GetProperty("objectCount").GetInt32() > 0);
+            if (!macroBox)
+            {
+                Assert.Equal(195, result.GetProperty("objectCount").GetInt32());
+                JsonElement frames = await eplan.CallAsync("eplan_object_find", new() { ["project"] = session.Project, ["page"] = page, ["object_type"] = "MacroBox", ["limit"] = 200 });
+                Assert.Equal("supported", frames.GetProperty("status").GetString());
+                Assert.Empty(frames.GetProperty("items").EnumerateArray());
+            }
 
             LiveSnapshots.Snapshot snapshot = await session.SnapshotAsync(page);
             Assert.True(snapshot.Chunks[^1].Complete);

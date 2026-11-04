@@ -83,7 +83,7 @@ public sealed class MacroInsertExecuteOperation(
     private PlacedMacro Insert(MacroInsertRequest request)
     {
         string[] before = request.Number ? [] : MainFunctions(request);
-        PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number, request.Representation, request.Source?.Part, request.Source?.PartVariant);
+        PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number, request.Representation, request.Source?.Part, request.Source?.PartVariant, request.MacroBox);
         List<string> merged = request.Number ? [] : MacroInsertRequest.Merged(before, MainFunctions(request));
         return merged.Count == 0
             ? placed

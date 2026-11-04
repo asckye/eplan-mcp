@@ -29,6 +29,7 @@ internal sealed class MacroInsertRequest
         Number = number;
         Representation = representation;
         Source = source;
+        MacroBox = args.MacroBox;
     }
 
     public OpenProject Project { get; }
@@ -53,6 +54,7 @@ internal sealed class MacroInsertRequest
     public bool Number { get; }
     public string Representation { get; }
     public PartMacroSource? Source { get; }
+    public bool MacroBox { get; }
 
     /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the macro.</summary>
     public static MacroInsertRequest Check(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter)
@@ -107,7 +109,7 @@ internal sealed class MacroInsertRequest
 
     /// <summary>The one change, for the dry run, the approval form and the audit (tool spec 5).</summary>
     public PlannedChange Change(int devices) =>
-        new() { Action = "create", Kind = "macro", Name = Page.Name, NewValue = Describe(Macro, X, Y, Variant, Number, devices) + (Representation == MultiLine ? "" : ", representation " + Representation) + (Source is null ? "" : ", part " + Source.Part + ", part variant " + Source.PartVariant) };
+        new() { Action = "create", Kind = "macro", Name = Page.Name, NewValue = Describe(Macro, X, Y, Variant, Number, devices) + (Representation == MultiLine ? "" : ", representation " + Representation) + (MacroBox ? "" : ", without macro box") + (Source is null ? "" : ", part " + Source.Part + ", part variant " + Source.PartVariant) };
 
     /// <summary>The change's value as the tool spec words it: <c>Contactor_Feedback_Control.ema at (40, 200), numbering number, 8 devices</c>.</summary>
     internal static string Describe(string macro, double x, double y, int variant, bool number, int devices) => string.Format(
@@ -130,6 +132,7 @@ internal sealed class MacroInsertRequest
         var file = new FileInfo(MacroPath);
         IEnumerable<string> lines = Page.Objects.Select(id => "object\t" + id)
             .Append(Page.Layout is null ? "layout unavailable" : Protocol.BridgeJson.FromObject(Page.Layout).ToString())
+            .Append("macroBox\t" + MacroBox)
             .Append("source\t" + Macro + "\t" + Representation + "\t" + Variant + "\t" + Source?.Part + "\t" + Source?.PartVariant)
             .Append("macro\t" + file.Length.ToString(CultureInfo.InvariantCulture) + "\t" + file.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture));
         if (!Number)

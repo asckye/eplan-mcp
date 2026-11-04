@@ -24,6 +24,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上。宏外框的左上角落在这里（A14） |
 | `variant` | integer | 否 | 0 | 宏的变体编号（`eplan_macro_get` 的 `variants`） |
 | `numbering` | enum `number` / `keep` | 否 | `number` | `number`：EPLAN 给宏中的设备分配不冲突的标识；`keep`：保留宏中的标识，结构跟随目标页，与已有设备同名时拒绝（M3b 设计 Q2） |
+| `macro_box` | boolean | 否 | true | true 按项目设置保留宏框；false 在插入的同一事务删除返回的宏框，引用对象保留 |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行传 `dry_run: false` |
 
@@ -51,6 +52,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 - `devices`：
   - 提交后，是插入后读回的设备（除连接线外的功能，按标识去重，最多 50 个）；
   - `dry_run` 时，是宏中的设备，带宏自己的占位标识，`hint` 说明插入后标识会怎样变化。
+- `objectCount`：不计 `macro_box: false` 删除的宏框；预览按宏文件中的框数扣除。
 - `articleReferences`：提交后从新增主功能的新包装对象读回的 `{tag, partNumber, variant, count}`；预览或恢复结果时为空。已有部件引用保留，不重复添加。
 - 预览另返回 `changes` 和 `fingerprint`，`hint` 提示再次调用并传 `dry_run: false`。
 - 带 `?` 的标识（S10：没有主功能的触点 `-?QA1`、未编号的端子 `:?1`）原样列出，`hint` 提示工程师在 EPLAN 中确认。
@@ -84,7 +86,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
   - 指纹包括三部分，排序后取 SHA-256：页上全部对象的会话内标识；`keep` 时，宏中各标识在项目中的功能；宏文件的大小和修改时间。
 - **执行**：在 `TransactionScope`（`SafetyPoint` → `UndoStep` → `QuietModeStep`）中执行：
   1. 记录主功能集合，调用 `Insert.WindowMacro` 插入指定表达及宏变体；部件来源在同一事务向无部件的新增主功能调用 `AddArticleReference(part, partVariant, 1)` 并核对（A82）；
-  2. 读回页上新增的功能。`keep` 时，若有标识在插入前已有主功能、插入后主功能变多，就抛出（`ALREADY_EXISTS`），整体回滚。按"变多"而不是"两个以上"判断，是因为一个设备本来就可能有两个同名主功能（A12：黑盒、第二种表达）。`number` 时不检查：PLC 端子在各种编号方式下都保留宏自带的结构（`=K1+A1:1.4`，A14），再次插入同一个宏时名称会重复；
+  2. `macro_box: false` 时只对返回的 `MacroBox` 调用 `Placement.Remove()`，不删除引用对象；与插入共用撤销步骤。读回页上新增的功能。`keep` 时，若有标识在插入前已有主功能、插入后主功能变多，就抛出（`ALREADY_EXISTS`），整体回滚。按"变多"而不是"两个以上"判断，是因为一个设备本来就可能有两个同名主功能（A12：黑盒、第二种表达）。`number` 时不检查：PLC 端子在各种编号方式下都保留宏自带的结构（`=K1+A1:1.4`，A14），再次插入同一个宏时名称会重复；
   3. 保持布局守卫；通过后提交并关闭撤销步骤，按对象号重新读取新增功能及部件引用（A79），读回失败返回已提交警告。
 - **已验证**（S9、S10，api-notes A13、A14）：
   - 插入宏能被 `SafetyPoint` 回滚，`Transaction` 不行，所以只用 `SafetyPoint`；
@@ -111,7 +113,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
   - `dry_run`；`ALREADY_EXISTS`（`rolled_back`）；叠放（`rolled_back`）；`PLAN_STALE`；
   - 表达与页类型匹配、实际表达/变体选择、部件宏路径与引用、省略/true/false 预览边界。
 - **Large**（示例项目的 scratch 副本）：
-  - `MacroOverviewTests`：LargeWrite 新 Overview 页按 PXC.2861344 插入，核对对象、PLC 盒、总览点及部件引用，再撤销恢复；本次仅编写，未运行。
+  - `MacroOverviewTests`：LargeWrite 新 Overview 页按 PXC.2861344 插入；`macro_box: false` 在 (0, 292) 核对 195 个对象、无宏框、PLC 盒、总览点及部件引用，一次撤销恢复；本次未运行。
   - 新建页上插入 `Contactor_Feedback_Control.ema`，用 `number`：读回的设备与 S10 相同；导出页面图片，宏外框的左上角在插入点；
   - 在同一项目中用 `keep` 再插一次，返回 `ALREADY_EXISTS`，项目不变；
   - 同一位置再插一次，返回 `INVALID_ARGUMENT`（`rolled_back`）；

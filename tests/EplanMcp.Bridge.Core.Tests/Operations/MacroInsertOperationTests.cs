@@ -66,6 +66,35 @@ public sealed class MacroInsertOperationTests : IDisposable
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void MacroBox_IsBoundToPlanAndPassedIntoTheInsertionTransaction(bool retain)
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.MacroBox = retain;
+        _macros.Content.MacroBoxCount = 1;
+        WritePlan plan = Plan(args);
+        Assert.Equal(retain ? "28" : "27", plan.Details!["objectCount"]);
+        Assert.Equal(!retain, plan.Changes[0].NewValue!.Contains("without macro box", StringComparison.Ordinal));
+        args.Fingerprint = plan.Fingerprint;
+        Execute(args);
+        Assert.Equal(retain, _inserter.MacroBox);
+        Assert.Single(_transactions.Calls, c => c.StartsWith("Begin ", StringComparison.Ordinal));
+        Assert.Contains("Commit", _transactions.Calls);
+    }
+
+    [Fact]
+    public void MacroBoxChangedAfterPlan_IsStaleBeforeInsertion()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Fingerprint = Plan(args).Fingerprint;
+        args.MacroBox = false;
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Execute(args)).Error.Reason);
+        Assert.Empty(_inserter.Inserts);
+        Assert.Empty(_transactions.Calls);
+    }
+
     [Fact]
     public void LayoutGuard_MacroEnvelopeOverSymbol_RefusesWithSuggestion()
     {

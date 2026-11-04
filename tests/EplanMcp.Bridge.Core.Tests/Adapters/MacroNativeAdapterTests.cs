@@ -140,6 +140,41 @@ public sealed class MacroNativeAdapterTests : IDisposable
         Assert.DoesNotContain("Commit", transactions.Calls);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void MacroBox_OnlyRequestedFramesAreRemoved_ReferencedObjectsSurvive(bool retain)
+    {
+        Page page = ConfigureMacro();
+        Placement[] referenced = [.. Enumerable.Range(1, 195).Select(id => Function(page, id, main: id == 1))];
+        var frame = new MacroBox(300) { Page = page, ReferencedObjects = referenced };
+        NativeInsert.Place = target => { target.AllPlacements = [frame, .. referenced]; return [frame, .. referenced]; };
+        WindowMacro.State!.Representations[WindowMacro.Enums.RepresentationType.Overview][0] = [frame, .. referenced];
+        MacroContent content = new EplanMacroReader().ReadMacro("project", "2861344.ema", representation: "Overview");
+        Assert.Equal(1, content.MacroBoxCount);
+        PlacedMacro result = new EplanMacroInserter().Insert("project", page.Name, "2861344.ema", 0, 0, 292, true, "Overview", macroBox: retain);
+        Assert.Equal(retain ? 196 : 195, result.ObjectCount);
+        Assert.Equal(retain, frame.IsValid);
+        Assert.Equal(retain, page.AllPlacements.Contains(frame));
+        Assert.All(referenced, item => { Assert.True(item.IsValid); Assert.Contains(item, page.AllPlacements); });
+    }
+
+    [Fact]
+    public void MacroBoxRemovalFailure_RollsBackTheWholeInsert()
+    {
+        Page page = ConfigureMacro();
+        var frame = new MacroBox(300) { Page = page, RemoveError = new BaseException("Cannot remove frame") };
+        var function = Function(page, 2);
+        NativeInsert.Place = target => { target.AllPlacements = [frame, function]; return [frame, function]; };
+        var transactions = new FakeTransactions { Snapshot = () => () => page.AllPlacements = [] };
+        BaseException error = Assert.Throws<BaseException>(() => TransactionRunner.Run(transactions, "eplan_macro_insert",
+            () => new EplanMacroInserter().Insert("project", page.Name, "2861344.ema", 0, 0, 292, true, "Overview", macroBox: false)));
+        Assert.Same(frame.RemoveError, error);
+        Assert.Empty(page.AllPlacements);
+        Assert.Contains("Rollback", transactions.Calls);
+        Assert.DoesNotContain("Commit", transactions.Calls);
+    }
+
     private static Page ConfigureMacro()
     {
         var page = new Page { Name = "+A1/80", PageType = DocumentTypeManager.DocumentType.Overview };

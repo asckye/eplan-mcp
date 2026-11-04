@@ -98,6 +98,18 @@ namespace Eplan.EplApi.HEServices
 
 namespace Eplan.EplApi.DataModel
 {
+    internal sealed class MacroBox(long oid) : Placement(oid)
+    {
+        public Placement[] ReferencedObjects { get; set; } = [];
+        public Exception? RemoveError { get; set; }
+        public void Remove()
+        {
+            if (RemoveError is { } error)
+            { throw error; }
+            Page.AllPlacements = [.. Page.AllPlacements.Where(p => p != this)];
+            IsValid = false;
+        }
+    }
     internal sealed partial class ArticleReference
     {
         public string VariantNr { get; set; } = "1";

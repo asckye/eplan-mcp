@@ -30,24 +30,25 @@ internal sealed class MacroWriteTools
         OutputSchemaType = typeof(MacroInsertResult))]
     [Description(
         "Inserts a window macro or a part's group symbol macro (give macro or part; MultiLine on Circuit pages, Overview on Overview pages), " +
-        "its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. x, y: mm " +
+        "its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. macro_box:false removes boxes; true uses project settings. x, y: mm " +
         "from the page's bottom left (y up) to the macro's top left corner. Omit dry_run to preview; false executes. Outside scratch it needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.")]
     public static async Task<CallToolResult> MacroInsertAsync(
         WritePipeline pipeline,
         IBridgeClient bridge,
         string project,
-        [Description("Full page name")] string page,
+        string page,
         double x,
         double y,
         [Description("From eplan_macro_list")] string? macro = null,
         int variant = 0,
-        [Description("keep: macro tags")][AllowedValues("number", "keep")] string numbering = "number",
+        [AllowedValues("number", "keep")] string numbering = "number",
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
         [AllowedValues("MultiLine", "Overview")] string representation = "MultiLine",
         string? part = null,
         [Description("Default 1")] string? part_variant = null,
+        bool macro_box = true,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -57,14 +58,14 @@ internal sealed class MacroWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering, Representation = representation, Part = part, PartVariant = part_variant };
+        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering, Representation = representation, Part = part, PartVariant = part_variant, MacroBox = macro_box };
         var request = new WriteRequest<MacroInsertArgs, MacroInsertArgs>(
             InsertTool,
             ToolTier.Write,
             OperationNames.MacroInsertPlan,
             OperationNames.MacroInsertExecute,
             args,
-            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Representation = args.Representation, Part = args.Part, PartVariant = args.PartVariant, Fingerprint = plan.Fingerprint },
+            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Representation = args.Representation, Part = args.Part, PartVariant = args.PartVariant, MacroBox = args.MacroBox, Fingerprint = plan.Fingerprint },
             dry_run,
             PageWriteTools.DefaultLimit,
             "Inserting the macro");

@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_macro_insert` 新增 `macro_box`（默认 true）；false 在插入事务内移除宏框，返回对象数不含被移除的框，内容和一次撤销语义保留。
+
 - `eplan_placement_update.property_moves` 增加对齐、字高、可见性、图层和画笔；坐标仍为页面绝对坐标。隐藏请求单列不比较可见性读回，其他字段严格核对。
 
 - `eplan_placement_create` 支持图形和文字的画笔、图层、折线闭合及矩形/文字角度和文字对齐；画笔接受默认值 `-16002`，角度入参为度，写入后核对原生读回。

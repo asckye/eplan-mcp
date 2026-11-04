@@ -68,6 +68,19 @@ public sealed class MacroInsertToolTests : IDisposable
         Assert.Empty(_harness.Bridge.Writes);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task MacroBox_PassesUnchangedThroughPlanAndExecution(bool retain)
+    {
+        await MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, "Line1", Page, 0, 292, Macro,
+            dry_run: false, macro_box: retain, cancellationToken: TestContext.Current.CancellationToken);
+        MacroInsertArgs[] args = [.. _harness.Bridge.Calls.Where(c => c.Operation is OperationNames.MacroInsertPlan or OperationNames.MacroInsertExecute)
+            .Select(c => Assert.IsType<MacroInsertArgs>(c.Args))];
+        Assert.Equal(2, args.Length);
+        Assert.All(args, a => Assert.Equal(retain, a.MacroBox));
+    }
+
     [Fact]
     public async Task Preview_IncompleteLayoutWarningIsPreserved()
     {

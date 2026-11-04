@@ -29,7 +29,7 @@ public sealed class MacroInsertPlanOperation(IProjectCatalog catalog, IPageReade
                 ["layoutWarnings"] = string.Join("\n", request.LayoutWarnings),
                 ["deviceCount"] = inMacro.Count.ToString(CultureInfo.InvariantCulture),
                 ["devices"] = string.Join("\n", inMacro.Take(MacroInsertRequest.MaxDevices).Select(d => d.Tag + "\t" + d.VisibleTag + "\t" + d.Category)),
-                ["objectCount"] = request.Content.ObjectCount.ToString(CultureInfo.InvariantCulture),
+                ["objectCount"] = (request.Content.ObjectCount - (request.MacroBox ? 0 : request.Content.MacroBoxCount)).ToString(CultureInfo.InvariantCulture),
                 ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true",
             },
         };
