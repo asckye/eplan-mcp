@@ -147,10 +147,10 @@ public sealed class PropertySetPlcTests
     }
 
     [Fact]
-    public void UnrequestedDirectFieldOnAnotherCard_RollsBack()
+    public void UnrequestedDirectFieldOnTheSameCard_RollsBack()
     {
         using FakePropertySetSession session = Session("PLCBox", true, 20161);
-        session.Inventory[1].Name = "=GAA+A1-A2";
+        session.Inventory[1].Name = session.Inventory[0].Name + ":1.1";
         session.Objects[2].Properties[20427] = new FakeProperty
         {
             Stored = "old",

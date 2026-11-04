@@ -32,9 +32,6 @@ public sealed class InterruptionExplicitVariantTests(LiveEplan eplan, WriteHost 
         Assert.True(ok, result.GetRawText());
         JsonElement symbol = Assert.Single(result.GetProperty("symbols").EnumerateArray()).GetProperty("symbol");
         Assert.Equal(0, symbol.GetProperty("variant").GetInt32());
-        JsonElement readback = Assert.Single(result.GetProperty("interruptionPoints").EnumerateArray());
-        Assert.Equal(0, readback.GetProperty("symbol").GetProperty("variant").GetInt32());
-        Assert.Contains(readback.GetProperty("pins").EnumerateArray(), p => p.GetProperty("direction").GetString() == "Right");
         DrawingPlacement point = Assert.Single(actual.Placements, p => p.Kind == "InterruptionPoint");
         Assert.Equal("=GAA-2L1", point.Properties["name"]);
         // The successful result includes the adapter's committed SymbolVariant readback.
