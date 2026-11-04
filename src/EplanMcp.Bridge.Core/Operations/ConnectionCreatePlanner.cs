@@ -66,7 +66,8 @@ public static class ConnectionCreatePlanner
         bool generate = (bool?)input["generate"] ?? true;
         if (!generate)
         { Require(input["items"]!.All(i => i is JObject && (string?)i["kind"] is "corner" or "t_node" or "potential_point" or "interruption_point" or "potential_definition"), "/items", "generate:false accepts only corner, t_node, potential_point, interruption_point and potential_definition."); }
-        if (SceneGap(scene, generate) is { } gap)
+        bool definitionsOnly = input["items"]!.All(i => i is JObject && (string?)i["kind"] is "definition_point" or "potential_definition");
+        if (SceneGap(scene, generate && !definitionsOnly) is { } gap)
         { throw Missing("Read a complete Circuit page inventory with verified bounds and pin geometry: " + gap + "."); }
         bool snap = (bool?)input["snap_to_grid"] ?? true;
         double grid = scene.Page.GridSize;
