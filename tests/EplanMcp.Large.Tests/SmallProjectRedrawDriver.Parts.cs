@@ -8,7 +8,7 @@ internal sealed partial class SmallProjectRedrawDriver
     {
         JObject[] parts = Objects(item["parts"]);
         // An earlier page already placed another representation of this device: join it, then assign the part.
-        if ((bool?)item["isMain"] != true || parts.Length == 0 || IsPlaced(DeviceName(Text(item["name"]) ?? "")))
+        if ((bool?)item["isMain"] != true || parts.Length == 0 || item["symbol"] is JObject || IsPlaced(DeviceName(Text(item["name"]) ?? "")))
         {
             await PlaceDeviceAsync(page, item);
             return;

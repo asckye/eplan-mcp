@@ -24,6 +24,7 @@ internal static class PageExportComparer
         new("11024", "Automatic modification date belongs to the new page's edit history."),
         new("11020", "Page creator identifies the editing session, not drawing content."),
         new("11022", "Last editor sign-in identifies the editing session, not drawing content."),
+        new("3010", "The creator's name identifies the editing session, not drawing content."),
         new("3011", "Last editor name identifies the editing session, not drawing content."),
         new("10045", "Full project directory changes between source and destination projects."),
         new("10009", "Full project filename includes the source or destination directory."),

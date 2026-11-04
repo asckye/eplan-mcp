@@ -36,6 +36,13 @@ internal sealed partial class SmallProjectRedrawDriver
         try
         {
             JObject result = await call(tool, args);
+            for (int retry = 0; retry < 3 && result["error"] is JObject failure && Text(failure["reason"]) is "EPLAN_BUSY" or "INTERNAL"
+                && Text(failure["execution"]) is null or "not_started"; retry++)
+            {
+                report.Note(page, tool, "", "Retrying after " + Text(failure["reason"]) + ": the write did not start.");
+                await Task.Delay(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
+                result = await call(tool, args);
+            }
             if (write && Text(result["error"]?["execution"] ?? result["execution"]) != "not_started")
             { _drawingCache.Remove(page); }
             bool success = result["error"] is null;

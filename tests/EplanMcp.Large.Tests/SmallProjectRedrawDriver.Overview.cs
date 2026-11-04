@@ -109,7 +109,7 @@ internal sealed partial class SmallProjectRedrawDriver
                 var locators = new JArray();
                 foreach (JObject member in members)
                 {
-                    JObject? found = available.FirstOrDefault(a => IsGraphic(member) ? GraphicMatches(member, a, compareStyle: !macroPage) : DrawingMatches(member, a));
+                    JObject? found = available.FirstOrDefault(a => macroPage ? GeometryMatches(member, a) : IsGraphic(member) ? GraphicMatches(member, a) : DrawingMatches(member, a));
                     if (found is null && macroPage)
                     {
                         report.RecordMacroVersionDifference(page, member, "source macro", "library macro", "The library macro has no object at this block member's position; no repair was drawn.");
@@ -170,6 +170,17 @@ internal sealed partial class SmallProjectRedrawDriver
 
     private static bool IsUngroupedDrawing(JObject actual) => actual["parent"]?.Type is null or JTokenType.Null
         && actual["locator"] is JObject;
+
+    // The macro's pen can differ from the sample's block member, which widens the bounds around the same geometry.
+    private static bool GeometryMatches(JObject source, JObject actual)
+    {
+        if (Type(source) != Text(actual["kind"]) || !ClosePoint(source["location"], actual["location"]))
+        { return false; }
+        return source["boundingBox"] is JArray { Count: 2 } bounds && actual["bounds"] is JArray { Count: 4 } box
+            && TryPoint(bounds[0], out double[] lower) && TryPoint(bounds[1], out double[] upper)
+            && Near((lower[0] + upper[0]) / 2, (ReadNumber(box[0]) + ReadNumber(box[2])) / 2)
+            && Near((lower[1] + upper[1]) / 2, (ReadNumber(box[1]) + ReadNumber(box[3])) / 2);
+    }
 
     private static bool GraphicMatches(JObject source, JObject actual, bool compareStyle = true)
     {
