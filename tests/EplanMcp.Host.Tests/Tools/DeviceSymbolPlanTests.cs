@@ -459,7 +459,8 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         }
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) { Search = args; return Symbols; }
         public PartsDatabaseContent Read(string? database) { PartReads++; throw new NotSupportedException(); }
-        public DeviceNames? ReadDevice(string projectPath, string tag) => throw new NotSupportedException();
+        public DeviceNames? ReadDevice(string projectPath, string tag) => new()
+        { Tag = tag, Functions = [.. Channels.Select(c => new DeviceNames.NamedFunction { Name = c.Name, Category = "PLCTerminal", Page = c.Page, IsMain = c.Main })] };
         public RenameReadBack Rename(string projectPath, string tag, string newTag) => throw new NotSupportedException();
         public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language) => throw new NotSupportedException();
         public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language) => throw new NotSupportedException();

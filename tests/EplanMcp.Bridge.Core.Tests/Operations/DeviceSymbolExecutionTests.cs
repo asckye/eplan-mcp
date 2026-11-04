@@ -4,7 +4,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 [Trait("Size", "Small")]
-public sealed class DeviceSymbolExecutionTests
+public sealed partial class DeviceSymbolExecutionTests
 {
     private readonly FakeCatalog _catalog = new(new OpenProject { Name = "Line1", Path = @"D:\Scratch\Line1" });
     private readonly FakePageReader _pages = new();
@@ -143,8 +143,8 @@ public sealed class DeviceSymbolExecutionTests
         Assert.Contains(plan.Changes, c => c.Property == "20406" && c.NewValue == "-X10");
         Assert.Equal(["1"], args.ConnectionDesignations!);
         _names.Functions.Add(("=GAA+A1-D3KF3:1", "1/17/2/0", false, args.Page, "D3KF3:1"));
-        Assert.Equal(ErrorReason.AlreadyExists, Assert.Throws<BridgeErrorException>(() =>
-            new DevicePlacePlanOperation(_catalog, _pages, _names, _parts, _source, _source, _source).Execute(args)).Error.Reason);
+        var repeated = Assert.IsType<WritePlan>(new DevicePlacePlanOperation(_catalog, _pages, _names, _parts, _source, _source, _source).Execute(args));
+        Assert.Contains("category is unreadable", repeated.Details!["layoutWarnings"], StringComparison.Ordinal);
         Assert.Empty(_transactions.Calls);
     }
 

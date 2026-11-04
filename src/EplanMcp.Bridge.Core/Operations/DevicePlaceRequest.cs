@@ -18,6 +18,7 @@ internal sealed class DevicePlaceRequest
 
     private bool _joinsDevice;
     private bool _requiresExistingDevice;
+    private string? _plcWarning;
     private DevicePlaceRequest(OpenProject project, MacroTargetPage page, PartSearchItem part, DevicePlaceArgs args, string tag, string[] taken, string[] existing)
     {
         Project = project;
@@ -119,7 +120,10 @@ internal sealed class DevicePlaceRequest
             PlcRecord? state = plc?.ReadPlc(project.Path, parent, TextLanguages.Independent, detailed: true);
             if (state?.Plc is null)
             { throw new BridgeErrorException(ErrorReason.DeviceNotFound, "An existing native PLC card is required; create it explicitly first."); }
-            if (args.PlcAddress is not null && state.Channels.Any(c => string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
+            if (args.PlcAddress is not null && state.Channels.Any(c => SameName(full, c.Name, ignoreCase: true)
+                && c.Address is not null && !string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
+            { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC channel already uses a different address; keep its address for another representation."); }
+            if (args.PlcAddress is not null && state.Channels.Any(c => !SameName(full, c.Name, ignoreCase: true) && string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
             { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC card already has the I/O address; choose a free address."); }
             existing = [.. existing, Protocol.BridgeJson.FromObject(state).ToString(Newtonsoft.Json.Formatting.None)];
         }
@@ -131,9 +135,18 @@ internal sealed class DevicePlaceRequest
         ];
         if (args.JoinDevice == true && taken.FirstOrDefault(n => SameName(full, n, ignoreCase: true)) is { } joinedTag)
         { full = joinedTag; }
+        string? plcWarning = null;
+        bool reusesPoint = false;
+        if (args.PlcConnectionPoint is not null && taken.Length > 0)
+        {
+            DeviceNames? device = names.ReadDevice(project.Path, DevicePlcPlan.Parent(args, full));
+            reusesPoint = DevicePlcPlan.ReusesPoint(full, taken, device, out plcWarning);
+            existing = [.. existing, Protocol.BridgeJson.FromObject(device).ToString(Newtonsoft.Json.Formatting.None)];
+        }
         var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing)
         {
-            _joinsDevice = args.JoinDevice == true || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args),
+            _joinsDevice = reusesPoint || args.JoinDevice == true || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args),
+            _plcWarning = plcWarning,
             _requiresExistingDevice = args.JoinDevice == true
         };
         if (args.Fingerprint is null)
@@ -152,6 +165,8 @@ internal sealed class DevicePlaceRequest
                 && row.Location.SequenceEqual(new[] { args.X + p.OffsetXmm, args.Y + p.OffsetYmm }));
         LayoutWarnings = LayoutGuard.Enforce(layout, Page.PredictDevice?.Invoke(args)
             ?? [LayoutGuard.Proposed(args.LocationBox is null ? "Function" : "LocationBox", [args.X, args.Y], null)]);
+        if (_plcWarning is not null)
+        { LayoutWarnings.Add(_plcWarning); }
     }
 
     /// <summary>The one change, for the dry run, the approval form and the audit (tool spec 5).</summary>

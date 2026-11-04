@@ -57,7 +57,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
 #pragma warning disable CA2000 // A39/A55: returned persistent functions belong to EPLAN, including on Abort.
         Function function = CreateFunction(args, tag, project, page, variant);
 #pragma warning restore CA2000
-        if (args.JoinDevice == true)
+        if (args.JoinDevice == true || args.PlcConnectionPoint is not null)
         { function.IsMainFunction = false; Require(!function.IsMainFunction); }
         function.Name = tag;
         // Live T7d: a standalone contact is not a main function by default, so device reads cannot find it. The tag is

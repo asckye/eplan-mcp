@@ -39,7 +39,7 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - Placed strip: defaults.strip_definition.symbol/.variant from plugins (SPECIAL), else TDEF/0. metadata.plugins=used id@version in preview/execute; plugin changes invalidate plans.
 - terminal: strip/number/owner/position/sortCode (20809)/stripCreated. Preview/recovery: owner/sortCode=null; empty sortCode=null. functions includes new strip. Segments: eplan_connection_generate dry_run:false (A52/A55).
 
-- PLC: require plc_connection_point and an existing SPECIAL/PLCC card tag. Address, symbolic address and text optional. Point: 1-64 chars, no leading colon; others: 1-256, nonblank, no controls. Use a one-pin DI variant. Duplicate points/addresses ignore case; omitted values are not written or checked for duplicates.
+- PLC: plc_connection_point + existing SPECIAL/PLCC tag; one-pin DI variant. Point: 1-64 chars, no leading colon; optional address/symbolic/text: 1-256 nonblank chars, no controls. Same-name PLCTerminal/BusTerminal allows a secondary representation; keep known address. Other-channel address conflicts reject; omitted values stay unchanged.
 - NO/NC: select NoContact/NcContact; connection_designations=["13","14"] / ["11","12"].
 - plc_connection_point: 20022; connection_designations must match. Writes 20400/20402/20011=address/manual symbolic address/??_?? text; calculated 20403/20301 read-only.
 - plc_plug_designation: optional manual 20406, 1-64 nonblank characters, no controls; requires a PLC point. Name stays card:point.

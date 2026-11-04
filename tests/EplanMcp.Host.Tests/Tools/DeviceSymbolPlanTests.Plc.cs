@@ -37,7 +37,7 @@ public sealed partial class DeviceSymbolPlanTests
         Assert.Null(_placement.Args!.PlcAddress);
         Assert.Null(_placement.Args.PlcSymbolicAddress);
         Assert.Equal(text, _placement.Args.PlcText);
-        Assert.Equal(ErrorReason.AlreadyExists, WriteToolHarness.Error(await PlaceOptional(false)).GetProperty("reason").GetString());
+        Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(await PlaceOptional(false)).GetProperty("execution").GetString());
         Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(await PlaceOptional(false, "3")).GetProperty("execution").GetString());
     }
 

@@ -28,6 +28,8 @@ public sealed class DeviceNames
 
         public bool IsMain { get; set; }
 
+        public string? Category { get; set; }
+
         public string? Page { get; set; }
     }
 }

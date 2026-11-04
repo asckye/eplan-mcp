@@ -8,6 +8,19 @@ internal static class DevicePlcPlan
     internal static string Suffix(DevicePlaceArgs args) => args.PlcConnectionPoint!;
     internal static string Parent(DevicePlaceArgs args, string tag) => tag.Substring(0, tag.Length - Suffix(args).Length - 1);
 
+    internal static bool ReusesPoint(string tag, IReadOnlyList<string> taken, DeviceNames? device, out string? warning)
+    {
+        warning = null;
+        if (taken.Count == 0 || taken.Any(n => !DevicePlaceRequest.SameName(tag, n, ignoreCase: true)))
+        { return false; }
+        DeviceNames.NamedFunction[] functions = [.. device?.Functions.Where(f => DevicePlaceRequest.SameName(tag, f.Name, ignoreCase: true)) ?? []];
+        if (functions.Any(f => f.Category is not (null or "PLCTerminal" or "BusTerminal")))
+        { return false; }
+        if (functions.Length == 0 || functions.Any(f => f.Category is null))
+        { warning = "Existing PLC point category is unreadable; verify both representations with eplan_page_get after placement."; }
+        return true;
+    }
+
     internal static void Check(DevicePlaceArgs args)
     {
         if (args.PlcPlugDesignation is { } plug && (args.PlcConnectionPoint is null || string.IsNullOrWhiteSpace(plug) || plug.Length > 64 || plug.Any(char.IsControl)))

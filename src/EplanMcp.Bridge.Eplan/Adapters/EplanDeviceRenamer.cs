@@ -1,3 +1,4 @@
+using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.HEServices;
 using EplanMcp.Bridge.Core.Operations;
@@ -27,7 +28,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
             Tag = tag,
             DeviceTag = own.IsEmpty ? string.Empty : own.ToString(),
             VisibleName = main.VisibleName ?? string.Empty,
-            Functions = [.. named.Select(f => new DeviceNames.NamedFunction { Name = f.Name ?? string.Empty, Id = f.ToStringIdentifier(), IsMain = f.IsMainFunction, Page = f.Page?.Name })],
+            Functions = [.. named.Select(f => new DeviceNames.NamedFunction { Name = f.Name ?? string.Empty, Id = f.ToStringIdentifier(), IsMain = f.IsMainFunction, Category = Category(f), Page = f.Page?.Name })],
             SubFunctions = [.. EplanNativePreconditions.Valid(main.SubFunctions).Select(f => f.Name ?? string.Empty)],
         };
     }
@@ -37,6 +38,14 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         return [.. EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => f.Name ?? string.Empty)];
+    }
+
+    private static string? Category(Function function)
+    {
+        try
+        { return function.FunctionCategory.ToString(); }
+        catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+        { WriteExceptionDiagnostics.Report(ex); return null; }
     }
 
     public RenameReadBack Rename(string projectPath, string tag, string newTag)

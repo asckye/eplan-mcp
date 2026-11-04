@@ -136,7 +136,9 @@ internal partial class Function(long oid = 1) : FunctionBase(oid)
         { EObjects.Terminal.OnCreate?.Invoke(terminal); }
     }
     public string? VisibleName { get; set; }
-    public FunctionCategory FunctionCategory { get; set; } = FunctionCategory.Terminal;
+    private FunctionCategory _category = FunctionCategory.Terminal;
+    public Exception? CategoryReadError { get; set; }
+    public FunctionCategory FunctionCategory { get { if (CategoryReadError is { } error) { throw error; } return _category; } set => _category = value; }
     private ArticleReference[] _articleReferences = [];
     public ArticleReference[] ArticleReferences { get { CheckNative?.Invoke(); return _articleReferences; } set { CheckNative?.Invoke(); _articleReferences = value; } }
     public Function[] SubFunctions { get; set; } = [];
