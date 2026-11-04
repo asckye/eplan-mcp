@@ -48,7 +48,7 @@ internal sealed partial class SmallProjectRedrawDriver(
         foreach (JObject item in objects.Where(IsDevice).OrderBy(DeviceOrder))
         {
             if (!_covered.Contains(Key(page, item)) && !_macroOwned.Contains(Key(page, item)))
-            { await ObserveAsync(page, item, () => PlaceDeviceWithPartAsync(page, item, objects)); }
+            { await ObserveAsync(page, item, () => PlaceDeviceAsync(page, item)); }
         }
         foreach (JObject item in objects.Where(o => Type(o) == "LocationBox"))
         {
@@ -199,7 +199,8 @@ internal sealed partial class SmallProjectRedrawDriver(
         JObject? placed = await InvokeAsync(page, "eplan_device_place", args, [item]);
         if (placed is null)
         { return; }
-        report.RecordOrigin(page, item, "symbol_fallback");
+        // The sample shows which symbol its engineer chose for a part (FAH1 where the part's macro brings FA1): the same data as a part route.
+        report.RecordOrigin(page, item, assignParts && (bool?)item["isMain"] == true && Objects(item["parts"]).Length > 0 ? "part" : "symbol_fallback");
         _placedTags.Add(placedTag);
         if (Text(placed["device"]?["tag"]) is string actualTag)
         {

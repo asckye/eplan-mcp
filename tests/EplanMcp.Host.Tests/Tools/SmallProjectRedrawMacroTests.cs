@@ -222,6 +222,24 @@ public sealed class SmallProjectRedrawMacroTests
     }
 
     [Fact]
+    public async Task DeviceWithPart_PlacesTheSourceSymbolAndAssignsThePart()
+    {
+        JObject device = Device(5, "=K1+A2-FC2", "CircuitBreaker", 112, 248, "", true);
+        device["symbol"] = new JObject { ["library"] = "IEC_symbol", ["name"] = "FAH1", ["variant"] = 0 };
+        device["parts"] = new JArray(new JObject { ["part"] = "SIE.5SY4106-7", ["variant"] = "1" });
+        JObject page = Page("Circuit", device);
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = Driver(calls, new SmallProjectRedrawReport("test", "ScratchTest"), (_, _) => Success([]));
+
+        await driver.DrawPageAsync(page, [page]);
+
+        JObject place = Assert.Single(calls, call => call.Tool == "eplan_device_place").Args;
+        Assert.Equal("FAH1", (string?)place["symbol"]);
+        Assert.Null(place["part"]);
+        Assert.Equal("SIE.5SY4106-7", (string?)Assert.Single(calls, call => call.Tool == "eplan_device_update").Args["part"]);
+    }
+
+    [Fact]
     public async Task PartMark_IsNeverDrawnByHand()
     {
         JObject mark = new()
