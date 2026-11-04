@@ -96,6 +96,7 @@ internal sealed class EplanMacroReader : IMacroReader
             Width = size.X,
             Height = size.Y,
             ReferencePoint = Point(() => macro.ReferencePoint),
+            Location = Point(() => macro.Location),
             Functions =
             [
                 .. objects.OfType<Function>().Select(f => new MacroFunctionRecord

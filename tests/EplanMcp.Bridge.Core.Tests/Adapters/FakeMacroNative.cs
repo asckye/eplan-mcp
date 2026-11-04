@@ -65,6 +65,7 @@ namespace Eplan.EplApi.DataModel.MasterData
         public int[] GetVariants(Enums.RepresentationType type) => [.. State!.Representations[type].Keys];
         public Placement[] Objects => State!.Representations[RepresentationType][Variant];
         public PointD Size => new(20, 30);
+        public PointD Location => new(0, 0);
         public PointD ReferencePoint => State!.ReferencePointError is { } error ? throw error
             : State.ReferencePoints.GetValueOrDefault((RepresentationType, Variant));
         public void Open(string path, Project project) => Open(path, project, false);

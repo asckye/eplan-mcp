@@ -30,7 +30,10 @@ internal sealed class MacroInsertRequest
         Representation = representation;
         Source = source;
         MacroBox = args.MacroBox;
+        _guard = args.LayoutGuard;
     }
+
+    private readonly string? _guard;
 
     public OpenProject Project { get; }
 
@@ -92,10 +95,24 @@ internal sealed class MacroInsertRequest
         var request = new MacroInsertRequest(project, page, macro, path, macros.ReadMacro(project.Path, path, representation: representation, variant: args.Variant), args, number, representation, source);
         violations.AddRange(request.Problems());
         if (violations.Count == 0)
-        { request.LayoutWarnings = Layout(() => page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [args.X, args.Y], [args.X, args.Y - request.Content.Height, args.X + request.Content.Width, args.Y])], mode: args.LayoutGuard ?? "refuse")); }
+        { request.LayoutWarnings = Layout(() => page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [args.X, args.Y], request.ProposedOutline())], mode: args.LayoutGuard ?? "refuse")); }
         return violations.Count > 0 ? throw WriteArguments.Invalid(violations) : request;
     }
     public List<string> LayoutWarnings { get; private set; } = [];
+
+    /// <summary>How far the outline's top left corner lies from the reference point that (x, y) places (A89).</summary>
+    private (double X, double Y) OutlineOffset() => Content.ReferencePoint is { Length: 2 } reference && Content.Location is { Length: 2 } location
+        ? (location[0] - reference[0], location[1] + Content.Height - reference[1]) : (0, 0);
+
+    public bool ReproducesWithoutBox => _guard == "warn" && !MacroBox;
+
+    private double[]? ProposedOutline()
+    {
+        if (ReproducesWithoutBox)
+        { return null; }
+        (double dx, double dy) = OutlineOffset();
+        return [X + dx, Y + dy - Content.Height, X + dx + Content.Width, Y + dy];
+    }
     internal static List<string> Layout(Func<List<string>> read)
     {
         try
@@ -162,7 +179,7 @@ internal sealed class MacroInsertRequest
     /// (<paramref name="x"/>, <paramref name="y"/>) (A14), leaves a page of <paramref name="pageWidth"/> x
     /// <paramref name="pageHeight"/> mm whose origin is its bottom left corner (A3); null when it lies within.
     /// </summary>
-    internal static string? Outside(double x, double y, double width, double height, double pageWidth, double pageHeight)
+    internal static string? Outside(double x, double y, double width, double height, double pageWidth, double pageHeight, double offsetX = 0, double offsetY = 0)
     {
         if (x + width <= pageWidth && y <= pageHeight && y - height >= 0)
         {
@@ -173,12 +190,15 @@ internal sealed class MacroInsertRequest
             ? string.Format(CultureInfo.InvariantCulture, "the macro, {0:0.##} x {1:0.##} mm, is larger than the page, {2:0.##} x {3:0.##} mm.", width, height, pageWidth, pageHeight)
             : string.Format(
                 CultureInfo.InvariantCulture,
-                "'x' and 'y' put the macro's outline, {0:0.##} x {1:0.##} mm below and right of its top left corner at (x, y), outside the page, {2:0.##} x {3:0.##} mm: x must be from 0 to {4:0.##} and y from {1:0.##} to {3:0.##}.",
+                "'x' and 'y' put the macro's outline, {0:0.##} x {1:0.##} mm below and right of its top left corner at (x, y), outside the page, {2:0.##} x {3:0.##} mm: x must be from {5:0.##} to {4:0.##} and y from {6:0.##} to {7:0.##}.",
                 width,
                 height,
                 pageWidth,
                 pageHeight,
-                pageWidth - width);
+                pageWidth - width - offsetX,
+                0 - offsetX,
+                height - offsetY,
+                pageHeight - offsetY);
     }
 
     /// <summary>
@@ -240,7 +260,8 @@ internal sealed class MacroInsertRequest
     {
         foreach (string problem in RepresentationProblems(Page, Content, Representation, Variant))
         { yield return problem; }
-        if (Page.Width is { } width && Page.Height is { } height && Outside(X, Y, Content.Width, Content.Height, width, height) is { } outside)
+        (double dx, double dy) = OutlineOffset();
+        if (!ReproducesWithoutBox && Page.Width is { } width && Page.Height is { } height && Outside(X + dx, Y + dy, Content.Width, Content.Height, width, height, dx, dy) is { } outside)
         { yield return outside; }
     }
     internal static IEnumerable<string> RepresentationProblems(MacroTargetPage page, MacroContent content, string representation, int variant)

@@ -63,6 +63,9 @@ public sealed class MacroContent
 
     public double[]? ReferencePoint { get; set; }
 
+    /// <summary>The lower left corner of the macro's outline, in the same coordinates as <see cref="ReferencePoint"/>.</summary>
+    public double[]? Location { get; set; }
+
     /// <summary>Every function in the macro, in the macro's order.</summary>
     public List<MacroFunctionRecord> Functions { get; set; } = [];
 
