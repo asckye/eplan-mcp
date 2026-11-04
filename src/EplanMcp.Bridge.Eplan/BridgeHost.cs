@@ -162,7 +162,7 @@ internal static class BridgeHost
             new PlanMacroInspectOperation(catalog, macros),
             .. eplan.Offline ? [] : new IOperation[] { new ApprovalAskOperation(new EplanApprovalDialog()) },
             new PageCreatePlanOperation(catalog, pages, pageWriter),
-            new PageCreateExecuteOperation(catalog, pages, pageWriter, transactions),
+            new PageCreateExecuteOperation(catalog, pages, pageWriter, transactions, descriptions),
             new PageUpdatePlanOperation(catalog, pages, descriptions, () => new EplanPagePlotFrames()),
             new PageUpdateExecuteOperation(catalog, pages, descriptions, transactions, () => new EplanPagePlotFrames()),
             new PagePlotFrameInspectOperation(catalog, () => new EplanPagePlotFrames()),

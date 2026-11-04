@@ -61,6 +61,10 @@ internal static class ToolSchemas
                         items["additionalProperties"] = false;
                     }
 
+                    if (tool.ProtocolTool.Name is PageWriteTools.CreateTool or PageWriteTools.UpdateTool)
+                    {
+                        items["properties"]!["description"] = JsonNode.Parse("""{"oneOf":[{"type":"string","maxLength":500},{"type":"object","minProperties":1,"propertyNames":{"pattern":"^[a-z]{2}_[A-Z]{2}$"},"additionalProperties":{"type":"string","maxLength":500}},{"type":"null"}]}""");
+                    }
                     if (tool.ProtocolTool.Name == PageWriteTools.UpdateTool)
                     {
                         items["anyOf"] = JsonNode.Parse("""[{"required":["description"]},{"required":["plot_frame"]}]""");

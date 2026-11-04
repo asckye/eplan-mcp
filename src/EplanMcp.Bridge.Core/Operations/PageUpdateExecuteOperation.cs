@@ -65,12 +65,14 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
     private static PageDescriptionChange Write(PageUpdateRequest request, PageUpdateRequest.Page page, PageDescription before, IPageDescriptions descriptions, IPagePlotFrames? frames)
     {
         OperationContext.Current.ThrowIfCancellationRequested();
+        var expected = before.Entries.ToList();
+        foreach (var edit in page.Edits(request.Language)) { expected = PageDescriptionEdit.With(expected, edit.Key, edit.Value); }
         PageDescription after = PageUpdatePlanOperation.Changes((page, before), request.Language)
-            ? descriptions.Write(request.Project.Path, page.Name, PageDescriptionEdit.With(before.Entries, request.Language, page.Text)) : before;
-        string? differs = page.HasDescription ? PageDescriptionEdit.Difference(before, after, request.Language, page.Text) : null;
+            ? descriptions.Write(request.Project.Path, page.Name, expected) : before;
+        var planned = new PageDescription(null, expected);
+        string? differs = page.HasDescription ? expected.Concat(after.Entries).Select(t => t.Language).FirstOrDefault(code => planned.TextIn(code) != after.TextIn(code)) : null;
         if (differs is not null)
         {
-            bool target = string.Equals(differs, request.Language, StringComparison.OrdinalIgnoreCase);
             throw new BridgeErrorException(
                 ErrorReason.InvalidArgument,
                 $"EPLAN did not store the description of '{page.Name}' as planned (its {differs} text differs), so nothing was changed. Leave out unusual characters and call again.",
@@ -79,7 +81,7 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
                 {
                     ["page"] = page.Name,
                     ["language"] = differs,
-                    ["requested"] = (target ? page.Text : before.TextIn(differs)) ?? string.Empty,
+                    ["requested"] = planned.TextIn(differs) ?? string.Empty,
                     ["actual"] = after.TextIn(differs) ?? string.Empty,
                 });
         }

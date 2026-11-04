@@ -160,6 +160,29 @@ public sealed class PageCreateToolTests : IDisposable
         Assert.Equal(["create page =A/1 (Circuit, \"电源\")", "create page =A/2"], WritePipeline.ChangeLines(plan));
     }
 
+    [Fact]
+    public async Task MultilingualDescription_DefaultsToPreviewAndPreservesTheMap()
+    {
+        var map = new Dictionary<string, string> { ["en_US"] = "Panel", ["de_DE"] = "Schrank", ["zh_CN"] = "面板" };
+        var result = await PageWriteTools.PageCreateAsync(_pipeline, "Line1", [new() { Name = "/1", Description = JsonSerializer.SerializeToElement(map) }], cancellationToken: TestContext.Current.CancellationToken);
+        Assert.NotEqual(true, result.IsError);
+        Assert.Empty(_bridge.Writes);
+        var args = (PageCreateArgs)_bridge.Calls.Single(c => c.Operation == OperationNames.PageCreatePlan).Args!;
+        Assert.Equal(map, args.Pages[0].DescriptionTranslations);
+        Assert.Null(args.Pages[0].Description);
+    }
+
+    [Theory]
+    [InlineData("42")]
+    [InlineData("[]")]
+    [InlineData("{\"en_US\":42}")]
+    public async Task InvalidDescriptionShapeNeverCallsTheBridge(string json)
+    {
+        var result = await PageWriteTools.PageCreateAsync(_pipeline, "Line1", [new() { Name = "/1", Description = JsonDocument.Parse(json).RootElement.Clone() }], cancellationToken: TestContext.Current.CancellationToken);
+        Assert.True(result.IsError);
+        Assert.Equal(0, _bridge.Invocations);
+    }
+
     private static PageWriteTools.NewPage Page(string name, string? type = null, string? description = null) => new() { Name = name, PageType = type, Description = description };
 
     private Task<CallToolResult> Create(PageWriteTools.NewPage[] pages, bool dryRun = false, string? language = null) =>

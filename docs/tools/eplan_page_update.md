@@ -17,7 +17,7 @@
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array，1–50 项 | 是 | — | 要修改的页 |
 | `pages[].name` | string | 是 | — | 完整页名，如 `=GAA+A1&EFS1/3`（用 `eplan_page_list` 查） |
-| `pages[].description` | string，最长 500 个字符 | 否 | 不修改 | `language` 下的新页描述；空串表示清除这种语言的描述 |
+| `pages[].description` | string 或语言到文本的 object，每语言最长 500 字符 | 否 | 不修改 | `language` 下的新页描述；空串表示清除这种语言的描述 |
 | `pages[].plot_frame` | string | 否 | 不修改 | 项目中已被页面使用的图框名称，Ordinal 精确匹配；不接受空白或导入文件路径 |
 | `language` | string | 否 | EPLAN 界面语言 | 要修改的语言，如 `zh_CN`、`en_US`。**其他语言的描述保持不变** |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false，不改变审批、读回和撤销规则 |
@@ -25,6 +25,8 @@
 - 页名的查找规则与 `eplan_page_get` 相同：先精确匹配；找不到时，再做不区分大小写的比较，只有唯一一个匹配时才采用。
 - 同一次调用中，同一页出现两次时返回 `INVALID_ARGUMENT`。
 - 每项至少提供 `description`、`plot_frame` 之一；null 按省略处理。描述专用调用保留原来的匹配、语言、指纹、摘要和响应字段。
+
+`description` 还接受 `{语言代码: 文本}` 对象，例如 `{"en_US":"Panel","de_DE":"Schrank","zh_CN":"面板"}`，每个文本最长 500 字符。对象键使用 EPLAN 支持的语言代码，不受项目显示语言数量限制；对象形式忽略顶层 `language` 的选字作用。一次构造并写入完整 `MultiLangString`，逐语言读回核对；有差异整批回滚。字符串形式保持原有行为。 对象仅修改列出的语言，未列出的语言保留；空串清除对应语言，计划按语言列出每项变化。
 
 ## 3. 输出
 

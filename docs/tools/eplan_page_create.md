@@ -18,7 +18,7 @@
 | `pages` | array，1–50 项 | 是 | — | 要新建的页，按给出的顺序创建 |
 | `pages[].name` | string | 是 | — | 完整页名，如 `=GAA+A1&EFS1/5`。结构部分参照 `eplan_page_list` 中的已有页 |
 | `pages[].page_type` | enum `Circuit` / `CircuitSingleLine` / `Overview` / `Graphics` | 否 | `Circuit` | 页类型 |
-| `pages[].description` | string，最长 500 个字符 | 否 | — | 页描述 |
+| `pages[].description` | string 或语言到文本的 object，每语言最长 500 字符 | 否 | — | 页描述 |
 | `language` | string | 否 | EPLAN 界面语言 | 页描述的语言，如 `zh_CN`、`en_US` |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false，不改变审批、读回和撤销规则 |
 
@@ -29,6 +29,8 @@
   - 其他前缀（`==`、`++`、`#`）这一版不支持，返回 `INVALID_ARGUMENT`。
 - **与 M3 设计 4.4 的差别**：`language` 由每页一个改为整个调用一个。同一次调用中各页的描述通常是同一种语言，这样参数更少。
 - `page_type` 只开放四种可以交互编辑的页类型。S9 只验证过 `Circuit`，其余三种由 Large 测试逐个验证，未通过的从 `enum` 中去掉。
+
+`description` 还接受 `{语言代码: 文本}` 对象，例如 `{"en_US":"Panel","de_DE":"Schrank","zh_CN":"面板"}`，每个文本最长 500 字符。对象键使用 EPLAN 支持的语言代码，不受项目显示语言数量限制；对象形式忽略顶层 `language` 的选字作用。一次构造并写入完整 `MultiLangString`，逐语言读回核对；有差异整批回滚。字符串形式保持原有行为。 预览列出全部语言；结果的既有 `description` 字段仍为字符串，完整文本用 `eplan_page_get` 的 `language` 分别读取。
 
 ## 3. 输出
 
@@ -88,7 +90,7 @@
   - 先重算指纹，不同就返回 `PLAN_STALE`；
   - 在 `TransactionScope` 中按顺序处理每一页：
     - 用 `PagePropertyList` 设置各部分，调用 `Page.Create(project, DocumentType, properties)`；
-    - 有页描述时，用只含 `language` 一种语言的 `MultiLangString` 写入 `PAGE_NOMINATIOMN`（新页没有其他语言，A13）；
+    - 有页描述时，字符串形式用只含 `language` 一种语言的 `MultiLangString` 写入 `PAGE_NOMINATIOMN`（新页没有其他语言，A13）；
     - 读回 `Page.Name` 和页描述，与请求做精确比较，不同就抛出，整体回滚；
   - 全部通过后 `Commit()`，再 `CloseUndo()`。
 - **包装**：`LockingStep → SafetyPoint → UndoStep("AI: eplan_page_create") → QuietModeStep`。S2 和 S1 已验证这种包装能撤回新建的页，并且能用 Ctrl+Z 撤销（A7、A9）。S9 证实它不适用于按符号新建设备，但建页不受影响（A13）。

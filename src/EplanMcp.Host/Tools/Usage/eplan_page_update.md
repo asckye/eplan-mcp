@@ -12,12 +12,18 @@ Preview a switch to a frame already used by a page in the project:
 
     {"project":"Line1","pages":[{"name":"=GAA+A1&EFS1/3","plot_frame":"FN1_015"}],"dry_run":true}
 
+A multilingual description (native execution of this extension is pending Large verification):
+
+    {"project":"Line1","pages":[{"name":"=GAA+A1&EFS1/60","description":{"en_US":"Panel","de_DE":"Schrank","zh_CN":"Panel"}}],"dry_run":true}
+
+`description` accepts a string or a language-to-text object, up to 500 characters per text. An object writes all listed languages once and verifies each; read them with eplan_page_get using `language`. String behavior is unchanged. Unlisted languages on existing pages stay unchanged.
+
 ## Workflow
 
 Omitting `dry_run` or passing true only previews; pass `dry_run: false` with the same arguments to execute. Previews return `fingerprint`, the planned changes, and `execution: not_started` without approval or writes.
 
 1. Find the pages with eplan_page_list (`name_prefix`, `text`) and read the current descriptions with eplan_page_get in the same `language`.
-2. Call with the full page names and the new texts. Only the given `language` changes; every other language of each description stays as it is. An empty `description` removes that language's text.
+2. Call with the full page names and the new texts. For a string, only the given `language` changes; every other language of each description stays as it is. An empty `description` removes that language's text.
 3. Pages that already have the text are counted in `unchanged` and not touched; when none changes, nothing is written and no approval is asked.
 4. All changes are one step: one Ctrl+Z in EPLAN reverts them, and a failure on any page changes none.
 5. Each page needs `description`, `plot_frame`, or both. Omitted fields stay unchanged. Frame names match exactly; only frames observed on project pages are discoverable. Unknown names return bounded `metadata.available` and complete `availableCount`; unused master data is not enumerated or imported. An already effective frame is left alone, including an inherited frame with empty 11016.

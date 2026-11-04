@@ -97,7 +97,7 @@ public sealed class PlanStepExecuteOperation(
             (IOperation Plan, IOperation Execute) operations = selected switch
             {
                 PageCreateArgs => (new PageCreatePlanOperation(catalog, pages, writer),
-                    new PageCreateExecuteOperation(catalog, pages, writer, named)),
+                    new PageCreateExecuteOperation(catalog, pages, writer, named, descriptions)),
                 PageUpdateArgs => (new PageUpdatePlanOperation(catalog, pages, descriptions),
                     new PageUpdateExecuteOperation(catalog, pages, descriptions, named)),
                 PageDeleteArgs => (new PageDeletePlanOperation(catalog, remover),

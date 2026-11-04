@@ -12082,12 +12082,12 @@
     {
       "name": "eplan_page_create",
       "title": "Create pages in an EPLAN project",
-      "description": "Creates 1-50 pages using names from eplan_page_list. Omit/true previews; false executes. Outside scratch needs approval; one Ctrl+Z undoes the batch. See usage.",
+      "description": "Creates 1-50 named pages. Omit/true previews; false executes. Approval outside scratch; one undo. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "project": {
-            "description": "Name or path from eplan_project_list",
+            "description": "Open project",
             "type": "string"
           },
           "pages": {
@@ -12113,10 +12113,25 @@
                   ]
                 },
                 "description": {
-                  "description": "Max 500 chars",
-                  "type": [
-                    "string",
-                    "null"
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    {
+                      "type": "object",
+                      "minProperties": 1,
+                      "propertyNames": {
+                        "pattern": "^[a-z]{2}_[A-Z]{2}$"
+                      },
+                      "additionalProperties": {
+                        "type": "string",
+                        "maxLength": 500
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
                   ]
                 }
               },
@@ -13805,12 +13820,12 @@
     {
       "name": "eplan_page_update",
       "title": "Change page descriptions in an EPLAN project",
-      "description": "Updates descriptions or existing plot frames on named pages. Omit/true previews; false executes. Outside scratch needs approval; one Ctrl+Z undoes the batch. See usage.",
+      "description": "Updates descriptions or plot frames. Omit/true previews; false executes. One undo; approval outside scratch.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "project": {
-            "description": "Name or path from eplan_project_list",
+            "description": "Open project",
             "type": "string"
           },
           "pages": {
@@ -13824,10 +13839,25 @@
                   "type": "string"
                 },
                 "description": {
-                  "description": "New text, max 500 chars; empty clears it",
-                  "type": [
-                    "string",
-                    "null"
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    {
+                      "type": "object",
+                      "minProperties": 1,
+                      "propertyNames": {
+                        "pattern": "^[a-z]{2}_[A-Z]{2}$"
+                      },
+                      "additionalProperties": {
+                        "type": "string",
+                        "maxLength": 500
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
                   ]
                 },
                 "plot_frame": {
@@ -13857,7 +13887,7 @@
             }
           },
           "language": {
-            "description": "The one language to change; default: EPLAN UI",
+            "description": "String language",
             "type": [
               "string",
               "null"

@@ -7,7 +7,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// every page in one transaction and reads each one back; a name or description EPLAN did not keep rolls all of them
 /// back (docs/tools/eplan_page_create.md, section 5; api-notes A13).
 /// </summary>
-public sealed class PageCreateExecuteOperation(IProjectCatalog catalog, IPageReader reader, IPageWriter writer, ITransactionScopeFactory transactions)
+public sealed class PageCreateExecuteOperation(IProjectCatalog catalog, IPageReader reader, IPageWriter writer, ITransactionScopeFactory transactions, IPageDescriptions? descriptions = null)
     : Operation<PageCreateArgs, PageCreateData>, IWriteOperation
 {
     /// <summary>The tool whose undo step this is: EPLAN lists it as "AI: eplan_page_create".</summary>
@@ -67,6 +67,16 @@ public sealed class PageCreateExecuteOperation(IProjectCatalog catalog, IPageRea
                 created.Description ?? string.Empty);
         }
 
+        if (page.Translations is { } translations)
+        {
+            PageDescription stored = descriptions!.Write(request.Project.Path, created.Name,
+                translations.Select(t => new TextEntry(t.Key, t.Value)).ToList());
+            foreach (var entry in translations)
+            {
+                if ((stored.TextIn(entry.Key) ?? "") != entry.Value)
+                { throw ReadBack("EPLAN did not keep the description in " + entry.Key + ".", entry.Value, stored.TextIn(entry.Key) ?? ""); }
+            }
+        }
         return created;
     }
 

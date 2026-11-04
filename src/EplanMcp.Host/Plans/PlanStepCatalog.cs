@@ -39,11 +39,14 @@ internal static class PlanStepCatalog
             schema["properties"]!["new_tag"]!.AsObject().Remove("default");
             schema["required"]!.AsArray().Add("new_tag");
         }
+        if (e.Op is "page.create" or "page.update") // Workflow predictions retain single-language descriptions.
+        { schema["properties"]!["pages"]!["items"]!["properties"]!["description"] = JsonNode.Parse("""{"description":"Max 500 chars","type":["string","null"]}"""); }
         if (e.Op == "page.update") // Workflow predictions currently cover descriptions only.
         {
             JsonObject item = schema["properties"]!["pages"]!["items"]!.AsObject();
             item["properties"]!.AsObject().Remove("plot_frame");
-            item["properties"]!["description"]!["type"] = "string";
+            item["properties"]!["description"] = JsonNode.Parse("""{"description":"New text, max 500 chars; empty clears it","type":"string"}""");
+            schema["properties"]!["language"]!["description"] = "The one language to change; default: EPLAN UI";
             item["required"] = new JsonArray("name", "description");
             item.Remove("anyOf");
         }

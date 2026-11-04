@@ -26,15 +26,15 @@ public sealed class PageUpdatePlanOperation(IProjectCatalog catalog, IPageReader
             ProjectPath = request.Project.Path,
             Changes =
             [
-                .. pages.Where(p => Changes(p, request.Language)).Select(p => new PlannedChange
+                .. pages.SelectMany(p => p.Page.Edits(request.Language).Where(t => p.Page.HasDescription && p.Before.TextIn(t.Key) != t.Value).Select(t => new PlannedChange
                 {
                     Action = "update",
                     Kind = "page",
                     Name = p.Page.Name,
-                    Property = $"description ({request.Language})",
-                    OldValue = p.Before.TextIn(request.Language),
-                    NewValue = p.Page.Text,
-                }),
+                    Property = $"description ({t.Key})",
+                    OldValue = p.Before.TextIn(t.Key),
+                    NewValue = t.Value,
+                })),
                 .. pages.Where(p => request.FrameChanges(p.Page)).Select(p => new PlannedChange
                 {
                     Action = "update",
@@ -51,5 +51,5 @@ public sealed class PageUpdatePlanOperation(IProjectCatalog catalog, IPageReader
 
     /// <summary>Whether the page's text in the language is not already the requested one.</summary>
     internal static bool Changes((PageUpdateRequest.Page Page, PageDescription Before) page, string language) =>
-        page.Page.HasDescription && !string.Equals(page.Before.TextIn(language), page.Page.Text, StringComparison.Ordinal);
+        page.Page.HasDescription && page.Page.Edits(language).Any(t => !string.Equals(page.Before.TextIn(t.Key), t.Value, StringComparison.Ordinal));
 }

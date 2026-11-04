@@ -53,8 +53,9 @@ internal sealed class PageUpdateRequest
             int same = items.FindIndex(0, i, p => string.Equals(p?.Name, items[i].Name, StringComparison.OrdinalIgnoreCase));
             AddIf(violations, string.IsNullOrEmpty(items[i].Name), $"{at}.name is required: a full page name as eplan_page_list returns it.");
             AddIf(violations, same >= 0 && !string.IsNullOrEmpty(items[i].Name), $"{at}.name repeats pages[{same.ToString(CultureInfo.InvariantCulture)}].name (letter case does not count).");
-            AddIf(violations, items[i].Description is null && items[i].PlotFrame is null, $"{at}.description is required when plot_frame is omitted; an empty string clears it.");
+            AddIf(violations, items[i].Description is null && items[i].DescriptionTranslations is null && items[i].PlotFrame is null, $"{at}.description is required when plot_frame is omitted; an empty string clears it.");
             AddIf(violations, items[i].Description?.Length > MaxDescription, $"{at}.description must have at most {MaxDescription.ToString(CultureInfo.InvariantCulture)} characters.");
+            PageDescriptionMap.Check(items[i].DescriptionTranslations, code => descriptions.LanguageCode(code) is not null, at + ".description", violations);
             AddIf(violations, items[i].PlotFrame is not null && string.IsNullOrWhiteSpace(items[i].PlotFrame), $"{at}.plot_frame must be a nonempty exact frame name.");
         }
 
@@ -79,7 +80,7 @@ internal sealed class PageUpdateRequest
             }
             else
             {
-                pages.Add(new Page(name, item.Description?.Length == 0 ? null : item.Description, item.Description is not null, item.PlotFrame));
+                pages.Add(new Page(name, item.Description?.Length == 0 ? null : item.Description, item.Description is not null || item.DescriptionTranslations is not null, item.PlotFrame, item.DescriptionTranslations));
             }
         }
 
@@ -155,7 +156,7 @@ internal sealed class PageUpdateRequest
     }
 
     /// <summary>One page to change: its name as EPLAN has it and the new text (null clears it).</summary>
-    internal sealed class Page(string name, string? text, bool hasDescription, string? plotFrame)
+    internal sealed class Page(string name, string? text, bool hasDescription, string? plotFrame, Dictionary<string, string>? translations)
     {
         public string Name { get; } = name;
 
@@ -164,5 +165,8 @@ internal sealed class PageUpdateRequest
         public bool HasDescription { get; } = hasDescription;
 
         public string? PlotFrame { get; } = plotFrame;
+
+        public IEnumerable<KeyValuePair<string, string?>> Edits(string language) => translations is null
+            ? [new(language, Text)] : translations.Select(t => new KeyValuePair<string, string?>(t.Key, t.Value.Length == 0 ? null : t.Value));
     }
 }

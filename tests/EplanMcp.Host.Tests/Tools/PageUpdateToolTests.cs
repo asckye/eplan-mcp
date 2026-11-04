@@ -90,6 +90,25 @@ public sealed class PageUpdateToolTests : IDisposable
         Assert.Equal(0, _harness.Bridge.Invocations);
     }
 
+    [Fact]
+    public async Task MultilingualDescription_ExplicitExecutionPreservesAllLanguages()
+    {
+        var map = new Dictionary<string, string> { ["en_US"] = "Panel", ["de_DE"] = "Schrank", ["zh_CN"] = "面板" };
+        var result = await PageWriteTools.PageUpdateAsync(_harness.Pipeline, "Line1", [new() { Name = "/1", Description = map }], dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.NotEqual(true, result.IsError);
+        var args = (PageUpdateArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.PageUpdateExecute).Args!;
+        Assert.Equal(map, args.Pages[0].DescriptionTranslations);
+        Assert.Null(args.Pages[0].Description);
+    }
+
+    [Fact]
+    public async Task InvalidDescriptionObjectIsRejectedBeforePlanning()
+    {
+        var result = await PageWriteTools.PageUpdateAsync(_harness.Pipeline, "Line1", [new() { Name = "/1", Description = new { en_US = 7 } }], cancellationToken: TestContext.Current.CancellationToken);
+        Assert.True(result.IsError);
+        Assert.Equal(0, _harness.Bridge.Invocations);
+    }
+
     private static PlannedChange Change(string page, string? before, string? after) =>
         new() { Action = "update", Kind = "page", Name = page, Property = "description (zh_CN)", OldValue = before, NewValue = after };
 

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
@@ -34,10 +35,10 @@ internal sealed class PageWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageCreateResult))]
-    [Description("Creates 1-50 pages using names from eplan_page_list. Omit/true previews; false executes. Outside scratch needs approval; one Ctrl+Z undoes the batch. See usage.")]
+    [Description("Creates 1-50 named pages. Omit/true previews; false executes. Approval outside scratch; one undo. See usage.")]
     public static async Task<CallToolResult> PageCreateAsync(
         WritePipeline pipeline,
-        [Description("Name or path from eplan_project_list")] string project,
+        [Description("Open project")] string project,
         [Description("1-50, created in order")] NewPage[] pages,
         [Description("e.g. zh_CN; default: EPLAN UI")] string? language = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
@@ -49,10 +50,11 @@ internal sealed class PageWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
+        if (DescriptionViolations(pages!.Select(p => p.Description)) is { Count: > 0 } descriptions) { return ToolResults.InvalidArguments(descriptions); }
         var args = new PageCreateArgs
         {
             Project = project,
-            Pages = [.. pages!.Select(p => new PageCreateItem { Name = p.Name ?? string.Empty, PageType = PageType(p.PageType), Description = ToolArguments.Optional(p.Description) })],
+            Pages = [.. pages!.Select(p => new PageCreateItem { Name = p.Name ?? string.Empty, PageType = PageType(p.PageType), Description = ToolArguments.Optional(DescriptionText(p.Description)), DescriptionTranslations = DescriptionMap(p.Description) })],
             Language = ToolArguments.Optional(language),
         };
         var request = new WriteRequest<PageCreateArgs, PageCreateArgs>(
@@ -106,12 +108,12 @@ internal sealed class PageWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageUpdateResult))]
-    [Description("Updates descriptions or existing plot frames on named pages. Omit/true previews; false executes. Outside scratch needs approval; one Ctrl+Z undoes the batch. See usage.")]
+    [Description("Updates descriptions or plot frames. Omit/true previews; false executes. One undo; approval outside scratch.")]
     public static async Task<CallToolResult> PageUpdateAsync(
         WritePipeline pipeline,
-        [Description("Name or path from eplan_project_list")] string project,
+        [Description("Open project")] string project,
         [Description("1-50 pages")] PageText[] pages,
-        [Description("The one language to change; default: EPLAN UI")] string? language = null,
+        [Description("String language")] string? language = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -121,10 +123,11 @@ internal sealed class PageWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
+        if (DescriptionViolations(pages!.Select(p => p.Description)) is { Count: > 0 } descriptions) { return ToolResults.InvalidArguments(descriptions); }
         var args = new PageUpdateArgs
         {
             Project = project,
-            Pages = [.. pages!.Select(p => new PageUpdateItem { Name = p.Name ?? string.Empty, Description = p.Description, PlotFrame = p.PlotFrame })],
+            Pages = [.. pages!.Select(p => new PageUpdateItem { Name = p.Name ?? string.Empty, Description = DescriptionText(p.Description), DescriptionTranslations = DescriptionMap(p.Description), PlotFrame = p.PlotFrame })],
             Language = ToolArguments.Optional(language),
         };
         var request = new WriteRequest<PageUpdateArgs, PageUpdateArgs>(
@@ -182,6 +185,29 @@ internal sealed class PageWriteTools
         }
 
         return ToolResults.Success(summary, result);
+    }
+
+    private static List<string> DescriptionViolations(IEnumerable<object?> values)
+    {
+        var errors = new List<string>();
+        foreach ((object? value, int index) in values.Select((value, index) => (value, index)))
+        {
+            try { _ = DescriptionMap(value); }
+            catch (ArgumentException) { errors.Add($"pages[{index}].description must be text or an object of language texts."); }
+        }
+        return errors;
+    }
+
+    private static string? DescriptionText(object? value) => value is string text ? text
+        : value is JsonElement { ValueKind: JsonValueKind.String } json ? json.GetString() : null;
+
+    private static Dictionary<string, string>? DescriptionMap(object? value)
+    {
+        if (value is null || value is string || value is JsonElement { ValueKind: JsonValueKind.String or JsonValueKind.Null }) { return null; }
+        JsonElement json = JsonSerializer.SerializeToElement(value);
+        if (json.ValueKind != JsonValueKind.Object || json.EnumerateObject().Any(p => p.Value.ValueKind != JsonValueKind.String))
+        { throw new ArgumentException("description must be text or an object of language texts."); }
+        return json.EnumerateObject().ToDictionary(p => p.Name, p => p.Value.GetString()!, StringComparer.Ordinal);
     }
 
     /// <summary>The default execution limit of a write (M3 design 4.3).</summary>
@@ -248,9 +274,9 @@ internal sealed class PageWriteTools
         [JsonPropertyName("page_type")]
         public string? PageType { get; set; }
 
-        [Description("Max 500 chars")]
+        [Description("Text or language-to-text object; max 500 chars per language")]
         [JsonPropertyName("description")]
-        public string? Description { get; set; }
+        public object? Description { get; set; }
     }
 
     /// <summary>One element of eplan_page_update's <c>pages</c>.</summary>
@@ -261,9 +287,9 @@ internal sealed class PageWriteTools
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
-        [Description("New text, max 500 chars; empty clears it")]
+        [Description("Text or language-to-text object; max 500 chars each; empty clears text")]
         [JsonPropertyName("description")]
-        public string? Description { get; set; }
+        public object? Description { get; set; }
 
         [Description("Existing frame name")]
         [JsonPropertyName("plot_frame")]

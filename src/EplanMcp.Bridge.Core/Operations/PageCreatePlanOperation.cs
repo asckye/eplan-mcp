@@ -26,7 +26,7 @@ public sealed class PageCreatePlanOperation(IProjectCatalog catalog, IPageReader
                     Action = "create",
                     Kind = "page",
                     Name = page.Name.Text,
-                    NewValue = page.Description is null ? page.Type : $"{page.Type}, \"{page.Description}\"",
+                    NewValue = page.Translations is not null ? page.Type + ", " + string.Join("; ", page.Translations.Select(t => t.Key + ": " + t.Value)) : page.Description is null ? page.Type : $"{page.Type}, \"{page.Description}\"",
                 }),
             ],
             Fingerprint = request.FingerprintOf(existing),

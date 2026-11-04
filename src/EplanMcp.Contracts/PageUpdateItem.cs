@@ -9,6 +9,9 @@ public sealed class PageUpdateItem
     /// <summary>The new description in <see cref="PageUpdateArgs.Language"/>; empty clears that language's text.</summary>
     public string? Description { get; set; }
 
+    /// <summary>All requested language texts; null retains the string description behavior.</summary>
+    public Dictionary<string, string>? DescriptionTranslations { get; set; }
+
     /// <summary>Optional exact name of a plot frame already used by a page in this project; never imports master data.</summary>
     public string? PlotFrame { get; set; }
 }

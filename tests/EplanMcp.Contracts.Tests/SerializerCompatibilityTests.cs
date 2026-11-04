@@ -20,6 +20,8 @@ public sealed class SerializerCompatibilityTests
 
     public static TheoryData<object> Samples() =>
     [
+        new PageCreateItem { Name = "/1", DescriptionTranslations = new() { ["en_US"] = "Panel", ["de_DE"] = "Schrank" } },
+        new PageUpdateItem { Name = "/1", DescriptionTranslations = new() { ["en_US"] = "Panel", ["zh_CN"] = "面板" } },
         new ReportCreateArgs(),
         new ReportCreateArgs { Project = "Line1", Type = "TerminalDiagram", Form = "F13_008", FirstPage = "+A1&EMA2/100", FilterScheme = "Location designation_A3", SortScheme = "DT (full)", PageDescription = "Terminals", Fingerprint = new string('a', 64), FilterSchemeData = "<Filter>\r\n\tA3</Filter>", SortSchemeData = "<Sort>&full</Sort>", FunctionFilterSchemeData = "\u202eFunctions", FunctionSortSchemeData = "" },
         new PageReport { Type = "TerminalDiagram", FilterSchemeData = "<Filter>\r\n\tA3</Filter>", SortSchemeData = "<Sort>&full</Sort>", FunctionFilterSchemeData = "\u202eFunctions", FunctionSortSchemeData = "" },

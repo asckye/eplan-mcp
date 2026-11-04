@@ -11,4 +11,7 @@ public sealed class PageCreateItem
 
     /// <summary>The page description in <see cref="PageCreateArgs.Language"/>; null for none.</summary>
     public string? Description { get; set; }
+
+    /// <summary>All requested language texts; null retains the string description behavior.</summary>
+    public Dictionary<string, string>? DescriptionTranslations { get; set; }
 }

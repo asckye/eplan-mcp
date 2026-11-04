@@ -8,6 +8,12 @@ An overview page and a graphics page, descriptions left empty:
 
     {"project": "Line1", "pages": [{"name": "=GAA+A1&EFS1/62", "page_type": "Overview"}, {"name": "=GAA+A1&EFS1/63", "page_type": "Graphics"}], "dry_run": false}
 
+A multilingual description (native execution of this extension is pending Large verification):
+
+    {"project":"Line1","pages":[{"name":"=GAA+A1&EFS1/60","description":{"en_US":"Panel","de_DE":"Schrank","zh_CN":"Panel"}}],"dry_run":true}
+
+`description` accepts a string or a language-to-text object, up to 500 characters per text. An object writes all listed languages once and verifies each; read them with eplan_page_get using `language`. String behavior is unchanged. Unlisted languages on existing pages stay unchanged.
+
 ## Workflow
 
 Omitting `dry_run` or passing true only previews; pass `dry_run: false` with the same arguments to execute. Previews return `fingerprint`, the planned changes, and `execution: not_started` without approval or writes.
