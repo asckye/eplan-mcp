@@ -8,14 +8,14 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | 标题 / 四注解 | `Create text and graphics on an EPLAN page`；readOnly/destructive/idempotent/openWorld 均 false |
 | 状态 | Implemented (Unreleased) |
 ## 1. 这个工具解决什么任务
-在指定电路图页添加说明文字、直线、矩形、折线、圆弧、路径功能文本和图片；图形线不承担导线功能。路径功能文本用于该路径上器件的功能说明与报表。契约见 `PlacementCreateContract`，英文用法见 [PlacementCreate.usage.md](../../src/EplanMcp.Host/Tools/PlacementCreate.usage.md)。
+在指定电路图、总览或图形页添加说明文字、直线、矩形、折线、圆弧、路径功能文本和图片；图形线不承担导线功能。路径功能文本用于该路径上器件的功能说明与报表。契约见 `PlacementCreateContract`，英文用法见 [PlacementCreate.usage.md](../../src/EplanMcp.Host/Tools/PlacementCreate.usage.md)。
 ## 2. 输入参数
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 
-`project,page` 显式必填；单一 `Circuit` 页；`items` 1–50 项，严格成员且拒绝重复键。`dry_run=true`、`snap_to_grid=true`、`response_format=concise`（另可 detailed）；请求≤256 KiB。
+`project,page` 显式必填；单一 `Circuit`、`Overview` 或 `Graphics` 页；`items` 1–50 项，严格成员且拒绝重复键。`dry_run=true`、`snap_to_grid=true`、`response_format=concise`（另可 detailed）；请求≤256 KiB。
 每项 `kind=text/line/rectangle/polyline/arc/path_text/image`；text 与 path_text 必填 `position:[x_mm,y_mm]`、`contents:{语言代码:文字}`、`height_mm`（0.5–100）；总文字≤500 字符，每种语言非空且唯一，代码如 `en_US` 或语言无关 `??_??`。A54：缺项目显示语言的文字不显示，必须提供语言无关内容或至少项目显示语言；显示语言来自可信读取，不从工具参数自报。 `??_??` 不得与具体语言混用（A54 / T4b 实测）。
 line 必填 `points:[[x1,y1],[x2,y2]]`；rectangle 必填 `corners` 同形状，可反向给角点。坐标均为有限数，0–10,000 mm，页左下角原点、y 向上；默认按页栅格吸附，中点远离零，关闭时保持原值。
 polyline 必填至少两个 `points`，不闭合；arc 必填 `center`、正数 `radius_mm`、以度为单位的 `start_angle/end_angle`。image 必填 `file` 与两个对角点 `corners`；文件路径相对 imports，扩展名仅 `.png/.jpg/.jpeg/.bmp/.emf/.wmf`，拒绝绝对路径、目录穿越、符号链接与 junction，执行前重核 SHA-256。图片链接到 imports 源文件，不复制到项目或覆盖文件。

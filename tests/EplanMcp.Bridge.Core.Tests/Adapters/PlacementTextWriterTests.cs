@@ -61,10 +61,22 @@ public sealed class PlacementTextWriterTests
     [InlineData("+a1/1", ErrorReason.PageNotFound)]
     [InlineData("+A1", ErrorReason.PageNotFound)]
     [InlineData("+A1/1", ErrorReason.InvalidArgument)]
-    public void Validate_RequiresExactCircuitPage(string name, string reason)
+    public void Validate_RequiresExactAllowedPage(string name, string reason)
     {
-        EplanProjects.Project = new(new Page { PageType = DocumentTypeManager.DocumentType.Graphics });
+        EplanProjects.Project = new(new Page { PageType = DocumentTypeManager.DocumentType.TableOfContents });
         Assert.Equal(reason, Assert.Throws<BridgeErrorException>(() => new EplanPlacementTextWriter().Validate("project", name, PlacementTextStore.Args().Text)).Error.Reason);
+    }
+
+    [Theory]
+    [InlineData("Circuit")]
+    [InlineData("Overview")]
+    [InlineData("Graphics")]
+    public void Validate_AllowsDrawingPageTypes(string type)
+    {
+        EplanProjects.Project = new(new Page { PageType = Enum.Parse<DocumentTypeManager.DocumentType>(type) });
+        var text = PlacementTextStore.Args().Text;
+        text.Contents = new() { ["??_??"] = "Panel" };
+        new EplanPlacementTextWriter().Validate("project", "+A1/1", text);
     }
 
     [Fact]

@@ -43,7 +43,7 @@ internal static class PlacementCreateContract
     {
         Name = "eplan_placement_create",
         Title = "Create text and graphics on an EPLAN page",
-        Description = "Creates text, line, rectangle, polyline, arc, path_text or image on a Circuit page; mm, bottom left, y up; arc angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Omit dry_run to preview; false executes. One undo; approval outside scratch. " +
+        Description = "Creates text, line, rectangle, polyline, arc, path_text or image on a Circuit, Overview or Graphics page; mm, bottom left, y up; arc angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Omit dry_run to preview; false executes. One undo; approval outside scratch. " +
             "Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). " +
             "Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
         InputSchema = Input,

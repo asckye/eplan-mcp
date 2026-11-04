@@ -13,8 +13,9 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
     public void Validate(string projectPath, string page, PlacementText text)
     {
         MainThread.Assert();
-        if (Find(projectPath, page).PageType != DocumentTypeManager.DocumentType.Circuit)
-        { throw WriteArguments.Invalid(["/page must be an exact Circuit page from eplan_page_list."]); }
+        DocumentTypeManager.DocumentType[] allowed = [DocumentTypeManager.DocumentType.Circuit, DocumentTypeManager.DocumentType.Overview, DocumentTypeManager.DocumentType.Graphics];
+        if (!allowed.Contains(Find(projectPath, page).PageType))
+        { throw WriteArguments.Invalid(["/page requires a Circuit, Overview or Graphics page from eplan_page_list."]); }
         if (text.Kind is not ("text" or "path_text"))
         { return; }
         foreach (string language in text.Contents.Keys)

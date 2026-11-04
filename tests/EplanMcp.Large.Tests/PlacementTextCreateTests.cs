@@ -78,6 +78,49 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
         Assert.Equal(before.Hash, (await LiveSnapshots.TakeAsync(bridge, new() { Project = host.Writable })).Hash);
     }
 
+    [Theory]
+    [InlineData("Overview")]
+    [InlineData("Graphics")]
+    public async Task DrawingPageKinds_LineAndTextReadBack(string type)
+    {
+        Assert.Equal(eplan.ProcessId, host.ProcessId);
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        Assert.Equal(host.Writable, selection.Project, ignoreCase: true);
+        string page = selection.NextPage;
+        await host.CallAsync("eplan_page_create", new()
+        {
+            ["project"] = host.Writable, ["dry_run"] = false,
+            ["pages"] = new[] { new { name = page, page_type = type } },
+        });
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = host.Writable, ["page"] = page, ["dry_run"] = false, ["snap_to_grid"] = false,
+            ["items"] = new object[]
+            {
+                new { kind = "line", points = (double[][])[[10, 20], [30, 20]] },
+                new { kind = "text", position = new[] { 40d, 50d }, height_mm = 3.5, contents = new Dictionary<string, string> { ["??_??"] = "Overview text" } },
+            },
+        };
+        TestContext.Current.TestOutputHelper?.WriteLine("request: " + JsonSerializer.Serialize(request));
+        var read = new Dictionary<string, object?> { ["project"] = host.Writable, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };
+        JsonElement result;
+        try { result = await host.CallAsync("eplan_placement_create", request); }
+        catch (Exception ex)
+        {
+            TestContext.Current.TestOutputHelper?.WriteLine("result: " + ex);
+            TestContext.Current.TestOutputHelper?.WriteLine("readback: " + await host.CallAsync("eplan_page_get", read));
+            throw;
+        }
+        TestContext.Current.TestOutputHelper?.WriteLine("result: " + result);
+        JsonElement readback = await host.CallAsync("eplan_page_get", read);
+        TestContext.Current.TestOutputHelper?.WriteLine("readback: " + readback);
+        Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+        JsonElement rows = readback.GetProperty("drawings").GetProperty("items");
+        Assert.Single(rows.EnumerateArray(), row => row.GetProperty("kind").GetString() == "Line");
+        JsonElement text = Assert.Single(rows.EnumerateArray(), row => row.GetProperty("kind").GetString() == "Text");
+        Assert.Equal("??_??@Overview text;", text.GetProperty("properties").GetProperty("text").GetString());
+    }
+
     [Fact]
     public async Task ForcedMidBatchFailure_OnFreshScratchCopy_RollsBackAndLeavesNoUndoStep()
     {

@@ -34,8 +34,8 @@ internal sealed class PlacementCreateTools
                 new() { Project = input.GetProperty("project").GetString() }, cancellationToken).ConfigureAwait(false)).Project;
             var pageArgs = new PageGetArgs { Project = project.Path, Page = input.GetProperty("page").GetString()! };
             PageGetData page = await bridge.InvokeAsync<PageGetArgs, PageGetData>(OperationNames.PageGet, pageArgs, cancellationToken).ConfigureAwait(false);
-            if (page.Page.Type != "Circuit")
-            { throw new BridgeCallException(ToolResults.InvalidArgumentError(["/page requires a Circuit page."])); }
+            if (!PlacementCreatePlanning.AllowedPageTypes.Contains(page.Page.Type, StringComparer.Ordinal))
+            { throw new BridgeCallException(ToolResults.InvalidArgumentError([PlacementCreatePlanning.AllowedPageMessage])); }
             pageArgs.Page = page.Page.Name;
             PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet, pageArgs, cancellationToken).ConfigureAwait(false);
             var args = new PlacementTextCreateArgs { Project = project.Path, Page = pageArgs.Page, Items = [], Fingerprint = geometry.Fingerprint() };

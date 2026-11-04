@@ -13,6 +13,8 @@ namespace EplanMcp.Host.Tools;
 /// <summary>Read-only preview. Display language and absolute text outlines must come from trusted readers, never arguments.</summary>
 internal static class PlacementCreatePlanning
 {
+    internal static readonly string[] AllowedPageTypes = ["Circuit", "Overview", "Graphics"];
+    internal const string AllowedPageMessage = "/page requires a Circuit, Overview or Graphics page from eplan_page_list.";
     internal static async Task<CallToolResult> PreviewAsync(IBridgeClient bridge, JsonElement input, string? displayLanguage = null,
         Func<JsonElement, double[]?>? measureText = null, ImportFiles? files = null, CancellationToken cancellationToken = default)
     {
@@ -28,8 +30,8 @@ internal static class PlacementCreatePlanning
                 new() { Project = input.GetProperty("project").GetString() }, cancellationToken).ConfigureAwait(false);
             var args = new PageGetArgs { Project = project.Project.Path, Page = input.GetProperty("page").GetString()! };
             PageGetData page = await bridge.InvokeAsync<PageGetArgs, PageGetData>(OperationNames.PageGet, args, cancellationToken).ConfigureAwait(false);
-            if (page.Page.Type != "Circuit")
-            { return Invalid(["/page: use a Circuit page from eplan_page_list."]); }
+            if (!AllowedPageTypes.Contains(page.Page.Type, StringComparer.Ordinal))
+            { return Invalid([AllowedPageMessage]); }
             args.Page = page.Page.Name;
             PageDrawingGeometry geometry = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet, args, cancellationToken).ConfigureAwait(false);
             string? layoutWarnings = null;

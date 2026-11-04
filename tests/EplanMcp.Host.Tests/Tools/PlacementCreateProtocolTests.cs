@@ -152,6 +152,23 @@ public sealed class PlacementCreateProtocolTests
         });
     }
 
+    [Theory]
+    [InlineData("Overview", true)]
+    [InlineData("Graphics", true)]
+    [InlineData("TableOfContents", false)]
+    public async Task DrawingPageKinds_ExecuteAllowedTypesAndRejectOthers(string type, bool allowed)
+    {
+        await WithClient(async (client, harness, store) =>
+        {
+            harness.Bridge.Handlers[OperationNames.PageGet] = _ => new PageGetData { Page = new() { Name = "P", Type = type } };
+            CallToolResult result = await client.CallToolAsync(PlacementCreateTools.Tool, Args(), cancellationToken: Token);
+            Assert.Equal(!allowed, result.IsError == true);
+            Assert.Equal(allowed ? 3 : 0, store.Items.Count);
+            if (!allowed)
+            { Assert.Equal(ErrorReason.InvalidArgument, WriteToolHarness.Error(result).GetProperty("reason").GetString()); }
+        });
+    }
+
     private static Dictionary<string, object?> Args() => new()
     {
         ["project"] = "Line1",

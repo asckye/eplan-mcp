@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_placement_create` 可在 Circuit、Overview 和 Graphics 页创建图形与文字，并照常检查布局。
+
 - `eplan_connection_create` 允许连接的实际端点落在黑盒边缘或框内引脚上，仍拒绝真正穿越外框的路径。
 
 - `eplan_connection_create` 仅放置节点且没有逻辑连接端点时只放置、读回，跳过连接生成并返回 `undoSteps: 1`。

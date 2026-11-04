@@ -208,10 +208,23 @@ public sealed class PlacementCreateTests
         Assert.Equal("placement.create.execute", Error(await Preview(bridge, Input(Line, dry: false))).GetProperty("metadata").GetProperty("missing").GetString());
         Assert.Empty(bridge.Calls);
         bridge = Bridge();
-        bridge.Handlers[OperationNames.PageGet] = _ => new PageGetData { Page = new() { Name = "P", Type = "Overview" } };
+        bridge.Handlers[OperationNames.PageGet] = _ => new PageGetData { Page = new() { Name = "P", Type = "TableOfContents" } };
         Assert.Equal(ErrorReason.InvalidArgument, Error(await Preview(bridge, Input(Line))).GetProperty("reason").GetString());
         Assert.Empty(bridge.Writes);
         Assert.DoesNotContain(bridge.Calls, c => c.Operation == OperationNames.PageDrawingGet);
+    }
+
+    [Theory]
+    [InlineData("Circuit")]
+    [InlineData("Overview")]
+    [InlineData("Graphics")]
+    public async Task AllowedPageTypes_PreviewStillChecksLayout(string type)
+    {
+        var bridge = Bridge();
+        bridge.Handlers[OperationNames.PageGet] = _ => new PageGetData { Page = new() { Name = "P", Type = type } };
+        Assert.NotEqual(true, (await Preview(bridge, Input(Line))).IsError);
+        Assert.Equal(ErrorReason.InvalidArgument, Error(await Preview(bridge,
+            Input("""{"kind":"line","points":[[10,10],[105,105]]}"""))).GetProperty("reason").GetString());
     }
 
     [Fact]

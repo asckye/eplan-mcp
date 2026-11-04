@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R1 03-graphics-pages（2026-11-03 brief） | `PlacementGraphicsCreateTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 新建 Overview 页上的 line、text 读回。 |
 | R1 02-box-endpoints（2026-11-03 brief） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。黑盒框边 DCP 连接及逻辑端点、图形路径读回；Small/Medium 同时覆盖框内引脚、穿越与无关拐点引脚。 |
 | R1 01-nodes（2026-11-03 brief） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。独立 corner、t_node、potential_point 的读回及一步撤销恢复；混合导线仍保留两步撤销。 |
 | G8 可选端子符号（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 X2_2、KA1_PE 的库名、符号、变体、编号及逐次单步撤销。 |
