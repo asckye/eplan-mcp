@@ -3,6 +3,9 @@ namespace EplanMcp.Contracts;
 /// <summary>Arguments of <see cref="OperationNames.DevicePlacePlan"/> and <see cref="OperationNames.DevicePlaceExecute"/>.</summary>
 public sealed class DevicePlaceArgs
 {
+    /// <summary>Use warn to reproduce existing drawings; refuse is the default.</summary>
+    public string? LayoutGuard { get; set; }
+
     /// <summary>Project name or path as eplan_project_list returns it; required for writes.</summary>
     public string? Project { get; set; }
 

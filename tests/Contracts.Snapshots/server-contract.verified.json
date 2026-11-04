@@ -6638,6 +6638,14 @@
             "description": "Join an existing tag as a secondary library symbol.",
             "type": "boolean",
             "default": false
+          },
+          "layout_guard": {
+            "type": "string",
+            "default": "refuse",
+            "enum": [
+              "refuse",
+              "warn"
+            ]
           }
         },
         "required": [
@@ -10034,6 +10042,14 @@
           "macro_box": {
             "type": "boolean",
             "default": true
+          },
+          "layout_guard": {
+            "type": "string",
+            "default": "refuse",
+            "enum": [
+              "refuse",
+              "warn"
+            ]
           }
         },
         "required": [

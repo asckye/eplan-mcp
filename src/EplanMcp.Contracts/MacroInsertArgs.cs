@@ -39,6 +39,9 @@ public sealed class MacroInsertArgs
     /// <summary>Retain the macro box according to project settings; false removes inserted boxes in the same transaction.</summary>
     public bool MacroBox { get; set; } = true;
 
+    /// <summary>Use warn to reproduce existing drawings; refuse is the default.</summary>
+    public string? LayoutGuard { get; set; }
+
     /// <summary>For the execute operation: the plan's <see cref="WritePlan.Fingerprint"/>. Null for the plan.</summary>
     public string? Fingerprint { get; set; }
 }

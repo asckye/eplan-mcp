@@ -52,3 +52,5 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 
 not_started/rolled_back: unchanged. INVALID_ARGUMENT: fix source/coordinates/variant/structure/readback. PART_NOT_FOUND: eplan_part_search. ALREADY_EXISTS: free tag/address. PAGE_NOT_FOUND/AMBIGUOUS_NAME: eplan_page_list/get. PLAN_STALE: re-plan. Policy/approval/audit/lock/connection: eplan_page_create. OUTCOME_UNKNOWN: inspect before retry.
 R1-R5/R8 refuse; R6/R7/R9 warn; strict: refuse.
+
+`layout_guard: "warn"` reproduces an existing drawing: layout conflicts become warnings. The default `refuse` draws freely; off-page always refuses.

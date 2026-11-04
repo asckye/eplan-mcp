@@ -5,6 +5,11 @@
 
 ## [Unreleased]
 
+- `eplan_macro_insert`、`eplan_device_place` 支持 `layout_guard: "warn"`，用于复现已有图纸。
+- `eplan_device_update` 允许 PLC 模块点改到还没有卡的标识。
+- `eplan_placement_delete` 不再因页面上有不可读的空块而失败。
+- 端子放置只拒绝盒子类符号，其他功能类别交给 EPLAN 判断（示例项目的 `XTR1`）。
+
 - `eplan_macro_get` 支持选择表达和变体，返回宏参考点与功能位置；位置不可读时返回 null 并告警。
 - `eplan_device_update` 允许将全部为非主功能 PLC 点的器件并入已有 PLC 盒，保留后缀并核对两侧读回；其它重名仍拒绝。新增 Large 验证待实测。
 

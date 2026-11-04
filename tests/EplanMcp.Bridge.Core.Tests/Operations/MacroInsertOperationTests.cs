@@ -108,6 +108,18 @@ public sealed class MacroInsertOperationTests : IDisposable
     }
 
     [Fact]
+    public void LayoutGuardWarn_MacroEnvelopeOverSymbol_PlansWithAWarning()
+    {
+        MacroTargetPage page = LayoutFixture.Target(_inserter.Pages[SamplePage])!;
+        page.Layout!.Page.Placements.Add(LayoutGuardTests.Row("Function", 9, 40, 100));
+        MacroInsertArgs args = Args(SamplePage, 40, 290);
+        args.LayoutGuard = "warn";
+
+        Assert.Contains("R2", Plan(args).Details!["layoutWarnings"], StringComparison.Ordinal);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
     public void Plan_IsOneMacroChange_WithTheMacroDevicesForTheDryRun()
     {
         WritePlan plan = Plan(Args(NewPage, 40, 280));

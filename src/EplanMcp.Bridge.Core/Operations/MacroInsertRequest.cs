@@ -92,7 +92,7 @@ internal sealed class MacroInsertRequest
         var request = new MacroInsertRequest(project, page, macro, path, macros.ReadMacro(project.Path, path, representation: representation, variant: args.Variant), args, number, representation, source);
         violations.AddRange(request.Problems());
         if (violations.Count == 0)
-        { request.LayoutWarnings = Layout(() => page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [args.X, args.Y], [args.X, args.Y - request.Content.Height, args.X + request.Content.Width, args.Y])])); }
+        { request.LayoutWarnings = Layout(() => page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [args.X, args.Y], [args.X, args.Y - request.Content.Height, args.X + request.Content.Width, args.Y])], mode: args.LayoutGuard ?? "refuse")); }
         return violations.Count > 0 ? throw WriteArguments.Invalid(violations) : request;
     }
     public List<string> LayoutWarnings { get; private set; } = [];

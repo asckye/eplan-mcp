@@ -57,6 +57,18 @@ public sealed class DevicePlaceOperationTests
     }
 
     [Fact]
+    public void LayoutGuardWarn_Overlap_PlansWithAWarning()
+    {
+        MacroTargetPage page = LayoutFixture.Target(_placer.Pages[SamplePage])!;
+        page.Layout!.Page.Placements.Add(LayoutGuardTests.Row("Function", 9, 80, 160));
+        page.PredictDevice = _ => [LayoutGuardTests.Row("Function", 10, 80, 160)];
+        DevicePlaceArgs args = Args(SamplePage, "-NEW");
+        args.LayoutGuard = "warn";
+
+        Assert.Contains("R2", Plan(args).Details!["layoutWarnings"], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void LayoutGuard_OverlapRefusesWithSuggestion_BeforeAnyWrite()
     {
         MacroTargetPage page = LayoutFixture.Target(_placer.Pages[SamplePage])!;

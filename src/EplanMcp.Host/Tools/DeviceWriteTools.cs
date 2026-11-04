@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -143,6 +144,7 @@ internal sealed class DeviceWriteTools
         IProgress<ProgressNotificationValue>? progress = null,
         PackLibrary? packs = null,
         [Description("Join an existing tag as a secondary library symbol.")] bool? join_device = null,
+        [AllowedValues("refuse", "warn")] string layout_guard = "refuse",
         CancellationToken cancellationToken = default)
     {
         var args = new DevicePlaceArgs
@@ -155,6 +157,7 @@ internal sealed class DeviceWriteTools
             Y = y,
             Tag = tag,
             JoinDevice = join_device,
+            LayoutGuard = layout_guard,
             Library = library?.Trim(),
             Symbol = symbol?.Trim(),
             SymbolVariant = symbol_variant,
@@ -210,6 +213,7 @@ internal sealed class DeviceWriteTools
                 Y = args.Y,
                 Tag = args.Tag,
                 JoinDevice = args.JoinDevice,
+                LayoutGuard = args.LayoutGuard,
                 Library = args.Library,
                 Symbol = args.Symbol,
                 SymbolVariant = args.SymbolVariant,

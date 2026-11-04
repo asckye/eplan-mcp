@@ -49,6 +49,7 @@ internal sealed class MacroWriteTools
         string? part = null,
         [Description("Default 1")] string? part_variant = null,
         bool macro_box = true,
+        [AllowedValues("refuse", "warn")] string layout_guard = "refuse",
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -58,14 +59,14 @@ internal sealed class MacroWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering, Representation = representation, Part = part, PartVariant = part_variant, MacroBox = macro_box };
+        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering, Representation = representation, Part = part, PartVariant = part_variant, MacroBox = macro_box, LayoutGuard = layout_guard };
         var request = new WriteRequest<MacroInsertArgs, MacroInsertArgs>(
             InsertTool,
             ToolTier.Write,
             OperationNames.MacroInsertPlan,
             OperationNames.MacroInsertExecute,
             args,
-            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Representation = args.Representation, Part = args.Part, PartVariant = args.PartVariant, MacroBox = args.MacroBox, Fingerprint = plan.Fingerprint },
+            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Representation = args.Representation, Part = args.Part, PartVariant = args.PartVariant, MacroBox = args.MacroBox, LayoutGuard = args.LayoutGuard, Fingerprint = plan.Fingerprint },
             dry_run,
             PageWriteTools.DefaultLimit,
             "Inserting the macro");

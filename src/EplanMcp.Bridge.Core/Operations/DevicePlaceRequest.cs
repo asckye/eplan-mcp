@@ -164,7 +164,7 @@ internal sealed class DevicePlaceRequest
             && (args.DisplayProperties ?? []).Any(p => row.Properties.TryGetValue("property_id", out string? id) && id == p.PropertyId.ToString(CultureInfo.InvariantCulture)
                 && row.Location.SequenceEqual(new[] { args.X + p.OffsetXmm, args.Y + p.OffsetYmm }));
         LayoutWarnings = LayoutGuard.Enforce(layout, Page.PredictDevice?.Invoke(args)
-            ?? [LayoutGuard.Proposed(args.LocationBox is null ? "Function" : "LocationBox", [args.X, args.Y], null)]);
+            ?? [LayoutGuard.Proposed(args.LocationBox is null ? "Function" : "LocationBox", [args.X, args.Y], null)], mode: args.LayoutGuard ?? "refuse");
         if (_plcWarning is not null)
         { LayoutWarnings.Add(_plcWarning); }
     }
