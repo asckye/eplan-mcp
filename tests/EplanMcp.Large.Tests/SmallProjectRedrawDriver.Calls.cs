@@ -29,7 +29,7 @@ internal sealed partial class SmallProjectRedrawDriver
         { args["project"] = project; }
         if (write)
         { args["dry_run"] = false; }
-        if (tool is "eplan_placement_create" or "eplan_connection_create")
+        if (tool is "eplan_placement_create" or "eplan_connection_create" or "eplan_macro_insert" or "eplan_device_place")
         { args["layout_guard"] = "warn"; }
         if (tool is "eplan_page_get" or "eplan_page_review" or "eplan_connection_create" or "eplan_placement_create" or "eplan_placement_update")
         { args["response_format"] = "detailed"; }

@@ -313,7 +313,7 @@ public sealed class SmallProjectRedrawDriverTests
         await driver.DrawPageAsync(source, [source]);
 
         JObject[] placements = [.. calls.Where(call => call.Tool == "eplan_placement_create").Select(call => call.Args)];
-        Assert.Equal([50, 1], placements.Select(arguments => ((JArray)arguments["items"]!).Count));
+        Assert.Equal([20, 20, 11], placements.Select(arguments => ((JArray)arguments["items"]!).Count));
         Assert.All(placements, arguments =>
         {
             Assert.False((bool)arguments["snap_to_grid"]!);
@@ -323,7 +323,7 @@ public sealed class SmallProjectRedrawDriverTests
         JObject result = report.ToJson();
         Assert.Equal(1, (int)result["failedToolCallCount"]!);
         JToken failed = Assert.Single((JArray)result["calls"]!, call => !(bool)call["succeeded"]!);
-        Assert.Equal(50, ((JArray)failed["objectOids"]!).Count);
+        Assert.Equal(20, ((JArray)failed["objectOids"]!).Count);
         Assert.Contains("outside drawable area", (string)failed["error"]!, StringComparison.Ordinal);
     }
 

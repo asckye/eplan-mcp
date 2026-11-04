@@ -67,11 +67,77 @@ public sealed class SmallProjectRedrawOverviewTests
         await driver.DrawPageAsync(source, [source]);
 
         Assert.False((bool)Assert.Single(calls, c => c.Tool == "eplan_macro_insert").Args["macro_box"]!);
-        JObject rename = Assert.Single(calls, c => c.Tool == "eplan_device_update").Args;
+        // Rename and part are separate calls: a part the macro already carries must not block the rename.
+        JObject rename = calls.First(c => c.Tool == "eplan_device_update").Args;
         Assert.Equal("-OLD", (string?)rename["tag"]);
         Assert.Equal("-NEW", (string?)rename["new_tag"]);
+        Assert.Null(rename["part"]);
+        Assert.Equal("FICTION.PLC", (string?)calls.Last(c => c.Tool == "eplan_device_update").Args["part"]);
         Assert.True(calls.FindIndex(c => c.Tool == "eplan_device_update") < calls.FindLastIndex(c => c.Tool == "eplan_page_get"));
         Assert.DoesNotContain(calls, c => c.Tool == "eplan_device_place");
+    }
+
+    [Fact]
+    public async Task MacroPage_LooseModulePicture_BecomesTheSourceBlock()
+    {
+        // The library macro leaves these lines loose where the sample has the block 144_268557.
+        JObject box = new()
+        {
+            ["type"] = "PLC",
+            ["oid"] = 1,
+            ["name"] = "-NEW",
+            ["category"] = "PLCBox",
+            ["isMain"] = true,
+            ["location"] = Point(212, 284),
+            ["properties"] = new JArray(new JObject { ["id"] = 20468, ["value"] = "FICTION/PLC.ema" }),
+        };
+        JObject block = new()
+        {
+            ["type"] = "Block",
+            ["oid"] = 2,
+            ["name"] = "144_268557",
+            ["location"] = Point(4, 20),
+            ["members"] = new JArray(Line(3, 6, 0), Line(4, 26, 0), Line(5, 46, 0)),
+        };
+        JObject source = Page(box, block);
+        JObject first = Drawing(Line(13, 10), 113), second = Drawing(Line(14, 30), 114);
+        var calls = new List<(string Tool, JObject Args)>();
+        var report = new SmallProjectRedrawReport("test", "ScratchTest");
+        bool inserted = false;
+        var driver = new SmallProjectRedrawDriver((tool, args) =>
+        {
+            calls.Add((tool, (JObject)args.DeepClone()));
+            if (tool == "eplan_macro_list")
+            { return Task.FromResult(new JObject { ["macros"] = new JArray(new JObject { ["path"] = "FICTION/PLC.ema" }) }); }
+            if (tool == "eplan_macro_get")
+            {
+                return Task.FromResult(new JObject
+                {
+                    ["macro"] = new JObject
+                    {
+                        ["reference_point"] = Point(0, 292),
+                        ["representations"] = new JArray(new JObject { ["type"] = "Overview", ["variants"] = new JArray(0) }),
+                        ["devices"] = new JArray(new JObject { ["tag"] = "-NEW", ["category"] = "PLCBox", ["main"] = true, ["location"] = Point(212, 284) }),
+                    },
+                });
+            }
+            if (tool == "eplan_macro_insert")
+            { inserted = true; }
+            return Task.FromResult(new JObject
+            {
+                ["execution"] = "committed",
+                ["devices"] = new JArray(new JObject { ["tag"] = "-NEW", ["category"] = "PLCBox" }),
+                ["drawings"] = new JObject { ["items"] = inserted ? new JArray(first, second) : new JArray(), ["truncated"] = false },
+            });
+        }, "ScratchTest", Path.GetTempPath(), report);
+
+        await driver.DrawPageAsync(source, [source]);
+
+        JObject item = (JObject)Assert.Single(calls, c => c.Tool == "eplan_placement_create" && (string?)c.Args["items"]![0]!["kind"] == "block").Args["items"]![0]!;
+        Assert.Equal("144_268557", (string?)item["name"]);
+        Assert.Equal(2, ((JArray)item["members"]!).Count);
+        // The third member has no counterpart in the library macro: listed, not drawn.
+        Assert.Single((JArray)report.ToJson()["macroVersionDifferences"]!);
     }
 
     [Fact]

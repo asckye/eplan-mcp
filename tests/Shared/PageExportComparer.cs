@@ -361,7 +361,7 @@ internal static class PageExportComparer
             IEnumerable<JToken> items = array;
             if (member == "properties")
             {
-                items = items.Where(item => !_ignoredNames.Contains((string?)item["id"] ?? ""));
+                items = BlockPropertiesByValue(items.Where(item => !_ignoredNames.Contains((string?)item["id"] ?? "")));
             }
             var normalized = items.Select(item => Normalize(item, member, identities)!).ToList();
             if (member is "pins" or "parts" or "functionsInside")
@@ -389,6 +389,17 @@ internal static class PageExportComparer
 
     private static JToken NormalizeBlockReference(JToken oid, Dictionary<string, string>? identities) =>
         identities is not null && Identity(identities, oid) is string identity ? new JValue(identity) : oid.DeepClone();
+
+    // A project allocates block property IDs itself, so only the values can be compared.
+    private static IEnumerable<JToken> BlockPropertiesByValue(IEnumerable<JToken> properties)
+    {
+        JToken[] all = properties.ToArray();
+        static bool IsBlockProperty(JToken item) => (int?)item["id"] is >= 59000 and < 60000;
+        JObject[] values = [.. all.Where(IsBlockProperty).Where(item => item["value"] is { Type: not JTokenType.Null })
+            .OrderBy(item => item["value"]!.ToString(Formatting.None), StringComparer.Ordinal)
+            .Select((item, index) => new JObject { ["id"] = 59000 + index, ["index"] = 0, ["value"] = item["value"]!.DeepClone() })];
+        return all.Where(item => !IsBlockProperty(item)).Concat(values);
+    }
 
     private static JArray BlockReferenceProperties(JArray properties, JToken? origin)
     {

@@ -7,7 +7,8 @@ internal sealed partial class SmallProjectRedrawDriver
     private async Task PlaceDeviceWithPartAsync(string page, JObject item, JObject[] sourceObjects)
     {
         JObject[] parts = Objects(item["parts"]);
-        if ((bool?)item["isMain"] != true || parts.Length == 0)
+        // An earlier page already placed another representation of this device: join it, then assign the part.
+        if ((bool?)item["isMain"] != true || parts.Length == 0 || IsPlaced(DeviceName(Text(item["name"]) ?? "")))
         {
             await PlaceDeviceAsync(page, item);
             return;
@@ -73,6 +74,12 @@ internal sealed partial class SmallProjectRedrawDriver
             && ClosePoint(item["location"], drawing["location"])).ToArray();
         bool? symbolMatches = candidates.Length == 1 ? await PartSymbolMatchesAsync(page, item, candidates[0]) : null;
         JObject[] added = beforeComplete ? after.Where(drawing => !prior.Contains(DrawingKey(drawing))).ToArray() : [];
+        // The sample's parts have no macro boxes around them.
+        JObject[] boxes = added.Where(drawing => Text(drawing["kind"]) == "MacroBox").ToArray();
+        if (boxes.Length > 0)
+        {
+            await InvokeAsync(page, "eplan_placement_delete", new JObject { ["page"] = page, ["items"] = new JArray(boxes.Select(box => box["locator"]!.DeepClone())) }, [item]);
+        }
         foreach (JObject source in sourceObjects.Where(source => !_covered.Contains(Key(page, source))))
         {
             JObject? match = added.FirstOrDefault(drawing => IsDevice(source) ? DrawingMatches(source, drawing)

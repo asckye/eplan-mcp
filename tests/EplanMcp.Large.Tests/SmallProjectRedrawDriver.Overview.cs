@@ -89,8 +89,7 @@ internal sealed partial class SmallProjectRedrawDriver
 
     private async Task CreateOverviewBlocksAsync(string page, JObject[] objects)
     {
-        if (_macroPages.Contains(page))
-        { return; }
+        bool macroPage = _macroPages.Contains(page);
         foreach (JObject block in objects.Where(o => Type(o) == "Block"))
         {
             await ObserveAsync(page, block, async () =>
@@ -110,11 +109,21 @@ internal sealed partial class SmallProjectRedrawDriver
                 var locators = new JArray();
                 foreach (JObject member in members)
                 {
-                    JObject? found = available.FirstOrDefault(a => IsGraphic(member) ? GraphicMatches(member, a) : DrawingMatches(member, a));
+                    JObject? found = available.FirstOrDefault(a => IsGraphic(member) ? GraphicMatches(member, a, compareStyle: !macroPage) : DrawingMatches(member, a));
+                    if (found is null && macroPage)
+                    {
+                        report.RecordMacroVersionDifference(page, member, "source macro", "library macro", "The library macro has no object at this block member's position; no repair was drawn.");
+                        continue;
+                    }
                     if (found is null)
                     { throw new InvalidDataException("Block member " + Id(member) + " (" + Type(member) + ") has no matching ungrouped target; the block was not created."); }
                     available.Remove(found);
                     locators.Add(found["locator"]!.DeepClone());
+                }
+                if (locators.Count < 2)
+                {
+                    report.Warning(page, "Block " + name + ": fewer than two members exist on the page; it was not created.");
+                    return;
                 }
                 await InvokeAsync(page, "eplan_placement_create", new JObject
                 {

@@ -11,6 +11,11 @@ internal sealed partial class SmallProjectRedrawDriver
         var mapped = new List<(JObject Source, JObject Item)>();
         foreach (JObject item in objects.Where(IsGraphic).Where(item => !_covered.Contains(Key(page, item)) && !_unresolvedMacroGraphics.Contains(Key(page, item))))
         {
+            if (IsPartMark(item))
+            {
+                report.RecordMacroVersionDifference(page, item, "source macro", "library macro", "A part macro's mark without an exact counterpart: it is never drawn by hand.");
+                continue;
+            }
             if (Type(item) is "Text" or "PathText" && IsEmptyText(item["content"]))
             {
                 report.Note(page, Type(item), Id(item), "Empty text content; no placement_create call was made.");
@@ -23,7 +28,7 @@ internal sealed partial class SmallProjectRedrawDriver
                 return Task.CompletedTask;
             });
         }
-        foreach ((JObject Source, JObject Item)[] batch in mapped.Chunk(50))
+        foreach ((JObject Source, JObject Item)[] batch in mapped.Chunk(20))
         {
             await InvokeItemsAsync(page, "eplan_placement_create", new JObject
             {
@@ -33,6 +38,9 @@ internal sealed partial class SmallProjectRedrawDriver
             }, batch.Select(item => item.Source).ToArray());
         }
     }
+
+    // Closed polylines set visible explicitly (19101 = 0) come from part macros, like the Phoenix mark.
+    private static bool IsPartMark(JObject item) => Type(item) == "PolyLine" && (bool?)item["closed"] == true && Property(item, 19101) == "0";
 
     private JObject Graphic(string page, JObject source)
     {

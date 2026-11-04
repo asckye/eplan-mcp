@@ -1,3 +1,4 @@
+using System.Globalization;
 using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Large.Tests;
@@ -14,8 +15,8 @@ internal sealed partial class SmallProjectRedrawDriver
         var instances = objects.Where(item => !string.IsNullOrWhiteSpace(Property(item, 20468)))
             .GroupBy(item => (Macro: Property(item, 20468)!.Replace('\\', '/'), Tag: DeviceName(Text(item["name"]) ?? "")))
             .Select(group => (group.Key.Macro, group.Key.Tag, Members: group.ToArray())).ToList();
-        foreach (JObject box in objects.Where(item => pageType == "Overview" && Text(item["category"]) == "PLCBox"
-            && string.IsNullOrWhiteSpace(Property(item, 20468))))
+        foreach (JObject box in objects.Where(item => string.IsNullOrWhiteSpace(Property(item, 20468))
+            && (pageType == "Overview" && Text(item["category"]) == "PLCBox" || pageType == "Circuit" && Type(item) == "BoxedDevice" && Objects(item["parts"]).Length > 0)))
         {
             string tag = Text(box["name"]) ?? "";
             if (!instances.Any(instance => instance.Tag == tag))
@@ -30,7 +31,7 @@ internal sealed partial class SmallProjectRedrawDriver
             JObject? owner = members.Concat(allPages.SelectMany(source => Objects(source["placements"])))
                 .FirstOrDefault(item => Text(item["name"]) == instance.Tag && Objects(item["parts"]).Length > 0);
             JObject? part = owner is null ? null : Objects(owner["parts"]).FirstOrDefault();
-            bool partRoute = pageType == "Overview" && members.Any(item => Text(item["category"]) == "PLCBox"
+            bool partRoute = instance.Macro.Length == 0 || pageType == "Overview" && members.Any(item => Text(item["category"]) == "PLCBox"
                 && string.IsNullOrWhiteSpace(Property(item, 20468)));
             await ObserveAsync(page, members.FirstOrDefault() ?? instance.Members[0], async () =>
             {
@@ -73,27 +74,27 @@ internal sealed partial class SmallProjectRedrawDriver
                 JObject anchor = members.FirstOrDefault(item => (bool?)item["isMain"] == true)
                     ?? UniqueMembers(members).FirstOrDefault() ?? instance.Members[0];
                 bool module = members.All(item => Text(item["category"]) == "PLCTerminal");
-                int variant = 0;
+                int variant = 0, votes = 0;
+                double[]? best = null;
+                JObject chosen = description;
                 foreach (int candidate in Objects(description["representations"]).Where(item => Text(item["type"]) == representation)
                     .SelectMany(item => (item["variants"] as JArray)?.Select(value => (int?)value ?? 0) ?? []).Distinct().OrderBy(value => value))
                 {
                     JObject? described = candidate == 0 ? description : await DescribeMacroAsync(page, instance.Members[0], path, representation, candidate);
-                    if (described is not null && VariantReproduces(anchor, members, Objects(described["devices"])))
+                    if (described is null)
+                    { continue; }
+                    (double[]? offset, int score) = BestTranslation(members, Objects(described["devices"]));
+                    if (score > votes)
                     {
-                        description = described;
-                        variant = candidate;
-                        break;
+                        (chosen, variant, best, votes) = (described, candidate, offset, score);
                     }
                 }
-                JObject? macroAnchor = FindMacroAnchor(anchor, Objects(description["devices"]));
-                if (macroAnchor is null || !TryPoint(description["reference_point"], out double[] reference)
-                    || !TryPoint(macroAnchor["location"], out double[] origin) || !TryPoint(anchor["location"], out double[] location))
+                if (best is not { } translation || !TryPoint(chosen["reference_point"], out double[] reference))
                 {
                     report.Warning(page, "Macro " + path + ": reference_point or anchor location is unreadable; no insertion position was guessed.");
                     return;
                 }
-                double[] translation = [location[0] - origin[0], location[1] - origin[1]];
-                CheckDefaultVariant(page, path, members, Objects(description["devices"]), translation);
+                CheckDefaultVariant(page, path, members, Objects(chosen["devices"]), translation);
                 JObject[] before = await ReadDrawingsAsync(page, anchor);
                 if (!_lastDrawingReadComplete)
                 {
@@ -234,15 +235,21 @@ internal sealed partial class SmallProjectRedrawDriver
         return description;
     }
 
-    private static JObject? FindMacroAnchor(JObject anchor, JObject[] devices)
+    // The position most members agree on: the sample's engineer moved single points (=K1+A2-KEB1:X8) after inserting.
+    private static (double[]? Translation, int Votes) BestTranslation(JObject[] members, JObject[] devices)
     {
-        string suffix = FunctionSuffix(Text(anchor["name"]));
-        JObject[] matches = devices.Where(item => Text(item["category"]) == Text(anchor["category"])
-            && FunctionSuffix(Text(item["tag"])) == suffix).ToArray();
-        if (matches.Length == 1)
-        { return matches[0]; }
-        JObject[] main = matches.Where(item => (bool?)item["main"] == true).ToArray();
-        return main.Length == 1 ? main[0] : null;
+        var votes = new Dictionary<string, (double[] Translation, int Count)>(StringComparer.Ordinal);
+        foreach (JObject member in UniqueMembers(members).OrderByDescending(item => (bool?)item["isMain"] == true))
+        {
+            JObject? device = devices.FirstOrDefault(item => Text(item["category"]) == Text(member["category"])
+                && FunctionSuffix(Text(item["tag"])) == FunctionSuffix(Text(member["name"])));
+            if (device is null || !TryPoint(device["location"], out double[] location) || !TryPoint(member["location"], out double[] source))
+            { continue; }
+            double[] translation = [source[0] - location[0], source[1] - location[1]];
+            string key = string.Format(CultureInfo.InvariantCulture, "{0:0.00},{1:0.00}", translation[0], translation[1]);
+            votes[key] = (translation, votes.TryGetValue(key, out (double[] Translation, int Count) seen) ? seen.Count + 1 : 1);
+        }
+        return votes.Count == 0 ? (null, 0) : votes.Values.MaxBy(vote => vote.Count);
     }
 
     private static string FunctionSuffix(string? name) => name is not null && name.Contains(':', StringComparison.Ordinal)
@@ -257,10 +264,6 @@ internal sealed partial class SmallProjectRedrawDriver
             && FunctionSuffix(Text(device["tag"])) == FunctionSuffix(Text(member["name"]))
             && TryPoint(device["location"], out double[] location) && TryPoint(member["location"], out double[] source)
             && Near(source[0], location[0] + translation[0]) && Near(source[1], location[1] + translation[1])));
-
-    private static bool VariantReproduces(JObject anchor, JObject[] members, JObject[] devices) =>
-        FindMacroAnchor(anchor, devices) is { } macroAnchor && TryPoint(macroAnchor["location"], out double[] origin) && TryPoint(anchor["location"], out double[] location)
-        && MembersMatch(members, devices, [location[0] - origin[0], location[1] - origin[1]]);
 
     private void CheckDefaultVariant(string page, string path, JObject[] members, JObject[] devices, double[] translation)
     {
@@ -281,18 +284,17 @@ internal sealed partial class SmallProjectRedrawDriver
             return;
         }
         string inserted = roots[0];
-        var args = new JObject { ["tag"] = inserted };
-        if (inserted != wanted)
-        { args["new_tag"] = wanted; }
-        if (part is not null)
-        {
-            args["part"] = part["part"]?.DeepClone();
-            args["variant"] = part["variant"]?.DeepClone();
-        }
-        if (args.Count > 1 && await InvokeAsync(page, "eplan_device_update", args, [anchor]) is null)
+        if (inserted != wanted && await InvokeAsync(page, "eplan_device_update", new JObject { ["tag"] = inserted, ["new_tag"] = wanted }, [anchor]) is null)
         { return; }
         _placedTags.Add(wanted);
         _actualNames[wanted] = wanted;
+        if (part is null)
+        { return; }
+        JObject? device = await InvokeAsync(page, "eplan_device_get", new JObject { ["tag"] = wanted }, [anchor], write: false);
+        if (!Objects(device?["parts"]).Any(item => Text(item["partNumber"]) == Text(part["part"])))
+        {
+            await InvokeAsync(page, "eplan_device_update", new JObject { ["tag"] = wanted, ["part"] = part["part"]?.DeepClone(), ["variant"] = part["variant"]?.DeepClone() }, [anchor]);
+        }
     }
 
     private void MarkMacroCoverage(string page, JObject[] objects, JObject[] members, JObject[] actual,
@@ -332,8 +334,7 @@ internal sealed partial class SmallProjectRedrawDriver
             report.Warning(page, "Overview text replacement requires complete drawing evidence; no text deletion or duplicate was attempted.");
             return;
         }
-        JObject[] sourceTexts = objects.Where(item => Type(item) is "Text" or "PathText").Concat(objects.Where(item => Type(item) == "Block")
-            .Where(item => item["members"] is JArray).SelectMany(AbsoluteBlockMembers).Where(item => Type(item) is "Text" or "PathText")).ToArray();
+        JObject[] sourceTexts = objects.Where(item => Type(item) is "Text" or "PathText").ToArray();
         JObject[] existingTexts = actual.Where(item => IsUngroupedDrawing(item) && Text(item["kind"]) is "Text" or "PathText").ToArray();
         foreach (JObject[] batch in existingTexts.Chunk(100))
         {
@@ -350,7 +351,5 @@ internal sealed partial class SmallProjectRedrawDriver
         await DrawGraphicsAsync(page, sourceTexts);
         foreach (JObject source in objects.Where(IsGraphic).Where(item => Type(item) is not ("Text" or "PathText") && !_covered.Contains(Key(page, item))))
         { report.NoTool(page, Type(source), Id(source), "Overview macro graphic is retained as inserted. Source geometry has no exact match; no graphic repair or duplicate was attempted."); }
-        foreach (JObject block in objects.Where(item => Type(item) == "Block"))
-        { report.Note(page, Type(block), Id(block), "Overview source block is comparison evidence; the inserted macro's native grouping is retained without rebuilding graphics."); }
     }
 }

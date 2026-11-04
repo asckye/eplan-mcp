@@ -180,6 +180,18 @@ public sealed class PageExportRoundFourTests
     }
 
     [Fact]
+    public void Compare_BlockPropertyIds_AreProjectLocalSoOnlyValuesCount()
+    {
+        // Live 2026-11-04: the same value sits under 59459 in the sample and 59456 in the redraw.
+        const string source = """{"placements":[{"type":"Line","location":{"x":1,"y":1},"properties":[{"id":59459,"index":0,"value":"37800 mm2"},{"id":59001,"index":0,"value":null}]}]}""";
+        const string same = """{"placements":[{"type":"Line","location":{"x":1,"y":1},"properties":[{"id":59456,"index":0,"value":"37800 mm2"}]}]}""";
+        const string other = """{"placements":[{"type":"Line","location":{"x":1,"y":1},"properties":[{"id":59456,"index":0,"value":"1 mm2"}]}]}""";
+
+        Assert.False(PageExportComparer.Compare(source, same).HasDifferences);
+        Assert.True(PageExportComparer.Compare(source, other).HasDifferences);
+    }
+
+    [Fact]
     public void Compare_ReportRows_AreCheckedByPositionAndTextWithoutCountingAsObjects()
     {
         const string source = """

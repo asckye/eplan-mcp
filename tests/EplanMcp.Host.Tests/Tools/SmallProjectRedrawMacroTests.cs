@@ -119,7 +119,7 @@ public sealed class SmallProjectRedrawMacroTests
         Assert.Equal(partRoute ? "PXC.2703994" : null, (string?)args["part"]);
         Assert.Equal(partRoute ? null : "Custom/Controller-V2.ema", (string?)args["macro"]);
         Assert.DoesNotContain(calls, call => call.Tool is "eplan_device_place" or "eplan_placement_create");
-        Assert.Equal(partRoute ? null : "PXC.2703994", (string?)Assert.Single(calls, call => call.Tool == "eplan_device_update").Args["part"]);
+        Assert.Equal(partRoute ? null : "PXC.2703994", (string?)calls.Last(call => call.Tool == "eplan_device_update").Args["part"]);
         Assert.NotEmpty((JArray)report.ToJson()["macroVersionDifferences"]!);
         Assert.Contains(((JArray)report.ToJson()["noToolTypes"]!).OfType<JObject>(), item => (string?)item["objectType"] == "Line"
             && ((JArray)item["objects"]!).Any(source => (string?)source["oid"] == "140001"));
@@ -188,6 +188,60 @@ public sealed class SmallProjectRedrawMacroTests
         Assert.Equal("=K1+A2-A?", (string?)update["tag"]);
         Assert.Equal("=K1+A2-KE4", (string?)update["new_tag"]);
         Assert.Null(update["part"]);
+    }
+
+    [Fact]
+    public async Task MovedPoint_DoesNotDecideTheVariantOrPosition()
+    {
+        // The sample's =K1+A2-KEB1: variant 1 fits, and its engineer moved X8 after inserting. Measured reference points.
+        JObject box = Device(1, "=K1+A2-KEB1", "Blackbox", 24, 100, "PXC\\2701290.ema", true);
+        JObject plus = Device(2, "=K1+A2-KEB1:+", "DeviceConnectionPoint", 32, 96, "PXC\\2701290.ema");
+        JObject eth = Device(3, "=K1+A2-KEB1:X2ETH", "DeviceConnectionPoint", 88, 92, "PXC\\2701290.ema");
+        JObject moved = Device(4, "=K1+A2-KEB1:X8", "DeviceConnectionPoint", 224, 93.1, "PXC\\2701290.ema");
+        JObject page = Page("Circuit", box, plus, eth, moved);
+        JObject Variant(double[] reference, double boxY, double plusY, double ethY, double movedY)
+        {
+            JObject described = Described("MultiLine", Point(reference[0], reference[1]), MacroDevice(box, 8, boxY), MacroDevice(plus, 16, plusY), MacroDevice(eth, 72, ethY), MacroDevice(moved, 208, movedY));
+            described["macro"]!["representations"]![0]!["variants"] = new JArray(0, 1);
+            return described;
+        }
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = Driver(calls, new SmallProjectRedrawReport("test", "ScratchTest"), (tool, args) => tool switch
+        {
+            "eplan_macro_list" => Listed("PXC/2701290.ema"),
+            "eplan_macro_get" => (int?)args["variant"] == 1 ? Variant([16, 128], 132, 128, 124, 120) : Variant([16, 168], 208, 168, 172, 176),
+            _ => Success([]),
+        });
+
+        await driver.DrawPageAsync(page, [page]);
+
+        JObject insert = Assert.Single(calls, call => call.Tool == "eplan_macro_insert").Args;
+        Assert.Equal(1, (int)insert["variant"]!);
+        Assert.Equal(32d, (double)insert["x"]!);
+        Assert.Equal(96d, (double)insert["y"]!);
+    }
+
+    [Fact]
+    public async Task PartMark_IsNeverDrawnByHand()
+    {
+        JObject mark = new()
+        {
+            ["type"] = "PolyLine",
+            ["oid"] = 7,
+            ["closed"] = true,
+            ["location"] = Point(26, 57),
+            ["points"] = new JArray(Point(26, 57), Point(27, 57), Point(27, 58)),
+            ["properties"] = new JArray(new JObject { ["id"] = 19101, ["index"] = 0, ["value"] = "0" }),
+        };
+        JObject page = Page("Circuit", mark);
+        var calls = new List<(string Tool, JObject Args)>();
+        var report = new SmallProjectRedrawReport("test", "ScratchTest");
+        var driver = Driver(calls, report, (_, _) => Success([]));
+
+        await driver.DrawPageAsync(page, [page]);
+
+        Assert.DoesNotContain(calls, call => call.Tool == "eplan_placement_create");
+        Assert.NotEmpty((JArray)report.ToJson()["macroVersionDifferences"]!);
     }
 
     [Fact]

@@ -136,6 +136,8 @@ internal sealed partial class SmallProjectRedrawDriver(
         }
     }
 
+    private bool IsPlaced(string tag) => _placedTags.Any(placed => placed == tag || placed.StartsWith(tag + ":", StringComparison.Ordinal));
+
     private async Task PlaceDeviceAsync(string page, JObject item, bool assignParts = true)
     {
         JObject symbol = item["symbol"] as JObject ?? throw new InvalidDataException("Exported symbol is unreadable.");
@@ -191,7 +193,7 @@ internal sealed partial class SmallProjectRedrawDriver(
         }
         string placedTag = Text(args["tag"]) ?? name;
         // Busbar definitions and points, device connection points and PLC points join their device by themselves.
-        if (_placedTags.Contains(placedTag) && args["terminal_strip"] is null && args["plc_connection_point"] is null && Text(item["category"]) != "PLCTerminal"
+        if (IsPlaced(placedTag) && args["terminal_strip"] is null && args["plc_connection_point"] is null && Text(item["category"]) != "PLCTerminal"
             && symbolName is not ("BCP" or "BBDEF" or "DCP" or "DCPP3"))
         { args["join_device"] = true; }
         JObject? placed = await InvokeAsync(page, "eplan_device_place", args, [item]);
