@@ -6188,6 +6188,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/InterruptionExistingNetTests.cs"
           },
           {
+            "name": "PotentialDefinitionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PotentialDefinitionTests.cs"
+          },
+          {
             "name": "ProjectGetOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectGetOperationTests.cs"
@@ -10874,6 +10879,11 @@
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
           },
           {
+            "name": "ConnectionCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
+          },
+          {
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
@@ -10882,6 +10892,11 @@
             "name": "GenericObjectReadTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/GenericObjectReadTests.cs"
+          },
+          {
+            "name": "MacroOverviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
           },
           {
             "name": "ObjectReadTests",
@@ -15666,6 +15681,11 @@
             "name": "InterruptionExistingNetTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/InterruptionExistingNetTests.cs"
+          },
+          {
+            "name": "PotentialDefinitionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PotentialDefinitionTests.cs"
           },
           {
             "name": "CableDefinitionExecutionTests",

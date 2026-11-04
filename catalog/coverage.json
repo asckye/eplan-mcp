@@ -1737,7 +1737,7 @@
       "spec": "docs/tools/eplan_object_find.md",
       "small": 3,
       "medium": 1,
-      "large": 8,
+      "large": 10,
       "apiNotes": [
         "A57",
         "A60"
