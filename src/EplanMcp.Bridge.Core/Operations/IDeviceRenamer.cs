@@ -13,9 +13,8 @@ public interface IDeviceRenamer
     public IReadOnlyList<string> FunctionNames(string projectPath);
 
     /// <summary>
-    /// Gives every function named exactly <paramref name="tag"/> the name <paramref name="newTag"/>, the main function
-    /// first (spike S9: renaming only the main one detaches the auxiliary functions, A13), and reads back: the main
-    /// function's name and shown name, and how many functions carry the old and the new tag.
+    /// Renames the whole device with NameService (A85), preserving suffixes. The returned names are provisional;
+    /// the caller reacquires the device after commit because native wrappers and unplaced IDs can change.
     /// </summary>
     public RenameReadBack Rename(string projectPath, string tag, string newTag);
 }

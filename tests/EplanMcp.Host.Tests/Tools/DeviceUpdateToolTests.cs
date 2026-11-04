@@ -100,6 +100,22 @@ public sealed class DeviceUpdateToolTests : IDisposable
         Assert.Equal("f1", data.GetProperty("fingerprint").GetString());
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task PlcRenamePassesTheLiveTagsAndReportsEveryFunction(bool preview)
+    {
+        _harness.Bridge.Handlers[OperationNames.DeviceUpdateExecute] = _ => new DeviceUpdateData
+        { Project = "Line1", PreviousTag = "=K1+A2-A0015", Tag = "=K1+A2-KE1", Functions = 169 };
+        JsonElement result = WriteToolHarness.Structured(await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline,
+            "Line1", "=K1+A2-A0015", "=K1+A2-KE1", preview, cancellationToken: TestContext.Current.CancellationToken));
+        var planned = (DeviceUpdateArgs)_harness.Bridge.Calls.First(c => c.Operation == OperationNames.DeviceUpdatePlan).Args!;
+        Assert.Equal(("=K1+A2-A0015", "=K1+A2-KE1"), (planned.Tag, planned.NewTag));
+        Assert.Equal(preview ? "not_started" : "committed", result.GetProperty("execution").GetString());
+        if (!preview)
+        { Assert.Equal(169, result.GetProperty("device").GetProperty("functions").GetInt32()); }
+    }
+
     [Fact]
     public async Task ARecoveredCommit_ShowsThePlanAndPointsToDeviceGet()
     {

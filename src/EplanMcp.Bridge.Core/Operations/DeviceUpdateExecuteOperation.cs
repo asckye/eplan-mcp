@@ -45,26 +45,28 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
 
         Committed<RenameReadBack> committed = TransactionRunner.Run(transactions, Tool, () =>
         {
-            RenameReadBack back = request.Rename ? Rename(request) : new RenameReadBack
+            RenameReadBack back = request.Rename ? renamer.Rename(request.Project.Path, request.Device.Tag, request.NewTag) : new RenameReadBack
             { MainName = request.ResultTag, VisibleName = request.Main?.VisibleName ?? string.Empty, Renamed = request.Device.Functions.Count };
             if (request.Part is { } part)
             { assigner!.AddPart(request.Project.Path, request.Main!.Id, part.PartNumber, part.Variant!); }
             return back;
-        }, verifyCommitted: _ =>
+        }, verifyCommitted: back =>
         {
+            if (request.Rename)
+            { VerifyRename(request, back); }
             if (request.Part is not { } part)
             { return; }
             // A79/A82: reacquire the main function and its ArticleReferences after commit.
             DevicePartTarget main = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.NewTag);
-            if (main.Id != request.Main!.Id || main.Name != request.ResultTag || DeviceUpdateRequest.ReferencesFingerprint(main.Parts)
-                != DeviceUpdateRequest.ReferencesFingerprint(request.Main.Parts.Append(new DevicePart { PartNumber = part.PartNumber, Variant = part.Variant, Count = 1 })))
+            if (!request.Rename && main.Id != request.Main!.Id || main.Name != request.ResultTag || DeviceUpdateRequest.ReferencesFingerprint(main.Parts)
+                != DeviceUpdateRequest.ReferencesFingerprint(request.Main!.Parts.Append(new DevicePart { PartNumber = part.PartNumber, Variant = part.Variant, Count = 1 })))
             { throw InvalidArgument("The committed main function or added part reference did not match the plan; the change was rolled back."); }
         }, verifyRollback: () =>
         {
             if (request.Main is not { } before)
             { return; }
             DevicePartTarget restored = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.Device.Tag);
-            if (restored.Id != before.Id || restored.Name != before.Name || DeviceUpdateRequest.ReferencesFingerprint(restored.Parts) != DeviceUpdateRequest.ReferencesFingerprint(before.Parts))
+            if (!request.Rename && restored.Id != before.Id || restored.Name != before.Name || DeviceUpdateRequest.ReferencesFingerprint(restored.Parts) != DeviceUpdateRequest.ReferencesFingerprint(before.Parts))
             { throw new InvalidOperationException("The original main function and part references were not restored."); }
         });
         return new DeviceUpdateData
@@ -81,10 +83,10 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
         };
     }
 
-    private RenameReadBack Rename(DeviceUpdateRequest request)
+    private void VerifyRename(DeviceUpdateRequest request, RenameReadBack back)
     {
-        RenameReadBack back = renamer.Rename(request.Project.Path, request.Device.Tag, request.NewTag);
-        if (!string.Equals(back.MainName, request.NewTag, StringComparison.Ordinal))
+        DeviceNames? actual = renamer.ReadDevice(request.Project.Path, request.NewTag);
+        if (actual is null)
         {
             throw ReadBack(
                 $"EPLAN named the device '{back.MainName}' instead of '{request.NewTag}': devices of this kind do not use every part of the new tag, so nothing was renamed. Use the structure that similar devices have (eplan_device_list).",
@@ -92,12 +94,19 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
                 back.MainName);
         }
 
-        return back.Remaining == 0
-            ? back
-            : throw ReadBack(
+        string[] expected = [.. request.Device.Functions.Select(f => request.NewTag + (f.Name.Length == 0 ? "" : f.Name.Substring(request.Device.Tag.Length))).OrderBy(n => n, StringComparer.Ordinal)];
+        string[] names = [.. actual.Functions.Select(f => f.Name.Length == 0 ? actual.Tag : f.Name).OrderBy(n => n, StringComparer.Ordinal)];
+        if (!expected.SequenceEqual(names, StringComparer.Ordinal)
+            || renamer.FunctionNames(request.Project.Path).Any(n => DeviceUpdateRequest.BelongsTo(n, request.Device.Tag)))
+        {
+            throw ReadBack(
                 $"After the rename, functions still carried '{request.Device.Tag}', so nothing was renamed. Ask the engineer to check the device in EPLAN.",
                 request.NewTag,
                 request.Device.Tag);
+        }
+        back.MainName = actual.Tag;
+        back.VisibleName = actual.VisibleName;
+        back.Renamed = actual.Functions.Count;
     }
 
     private static BridgeErrorException ReadBack(string message, string requested, string actual) =>

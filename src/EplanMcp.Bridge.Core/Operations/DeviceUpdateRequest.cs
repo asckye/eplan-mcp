@@ -70,12 +70,6 @@ internal sealed class DeviceUpdateRequest
                 "No device in the project has this tag. Call eplan_device_list with 'tag_contains' to find the device's full tag.",
                 retryable: false,
                 new Dictionary<string, string> { ["tag"] = tag });
-        if (device.SubFunctions.FirstOrDefault(name => !string.Equals(name, device.Tag, StringComparison.Ordinal)) is { } suffixed)
-        {
-            throw Invalid(
-                $"This version renames only devices whose functions all carry the device tag itself; '{device.Tag}' has functions with their own suffixes (such as '{suffixed}').");
-        }
-
         string target = newTag.Length == 0 ? device.Tag : Full(device, newTag);
         if (newTag.Length > 0 && string.Equals(target, device.Tag, StringComparison.Ordinal))
         {
@@ -85,7 +79,7 @@ internal sealed class DeviceUpdateRequest
         string[] taken = newTag.Length == 0 ? [] :
         [
             .. renamer.FunctionNames(project.Path)
-                .Where(name => !string.Equals(name, device.Tag, StringComparison.Ordinal)
+                .Where(name => !BelongsTo(name, device.Tag)
                     && (string.Equals(name, target, StringComparison.OrdinalIgnoreCase) || name.StartsWith(target + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
@@ -112,7 +106,7 @@ internal sealed class DeviceUpdateRequest
 
     /// <summary>The plan's state: each function to rename by name and session identifier, and how many carry the new tag.</summary>
     public string StateFingerprint() =>
-        Fingerprint.Of(Device.Functions.Select(f => Device.Tag + "\t" + f.Id).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture))
+        Fingerprint.Of(Device.Functions.Select(f => (f.Name.Length == 0 ? Device.Tag : f.Name) + "\t" + f.Id).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture))
             .Concat(Main is null ? [] : Main.Parts.Select(p => FormattableString.Invariant($"{p.PartNumber}\t{p.Variant}\t{p.Count}")).Append(Main.Id).Append(Main.Name))
             .Concat(Part is null ? [] : new[] { Part.PartNumber, Part.Variant ?? string.Empty }));
 
@@ -162,9 +156,12 @@ internal sealed class DeviceUpdateRequest
     private static string? NewTagProblem(string newTag) =>
         newTag.Length == 0 ? "is required: the new tag, in full (=GAA+A1-KF10) or from '-' (-KF10) to keep the structure."
         : newTag.Any(c => char.IsWhiteSpace(c) || char.IsControl(c)) ? "must not contain white space or control characters."
-        : newTag.IndexOf(':') >= 0 ? "must not contain ':'; connection point suffixes are not renamed by this tool."
+        : newTag.IndexOf(':') >= 0 ? "must not contain ':'; existing connection point suffixes are preserved."
         : newTag.LastIndexOf('-') is int dash && (dash < 0 || dash == newTag.Length - 1) ? "needs a device part after '-', such as -KF10."
         : null;
+
+    internal static bool BelongsTo(string name, string tag) =>
+        name == tag || name.StartsWith(tag + ":", StringComparison.Ordinal);
 
     private static BridgeErrorException Invalid(string violation) => WriteArguments.Invalid([violation]);
 

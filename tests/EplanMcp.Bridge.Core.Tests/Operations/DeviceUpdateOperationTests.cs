@@ -100,13 +100,52 @@ public sealed class DeviceUpdateOperationTests
     }
 
     [Fact]
-    public void Plan_ADeviceWithSuffixedFunctions_IsRefused()
+    public void LivePlcRename_PreservesAllSuffixesAndIncludesUnplacedFunctions()
     {
-        _renamer.SubFunctions["1/1/1/0"] = ["=F+A2-KF1", "=F+A2-KF1:13"];
+        // Live failed call 14: only the local project identity is replaced by the test fixture.
+        const string oldTag = "=K1+A2-A0015", newTag = "=K1+A2-KE1";
+        _renamer.Functions.AddRange([(oldTag, "2/1/1/0", true, "=K1+A2&EFA1/1", "A0015"),
+            (oldTag + ":3.1", "2/1/2/0", false, "=K1+A2&EFA1/1", ""),
+            (oldTag + ":3.2", "2/1/3/0", false, null, "")]);
+        DeviceUpdateArgs args = Args(oldTag, newTag);
+        args.Fingerprint = Plan(args).Fingerprint;
 
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(Args("=F+A2-KF1", "-KF19"))).Error;
+        DeviceUpdateData result = Execute(args);
 
-        Assert.Contains("'=F+A2-KF1:13'", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Equal((newTag, 3), (result.Tag, result.Functions));
+        Assert.Equal([newTag, newTag + ":3.1", newTag + ":3.2"], _renamer.Functions.Where(f => f.Id.StartsWith("2/", StringComparison.Ordinal)).Select(f => f.Name));
+        Assert.DoesNotContain(_renamer.Functions, f => f.Name.StartsWith(oldTag, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void SuffixChangesInvalidateThePlan()
+    {
+        _renamer.Functions.Add(("=F+A2-KF1:13", "2/1/1/0", false, null, ""));
+        DeviceUpdateArgs args = Args("=F+A2-KF1", "-KF19");
+        args.Fingerprint = Plan(args).Fingerprint;
+        _renamer.Functions[^1] = _renamer.Functions[^1] with { Name = "=F+A2-KF1:14" };
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Execute(args)).Error.Reason);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
+    public void CaseOnlyRenameDoesNotMistakeOwnSuffixedFunctionsForAnotherDevice()
+    {
+        _renamer.Functions.Add(("=F+A2-KF1:13", "2/1/1/0", false, null, ""));
+        DeviceUpdateArgs args = Args("=F+A2-KF1", "=F+A2-kf1");
+        args.Fingerprint = Plan(args).Fingerprint;
+        Assert.Equal(4, Execute(args).Functions);
+    }
+
+    [Fact]
+    public void CommittedReadbackIgnoresProvisionalNamesAndChangedIds()
+    {
+        var deferred = new DeferredRenamer(_renamer, _transactions);
+        DeviceUpdateArgs args = Args("=F+A2-KF1", "-KF19");
+        args.Fingerprint = ((WritePlan)new DeviceUpdatePlanOperation(_catalog, _reader, deferred).Execute(args)!).Fingerprint;
+        var result = (DeviceUpdateData)new DeviceUpdateExecuteOperation(_catalog, _reader, deferred, _transactions).Execute(args)!;
+        Assert.Equal(("=F+A2-KF19", 3), (result.Tag, result.Functions));
+        Assert.True(deferred.ReadCommitted);
     }
 
     [Fact]
@@ -191,4 +230,26 @@ public sealed class DeviceUpdateOperationTests
 
     private DeviceUpdateData Execute(DeviceUpdateArgs args) =>
         (DeviceUpdateData)new DeviceUpdateExecuteOperation(_catalog, _reader, _renamer, _transactions).Execute(args)!;
+
+    private sealed class DeferredRenamer(FakeDeviceRenamer inner, FakeTransactions transactions) : IDeviceRenamer
+    {
+        public bool ReadCommitted { get; private set; }
+        public DeviceNames? ReadDevice(string projectPath, string tag)
+        {
+            if (tag == "=F+A2-KF19")
+            {
+                Assert.Contains("Commit", transactions.Calls);
+                ReadCommitted = true;
+                for (int i = 0; i < inner.Functions.Count; i++)
+                { inner.Functions[i] = inner.Functions[i] with { Id = "committed/" + i }; }
+            }
+            return inner.ReadDevice(projectPath, tag);
+        }
+        public IReadOnlyList<string> FunctionNames(string projectPath) => inner.FunctionNames(projectPath);
+        public RenameReadBack Rename(string projectPath, string tag, string newTag)
+        {
+            inner.Rename(projectPath, tag, newTag);
+            return new() { MainName = tag, Remaining = 3 };
+        }
+    }
 }

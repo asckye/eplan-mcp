@@ -55,7 +55,7 @@
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
-| `INVALID_ARGUMENT` | `new_tag` 不合法，或与现有标识相同；部件、变体、唯一主功能或重复引用检查失败；`new_tag` 以 `-` 开头但拼不出现在的结构；设备有带后缀的功能（见第 5 节） | `not_started` | `metadata.violations` 列出全部问题。带后缀的情况："This version renames only devices whose functions all carry the device tag itself; '<tag>' has functions with their own suffixes (such as '<tag>:1')." |
+| `INVALID_ARGUMENT` | `new_tag` 不合法，或与现有标识相同；部件、变体、唯一主功能或重复引用检查失败；`new_tag` 以 `-` 开头但拼不出现在的结构 | `not_started` | `metadata.violations` 列出全部问题 |
 | `INVALID_ARGUMENT` | 读回的标识与请求不同（项目结构对这类设备不用新标识中的某一部分，EPLAN 把它丢掉了），或者改名后仍有功能带着旧标识 | `rolled_back` | `metadata.requested`、`metadata.actual`；提示参照同类设备的标识（`eplan_device_list`） |
 | `DEVICE_NOT_FOUND` / `AMBIGUOUS_NAME` | `tag` 找不到，或短标识对应多个设备 | `not_started` | 同 `eplan_device_get` |
 | `ALREADY_EXISTS` | 新标识已被其他设备使用（不区分大小写） | `not_started` | "'<new_tag>' is already used by another device; giving this device the same tag would merge the two devices in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use." |
@@ -64,10 +64,7 @@
 
 ## 5. 实现要点
 - **Host**：走 `WritePipeline`，规划操作是 `device.update.plan`，执行操作是 `device.update.execute`。执行时限为默认的 60 秒。
-- **改名的范围**（S9，api-notes A13）：
-  - 只给主功能的 `Name` 赋值时，辅助功能保留旧标识，**从设备上脱离**；
-  - 要把带旧标识的功能全部改成新标识。范围是：`Name` 与旧的完整标识完全相同（`Ordinal`）的全部功能，包括主功能、辅助功能，以及黑盒中同名的功能（A12）；
-  - 主功能的 `SubFunctions` 必须都在这个范围内。如果有辅助功能的名称带后缀（如端子的 `+A1-FC2:1`，A11），这一版不改，返回 `INVALID_ARGUMENT`。带后缀的功能怎样改名，没有在实机上验证过。
+- **改名的范围**（A85）：`NameService.RenameDevice(main, FunctionBasePropertyList, false, true)` 一次改名全部功能，保留连接点后缀和描述属性。比如 `=K1+A2-A0015:3.1` 改为 `=K1+A2-KE1:3.1`；不逐个赋值 `Function.Name`。
 - **新标识**：
   - 完整标识原样使用；
   - 以 `-` 开头时，先算出设备现在的结构：从 `Name` 末尾去掉 `-` 加 `FUNC_DEVICETAG_FULLNAME`（S6），再接上 `new_tag`。`Name` 不以它结尾时，要求给出完整标识。
@@ -82,10 +79,11 @@
     EPLAN 重启后会话内标识会变，计划也随之失效，这正是想要的结果。
 - **执行**：
   - 先重算指纹，不同就返回 `PLAN_STALE`；
-  - 在 `TransactionScope` 中给范围内的每个功能的 `Name` 赋值新标识，然后读回：
+  - 在事务内通过 `Project.ParseNameAndProps` 解析新标识的结构与器件部分，再调用 `NameService.RenameDevice`；提交后按新标识重新查找，不能使用事务内的包装对象或未放置功能 ID（A55/A85）：
     - 主功能的 `Name` 必须等于新标识（EPLAN 可能丢掉这类设备不用的结构部分，A13）；
     - 项目中不能再有带旧标识的功能；
-  - 不满足就抛出，整体回滚；全部通过后 `Commit()`，再 `CloseUndo()`。
+    - 每个功能的新名称与原名称后缀逐个相符，数量相同；
+  - 不满足就抛出并补偿回滚；事务与撤销边界沿用 `TransactionRunner`。
 - **包装**：同 `eplan_page_create`。S9 验证过：改名后 `SafetyPoint.Rollback()` 能恢复主功能和全部辅助功能的标识。
 - **没有验证过的影响**：改名对已有连接和部件引用的影响。由 Large 测试比较改名前后设备的连接数和部件。
 
@@ -107,7 +105,7 @@
   - 把 `=F+A2-KF1`（辅助功能在另一页，S9）改成 `-KF19`：`eplan_device_get` 读回后，主功能和两个辅助功能都是新标识，连接数和部件与改名前相同；
   - 改成已有的标识，返回 `ALREADY_EXISTS`；
   - 用 `-` 开头的短标识，结构保持不变；
-  - 选一个辅助功能带后缀的设备（端子排），返回 `INVALID_ARGUMENT`。
+  - 总览宏 `PXC.2861344` 变体 0 在 `(0,292)`、`macro_box:false` 插入后给 PLC 盒改名，盒及全部点保留后缀，一次撤销恢复；新增用例待实测。
 - **Agent 评测**："把 scratch 项目中的 `=F+A2-KF1` 改名为 `=F+A2-KF19`"，作答后用 `eplan_device_get` 核对辅助功能也跟着改了名。
 
 ### 部件赋值（FP3）

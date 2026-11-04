@@ -322,12 +322,13 @@ internal sealed class FakeDeviceRenamer : IDeviceRenamer
             return null;
         }
 
-        var named = Functions.Where(f => f.Name == tag).ToList();
+        var named = Functions.Where(f => f.Name == tag || f.Name.StartsWith(tag + ":", StringComparison.Ordinal)).ToList();
         return new DeviceNames
         {
             Tag = tag,
             DeviceTag = main.DeviceTag,
-            Functions = [.. named.Select(f => new DeviceNames.NamedFunction { Id = f.Id, IsMain = f.IsMain, Page = f.Page })],
+            VisibleName = "-" + tag.Split('-')[^1],
+            Functions = [.. named.Select(f => new DeviceNames.NamedFunction { Name = f.Name, Id = f.Id, IsMain = f.IsMain, Page = f.Page })],
             SubFunctions = SubFunctions.TryGetValue(main.Id, out List<string>? subs) ? subs : [.. named.Where(f => !f.IsMain).Select(f => f.Name)],
         };
     }
@@ -341,7 +342,7 @@ internal sealed class FakeDeviceRenamer : IDeviceRenamer
         bool leftOne = false;
         for (int i = 0; i < Functions.Count; i++)
         {
-            if (Functions[i].Name == tag)
+            if (Functions[i].Name == tag || Functions[i].Name.StartsWith(tag + ":", StringComparison.Ordinal))
             {
                 if (LeaveBehind && !Functions[i].IsMain && !leftOne)
                 {
@@ -349,7 +350,7 @@ internal sealed class FakeDeviceRenamer : IDeviceRenamer
                     continue;
                 }
 
-                Functions[i] = Functions[i] with { Name = actual };
+                Functions[i] = Functions[i] with { Name = string.Concat(actual, Functions[i].Name.AsSpan(tag.Length)) };
             }
         }
 

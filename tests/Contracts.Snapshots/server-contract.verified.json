@@ -7481,7 +7481,7 @@
     {
       "name": "eplan_device_update",
       "title": "Update a device in an EPLAN project",
-      "description": "Renames a device or appends a part to its unique main function. Give new_tag, part, or both. One Ctrl+Z undoes the update. Omit/true dry_run previews; false executes. Outside scratch needs engineer approval. See usage.",
+      "description": "Renames a device, preserving function suffixes, or appends a part to its unique main function. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {

@@ -1,6 +1,6 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
-/// <summary>What <see cref="IDeviceRenamer.Rename"/> reads back after the rename, inside the transaction.</summary>
+/// <summary>Provisional rename details, replaced with freshly acquired values after commit (A85).</summary>
 public sealed class RenameReadBack
 {
     /// <summary>The main function's <c>Name</c> now; EPLAN drops structure parts the category does not use (A13).</summary>

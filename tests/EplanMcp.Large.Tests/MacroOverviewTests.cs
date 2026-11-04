@@ -60,6 +60,8 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
                 } while (cursor is not null);
                 TestContext.Current.TestOutputHelper.WriteLine("macro box readback: " + (await eplan.CallAsync("eplan_object_find", new() { ["project"] = session.Project, ["page"] = page, ["object_type"] = "MacroBox", ["limit"] = 200 })).GetRawText());
             }
+            if (tool == "eplan_device_update")
+            { TestContext.Current.TestOutputHelper!.WriteLine("rename readback: " + JsonSerializer.Serialize((await session.SnapshotAsync(page)).Objects("function"))); }
             Assert.True(response.success, tool + ": " + response.result);
             Assert.Equal("committed", execution);
             return response.result;
@@ -126,6 +128,27 @@ public sealed class MacroOverviewTests(LiveEplan eplan)
             JsonElement device = await eplan.CallAsync("eplan_device_get", new() { ["project"] = session.Project, ["tag"] = box.Name });
             Assert.Equal(page, device.GetProperty("device").GetProperty("page").GetString());
             AssertPart(Assert.Single(device.GetProperty("parts").EnumerateArray(), p => p.GetProperty("partNumber").GetString() == Part));
+
+            if (!macroBox)
+            {
+                string oldTag = box.Name!;
+                string newTag = oldTag[..oldTag.LastIndexOf('-')] + "-KR3" + Guid.NewGuid().ToString("N")[..6];
+                string[] expected = [.. snapshot.Objects("function").Where(f => f.Name == oldTag || (f.Name ?? "").StartsWith(oldTag + ":", StringComparison.Ordinal))
+                    .Select(f => newTag + f.Name![oldTag.Length..]).Order(StringComparer.Ordinal)];
+                string beforeRename = await session.StateAsync();
+                JsonElement renamed = await WriteAsync("eplan_device_update", new()
+                { ["project"] = session.Project, ["tag"] = oldTag, ["new_tag"] = newTag, ["dry_run"] = false });
+                LiveSnapshots.Snapshot afterRename = await session.SnapshotAsync(page);
+                TestContext.Current.TestOutputHelper!.WriteLine("rename readback: " + JsonSerializer.Serialize(afterRename.Objects("function")));
+                Assert.Equal(newTag, renamed.GetProperty("device").GetProperty("tag").GetString());
+                Assert.Equal(expected, afterRename.Objects("function").Where(f => f.Name == newTag || (f.Name ?? "").StartsWith(newTag + ":", StringComparison.Ordinal))
+                    .Select(f => f.Name).Order(StringComparer.Ordinal));
+                Assert.DoesNotContain(afterRename.Objects("function"), f => f.Name == oldTag || (f.Name ?? "").StartsWith(oldTag + ":", StringComparison.Ordinal));
+                Assert.True(expected.Length > 1);
+                Assert.Equal(expected.Length, renamed.GetProperty("device").GetProperty("functions").GetInt32());
+                await UndoAsync();
+                Assert.Equal(beforeRename, await session.StateAsync());
+            }
 
             await UndoAsync();
             Assert.Equal(beforeInsert, await session.StateAsync());
