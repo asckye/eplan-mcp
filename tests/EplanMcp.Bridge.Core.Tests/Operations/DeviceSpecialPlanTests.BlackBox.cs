@@ -56,7 +56,9 @@ public sealed partial class DeviceSpecialPlanTests
 
         Assert.Equal("=GAA+A1-PF9:2", plan.Details!["tag"]);
         Assert.Equal("-PF9", args.Tag);
-        Assert.Contains("SPECIAL/" + name, Assert.Single(plan.Changes).NewValue, StringComparison.Ordinal);
+        Assert.Equal(2, plan.Changes.Count);
+        Assert.Contains("SPECIAL/" + name, plan.Changes[0].NewValue, StringComparison.Ordinal);
+        Assert.Equal("pin", plan.Changes[1].Kind);
         Assert.Empty(_parts.Reads);
     }
 
