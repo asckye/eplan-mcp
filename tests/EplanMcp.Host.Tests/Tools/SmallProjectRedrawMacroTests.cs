@@ -190,6 +190,27 @@ public sealed class SmallProjectRedrawMacroTests
         Assert.Null(update["part"]);
     }
 
+    [Fact]
+    public async Task ReportSpanningPages_IsGeneratedOnceFromItsFirstPage()
+    {
+        // The sample's PLC diagrams: one report with one page per card, not one report per page.
+        static JObject Report(string name) => new()
+        {
+            ["name"] = name,
+            ["pageType"] = "PLCDiagram",
+            ["placements"] = new JArray(),
+            ["report"] = new JArray(new JObject { ["type"] = "PLCDiagram", ["formName"] = "F19_001", ["deviceTag"] = name }),
+        };
+        JObject first = Report("/6"), second = Report("/7");
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = Driver(calls, new SmallProjectRedrawReport("test", "ScratchTest"), (_, _) => Success([]));
+
+        await driver.DrawPageAsync(first, [first, second]);
+        await driver.DrawPageAsync(second, [first, second]);
+
+        Assert.Equal("/6", (string?)Assert.Single(calls, call => call.Tool == "eplan_report_create").Args["first_page"]);
+    }
+
     private static SmallProjectRedrawDriver Driver(List<(string Tool, JObject Args)> calls, SmallProjectRedrawReport report,
         Func<string, JObject, JObject> response) => new((tool, args) =>
         {

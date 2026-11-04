@@ -93,6 +93,8 @@ internal sealed partial class SmallProjectRedrawDriver(
 
     private static bool IsReportPage(JObject source) => (bool?)source["isReportPage"] == true
         || Objects(source["report"]).Length > 0 || Text(source["pageType"]) is not ("Circuit" or "Overview");
+    private readonly HashSet<string> _generatedReports = new(StringComparer.Ordinal);
+
     private async Task DrawReportsAsync(string page, JObject source)
     {
         JObject[] blocks = Objects(source["report"]);
@@ -103,7 +105,7 @@ internal sealed partial class SmallProjectRedrawDriver(
         }
         foreach (JObject block in blocks)
         {
-            var args = new JObject { ["type"] = block["type"]?.DeepClone(), ["form"] = block["formName"]?.DeepClone(), ["first_page"] = page };
+            var args = new JObject { ["type"] = block["type"]?.DeepClone(), ["form"] = block["formName"]?.DeepClone() };
             foreach ((string from, string to) in new[]
             {
                 ("filterSchemaName", "filter_scheme"), ("sortSchemaName", "sort_scheme"),
@@ -123,6 +125,13 @@ internal sealed partial class SmallProjectRedrawDriver(
                 if (!string.IsNullOrEmpty(Text(block[field])))
                 { report.Note(page, "ReportBlock", "", field + " has no report_create parameter; corresponding raw scheme data is passed unchanged."); }
             }
+            // One generation fills every page of a report, as when a person selects it once: a later page of the same report only checks the result.
+            if (!_generatedReports.Add(args.ToString(Newtonsoft.Json.Formatting.None)))
+            {
+                report.Note(page, "ReportBlock", "", "Filled by the generation that started on the report's first page.");
+                continue;
+            }
+            args["first_page"] = page;
             await InvokeAsync(page, "eplan_report_create", args, [new JObject { ["type"] = "ReportBlock" }]);
         }
     }
