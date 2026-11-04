@@ -48,7 +48,9 @@ internal sealed class Block() : Placement(901)
     public Exception? CountError { get; set; }
     public string Name { get => NameError is { } error ? throw error : _name; set => _name = value; }
     public int Count => CountError is { } error ? throw error : SubPlacements.Length;
-    public Placement[] SubPlacements { get; private set; } = [];
+    public Exception? SubPlacementsError { get; set; }
+    private Placement[] _subPlacements = [];
+    public Placement[] SubPlacements { get => SubPlacementsError is { } error ? throw error : _subPlacements; private set => _subPlacements = value; }
     public void Create(Page page, Placement[] members)
     {
         Page = page;

@@ -1,3 +1,4 @@
+using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Eplan.Adapters;
@@ -20,6 +21,21 @@ public sealed class PlacementRemoverTests
         Assert.Equal(2, page.AllPlacements.Length);
         change();
         Assert.Same(text, Assert.Single(page.AllPlacements));
+    }
+
+    [Fact]
+    public void UnreadableBlockOnThePageDoesNotStopDeletingAnotherGraphic()
+    {
+        // Live 2026-11-04: =K1+A2&EFA1/5 holds an empty nested block whose SubPlacements throws.
+        var page = new Page();
+        var line = new Line { Page = page };
+        var block = new Block { SubPlacementsError = new BaseException("access") };
+        page.AllPlacements = [line, block];
+        EplanProjects.Project = new(page);
+
+        new EplanPlacementRemover().Prepare("project", "+A1/1", [Locator(line)])();
+
+        Assert.Same(block, Assert.Single(page.AllPlacements));
     }
 
     [Fact]

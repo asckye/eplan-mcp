@@ -1,3 +1,4 @@
+using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Core;
@@ -12,7 +13,7 @@ internal sealed class EplanPlacementRemover : IPlacementRemover
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
         Placement[] all = EplanDeviceReader.FindPage(finder, page)!.AllPlacements;
-        var members = new HashSet<string>(all.OfType<Block>().SelectMany(b => b.SubPlacements).Select(p => p.ToStringIdentifier()), StringComparer.Ordinal);
+        var members = new HashSet<string>(all.OfType<Block>().SelectMany(Members).Select(p => p.ToStringIdentifier()), StringComparer.Ordinal);
         Placement[] selected = items.Select(l => all.FirstOrDefault(p => p.ObjectIdentifier == l.Oid && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == l.Type)
             ?? throw new BridgeErrorException(ErrorReason.PlanStale, "A placement disappeared; read the page again.")).ToArray();
         foreach (Placement placement in selected)
@@ -23,5 +24,13 @@ internal sealed class EplanPlacementRemover : IPlacementRemover
             { throw WriteArguments.Invalid([$"Cannot delete {placement.GetType().Name}: devices, connections and blocks are excluded."]); }
         }
         return () => { foreach (Placement placement in selected) { OperationContext.Current.ThrowIfCancellationRequested(); placement.Remove(); } };
+    }
+
+    private static Placement[] Members(Block block)
+    {
+        try
+        { return block.SubPlacements; }
+        catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+        { WriteExceptionDiagnostics.Report(ex); return []; }
     }
 }
