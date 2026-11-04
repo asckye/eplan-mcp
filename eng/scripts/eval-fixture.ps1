@@ -54,8 +54,9 @@ function Copy-Project([string] $Target) {
 
     New-Item -ItemType Directory -Force (Split-Path $Target) | Out-Null
     Copy-Item "$sourceBase.elk" "$Target.elk" -Force
-    # /MIR makes the copy exactly the source; robocopy exits with 8 or more on failure.
-    robocopy "$sourceBase.edb" "$Target.edb" /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+    # /MIR makes the copy exactly the source; /IS /IT also rewrite files whose size and time match, since an unclean shutdown
+    # can leave damaged index files with their old time (live 2026-11-03). robocopy exits with 8 or more on failure.
+    robocopy "$sourceBase.edb" "$Target.edb" /MIR /IS /IT /NFL /NDL /NJH /NJS /NP | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "Copying $sourceBase.edb failed (robocopy $LASTEXITCODE); is EPLAN holding the old copy open?" }
     Write-Output "Copied $(Split-Path $sourceBase -Leaf) to $Target."
 }
