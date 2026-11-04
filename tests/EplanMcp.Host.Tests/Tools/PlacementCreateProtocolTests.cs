@@ -287,9 +287,21 @@ public sealed partial class PlacementCreateProtocolTests
         public int Writes { get; private set; }
         public bool Fail { get; set; }
         public bool Measure { get; set; } = true;
+        public string? DisplayLanguage { get; set; }
         public IReadOnlyList<OpenProject> ListOpenProjects() => [Project];
         public PageDrawingGeometry Read(string projectPath, string pageName) => Geometry;
-        public void Validate(string projectPath, string page, PlacementText text) => Assert.Equal((Project.Path, "P"), (projectPath, page));
+        public string? Validate(string projectPath, string page, PlacementText text, bool warn = false)
+        {
+            Assert.Equal((Project.Path, "P"), (projectPath, page));
+            if (DisplayLanguage is not null && text.Kind is "text" or "path_text" && !text.Contents.ContainsKey("??_??") && !text.Contents.ContainsKey(DisplayLanguage))
+            {
+                const string message = "/text/contents must include the project display language or ??_?? (A54).";
+                if (warn)
+                { return message; }
+                throw new BridgeErrorException(ErrorReason.InvalidArgument, message);
+            }
+            return null;
+        }
         public PlacementText Create(string projectPath, string page, PlacementText text)
         {
             Writes++;

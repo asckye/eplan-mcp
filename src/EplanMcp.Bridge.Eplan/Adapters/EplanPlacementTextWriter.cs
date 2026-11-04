@@ -10,7 +10,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>S42/A54: TEXT in SafetyPoint; no property lists or native references survive Abort (A55).</summary>
 internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
 {
-    public void Validate(string projectPath, string page, PlacementText text)
+    public string? Validate(string projectPath, string page, PlacementText text, bool warn = false)
     {
         MainThread.Assert();
         EplanPlacementStyle.Validate(EplanProjects.ByPath(projectPath), text.Layer, text.Alignment);
@@ -18,7 +18,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         if (!allowed.Contains(Find(projectPath, page).PageType))
         { throw WriteArguments.Invalid(["/page requires a Circuit, Overview or Graphics page from eplan_page_list."]); }
         if (text.Kind is not ("text" or "path_text"))
-        { return; }
+        { return null; }
         foreach (string language in text.Contents.Keys)
         {
             using var code = new ISOCode(language);
@@ -26,7 +26,13 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
             { throw WriteArguments.Invalid(["/text/contents requires known EPLAN ISO language codes."]); }
         }
         if (!text.Contents.ContainsKey("??_??") && !LanguageCodes.Split(new EplanProjectLanguages().Read(projectPath).Display).Any(text.Contents.ContainsKey))
-        { throw WriteArguments.Invalid(["/text/contents must include the project display language or ??_?? so the text is visible (A54)."]); }
+        {
+            const string message = "/text/contents must include the project display language or ??_?? so the text is visible (A54).";
+            if (warn)
+            { return message; }
+            throw WriteArguments.Invalid([message]);
+        }
+        return null;
     }
 
     public List<PlacementText> CreateBatch(string projectPath, string page, IReadOnlyList<PlacementText> items)

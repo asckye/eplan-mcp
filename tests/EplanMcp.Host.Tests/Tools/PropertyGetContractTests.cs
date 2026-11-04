@@ -181,7 +181,17 @@ public sealed class PropertyGetContractTests
                     {
                         return false;
                     }
+                    else if (schema.TryGetProperty("additionalProperties", out additional) && additional.ValueKind == JsonValueKind.Object
+                        && !Accepts(additional, property.Value, root))
+                    {
+                        return false;
+                    }
                 }
+            }
+            else if (schema.TryGetProperty("additionalProperties", out JsonElement additional) && additional.ValueKind == JsonValueKind.Object
+                && value.EnumerateObject().Any(property => !Accepts(additional, property.Value, root)))
+            {
+                return false;
             }
         }
         if (value.ValueKind == JsonValueKind.Array)

@@ -9,6 +9,7 @@
 | R4-3 整圆/旋转（A89） | `PlacementRotationRound4Tests` | NOT RUN：180..180 读回 Circle/双角，text -16002 原样读取。 |
 | R4-4 PLC 第二表达（A89） | `PlcRepresentationTests` | NOT RUN：Overview 宏后 Circuit 放同名 1.1/RJ45，读回两个表达与非主功能、一步撤销。原 Large 的同名不同地址拒绝断言保留。 |
 | R4-5 空块读取（A89） | `EmptyMacroBlockTests` | NOT RUN：PXC.2861289 Overview (0,292) 插入、完整绘图读回和一步撤销。 |
+| R4-6 多语言文字（A89） | `PlacementLanguageRound4Tests` | NOT RUN：20语言长文本、仅 de_DE 在 warn 下带警告提交，恢复原语言设置。 |
 | G8 可选端子符号（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 X2_2、KA1_PE 的库名、符号、变体、编号及逐次单步撤销。 |
 | G6 母线定义（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 BBDEF 主功能与两个 BCP 同属一个器件、逐次单步撤销。 |
 | G5 黑盒（2026-11-03 brief；g4probe A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 60×40 黑盒、DCP 0/2/4 同器件与框内列表、后缀及逐步单次撤销。 |

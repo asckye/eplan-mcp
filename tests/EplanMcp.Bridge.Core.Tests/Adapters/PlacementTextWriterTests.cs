@@ -113,6 +113,21 @@ public sealed class PlacementTextWriterTests
         Assert.Equal(-16002, actual.Angle);
     }
 
+    [Theory]
+    [InlineData("de_DE", true)]
+    [InlineData("xx_YY", false)]
+    public void Warn_AllowsMissingDisplayLanguageButStillRejectsUnknownIso(string language, bool valid)
+    {
+        EplanProjects.Project = new(new Page());
+        var text = new PlacementText { Position = [20, 20], HeightMm = 3.5, Contents = new() { [language] = "Eingang" } };
+        var writer = new EplanPlacementTextWriter();
+        if (valid)
+        { Assert.Contains("project display language", writer.Validate("project", "+A1/1", text, warn: true), StringComparison.Ordinal); }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => writer.Validate("project", "+A1/1", text, warn: true)).Error.Reason); }
+        Assert.Empty(EplanProjects.Project.Pages[0].AllPlacements);
+    }
+
     [Fact]
     public void Ellipse_UsesRadiansAndEllipseSpecificReadback()
     {

@@ -80,7 +80,7 @@ internal static class TextCreation
     private sealed class MismatchedWriter : IPlacementTextWriter
     {
         private readonly EplanPlacementTextWriter _native = new();
-        public void Validate(string projectPath, string page, PlacementText text) => _native.Validate(projectPath, page, text);
+        public string? Validate(string projectPath, string page, PlacementText text, bool warn = false) => _native.Validate(projectPath, page, text, warn);
         public List<PlacementText> CreateBatch(string projectPath, string page, IReadOnlyList<PlacementText> items)
         {
             if (items.Count == 1)

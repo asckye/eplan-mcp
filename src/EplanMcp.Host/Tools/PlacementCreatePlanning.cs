@@ -137,14 +137,12 @@ internal static class PlacementCreatePlanning
                 if (!item.TryGetProperty("contents", out JsonElement c) || c.ValueKind != JsonValueKind.Object)
                 { problems.Add(at + "/contents: requires explicit language contents."); continue; }
                 var languages = new HashSet<string>(StringComparer.Ordinal);
-                int length = 0;
                 foreach (JsonProperty text in c.EnumerateObject())
                 {
                     Check(languages.Add(text.Name) && text.Name.Length == 5 && Regex.IsMatch(text.Name, "^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$", RegexOptions.CultureInvariant), Child(at + "/contents", text.Name), "requires a unique language code, e.g. en_US or ??_??.");
-                    Check(text.Value.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(text.Value.GetString()), Child(at + "/contents", text.Name), "requires nonempty text.");
-                    length += text.Value.ValueKind == JsonValueKind.String ? text.Value.GetString()!.Length : 0;
+                    Check(text.Value.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(text.Value.GetString()) && text.Value.GetString()!.Length <= 500, Child(at + "/contents", text.Name), "requires 1..500 characters per language.");
                 }
-                Check(length is >= 1 and <= 500, at + "/contents", "requires 1..500 characters in total.");
+                Check(languages.Count > 0, at + "/contents", "requires at least one language.");
                 Check(!languages.Contains("??_??") || languages.Count == 1, at + "/contents", "??_?? cannot be mixed with languages (A54/live T4b).");
             }
             else if (kind is "arc" or "ellipse")
@@ -175,6 +173,8 @@ internal static class PlacementCreatePlanning
         var rows = new JsonArray();
         var changes = new List<string>();
         var problems = new List<string>();
+        var warnings = new List<string>();
+        bool warn = input.TryGetProperty("layout_guard", out JsonElement guard) && guard.GetString() == "warn";
         foreach ((JsonElement item, int i) in input.GetProperty("items").EnumerateArray().Select((item, i) => (item, i)))
         {
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
@@ -190,12 +190,18 @@ internal static class PlacementCreatePlanning
             JsonArray[] points = IsText(kind) || kind is "arc" or "ellipse" ? [actual[field]!.AsArray()] : [.. actual[field]!.AsArray().Select(p => p!.AsArray())];
             if (points.SelectMany(p => p).Any(n => !double.IsFinite(n!.GetValue<double>()) || n.GetValue<double>() is < 0 or > 10000))
             { problems.Add(at + ": snapping must produce finite coordinates in 0..10000 mm."); continue; }
-            if (IsText(kind) && !item.GetProperty("contents").TryGetProperty("??_??", out _))
+            if (measureText is not null && IsText(kind) && !item.GetProperty("contents").TryGetProperty("??_??", out _))
             {
                 if (displayLanguage is null)
-                { return Missing("placement.display_language", "Read the project's display language before planning language-specific text (A54)."); }
-                if (!item.GetProperty("contents").TryGetProperty(displayLanguage, out _))
-                { problems.Add(at + "/contents: include ??_?? or the project display language " + displayLanguage + " (A54)."); continue; }
+                { warnings.Add("Project display language is unreadable; text visibility was not checked (A54)."); }
+                else if (!item.GetProperty("contents").TryGetProperty(displayLanguage, out _))
+                {
+                    string message = at + "/contents: include ??_?? or the project display language " + displayLanguage + " (A54).";
+                    if (warn)
+                    { warnings.Add(message); }
+                    else
+                    { problems.Add(message); continue; }
+                }
             }
             double radius = kind == "arc" ? item.GetProperty("radius_mm").GetDouble() : kind == "ellipse" ? Math.Max(item.GetProperty("radius_x_mm").GetDouble(), item.GetProperty("radius_y_mm").GetDouble()) : 0;
             double[]? bounds = IsText(kind) ? measureText?.Invoke(JsonSerializer.SerializeToElement(actual)) : kind is "arc" or "ellipse" ?
@@ -214,7 +220,9 @@ internal static class PlacementCreatePlanning
         result["fingerprint"] = page.Fingerprint();
         result["hint"] = WriteToolDefaults.ExecutionHint;
         if (!string.IsNullOrEmpty(layoutWarnings))
-        { result["warning"] = layoutWarnings; }
+        { warnings.Add(layoutWarnings); }
+        if (warnings.Count > 0)
+        { result["warning"] = string.Join(" ", warnings); }
         int budget = input.TryGetProperty("response_format", out JsonElement format) && format.GetString() == "detailed" ? 20000 : 5000;
         return ResultShaper.Fits(result, budget) ? ToolResults.Success("Dry run: would create text/graphics; no connection changes. Nothing was changed.", result)
             : Invalid(["/response_format: use detailed or fewer items; the complete impact list cannot be truncated."]);

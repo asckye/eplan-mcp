@@ -321,7 +321,7 @@ public sealed class PlacementTextCreateExecuteOperationTests
                 args.Text.Contents["en_US"] = null!;
                 break;
             case "large-text":
-                args.Text.Contents["en_US"] = new('a', 500);
+                args.Text.Contents["en_US"] = new('a', 501);
                 break;
             case "invalid-language":
                 args.Text.Contents["en_US\n"] = "A";

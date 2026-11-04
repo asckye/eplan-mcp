@@ -15180,7 +15180,7 @@
     {
       "name": "eplan_placement_create",
       "title": "Create text and graphics on an EPLAN page",
-      "description": "Creates text, graphics or a named block of 2..1000 drawing locators (block alone per call) on a Circuit, Overview or Graphics page; mm, bottom left, y up; angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text needs the project display language or ??_??; ??_?? cannot be mixed with languages (A54). Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
+      "description": "Creates text, graphics or a named block of 2..1000 drawing locators (block alone per call) on a Circuit, Overview or Graphics page; mm, bottom left, y up; angles in degrees. Path_text is native path function text for device function descriptions and reports. Image file: relative imports path. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; approval outside scratch. Text: 500 chars per language; include project display language or ??_?? (warn allows missing display language); do not mix ??_?? with languages. Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"line\",\"points\":[[1,1],[2,2]]}]}.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,

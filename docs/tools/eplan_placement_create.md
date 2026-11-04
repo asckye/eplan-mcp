@@ -18,7 +18,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 
 `project,page` 显式必填；单一 `Circuit`、`Overview` 或 `Graphics` 页；`items` 1–50 项，严格成员且拒绝重复键。`dry_run=true`、`snap_to_grid=true`、`response_format=concise`（另可 detailed）；请求≤256 KiB。
-每项 `kind=text/line/rectangle/polyline/arc/ellipse/path_text/image`；text 与 path_text 必填 `position:[x_mm,y_mm]`、`contents:{语言代码:文字}`；text 另必填 `height_mm`（0.5–100），path_text 可省略高度以传入 EPLAN 默认值标记 `-16002`，显式高度仍限 0.5–100；总文字≤500 字符，每种语言非空且唯一，代码如 `en_US` 或语言无关 `??_??`。A54：缺项目显示语言的文字不显示，必须提供语言无关内容或至少项目显示语言；显示语言来自可信读取，不从工具参数自报。 `??_??` 不得与具体语言混用（A54 / T4b 实测）。
+每项 `kind=text/line/rectangle/polyline/arc/ellipse/path_text/image`；text 与 path_text 必填 `position:[x_mm,y_mm]`、`contents:{语言代码:文字}`；text 另必填 `height_mm`（0.5–100），path_text 可省略高度以传入 EPLAN 默认值标记 `-16002`，显式高度仍限 0.5–100；每种语言≤500 字符，总数不限，每种语言非空且唯一，代码如 `en_US` 或语言无关 `??_??`。A54：缺项目显示语言的文字不显示，默认必须提供语言无关内容或至少项目显示语言，`layout_guard:warn` 时缺显示语言只告警；显示语言来自可信读取，不从工具参数自报。 `??_??` 不得与具体语言混用（A54 / T4b 实测）。
 line 必填 `points:[[x1,y1],[x2,y2]]`；rectangle 必填 `corners` 同形状，可反向给角点。坐标均为有限数，0–10,000 mm，页左下角原点、y 向上；默认按页栅格吸附，中点远离零，关闭时保持原值。
 polyline 必填至少两个 `points`，默认不闭合，可用 `closed:true` 闭合；arc 必填 `center`、正数 `radius_mm`、以度为单位的 `start_angle/end_angle`；两角模 360 相等时创建整圆；起止角相等保留两个角度，整周跨度仍用 SetCircle。ellipse 必填 `center`、正数 `radius_x_mm/radius_y_mm`，可选 `angle`（度，默认 0）。image 必填 `file` 与两个对角点 `corners`；文件路径相对 imports，扩展名仅 `.png/.jpg/.jpeg/.bmp/.emf/.wmf`，拒绝绝对路径、目录穿越、符号链接与 junction，执行前重核 SHA-256。图片链接到 imports 源文件，不复制到项目或覆盖文件。
 ## 3. 输出
@@ -26,7 +26,7 @@ polyline 必填至少两个 `points`，默认不闭合，可用 `closed:true` �
 dry-run 回显实际 `project,page`、`execution=not_started,dryRun=true`、`gridSize,boundarySource=Page.Size`；`items` 逐项含 `requested,actual,bounds,snapped`，保留全部语言。`changes` 完整列出每项类型、页、索引、实际内容/几何和外框；`connectionChanges=[]`，不生成连接、不猜 locator。 执行成功为 `execution=committed,dryRun=false`，附 `warning,recovered`；结果来自已逐项核对的计划。
 dry-run 的外框是绝对 min-x/min-y/max-x/max-y，整体必须在可靠页界内；线/矩形/图片取两点包围盒，折线取全部点包围盒，圆弧保守取整圆外框，旋转椭圆以两轴较大的半径取包围框，文字只接受可信测量依赖，禁止按字数猜宽。未知页界不以图框尺寸兜底。concise/detailed 双份预算 5k/20k；装不下要求详细模式或减少项，不能截断影响清单。
 ## 4. 错误
-`INVALID_ARGUMENT`：schema、语言、字高、坐标或完整外框越界，`metadata.violations` 汇总 JSON Pointer；`PAGE_NOT_FOUND` 等读取错误沿用原码。dry-run 缺页界或显示语言证据时返回 `CAPABILITY_MISSING`，执行缺可靠栅格同样拒绝。预检为 `execution=not_started`；写失败为 `rolled_back`，提交或回滚结果不能证明则为 `unknown` 并暂停。
+`INVALID_ARGUMENT`：schema、语言、字高、坐标或完整外框越界，`metadata.violations` 汇总 JSON Pointer；`PAGE_NOT_FOUND` 等读取错误沿用原码。dry-run 缺页界时返回 `CAPABILITY_MISSING`，缺显示语言证据只告警，执行缺可靠栅格同样拒绝。预检为 `execution=not_started`；写失败为 `rolled_back`，提交或回滚结果不能证明则为 `unknown` 并暂停。
 ## 5. 实现要点
 本机 2026 XML：折线用 `PolyLine.Create(Page)`、`SetPointAt(int, ref PointD)`，默认开放，可设 closed；圆弧用 `Arc.Create(Page)`、`SetArc(center,radius,start,end,false)`，角度由度转换为弧度（XML 的闭合条件为模 2π 相等），末参数表示是否扇形。起止角完全相等的整圆沿 `SetArc` 保留原角度；相差整周时用 `SetCircle`；椭圆用 `SetEllipse`，角度先由度转为弧度（单位待 Large 实测）。整圆/椭圆核对原生 `Kind=Circle/Ellipse`；椭圆从 `FirstRadius/SecondRadius/ElipseAngle` 读回，不能用 XML 明示为 0 的 `Radius/StartAngle/EndAngle`。页图形属性增加 `arc_kind`、两轴半径与原生弧度 `ellipse_angle`。路径功能文本用 `PathText.Create(Page,MultiLangString,height)` 后设置位置；省略高度时传 `-16002`，必须原样读回，实机待验证。图片 `Create` 的末两参数为复制到项目和覆盖，均为 false。角度方向及原生几何读回仍需 Large 实测，不能由签名推定。
 只读规划复用 `project.get → page.get → page.drawing.get`，缺可靠页界仍拒绝，未知文字外框返回 `bounds=null` 并延后测量。执行在原事务提交前用实际外框校验布局；结果 warning 说明检查阶段和页尺寸减边距的 fallback。`boundarySource=unverified` 表示图框可用区尚未验证，不能把图框尺寸当作可用区。

@@ -9,6 +9,7 @@ internal sealed class PlacementTextStore : IPlacementTextWriter, IPageDrawingRea
     public List<PlacementText> Texts { get; } = [];
     public FakeTransactions Transactions { get; } = new();
     public BridgeErrorException? ValidationFailure { get; set; }
+    public string? ValidationWarning { get; set; }
     public Exception? WriteFailure { get; set; }
     public Func<PlacementText, PlacementText> Readback { get; set; } = t => t;
     public Action? AfterWrite { get; set; }
@@ -28,12 +29,13 @@ internal sealed class PlacementTextStore : IPlacementTextWriter, IPageDrawingRea
         };
     }
 
-    public void Validate(string projectPath, string page, PlacementText text)
+    public string? Validate(string projectPath, string page, PlacementText text, bool warn = false)
     {
         Validations++;
         Assert.Equal(("project", "P"), (projectPath, page));
         if (ValidationFailure is { } error)
         { throw error; }
+        return warn ? ValidationWarning : null;
     }
 
     public PlacementText Create(string projectPath, string page, PlacementText text)

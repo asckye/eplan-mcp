@@ -118,6 +118,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         if (items.Any(item => item?.Kind == "block"))
         { return BlockCreation.Run(args, catalog, drawings, writer, transactions, planning); }
         var images = new List<ImportSource>();
+        var textWarnings = new List<string>();
         foreach (PlacementText item in items)
         {
             if (item is null || !KnownKind(item.Kind) || item.Kind is "line" or "rectangle" or "image" && !Point(item.EndPosition)
@@ -137,7 +138,9 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             }
             if (!Finite(item.Angle) || item.Layer < 0 || item.Alignment is not null && !IsText(item) || item.Closed && item.Kind != "polyline" || item.Pen?.Any(p => !ValidPen(p.Key, p.Value)) == true)
             { throw WriteArguments.NotStarted(InvalidArgument("/items: invalid style values.")); }
-            Validate(new() { Project = args.Project, Page = args.Page, Text = item });
+            string? textWarning = Validate(new() { Project = args.Project, Page = args.Page, Text = item }, guard == "warn");
+            if (textWarning is not null)
+            { textWarnings.Add(textWarning); }
         }
         PageDrawingGeometry geometry = drawings?.Read(WriteArguments.Writable(catalog, args.Project).Path, args.Page)
             ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "R1/R3: read complete page bounds before creating placements."));
@@ -159,6 +162,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             row.Properties = new() { ["height_mm"] = p.HeightMm.ToString("R", CultureInfo.InvariantCulture), ["angle"] = "0" };
             return row;
         }).ToArray(), mode: guard);
+        warnings.InsertRange(0, textWarnings);
         if (planning)
         { return new() { Text = items[0], Items = items, Warning = LayoutGuard.Summary(warnings) }; }
         Committed<List<PlacementText>> batch = TransactionRunner.Run(transactions, "eplan_placement_create", () =>
@@ -174,7 +178,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         return new() { Text = batch.Result[0], Items = batch.Result, Warning = LayoutGuard.Summary(warnings.Append(batch.Warning)) };
     }
 
-    private OpenProject Validate(PlacementTextCreateArgs args)
+    private string? Validate(PlacementTextCreateArgs args, bool warn)
     {
         OpenProject project;
         PlacementText text = args.Text;
@@ -185,13 +189,12 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             if (text is null || !Point(text.Position)
                 || IsText(text) && ((!Finite(text.HeightMm) || text.HeightMm is < 0.5 or > 100) && !(text.Kind == "path_text" && text.HeightMm == -16002) || text.Contents is null || text.Contents.Count == 0
                 || text.Contents.Any(p => (p.Key != "??_??" && (p.Key.Length != 5 || !LanguageCodes.IsCode(p.Key))) || string.IsNullOrWhiteSpace(p.Value))
-                || text.Contents.Sum(p => (long)p.Value.Length) > 500))
-            { throw InvalidArgument("/text requires finite 0..10000 mm coordinates, heightMm in 0.5..100 (path_text also accepts its default -16002), and 1..500 characters with explicit languages."); }
+                || text.Contents.Any(p => p.Value.Length > 500)))
+            { throw InvalidArgument("/text requires finite 0..10000 mm coordinates, heightMm in 0.5..100 (path_text also accepts its default -16002), and 1..500 characters per language."); }
             if (IsText(text) && text.Contents.ContainsKey("??_??") && text.Contents.Count > 1)
             { throw InvalidArgument("/text/contents: ??_?? (language-independent) cannot be combined with languages; EPLAN keeps only the languages (live T4b)."); }
             project = WriteArguments.Writable(catalog, args.Project);
-            writer.Validate(project.Path, args.Page, text);
-            return project;
+            return writer.Validate(project.Path, args.Page, text, warn);
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
     }

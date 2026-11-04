@@ -92,7 +92,7 @@ public sealed class PlacementCreateTests
         oversized["items"]![0]!["contents"]!["en_US"] = new string('a', 256 * 1024);
         List<string> violations = PlacementCreatePlanning.Validate(JsonSerializer.SerializeToElement(oversized));
         Assert.Contains(violations, v => v.Contains("256 KiB", StringComparison.Ordinal));
-        Assert.Contains(violations, v => v.StartsWith("/items/0/contents:", StringComparison.Ordinal));
+        Assert.Contains(violations, v => v.StartsWith("/items/0/contents/en_US:", StringComparison.Ordinal));
     }
 
     [Theory]
@@ -113,7 +113,7 @@ public sealed class PlacementCreateTests
     [InlineData("en_US", "en_US", null)]
     [InlineData("??_??", null, null)]
     [InlineData("en_US", "zh_CN", ErrorReason.InvalidArgument)]
-    [InlineData("en_US", null, ErrorReason.CapabilityMissing)]
+    [InlineData("en_US", null, null)]
     public async Task TextLanguage_RequiresDisplayLanguageOrIndependentContent(string stored, string? display, string? reason)
     {
         JsonObject input = JsonNode.Parse(Input(Text).GetRawText())!.AsObject();
@@ -123,6 +123,8 @@ public sealed class PlacementCreateTests
         {
             JsonElement data = Data(result);
             Assert.Equal("Panel", data.GetProperty("items")[0].GetProperty("actual").GetProperty("contents").GetProperty(stored).GetString());
+            if (display is null && stored != "??_??")
+            { Assert.Contains("text visibility was not checked", data.GetProperty("warning").GetString(), StringComparison.Ordinal); }
         }
         else
         { Assert.Equal(reason, Error(result).GetProperty("reason").GetString()); }

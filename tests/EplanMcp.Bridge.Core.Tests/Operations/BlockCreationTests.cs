@@ -79,7 +79,7 @@ public sealed class BlockCreationTests
         public Fixture() => Args = new() { Project = "project", Page = "P", Items = [new() { Kind = "block", Name = "144_268557", Members = Page.Placements.Select(p => new DrawingLocator { Project = "project", Page = "P", Type = p.Locator.Type, Oid = p.Locator.Oid, Digest = p.Locator.Digest }).ToList() }] };
         public PlacementTextCreateData Run(bool planning) => BlockCreation.Run(Args, new FakeCatalog(new OpenProject { Name = "project", Path = "project" }), this, this, Transactions, planning);
         public PageDrawingGeometry Read(string projectPath, string page) => Page;
-        public void Validate(string projectPath, string page, PlacementText text) { }
+        public string? Validate(string projectPath, string page, PlacementText text, bool warn = false) => null;
         public PlacementText Create(string projectPath, string page, PlacementText text) { Writes++; return new() { Kind = "block", Name = Wrong == "name" ? "wrong" : text.Name, Count = Wrong == "count" ? 0 : text.Members!.Count }; }
         public List<PlacementText> CreateBatch(string projectPath, string page, IReadOnlyList<PlacementText> items) => items.Select(i => Create(projectPath, page, i)).ToList();
         private static DrawingPlacement Row(long oid) => new() { Kind = "Line", Locator = new() { Project = "project", Page = "P", Type = 4, Oid = oid, Digest = new string('a', 64) } };
