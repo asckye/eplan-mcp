@@ -50,11 +50,8 @@ public sealed class MacroInsertExecuteOperation(
         Committed<PlacedMacro> committed = TransactionRunner.Run(transactions, Tool, () =>
         {
             PlacedMacro placed = Insert(request);
-            List<string> measured = MacroInsertRequest.Layout(() => request.Page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.AfterWriting(request.Page.Layout));
-            // Reproducing without a box skips the outline check, so the measured objects decide: they may not leave the page.
-            if (request.ReproducesWithoutBox && measured.FirstOrDefault(warning => warning.IndexOf("R1:", StringComparison.Ordinal) >= 0) is { } offPage)
-            { throw WriteArguments.Invalid([offPage]); }
-            request.LayoutWarnings.AddRange(measured);
+            // AfterWriting refuses objects measured off the page (S2), so reproducing without a box needs no outline check.
+            request.LayoutWarnings.AddRange(MacroInsertRequest.Layout(() => request.Page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.AfterWriting(request.Page.Layout)));
             return placed;
         });
         PlacedMacro readback = committed.Result;

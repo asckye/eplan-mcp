@@ -104,7 +104,7 @@ internal sealed class MacroInsertRequest
     private (double X, double Y) OutlineOffset() => Content.ReferencePoint is { Length: 2 } reference && Content.Location is { Length: 2 } location
         ? (location[0] - reference[0], location[1] + Content.Height - reference[1]) : (0, 0);
 
-    public bool ReproducesWithoutBox => _guard == "warn" && !MacroBox;
+    private bool ReproducesWithoutBox => _guard == "warn" && !MacroBox;
 
     private double[]? ProposedOutline()
     {
