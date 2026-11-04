@@ -130,7 +130,8 @@ internal sealed class DevicePlaceRequest
         string[] taken =
         [
             .. (box ? page.LocationBoxStructures : terminal || args.PlcConnectionPoint is not null ? existing : names.FunctionNames(project.Path))
-                .Where(n => full.Length > 0 && (SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
+                .Where(n => full.Length > 0 && ((box || terminal || args.PlcConnectionPoint is not null
+                    ? SameName(full, n, ignoreCase: true) : string.Equals(full, n, StringComparison.OrdinalIgnoreCase)) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
         if (args.JoinDevice == true && taken.FirstOrDefault(n => SameName(full, n, ignoreCase: true)) is { } joinedTag)

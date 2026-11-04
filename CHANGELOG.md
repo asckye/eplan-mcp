@@ -6,9 +6,12 @@
 ## [Unreleased]
 
 - `eplan_macro_insert`、`eplan_device_place` 支持 `layout_guard: "warn"`，用于复现已有图纸。
+- `eplan_macro_insert` 的外框按宏的参考点和 `WindowMacro.Location` 计算；`warn` 且不带宏框时，改由写入后实测的对象判断是否超出页面。
+- `eplan_device_place` 判断重名时，只有端子排和端子才允许省略高层代号，`=GAA+A1-FC2` 和端子排 `+A1-FC2` 不再算重名。
+- `eplan_connection_create` 只放定义点时不再要求页面上的引脚互不重合。
+- 端子可以使用自身逻辑定义不是端子的符号（`XTR1`），端子保留端子定义，只采用符号图形。
 - `eplan_device_update` 允许 PLC 模块点改到还没有卡的标识。
 - `eplan_placement_delete` 不再因页面上有不可读的空块而失败。
-- 端子放置只拒绝盒子类符号，其他功能类别交给 EPLAN 判断（示例项目的 `XTR1`）。
 
 - `eplan_macro_get` 支持选择表达和变体，返回宏参考点与功能位置；位置不可读时返回 null 并告警。
 - `eplan_device_update` 允许将全部为非主功能 PLC 点的器件并入已有 PLC 盒，保留后缀并核对两侧读回；其它重名仍拒绝。新增 Large 验证待实测。
