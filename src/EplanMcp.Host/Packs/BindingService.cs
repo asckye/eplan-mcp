@@ -13,6 +13,7 @@ namespace EplanMcp.Host.Packs;
 internal sealed class BindingService(PackLibrary packs, AuditLog audit, ApprovalService approvals, IBridgeClient bridge)
 {
     internal Action<string>? Checkpoint { get; init; }
+    internal TimeSpan ProjectLockWait { get; init; } = TimeSpan.FromSeconds(5);
 
     public async Task<ProjectBinding> WriteAsync(ProjectBinding proposed, int expectedRevision, string source, string tool,
         bool dryRun, Func<ProjectBinding, CancellationToken, Task>? validate,
@@ -73,7 +74,8 @@ internal sealed class BindingService(PackLibrary packs, AuditLog audit, Approval
                 throw new BridgeCallException(approvals.Refusal(decision.Decision));
             }
         }
-        using FileStream projectLock = await FileLock.AcquireAsync(paths.ProjectLock(project), TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false)
+        Checkpoint?.Invoke("locking");
+        using FileStream projectLock = await FileLock.AcquireAsync(paths.ProjectLock(project), ProjectLockWait, cancellationToken).ConfigureAwait(false)
             ?? throw new PlanCapacityException("plans.project", 1, 1);
         using FileStream storeLock = await FileLock.AcquireAsync(paths.Check(Path.Combine(packs.Installed.Root, PackStore.LockFileName)), packs.Installed.LockWait, cancellationToken).ConfigureAwait(false)
             ?? throw Failure(ErrorReason.Timeout, "The pack store is busy; bind again when the other change finishes.");

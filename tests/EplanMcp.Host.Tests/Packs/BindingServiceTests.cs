@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text.Json.Nodes;
 using EplanMcp.Contracts;
@@ -71,22 +72,43 @@ public sealed class BindingServiceTests : IDisposable
     public async Task Write_ConcurrentLocalChanges_SerializesBeforeCheckingRevision()
     {
         var staged = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondLocking = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var release = new ManualResetEventSlim();
         BindingService firstService = Service(checkpoint: point =>
         {
             if (point == "staged")
             {
                 staged.SetResult();
-                Assert.True(release.Wait(TimeSpan.FromSeconds(3), Token));
+                release.Wait(Token);
             }
         });
+        var secondPoints = new ConcurrentQueue<string>();
+        // No lock timeout: only the first writer's release may let the second one through, however slow the machine is.
+        BindingService secondService = Service(projectLockWait: TimeSpan.MaxValue, checkpoint: point =>
+        {
+            secondPoints.Enqueue(point);
+            if (point == "locking")
+            { secondLocking.SetResult(); }
+        });
         Task<ProjectBinding> first = Task.Run(() => firstService.WriteAsync(Proposal(), 0, "first", "bind", null, Token), Token);
-        await staged.Task.WaitAsync(Token);
-        Task<ProjectBinding> second = WriteAsync(Proposal(), 0);
-        Assert.False(second.IsCompleted);
-        release.Set();
+        Task<ProjectBinding> second;
+        try
+        {
+            await staged.Task.WaitAsync(Token);
+            // The second writer passes its unlocked revision check, then has to queue behind the first writer's locks.
+            second = Task.Run(() => secondService.WriteAsync(Proposal(), 0, "second", "bind", null, Token), Token);
+            await secondLocking.Task.WaitAsync(Token);
+            Assert.False(second.IsCompleted);
+        }
+        finally
+        {
+            release.Set();
+        }
         Assert.Equal(1, (await first).Revision);
-        Assert.Equal(ErrorReason.PlanStale, (await Assert.ThrowsAsync<BridgeCallException>(() => second)).Error.Reason);
+        BridgeCallException stale = await Assert.ThrowsAsync<BridgeCallException>(() => second);
+        Assert.Equal(ErrorReason.PlanStale, stale.Error.Reason);
+        Assert.Equal(["locking"], secondPoints);
+        Assert.Equal(1, PackJson.ReadBinding(File.ReadAllBytes(BindingFile)).Revision);
     }
 
     [Theory]
@@ -322,9 +344,9 @@ public sealed class BindingServiceTests : IDisposable
         Assert.False(File.Exists(BindingFile));
     }
 
-    private BindingService Service(IApprovalChannel? channel = null, Action<string>? checkpoint = null) => new(Library, Audit,
+    private BindingService Service(IApprovalChannel? channel = null, Action<string>? checkpoint = null, TimeSpan? projectLockWait = null) => new(Library, Audit,
         new ApprovalService([channel ?? _channel], HostConfig.Defaults(_locations), _clock, NullLogger<ApprovalService>.Instance), _bridge)
-    { Checkpoint = checkpoint };
+    { Checkpoint = checkpoint, ProjectLockWait = projectLockWait ?? TimeSpan.FromSeconds(5) };
 
     private Task<ProjectBinding> WriteAsync(ProjectBinding proposal, int revision, IApprovalChannel? channel = null) =>
         Service(channel).WriteAsync(proposal, revision, "test-source", "bind", null, Token);
