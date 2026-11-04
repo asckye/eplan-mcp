@@ -7719,6 +7719,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/DevicePlaceInputTests.cs"
           },
           {
+            "name": "DeviceSpecialInputTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DeviceSpecialInputTests.BlackBox.cs"
+          },
+          {
             "name": "LocationBoxPlacementTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/LocationBoxPlacementTests.cs"
@@ -7839,6 +7844,11 @@
             "name": "DevicePlaceOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DevicePlaceOperationTests.cs"
+          },
+          {
+            "name": "DeviceSpecialPlanTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DeviceSpecialPlanTests.BlackBox.cs"
           },
           {
             "name": "DeviceSymbolExecutionTests",
