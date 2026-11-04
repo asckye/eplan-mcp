@@ -16,6 +16,7 @@ internal sealed class PlacementCreateTools
 {
     public const string Tool = "eplan_placement_create";
     internal const string ShowPageDescription = "Open page (UI).";
+    internal static readonly TimeSpan CallLimit = TimeSpan.FromSeconds(180);
 
     [McpServerTool(Name = Tool, ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     public static async Task<CallToolResult> CreateAsync(IBridgeClient bridge, WritePipeline pipeline, ImportFiles files, RequestContext<CallToolRequestParams> context,
@@ -48,14 +49,14 @@ internal sealed class PlacementCreateTools
                 args.Items.Add(await PlacementCreatePlanning.RequestAsync(JsonSerializer.SerializeToElement(actual), files, cancellationToken).ConfigureAwait(false));
                 rows.Add(new JsonObject { ["requested"] = JsonNode.Parse(item.GetRawText()), ["actual"] = actual, ["bounds"] = null, ["snapped"] = !JsonElement.DeepEquals(item, JsonSerializer.SerializeToElement(actual)) });
             }
-            PlacementTextCreateData checkedLayout = await bridge.InvokeAsync<PlacementTextCreateArgs, PlacementTextCreateData>(OperationNames.PlacementTextCreatePlan, args, cancellationToken).ConfigureAwait(false);
+            PlacementTextCreateData checkedLayout = await bridge.InvokeAsync<PlacementTextCreateArgs, PlacementTextCreateData>(OperationNames.PlacementTextCreatePlan, args, CallLimit, null, cancellationToken).ConfigureAwait(false);
             var plan = new WritePlan { Project = project.Name, ProjectPath = project.Path, Fingerprint = args.Fingerprint, Details = new() { ["layoutWarnings"] = checkedLayout.Warning ?? "" }, Changes = rows.Select(row => new PlannedChange { Action = "create", Kind = "placement", Name = args.Page, NewValue = row!["actual"]!.ToJsonString() }).ToList() };
             var result = new JsonObject { ["project"] = project.Name, ["page"] = args.Page, ["execution"] = ExecutionState.NotStarted, ["dryRun"] = false, ["gridSize"] = geometry.GridSize, ["boundarySource"] = "unverified", ["items"] = rows, ["changes"] = JsonSerializer.SerializeToNode(plan.Changes.Select(c => c.NewValue)), ["connectionChanges"] = new JsonArray() };
             int budget = input.TryGetProperty("response_format", out JsonElement f) && f.GetString() == "detailed" ? 20000 : 5000;
             if (!ResultShaper.Fits(result, budget - 1024))
             { throw new BridgeCallException(ToolResults.InvalidArgumentError(["/items: reduce items or use detailed; the complete impact list exceeds the response budget."])); }
             var request = new WriteRequest<PlacementTextCreateArgs, PlacementTextCreateArgs>(Tool, ToolTier.Write, OperationNames.PlacementTextCreateExecute,
-                OperationNames.PlacementTextCreateExecute, args, _ => args, false, TimeSpan.FromSeconds(60), "Creating text and graphics")
+                OperationNames.PlacementTextCreateExecute, args, _ => args, false, CallLimit, "Creating text and graphics")
             { PreparedPlan = plan };
             WriteOutcome<PlacementTextCreateData> outcome = await pipeline.RunAsync<PlacementTextCreateArgs, PlacementTextCreateArgs, PlacementTextCreateData>(request, progress, cancellationToken).ConfigureAwait(false);
             result["execution"] = outcome.Execution;

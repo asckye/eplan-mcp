@@ -43,7 +43,7 @@ internal static class PlacementCreatePlanning
                     JsonNode actual = Snap(item, geometry.GridSize, !input.TryGetProperty("snap_to_grid", out JsonElement s) || s.GetBoolean(), normalizeRectangle: false);
                     preflight.Items.Add(await RequestAsync(JsonSerializer.SerializeToElement(actual), files, cancellationToken).ConfigureAwait(false));
                 }
-                layoutWarnings = (await bridge.InvokeAsync<PlacementTextCreateArgs, PlacementTextCreateData>(OperationNames.PlacementTextCreatePlan, preflight, cancellationToken).ConfigureAwait(false)).Warning;
+                layoutWarnings = (await bridge.InvokeAsync<PlacementTextCreateArgs, PlacementTextCreateData>(OperationNames.PlacementTextCreatePlan, preflight, PlacementCreateTools.CallLimit, null, cancellationToken).ConfigureAwait(false)).Warning;
             }
             return Plan(input, geometry, displayLanguage, measureText, layoutWarnings);
         }

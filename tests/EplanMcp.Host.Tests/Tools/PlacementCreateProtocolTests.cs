@@ -17,7 +17,7 @@ namespace EplanMcp.Host.Tests.Tools;
 
 [Trait("Size", "Medium")]
 [Collection(typeof(ToolBuildIsolation))]
-public sealed class PlacementCreateProtocolTests
+public sealed partial class PlacementCreateProtocolTests
 {
     [Theory]
     [InlineData(false)]

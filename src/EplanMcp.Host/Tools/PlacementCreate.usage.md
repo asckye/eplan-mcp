@@ -3,6 +3,7 @@
 {"project":"Line1","page":"P","items":[{"kind":"text","position":[10,20],"contents":{"??_??":"Panel"},"height_mm":3},{"kind":"line","points":[[10,10],[30,10]]},{"kind":"rectangle","corners":[[5,5],[40,30]]}]}
 ```
 ## Workflow
+Placement preflight and execution each allow 180 seconds, including preview preflight. Other reads keep their usual limits.
 Omitting dry_run (or true) previews only: no approval, no project/file writes, execution=not_started. Call again with dry_run:false to execute; preview hint explains this step.
 Full profile. Execution creates the complete batch atomically, reads every item back and supports one-step undo; outside scratch needs approval. Never repeat a committed or unknown call. A failed batch rolls back everything without an undo step.
 ## Fields
