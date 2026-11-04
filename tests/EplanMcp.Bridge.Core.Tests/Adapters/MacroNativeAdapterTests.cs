@@ -14,7 +14,7 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 
 [Trait("Size", "Small")]
 [Collection("Macro native adapters")]
-public sealed class MacroNativeAdapterTests : IDisposable
+public sealed partial class MacroNativeAdapterTests : IDisposable
 {
     public void Dispose()
     {

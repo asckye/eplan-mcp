@@ -116,8 +116,44 @@ public sealed class MacroGetOperationTests : IDisposable
         Assert.Equal("eplan_macro/203/CONTACTOR_FEEDBACK.EMA", Run("eplan_macro/203/CONTACTOR_FEEDBACK.EMA").Path);
     }
 
-    private MacroGetData Run(string macro) =>
-        (MacroGetData)new MacroGetOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = "p1", Current = true }), _reader).Execute(new MacroGetArgs { Macro = macro })!;
+    [Fact]
+    public void Execute_ExplicitOverviewPassesSelectionAndCopiesLocationWithoutSubtractingReference()
+    {
+        _reader.Content.Representation = "Overview";
+        _reader.Content.ReferencePoint = [0, 292];
+        _reader.Content.Representations.Add(new("Overview", [0]));
+        _reader.Content.Functions = [new() { Name = "=GAA+A1-A1", Category = "PLCBox", Location = [44, 132] },
+            new() { Name = "=GAA+A1-A1:1.1", Category = "PLCTerminal" }];
+        MacroGetData data = Run(Feedback, "Overview");
+        Assert.Equal(("Overview", 0), _reader.Selection);
+        Assert.Equal([0d, 292d], Assert.IsType<double[]>(data.ReferencePoint));
+        Assert.Equal([44d, 132d], Assert.IsType<double[]>(data.Devices[0].Location));
+        Assert.Null(data.Devices[1].Location);
+        Assert.Equal(2, data.Representations.Count);
+    }
+
+    [Theory]
+    [InlineData("Missing", 0)]
+    [InlineData("MultiLine", 6)]
+    [InlineData("MultiLine", -1)]
+    public void Execute_UnavailableSelectionIsInvalidArgument(string representation, int variant)
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Run(Feedback, representation, variant)).Error;
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+    }
+
+    [Fact]
+    public void Execute_DefaultSelectionAndUnavailablePositionRemainUsable()
+    {
+        MacroGetData data = Run(Feedback);
+        Assert.Equal((null, 0), _reader.Selection);
+        Assert.Null(data.ReferencePoint);
+        Assert.Equal((52d, 268d, 28), (data.Width, data.Height, data.ObjectCount));
+    }
+
+    private MacroGetData Run(string macro, string? representation = null, int variant = 0) =>
+        (MacroGetData)new MacroGetOperation(new FakeCatalog(new OpenProject { Name = "Line1", Path = "p1", Current = true }), _reader)
+            .Execute(new MacroGetArgs { Macro = macro, Representation = representation, Variant = variant })!;
 
     private BridgeError Fails(string macro) => Assert.Throws<BridgeErrorException>(() => Run(macro)).Error;
 

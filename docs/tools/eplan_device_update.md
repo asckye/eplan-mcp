@@ -21,7 +21,7 @@
 | `variant` | string | 否 | "1" | 部件变体；只能随 `part` 提供，必须在库中存在 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
-- `tag` 的查找规则与 `eplan_device_get` 相同。
+- `tag` 的查找规则与 `eplan_device_get` 相同；另支持全部为非主 `PLCTerminal` 的模块标识。此类模块可改名到已有 `PLCBox` 的标识，保留各点后缀。
 - 给出 `new_tag` 时不能为空，不能含空白和控制字符，必须含有 `-` 开头的设备部分；与现有标识相同时返回 `INVALID_ARGUMENT`。只改大小写（`-kf1` → `-KF1`）是允许的。
 
 ## 3. 输出
@@ -58,7 +58,7 @@
 | `INVALID_ARGUMENT` | `new_tag` 不合法，或与现有标识相同；部件、变体、唯一主功能或重复引用检查失败；`new_tag` 以 `-` 开头但拼不出现在的结构 | `not_started` | `metadata.violations` 列出全部问题 |
 | `INVALID_ARGUMENT` | 读回的标识与请求不同（项目结构对这类设备不用新标识中的某一部分，EPLAN 把它丢掉了），或者改名后仍有功能带着旧标识 | `rolled_back` | `metadata.requested`、`metadata.actual`；提示参照同类设备的标识（`eplan_device_list`） |
 | `DEVICE_NOT_FOUND` / `AMBIGUOUS_NAME` | `tag` 找不到，或短标识对应多个设备 | `not_started` | 同 `eplan_device_get` |
-| `ALREADY_EXISTS` | 新标识已被其他设备使用（不区分大小写） | `not_started` | "'<new_tag>' is already used by another device; giving this device the same tag would merge the two devices in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use." |
+| `ALREADY_EXISTS` | 新标识已被其他设备使用（不区分大小写），且不满足非主 PLC 点并入已有 PLC 盒的条件 | `not_started` | "'<new_tag>' is already used by another device; giving this device the same tag would merge the two devices in EPLAN, only PLC terminals without a main function may join an existing PLC box. Choose a free tag; eplan_device_list with tag_contains shows the tags in use." |
 | `PLAN_STALE` | 规划之后，这个设备的功能发生了变化，或者新标识被占用了 | `not_started` | 提示重新调用 |
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_create` | 同 `eplan_page_create` | 同 `eplan_page_create` |
 
@@ -70,9 +70,9 @@
   - 以 `-` 开头时，先算出设备现在的结构：从 `Name` 末尾去掉 `-` 加 `FUNC_DEVICETAG_FULLNAME`（S6），再接上 `new_tag`。`Name` 不以它结尾时，要求给出完整标识。
 - **规划**：
   - 找到设备和改名范围；
-  - 检查新标识：全部功能中有不区分大小写同名、又不在改名范围内的，返回 `ALREADY_EXISTS`。EPLAN 自己不检查重名（A13）；
+  - 检查新标识：全部功能中有不区分大小写同名、又不在改名范围内的，返回 `ALREADY_EXISTS`；仅当源全部为非主 `PLCTerminal`、目标存在 `PLCBox` 时允许并入。EPLAN 自己不检查重名（A13）；
   - 一条 `update` 变更：`Property = "tag"`，表单显示为 `update device =GAA+A1-KF1: tag '=GAA+A1-KF1' -> '=GAA+A1-KF10'`；
-  - 指纹包括两部分，排序后取 SHA-256：
+  - 指纹排序后取 SHA-256，包含源功能类别与主功能状态；并入时还包含目标原功能的身份与类别：
     - 改名范围内每个功能的 `Name` 和会话内标识（`ToStringIdentifier`，A3）；
     - 带新标识的功能个数。
 
@@ -82,7 +82,7 @@
   - 在事务内通过 `Project.ParseNameAndProps` 解析新标识的结构与器件部分，再调用 `NameService.RenameDevice`；提交后按新标识重新查找，不能使用事务内的包装对象或未放置功能 ID（A55/A85）：
     - 主功能的 `Name` 必须等于新标识（EPLAN 可能丢掉这类设备不用的结构部分，A13）；
     - 项目中不能再有带旧标识的功能；
-    - 每个功能的新名称与原名称后缀逐个相符，数量相同；
+    - 每个功能的新名称与原名称后缀逐个相符，数量相同；并入 PLC 盒时还核对目标原有功能的名称、页、类别和主功能状态不变，返回的 `functions` 只计移动的点；
   - 不满足就抛出并补偿回滚；事务与撤销边界沿用 `TransactionRunner`。
 - **包装**：同 `eplan_page_create`。S9 验证过：改名后 `SafetyPoint.Rollback()` 能恢复主功能和全部辅助功能的标识。
 - **没有验证过的影响**：改名对已有连接和部件引用的影响。由 Large 测试比较改名前后设备的连接数和部件。
@@ -102,6 +102,7 @@
   - `dry_run`；`ALREADY_EXISTS`；`AMBIGUOUS_NAME`；`PLAN_STALE`；
   - 读回不一致或仍有旧标识时返回 `rolled_back`。
 - **Large**（示例项目的 scratch 副本）：
+  - `PXC.2861344` 总览宏后插入 `numbering: "keep"` 的多线宏，非主 PLC 点并入已有盒，读回两页、总览点不变、一次撤销；`PlcModuleMergeTests` 待实测。
   - 把 `=F+A2-KF1`（辅助功能在另一页，S9）改成 `-KF19`：`eplan_device_get` 读回后，主功能和两个辅助功能都是新标识，连接数和部件与改名前相同；
   - 改成已有的标识，返回 `ALREADY_EXISTS`；
   - 用 `-` 开头的短标识，结构保持不变；

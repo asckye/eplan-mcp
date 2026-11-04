@@ -11,7 +11,7 @@ namespace EplanMcp.Host.Tests.Tools;
 /// <summary>eplan_device_update through the real write pipeline against a fake Bridge (docs/tools/eplan_device_update.md, sections 3, 4, 7).</summary>
 [Trait("Size", "Medium")]
 [Collection(typeof(ToolBuildIsolation))]
-public sealed class DeviceUpdateToolTests : IDisposable
+public sealed partial class DeviceUpdateToolTests : IDisposable
 {
     private readonly WriteToolHarness _harness = new(OutsideScratchWrites.Deny);
 

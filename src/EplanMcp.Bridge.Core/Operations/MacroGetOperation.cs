@@ -23,7 +23,12 @@ public sealed class MacroGetOperation(IProjectCatalog catalog, IMacroReader read
             ? resolved
             : throw new BridgeErrorException(ErrorReason.EplanOperationFailed, MacroListOperation.NoMacroDirectory);
         string path = MacroFiles.Resolve(root, args.Macro);
-        MacroContent content = reader.ReadMacro(project.Path, path);
+        if (args.Variant < 0)
+        { throw WriteArguments.Invalid(["'variant' must be zero or greater."]); }
+        MacroContent content = reader.ReadMacro(project.Path, path, representation: args.Representation, variant: args.Variant);
+        if ((args.Representation is not null || args.Variant != 0)
+            && !content.Representations.Any(r => r.Key == (args.Representation ?? content.Representation) && r.Value.Contains(args.Variant)))
+        { throw WriteArguments.Invalid(["Select 'representation' and 'variant' from the macro's 'representations'."]); }
 
         // One entry per tag: a terminal strip or a cable appears once however many functions carry its tag; the one the
         // drawing labels wins, as in the device lists.
@@ -33,7 +38,7 @@ public sealed class MacroGetOperation(IProjectCatalog catalog, IMacroReader read
                 .Where(f => f.Category != Wire && f.Name.Length > 0)
                 .GroupBy(f => f.Name, StringComparer.Ordinal)
                 .Select(g => g.FirstOrDefault(f => f.VisibleName.Length > 0) ?? g.First())
-                .Select(f => new MacroDevice { Tag = f.Name, VisibleTag = f.VisibleName.Length == 0 ? null : f.VisibleName, Category = f.Category, Main = f.Main }),
+                .Select(f => new MacroDevice { Tag = f.Name, VisibleTag = f.VisibleName.Length == 0 ? null : f.VisibleName, Category = f.Category, Main = f.Main, Location = f.Location }),
         ];
         return new MacroGetData
         {
@@ -42,6 +47,7 @@ public sealed class MacroGetOperation(IProjectCatalog catalog, IMacroReader read
             Representations = [.. content.Representations.Select(r => new MacroRepresentation { Type = r.Key, Variants = r.Value })],
             Width = content.Width,
             Height = content.Height,
+            ReferencePoint = content.ReferencePoint,
             Devices = [.. devices.Take(MaxDevices)],
             DeviceCount = devices.Count,
             ObjectCount = content.ObjectCount,

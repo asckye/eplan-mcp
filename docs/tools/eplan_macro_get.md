@@ -11,13 +11,15 @@
 ## 1. 这个工具解决什么任务
 "这个宏里有哪些设备，有多大，有几个变体"。代理用 `eplan_macro_list` 找到宏之后，用它确认宏是否合适、要放在页上的什么位置，再调用 `eplan_macro_insert`。
 
-**与 M3b 设计 4.1 的差别**：设计中把单个宏的内容放在 `eplan_macro_list` 的 `detailed` 里。现在改为单独的工具，与 `eplan_page_list` / `eplan_page_get` 的分工相同：列表工具的参数只有过滤条件，取单个对象的工具只有对象名。
+**与 M3b 设计 4.1 的差别**：设计中把单个宏的内容放在 `eplan_macro_list` 的 `detailed` 里。现在改为单独的工具，与 `eplan_page_list` / `eplan_page_get` 的分工相同：列表工具用于过滤，取单个对象的工具按路径及可选表达/变体读取。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `macro` | string | 是 | — | `eplan_macro_list` 返回的 `path`，如 `EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema` |
 | `project` | string | 否 | EPLAN 中选中的项目 | 在哪个项目中打开宏（项目名，或 `eplan_project_list` 返回的 `path`）。宏不会被插入，项目不变 |
+| `representation` | string | 否 | 文件默认表达 | `representations[].type`，如 `Overview`、`MultiLine` |
+| `variant` | integer | 否 | 0 | 所选表达的变体编号，非负且须存在 |
 
 - `macro` 必须是宏目录之下的相对路径，扩展名为 `.ema`（SEC-19）。
 
@@ -29,29 +31,33 @@
     "path": "EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema",
     "representations": [ { "type": "MultiLine", "variants": [0, 1, 2, 3, 4, 5] } ],
     "size": { "width": 52.0, "height": 268.0 },
+    "reference_point": null,
     "devices": [
-      { "tag": "=+A1-QA1", "visibleTag": "-QA1", "category": "NoContact", "main": false },
-      { "tag": "+-WG6", "visibleTag": "-WG6", "category": "Cable", "main": true }
+      { "tag": "=+A1-QA1", "visibleTag": "-QA1", "category": "NoContact", "main": false, "location": null },
+      { "tag": "+-WG6", "visibleTag": "-WG6", "category": "Cable", "main": true, "location": null }
     ],
     "deviceCount": 8,
     "objectCount": 28
   },
   "truncated": false,
-  "hint": null
+  "hint": "Some macro coordinates are unavailable; see null reference_point or location."
 }
 ```
 - `representations`：宏有的表达类型，以及每种类型的变体编号（`GetVariants`）。电路图页用 `MultiLine`。
-- `size`：宏外框的宽和高，单位毫米。插入点对应外框的左上角（A14），代理据此选择插入位置。
+- `size`：所选表达和变体的宏外框宽高，单位毫米。
+- `reference_point`：所选表达和变体的 `WindowMacro.ReferencePoint`，`[x,y]` 毫米；读不到时为 null。`MoveKind.Absolute` 将此点放到插入坐标（A89）。
+- `devices[].location`：瞬态 `Function.Location` 原值，`[x,y]` 毫米；读不到时为 null，不中断其他设备。是否为宏内绝对坐标或相对参考点尚待实测，不擅自相减（A89）。
 - `devices`：宏中的功能（`Objects` 中的 `Function`，去掉类别为 `Wire` 的连接线），按完整标识去重，最多 50 个。示例宏有 19 个功能，去掉连接线并去重后是 8 个。标识是宏自己的占位写法（如 `+-XG8:?`），插入后结构跟随目标页，编号取决于 `numbering`（A14）。
 - `deviceCount`：宏中不同标识的个数，含没有列出的。设备超过 50 个时 `truncated = true`，`hint` 说明列出了多少。
 - 插入后标识怎样变化（结构跟随目标页、编号），写在字段描述和 `eplan_tool_usage` 中，不放在每次的 `hint` 里。
+- 坐标读不到时保留 null 并在 `hint` 告警；不因此标记截断或使读取失败。
 - 宏中的名称来自外部数据，经过 ResultShaper。
 - 一行摘要：`Macro found: MultiLine, 6 variants, 8 devices, 52 x 268 mm.`
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
 |---|---|---|
-| `INVALID_ARGUMENT` | `macro` 不是宏目录之下的相对 `.ema` 路径（绝对路径、UNC、`..`、跳出根目录、扩展名不对） | 提示用 `eplan_macro_list` 返回的 `path`，不给出宏目录的本机路径（SEC-12、SEC-19） |
+| `INVALID_ARGUMENT` | `macro` 不是宏目录之下的相对 `.ema` 路径（绝对路径、UNC、`..`、跳出根目录、扩展名不对），或表达/变体不存在 | 提示用 `eplan_macro_list` 返回的 `path`，不给出宏目录的本机路径（SEC-12、SEC-19） |
 | `MACRO_NOT_FOUND` | 宏目录中没有这个文件 | 提示用 `eplan_macro_list` 的 `name_contains` 查找 |
 | `EPLAN_OPERATION_FAILED` | EPLAN 打不开这个宏 | 附带 EPLAN 的系统消息 |
 | `PROJECT_NOT_OPEN` / `AMBIGUOUS_NAME` | 项目解析失败 | 同 `eplan_project_get` |
@@ -62,7 +68,7 @@
   - 统一分隔符，拒绝绝对路径、UNC、驱动器号、`.` 和 `..`；
   - 从根目录逐级往下检查：每一级（文件夹和文件）都必须存在，并且不是重解析点（链接、联接点），与 `eplan_macro_list` 的规则相同（SEC-19）；
   - 扩展名必须是 `.ema`。
-- **读取**：`new WindowMacro().Open(path, project)`，然后读 `RepresentationTypes`、`GetVariants(type)`、`Size`、`Objects`。S10 证实打开宏不改动项目，项目文件和功能数都不变（A14）。
+- **读取**：`new WindowMacro().Open(path, project)`，按显式参数选表达/变体，然后读 `RepresentationTypes`、`GetVariants(type)`、`ReferencePoint`、`Size`、`Objects`。S10 证实打开宏不改动项目，项目文件和功能数都不变（A14）。
 - 当前 [`EplanMacroReader`](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroReader.cs) 用 `using` 管理 `WindowMacro`，读取结果复制到 DTO。
 - `MACRO_NOT_FOUND` 已在错误码表（engineering-handbook.html#pa）中，但 Contracts 的 `ErrorReason` 中还没有，实现时补上。
 - **耗时**：S10 中打开并读取示例宏约 0.4 秒（含 Remote Client 往返），由 Large 测试测量。
@@ -73,8 +79,9 @@
 ## 7. 测试
 - **Small**：`MacroFiles.Resolve` 的格式检查：相对路径、`/` 与 `\`、绝对路径、UNC、`..`、驱动器号、扩展名、大小写；设备列表的去重与截断；摘要。
 - **Medium**（临时目录）：经联接点访问宏时返回 `INVALID_ARGUMENT`。
-- **Medium**：在假 Bridge 上测试 `MACRO_NOT_FOUND`、`INVALID_ARGUMENT`。
+- **Medium**：选择表达/变体、定位字段与 null、默认选择不变；假 Bridge 测试 `MACRO_NOT_FOUND`、`INVALID_ARGUMENT`。
 - **Large**（示例数据）：
   - `Contactor_Feedback_Control.ema` 返回 `MultiLine`、变体 0–5、尺寸 52 × 268 mm，设备中有 `-QA1`、`-WG6`（S10）；
+  - `MacroPositionTests`：`PXC/2861344.ema` 的 Overview/0 参考点 `(0,292)`；`PXC/2701290.ema` 的 MultiLine/0 参考点 `(16,168)`，设备含 location（待实测）；
   - 调用前后项目 `.edb` 中的文件不变。
 - **Agent 评测**："`Contactor_Feedback_Control` 这个宏里有哪些设备？"

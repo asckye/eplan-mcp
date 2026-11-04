@@ -79,7 +79,7 @@ internal sealed class EplanMacroReader : IMacroReader
         }
         List<KeyValuePair<string, List<int>>> representations = [.. macro.RepresentationTypes
             .Select(t => new KeyValuePair<string, List<int>>(t.ToString(), [.. macro.GetVariants(t)]))];
-        string? selected = representation ?? (defaultMultiLine ? "MultiLine" : null);
+        string? selected = representation ?? (defaultMultiLine ? "MultiLine" : variant != 0 ? macro.RepresentationType.ToString() : null);
         if (selected is not null && representations.Any(r => r.Key == selected && r.Value.Contains(variant)))
         {
             macro.Open(macroPath, project, (WindowMacro.Enums.RepresentationType)Enum.Parse(typeof(WindowMacro.Enums.RepresentationType), selected), variant, false);
@@ -95,6 +95,7 @@ internal sealed class EplanMacroReader : IMacroReader
             Representations = representations,
             Width = size.X,
             Height = size.Y,
+            ReferencePoint = Point(() => macro.ReferencePoint),
             Functions =
             [
                 .. objects.OfType<Function>().Select(f => new MacroFunctionRecord
@@ -104,10 +105,24 @@ internal sealed class EplanMacroReader : IMacroReader
                     VisibleName = f.VisibleName ?? string.Empty,
                     Category = f.FunctionCategory.ToString(),
                     Main = f.IsMainFunction,
+                    Location = Point(() => f.Location),
                 }),
             ],
             ObjectCount = objects.Length,
             MacroBoxCount = objects.OfType<MacroBox>().Count(),
         };
+    }
+
+    private static double[]? Point(Func<PointD> read)
+    {
+        try
+        {
+            PointD point = read();
+            if (double.IsNaN(point.X) || double.IsInfinity(point.X) || double.IsNaN(point.Y) || double.IsInfinity(point.Y))
+            { throw new InvalidOperationException("Macro coordinates are not finite."); }
+            return [point.X, point.Y];
+        }
+        catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+        { WriteExceptionDiagnostics.Report(ex); return null; }
     }
 }

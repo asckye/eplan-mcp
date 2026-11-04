@@ -16,7 +16,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         Function[] named = Named(finder, tag);
-        if (MainFunction(named) is not { } main)
+        if (Representative(named) is not { } main)
         {
             return null;
         }
@@ -29,7 +29,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
             DeviceTag = own.IsEmpty ? string.Empty : own.ToString(),
             VisibleName = main.VisibleName ?? string.Empty,
             Functions = [.. named.Select(f => new DeviceNames.NamedFunction { Name = f.Name ?? string.Empty, Id = f.ToStringIdentifier(), IsMain = f.IsMainFunction, Category = Category(f), Page = f.Page?.Name })],
-            SubFunctions = [.. EplanNativePreconditions.Valid(main.SubFunctions).Select(f => f.Name ?? string.Empty)],
+            SubFunctions = [.. EplanNativePreconditions.Valid(main.IsMainFunction ? main.SubFunctions : []).Select(f => f.Name ?? string.Empty)],
         };
     }
 
@@ -54,7 +54,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         Project project = EplanProjects.ByPath(projectPath);
         using var finder = new DMObjectsFinder(project);
         Function[] named = Named(finder, tag);
-        Function main = MainFunction(named) ?? throw new InvalidOperationException("The planned device has no main function any more.");
+        Function main = Representative(named) ?? throw new InvalidOperationException("The planned device has no main function or terminal-only representative any more.");
         using var parsed = new FunctionPropertyList();
         using var additional = new FunctionPropertyList();
         using var newName = new FunctionBasePropertyList();
@@ -81,7 +81,8 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         return [.. EplanNativePreconditions.Valid(finder.GetFunctions(null)).Where(f => f.Name == tag || (f.Name ?? string.Empty).StartsWith(tag + ":", StringComparison.Ordinal))];
     }
 
-    /// <summary>The main function that stands for the device: the one with a shown tag, else the first (A12).</summary>
-    private static Function? MainFunction(Function[] named) =>
-        named.FirstOrDefault(f => f.IsMainFunction && DeviceTags.Shown(f.VisibleName) is not null) ?? named.FirstOrDefault(f => f.IsMainFunction);
+    /// <summary>The main function (A12), or the first point of a terminal-only PLC module (A89).</summary>
+    private static Function? Representative(Function[] named) =>
+        named.FirstOrDefault(f => f.IsMainFunction && DeviceTags.Shown(f.VisibleName) is not null) ?? named.FirstOrDefault(f => f.IsMainFunction)
+        ?? (named.Length > 0 && named.All(f => !f.IsMainFunction && Category(f) == "PLCTerminal") ? named[0] : null);
 }

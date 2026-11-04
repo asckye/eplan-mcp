@@ -48,6 +48,8 @@ namespace Eplan.EplApi.DataModel.MasterData
     {
         public Dictionary<WindowMacro.Enums.RepresentationType, Dictionary<int, Placement[]>> Representations { get; } = [];
         public List<(WindowMacro.Enums.RepresentationType Representation, int Variant)> Selections { get; } = [];
+        public Dictionary<(WindowMacro.Enums.RepresentationType, int), PointD> ReferencePoints { get; } = [];
+        public Exception? ReferencePointError { get; set; }
     }
     internal sealed class WindowMacro : IDisposable
     {
@@ -63,6 +65,8 @@ namespace Eplan.EplApi.DataModel.MasterData
         public int[] GetVariants(Enums.RepresentationType type) => [.. State!.Representations[type].Keys];
         public Placement[] Objects => State!.Representations[RepresentationType][Variant];
         public PointD Size => new(20, 30);
+        public PointD ReferencePoint => State!.ReferencePointError is { } error ? throw error
+            : State.ReferencePoints.GetValueOrDefault((RepresentationType, Variant));
         public void Open(string path, Project project) => Open(path, project, false);
         public void Open(string path, Project project, bool useCache)
         {

@@ -21,6 +21,9 @@ public sealed class MacroGetData
     /// <summary>The height of the macro's outline, in millimetres.</summary>
     public double Height { get; set; }
 
+    /// <summary>The selected macro reference point in mm, or null when unavailable.</summary>
+    public double[]? ReferencePoint { get; set; }
+
     /// <summary>The macro's functions other than wires, one per tag, in the macro's order; at most <c>MacroGetOperation.MaxDevices</c>.</summary>
     public List<MacroDevice> Devices { get; set; } = [];
 
@@ -55,4 +58,7 @@ public sealed class MacroDevice
 
     /// <summary>Whether the function is a main function.</summary>
     public bool Main { get; set; }
+
+    /// <summary>Unmodified Function.Location coordinates in mm, or null when unavailable.</summary>
+    public double[]? Location { get; set; }
 }

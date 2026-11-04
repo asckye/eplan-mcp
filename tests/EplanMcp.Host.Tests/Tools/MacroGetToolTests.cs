@@ -18,10 +18,11 @@ public sealed class MacroGetToolTests
         Representations = [new MacroRepresentation { Type = "MultiLine", Variants = [0, 1, 2, 3, 4, 5] }],
         Width = 52,
         Height = 268.004,
+        ReferencePoint = [0, 292],
         Devices =
         [
-            new MacroDevice { Tag = "=+A1-QA1", VisibleTag = "-QA1", Category = "NoContact" },
-            new MacroDevice { Tag = "+-WG6", VisibleTag = "-WG6", Category = "Cable", Main = true },
+            new MacroDevice { Tag = "=+A1-QA1", VisibleTag = "-QA1", Category = "NoContact", Location = [44, 132] },
+            new MacroDevice { Tag = "+-WG6", VisibleTag = "-WG6", Category = "Cable", Main = true, Location = [12, 64] },
         ],
         DeviceCount = 2,
         ObjectCount = 28,
@@ -49,6 +50,9 @@ public sealed class MacroGetToolTests
 
         var args = (MacroGetArgs)_bridge.LastArgs!;
         Assert.Equal((Feedback, "Line1"), (args.Macro, args.Project));
+        Assert.Equal((null, 0), (args.Representation, args.Variant));
+        Assert.Equal([0d, 292d], macro.GetProperty("reference_point").EnumerateArray().Select(p => p.GetDouble()));
+        Assert.Equal([12d, 64d], cable.GetProperty("location").EnumerateArray().Select(p => p.GetDouble()));
     }
 
     [Theory]
@@ -113,8 +117,55 @@ public sealed class MacroGetToolTests
         Assert.Null(result.StructuredContent);
     }
 
+    [Theory]
+    [InlineData("Overview", 0)]
+    [InlineData("MultiLine", 1)]
+    public async Task MacroGet_PositionAndSelectionReachTheProtocol(string representation, int variant)
+    {
+        _data.ReferencePoint = [0, 292];
+        _data.Devices[0].Location = [44, 132];
+        _data.Devices[1].Location = null;
+        JsonElement macro = Structured(await MacroTools.MacroGetAsync(_bridge, "PXC/2861344.ema", representation: representation,
+            variant: variant, cancellationToken: TestContext.Current.CancellationToken)).GetProperty("macro");
+        Assert.Equal([0d, 292d], macro.GetProperty("reference_point").EnumerateArray().Select(p => p.GetDouble()));
+        Assert.Equal([44d, 132d], macro.GetProperty("devices")[0].GetProperty("location").EnumerateArray().Select(p => p.GetDouble()));
+        Assert.Equal(JsonValueKind.Null, macro.GetProperty("devices")[1].GetProperty("location").ValueKind);
+        var args = Assert.IsType<MacroGetArgs>(_bridge.LastArgs);
+        Assert.Equal((representation, variant), (args.Representation, args.Variant));
+    }
+
+    [Fact]
+    public async Task MacroGet_InvalidCoordinatesAreNullWithoutFailingTheResult()
+    {
+        _data.ReferencePoint = [double.NaN, 0];
+        _data.Devices[0].Location = [0, double.PositiveInfinity];
+        JsonElement macro = Structured(await Get(Feedback)).GetProperty("macro");
+        Assert.Equal(JsonValueKind.Null, macro.GetProperty("reference_point").ValueKind);
+        Assert.Equal(JsonValueKind.Null, macro.GetProperty("devices")[0].GetProperty("location").ValueKind);
+    }
+
+    [Fact]
+    public async Task MacroGet_UnavailableCoordinatesWarnWithoutMarkingTheResultTruncated()
+    {
+        _data.ReferencePoint = null;
+        _data.Devices[0].Location = null;
+        JsonElement result = Structured(await Get(Feedback));
+        Assert.False(result.GetProperty("truncated").GetBoolean());
+        Assert.Contains("coordinates are unavailable", result.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.Equal(JsonValueKind.Null, result.GetProperty("macro").GetProperty("reference_point").ValueKind);
+        Assert.Equal(JsonValueKind.Null, result.GetProperty("macro").GetProperty("devices")[0].GetProperty("location").ValueKind);
+    }
+
+    [Fact]
+    public async Task MacroGet_NegativeVariantIsRejectedBeforeBridge()
+    {
+        CallToolResult result = await MacroTools.MacroGetAsync(_bridge, Feedback, variant: -1, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Equal(ErrorReason.InvalidArgument, Error(result).GetProperty("reason").GetString());
+        Assert.Equal(0, _bridge.Invocations);
+    }
+
     private Task<CallToolResult> Get(string macro, string? project = null) =>
-        MacroTools.MacroGetAsync(_bridge, macro, project, TestContext.Current.CancellationToken);
+        MacroTools.MacroGetAsync(_bridge, macro, project, cancellationToken: TestContext.Current.CancellationToken);
 
     private static string Text(CallToolResult result, int index) => ((TextContentBlock)result.Content[index]).Text;
 

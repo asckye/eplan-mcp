@@ -6,7 +6,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// </summary>
 public interface IDeviceRenamer
 {
-    /// <summary>The device whose main function's full tag is exactly <paramref name="tag"/> (ordinal); null when there is none.</summary>
+    /// <summary>The device or terminal-only PLC module whose full tag is exactly <paramref name="tag"/> (ordinal); null when there is none.</summary>
     public DeviceNames? ReadDevice(string projectPath, string tag);
 
     /// <summary>The name of every function of the project, main and auxiliary, for checking that a new tag is free.</summary>

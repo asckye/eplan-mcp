@@ -12,14 +12,18 @@ Append a part reference to an existing device:
 
     {"project": "Line1", "tag": "=GAA+A1-SF91", "part": "SIE.3SB3400-0B", "variant": "1"}
 
+Join a multi-line macro's non-main PLC points to an existing PLC box (suffixes stay unchanged):
+
+    {"project": "Line1", "tag": "=GAA+A1-A?", "new_tag": "=GAA+A1-A1", "dry_run": false}
+
 ## Workflow
 
 Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. Find the device's full tag with eplan_device_list (`tag_contains`) or eplan_device_get. A shown tag such as `-KF1` works when only one device shows it.
-2. Provide `new_tag`, `part`, or both. For renaming, check that the new tag is free with eplan_device_list (`tag_contains`). The tool refuses a tag another device uses, because EPLAN would merge the two devices.
+2. Provide `new_tag`, `part`, or both. For renaming, check that the new tag is free with eplan_device_list (`tag_contains`). Only a module consisting entirely of non-main PLCTerminal functions may join an existing PLCBox tag; other collisions are refused.
 3. A `new_tag` starting with `-` keeps the device's structure; a full tag sets it. Copy the structure of similar devices: EPLAN drops structure parts a kind of device does not use, and the tool then changes nothing.
-   PLC points and other function suffixes are preserved: `=K1+A2-A0015:3.1` becomes `=K1+A2-KE1:3.1` when the device is renamed to `=K1+A2-KE1`. Readback reacquires every function after commit.
+   PLC points and other function suffixes are preserved: `=K1+A2-A0015:3.1` becomes `=K1+A2-KE1:3.1` when the device is renamed to `=K1+A2-KE1`. Readback reacquires every function after commit; a PLC join also checks the existing box and overview points are unchanged. The function count covers only moved points.
 4. For part assignment, use eplan_part_search to find a part and variant in the current database. `variant` requires `part` and defaults to `"1"`. The device must have exactly one main function, placed or unplaced. `tag` remains the device tag; the main function itself may have a connection-point suffix. Existing references are kept.
 5. The plan names each change, including `add part <part> (variant <v>) to <tag>`. `dry_run` returns the plan without writing. A combined update renames first, then appends the reference; one Ctrl+Z in EPLAN reverts the entire step. Committed references are read back from fresh objects.
 6. Repeating a rename fails with DEVICE_NOT_FOUND because the old tag no longer exists; repeating a part assignment fails with INVALID_ARGUMENT because the reference already exists. Never repeat a call that ended in OUTCOME_UNKNOWN; check with eplan_device_get instead.
@@ -50,6 +54,6 @@ Every error carries `execution`: `not_started` and `rolled_back` mean the projec
 - INVALID_ARGUMENT (`rolled_back`): the committed part reference or main function differs from the plan; or EPLAN named the device differently, because this kind of device does not use every part of the new tag. For rename mismatches, `metadata.requested` and `metadata.actual` show both. Use the structure of similar devices.
 - PART_NOT_FOUND (`not_started`): use eplan_part_search to find the part in the current database. Ambiguous case-insensitive matches require an exact part number.
 - DEVICE_NOT_FOUND, AMBIGUOUS_NAME: as for eplan_device_get; pass one of `metadata.candidates` as `tag`.
-- ALREADY_EXISTS (`not_started`): another device uses the new tag; `metadata.existing` lists its functions. Choose a free tag.
+- ALREADY_EXISTS (`not_started`): another device uses the new tag and this is not a non-main PLCTerminal module joining an existing PLCBox; `metadata.existing` lists its functions. Choose a free tag.
 - PLAN_STALE (`not_started`): the device's functions or part references changed, or the new tag came into use, while the call waited; call again.
 - POLICY_DENIED, APPROVAL_DENIED, APPROVAL_EXPIRED, WRITES_SUSPENDED, AUDIT_UNAVAILABLE (`not_started`), OUTCOME_UNKNOWN (`unknown`), LOCK_FAILED, EPLAN_OPERATION_FAILED, INTERNAL, and the connection errors: as for eplan_page_create.

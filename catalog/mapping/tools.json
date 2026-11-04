@@ -6086,6 +6086,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
           },
           {
+            "name": "ConnectionCreateLimitTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionCreateLimitTests.cs"
+          },
+          {
             "name": "PageReviewCableFixTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewCableFixTests.cs"
@@ -6156,6 +6161,16 @@
             "file": "tests/EplanMcp.Large.Tests/DanglingInterruptionTests.cs"
           },
           {
+            "name": "DeferredConnectionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeferredConnectionTests.cs"
+          },
+          {
+            "name": "EmptyConnectionDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/EmptyConnectionDefinitionTests.cs"
+          },
+          {
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
@@ -6181,6 +6196,11 @@
             "name": "ConnectionCreateExecutionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateExecutionTests.cs"
+          },
+          {
+            "name": "ConnectionDeferredGenerationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionDeferredGenerationTests.cs"
           },
           {
             "name": "ConnectionDefinitionPointTests",
@@ -6376,6 +6396,16 @@
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
           },
           {
+            "name": "DeferredConnectionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeferredConnectionTests.cs"
+          },
+          {
+            "name": "EmptyConnectionDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/EmptyConnectionDefinitionTests.cs"
+          },
+          {
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
@@ -6555,6 +6585,11 @@
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
+          },
+          {
+            "name": "DeferredConnectionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeferredConnectionTests.cs"
           },
           {
             "name": "DeviceAndConnectionTests",
@@ -7145,6 +7180,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "PlcModuleMergeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcModuleMergeTests.cs"
           },
           {
             "name": "WriteSafetyTests",
@@ -7810,9 +7850,19 @@
             "file": "tests/EplanMcp.Large.Tests/DanglingInterruptionTests.cs"
           },
           {
+            "name": "DeferredConnectionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeferredConnectionTests.cs"
+          },
+          {
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
+          },
+          {
+            "name": "EmptyConnectionDefinitionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/EmptyConnectionDefinitionTests.cs"
           },
           {
             "name": "InterruptionPairingSpikeTests",
@@ -7863,6 +7913,11 @@
             "name": "PlcOverviewSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
+          },
+          {
+            "name": "PlcRepresentationTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
           },
           {
             "name": "SelectionSpikeTests",
@@ -8220,6 +8275,11 @@
             "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
           },
           {
+            "name": "PlcModuleMergeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcModuleMergeTests.cs"
+          },
+          {
             "name": "WriteSafetyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/WriteSafetyTests.cs"
@@ -8235,6 +8295,11 @@
             "name": "DeviceUpdateOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DeviceUpdateOperationTests.cs"
+          },
+          {
+            "name": "PlcModuleMergeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlcModuleMergeTests.cs"
           }
         ]
       },
@@ -9901,6 +9966,11 @@
             "file": "tests/EplanMcp.Large.Tests/LanguageSetTests.cs"
           },
           {
+            "name": "PlacementLanguageRound4Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementLanguageRound4Tests.cs"
+          },
+          {
             "name": "ProjectTranslateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectTranslateTests.cs"
@@ -9980,13 +10050,19 @@
         "spec": "docs/tools/eplan_macro_get.md",
         "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
-          "A14"
+          "A14",
+          "A89"
         ],
         "tests": [
           {
             "name": "MacroGetToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/MacroGetToolTests.cs"
+          },
+          {
+            "name": "MacroPositionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroPositionTests.cs"
           },
           {
             "name": "MacroTests",
@@ -10280,6 +10356,16 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
+            "name": "EmptyMacroBlockTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/EmptyMacroBlockTests.cs"
+          },
+          {
+            "name": "MacroGroupedPlacementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroGroupedPlacementTests.cs"
+          },
+          {
             "name": "MacroInsertTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroInsertTests.cs"
@@ -10293,6 +10379,16 @@
             "name": "PlanDependencyPredictionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanDependencyPredictionTests.cs"
+          },
+          {
+            "name": "PlcModuleMergeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcModuleMergeTests.cs"
+          },
+          {
+            "name": "PlcRepresentationTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
           }
         ],
         "operationTests": [
@@ -12076,9 +12172,19 @@
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
           },
           {
+            "name": "EmptyMacroBlockTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/EmptyMacroBlockTests.cs"
+          },
+          {
             "name": "ImportDxfTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportDxfTests.cs"
+          },
+          {
+            "name": "MacroGroupedPlacementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroGroupedPlacementTests.cs"
           },
           {
             "name": "MacroInsertTests",
@@ -12116,9 +12222,19 @@
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
           },
           {
+            "name": "PlcModuleMergeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcModuleMergeTests.cs"
+          },
+          {
             "name": "PlcOverviewSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
+          },
+          {
+            "name": "PlcRepresentationTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
           },
           {
             "name": "WriteSafetyTests",
@@ -12621,6 +12737,11 @@
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
           },
           {
+            "name": "EmptyMacroBlockTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/EmptyMacroBlockTests.cs"
+          },
+          {
             "name": "FullPropertyReadTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/FullPropertyReadTests.cs"
@@ -12634,6 +12755,11 @@
             "name": "InterruptionVariantSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionVariantSpikeTests.cs"
+          },
+          {
+            "name": "MacroGroupedPlacementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroGroupedPlacementTests.cs"
           },
           {
             "name": "MacroInsertTests",
@@ -12674,6 +12800,16 @@
             "name": "PlacementGraphicsCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementGraphicsCreateTests.cs"
+          },
+          {
+            "name": "PlacementLanguageRound4Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementLanguageRound4Tests.cs"
+          },
+          {
+            "name": "PlacementRotationRound4Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementRotationRound4Tests.cs"
           },
           {
             "name": "PlacementTextCreateTests",
@@ -15077,6 +15213,11 @@
             "file": "tests/EplanMcp.Large.Tests/LayoutGuardWarningTests.cs"
           },
           {
+            "name": "MacroGroupedPlacementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroGroupedPlacementTests.cs"
+          },
+          {
             "name": "PlacementDeleteTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
@@ -15092,9 +15233,19 @@
             "file": "tests/EplanMcp.Large.Tests/PlacementGraphicsCreateTests.cs"
           },
           {
+            "name": "PlacementLanguageRound4Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementLanguageRound4Tests.cs"
+          },
+          {
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
+          },
+          {
+            "name": "PlacementRotationRound4Tests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementRotationRound4Tests.cs"
           },
           {
             "name": "PlacementTextCreateTests",
@@ -15122,6 +15273,11 @@
             "name": "PageGetOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageGetOperationTests.cs"
+          },
+          {
+            "name": "PlacementLanguageRegressionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementLanguageRegressionTests.cs"
           },
           {
             "name": "PlacementTextCreateExecuteOperationTests",
@@ -15179,6 +15335,11 @@
             "name": "PlacementDeleteProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementDeleteProtocolTests.cs"
+          },
+          {
+            "name": "MacroGroupedPlacementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroGroupedPlacementTests.cs"
           },
           {
             "name": "PlacementDeleteTests",
@@ -15784,6 +15945,11 @@
             "name": "ConnectionCreateExecutionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionCreateExecutionTests.cs"
+          },
+          {
+            "name": "ConnectionDeferredGenerationTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ConnectionDeferredGenerationTests.cs"
           },
           {
             "name": "ConnectionDefinitionPointTests",
@@ -18537,6 +18703,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanStepExecuteOperationTests.cs"
           },
           {
+            "name": "PlcModuleMergeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlcModuleMergeTests.cs"
+          },
+          {
             "name": "DeviceRenumberOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DeviceRenumberOperationTests.cs"
@@ -20489,6 +20660,11 @@
             "name": "PlanStepExecuteOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlanStepExecuteOperationTests.cs"
+          },
+          {
+            "name": "PlcModuleMergeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlcModuleMergeTests.cs"
           },
           {
             "name": "DeviceRenumberOperationTests",

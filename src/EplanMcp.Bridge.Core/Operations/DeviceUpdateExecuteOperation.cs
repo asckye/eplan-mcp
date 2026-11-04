@@ -49,7 +49,8 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             { MainName = request.ResultTag, VisibleName = request.Main?.VisibleName ?? string.Empty, Renamed = request.Device.Functions.Count };
             // A17: a kind that ignores a part of the tag gets a third name at once, and the open transaction can still take
             // it back. The old name alone proves nothing: wrappers can show it until the commit (A85).
-            if (request.Rename && back.MainName != request.NewTag && back.MainName != request.Device.Tag)
+            if (request.Rename && back.MainName != request.NewTag && back.MainName != request.Device.Tag
+                && !(request.MergeTarget is not null && DeviceUpdateRequest.BelongsTo(back.MainName, request.NewTag)))
             { throw Misnamed(request, back.MainName); }
             if (request.Part is { } part)
             { assigner!.AddPart(request.Project.Path, request.Main!.Id, part.PartNumber, part.Variant!); }
@@ -97,19 +98,22 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             throw Misnamed(request, back.MainName);
         }
 
-        string[] expected = [.. request.Device.Functions.Select(f => request.NewTag + (f.Name.Length == 0 ? "" : f.Name.Substring(request.Device.Tag.Length))).OrderBy(n => n, StringComparer.Ordinal)];
-        string[] names = [.. actual.Functions.Select(f => f.Name.Length == 0 ? actual.Tag : f.Name).OrderBy(n => n, StringComparer.Ordinal)];
+        string[] expected = [.. request.Device.Functions.Select(f => Signature(f, request.NewTag + (f.Name.Length == 0 ? "" : f.Name.Substring(request.Device.Tag.Length))))
+            .Concat(request.MergeTarget?.Functions.Select(f => Signature(f, f.Name)) ?? []).OrderBy(n => n, StringComparer.Ordinal)];
+        string[] names = [.. actual.Functions.Select(f => Signature(f, f.Name.Length == 0 ? actual.Tag : f.Name)).OrderBy(n => n, StringComparer.Ordinal)];
+        string Signature(DeviceNames.NamedFunction function, string name) => request.MergeTarget is null ? name
+            : $"{name}\t{function.IsMain}\t{function.Category}\t{function.Page}";
         if (!expected.SequenceEqual(names, StringComparer.Ordinal)
             || renamer.FunctionNames(request.Project.Path).Any(n => DeviceUpdateRequest.BelongsTo(n, request.Device.Tag)))
         {
             throw ReadBack(
-                $"After the rename, functions still carried '{request.Device.Tag}', so nothing was renamed. Ask the engineer to check the device in EPLAN.",
+                $"After the rename, the functions did not match the plan or still carried '{request.Device.Tag}', so the change was rolled back. Ask the engineer to check the device in EPLAN.",
                 request.NewTag,
                 request.Device.Tag);
         }
         back.MainName = actual.Tag;
         back.VisibleName = actual.VisibleName;
-        back.Renamed = actual.Functions.Count;
+        back.Renamed = request.Device.Functions.Count;
     }
 
     private static BridgeErrorException Misnamed(DeviceUpdateRequest request, string actual) => ReadBack(

@@ -11,6 +11,8 @@
 | R4-5 空块读取（A89） | `EmptyMacroBlockTests` | NOT RUN：PXC.2861289 Overview (0,292) 插入、完整绘图读回和一步撤销。 |
 | R4-6 多语言文字（A89） | `PlacementLanguageRound4Tests` | NOT RUN：20语言长文本、仅 de_DE 在 warn 下带警告提交，恢复原语言设置。 |
 | R4-7 无属性定义点（A89） | `EmptyConnectionDefinitionTests` | NOT RUN：无颜色/截面/标识/部件的 CDP，默认生成、点位读回与一步撤销。 |
+| R4-8 宏定位信息（A89） | `MacroPositionTests` | NOT RUN：PXC/2861344 Overview 0 参考点 (0,292)、PXC/2701290 MultiLine 0 参考点 (16,168) 与功能位置；记录 location 原值及相对参考点的差值，坐标含义待实测。 |
+| R4-9 PLC 点并入盒（A89） | `PlcModuleMergeTests` | NOT RUN：PXC.2861344 总览与多线宏，非主 PLCTerminal 并入已存在 PLCBox，保留后缀和两侧表达，提交后读回，一次撤销恢复。现有 page_get/device_get 不返回符号名，PLC_CBOX_PCON_PLUG 仅有负责人实测依据，正式工具符号读回未覆盖。 |
 | G8 可选端子符号（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 X2_2、KA1_PE 的库名、符号、变体、编号及逐次单步撤销。 |
 | G6 母线定义（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 BBDEF 主功能与两个 BCP 同属一个器件、逐次单步撤销。 |
 | G5 黑盒（2026-11-03 brief；g4probe A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 60×40 黑盒、DCP 0/2/4 同器件与框内列表、后缀及逐步单次撤销。 |

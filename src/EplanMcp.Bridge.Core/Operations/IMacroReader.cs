@@ -61,6 +61,8 @@ public sealed class MacroContent
     /// <summary>The outline's height, in millimetres.</summary>
     public double Height { get; set; }
 
+    public double[]? ReferencePoint { get; set; }
+
     /// <summary>Every function in the macro, in the macro's order.</summary>
     public List<MacroFunctionRecord> Functions { get; set; } = [];
 
@@ -88,4 +90,6 @@ public sealed class MacroFunctionRecord
 
     /// <summary><c>Function.IsMainFunction</c>.</summary>
     public bool Main { get; set; }
+
+    public double[]? Location { get; set; }
 }

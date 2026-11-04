@@ -28,6 +28,7 @@ internal sealed class DeviceUpdateRequest
     public string NewTag { get; }
 
     public bool Rename { get; private set; }
+    public DeviceNames? MergeTarget { get; private set; }
     public DevicePartTarget? Main { get; private set; }
     public PartSearchItem? Part { get; private set; }
     public string ResultTag => !Rename && Main is not null ? Main.Name : NewTag;
@@ -101,12 +102,21 @@ internal sealed class DeviceUpdateRequest
             if (main!.Parts.Any(p => p.PartNumber == selected.PartNumber && p.Variant == selected.Variant))
             { throw Invalid("There is nothing to change: the main function already references this part and variant."); }
         }
-        return new DeviceUpdateRequest(project, device, target, taken) { Rename = newTag.Length > 0, Main = main, Part = selected };
+        DeviceNames? destination = taken.Length > 0 && device.Functions.Count > 0 && device.Functions.All(f => !f.IsMain && f.Category == "PLCTerminal")
+            ? renamer.ReadDevice(project.Path, target) : null;
+        return new DeviceUpdateRequest(project, device, target, taken)
+        {
+            Rename = newTag.Length > 0,
+            Main = main,
+            Part = selected,
+            MergeTarget = destination?.Functions.Any(f => f.Category == "PLCBox") == true ? destination : null,
+        };
     }
 
     /// <summary>The plan's state: each function to rename by name and session identifier, and how many carry the new tag.</summary>
     public string StateFingerprint() =>
-        Fingerprint.Of(Device.Functions.Select(f => (f.Name.Length == 0 ? Device.Tag : f.Name) + "\t" + f.Id).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture))
+        Fingerprint.Of(Device.Functions.Select(f => (f.Name.Length == 0 ? Device.Tag : f.Name) + "\t" + f.Id + "\t" + f.IsMain + "\t" + f.Category).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture))
+            .Concat(MergeTarget?.Functions.Select(f => f.Name + "\t" + f.Id + "\t" + f.IsMain + "\t" + f.Category) ?? [])
             .Concat(Main is null ? [] : Main.Parts.Select(p => FormattableString.Invariant($"{p.PartNumber}\t{p.Variant}\t{p.Count}")).Append(Main.Id).Append(Main.Name))
             .Concat(Part is null ? [] : new[] { Part.PartNumber, Part.Variant ?? string.Empty }));
 
@@ -126,11 +136,11 @@ internal sealed class DeviceUpdateRequest
     /// <summary>ALREADY_EXISTS when another device carries the new tag: EPLAN would merge them (A13: it does not check).</summary>
     public void CheckFree()
     {
-        if (Taken.Count > 0)
+        if (Taken.Count > 0 && MergeTarget is null)
         {
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
-                $"'{NewTag}' is already used by another device; giving this device the same tag would merge the two devices in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
+                $"'{NewTag}' is already used by another device; giving this device the same tag would merge the two devices in EPLAN, only PLC terminals without a main function may join an existing PLC box. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = Project.Name, ["existing"] = string.Join("\n", Taken.Take(ProjectResolver.MaxCandidates)) });
         }

@@ -32,7 +32,7 @@ internal sealed class DeviceWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(DeviceUpdateResult))]
-    [Description("Renames a device, preserving function suffixes, or appends a part to its unique main function. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.")]
+    [Description("Renames a device preserving suffixes; terminal-only PLC modules may join an existing PLC box. Or append a part to its unique main function. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.")]
     public static async Task<CallToolResult> DeviceUpdateAsync(
         WritePipeline pipeline,
         [Description("Name or path from eplan_project_list")] string project,
