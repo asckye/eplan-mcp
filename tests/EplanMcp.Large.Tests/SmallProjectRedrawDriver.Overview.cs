@@ -10,76 +10,13 @@ internal sealed partial class SmallProjectRedrawDriver
     private static readonly string[] _blockPointArrayFields = ["points", "boundingBox"];
     private readonly HashSet<string> _incompleteOverviewPages = new(StringComparer.Ordinal);
 
-    private async Task InsertOverviewMacrosAsync(string page, JObject[] objects)
-    {
-        foreach (JObject box in objects.Where(o => Text(o["category"]) == "PLCBox" || Type(o) == "PLC"))
-        {
-            JObject? part = Objects(box["parts"]).FirstOrDefault();
-            if (part is null)
-            {
-                report.Note(page, Type(box), Id(box), "PLC box has no exported part reference; using individual objects.");
-                continue;
-            }
-            await ObserveAsync(page, box, async () =>
-            {
-                JObject? result = await InvokeAsync(page, "eplan_macro_insert", new JObject
-                {
-                    ["page"] = page,
-                    ["part"] = part["part"]?.DeepClone(),
-                    ["part_variant"] = part["variant"]?.DeepClone(),
-                    ["representation"] = "Overview",
-                    ["variant"] = (int?)box["symbol"]?["variant"] ?? 0,
-                    ["x"] = OverviewMacroPosition.X,
-                    ["y"] = OverviewMacroPosition.Y,
-                    ["macro_box"] = false,
-                }, [box]);
-                if (result is null)
-                {
-                    report.Note(page, Type(box), Id(box), "Overview macro insertion failed; continuing with individual objects.");
-                    return;
-                }
-                JObject[] cards = Objects(result["devices"]).Where(d => Text(d["category"]) == "PLCBox").ToArray();
-                if (cards.Length != 1 || Text(cards[0]["tag"]) is not string inserted || Text(box["name"]) is not string wanted)
-                {
-                    report.Warning(page, "Inserted Overview PLC box has no unambiguous tag; rename and device coverage remain unverified.");
-                    return;
-                }
-                if ((bool?)result["recovered"] != true && inserted != wanted)
-                {
-                    if (await InvokeAsync(page, "eplan_device_update", new JObject { ["tag"] = inserted, ["new_tag"] = wanted }, [box]) is null)
-                    { return; }
-                }
-                // A85: commit changes suffix-bearing functions; only fresh post-commit names prove coverage.
-                JObject[] actual = await ReadDrawingsAsync(page, box);
-                if (!_lastDrawingReadComplete)
-                {
-                    report.Warning(page, "Overview macro device coverage is unverified because the post-rename drawing read was incomplete.");
-                    return;
-                }
-                JObject[] boxes = actual.Where(a => Text(a["kind"]) == Type(box) && Text(a["properties"]?["name"]) == wanted).ToArray();
-                if (boxes.Length == 1 && TryPoint(box["location"], out double[] from) && TryPoint(boxes[0]["location"], out double[] to))
-                {
-                    report.Note(page, Type(box), Id(box), FormattableString.Invariant(
-                        $"Overview PLC box position: source=({from[0]},{from[1]}); target=({to[0]},{to[1]}); dx={to[0] - from[0]}; dy={to[1] - from[1]} (mm)."));
-                }
-                HashSet<string> members = MacroMemberIds(box, objects);
-                foreach (JObject candidate in objects.Where(o => members.Contains(Id(o)) && IsDevice(o)))
-                {
-                    if (actual.Any(a => DrawingMatches(candidate, a)))
-                    {
-                        _covered.Add(Key(page, candidate));
-                        report.Note(page, Type(candidate), Id(candidate), "Covered by the Overview macro after fresh name and geometry readback.");
-                    }
-                    else
-                    { report.Warning(page, Type(candidate) + " " + Id(candidate) + ": Overview macro device readback did not match the source."); }
-                }
-                _placedTags.Add(wanted);
-            });
-        }
-    }
-
     private async Task ReconcileOverviewGraphicsAsync(string page, JObject[] objects)
     {
+        if (_macroPages.Contains(page))
+        {
+            await ReplaceOverviewMacroTextAsync(page, objects);
+            return;
+        }
         _incompleteOverviewPages.Add(page);
         JObject evidence = objects.FirstOrDefault() ?? new JObject { ["type"] = "Page" };
         JObject[] read = await ReadDrawingsAsync(page, evidence);
@@ -114,13 +51,7 @@ internal sealed partial class SmallProjectRedrawDriver
             // Macro text lacks the complete source languages: always rebuild it, even at identical geometry.
             JObject? match = Type(source) is "Text" or "PathText" ? null : available.FirstOrDefault(a => GraphicMatches(source, a));
             if (match is null)
-            {
-                if (Id(source).Contains("/members/", StringComparison.Ordinal)
-                    && read.Any(a => Text(a["properties"]?["grouped"]) == "true" && GraphicMatches(source, a)))
-                { report.Warning(page, Type(source) + " " + Id(source) + ": corresponding target is already grouped, but its block name is unreadable; membership cannot be reconstructed without guessing."); }
-                else
-                { missing.Add(source); }
-            }
+            { missing.Add(source); }
             else
             {
                 available.Remove(match);
@@ -158,6 +89,8 @@ internal sealed partial class SmallProjectRedrawDriver
 
     private async Task CreateOverviewBlocksAsync(string page, JObject[] objects)
     {
+        if (_macroPages.Contains(page))
+        { return; }
         foreach (JObject block in objects.Where(o => Type(o) == "Block"))
         {
             await ObserveAsync(page, block, async () =>
@@ -227,9 +160,9 @@ internal sealed partial class SmallProjectRedrawDriver
         && IsUngroupedDrawing(actual);
 
     private static bool IsUngroupedDrawing(JObject actual) => actual["parent"]?.Type is null or JTokenType.Null
-        && Text(actual["properties"]?["grouped"]) != "true" && actual["locator"] is JObject;
+        && actual["locator"] is JObject;
 
-    private static bool GraphicMatches(JObject source, JObject actual)
+    private static bool GraphicMatches(JObject source, JObject actual, bool compareStyle = true)
     {
         if (Type(source) != Text(actual["kind"]) || !ClosePoint(source["location"], actual["location"]))
         { return false; }
@@ -250,13 +183,13 @@ internal sealed partial class SmallProjectRedrawDriver
         }
         else
         { return false; }
-        if (source["layer"] is not null && !CloseReadNumber(source["layer"], properties["layer"]))
+        if (compareStyle && source["layer"] is not null && !CloseReadNumber(source["layer"], properties["layer"]))
         { return false; }
-        if (source["alignment"] is not null && Text(source["alignment"]) != Text(properties["alignment"]))
+        if (compareStyle && source["alignment"] is not null && Text(source["alignment"]) != Text(properties["alignment"]))
         { return false; }
         if (source["angle"] is not null && !SameAngle(source["angle"], properties["angle"]))
         { return false; }
-        if (source["pen"] is JObject pen)
+        if (compareStyle && source["pen"] is JObject pen)
         {
             foreach ((string from, string to) in new[] { ("color", "pen_color"), ("width", "pen_width_mm"), ("style", "pen_style"), ("patternLength", "pen_pattern_length"), ("lineEndType", "pen_line_end") })
             {
@@ -281,7 +214,7 @@ internal sealed partial class SmallProjectRedrawDriver
                 : new[] { ("radius", "radius_mm", false), ("startAngle", "start_angle", true), ("endAngle", "end_angle", true) })
             {
                 if (!(angle ? SameAngle(source[from], properties[to]) : from == "ellipseAngle"
-                    ? CloseReadNumber(source[from], properties[to]) : CloseGeometryNumber(source[from], properties[to])))
+                    ? SameRadianAngle(source[from], properties[to]) : CloseGeometryNumber(source[from], properties[to])))
                 { return false; }
             }
         }
@@ -300,6 +233,22 @@ internal sealed partial class SmallProjectRedrawDriver
     private static bool Near(double value, double? other) => other is double number && Math.Abs(value - number) <= 0.0100000001;
     private static bool CloseGeometryNumber(JToken? left, JToken? right) => Number(left) is double value && Near(value, ReadNumber(right));
     private static bool CloseReadNumber(JToken? left, JToken? right) => Number(left) is double value && ReadNumber(right) is double other && Math.Abs(value - other) <= 0.000001;
-    private static bool SameAngle(JToken? radians, JToken? degrees) => Number(radians) is double angle && ReadNumber(degrees) is double other
-        && Math.Abs((angle == -16002 ? angle : angle * 180 / Math.PI) - other) <= 0.000001;
+    private static bool SameRadianAngle(JToken? left, JToken? right)
+    {
+        if (Number(left) is not double value || ReadNumber(right) is not double other)
+        { return false; }
+        if (value == -16002 || other == -16002)
+        { return value == other; }
+        double difference = Math.Abs((value - other) % (2 * Math.PI));
+        return Math.Min(difference, 2 * Math.PI - difference) <= 0.000001;
+    }
+    private static bool SameAngle(JToken? radians, JToken? degrees)
+    {
+        if (Number(radians) is not double angle || ReadNumber(degrees) is not double other)
+        { return false; }
+        if (angle == -16002 || other == -16002)
+        { return angle == other; }
+        double difference = Math.Abs((angle * 180 / Math.PI - other) % 360);
+        return Math.Min(difference, 360 - difference) <= 0.000001;
+    }
 }

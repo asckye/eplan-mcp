@@ -121,6 +121,9 @@ public sealed partial class PageExportAction
             {
                 Read(row, "propertyId", displayed, "AnyPropertyId.AsInt", () => displayed.AsInt);
                 Read(row, "propertyIndex", displayed, "AnyPropertyId.Index", () => displayed.Index);
+                using PropertyDefinition? definition = Get<PropertyDefinition?>(row, displayed, "AnyPropertyId.Definition", () => displayed.Definition);
+                if ((int?)row["propertyId"] is int id)
+                { ReadPropertyName(id, definition, row); }
             }
             finally
             { displayed.Dispose(); GC.KeepAlive(property); }

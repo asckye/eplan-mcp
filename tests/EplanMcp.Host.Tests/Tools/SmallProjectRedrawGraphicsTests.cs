@@ -96,14 +96,14 @@ public sealed class SmallProjectRedrawGraphicsTests
     }
 
     [Theory]
-    [InlineData("Circle", 0, 360)]
+    [InlineData("Circle", 90, 90)]
     [InlineData("Arc", 90, 180)]
     public async Task CircularGeometry_PreservesCircleAndArcAngleMappings(string kind, double start, double end)
     {
         JObject source = Arc(kind);
         source["radius"] = 3.5;
         source["startAngle"] = Math.PI / 2;
-        source["endAngle"] = Math.PI;
+        source["endAngle"] = kind == "Circle" ? Math.PI / 2 : Math.PI;
 
         (JObject[] items, _) = await DrawAsync(source);
 

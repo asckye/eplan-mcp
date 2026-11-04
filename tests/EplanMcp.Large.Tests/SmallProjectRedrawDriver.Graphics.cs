@@ -9,7 +9,7 @@ internal sealed partial class SmallProjectRedrawDriver
     private async Task DrawGraphicsAsync(string page, JObject[] objects)
     {
         var mapped = new List<(JObject Source, JObject Item)>();
-        foreach (JObject item in objects.Where(IsGraphic).Where(item => !_covered.Contains(Key(page, item))))
+        foreach (JObject item in objects.Where(IsGraphic).Where(item => !_covered.Contains(Key(page, item)) && !_unresolvedMacroGraphics.Contains(Key(page, item))))
         {
             if (Type(item) is "Text" or "PathText" && IsEmptyText(item["content"]))
             {
@@ -70,10 +70,9 @@ internal sealed partial class SmallProjectRedrawDriver
                 {
                     item["kind"] = "arc";
                     item["radius_mm"] = source["radius"]?.DeepClone();
-                    // Arc.StartAngle/EndAngle use radians; a native circle conventionally exports 0/0.
-                    bool circle = Text(source["kind"]) == "Circle";
-                    item["start_angle"] = circle ? 0 : RequiredNumber(source["startAngle"]) * 180 / Math.PI;
-                    item["end_angle"] = circle ? 360 : RequiredNumber(source["endAngle"]) * 180 / Math.PI;
+                    // Equal native angles preserve a circle's orientation as well as its radius.
+                    item["start_angle"] = RequiredNumber(source["startAngle"]) * 180 / Math.PI;
+                    item["end_angle"] = RequiredNumber(source["endAngle"]) * 180 / Math.PI;
                 }
                 if (Text(source["kind"]) is not ("Circle" or "Arc" or "Ellipse") || (bool?)source["sector"] == true)
                 { report.Note(page, Type(source), Id(source), "Exported arc kind or sector semantics have no placement_create parameter."); }

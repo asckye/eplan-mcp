@@ -5,6 +5,7 @@ namespace EplanMcp.Large.Tests;
 
 internal sealed partial class SmallProjectRedrawDriver
 {
+    private static readonly string[] _propertyParentIdentityFields = ["type", "oid", "page", "project"];
     private readonly Dictionary<string, (JObject[] Items, bool Complete)> _drawingCache = new(StringComparer.Ordinal);
 
     private async Task MovePropertiesAsync(string page, JObject[] objects)
@@ -17,30 +18,56 @@ internal sealed partial class SmallProjectRedrawDriver
         var moves = new List<(JObject Source, JObject Move)>();
         foreach (IGrouping<string, JObject> group in properties.GroupBy(p => p["parentOid"]?.ToString() ?? "", StringComparer.Ordinal))
         {
-            JObject? owner = objects.FirstOrDefault(o => Id(o) == group.Key && Type(o) is not ("PropertyPlacement" or "ContextPropertyPlacement"));
-            JObject[] parents = owner is null ? [] : actual.Where(a => a["parent"]?.Type is null or JTokenType.Null && DrawingMatches(owner, a)).ToArray();
+            JObject[] owners = objects.Where(o => Id(o) == group.Key && Type(o) is not ("PropertyPlacement" or "ContextPropertyPlacement")).ToArray();
+            JObject? owner = owners.Length == 1 ? owners[0] : null;
+            JObject[] parents = owner is null ? [] : PropertyParents(page, owner, actual);
             if (owner is null || parents.Length != 1)
             {
                 foreach (JObject item in group)
-                { report.Warning(page, Type(item) + " " + Id(item) + ": source or target parent is absent or ambiguous; no property move was guessed."); }
+                {
+                    report.Warning(page, Type(item) + " " + Id(item) + ": property " + item["propertyId"] + " index " + item["propertyIndex"]
+                    + " source or target parent is absent or ambiguous (source candidates=" + owners.Length + ", target candidates="
+                    + parents.Length + ", source owner=" + owner?["name"] + "); no property move was guessed.");
+                }
                 continue;
             }
             JObject parent = parents[0];
+            var available = actual.Where(a => Text(a["kind"]) is "PropertyPlacement" or "ContextPropertyPlacement"
+                && SameParent(a["parent"], parent["locator"])).ToList();
             foreach (JObject item in group)
             {
                 await ObserveAsync(page, item, () =>
                 {
-                    string? propertyId = item["propertyId"]?.ToString();
-                    JObject[] matches = actual.Where(a => JToken.DeepEquals(a["parent"], parent["locator"])
-                        && Text(a["properties"]?["property_id"]) == propertyId).ToArray();
-                    // Exported propertyIndex is AnyPropertyId.Index, not the target collection slot.
-                    if (matches.Length != 1 || group.Count(p => p["propertyId"]?.ToString() == propertyId) != 1
-                        || !int.TryParse(Text(matches[0]["properties"]?["property_index"]), NumberStyles.None, CultureInfo.InvariantCulture, out int targetSlot))
-                    { throw new InvalidDataException("Displayed property ID is absent or ambiguous, or the target collection slot is unreadable; no selector was guessed."); }
-                    JObject target = matches[0];
-                    JObject current = target["properties"] as JObject ?? new JObject();
                     double[] offset = Point(item["location"]), origin = Point(owner["location"]);
                     double[] desired = [origin[0] + offset[0], origin[1] + offset[1]];
+                    (int? propertyId, int? propertyIndex, string? inferred) = PropertyIdentity(item, owner, available, desired);
+                    if (propertyId is null)
+                    { throw new InvalidDataException("Displayed property ID cannot be inferred from exported content and position; no selector was guessed."); }
+                    if (inferred is not null)
+                    { report.Note(page, Type(item), Id(item), "Displayed property " + propertyId + " index " + propertyIndex + " inferred from " + inferred + "."); }
+                    JObject[] candidates = available.Where(a => DisplayedPropertyId(a) == propertyId).ToArray();
+                    JObject[] unreadable = available.Where(a => DisplayedPropertyId(a) is null).ToArray();
+                    JObject? target = MatchProperty(item, owner, propertyId.Value, propertyIndex, group.ToArray(), candidates, desired)
+                        ?? MatchProperty(item, owner, propertyId.Value, propertyIndex, group.ToArray(), unreadable, desired, allowSingle: false);
+                    if (target is null)
+                    {
+                        if (_lastDrawingReadComplete && candidates.Length == 0 && unreadable.Length == 0)
+                        {
+                            report.MissingPropertyPlacement(page, Type(item), Id(item), propertyId, propertyIndex,
+                            "Target owner exists, but its default property placements do not contain this displayed property; no tool can create it.");
+                        }
+                        else
+                        {
+                            report.Warning(page, Type(item) + " " + Id(item) + ": displayed property " + propertyId + " index " + propertyIndex
+                            + " has absent or ambiguous target content/position; the target collection slot is not the native property index, so no selector was guessed.");
+                        }
+                        return Task.CompletedTask;
+                    }
+                    // The MCP property_index is the collection slot, not exported AnyPropertyId.Index.
+                    if (Integer(target["properties"]?["property_index"]) is not int targetSlot)
+                    { throw new InvalidDataException("Target property collection slot is unreadable; no selector was guessed."); }
+                    available.Remove(target);
+                    JObject current = target["properties"] as JObject ?? new JObject();
                     int angle = PropertyAngle(item["angle"]);
                     double[] position = Point(target["location"]);
                     bool different = Math.Abs(desired[0] - position[0]) > 0.01 || Math.Abs(desired[1] - position[1]) > 0.01
@@ -49,7 +76,7 @@ internal sealed partial class SmallProjectRedrawDriver
                     var move = new JObject
                     {
                         ["parent"] = parent["locator"]!.DeepClone(),
-                        ["property_id"] = item["propertyId"]!.DeepClone(),
+                        ["property_id"] = propertyId.Value,
                         ["property_index"] = targetSlot,
                         ["x_mm"] = desired[0],
                         ["y_mm"] = desired[1],
@@ -91,6 +118,89 @@ internal sealed partial class SmallProjectRedrawDriver
                 ["property_moves"] = new JArray(batch.Select(m => m.Move)),
             }, batch.Select(m => m.Source).ToArray());
         }
+    }
+
+    private JObject[] PropertyParents(string page, JObject source, JObject[] actual)
+    {
+        var candidates = actual.Where(a => a["parent"]?.Type is null or JTokenType.Null
+            && Type(source) == Text(a["kind"]) && ClosePoint(source["location"], a["location"])
+            && (Text(a["locator"]?["page"]) is not string targetPage || targetPage == page)).ToArray();
+        string? name = Text(source["name"]);
+        JObject[] exact = candidates.Where(a => string.Equals(name ?? "", Text(a["properties"]?["name"]) ?? "", StringComparison.Ordinal)).ToArray();
+        if (exact.Length > 0 || name is null)
+        { return exact; }
+        string mapped = _actualNames.GetValueOrDefault(name, name);
+        // Device placement can return the owner's tag for a terminal. Preserve the terminal designation.
+        if (name.LastIndexOf(':') is int colon && colon >= 0 && !mapped.Contains(':', StringComparison.Ordinal))
+        { mapped += name[colon..]; }
+        return candidates.Where(a => Text(a["properties"]?["name"]) == mapped).ToArray();
+    }
+
+    private static bool SameParent(JToken? first, JToken? second) => first is JObject && second is JObject
+        && _propertyParentIdentityFields.All(field => JToken.DeepEquals(first[field], second[field]));
+
+    private static int? Integer(JToken? token) => int.TryParse(token?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value) ? value : null;
+
+    private static int? DisplayedPropertyId(JObject target)
+    {
+        int? id = Integer(target["properties"]?["property_id"]) ?? Integer(target["properties"]?["displayed_property_id"]);
+        return id > 0 ? id : null;
+    }
+
+    private static (int? Id, int? Index, string? Inferred) PropertyIdentity(JObject item, JObject owner, List<JObject> targets, double[] desired)
+    {
+        int? id = Integer(item["propertyId"]), index = Integer(item["propertyIndex"]);
+        if (id > 0)
+        { return (id, index, null); }
+        var values = Objects(owner["properties"]).Where(p => Integer(p["id"]) > 0
+            && (index is null || Integer(p["index"]) == index) && ContentsOverlap(item["content"], p["value"]))
+            .Select(p => (Id: Integer(p["id"]), Index: Integer(p["index"]))).Distinct().ToArray();
+        if (values.Length == 1)
+        { return (values[0].Id, index ?? values[0].Index, "the owner's exported property value"); }
+        JObject[] positioned = targets.Where(t => ClosePoint(new JArray(desired), t["location"]) && DisplayedPropertyId(t) is not null).ToArray();
+        JObject[] content = positioned.Where(t => ContentMatches(item["content"], t)).ToArray();
+        JObject[] evidence = content.Length > 0 ? content : positioned;
+        if (evidence.Length == 1)
+        { return (DisplayedPropertyId(evidence[0]), index, "the target's unique absolute position and available content"); }
+        return (null, index, null);
+    }
+
+    private static JObject? MatchProperty(JObject item, JObject owner, int id, int? index, JObject[] siblings,
+        JObject[] candidates, double[] desired, bool allowSingle = true)
+    {
+        if (candidates.Length == 0)
+        { return null; }
+        JToken? indexedValue = Objects(owner["properties"]).FirstOrDefault(p => Integer(p["id"]) == id && Integer(p["index"]) == index)?["value"];
+        JObject[] content = candidates.Where(t => ContentMatches(item["content"], t) || ContentMatches(indexedValue, t)).ToArray();
+        if (content.Length == 1)
+        { return content[0]; }
+        bool repeatedId = siblings.Count(s => Integer(s["propertyId"]) == id) > 1;
+        JObject[] located = (content.Length > 0 ? content : candidates).Where(t => ClosePoint(new JArray(desired), t["location"])
+            && (!repeatedId || content.Length > 0 || !HasContent(item["content"]) || !HasContent(t["properties"]?["display"]))).ToArray();
+        if (located.Length == 1)
+        { return located[0]; }
+        // A single readable ID on each side identifies a pair even when its style needs moving.
+        return allowSingle && candidates.Length == 1 && siblings.Count(s => Integer(s["propertyId"]) == id) == 1 ? candidates[0] : null;
+    }
+
+    private static bool ContentMatches(JToken? content, JObject target)
+    {
+        if (ContentsOverlap(content, target["properties"]?["display"]))
+        { return true; }
+        string? text = Text(target["properties"]?["text"]);
+        return content is JObject languages && languages.Properties().Any(p => !string.IsNullOrEmpty(Text(p.Value))
+            && text == p.Name + "@" + Text(p.Value) + ";");
+    }
+
+    private static bool HasContent(JToken? value) => value is JObject languages
+        ? languages.Properties().Any(p => !string.IsNullOrEmpty(Text(p.Value))) : !string.IsNullOrEmpty(Text(value));
+
+    private static bool ContentsOverlap(JToken? left, JToken? right)
+    {
+        static IEnumerable<string> Values(JToken? value) => value is JObject languages
+            ? languages.Properties().Select(p => p.Value.ToString()).Where(v => !string.IsNullOrEmpty(v))
+            : value is JValue && !string.IsNullOrEmpty(value.ToString()) ? [value.ToString()] : [];
+        return Values(left).Intersect(Values(right), StringComparer.Ordinal).Any();
     }
 
     private static int PropertyAngle(JToken? value)

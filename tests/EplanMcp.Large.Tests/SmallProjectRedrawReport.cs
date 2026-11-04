@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using EplanMcp.Tests;
 using Newtonsoft.Json.Linq;
 
@@ -15,7 +16,28 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
     private readonly List<JObject> _warnings = [];
     private readonly List<JObject> _pages = [];
     private readonly List<JObject> _infrastructureErrors = [];
+    private readonly List<JObject> _missingPropertyPlacements = [];
+    private readonly JObject _propertyNames = new();
     private readonly Dictionary<string, double> _pageElapsed = new(StringComparer.Ordinal);
+    private readonly Dictionary<(string Page, string Type, string Oid), JObject> _origins = [];
+    private readonly List<JObject> _macroVersionDifferences = [];
+
+    internal void RecordOrigin(string page, JObject source, string origin)
+    {
+        if (origin is not ("macro" or "part" or "symbol_fallback" or "manual_graphics"))
+        { throw new ArgumentOutOfRangeException(nameof(origin)); }
+        string type = (string?)source["type"] ?? "Page", oid = source["oid"]?.ToString() ?? "";
+        _origins[(page, type, oid)] = new JObject { ["page"] = page, ["objectType"] = type, ["oid"] = oid, ["origin"] = origin };
+    }
+
+    internal void RecordMacroVersionDifference(string page, JObject source, string requestedMacro, string actualMacro, string reason)
+    {
+        JObject item = ObjectNote(page, (string?)source["type"] ?? "Page", source["oid"]?.ToString() ?? "", reason);
+        item["requestedMacro"] = requestedMacro;
+        item["actualMacro"] = actualMacro;
+        item["source"] = source.DeepClone();
+        _macroVersionDifferences.Add(item);
+    }
 
     internal void RecordPageElapsed(string page, TimeSpan elapsed) => _pageElapsed[page] = elapsed.TotalMilliseconds;
 
@@ -42,11 +64,28 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
 
     internal void Warning(string page, string reason) => _warnings.Add(new JObject { ["page"] = page, ["reason"] = reason });
 
+    internal void MissingPropertyPlacement(string page, string type, string oid, int? propertyId, int? propertyIndex, string reason)
+    {
+        JObject note = ObjectNote(page, type, oid, reason);
+        note["propertyId"] = propertyId;
+        note["propertyIndex"] = propertyIndex;
+        _missingPropertyPlacements.Add(note);
+        Warning(page, type + " " + oid + ": " + reason);
+    }
+
     internal void InfrastructureError(string stage, string reason) =>
         _infrastructureErrors.Add(new JObject { ["stage"] = stage, ["reason"] = reason });
 
     internal void AddPage(string name, JObject? source, JObject? target, string? sourceFile = null, string? targetFile = null)
     {
+        foreach (JObject? page in new[] { source, target })
+        {
+            if (page?["propertyNames"] is JObject names)
+            {
+                foreach (JProperty property in names.Properties())
+                { _propertyNames[property.Name] ??= property.Value.DeepClone(); }
+            }
+        }
         if (source is null)
         {
             Warning(name, "Source export is missing or unreadable; no source object count can be established.");
@@ -88,7 +127,9 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
             ["comparisonMode"] = reportPage ? "report fields" : "native objects and page fields",
             ["totals"] = SumCounts(types.Properties().Select(property => (JObject)property.Value)),
             ["types"] = types,
+            ["originStatistics"] = OriginStatistics(_origins.Values.Where(item => (string?)item["page"] == name)),
             ["pageDifferences"] = new JArray(comparison.PageDifferences.Select(Field)),
+            ["groupStructureDifferences"] = new JArray(comparison.PageDifferences.Where(field => IsGroupField(field.Field)).Select(Field)),
             ["subsetDifferenceCount"] = comparison.SubsetDifferenceCount,
             ["subsetDifferences"] = new JArray(comparison.SubsetDifferences.Select(SubsetField)),
             ["readWarnings"] = new JArray(comparison.Warnings.Select(warning => new JObject
@@ -131,18 +172,46 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
                 ["reasons"] = new JArray(group.Select(item => (string)item["reason"]!).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal)),
                 ["objects"] = new JArray(group.Select(item => item.DeepClone())),
             });
-        IEnumerable<JObject> differentFields = _pages.SelectMany(page => ((JArray)page["pageDifferences"]!).OfType<JObject>()
+        // One multilingual property is one difference per object, regardless of language count.
+        IEnumerable<string> differentFields = _pages.SelectMany(page =>
+            ((JArray)page["pageDifferences"]!).OfType<JObject>().Select(field => RankingField((string)field["field"]!)).Distinct(StringComparer.Ordinal)
             .Concat(((JObject)page["types"]!).Properties().SelectMany(type =>
-                ((JArray)type.Value["differentObjects"]!).SelectMany(item => ((JArray)item["fields"]!).OfType<JObject>()))));
-        var fields = differentFields.GroupBy(field => (string)field["field"]!, StringComparer.Ordinal)
+                ((JArray)type.Value["differentObjects"]!).SelectMany(item => ((JArray)item["fields"]!).OfType<JObject>()
+                    .Select(field => RankingField((string)field["field"]!)).Distinct(StringComparer.Ordinal)))));
+        var fields = differentFields.GroupBy(field => field, StringComparer.Ordinal)
             .OrderByDescending(group => group.Count()).ThenBy(group => group.Key, StringComparer.Ordinal)
-            .Select(group => new JObject { ["field"] = group.Key, ["count"] = group.Count() });
+            .Select(group => new JObject { ["field"] = group.Key, ["name"] = PropertyName(group.Key), ["count"] = group.Count() });
+        var missingPropertyIds = _missingPropertyPlacements.GroupBy(item => (int?)item["propertyId"])
+            .OrderByDescending(group => group.Count()).ThenBy(group => group.Key)
+            .Select(group => new JObject
+            {
+                ["propertyId"] = group.Key,
+                ["name"] = group.Key is int id ? _propertyNames[id.ToString(CultureInfo.InvariantCulture)]?.DeepClone() : null,
+                ["count"] = group.Count(),
+            });
         return new JObject
         {
             ["run"] = run,
             ["project"] = project,
             ["matchingRateDefinition"] = "matched / (matched + missing + extra + different); null when no native objects were compared. Subset differences are listed separately and excluded. Report pages use the comparer's report-field comparison.",
             ["positionTolerance"] = PageExportComparer.PositionTolerance,
+            ["propertyNames"] = _propertyNames.DeepClone(),
+            ["objectOrigins"] = new JArray(_origins.Values.Select(item => item.DeepClone())),
+            ["originStatistics"] = OriginStatistics(_origins.Values),
+            ["pageOriginStatistics"] = new JArray(_pageElapsed.Keys.Union(_pages.Select(page => (string)page["name"]!), StringComparer.Ordinal)
+                .Order(StringComparer.Ordinal).Select(page => new JObject
+                {
+                    ["page"] = page,
+                    ["statistics"] = OriginStatistics(_origins.Values.Where(item => (string?)item["page"] == page)),
+                })),
+            ["macroVersionDifferenceCount"] = _macroVersionDifferences.Count,
+            ["macroVersionDifferences"] = new JArray(_macroVersionDifferences.Select(item => item.DeepClone())),
+            ["missingPropertyPlacementCount"] = _missingPropertyPlacements.Count,
+            ["missingPropertyPlacements"] = new JArray(_missingPropertyPlacements.Select(item => item.DeepClone())),
+            ["missingPropertyIds"] = new JArray(missingPropertyIds),
+            ["groupStructureDifferenceCount"] = _pages.Sum(page => ((JArray)page["groupStructureDifferences"]!).Count),
+            ["groupStructureDifferences"] = new JArray(_pages.SelectMany(page => ((JArray)page["groupStructureDifferences"]!).OfType<JObject>()
+                .Select(field => new JObject { ["page"] = page["name"]!.DeepClone(), ["difference"] = field.DeepClone() }))),
             ["ignoredFields"] = new JArray(PageExportComparer.Ignored.Select(rule => new JObject { ["field"] = rule.Member, ["reason"] = rule.Reason })),
             ["subsetFields"] = new JArray(PageExportComparer.SubsetFields.Select(rule => new JObject { ["field"] = rule.Member, ["name"] = rule.Name, ["reason"] = rule.Reason })),
             ["subsetDifferenceCount"] = _pages.Sum(page => (int)page["subsetDifferenceCount"]!),
@@ -209,6 +278,24 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
         foreach (JObject timing in ((JArray)report["pageTimings"]!).OfType<JObject>())
         { text.AppendLine("| " + Escape((string)timing["page"]!) + " | " + timing["elapsedMilliseconds"] + " | " + timing["drawingReadCalls"] + " |"); }
         text.AppendLine();
+        text.AppendLine("## Object origins");
+        text.AppendLine();
+        text.AppendLine("Shares use classified source objects; each source object has one final origin. Unmapped objects remain in warnings and comparison results.");
+        text.AppendLine();
+        text.AppendLine("| Page | From macros | From parts | Symbol fallback | Manual graphics | Classified objects | Manual types |");
+        text.AppendLine("| --- | ---: | ---: | ---: | ---: | ---: | --- |");
+        AppendOrigins(text, "All pages", (JObject)report["originStatistics"]!);
+        foreach (JObject row in ((JArray)report["pageOriginStatistics"]!).OfType<JObject>())
+        { AppendOrigins(text, (string)row["page"]!, (JObject)row["statistics"]!); }
+        text.AppendLine();
+        text.AppendLine("## Macro version differences (" + report["macroVersionDifferenceCount"] + ")");
+        text.AppendLine();
+        foreach (JObject item in _macroVersionDifferences)
+        {
+            text.AppendLine("- " + Escape((string)item["page"]!) + " / " + Escape((string)item["objectType"]!) + " " + item["oid"]
+                + ": " + Escape((string)item["requestedMacro"]!) + " → " + Escape((string)item["actualMacro"]!) + "; " + Escape((string)item["reason"]!));
+        }
+        text.AppendLine();
         text.AppendLine("## Subset differences (" + report["subsetDifferenceCount"] + ")");
         text.AppendLine();
         foreach (JObject item in ((JArray)report["subsetDifferences"]!).OfType<JObject>())
@@ -237,11 +324,29 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
                 + Escape(string.Join("; ", ((JArray)item["reasons"]!).Values<string>())));
         }
         text.AppendLine();
+        text.AppendLine("## Group structure differences (" + report["groupStructureDifferenceCount"] + ")");
+        text.AppendLine();
+        foreach (JObject item in ((JArray)report["groupStructureDifferences"]!).OfType<JObject>())
+        {
+            JToken field = item["difference"]!;
+            text.AppendLine("- " + Escape((string)item["page"]!) + " / " + Escape((string)field["field"]!) + ": "
+                + Escape(field["source"]!.ToString(Newtonsoft.Json.Formatting.None)) + " → "
+                + Escape(field["target"]!.ToString(Newtonsoft.Json.Formatting.None)));
+        }
+        text.AppendLine();
+        text.AppendLine("## Missing default property placements (" + report["missingPropertyPlacementCount"] + ")");
+        text.AppendLine();
+        foreach (JObject item in ((JArray)report["missingPropertyIds"]!).OfType<JObject>())
+        {
+            text.AppendLine("- " + (item["propertyId"]?.Type == JTokenType.Null ? "Unknown property ID" : item["propertyId"])
+            + " " + Escape((string?)item["name"] ?? "") + ": " + item["count"]);
+        }
+        text.AppendLine();
         text.AppendLine("## Most frequent different fields");
         text.AppendLine();
         foreach (JObject field in ((JArray)report["differentFields"]!).OfType<JObject>())
         {
-            text.AppendLine("- " + Escape((string)field["field"]!) + ": " + field["count"]);
+            text.AppendLine("- " + Escape((string)field["field"]!) + " " + Escape((string?)field["name"] ?? "") + ": " + field["count"]);
         }
         AppendNotes(text, "Notes", _notes);
         AppendNotes(text, "Warnings", _warnings);
@@ -258,6 +363,43 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
         ["oid"] = oid,
         ["reason"] = reason,
     };
+
+    private static bool IsGroupField(string field) => field == "groups" || field.StartsWith("groups[", StringComparison.Ordinal);
+
+    private static JObject OriginStatistics(IEnumerable<JObject> origins)
+    {
+        JObject[] items = origins.ToArray();
+        var result = new JObject { ["total"] = items.Length };
+        foreach (string origin in new[] { "macro", "part", "symbol_fallback", "manual_graphics" })
+        {
+            JObject[] selected = items.Where(item => (string?)item["origin"] == origin).ToArray();
+            result[origin] = new JObject
+            {
+                ["count"] = selected.Length,
+                ["share"] = items.Length == 0 ? null : (double)selected.Length / items.Length,
+                ["types"] = JObject.FromObject(selected.GroupBy(item => (string)item["objectType"]!, StringComparer.Ordinal)
+                    .OrderBy(group => group.Key, StringComparer.Ordinal).ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal)),
+            };
+        }
+        return result;
+    }
+
+    private static void AppendOrigins(StringBuilder text, string page, JObject statistics)
+    {
+        string Cell(string origin) => statistics[origin]!["count"] + " ("
+            + (statistics[origin]!["share"]?.Type == JTokenType.Null ? "N/A" : ((double)statistics[origin]!["share"]!).ToString("P2", CultureInfo.InvariantCulture)) + ")";
+        var types = (JObject)statistics["manual_graphics"]!["types"]!;
+        text.AppendLine("| " + Escape(page) + " | " + Cell("macro") + " | " + Cell("part") + " | " + Cell("symbol_fallback") + " | " + Cell("manual_graphics") + " | " + statistics["total"]
+            + " | " + string.Join(", ", types.Properties().Select(item => item.Name + "=" + item.Value)) + " |");
+    }
+
+    private static string RankingField(string field) => Regex.Replace(field, @"\.(?:[a-z]{2}_[A-Z]{2}|\?\?_\?\?)(?=\.|$)", "", RegexOptions.CultureInvariant);
+
+    private string? PropertyName(string field)
+    {
+        Match match = Regex.Match(field, @"properties(?:\[id=|\.)(\d+)", RegexOptions.CultureInvariant);
+        return match.Success ? (string?)_propertyNames[match.Groups[1].Value] : null;
+    }
 
     private static JObject Field(PageExportFieldDifference field) => new()
     {

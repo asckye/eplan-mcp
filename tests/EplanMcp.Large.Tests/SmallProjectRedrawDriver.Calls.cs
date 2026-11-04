@@ -25,7 +25,8 @@ internal sealed partial class SmallProjectRedrawDriver
     private async Task<JObject?> InvokeAsync(string page, string tool, JObject args, JObject[] items, bool write = true,
         Action<JObject>? onFailure = null)
     {
-        args["project"] = project;
+        if (tool != "eplan_macro_list")
+        { args["project"] = project; }
         if (write)
         { args["dry_run"] = false; }
         if (tool is "eplan_placement_create" or "eplan_connection_create")
@@ -43,6 +44,11 @@ internal sealed partial class SmallProjectRedrawDriver
             { success = false; }
             string? error = success ? null : (result["error"] ?? result).ToString(Newtonsoft.Json.Formatting.None);
             report.RecordCall(page, tool, items.Select(Type), items.Select(Id), args, result, success, error);
+            if (success && tool == "eplan_placement_create")
+            {
+                foreach (JObject item in items.Where(IsGraphic))
+                { report.RecordOrigin(page, item, "manual_graphics"); }
+            }
             if (noConnections)
             { report.Note(page, "Connection", "", "Connection generation did not start because no connections were added or removed; see the recorded result."); }
             if (!success)

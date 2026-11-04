@@ -8,7 +8,6 @@ namespace EplanMcp.Large.Tests;
 internal sealed partial class SmallProjectRedrawDriver(
     Func<string, JObject, Task<JObject>> call, string project, string importsRoot, SmallProjectRedrawReport report)
 {
-    internal static readonly (double X, double Y) OverviewMacroPosition = (0, 292);
     private readonly Dictionary<string, string> _actualNames = new(StringComparer.Ordinal);
     private readonly HashSet<string> _placedTags = new(StringComparer.Ordinal);
     private readonly HashSet<string> _attemptedPages = new(StringComparer.Ordinal);
@@ -44,31 +43,26 @@ internal sealed partial class SmallProjectRedrawDriver(
         // Opening the page is an MCP read/UI operation and makes it observable during a live run.
         await InvokeAsync(page, "eplan_page_open", new JObject { ["page"] = page }, [source], write: false);
 
-        if (Text(source["pageType"]) == "Overview")
-        { await InsertOverviewMacrosAsync(page, objects); }
+        await InsertMacrosAsync(page, objects, Text(source["pageType"]) ?? "Circuit", allPages);
 
         foreach (JObject item in objects.Where(IsDevice).OrderBy(DeviceOrder))
         {
-            if (!_covered.Contains(Key(page, item)))
-            { await ObserveAsync(page, item, () => PlaceDeviceAsync(page, item)); }
+            if (!_covered.Contains(Key(page, item)) && !_macroOwned.Contains(Key(page, item)))
+            { await ObserveAsync(page, item, () => PlaceDeviceWithPartAsync(page, item, objects)); }
         }
         foreach (JObject item in objects.Where(o => Type(o) == "LocationBox"))
         {
-            if (!_covered.Contains(Key(page, item)))
+            if (!_covered.Contains(Key(page, item)) && !_macroOwned.Contains(Key(page, item)))
             { await ObserveAsync(page, item, () => PlaceLocationBoxAsync(page, item)); }
         }
-        foreach (JObject item in objects.Where(o => Type(o) is "SymbolReference" or "InterruptionPoint"))
-        {
-            if (!_covered.Contains(Key(page, item)))
-            { await ObserveAsync(page, item, () => PlaceNodeAsync(page, item, allPages)); }
-        }
+        await PlaceNodesAsync(page, objects, allPages);
 
         await InvokeAsync(page, "eplan_connection_generate", new JObject { ["pages"] = new JArray(page) },
             objects.Where(o => IsDevice(o) || Type(o) is "SymbolReference" or "InterruptionPoint").ToArray());
         await PlaceDefinitionsAsync(page, objects);
-        foreach (JObject item in objects.Where(o => Type(o) == "Cable" && !_covered.Contains(Key(page, o))))
-        { await ObserveAsync(page, item, () => PlaceCableAsync(page, item, source)); }
         await PlacePotentialsAsync(page, objects);
+        foreach (JObject item in objects.Where(o => Type(o) == "Cable" && !_covered.Contains(Key(page, o)) && !_macroOwned.Contains(Key(page, o))))
+        { await ObserveAsync(page, item, () => PlaceCableAsync(page, item, source)); }
         if (Text(source["pageType"]) == "Overview")
         { await ReconcileOverviewGraphicsAsync(page, objects); }
         else
@@ -133,7 +127,7 @@ internal sealed partial class SmallProjectRedrawDriver(
         }
     }
 
-    private async Task PlaceDeviceAsync(string page, JObject item)
+    private async Task PlaceDeviceAsync(string page, JObject item, bool assignParts = true)
     {
         JObject symbol = item["symbol"] as JObject ?? throw new InvalidDataException("Exported symbol is unreadable.");
         double[] location = Point(item["location"]);
@@ -194,13 +188,14 @@ internal sealed partial class SmallProjectRedrawDriver(
         JObject? placed = await InvokeAsync(page, "eplan_device_place", args, [item]);
         if (placed is null)
         { return; }
+        report.RecordOrigin(page, item, "symbol_fallback");
         _placedTags.Add(placedTag);
         if (Text(placed["device"]?["tag"]) is string actualTag)
         {
             _actualNames[name] = actualTag;
             _placedTags.Add(actualTag);
         }
-        if ((bool?)item["isMain"] == true)
+        if (assignParts && (bool?)item["isMain"] == true)
         {
             foreach (JObject part in Objects(item["parts"]))
             {
@@ -230,7 +225,32 @@ internal sealed partial class SmallProjectRedrawDriver(
         }, [item]);
     }
 
-    private async Task PlaceNodeAsync(string page, JObject item, IReadOnlyList<JObject> allPages)
+    private async Task PlaceNodesAsync(string page, JObject[] objects, IReadOnlyList<JObject> allPages)
+    {
+        var mapped = new List<(JObject Source, JObject Node)>();
+        foreach (JObject item in objects.Where(o => Type(o) is "SymbolReference" or "InterruptionPoint"))
+        {
+            if (_covered.Contains(Key(page, item)) || _macroOwned.Contains(Key(page, item)))
+            { continue; }
+            await ObserveAsync(page, item, () =>
+            {
+                mapped.Add((item, BuildNode(page, item, allPages)));
+                return Task.CompletedTask;
+            });
+        }
+        foreach (var batch in mapped.Chunk(50))
+        {
+            await InvokeItemsAsync(page, "eplan_connection_create", new JObject
+            {
+                ["page"] = page,
+                ["snap_to_grid"] = false,
+                ["generate"] = false,
+                ["items"] = new JArray(batch.Select(item => item.Node)),
+            }, batch.Select(item => item.Source).ToArray());
+        }
+    }
+
+    private JObject BuildNode(string page, JObject item, IReadOnlyList<JObject> allPages)
     {
         var node = new JObject();
         if (Type(item) == "InterruptionPoint")
@@ -271,13 +291,13 @@ internal sealed partial class SmallProjectRedrawDriver(
             else if (item["symbol"]?["variant"] is not null)
             { report.Note(page, Type(item), Id(item), "The node route selects its variant from directions; explicit variant is only accepted for t_node."); }
         }
-        await InvokeAsync(page, "eplan_connection_create", new JObject { ["page"] = page, ["snap_to_grid"] = false, ["items"] = new JArray(node) }, [item]);
+        return node;
     }
 
     private async Task PlaceDefinitionsAsync(string page, JObject[] objects)
     {
         var mapped = new List<(JObject Source, JObject Point)>();
-        foreach (JObject item in objects.Where(o => Type(o) == "ConnectionDefinitionPoint" && !_covered.Contains(Key(page, o))))
+        foreach (JObject item in objects.Where(o => Type(o) == "ConnectionDefinitionPoint" && !_covered.Contains(Key(page, o)) && !_macroOwned.Contains(Key(page, o))))
         {
             await ObserveAsync(page, item, () =>
             {
@@ -305,11 +325,6 @@ internal sealed partial class SmallProjectRedrawDriver(
                     if (parts.Length > 1)
                     { report.Warning(page, "Definition point " + Id(item) + " has multiple part references; the tool accepts one. Remaining references: " + new JArray(parts.Skip(1))); }
                 }
-                if (point["color"] is null && point["cross_section"] is null && point["designation"] is null && point["part"] is null)
-                {
-                    report.Warning(page, "Definition point " + Id(item) + " has no readable property or part reference; no placement can be identified.");
-                    return Task.CompletedTask;
-                }
                 mapped.Add((item, point));
                 return Task.CompletedTask;
             });
@@ -328,7 +343,7 @@ internal sealed partial class SmallProjectRedrawDriver(
     private async Task PlacePotentialsAsync(string page, JObject[] objects)
     {
         var mapped = new List<(JObject Source, JObject Point)>();
-        foreach (JObject item in objects.Where(o => Type(o) == "PotentialDefinition"))
+        foreach (JObject item in objects.Where(o => Type(o) == "PotentialDefinition" && !_covered.Contains(Key(page, o)) && !_macroOwned.Contains(Key(page, o))))
         {
             await ObserveAsync(page, item, () =>
             {
@@ -351,6 +366,7 @@ internal sealed partial class SmallProjectRedrawDriver(
             {
                 ["page"] = page,
                 ["snap_to_grid"] = false,
+                ["generate"] = false,
                 ["items"] = new JArray(batch.Select(item => item.Point)),
             }, batch.Select(item => item.Source).ToArray());
         }

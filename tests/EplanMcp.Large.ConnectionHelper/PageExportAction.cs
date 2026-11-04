@@ -41,10 +41,17 @@ public sealed partial class PageExportAction : IEplAction
                 _trace = trace;
                 var pages = new JArray();
                 result["pages"] = pages;
+                var propertyNames = new JObject();
+                result["propertyNames"] = propertyNames;
                 var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (string name in requested.Values<string>().Select(name => name!))
                 {
                     JObject page = ReadPage(project, name);
+                    if (page["propertyNames"] is JObject pageNames)
+                    {
+                        foreach (JProperty property in pageNames.Properties())
+                        { propertyNames[property.Name] = property.Value.DeepClone(); }
+                    }
                     string stem = string.Concat(name.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
                     string leaf = stem + ".json";
                     int suffix = 1;
@@ -66,6 +73,11 @@ public sealed partial class PageExportAction : IEplAction
     private static JObject ReadPage(Project project, string name)
     {
         var row = new JObject { ["name"] = name, ["errors"] = new JArray(), ["placements"] = new JArray(), ["connections"] = new JArray(), ["unhandledTypes"] = new JObject() };
+        _propertyNames = new JObject();
+        _groups = new JArray();
+        _groupIds = new HashSet<string>(StringComparer.Ordinal);
+        row["propertyNames"] = _propertyNames;
+        row["groups"] = _groups;
         Page? page = null;
         Page[] candidates = Get(row, project, "Project.Pages", () => project.Pages, []);
         foreach (Page candidate in candidates)
@@ -144,6 +156,7 @@ public sealed partial class PageExportAction : IEplAction
         try
         {
             Read(row, "oid", placement, "Placement.ObjectIdentifier", () => placement.ObjectIdentifier);
+            ReadGroups(placement, row);
             Read(row, "location", placement, "Placement.Location", () => Point(placement.Location));
             Read(row, "boundingBox", placement, "Placement.GetBoundingBox", () => new JArray(placement.GetBoundingBox().Select(Point)));
             bool handled = ReadGraphics(placement, row);
@@ -390,6 +403,7 @@ public sealed partial class PageExportAction : IEplAction
                 if (value is null)
                 { continue; }
                 using PropertyDefinition? definition = Get<PropertyDefinition?>(row, value, member + ".Definition", () => value.Definition);
+                ReadPropertyName(number.Value, definition, row);
                 bool indexed = definition is not null && Get(row, definition, member + ".IsIndexed", () => definition.IsIndexed);
                 PropertyDefinition.PropertyType? type = definition is null ? null
                     : Get<PropertyDefinition.PropertyType?>(row, definition, member + ".Type", () => definition.Type);
@@ -469,6 +483,46 @@ public sealed partial class PageExportAction : IEplAction
     }
 
     private static JObject Point(PointD point) => new() { ["x"] = point.X, ["y"] = point.Y };
+
+    private static JObject? _propertyNames;
+    private static JArray? _groups;
+    private static HashSet<string>? _groupIds;
+
+    private static void ReadPropertyName(int id, PropertyDefinition? definition, JObject row)
+    {
+        if (_propertyNames is null || definition is null)
+        { return; }
+        string key = id.ToString(CultureInfo.InvariantCulture);
+        if (_propertyNames[key] is not null)
+        { return; }
+        string? name = Get<string?>(row, definition, "PropertyDefinition.Name", () => definition.Name);
+        if (!string.IsNullOrEmpty(name))
+        { _propertyNames[key] = name; }
+    }
+
+    private static void ReadGroups(Placement placement, JObject row)
+    {
+        if (_groups is null || _groupIds is null)
+        { return; }
+        Group? group = Get<Group?>(row, placement, "Placement.Group", () => placement.Group);
+        while (group is not null)
+        {
+            string? identity = Get<string?>(row, group, "Group.ToStringIdentifier", () => group.ToStringIdentifier());
+            if (identity is null || !_groupIds.Add(identity))
+            { return; }
+            var data = new JObject();
+            _groups.Add(data);
+            Read(data, "location", group, "Group.Location", () => Point(group.Location));
+            Placement[] members = Get(data, group, "Group.SubPlacements", () => group.SubPlacements, []);
+            data["count"] = members.Length;
+            data["types"] = new JObject(members.GroupBy(member => member.GetType().Name)
+                .OrderBy(type => type.Key, StringComparer.Ordinal).Select(type => new JProperty(type.Key, type.Count())));
+            Group? parent = Get<Group?>(data, group, "Group.Group", () => group.Group);
+            GC.KeepAlive(group);
+            group = parent;
+        }
+        GC.KeepAlive(placement);
+    }
 
     private static void Read(JObject row, string key, object owner, string member, Func<object?> read)
     {

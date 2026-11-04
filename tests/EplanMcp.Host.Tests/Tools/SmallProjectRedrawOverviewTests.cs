@@ -17,6 +17,7 @@ public sealed class SmallProjectRedrawOverviewTests
             ["category"] = "PLCBox",
             ["location"] = Point(212, 284),
             ["parts"] = new JArray(new JObject { ["part"] = "FICTION.PLC", ["variant"] = "1" }),
+            ["properties"] = new JArray(new JObject { ["id"] = 20468, ["value"] = "FICTION/PLC.ema" }),
             ["symbol"] = new JObject { ["name"] = "PLCC", ["library"] = "SPECIAL", ["variant"] = 0 },
         };
         JObject point = new()
@@ -36,6 +37,22 @@ public sealed class SmallProjectRedrawOverviewTests
             calls.Add((tool, (JObject)args.DeepClone()));
             if (tool == "eplan_device_update")
             { renamed = true; }
+            if (tool == "eplan_macro_list")
+            { return Task.FromResult(new JObject { ["macros"] = new JArray(new JObject { ["path"] = "FICTION/PLC.ema" }) }); }
+            if (tool == "eplan_macro_get")
+            {
+                return Task.FromResult(new JObject
+                {
+                    ["macro"] = new JObject
+                    {
+                        ["reference_point"] = Point(0, 292),
+                        ["representations"] = new JArray(new JObject { ["type"] = "Overview", ["variants"] = new JArray(0) }),
+                        ["devices"] = new JArray(
+                            new JObject { ["tag"] = "-OLD", ["category"] = "PLCBox", ["main"] = true, ["location"] = Point(212, 284) },
+                            new JObject { ["tag"] = "-OLD:3.1", ["category"] = "PLCTerminal", ["location"] = Point(220, 280) }),
+                    },
+                });
+            }
             JObject actualBox = Drawing(box, 101), actualPoint = Drawing(point, 102);
             actualBox["properties"]!["name"] = renamed ? "-NEW" : "-OLD";
             actualPoint["properties"]!["name"] = renamed ? "-NEW:3.1" : "-OLD:3.1";
@@ -43,7 +60,7 @@ public sealed class SmallProjectRedrawOverviewTests
             {
                 ["execution"] = "committed",
                 ["devices"] = new JArray(new JObject { ["tag"] = "-OLD", ["category"] = "PLCBox" }),
-                ["drawings"] = new JObject { ["items"] = new JArray(actualBox, actualPoint), ["truncated"] = false },
+                ["drawings"] = new JObject { ["items"] = renamed ? new JArray(actualBox, actualPoint) : new JArray(), ["truncated"] = false },
             });
         }, "ScratchTest", Path.GetTempPath(), new SmallProjectRedrawReport("test", "ScratchTest"));
 
@@ -53,7 +70,7 @@ public sealed class SmallProjectRedrawOverviewTests
         JObject rename = Assert.Single(calls, c => c.Tool == "eplan_device_update").Args;
         Assert.Equal("-OLD", (string?)rename["tag"]);
         Assert.Equal("-NEW", (string?)rename["new_tag"]);
-        Assert.True(calls.FindIndex(c => c.Tool == "eplan_device_update") < calls.FindIndex(c => c.Tool == "eplan_page_get"));
+        Assert.True(calls.FindIndex(c => c.Tool == "eplan_device_update") < calls.FindLastIndex(c => c.Tool == "eplan_page_get"));
         Assert.DoesNotContain(calls, c => c.Tool == "eplan_device_place");
     }
 
@@ -341,10 +358,11 @@ public sealed class SmallProjectRedrawOverviewTests
     }
 
     [Fact]
-    public async Task Overview_LeavesGroupedObjectsAndAlreadyNamedBlocksUntouched()
+    public async Task Overview_LeavesBlockMembersAndAlreadyNamedBlocksUntouched()
     {
         JObject line = Drawing(Line(1, 10), 101);
         line["properties"]!["grouped"] = "true";
+        line["parent"] = new JObject { ["type"] = 144, ["oid"] = 5 };
         JObject block = new() { ["type"] = "Block", ["oid"] = 5, ["name"] = "Existing", ["location"] = Point(0, 0), ["members"] = new JArray() };
         JObject actualBlock = new() { ["kind"] = "Block", ["properties"] = new JObject { ["name"] = "Existing" } };
         JObject source = Page(block);

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -8,6 +9,7 @@ namespace EplanMcp.Tests;
 internal static class PageExportComparer
 {
     internal const double PositionTolerance = 0.01;
+    internal const double AngleTolerance = 0.000001;
 
     // Property names and IDs are deliberately explicit: do not discard arbitrary dates, paths or user text.
     // Numeric IDs are documented by the installed DataModel XML (Page / Project property lists).
@@ -54,6 +56,13 @@ internal static class PageExportComparer
     };
     private static readonly string[] _memberGeometryFields =
         ["start", "end", "center", "points", "vertices", "radius", "firstRadius", "secondRadius", "width", "height", "angle", "ellipseAngle", "startAngle", "endAngle", "closed"];
+    private static readonly HashSet<string> _angleFields = new(StringComparer.Ordinal)
+        { "startAngle", "endAngle", "ellipseAngle", "angle", "rotation" };
+    // Native placement angles are radians; these DataModel property values are degrees.
+    private static readonly HashSet<string> _angleProperties = new(StringComparer.Ordinal)
+        { "19323", "19324", "19342", "19343", "20451", "20869" };
+    private static readonly Dictionary<string, string> _coordinateProperties = new(StringComparer.Ordinal)
+    { ["19002"] = "x", ["19003"] = "y", ["19310"] = "x", ["19311"] = "y", ["19312"] = "x", ["19313"] = "y", ["19321"] = "x", ["19322"] = "y", ["19340"] = "x", ["19341"] = "y" };
 
     internal static PageExportComparison Compare(string sourceJson, string targetJson) =>
         Compare(JObject.Parse(sourceJson), JObject.Parse(targetJson));
@@ -64,8 +73,8 @@ internal static class PageExportComparer
         CollectWarnings(source, "source", result.Warnings);
         CollectWarnings(target, "target", result.Warnings);
         bool reportPage = IsReportPage(source) || IsReportPage(target);
-        string[] pageFields = reportPage ? ["report", "properties"] :
-            ["name", "pageType", "description", "plotFrame", "size", "gridSize", "form", "report", "properties"];
+        string[] pageFields = reportPage ? ["report", "properties", "groups"] :
+            ["name", "pageType", "description", "plotFrame", "size", "gridSize", "form", "report", "properties", "groups"];
         foreach (string field in pageFields)
         {
             JToken? left = Normalize(source[field], field, null);
@@ -171,7 +180,7 @@ internal static class PageExportComparer
     {
         PageExportTypeComparison group = Group(result, type);
         var candidates = source.Select(left => target.Select((right, index) => (right, index))
-            .Where(item => (type == "Connection" || SamePosition(left["location"], item.right["location"]))
+            .Where(item => (type == "Connection" || type == "Block" || SamePosition(left["location"], item.right["location"]))
                 && JToken.DeepEquals(left["symbol"], item.right["symbol"])
                 && (additionalKey?.Invoke(left, item.right) ?? true))
             .OrderBy(item => DifferenceCount(left, item.right)).ThenBy(item => item.index)
@@ -282,6 +291,21 @@ internal static class PageExportComparer
             var normalized = new JObject();
             foreach (JProperty property in obj.Properties().OrderBy(p => p.Name, StringComparer.Ordinal))
             {
+                if (Type(obj) == "Block" && property.Name == "location")
+                {
+                    // A block's reference point can move without changing any of its absolute geometry.
+                    continue;
+                }
+                if (Type(obj) == "Block" && property.Name == "members" && property.Value is JArray members)
+                {
+                    normalized[property.Name] = Normalize(new JArray(members.Select(item => AbsoluteMember(item, obj["location"]))), property.Name, identities);
+                    continue;
+                }
+                if (Type(obj) == "Block" && property.Name == "properties" && property.Value is JArray blockProperties)
+                {
+                    normalized[property.Name] = Normalize(BlockReferenceProperties(blockProperties, obj["location"]), property.Name, identities);
+                    continue;
+                }
                 if (property.Name is "errors" or "memberOids")
                 {
                     // Read errors are warnings; block membership is compared using detached member content, not unstable IDs.
@@ -329,6 +353,12 @@ internal static class PageExportComparer
                     .ThenBy(MemberGeometry, StringComparer.Ordinal)
                     .ThenBy(item => item.ToString(Formatting.None), StringComparer.Ordinal).ToList();
             }
+            if (member == "groups")
+            {
+                normalized = normalized.OrderBy(item => (double?)item["location"]?["x"])
+                    .ThenBy(item => (double?)item["location"]?["y"])
+                    .ThenBy(item => item.ToString(Formatting.None), StringComparer.Ordinal).ToList();
+            }
             return new JArray(normalized);
         }
         return value?.DeepClone();
@@ -337,10 +367,84 @@ internal static class PageExportComparer
     private static JToken NormalizeBlockReference(JToken oid, Dictionary<string, string>? identities) =>
         identities is not null && Identity(identities, oid) is string identity ? new JValue(identity) : oid.DeepClone();
 
+    private static JArray BlockReferenceProperties(JArray properties, JToken? origin)
+    {
+        var normalized = (JArray)properties.DeepClone();
+        foreach (JObject property in normalized.OfType<JObject>())
+        {
+            // Block.INSTANCE_XCOORD/YCOORD repeat the reference point. Compare their offset from
+            // Location so an inconsistent exported value remains visible rather than discarding it.
+            string? axis = (int?)property["id"] switch { 19002 => "x", 19003 => "y", _ => null };
+            if (axis is not null && IsNumber(origin?[axis])
+                && double.TryParse(property["value"]?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double coordinate))
+            { property["value"] = coordinate - (double)origin![axis]!; }
+        }
+        return normalized;
+    }
+
+    private static JToken AbsoluteMember(JToken value, JToken? origin)
+    {
+        JToken copy = value.DeepClone();
+        if (copy is not JObject member || origin is not JObject || !IsNumber(origin["x"]) || !IsNumber(origin["y"]))
+        { return copy; }
+        foreach (string field in new[] { "location", "start", "end", "center", "lowerLeft", "upperRight", "boundingBox", "points", "vertices", "logicalArea" })
+        { TranslateCoordinates(member[field], (double)origin["x"]!, (double)origin["y"]!); }
+        foreach (JObject property in Objects(member["properties"]))
+        {
+            string id = property["id"]?.ToString() ?? "";
+            if (_coordinateProperties.TryGetValue(id, out string? axis)
+                && double.TryParse(property["value"]?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double coordinate))
+            { property["value"] = coordinate + (double)origin[axis]!; }
+            else if (id == "19103")
+            {
+                // The native display property contains the same relative location, rounded to two decimals.
+                Match match = Regex.Match(property["value"]?.ToString() ?? "", @"^X:\s*([-+\d.eE]+)\s+mm\s+Y:\s*([-+\d.eE]+)\s+mm$");
+                if (match.Success && double.TryParse(match.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double x)
+                    && double.TryParse(match.Groups[2].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double y))
+                { property["value"] = new JObject { ["x"] = x + (double)origin["x"]!, ["y"] = y + (double)origin["y"]! }; }
+            }
+        }
+        // Nested blocks retain their translated origin so their own members can be expanded recursively.
+        return member;
+    }
+
+    private static void TranslateCoordinates(JToken? value, double x, double y)
+    {
+        if (value is JObject point)
+        {
+            if (IsNumber(point["x"]) && IsNumber(point["y"]))
+            {
+                point["x"] = (double)point["x"]! + x;
+                point["y"] = (double)point["y"]! + y;
+            }
+            else
+            {
+                foreach (JProperty property in point.Properties())
+                { TranslateCoordinates(property.Value, x, y); }
+            }
+        }
+        else if (value is JArray points)
+        {
+            foreach (JToken item in points)
+            { TranslateCoordinates(item, x, y); }
+        }
+    }
+
     private static string MemberGeometry(JToken member) => new JObject(
         _memberGeometryFields
-            .Where(name => member[name] is not null).Select(name => new JProperty(name, member[name]!.DeepClone())))
+            .Where(name => member[name] is not null).Select(name => new JProperty(name,
+                _angleFields.Contains(name) ? AngleOrderValue(member[name]!) : member[name]!.DeepClone())))
         .ToString(Formatting.None);
+
+    private static JToken AngleOrderValue(JToken value)
+    {
+        if (!double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double angle)
+            || !double.IsFinite(angle) || angle == -16002)
+        { return value.DeepClone(); }
+        double normalized = (angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+        // Canonicalize the sorting key only; Differences still checks the unrounded exported angle.
+        return new JValue(Math.Min(normalized, 2 * Math.PI - normalized) <= AngleTolerance ? 0 : Math.Round(normalized, 6));
+    }
 
     private static void Differences(JToken? source, JToken? target, string path, List<PageExportFieldDifference> differences)
     {
@@ -383,7 +487,9 @@ internal static class PageExportComparer
             }
             return;
         }
-        if (JToken.DeepEquals(source, target) || (_lengthFields.Contains(member) && Close(source, target)))
+        if (JToken.DeepEquals(source, target) || (_lengthFields.Contains(member) && Close(source, target))
+            || (_angleFields.Contains(member) && SameAngle(source, target, 2 * Math.PI))
+            || (_angleProperties.Contains(member) && SameAngle(source, target, 360)))
         {
             return;
         }
@@ -404,7 +510,9 @@ internal static class PageExportComparer
             }
             else
             {
-                Differences(property["value"], counterpart["value"], valuePath, differences);
+                if (!(_angleProperties.Contains(id) && SameAngle(property["value"], counterpart["value"], 360))
+                    && !(_coordinateProperties.ContainsKey(id) && Close(property["value"], counterpart["value"])))
+                { Differences(property["value"], counterpart["value"], valuePath, differences); }
             }
         }
         // The owner's acceptance is a complete match: a property only the redraw has is a difference too.
@@ -423,6 +531,18 @@ internal static class PageExportComparer
         && Math.Abs((double)source! - (double)target!) <= PositionTolerance + 1e-10;
 
     private static bool IsNumber(JToken? value) => value?.Type is JTokenType.Integer or JTokenType.Float;
+
+    private static bool SameAngle(JToken? source, JToken? target, double fullTurn)
+    {
+        if (!double.TryParse(source?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double left)
+            || !double.TryParse(target?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double right)
+            || !double.IsFinite(left) || !double.IsFinite(right))
+        { return false; }
+        if (left == -16002 || right == -16002)
+        { return left == right; }
+        double difference = Math.Abs((left - right) % fullTurn);
+        return Math.Min(difference, fullTurn - difference) <= AngleTolerance;
+    }
 
     private static bool IsReference(string member, string property) => property is "parentOid" or "sourceOid" or "blockOid"
         || (property == "oid" && member is "start" or "end" or "parentFunction" or "functionsInside");
