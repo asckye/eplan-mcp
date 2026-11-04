@@ -46,6 +46,7 @@ public sealed class WriteSafetyTests(LiveEplan eplan, WriteHost host) : IClassFi
         int records = host.AuditRecords().Count;
 
         JsonElement error = await host.ErrorAsync("eplan_device_update", new() { ["dry_run"] = false, ["project"] = project, ["tag"] = "+A1-WE1", ["new_tag"] = "=F+A1-WE19" });
+        TestContext.Current.TestOutputHelper?.WriteLine("rename error: " + error.GetRawText());
 
         Assert.Equal(
             (ErrorReason.InvalidArgument, ExecutionState.RolledBack, "+A1-WE19"),

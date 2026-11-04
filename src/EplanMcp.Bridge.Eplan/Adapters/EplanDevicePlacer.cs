@@ -65,8 +65,11 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             using PropertyValue location = parsed.DESIGNATION_LOCATION;
             using PropertyValue code = parsed.FUNC_CODE;
             using PropertyValue counter = parsed.FUNC_COUNTER;
-            newName.DESIGNATION_PLANT = plant;
-            newName.DESIGNATION_LOCATION = location;
+            // A tag without a plant or location parses to an empty value, which the list refuses (S063111).
+            if (!plant.IsEmpty)
+            { newName.DESIGNATION_PLANT = plant; }
+            if (!location.IsEmpty)
+            { newName.DESIGNATION_LOCATION = location; }
             newName.FUNC_CODE = code;
             newName.FUNC_COUNTER = counter;
             using var service = new NameService();

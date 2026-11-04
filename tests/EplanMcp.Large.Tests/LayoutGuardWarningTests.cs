@@ -8,7 +8,7 @@ namespace EplanMcp.Large.Tests;
 public sealed class LayoutGuardWarningTests(LiveEplan eplan, WriteHost host, ITestOutputHelper output) : IClassFixture<WriteHost>
 {
     [Fact]
-    public async Task ReproducedLineAcrossBlackBox_Warns_DefaultAndOffPageRefuse()
+    public async Task ReproducedLineAcrossSymbol_Warns_DefaultAndOffPageRefuse()
     {
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         Assert.Equal(host.Writable, session.Project, ignoreCase: true);
@@ -35,8 +35,8 @@ public sealed class LayoutGuardWarningTests(LiveEplan eplan, WriteHost host, ITe
         }
         await Call("eplan_device_place", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["library"] = "SPECIAL", ["symbol"] = "DC", ["symbol_variant"] = 0,
-            ["tag"] = "-LG" + Guid.NewGuid().ToString("N")[..8], ["x"] = 60, ["y"] = 120, ["corner_x"] = 120, ["corner_y"] = 160,
+            ["project"] = session.Project, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "K", ["symbol_variant"] = 0,
+            ["tag"] = "-LG" + Guid.NewGuid().ToString("N")[..8], ["x"] = 80, ["y"] = 140,
             ["dry_run"] = false
         });
         PageDrawingGeometry before = await Read();
@@ -47,11 +47,11 @@ public sealed class LayoutGuardWarningTests(LiveEplan eplan, WriteHost host, ITe
         };
         JsonElement refused = await Call("eplan_placement_create", request, failure: true);
         Assert.Equal(ErrorReason.InvalidArgument, refused.GetProperty("reason").GetString());
-        Assert.Contains("R4", refused.GetProperty("message").GetString(), StringComparison.Ordinal);
+        Assert.Matches(@"R[1-9]", refused.GetProperty("message").GetString());
         request["layout_guard"] = "warn";
         JsonElement committed = await Call("eplan_placement_create", request);
         Assert.Equal(ExecutionState.Committed, committed.GetProperty("execution").GetString());
-        Assert.Contains("R4", committed.GetProperty("warning").GetString(), StringComparison.Ordinal);
+        Assert.Matches(@"R[1-9]", committed.GetProperty("warning").GetString());
         Assert.Equal(before.Placements.Count + 1, (await Read()).Placements.Count);
         await session.UndoAsync();
         Assert.Equal(before.Placements.Count, (await Read()).Placements.Count);

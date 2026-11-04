@@ -47,6 +47,10 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
         {
             RenameReadBack back = request.Rename ? renamer.Rename(request.Project.Path, request.Device.Tag, request.NewTag) : new RenameReadBack
             { MainName = request.ResultTag, VisibleName = request.Main?.VisibleName ?? string.Empty, Renamed = request.Device.Functions.Count };
+            // A17: a kind that ignores a part of the tag gets a third name at once, and the open transaction can still take
+            // it back. The old name alone proves nothing: wrappers can show it until the commit (A85).
+            if (request.Rename && back.MainName != request.NewTag && back.MainName != request.Device.Tag)
+            { throw Misnamed(request, back.MainName); }
             if (request.Part is { } part)
             { assigner!.AddPart(request.Project.Path, request.Main!.Id, part.PartNumber, part.Variant!); }
             return back;
@@ -63,6 +67,8 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             { throw InvalidArgument("The committed main function or added part reference did not match the plan; the change was rolled back."); }
         }, verifyRollback: () =>
         {
+            if (request.Rename && renamer.ReadDevice(request.Project.Path, request.Device.Tag) is null)
+            { throw new InvalidOperationException("The device's original tag was not restored."); }
             if (request.Main is not { } before)
             { return; }
             DevicePartTarget restored = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.Device.Tag);
@@ -88,10 +94,7 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
         DeviceNames? actual = renamer.ReadDevice(request.Project.Path, request.NewTag);
         if (actual is null)
         {
-            throw ReadBack(
-                $"EPLAN named the device '{back.MainName}' instead of '{request.NewTag}': devices of this kind do not use every part of the new tag, so nothing was renamed. Use the structure that similar devices have (eplan_device_list).",
-                request.NewTag,
-                back.MainName);
+            throw Misnamed(request, back.MainName);
         }
 
         string[] expected = [.. request.Device.Functions.Select(f => request.NewTag + (f.Name.Length == 0 ? "" : f.Name.Substring(request.Device.Tag.Length))).OrderBy(n => n, StringComparer.Ordinal)];
@@ -108,6 +111,11 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
         back.VisibleName = actual.VisibleName;
         back.Renamed = actual.Functions.Count;
     }
+
+    private static BridgeErrorException Misnamed(DeviceUpdateRequest request, string actual) => ReadBack(
+        $"EPLAN named the device '{actual}' instead of '{request.NewTag}': devices of this kind do not use every part of the new tag, so nothing was renamed. Use the structure that similar devices have (eplan_device_list).",
+        request.NewTag,
+        actual);
 
     private static BridgeErrorException ReadBack(string message, string requested, string actual) =>
         new(ErrorReason.InvalidArgument, message, retryable: false, new Dictionary<string, string> { ["requested"] = requested, ["actual"] = actual });

@@ -4,11 +4,6 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| R3-01 布局告警模式 | `LayoutGuardWarningTests` | NOT RUN：本次禁止 EPLAN；待验穿黑盒线 warn 成功且告警、默认拒绝、超页拒绝。 |
-| R3-02 多语言页描述 | `PageDescriptionMapTests` | NOT RUN：本次禁止 EPLAN；新页写三种语言，按语言逐项读取。 |
-| R3-03 后缀器件改名 | `MacroOverviewTests` | NOT RUN：本次禁止 EPLAN；总览宏 PLC 盒及全部点前缀变化，一次撤销恢复。 |
-| R3-04 建块 | `BlockCreateTests` | NOT RUN：本次禁止 EPLAN；三线组成命名块，读回 Count/Name，一次撤销恢复。 |
-| R3-05 删除图形 | `PlacementDeleteTests` | NOT RUN：本次禁止 EPLAN；删除一线一文字、拒绝器件，一次撤销恢复。 |
 | G8 可选端子符号（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 X2_2、KA1_PE 的库名、符号、变体、编号及逐次单步撤销。 |
 | G6 母线定义（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 BBDEF 主功能与两个 BCP 同属一个器件、逐次单步撤销。 |
 | G5 黑盒（2026-11-03 brief；g4probe A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 60×40 黑盒、DCP 0/2/4 同器件与框内列表、后缀及逐步单次撤销。 |

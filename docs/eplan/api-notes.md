@@ -346,6 +346,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 ### A88. 第三轮重绘工具：分组、删除与提交后读回（2026-11-04）
 - 依据负责人提供的 `ExactMatchSpikeTests` 实测记录：`new Block().Create(page, Placement[])` 后 Count 等于图形成员数，Name 可写可读，块外对象不变；成员坐标变为相对块且对象号改变。工具每次仅建一个块，提交后重新取得定位器；块子对象标记相对坐标，绝对 Location/Bounds 留空而不猜测变换。— 已有实测反馈；本轮 Large `BlockCreateTests` 待实测。
 - 安装版本 XML 的 Block.Create 要求至少两个成员，最多一个 SymbolReference；Block.Count 不计该 SymbolReference。前述 Count 等于成员数适用于图形成员；含符号的组合不据此推定。— 官方本地 XML 签名与说明；扩展组合待实测。
-- 多语言页描述通过单次 MultiLangString 写入并逐语言读回；PLC 盒重命名依 A85，用 NameService.RenameDevice，提交后按新标识查找，禁止沿用未放置功能 ID。— 页三语言及宏盒工具链待实测，A85 已有证据不变。
-- `Placement.Remove()` 用于独立 Line/Arc/PolyLine/Rectangle/Text/PathText/Image/MacroBox 的删除；A87 已验证宏框删除不删除引用内容。其余白名单类型的工具链、一事务和单步撤销由新增 Large 待实测。
-- 写前 layout_guard=warn 仅把非 OffPage 布局违规降为警告；写后仍遵循 ADR-0046。— Small/Medium 可离线验证；穿黑盒线及超页 Large 待实测。
+- 多语言页描述通过单次 MultiLangString 写入并逐语言读回；PLC 盒重命名依 A85，用 NameService.RenameDevice，提交后按新标识查找，禁止沿用未放置功能 ID。— 实测（`PageDescriptionMapTests`、`MacroOverviewTests`）不变。
+- `Placement.Remove()` 用于独立 Line/Arc/PolyLine/Rectangle/Text/PathText/Image/MacroBox 的删除；A87 已验证宏框删除不删除引用内容。线和文字的工具链、一事务和单步撤销已实测（`PlacementDeleteTests`）。
+- 写前 layout_guard=warn 仅把非 OffPage 布局违规降为警告；写后仍遵循 ADR-0046。— 实测（`LayoutGuardWarningTests`）：穿过普通符号的线默认被 R3/R4 拒绝，warn 时提交并告警，超出页面仍拒绝。线穿过黑盒外框本身不触发拒绝。
+- `ParseNameAndProps` 对不含高层代号或位置代号的标识（如 `+A1-WE1`）返回空值，把空值赋给 `FunctionBasePropertyList.DESIGNATION_PLANT` 会抛 `EmptyPropertyException`（S063111），所以只赋非空部分。`RenameDevice` 之后主功能立即显示实际名称；不使用某部分标识的器件类型（如 `BusBarDefText`）把 `=F+A1-WE19` 变成 `+A1-WE19`，要在提交前发现并回滚。提交后再撤销未能恢复原标识，所以回滚后要核对原标识还在。— 实测（`WriteSafetyTests.Q2`）
