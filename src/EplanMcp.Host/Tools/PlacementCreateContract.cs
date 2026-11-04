@@ -19,7 +19,7 @@ internal static class PlacementCreateContract
             {"type":"object","additionalProperties":false,"required":["kind","position","contents","height_mm"],"properties":{
               "kind":{"const":"text"},"position":{"$ref":"#/$defs/point"},"height_mm":{"type":"number","minimum":0.5,"maximum":100},
               "contents":{"type":"object","minProperties":1,"propertyNames":{"minLength":5,"maxLength":5,"pattern":"^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"},"additionalProperties":{"type":"string","minLength":1,"maxLength":500}}}},
-            {"type":"object","additionalProperties":false,"required":["kind","position","contents","height_mm"],"properties":{
+            {"type":"object","additionalProperties":false,"required":["kind","position","contents"],"properties":{
               "kind":{"const":"path_text"},"position":{"$ref":"#/$defs/point"},"height_mm":{"type":"number","minimum":0.5,"maximum":100},
               "contents":{"type":"object","minProperties":1,"propertyNames":{"minLength":5,"maxLength":5,"pattern":"^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"},"additionalProperties":{"type":"string","minLength":1,"maxLength":500}}}},
             {"type":"object","additionalProperties":false,"required":["kind","points"],"properties":{"kind":{"const":"line"},"points":{"$ref":"#/$defs/pair"}}},

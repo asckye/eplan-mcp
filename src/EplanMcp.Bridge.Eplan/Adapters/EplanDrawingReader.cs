@@ -103,7 +103,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
 
             using MultiLangString? contents = placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null };
             string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null;
-            string? height = placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null;
+            string? height = placement is PathText { Height: -16002 } ? "-16002"
+                : placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null;
             string? imagePath = null;
             Dictionary<string, string?> graphics;
             try

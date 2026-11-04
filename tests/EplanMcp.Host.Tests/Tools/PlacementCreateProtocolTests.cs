@@ -169,6 +169,40 @@ public sealed class PlacementCreateProtocolTests
         });
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task PathText_OmittedHeightReachesPreviewAndWriteAsDefaultSentinel(bool preview)
+    {
+        await WithClient(async (client, harness, store) =>
+        {
+            Dictionary<string, object?> args = Args();
+            args["dry_run"] = preview;
+            args["items"] = JsonSerializer.Deserialize<JsonElement>("""[{"kind":"path_text","position":[20,20],"contents":{"??_??":"Path text"}}]""");
+            JsonElement result = WriteToolHarness.Structured(await client.CallToolAsync(PlacementCreateTools.Tool, args, cancellationToken: Token));
+            Assert.Equal(preview ? ExecutionState.NotStarted : ExecutionState.Committed, result.GetProperty("execution").GetString());
+            PlacementTextCreateArgs request = Assert.IsType<PlacementTextCreateArgs>(harness.Bridge.Calls.Single(c => c.Operation == OperationNames.PlacementTextCreatePlan).Args);
+            Assert.Equal(-16002, request.Items![0].HeightMm);
+            Assert.Equal(preview ? 0 : 1, store.Items.Count);
+        });
+    }
+
+    [Theory]
+    [InlineData("\"height_mm\":-16002,\"contents\":{\"??_??\":\"Path text\"}")]
+    [InlineData("\"contents\":{}")]
+    public async Task PathText_InvalidHeightOrMissingTextRejectsBeforeRead(string fields)
+    {
+        await WithClient(async (client, harness, store) =>
+        {
+            Dictionary<string, object?> args = Args();
+            args["items"] = JsonSerializer.Deserialize<JsonElement>("[{\"kind\":\"path_text\",\"position\":[20,20]," + fields + "}]");
+            JsonElement error = WriteToolHarness.Error(await client.CallToolAsync(PlacementCreateTools.Tool, args, cancellationToken: Token));
+            Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
+            Assert.Empty(harness.Bridge.Calls);
+            Assert.Empty(store.Items);
+        });
+    }
+
     private static Dictionary<string, object?> Args() => new()
     {
         ["project"] = "Line1",

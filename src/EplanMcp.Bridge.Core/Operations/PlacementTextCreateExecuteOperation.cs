@@ -141,10 +141,10 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             if (string.IsNullOrWhiteSpace(args.Project) || string.IsNullOrWhiteSpace(args.Page))
             { throw InvalidArgument("/project and /page must be explicit nonempty names."); }
             if (text is null || !Point(text.Position)
-                || IsText(text) && (double.IsNaN(text.HeightMm) || text.HeightMm is < 0.5 or > 100 || text.Contents is null || text.Contents.Count == 0
+                || IsText(text) && ((!Finite(text.HeightMm) || text.HeightMm is < 0.5 or > 100) && !(text.Kind == "path_text" && text.HeightMm == -16002) || text.Contents is null || text.Contents.Count == 0
                 || text.Contents.Any(p => (p.Key != "??_??" && (p.Key.Length != 5 || !LanguageCodes.IsCode(p.Key))) || string.IsNullOrWhiteSpace(p.Value))
                 || text.Contents.Sum(p => (long)p.Value.Length) > 500))
-            { throw InvalidArgument("/text requires two finite 0..10000 mm coordinates, /text/heightMm in 0.5..100 and /text/contents of 1..500 characters with explicit languages."); }
+            { throw InvalidArgument("/text requires finite 0..10000 mm coordinates, heightMm in 0.5..100 (path_text also accepts its default -16002), and 1..500 characters with explicit languages."); }
             if (IsText(text) && text.Contents.ContainsKey("??_??") && text.Contents.Count > 1)
             { throw InvalidArgument("/text/contents: ??_?? (language-independent) cannot be combined with languages; EPLAN keeps only the languages (live T4b)."); }
             project = WriteArguments.Writable(catalog, args.Project);

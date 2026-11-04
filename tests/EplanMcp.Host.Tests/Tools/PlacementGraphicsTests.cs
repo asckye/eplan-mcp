@@ -31,7 +31,6 @@ public sealed class PlacementGraphicsTests
     [InlineData("{\"kind\":\"arc\",\"center\":[10,10],\"radius_mm\":5,\"start_angle\":0,\"end_angle\":1e400}", "/end_angle")]
     [InlineData("{\"kind\":\"path_text\"}", "/contents")]
     [InlineData("{\"kind\":\"path_text\",\"height_mm\":3,\"contents\":{\"??_??\":\"a\"}}", "/position")]
-    [InlineData("{\"kind\":\"path_text\",\"position\":[10,10],\"contents\":{\"??_??\":\"a\"}}", "/height_mm")]
     [InlineData("{\"kind\":\"path_text\",\"position\":[10,10],\"height_mm\":0,\"contents\":{\"??_??\":\"a\"}}", "/height_mm")]
     [InlineData("{\"kind\":\"path_text\",\"position\":[10,10],\"height_mm\":3,\"contents\":{\"??_??\":\"\"}}", "/contents")]
     [InlineData("{\"kind\":\"image\",\"corners\":[[10,10],[20,20]]}", "/file")]
@@ -39,6 +38,28 @@ public sealed class PlacementGraphicsTests
     [InlineData("{\"kind\":\"image\",\"file\":\"test.png\",\"corners\":[[10,10]]}", "/corners")]
     public void InvalidFields_ReportTheirPointer(string item, string path) =>
         Assert.Contains(PlacementCreatePlanning.Validate(PlacementCreateTests.Input(item)), p => p.Contains(path, StringComparison.Ordinal));
+
+    [Theory]
+    [InlineData("path_text", true)]
+    [InlineData("text", false)]
+    public void OmittedHeight_UsesDefaultOnlyForPathText(string kind, bool valid)
+    {
+        JsonElement input = PlacementCreateTests.Input("{\"kind\":\"" + kind + "\",\"position\":[10,10],\"contents\":{\"??_??\":\"Path text\"}}");
+        Assert.Equal(valid, PlacementCreatePlanning.Validate(input).Count == 0);
+        Assert.Equal(valid, PropertyGetContractTests.Accepts(PlacementCreateContract.Input, input, PlacementCreateContract.Input));
+        if (valid)
+        { Assert.Equal(-16002, PlacementCreatePlanning.Request(input.GetProperty("items")[0]).HeightMm); }
+    }
+
+    [Theory]
+    [InlineData(-16002)]
+    [InlineData(0)]
+    [InlineData(100.01)]
+    public void ExplicitPathTextHeight_KeepsRangeValidation(double height)
+    {
+        string item = "{\"kind\":\"path_text\",\"position\":[10,10],\"height_mm\":" + JsonSerializer.Serialize(height) + ",\"contents\":{\"??_??\":\"Path text\"}}";
+        Assert.NotEmpty(PlacementCreatePlanning.Validate(PlacementCreateTests.Input(item)));
+    }
 
     [Theory]
     [InlineData("../test.png")]

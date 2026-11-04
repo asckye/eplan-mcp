@@ -15404,8 +15404,7 @@
                 "required": [
                   "kind",
                   "position",
-                  "contents",
-                  "height_mm"
+                  "contents"
                 ],
                 "properties": {
                   "kind": {

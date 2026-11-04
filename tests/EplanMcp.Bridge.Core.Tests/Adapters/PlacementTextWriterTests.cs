@@ -80,6 +80,18 @@ public sealed class PlacementTextWriterTests
     }
 
     [Fact]
+    public void PathText_DefaultHeightIsPassedToCreateAndReadBackUnchanged()
+    {
+        var page = new Page();
+        EplanProjects.Project = new(page);
+        var requested = new PlacementText { Kind = "path_text", Position = [20, 20], HeightMm = -16002, Contents = new() { ["??_??"] = "Path text" } };
+        PlacementText actual = new EplanPlacementTextWriter().Create("project", "+A1/1", requested);
+        Assert.Equal(-16002, Assert.IsType<PathText>(Assert.Single(page.AllPlacements)).Height);
+        Assert.Equal(-16002, actual.HeightMm);
+        Assert.Equal("-16002", Assert.Single(new EplanDrawingReader().Read("project", "+A1/1")!.Placements).Properties["height_mm"]);
+    }
+
+    [Fact]
     public void Create_RequestedLanguagesHeightAndPosition_AreDetachedAndReadBack()
     {
         var page = new Page();

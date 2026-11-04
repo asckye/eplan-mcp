@@ -101,6 +101,43 @@ public sealed class PlacementGraphicsCreateTests(LiveEplan eplan, WriteHost host
         Assert.Equal(projectBefore.Hash, (await LiveSnapshots.TakeAsync(bridge, new() { Project = host.Writable })).Hash);
     }
 
+    [Fact]
+    public async Task PathText_OmittedHeightReadsDefaultSentinel()
+    {
+        Assert.Equal(eplan.ProcessId, host.ProcessId);
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        Assert.Equal(host.Writable, selection.Project, ignoreCase: true);
+        string page = Assert.Single(await selection.CreatePagesAsync(1));
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = host.Writable, ["page"] = page, ["dry_run"] = false, ["snap_to_grid"] = false,
+            ["items"] = new[] { new { kind = "path_text", position = new[] { 40d, 80d }, contents = new Dictionary<string, string> { ["??_??"] = "Default path function" } } },
+        };
+        JsonElement readback = await CreateAndReadback(request);
+        JsonElement row = Assert.Single(readback.GetProperty("drawings").GetProperty("items").EnumerateArray(), r => r.GetProperty("kind").GetString() == "PathText");
+        Assert.Equal(-16002, Number(row.GetProperty("properties"), "height_mm"));
+        Assert.Equal("??_??@Default path function;", row.GetProperty("properties").GetProperty("text").GetString());
+    }
+
+    private async Task<JsonElement> CreateAndReadback(Dictionary<string, object?> request)
+    {
+        var read = new Dictionary<string, object?> { ["project"] = host.Writable, ["page"] = request["page"], ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };
+        Evidence("request", request);
+        JsonElement result;
+        try { result = await host.CallAsync("eplan_placement_create", request); }
+        catch (Exception ex)
+        {
+            Evidence("failed result", ex.ToString());
+            Evidence("readback after failed create", await host.CallAsync("eplan_page_get", read));
+            throw;
+        }
+        Evidence("result", result);
+        JsonElement readback = await host.CallAsync("eplan_page_get", read);
+        Evidence("readback", readback);
+        Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+        return readback;
+    }
+
     private async Task<string> Hash(BridgeClient bridge, string page) => SnapshotCanonical.Sha256(JsonSerializer.Serialize(
         await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
             new() { Project = host.Writable, Page = page }, TestContext.Current.CancellationToken)));

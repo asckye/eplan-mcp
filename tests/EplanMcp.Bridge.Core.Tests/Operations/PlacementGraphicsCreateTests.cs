@@ -82,6 +82,34 @@ public sealed class PlacementGraphicsCreateTests
     }
 
     [Theory]
+    [InlineData("path_text", true)]
+    [InlineData("text", false)]
+    public void DefaultHeight_IsAcceptedOnlyForPathText(string kind, bool valid)
+    {
+        var store = new PlacementTextStore();
+        PlacementTextCreateArgs request = Request("path_text");
+        request.Items![0].Kind = kind;
+        request.Items[0].HeightMm = -16002;
+        if (valid)
+        {
+            var result = Assert.IsType<PlacementTextCreateData>(store.Operation.Execute(request));
+            Assert.Equal(-16002, result.Items[0].HeightMm);
+        }
+        else
+        { Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => store.Operation.Execute(request)).Error.Reason); }
+    }
+
+    [Fact]
+    public void DefaultHeight_ReadbackMustPreserveSentinel()
+    {
+        var store = new PlacementTextStore { Readback = item => { item.HeightMm = 3.5; return item; } };
+        PlacementTextCreateArgs request = Request("path_text");
+        request.Items![0].HeightMm = -16002;
+        Assert.Equal(ErrorReason.EplanOperationFailed, Assert.Throws<BridgeErrorException>(() => store.Operation.Execute(request)).Error.Reason);
+        Assert.Empty(store.Texts);
+    }
+
+    [Theory]
     [InlineData("polyline")]
     [InlineData("arc")]
     [InlineData("path_text")]

@@ -95,7 +95,7 @@ internal static class PlacementCreatePlanning
         {
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
             string? kind = item.ValueKind == JsonValueKind.Object && item.TryGetProperty("kind", out JsonElement k) && k.ValueKind == JsonValueKind.String ? k.GetString() : null;
-            if (!Members(item, at, IsText(kind) ? "kind position contents height_mm" : kind is "line" or "polyline" ? "kind points" : kind == "arc" ? "kind center radius_mm start_angle end_angle" : kind == "image" ? "kind file corners" : "kind corners"))
+            if (!Members(item, at, kind == "path_text" ? "kind position contents" : IsText(kind) ? "kind position contents height_mm" : kind is "line" or "polyline" ? "kind points" : kind == "arc" ? "kind center radius_mm start_angle end_angle" : kind == "image" ? "kind file corners" : "kind corners", kind == "path_text" ? "height_mm" : ""))
             { continue; }
             Check(kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "path_text" or "image", at + "/kind", "unsupported primitive kind.");
             if (IsText(kind))
@@ -209,7 +209,7 @@ internal static class PlacementCreatePlanning
             Position = points[0],
             EndPosition = kind is "line" or "rectangle" or "image" ? points[1] : [],
             Points = kind == "polyline" ? points : [],
-            HeightMm = IsText(kind) ? item.GetProperty("height_mm").GetDouble() : 0,
+            HeightMm = IsText(kind) ? item.TryGetProperty("height_mm", out JsonElement height) ? height.GetDouble() : -16002 : 0,
             Contents = IsText(kind) ? item.GetProperty("contents").Deserialize<Dictionary<string, string>>()! : [],
             RadiusMm = kind == "arc" ? item.GetProperty("radius_mm").GetDouble() : 0,
             StartAngle = kind == "arc" ? item.GetProperty("start_angle").GetDouble() : 0,
