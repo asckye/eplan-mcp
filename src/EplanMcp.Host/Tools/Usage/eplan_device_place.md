@@ -17,7 +17,7 @@ dry_run omitted/true: preview only, execution=not_started. false executes.
 2. Free symbol tag: eplan_device_list; short tags inherit page structure. Parts: omit tag for native numbering, or rename all functions. Outside scratch needs approval.
 3. Parts: eplan_part_search, variant 1; others unplaced. PLC module: eplan_macro_insert part. Symbols: eplan_symbol_search. More symbols: library/symbol + join_device:true, existing tag, secondary function; then eplan_device_update part.
 
-join_device defaults false; no part/pin lists/terminal/PLC. Unknown tag: DEVICE_NOT_FOUND.
+join_device defaults false; no part/terminal/PLC. Unknown tag: DEVICE_NOT_FOUND.
 
 SPECIAL/DC: tag and corner_x/corner_y required; x/y lower left, corners upper right. DCP/DCPP3: same tag plus one connection_designations pin; named tag:pin. blackBox: tag/bounds/functionsInside (preview membership unknown); device.type/isMainFunction: native after commit.
 

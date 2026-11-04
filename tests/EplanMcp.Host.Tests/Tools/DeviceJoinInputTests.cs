@@ -20,8 +20,6 @@ public sealed class DeviceJoinInputTests
     [Theory]
     [InlineData("part", false)]
     [InlineData("part", true)]
-    [InlineData("designations", true)]
-    [InlineData("descriptions", true)]
     [InlineData("terminal", true)]
     [InlineData("plc", true)]
     [InlineData("plcBox", true)]
@@ -34,6 +32,16 @@ public sealed class DeviceJoinInputTests
         string error = Assert.Single(DevicePlaceInputs.Check(args, null), problem => problem.StartsWith("/join_device:", StringComparison.Ordinal));
         Assert.Contains("library", error, StringComparison.Ordinal);
         Assert.Contains("symbol", error, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void JoinDevice_AcceptsConnectionDesignationsAndDescriptions()
+    {
+        DevicePlaceArgs args = Args();
+        args.JoinDevice = true;
+        args.ConnectionDesignations = ["x1", "x2"];
+        args.ConnectionDescriptions = ["In", "Out"];
+        Assert.Empty(DevicePlaceInputs.Check(args, null));
     }
 
     private static DevicePlaceArgs Args() => new() { Project = "Line1", Library = "IEC_symbol", Symbol = "K", SymbolVariant = 0, Tag = "-K2", X = 80, Y = 160 };

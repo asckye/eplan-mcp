@@ -30,7 +30,7 @@ internal static partial class DevicePlaceInputs
         schema["dependentRequired"]!["library"] = JsonNode.Parse("""["symbol"]""");
         schema["dependentRequired"]!["symbol"] = JsonNode.Parse("""["library"]""");
         schema["dependentRequired"]!["join_device"] = JsonNode.Parse("""["library","symbol"]""");
-        schema["dependentSchemas"] = JsonNode.Parse("""{"join_device":{"propertyNames":{"not":{"pattern":"^(terminal_|plc_|connection_)"}}}}""");
+        schema["dependentSchemas"] = JsonNode.Parse("""{"join_device":{"propertyNames":{"not":{"pattern":"^(terminal_|plc_)"}}}}""");
         schema["dependentRequired"]!["plc_plug_designation"] = JsonNode.Parse("""["plc_connection_point"]""");
         schema["properties"]!["plc_plug_designation"]!["minLength"] = 1;
         schema["properties"]!["plc_plug_designation"]!["maxLength"] = 64;

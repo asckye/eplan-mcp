@@ -6783,7 +6783,7 @@
           "join_device": {
             "propertyNames": {
               "not": {
-                "pattern": "^(terminal_|plc_|connection_)"
+                "pattern": "^(terminal_|plc_)"
               }
             }
           }

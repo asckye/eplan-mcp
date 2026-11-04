@@ -56,8 +56,6 @@ public sealed class DeviceJoinPlanTests
     [Theory]
     [InlineData("part", false)]
     [InlineData("part", true)]
-    [InlineData("designations", true)]
-    [InlineData("descriptions", true)]
     [InlineData("terminal", true)]
     [InlineData("plc", true)]
     [InlineData("plcBox", true)]

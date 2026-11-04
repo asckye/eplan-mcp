@@ -158,13 +158,18 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
     }
 
+    /// <summary>EPLAN reads coordinates back with rounding noise; exported sample values have 14 decimals.</summary>
+    private static bool Close(double a, double b) => Math.Abs(a - b) <= 1e-6;
+
+    private static bool Close(double[] a, double[] b) => a.Length == b.Length && a.Zip(b, Close).All(close => close);
+
     private static PlacementText Verify(PlacementText text, PlacementText actual)
     {
-        if (actual.Kind != text.Kind || !actual.EndPosition.SequenceEqual(text.EndPosition) || actual.HeightMm != text.HeightMm || !actual.Position.SequenceEqual(text.Position) || actual.Contents.Count != text.Contents.Count
-            || actual.Points.Length != text.Points.Length || actual.Points.Zip(text.Points, (a, b) => a.SequenceEqual(b)).Any(equal => !equal)
-            || actual.RadiusMm != text.RadiusMm || !Finite(actual.StartAngle) || !Finite(actual.EndAngle)
+        if (actual.Kind != text.Kind || !Close(actual.EndPosition, text.EndPosition) || actual.HeightMm != text.HeightMm || !Close(actual.Position, text.Position) || actual.Contents.Count != text.Contents.Count
+            || actual.Points.Length != text.Points.Length || actual.Points.Zip(text.Points, Close).Any(equal => !equal)
+            || !Close(actual.RadiusMm, text.RadiusMm) || !Finite(actual.StartAngle) || !Finite(actual.EndAngle)
             || !DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle) && (Math.Abs(actual.StartAngle - text.StartAngle) > 1e-9 || Math.Abs(actual.EndAngle - text.EndAngle) > 1e-9)
-            || actual.RadiusXmm != text.RadiusXmm || actual.RadiusYmm != text.RadiusYmm || !Finite(actual.Angle) || Math.Abs(actual.Angle - text.Angle) > 1e-9
+            || !Close(actual.RadiusXmm, text.RadiusXmm) || !Close(actual.RadiusYmm, text.RadiusYmm) || !Finite(actual.Angle) || Math.Abs(actual.Angle - text.Angle) > 1e-9
             || actual.File != text.File || text.Kind == "image" && !ProjectResolver.SamePath(actual.FilePath, text.FilePath)
             || text.Contents.Any(p => !actual.Contents.TryGetValue(p.Key, out string? value) || !string.Equals(value, p.Value, StringComparison.Ordinal)))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Primitive geometry or text languages/height did not read back as requested; all changes were rolled back. Ask the engineer to check the page."); }

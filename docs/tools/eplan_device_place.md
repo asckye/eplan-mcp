@@ -46,7 +46,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `corner_x`、`corner_y` | number | 位置框/黑盒必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；也用于 SPECIAL/DC |
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
 | `tag` | string | 库符号来源必填，部件来源可选 | EPLAN 自动标识 | 以 `-` 开头的短标识（如 `-KF20`）取页结构但去掉 `&` 文档类型；或完整标识（如 `=GAA+A1-KF20`）。部件来源指定时一起重命名全部功能 |
-| `join_device` | boolean | 否 | false | 仅库符号：向已有标识添加非主功能；与部件、端口列表、端子、PLC 路线互斥 |
+| `join_device` | boolean | 否 | false | 仅库符号：向已有标识添加非主功能；与部件、端子、PLC 路线互斥；可带连接点代号和描述 |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行传 `dry_run: false` |
 
