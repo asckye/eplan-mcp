@@ -29,9 +29,9 @@ public sealed partial class DeviceSpecialPlanTests
     }
 
     [Theory]
-    [InlineData("Coil")]
+    [InlineData("Blackbox")]
     [InlineData("PLCTerminal")]
-    public void TerminalSymbol_NonTerminalCategoryIsInvalidArgumentEvenWhenKindSaysTerminal(string? category)
+    public void TerminalSymbol_BoxOrPlcCategoryIsInvalidArgumentEvenWhenKindSaysTerminal(string? category)
     {
         SetSymbol("IEC_symbol", "X2_2", 0, "Function", "terminal", category);
         DevicePlaceArgs args = TerminalArgs();

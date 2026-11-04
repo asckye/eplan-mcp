@@ -42,8 +42,9 @@ internal static class DeviceSymbolPlan
         SymbolSearchItem symbol = found[0];
         if (args.JoinDevice.HasValue && (symbol.Kind is "terminal" or "plc_box" || symbol.FunctionCategory is "Terminal" or "PLCTerminal" or "PLCBox"))
         { throw WriteArguments.Invalid(["/join_device: use library/symbol for the second symbol; terminal and PLC routes are not supported."]); }
-        if (terminal && symbol.FunctionCategory is { } category && category != "Terminal")
-        { throw WriteArguments.Invalid(["/symbol: terminal symbols must have discovered FunctionCategory Terminal."]); }
+        // The sample proves other categories work as terminals (XTR1); only a box can never be one.
+        if (terminal && symbol.FunctionCategory is "Blackbox" or "PLCBox")
+        { throw WriteArguments.Invalid(["/symbol: terminal symbols cannot be box symbols."]); }
         if (args.PlcConnectionPoint is { } point)
         {
             if (symbol.PlcInputDefinition is null || symbol.FunctionCategory != "PLCTerminal")

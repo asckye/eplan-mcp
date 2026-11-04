@@ -16,7 +16,7 @@ public sealed partial class DevicePlaceTests
         var snapshots = new List<string> { (await session.SnapshotAsync()).Hash };
         try
         {
-            foreach ((string library, string symbol, string number, int x) in new[] { ("IEC_symbol", "X2_2", "1", 80), ("GRAPHICS", "KA1_PE", "2", 140) })
+            foreach ((string library, string symbol, string number, int x) in new[] { ("IEC_symbol", "X2_2", "1", 80), ("IEC_symbol", "XTR1", "3", 40), ("GRAPHICS", "KA1_PE", "2", 140) })
             {
                 JsonElement result = await PartsCallAsync("eplan_device_place", new()
                 {
