@@ -16,6 +16,7 @@ internal sealed class DevicePlaceRequest
 
     private const string Circuit = "Circuit";
 
+    private bool _joinsDevice;
     private DevicePlaceRequest(OpenProject project, MacroTargetPage page, PartSearchItem part, DevicePlaceArgs args, string tag, string[] taken, string[] existing)
     {
         Project = project;
@@ -55,6 +56,7 @@ internal sealed class DevicePlaceRequest
     public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, IPlcReader? plc = null)
     {
         bool box = args.LocationBox is not null;
+        bool blackBox = DeviceSymbolPlan.BlackBox(args);
         bool terminal = args.TerminalStrip is not null;
         DevicePlcPlan.Check(args);
         DeviceTerminalPlan.Check(args);
@@ -83,9 +85,9 @@ internal sealed class DevicePlaceRequest
                 new Dictionary<string, string> { ["project"] = project.Name, ["page"] = args.Page });
         PartSearchItem? chosen = box || terminal || args.Library is not null ? new PartSearchItem() : ChooseVariant(FindPart(parts.Read(null), part), args.Variant?.Trim() is { Length: > 0 } variant ? variant : null, violations);
         violations.AddRange(PageProblems(page, args.X, args.Y));
-        if (box)
+        if (box || blackBox)
         {
-            if (page.Width is not { } w || page.Height is not { } h || !Finite(w) || !Finite(h) || w <= 0 || h <= 0)
+            if (box && (page.Width is not { } w || page.Height is not { } h || !Finite(w) || !Finite(h) || w <= 0 || h <= 0))
             { violations.Add("/location_box: page bounds are unknown; select a page with readable bounds."); }
             violations.AddRange(PageProblems(page, args.CornerX!.Value, args.CornerY!.Value));
         }
@@ -120,7 +122,7 @@ internal sealed class DevicePlaceRequest
                 .Where(n => full.Length > 0 && (SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
-        var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing);
+        var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing) { _joinsDevice = DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args) };
         if (args.Fingerprint is null)
         { request.CheckFree(); }
         if (args.Library is null && args.LocationBox is null && args.TerminalStrip is null)
@@ -159,7 +161,7 @@ internal sealed class DevicePlaceRequest
     /// <summary>ALREADY_EXISTS when a device carries the tag: EPLAN would merge the two (A13: it does not check).</summary>
     public void CheckFree()
     {
-        if (Taken.Count > 0)
+        if (Taken.Count > 0 && !_joinsDevice)
         {
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,

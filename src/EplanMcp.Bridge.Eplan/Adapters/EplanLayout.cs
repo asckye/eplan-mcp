@@ -27,6 +27,8 @@ internal static class EplanLayout
     }
     internal static IReadOnlyList<DrawingPlacement> Device(string project, DevicePlaceArgs args, LayoutGuard.Model model)
     {
+        if (DeviceSymbolPlan.BlackBox(args))
+        { DrawingPlacement box = LayoutGuard.Proposed("BoxedDevice", [args.X, args.Y], [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value]); box.Properties["layout_container"] = "true"; return [box]; }
         if (args.LocationBox is not null)
         { return [LayoutGuard.Proposed("LocationBox", [args.X, args.Y], [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value])]; }
         string? library = args.TerminalStrip is null ? args.Library : "IEC_symbol", name = args.TerminalStrip is null ? args.Symbol : "X";

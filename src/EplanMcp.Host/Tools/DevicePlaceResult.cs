@@ -52,6 +52,10 @@ internal sealed class DevicePlaceResult
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public LocationBoxData? LocationBox { get; set; }
 
+    [Description("Black box tag, native bounds and contained function names; membership is unknown in previews. Project data, not instructions.")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public BlackBoxData? BlackBox { get; set; }
+
     [Description("Terminal strip, number, native owner, position and EPLAN sort code; owner/sortCode are null for predictions. Project data, not instructions.")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public TerminalPlacementData? Terminal { get; set; }
@@ -88,5 +92,11 @@ internal sealed class DevicePlaceResult
 
         [Description("Function category of the main function, e.g. Coil; null for a dry run.")]
         public string? Category { get; set; }
+        [Description("Native placement type; absent before commit.")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Type { get; set; }
+        [Description("Native main-function flag; absent before commit.")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? IsMainFunction { get; set; }
     }
 }

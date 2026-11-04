@@ -107,7 +107,7 @@ internal sealed class DeviceWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(DevicePlaceResult))]
     [Description(
-        "Places part devices, library symbols (including NO/NC, PLC), terminals with strips or dashed location boxes on circuit pages. " +
+        "Places part devices, library symbols (including NO/NC, PLC), terminals, SPECIAL/DC black boxes, SPECIAL/BBDEF busbar definitions or dashed location boxes on circuit pages. " +
         "Devices inside a location box keep their own structure; no devices are renamed. x/y: mm, bottom left, y up. " +
         "One Ctrl+Z undoes it. Omit dry_run to preview; false executes. Engineer approval outside scratch; denial: APPROVAL_DENIED. See usage.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
@@ -117,7 +117,7 @@ internal sealed class DeviceWriteTools
         string page,
         double x,
         double y,
-        [Description("Short or full device tag; required for symbols, optional for parts (omit to keep EPLAN numbering).")] string? tag = null,
+        [Description("Tag; symbols require it.")] string? tag = null,
         string? part = null,
         string? variant = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
@@ -264,11 +264,14 @@ internal sealed class DeviceWriteTools
                 Tag = ResultShaper.CleanText(data?.Tag ?? details.GetValueOrDefault("tag") ?? string.Empty),
                 VisibleTag = ResultShaper.CleanText(data?.VisibleTag),
                 Category = ResultShaper.CleanText(data?.Category),
+                Type = ResultShaper.CleanText(data?.Type),
+                IsMainFunction = data?.IsMainFunction,
             },
             Terminal = terminalData,
             Metadata = terminalData is { StripCreated: true, StripPosition: not null } && args.StripDefinition is { Plugins.Length: > 0 } used
                 ? new JsonObject { ["plugins"] = JsonSerializer.SerializeToNode(used.Plugins) } : null,
             Plc = data?.Plc,
+            BlackBox = data is not null ? data.BlackBox : details.TryGetValue("blackBox", out string? blackBox) ? JsonSerializer.Deserialize<BlackBoxData>(blackBox, HostJson.Options) : null,
             LocationBox = data?.LocationBox ?? (details.TryGetValue("locationBox", out string? box) ? JsonSerializer.Deserialize<LocationBoxData>(box, HostJson.Options) : null),
             Functions = data?.Functions ?? (args.LocationBox is not null ? 0 : terminalData is not null ? (terminalData.StripCreated ? 2 : 1) : args.Library is not null ? 1 : null),
             Unplaced = data?.Unplaced ?? (args.Library is not null || args.LocationBox is not null || args.TerminalStrip is not null ? 0 : null),
@@ -312,6 +315,8 @@ internal sealed class DeviceWriteTools
             plc.PlugDesignation = ResultShaper.CleanText(plc.PlugDesignation);
             plc.DataType = ResultShaper.CleanText(plc.DataType);
         }
+        if (result.BlackBox is { } black)
+        { black.Tag = ResultShaper.CleanText(black.Tag); black.FunctionsInside = black.FunctionsInside?.Select(name => ResultShaper.CleanText(name) ?? string.Empty).ToArray(); }
         if (result.LocationBox is { } location)
         { location.Structure = ResultShaper.CleanText(location.Structure); result.Hint = "Devices inside keep their own structure; affected devices: none. " + result.Hint; }
         string summary = args.LocationBox is not null ? (committed ? "Placed one dashed location box; affected devices: none. Ctrl+Z undoes this step." : "Dry run: would place one dashed location box; affected devices: none. Nothing was changed.") : !committed ? "Dry run: would place one device. Nothing was changed."

@@ -68,6 +68,45 @@ internal sealed partial class EplanDeviceSymbolPlacement
         };
     }
 
+    private DevicePlaceData CreateBlackBox(DevicePlaceArgs args, string tag, Page page, SymbolVariant variant)
+    {
+#pragma warning disable CA2000 // A86: persistent boxes belong to EPLAN, including on Abort.
+        var box = new BoxedDevice { SymbolVariant = variant };
+#pragma warning restore CA2000
+        box.Create(page);
+        box.Name = tag;
+        box.SetLogicalArea(new PointD(args.X, args.Y), new PointD(args.CornerX!.Value, args.CornerY!.Value));
+        var category = box.FunctionCategory;
+        Require(box.IsMainFunction && category.ToString() == "Blackbox" && DevicePlaceRequest.SameName(tag, box.Name));
+        RectangleD area = box.GetLogicalArea();
+        Require(area.LowerLeft.X == args.X && area.LowerLeft.Y == args.Y && area.UpperRight.X == args.CornerX && area.UpperRight.Y == args.CornerY);
+        _placedFunctionId = box.ObjectIdentifier;
+        _placedLayout = EplanLayout.Measure(_projectPath, _pageName, [box]);
+        return new() { Page = page.Name, Tag = box.Name, Category = category.ToString(), Functions = 1 };
+    }
+
+    private void ReadSpecialCommitted(DevicePlaceArgs args, DevicePlaceData data)
+    {
+        Page page = EplanProjects.ByPath(_projectPath).Pages.Single(p => p.Name == _pageName);
+        Function[] functions = EplanNativePreconditions.Valid(page.AllPlacements).OfType<Function>().ToArray();
+        Function placed = functions.Single(f => f.ObjectIdentifier == _placedFunctionId);
+        data.Tag = placed.Name;
+        data.Type = placed.GetType().Name;
+        data.Category = placed.FunctionCategory.ToString();
+        data.IsMainFunction = placed.IsMainFunction;
+        Require(placed.IsPlaced && placed.Page.Name == data.Page && placed.SymbolVariant.SymbolLibraryName == _symbol.Library
+            && placed.SymbolVariant.SymbolName == _symbol.Name && placed.SymbolVariant.VariantNr == _symbol.Variant && data.Category == _symbol.FunctionCategory);
+        if (DeviceSymbolPlan.BusBarDefinition(args))
+        { Require(data.Type == "TextFunction" && data.IsMainFunction == true && data.Category == "BusBarDefText"); }
+        BoxedDevice? box = placed as BoxedDevice ?? functions.OfType<BoxedDevice>().FirstOrDefault(b => b.FunctionsInside.Any(f => f.ObjectIdentifier == placed.ObjectIdentifier));
+        if (box is null)
+        { return; }
+        RectangleD area = box.GetLogicalArea();
+        data.BlackBox = new() { Tag = box.Name, Bounds = [area.LowerLeft.X, area.LowerLeft.Y, area.UpperRight.X, area.UpperRight.Y], FunctionsInside = box.FunctionsInside.Select(f => f.Name).ToArray() };
+        if (DeviceSymbolPlan.BlackBox(args))
+        { Require(data.Type == "BoxedDevice" && data.IsMainFunction == true && data.BlackBox.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })); }
+    }
+
     private static void Check(bool matches, string what)
     {
         if (!matches)

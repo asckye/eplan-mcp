@@ -87,6 +87,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             }) ?? [];
             double[]? bounds = Optional(() =>
             {
+                if (placement is BoxedDevice device)
+                { RectangleD area = device.GetLogicalArea(); return new[] { area.LowerLeft, area.UpperRight }.SelectMany(XY).ToArray(); }
                 if (placement is LocationBox box)
                 { RectangleD area = box.GetLogicalArea(); return new[] { area.LowerLeft, area.UpperRight }.SelectMany(XY).ToArray(); }
                 return (placement is PropertyPlacement p ? p.GetBoundingBox(false) : placement.GetBoundingBox()).SelectMany(XY).ToArray();
@@ -120,13 +122,13 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             // but its wire outline is neither a layout symbol nor a container.
             // Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
             bool isContainer = placement is not DynamicConnectionLine && (placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant?.SymbolName == "PLCC"
-                || placement.GetType().Name == "PLC" || placement is Function boxFunction && boxFunction.FunctionCategory.ToString() is "PLCBox" or "BlackBox"));
+                || placement.GetType().Name == "PLC" || placement is Function boxFunction && boxFunction.FunctionCategory.ToString() is "PLCBox" or "BlackBox" or "Blackbox"));
             string? containerOwner = isContainer ? placement.ToStringIdentifier() : null;
             try
             {
                 if (cardOwners.TryGetValue(placement.ToStringIdentifier(), out string? card))
                 { containerOwner = card; }
-                else if (placement is Function function && function.ParentFunction is { } box && box.FunctionCategory.ToString() is "PLCBox" or "BlackBox")
+                else if (placement is Function function && function.ParentFunction is { } box && box.FunctionCategory.ToString() is "PLCBox" or "BlackBox" or "Blackbox")
                 { containerOwner = box.ToStringIdentifier(); }
             }
             catch (Exception ex) when (ex is BaseException or InvalidOperationException)

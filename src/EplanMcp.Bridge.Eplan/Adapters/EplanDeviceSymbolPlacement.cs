@@ -41,7 +41,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
             SymbolVariant variant = project.SymbolLibraries.Single(l => l.Name == _symbol.Library).Symbols.Single(s => s.Name == _symbol.Name)
                 .Variants.Single(v => v.VariantNr == _symbol.Variant);
             return args.TerminalStrip is not null ? CreateTerminal(args, tag, project, page, variant)
-                : args.LocationBox is null ? Create(args, tag, project, page, variant) : CreateLocationBox(args, project, page, variant);
+                : DeviceSymbolPlan.BlackBox(args) ? CreateBlackBox(args, tag, page, variant) : args.LocationBox is null ? Create(args, tag, project, page, variant) : CreateLocationBox(args, project, page, variant);
         }
         catch (Exception ex) when (ex is BaseException or ArgumentException or ApplicationException && new EplanExceptionMapper().Map(ex) is null)
         {
@@ -61,7 +61,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         // Live T7d: a standalone contact is not a main function by default, so device reads cannot find it. The tag is
         // new (ALREADY_EXISTS otherwise), so this function is the device's main function, like a pushbutton's contact.
         // A PLC point belongs to its existing PLC box (its own main function), so it stays as EPLAN places it.
-        if (args.PlcConnectionPoint is null)
+        if (args.PlcConnectionPoint is null && !DeviceSymbolPlan.ConnectionPoint(args) && !DeviceSymbolPlan.BusBarPoint(args))
         {
             if (!function.IsMainFunction)
             { function.IsMainFunction = true; }
@@ -117,7 +117,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         // A13: finder cannot see uncommitted functions. Check the returned function and its pins directly.
         Pin[] pins = function.Pins;
         Require(_symbol.FunctionCategory is null || function.FunctionCategory.ToString() == _symbol.FunctionCategory);
-        Require(function.IsPlaced && function.Page.Name == page.Name && DevicePlaceRequest.SameName(tag, function.Name) && function.ArticleReferences.Length == 0
+        Require(function.IsPlaced && function.Page.Name == page.Name && (DevicePlaceRequest.SameName(tag, function.Name) || DeviceSymbolPlan.ConnectionPoint(args) && DevicePlaceRequest.SameName(tag, function.Name.Split(':')[0])) && function.ArticleReferences.Length == 0
             && function.Location.X == args.X && function.Location.Y == args.Y && pins.Length == _symbol.ConnectionPoints.Count
             && function.SymbolVariant.SymbolLibraryName == _symbol.Library && function.SymbolVariant.SymbolName == _symbol.Name
             && function.SymbolVariant.VariantNr == _symbol.Variant);

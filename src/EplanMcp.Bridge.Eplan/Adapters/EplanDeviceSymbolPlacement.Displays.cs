@@ -14,6 +14,8 @@ internal sealed partial class EplanDeviceSymbolPlacement
     public void ReadCommitted(DevicePlaceArgs args, DevicePlaceData data)
     {
         MainThread.Assert();
+        if (args.PlcConnectionPoint is null)
+        { ReadSpecialCommitted(args, data); return; }
         string verification = "the placed PLC point's identity and page";
         try
         {

@@ -5,6 +5,12 @@
 
 ## [Unreleased]
 
+- `eplan_device_place` 端子来源可选择库符号及变体，按 Terminal 类别校验；省略时保持 IEC_symbol/X 默认。
+
+- `eplan_device_place` 支持 SPECIAL/BBDEF 母线定义及同标识 BCP 连接点，返回原生类别与主功能标志。
+
+- `eplan_device_place` 支持 SPECIAL/DC 黑盒及同标识 DCP/DCPP3 连接点，读回原生类型、类别、主功能、外框与框内功能。
+
 - `eplan_macro_insert` 新增 `representation`：可在总览页插入宏的 `Overview` 表达；布局检查按所选表达和宏变体读取外框。
 - `eplan_macro_insert` 可用 `part` / `part_variant` 代替 `macro`：插入部件的组符号宏，在同一事务中给主功能补上部件引用，提交后读回。
 - `eplan_macro_insert`：宏的声明外框超出可绘制区但仍在已知幅面的页内时只给警告（部件总览宏铺满 A3 页）；插入的对象仍在写入后实测检查。

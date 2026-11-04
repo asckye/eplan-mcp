@@ -71,7 +71,7 @@ public sealed class DevicePlaceExecuteOperation(
                 return data;
             }, _ => true);
             string? warning = result.Warning;
-            if (args.PlcConnectionPoint is not null && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
+            if ((args.PlcConnectionPoint is not null || DeviceSymbolPlan.BlackBox(args) || DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args)) && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
             {
                 try
                 { committedReadback.ReadCommitted(args, result.Result); }
@@ -80,7 +80,8 @@ public sealed class DevicePlaceExecuteOperation(
                     // Commit succeeded: a lookup/verification failure cannot make its outcome unknown.
                     string readbackWarning = failure is BridgeErrorException { Error.Execution: ExecutionState.Committed } known
                         ? known.Error.Message
-                        : "The PLC point was committed, but its identity, card ownership, address, symbolic address, text, plug designation, native references and displays could not be fully verified. Inspect the page and eplan_plc_get before repeating the placement.";
+                        : args.PlcConnectionPoint is not null ? "The PLC point was committed, but its identity, card ownership, address, symbolic address, text, plug designation, native references and displays could not be fully verified. Inspect the page and eplan_plc_get before repeating the placement."
+                        : "The symbol was committed, but its native readback could not be fully verified. Inspect the page and device before repeating the placement.";
                     warning = warning is null ? readbackWarning : warning + " " + readbackWarning;
                 }
             }

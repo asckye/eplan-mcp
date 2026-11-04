@@ -5,6 +5,9 @@ public sealed class DevicePlaceData
 {
     /// <summary>PLC point readback, including pending parent/reference; null for other sources.</summary>
     public PlcChannel? Plc { get; set; }
+    public string? Type { get; set; }
+    public bool? IsMainFunction { get; set; }
+    public BlackBoxData? BlackBox { get; set; }
     /// <summary>Native terminal identity, ownership and position; null for other sources.</summary>
     public TerminalPlacementData? Terminal { get; set; }
     /// <summary>Location-box readback, or null for device sources.</summary>

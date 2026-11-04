@@ -19,7 +19,7 @@ public sealed class DevicePlaceArgs
     public string? Library { get; set; }
     /// <summary>Exact symbol name from the project library.</summary>
     public string? Symbol { get; set; }
-    /// <summary>Native variant number, required for a symbol source.</summary>
+    /// <summary>Native variant number; terminal sources default to 0, other symbol sources require it.</summary>
     public int? SymbolVariant { get; set; }
     /// <summary>Requested property placements relative to the symbol (A53/A54).</summary>
     public List<DeviceDisplayProperty>? DisplayProperties { get; set; }
@@ -29,9 +29,9 @@ public sealed class DevicePlaceArgs
     public string[]? ConnectionDescriptions { get; set; }
     /// <summary>Exclusive location-box source: a literal location identifier such as +P1 (A55).</summary>
     public string? LocationBox { get; set; }
-    /// <summary>Opposite corner x in millimetres; required only for LocationBox.</summary>
+    /// <summary>Opposite corner x in millimetres; required for LocationBox or SPECIAL/DC.</summary>
     public double? CornerX { get; set; }
-    /// <summary>Opposite corner y in millimetres; required only for LocationBox.</summary>
+    /// <summary>Opposite corner y in millimetres; required for LocationBox or SPECIAL/DC.</summary>
     public double? CornerY { get; set; }
     /// <summary>Exclusive terminal source: parent strip designation, short or full (A55).</summary>
     public string? TerminalStrip { get; set; }

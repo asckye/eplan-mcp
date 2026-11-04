@@ -41,7 +41,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `connection_descriptions` | string[] | 否 | 不写 | 每个连接点的描述，按连接点数组顺序，数量必须相等；每项非空、最多 64 字符；写一基索引的 20023，PLC 点以只读的 20029 显示（例如 `DI a.0`）。只用于库符号来源 |
 | `connection_designations` | string[] | 否 | 保留默认代号 | 按 T1 连接点数组顺序，每引脚一项，数量必须相等；每项非空、无控制字符且最多 64 字符；T2b 写入带一基索引的 20022，不使用汇总属性 20038 或 `Pin.Designation` |
 | `location_box` | string | 位置框来源 | — | 与部件、库符号、tag、显示属性和引脚代号互斥；如 `+P1`，`+` 后 1–64 个字母、数字、下划线或点；不含通配、空白、设备段或页名 |
-| `corner_x`、`corner_y` | number | 位置框必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；其余来源禁止 |
+| `corner_x`、`corner_y` | number | 位置框/黑盒必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；也用于 SPECIAL/DC |
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
 | `tag` | string | 库符号来源必填，部件来源可选 | EPLAN 自动标识 | 以 `-` 开头的短标识（如 `-KF20`）取页结构但去掉 `&` 文档类型；或完整标识（如 `=GAA+A1-KF20`）。部件来源指定时一起重命名全部功能 |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
@@ -50,6 +50,10 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 - 部件来源省略 `tag` 时保留 EPLAN 自动编号；指定时规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。库符号来源仍要求 `tag`。
 - 变体不存在时 EPLAN 会静默改用第一个变体（XML），所以规划时先确认变体存在。
 - 显示属性和连接点代号仅用于库符号来源；不提供任意属性写入，也不改变功能文本及其现有语言（A53）。
+
+SPECIAL/DC 黑盒要求 `tag`、`corner_x/corner_y`（x/y 左下、corner 右上）。提交后 `device.type/category/isMainFunction` 与 `blackBox.bounds/functionsInside` 为原生读回。DCP/DCPP3 用同标识、不带冒号；EPLAN 分配后缀，框外也按原生结果返回。见 [A86](../eplan/api-notes.md)。
+
+SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功能），tag 必填；同标识 SPECIAL/BCP 同属一个器件。提交后 device.type/category/isMainFunction 为原生读回。依据 A86；Large 已补，尚未运行。
 
 ## 3. 输出
 - 新建并放置端子排定义时，可从项目的插件解析结果读取 `defaults.strip_definition.symbol` 与 `defaults.strip_definition.variant`（必须同时有值）。只支持 SPECIAL 库；未配置时保留 `TDEF`/0。仅实际消费插件值时，dry-run 和执行结果附 `metadata.plugins`（精确 `id@version`）；复用已有排或创建不放置的排不报告消费。内部选择与来源进入计划指纹，改变后必须重新规划。
@@ -138,7 +142,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 
 - D6：可选 `terminal_strip_position:[x,y]` 是新父排定义的页面绝对毫米位置；必须同时给 `terminal_strip_text`，仅首次新建父排可用，页界未知或越界拒绝。此时 `TerminalStrip.Create(Page)` 后设置 Location；省略仍建不放置定义（A55）。与首个端子共用一个事务和撤销步，读回排名、页、位置及语言无关功能文本；返回 terminal.stripPosition/stripText（预览为预测）。审批清单和指纹含位置及文本。LargeWrite 新页读回、导图和一步撤销仅编写，未运行。
 
-- 新增互斥来源 `terminal_strip`（短标识如 `-X6` 或完整标识）和 `terminal_number`（1–64 个字母、数字、下划线或点）；省略 `tag/part/variant/library/symbol/location_box` 和显示/引脚选项。固定 IEC_symbol/X，`symbol_variant` 默认 0。坐标沿既有页类型、有限数与页界检查。
+- 端子来源 `terminal_strip`（短标识如 `-X6` 或完整标识）和 `terminal_number`（1–64 个字母、数字、下划线或点）；省略 `tag/part/variant/location_box` 和显示/引脚选项。可成对传 `library` + `symbol`，按符号库读出的 `FunctionCategory=Terminal` 校验，不设名称名单；类别不可读只警告，创建后仍核对原生类别。省略库名/符号时保留 IEC_symbol/X，`symbol_variant` 默认 0。支持 IEC_symbol/X2_2、XTR1、XFD 与 GRAPHICS/KA1_PE 中实际存在的 Terminal 变体。坐标沿既有页类型、有限数与页界检查。
 - `terminal_strip_text` 为可选的 1–256 字符无控制符功能文本，按语言无关 `??_??` 写入并读回；仅新建父排时允许，追加端子须省略，不覆盖已有排文本。示例：`{"project":"Line1","page":"=F+A1/1","terminal_strip":"-X6","terminal_number":"1","terminal_strip_text":"操作控制盒","symbol_variant":0,"x":80,"y":160,"dry_run":true}`。
 - 父排按完整名称复用（忽略大小写，沿用已有拼写），不存在时先建立不放置的定义；给定 `terminal_strip_position` 时改用 `TerminalStrip.Create(page)` 并设置 Location，均设为主功能，再 `Terminal.Create(strip,page,variant)`、命名 `<排>:<号>`、设置 20030。全项目同复合键忽略大小写拒绝；普通器件占用父排名也不能冒充端子排。审批逐项列父排/文本和端子；指纹覆盖全项目名称、页对象、实际库变体、坐标与全部变更。
 - 沿 `FunctionTransactionScope` 一次提交；事务内核对实际排名、主功能、20030、原生 owner 对象及名称、位置、页和库变体。父关系为空视为提交前尚未建立（S43 relationPendingCommit，T7c 实测），读到非目标排才回滚，提交后用 `eplan_terminal_strip_get` 核实；不推测已归属；属性列表只取一次并在 Abort 前释放，Abort 后不碰新对象。成功一步撤销；不生成连接（A52/A55）。允许 LockAllObjects，负责人已确认无多用户编辑。

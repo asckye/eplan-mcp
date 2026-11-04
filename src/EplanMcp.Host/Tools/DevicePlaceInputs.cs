@@ -13,10 +13,11 @@ internal static partial class DevicePlaceInputs
         ((JsonArray)schema["required"]!).Remove("tag");
         schema["oneOf"] = JsonNode.Parse("""
             [{"required":["part"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","library","symbol","symbol_variant","display_properties","connection_designations","connection_descriptions","location_box","corner_x","corner_y"]}}},
-             {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","part","variant","location_box","corner_x","corner_y"]}}},
-             {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","tag","part","variant","library","symbol","symbol_variant","display_properties","connection_designations","connection_descriptions"]}}},
-             {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"enum":["tag","part","variant","library","symbol","location_box","corner_x","corner_y","display_properties","connection_designations","connection_descriptions"]}}}]
+             {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"pattern":"^(terminal_.*|part|variant|location_box)$"}}},
+             {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"pattern":"^(terminal_.*|tag|part|variant|library|symbol.*|display_.*|connection_.*)$"}}},
+             {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"pattern":"^(tag|part|variant|location_box|corner_.*|display_.*|connection_.*)$"}}}]
             """);
+        schema["allOf"] = JsonNode.Parse("""[{"if":{"properties":{"library":{"pattern":"^[sS][pP][eE][cC][iI][aA][lL]$"},"symbol":{"pattern":"^[dD][cC]$"}},"required":["library","symbol"],"not":{"required":["terminal_strip"]}},"then":{"required":["corner_x","corner_y"]},"else":{"if":{"required":["library"]},"then":{"propertyNames":{"not":{"enum":["corner_x","corner_y"]}}}}}]""");
         schema["properties"]!["display_properties"] = JsonNode.Parse("""
             {"type":["array","null"],"maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["property_id","offset_x_mm","offset_y_mm"],"properties":{
             "property_id":{"type":"integer","enum":[20214,20213,20211,20215,20058,20011,20027,20400,20403,20301,20300,20406]},"offset_x_mm":{"type":"number"},"offset_y_mm":{"type":"number"}}}}
@@ -24,6 +25,8 @@ internal static partial class DevicePlaceInputs
         schema["dependentRequired"] = JsonNode.Parse("""{"plc_connection_point":["library","symbol","symbol_variant","tag","plc_address","plc_symbolic_address","plc_text"],"plc_address":["plc_connection_point"],"plc_symbolic_address":["plc_connection_point"],"plc_text":["plc_connection_point"]}""");
         foreach (string field in new[] { "plc_connection_point", "plc_address", "plc_symbolic_address", "plc_text" })
         { schema["properties"]![field]!["minLength"] = 1; schema["properties"]![field]!["maxLength"] = 256; }
+        schema["dependentRequired"]!["library"] = JsonNode.Parse("""["symbol"]""");
+        schema["dependentRequired"]!["symbol"] = JsonNode.Parse("""["library"]""");
         schema["dependentRequired"]!["plc_plug_designation"] = JsonNode.Parse("""["plc_connection_point"]""");
         schema["properties"]!["plc_plug_designation"]!["minLength"] = 1;
         schema["properties"]!["plc_plug_designation"]!["maxLength"] = 64;
@@ -63,9 +66,12 @@ internal static partial class DevicePlaceInputs
         }
         if (args.TerminalStrip is not null)
         {
-            if (args.Part is not null || args.Variant is not null || args.Library is not null || args.Symbol is not null || args.Tag is not null
-                || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || display is not null || args.ConnectionDesignations is not null || args.SymbolVariant is < 0)
-            { problems.Add("/terminal_strip: use an exclusive terminal source with optional symbol_variant; omit tag and other sources."); }
+            if (args.Part is not null || args.Variant is not null || args.Tag is not null
+                || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null || args.SymbolVariant is < 0)
+            { problems.Add("/terminal_strip: use an exclusive terminal source with optional library/symbol and symbol_variant; omit tag and other sources."); }
+            if ((args.Library is not null || args.Symbol is not null) && (string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
+                || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl)))
+            { problems.Add("/library: terminal symbols require a complete library/symbol pair without controls."); }
             if (args.TerminalStrip.Length is < 2 or > 128 || args.TerminalStrip.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == ':')
                 || args.TerminalStrip.LastIndexOf('-') < 0 || args.TerminalStrip[args.TerminalStrip.Length - 1] == '-')
             { problems.Add("/terminal_strip: require a short or full device tag, at most 128 characters, without whitespace, controls or colon."); }
@@ -90,8 +96,15 @@ internal static partial class DevicePlaceInputs
             { problems.Add("/corner_x: require finite lower-left x/y and upper-right corner_x/corner_y, with positive width and height."); }
             return problems;
         }
-        if (args.CornerX is not null || args.CornerY is not null)
-        { problems.Add("/location_box: corner_x and corner_y require a location_box source."); }
+        bool blackBox = string.Equals(args.Library, "SPECIAL", StringComparison.OrdinalIgnoreCase) && string.Equals(args.Symbol, "DC", StringComparison.OrdinalIgnoreCase);
+        if (blackBox && (args.CornerX is not { } bx || args.CornerY is not { } by || !double.IsFinite(bx) || !double.IsFinite(by) || bx <= args.X || by <= args.Y))
+        { problems.Add("/corner_x: a black box requires finite corner_x/corner_y above and right of x/y."); }
+        if ((blackBox || string.Equals(args.Library, "SPECIAL", StringComparison.OrdinalIgnoreCase) && string.Equals(args.Symbol, "BBDEF", StringComparison.OrdinalIgnoreCase)) && string.IsNullOrWhiteSpace(args.Tag))
+        { problems.Add("/tag: SPECIAL/DC and SPECIAL/BBDEF require a device tag."); }
+        if (blackBox && (display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
+        { problems.Add("/display_properties: black boxes do not accept display or pin options."); }
+        if (!blackBox && (args.CornerX is not null || args.CornerY is not null))
+        { problems.Add("/location_box: corner_x and corner_y require a location_box or SPECIAL/DC source."); }
         bool symbol = args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null;
         bool part = !string.IsNullOrWhiteSpace(args.Part);
         if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))

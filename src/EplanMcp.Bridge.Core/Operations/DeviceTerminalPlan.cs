@@ -20,10 +20,13 @@ internal static class DeviceTerminalPlan
             { throw WriteArguments.Invalid(["/terminal_strip: terminal_number and terminal_strip_text require a terminal source."]); }
             return;
         }
-        if (args.Part is not null || args.Variant is not null || args.Library is not null || args.Symbol is not null || args.Tag is not null
-            || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null
+        if (args.Part is not null || args.Variant is not null || args.Tag is not null
+            || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null
             || args.SymbolVariant is < 0)
-        { throw WriteArguments.Invalid(["/terminal_strip: use an exclusive terminal source with optional symbol_variant; omit tag and other sources."]); }
+        { throw WriteArguments.Invalid(["/terminal_strip: use an exclusive terminal source with optional library/symbol and symbol_variant; omit tag and other sources."]); }
+        if ((args.Library is not null || args.Symbol is not null) && (string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
+            || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl)))
+        { throw WriteArguments.Invalid(["/library: terminal symbols require a complete library/symbol pair without controls."]); }
         if (args.TerminalStrip.Length is < 2 or > 128 || args.TerminalStrip.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == ':')
             || args.TerminalStrip.LastIndexOf('-') < 0 || args.TerminalStrip[args.TerminalStrip.Length - 1] == '-')
         { throw WriteArguments.Invalid(["/terminal_strip: require a short or full device tag, at most 128 characters, without whitespace, controls or colon."]); }
