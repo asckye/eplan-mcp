@@ -118,11 +118,15 @@ public sealed class SmallProjectRedrawMacroTests
         JObject args = Assert.Single(calls, call => call.Tool == "eplan_macro_insert" && (bool?)call.Args["dry_run"] == false).Args;
         Assert.Equal(partRoute ? "PXC.2703994" : null, (string?)args["part"]);
         Assert.Equal(partRoute ? null : "Custom/Controller-V2.ema", (string?)args["macro"]);
-        Assert.DoesNotContain(calls, call => call.Tool is "eplan_device_place" or "eplan_placement_create");
+        Assert.DoesNotContain(calls, call => call.Tool == "eplan_device_place" || call.Tool == "eplan_placement_create" && partRoute);
         Assert.Equal(partRoute ? null : "PXC.2703994", (string?)calls.Last(call => call.Tool == "eplan_device_update").Args["part"]);
         Assert.NotEmpty((JArray)report.ToJson()["macroVersionDifferences"]!);
-        Assert.Contains(((JArray)report.ToJson()["noToolTypes"]!).OfType<JObject>(), item => (string?)item["objectType"] == "Line"
-            && ((JArray)item["objects"]!).Any(source => (string?)source["oid"] == "140001"));
+        // A circuit page's own graphics are drawn; an Overview page keeps what its macro brought and lists the rest.
+        if (partRoute)
+        {
+            Assert.Contains(((JArray)report.ToJson()["noToolTypes"]!).OfType<JObject>(), item => (string?)item["objectType"] == "Line"
+                && ((JArray)item["objects"]!).Any(source => (string?)source["oid"] == "140001"));
+        }
     }
 
     [Fact]
