@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A90、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A91、B13**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -351,14 +351,23 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 写前 layout_guard=warn 仅把非 OffPage 布局违规降为警告；写后仍遵循 ADR-0046。— 实测（`LayoutGuardWarningTests`）：穿过普通符号的线默认被 R3/R4 拒绝，warn 时提交并告警，超出页面仍拒绝。线穿过黑盒外框本身不触发拒绝。
 - `ParseNameAndProps` 对不含高层代号或位置代号的标识（如 `+A1-WE1`）返回空值，把空值赋给 `FunctionBasePropertyList.DESIGNATION_PLANT` 会抛 `EmptyPropertyException`（S063111），所以只赋非空部分。`RenameDevice` 之后主功能立即显示实际名称；不使用某部分标识的器件类型（如 `BusBarDefText`）把 `=F+A1-WE19` 变成 `+A1-WE19`，要在提交前发现并回滚。提交后再撤销未能恢复原标识，所以回滚后要核对原标识还在。— 实测（`WriteSafetyTests.Q2`）
 
+### A90. PLC 同一通道的两种表达如何关联（2026-11-04，EPLAN 2026.0.3，Pro Panel，scratch 项目，`MacroBoxSpikeTests`）
+- 总览宏建立卡和总览点后，在原理图页插入同一部件的多线宏（`NumerationMode.None`，点名为 `=GAA+A1-A?:1.1`），再用 `NameService.RenameDevice` 改成卡的标识，两边立刻配对：总览点 20301 指向原理图页和路径，原理图点 20300、20301 指向自己的路径。宏已带插头代号 20406，不需要生成连接。— 实测。
+- 在原理图点写 20011，总览点的 20031、20120 立刻变化，总览点自己的 20011 仍为空。功能文字只写原理图这一边。— 实测。
+- 在总览点写 20400，原理图点不变；调用 `Synchronize.OverviewToMultilineAndSingleline(project)` 后才同步。示例项目里地址只在总览点上（52 个总览点有地址，原理图点 0 个），重绘时不同步。— 实测 + 示例数据。
+- 只设相同 `Name`、不带插头代号的新功能不配对。同一张卡可有两个同名点，靠插头代号区分（`:RJ45` 的 20406 分别为 X1、X2）。— 实测 + 示例数据。
+- 设计思路和数据关联见 [design-model.md](design-model.md)、[data-relationships.md](data-relationships.md)。
+
+块成员的标识：`Block.SubPlacements` 里所有成员的 `ToStringIdentifier` 相同（示例项目块 `144_282958` 的 27 个成员 oid 都是 550；scratch 新建块的 3 条线都读到 type 5、oid 52125），按标识去重只剩一行。块成员不能按标识定位，只能按它在块里的位置区分。— 示例数据 + `MacroGroupedPlacementTests` 实测。
+
 ### A89. 第四轮重绘：延后生成、组成员与多表达（2026-11-04，EPLAN 2026.0.3，负责人实测反馈）
-依据：负责人提供的第三次重绘报告 `report-20261104120419136-ec5bf3a2.json`（只读、不入库）和本轮任务记录；本轮不启动 EPLAN，新增工具链 Large 全部 **待实测 / NOT RUN**。
-- 每放一个节点即生成会加入计划外自动连接；报告调用 926 的 T 节点为 (96,248)、Up/Down/Right、variant 1。`generate:false` 只放五种节点/电位对象，略过逻辑端点、路径/自动线冲突和中断配对页校验，最后显式生成。— 报告失败已核对；分步生成、读回和撤销待实测。
-- `MacroBoxSpikeTests` 的宏对象与示例页对象位于嵌套 `Group`；普通 `Placement.Group` 非空不等于块成员，块成员由绘图的 `parent` 指定。— 负责人实测反馈；PXC.2861344 组内线建块、删除与撤销待实测，若 Block.Create 拒绝则保留异常、不改用替代路径。
-- 原生整圆可为 `Kind=Circle` 且 StartAngle=EndAngle=0、π/2 或 π。等角使用 SetArc 保留角度，0..360 保持 SetCircle；矩形/文字的 -16002 表示取图层角度，应原样写入。— 负责人实测反馈；报告请求已归一为0..360，180..180 与 -16002 新用例待实测。
-- 同名 PLC 总览/电路表达同时存在，含 `=K1+A2-KE1:1.1` 与 BusTerminal `:RJ45`；报告调用1339/1340被重名校验拒绝。— 已核对报告；允许非主表达与同名地址复用的工具链待实测，已知不同地址继续拒绝以保留原 Large 断言。
-- PXC.2861289 的 Overview 宏在 (0,292)、macro_box:false 插入时，空块 `Name` 抛 BaseException，导致整页失败（报告调用642，页 `=K1+A2&EFA1/5`）。不可读字段保留未知并附警告。— 负责人定位与报告已核对；修复后插入待实测。
-- 报告调用1012包含20种语言、合计1003字符；限制改为每语言500。`warn` 下缺少项目显示语言/??_?? 应告警放行。— 输入已核对，测试正文去项目数据化；20语言与仅 de_DE 的提交待实测。
-- 示例存在没有颜色、截面、标识及部件的连接定义点。— 负责人反馈；报告未定位到全部省略的请求；无属性 CDP 创建读回与撤销待实测。
-- 宏定位补充：`WindowMacro.ReferencePoint` 与 `macro.Objects` 内瞬态 `Function.Location` 按所选表达/变体读取，不使用项目对象定位器。负责人提供 `.ema` 的 `MacroVariant.ReferencePoint`：PXC/2861344 Overview 0 为 (0,292)，PXC/2701290 MultiLine 0 为 (16,168)；前者与插入坐标一致，`MoveKind.Absolute` 将宏参考点放到指定坐标。`location` 返回宏原生坐标，不先减参考点；它是宏坐标系绝对位置还是相对参考点，须用这两个宏的读回与参考点相减结果核验，当前 **待实测**，不得据 XML 属性存在推定坐标语义。
-- PLC 点并入补充：负责人 2026-11-04 `MacroBoxSpikeTests` 实测，在 PXC.2861344 总览 PLC 盒 `=GAA+A1-A1` 已存在时，以 `NumerationMode.None` 插入多线宏，再用 `NameService.RenameDevice` 将 `=GAA+A1-A?:1.1` 等非主功能 PLCTerminal 并入该标识，后缀保留且符号为 `PLC_CBOX_PCON_PLUG`。正式工具仅对“源全为非主 PLCTerminal、目标含 PLCBox”放行；提交后重取目标功能核对迁入点及原总览点、一次撤销恢复的工具链 **待实测 / NOT RUN**。
+依据：负责人提供的第三次重绘报告 `report-20261104120419136-ec5bf3a2.json`（只读、不入库）和本轮任务记录；新增工具链的 Large 于 2026-11-04 在 Pro Panel、LargeWrite 上全部通过（`DeferredConnectionTests`、`MacroGroupedPlacementTests`、`PlacementRotationRound4Tests`、`PlcRepresentationTests`、`EmptyMacroBlockTests`、`PlacementLanguageRound4Tests`、`EmptyConnectionDefinitionTests`、`MacroPositionTests`、`PlcModuleMergeTests`），回归 `DevicePlaceTests`、`ConnectionCreateTests` 同样通过。
+- 每放一个节点即生成会加入计划外自动连接；报告调用 926 的 T 节点为 (96,248)、Up/Down/Right、variant 1。`generate:false` 只放五种节点/电位对象，略过逻辑端点、路径/自动线冲突和中断配对页校验，最后显式生成。— 报告失败已核对；分步生成、读回和撤销已实测。
+- `MacroBoxSpikeTests` 的宏对象与示例页对象位于嵌套 `Group`；普通 `Placement.Group` 非空不等于块成员，块成员由绘图的 `parent` 指定。— 负责人实测反馈；PXC.2861344 组内线建块、删除与撤销已实测。
+- 原生整圆可为 `Kind=Circle` 且 StartAngle=EndAngle=0、π/2 或 π。等角使用 SetArc 保留角度，0..360 保持 SetCircle；矩形/文字的 -16002 表示取图层角度，应原样写入。— 负责人实测反馈；报告请求已归一为0..360，180..180 与 -16002 已实测。
+- 同名 PLC 总览/电路表达同时存在，含 `=K1+A2-KE1:1.1` 与 BusTerminal `:RJ45`；报告调用1339/1340被重名校验拒绝。— 已核对报告；允许非主表达与同名地址复用已实测（RJ45 属于总线耦合器 PXC.2703994，PXC.2861344 没有这个点）；已知不同地址继续拒绝。
+- PXC.2861289 的 Overview 宏在 (0,292)、macro_box:false 插入时，空块 `Name` 抛 BaseException，导致整页失败（报告调用642，页 `=K1+A2&EFA1/5`）。不可读字段保留未知并附警告。— 负责人定位与报告已核对；修复后插入已实测。
+- 报告调用1012包含20种语言、合计1003字符；限制改为每语言500。`warn` 下缺少项目显示语言/??_?? 应告警放行。— 输入已核对，测试正文去项目数据化；20语言与仅 de_DE 的提交已实测。
+- 示例存在没有颜色、截面、标识及部件的连接定义点。— 负责人反馈；报告未定位到全部省略的请求；无属性 CDP 创建读回与撤销已实测。
+- 宏定位补充：`WindowMacro.ReferencePoint` 与 `macro.Objects` 内瞬态 `Function.Location` 按所选表达/变体读取，不使用项目对象定位器。负责人提供 `.ema` 的 `MacroVariant.ReferencePoint`：PXC/2861344 Overview 0 为 (0,292)，PXC/2701290 MultiLine 0 为 (16,168)；前者与插入坐标一致，`MoveKind.Absolute` 将宏参考点放到指定坐标。`location` 是宏坐标系里的绝对位置，和参考点同一坐标系：实测 PXC/2701290 的 `:+` 点 location 为 (16,168)，正好等于参考点；PXC/2861344 的盒 location 为 (212,284)，插入 (0,292) 后与示例一致。所以插入点 = 参考点 + (示例位置 − 宏内位置)。
+- PLC 点并入补充：负责人 2026-11-04 `MacroBoxSpikeTests` 实测，在 PXC.2861344 总览 PLC 盒 `=GAA+A1-A1` 已存在时，以 `NumerationMode.None` 插入多线宏，再用 `NameService.RenameDevice` 将 `=GAA+A1-A?:1.1` 等非主功能 PLCTerminal 并入该标识，后缀保留且符号为 `PLC_CBOX_PCON_PLUG`。正式工具仅对“源全为非主 PLCTerminal、目标含 PLCBox”放行；提交后重取目标功能核对迁入点及原总览点、一次撤销恢复已实测。

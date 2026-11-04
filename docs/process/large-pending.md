@@ -4,20 +4,6 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| R4-1 延后生成（A89） | `DeferredConnectionTests` | NOT RUN：禁止 EPLAN；五种放置模式、无配对页中断点、先无逻辑连接后显式生成及单步撤销。 |
-| R4-2 组内建块/删除（A89） | `MacroGroupedPlacementTests` | NOT RUN：PXC.2861344 Overview (0,292)、macro_box:false，组内线建块/删除、读回及各一步撤销；Block.Create 拒绝时记录异常停止。 |
-| R4-3 整圆/旋转（A89） | `PlacementRotationRound4Tests` | NOT RUN：180..180 读回 Circle/双角，text -16002 原样读取。 |
-| R4-4 PLC 第二表达（A89） | `PlcRepresentationTests` | NOT RUN：Overview 宏后 Circuit 放同名 1.1/RJ45，读回两个表达与非主功能、一步撤销。原 Large 的同名不同地址拒绝断言保留。 |
-| R4-5 空块读取（A89） | `EmptyMacroBlockTests` | NOT RUN：PXC.2861289 Overview (0,292) 插入、完整绘图读回和一步撤销。 |
-| R4-6 多语言文字（A89） | `PlacementLanguageRound4Tests` | NOT RUN：20语言长文本、仅 de_DE 在 warn 下带警告提交，恢复原语言设置。 |
-| R4-7 无属性定义点（A89） | `EmptyConnectionDefinitionTests` | NOT RUN：无颜色/截面/标识/部件的 CDP，默认生成、点位读回与一步撤销。 |
-| R4-8 宏定位信息（A89） | `MacroPositionTests` | NOT RUN：PXC/2861344 Overview 0 参考点 (0,292)、PXC/2701290 MultiLine 0 参考点 (16,168) 与功能位置；记录 location 原值及相对参考点的差值，坐标含义待实测。 |
-| R4-9 PLC 点并入盒（A89） | `PlcModuleMergeTests` | NOT RUN：PXC.2861344 总览与多线宏，非主 PLCTerminal 并入已存在 PLCBox，保留后缀和两侧表达，提交后读回，一次撤销恢复。现有 page_get/device_get 不返回符号名，PLC_CBOX_PCON_PLUG 仅有负责人实测依据，正式工具符号读回未覆盖。 |
-| G8 可选端子符号（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 X2_2、KA1_PE 的库名、符号、变体、编号及逐次单步撤销。 |
-| G6 母线定义（2026-11-03 brief；A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 BBDEF 主功能与两个 BCP 同属一个器件、逐次单步撤销。 |
-| G5 黑盒（2026-11-03 brief；g4probe A86） | `DevicePlaceTests` | NOT RUN：禁止 EPLAN；待验 60×40 黑盒、DCP 0/2/4 同器件与框内列表、后缀及逐步单次撤销。 |
-| G4b 已有连接定义点（2026-11-03 负责人 brief；A86） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite 新页先生成两端子连接，再仅以 definition_point item 写 RD、1.5；读回点位、连接属性及数量/端点不变，一步撤销恢复快照；失败输出完整请求、结果与读回。 |
-| G4 连接定义点（2026-11-03 负责人 brief；A86） | `ConnectionCreateTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite 新页验证两端子连接与 CDP/CDPNG 同次创建，连接颜色 RD、截面 1.5、定义点位置读回和一步撤销恢复页面快照；失败输出完整请求、结果与读回。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite Overview 页验证 PXC.2861344 的对象、PLC 盒、总览点、部件引用及撤销恢复；默认预览迁移后的旧宏断言保留。 |
 | G9 图形创建（2026-11-03，负责人 brief） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | NOT RUN：本次禁止 EPLAN。新增折线、圆弧、路径功能文本、imports 图片混合批次；待核对原生类型、全部点、角度/端点与外框、文字、图片路径和一次撤销恢复快照。XML 仅证明签名，不证明角度方向或实际图片行为。 |
 | S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 待运行：本次禁止 EPLAN；需验证写入未知结果、真实回滚及原有写入安全回归。Small 假对象覆盖未分类异常、回滚证据、结果查询与不重放；未改 Large 断言，不宣称实机通过。 |
@@ -48,8 +34,6 @@
 | 报表方案数据修正（2026-11-03，负责人 brief；`fix(tools): carry report scheme data from page_get to report_create`；A84） | `ReportCreateTests` | 待运行（NOT RUN）：03:39 目录通过，端子图因目标项目没有 `Location designation_A3` 且未传数据而失败。修正后须只读示例 `&AAB1/1` 与 `+A1&EMA2/2`，仅在 LargeWrite 生成目录，并原样传入端子图方案名和四项数据；核对 `pages`、`new_pages`、类型与表格及两次写入分别单步撤销。主线程时长未测；本次禁止 EPLAN。 |
 | 报表块读取 R1 及方案数据修正（2026-11-03，负责人 brief；A84） | `ReportReadTests` | 待运行（NOT RUN）：本次禁止 EPLAN；正式 `eplan_page_get` 只读示例夹具 `&AAB1/1`，核对报表类型、表格与方案字段。方案数据原样返回，每项上限 4000 字符，超出截断并警告。 |
 | 报表块探测 T.4（2026-11-03，负责人 brief；P-01） | `ReportBlockSpikeTests` | 待运行（NOT RUN）：本次禁止运行 EPLAN。待只读观察示例夹具 7 页的 ReportBlock 全字段及名称属性列表，再在 LargeWrite 按原设置生成目录和端子图，核对 Type/FormName、事务失败回滚和提交后新包装读回；证据写 `%TEMP%\eplanmcp-spikes\report-blocks-*.json`。 |
-| FP3 现有设备分配部件（2026-11-03 G3 brief） | `DevicePlaceTests` | 待运行：本次禁止 EPLAN；LargeWrite 新页以 IEC_symbol/SSD 放置 -S 器件，再指定 SIE.3SB3400-0B，核对主功能新增部件引用及一步撤销恢复。 |
-| FP1 部件放置与整器件改名（2026-11-03 G3 brief；A85） | `DevicePlaceTests` | 待运行：本次禁止 EPLAN；LargeWrite 新页带 tag 放置 SIE.6ES7131-4BD01-0AA0，提交后核对 6 个功能（主功能已放置、5 个未放置）、20023、主功能部件引用、旧自动标识无功能及一步撤销恢复。 |
 | 官方 action 离线导入（`feat/official-actions`，2026-11-01 负责人 brief） | `BatchVerification`、`ActionTryTests`、`ActionCatalogTests` | 待运行：批量 action 仅取官方 action/TYPE 行，按第一条官方示例准备参数；需要文件、页或选择上下文仍为 needs_context。此次禁止运行 EPLAN；审批、scratch、unknown 停止与撤销断言保留。 |
 | 崩溃成员拒绝与失联停跑（`feat/crash-refusals`，2026-11-02，负责人 brief；A77） | `BatchVerification`、`ApiTryTests` | 待运行：本次禁止运行 EPLAN；拒绝写侧、保留 MacroBox 读取、失联后停止并持久暂停需验证。崩溃成员不再试执行，原生 target/value 未提供，不宣称复现原生崩溃。 |
 | 批量验证与 main 生成表合并（`feat/batch-verify`，2026-11-01，负责人 brief） | `BatchVerification`、`ApiTryTests`、`ActionTryTests` | 进行中：2026-11-01 已落地 main 68e9f61b，首批 10-31 结果导入后实机验证计数 171 → 228；当夜两槽循环续跑（单次运行在结果未知或状态不可信的条目处按设计停止并换新副本续跑），次日汇总导入。 |
