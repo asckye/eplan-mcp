@@ -22,27 +22,12 @@ public sealed class RuleInterpreterMediumTests
     {
         var fixture = new RuleInterpreterFixture();
         using var cancellation = new CancellationTokenSource();
-        using var release = new ManualResetEventSlim();
-        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         fixture.Properties[("-M1", "function.main")] = Data("true", "boolean");
-        fixture.OnProperty = _ =>
-        {
-            entered.TrySetResult();
-            Assert.True(release.Wait(TimeSpan.FromSeconds(2)));
-        };
-        Task<IReadOnlyList<RuleResult>> evaluation = new RuleInterpreter().EvaluateAsync(
-            [fixture.Rule("{\"property\":\"function.main\"}")], fixture, fixture.Config, fixture.Parameters, cancellation.Token);
-        try
-        {
-            await entered.Task.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
-            await cancellation.CancelAsync();
-        }
-        finally
-        {
-            release.Set();
-        }
+        // Cancelling inside the read needs no second thread to be scheduled in time; the read still answers true, so only the token can stop a Pass.
+        fixture.OnProperty = _ => cancellation.Cancel();
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => evaluation);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => new RuleInterpreter(new ManualRuleClock()).EvaluateAsync(
+            [fixture.Rule("{\"property\":\"function.main\"}")], fixture, fixture.Config, fixture.Parameters, cancellation.Token));
     }
 
     [Fact]

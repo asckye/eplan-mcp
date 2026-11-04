@@ -77,14 +77,24 @@ public sealed class BindingServiceTests : IDisposable
             if (point == "staged")
             {
                 staged.SetResult();
-                Assert.True(release.Wait(TimeSpan.FromSeconds(3), Token));
+                release.Wait(Token);
             }
         });
         Task<ProjectBinding> first = Task.Run(() => firstService.WriteAsync(Proposal(), 0, "first", "bind", null, Token), Token);
-        await staged.Task.WaitAsync(Token);
-        Task<ProjectBinding> second = WriteAsync(Proposal(), 0);
-        Assert.False(second.IsCompleted);
-        release.Set();
+        Task<ProjectBinding> second;
+        try
+        {
+            await await Task.WhenAny(staged.Task, first);
+            // No deadline on either side: first keeps its locks until released and second waits for them, however late this thread runs.
+            var waiting = new BindingService(Library, Audit, Approvals(), _bridge) { ProjectLockWait = TimeSpan.MaxValue };
+            second = waiting.WriteAsync(Proposal(), 0, "second", "bind", null, Token);
+            Assert.False(second.IsCompleted);
+        }
+        finally
+        {
+            release.Set();
+        }
+
         Assert.Equal(1, (await first).Revision);
         Assert.Equal(ErrorReason.PlanStale, (await Assert.ThrowsAsync<BridgeCallException>(() => second)).Error.Reason);
     }
@@ -322,9 +332,11 @@ public sealed class BindingServiceTests : IDisposable
         Assert.False(File.Exists(BindingFile));
     }
 
-    private BindingService Service(IApprovalChannel? channel = null, Action<string>? checkpoint = null) => new(Library, Audit,
-        new ApprovalService([channel ?? _channel], HostConfig.Defaults(_locations), _clock, NullLogger<ApprovalService>.Instance), _bridge)
-    { Checkpoint = checkpoint };
+    private ApprovalService Approvals(IApprovalChannel? channel = null) =>
+        new([channel ?? _channel], HostConfig.Defaults(_locations), _clock, NullLogger<ApprovalService>.Instance);
+
+    private BindingService Service(IApprovalChannel? channel = null, Action<string>? checkpoint = null) =>
+        new(Library, Audit, Approvals(channel), _bridge) { Checkpoint = checkpoint };
 
     private Task<ProjectBinding> WriteAsync(ProjectBinding proposal, int revision, IApprovalChannel? channel = null) =>
         Service(channel).WriteAsync(proposal, revision, "test-source", "bind", null, Token);
