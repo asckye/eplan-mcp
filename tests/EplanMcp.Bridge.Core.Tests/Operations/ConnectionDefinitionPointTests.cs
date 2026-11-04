@@ -107,7 +107,7 @@ public sealed class ConnectionDefinitionPointTests
     }
 
     [Fact]
-    public void StraightWireWithDefinitionPoint_CreatesAndGeneratesWithinOneCommit()
+    public void StraightWireWithDefinitionPoint_GeneratesAfterTheCommit_InOneUndoStep()
     {
         var creator = new Creator();
         JObject result = creator.Execute();
@@ -142,11 +142,12 @@ public sealed class ConnectionDefinitionPointTests
     }
 
     [Fact]
-    public void GenerationFailure_RollsBackBeforeCommit()
+    public void GenerationFailure_RollsBackTheCommittedPlacement()
     {
         var creator = new Creator { Mismatch = "generate" };
         Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => creator.Execute()).Error.Execution);
-        Assert.DoesNotContain("Commit", creator.Transactions.Calls);
+        Assert.Contains("Commit", creator.Transactions.Calls);
+        Assert.Contains("Rollback", creator.Transactions.Calls);
         Assert.Equal(0, creator.State);
     }
 
@@ -213,7 +214,7 @@ public sealed class ConnectionDefinitionPointTests
         public void Generate(string project, IReadOnlyList<string> pages)
         {
             Assert.Equal(2, State);
-            Assert.DoesNotContain("Commit", Transactions.Calls);
+            Assert.Contains("Commit", Transactions.Calls); // A52: generation only sees committed placement.
             Events.Add("generate");
             if (Mismatch == "generate")
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "generation failed"); }

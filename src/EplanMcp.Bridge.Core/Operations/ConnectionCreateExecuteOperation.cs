@@ -62,9 +62,11 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             { define = writer.PrepareDefinitionPoints(project, page, definitions); }
             catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
             Committed<bool> result = TransactionRunner.Run(creator.PlacementTransactions(project, undoCommitted: true), "eplan_connection_create",
-                () => { place(); define(); plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify()); return true; }, _ => true,
+                () => { place(); define(); return true; }, _ => true,
                 _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() =>
                 {
+                    // A52/D5: generation only sees committed placement; the undo step spans the committed transactions.
+                    plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify());
                     VerifyGraphical("generation");
                     CheckLayout();
                     plan["definitionPoints"] = ConnectionDefinitionPoints.Verify(definitions, writer.ReadDefinitionPoints(project, page, definitions));

@@ -53,7 +53,7 @@ P1 插件默认：每次调用只解析一次请求项目的有效插件配置�
 执行沿既有串行主线程 LockingStep 和 WritePipeline：规划→scratch 外审批→完整指纹重核→执行→outcome，默认 60 秒。符号发现与变体选择在写入之前完成；不显式 LockObject，不保留跨请求原生对象。
 
 ## 6. 写操作专项
-G4 定义点按 A86：沿现有连接逻辑放置，再以 `new Function().Create(page, SPECIAL变体)` 建 CDP/CDPNG、写属性并生成连接，保持同一个写事务与撤销步骤。提交后读回 CDP 与连接的 31004/31002/31011；任一请求字段不符按写后安全不符回滚，并报告具体字段。CDP 按导线上的点处理，不与所处导线算重叠；其他布局规则保持。不得对 CDP 调用 `GetLogicalArea()`。定义点批次不可混用 cable_definition 或 interruption_point，须分次调用。正式工具 Large 仍待实机验证。
+G4 定义点按 A86：沿现有连接逻辑放置，再以 `new Function().Create(page, SPECIAL变体)` 建 CDP/CDPNG、写属性；放置提交后再生成连接（A52：同一事务内生成读不到新放置的对象，做法与 D5 相同），整个调用仍是一个撤销步骤。提交后读回 CDP 与连接的 31004/31002/31011；任一请求字段不符按写后安全不符回滚，并报告具体字段。CDP 按导线上的点处理，不与所处导线算重叠；其他布局规则保持。不得对 CDP 调用 `GetLogicalArea()`。定义点批次不可混用 cable_definition 或 interruption_point，须分次调用。正式工具 Large 仍待实机验证。
 **普通连线一次调用、两次提交（负责人 O3）。** 第一步在现有 SafetyPoint→UndoStep→QuietModeStep 中用 SymbolReference.Create(variant,page) 放连接符号及路径拐角，读回位置、变体、外框后提交；对齐的连接点产生图形自动连线。第二步独立 SafetyPoint 中运行目标页 Generate.Connections，核对既有连接不变、实际 StartPin/EndPin 连通集合与预测一致，电位点起点为空，才提交。成功需 Ctrl+Z 两次。
 电缆按 S43/A55：先完成同次导线和生成，再独立提交定义线→生成→定向绑定→生成→芯线分配→生成。定义线、绑定和芯线使用 FunctionTransactionScope，生成使用既有 SafetyPoint；只对显式连接对齐定义点名称、赋 CableNameParts，并用电缆及显式模板重载 DoReassignWires，不运行全项目重分配。定义线先创建并提交，再校验名称、几何、型号/芯数/截面；绑定与芯线分配也先提交再校验，芯线模板数量/标记和逐芯内容均在提交后读取，最后生成提交后再次核对 CableConnections、每芯连接/标签/颜色和其他本页连接不变。任一步提交后读回不符，撤销该提交及本次此前全部已确认提交，并按完整业务内容核验恢复，成功才报 rolled_back；生成失败先回滚当前 SafetyPoint，再撤销本次已确认提交。原生创建调用失败/取消进入 Abort、提交不确定或撤销/恢复核验失败均报 unknown；属性列表在 Abort 前释放，Abort 后不读取可能残留的新对象。
 2026-10-30 live T8b（EPLAN 2026.0.3，LargeWrite 副本）日志确认：空位置段使 `-W9` 读回 `+-W9`；该事务 Abort 后，`(60,140)`、横向外框 `59.75..220.25` 的 Cable 及五个属性放置仍留在页上。S43 未验证这条失败路径，因此定义线补偿只依赖提交后的原生撤销，不依赖 Abort 移除新对象；本次未运行 EPLAN。
