@@ -9,6 +9,7 @@
 - 页面创建和更新的 `description` 支持语言代码到文本的对象，一次写入多语言并逐项读回，字符串行为保持不变。
 - 器件改名改用 NameService，保留 PLC 等功能后缀，提交后按新标识读回；已占用标识仍拒绝。
 - 图形创建支持 `kind: "block"`，将 2–1000 个同页定位器组成命名块，一次撤销恢复。
+- 新增 `eplan_placement_delete`，默认预览，执行时只删除独立图形和自由文字，拒绝器件、连接、属性文字及块成员。
 
 - `eplan_connection_create.interruption_point` 的 `counterpart_pages` 可省略；省略只放置中断点，提供时继续核对配对页。
 

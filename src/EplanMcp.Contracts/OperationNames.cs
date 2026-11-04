@@ -6,6 +6,8 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    public const string PlacementDeletePlan = "placement.delete.plan";
+    public const string PlacementDeleteExecute = "placement.delete.execute";
     /// <summary>Read current UI context and a bounded selection block.</summary>
     public const string SelectionGet = "selection.get";
     /// <summary>Set UI selection without a project transaction.</summary>

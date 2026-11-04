@@ -37,6 +37,7 @@ internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
     public Exception? BoundsError { get; set; }
     public string ToStringIdentifier() => $"{Prefix}/{IdentifierType}/{ObjectIdentifier}/0";
     public PointD[] GetBoundingBox() => BoundsError is { } error ? throw error : Bounds;
+    public void Remove() => Page.AllPlacements = Page.AllPlacements.Where(p => !ReferenceEquals(p, this)).ToArray();
     public void Dispose() => throw new InvalidOperationException("Borrowed placement must never be disposed.");
 }
 

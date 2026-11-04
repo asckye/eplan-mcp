@@ -6116,6 +6116,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionDefinitionPointToolTests.cs"
           },
           {
+            "name": "ConnectionLayoutGuardTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionLayoutGuardTests.cs"
+          },
+          {
             "name": "ConnectionPluginIntegrationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionPluginIntegrationTests.cs"
@@ -7820,6 +7825,11 @@
             "file": "tests/EplanMcp.Large.Tests/LayoutGuardTests.cs"
           },
           {
+            "name": "LayoutGuardWarningTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/LayoutGuardWarningTests.cs"
+          },
+          {
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
@@ -7828,6 +7838,11 @@
             "name": "PartsFirstSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PartsFirstSpikeTests.cs"
+          },
+          {
+            "name": "PlacementDeleteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
           },
           {
             "name": "PlacementEditSpikeTests",
@@ -8173,11 +8188,10 @@
         "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [
           "A3",
-          "A11",
-          "A12",
           "A13",
           "A79",
-          "A82"
+          "A82",
+          "A85"
         ],
         "tests": [
           {
@@ -8199,6 +8213,11 @@
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
+          },
+          {
+            "name": "MacroOverviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
           },
           {
             "name": "WriteSafetyTests",
@@ -12072,6 +12091,16 @@
             "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
           },
           {
+            "name": "PageDescriptionMapTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageDescriptionMapTests.cs"
+          },
+          {
+            "name": "PlacementDeleteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
+          },
+          {
             "name": "PlacementTextCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
@@ -12102,6 +12131,11 @@
             "name": "PageCreateOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageCreateOperationTests.cs"
+          },
+          {
+            "name": "PageDescriptionMapTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDescriptionMapTests.cs"
           },
           {
             "name": "PlanStepExecuteOperationTests",
@@ -12557,6 +12591,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "BlockCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/BlockCreateTests.cs"
+          },
+          {
             "name": "CableBusStarSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableBusStarSpikeTests.cs"
@@ -12612,6 +12651,11 @@
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
           },
           {
+            "name": "PageDescriptionMapTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageDescriptionMapTests.cs"
+          },
+          {
             "name": "PageDrawingDiscoveryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageDrawingDiscoveryTests.cs"
@@ -12620,6 +12664,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PlacementDeleteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
           },
           {
             "name": "PlacementGraphicsCreateTests",
@@ -13766,6 +13815,11 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/PlanApprovalTests.cs"
           },
           {
+            "name": "PageDescriptionMapTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageDescriptionMapTests.cs"
+          },
+          {
             "name": "PageUpdateFrameTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageUpdateFrameTests.cs"
@@ -13792,6 +13846,11 @@
           }
         ],
         "operationTests": [
+          {
+            "name": "PageDescriptionMapTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDescriptionMapTests.cs"
+          },
           {
             "name": "PageUpdateFrameTests",
             "size": "Small",
@@ -14958,7 +15017,8 @@
         "spec": "docs/tools/eplan_placement_create.md",
         "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
-          "A54"
+          "A54",
+          "A88"
         ],
         "tests": [
           {
@@ -15002,9 +15062,24 @@
             "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
           },
           {
+            "name": "BlockCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/BlockCreateTests.cs"
+          },
+          {
             "name": "LayoutGuardTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/LayoutGuardTests.cs"
+          },
+          {
+            "name": "LayoutGuardWarningTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/LayoutGuardWarningTests.cs"
+          },
+          {
+            "name": "PlacementDeleteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
           },
           {
             "name": "PlacementEditSpikeTests",
@@ -15033,6 +15108,11 @@
           }
         ],
         "operationTests": [
+          {
+            "name": "LayoutGuardWarningModeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/LayoutGuardWarningModeTests.cs"
+          },
           {
             "name": "PageDrawingGetOperationTests",
             "size": "Small",
@@ -15074,6 +15154,38 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           }
         ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_placement_delete",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/PlacementDeleteTools.cs",
+      "operations": [
+        "placement.delete.execute",
+        "placement.delete.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_placement_delete.md",
+        "apiNotes": [
+          "A87"
+        ],
+        "tests": [
+          {
+            "name": "PlacementDeleteProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlacementDeleteProtocolTests.cs"
+          },
+          {
+            "name": "PlacementDeleteTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
+          }
+        ],
+        "operationTests": []
       },
       "live": [],
       "dataDictionary": []
@@ -18389,6 +18501,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDeleteOperationTests.cs"
           },
           {
+            "name": "PageDescriptionMapTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDescriptionMapTests.cs"
+          },
+          {
             "name": "PageUpdateFrameTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageUpdateFrameTests.cs"
@@ -20341,6 +20458,11 @@
             "name": "PageDeleteOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDeleteOperationTests.cs"
+          },
+          {
+            "name": "PageDescriptionMapTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageDescriptionMapTests.cs"
           },
           {
             "name": "PageUpdateFrameTests",

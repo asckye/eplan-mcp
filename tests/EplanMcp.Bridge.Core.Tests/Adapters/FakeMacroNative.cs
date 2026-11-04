@@ -102,7 +102,7 @@ namespace Eplan.EplApi.DataModel
     {
         public Placement[] ReferencedObjects { get; set; } = [];
         public Exception? RemoveError { get; set; }
-        public void Remove()
+        public new void Remove()
         {
             if (RemoveError is { } error)
             { throw error; }

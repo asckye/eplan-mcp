@@ -8695,7 +8695,7 @@
           "bytes": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 9.223372036854776e+18
+            "maximum": 9.223372036854776E+18
           },
           "sha256": {
             "type": "string",
@@ -16007,6 +16007,160 @@
       }
     },
     {
+      "name": "eplan_placement_delete",
+      "title": "Delete independent drawing placements",
+      "description": "Deletes 1-100 independent graphics by eplan_page_get drawing locators. Refuses devices, connections, property text and block members. dry_run defaults true; false needs approval and backup. One undo. See eplan_tool_usage.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "items"
+        ],
+        "properties": {
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "page": {
+            "type": "string",
+            "minLength": 1
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/$defs/locator"
+            }
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "$defs": {
+          "locator": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "page",
+              "type",
+              "oid",
+              "digest"
+            ],
+            "properties": {
+              "project": {
+                "type": "string",
+                "minLength": 1
+              },
+              "page": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "oid": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "items",
+          "fingerprint",
+          "execution",
+          "dryRun",
+          "recovered",
+          "backup"
+        ],
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "oid"
+              ],
+              "properties": {
+                "type": {
+                  "type": "integer"
+                },
+                "oid": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "execution": {
+            "enum": [
+              "not_started",
+              "committed"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "recovered": {
+            "type": "boolean"
+          },
+          "backup": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "warning": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "annotations": {
+        "title": "Delete independent drawing placements",
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_placement_edit",
       "title": "Edit placements on one EPLAN page",
       "description": "Deletes, copies, rotates, mirrors, aligns or distributes eplan_object_find locators on one Circuit page of an open project. mm, bottom left, y up. Rotation: 90-degree steps, positive counterclockwise. Copy preserves tags and may associate devices. Delete always needs approval and backup; other edits need approval outside scratch. Denial: APPROVAL_DENIED. Omit dry_run to preview; false executes. One undo. See eplan_tool_usage.",
@@ -17653,7 +17807,7 @@
           "seconds": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1.7976931348623157e+308
+            "maximum": 1.7976931348623157E+308
           },
           "hint": {
             "type": [
@@ -21980,6 +22134,7 @@
               "eplan_placeholder_apply",
               "eplan_placeholder_list",
               "eplan_placement_create",
+              "eplan_placement_delete",
               "eplan_placement_edit",
               "eplan_placement_update",
               "eplan_plan_apply",
