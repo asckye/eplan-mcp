@@ -132,6 +132,12 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
             ["groupStructureDifferences"] = new JArray(comparison.PageDifferences.Where(field => IsGroupField(field.Field)).Select(Field)),
             ["subsetDifferenceCount"] = comparison.SubsetDifferenceCount,
             ["subsetDifferences"] = new JArray(comparison.SubsetDifferences.Select(SubsetField)),
+            ["reportRows"] = comparison.ReportRows is { } rows ? new JObject
+            {
+                ["matched"] = rows.Matched,
+                ["sourceOnly"] = new JArray(rows.SourceOnly),
+                ["targetOnly"] = new JArray(rows.TargetOnly),
+            } : null,
             ["readWarnings"] = new JArray(comparison.Warnings.Select(warning => new JObject
             {
                 ["path"] = warning.Path,
@@ -304,6 +310,16 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
             text.AppendLine("- " + Escape((string)item["page"]!) + " / " + Escape((string)field["field"]!) + " (" + Escape((string)field["name"]!)
                 + "): " + Escape(field["source"]!.ToString(Newtonsoft.Json.Formatting.None)) + " → "
                 + Escape(field["target"]!.ToString(Newtonsoft.Json.Formatting.None)) + "; " + Escape((string)field["reason"]!));
+        }
+        text.AppendLine();
+        text.AppendLine("## Generated report rows (checked per page, not counted as drawn objects)");
+        text.AppendLine();
+        text.AppendLine("| Page | Matched | Source only | Target only |");
+        text.AppendLine("| --- | ---: | ---: | ---: |");
+        foreach (JObject page in ((JArray)report["pages"]!).OfType<JObject>().Where(page => page["reportRows"] is JObject))
+        {
+            JToken rows = page["reportRows"]!;
+            text.AppendLine("| " + Escape((string)page["name"]!) + " | " + rows["matched"] + " | " + ((JArray)rows["sourceOnly"]!).Count + " | " + ((JArray)rows["targetOnly"]!).Count + " |");
         }
         text.AppendLine();
         text.AppendLine("## Failed tool calls (" + report["failedToolCallCount"] + ")");

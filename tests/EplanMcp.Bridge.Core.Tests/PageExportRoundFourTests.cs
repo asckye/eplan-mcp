@@ -180,6 +180,30 @@ public sealed class PageExportRoundFourTests
     }
 
     [Fact]
+    public void Compare_ReportRows_AreCheckedByPositionAndTextWithoutCountingAsObjects()
+    {
+        const string source = """
+            {"isReportPage":true,"placements":[
+            {"type":"PlaceHolderText","location":{"x":10,"y":20},"content":{"??_??":"%QX2.0"}},
+            {"type":"PlaceHolderText","location":{"x":10,"y":30},"content":{"??_??":"1.1"}},
+            {"type":"Line","location":{"x":1,"y":1}}]}
+            """;
+        const string target = """
+            {"isReportPage":true,"placements":[
+            {"type":"PlaceHolderText","location":{"x":10,"y":20},"content":{"??_??":"%QX1.0"}},
+            {"type":"PlaceHolderText","location":{"x":10,"y":30},"content":{"??_??":"1.1"}}]}
+            """;
+
+        PageExportComparison comparison = PageExportComparer.Compare(source, target);
+
+        PageExportReportRows rows = comparison.ReportRows!;
+        Assert.Equal(1, rows.Matched);
+        Assert.Equal("(10, 20) ??_??@%QX2.0", Assert.Single(rows.SourceOnly));
+        Assert.Equal("(10, 20) ??_??@%QX1.0", Assert.Single(rows.TargetOnly));
+        Assert.Empty(comparison.Types);
+    }
+
+    [Fact]
     public void Compare_MissingGroups_AreReportedEvenOnReportPages()
     {
         const string source = """{"isReportPage":true,"groups":[{"location":{"x":1,"y":2},"count":1,"types":{"Text":1}}]}""";

@@ -85,6 +85,7 @@ internal static class PageExportComparer
         SeparateSubsetDifferences(result, source, target, reportPage);
         if (reportPage)
         {
+            result.ReportRows = CompareReportRows(source, target);
             return result;
         }
 
@@ -134,6 +135,28 @@ internal static class PageExportComparer
             }
         }
         return result;
+    }
+
+    // Generated rows are computed from the project's data, partly from pages outside the redrawn subset:
+    // they are checked per page and never counted as drawn objects.
+    private static PageExportReportRows CompareReportRows(JObject source, JObject target)
+    {
+        static string Row(JObject row)
+        {
+            double x = (double?)row["location"]?["x"] ?? 0, y = (double?)row["location"]?["y"] ?? 0;
+            string text = row["content"] is JObject content
+                ? string.Join("|", content.Properties().OrderBy(p => p.Name, StringComparer.Ordinal).Select(p => p.Name + "@" + p.Value)) : "";
+            return string.Format(CultureInfo.InvariantCulture, "({0:0.##}, {1:0.##}) {2}", x, y, text);
+        }
+        static List<string> Rows(JObject page) => [.. Objects(page["placements"]).Where(p => (string?)p["type"] == "PlaceHolderText").Select(Row)];
+        List<string> sourceOnly = Rows(source), targetOnly = [];
+        foreach (string row in Rows(target))
+        {
+            if (!sourceOnly.Remove(row))
+            { targetOnly.Add(row); }
+        }
+        int matched = Rows(target).Count - targetOnly.Count;
+        return new(matched, sourceOnly, targetOnly);
     }
 
     private static bool IsReportPage(JObject page) => (bool?)page["isReportPage"] == true || page["report"] is JContainer { Count: > 0 };
@@ -640,12 +663,15 @@ internal sealed class PageExportTypeComparison
     public List<PageExportObjectDifference> Different { get; } = [];
 }
 
+internal sealed record PageExportReportRows(int Matched, IReadOnlyList<string> SourceOnly, IReadOnlyList<string> TargetOnly);
+
 internal sealed class PageExportComparison
 {
     public SortedDictionary<string, PageExportTypeComparison> Types { get; } = new(StringComparer.Ordinal);
     public List<PageExportFieldDifference> PageDifferences { get; } = [];
     public List<PageExportSubsetDifference> SubsetDifferences { get; } = [];
     public int SubsetDifferenceCount => SubsetDifferences.Count;
+    public PageExportReportRows? ReportRows { get; set; }
     public List<PageExportReadWarning> Warnings { get; } = [];
     public bool HasDifferences => PageDifferences.Count > 0 || Types.Values.Any(type => type.Missing.Count > 0 || type.Extra.Count > 0 || type.Different.Count > 0);
     public bool IsComplete => Warnings.Count == 0;
