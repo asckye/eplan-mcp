@@ -29,22 +29,24 @@ public sealed partial class PageExportAction
         Read(row, "name", point, "InterruptionPoint.Name", () => point.Name);
         Read(row, "visibleName", point, "InterruptionPoint.VisibleName", () => point.VisibleName);
         Read(row, "isStarSource", point, "InterruptionPoint.IsStarSource", () => point.IsStarSource);
-        using (InterruptionPointPropertyList? properties = Get<InterruptionPointPropertyList?>(row, point, "InterruptionPoint.Properties", () => point.Properties))
+        // A55/live 2026-11-03: Properties is a cached list. Disposing it here made the later generic read use a freed native
+        // object (0xc0000374), so it stays alive for this object's whole read.
+#pragma warning disable CA2000
+        InterruptionPointPropertyList? properties = Get<InterruptionPointPropertyList?>(row, point, "InterruptionPoint.Properties", () => point.Properties);
+#pragma warning restore CA2000
+        if (properties is not null)
         {
-            if (properties is not null)
+            // Keep the API's raw cross-reference text. It is not necessarily a page name.
+            Read(row, "counterpartReference", point, "INTERRUPTIONPOINT_CROSSREFDESTINATION", () =>
             {
-                // Keep the API's raw cross-reference text. It is not necessarily a page name.
-                Read(row, "counterpartReference", point, "INTERRUPTIONPOINT_CROSSREFDESTINATION", () =>
-                {
-                    using PropertyValue value = properties.INTERRUPTIONPOINT_CROSSREFDESTINATION;
-                    return value.IsEmpty ? null : value.ToString();
-                });
-                Read(row, "destination", point, "INTERRUPTIONPOINT_DESTINATION", () =>
-                {
-                    using PropertyValue value = properties.INTERRUPTIONPOINT_DESTINATION;
-                    return value.IsEmpty ? null : value.ToString();
-                });
-            }
+                using PropertyValue value = properties.INTERRUPTIONPOINT_CROSSREFDESTINATION;
+                return value.IsEmpty ? null : value.ToString();
+            });
+            Read(row, "destination", point, "INTERRUPTIONPOINT_DESTINATION", () =>
+            {
+                using PropertyValue value = properties.INTERRUPTIONPOINT_DESTINATION;
+                return value.IsEmpty ? null : value.ToString();
+            });
         }
 
         var connected = new HashSet<int>();
@@ -84,7 +86,9 @@ public sealed partial class PageExportAction
             RectangleD area = box.GetLogicalArea();
             return new JObject { ["lowerLeft"] = Point(area.LowerLeft), ["upperRight"] = Point(area.UpperRight) };
         });
-        using FunctionBasePropertyList? parts = Get<FunctionBasePropertyList?>(row, box, "LocationBox.NameParts", () => box.NameParts);
+#pragma warning disable CA2000 // Same as the interruption point list: not disposed during the read.
+        FunctionBasePropertyList? parts = Get<FunctionBasePropertyList?>(row, box, "LocationBox.NameParts", () => box.NameParts);
+#pragma warning restore CA2000
         if (parts is not null)
         {
             row["nameParts"] = ReadProperties(box, parts, row);
