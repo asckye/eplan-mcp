@@ -177,7 +177,116 @@ public sealed class PageExportComparerTests
         target["connections"]![0]!["start"]!["oid"] = 11;
         Assert.False(PageExportComparer.Compare(JObject.Parse(source), target).HasDifferences);
         target["connections"]![0]!["properties"]![0]!["value"] = "BU";
-        Assert.Equal("properties[0].value", Assert.Single(Assert.Single(PageExportComparer.Compare(JObject.Parse(source), target).Types["Connection"].Different).Fields).Field);
+        Assert.Equal("properties[id=31004,index=0].value", Assert.Single(Assert.Single(PageExportComparer.Compare(JObject.Parse(source), target).Types["Connection"].Different).Fields).Field);
+    }
+
+    [Fact]
+    public void Compare_LivePropertyArrayInsertionAndReordering_ReportsOnlyMissingAndExtraIds()
+    {
+        const string source = """
+            {"placements":[{"type":"Function","properties":[
+              {"id":20068,"index":0,"value":"0"},
+              {"id":20121,"index":0,"value":"1"},
+              {"id":20122,"index":0,"value":"1"},
+              {"id":20123,"index":0,"value":"0"}
+            ]}]}
+            """;
+        const string target = """
+            {"placements":[{"type":"Function","properties":[
+              {"id":20123,"index":0,"value":"0"},
+              {"id":20051,"index":0,"value":"0"},
+              {"id":20122,"index":0,"value":"1"},
+              {"id":20121,"index":0,"value":"1"}
+            ]}]}
+            """;
+
+        IReadOnlyList<PageExportFieldDifference> fields = Assert.Single(PageExportComparer.Compare(source, target).Types["Function"].Different).Fields;
+
+        Assert.Equal(["properties[id=20068,index=0].value", "properties[id=20051,index=0].value"], fields.Select(f => f.Field));
+        Assert.Equal("0", (string?)fields[0].Source);
+        Assert.Null(fields[0].Target);
+        Assert.Null(fields[1].Source);
+        Assert.Equal("0", (string?)fields[1].Target);
+    }
+
+    [Fact]
+    public void Compare_IndexedProperties_PairsByBothIdAndIndex()
+    {
+        const string source = """
+            {"properties":[{"id":20022,"index":1,"value":"1"},{"id":20022,"index":2,"value":"2"}]}
+            """;
+        const string target = """
+            {"properties":[{"id":20022,"index":2,"value":"changed"},{"id":20022,"index":1,"value":"1"}]}
+            """;
+
+        PageExportFieldDifference difference = Assert.Single(PageExportComparer.Compare(source, target).PageDifferences);
+
+        Assert.Equal("properties[id=20022,index=2].value", difference.Field);
+        Assert.Equal("2", (string?)difference.Source);
+        Assert.Equal("changed", (string?)difference.Target);
+    }
+
+    [Fact]
+    public void Compare_TargetOnlyArrayProperties_AreDifferences()
+    {
+        const string source = """{"properties":[{"id":11011,"index":0,"value":"Power"}]}""";
+        const string target = """
+            {"properties":[{"id":11012,"index":0,"value":"target only"},{"id":11011,"index":0,"value":"Power"}]}
+            """;
+
+        PageExportFieldDifference difference = Assert.Single(PageExportComparer.Compare(source, target).PageDifferences);
+        Assert.Equal("properties[id=11012,index=0].value", difference.Field);
+        Assert.Null(difference.Source);
+        Assert.Equal("target only", (string?)difference.Target);
+        Assert.Equal(2, PageExportComparer.Compare("{}", target).PageDifferences.Count);
+    }
+
+    [Fact]
+    public void Compare_MissingPropertyArray_ReportsEachSourceValueInIdOrder()
+    {
+        const string source = """
+            {"properties":[{"id":20022,"index":2,"value":"2"},{"id":11011,"index":0,"value":null},{"id":20022,"index":1,"value":"1"}]}
+            """;
+
+        PageExportComparison result = PageExportComparer.Compare(source, "{}");
+
+        Assert.Equal(["properties[id=11011,index=0].value", "properties[id=20022,index=1].value", "properties[id=20022,index=2].value"],
+            result.PageDifferences.Select(difference => difference.Field));
+        Assert.All(result.PageDifferences, difference => Assert.Null(difference.Target));
+    }
+
+    [Fact]
+    public void Compare_MultilingualPropertyValue_ReportsIdIndexAndLanguage()
+    {
+        const string source = """{"properties":[{"id":20011,"index":0,"value":{"en_US":"Source","de_DE":"Text"}}]}""";
+        const string target = """{"properties":[{"id":20011,"index":0,"value":{"de_DE":"Text","en_US":"Target"}}]}""";
+
+        PageExportFieldDifference difference = Assert.Single(PageExportComparer.Compare(source, target).PageDifferences);
+
+        Assert.Equal("properties[id=20011,index=0].value.en_US", difference.Field);
+        Assert.Equal("Source", (string?)difference.Source);
+        Assert.Equal("Target", (string?)difference.Target);
+    }
+
+    [Theory]
+    [InlineData("firstRadius", 2.5)]
+    [InlineData("secondRadius", 2.5)]
+    [InlineData("ellipseAngle", 1.5717963267948966)]
+    public void Compare_LiveEllipseWithZeroCircleRadius_ReportsEllipseGeometry(string field, double value)
+    {
+        const string source = """
+            {"placements":[{"type":"Arc","kind":"Ellipse","location":{"x":368.19053251362,"y":90.45769752315101},
+            "center":{"x":368.19053251362,"y":90.45769752315101},"radius":0.0,
+            "firstRadius":1.43748000000004,"secondRadius":1.43748000000004,"ellipseAngle":1.5707963267948966}]}
+            """;
+        JObject target = JObject.Parse(source);
+        target["placements"]![0]![field] = value;
+
+        PageExportTypeComparison result = PageExportComparer.Compare(JObject.Parse(source), target).Types["Arc"];
+
+        Assert.Empty(result.Missing);
+        Assert.Empty(result.Extra);
+        Assert.Equal(field, Assert.Single(Assert.Single(result.Different).Fields).Field);
     }
 
     [Fact]

@@ -12,6 +12,11 @@ internal sealed partial class SmallProjectRedrawDriver
         var mapped = new List<(JObject Source, JObject Item)>();
         foreach (JObject item in objects.Where(IsGraphic).Where(item => !_covered.Contains(Key(page, item))))
         {
+            if (Type(item) is "Text" or "PathText" && IsEmptyText(item["content"]))
+            {
+                report.Note(page, Type(item), Id(item), "Empty text content; no placement_create call was made.");
+                continue;
+            }
             await ObserveAsync(page, item, () =>
             {
                 JObject graphic = Graphic(page, item);
@@ -21,7 +26,7 @@ internal sealed partial class SmallProjectRedrawDriver
         }
         foreach ((JObject Source, JObject Item)[] batch in mapped.Chunk(50))
         {
-            await InvokeAsync(page, "eplan_placement_create", new JObject
+            await InvokeItemsAsync(page, "eplan_placement_create", new JObject
             {
                 ["page"] = page,
                 ["snap_to_grid"] = false,
@@ -52,22 +57,33 @@ internal sealed partial class SmallProjectRedrawDriver
                 { report.Note(page, Type(source), Id(source), "placement_create supports open straight polylines only; exported closed/bulged geometry remains a reported difference."); }
                 break;
             case "Arc":
-                item["kind"] = "arc";
                 item["center"] = new JArray(Point(source["center"]));
-                item["radius_mm"] = source["radius"]?.DeepClone();
-                // Arc.StartAngle/EndAngle use radians; a native circle conventionally exports 0/0.
-                bool circle = Text(source["kind"]) == "Circle";
-                item["start_angle"] = circle ? 0 : RequiredNumber(source["startAngle"]) * 180 / Math.PI;
-                item["end_angle"] = circle ? 360 : RequiredNumber(source["endAngle"]) * 180 / Math.PI;
-                if (Text(source["kind"]) is not ("Circle" or "Arc") || (bool?)source["sector"] == true)
-                { report.Note(page, Type(source), Id(source), "placement_create only accepts circular arcs; ellipse/sector semantics are not expressible."); }
+                if (Text(source["kind"]) == "Ellipse")
+                {
+                    item["kind"] = "ellipse";
+                    item["radius_x_mm"] = source["firstRadius"]?.DeepClone();
+                    item["radius_y_mm"] = source["secondRadius"]?.DeepClone();
+                    item["angle"] = RequiredNumber(source["ellipseAngle"]) * 180 / Math.PI;
+                }
+                else
+                {
+                    item["kind"] = "arc";
+                    item["radius_mm"] = source["radius"]?.DeepClone();
+                    // Arc.StartAngle/EndAngle use radians; a native circle conventionally exports 0/0.
+                    bool circle = Text(source["kind"]) == "Circle";
+                    item["start_angle"] = circle ? 0 : RequiredNumber(source["startAngle"]) * 180 / Math.PI;
+                    item["end_angle"] = circle ? 360 : RequiredNumber(source["endAngle"]) * 180 / Math.PI;
+                }
+                if (Text(source["kind"]) is not ("Circle" or "Arc" or "Ellipse") || (bool?)source["sector"] == true)
+                { report.Note(page, Type(source), Id(source), "Exported arc kind or sector semantics have no placement_create parameter."); }
                 break;
             case "Text":
             case "PathText":
                 item["kind"] = Type(source) == "PathText" ? "path_text" : "text";
                 item["position"] = new JArray(Point(source["location"]));
                 item["contents"] = source["content"]?.DeepClone();
-                item["height_mm"] = source["height"]?.DeepClone();
+                if (Type(source) != "PathText" || Number(source["height"]) != -16002)
+                { item["height_mm"] = source["height"]?.DeepClone(); }
                 NoteRotation(page, source);
                 if (Text(source["alignment"]) is string alignment)
                 { report.Note(page, Type(source), Id(source), "Exported text alignment " + alignment + " has no placement_create parameter."); }
@@ -92,6 +108,10 @@ internal sealed partial class SmallProjectRedrawDriver
         { report.Note(page, Type(source), Id(source), "Exported layer/pen attributes have no placement_create parameters and remain comparison differences."); }
         return item;
     }
+
+    private static bool IsEmptyText(JToken? content) => content is JValue { Type: JTokenType.String }
+        ? string.IsNullOrWhiteSpace(Text(content))
+        : content is JObject translations && translations.Properties().All(p => p.Value.Type == JTokenType.String && string.IsNullOrWhiteSpace(Text(p.Value)));
 
     private void NoteRotation(string page, JObject source)
     {

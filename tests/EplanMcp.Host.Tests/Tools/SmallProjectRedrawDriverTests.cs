@@ -6,6 +6,202 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Small")]
 public sealed class SmallProjectRedrawDriverTests
 {
+    [Fact]
+    public async Task Pages_AllCircuitAndOverviewPagesExistBeforeDrawingStarts()
+    {
+        JObject first = Page(Device(1, "Function", "-K1", "K", 10));
+        JObject second = Page();
+        second["name"] = "/2";
+        second["pageType"] = "Overview";
+        JObject reportPage = Page();
+        reportPage["name"] = "/3";
+        reportPage["isReportPage"] = true;
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = new SmallProjectRedrawDriver((tool, args) =>
+        {
+            calls.Add((tool, (JObject)args.DeepClone()));
+            return Task.FromResult(Success(args));
+        }, "ScratchTest", Path.GetTempPath(), new SmallProjectRedrawReport("test", "ScratchTest"));
+
+        await driver.DrawPageAsync(first, [first, second, reportPage]);
+        await driver.DrawPageAsync(second, [first, second, reportPage]);
+
+        Assert.Equal(["/1", "/2"], calls.Where(call => call.Tool == "eplan_page_create")
+            .Select(call => (string?)call.Args["pages"]![0]!["name"]));
+        Assert.Equal(["eplan_page_create", "eplan_page_create", "eplan_page_open"], calls.Take(3).Select(call => call.Tool));
+        Assert.Single(calls, call => call.Tool == "eplan_device_place");
+    }
+
+    [Fact]
+    public async Task Overview_UsesFixedPositionAndReportsActualPlcBoxDisplacement()
+    {
+        JObject box = Device(1, "PLC", "-K1", "PLCC", 212);
+        box["location"] = Point(212, 284);
+        box["category"] = "PLCBox";
+        box["parts"] = new JArray(new JObject { ["part"] = "FICTION.PLC", ["variant"] = "1" });
+        box["boundingBox"] = new JArray(Point(212, 20), Point(244, 284));
+        JObject property = new()
+        {
+            ["type"] = "ContextPropertyPlacement",
+            ["oid"] = 2,
+            ["boundingBox"] = new JArray(Point(-204, -200), Point(-200, -190)),
+        };
+        JObject point = Device(3, "Terminal", "-K1:1:2", "DCP", 216);
+        point["category"] = "PLCTerminal";
+        point["parentFunction"] = new JObject { ["oid"] = 1, ["name"] = "-K1" };
+        JObject source = Page(box, property, point);
+        source["pageType"] = "Overview";
+        var report = new SmallProjectRedrawReport("test", "ScratchTest");
+        var calls = new List<(string Tool, JObject Args)>();
+        int reads = 0;
+        var driver = new SmallProjectRedrawDriver((tool, args) =>
+        {
+            calls.Add((tool, (JObject)args.DeepClone()));
+            JObject result = Success(args);
+            if (tool == "eplan_macro_insert")
+            { result["devices"] = new JArray(new JObject { ["tag"] = "-K1", ["category"] = "PLCBox" }); }
+            if (tool == "eplan_page_get" && ++reads > 1)
+            {
+                JObject actual = Drawing(box, 101);
+                actual["location"] = new JArray(212, 288);
+                result["drawings"]!["items"] = new JArray(actual);
+            }
+            return Task.FromResult(result);
+        }, "ScratchTest", Path.GetTempPath(), report);
+
+        await driver.DrawPageAsync(source, [source]);
+
+        JObject macro = Assert.Single(calls, call => call.Tool == "eplan_macro_insert").Args;
+        Assert.Equal((0d, 292d), ((double)macro["x"]!, (double)macro["y"]!));
+        Assert.DoesNotContain(calls, call => call.Tool == "eplan_macro_get");
+        Assert.DoesNotContain(calls, call => call.Tool == "eplan_device_place" && (string?)call.Args["symbol"] == "DCP");
+        Assert.Contains(((JArray)report.ToJson()["notes"]!).OfType<JObject>(),
+            note => ((string?)note["reason"])?.Contains("dx=0; dy=4", StringComparison.Ordinal) == true);
+    }
+
+    [Fact]
+    public async Task Interruptions_ResolveReferenceAndSameNamePagesWithoutSendingEmptyCounterparts()
+    {
+        JObject point = Device(1, "InterruptionPoint", "-2L1", "BP", 376);
+        point["direction"] = "Left";
+        point["counterpartReference"] = "-FC2:1";
+        JObject source = Page(point);
+        JObject sameName = Page(Device(2, "InterruptionPoint", "-2L1", "BP", 48));
+        sameName["name"] = "/2";
+        JObject referenced = Page(Device(3, "Function", "-FC2", "K", 20));
+        referenced["name"] = "/3";
+        JObject orphan = Device(4, "InterruptionPoint", "-ORPHAN", "BP", 376);
+        orphan["direction"] = "Left";
+        orphan["counterpartReference"] = "-ABSENT:1";
+        ((JArray)source["placements"]!).Add(orphan);
+        var report = new SmallProjectRedrawReport("test", "ScratchTest");
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = new SmallProjectRedrawDriver((tool, args) =>
+        {
+            calls.Add((tool, (JObject)args.DeepClone()));
+            return Task.FromResult(Success(args));
+        }, "ScratchTest", Path.GetTempPath(), report);
+
+        await driver.DrawPageAsync(source, [source, sameName, referenced]);
+
+        JObject connection = Assert.Single(calls, call => call.Tool == "eplan_connection_create").Args;
+        Assert.Equal(["/2", "/3"], connection["items"]![0]!["counterpart_pages"]!.Values<string>());
+        Assert.Contains(((JArray)report.ToJson()["notes"]!).OfType<JObject>(),
+            note => (string?)note["oid"] == "4" && ((string?)note["reason"])?.Contains("not placed", StringComparison.Ordinal) == true);
+    }
+
+    [Fact]
+    public async Task Devices_OptionalPlcFieldsAreOmittedAndLaterFunctionsJoinExistingTag()
+    {
+        JObject first = Device(1, "PLC", "-K1", "PLCC", 10);
+        JObject later = Device(2, "Function", "-K1", "K", 30);
+        JObject point = Device(3, "Terminal", "-K1:1:2", "DCP", 40);
+        point["category"] = "PLCTerminal";
+        point["parentFunction"] = new JObject { ["name"] = "-K1" };
+        point["properties"] = new JArray(new JObject { ["id"] = 20400, ["index"] = 0, ["value"] = "I0.1" },
+            new JObject { ["id"] = 20402, ["index"] = 0, ["value"] = "" });
+        JObject source = Page(first, later, point);
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = new SmallProjectRedrawDriver((tool, args) =>
+        {
+            calls.Add((tool, (JObject)args.DeepClone()));
+            return Task.FromResult(Success(args));
+        }, "ScratchTest", Path.GetTempPath(), new SmallProjectRedrawReport("test", "ScratchTest"));
+
+        await driver.DrawPageAsync(source, [source]);
+
+        JObject[] placed = calls.Where(call => call.Tool == "eplan_device_place").Select(call => call.Args).ToArray();
+        Assert.Equal(3, placed.Length);
+        Assert.Null(placed[0]["join_device"]);
+        Assert.True((bool)placed[1]["join_device"]!);
+        Assert.True((bool)placed[2]["join_device"]!);
+        Assert.Equal("I0.1", (string?)placed[2]["plc_address"]);
+        Assert.Null(placed[2]["plc_connection_point"]);
+        Assert.Null(placed[2]["plc_symbolic_address"]);
+        Assert.Null(placed[2]["plc_text"]);
+        Assert.Null(placed[2]["plc_plug_designation"]);
+    }
+
+    [Fact]
+    public async Task Definitions_PreserveCommaCrossSectionAndReportPartOnlyPoints()
+    {
+        JObject point = Device(1, "ConnectionDefinitionPoint", "", "CDP", 200);
+        point["properties"] = new JArray(new JObject { ["id"] = 31002, ["index"] = 0, ["value"] = "1,5" });
+        JObject partOnly = Device(2, "ConnectionDefinitionPoint", "", "CDP", 204);
+        partOnly["parts"] = new JArray(new JObject { ["part"] = "FICTION.PART" });
+        JObject source = Page(point, partOnly);
+        var report = new SmallProjectRedrawReport("test", "ScratchTest");
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = new SmallProjectRedrawDriver((tool, args) =>
+        {
+            calls.Add((tool, (JObject)args.DeepClone()));
+            return Task.FromResult(Success(args));
+        }, "ScratchTest", Path.GetTempPath(), report);
+
+        await driver.DrawPageAsync(source, [source]);
+
+        JObject connection = Assert.Single(calls, call => call.Tool == "eplan_connection_create").Args;
+        JToken definition = Assert.Single((JArray)connection["items"]!);
+        Assert.Equal("1,5", (string?)definition["cross_section"]);
+        Assert.Contains(((JArray)report.ToJson()["notes"]!).OfType<JObject>(),
+            note => (string?)note["oid"] == "2" && ((string?)note["reason"])?.Contains("part references alone", StringComparison.Ordinal) == true);
+    }
+
+    [Fact]
+    public async Task Definitions_InvalidPositionBatchRetriesEachPointOnce()
+    {
+        JObject valid = Device(1, "ConnectionDefinitionPoint", "", "CDP", 200);
+        JObject invalid = Device(2, "ConnectionDefinitionPoint", "", "CDP", 204);
+        valid["properties"] = new JArray(new JObject { ["id"] = 31002, ["index"] = 0, ["value"] = "1,5" });
+        invalid["properties"] = valid["properties"]!.DeepClone();
+        JObject source = Page(valid, invalid);
+        var report = new SmallProjectRedrawReport("test", "ScratchTest");
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = new SmallProjectRedrawDriver((tool, args) =>
+        {
+            calls.Add((tool, (JObject)args.DeepClone()));
+            bool invalidPoint = tool == "eplan_connection_create" && ((JArray)args["items"]!).Any(item => (double)item["position"]![0]! == 204);
+            return Task.FromResult(invalidPoint ? new JObject
+            {
+                ["error"] = new JObject
+                {
+                    ["reason"] = "INVALID_ARGUMENT",
+                    ["execution"] = "not_started",
+                    ["message"] = "Invalid arguments: /items/0/position: Place the definition point on a segment of this connection. Nearest existing segment: [[200.0,219.0],[200.0,229.0]].",
+                },
+            } : Success(args));
+        }, "ScratchTest", Path.GetTempPath(), report);
+
+        await driver.DrawPageAsync(source, [source]);
+
+        Assert.Equal([2, 1, 1], calls.Where(call => call.Tool == "eplan_connection_create").Select(call => ((JArray)call.Args["items"]!).Count));
+        Assert.Equal(2, (int)report.ToJson()["failedToolCallCount"]!);
+        Assert.Contains(((JArray)report.ToJson()["calls"]!).OfType<JObject>(), call => (string?)call["tool"] == "eplan_connection_create"
+            && (bool)call["succeeded"]! && ((JArray)call["objectOids"]!).Values<string>().SequenceEqual(["1"]));
+        Assert.Contains(((JArray)report.ToJson()["calls"]!).OfType<JObject>(), call => (string?)call["tool"] == "eplan_connection_create"
+            && !(bool)call["succeeded"]! && ((JArray)call["objectOids"]!).Values<string>().SequenceEqual(["2"]));
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
@@ -134,7 +330,7 @@ public sealed class SmallProjectRedrawDriverTests
         await driver.DrawPageAsync(source, [source]);
 
         JObject macro = Assert.Single(calls, call => call.Tool == "eplan_macro_insert").Args;
-        Assert.Equal(("FICTION.PLC", "1", "Overview", 10d, 50d),
+        Assert.Equal(("FICTION.PLC", "1", "Overview", 0d, 292d),
             ((string?)macro["part"], (string?)macro["part_variant"], (string?)macro["representation"], (double)macro["x"]!, (double)macro["y"]!));
         Assert.False((bool)macro["dry_run"]!);
         JObject placed = Assert.Single(calls, call => call.Tool == "eplan_device_place").Args;

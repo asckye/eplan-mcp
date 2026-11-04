@@ -7,7 +7,11 @@ namespace EplanMcp.Large.Tests;
 internal sealed partial class SmallProjectRedrawDriver(
     Func<string, JObject, Task<JObject>> call, string project, string importsRoot, SmallProjectRedrawReport report)
 {
+    internal static readonly (double X, double Y) OverviewMacroPosition = (0, 292);
     private readonly Dictionary<string, string> _actualNames = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _placedTags = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _attemptedPages = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _createdPages = new(StringComparer.Ordinal);
     private readonly HashSet<string> _covered = new(StringComparer.Ordinal);
     private bool _lastDrawingReadComplete;
 
@@ -15,17 +19,18 @@ internal sealed partial class SmallProjectRedrawDriver(
     {
         string page = Text(source["name"]) ?? throw new InvalidDataException("Export has no page name.");
         JObject[] objects = Objects(source["placements"]);
-        if ((bool?)source["isReportPage"] == true || Objects(source["report"]).Length > 0)
+        if (IsReportPage(source))
         {
             await DrawReportsAsync(page, source);
             return;
         }
 
-        var pageItem = new JObject { ["name"] = page, ["page_type"] = source["pageType"]?.DeepClone() };
-        string? description = Multilingual(source["description"]);
-        if (description is not null)
-        { pageItem["description"] = description; }
-        await InvokeAsync(page, "eplan_page_create", new JObject { ["pages"] = new JArray(pageItem) }, [source]);
+        await CreatePagesAsync(allPages);
+        if (!_createdPages.Contains(page))
+        {
+            report.Warning(page, "Page creation did not succeed; no drawing calls were sent for this page.");
+            return;
+        }
         // Opening the page is an MCP read/UI operation and makes it observable during a live run.
         await InvokeAsync(page, "eplan_page_open", new JObject { ["page"] = page }, [source], write: false);
 
@@ -56,11 +61,9 @@ internal sealed partial class SmallProjectRedrawDriver(
 
         await InvokeAsync(page, "eplan_connection_generate", new JObject { ["pages"] = new JArray(page) },
             objects.Where(o => IsDevice(o) || Type(o) is "SymbolReference" or "InterruptionPoint").ToArray());
-        foreach (JObject item in objects.Where(o => Type(o) is "ConnectionDefinitionPoint" or "Cable"))
-        {
-            if (!_covered.Contains(Key(page, item)))
-            { await ObserveAsync(page, item, () => Type(item) == "Cable" ? PlaceCableAsync(page, item, source) : PlaceDefinitionAsync(page, item)); }
-        }
+        await PlaceDefinitionsAsync(page, objects);
+        foreach (JObject item in objects.Where(o => Type(o) == "Cable" && !_covered.Contains(Key(page, o))))
+        { await ObserveAsync(page, item, () => PlaceCableAsync(page, item, source)); }
         foreach (JObject item in objects.Where(o => Type(o) == "PotentialDefinition"))
         { report.NoTool(page, Type(item), Id(item), "A86: no MCP tool creates potential definitions."); }
         await DrawGraphicsAsync(page, objects);
@@ -71,6 +74,23 @@ internal sealed partial class SmallProjectRedrawDriver(
         { report.NoTool(page, Type(item), Id(item), "No documented redraw mapping for this exported object type."); }
     }
 
+    internal async Task CreatePagesAsync(IReadOnlyList<JObject> sources)
+    {
+        foreach (JObject source in sources.Where(source => !IsReportPage(source)))
+        {
+            string page = Text(source["name"]) ?? throw new InvalidDataException("Export has no page name.");
+            if (!_attemptedPages.Add(page))
+            { continue; }
+            var item = new JObject { ["name"] = page, ["page_type"] = source["pageType"]?.DeepClone() };
+            if (Multilingual(source["description"]) is string description)
+            { item["description"] = description; }
+            if (await InvokeAsync(page, "eplan_page_create", new JObject { ["pages"] = new JArray(item) }, [source]) is not null)
+            { _createdPages.Add(page); }
+        }
+    }
+
+    private static bool IsReportPage(JObject source) => (bool?)source["isReportPage"] == true
+        || Objects(source["report"]).Length > 0 || Text(source["pageType"]) is not ("Circuit" or "Overview");
     private async Task DrawReportsAsync(string page, JObject source)
     {
         JObject[] blocks = Objects(source["report"]);
@@ -117,10 +137,9 @@ internal sealed partial class SmallProjectRedrawDriver(
             }
             await ObserveAsync(page, box, async () =>
             {
-                double[] bounds = Bounds(box);
                 int variant = (int?)box["symbol"]?["variant"] ?? 0;
                 report.Note(page, Type(box), Id(box), FormattableString.Invariant(
-                    $"Overview macro estimate: variant={variant} from box symbol variant; top-left=({bounds[0]},{bounds[3]}) from exported box bounds. Coverage requires fresh drawing evidence."));
+                    $"Overview macro position: variant={variant}; top-left=({OverviewMacroPosition.X},{OverviewMacroPosition.Y}). Coverage requires fresh drawing evidence."));
                 var before = (await ReadDrawingsAsync(page, box)).Select(DrawingKey).ToHashSet(StringComparer.Ordinal);
                 bool beforeComplete = _lastDrawingReadComplete;
                 JObject? result = await InvokeAsync(page, "eplan_macro_insert", new JObject
@@ -130,8 +149,8 @@ internal sealed partial class SmallProjectRedrawDriver(
                     ["part_variant"] = part["variant"]?.DeepClone(),
                     ["representation"] = "Overview",
                     ["variant"] = variant,
-                    ["x"] = bounds[0],
-                    ["y"] = bounds[3],
+                    ["x"] = OverviewMacroPosition.X,
+                    ["y"] = OverviewMacroPosition.Y,
                 }, [box]);
                 if (result is null)
                 {
@@ -146,13 +165,33 @@ internal sealed partial class SmallProjectRedrawDriver(
                     { await InvokeAsync(page, "eplan_device_update", new JObject { ["tag"] = inserted, ["new_tag"] = wanted }, [box]); }
                 }
                 JObject[] actual = await ReadDrawingsAsync(page, box);
+                JObject[] insertedBoxes = actual.Where(a => !before.Contains(DrawingKey(a)) && Text(a["kind"]) == Type(box)
+                    && (Text(a["properties"]?["name"]) == Text(box["name"])
+                        || cards.Any(card => Text(card["tag"]) == Text(a["properties"]?["name"])))).ToArray();
+                if (insertedBoxes.Length == 1 && TryPoint(box["location"], out double[] sourcePoint)
+                    && TryPoint(insertedBoxes[0]["location"], out double[] targetPoint))
+                {
+                    _covered.Add(Key(page, box));
+                    report.Note(page, Type(box), Id(box), FormattableString.Invariant(
+                        $"Overview PLC box position: source=({sourcePoint[0]},{sourcePoint[1]}); target=({targetPoint[0]},{targetPoint[1]}); dx={targetPoint[0] - sourcePoint[0]}; dy={targetPoint[1] - sourcePoint[1]} (mm)."));
+                }
+                else
+                { report.Warning(page, "Overview PLC box position could not be compared: target box is absent, ambiguous, or has unreadable coordinates."); }
+                HashSet<string> members = MacroMemberIds(box, objects);
+                foreach (JObject point in objects.Where(o => members.Contains(Id(o)) && Text(o["category"]) == "PLCTerminal"))
+                {
+                    _covered.Add(Key(page, point));
+                    report.Note(page, Type(point), Id(point), "PLC point supplied by the successful Overview macro; individual placement omitted.");
+                }
+                if (Text(box["name"]) is string boxTag)
+                { _placedTags.Add(boxTag); }
                 if (!beforeComplete || !_lastDrawingReadComplete)
                 {
                     report.Warning(page, "Macro coverage could not be proved from complete before/after MCP drawing reads; objects remain eligible for individual redraw.");
                     return;
                 }
                 var available = actual.Where(a => a["parent"]?.Type is null or JTokenType.Null && !before.Contains(DrawingKey(a))).ToList();
-                HashSet<string> members = MacroMemberIds(box, objects);
+
                 foreach (JObject candidate in objects.Where(o => members.Contains(Id(o)) && Type(o) != "Block" && Type(o) is not ("PropertyPlacement" or "ContextPropertyPlacement")))
                 {
                     JObject? match = available.FirstOrDefault(a => DrawingMatches(candidate, a));
@@ -209,20 +248,28 @@ internal sealed partial class SmallProjectRedrawDriver(
             }
             if (Text(item["category"]) == "PLCTerminal")
             {
-                args["plc_connection_point"] = pins.FirstOrDefault() ?? Property(item, 20022);
-                args["plc_address"] = Property(item, 20400);
-                args["plc_symbolic_address"] = Property(item, 20402);
-                args["plc_text"] = Property(item, 20011);
-                if (Property(item, 20406) is string plug)
-                { args["plc_plug_designation"] = plug; }
-                report.Note(page, Type(item), Id(item), "PLC mandatory fields are copied from 20022/20400/20402/20011; missing values remain missing and are not fabricated.");
+                string? point = pins.FirstOrDefault(value => !string.IsNullOrEmpty(value)) ?? Property(item, 20022);
+                if (!string.IsNullOrEmpty(point))
+                { args["plc_connection_point"] = point; }
+                foreach ((int id, string field) in new[] { (20400, "plc_address"), (20402, "plc_symbolic_address"), (20011, "plc_text"), (20406, "plc_plug_designation") })
+                {
+                    if (Property(item, id) is string value && !string.IsNullOrEmpty(value))
+                    { args[field] = value; }
+                }
             }
         }
+        string placedTag = Text(args["tag"]) ?? name;
+        if (_placedTags.Contains(placedTag))
+        { args["join_device"] = true; }
         JObject? placed = await InvokeAsync(page, "eplan_device_place", args, [item]);
         if (placed is null)
         { return; }
+        _placedTags.Add(placedTag);
         if (Text(placed["device"]?["tag"]) is string actualTag)
-        { _actualNames[name] = actualTag; }
+        {
+            _actualNames[name] = actualTag;
+            _placedTags.Add(actualTag);
+        }
         if ((bool?)item["isMain"] == true)
         {
             foreach (JObject part in Objects(item["parts"]))
@@ -259,11 +306,17 @@ internal sealed partial class SmallProjectRedrawDriver(
         if (Type(item) == "InterruptionPoint")
         {
             string name = Text(item["name"]) ?? throw new InvalidDataException("Interruption point name is unreadable.");
-            string[] counterparts = allPages.Where(p => Text(p["name"]) != page && Objects(p["placements"])
-                .Any(o => Type(o) == "InterruptionPoint" && Text(o["name"]) == name))
-                .Select(p => Text(p["name"])!).ToArray();
-            if (counterparts.Length == 0)
-            { report.Warning(page, "Interruption " + Id(item) + ": no same-name counterpart in the 16 exported pages; raw cross-reference text is not treated as a page locator."); }
+            string? reference = Text(item["counterpartReference"]);
+            string[] counterparts = allPages.Where(p => Text(p["name"]) != page && Text(p["pageType"]) == "Circuit"
+                && Objects(p["placements"]).Any(o => (Type(o) == "InterruptionPoint" && Text(o["name"]) == name)
+                    || (IsDevice(o) && Text(o["name"]) is string device && reference is not null
+                        && (reference == device || reference.StartsWith(device + ":", StringComparison.Ordinal)))))
+                .Select(p => Text(p["name"])!).Distinct(StringComparer.Ordinal).ToArray();
+            if (counterparts.Length is 0 or > 20)
+            {
+                report.Note(page, Type(item), Id(item), "Interruption point not placed: no supported set of 1..20 counterpart Circuit pages from exported same-name points or counterpartReference=" + reference + ".");
+                return;
+            }
             JObject? pin = Objects(item["connectionPoints"]).FirstOrDefault(p => JToken.DeepEquals(p["index"], item["connectionPointIndex"]));
             node = new JObject
             {
@@ -291,20 +344,44 @@ internal sealed partial class SmallProjectRedrawDriver(
         await InvokeAsync(page, "eplan_connection_create", new JObject { ["page"] = page, ["snap_to_grid"] = false, ["items"] = new JArray(node) }, [item]);
     }
 
-    private Task<JObject?> PlaceDefinitionAsync(string page, JObject item)
+    private async Task PlaceDefinitionsAsync(string page, JObject[] objects)
     {
-        var point = new JObject
+        var mapped = new List<(JObject Source, JObject Point)>();
+        foreach (JObject item in objects.Where(o => Type(o) == "ConnectionDefinitionPoint" && !_covered.Contains(Key(page, o))))
         {
-            ["kind"] = "definition_point",
-            ["position"] = new JArray(Point(item["location"])),
-            ["symbol"] = item["symbol"]?["name"]?.DeepClone(),
-            ["symbol_variant"] = item["symbol"]?["variant"]?.DeepClone(),
-        };
-        foreach ((int id, string field) in new[] { (31004, "color"), (31002, "cross_section"), (31011, "designation") })
-        { if (Property(item, id) is string value) { point[field] = value; } }
-        return InvokeAsync(page, "eplan_connection_create", new JObject { ["page"] = page, ["snap_to_grid"] = false, ["items"] = new JArray(point) }, [item]);
+            await ObserveAsync(page, item, () =>
+            {
+                var point = new JObject
+                {
+                    ["kind"] = "definition_point",
+                    ["position"] = new JArray(Point(item["location"])),
+                    ["symbol"] = item["symbol"]?["name"]?.DeepClone(),
+                    ["symbol_variant"] = item["symbol"]?["variant"]?.DeepClone(),
+                };
+                foreach ((int id, string field) in new[] { (31004, "color"), (31002, "cross_section"), (31011, "designation") })
+                {
+                    if (Property(item, id) is string value && !string.IsNullOrEmpty(value))
+                    { point[field] = value; }
+                }
+                if (point["color"] is null && point["cross_section"] is null && point["designation"] is null)
+                {
+                    report.Note(page, Type(item), Id(item), "Definition point not placed: exported part references alone cannot satisfy the required color, cross_section or designation property.");
+                    return Task.CompletedTask;
+                }
+                mapped.Add((item, point));
+                return Task.CompletedTask;
+            });
+        }
+        foreach ((JObject Source, JObject Point)[] batch in mapped.Chunk(50))
+        {
+            await InvokeItemsAsync(page, "eplan_connection_create", new JObject
+            {
+                ["page"] = page,
+                ["snap_to_grid"] = false,
+                ["items"] = new JArray(batch.Select(item => item.Point)),
+            }, batch.Select(item => item.Source).ToArray());
+        }
     }
-
     private Task PlaceCableAsync(string page, JObject item, JObject source)
     {
         // The export has a native symbol and its ink bounds, not CABDL's definition-line endpoints or core ownership.
@@ -312,32 +389,6 @@ internal sealed partial class SmallProjectRedrawDriver(
         report.Note(page, "Cable", Id(item), "cable_definition mapping incomplete: exported Cable lacks definition-line endpoints and verified core-to-connection ownership. "
             + "Available name=" + Text(item["name"]) + "; source connections=" + Objects(source["connections"]).Length.ToString(CultureInfo.InvariantCulture) + ". No native fallback was used.");
         return Task.CompletedTask;
-    }
-
-    private async Task<JObject?> InvokeAsync(string page, string tool, JObject args, JObject[] items, bool write = true)
-    {
-        args["project"] = project;
-        if (write)
-        { args["dry_run"] = false; }
-        if (tool is "eplan_page_get" or "eplan_page_review" or "eplan_connection_create" or "eplan_placement_create" or "eplan_placement_update")
-        { args["response_format"] = "detailed"; }
-        try
-        {
-            JObject result = await call(tool, args);
-            bool success = result["error"] is null;
-            if (write && Text(result["execution"]) != "committed")
-            { success = false; }
-            string? error = success ? null : (result["error"] ?? result).ToString(Newtonsoft.Json.Formatting.None);
-            report.RecordCall(page, tool, items.Select(Type), items.Select(Id), args, result, success, error);
-            return success ? result : null;
-        }
-        catch (OperationCanceledException) when (TestContext.Current.CancellationToken.IsCancellationRequested)
-        { throw; }
-        catch (Exception error)
-        {
-            report.RecordCall(page, tool, items.Select(Type), items.Select(Id), args, null, false, error.GetType().Name + ": " + error.Message);
-            return null;
-        }
     }
 
     private async Task ObserveAsync(string page, JObject item, Func<Task> action)
@@ -364,13 +415,6 @@ internal sealed partial class SmallProjectRedrawDriver(
         : token is JArray array && array.Count == 2 && Number(array[0]) is double ax && Number(array[1]) is double ay ? [ax, ay]
         : throw new InvalidDataException("Point coordinates are absent or unreadable.");
     private static double? Number(JToken? token) => token?.Type is JTokenType.Integer or JTokenType.Float && double.IsFinite((double)token) ? (double)token : null;
-    private static double[] Bounds(JObject item)
-    {
-        if (item["boundingBox"] is not JArray { Count: 2 } corners)
-        { throw new InvalidDataException("Exported bounds are absent or unreadable."); }
-        double[] a = Point(corners[0]), b = Point(corners[1]);
-        return [Math.Min(a[0], b[0]), Math.Min(a[1], b[1]), Math.Max(a[0], b[0]), Math.Max(a[1], b[1])];
-    }
     private static double[] LogicalBounds(JObject item) => item["logicalArea"] is JObject area
         ? [.. Point(area["lowerLeft"]), .. Point(area["upperRight"])] : throw new InvalidDataException("Native logical area is absent or unreadable; ink bounds do not substitute for a box's area.");
 }

@@ -277,7 +277,7 @@ internal static class PageExportComparer
                 items = items.Where(item => !_ignoredNames.Contains((string?)item["id"] ?? ""));
             }
             var normalized = items.Select(item => Normalize(item, member, identities)!).ToList();
-            if (member is "properties" or "pins" or "parts" or "functionsInside")
+            if (member is "pins" or "parts" or "functionsInside")
             {
                 normalized = normalized.OrderBy(item => item.ToString(Formatting.None), StringComparer.Ordinal).ToList();
             }
@@ -291,6 +291,12 @@ internal static class PageExportComparer
 
     private static void Differences(JToken? source, JToken? target, string path, List<PageExportFieldDifference> differences)
     {
+        string member = path[(path.LastIndexOf('.') + 1)..];
+        if (member == "properties" && source is null or JArray && target is null or JArray)
+        {
+            PropertyDifferences(source, target, path, differences);
+            return;
+        }
         if (source is JObject sourceObject && target is JObject targetObject)
         {
             foreach (string name in sourceObject.Properties().Select(p => p.Name).Union(targetObject.Properties().Select(p => p.Name), StringComparer.Ordinal).Order(StringComparer.Ordinal))
@@ -308,13 +314,41 @@ internal static class PageExportComparer
             }
             return;
         }
-        string member = path[(path.LastIndexOf('.') + 1)..];
         if (JToken.DeepEquals(source, target) || (_lengthFields.Contains(member) && Close(source, target)))
         {
             return;
         }
         differences.Add(new(path, source?.DeepClone(), target?.DeepClone()));
     }
+
+    private static void PropertyDifferences(JToken? source, JToken? target, string path, List<PageExportFieldDifference> differences)
+    {
+        ILookup<(string Id, string Index), JObject> targets = Objects(target).ToLookup(PropertyKey);
+        foreach (JObject property in Objects(source).OrderBy(p => (int?)p["id"]).ThenBy(p => (int?)p["index"]))
+        {
+            (string id, string index) = PropertyKey(property);
+            JObject? counterpart = targets[(id, index)].FirstOrDefault();
+            string valuePath = path + "[id=" + id + ",index=" + index + "].value";
+            if (counterpart is null)
+            {
+                differences.Add(new(valuePath, property["value"]?.DeepClone(), null));
+            }
+            else
+            {
+                Differences(property["value"], counterpart["value"], valuePath, differences);
+            }
+        }
+        // The owner's acceptance is a complete match: a property only the redraw has is a difference too.
+        var sources = Objects(source).Select(PropertyKey).ToHashSet();
+        foreach (JObject property in Objects(target).Where(p => !sources.Contains(PropertyKey(p))).OrderBy(p => (int?)p["id"]).ThenBy(p => (int?)p["index"]))
+        {
+            (string id, string index) = PropertyKey(property);
+            differences.Add(new(path + "[id=" + id + ",index=" + index + "].value", null, property["value"]?.DeepClone()));
+        }
+    }
+
+    private static (string Id, string Index) PropertyKey(JObject property) =>
+        (property["id"]?.ToString(Formatting.None) ?? "null", property["index"]?.ToString(Formatting.None) ?? "null");
 
     private static bool Close(JToken? source, JToken? target) => IsNumber(source) && IsNumber(target)
         && Math.Abs((double)source! - (double)target!) <= PositionTolerance + 1e-10;
