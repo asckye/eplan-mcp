@@ -43,6 +43,8 @@ CI 在 `main` 上运行全部自动测试；Large 与 Agent 评测由开发机�
 - [CONTRIBUTING.md](../../CONTRIBUTING.md)：构建配置、输出目录、测试 trait 和本地命令的项目入口。
 - [architecture.md](../architecture/architecture.md)：组件、进程、协议、错误映射、结果整形与已实现安全机制。
 - [api-notes.md](../eplan/api-notes.md)：EPLAN 版本、调用条件、精确输入和已验证行为的证据索引。
+- [design-model.md](../eplan/design-model.md)：EPLAN 的设计思路；绘图工具和任务说明都先按这里判断，差异先找数据模型里的源头。
+- [data-relationships.md](../eplan/data-relationships.md)：十组数据关联，说明谁是源头、谁跟着变。
 - [docs/tools/](../tools/)：已发布工具的名称、schema、参数、结果、安全分类及具体调用示例。
 - [cli.md](../reference/cli.md)：CLI 参数、Profile、日志位置与诊断输出。
 - [M5 设计](../design/2026-10-20-m5-operability.md)：Workbench 的既有决定、布局资源、交互、来源及验证状态。
