@@ -9,7 +9,7 @@ internal sealed partial class SmallProjectRedrawDriver
     private async Task DrawGraphicsAsync(string page, JObject[] objects)
     {
         var mapped = new List<(JObject Source, JObject Item)>();
-        foreach (JObject item in objects.Where(IsGraphic).Where(item => !_covered.Contains(Key(page, item)) && !_unresolvedMacroGraphics.Contains(Key(page, item))))
+        foreach (JObject item in objects.Where(IsGraphic).Where(item => !_covered.Contains(Key(page, item))))
         {
             if (IsPartMark(item))
             {

@@ -8,7 +8,6 @@ internal sealed partial class SmallProjectRedrawDriver
     private readonly HashSet<string> _macroOwned = new(StringComparer.Ordinal);
     private readonly HashSet<string> _macroPages = new(StringComparer.Ordinal);
     private readonly Dictionary<string, JObject> _macroDescriptions = new(StringComparer.OrdinalIgnoreCase);
-    private readonly HashSet<string> _unresolvedMacroGraphics = new(StringComparer.Ordinal);
 
     private async Task InsertMacrosAsync(string page, JObject[] objects, string pageType, IReadOnlyList<JObject> allPages)
     {
@@ -22,7 +21,6 @@ internal sealed partial class SmallProjectRedrawDriver
             if (!instances.Any(instance => instance.Tag == tag))
             { instances.Add(("", tag, [box])); }
         }
-        bool replacedMacro = false;
         foreach (var instance in instances)
         {
             JObject[] members = instance.Members.Concat(objects.Where(item => IsDevice(item)
@@ -127,7 +125,6 @@ internal sealed partial class SmallProjectRedrawDriver
                     return;
                 }
                 _macroPages.Add(page);
-                replacedMacro |= replacement;
                 report.Note(page, Type(anchor), Id(anchor), "Macro instance " + instance.Tag + " used " + (Text(result["macro"]) ?? path)
                     + " at (" + args["x"] + ", " + args["y"] + "), " + representation + " variant " + variant + (partRoute ? " through its source part." : "."));
                 if ((bool?)result["recovered"] == true)
@@ -148,15 +145,6 @@ internal sealed partial class SmallProjectRedrawDriver
                 JObject[] added = after.Where(item => !existing.Contains(DrawingKey(item))).ToArray();
                 MarkMacroCoverage(page, objects, members, added, requested, Text(result["macro"]) ?? path, replacement, pageType == "Overview");
             });
-        }
-        if (replacedMacro && pageType != "Overview")
-        {
-            foreach (JObject graphic in objects.Where(IsGraphic).Where(item => !_covered.Contains(Key(page, item))))
-            {
-                _unresolvedMacroGraphics.Add(Key(page, graphic));
-                report.NoTool(page, Type(graphic), Id(graphic), "A replacement macro is present, but this unmatched source graphic has no macro/group membership identity. "
-                    + "It cannot be classified as a version difference or page-owned geometry; no manual repair was guessed.");
-            }
         }
     }
 
