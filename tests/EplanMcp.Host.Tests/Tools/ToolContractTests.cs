@@ -168,7 +168,11 @@ public sealed class ToolContractTests : IDisposable
         Assert.Equal(["project", "page", "x", "y"], input.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         Assert.Equal(4, input.GetProperty("oneOf").GetArrayLength());
         Assert.Equal(["part"], input.GetProperty("oneOf")[0].GetProperty("required").EnumerateArray().Select(v => v.GetString()));
-        Assert.Contains("library", input.GetProperty("oneOf")[0].GetProperty("propertyNames").GetProperty("not").GetProperty("enum").EnumerateArray().Select(p => p.GetString()));
+        string excluded = input.GetProperty("oneOf")[0].GetProperty("propertyNames").GetProperty("not").GetProperty("pattern").GetString()!;
+        foreach (string field in new[] { "terminal_strip", "terminal_number", "terminal_strip_text", "terminal_strip_position", "library", "symbol", "symbol_variant", "display_properties", "connection_designations", "connection_descriptions", "location_box", "corner_x", "corner_y" })
+        { Assert.Matches(excluded, field); }
+        foreach (string field in new[] { "project", "page", "part", "variant", "tag", "x", "y", "dry_run", "show_page" })
+        { Assert.DoesNotMatch(excluded, field); }
         Assert.Equal(64, input.GetProperty("properties").GetProperty("plc_connection_point").GetProperty("maxLength").GetInt32());
         Assert.Equal(["library", "symbol", "symbol_variant", "tag"], input.GetProperty("dependentRequired").GetProperty("plc_connection_point").EnumerateArray().Select(p => p.GetString()));
         Assert.Equal(["library", "symbol", "symbol_variant", "tag"], input.GetProperty("oneOf")[1].GetProperty("required").EnumerateArray().Select(v => v.GetString()));

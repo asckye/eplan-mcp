@@ -66,6 +66,9 @@ public sealed class DevicePlaceArgs
     /// <summary>Short or full device tag; required for symbols, optional for parts to retain EPLAN numbering.</summary>
     public string? Tag { get; set; }
 
+    /// <summary>Join an existing device with a secondary library symbol; omitted means false.</summary>
+    public bool? JoinDevice { get; set; }
+
     /// <summary>For the execute operation: the plan's <see cref="WritePlan.Fingerprint"/>. Null for the plan.</summary>
     public string? Fingerprint { get; set; }
 }

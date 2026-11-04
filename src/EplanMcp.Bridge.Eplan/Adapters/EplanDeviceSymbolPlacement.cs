@@ -57,11 +57,13 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
 #pragma warning disable CA2000 // A39/A55: returned persistent functions belong to EPLAN, including on Abort.
         Function function = CreateFunction(args, tag, project, page, variant);
 #pragma warning restore CA2000
+        if (args.JoinDevice == true)
+        { function.IsMainFunction = false; Require(!function.IsMainFunction); }
         function.Name = tag;
         // Live T7d: a standalone contact is not a main function by default, so device reads cannot find it. The tag is
         // new (ALREADY_EXISTS otherwise), so this function is the device's main function, like a pushbutton's contact.
         // A PLC point belongs to its existing PLC box (its own main function), so it stays as EPLAN places it.
-        if (args.PlcConnectionPoint is null && !DeviceSymbolPlan.ConnectionPoint(args) && !DeviceSymbolPlan.BusBarPoint(args))
+        if (args.JoinDevice != true && args.PlcConnectionPoint is null && !DeviceSymbolPlan.ConnectionPoint(args) && !DeviceSymbolPlan.BusBarPoint(args))
         {
             if (!function.IsMainFunction)
             { function.IsMainFunction = true; }
@@ -137,7 +139,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         // A55: only managed identity, values and display snapshots may outlive this transaction.
         if (args.DisplayProperties is { Count: > 0 })
         { _placedDisplays = ReadDisplays(function); }
-        return new DevicePlaceData { Page = page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc };
+        return new DevicePlaceData { Page = page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc, IsMainFunction = args.JoinDevice == true ? function.IsMainFunction : null };
     }
 
     private static void Require(bool matches)

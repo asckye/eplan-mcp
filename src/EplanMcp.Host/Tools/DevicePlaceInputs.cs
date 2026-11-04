@@ -11,8 +11,10 @@ internal static partial class DevicePlaceInputs
     internal static void Configure(JsonObject schema)
     {
         ((JsonArray)schema["required"]!).Remove("tag");
+        schema["properties"]!["join_device"]!["type"] = "boolean";
+        schema["properties"]!["join_device"]!["default"] = false;
         schema["oneOf"] = JsonNode.Parse("""
-            [{"required":["part"],"propertyNames":{"not":{"enum":["terminal_strip","terminal_number","terminal_strip_text","terminal_strip_position","library","symbol","symbol_variant","display_properties","connection_designations","connection_descriptions","location_box","corner_x","corner_y"]}}},
+            [{"required":["part"],"propertyNames":{"not":{"pattern":"^(terminal_|library$|symbol|display_|connection_|location_box$|corner_)"}}},
              {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"pattern":"^(terminal_.*|part|variant|location_box)$"}}},
              {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"pattern":"^(terminal_.*|tag|part|variant|library|symbol.*|display_.*|connection_.*)$"}}},
              {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"pattern":"^(tag|part|variant|location_box|corner_.*|display_.*|connection_.*)$"}}}]
@@ -27,6 +29,8 @@ internal static partial class DevicePlaceInputs
         { schema["properties"]![field]!["minLength"] = 1; schema["properties"]![field]!["maxLength"] = 256; }
         schema["dependentRequired"]!["library"] = JsonNode.Parse("""["symbol"]""");
         schema["dependentRequired"]!["symbol"] = JsonNode.Parse("""["library"]""");
+        schema["dependentRequired"]!["join_device"] = JsonNode.Parse("""["library","symbol"]""");
+        schema["dependentSchemas"] = JsonNode.Parse("""{"join_device":{"propertyNames":{"not":{"pattern":"^(terminal_|plc_|connection_)"}}}}""");
         schema["dependentRequired"]!["plc_plug_designation"] = JsonNode.Parse("""["plc_connection_point"]""");
         schema["properties"]!["plc_plug_designation"]!["minLength"] = 1;
         schema["properties"]!["plc_plug_designation"]!["maxLength"] = 64;
@@ -46,6 +50,8 @@ internal static partial class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        if (DeviceJoinMode.Problem(args) is { } joinProblem)
+        { problems.Add(joinProblem); }
         if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Any(s => string.IsNullOrWhiteSpace(s) || s.Length > 64 || s.Any(char.IsControl))))
         { problems.Add("/connection_descriptions: require a symbol source and nonempty text of at most 64 characters without controls per pin."); }
         if (args.TerminalStripPosition is { } position && (args.TerminalStrip is null || args.TerminalStripText is null || position.Length != 2 || position.Any(n => !double.IsFinite(n) || n is < 0 or > 10000)))

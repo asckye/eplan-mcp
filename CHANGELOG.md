@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_device_place` 新增 `join_device`，可用库符号向已有器件加入非主功能；默认仍拒绝重复标识，不支持部件、端口列表、端子或 PLC 路线。
+
 - `eplan_placement_create` 的写入前布局预检（含预览）及批量写调用时限统一为 180 秒，其他读调用不变。
 
 - `eplan_placement_create` 新增 ellipse；arc 起止角模 360 相等时创建整圆，分别核对 Ellipse/Circle 与原生半径、弧度角读回。

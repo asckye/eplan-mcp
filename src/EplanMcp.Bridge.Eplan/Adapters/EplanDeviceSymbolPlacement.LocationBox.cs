@@ -76,15 +76,17 @@ internal sealed partial class EplanDeviceSymbolPlacement
         // A86: the symbol can only be set on a created object (S063080 before Create).
         box.Create(page);
         box.SymbolVariant = variant;
+        if (args.JoinDevice == true)
+        { box.IsMainFunction = false; }
         box.Name = tag;
         box.SetLogicalArea(new PointD(args.X, args.Y), new PointD(args.CornerX!.Value, args.CornerY!.Value));
         var category = box.FunctionCategory;
-        Require(box.IsMainFunction && category.ToString() == "Blackbox" && DevicePlaceRequest.SameName(tag, box.Name));
+        Require(box.IsMainFunction == (args.JoinDevice != true) && category.ToString() == "Blackbox" && DevicePlaceRequest.SameName(tag, box.Name));
         RectangleD area = box.GetLogicalArea();
         Require(area.LowerLeft.X == args.X && area.LowerLeft.Y == args.Y && area.UpperRight.X == args.CornerX && area.UpperRight.Y == args.CornerY);
         _placedFunctionId = box.ObjectIdentifier;
         _placedLayout = EplanLayout.Measure(_projectPath, _pageName, [box]);
-        return new() { Page = page.Name, Tag = box.Name, Category = category.ToString(), Functions = 1 };
+        return new() { Page = page.Name, Tag = box.Name, Category = category.ToString(), Functions = 1, IsMainFunction = args.JoinDevice == true ? box.IsMainFunction : null };
     }
 
     private void ReadSpecialCommitted(DevicePlaceArgs args, DevicePlaceData data)
@@ -92,21 +94,25 @@ internal sealed partial class EplanDeviceSymbolPlacement
         Page page = EplanProjects.ByPath(_projectPath).Pages.Single(p => p.Name == _pageName);
         Function[] functions = EplanNativePreconditions.Valid(page.AllPlacements).OfType<Function>().ToArray();
         Function placed = functions.Single(f => f.ObjectIdentifier == _placedFunctionId);
+        string expectedTag = data.Tag;
         data.Tag = placed.Name;
         data.Type = placed.GetType().Name;
         data.Category = placed.FunctionCategory.ToString();
         data.IsMainFunction = placed.IsMainFunction;
         Require(placed.IsPlaced && placed.Page.Name == data.Page && placed.SymbolVariant.SymbolLibraryName == _symbol.Library
-            && placed.SymbolVariant.SymbolName == _symbol.Name && placed.SymbolVariant.VariantNr == _symbol.Variant && data.Category == _symbol.FunctionCategory);
+            && placed.SymbolVariant.SymbolName == _symbol.Name && placed.SymbolVariant.VariantNr == _symbol.Variant
+            && (data.Category == _symbol.FunctionCategory || args.JoinDevice == true && _symbol.FunctionCategory is null));
+        if (args.JoinDevice == true)
+        { Require(data.IsMainFunction == false && DevicePlaceRequest.SameName(expectedTag, placed.Name)); }
         if (DeviceSymbolPlan.BusBarDefinition(args))
-        { Require(data.IsMainFunction == true && data.Category == "BusBarDefText"); }
+        { Require(data.IsMainFunction == (args.JoinDevice != true) && data.Category == "BusBarDefText"); }
         BoxedDevice? box = placed as BoxedDevice ?? functions.OfType<BoxedDevice>().FirstOrDefault(b => b.FunctionsInside.Any(f => f.ObjectIdentifier == placed.ObjectIdentifier));
         if (box is null)
         { return; }
         RectangleD area = box.GetLogicalArea();
         data.BlackBox = new() { Tag = box.Name, Bounds = [area.LowerLeft.X, area.LowerLeft.Y, area.UpperRight.X, area.UpperRight.Y], FunctionsInside = box.FunctionsInside.Select(f => f.Name).ToArray() };
         if (DeviceSymbolPlan.BlackBox(args))
-        { Require(data.Type == "BoxedDevice" && data.IsMainFunction == true && data.BlackBox.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })); }
+        { Require(data.Type == "BoxedDevice" && data.IsMainFunction == (args.JoinDevice != true) && data.BlackBox.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })); }
     }
 
     private static void Check(bool matches, string what)

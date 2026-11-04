@@ -139,9 +139,10 @@ internal sealed class DeviceWriteTools
         string? plc_symbolic_address = null,
         string? plc_text = null,
         string? plc_plug_designation = null,
-        [Description("Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change.")] bool show_page = false,
+        [Description("Open/focus the page before drawing; UI only.")] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,
         PackLibrary? packs = null,
+        [Description("Join an existing tag as a secondary library symbol.")] bool? join_device = null,
         CancellationToken cancellationToken = default)
     {
         var args = new DevicePlaceArgs
@@ -153,6 +154,7 @@ internal sealed class DeviceWriteTools
             X = x,
             Y = y,
             Tag = tag,
+            JoinDevice = join_device,
             Library = library?.Trim(),
             Symbol = symbol?.Trim(),
             SymbolVariant = symbol_variant,
@@ -207,6 +209,7 @@ internal sealed class DeviceWriteTools
                 X = args.X,
                 Y = args.Y,
                 Tag = args.Tag,
+                JoinDevice = args.JoinDevice,
                 Library = args.Library,
                 Symbol = args.Symbol,
                 SymbolVariant = args.SymbolVariant,

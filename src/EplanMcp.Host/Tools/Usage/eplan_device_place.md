@@ -15,7 +15,9 @@ dry_run omitted/true: preview only, execution=not_started. false executes.
 
 1. Circuit page via eplan_page_list/create/get. mm within page; origin bottom left, y up.
 2. Free symbol tag: eplan_device_list; short tags inherit page structure. Parts: omit tag for native numbering, or rename all functions. Outside scratch needs approval.
-3. Parts: eplan_part_search (variant 1). Symbols: eplan_symbol_search. Other functions stay unplaced. PLC module: eplan_macro_insert part. Several symbols: same tag, then eplan_device_update part.
+3. Parts: eplan_part_search, variant 1; others unplaced. PLC module: eplan_macro_insert part. Symbols: eplan_symbol_search. More symbols: library/symbol + join_device:true, existing tag, secondary function; then eplan_device_update part.
+
+join_device defaults false; no part/pin lists/terminal/PLC. Unknown tag: DEVICE_NOT_FOUND.
 
 SPECIAL/DC: tag and corner_x/corner_y required; x/y lower left, corners upper right. DCP/DCPP3: same tag plus one connection_designations pin; named tag:pin. blackBox: tag/bounds/functionsInside (preview membership unknown); device.type/isMainFunction: native after commit.
 
@@ -23,18 +25,18 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 
 ## Fields
 
-- device: full tag/visibleTag/category (preview: requested tag); functions/unplaced=counts. unplaced_functions: committed full names, including PLC suffixes; [] if none/unknown.
+- device: full tag/visibleTag/category (preview=requested tag); functions/unplaced=count; unplaced_functions=committed names incl. PLC suffixes, [] if none/unknown.
 - execution=committed/not_started; dryRun=preview; undo="AI: eplan_device_place". recovered=lost response confirmed; hint=checks.
-- Symbols: symbol=resolved variant/local pins, changes=approval lines; part/variant empty; functions=1,unplaced=0.
+- Symbols: symbol=variant/pins, changes=approval; part/variant empty; functions=1,unplaced=0.
 - Symbol-only display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm} objects. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite parent-relative offsets; negatives allowed. 20214: native prefixed tag.
-- Symbol-only connection_designations: one nonblank pin name in search order, <=64 characters, no controls; writes indexed 20022 and verifies pin names.
-- Atomic; mismatch/cancellation rolls back. One Ctrl+Z. visibleTag=null without tag display.
+- connection_designations: symbols only, one nonblank pin/search order, <=64 chars, no controls; indexed 20022 writes verify pin names.
+- Mismatch/cancellation rolls back. One Ctrl+Z. visibleTag=null without tag display.
 - location_box: + followed by 1-64 letters/digits/underscores/dots. Omit tag and part/symbol options. Fixed SPECIAL/SC variant 0, dashed. x,y: lower-left; corner_x,corner_y: upper-right; positive area.
-- locationBox: structure, bounds [minX,minY,maxX,maxY], outline=dashed, affectedDevices=[]; predicted before commit. functions/unplaced=0; device.tag/category=structure/LocationBox. Duplicate page structure refused; verify recovery via eplan_page_get include_drawings.
+- locationBox: structure, bounds [minX,minY,maxX,maxY], outline=dashed, affectedDevices=[]; predicted before commit. functions/unplaced=0; device.tag/category=structure/LocationBox. No duplicate page structure; verify recovery via eplan_page_get include_drawings.
 
-- Terminal: terminal_strip + terminal_number; default IEC_symbol/X/0; optional library+symbol must be Terminal (variant defaults to 0). No tag/part or display/pin options. Number: 1-64 letters/digits/_/dots. terminal_strip_text: new strips only, 1-256 chars, no controls, plain ??_??. Duplicate strip:number ignores case.
+- Terminal: terminal_strip + terminal_number; defaults IEC_symbol/X/0; library+symbol must be Terminal, variant default 0. No tag/part/display/pin options. Number: 1-64 letters/digits/_/dots. terminal_strip_text: new strips only, 1-256 chars, no controls, plain ??_??. Duplicate strip:number ignores case.
 - terminal_strip_position:[x,y]: finite 0..10000 mm; requires new strip text. Omit for unplaced. Read stripPosition/stripText.
-- Placed strip: defaults.strip_definition.symbol + .variant from plugins (SPECIAL), else TDEF/0. metadata.plugins: used id@version in preview/execute. Plugin changes invalidate plans.
+- Placed strip: defaults.strip_definition.symbol/.variant from plugins (SPECIAL), else TDEF/0. metadata.plugins=used id@version in preview/execute; plugin changes invalidate plans.
 - terminal: strip/number/owner/position/sortCode (20809)/stripCreated. Preview/recovery: owner/sortCode=null; empty sortCode=null. functions includes new strip. Segments: eplan_connection_generate dry_run:false (A52/A55).
 
 - PLC: require plc_connection_point and an existing SPECIAL/PLCC card tag. Address, symbolic address and text optional. Point: 1-64 chars, no leading colon; others: 1-256, nonblank, no controls. Use a one-pin DI variant. Duplicate points/addresses ignore case; omitted values are not written or checked for duplicates.
@@ -42,11 +44,11 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - plc_connection_point: 20022; connection_designations must match. Writes 20400/20402/20011=address/manual symbolic address/??_?? text; calculated 20403/20301 read-only.
 - plc_plug_designation: optional manual 20406, 1-64 nonblank characters, no controls; requires a PLC point. Name stays card:point.
 - PLC displays: 20213=card DT, 20406=plug, 20300=main/auxiliary, 20301=overview. References are native/read-only, may be empty; overview needs a matching representation.
-- Local PLC displays set 20021=2. Verify text/position/visibility by fresh IDs (A78/A79).
-- plc: committed fields + plugDesignation/mainReference; failed readback keeps committed + warning. Verify eplan_plc_get detailed / eplan_page_get include_drawings before retry. functions/unplaced=null; plc_get counts parentlessRepresentations (A55). Use returned names.
+- Local PLC displays: 20021=2; verify text/position/visibility by fresh IDs.
+- plc: fields + plugDesignation/mainReference. Readback failure: committed+warning; inspect eplan_plc_get detailed / eplan_page_get include_drawings before retry. functions/unplaced=null; plc_get counts parentlessRepresentations. Use returned names.
 - show_page opens/focuses the page; UI only.
 
 ## Errors
 
-not_started/rolled_back: unchanged. INVALID_ARGUMENT: fix reported source/coordinates/variant/structure or readback mismatch. PART_NOT_FOUND: eplan_part_search. ALREADY_EXISTS: free tag/address. PAGE_NOT_FOUND/AMBIGUOUS_NAME: eplan_page_list/get. PLAN_STALE: re-plan. For policy/approval/audit/lock/connection see eplan_page_create. Never retry OUTCOME_UNKNOWN; inspect first.
+not_started/rolled_back: unchanged. INVALID_ARGUMENT: fix source/coordinates/variant/structure/readback. PART_NOT_FOUND: eplan_part_search. ALREADY_EXISTS: free tag/address. PAGE_NOT_FOUND/AMBIGUOUS_NAME: eplan_page_list/get. PLAN_STALE: re-plan. Policy/approval/audit/lock/connection: eplan_page_create. OUTCOME_UNKNOWN: inspect before retry.
 R1-R5/R8 refuse; R6/R7/R9 warn; strict: refuse.

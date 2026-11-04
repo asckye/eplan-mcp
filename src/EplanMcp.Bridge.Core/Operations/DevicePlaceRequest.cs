@@ -17,6 +17,7 @@ internal sealed class DevicePlaceRequest
     private const string Circuit = "Circuit";
 
     private bool _joinsDevice;
+    private bool _requiresExistingDevice;
     private DevicePlaceRequest(OpenProject project, MacroTargetPage page, PartSearchItem part, DevicePlaceArgs args, string tag, string[] taken, string[] existing)
     {
         Project = project;
@@ -55,6 +56,8 @@ internal sealed class DevicePlaceRequest
     /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the part.</summary>
     public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, IPlcReader? plc = null)
     {
+        if (DeviceJoinMode.Problem(args) is { } joinProblem)
+        { throw WriteArguments.Invalid([joinProblem]); }
         bool box = args.LocationBox is not null;
         bool blackBox = DeviceSymbolPlan.BlackBox(args);
         bool terminal = args.TerminalStrip is not null;
@@ -126,7 +129,13 @@ internal sealed class DevicePlaceRequest
                 .Where(n => full.Length > 0 && (SameName(full, n, ignoreCase: true) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
-        var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing) { _joinsDevice = DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args) };
+        if (args.JoinDevice == true && taken.FirstOrDefault(n => SameName(full, n, ignoreCase: true)) is { } joinedTag)
+        { full = joinedTag; }
+        var request = new DevicePlaceRequest(project, page, chosen!, args, full, taken, existing)
+        {
+            _joinsDevice = args.JoinDevice == true || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args),
+            _requiresExistingDevice = args.JoinDevice == true
+        };
         if (args.Fingerprint is null)
         { request.CheckFree(); }
         if (args.Library is null && args.LocationBox is null && args.TerminalStrip is null)
@@ -165,6 +174,8 @@ internal sealed class DevicePlaceRequest
     /// <summary>ALREADY_EXISTS when a device carries the tag: EPLAN would merge the two (A13: it does not check).</summary>
     public void CheckFree()
     {
+        if (_requiresExistingDevice && !Taken.Any(n => SameName(Tag, n, ignoreCase: true)))
+        { throw new BridgeErrorException(ErrorReason.DeviceNotFound, $"'{Tag}' does not identify an existing device; place its first symbol before using join_device."); }
         if (Taken.Count > 0 && !_joinsDevice)
         {
             throw new BridgeErrorException(

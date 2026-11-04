@@ -71,7 +71,7 @@ public sealed class DevicePlaceExecuteOperation(
                 return data;
             }, _ => true);
             string? warning = result.Warning;
-            if ((args.PlcConnectionPoint is not null || DeviceSymbolPlan.BlackBox(args) || DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args)) && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
+            if ((args.JoinDevice == true || args.PlcConnectionPoint is not null || DeviceSymbolPlan.BlackBox(args) || DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args)) && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
             {
                 try
                 { committedReadback.ReadCommitted(args, result.Result); }
@@ -125,6 +125,8 @@ public sealed class DevicePlaceExecuteOperation(
     private static DevicePlaceData PlaceSymbol(IDeviceSymbolPlacement session, DevicePlaceArgs args, string tag, string page)
     {
         DevicePlaceData data = session.Place(args, tag);
+        if (args.JoinDevice == true && (data.IsMainFunction != false || !DevicePlaceRequest.SameName(tag, data.Tag) || data.Page != page))
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The joined symbol must retain the existing device tag and be a secondary function; nothing was committed."); }
         if (args.PlcConnectionPoint is not null && (data.Plc is not { } channel || !DevicePlaceRequest.SameName(tag, channel.Name)
             || data.Page != page || !DevicePlaceRequest.SameName(tag, data.Tag) || channel.Page != page || data.Category != "PLCTerminal"
             || channel.Owner is not null && !DevicePlaceRequest.SameName(DevicePlcPlan.Parent(args, tag), channel.Owner)

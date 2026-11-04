@@ -40,6 +40,8 @@ internal static class DeviceSymbolPlan
         if (found.Count > 1)
         { throw ProjectResolver.Ambiguous("symbol", name!, found.Select(s => s.Library + "/" + s.Name), "Select the exact library and symbol spelling from eplan_symbol_search."); }
         SymbolSearchItem symbol = found[0];
+        if (args.JoinDevice.HasValue && (symbol.Kind is "terminal" or "plc_box" || symbol.FunctionCategory is "Terminal" or "PLCTerminal" or "PLCBox"))
+        { throw WriteArguments.Invalid(["/join_device: use library/symbol for the second symbol; terminal and PLC routes are not supported."]); }
         if (terminal && symbol.FunctionCategory is { } category && category != "Terminal")
         { throw WriteArguments.Invalid(["/symbol: terminal symbols must have discovered FunctionCategory Terminal."]); }
         if (args.PlcConnectionPoint is { } point)
@@ -71,6 +73,8 @@ internal static class DeviceSymbolPlan
                 ? FormattableString.Invariant($"{request.Tag}, corners ({args.X}, {args.Y}) to ({args.CornerX}, {args.CornerY}); dashed; affected devices: none; devices keep their own structure")
                 : FormattableString.Invariant($"{symbol.Library}/{symbol.Name}, variant {symbol.Variant} as {request.Tag} at ({args.X}, {args.Y}); no part") },
         };
+        if (args.JoinDevice == true)
+        { changes[0].NewValue += "; join existing device as a secondary function"; }
         foreach (DeviceDisplayProperty p in args.DisplayProperties ?? [])
         {
             changes.Add(new()

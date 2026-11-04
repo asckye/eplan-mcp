@@ -78,7 +78,7 @@ public sealed class PageDisplayToolTests
                     Tool definition = Assert.Single(await client.ListToolsAsync(cancellationToken: Token), t => t.Name == tool).ProtocolTool;
                     JsonElement parameter = definition.InputSchema.GetProperty("properties").GetProperty("show_page");
                     Assert.False(parameter.GetProperty("default").GetBoolean());
-                    Assert.Equal(tool == ConnectionCreateTools.Tool ? "Open this page before drawing; UI only, no data change." : tool == PlacementCreateTools.Tool ? PlacementCreateTools.ShowPageDescription : PageDisplay.Description,
+                    Assert.Equal(tool == ConnectionCreateTools.Tool ? "Open this page before drawing; UI only, no data change." : tool == PlacementCreateTools.Tool ? PlacementCreateTools.ShowPageDescription : tool == DeviceWriteTools.PlaceTool ? "Open/focus the page before drawing; UI only." : PageDisplay.Description,
                         parameter.GetProperty("description").GetString());
                     Assert.Contains("boolean", definition.OutputSchema!.Value.GetProperty("properties").GetProperty("pageShown").GetProperty("type").ToString(), StringComparison.Ordinal);
                 }

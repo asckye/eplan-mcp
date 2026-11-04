@@ -15,7 +15,7 @@ T7d 回归修复：`plc_text`、`terminal_strip_text` 均接收普通文本，�
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-"在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。工具通过部件自带的宏或功能模板放置；传 `tag` 时在同一事务内一次重命名器件全部功能，含未放置功能（A85），省略则保留 EPLAN 自动标识。其余功能保持未放置，与 EPLAN“插入设备”相同。PLC 模块用 `eplan_macro_insert` 的 `part` 插入部件的组符号宏；需要画成多个符号时，以同一标识放置符号，再用 `eplan_device_update` 的 `part` 指定部件（A82 第 5 条）。
+"在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。工具通过部件自带的宏或功能模板放置；传 `tag` 时在同一事务内一次重命名器件全部功能，含未放置功能（A85），省略则保留 EPLAN 自动标识。其余功能保持未放置，与 EPLAN“插入设备”相同。PLC 模块用 `eplan_macro_insert` 的 `part` 插入部件的组符号宏；需要画成多个符号时，先创建器件，再用 `library`/`symbol` 配合 `join_device:true` 向已有标识加入非主功能符号，最后用 `eplan_device_update` 的 `part` 指定部件（A82 第 5 条）。
 
 M8 T7a 增加原生位置框：框内设备保留自己的结构，不继承框的结构（A55）；工具不重命名任何既有设备，受影响设备恒为空。仅支持 `+` 位置标识，固定 SPECIAL/SC 变体 0 与虚线，不提供装置段或任意外观配置。Large 验收代码已补，尚未运行。
 
@@ -28,6 +28,8 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 ```
 
 注册参数使用 `x`/`y` 和必填库变体 `symbol_variant`；坐标单位为毫米，原点在页左下角，y 向上。该示例由 Host 的用法示例测试校验参数形状；原生放置的实机状态见本页第 7 节与[待验台账](../process/large-pending.md)。
+
+可选 `join_device` 默认 false，原有重复标识仍返回 `ALREADY_EXISTS`。true 时目标标识必须已存在（否则 `DEVICE_NOT_FOUND`），新功能沿用该名称且不是主功能；提交后按对象号读回名称和主功能状态。此参数仅支持库符号路线，与 `part`、端口列表（`connection_designations`/`connection_descriptions`）、端子或 PLC 路线同时出现均返回 `INVALID_ARGUMENT`。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
@@ -44,6 +46,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `corner_x`、`corner_y` | number | 位置框/黑盒必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；也用于 SPECIAL/DC |
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
 | `tag` | string | 库符号来源必填，部件来源可选 | EPLAN 自动标识 | 以 `-` 开头的短标识（如 `-KF20`）取页结构但去掉 `&` 文档类型；或完整标识（如 `=GAA+A1-KF20`）。部件来源指定时一起重命名全部功能 |
+| `join_device` | boolean | 否 | false | 仅库符号：向已有标识添加非主功能；与部件、端口列表、端子、PLC 路线互斥 |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行传 `dry_run: false` |
 

@@ -6634,7 +6634,12 @@
             "maxLength": 64
           },
           "show_page": {
-            "description": "Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change.",
+            "description": "Open/focus the page before drawing; UI only.",
+            "type": "boolean",
+            "default": false
+          },
+          "join_device": {
+            "description": "Join an existing tag as a secondary library symbol.",
             "type": "boolean",
             "default": false
           }
@@ -6653,21 +6658,7 @@
             ],
             "propertyNames": {
               "not": {
-                "enum": [
-                  "terminal_strip",
-                  "terminal_number",
-                  "terminal_strip_text",
-                  "terminal_strip_position",
-                  "library",
-                  "symbol",
-                  "symbol_variant",
-                  "display_properties",
-                  "connection_designations",
-                  "connection_descriptions",
-                  "location_box",
-                  "corner_x",
-                  "corner_y"
-                ]
+                "pattern": "^(terminal_|library$|symbol|display_|connection_|location_box$|corner_)"
               }
             }
           },
@@ -6776,6 +6767,10 @@
           "symbol": [
             "library"
           ],
+          "join_device": [
+            "library",
+            "symbol"
+          ],
           "plc_plug_designation": [
             "plc_connection_point"
           ],
@@ -6783,6 +6778,15 @@
             "terminal_strip",
             "terminal_strip_text"
           ]
+        },
+        "dependentSchemas": {
+          "join_device": {
+            "propertyNames": {
+              "not": {
+                "pattern": "^(terminal_|plc_|connection_)"
+              }
+            }
+          }
         }
       },
       "outputSchema": {
