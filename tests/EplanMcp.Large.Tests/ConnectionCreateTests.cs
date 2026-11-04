@@ -7,6 +7,8 @@ namespace EplanMcp.Large.Tests;
 [Trait("Size", "Large")]
 public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
+    private static readonly int[] _point100 = [100, 100];
+
     [Theory]
     [InlineData("corner", "Left,Up")]
     [InlineData("t_node", "Left,Right,Up")]
@@ -41,6 +43,36 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         Assert.Empty(result.GetProperty("logicalAfterGenerate").EnumerateArray());
         await session.UndoAsync();
         Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
+    }
+
+    [Fact]
+    public async Task PotentialDefinition_NamesAndLocation_OneUndoRestores()
+    {
+        Assert.NotNull(host);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = await NewPageAsync(session);
+        await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+        async Task<PageDrawingGeometry> Drawing() => await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet,
+            new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+        string before = (await session.SnapshotAsync(page)).Hash;
+        var request = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["dry_run"] = false,
+            ["items"] = new[] { new { kind = "potential_definition", position = _point100, potential_name = "N", signal_name = "S" } } };
+        TestContext.Current.TestOutputHelper!.WriteLine("request: " + JsonSerializer.Serialize(request));
+        (bool ok, JsonElement result) = await eplan.CallOrErrorAsync("eplan_connection_create", request);
+        TestContext.Current.TestOutputHelper.WriteLine("result: " + result.GetRawText());
+        TestContext.Current.TestOutputHelper.WriteLine("readback: " + JsonSerializer.Serialize(await Drawing()));
+        Assert.True(ok, result.GetRawText());
+        JsonElement point = Assert.Single(result.GetProperty("definitionPoints").EnumerateArray());
+        Assert.Equal("PotentialDefinition", point.GetProperty("type").GetString());
+        Assert.Equal(_point100.Select(v => (double)v), point.GetProperty("position").EnumerateArray().Select(n => n.GetDouble()));
+        Assert.Equal("N", point.GetProperty("properties").GetProperty("potential_name").GetString());
+        Assert.Equal("S", point.GetProperty("properties").GetProperty("signal_name").GetString());
+        Assert.Equal(1, result.GetProperty("undoSteps").GetInt32());
+        Assert.Empty(result.GetProperty("actualEndpoints").EnumerateArray());
+        JsonElement frames = await eplan.CallAsync("eplan_object_find", new() { ["project"] = session.Project, ["page"] = page, ["object_type"] = "MacroBox" });
+        TestContext.Current.TestOutputHelper.WriteLine("macro box readback: " + frames.GetRawText());
+        Assert.Empty(frames.GetProperty("items").EnumerateArray());
+        await session.UndoAsync(); Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
     }
 
     [Fact]

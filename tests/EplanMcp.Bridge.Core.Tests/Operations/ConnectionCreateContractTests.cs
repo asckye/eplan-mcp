@@ -51,6 +51,12 @@ public sealed class ConnectionCreateContractTests
         Validate(OutputSchema(), definitionPlan);
         contract["definitionPointExample"] = definitions.Request;
         contract["definitionPointPreview"] = definitionPlan;
+        var potentials = new ConnectionCreateFixture();
+        potentials.Request["items"] = JArray.Parse("[{\"kind\":\"potential_definition\",\"position\":[40,40],\"potential_name\":\"N\",\"signal_name\":\"S\"}]");
+        Validate(InputSchema(), potentials.Request);
+        Validate(OutputSchema(), potentials.Plan());
+        contract["potentialDefinitionExample"] = potentials.Request;
+        contract["potentialDefinitionPreview"] = potentials.Plan();
         await Verify(contract.ToString(Formatting.Indented).ReplaceLineEndings("\n") + "\n", "json")
             .UseDirectory("../../Contracts.Snapshots").UseFileName("connection-create-contract");
     }
@@ -117,11 +123,16 @@ public sealed class ConnectionCreateContractTests
                 ["colour"] = new JObject { ["type"] = "string", ["enum"] = new JArray(CableDefinitionPlanner.Colours.Split(' ')) },
             }), 1, 50),
         });
+        JObject definition = (JObject)wire["properties"]!["definition_point"]!.DeepClone();
+        definition["properties"]!["kind"] = Constant("definition_point");
+        definition["required"] = new JArray("kind", "position");
+        JObject potential = Object(new() { ["kind"] = Constant("potential_definition"), ["position"] = Point(), ["potential_name"] = Text(), ["signal_name"] = Text() }, "kind position");
+        potential["anyOf"] = new JArray(new JObject { ["required"] = new JArray("potential_name") }, new JObject { ["required"] = new JArray("signal_name") });
         JObject schema = Object(new()
         {
             ["project"] = Text(),
             ["page"] = Text(),
-            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable) }, 1, 50),
+            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable, definition, potential) }, 1, 50),
             ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["snap_to_grid"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["response_format"] = new JObject { ["type"] = "string", ["enum"] = new JArray("concise", "detailed"), ["default"] = "concise" },

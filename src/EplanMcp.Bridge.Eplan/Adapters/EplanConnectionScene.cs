@@ -11,7 +11,7 @@ internal static class EplanConnectionScene
         foreach (SymbolReference reference in EplanNativePreconditions.Valid(placements).OfType<SymbolReference>())
         {
             // A71/A86: wires and their definition points are not devices/nodes that terminate an edge.
-            if (reference is DynamicConnectionLine or ConnectionDefinitionPoint || !seen.Add(reference.ToStringIdentifier()))
+            if (reference is DynamicConnectionLine or ConnectionDefinitionPoint or PotentialDefinition || !seen.Add(reference.ToStringIdentifier()))
             { continue; }
             foreach (PinBase pin in reference.GraphicalConnectionPoints)
             {

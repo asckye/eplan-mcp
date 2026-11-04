@@ -6,7 +6,7 @@ internal static class ConnectionCreateSchema
 {
     internal static JsonObject Items()
     {
-        JsonObject Text(int max = 200) => new() { ["type"] = "string", ["minLength"] = 1, ["maxLength"] = max };
+        JsonObject Text(int max = 200) => max == 200 ? new() { ["$ref"] = "#/$defs/t" } : new() { ["type"] = "string", ["minLength"] = 1, ["maxLength"] = max };
         JsonObject Integer(int min, int max) => new() { ["type"] = "integer", ["minimum"] = min, ["maximum"] = max };
         JsonObject Array(JsonObject item, int min, int max) => new() { ["type"] = "array", ["items"] = item, ["minItems"] = min, ["maxItems"] = max };
         JsonObject Object(JsonObject properties) => new() { ["type"] = "object", ["additionalProperties"] = false, ["properties"] = properties, ["required"] = new JsonArray([.. properties.Select(p => (JsonNode?)JsonValue.Create(p.Key))]) };
@@ -23,9 +23,14 @@ internal static class ConnectionCreateSchema
             ["properties"] = new JsonObject { ["position"] = Point(), ["symbol"] = new JsonObject { ["enum"] = new JsonArray("CDP", "CDPNG"), ["default"] = "CDP" }, ["symbol_variant"] = new JsonObject { ["type"] = "integer", ["minimum"] = 0, ["default"] = 0 }, ["color"] = Text(), ["cross_section"] = new JsonObject { ["type"] = "string", ["pattern"] = "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$" }, ["designation"] = Text() },
             ["anyOf"] = new JsonArray(new JsonObject { ["required"] = new JsonArray("color") }, new JsonObject { ["required"] = new JsonArray("cross_section") }, new JsonObject { ["required"] = new JsonArray("designation") }),
         };
-        JsonObject definition = wire["properties"]!["definition_point"]!.DeepClone().AsObject();
-        definition["properties"]!["kind"] = Kind("definition_point");
-        definition["required"] = new JsonArray("kind", "position");
+        JsonObject definitionFields = wire["properties"]!["definition_point"]!.AsObject();
+        definitionFields["properties"]!["kind"] = Kind("definition_point");
+        wire["properties"]!["definition_point"] = new JsonObject { ["$ref"] = "#/$defs/d", ["not"] = new JsonObject { ["required"] = new JsonArray("kind") } };
+        JsonObject definition = new() { ["$ref"] = "#/$defs/d", ["properties"] = new JsonObject { ["kind"] = Kind("definition_point") }, ["required"] = new JsonArray("kind", "position") };
+        JsonObject potential = Object(new() { ["kind"] = Kind("potential_definition"), ["position"] = Point() });
+        potential["properties"]!["potential_name"] = Text();
+        potential["properties"]!["signal_name"] = Text();
+        potential["anyOf"] = new JsonArray(new JsonObject { ["required"] = new JsonArray("potential_name") }, new JsonObject { ["required"] = new JsonArray("signal_name") });
         JsonObject pages = Array(Text(1024), 1, 20);
         pages["uniqueItems"] = true;
         JsonObject interruption = Object(new() { ["kind"] = Kind("interruption_point"), ["name"] = Text(), ["position"] = Point(), ["direction"] = new JsonObject { ["enum"] = new JsonArray("Up", "Down", "Left", "Right") }, ["counterpart_pages"] = pages });
@@ -37,8 +42,8 @@ internal static class ConnectionCreateSchema
         JsonObject core = Object(new() { ["connection"] = reference, ["label"] = Text(32), ["colour"] = new JsonObject { ["enum"] = new JsonArray("BK", "BN", "RD", "OG", "YE", "GN", "BU", "VT", "GY", "WH", "PK", "TQ", "GNYE") } });
         JsonObject cable = Object(new() { ["kind"] = Kind("cable_definition"), ["points"] = Array(Point(), 2, 2), ["designation"] = Text(128), ["type_text"] = Text(), ["core_count"] = Integer(1, 50), ["cross_section_mm2"] = new JsonObject { ["type"] = "number", ["exclusiveMinimum"] = 0 }, ["cores"] = Array(core, 1, 50) });
         cable["properties"]!["voltage"] = Text(64);
-        JsonObject items = Array(new() { ["oneOf"] = new JsonArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable, definition) }, 1, 50);
-        items["$defs"] = new JsonObject { ["p"] = Array(new() { ["type"] = "number", ["minimum"] = 0, ["maximum"] = 10000 }, 2, 2), ["pin"] = Object(new() { ["locator"] = Locator(), ["pin_index"] = Integer(0, int.MaxValue) }), ["locator"] = Object(new() { ["project"] = Text(32768), ["page"] = Text(1024), ["type"] = Integer(1, int.MaxValue), ["oid"] = new JsonObject { ["type"] = "integer", ["minimum"] = 1 }, ["digest"] = new JsonObject { ["type"] = "string", ["pattern"] = "^[0-9a-f]{64}$" } }) };
+        JsonObject items = Array(new() { ["oneOf"] = new JsonArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable, definition, potential) }, 1, 50);
+        items["$defs"] = new JsonObject { ["d"] = definitionFields, ["t"] = new JsonObject { ["type"] = "string", ["minLength"] = 1, ["maxLength"] = 200 }, ["p"] = Array(new() { ["type"] = "number", ["minimum"] = 0, ["maximum"] = 10000 }, 2, 2), ["pin"] = Object(new() { ["locator"] = Locator(), ["pin_index"] = Integer(0, int.MaxValue) }), ["locator"] = Object(new() { ["project"] = Text(32768), ["page"] = Text(1024), ["type"] = Integer(1, int.MaxValue), ["oid"] = new JsonObject { ["type"] = "integer", ["minimum"] = 1 }, ["digest"] = new JsonObject { ["type"] = "string", ["pattern"] = "^[0-9a-f]{64}$" } }) };
         return items;
     }
 }

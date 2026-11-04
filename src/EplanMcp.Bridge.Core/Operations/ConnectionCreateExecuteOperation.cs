@@ -64,7 +64,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() =>
                 {
                     // A52/D5: generation only sees committed placement; the undo step spans the committed transactions.
-                    plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify());
+                    plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify(definitions.Any(d => (string?)d["type"] == "ConnectionDefinitionPoint") || plan["logicalAfterGenerate"]!.Any()));
                     VerifyGraphical("generation");
                     CheckLayout();
                     plan["definitionPoints"] = ConnectionDefinitionPoints.Verify(definitions, writer.ReadDefinitionPoints(project, page, definitions));
@@ -123,7 +123,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 plan["actualEndpoints"] = JArray.FromObject(actual);
                 return plan;
             }
-            Committed<List<string?[]>> generated = TransactionRunner.Run(transactions, "eplan_connection_create", GenerateAndVerify, _ => true,
+            Committed<List<string?[]>> generated = TransactionRunner.Run(transactions, "eplan_connection_create", () => GenerateAndVerify(), _ => true,
                 _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { CheckLayout(); return true; }));
             if (generated.Warning is not null)
             { throw Unknown(); }
@@ -147,9 +147,10 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Connection creation failed; generation and placement were rolled back. Re-read the page before retrying." + cause, failure)
             { Error = { Execution = ExecutionState.RolledBack } };
         }
-        List<string?[]> GenerateAndVerify()
+        List<string?[]> GenerateAndVerify(bool generate = true)
         {
-            generator.Generate(project, pages);
+            if (generate)
+            { generator.Generate(project, pages); }
             List<string?[]> actual = pages.SelectMany(p => creator.Endpoints(project, p)).ToList();
             if (interruptions && plan["interruptionScope"]!["preservedEndpoints"]!.Any(p => !actual.Any(a => a[0] == (string?)p[0] && a[1] == (string?)p[1])))
             { throw Mismatch("an interruption point's existing connection was lost"); }

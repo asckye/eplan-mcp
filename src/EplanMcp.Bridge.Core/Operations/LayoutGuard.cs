@@ -409,7 +409,7 @@ public static class LayoutGuard
     {
         unverified = false;
         string owner = FormattableString.Invariant($"{p.Locator.Type}/{p.Locator.Oid}");
-        if (p.Kind == "ConnectionDefinitionPoint")
+        if (p.Kind is "ConnectionDefinitionPoint" or "PotentialDefinition")
         {
             // A75 fifth run: rebinding changes existing type 59 points even when their owning route is unreadable.
             // Unknown ownership only warns on centre passage; known perpendicular routes and outline clips still refuse.
@@ -450,7 +450,7 @@ public static class LayoutGuard
             (endpointPins is null || endpointPins.Contains(pin.Key)) && Hits([pin.Value.Location, pin.Value.Location], p.Bounds!)
             && (s[0].SequenceEqual(pin.Value.Location) || s[s.Length - 1].SequenceEqual(pin.Value.Location)));
         return Hits(s, p.Bounds!) && !endsAtBoxPin && !ConnectedPoint(s, p, pins, pointRoutes, out unverified)
-            && (p.Kind == "ConnectionDefinitionPoint" || !pins.Any(pin => pin.Key.StartsWith(FormattableString.Invariant($"{p.Locator.Type}/{p.Locator.Oid}/"), StringComparison.Ordinal)
+            && (p.Kind is "ConnectionDefinitionPoint" or "PotentialDefinition" || !pins.Any(pin => pin.Key.StartsWith(FormattableString.Invariant($"{p.Locator.Type}/{p.Locator.Oid}/"), StringComparison.Ordinal)
             && Hits([pin.Value.Location, pin.Value.Location], p.Bounds!)
             && s.Any(end => end.SequenceEqual(pin.Value.Location) && s.Any(other => !other.SequenceEqual(end) && !Hits([other, other], p.Bounds!)
                 && Faces(pin.Value, other)))));

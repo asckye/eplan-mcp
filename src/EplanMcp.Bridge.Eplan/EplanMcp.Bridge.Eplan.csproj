@@ -18,6 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\potential-definition.ema" />
     <ProjectReference Include="..\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <!-- Compile-time only; EPLAN's own Newtonsoft.Json 13 is used at run time (coding standards 9.7). -->
     <PackageReference Include="Newtonsoft.Json" ExcludeAssets="runtime" PrivateAssets="all" />

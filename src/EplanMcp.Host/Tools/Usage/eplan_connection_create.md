@@ -19,3 +19,5 @@ items: 1-50 wire {kind,from,to,points} or node {kind,position,directions}; from/
 ## Errors
 INVALID_ARGUMENT: fix JSON Pointers. PLAN_STALE: re-read/re-plan. CAPABILITY_MISSING: obtain verified geometry or select target. APPROVAL_DENIED: ask engineer. rolled_back: no partial result. OUTCOME_UNKNOWN: inspect EPLAN; do not retry.
 Layout: R1-R5/R8 refuse with rule/suggested grid position when available; R6/R7/R9 warn unless layout.strict. Fallback: Page.Size minus layout.marginMm. Incomplete prediction checks known points/outlines/routes; measured symbols/texts are checked before commit, or undone if available only after commit. metadata.layoutViolations/layoutChecks reports geometry/nearest free positions and both stages/fallback.
+
+potential_definition: {kind,position,potential_name?,signal_name?}; at least one nonempty name. Embedded macro insertion removes its box in the same transaction; reads type/position/names. Standalone: no connection generation, one undo; may annotate an existing connection.

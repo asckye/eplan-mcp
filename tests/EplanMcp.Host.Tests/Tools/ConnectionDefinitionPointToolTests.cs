@@ -11,6 +11,7 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Medium")]
 public sealed class ConnectionDefinitionPointToolTests
 {
+    private static readonly int[] _position100 = [100, 100];
     private static JsonElement Item => JsonSerializer.SerializeToElement(new { kind = "definition_point", position = (int[])[40, 40], color = "RD", cross_section = "1.5" });
     private static JsonElement WireItem => JsonSerializer.SerializeToElement(new
     {
@@ -50,6 +51,22 @@ public sealed class ConnectionDefinitionPointToolTests
         }
         else
         { Assert.Contains("dry_run: false", result.GetProperty("hint").GetString(), StringComparison.Ordinal); }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task PotentialDefinition_ForwardsNamesAndReportsWriteFailure(bool fail)
+    {
+        using var harness = Setup();
+        if (fail) { harness.Bridge.WriteFailure = new BridgeError { Reason = ErrorReason.EplanOperationFailed, Execution = ExecutionState.RolledBack, Message = "potential readback" }; }
+        JsonElement item = JsonSerializer.SerializeToElement(new { kind = "potential_definition", position = _position100, potential_name = "N", signal_name = "S" });
+        CallToolResult result = await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", "page", [item], dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Single(harness.Bridge.Writes);
+        if (fail) { Assert.Equal(ExecutionState.RolledBack, WriteToolHarness.Error(result).GetProperty("execution").GetString()); }
+        else { Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(result).GetProperty("execution").GetString()); }
+        JsonElement sent = JsonSerializer.SerializeToElement(harness.Bridge.Calls.Last().Args);
+        Assert.Equal(item.GetRawText(), sent.GetProperty("request").GetProperty("items")[0].GetRawText());
     }
 
     [Fact]

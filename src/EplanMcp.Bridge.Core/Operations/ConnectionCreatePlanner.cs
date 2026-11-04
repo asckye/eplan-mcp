@@ -133,6 +133,11 @@ public static class ConnectionCreatePlanner
             if (item is JObject && (string?)item["kind"] == "cable_definition")
             { continue; }
             Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node, potential_point, interruption_point, cable_definition or definition_point.");
+            if ((string?)item["kind"] == "potential_definition")
+            {
+                definitions.Add(ConnectionDefinitionPoints.PlanPotential(item, at, Point(item["position"], at + "/position"), index - 1));
+                continue;
+            }
             if ((string?)item["kind"] == "definition_point")
             {
                 definitions.Add(ConnectionDefinitionPoints.Plan(item, at, [], "", "", index - 1, scene, variants ??= reader.Read(scene.Project.Path, new() { Library = "SPECIAL" }), existing: true));
@@ -381,7 +386,7 @@ public static class ConnectionCreatePlanner
         foreach (JToken definition in definitions)
         {
             double[] point = definition["position"]!.ToObject<double[]>()!;
-            DrawingPlacement placed = LayoutGuard.Proposed("ConnectionDefinitionPoint", point, [point[0], point[1], point[0], point[1]], proposed.Length);
+            DrawingPlacement placed = LayoutGuard.Proposed((string)definition["type"]!, point, [point[0], point[1], point[0], point[1]], proposed.Length);
             layout.PointRoutes[$"0/{placed.Locator.Oid}"] = layout.Lines.Where(l => On(point, l.Points)).Select(l => l.Points).ToList();
             proposed = [.. proposed, placed];
         }
@@ -411,7 +416,7 @@ public static class ConnectionCreatePlanner
         if (interruptions.Count > 0)
         { InterruptionPointPlanning.Plan(result, scene, reader as IConnectionCreator ?? throw Missing("Read explicit counterpart scope before planning interruption points.")); }
         if (definitions.Count > 0)
-        { result["definitionPoints"] = definitions; result["undoSteps"] = 1; result["generation"] = "Placement, definition points and connection generation share one undo step."; }
+        { result["definitionPoints"] = definitions; result["undoSteps"] = 1; if (definitions.Any(d => (string?)d["type"] == "ConnectionDefinitionPoint") || logical.Count > 0) { result["generation"] = "Placement, definition points and connection generation share one undo step."; }; }
         string cableFingerprint = CableDefinitionPlanner.Add(input, scene, result, Point);
         string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), .. definitions.Count > 0 ? new[] { definitions.ToString(Formatting.None) } : Array.Empty<string>(), .. (cableFingerprint == "" ? Array.Empty<string>() : new[] { cableFingerprint }), BridgeJson.FromObject(new { scene.Project, PageProject = scene.Page.Project, scene.Page.Page, scene.Page.GridSize, scene.Page.PageSize, scene.PageType, scene.Complete, scene.Layout }).ToString(Formatting.None), resolved.ToString(Formatting.None),
             .. scene.Page.Placements.Select(p => "placement:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Pins.Select(p => "pin:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)),

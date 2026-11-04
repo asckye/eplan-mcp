@@ -22,7 +22,7 @@ internal sealed partial class EplanConnectionCreator
         AssertCurrent(project);
         _ = Page(project, page);
         foreach (JToken row in planned)
-        { _ = DefinitionVariant(project, row); }
+        { if ((string?)row["type"] == "ConnectionDefinitionPoint") { _ = DefinitionVariant(project, row); } }
         _definitionPointIds.Clear();
         return () =>
         {
@@ -30,6 +30,8 @@ internal sealed partial class EplanConnectionCreator
             foreach (JToken row in planned)
             {
                 OperationContext.Current.ThrowIfCancellationRequested();
+                if ((string?)row["type"] == "PotentialDefinition")
+                { _definitionPointIds.Add((int)row["itemIndex"]!, InsertPotential(target, row).ObjectIdentifier); continue; }
 #pragma warning disable CA2000 // A39/A86: newly created native objects remain project-owned, including on Abort.
                 var point = new Function();
 #pragma warning restore CA2000
@@ -63,6 +65,8 @@ internal sealed partial class EplanConnectionCreator
         foreach (JToken expected in planned)
         {
             long oid = _definitionPointIds[(int)expected["itemIndex"]!];
+            if ((string?)expected["type"] == "PotentialDefinition")
+            { result.Add(ReadPotential(placements.OfType<PotentialDefinition>().Single(p => p.ObjectIdentifier == oid), expected, geometry)); continue; }
             ConnectionDefinitionPoint? point = placements.OfType<ConnectionDefinitionPoint>().SingleOrDefault(p => p.ObjectIdentifier == oid);
             if (point is null)
             { throw DefinitionMismatch(FormattableString.Invariant($"item {expected["itemIndex"]}: created point {oid} is missing")); }

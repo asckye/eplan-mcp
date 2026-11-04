@@ -70,6 +70,21 @@ internal static class ConnectionDefinitionPoints
         };
     }
 
+    internal static JObject PlanPotential(JToken value, string at, double[] position, int index)
+    {
+        ConnectionCreatePlanner.Members(value, at, "kind position", "potential_name signal_name");
+        var properties = new JObject();
+        foreach (string field in new[] { "potential_name", "signal_name" })
+        {
+            if (value[field] is not { } name) { continue; }
+            ConnectionCreatePlanner.Require(name.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)name)
+                && ((string)name!).Length <= 200 && !((string)name!).Any(char.IsControl), at + "/" + field, "Supply nonempty text within 200 characters.");
+            properties[field] = name.DeepClone();
+        }
+        ConnectionCreatePlanner.Require(properties.Count > 0, at, "Supply potential_name or signal_name.");
+        return new JObject { ["itemIndex"] = index, ["type"] = "PotentialDefinition", ["position"] = new JArray(position), ["properties"] = properties };
+    }
+
     private static bool Number(JToken? value, out double number)
     {
         number = 0;
@@ -92,12 +107,14 @@ internal static class ConnectionDefinitionPoints
             JToken? found = actual.SingleOrDefault(a => JToken.DeepEquals(a["itemIndex"], row["itemIndex"]));
             foreach (string field in new[] { "type", "symbol", "position" })
             { Match(row[field], found?[field], at + "/" + field); }
-            Match(new JArray(row["endpoints"]!.Values<string>().OrderBy(p => p, StringComparer.Ordinal)),
-                found?["endpoints"] is { } ends ? new JArray(ends.Values<string>().OrderBy(p => p, StringComparer.Ordinal)) : null, at + "/endpoints");
+            if ((string?)row["type"] == "ConnectionDefinitionPoint")
+            { Match(new JArray(row["endpoints"]!.Values<string>().OrderBy(p => p, StringComparer.Ordinal)),
+                found?["endpoints"] is { } ends ? new JArray(ends.Values<string>().OrderBy(p => p, StringComparer.Ordinal)) : null, at + "/endpoints"); }
             foreach (JProperty property in ((JObject)row["properties"]!).Properties())
             {
                 Match(property.Value, found?["properties"]?[property.Name], at + "/properties/" + property.Name, property.Name == "cross_section");
-                Match(property.Value, found?["connectionValues"]?[property.Name], at + "/connectionValues/" + property.Name, property.Name == "cross_section");
+                if ((string?)row["type"] == "ConnectionDefinitionPoint")
+                { Match(property.Value, found?["connectionValues"]?[property.Name], at + "/connectionValues/" + property.Name, property.Name == "cross_section"); }
             }
         }
         return actual;

@@ -105,10 +105,10 @@ public sealed class ToolContractTests : IDisposable
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
         JsonElement itemBranches = tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf");
-        Assert.Equal(["wire", "corner", "t_node", "potential_point", "interruption_point", "cable_definition", "definition_point"],
+        Assert.Equal(["wire", "corner", "t_node", "potential_point", "interruption_point", "cable_definition", "definition_point", "potential_definition"],
             itemBranches.EnumerateArray().Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));
         foreach (JsonElement branch in itemBranches.EnumerateArray())
-        { Assert.False(branch.GetProperty("additionalProperties").GetBoolean()); }
+        { Assert.False((branch.TryGetProperty("$ref", out _) ? tool.InputSchema.GetProperty("$defs").GetProperty("d") : branch).GetProperty("additionalProperties").GetBoolean()); }
         JsonElement interruption = itemBranches.EnumerateArray().Single(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "interruption_point");
         Assert.Equal(["kind", "name", "position", "direction", "counterpart_pages"], interruption.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         Assert.True(interruption.GetProperty("properties").GetProperty("counterpart_pages").GetProperty("uniqueItems").GetBoolean());
@@ -139,6 +139,8 @@ public sealed class ToolContractTests : IDisposable
             Assert.DoesNotContain(branch.GetProperty("required").EnumerateArray(), p => p.GetString() == "definition_point");
             if (!wire)
             { continue; }
+            Assert.Equal("kind", point.GetProperty("not").GetProperty("required")[0].GetString());
+            point = schema.GetProperty("$defs").GetProperty("d");
             Assert.False(point.GetProperty("additionalProperties").GetBoolean());
             Assert.Equal(["color", "cross_section", "designation"], point.GetProperty("anyOf").EnumerateArray().Select(p => p.GetProperty("required")[0].GetString()));
             JsonElement properties = point.GetProperty("properties");
@@ -153,9 +155,9 @@ public sealed class ToolContractTests : IDisposable
         JsonElement standalone = branches.Single(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString() == "definition_point");
         Assert.Equal(["kind", "position"], standalone.GetProperty("required").EnumerateArray().Select(p => p.GetString()));
         JsonElement nested = branches[0].GetProperty("properties").GetProperty("definition_point");
-        Assert.True(JsonElement.DeepEquals(nested.GetProperty("anyOf"), standalone.GetProperty("anyOf")));
-        foreach (JsonProperty property in nested.GetProperty("properties").EnumerateObject())
-        { Assert.True(JsonElement.DeepEquals(property.Value, standalone.GetProperty("properties").GetProperty(property.Name))); }
+        Assert.Equal("#/$defs/d", nested.GetProperty("$ref").GetString());
+        Assert.Equal(nested.GetProperty("$ref").GetString(), standalone.GetProperty("$ref").GetString());
+        Assert.Equal("definition_point", schema.GetProperty("$defs").GetProperty("d").GetProperty("properties").GetProperty("kind").GetProperty("const").GetString());
         Assert.Equal("#/$defs/pin", branches[0].GetProperty("properties").GetProperty("from").GetProperty("$ref").GetString());
         Assert.False(schema.GetProperty("$defs").GetProperty("pin").GetProperty("additionalProperties").GetBoolean());
     }

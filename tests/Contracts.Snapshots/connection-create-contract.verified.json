@@ -535,6 +535,115 @@
                 "cross_section_mm2",
                 "cores"
               ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "symbol": {
+                  "enum": [
+                    "CDP",
+                    "CDPNG"
+                  ],
+                  "default": "CDP"
+                },
+                "symbol_variant": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "default": 0
+                },
+                "color": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "cross_section": {
+                  "type": "string",
+                  "pattern": "^ *[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)(?:[eE][+-]?[0-9]+)? *$"
+                },
+                "designation": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "const": "definition_point"
+                }
+              },
+              "required": [
+                "kind",
+                "position"
+              ],
+              "anyOf": [
+                {
+                  "required": [
+                    "color"
+                  ]
+                },
+                {
+                  "required": [
+                    "cross_section"
+                  ]
+                },
+                {
+                  "required": [
+                    "designation"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "potential_definition"
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "potential_name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "signal_name": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "kind",
+                "position"
+              ],
+              "anyOf": [
+                {
+                  "required": [
+                    "potential_name"
+                  ]
+                },
+                {
+                  "required": [
+                    "signal_name"
+                  ]
+                }
+              ]
             }
           ]
         },
@@ -766,8 +875,7 @@
                 "kind",
                 "name",
                 "position",
-                "direction",
-                "counterpart_pages"
+                "direction"
               ]
             }
           },
@@ -2023,8 +2131,7 @@
                 "kind",
                 "name",
                 "position",
-                "direction",
-                "counterpart_pages"
+                "direction"
               ]
             }
           },
@@ -2597,45 +2704,12 @@
     "dry_run": true,
     "items": [
       {
-        "kind": "wire",
-        "from": {
-          "locator": {
-            "project": "scratch-project",
-            "page": "=F+A1&EFS1/1",
-            "type": 17,
-            "oid": 1,
-            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          },
-          "pin_index": 0
-        },
-        "to": {
-          "locator": {
-            "project": "scratch-project",
-            "page": "=F+A1&EFS1/1",
-            "type": 17,
-            "oid": 2,
-            "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          },
-          "pin_index": 0
-        },
-        "points": [
-          [
-            8.0,
-            8.0
-          ],
-          [
-            24.0,
-            8.0
-          ],
-          [
-            24.0,
-            24.0
-          ]
+        "kind": "definition_point",
+        "position": [
+          40,
+          40
         ],
-        "definition_point": {
-          "color": "RD",
-          "cross_section": "1,5"
-        }
+        "part": "PXC.2861344"
       }
     ]
   },
@@ -2778,9 +2852,73 @@
         "properties": {
           "color": "RD",
           "cross_section": "1,5"
+        },
+        "articles": null
+      }
+    ],
+    "fingerprint": "db1d1437cc61c93a840933575a0a25e9e846468e311ffdf0dc8271efd92c48fe"
+  },
+  "potentialDefinitionExample": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "dry_run": true,
+    "items": [
+      {
+        "kind": "potential_definition",
+        "position": [
+          40,
+          40
+        ],
+        "potential_name": "N",
+        "signal_name": "S"
+      }
+    ]
+  },
+  "potentialDefinitionPreview": {
+    "project": "Line1",
+    "page": "=F+A1&EFS1/1",
+    "execution": "not_started",
+    "dryRun": true,
+    "coordinates": [
+      {
+        "pointer": "/items/0/position",
+        "requested": [
+          40,
+          40
+        ],
+        "actual": [
+          40.0,
+          40.0
+        ]
+      }
+    ],
+    "symbols": [],
+    "graphicalAutoconnect": [],
+    "logicalAfterGenerate": [],
+    "gridSize": 4.0,
+    "pageSize": [
+      100.0,
+      100.0
+    ],
+    "coverage": "complete_page_predicted_endpoints",
+    "logicalDuringPlacement": 0,
+    "generation": "No logical endpoints: place and read back nodes without connection generation; 1 undo step.",
+    "undoSteps": 1,
+    "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
+    "definitionPoints": [
+      {
+        "itemIndex": 0,
+        "type": "PotentialDefinition",
+        "position": [
+          40.0,
+          40.0
+        ],
+        "properties": {
+          "potential_name": "N",
+          "signal_name": "S"
         }
       }
     ],
-    "fingerprint": "3e0975fd0f462a949b93556971fc4d74ddcba71775f4fd793a86bb01dfa77497"
+    "fingerprint": "8597f196d3a72cd68db2e37d61c2da5f2ab319d72f126c465632ed9289d1b105"
   }
 }

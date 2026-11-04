@@ -4424,7 +4424,7 @@
     {
       "name": "eplan_connection_create",
       "title": "Create connection symbols and explicit wire paths",
-      "description": "Creates SPECIAL nodes, interruptions, wires, cables and CDP/CDPNG on new or existing Circuit connections. Verifies geometry, endpoints and properties. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes the call. Omit dry_run to preview; false executes. Outside scratch needs approval. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.",
+      "description": "Creates SPECIAL nodes, interruptions, wires, cables, potential definitions and CDP/CDPNG on new or existing Circuit connections. Verifies geometry, endpoints and properties. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes the call. Omit dry_run to preview; false executes. Outside scratch needs approval. See usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -4460,56 +4460,12 @@
                       "maxItems": 32
                     },
                     "definition_point": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "position": {
-                          "$ref": "#/$defs/p"
-                        },
-                        "symbol": {
-                          "enum": [
-                            "CDP",
-                            "CDPNG"
-                          ],
-                          "default": "CDP"
-                        },
-                        "symbol_variant": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "default": 0
-                        },
-                        "color": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 200
-                        },
-                        "cross_section": {
-                          "type": "string",
-                          "pattern": "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$"
-                        },
-                        "designation": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 200
-                        }
-                      },
-                      "anyOf": [
-                        {
-                          "required": [
-                            "color"
-                          ]
-                        },
-                        {
-                          "required": [
-                            "cross_section"
-                          ]
-                        },
-                        {
-                          "required": [
-                            "designation"
-                          ]
-                        }
-                      ]
+                      "$ref": "#/$defs/d",
+                      "not": {
+                        "required": [
+                          "kind"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -4623,9 +4579,7 @@
                       "const": "interruption_point"
                     },
                     "name": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
+                      "$ref": "#/$defs/t"
                     },
                     "position": {
                       "$ref": "#/$defs/p"
@@ -4688,9 +4642,7 @@
                       "maxLength": 128
                     },
                     "type_text": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
+                      "$ref": "#/$defs/t"
                     },
                     "core_count": {
                       "type": "integer",
@@ -4786,62 +4738,49 @@
                   ]
                 },
                 {
-                  "type": "object",
-                  "additionalProperties": false,
+                  "$ref": "#/$defs/d",
                   "properties": {
-                    "position": {
-                      "$ref": "#/$defs/p"
-                    },
-                    "symbol": {
-                      "enum": [
-                        "CDP",
-                        "CDPNG"
-                      ],
-                      "default": "CDP"
-                    },
-                    "symbol_variant": {
-                      "type": "integer",
-                      "minimum": 0,
-                      "default": 0
-                    },
-                    "color": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
-                    },
-                    "cross_section": {
-                      "type": "string",
-                      "pattern": "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$"
-                    },
-                    "designation": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
-                    },
                     "kind": {
                       "const": "definition_point"
                     }
                   },
-                  "anyOf": [
-                    {
-                      "required": [
-                        "color"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "cross_section"
-                      ]
-                    },
-                    {
-                      "required": [
-                        "designation"
-                      ]
-                    }
-                  ],
                   "required": [
                     "kind",
                     "position"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "potential_definition"
+                    },
+                    "position": {
+                      "$ref": "#/$defs/p"
+                    },
+                    "potential_name": {
+                      "$ref": "#/$defs/t"
+                    },
+                    "signal_name": {
+                      "$ref": "#/$defs/t"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "position"
+                  ],
+                  "anyOf": [
+                    {
+                      "required": [
+                        "potential_name"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "signal_name"
+                      ]
+                    }
                   ]
                 }
               ]
@@ -4878,6 +4817,62 @@
         ],
         "additionalProperties": false,
         "$defs": {
+          "d": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "position": {
+                "$ref": "#/$defs/p"
+              },
+              "symbol": {
+                "enum": [
+                  "CDP",
+                  "CDPNG"
+                ],
+                "default": "CDP"
+              },
+              "symbol_variant": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0
+              },
+              "color": {
+                "$ref": "#/$defs/t"
+              },
+              "cross_section": {
+                "type": "string",
+                "pattern": "^ *[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)? *$"
+              },
+              "designation": {
+                "$ref": "#/$defs/t"
+              },
+              "kind": {
+                "const": "definition_point"
+              }
+            },
+            "anyOf": [
+              {
+                "required": [
+                  "color"
+                ]
+              },
+              {
+                "required": [
+                  "cross_section"
+                ]
+              },
+              {
+                "required": [
+                  "designation"
+                ]
+              }
+            ]
+          },
+          "t": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
           "p": {
             "type": "array",
             "items": {
