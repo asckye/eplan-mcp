@@ -51,9 +51,16 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 OperationContext.Current.ThrowIfCancellationRequested();
                 // Live T2b run: Function.PropertyPlacements are ContextPropertyPlacements that share the function's
                 // identifier, so key them by parent, displayed property and position, not by ToStringIdentifier.
-                string? slot = placement is PropertyPlacement child && parent is not null
-                    ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}#{1}", DisplayedId(child), index++)
-                    : null;
+                string? slot = null;
+                if (placement is PropertyPlacement child && parent is not null)
+                {
+                    string? propertyId;
+                    try
+                    { propertyId = Number(DisplayedId(child)); }
+                    catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+                    { WriteExceptionDiagnostics.Report(ex); propertyId = null; }
+                    slot = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}#{1}", propertyId, index++);
+                }
                 string key = slot is null ? placement.ToStringIdentifier() : FormattableString.Invariant($"{parent!.Type}/{parent.Oid}#{slot}");
                 if ((placement is PropertyPlacement && parent is null && !excluded) || !seen.Add(key))
                 {
@@ -67,19 +74,39 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     result.Placements.Add(row);
                 }
 
-                Walk(placement switch
+                IEnumerable<Placement> children;
+                try
                 {
-                    Group group => group.SubPlacements,
-                    Block block => block.SubPlacements,
-                    SymbolReference symbol => symbol.PropertyPlacements,
-                    IPropertyPlacementsContainer container => container.PropertyPlacements,
-                    _ => [],
-                }, excluded, row?.Locator, blockChild || placement is Block);
+                    children = placement switch
+                    {
+                        Group group => group.SubPlacements,
+                        Block block => block.SubPlacements,
+                        SymbolReference symbol => symbol.PropertyPlacements,
+                        IPropertyPlacementsContainer container => container.PropertyPlacements,
+                        _ => [],
+                    };
+                }
+                catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+                {
+                    WriteExceptionDiagnostics.Report(ex);
+                    if (row is not null)
+                    { row.Properties["read_warning"] = "Child placements are unavailable; inspect this placement in EPLAN."; }
+                    children = [];
+                }
+                Walk(children, excluded, row?.Locator, blockChild || placement is Block);
             }
         }
 
         DrawingPlacement ReadPlacement(Placement placement, DrawingLocator? parent, string? slot, bool blockChild)
         {
+            bool metadataUnavailable = false;
+            T ReadOptional<T>(Func<T> read)
+            {
+                try
+                { return read(); }
+                catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+                { WriteExceptionDiagnostics.Report(ex); metadataUnavailable = true; return default!; }
+            }
             // A87: Location and default bounds are relative; GetBoundingBox(false) is absolute.
             double[] location = Optional(() =>
             {
@@ -98,14 +125,26 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             {
                 bounds = null;
             }
-            string? display = (placement as PropertyPlacement)?.GetDisplayString();
+            string? display = ReadOptional(() => (placement as PropertyPlacement)?.GetDisplayString());
             if (bounds is null && display == "")
             { bounds = [0, 0, 0, 0]; } // A53/A54: empty property text has no visible ink.
 
-            using MultiLangString? contents = placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null };
-            string? angle = placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null;
-            string? height = placement is PathText { Height: -16002 } ? "-16002"
-                : placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null;
+            using MultiLangString? contents = ReadOptional(() => placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null });
+            string? text = ReadOptional(() => contents?.GetAsString());
+            string? angle = ReadOptional(() => placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null);
+            string? height = ReadOptional(() => placement is PathText { Height: -16002 } ? "-16002"
+                : placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null);
+            string? name = ReadOptional(() => placement is Block namedBlock ? namedBlock.Name : (placement as FunctionBase)?.Name);
+            int? count = ReadOptional(() => placement is Block countedBlock ? countedBlock.Count : (int?)null);
+            long? group = ReadOptional(() => (long?)placement.Group?.ObjectIdentifier);
+            bool? grouped = ReadOptional(() => (bool?)(placement.Group is not null));
+            double? rotation = ReadOptional(() => (placement as PropertyPlacement)?.Rotation);
+            bool? docked = ReadOptional(() => (placement as PropertyPlacement)?.IsDocked);
+            bool? visible = ReadOptional(() => (placement as PropertyPlacement)?.IsVisible);
+            string? displayedId = ReadOptional(() => placement is PropertyPlacement property ? DisplayedId(property).ToString(System.Globalization.CultureInfo.InvariantCulture) : null);
+            string? rawHeight = ReadOptional(() => placement is PropertyPlacement raw ? Number(raw.Height) : null);
+            double[]? start = ReadOptional(() => placement is Line line ? XY(line.StartPoint) : null);
+            double[]? end = ReadOptional(() => placement is Line line ? XY(line.EndPoint) : null);
             string? imagePath = null;
             Dictionary<string, string?> graphics;
             try
@@ -155,8 +194,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             // A75 catalog: DynamicConnectionLine derives from SymbolReference (DMClassId.InternalTypeId = 33),
             // but its wire outline is neither a layout symbol nor a container.
             // Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
-            bool isContainer = placement is not DynamicConnectionLine && (placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant?.SymbolName == "PLCC"
-                || placement.GetType().Name == "PLC" || placement is Function boxFunction && boxFunction.FunctionCategory.ToString() is "PLCBox" or "BlackBox" or "Blackbox"));
+            bool isContainer = ReadOptional(() => placement is not DynamicConnectionLine && (placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant?.SymbolName == "PLCC"
+                || placement.GetType().Name == "PLC" || placement is Function boxFunction && boxFunction.FunctionCategory.ToString() is "PLCBox" or "BlackBox" or "Blackbox")));
             string? containerOwner = isContainer ? placement.ToStringIdentifier() : null;
             try
             {
@@ -167,6 +206,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             }
             catch (Exception ex) when (ex is BaseException or InvalidOperationException)
             { /* Unreadable ownership grants no collision exemption. */ }
+            if (metadataUnavailable)
+            { graphics["read_warning"] = "Some placement metadata is unavailable; inspect this placement in EPLAN."; }
             string digest = SnapshotCanonical.Sha256(JsonConvert.SerializeObject(new
             {
                 kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name,
@@ -174,20 +215,20 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 parentOid = parent?.Oid,
                 containerOwner,
                 slot, // property placements share their parent's identifier
-                rotation = (placement as PropertyPlacement)?.Rotation,
-                docked = (placement as PropertyPlacement)?.IsDocked,
-                group = placement.Group?.ObjectIdentifier,
+                rotation,
+                docked,
+                group,
                 location,
                 bounds,
-                content = contents?.GetAsString(),
+                content = text,
                 height,
                 angle,
-                name = placement is Block namedBlock ? namedBlock.Name : (placement as FunctionBase)?.Name,
-                count = placement is Block countedBlock ? countedBlock.Count : (int?)null,
+                name,
+                count,
                 display,
-                visible = placement is PropertyPlacement visibleProperty ? visibleProperty.IsVisible : (bool?)null,
-                start = placement is Line line ? XY(line.StartPoint) : null,
-                end = placement is Line endLine ? XY(endLine.EndPoint) : null,
+                visible,
+                start,
+                end,
                 graphics,
                 imageFile = imagePath,
             }));
@@ -199,21 +240,21 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                     ["layout_symbol"] = placement is SymbolReference && placement.GetType().Name is not ("LocationBox" or "Cable" or "DynamicConnectionLine") ? "true" : null,
                     ["layout_container_owner"] = containerOwner,
                     ["layout_container"] = isContainer ? "true" : null,
-                    ["grouped"] = (placement.Group is not null).ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant(),
-                    ["name"] = placement is Block blockName ? blockName.Name : (placement as FunctionBase)?.Name,
-                    ["count"] = placement is Block blockCount ? Number(blockCount.Count) : null,
-                    ["text"] = contents?.GetAsString(),
+                    ["grouped"] = grouped?.ToString().ToLowerInvariant(),
+                    ["name"] = name,
+                    ["count"] = count is { } knownCount ? Number(knownCount) : null,
+                    ["text"] = text,
                     ["display"] = display,
-                    ["property_id"] = placement is PropertyPlacement propertyText ? DisplayedId(propertyText).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
-                    ["displayed_property_id"] = placement is PropertyPlacement displayed ? DisplayedId(displayed).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
+                    ["property_id"] = displayedId,
+                    ["displayed_property_id"] = displayedId,
                     ["property_index"] = slot?.Split('#')[1],
                     ["angle_deg"] = placement is PropertyPlacement ? angle : null,
-                    ["docked"] = placement is PropertyPlacement docked ? docked.IsDocked.ToString().ToLowerInvariant() : null,
-                    ["cross_reference"] = placement is PropertyPlacement crossText && DisplayedId(crossText) is 20300 or 20314 or 20304 or 20252 or 20306 or 20302 or 24300 ? "true" : null,
+                    ["docked"] = docked?.ToString().ToLowerInvariant(),
+                    ["cross_reference"] = displayedId is "20300" or "20314" or "20304" or "20252" or "20306" or "20302" or "24300" ? "true" : null,
                     ["angle"] = angle,
-                    ["visible"] = placement is PropertyPlacement visible ? visible.IsVisible.ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant() : null,
+                    ["visible"] = visible?.ToString().ToLowerInvariant(),
                     ["height_mm"] = height,
-                    ["height_raw_mm"] = placement is PropertyPlacement rawHeight ? Number(rawHeight.Height) : null
+                    ["height_raw_mm"] = rawHeight
                 }
                     .Concat(graphics).Where(p => p.Value is not null).ToDictionary(p => p.Key, p => p.Value!, StringComparer.Ordinal),
                 Kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name, // ContextPropertyPlacement too

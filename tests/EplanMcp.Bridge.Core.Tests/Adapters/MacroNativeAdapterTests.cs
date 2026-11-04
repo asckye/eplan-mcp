@@ -175,6 +175,34 @@ public sealed class MacroNativeAdapterTests : IDisposable
         Assert.DoesNotContain("Commit", transactions.Calls);
     }
 
+    [Fact]
+    public void Pxc2861289_OverviewAtZero292_EmptyBlockReadFailureKeepsInsertedObjects()
+    {
+        Page page = ConfigureMacro();
+        page.Name = "=K1+A2&EFA1/5";
+        var empty = new Block { Page = page, NameError = new BaseException("访问一对象时出错") };
+        var plc = Function(page, 20);
+        WindowMacro.State!.Representations[WindowMacro.Enums.RepresentationType.Overview][0] = [empty, plc];
+        NativeInsert.Place = target => { target.AllPlacements = [empty, plc]; return [empty, plc]; };
+        var request = new MacroInsertArgs
+        { Project = "project", Page = page.Name, Part = "PXC.2861289", PartVariant = "1", Representation = "Overview", Variant = 0, X = 0, Y = 292, MacroBox = false };
+        var transactions = new FakeTransactions();
+        TransactionRunner.Run(transactions, "eplan_macro_insert", () =>
+        {
+            PlacedMacro placed = new EplanMacroInserter().Insert(request.Project!, request.Page, "PXC/2861289.ema", request.Variant,
+                request.X, request.Y, true, request.Representation!, request.Part, request.PartVariant, request.MacroBox);
+            Assert.Equal(2, placed.ObjectCount);
+            PageDrawingGeometry drawing = new EplanDrawingReader().Read(request.Project!, request.Page)!;
+            DrawingPlacement block = Assert.Single(drawing.Placements, p => p.Kind == "Block");
+            Assert.False(block.Properties.ContainsKey("name"));
+            Assert.Contains("unavailable", block.Properties["read_warning"], StringComparison.Ordinal);
+            Assert.Single(drawing.Placements, p => p.Kind == "Function");
+            return placed;
+        });
+        Assert.Contains("Commit", transactions.Calls);
+        Assert.DoesNotContain("Rollback", transactions.Calls);
+    }
+
     private static Page ConfigureMacro()
     {
         var page = new Page { Name = "+A1/80", PageType = DocumentTypeManager.DocumentType.Overview };

@@ -145,6 +145,36 @@ public sealed class DrawingReaderTests
         Assert.NotEqual(before.Locator.Digest, after.Locator.Digest);
     }
 
+    [Theory]
+    [InlineData("name")]
+    [InlineData("count")]
+    public void EmptyBlockUnreadableMetadataKeepsBlockAndOtherPlacements(string field)
+    {
+        var block = new Block { Name = "macro block" };
+        if (field == "name")
+        { block.NameError = new BaseException("访问一对象时出错"); }
+        else
+        { block.CountError = new BaseException("访问一对象时出错"); }
+        var page = new Page { AllPlacements = [block, new Line(5)] };
+        PageDrawingGeometry result = new FakeDrawingBridge(page).Read(page.Name)!;
+        DrawingPlacement row = Assert.Single(result.Placements, p => p.Kind == "Block");
+        Assert.False(row.Properties.ContainsKey(field));
+        Assert.Contains("unavailable", row.Properties["read_warning"], StringComparison.Ordinal);
+        Assert.Equal("false", row.Properties["grouped"]);
+        Assert.Single(result.Placements, p => p.Kind == "Line");
+        Assert.Empty(block.SubPlacements);
+    }
+
+    [Fact]
+    public void EmptyReadableBlockKeepsNameAndCountWithoutWarning()
+    {
+        var page = new Page { AllPlacements = [new Block { Name = "empty" }] };
+        DrawingPlacement row = Assert.Single(new FakeDrawingBridge(page).Read(page.Name)!.Placements);
+        Assert.Equal("empty", row.Properties["name"]);
+        Assert.Equal("0", row.Properties["count"]);
+        Assert.False(row.Properties.ContainsKey("read_warning"));
+    }
+
     private sealed class FakeDrawingBridge(params Page[] pages)
     {
         private readonly InlineDispatcher _dispatcher = new();

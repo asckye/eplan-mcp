@@ -43,8 +43,11 @@ internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
 
 internal sealed class Block() : Placement(901)
 {
-    public string Name { get; set; } = "";
-    public int Count => SubPlacements.Length;
+    private string _name = "";
+    public Exception? NameError { get; set; }
+    public Exception? CountError { get; set; }
+    public string Name { get => NameError is { } error ? throw error : _name; set => _name = value; }
+    public int Count => CountError is { } error ? throw error : SubPlacements.Length;
     public Placement[] SubPlacements { get; private set; } = [];
     public void Create(Page page, Placement[] members)
     {
