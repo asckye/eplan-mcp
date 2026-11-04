@@ -13,6 +13,24 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 public sealed class PlcCommittedReadbackTests
 {
     [Theory]
+    [InlineData(null)]
+    [InlineData("Start input")]
+    public void OptionalPlcProperties_LeaveOmittedNativeValuesUntouched(string? text)
+    {
+        using var properties = new FunctionPropertyList
+        {
+            FUNC_PLCADDRESS = "native address",
+            FUNC_PLCSYMBOLICADDRESS_MANUAL = "native symbolic",
+            FUNC_TEXT = "native text"
+        };
+        typeof(EplanDeviceSymbolPlacement).GetMethod("WritePlcPoint", BindingFlags.Static | BindingFlags.NonPublic)!
+            .Invoke(null, [properties, new DevicePlaceArgs { PlcConnectionPoint = "2", PlcText = text }]);
+        Assert.Equal("native address", properties.FUNC_PLCADDRESS.ToString());
+        Assert.Equal("native symbolic", properties.FUNC_PLCSYMBOLICADDRESS_MANUAL.ToString());
+        Assert.Equal(text is null ? "native text" : "??_??@" + text + ";", properties.FUNC_TEXT.ToString());
+    }
+
+    [Theory]
     [InlineData(false, null)]
     [InlineData(true, null)]
     [InlineData(true, "renamed")]

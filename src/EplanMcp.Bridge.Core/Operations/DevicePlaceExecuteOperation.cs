@@ -129,7 +129,9 @@ public sealed class DevicePlaceExecuteOperation(
             || data.Page != page || !DevicePlaceRequest.SameName(tag, data.Tag) || channel.Page != page || data.Category != "PLCTerminal"
             || channel.Owner is not null && !DevicePlaceRequest.SameName(DevicePlcPlan.Parent(args, tag), channel.Owner)
             || args.PlcPlugDesignation is not null && channel.PlugDesignation != args.PlcPlugDesignation
-            || channel.Address != args.PlcAddress || channel.ManualSymbolicAddress != args.PlcSymbolicAddress || channel.Text != args.PlcText))
+            || args.PlcAddress is not null && channel.Address != args.PlcAddress
+            || args.PlcSymbolicAddress is not null && channel.ManualSymbolicAddress != args.PlcSymbolicAddress
+            || args.PlcText is not null && channel.Text != args.PlcText))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "PLC point identity, owner, plug, address or text readback differs; nothing was committed."); }
         if (args.LocationBox is not null && (data.LocationBox is not { } box || box.Structure != args.LocationBox
             || box.Outline != "dashed" || box.AffectedDevices.Length != 0 || !box.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })))

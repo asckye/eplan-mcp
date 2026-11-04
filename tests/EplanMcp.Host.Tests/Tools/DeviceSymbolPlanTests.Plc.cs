@@ -17,6 +17,30 @@ public sealed partial class DeviceSymbolPlanTests
         _store.Symbols.Add(new() { Library = "IEC_symbol", Name = "PLC_DI", Type = "Function", Kind = "function", FunctionCategory = "PLCTerminal", PlcInputDefinition = "1/2", ConnectionPoints = [new() { Location = [0, 0] }] });
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("Start input")]
+    public async Task Plc_OnlyPointAndOptionalText_CommitWithoutAddressWritesOrDuplicateChecks(string? text)
+    {
+        PlcSymbol();
+        _store.Channels.Add(new() { Name = "+A1-KF1:existing", Address = null });
+        async Task<CallToolResult> PlaceOptional(bool dryRun, string point = "2") =>
+            await DeviceWriteTools.DevicePlaceAsync(_harness.Pipeline, _harness.Bridge, "Line1", Page, 80, 160, "-KF1", dry_run: dryRun,
+                library: "IEC_symbol", symbol: "PLC_DI", symbol_variant: 0, plc_connection_point: point, plc_text: text,
+                cancellationToken: TestContext.Current.CancellationToken);
+        JsonElement preview = WriteToolHarness.Structured(await PlaceOptional(true));
+        Assert.DoesNotContain(preview.GetProperty("changes").EnumerateArray(), c => c.GetProperty("property").GetString() is "20400" or "20402");
+        Assert.Equal(text is not null, preview.GetProperty("changes").EnumerateArray().Any(c => c.GetProperty("property").GetString() == "20011 (??_??)"));
+        Assert.Empty(_placement.Calls);
+        JsonElement result = WriteToolHarness.Structured(await PlaceOptional(false));
+        Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+        Assert.Null(_placement.Args!.PlcAddress);
+        Assert.Null(_placement.Args.PlcSymbolicAddress);
+        Assert.Equal(text, _placement.Args.PlcText);
+        Assert.Equal(ErrorReason.AlreadyExists, WriteToolHarness.Error(await PlaceOptional(false)).GetProperty("reason").GetString());
+        Assert.Equal(ExecutionState.Committed, WriteToolHarness.Structured(await PlaceOptional(false, "3")).GetProperty("execution").GetString());
+    }
+
     [Fact]
     public void Plc_ChangedPlugDesignation_ChangesApprovalAndFingerprint()
     {

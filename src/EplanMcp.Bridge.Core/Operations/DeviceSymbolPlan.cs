@@ -51,7 +51,7 @@ internal static class DeviceSymbolPlan
             { throw WriteArguments.Invalid(["/connection_designations: a digital input requires its single plc_connection_point designation (at most 64 characters)."]); }
         }
         else if (symbol.FunctionCategory == "PLCTerminal")
-        { throw WriteArguments.Invalid(["/plc_connection_point: PLC points require an existing card and explicit address, symbolic address and text."]); }
+        { throw WriteArguments.Invalid(["/plc_connection_point: PLC points require an existing card and a connection-point designation."]); }
         if (symbol.ConnectionPoints.Any(p => p.Location.Length != 2 || p.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v))))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The symbol has invalid pin geometry; select another symbol with eplan_symbol_search."); }
         if (BlackBox(args) && ((symbol.Type.Length > 0 && symbol.Type != "BoxFunction") || (symbol.FunctionCategory is not null && symbol.FunctionCategory != "Blackbox")))

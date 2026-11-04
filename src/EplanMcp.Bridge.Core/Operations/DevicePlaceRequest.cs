@@ -116,7 +116,7 @@ internal sealed class DevicePlaceRequest
             PlcRecord? state = plc?.ReadPlc(project.Path, parent, TextLanguages.Independent, detailed: true);
             if (state?.Plc is null)
             { throw new BridgeErrorException(ErrorReason.DeviceNotFound, "An existing native PLC card is required; create it explicitly first."); }
-            if (state.Channels.Any(c => string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
+            if (args.PlcAddress is not null && state.Channels.Any(c => string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
             { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC card already has the I/O address; choose a free address."); }
             existing = [.. existing, Protocol.BridgeJson.FromObject(state).ToString(Newtonsoft.Json.Formatting.None)];
         }

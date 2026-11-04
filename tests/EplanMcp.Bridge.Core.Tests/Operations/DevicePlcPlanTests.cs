@@ -7,6 +7,18 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class DevicePlcPlanTests
 {
     [Theory]
+    [InlineData(null, null, null)]
+    [InlineData(null, null, "Start input")]
+    [InlineData("I0.0", null, null)]
+    [InlineData(null, "Start", null)]
+    [InlineData("I0.0", "Start", "Start input")]
+    public void Plc_OptionalFieldsMayBeOmitted(string? address, string? symbolic, string? text)
+    {
+        var args = new DevicePlaceArgs { Project = "Line1", Tag = "-KF1", Library = "IEC_symbol", Symbol = "PLC_DI", SymbolVariant = 0, PlcConnectionPoint = "2", PlcAddress = address, PlcSymbolicAddress = symbolic, PlcText = text };
+        DevicePlcPlan.Check(args);
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("-X10\n")]
@@ -74,10 +86,8 @@ public sealed class DevicePlcPlanTests
     }
 
     [Theory]
-    [InlineData("address")]
     [InlineData("point")]
     [InlineData("text")]
-    [InlineData("symbolic")]
     [InlineData("source")]
     [InlineData("pointLength")]
     [InlineData("controls")]
@@ -86,17 +96,11 @@ public sealed class DevicePlcPlanTests
         var args = new DevicePlaceArgs { Library = "IEC_symbol", PlcConnectionPoint = "X10:2", PlcAddress = "I0.0", PlcSymbolicAddress = "Start", PlcText = "Start input" };
         switch (field)
         {
-            case "address":
-                args.PlcAddress = null;
-                break;
             case "point":
                 args.PlcConnectionPoint = null;
                 break;
             case "text":
                 args.PlcText = " ";
-                break;
-            case "symbolic":
-                args.PlcSymbolicAddress = null;
                 break;
             case "source":
                 args.TerminalStrip = "-X1";

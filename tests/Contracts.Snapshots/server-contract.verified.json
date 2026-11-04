@@ -6759,10 +6759,7 @@
             "library",
             "symbol",
             "symbol_variant",
-            "tag",
-            "plc_address",
-            "plc_symbolic_address",
-            "plc_text"
+            "tag"
           ],
           "plc_address": [
             "plc_connection_point"

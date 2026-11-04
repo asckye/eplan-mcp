@@ -47,11 +47,11 @@ public sealed class DevicePlaceArgs
 
     /// <summary>PLC pin designation; with an explicit plug the suffix is plug:point. Tag identifies its existing card.</summary>
     public string? PlcConnectionPoint { get; set; }
-    /// <summary>PLC I/O address (20400), required with PlcConnectionPoint.</summary>
+    /// <summary>PLC I/O address (20400), optional with PlcConnectionPoint.</summary>
     public string? PlcAddress { get; set; }
-    /// <summary>Manual symbolic address (20402), required with PlcConnectionPoint.</summary>
+    /// <summary>Manual symbolic address (20402), optional with PlcConnectionPoint.</summary>
     public string? PlcSymbolicAddress { get; set; }
-    /// <summary>Language-independent PLC function text (20011), required with PlcConnectionPoint.</summary>
+    /// <summary>Language-independent PLC function text (20011), optional with PlcConnectionPoint.</summary>
     public string? PlcText { get; set; }
 
     /// <summary>Optional manual PLC plug designation (20406); requires a complete PLC point source.</summary>

@@ -17,9 +17,10 @@ internal static class DevicePlcPlan
         if (args.PlcConnectionPoint is null && args.PlcAddress is null && args.PlcSymbolicAddress is null && args.PlcText is null)
         { return; }
         if (args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
-            || new[] { args.PlcConnectionPoint, args.PlcAddress, args.PlcSymbolicAddress, args.PlcText }.Any(s => string.IsNullOrWhiteSpace(s) || s!.Length > 256 || s.Any(char.IsControl))
+            || string.IsNullOrWhiteSpace(args.PlcConnectionPoint)
+                || new[] { args.PlcConnectionPoint, args.PlcAddress, args.PlcSymbolicAddress, args.PlcText }.Any(s => s is not null && (string.IsNullOrWhiteSpace(s) || s.Length > 256 || s.Any(char.IsControl)))
             || args.PlcConnectionPoint is { Length: > 64 } || args.PlcConnectionPoint!.StartsWith(":", StringComparison.Ordinal))
-        { throw WriteArguments.Invalid(["/plc_connection_point: require a symbol source, existing PLC tag and four nonempty PLC fields without controls (point at most 64 characters, others 256); omit a leading colon."]); }
+        { throw WriteArguments.Invalid(["/plc_connection_point: require a symbol source, existing PLC tag and a nonempty point and optional address, symbolic address and text without controls (point at most 64 characters, others 256); omit a leading colon."]); }
     }
 
     internal static void Describe(DevicePlaceArgs args, DevicePlaceRequest request, List<PlannedChange> changes)
@@ -36,6 +37,6 @@ internal static class DevicePlcPlan
         if (args.DisplayProperties?.Any(p => p.PropertyId is 20300 or 20301) == true)
         { changes.Add(new() { Action = "update", Kind = "plc_property", Name = request.Tag, Property = "20021", NewValue = "2" }); }
         foreach ((string id, string? value) in new[] { ("20400", args.PlcAddress), ("20402", args.PlcSymbolicAddress), ("20011 (??_??)", args.PlcText) })
-        { changes.Add(new() { Action = "update", Kind = "plc_property", Name = request.Tag, Property = id, NewValue = value }); }
+        { if (value is not null) { changes.Add(new() { Action = "update", Kind = "plc_property", Name = request.Tag, Property = id, NewValue = value }); } }
     }
 }

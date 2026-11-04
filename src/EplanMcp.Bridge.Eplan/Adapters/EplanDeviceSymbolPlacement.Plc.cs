@@ -55,10 +55,15 @@ internal sealed partial class EplanDeviceSymbolPlacement
             using PropertyValue visible = properties.FUNC_SUPPRESSCROSSREFERENCE;
             Require(!visible.IsEmpty && visible.ToInt() == 2);
         }
-        properties.FUNC_PLCADDRESS = args.PlcAddress!;
-        properties.FUNC_PLCSYMBOLICADDRESS_MANUAL = args.PlcSymbolicAddress!;
-        using var text = new MultiLangString();
-        text.AddString(ISOCode.Language.L___, args.PlcText!);
-        properties.FUNC_TEXT = text;
+        if (args.PlcAddress is { } address)
+        { properties.FUNC_PLCADDRESS = address; }
+        if (args.PlcSymbolicAddress is { } symbolic)
+        { properties.FUNC_PLCSYMBOLICADDRESS_MANUAL = symbolic; }
+        if (args.PlcText is { } value)
+        {
+            using var text = new MultiLangString();
+            text.AddString(ISOCode.Language.L___, value);
+            properties.FUNC_TEXT = text;
+        }
     }
 }

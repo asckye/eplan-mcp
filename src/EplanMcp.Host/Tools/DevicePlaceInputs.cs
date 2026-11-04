@@ -22,7 +22,7 @@ internal static partial class DevicePlaceInputs
             {"type":["array","null"],"maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["property_id","offset_x_mm","offset_y_mm"],"properties":{
             "property_id":{"type":"integer","enum":[20214,20213,20211,20215,20058,20011,20027,20400,20403,20301,20300,20406]},"offset_x_mm":{"type":"number"},"offset_y_mm":{"type":"number"}}}}
             """);
-        schema["dependentRequired"] = JsonNode.Parse("""{"plc_connection_point":["library","symbol","symbol_variant","tag","plc_address","plc_symbolic_address","plc_text"],"plc_address":["plc_connection_point"],"plc_symbolic_address":["plc_connection_point"],"plc_text":["plc_connection_point"]}""");
+        schema["dependentRequired"] = JsonNode.Parse("""{"plc_connection_point":["library","symbol","symbol_variant","tag"],"plc_address":["plc_connection_point"],"plc_symbolic_address":["plc_connection_point"],"plc_text":["plc_connection_point"]}""");
         foreach (string field in new[] { "plc_connection_point", "plc_address", "plc_symbolic_address", "plc_text" })
         { schema["properties"]![field]!["minLength"] = 1; schema["properties"]![field]!["maxLength"] = 256; }
         schema["dependentRequired"]!["library"] = JsonNode.Parse("""["symbol"]""");
@@ -60,9 +60,10 @@ internal static partial class DevicePlaceInputs
         if (args.PlcConnectionPoint is not null || args.PlcAddress is not null || args.PlcSymbolicAddress is not null || args.PlcText is not null)
         {
             if (args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
-                || new[] { args.PlcConnectionPoint, args.PlcAddress, args.PlcSymbolicAddress, args.PlcText }.Any(s => string.IsNullOrWhiteSpace(s) || s.Length > 256 || s.Any(char.IsControl))
+                || string.IsNullOrWhiteSpace(args.PlcConnectionPoint)
+                || new[] { args.PlcConnectionPoint, args.PlcAddress, args.PlcSymbolicAddress, args.PlcText }.Any(s => s is not null && (string.IsNullOrWhiteSpace(s) || s.Length > 256 || s.Any(char.IsControl)))
                 || args.PlcConnectionPoint is { Length: > 64 } || args.PlcConnectionPoint!.StartsWith(':'))
-            { problems.Add("/plc_connection_point: require a symbol source, existing PLC tag and four nonempty PLC fields without controls (point at most 64 characters, others 256); omit a leading colon."); }
+            { problems.Add("/plc_connection_point: require a symbol source, existing PLC tag and a nonempty point and optional address, symbolic address and text without controls (point at most 64 characters, others 256); omit a leading colon."); }
         }
         if (args.TerminalStrip is not null)
         {

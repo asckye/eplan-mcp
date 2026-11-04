@@ -8,6 +8,18 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class DevicePlcInputTests
 {
     [Theory]
+    [InlineData(null, null, null)]
+    [InlineData(null, null, "Start input")]
+    [InlineData("I0.0", null, null)]
+    [InlineData(null, "Start", null)]
+    [InlineData("I0.0", "Start", "Start input")]
+    public void Plc_OptionalFieldsMayBeOmitted(string? address, string? symbolic, string? text)
+    {
+        var args = new DevicePlaceArgs { Project = "Line1", Tag = "-KF1", Library = "IEC_symbol", Symbol = "PLC_DI", SymbolVariant = 0, PlcConnectionPoint = "2", PlcAddress = address, PlcSymbolicAddress = symbolic, PlcText = text };
+        Assert.Empty(DevicePlaceInputs.Check(args, null));
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData(" ")]
     [InlineData("-X10\n")]
@@ -46,9 +58,6 @@ public sealed class DevicePlcInputTests
 
     [Theory]
     [InlineData("missingPoint")]
-    [InlineData("missingAddress")]
-    [InlineData("missingSymbol")]
-    [InlineData("missingText")]
     [InlineData("blank")]
     [InlineData("control")]
     [InlineData("length")]
@@ -64,15 +73,6 @@ public sealed class DevicePlcInputTests
         {
             case "missingPoint":
                 args.PlcConnectionPoint = null;
-                break;
-            case "missingAddress":
-                args.PlcAddress = null;
-                break;
-            case "missingSymbol":
-                args.PlcSymbolicAddress = null;
-                break;
-            case "missingText":
-                args.PlcText = null;
                 break;
             case "blank":
                 args.PlcText = " ";

@@ -42,8 +42,10 @@ internal sealed partial class EplanDeviceSymbolPlacement
             { channel = EplanPlcReader.Channel(terminal, new TextLanguage(ISOCode.Language.L___, false), properties); }
             // A55: Terminal.PLC can stay null; membership in the freshly acquired card establishes ownership.
             channel.Owner = card!.Name;
-            Require(channel.Address == args.PlcAddress && channel.ManualSymbolicAddress == args.PlcSymbolicAddress
-                && channel.Text == args.PlcText && (args.PlcPlugDesignation is null || channel.PlugDesignation == args.PlcPlugDesignation));
+            Require((args.PlcAddress is null || channel.Address == args.PlcAddress)
+                && (args.PlcSymbolicAddress is null || channel.ManualSymbolicAddress == args.PlcSymbolicAddress)
+                && (args.PlcText is null || channel.Text == args.PlcText)
+                && (args.PlcPlugDesignation is null || channel.PlugDesignation == args.PlcPlugDesignation));
             data.Plc = channel;
 
             verification = "the requested PLC displays (property, parent, page, position, format and native text, including plug designation and main reference)";

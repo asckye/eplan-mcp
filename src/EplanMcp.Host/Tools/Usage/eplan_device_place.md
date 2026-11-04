@@ -13,9 +13,9 @@
 ## Workflow
 dry_run omitted/true: preview only, execution=not_started. false executes.
 
-1. Circuit page via eplan_page_list/create/get. Finite mm within page bounds; origin bottom left, y up.
+1. Circuit page via eplan_page_list/create/get. mm within page; origin bottom left, y up.
 2. Free symbol tag: eplan_device_list; short tags inherit page structure. Parts: omit tag for native numbering, or rename all functions. Outside scratch needs approval.
-3. Parts: eplan_part_search (variant 1). Symbols: eplan_symbol_search. Other functions stay unplaced (as EPLAN Insert Device). PLC module: eplan_macro_insert part. Several symbols: same tag, then eplan_device_update part.
+3. Parts: eplan_part_search (variant 1). Symbols: eplan_symbol_search. Other functions stay unplaced. PLC module: eplan_macro_insert part. Several symbols: same tag, then eplan_device_update part.
 
 SPECIAL/DC: tag and corner_x/corner_y required; x/y lower left, corners upper right. DCP/DCPP3: same tag plus one connection_designations pin; named tag:pin. blackBox: tag/bounds/functionsInside (preview membership unknown); device.type/isMainFunction: native after commit.
 
@@ -28,7 +28,7 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - Symbols: symbol=resolved variant/local pins, changes=approval lines; part/variant empty; functions=1,unplaced=0.
 - Symbol-only display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm} objects. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite parent-relative offsets; negatives allowed. 20214: native prefixed tag.
 - Symbol-only connection_designations: one nonblank pin name in search order, <=64 characters, no controls; writes indexed 20022 and verifies pin names.
-- One transaction; mismatch/cancellation rolls back. One Ctrl+Z after success. visibleTag=null without tag display.
+- Atomic; mismatch/cancellation rolls back. One Ctrl+Z. visibleTag=null without tag display.
 - location_box: + followed by 1-64 letters/digits/underscores/dots. Omit tag and part/symbol options. Fixed SPECIAL/SC variant 0, dashed. x,y: lower-left; corner_x,corner_y: upper-right; positive area.
 - locationBox: structure, bounds [minX,minY,maxX,maxY], outline=dashed, affectedDevices=[]; predicted before commit. functions/unplaced=0; device.tag/category=structure/LocationBox. Duplicate page structure refused; verify recovery via eplan_page_get include_drawings.
 
@@ -37,10 +37,10 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - Placed strip: defaults.strip_definition.symbol + .variant from plugins (SPECIAL), else TDEF/0. metadata.plugins: used id@version in preview/execute. Plugin changes invalidate plans.
 - terminal: strip/number/owner/position/sortCode (20809)/stripCreated. Preview/recovery: owner/sortCode=null; empty sortCode=null. functions includes new strip. Segments: eplan_connection_generate dry_run:false (A52/A55).
 
-- PLC: four plc_* fields required; tag=existing card (create SPECIAL/PLCC first). Point: 1-64 chars, no leading colon; others: 1-256; nonblank, no controls. Choose a one-pin DI variant. Duplicate point/address ignores case.
+- PLC: require plc_connection_point and an existing SPECIAL/PLCC card tag. Address, symbolic address and text optional. Point: 1-64 chars, no leading colon; others: 1-256, nonblank, no controls. Use a one-pin DI variant. Duplicate points/addresses ignore case; omitted values are not written or checked for duplicates.
 - NO/NC: select NoContact/NcContact; connection_designations=["13","14"] / ["11","12"].
 - plc_connection_point: 20022; connection_designations must match. Writes 20400/20402/20011=address/manual symbolic address/??_?? text; calculated 20403/20301 read-only.
-- plc_plug_designation: optional manual 20406, 1-64 nonblank characters, no controls; requires four PLC fields. Name stays card:point.
+- plc_plug_designation: optional manual 20406, 1-64 nonblank characters, no controls; requires a PLC point. Name stays card:point.
 - PLC displays: 20213=card DT, 20406=plug, 20300=main/auxiliary, 20301=overview. References are native/read-only, may be empty; overview needs a matching representation.
 - Local PLC displays set 20021=2. Verify text/position/visibility by fresh IDs (A78/A79).
 - plc: committed fields + plugDesignation/mainReference; failed readback keeps committed + warning. Verify eplan_plc_get detailed / eplan_page_get include_drawings before retry. functions/unplaced=null; plc_get counts parentlessRepresentations (A55). Use returned names.
