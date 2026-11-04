@@ -180,6 +180,17 @@ public sealed class PageExportRoundFourTests
     }
 
     [Fact]
+    public void Compare_Blocks_PairByNameWhateverTheirOrder()
+    {
+        const string source = """{"placements":[{"type":"Block","name":"left","location":{"x":4,"y":240}},{"type":"Block","name":"right","location":{"x":216,"y":276}}]}""";
+        const string target = """{"placements":[{"type":"Block","name":"right","location":{"x":216,"y":276}},{"type":"Block","name":"left","location":{"x":3,"y":240}}]}""";
+
+        PageExportComparison comparison = PageExportComparer.Compare(source, target);
+
+        Assert.Equal(2, comparison.Types["Block"].Matched.Count);
+    }
+
+    [Fact]
     public void Compare_BlockPropertyIds_AreProjectLocalSoOnlyValuesCount()
     {
         // Live 2026-11-04: the same value sits under 59459 in the sample and 59456 in the redraw.

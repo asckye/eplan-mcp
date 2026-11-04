@@ -204,7 +204,7 @@ internal static class PageExportComparer
     {
         PageExportTypeComparison group = Group(result, type);
         var candidates = source.Select(left => target.Select((right, index) => (right, index))
-            .Where(item => (type == "Connection" || type == "Block" || SamePosition(left["location"], item.right["location"]))
+            .Where(item => (type == "Connection" || type == "Block" && (string?)left["name"] == (string?)item.right["name"] || SamePosition(left["location"], item.right["location"]) && type != "Block")
                 && JToken.DeepEquals(left["symbol"], item.right["symbol"])
                 && (additionalKey?.Invoke(left, item.right) ?? true))
             .OrderBy(item => DifferenceCount(left, item.right)).ThenBy(item => item.index)

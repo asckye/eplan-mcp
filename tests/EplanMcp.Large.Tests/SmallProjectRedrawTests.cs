@@ -9,7 +9,7 @@ namespace EplanMcp.Large.Tests;
 /// <summary>Redraws the detached sample exports through MCP and keeps discrepancies for the next gap list.</summary>
 [Trait("Size", "Large")]
 [Trait("Spike", "SmallProjectRedraw")]
-public sealed class SmallProjectRedrawTests(LiveEplan eplan)
+public sealed class SmallProjectRedrawTests(LiveEplan eplan, DestructiveHost host) : IClassFixture<DestructiveHost>
 {
     private static readonly string[] _pages =
     [
@@ -28,7 +28,8 @@ public sealed class SmallProjectRedrawTests(LiveEplan eplan)
         string targetFolder = Path.Combine(root, "target-" + run);
         Directory.CreateDirectory(targetFolder);
         string projectName = "SmallRedraw_" + run;
-        string project = Path.Combine(LiveEplan.ScratchRoot(), "projects", projectName, projectName);
+        // Below the Destructive Host's scratch root: deleting macro text is the only Destructive step of this run.
+        string project = Path.Combine(WriteHost.ScratchFolder, "redraw", projectName, projectName);
         var report = new SmallProjectRedrawReport(run, project);
         Dictionary<string, (JObject Page, string File)> source = LoadPages(Path.Combine(root, "source"), report);
         Dictionary<string, (JObject Page, string File)> target = new(StringComparer.Ordinal);
@@ -182,12 +183,21 @@ public sealed class SmallProjectRedrawTests(LiveEplan eplan)
         return pages;
     }
 
+    // This unattended run answers its own question for its own scratch project: no dialog waits on the engineer's screen.
+    private Task<(bool Succeeded, JsonElement Result)> DeleteAsync(JObject arguments, Dictionary<string, object?> args)
+    {
+        string page = (string)arguments["page"]!;
+        host.Approvals.Approve("eplan_placement_delete", (string)arguments["project"]!,
+            arguments["items"]!.Select(item => $"delete drawing {page}:{item["type"]}/{item["oid"]}"));
+        return host.CallOrErrorAsync("eplan_placement_delete", args);
+    }
+
     private async Task<JObject> CallAsync(string tool, JObject arguments)
     {
         using JsonDocument document = JsonDocument.Parse(arguments.ToString());
         Dictionary<string, object?> args = document.RootElement.EnumerateObject()
             .ToDictionary(property => property.Name, property => (object?)property.Value.Clone(), StringComparer.Ordinal);
-        (bool succeeded, JsonElement result) = await eplan.CallOrErrorAsync(tool, args);
+        (bool succeeded, JsonElement result) = tool == "eplan_placement_delete" ? await DeleteAsync(arguments, args) : await eplan.CallOrErrorAsync(tool, args);
         JObject body = JObject.Parse(result.GetRawText());
         return succeeded ? body : new JObject { ["error"] = body };
     }

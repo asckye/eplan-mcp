@@ -114,6 +114,15 @@ public sealed class DestructiveHost : IAsyncLifetime
         return result.StructuredContent!.Value;
     }
 
+    /// <summary>A call whose failure is evidence, not a test failure: its success flag and its structured result or error.</summary>
+    public async Task<(bool Succeeded, JsonElement Result)> CallOrErrorAsync(string tool, Dictionary<string, object?> args)
+    {
+        CallToolResult result = await _client!.CallToolAsync(tool, args, cancellationToken: TestContext.Current.CancellationToken);
+        return result.IsError == true
+            ? (false, JsonDocument.Parse(WriteHost.Text(result)).RootElement.GetProperty("error").Clone())
+            : (true, result.StructuredContent!.Value);
+    }
+
     /// <summary>The <c>error</c> object of a call that must fail.</summary>
     public async Task<JsonElement> ErrorAsync(string tool, Dictionary<string, object?> args)
     {
