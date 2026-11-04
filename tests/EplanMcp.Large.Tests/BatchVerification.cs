@@ -330,7 +330,17 @@ public sealed class BatchVerification(LiveEplan eplan)
             expected = _expected,
             entries = _results
         }, _json));
-        File.Move(temporary, _file, overwrite: true);
+        // Live 2026-11-03: a scanner holding results.json for a moment denied the move and ended the whole run.
+        for (int attempt = 1; ; attempt++)
+        {
+            try
+            {
+                File.Move(temporary, _file, overwrite: true);
+                return;
+            }
+            catch (Exception error) when (attempt < 10 && error is UnauthorizedAccessException or IOException)
+            { Thread.Sleep(500); }
+        }
     }
     private static bool InRepository(string path) => Repository(path) is not null;
     private static string? Repository(string start)
