@@ -86,19 +86,22 @@ public sealed class PlacementTextWriterTests
     [InlineData(30, 120, "Arc")]
     public void Arc_SelectsCircleOnlyForEqualAnglesModulo360(double start, double end, string expected)
     {
-        var page = new Page(); EplanProjects.Project = new(page);
+        var page = new Page();
+        EplanProjects.Project = new(page);
         var requested = new PlacementText { Kind = "arc", Position = [50, 50], RadiusMm = 8, StartAngle = start, EndAngle = end };
         PlacementText actual = new EplanPlacementTextWriter().Create("project", "+A1/1", requested);
         Arc native = Assert.IsType<Arc>(Assert.Single(page.AllPlacements));
         Assert.Equal(expected, native.Kind);
         Assert.Equal(8, actual.RadiusMm);
-        if (expected == "Arc") { Assert.Equal(start, actual.StartAngle, 9); Assert.Equal(end, actual.EndAngle, 9); }
+        if (expected == "Arc")
+        { Assert.Equal(start, actual.StartAngle, 9); Assert.Equal(end, actual.EndAngle, 9); }
     }
 
     [Fact]
     public void Ellipse_UsesRadiansAndEllipseSpecificReadback()
     {
-        var page = new Page(); EplanProjects.Project = new(page);
+        var page = new Page();
+        EplanProjects.Project = new(page);
         var requested = new PlacementText { Kind = "ellipse", Position = [50, 50], RadiusXmm = 1.43748, RadiusYmm = 1.43748, Angle = 90 };
         PlacementText actual = new EplanPlacementTextWriter().Create("project", "+A1/1", requested);
         Arc native = Assert.IsType<Arc>(Assert.Single(page.AllPlacements));
@@ -116,7 +119,8 @@ public sealed class PlacementTextWriterTests
     [InlineData("arc")]
     public void CircleAndEllipse_RejectWrongNativeKind(string kind)
     {
-        var page = new Page(); EplanProjects.Project = new(page);
+        var page = new Page();
+        EplanProjects.Project = new(page);
         page.AfterGraphicCreate = () => Assert.IsType<Arc>(page.AllPlacements[0]).Kind = "Arc";
         var requested = new PlacementText { Kind = kind, Position = [50, 50], RadiusMm = kind == "arc" ? 8 : 0, EndAngle = 360, RadiusXmm = 4, RadiusYmm = 8 };
         Assert.Equal(ErrorReason.EplanOperationFailed, Assert.Throws<BridgeErrorException>(() => new EplanPlacementTextWriter().CreateBatch("project", "+A1/1",

@@ -89,12 +89,16 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
         string page = selection.NextPage;
         await host.CallAsync("eplan_page_create", new()
         {
-            ["project"] = host.Writable, ["dry_run"] = false,
+            ["project"] = host.Writable,
+            ["dry_run"] = false,
             ["pages"] = new[] { new { name = page, page_type = type } },
         });
         var request = new Dictionary<string, object?>
         {
-            ["project"] = host.Writable, ["page"] = page, ["dry_run"] = false, ["snap_to_grid"] = false,
+            ["project"] = host.Writable,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["snap_to_grid"] = false,
             ["items"] = new object[]
             {
                 new { kind = "line", points = (double[][])[[10, 20], [30, 20]] },
@@ -104,7 +108,8 @@ public sealed class PlacementTextCreateTests(LiveEplan eplan, WriteHost host) : 
         TestContext.Current.TestOutputHelper?.WriteLine("request: " + JsonSerializer.Serialize(request));
         var read = new Dictionary<string, object?> { ["project"] = host.Writable, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };
         JsonElement result;
-        try { result = await host.CallAsync("eplan_placement_create", request); }
+        try
+        { result = await host.CallAsync("eplan_placement_create", request); }
         catch (Exception ex)
         {
             TestContext.Current.TestOutputHelper?.WriteLine("result: " + ex);

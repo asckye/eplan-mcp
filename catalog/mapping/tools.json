@@ -7857,6 +7857,11 @@
         ],
         "operationTests": [
           {
+            "name": "DeviceJoinPlanTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DeviceJoinPlanTests.cs"
+          },
+          {
             "name": "DevicePlaceOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DevicePlaceOperationTests.cs"
@@ -12050,6 +12055,11 @@
             "name": "MacroOverviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
+          },
+          {
+            "name": "PlacementTextCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
           },
           {
             "name": "PlanDependencyPredictionTests",

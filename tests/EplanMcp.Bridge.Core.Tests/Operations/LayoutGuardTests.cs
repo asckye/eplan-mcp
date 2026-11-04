@@ -208,8 +208,13 @@ public sealed class LayoutGuardTests
     [InlineData(196, false, true)]
     public void R4_BlackBoxEndpointPin_IsContactRatherThanPassage(double endY, bool pinAtEnd, bool crosses)
     {
-        var box = new DrawingPlacement { Kind = "BoxedDevice", Locator = new() { Type = 17, Oid = 10 },
-            Location = [184, 188], Bounds = [184, 188, 360, 220] };
+        var box = new DrawingPlacement
+        {
+            Kind = "BoxedDevice",
+            Locator = new() { Type = 17, Oid = 10 },
+            Location = [184, 188],
+            Bounds = [184, 188, 360, 220]
+        };
         var pins = new Dictionary<string, SymbolConnectionPoint>();
         if (pinAtEnd)
         { pins["17/11/0"] = new() { Location = [192, endY], Direction = "Down" }; }

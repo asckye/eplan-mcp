@@ -15,8 +15,15 @@ public sealed partial class DevicePlaceTests
         {
             JsonElement card = await PartsCallAsync("eplan_device_place", new()
             {
-                ["project"] = project, ["page"] = page, ["library"] = "SPECIAL", ["symbol"] = "PLCC",
-                ["symbol_variant"] = 0, ["tag"] = tag, ["x"] = 40, ["y"] = 100, ["dry_run"] = false
+                ["project"] = project,
+                ["page"] = page,
+                ["library"] = "SPECIAL",
+                ["symbol"] = "PLCC",
+                ["symbol_variant"] = 0,
+                ["tag"] = tag,
+                ["x"] = 40,
+                ["y"] = 100,
+                ["dry_run"] = false
             });
             tag = card.GetProperty("device").GetProperty("tag").GetString()!;
             JsonElement? input = null;
@@ -34,10 +41,17 @@ public sealed partial class DevicePlaceTests
             JsonElement symbol = Assert.NotNull(input);
             JsonElement placed = await PartsCallAsync("eplan_device_place", new()
             {
-                ["project"] = project, ["page"] = page, ["tag"] = tag,
-                ["library"] = symbol.GetProperty("library").GetString(), ["symbol"] = symbol.GetProperty("name").GetString(),
-                ["symbol_variant"] = symbol.GetProperty("variant").GetInt32(), ["plc_connection_point"] = "2",
-                ["plc_text"] = "Start input", ["x"] = 120, ["y"] = 180, ["dry_run"] = false
+                ["project"] = project,
+                ["page"] = page,
+                ["tag"] = tag,
+                ["library"] = symbol.GetProperty("library").GetString(),
+                ["symbol"] = symbol.GetProperty("name").GetString(),
+                ["symbol_variant"] = symbol.GetProperty("variant").GetInt32(),
+                ["plc_connection_point"] = "2",
+                ["plc_text"] = "Start input",
+                ["x"] = 120,
+                ["y"] = 180,
+                ["dry_run"] = false
             });
             Assert.Equal(ExecutionState.Committed, placed.GetProperty("execution").GetString());
             JsonElement read = await PartsCallAsync("eplan_plc_get", new()

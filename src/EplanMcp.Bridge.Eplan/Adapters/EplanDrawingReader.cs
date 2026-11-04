@@ -112,9 +112,17 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 graphics = placement switch
                 {
                     PolyLine polyline => new() { ["points"] = JsonConvert.SerializeObject(Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i)))), ["closed"] = polyline.Closed.ToString().ToLowerInvariant() },
-                    Arc arc => new() { ["radius_mm"] = Number(DrawingCoordinates.ApiToMillimetres(arc.Radius)), ["start_angle"] = Number(arc.StartAngle * (180 / Math.PI)), ["end_angle"] = Number(arc.EndAngle * (180 / Math.PI)), ["sector"] = arc.Sector.ToString().ToLowerInvariant(),
-                        ["arc_kind"] = arc.Kind.ToString(), ["radius_x_mm"] = arc.Kind.ToString() == "Ellipse" ? Number(DrawingCoordinates.ApiToMillimetres(arc.FirstRadius)) : null,
-                        ["radius_y_mm"] = arc.Kind.ToString() == "Ellipse" ? Number(DrawingCoordinates.ApiToMillimetres(arc.SecondRadius)) : null, ["ellipse_angle"] = arc.Kind.ToString() == "Ellipse" ? Number(arc.ElipseAngle) : null },
+                    Arc arc => new()
+                    {
+                        ["radius_mm"] = Number(DrawingCoordinates.ApiToMillimetres(arc.Radius)),
+                        ["start_angle"] = Number(arc.StartAngle * (180 / Math.PI)),
+                        ["end_angle"] = Number(arc.EndAngle * (180 / Math.PI)),
+                        ["sector"] = arc.Sector.ToString().ToLowerInvariant(),
+                        ["arc_kind"] = arc.Kind.ToString(),
+                        ["radius_x_mm"] = arc.Kind.ToString() == "Ellipse" ? Number(DrawingCoordinates.ApiToMillimetres(arc.FirstRadius)) : null,
+                        ["radius_y_mm"] = arc.Kind.ToString() == "Ellipse" ? Number(DrawingCoordinates.ApiToMillimetres(arc.SecondRadius)) : null,
+                        ["ellipse_angle"] = arc.Kind.ToString() == "Ellipse" ? Number(arc.ElipseAngle) : null
+                    },
                     Image image => new() { ["file"] = Path.GetFileName(imagePath = PathMap.SubstitutePath(image.FileName, projectPath)) },
                     _ => [],
                 };

@@ -110,7 +110,10 @@ public sealed class PlacementGraphicsCreateTests(LiveEplan eplan, WriteHost host
         string page = Assert.Single(await selection.CreatePagesAsync(1));
         var request = new Dictionary<string, object?>
         {
-            ["project"] = host.Writable, ["page"] = page, ["dry_run"] = false, ["snap_to_grid"] = false,
+            ["project"] = host.Writable,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["snap_to_grid"] = false,
             ["items"] = new[] { new { kind = "path_text", position = new[] { 40d, 80d }, contents = new Dictionary<string, string> { ["??_??"] = "Default path function" } } },
         };
         JsonElement readback = await CreateAndReadback(request);
@@ -128,7 +131,10 @@ public sealed class PlacementGraphicsCreateTests(LiveEplan eplan, WriteHost host
         string page = Assert.Single(await selection.CreatePagesAsync(1));
         var request = new Dictionary<string, object?>
         {
-            ["project"] = host.Writable, ["page"] = page, ["dry_run"] = false, ["snap_to_grid"] = false,
+            ["project"] = host.Writable,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["snap_to_grid"] = false,
             ["items"] = new object[]
             {
                 new { kind = "ellipse", center = new[] { 40d, 40d }, radius_x_mm = 1.43748, radius_y_mm = 1.43748, angle = 90 },
@@ -151,7 +157,8 @@ public sealed class PlacementGraphicsCreateTests(LiveEplan eplan, WriteHost host
         var read = new Dictionary<string, object?> { ["project"] = host.Writable, ["page"] = request["page"], ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };
         Evidence("request", request);
         JsonElement result;
-        try { result = await host.CallAsync("eplan_placement_create", request); }
+        try
+        { result = await host.CallAsync("eplan_placement_create", request); }
         catch (Exception ex)
         {
             Evidence("failed result", ex.ToString());

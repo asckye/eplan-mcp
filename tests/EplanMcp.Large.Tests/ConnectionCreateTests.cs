@@ -23,7 +23,10 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         string before = (await session.SnapshotAsync(page)).Hash;
         var request = new Dictionary<string, object?>
         {
-            ["project"] = session.Project, ["page"] = page, ["dry_run"] = false, ["response_format"] = "detailed",
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["response_format"] = "detailed",
             ["items"] = new[] { new { kind, position = new[] { 30 * grid, 30 * grid }, directions = directions.Split(',') } }
         };
         TestContext.Current.TestOutputHelper!.WriteLine("node request: " + JsonSerializer.Serialize(request));
@@ -83,18 +86,41 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         string boxTag = "-BR4" + suffix;
         await Call("eplan_device_place", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["library"] = "SPECIAL", ["symbol"] = "DC", ["symbol_variant"] = 0,
-            ["tag"] = boxTag, ["x"] = 184, ["y"] = 188, ["corner_x"] = 360, ["corner_y"] = 220, ["dry_run"] = false
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["library"] = "SPECIAL",
+            ["symbol"] = "DC",
+            ["symbol_variant"] = 0,
+            ["tag"] = boxTag,
+            ["x"] = 184,
+            ["y"] = 188,
+            ["corner_x"] = 360,
+            ["corner_y"] = 220,
+            ["dry_run"] = false
         });
         await Call("eplan_device_place", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["library"] = "SPECIAL", ["symbol"] = "DCP", ["symbol_variant"] = pointSymbol.GetProperty("variant").GetInt32(),
-            ["tag"] = boxTag, ["connection_designations"] = (string[])["1"], ["x"] = 192 - toOffset[0].GetDouble(), ["y"] = 188 - toOffset[1].GetDouble(), ["dry_run"] = false
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["library"] = "SPECIAL",
+            ["symbol"] = "DCP",
+            ["symbol_variant"] = pointSymbol.GetProperty("variant").GetInt32(),
+            ["tag"] = boxTag,
+            ["connection_designations"] = (string[])["1"],
+            ["x"] = 192 - toOffset[0].GetDouble(),
+            ["y"] = 188 - toOffset[1].GetDouble(),
+            ["dry_run"] = false
         });
         await Call("eplan_device_place", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["terminal_strip"] = "-XR4" + suffix, ["terminal_number"] = "1", ["symbol_variant"] = terminal.GetProperty("variant").GetInt32(),
-            ["x"] = 176 - fromOffset[0].GetDouble(), ["y"] = 180 - fromOffset[1].GetDouble(), ["dry_run"] = false
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["terminal_strip"] = "-XR4" + suffix,
+            ["terminal_number"] = "1",
+            ["symbol_variant"] = terminal.GetProperty("variant").GetInt32(),
+            ["x"] = 176 - fromOffset[0].GetDouble(),
+            ["y"] = 180 - fromOffset[1].GetDouble(),
+            ["dry_run"] = false
         });
         PageDrawingGeometry before = await Drawing();
         TestContext.Current.TestOutputHelper!.WriteLine("before wire drawing: " + JsonSerializer.Serialize(before));
@@ -103,7 +129,10 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
         static object Locator(DrawingPlacement p) => new { project = p.Locator.Project, page = p.Locator.Page, type = p.Locator.Type, oid = p.Locator.Oid, digest = p.Locator.Digest };
         JsonElement result = await Call("eplan_connection_create", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["dry_run"] = false, ["response_format"] = "detailed",
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["dry_run"] = false,
+            ["response_format"] = "detailed",
             ["items"] = new[] { new { kind = "wire", from = new { locator = Locator(from), pin_index = fromPin }, to = new { locator = Locator(to), pin_index = toPin }, points = new double[][] { [176, 180], [192, 180], [192, 188] } } }
         });
         TestContext.Current.TestOutputHelper.WriteLine("wire drawing readback: " + JsonSerializer.Serialize(await Drawing()));

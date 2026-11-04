@@ -70,8 +70,17 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
                 {
                     if ((ellipse || circle) && arc.Kind.ToString() != (ellipse ? "Ellipse" : "Circle"))
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Native arc Kind did not read back as the requested Circle or Ellipse."); }
-                    return new() { Kind = text.Kind, Position = XY(arc.Location), RadiusMm = DrawingCoordinates.ApiToMillimetres(arc.Radius), StartAngle = arc.StartAngle * (180 / Math.PI), EndAngle = arc.EndAngle * (180 / Math.PI),
-                        RadiusXmm = ellipse ? DrawingCoordinates.ApiToMillimetres(arc.FirstRadius) : 0, RadiusYmm = ellipse ? DrawingCoordinates.ApiToMillimetres(arc.SecondRadius) : 0, Angle = ellipse ? arc.ElipseAngle * (180 / Math.PI) : 0 };
+                    return new()
+                    {
+                        Kind = text.Kind,
+                        Position = XY(arc.Location),
+                        RadiusMm = DrawingCoordinates.ApiToMillimetres(arc.Radius),
+                        StartAngle = arc.StartAngle * (180 / Math.PI),
+                        EndAngle = arc.EndAngle * (180 / Math.PI),
+                        RadiusXmm = ellipse ? DrawingCoordinates.ApiToMillimetres(arc.FirstRadius) : 0,
+                        RadiusYmm = ellipse ? DrawingCoordinates.ApiToMillimetres(arc.SecondRadius) : 0,
+                        Angle = ellipse ? arc.ElipseAngle * (180 / Math.PI) : 0
+                    };
                 };
             }
             if (text.Kind == "image")

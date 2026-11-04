@@ -195,7 +195,8 @@ public sealed partial class PlacementCreateProtocolTests
     {
         await WithClient(async (client, harness, store) =>
         {
-            Dictionary<string, object?> args = Args(); args["dry_run"] = preview;
+            Dictionary<string, object?> args = Args();
+            args["dry_run"] = preview;
             args["items"] = new[] { new { kind = "ellipse", center = (double[])[50d, 50d], radius_x_mm = valid ? 4 : 0, radius_y_mm = 8, angle = 90 } };
             CallToolResult call = await client.CallToolAsync(PlacementCreateTools.Tool, args, cancellationToken: Token);
             Assert.Equal(!valid, call.IsError == true);
@@ -205,7 +206,8 @@ public sealed partial class PlacementCreateProtocolTests
                 Assert.Equal((4d, 8d, 90d), (request.Items![0].RadiusXmm, request.Items[0].RadiusYmm, request.Items[0].Angle));
                 Assert.Equal(preview ? 0 : 1, store.Items.Count);
             }
-            else { Assert.Empty(store.Items); Assert.Empty(harness.Bridge.Calls); }
+            else
+            { Assert.Empty(store.Items); Assert.Empty(harness.Bridge.Calls); }
         });
     }
 

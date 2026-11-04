@@ -219,13 +219,19 @@ public sealed class PlacementGraphicsCreateTests
     [InlineData("kind")]
     public void Ellipse_ReadbackMismatchRollsBack(string changed)
     {
-        var store = new PlacementTextStore { Readback = item =>
+        var store = new PlacementTextStore
         {
-            if (changed == "radius") { item.RadiusYmm += 1; }
-            if (changed == "angle") { item.Angle += 1; }
-            if (changed == "kind") { item.Kind = "arc"; }
+            Readback = item =>
+        {
+            if (changed == "radius")
+            { item.RadiusYmm += 1; }
+            if (changed == "angle")
+            { item.Angle += 1; }
+            if (changed == "kind")
+            { item.Kind = "arc"; }
             return item;
-        } };
+        }
+        };
         Assert.Equal(ErrorReason.EplanOperationFailed, Assert.Throws<BridgeErrorException>(() => store.Operation.Execute(Request("ellipse"))).Error.Reason);
         Assert.Empty(store.Texts);
     }
@@ -245,7 +251,8 @@ public sealed class PlacementGraphicsCreateTests
     {
         var store = new PlacementTextStore { Readback = item => { item.StartAngle = 0; item.EndAngle = 0; return item; } };
         PlacementTextCreateArgs request = Request("arc");
-        request.Items![0].StartAngle = 0; request.Items[0].EndAngle = 360;
+        request.Items![0].StartAngle = 0;
+        request.Items[0].EndAngle = 360;
         Assert.IsType<PlacementTextCreateData>(store.Operation.Execute(request));
     }
 
