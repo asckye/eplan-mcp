@@ -95,9 +95,9 @@ internal static class PlacementCreatePlanning
         {
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
             string? kind = item.ValueKind == JsonValueKind.Object && item.TryGetProperty("kind", out JsonElement k) && k.ValueKind == JsonValueKind.String ? k.GetString() : null;
-            if (!Members(item, at, kind == "path_text" ? "kind position contents" : IsText(kind) ? "kind position contents height_mm" : kind is "line" or "polyline" ? "kind points" : kind == "arc" ? "kind center radius_mm start_angle end_angle" : kind == "image" ? "kind file corners" : "kind corners", kind == "path_text" ? "height_mm" : ""))
+            if (!Members(item, at, kind == "path_text" ? "kind position contents" : IsText(kind) ? "kind position contents height_mm" : kind is "line" or "polyline" ? "kind points" : kind == "ellipse" ? "kind center radius_x_mm radius_y_mm" : kind == "arc" ? "kind center radius_mm start_angle end_angle" : kind == "image" ? "kind file corners" : "kind corners", kind == "path_text" ? "height_mm" : kind == "ellipse" ? "angle" : ""))
             { continue; }
-            Check(kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "path_text" or "image", at + "/kind", "unsupported primitive kind.");
+            Check(kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "ellipse" or "path_text" or "image", at + "/kind", "unsupported primitive kind.");
             if (IsText(kind))
             {
                 if (item.TryGetProperty("position", out JsonElement p))
@@ -117,12 +117,12 @@ internal static class PlacementCreatePlanning
                 Check(length is >= 1 and <= 500, at + "/contents", "requires 1..500 characters in total.");
                 Check(!languages.Contains("??_??") || languages.Count == 1, at + "/contents", "??_?? cannot be mixed with languages (A54/live T4b).");
             }
-            else if (kind == "arc")
+            else if (kind is "arc" or "ellipse")
             {
                 if (item.TryGetProperty("center", out JsonElement center))
                 { Point(center, at + "/center"); }
-                foreach (string name in new[] { "radius_mm", "start_angle", "end_angle" })
-                { if (item.TryGetProperty(name, out JsonElement n)) { Number(n, at + "/" + name, name == "radius_mm" ? double.Epsilon : -double.MaxValue, name == "radius_mm" ? 10000 : double.MaxValue); } }
+                foreach (string name in kind == "arc" ? new[] { "radius_mm", "start_angle", "end_angle" } : new[] { "radius_x_mm", "radius_y_mm", "angle" })
+                { if (item.TryGetProperty(name, out JsonElement n)) { Number(n, at + "/" + name, name.StartsWith("radius", StringComparison.Ordinal) ? double.Epsilon : -double.MaxValue, name.StartsWith("radius", StringComparison.Ordinal) ? 10000 : double.MaxValue); } }
             }
             else if (item.TryGetProperty(kind is "line" or "polyline" ? "points" : "corners", out JsonElement pair))
             {
@@ -151,7 +151,7 @@ internal static class PlacementCreatePlanning
             string kind = item.GetProperty("kind").GetString()!;
             JsonNode actual = Snap(item, page.GridSize, snap, normalizeRectangle: false);
             string field = Field(kind);
-            JsonArray[] points = IsText(kind) || kind == "arc" ? [actual[field]!.AsArray()] : [.. actual[field]!.AsArray().Select(p => p!.AsArray())];
+            JsonArray[] points = IsText(kind) || kind is "arc" or "ellipse" ? [actual[field]!.AsArray()] : [.. actual[field]!.AsArray().Select(p => p!.AsArray())];
             if (points.SelectMany(p => p).Any(n => !double.IsFinite(n!.GetValue<double>()) || n.GetValue<double>() is < 0 or > 10000))
             { problems.Add(at + ": snapping must produce finite coordinates in 0..10000 mm."); continue; }
             if (IsText(kind) && !item.GetProperty("contents").TryGetProperty("??_??", out _))
@@ -161,8 +161,9 @@ internal static class PlacementCreatePlanning
                 if (!item.GetProperty("contents").TryGetProperty(displayLanguage, out _))
                 { problems.Add(at + "/contents: include ??_?? or the project display language " + displayLanguage + " (A54)."); continue; }
             }
-            double[]? bounds = IsText(kind) ? measureText?.Invoke(JsonSerializer.SerializeToElement(actual)) : kind == "arc" ?
-                [points[0][0]!.GetValue<double>() - item.GetProperty("radius_mm").GetDouble(), points[0][1]!.GetValue<double>() - item.GetProperty("radius_mm").GetDouble(), points[0][0]!.GetValue<double>() + item.GetProperty("radius_mm").GetDouble(), points[0][1]!.GetValue<double>() + item.GetProperty("radius_mm").GetDouble()] :
+            double radius = kind == "arc" ? item.GetProperty("radius_mm").GetDouble() : kind == "ellipse" ? Math.Max(item.GetProperty("radius_x_mm").GetDouble(), item.GetProperty("radius_y_mm").GetDouble()) : 0;
+            double[]? bounds = IsText(kind) ? measureText?.Invoke(JsonSerializer.SerializeToElement(actual)) : kind is "arc" or "ellipse" ?
+                [points[0][0]!.GetValue<double>() - radius, points[0][1]!.GetValue<double>() - radius, points[0][0]!.GetValue<double>() + radius, points[0][1]!.GetValue<double>() + radius] :
                 [points.Min(p => p[0]!.GetValue<double>()), points.Min(p => p[1]!.GetValue<double>()), points.Max(p => p[0]!.GetValue<double>()), points.Max(p => p[1]!.GetValue<double>())];
             if (bounds is not null && (bounds.Length != 4 || bounds.Any(n => !double.IsFinite(n)) || bounds[0] > bounds[2] || bounds[1] > bounds[3]))
             { bounds = null; }
@@ -185,14 +186,14 @@ internal static class PlacementCreatePlanning
 
     internal static readonly string[] ImageExtensions = [".png", ".jpg", ".jpeg", ".bmp", ".emf", ".wmf"];
     internal static bool IsText(string? kind) => kind is "text" or "path_text";
-    private static string Field(string kind) => IsText(kind) ? "position" : kind == "arc" ? "center" : kind is "line" or "polyline" ? "points" : "corners";
+    private static string Field(string kind) => IsText(kind) ? "position" : kind is "arc" or "ellipse" ? "center" : kind is "line" or "polyline" ? "points" : "corners";
     internal static JsonNode Snap(JsonElement item, double grid, bool snap, bool normalizeRectangle = true)
     {
         if (!double.IsFinite(grid) || grid <= 0)
         { throw new BridgeCallException(new BridgeError { Reason = ErrorReason.CapabilityMissing, Message = "A reliable page grid is required." }); }
         JsonNode actual = JsonNode.Parse(item.GetRawText())!;
         string kind = item.GetProperty("kind").GetString()!, field = Field(kind);
-        JsonArray[] points = IsText(kind) || kind == "arc" ? [actual[field]!.AsArray()] : [.. actual[field]!.AsArray().Select(p => p!.AsArray())];
+        JsonArray[] points = IsText(kind) || kind is "arc" or "ellipse" ? [actual[field]!.AsArray()] : [.. actual[field]!.AsArray().Select(p => p!.AsArray())];
         foreach (JsonArray point in points)
         { for (int i = 0; i < 2; i++) { double n = point[i]!.GetValue<double>(); double value = snap ? Math.Round(n / grid, MidpointRounding.AwayFromZero) * grid : n; if (!double.IsFinite(value) || value is < 0 or > 10000) { throw new BridgeCallException(ToolResults.InvalidArgumentError(["/items: snapped coordinates must be finite and in 0..10000 mm."])); } point[i] = value; } }
         if (kind == "image" || kind == "rectangle" && normalizeRectangle)
@@ -202,7 +203,7 @@ internal static class PlacementCreatePlanning
     internal static PlacementText Request(JsonElement item)
     {
         string kind = item.GetProperty("kind").GetString()!, field = Field(kind);
-        double[][] points = IsText(kind) || kind == "arc" ? [item.GetProperty(field).Deserialize<double[]>()!] : item.GetProperty(field).Deserialize<double[][]>()!;
+        double[][] points = IsText(kind) || kind is "arc" or "ellipse" ? [item.GetProperty(field).Deserialize<double[]>()!] : item.GetProperty(field).Deserialize<double[][]>()!;
         return new()
         {
             Kind = kind,
@@ -212,6 +213,9 @@ internal static class PlacementCreatePlanning
             HeightMm = IsText(kind) ? item.TryGetProperty("height_mm", out JsonElement height) ? height.GetDouble() : -16002 : 0,
             Contents = IsText(kind) ? item.GetProperty("contents").Deserialize<Dictionary<string, string>>()! : [],
             RadiusMm = kind == "arc" ? item.GetProperty("radius_mm").GetDouble() : 0,
+            RadiusXmm = kind == "ellipse" ? item.GetProperty("radius_x_mm").GetDouble() : 0,
+            RadiusYmm = kind == "ellipse" ? item.GetProperty("radius_y_mm").GetDouble() : 0,
+            Angle = kind == "ellipse" && item.TryGetProperty("angle", out JsonElement angle) ? angle.GetDouble() : 0,
             StartAngle = kind == "arc" ? item.GetProperty("start_angle").GetDouble() : 0,
             EndAngle = kind == "arc" ? item.GetProperty("end_angle").GetDouble() : 0,
             File = kind == "image" ? ImportFiles.Normalized(item.GetProperty("file").GetString()!) : ""

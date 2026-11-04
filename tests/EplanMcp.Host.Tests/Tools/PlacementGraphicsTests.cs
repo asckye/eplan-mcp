@@ -62,6 +62,34 @@ public sealed class PlacementGraphicsTests
     }
 
     [Theory]
+    [InlineData("\"radius_x_mm\":0,\"radius_y_mm\":2")]
+    [InlineData("\"radius_x_mm\":2,\"radius_y_mm\":-1")]
+    [InlineData("\"radius_x_mm\":2")]
+    [InlineData("\"radius_x_mm\":2,\"radius_y_mm\":2,\"angle\":1e400")]
+    public void Ellipse_InvalidAxesAndAnglesAreRejected(string fields)
+    {
+        JsonElement input = PlacementCreateTests.Input("{\"kind\":\"ellipse\",\"center\":[50,50]," + fields + "}");
+        Assert.NotEmpty(PlacementCreatePlanning.Validate(input));
+        if (!fields.Contains("\"angle\"", StringComparison.Ordinal))
+        { Assert.False(PropertyGetContractTests.Accepts(PlacementCreateContract.Input, input, PlacementCreateContract.Input)); }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Ellipse_DefaultOrRotatedAngleKeepsAxesAndConservativeBounds(bool rotated)
+    {
+        string item = "{\"kind\":\"ellipse\",\"center\":[50,50],\"radius_x_mm\":4,\"radius_y_mm\":8" + (rotated ? ",\"angle\":90" : "") + "}";
+        JsonElement input = PlacementCreateTests.Input(item);
+        Assert.Empty(PlacementCreatePlanning.Validate(input));
+        Assert.True(PropertyGetContractTests.Accepts(PlacementCreateContract.Input, input, PlacementCreateContract.Input));
+        var requested = PlacementCreatePlanning.Request(input.GetProperty("items")[0]);
+        Assert.Equal((4d, 8d, rotated ? 90d : 0d), (requested.RadiusXmm, requested.RadiusYmm, requested.Angle));
+        JsonElement data = PlacementCreateTests.Data(await PlacementCreateTests.Preview(PlacementCreateTests.Bridge(), input));
+        Assert.Equal([42d, 42d, 58d, 58d], data.GetProperty("items")[0].GetProperty("bounds").Deserialize<double[]>()!);
+    }
+
+    [Theory]
     [InlineData("../test.png")]
     [InlineData("sub/../../test.png")]
     [InlineData("C:/test.png")]

@@ -17,6 +17,7 @@ public sealed class DrawingDtoTests
             Items =
             [
                 new() { Kind = "polyline", Position = [10, 20], Points = [[10, 20], [30, 40], [50, 20]] },
+                new() { Kind = "ellipse", Position = [50, 50], RadiusXmm = 1.43748, RadiusYmm = 1.43748, Angle = 90 },
                 new() { Kind = "arc", Position = [50, 50], RadiusMm = 8, StartAngle = 30, EndAngle = 135 },
                 new() { Kind = "path_text", Position = [30, 50], HeightMm = 3.5, Contents = new() { ["??_??"] = "Motor circuit" } },
                 new() { Kind = "image", Position = [60, 60], EndPosition = [70, 70], File = "fixtures/image.png", FilePath = "resolved-image.png", Sha256 = new('a', 64) }
@@ -29,7 +30,7 @@ public sealed class DrawingDtoTests
         string bridgeJson = JsonConvert.SerializeObject(fromHost, bridge);
         PlacementTextCreateArgs fromBridge = System.Text.Json.JsonSerializer.Deserialize<PlacementTextCreateArgs>(bridgeJson, host)!;
         Assert.Equal(json, System.Text.Json.JsonSerializer.Serialize(fromBridge, host));
-        Assert.Equal(["polyline", "arc", "path_text", "image"], fromBridge.Items!.Select(i => i.Kind));
+        Assert.Equal(["polyline", "ellipse", "arc", "path_text", "image"], fromBridge.Items!.Select(i => i.Kind));
     }
 
     [Fact]

@@ -112,6 +112,7 @@ public sealed class PlacementGraphicsCreateTests
     [Theory]
     [InlineData("polyline")]
     [InlineData("arc")]
+    [InlineData("ellipse")]
     [InlineData("path_text")]
     public void Geometry_PreservesAdapterRequestAndTransactionShape(string kind)
     {
@@ -198,6 +199,56 @@ public sealed class PlacementGraphicsCreateTests
         Assert.Empty(store.Transactions.Calls);
     }
 
+    [Theory]
+    [InlineData(0, 1, 0)]
+    [InlineData(1, -1, 0)]
+    [InlineData(1, 1, double.NaN)]
+    [InlineData(1, double.PositiveInfinity, 0)]
+    public void Ellipse_RejectsInvalidAxesAndRotation(double rx, double ry, double angle)
+    {
+        var store = new PlacementTextStore();
+        PlacementTextCreateArgs request = Request("ellipse");
+        (request.Items![0].RadiusXmm, request.Items[0].RadiusYmm, request.Items[0].Angle) = (rx, ry, angle);
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => store.Operation.Execute(request)).Error.Reason);
+        Assert.Empty(store.Transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData("radius")]
+    [InlineData("angle")]
+    [InlineData("kind")]
+    public void Ellipse_ReadbackMismatchRollsBack(string changed)
+    {
+        var store = new PlacementTextStore { Readback = item =>
+        {
+            if (changed == "radius") { item.RadiusYmm += 1; }
+            if (changed == "angle") { item.Angle += 1; }
+            if (changed == "kind") { item.Kind = "arc"; }
+            return item;
+        } };
+        Assert.Equal(ErrorReason.EplanOperationFailed, Assert.Throws<BridgeErrorException>(() => store.Operation.Execute(Request("ellipse"))).Error.Reason);
+        Assert.Empty(store.Texts);
+    }
+
+    [Fact]
+    public void Ellipse_UsesMaximumAxisForPageBounds()
+    {
+        var store = new PlacementTextStore();
+        PlacementTextCreateArgs request = Request("ellipse");
+        request.Items![0].Position = [2, 20];
+        Assert.Contains("R1", Assert.Throws<BridgeErrorException>(() => store.Operation.Execute(request)).Error.Message, StringComparison.Ordinal);
+        Assert.Empty(store.Transactions.Calls);
+    }
+
+    [Fact]
+    public void Circle_AcceptsNativeZeroAnglesAfterSetCircle()
+    {
+        var store = new PlacementTextStore { Readback = item => { item.StartAngle = 0; item.EndAngle = 0; return item; } };
+        PlacementTextCreateArgs request = Request("arc");
+        request.Items![0].StartAngle = 0; request.Items[0].EndAngle = 360;
+        Assert.IsType<PlacementTextCreateData>(store.Operation.Execute(request));
+    }
+
     internal static PlacementTextCreateArgs Request(string kind) => new()
     {
         Project = "Line1",
@@ -205,6 +256,7 @@ public sealed class PlacementGraphicsCreateTests
         Items = [kind switch
         {
             "polyline" => new() { Kind = kind, Position = [20, 20], Points = [[20, 20], [30, 30], [40, 20]] },
+            "ellipse" => new() { Kind = kind, Position = [50, 50], RadiusXmm = 4, RadiusYmm = 8, Angle = 90 },
             "arc" => new() { Kind = kind, Position = [50, 50], RadiusMm = 5, StartAngle = 30, EndAngle = 150 },
             "path_text" => new() { Kind = kind, Position = [20, 20], HeightMm = 3.5, Contents = new() { ["??_??"] = "Motor circuit" } },
             _ => new() { Kind = kind, Position = [20, 20], EndPosition = [30, 30], File = "image.png", FilePath = Path.GetFullPath("image.png"), Sha256 = new('a', 64) }

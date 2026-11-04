@@ -197,7 +197,8 @@ public sealed class PropertyGetContractTests
             }
         }
         if (value.ValueKind == JsonValueKind.Number
-            && (schema.TryGetProperty("minimum", out JsonElement min) && value.GetDecimal() < min.GetDecimal()
+            && (schema.TryGetProperty("exclusiveMinimum", out JsonElement exclusiveMin) && value.GetDecimal() <= exclusiveMin.GetDecimal()
+                || schema.TryGetProperty("minimum", out JsonElement min) && value.GetDecimal() < min.GetDecimal()
                 || schema.TryGetProperty("maximum", out JsonElement max) && value.GetDecimal() > max.GetDecimal()))
         {
             return false;

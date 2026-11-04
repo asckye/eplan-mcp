@@ -55,13 +55,24 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
                 return () => polyline.Closed ? throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Polyline readback is closed.")
                     : new() { Kind = "polyline", Position = XY(polyline.GetPointAt(0)), Points = Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i))).ToArray() };
             }
-            if (text.Kind == "arc")
+            if (text.Kind is "arc" or "ellipse")
             {
                 var arc = new Arc();
                 arc.Create(Find(projectPath, page));
-                // XML: equal angles modulo 2*pi close the arc; bAsPie=false requests an arc, not a pie.
-                arc.SetArc(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm), text.StartAngle * (Math.PI / 180), text.EndAngle * (Math.PI / 180), false);
-                return () => new() { Kind = "arc", Position = XY(arc.Location), RadiusMm = DrawingCoordinates.ApiToMillimetres(arc.Radius), StartAngle = arc.StartAngle * (180 / Math.PI), EndAngle = arc.EndAngle * (180 / Math.PI) };
+                bool ellipse = text.Kind == "ellipse", circle = !ellipse && DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle);
+                if (ellipse)
+                { arc.SetEllipse(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusXmm), DrawingCoordinates.MillimetresToApi(text.RadiusYmm), text.Angle * (Math.PI / 180)); }
+                else if (circle)
+                { arc.SetCircle(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm)); }
+                else
+                { arc.SetArc(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm), text.StartAngle * (Math.PI / 180), text.EndAngle * (Math.PI / 180), false); }
+                return () =>
+                {
+                    if ((ellipse || circle) && arc.Kind.ToString() != (ellipse ? "Ellipse" : "Circle"))
+                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Native arc Kind did not read back as the requested Circle or Ellipse."); }
+                    return new() { Kind = text.Kind, Position = XY(arc.Location), RadiusMm = DrawingCoordinates.ApiToMillimetres(arc.Radius), StartAngle = arc.StartAngle * (180 / Math.PI), EndAngle = arc.EndAngle * (180 / Math.PI),
+                        RadiusXmm = ellipse ? DrawingCoordinates.ApiToMillimetres(arc.FirstRadius) : 0, RadiusYmm = ellipse ? DrawingCoordinates.ApiToMillimetres(arc.SecondRadius) : 0, Angle = ellipse ? arc.ElipseAngle * (180 / Math.PI) : 0 };
+                };
             }
             if (text.Kind == "image")
             {

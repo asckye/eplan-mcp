@@ -40,7 +40,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         foreach (JToken row in rows)
         {
             string at = batch ? "/items/" + (index++).ToString(CultureInfo.InvariantCulture) : "/text";
-            Members(row, at, "position heightMm contents", "kind endPosition points radiusMm startAngle endAngle file filePath sha256");
+            Members(row, at, "position heightMm contents", "kind endPosition points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256");
             string kind = row["kind"]?.Type == JTokenType.String ? (string)row["kind"]! : "text";
             if (row["kind"] is not null && row["kind"]!.Type != JTokenType.String || !KnownKind(kind))
             { throw InvalidArgument(at + "/kind is not a supported primitive."); }
@@ -60,6 +60,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             { foreach (JToken n in row["points"]!.SelectMany(p => p.Children())) { Number(n, at + "/points"); } }
             if (kind == "arc")
             { foreach (string name in _arcFields) { Number(row[name], at + "/" + name); } }
+            if (kind == "ellipse")
+            { foreach (string name in new[] { "radiusXmm", "radiusYmm", "angle" }) { Number(row[name], at + "/" + name); } }
             if (kind == "image" && _imageFields.Any(n => row[n]?.Type != JTokenType.String))
             { throw InvalidArgument(at + "/file requires a resolved import image and digest."); }
         }
@@ -84,7 +86,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         {
             if (item is null || !KnownKind(item.Kind) || item.Kind is "line" or "rectangle" or "image" && !Point(item.EndPosition)
                 || item.Kind == "polyline" && (item.Points is not { Length: >= 2 } || item.Points.Any(p => !Point(p)))
-                || item.Kind == "arc" && (!Finite(item.RadiusMm) || item.RadiusMm <= 0 || !Finite(item.StartAngle) || !Finite(item.EndAngle)))
+                || item.Kind == "arc" && (!Finite(item.RadiusMm) || item.RadiusMm <= 0 || !Finite(item.StartAngle) || !Finite(item.EndAngle))
+                || item.Kind == "ellipse" && (!Finite(item.RadiusXmm) || item.RadiusXmm <= 0 || !Finite(item.RadiusYmm) || item.RadiusYmm <= 0 || !Finite(item.Angle)))
             { throw WriteArguments.NotStarted(InvalidArgument("/items: invalid kind or endpoint coordinates.")); }
             if (item.Kind == "image")
             {
@@ -109,10 +112,11 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         List<string> warnings = LayoutGuard.Enforce(layout, items.Select((p, i) =>
         {
             double[][] points = p.Kind == "polyline" ? p.Points : [p.Position, p.EndPosition];
-            double[]? bounds = IsText(p) ? measureText?.Invoke(p) : p.Kind == "arc"
-                ? [p.Position[0] - p.RadiusMm, p.Position[1] - p.RadiusMm, p.Position[0] + p.RadiusMm, p.Position[1] + p.RadiusMm]
+            double radius = p.Kind == "ellipse" ? Math.Max(p.RadiusXmm, p.RadiusYmm) : p.RadiusMm;
+            double[]? bounds = IsText(p) ? measureText?.Invoke(p) : p.Kind is "arc" or "ellipse"
+                ? [p.Position[0] - radius, p.Position[1] - radius, p.Position[0] + radius, p.Position[1] + radius]
                 : [points.Min(q => q[0]), points.Min(q => q[1]), points.Max(q => q[0]), points.Max(q => q[1])];
-            string kind = p.Kind switch { "path_text" => "PathText", "polyline" => "PolyLine", _ => char.ToUpperInvariant(p.Kind[0]) + p.Kind.Substring(1) };
+            string kind = p.Kind switch { "path_text" => "PathText", "polyline" => "PolyLine", "ellipse" => "Arc", _ => char.ToUpperInvariant(p.Kind[0]) + p.Kind.Substring(1) };
             DrawingPlacement row = LayoutGuard.Proposed(kind, p.Position, bounds, i);
             row.Properties = new() { ["height_mm"] = p.HeightMm.ToString("R", CultureInfo.InvariantCulture), ["angle"] = "0" };
             return row;
@@ -159,7 +163,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         if (actual.Kind != text.Kind || !actual.EndPosition.SequenceEqual(text.EndPosition) || actual.HeightMm != text.HeightMm || !actual.Position.SequenceEqual(text.Position) || actual.Contents.Count != text.Contents.Count
             || actual.Points.Length != text.Points.Length || actual.Points.Zip(text.Points, (a, b) => a.SequenceEqual(b)).Any(equal => !equal)
             || actual.RadiusMm != text.RadiusMm || !Finite(actual.StartAngle) || !Finite(actual.EndAngle)
-            || Math.Abs(actual.StartAngle - text.StartAngle) > 1e-9 || Math.Abs(actual.EndAngle - text.EndAngle) > 1e-9
+            || !DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle) && (Math.Abs(actual.StartAngle - text.StartAngle) > 1e-9 || Math.Abs(actual.EndAngle - text.EndAngle) > 1e-9)
+            || actual.RadiusXmm != text.RadiusXmm || actual.RadiusYmm != text.RadiusYmm || !Finite(actual.Angle) || Math.Abs(actual.Angle - text.Angle) > 1e-9
             || actual.File != text.File || text.Kind == "image" && !ProjectResolver.SamePath(actual.FilePath, text.FilePath)
             || text.Contents.Any(p => !actual.Contents.TryGetValue(p.Key, out string? value) || !string.Equals(value, p.Value, StringComparison.Ordinal)))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Primitive geometry or text languages/height did not read back as requested; all changes were rolled back. Ask the engineer to check the page."); }
@@ -168,7 +173,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         return actual;
     }
 
-    private static bool KnownKind(string kind) => kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "path_text" or "image";
+    private static bool KnownKind(string kind) => kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "ellipse" or "path_text" or "image";
     private static bool IsText(PlacementText p) => p.Kind is "text" or "path_text";
     private static bool Finite(double n) => !double.IsNaN(n) && !double.IsInfinity(n);
     private static bool Point(double[]? p) => p is { Length: 2 } && p.All(n => Finite(n) && n is >= 0 and <= 10000);

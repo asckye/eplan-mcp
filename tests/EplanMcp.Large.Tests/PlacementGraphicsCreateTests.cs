@@ -119,6 +119,33 @@ public sealed class PlacementGraphicsCreateTests(LiveEplan eplan, WriteHost host
         Assert.Equal("??_??@Default path function;", row.GetProperty("properties").GetProperty("text").GetString());
     }
 
+    [Fact]
+    public async Task EllipseAndFullCircle_ReadBackNativeKindsAndGeometry()
+    {
+        Assert.Equal(eplan.ProcessId, host.ProcessId);
+        await using PlanStepLiveSession selection = await PlanStepLiveSession.StartAsync(eplan);
+        Assert.Equal(host.Writable, selection.Project, ignoreCase: true);
+        string page = Assert.Single(await selection.CreatePagesAsync(1));
+        var request = new Dictionary<string, object?>
+        {
+            ["project"] = host.Writable, ["page"] = page, ["dry_run"] = false, ["snap_to_grid"] = false,
+            ["items"] = new object[]
+            {
+                new { kind = "ellipse", center = new[] { 40d, 40d }, radius_x_mm = 1.43748, radius_y_mm = 1.43748, angle = 90 },
+                new { kind = "arc", center = new[] { 80d, 40d }, radius_mm = 8, start_angle = 0, end_angle = 360 },
+            },
+        };
+        JsonElement readback = await CreateAndReadback(request);
+        JsonElement rows = readback.GetProperty("drawings").GetProperty("items");
+        JsonElement ellipse = Assert.Single(rows.EnumerateArray(), r => r.GetProperty("properties").TryGetProperty("arc_kind", out JsonElement kind) && kind.GetString() == "Ellipse").GetProperty("properties");
+        Assert.Equal(1.43748, Number(ellipse, "radius_x_mm"), 7);
+        Assert.Equal(1.43748, Number(ellipse, "radius_y_mm"), 7);
+        Assert.Equal(Math.PI / 2, Number(ellipse, "ellipse_angle"), 6);
+        Assert.Equal(0, Number(ellipse, "radius_mm"));
+        JsonElement circle = Assert.Single(rows.EnumerateArray(), r => r.GetProperty("properties").TryGetProperty("arc_kind", out JsonElement kind) && kind.GetString() == "Circle").GetProperty("properties");
+        Assert.Equal(8, Number(circle, "radius_mm"), 8);
+    }
+
     private async Task<JsonElement> CreateAndReadback(Dictionary<string, object?> request)
     {
         var read = new Dictionary<string, object?> { ["project"] = host.Writable, ["page"] = request["page"], ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" };

@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_placement_create` 新增 ellipse；arc 起止角模 360 相等时创建整圆，分别核对 Ellipse/Circle 与原生半径、弧度角读回。
+
 - `eplan_placement_create` 的写入前布局预检（含预览）及批量写调用时限统一为 180 秒，其他读调用不变。
 
 - `eplan_placement_create` 的 path_text 可省略 `height_mm`，使用 EPLAN 默认高度标记 `-16002` 并严格核对读回。

@@ -15,10 +15,11 @@ namespace EplanMcp.Host.Tools;
 internal sealed class PlacementCreateTools
 {
     public const string Tool = "eplan_placement_create";
+    internal const string ShowPageDescription = "Open page (UI).";
 
     [McpServerTool(Name = Tool, ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     public static async Task<CallToolResult> CreateAsync(IBridgeClient bridge, WritePipeline pipeline, ImportFiles files, RequestContext<CallToolRequestParams> context,
-        [Description(PageDisplay.Description)] bool show_page = false,
+        [Description(ShowPageDescription)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
         JsonElement input = JsonSerializer.SerializeToElement((context.Params?.Arguments ?? new Dictionary<string, JsonElement>()).Where(p => p.Key != "show_page").ToDictionary());

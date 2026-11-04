@@ -17,6 +17,11 @@ public sealed class PlacementText
     public double[][] Points { get; set; } = [];
     /// <summary>Arc radius in millimetres; Position is its centre.</summary>
     public double RadiusMm { get; set; }
+    /// <summary>Ellipse radii in millimetres.</summary>
+    public double RadiusXmm { get; set; }
+    public double RadiusYmm { get; set; }
+    /// <summary>Ellipse rotation in degrees.</summary>
+    public double Angle { get; set; }
     /// <summary>Arc start angle in degrees.</summary>
     public double StartAngle { get; set; }
     /// <summary>Arc end angle in degrees.</summary>

@@ -3,6 +3,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Two-dimensional Circuit coordinates: millimetres, lower-left origin, y upwards (api-notes A3).</summary>
 public static class DrawingCoordinates
 {
+    /// <summary>Equal angles modulo a complete turn request a circle.</summary>
+    public static bool IsCircle(double start, double end) => (start % 360 + 360) % 360 == (end % 360 + 360) % 360;
     /// <summary>Converts a finite signed millimetre value to API units; offsets may be negative.</summary>
     public static double MillimetresToApi(double value) => Finite(value, "/coordinate");
     /// <summary>Converts a finite signed API value to millimetres (1:1, A3).</summary>
