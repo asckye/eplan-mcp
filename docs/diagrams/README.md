@@ -18,4 +18,4 @@
 - 重新生成：在仓库根目录运行
   `node .claude/skills/archify/bin/archify.mjs finalize <类型> docs/diagrams/<名称>/<名称>.json docs/diagrams/<名称>/<名称>.html --quality showcase --out-dir .archify/<名称> --json`
   （类型：`architecture`、`workflow`、`sequence` 等；同一输出再次生成时，`--out-dir` 换一个新的子目录）。
-- 字体：生成前运行 `node eng/scripts/apply-archify-font.mjs`，让图优先使用 Maple Mono（见 [README 的开发工具一节](../../README.md#开发工具新的开发电脑上安装)）。图里只按名称引用字体，没有安装该字体的电脑会自动退回 archify 原来的字体。
+- 字体：生成前运行 `node eng/scripts/apply-archify-font.mjs`，让图优先使用 Maple Mono（见 [CONTRIBUTING 的开发工具一节](../../CONTRIBUTING.md#开发工具新的开发电脑上安装)）。图里只按名称引用字体，没有安装该字体的电脑会自动退回 archify 原来的字体。

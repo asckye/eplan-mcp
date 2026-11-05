@@ -19,6 +19,28 @@ git config core.hooksPath eng/hooks
 - Visual Studio 2026 或 JetBrains Rider（可选）
 - 运行 Large 测试需要：EPLAN Electric P8 / Pro Panel 2026，以及包含 **API 扩展**的授权
 
+## 开发工具（新的开发电脑上安装）
+
+下面这些工具只用于**开发阶段**，不是产品的依赖，不会随 EplanMcp 发布（Maple Mono 字体例外，见表中说明）。除 Maple Mono 字体（SIL OFL 1.1）外，都是 MIT 许可证或官方工具。
+
+| 工具 | 用途 | 安装 |
+|---|---|---|
+| [Node.js](https://nodejs.org/) LTS | archify 和 MCP Inspector 的运行环境 | `winget install --id OpenJS.NodeJS.LTS -e` |
+| [archify](https://github.com/tt-a1i/archify) | Claude Code 技能：把架构、工作流程、时序画成可交互的 HTML 图，图存放在 [docs/diagrams/](docs/diagrams/) | 版本记录在 `skills-lock.json`，技能文件本身不进仓库。在仓库根目录依次运行下面两条命令：先按锁文件还原技能，再把图的字体切换为 Maple Mono（技能每次更新后都要再运行第二条） |
+| [Maple Mono](https://github.com/subframe7536/maple-font) 字体 | 项目统一字体：archify 图、开发时的编辑器和终端；Workbench 界面（M5）也用它，那里随程序附带 `MapleMono-CN` 的字体文件和许可证（ADR-0017），工程师不需要另装 | 从 [Releases](https://github.com/subframe7536/maple-font/releases) 下载 `MapleMono-NF-CN` 压缩包，解压后选中全部字体文件，右键"安装"；编辑器和终端里的字体名填 `Maple Mono NF CN`。构建 Workbench 用的字体文件另外运行 `eng\scripts\get-fonts.ps1` 取得：它下载官方的 v7.9 `MapleMono-CN.zip`，核对 SHA-256 后只把 Regular、SemiBold 和许可证解压到不提交的 `.local\fonts\`，构建时复制到程序旁的 `Fonts\` |
+| [covagashi/eplan-development-skill](https://github.com/covagashi/eplan-development-skill) | Claude Code 技能：教 AI 写 EPLAN 的 C# 脚本、API 和 Remote Client 代码，让 Bridge 代码写得更准 | 按该仓库 README 安装到 Claude Code |
+| [covagashi/eplan-rag-mcp](https://github.com/covagashi/eplan-rag-mcp) 中的文档服务 | EPLAN 2026/2027 官方文档的语义检索 MCP 服务器，开发时让 AI 随时查 API 文档，不凭记忆猜 | 按该仓库 README 中"远程文档服务器"一节，把服务器地址加到 Claude Code 的 MCP 配置中 |
+| [MCP Inspector](https://github.com/modelcontextprotocol/inspector) | MCP 官方的可视化调试工具，打通骨架时用来手动调用和检查我们的工具 | 需要 Node.js；使用时运行 `npx @modelcontextprotocol/inspector <启动 Host 的命令>` |
+
+安装 archify（`DISABLE_TELEMETRY` 和 `DO_NOT_TRACK` 关闭安装工具的遥测；`skills experimental_install` 只会装到 `.agents/`，Claude Code 读不到，所以不用它）：
+```powershell
+$env:DISABLE_TELEMETRY = "1"; $env:DO_NOT_TRACK = "1"; npx -y skills add tt-a1i/archify --skill archify --agent claude-code --copy --yes
+```
+安装后如果 `skills-lock.json` 发生了变化，说明 archify 发布了新版本：按开发流程作为依赖变更评审后再提交。
+```powershell
+node eng/scripts/apply-archify-font.mjs
+```
+
 ## 命令与输出目录
 
 常用构建、测试、自检、插件命令和输出目录说明见 [CLAUDE.md](CLAUDE.md#常用命令)。本地关卡入口：
