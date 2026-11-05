@@ -84,10 +84,10 @@ public sealed class DevicePlaceExecuteOperation(
                 { return; }
                 if (symbolSession is not IDeviceSymbolCommittedReadback readback)
                 { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The placed function cannot read back its part reference."); }
-                readback.ReadCommitted(args, data);
+                readback.AttachPart(args, data);
             });
             string? warning = result.Warning;
-            if (args.Part is null && (args.JoinDevice == true || args.PlcConnectionPoint is not null || DeviceSymbolPlan.BlackBox(args) || DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args)) && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
+            if ((args.JoinDevice == true || args.PlcConnectionPoint is not null || DeviceSymbolPlan.BlackBox(args) || DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args)) && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
             {
                 try
                 { committedReadback.ReadCommitted(args, result.Result); }

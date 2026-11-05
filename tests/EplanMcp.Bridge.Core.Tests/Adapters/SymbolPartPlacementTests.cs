@@ -50,7 +50,7 @@ public sealed class SymbolPartPlacementTests
         if (fail)
         {
             BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => TransactionRunner.Run(adapter,
-                "eplan_device_place", Change, _ => true, data => adapter.ReadCommitted(args, data)));
+                "eplan_device_place", Change, _ => true, data => adapter.AttachPart(args, data)));
             Assert.Equal(ExecutionState.RolledBack, failure.Error.Execution);
             Assert.Contains("DoUndo", FakeMoveNative.Calls);
             Assert.DoesNotContain("CloseUndo", FakeMoveNative.Calls);
@@ -58,7 +58,7 @@ public sealed class SymbolPartPlacementTests
             return;
         }
         var result = TransactionRunner.Run(adapter, "eplan_device_place", Change, _ => true,
-            data => adapter.ReadCommitted(args, data));
+            data => { if (withPart) { adapter.AttachPart(args, data); } adapter.ReadCommitted(args, data); });
         Assert.Equal(withPart ? "RIT.3451500" : "", result.Result.Part);
         Assert.False(placed!.IsMainFunction);
         Assert.Equal(withPart ? 1 : 0, placed.ArticleAdds.Count);

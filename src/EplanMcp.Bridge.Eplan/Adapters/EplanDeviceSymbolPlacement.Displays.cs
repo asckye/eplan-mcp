@@ -11,26 +11,31 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanDeviceSymbolPlacement
 {
+    public void AttachPart(DevicePlaceArgs args, DevicePlaceData data)
+    {
+        MainThread.Assert();
+        Function Placed() => EplanNativePreconditions.Valid(EplanProjects.ByPath(_projectPath).Pages
+            .Single(p => p.Name == _pageName).AllPlacements).OfType<Function>().Single(f => f.ObjectIdentifier == _placedFunctionId);
+        string variant = args.Variant ?? DevicePlaceRequest.DefaultVariant;
+        // A95: append only after creation commits; each transaction reacquires the function.
+        using (Transaction transaction = new TransactionManager().CreateTransaction())
+        {
+            Function placed = Placed();
+            placed.AddArticleReference(args.Part!, variant, 1);
+            transaction.Commit();
+            GC.KeepAlive(placed);
+        }
+        Function committed = Placed();
+        if (!committed.ArticleReferences.Any(a => a.PartNr == args.Part && a.VariantNr == variant && a.Count == 1))
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN did not keep the requested part on the placed symbol."); }
+        GC.KeepAlive(committed);
+        data.Part = args.Part!;
+        data.Variant = variant;
+    }
+
     public void ReadCommitted(DevicePlaceArgs args, DevicePlaceData data)
     {
         MainThread.Assert();
-        if (args.Part is not null)
-        {
-            // A95: append only after creation commits, reacquiring the function in the new transaction.
-            using (Transaction transaction = new TransactionManager().CreateTransaction())
-            {
-                Function placed = EplanNativePreconditions.Valid(EplanProjects.ByPath(_projectPath).Pages
-                    .Single(p => p.Name == _pageName).AllPlacements).OfType<Function>()
-                    .Single(f => f.ObjectIdentifier == _placedFunctionId);
-                placed.AddArticleReference(args.Part, args.Variant ?? DevicePlaceRequest.DefaultVariant, 1);
-                Require(placed.ArticleReferences.Any(a => a.PartNr == args.Part
-                    && a.VariantNr == (args.Variant ?? DevicePlaceRequest.DefaultVariant) && a.Count == 1));
-                data.Part = args.Part;
-                data.Variant = args.Variant ?? DevicePlaceRequest.DefaultVariant;
-                transaction.Commit();
-                GC.KeepAlive(placed);
-            }
-        }
         if (args.PlcConnectionPoint is null)
         { ReadSpecialCommitted(args, data); return; }
         string verification = "the placed PLC point's identity and page";

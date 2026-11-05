@@ -7,4 +7,7 @@ public interface IDeviceSymbolCommittedReadback
 {
     /// <summary>Refreshes native PLC fields and verifies displays; failure becomes a committed warning, never an unknown commit.</summary>
     public void ReadCommitted(DevicePlaceArgs args, DevicePlaceData data);
+
+    /// <summary>Adds the requested part after the placement's commit, inside its undo step; a part EPLAN did not take rolls the placement back (A95).</summary>
+    public void AttachPart(DevicePlaceArgs args, DevicePlaceData data);
 }

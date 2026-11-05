@@ -68,7 +68,7 @@ internal static class PropertySetRequest
                 }
                 if ((entry.Definition.ValueType == "integer" ? value is not JsonValue number || !number.TryGetValue<long>(out long n)
                         || n < (entry.Definition.LowerBound?.IntegerValue ?? long.MinValue) || n > (entry.Definition.UpperBound?.IntegerValue ?? long.MaxValue) : text is null || text.Length > 500) || selector.Index is not null
-                    || entry.PropertyId == 20011 && (parsed.Language is not { Length: 5 } language || language[2] != '_'
+                    || entry.PropertyId == 20011 && parsed.Language != "??_??" && (parsed.Language is not { Length: 5 } language || language[2] != '_'
                         || language[..2].Any(c => c is < 'a' or > 'z') || language[3..].Any(c => c is < 'A' or > 'Z'))
                     || entry.PropertyId != 20011 && parsed.Language is not null)
                 {

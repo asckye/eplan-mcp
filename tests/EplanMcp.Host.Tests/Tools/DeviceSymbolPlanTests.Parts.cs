@@ -23,7 +23,7 @@ public sealed partial class DeviceSymbolPlanTests
             Kind = "function",
             FunctionCategory = "Busbar"
         });
-        _placement.FailAt = fail ? "CommittedReadback" : null;
+        _placement.FailAt = fail ? "AttachPart" : null;
         var response = await DeviceWriteTools.DevicePlaceAsync(_harness.Pipeline, _harness.Bridge,
             "Line1", Page, 100, 120, tag: "+A1-WE1", part: "RIT.3451500", variant: "1",
             library: "SPECIAL", symbol: "BCP", symbol_variant: 2, join_device: true, dry_run: preview,
@@ -45,8 +45,8 @@ public sealed partial class DeviceSymbolPlanTests
         { Assert.Empty(_placement.Calls); }
         else
         {
-            Assert.True(_placement.Calls.IndexOf("Commit") < _placement.Calls.IndexOf("CommittedReadback"));
-            Assert.True(_placement.Calls.IndexOf("CommittedReadback") < _placement.Calls.IndexOf("CloseUndo"));
+            Assert.True(_placement.Calls.IndexOf("Commit") < _placement.Calls.IndexOf("AttachPart"));
+            Assert.True(_placement.Calls.IndexOf("AttachPart") < _placement.Calls.IndexOf("CloseUndo"));
             Assert.Single(_placement.Calls, call => call == "CommittedReadback");
         }
     }

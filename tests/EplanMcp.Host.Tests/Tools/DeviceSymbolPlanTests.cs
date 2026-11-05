@@ -393,11 +393,17 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
             }
             finally { Calls.Add("ReleaseLists"); }
         }
+        public void AttachPart(DevicePlaceArgs args, DevicePlaceData data)
+        {
+            Calls.Add("AttachPart");
+            data.Part = args.Part!;
+            data.Variant = args.Variant ?? "1";
+            if (FailAt == "AttachPart")
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The part was refused."); }
+        }
         public void ReadCommitted(DevicePlaceArgs args, DevicePlaceData data)
         {
             Calls.Add("CommittedReadback");
-            if (args.Part is not null)
-            { data.Part = args.Part; data.Variant = args.Variant ?? "1"; }
             if (FailAt == "CommittedReadback")
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Display lost after commit."); }
             if (FailAt == "CommittedNameLookup")
@@ -418,7 +424,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
             public void CloseUndo() => owner.Calls.Add("CloseUndo");
             public void Rollback()
             {
-                Assert.True(owner.Calls[^1] is "ReleaseLists" or "ReadDisplays" || owner.Args?.Part is not null && owner.Calls[^1] == "CommittedReadback");
+                Assert.True(owner.Calls[^1] is "ReleaseLists" or "ReadDisplays" || owner.Args?.Part is not null && owner.Calls[^1] == "AttachPart");
                 owner.Calls.Add("Abort");
                 store.Names.Clear();
                 store.Names.AddRange(names);

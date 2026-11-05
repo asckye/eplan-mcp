@@ -34,7 +34,8 @@ public sealed partial class DevicePlaceTests
             JsonElement result = await PartsCallAsync("eplan_device_place", request);
             Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
             Assert.Equal(tag, result.GetProperty("device").GetProperty("tag").GetString());
-            JsonElement read = await ReadPlacedPartAsync(project, page, tag, category, 80, 160);
+            // A part's macro may set its reference point off the insertion point (LSW1C sits 4 mm from it).
+            JsonElement read = await ReadPlacedPartAsync(project, page, tag, category, null, null);
             Assert.Equal(tag, read.GetProperty("name").GetString());
             if (definition is not null)
             { Assert.Equal(definition, read.GetProperty("definition").GetString()); }
@@ -48,7 +49,7 @@ public sealed partial class DevicePlaceTests
         {
             await PartsFailureReadbackAsync(project, tag);
             try
-            { await ReadPlacedPartAsync(project, page, tag, category, 80, 160); }
+            { await ReadPlacedPartAsync(project, page, tag, category, null, null); }
             catch (Exception error) { TestContext.Current.TestOutputHelper!.WriteLine("Part priority readback failed: " + error); }
             throw;
         }
@@ -62,10 +63,10 @@ public sealed partial class DevicePlaceTests
         await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
     }
 
-    private async Task<JsonElement> ReadPlacedPartAsync(string project, string page, string tag, string category, double x, double y)
+    private async Task<JsonElement> ReadPlacedPartAsync(string project, string page, string tag, string category, double? x, double? y)
     {
         string file = Path.Combine(host.Home, "placed-part-" + Guid.NewGuid().ToString("N") + ".json");
-        string request = JsonSerializer.Serialize(new { project, page, tag, category, x, y });
+        string request = x is null ? JsonSerializer.Serialize(new { project, page, tag, category }) : JsonSerializer.Serialize(new { project, page, tag, category, x, y });
         TestContext.Current.TestOutputHelper!.WriteLine("Placed function request: " + request);
         await File.WriteAllTextAsync(file, request, TestContext.Current.CancellationToken);
         await PlanStepLiveSession.ActionAsync("EplanMcpLargeTerminalPartReadback /REQUEST:\"" + file + "\"");
