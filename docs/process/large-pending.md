@@ -4,7 +4,6 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| action 注册表目录（2026-11-04，手册 T.4；`01-registry-catalog`、`02-catalog-docs`） | `ActionCatalogTests` | NOT RUN：本次禁止 EPLAN。保留现有 UI 数量与白名单断言，新增只读检查 registry 总数超过 1300、按名找到 AfGetSettingAction、XCabIaChangeAngle 为 excluded；不执行 action，不以负责人提供的注册表事实代替本次 Large 结果。工具规格和 usage 已同步，Large 只读核验仍待运行。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite Overview 页验证 PXC.2861344 的对象、PLC 盒、总览点、部件引用及撤销恢复；默认预览迁移后的旧宏断言保留。 |
 | G9 图形创建（2026-11-03，负责人 brief） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | NOT RUN：本次禁止 EPLAN。新增折线、圆弧、路径功能文本、imports 图片混合批次；待核对原生类型、全部点、角度/端点与外框、文字、图片路径和一次撤销恢复快照。XML 仅证明签名，不证明角度方向或实际图片行为。 |
 | S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 待运行：本次禁止 EPLAN；需验证写入未知结果、真实回滚及原有写入安全回归。Small 假对象覆盖未分类异常、回滚证据、结果查询与不重放；未改 Large 断言，不宣称实机通过。 |
@@ -35,7 +34,6 @@
 | 报表方案数据修正（2026-11-03，负责人 brief；`fix(tools): carry report scheme data from page_get to report_create`；A84） | `ReportCreateTests` | 待运行（NOT RUN）：03:39 目录通过，端子图因目标项目没有 `Location designation_A3` 且未传数据而失败。修正后须只读示例 `&AAB1/1` 与 `+A1&EMA2/2`，仅在 LargeWrite 生成目录，并原样传入端子图方案名和四项数据；核对 `pages`、`new_pages`、类型与表格及两次写入分别单步撤销。主线程时长未测；本次禁止 EPLAN。 |
 | 报表块读取 R1 及方案数据修正（2026-11-03，负责人 brief；A84） | `ReportReadTests` | 待运行（NOT RUN）：本次禁止 EPLAN；正式 `eplan_page_get` 只读示例夹具 `&AAB1/1`，核对报表类型、表格与方案字段。方案数据原样返回，每项上限 4000 字符，超出截断并警告。 |
 | 报表块探测 T.4（2026-11-03，负责人 brief；P-01） | `ReportBlockSpikeTests` | 待运行（NOT RUN）：本次禁止运行 EPLAN。待只读观察示例夹具 7 页的 ReportBlock 全字段及名称属性列表，再在 LargeWrite 按原设置生成目录和端子图，核对 Type/FormName、事务失败回滚和提交后新包装读回；证据写 `%TEMP%\eplanmcp-spikes\report-blocks-*.json`。 |
-| 官方 action 离线导入（`feat/official-actions`，2026-11-01 负责人 brief） | `BatchVerification`、`ActionTryTests`、`ActionCatalogTests` | 待运行：批量 action 仅取官方 action/TYPE 行，按第一条官方示例准备参数；需要文件、页或选择上下文仍为 needs_context。此次禁止运行 EPLAN；审批、scratch、unknown 停止与撤销断言保留。 |
 | 崩溃成员拒绝与失联停跑（`feat/crash-refusals`，2026-11-02，负责人 brief；A77） | `BatchVerification`、`ApiTryTests` | 待运行：本次禁止运行 EPLAN；拒绝写侧、保留 MacroBox 读取、失联后停止并持久暂停需验证。崩溃成员不再试执行，原生 target/value 未提供，不宣称复现原生崩溃。 |
 | 批量验证与 main 生成表合并（`feat/batch-verify`，2026-11-01，负责人 brief） | `BatchVerification`、`ApiTryTests`、`ActionTryTests` | 进行中：2026-11-01 已落地 main 68e9f61b，首批 10-31 结果导入后实机验证计数 171 → 228；当夜两槽循环续跑（单次运行在结果未知或状态不可信的条目处按设计停止并换新副本续跑），次日汇总导入。 |
 | 移动后重新分配电缆芯线（后续，2026-11-02 A73） | `PageReviewTests`（cable 场景） | 待设计：移动电缆会丢失芯线归属且生成不恢复；先做一次探测（产品建的带芯线模板电缆，移动、生成后试原生绑定与重新分配导线），确认后再定修复工具。当前 cable 场景只验证检测与目标坐标，修复步骤跳过。 |
