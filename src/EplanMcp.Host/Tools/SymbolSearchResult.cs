@@ -26,6 +26,7 @@ internal sealed class SymbolSearchResult : IPagedResult<SymbolSearchResult.Item>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Description { get; set; }
         public int Variant { get; set; }
+        public string VariantLabel => Variant is >= 0 and <= 7 ? ((char)('A' + Variant)).ToString() : string.Empty;
         public string Type { get; set; } = string.Empty;
         public string Kind { get; set; } = string.Empty;
         public List<SymbolConnectionPoint> ConnectionPoints { get; set; } = [];

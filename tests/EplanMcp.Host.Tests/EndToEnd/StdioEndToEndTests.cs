@@ -161,15 +161,20 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         Assert.Equal("Line1", first.GetProperty("project").GetString());
         Assert.Equal(2, first.GetProperty("total").GetInt32());
         Assert.Equal(0, Assert.Single(first.GetProperty("symbols").EnumerateArray()).GetProperty("variant").GetInt32());
+        Assert.Equal("A", first.GetProperty("symbols")[0].GetProperty("variantLabel").GetString());
         args["cursor"] = first.GetProperty("nextCursor").GetString();
         response = await Call(SymbolTools.Tool, args);
         Assert.True(response.IsError is not true, Text(response));
         JsonElement second = response.StructuredContent!.Value;
         JsonElement symbol = Assert.Single(second.GetProperty("symbols").EnumerateArray());
         Assert.Equal(("CO", "Routing", 1), (symbol.GetProperty("name").GetString(), symbol.GetProperty("type").GetString(), symbol.GetProperty("variant").GetInt32()));
+        Assert.Equal("B", symbol.GetProperty("variantLabel").GetString());
         Assert.Equal("Up", symbol.GetProperty("connectionPoints")[0].GetProperty("direction").GetString());
         Assert.Equal(JsonValueKind.Null, second.GetProperty("nextCursor").ValueKind);
         Assert.False(second.TryGetProperty("execution", out _));
+
+        JsonElement extended = (await Call(SymbolTools.Tool, new() { ["project"] = "Line1", ["library"] = "EXTENDED" })).StructuredContent!.Value;
+        Assert.Equal(["A", "B", "C", "D", "E", "F", "G", "H", ""], extended.GetProperty("symbols").EnumerateArray().Select(row => row.GetProperty("variantLabel").GetString()));
 
         args["initialize"] = true;
         Assert.True((await Call(SymbolTools.Tool, args)).IsError);
@@ -638,7 +643,9 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
     private sealed class SymbolReader : ISymbolReader
     {
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) =>
-            SymbolKinds.Matches(args, "SPECIAL", "CO", "routing")
+            args.Library == "EXTENDED"
+                ? [.. Enumerable.Range(0, 9).Select(i => new SymbolSearchItem { Library = "EXTENDED", Name = "BP", Variant = i })]
+                : SymbolKinds.Matches(args, "SPECIAL", "CO", "routing")
                 ? [.. Enumerable.Range(0, 2).Reverse().Select(i => new SymbolSearchItem { Library = "SPECIAL", Name = "CO", Kind = "routing", Type = "Routing", Variant = i, ConnectionPoints = [new() { Location = [0, 0], Direction = "Up" }] })]
                 : [];
     }

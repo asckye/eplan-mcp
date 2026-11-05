@@ -17,6 +17,26 @@ public sealed class SymbolToolTests
         return new ListData<SymbolSearchItem> { Project = "Line1", Total = 3, Items = [.. Enumerable.Range(0, 3).Skip(args.Offset).Take(args.Limit).Select(i => new SymbolSearchItem { Library = "SPECIAL", Name = "CO\u202e", Variant = i, Type = "Routing", Kind = "routing", ConnectionPoints = [new() { Location = [-4, 0], Direction = "Left" }] })] };
     };
 
+    [Theory]
+    [InlineData(-1, "")]
+    [InlineData(0, "A")]
+    [InlineData(1, "B")]
+    [InlineData(2, "C")]
+    [InlineData(3, "D")]
+    [InlineData(4, "E")]
+    [InlineData(5, "F")]
+    [InlineData(6, "G")]
+    [InlineData(7, "H")]
+    [InlineData(8, "")]
+    public async Task Search_LabelsOnlyNativeVariantsZeroThroughSeven(int variant, string label)
+    {
+        _bridge.Handlers[OperationNames.SymbolSearch] = _ => new ListData<SymbolSearchItem>
+        { Project = "Line1", Total = 1, Items = [new() { Library = "IEC_symbol", Name = "BP", Variant = variant }] };
+        JsonElement row = Assert.Single(Data(await SymbolTools.SearchAsync(_bridge, "Line1", cancellationToken: TestContext.Current.CancellationToken)).GetProperty("symbols").EnumerateArray());
+        Assert.Equal(variant, row.GetProperty("variant").GetInt32());
+        Assert.Equal(label, row.GetProperty("variantLabel").GetString());
+    }
+
     [Fact]
     public async Task Search_SuccessRoundTripsWithAnOmittedErrorFlag()
     {
@@ -53,6 +73,7 @@ public sealed class SymbolToolTests
             Assert.False(item.TryGetProperty("description", out _));
             Assert.Equal("Left", item.GetProperty("connectionPoints")[0].GetProperty("direction").GetString());
             variants.Add(item.GetProperty("variant").GetInt32());
+            Assert.Equal(((char)('A' + variants[^1])).ToString(), item.GetProperty("variantLabel").GetString());
             cursor = data.GetProperty("nextCursor").GetString();
             Assert.False(data.GetProperty("truncated").GetBoolean());
         } while (cursor is not null);

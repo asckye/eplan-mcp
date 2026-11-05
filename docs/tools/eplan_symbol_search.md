@@ -26,7 +26,7 @@ T7d 兼容输出增加 `functionCategory`（原生功能类别）与 `plcInputDe
 | `cursor` | string | 否 | — | 上次结果的 `nextCursor`；绑定项目和全部过滤条件 |
 
 ## 3. 输出
-结构化结果及同内容 JSON 文本：`project, symbols, total, nextCursor, truncated, hint`。每个变体一行：`library, name, variant, type, kind, connectionPoints`；连接点含符号局部毫米坐标 `location=[x,y]` 与 EPLAN 原始 `direction`。按库名、符号名的序数顺序及变体号排序；`total` 是匹配变体总数。摘要只含数量。结果清洗并按既有双份预算分页；没有匹配返回空页。没有 `response_format`，始终返回连接点。
+结构化结果及同内容 JSON 文本：`project, symbols, total, nextCursor, truncated, hint`。每个变体一行：`library, name, variant, variantLabel, type, kind, connectionPoints`；`variantLabel` 将编号 0–7 对应 A–H（变量 E 即编号 4），范围外为空字符串。连接点含符号局部毫米坐标 `location=[x,y]` 与 EPLAN 原始 `direction`。按库名、符号名的序数顺序及变体号排序；`total` 是匹配变体总数。摘要只含数量。结果清洗并按既有双份预算分页；没有匹配返回空页。没有 `response_format`，始终返回连接点。
 每项增加可选 `description`（`SYMB_DESC` 多语言描述，空值省略），用于区分按钮、选择开关、急停和普通触点；所有符号类型均读取，每个符号与类别共用一次属性列表。游标同时绑定 `text_contains` 和 `language`。
 
 ## 4. 错误

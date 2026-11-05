@@ -21303,7 +21303,7 @@
     {
       "name": "eplan_symbol_search",
       "title": "Search project symbols",
-      "description": "Finds symbols, descriptions and pins (mm). Example: {\"project\":\"Line1\"}.",
+      "description": "Finds symbols and pins (mm); variants 0–7=A–H. Example: {\"project\":\"Line1\"}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -21422,6 +21422,12 @@
                 },
                 "variant": {
                   "type": "integer"
+                },
+                "variantLabel": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "type": {
                   "type": "string"

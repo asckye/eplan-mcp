@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R10-05 变量字母（2026-11-04 brief） | `SymbolSearchTests` | NOT RUN：本次禁止 EPLAN。无新增写入 Large；现有符号查询待实机回归。A–H 和范围外空字符串由 Small/Medium 覆盖。 |
 | R10-04 部件模板换变量（2026-11-04 brief） | `PartVariantPlacementTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待以 PXC.3211813 仅指定 symbol_variant，核对模板符号、变量、部件和单步撤销；不存在变量须完整回滚。 |
 | R10-03 放置时属性排列（2026-11-04 brief） | `PlacementArrangementTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对普通符号、部件与中断点的指定属性排列读回及一步撤销快照；本次不宣称原生 Selected 行为已验证。 |
 | R10-02 属性排列（2026-11-04 brief） | `PlacementSymbolEditTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 BP 变量 A 的“左,0°”、19307 与 20010 文字 x<0，不存在名称不改页，以及一步撤销。Selected 写入未实测，实测后按下一可用编号补 api-notes。 |

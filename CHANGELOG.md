@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_symbol_search` 每行增加 `variantLabel`：变量编号 0–7 对应 A–H，其他编号返回空字符串。
+
 - `eplan_device_place` 的部件路线可只传 `symbol_variant`，使用部件模板提供的库和符号；变量不存在时回滚。
 
 - `eplan_device_place` 两条放置路线及 `eplan_connection_create.interruption_point` 支持可选 `property_arrangement`，在放置事务内设置并读回；省略时沿用原行为。
