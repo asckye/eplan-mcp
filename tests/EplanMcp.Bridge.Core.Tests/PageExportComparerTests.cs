@@ -309,7 +309,7 @@ public sealed class PageExportComparerTests
     {
         const string source = """
             {"placements":[{"type":"Function","properties":[
-              {"id":20068,"index":0,"value":"0"},
+              {"id":20068,"index":0,"value":"2"},
               {"id":20121,"index":0,"value":"1"},
               {"id":20122,"index":0,"value":"1"},
               {"id":20123,"index":0,"value":"0"}
@@ -318,7 +318,7 @@ public sealed class PageExportComparerTests
         const string target = """
             {"placements":[{"type":"Function","properties":[
               {"id":20123,"index":0,"value":"0"},
-              {"id":20051,"index":0,"value":"0"},
+              {"id":20051,"index":0,"value":"3"},
               {"id":20122,"index":0,"value":"1"},
               {"id":20121,"index":0,"value":"1"}
             ]}]}
@@ -327,10 +327,10 @@ public sealed class PageExportComparerTests
         IReadOnlyList<PageExportFieldDifference> fields = Assert.Single(PageExportComparer.Compare(source, target).Types["Function"].Different).Fields;
 
         Assert.Equal(["properties[id=20068,index=0].value", "properties[id=20051,index=0].value"], fields.Select(f => f.Field));
-        Assert.Equal("0", (string?)fields[0].Source);
+        Assert.Equal("2", (string?)fields[0].Source);
         Assert.Null(fields[0].Target);
         Assert.Null(fields[1].Source);
-        Assert.Equal("0", (string?)fields[1].Target);
+        Assert.Equal("3", (string?)fields[1].Target);
     }
 
     [Fact]

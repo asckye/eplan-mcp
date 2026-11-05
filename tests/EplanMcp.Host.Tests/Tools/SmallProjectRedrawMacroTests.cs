@@ -226,7 +226,7 @@ public sealed class SmallProjectRedrawMacroTests
     }
 
     [Fact]
-    public async Task DeviceWithPart_PlacesTheSourceSymbolAndAssignsThePart()
+    public async Task DeviceWithPart_ComesFromTheLibraryWithTheSourceSymbol()
     {
         JObject device = Device(5, "=K1+A2-FC2", "CircuitBreaker", 112, 248, "", true);
         device["symbol"] = new JObject { ["library"] = "IEC_symbol", ["name"] = "FAH1", ["variant"] = 0 };
@@ -238,9 +238,29 @@ public sealed class SmallProjectRedrawMacroTests
         await driver.DrawPageAsync(page, [page]);
 
         JObject place = Assert.Single(calls, call => call.Tool == "eplan_device_place").Args;
-        Assert.Equal("FAH1", (string?)place["symbol"]);
-        Assert.Null(place["part"]);
-        Assert.Equal("SIE.5SY4106-7", (string?)Assert.Single(calls, call => call.Tool == "eplan_device_update").Args["part"]);
+        Assert.Equal(("FAH1", "SIE.5SY4106-7"), ((string?)place["symbol"], (string?)place["part"]));
+        Assert.DoesNotContain(calls, call => call.Tool == "eplan_device_update");
+    }
+
+    [Fact]
+    public async Task PartTheLibraryCannotPlace_IsDrawnWithItsSymbol()
+    {
+        JObject device = Device(5, "=K1+A2-FC2", "CircuitBreaker", 112, 248, "", true);
+        device["symbol"] = new JObject { ["library"] = "IEC_symbol", ["name"] = "FAH1", ["variant"] = 0 };
+        device["parts"] = new JArray(new JObject { ["part"] = "RIT.3581000", ["variant"] = "1" });
+        JObject page = Page("Circuit", device);
+        var calls = new List<(string Tool, JObject Args)>();
+        var driver = Driver(calls, new SmallProjectRedrawReport("test", "ScratchTest"), (tool, args) =>
+            tool == "eplan_device_place" && args["part"] is not null ? JObject.Parse("""{"error":{"reason":"EPLAN_OPERATION_FAILED","message":"EPLAN could not place part","execution":"rolled_back"}}""") : Success([]));
+
+        await driver.DrawPageAsync(page, [page]);
+
+        JObject[] places = [.. calls.Where(call => call.Tool == "eplan_device_place").Select(call => call.Args)];
+        Assert.Equal(2, places.Length);
+        Assert.Null(places[1]["part"]);
+        JObject[] updates = [.. calls.Where(call => call.Tool == "eplan_device_update").Select(call => call.Args)];
+        Assert.Equal("RIT.3581000", (string?)updates[0]["part"]);
+        Assert.True((bool?)updates[1]["update_from_parts"]);
     }
 
     [Fact]
@@ -251,7 +271,7 @@ public sealed class SmallProjectRedrawMacroTests
         card["properties"] = new JArray(new JObject { ["id"] = 20161, ["index"] = 0, ["value"] = "Phoenix1" }, new JObject { ["id"] = 20308, ["index"] = 0, ["value"] = "6" });
         JObject point = Device(2, "=K1+A2-KE4:1.1", "PLCTerminal", 238, 276, "");
         point["properties"] = new JArray(new JObject { ["id"] = 20400, ["index"] = 0, ["value"] = "%IX2.4" },
-            new JObject { ["id"] = 20011, ["index"] = 0, ["value"] = new JObject { ["en_US"] = "Voltage", ["??_??"] = "skipped" } });
+            new JObject { ["id"] = 20011, ["index"] = 0, ["value"] = new JObject { ["en_US"] = "Voltage", ["??_??"] = "Independent" } });
         JObject page = Page("Circuit", card, point);
         var calls = new List<(string Tool, JObject Args)>();
         var driver = Driver(calls, new SmallProjectRedrawReport("test", "ScratchTest"), (tool, _) =>
@@ -260,7 +280,7 @@ public sealed class SmallProjectRedrawMacroTests
         await driver.DrawPageAsync(page, [page]);
 
         JArray changes = (JArray)Assert.Single(calls, call => call.Tool == "eplan_property_set").Args["changes"]!;
-        Assert.Equal(["20161|Phoenix1", "20308|6", "20400|%IX2.4", "20011|Voltage"], changes.Select(c => c["property"]!["property_id"] + "|" + c["value"]));
+        Assert.Equal(["20161|Phoenix1", "20308|6", "20400|%IX2.4", "20011|Voltage", "20011|Independent"], changes.Select(c => c["property"]!["property_id"] + "|" + c["value"]));
         Assert.Equal(6, (int)changes[1]["value"]!);
         Assert.Equal("en_US", (string?)changes[3]["language"]);
         Assert.Equal("function", (string?)changes[2]["target"]!["locator"]!["kind"]);
