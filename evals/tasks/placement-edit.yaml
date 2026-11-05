@@ -11,11 +11,11 @@ answer: { type: object, required: [count, copied], properties: { count: { type: 
 after:
   rectangles:
     tool: eplan_page_get
-    args: { project: "{project}", page: "=GAA+A1&EFS1/9901", include_drawings: true }
+    args: { page: "=GAA+A1&EFS1/9901", include_drawings: true }
     pick: $.drawings.total
   positions:
     tool: eplan_page_get
-    args: { project: "{project}", page: "=GAA+A1&EFS1/9901", include_drawings: true }
+    args: { page: "=GAA+A1&EFS1/9901", include_drawings: true }
     pick: $.drawings.items[*].location[0]
 checks:
   - { answer: $.count, equals: 3 }

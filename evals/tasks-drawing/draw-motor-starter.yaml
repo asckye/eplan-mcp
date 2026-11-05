@@ -8,13 +8,13 @@ prompt: |
   电气元件优先用部件库里的部件，没有合适的部件再用符号。布局要整齐，不能重叠。画完后确认连接已经生成。
 answer: { type: object, required: [done], properties: { done: { type: boolean, description: true when the page is drawn and connected } } }
 after:
-  type: { tool: eplan_page_get, args: { project: "{project}", page: "=GAA+A1&EFS1/9911" }, pick: $.page.type }
-  q1: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", tag_contains: "-Q1" }, pick: $.total }
-  k1: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", tag_contains: "-K1" }, pick: $.total }
-  m1: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", tag_contains: "-M1" }, pick: $.total }
-  wires: { tool: eplan_connection_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911" }, pick: $.total }
-  through_k1: { tool: eplan_connection_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", device: "=GAA+A1-K1" }, pick: $.total }
-  overlaps: { tool: eplan_page_review, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", checks: [overlaps] }, pick: $.summary.clean }
+  type: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/9911" }, pick: $.page.type }
+  q1: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9911", tag_contains: "-Q1" }, pick: $.total }
+  k1: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9911", tag_contains: "-K1" }, pick: $.total }
+  m1: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9911", tag_contains: "-M1" }, pick: $.total }
+  wires: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9911" }, pick: $.total }
+  through_k1: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9911", device: "=GAA+A1-K1" }, pick: $.total }
+  overlaps: { tool: eplan_page_review, args: { page: "=GAA+A1&EFS1/9911", checks: [overlaps] }, pick: $.summary.clean }
 checks:
   - { answer: $.done, equals: true }
   - { after: type, equals: Circuit }
