@@ -12,10 +12,13 @@ public sealed class InterruptionVariantToolTests
 {
     private static readonly int[] _position = [60, 60];
     [Theory]
-    [InlineData(null)]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task ExplicitVariant_PreservesExactRequest_AndPreviewDefault(bool? dry)
+    [InlineData(null, "=GAA-2L1")]
+    [InlineData(true, "=GAA-2L1")]
+    [InlineData(false, "=GAA-2L1")]
+    [InlineData(null, "=GAA-2Z3")]
+    [InlineData(true, "=GAA-2Z3")]
+    [InlineData(false, "=GAA-2Z3")]
+    public async Task ExplicitVariant_PreservesExactRequest_AndPreviewDefault(bool? dry, string name)
     {
         using var harness = new WriteToolHarness();
         var fixture = new ConnectionCreateFixture();
@@ -33,7 +36,7 @@ public sealed class InterruptionVariantToolTests
             return plan;
         };
         harness.Bridge.Handlers[OperationNames.ConnectionCreateExecute] = args => JsonNode.Parse(Preview(JObject.Parse(JsonSerializer.Serialize(args))["request"]!.ToString()).ToString())!;
-        JsonElement item = JsonSerializer.SerializeToElement(new { kind = "interruption_point", name = "=GAA-2L1", direction = "Right", symbol = "BP", symbol_variant = 0, position = _position });
+        JsonElement item = JsonSerializer.SerializeToElement(new { kind = "interruption_point", name, direction = "Right", symbol = "BP", symbol_variant = 0, position = _position });
         var call = dry is null
             ? await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", ConnectionCreateFixture.PageName, [item], generate: false, cancellationToken: TestContext.Current.CancellationToken)
             : await ConnectionCreateTools.CreateAsync(harness.Pipeline, harness.Bridge, "Line1", ConnectionCreateFixture.PageName, [item], dry_run: dry.Value, generate: false, cancellationToken: TestContext.Current.CancellationToken);
@@ -41,5 +44,7 @@ public sealed class InterruptionVariantToolTests
         Assert.Equal(dry != false, result.GetProperty("dryRun").GetBoolean());
         Assert.Equal(0, result.GetProperty("symbols")[0].GetProperty("symbol").GetProperty("variant").GetInt32());
         Assert.Equal(dry == false ? 1 : 0, harness.Bridge.Writes.Count);
+        JsonElement planned = JsonSerializer.SerializeToElement(harness.Bridge.Calls.First(c => c.Operation == OperationNames.ConnectionCreatePlan).Args);
+        Assert.Equal(name, planned.GetProperty("items")[0].GetProperty("name").GetString());
     }
 }

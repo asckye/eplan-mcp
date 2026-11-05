@@ -129,7 +129,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 {
                     if (placed is not InterruptionPoint point)
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The interruption symbol did not create an interruption point."); }
-                    point.Name = (string)interruption["name"]!;
+                    NameInterruption(target, point, (string)interruption["name"]!);
                     if (interruption["sort_code"] is { } sortCode)
                     {
                         using InterruptionPointPropertyList properties = point.Properties;

@@ -4,6 +4,12 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanConnectionCreator
 {
+    internal static void NameInterruption(Page page, FunctionBase point, string name)
+    {
+        point.Name = name;
+        EplanVisibleNames.Adjust(page, point);
+    }
+
     internal static PinBase ReadInterruptionPin(SymbolReference point)
     {
         PinBase[] pins = point.GraphicalConnectionPoints;

@@ -142,6 +142,7 @@ internal static class SpikeReadback
     private static JObject InterruptionRow(InterruptionPoint point)
     {
         JObject row = Identity(point);
+        row["visibleName"] = point.VisibleName;
         using InterruptionPointPropertyList properties = point.Properties;
         row["properties"] = PropertiesOf(properties, [24300, 24301, 24351, 24000, 24020, 24021, 24809]);
         var connected = new HashSet<int>();

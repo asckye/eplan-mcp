@@ -5,8 +5,8 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>
 /// Customer redraw 2026-11-02: objects created through the API keep an empty visible name (S41), so the symbol's own
-/// DT texts (cable and box 20010, PLC point 20010) show nothing. Not used for interruption points: EPLAN derives their
-/// full name, and the block text then becomes the full name plus the counterpart reference.
+/// DT texts (cable and box 20010, PLC point 20010) show nothing. A95 also confirms interruption points need this
+/// adjustment after assigning their full name; a false result is not a write failure.
 /// </summary>
 internal static class EplanVisibleNames
 {

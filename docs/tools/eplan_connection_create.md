@@ -94,3 +94,5 @@ D5 新增 Small 图形缺失、名称/位置/引脚/方向不符、取消、正�
 连接定义点可选 `part`、`part_variant`（默认 `"1"`）、`part_count`（默认 1，正 uint）；仅部件也合法。部件须在配置的部件库中存在，缺失返回 PART_NOT_FOUND；读回定义点 `articles` 与生成连接 `connectionArticles`，不一致回滚。
 
 省略 `counterpart_pages` 仅放置中断点，不检查配对页；允许对端位于本次范围外。提供时仍执行原有完整范围与配对核验。
+
+- 中断点赋完整名称后调用 `NameService.AdjustVisibleName`，让 EPLAN 推导显示名；返回 false 不报错。新增 `InterruptionVisibleNameTests` 在 LargeWrite 读回 `=GAA-2L1` → `-2L1`、`=GAA-2Z3` → `-2Z3` 并比较一步撤销后的快照，NOT RUN。
