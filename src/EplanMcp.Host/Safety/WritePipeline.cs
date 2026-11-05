@@ -458,7 +458,7 @@ internal sealed partial class WritePipeline(
         };
         if (plan.Details?.ContainsKey("unverified") == true)
         { record["unverified"] = true; }
-        if (plan.Details?.ContainsKey("property_keys") == true || tool == "eplan_placement_edit")
+        if (plan.Details?.ContainsKey("property_keys") == true || tool is "eplan_placement_edit" or "eplan_graphic_edit")
         {
             record["fingerprint"] = plan.Fingerprint;
             record["changedCount"] = plan.Changes.Count;
