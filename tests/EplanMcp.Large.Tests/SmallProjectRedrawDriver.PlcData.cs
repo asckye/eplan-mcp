@@ -7,6 +7,7 @@ internal sealed partial class SmallProjectRedrawDriver
 {
     private static readonly int[] _cardProperties = [20161, 20408, 20409, 20410, 20411, 20427];
     private static readonly int[] _pointProperties = [20400, 20402, 20407];
+    private static readonly int[] _terminalProperties = [20367, 20809];
     private const int MaxChangesPerCall = 20;
 
     /// <summary>The sample's texts use more languages than the basic project; adding them is the engineer's project setting.</summary>
@@ -22,7 +23,7 @@ internal sealed partial class SmallProjectRedrawDriver
     /// <summary>What an engineer fills in in the PLC navigator: card data on the box, addresses on the Overview points, text on the circuit points (A90).</summary>
     private async Task WritePlcDataAsync(string page, JObject[] objects)
     {
-        JObject[] sources = objects.Where(item => Text(item["category"]) is "PLCBox" or "PLCTerminal").ToArray();
+        JObject[] sources = objects.Where(item => Text(item["category"]) is "PLCBox" or "PLCTerminal" or "Terminal" or "Busbar").ToArray();
         if (sources.Length == 0)
         { return; }
         JObject[] actual = await ReadDrawingsAsync(page, sources[0]);
@@ -77,17 +78,18 @@ internal sealed partial class SmallProjectRedrawDriver
             return change;
         }
         var changes = new List<JObject>();
-        bool card = Text(source["category"]) == "PLCBox";
-        foreach (int id in card ? _cardProperties : _pointProperties)
+        string? category = Text(source["category"]);
+        bool card = category == "PLCBox";
+        foreach (int id in card ? _cardProperties : category == "PLCTerminal" ? _pointProperties : category == "Terminal" ? _terminalProperties : [])
         {
             if (Property(source, id) is string value && value.Length > 0)
             { changes.Add(Change(id, value)); }
         }
         if (card && Property(source, 20308) is string bus && int.TryParse(bus, NumberStyles.Integer, CultureInfo.InvariantCulture, out int system))
         { changes.Add(Change(20308, system)); }
-        if (!card && RawProperty(source, 20011) is JObject text)
+        if (category is "PLCTerminal" or "Busbar" && RawProperty(source, 20011) is JObject text)
         {
-            changes.AddRange(text.Properties().Where(language => language.Name != "??_??" && language.Value.Type == JTokenType.String)
+            changes.AddRange(text.Properties().Where(language => language.Value.Type == JTokenType.String)
                 .Select(language => Change(20011, language.Value.DeepClone(), language.Name)));
         }
         return [.. changes];

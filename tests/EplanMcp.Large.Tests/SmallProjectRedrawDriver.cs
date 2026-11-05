@@ -139,6 +139,8 @@ internal sealed partial class SmallProjectRedrawDriver(
         }
     }
 
+    private readonly HashSet<string> _notInLibrary = new(StringComparer.Ordinal);
+
     private bool IsPlaced(string tag) => _placedTags.Any(placed => placed == tag || placed.StartsWith(tag + ":", StringComparison.Ordinal));
 
     private async Task PlaceDeviceAsync(string page, JObject item, bool assignParts = true)
@@ -199,41 +201,52 @@ internal sealed partial class SmallProjectRedrawDriver(
         if (IsPlaced(placedTag) && args["terminal_strip"] is null && args["plc_connection_point"] is null && Text(item["category"]) != "PLCTerminal"
             && symbolName is not ("BCP" or "BBDEF" or "DCP" or "DCPP3"))
         { args["join_device"] = true; }
+        // Owner 2026-11-04: components come from the parts library; a part it cannot place is drawn with its symbol.
+        JObject[] parts = assignParts && ((bool?)item["isMain"] == true || Text(item["category"]) is "Terminal" or "Busbar") ? Objects(item["parts"]) : [];
+        bool special = Text(symbol["library"]) == "SPECIAL";
+        string? firstPart = parts.Length == 0 ? null : Text(parts[0]["part"]);
+        bool fromLibrary = firstPart is not null && !special && !_notInLibrary.Contains(firstPart);
+        JToken? designations = args["connection_designations"];
+        if (firstPart is not null && (special || fromLibrary))
+        {
+            args["part"] = firstPart;
+            args["variant"] = parts[0]["variant"]?.DeepClone();
+        }
+        if (fromLibrary)
+        { args.Remove("connection_designations"); }
         JObject? placed = await InvokeAsync(page, "eplan_device_place", args, [item]);
+        if (placed is null && fromLibrary)
+        {
+            report.Note(page, Type(item), Id(item), "Part " + firstPart + " cannot be placed from the parts library; drawn with its symbol.");
+            _notInLibrary.Add(firstPart!);
+            fromLibrary = false;
+            args.Remove("part");
+            args.Remove("variant");
+            if (designations is not null)
+            { args["connection_designations"] = designations.DeepClone(); }
+            placed = await InvokeAsync(page, "eplan_device_place", args, [item]);
+        }
         if (placed is null)
         { return; }
-        // The sample shows which symbol its engineer chose for a part (FAH1 where the part's macro brings FA1): the same data as a part route.
-        report.RecordOrigin(page, item, assignParts && Objects(item["parts"]).Length > 0 ? "part" : "symbol_fallback");
+        report.RecordOrigin(page, item, fromLibrary ? "part" : "symbol_fallback");
         _placedTags.Add(placedTag);
         if (Text(placed["device"]?["tag"]) is string actualTag)
         {
             _actualNames[name] = actualTag;
             _placedTags.Add(actualTag);
         }
-        // A terminal carries its own part although it is no main function.
-        if (assignParts && ((bool?)item["isMain"] == true || Text(item["category"]) == "Terminal"))
+        string target = _actualNames.GetValueOrDefault(name, name);
+        int assigned = args["part"] is null ? 0 : 1;
+        foreach (JObject part in parts.Skip(assigned))
         {
-            foreach (JObject part in Objects(item["parts"]))
-            {
-                await InvokeAsync(page, "eplan_device_update", new JObject
-                {
-                    ["tag"] = _actualNames.GetValueOrDefault(name, name),
-                    ["part"] = part["part"]?.DeepClone(),
-                    ["variant"] = part["variant"]?.DeepClone(),
-                }, [item]);
-                if ((double?)part["count"] is double count && count != 1)
-                { report.Note(page, Type(item), Id(item), "Part reference quantity " + count.ToString(CultureInfo.InvariantCulture) + " cannot be specified by device_update."); }
-            }
-            // A93: what an engineer's part selection takes over, once every part is referenced.
-            if (Objects(item["parts"]).Length > 0)
-            {
-                await InvokeAsync(page, "eplan_device_update", new JObject
-                {
-                    ["tag"] = _actualNames.GetValueOrDefault(name, name),
-                    ["update_from_parts"] = true,
-                }, [item]);
-            }
+            var update = new JObject { ["tag"] = target, ["part"] = part["part"]?.DeepClone(), ["variant"] = part["variant"]?.DeepClone() };
+            if ((double?)part["count"] is double count && count != 1)
+            { update["count"] = (int)count; }
+            await InvokeAsync(page, "eplan_device_update", update, [item]);
         }
+        // A93: what an engineer's part selection takes over, once every part is referenced; the library route brought it already.
+        if (Text(item["category"]) != "Busbar" && parts.Length > (fromLibrary ? 1 : 0))
+        { await InvokeAsync(page, "eplan_device_update", new JObject { ["tag"] = target, ["update_from_parts"] = true }, [item]); }
     }
 
     private async Task PlaceLocationBoxAsync(string page, JObject item)
