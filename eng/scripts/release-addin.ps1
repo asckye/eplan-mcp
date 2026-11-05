@@ -116,7 +116,7 @@ try {
     $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
     Get-Draft | Out-Null
     gh release upload $Tag $zip --repo $repository
-    Write-Output "Uploaded to DRAFT only. Add this exact line to its release notes before rerunning release.yml:"
+    Write-Output "Uploaded to DRAFT only. Add this exact line to its release notes before running release-package.ps1:"
     Write-Output "Add-in SHA-256: $hash  $zipName"
     Write-Output "Tag: $Tag; commit: $commit; offline Large passed: $passed; EplanSign=false."
     Write-Output "Artifacts retained: $output"

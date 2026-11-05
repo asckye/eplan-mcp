@@ -97,8 +97,7 @@ gh release create v$Version --repo asckye/eplan-mcp --verify-tag --draft --prere
 pwsh eng/scripts/release-addin.ps1 -Tag v$Version -WhatIf
 pwsh eng/scripts/release-addin.ps1 -Tag v$Version
 ADR-0020：把脚本输出的 Add-in SHA-256 整行原样贴入草稿说明，补支持矩阵、提交号和验证证据。
-gh run list --repo asckye/eplan-mcp --workflow release.yml --branch v$Version
-gh run rerun <运行ID> --repo asckye/eplan-mcp
+pwsh eng/scripts/release-package.ps1 -Tag v$Version -Worktree <release-addin.ps1 打印的 worktree>
 核对最终附件、哈希和发布验收后，由维护者在 GitHub 发布草稿。
 "@
 }

@@ -5,6 +5,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- 发布包改为在维护者开发机上打包。从 v0.5.0 起不再附 GitHub 构建证明（attestation）；用 `SHA256SUMS.txt` 和逐文件清单校验。
+
 ## [0.5.0] - 2026-11-05
 
 ### 破坏性变化

@@ -1,8 +1,8 @@
 name: release
 
+# ADR-0051: packages are built locally by eng/scripts/release-package.ps1. A tag push no longer starts this.
 on:
-  push:
-    tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: read

@@ -16,8 +16,8 @@
 2. 审阅从 Unreleased 生成的中文说明和台账未关闭行，核对默认开关、受影响 Large 通过证据及明确排除的待验范围；补齐支持矩阵、Agent 与界面验收记录。台账缺失或格式不明仅提示证据缺口，由维护者核对。
 3. 审阅并提交准备改动，在干净工作区执行 `pwsh eng/scripts/local-gate.ps1 -Full -Push`；必须是最终发布提交关卡全绿且已落到 main，不能沿用旧提交结果。准备脚本后的提交与关卡均为人工步骤；关卡若变基，重新核对该提交的验证证据。
 4. 在该提交的 Release 构建上执行 `pwsh eng/scripts/smoke.ps1`（可用 `-HostPath` 指定已构建的 Host），完成 `doctor --offline`（未安装 EPLAN 只记警告）、stdio initialize 与 tools/list 往返；离线自检明确标记未检查实时 Bridge 与授权，不需要 EPLAN，任何失败均须处理，不能替代实机 Large。
-5. 在通过关卡的准确提交上打标签、推送标签，再用生成说明创建 **draft prerelease**；按下节执行 ADR-0020 插件构建与 **Add-in SHA-256 整行交接**。标签首次工作流可能因交接未完成而失败；补齐草稿、附件和哈希后重跑整次工作流。
-6. 核对 CI 最终产物、哈希、实机证据和最终 ZIP 验收，最后由维护者手动发布草稿。脚本不会执行上述发布动作。
+5. 在通过关卡的准确提交上打标签、推送标签，再用生成说明创建 **draft prerelease**；按下节执行 ADR-0020 插件构建与 **Add-in SHA-256 整行交接**，再用 `release-package.ps1` 在本机打包并上传到草稿（[ADR-0051](../adr/0051-build-release-packages-locally.md)）。
+6. 核对最终产物、哈希、实机证据和最终 ZIP 验收，最后由维护者发布草稿。脚本不会执行发布动作。打标签前先看 main 常规 CI 的结果。
 
 若某个周五没有新增且完成验证的内容，**跳过该班**，在 [路线图](../roadmap.md) 记录日期与跳过原因，不消耗 patch 号、不为空列车打标签。
 
@@ -53,7 +53,7 @@ eng/scripts/release-addin.ps1 -Tag v0.5.0
 Add-in SHA-256: <64 位小写十六进制 SHA-256>  EplanMcp-addin-v0.5.0.zip
 ```
 
-发布说明还须写明“插件由维护者在开发机上从标签 v0.5.0 构建”，附提交号、离线 Large 结果、其他实机和 Agent 评测结果，并按以下清单列出“支持矩阵”（版本边界见 [ADR-0009](../adr/0009-supported-eplan-versions.md) 和[版本兼容性](../eplan/eplan-versions.md)）：
+发布说明还须写明“程序包和插件由维护者在开发机上从标签 v0.5.0 构建，没有 GitHub 构建证明”，附提交号、离线 Large 结果、其他实机和 Agent 评测结果，并按以下清单列出“支持矩阵”（版本边界见 [ADR-0009](../adr/0009-supported-eplan-versions.md) 和[版本兼容性](../eplan/eplan-versions.md)）：
 
 - [ ] 已验证 EPLAN 年份、完整构建号与变体：2026，实测 2026.0.3.25421，Electric P8、Pro Panel。
 - [ ] 尚未验证：2024、2025、2027，留待 M7；与已验证版本分开列出。
@@ -63,31 +63,30 @@ Add-in SHA-256: <64 位小写十六进制 SHA-256>  EplanMcp-addin-v0.5.0.zip
 - [ ] Windows 10/11 x64；本机安装与连接无需管理员权限，虚拟机网络权限需管理员授权。
 - [ ] 客户端：Claude Code 与其他 stdio MCP 客户端；虚拟机连接须支持 Streamable HTTP 和自定义请求头，Claude 桌面版不适用，仅限宿主机与虚拟机私有网络、HTTP 不加密；仅 Claude Code 连接已实测，其他客户端、跨机器连接与 UAC 待验收，见[虚拟机部署](../getting-started/zh-CN.md#10-虚拟机部署)。
 
-标签 push 会立即触发 workflow；此时草稿或附件尚未就绪，addin 作业会明确失败。这是有意的交接关卡，不轮询开发机，也不使用自托管 runner。补齐上述附件和发布说明后，重跑该标签的整次执行：
+补齐上述附件和发布说明后，在 `release-addin.ps1` 保留的临时 worktree 上打包：
 
 ```powershell
-gh run list --repo asckye/eplan-mcp --workflow release.yml --branch v0.5.0
-gh run rerun <上一步的运行 ID> --repo asckye/eplan-mcp
+eng/scripts/release-package.ps1 -Tag v0.5.0 -Worktree <脚本打印的 worktree>
 ```
 
-## CI 输出与核查
+脚本要求 worktree 干净且在标签提交上，先下载草稿里的插件 ZIP，核对说明中的哈希行、manifest 的标签、提交和测试记录；再发布 Host 与 Workbench、收集许可证、合并 SBOM、打包，生成校验文件，只上传到草稿，插件 ZIP 不覆盖。`release.yml` 保留但不再由标签触发。
 
-三个作业分别构建/测试 Host 与 Workbench、验证插件、打包；插件作业读取草稿需 `contents: write`，只有打包作业有 `id-token`、`attestations` 写权限。插件 ZIP 的实际哈希必须符合发布说明中唯一且格式完全一致的 `Add-in SHA-256: …  EplanMcp-addin-vX.Y.Z.zip` 行，上传前再次核对；manifest JSON 的标签、提交和测试记录也必须符合。CI 不执行 EPLAN，不自动发布 release。
+## 产物与核查
+
+插件 ZIP 的实际哈希必须符合发布说明中唯一且格式完全一致的 `Add-in SHA-256: …  EplanMcp-addin-vX.Y.Z.zip` 行，上传前再次核对；manifest JSON 的标签、提交和测试记录也必须符合。打包不执行 EPLAN，不自动发布 release。上传后在解压的程序包上跑 `smoke.ps1 -HostPath`，并扫描程序包里有没有本机路径。
 
 Host 为 win-x64 自包含单文件；Workbench 为 win-x64 自包含目录，附经固定哈希验证的 Maple Mono CN 字体及许可证。发布使用独立的 `packages.win-x64.lock.json`，常规 CI 继续使用原锁文件，两者都保持 locked mode。CycloneDX 6.0.0（Apache-2.0，仅构建工具）生成三个项目的 SBOM 后合并，并补充随包运行时、字体和 TIA 主题。暂存 `app\` 的全部内容打进唯一顶层目录 `EplanMcp-<version>\`，包括点目录；不套 `app\`，不调用 Inno Setup。
 
-以 `v0.5.0` 为例，发布保留以下 8 个附件：
+以 `v0.5.0` 为例，发布保留以下 6 个附件：
 
 - `EplanMcp-0.5.0.zip`：工程师下载的完整程序包，顶层目录 `EplanMcp-0.5.0\`；打开其中 `workbench\EplanMcp.Workbench.exe`。
-- `SHA256SUMS.txt`：所有其他附件的 SHA-256，包括插件 ZIP、manifest、安装文件清单和两个证明包；不计算自身的哈希。
+- `SHA256SUMS.txt`：所有其他附件的 SHA-256，包括插件 ZIP、manifest 和安装文件清单；不计算自身的哈希。
 - `EplanMcp-v0.5.0.cdx.json`：合并的 CycloneDX SBOM。
-- `EplanMcp-v0.5.0-provenance.sigstore.json`：来源证明包。
-- `EplanMcp-v0.5.0-sbom.sigstore.json`：SBOM 证明包。
 - `EplanMcp-v0.5.0-files.sha256`：ZIP 内每个文件的路径和 SHA-256（含版本顶层目录），供解压后逐文件核查。
 - `EplanMcp-addin-v0.5.0.zip`：维护者构建的插件包。
 - `EplanMcp-addin-v0.5.0.json`：从插件包提取的标签、提交和测试记录（manifest）。
 
-不为每个附件单独生成 `.sha256` 文件。逐文件清单作为附件；来源证明的完整 subject 清单另存于工作区 `.local-subjects.sha256`，不上传。ZIP 及其每个文件均纳入来源证明，SBOM 证明绑定这个完整 ZIP；插件证明不能证明维护者开发机的源码构建过程。插件 ZIP 仅用于 ADR-0020 交接和核查，工程师无需另下。
+不为每个附件单独生成 `.sha256` 文件。逐文件清单作为附件。没有构建证明：它要 GitHub Actions 的身份，本地打包做不到（ADR-0051）；v0.4.1 及更早版本的证明仍可用 `gh attestation verify` 核验。插件 ZIP 仅用于 ADR-0020 交接和核查，工程师无需另下。
 
 ```powershell
 $asset = 'EplanMcp-0.5.0.zip'
@@ -95,10 +94,9 @@ $expected = @(Get-Content .\SHA256SUMS.txt | Where-Object { $_ -cmatch "^[0-9a-f
 if ($expected.Count -ne 1) { throw 'Missing or duplicate SHA-256 entry.' }
 $actual = (Get-FileHash -LiteralPath ".\$asset" -Algorithm SHA256).Hash.ToLowerInvariant()
 if ($actual -cne $expected[0].Substring(0, 64)) { throw 'SHA-256 mismatch.' }
-gh attestation verify ".\$asset" --repo asckye/eplan-mcp
 ```
 
-离线核对 SHA-256，联网可核验 GitHub 证明。维护者须下载最终 ZIP，在标准用户、无开发工具、断网的干净 Windows 虚拟机上完成 I1–I10，记录 SmartScreen 和智能应用控制状态。校验后先在 ZIP 属性中解除锁定，再解压到短且固定的任意目录；测试从 `workbench\EplanMcp.Workbench.exe` 勾选变体注册、客户端绝对路径和生成市场、失败提示、撤销后删程序及数据保留。升级必须先关闭 EPLAN、Workbench、客户端，再整体替换同一路径的程序目录；不依赖安装器做进程检查或拒绝降级。
+校验 SHA-256 不需要联网。维护者须下载最终 ZIP，在标准用户、无开发工具、断网的干净 Windows 虚拟机上完成 I1–I10，记录 SmartScreen 和智能应用控制状态。校验后先在 ZIP 属性中解除锁定，再解压到短且固定的任意目录；测试从 `workbench\EplanMcp.Workbench.exe` 勾选变体注册、客户端绝对路径和生成市场、失败提示、撤销后删程序及数据保留。升级必须先关闭 EPLAN、Workbench、客户端，再整体替换同一路径的程序目录；不依赖安装器做进程检查或拒绝降级。
 
 卸载先移除需要清理的客户端配置/Claude Code 市场，在 Workbench 关闭登录自启动、撤销注册，成功后退出并删除程序目录。默认及自定义数据根目录均保留；程序移动后须重新注册、重写客户端配置或生成市场。一台电脑由一个 Windows 用户使用 EplanMcp（Q15）。确认所有证据齐全后，维护者手动发布草稿。
 
