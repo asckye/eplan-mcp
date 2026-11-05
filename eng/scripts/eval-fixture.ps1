@@ -76,7 +76,8 @@ if ($WriteCopies) {
 if ($Open) {
     $eplan = Join-Path $EplanBin 'EPLAN.exe'
     if (-not (Test-Path $eplan)) { throw "EPLAN.exe not found in $EplanBin" }
-    Start-Process -FilePath $eplan -ArgumentList @("/Variant:`"$Variant`"", 'ProjectOpen', "/Project:`"$target.elk`"") | Out-Null
+    # Minimized: live runs happen while the engineer works, and a window coming to the front takes their clicks.
+    Start-Process -WindowStyle Minimized -FilePath $eplan -ArgumentList @("/Variant:`"$Variant`"", 'ProjectOpen', "/Project:`"$target.elk`"") | Out-Null
     Write-Output "Started EPLAN ($Variant) with $target.elk."
 }
 
