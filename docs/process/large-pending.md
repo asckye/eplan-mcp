@@ -61,6 +61,7 @@
 | 通知与无障碍 | 待运行：AI4W FastPass、讲述人对新问题/倒计时/结束/状态的播报，以及托盘通知；原 S16 仅提供检查方向，本工作区未找到同名 spike 目录，见 [M5 验证入口](../design/2026-10-20-m5-operability.md#workbench-evidence)。 |
 | DPI 与对比主题 | 待运行：100–200% 与混合 DPI、1366×768@100%、1920×1080@150%、文本大小 150%，以及 Aquatic/Desert/Dusk/Night sky 四套系统对比主题。 |
 | 高对比资源差异 | 2026-11-01 原表与 `Tia/Themes/Palette.HighContrast.xaml` 对 `Primer.cardSel`、`Primer.textFaint` 的映射不同；项目包装 `Themes/Palette.HighContrast.xaml` 已覆盖 `cardSel`、`selectedText`、`textFaint`。保留原始差异及包装事实，整体符合性仍待人工验证。 |
+| 官方 action 离线导入（`feat/official-actions`，2026-11-01 负责人 brief） | `BatchVerification`、`ActionTryTests`、`ActionCatalogTests` | 待运行：批量 action 仅取官方 action/TYPE 行，按第一条官方示例准备参数；需要文件、页或选择上下文仍为 needs_context。此次禁止运行 EPLAN；审批、scratch、unknown 停止与撤销断言保留。 |
 
 ## 最近移出（已实机通过）
 
