@@ -14,8 +14,8 @@
 | ADR-0049 P14 action 试运行 默认预览（2026-11-03，手册 T.4） | `ActionTryTests`、`BatchVerification` | 已通过：2026-11-03 迁移后 `ActionTryTests` 1/1、B 槽 `BatchVerification` 1/1。 |
 | ADR-0049 P13 已知 action 默认预览（2026-11-03，手册 T.4） | `ActionRunTests` | 已通过：2026-11-04，A 槽 Electric P8，EPLAN 2026.0.3.25421，main `9faf3790`：`ActionRunTests` 19/19。 |
 | ADR-0049 P12 占位符 默认预览（2026-11-03，手册 T.4） | `PlaceholderApplyTests` | 已通过：2026-11-03 迁移后 `PlaceholderApplyTests` 3/3。 |
-| ADR-0049 P11 翻译主数据 默认预览（2026-11-03，手册 T.4） | `TranslationImportTests` | 待运行：`TranslationImportTests` 要改翻译主数据，需负责人批准并在副本上运行，本版未跑。 |
-| ADR-0049 P10 部件主数据 默认预览（2026-11-03，手册 T.4） | `PartImportTests`、`PartSyncTests` | 待运行：`PartImportTests`、`PartSyncTests` 要改部件库，需负责人批准并在副本上运行，本版未跑。 |
+| ADR-0049 P11 翻译主数据 默认预览（2026-11-03，手册 T.4） | `TranslationImportTests` | 已通过：2026-11-05，B 槽 Pro Panel，部件库和翻译库都指向 scratch 副本（`MasterDataOnCopyTests`，A103）：`TranslationImportTests` 通过，正在用的库哈希不变。 |
+| ADR-0049 P10 部件主数据 默认预览（2026-11-03，手册 T.4） | `PartImportTests`、`PartSyncTests` | 已通过：2026-11-05，B 槽 Pro Panel，部件库和翻译库都指向 scratch 副本（`MasterDataOnCopyTests`，A103）：`PartImportTests`、`PartSyncTests` 通过，正在用的库哈希不变。 |
 | ADR-0049 P09 项目语言 默认预览（2026-11-03，手册 T.4） | `LanguageSetTests`、`LanguageRemoveTests`、`ProjectTranslateTests` | 已通过：2026-11-04，A 槽 Electric P8，EPLAN 2026.0.3.25421，main `9faf3790`：`LanguageRemoveTests` 3/3、`ProjectTranslateTests` 2/2；2026-11-03 迁移后 `LanguageSetTests` 4/4。 |
 | ADR-0049 P08 工程数据导入 默认预览（2026-11-03，手册 T.4） | `ImportListTests`、`ImportPlcTests`、`ImportPxfTests` | 部分通过：2026-11-04，A 槽 Electric P8，EPLAN 2026.0.3.25421，main `9faf3790`：`ImportListTests` 2/2、`ImportPxfTests` 2/2。未完成：`ImportPlcTests` 缺 PLC 交换文件夹具，跳过。 |
 | ADR-0049 P07 图形/审图导入 默认预览（2026-11-03，手册 T.4） | `ImportDxfTests`、`ImportPdfCommentsTests` | 部分通过：2026-11-03 迁移后 `ImportDxfTests` 4/4。未完成：`ImportPdfCommentsTests` 缺带便笺的 PDF。 |

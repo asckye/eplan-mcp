@@ -132,6 +132,14 @@ M4c 的编号工具（端子、电缆、线号）作用于整个端子排或整�
 dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Large.Tests.TranslationImportTests"
 ```
 
+### 系统主数据：在副本上运行（优先用这个）
+
+`MasterDataOnCopyTests` 把当前变体的部件库和翻译库设置指向 scratch 下的副本，再运行 `PartImportTests`、`PartSyncTests`、`TranslationImportTests`。每个测试开始前都核对 EPLAN 解析到的路径，不是副本就不写。2026-11-05 实测：跑前跑后正在用的两个库共 29 个文件（`.lck` 除外，含 `User.eod`、`User.eox`）的 SHA-256 完全相同（api-notes A103）。
+
+1. 关闭这个变体的 EPLAN，算两个库的 SHA-256；把部件库文件夹复制到 `<数据根目录>\scratch\masterdata-copy\parts\`（去掉 `.lck`），翻译库文件夹复制到 `...\translate\`，把 `C:\Users\Public\EPLAN\Settings\<变体>` 复制一份备用。
+2. 设置 `EPLANMCP_MASTERDATA_COPY` 为 `masterdata-copy` 文件夹，只运行这个类。`PartSyncTests` 会永久改动写副本，要用新复制的 `LargeWrite`。
+3. 关闭 EPLAN，用第 1 步的备份还原设置，核对哈希；再算两个库的 SHA-256，必须和第 1 步相同。证据在 `masterdata-copy\evidence.json`。
+
 ### 系统主数据（部件库）
 🔴 **这些测试写 EPLAN 配置的那个部件库**，也就是工程师正在用的库：S24 证实副本隔离不了导入（结论 8），所以没有"测试库"可用（[ADR-0019](../../docs/adr/0019-master-data-writes.md)）。它们默认跳过，只有环境变量 `EPLANMCP_LARGE_MASTERDATA` 为 `1` 时才运行，跳过的判断在连接 EPLAN 之前。**每次运行都要项目负责人事先批准**，并由维护者按下面的步骤做：
 1. 运行前：确认部件库在本机文件中（不是 SQL Server；在 SQL Server 上时测试会得到 `POLICY_DENIED`），对库的全部文件（`.alk` 和 `.adb\` 中的文件）计算 SHA-256，再把它们复制一份到 scratch 之外的地方；

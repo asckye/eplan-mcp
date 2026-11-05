@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A103、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A104、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -473,3 +473,9 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 连接的 31047 索引 1 在所有步骤都读出 4，不反映值的来源。
 - 改 `GraphicalLayer.Pen` 后，图形的 `Pen.ColorId` 仍是 -16002。
 — 探针 `RelationSpikeTests`（未合入）。
+
+### A103. 主数据测试可以隔离：把配置指向副本（2026-11-05，EPLAN 2026.0.3，Pro Panel）
+- `Settings.SetStringSetting("USER.PartsManagementGui.Database", 路径, 0)` 和 `USER.TRANSLATEGUI.DATABASE_NAME` 改完立刻生效，不用重启：`MDPartsManagement.SelectedPartsDatabaseAsString`、`Translate.TranslateDatabase` 都读到新路径。原值是 `$(MD_PARTS)\EPLAN_parts.alk`、`$(md_translate)\Translate.db`。
+- 这样运行 `eplan_part_import`、`eplan_part_sync`、`eplan_translation_import`，正在用的两个库 29 个文件（`.lck` 除外）的 SHA-256 不变，包括 `User.eod`、`User.eox`；副本的 `Translate.db` 变了。A30 说的“副本隔离不了导入”只针对按路径打开另一个库。
+- 设置是每个变体各一份，用文件备份还原后哈希一致。
+— `MasterDataOnCopyTests`。
