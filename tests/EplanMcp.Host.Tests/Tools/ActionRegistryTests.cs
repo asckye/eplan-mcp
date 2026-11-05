@@ -130,22 +130,29 @@ public sealed class ActionRegistryTests : IDisposable
     }
 
     [Fact]
-    public async Task Interactions_OverrideEverySameNameRowIncludingWhitelistedAndOtherRegistryKinds()
+    public async Task NameInActionsAndInteractions_StaysCallable_InteractionOnlyIsExcluded()
     {
         ActionCatalogItem known = ActionCatalogReader.Official().First(i => i.Tier == "A");
         await WriteAsync("regPlatform.xml", ActionRegistryFixture.Xml("Actions", known.Name));
         await WriteAsync("regMinimal.xml", ActionRegistryFixture.Xml("Interactions", known.Name));
         await WriteAsync("MFTools.xml", new XElement("Settings", new XElement("Button", new XAttribute("action", Command(known)))).ToString());
-        ActionCatalogItem[] rows = [.. (await _reader.ReadAsync(Token)).Items.Where(i => i.Name == known.Name)];
-        Assert.NotEmpty(rows);
-        Assert.DoesNotContain(rows, i => i.Source == "registry");
-        Assert.All(rows, i =>
+        ActionCatalogItem[] both = [.. (await _reader.ReadAsync(Token)).Items.Where(i => i.Name == known.Name)];
+        Assert.NotEmpty(both);
+        Assert.DoesNotContain(both, i => i.Source == "registry");
+        Assert.All(both, i =>
+        {
+            Assert.Equal("action", i.RegistryKind);
+            Assert.Null(i.ExcludedReason);
+        });
+
+        await WriteAsync("regPlatform.xml", ActionRegistryFixture.Xml("Interactions", known.Name));
+        ActionCatalogItem[] interaction = [.. (await _reader.ReadAsync(Token)).Items.Where(i => i.Name == known.Name)];
+        Assert.All(interaction, i =>
         {
             Assert.Equal("interaction", i.RegistryKind);
             Assert.Equal("excluded", i.Tier);
             Assert.Equal("interaction: not callable by name; use a drawing tool", i.ExcludedReason);
         });
-        Assert.Equal("A", known.Tier);
     }
 
     [Fact]

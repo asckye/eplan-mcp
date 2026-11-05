@@ -111,7 +111,8 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
             gaps.Add("Installation definitions could not be enumerated; check installation access with doctor.");
         }
         var registered = registry.GroupBy(i => i.Name, StringComparer.Ordinal).ToDictionary(g => g.Key,
-            g => (g.FirstOrDefault(i => i.RegistryKind == "interaction") ?? g.First()) with
+            // A name in both Actions and Interactions is callable by name.
+            g => (g.FirstOrDefault(i => i.RegistryKind == "action") ?? g.First()) with
             { Module = g.Select(i => i.Module).FirstOrDefault(m => !string.IsNullOrWhiteSpace(m)) }, StringComparer.Ordinal);
         var names = items.Select(i => i.Name).ToHashSet(StringComparer.Ordinal);
         items = [.. items.Select(i => registered.TryGetValue(i.Name, out ActionCatalogItem? entry) ? i with
