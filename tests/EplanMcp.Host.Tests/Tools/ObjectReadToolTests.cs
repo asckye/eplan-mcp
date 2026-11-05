@@ -115,6 +115,30 @@ public sealed class ObjectReadToolTests
     }
 
     [Theory]
+    [InlineData("HyperLink", "link", "https://example.test")]
+    [InlineData("QRCode", "text", "QR payload")]
+    [InlineData("DimensionItem", "dimension_text", "60 mm")]
+    [InlineData("DimensionCircle", "dimension_text", "12 mm")]
+    [InlineData("PlaceHolder", "name", "Motor")]
+    [InlineData("MacroBox", "macro_name", "Motor.ema")]
+    public async Task Find_AnnotationsExposePositionAndKeyFieldsWithoutChangingLocators(string kind, string key, string value)
+    {
+        FakeBridgeClient bridge = Bridge(1);
+        var annotation = new ObjectSummary
+        {
+            Locator = new() { Project = Project, Page = "=A/1", Type = 4, Oid = 2, Digest = new string('a', 64) },
+            Location = [20, 24],
+            Properties = new() { [key] = value },
+        };
+        bridge.Handlers[OperationNames.ObjectFind] = _ => new ObjectReadData { Objects = [annotation] };
+        JsonElement result = PropertyGetToolTests.Data(await Read(bridge, new(TimeProvider.System), new() { ["object_type"] = kind }));
+        JsonElement row = Assert.Single(result.GetProperty("items").EnumerateArray());
+        Assert.Equal(2, row.GetProperty("locator").GetProperty("oid").GetInt64());
+        Assert.Equal([20d, 24d], row.GetProperty("location").EnumerateArray().Select(p => p.GetDouble()).ToArray());
+        Assert.Equal(value, row.GetProperty("properties").GetProperty(key).GetString());
+    }
+
+    [Theory]
     [InlineData("{\"object_type\":\"nope\",\"limit\":300,\"extra\":true}")]
     [InlineData("{\"object_type\":\"Page\",\"limit\":\"1\"}")]
     [InlineData("{\"object_type\":\"Page\",\"limit\":null}")]

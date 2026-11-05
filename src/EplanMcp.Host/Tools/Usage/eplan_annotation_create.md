@@ -14,7 +14,7 @@ Preview a mixed annotation batch. Omit `dry_run` or use `true` to preview; send 
 
 Use `eplan_project_list` and `eplan_page_list` to choose an open project and a Circuit, Overview or Graphics page. Read existing objects with `eplan_page_get` or `eplan_object_find`. For a circle dimension, pass the fresh locator of an existing full-circle Arc on the target page.
 
-Review the preview's complete changes, actual coordinates, bounds and warnings. Set `dry_run:false` to execute; writes outside scratch require approval. The batch uses the same creation planner, write protocol, transaction, readback and layout guard as `eplan_placement_create`. One Ctrl+Z undoes the whole batch. Refresh locators after any modification. Discovery and deletion of annotations are added in the fourth change set.
+Review the preview's complete changes, actual coordinates, bounds and warnings. Set `dry_run:false` to execute; writes outside scratch require approval. The batch uses the same creation planner, write protocol, transaction, readback and layout guard as `eplan_placement_create`. One Ctrl+Z undoes the whole batch. Refresh locators after any modification. Use `eplan_placement_delete` to delete an annotation by its current locator, and `eplan_export_image` to inspect the page.
 
 ## fields
 

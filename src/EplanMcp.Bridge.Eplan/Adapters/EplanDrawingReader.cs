@@ -80,7 +80,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 { seen.Add(placement.ToStringIdentifier()); }
 
                 DrawingPlacement? row = !excluded && (placement is SymbolReference or PropertyPlacement or Block || placement.GetType() == typeof(Text)
-                    || placement is PathText or PolyLine or Arc or Image || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot, blockChild) : null;
+                    || placement is PathText or PolyLine or Arc or Image or HyperLink or QRCode or DimensionItem or DimensionCircle or PlaceHolder or MacroBox || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot, blockChild) : null;
                 if (row is not null)
                 {
                     result.Placements.Add(row);
@@ -141,12 +141,12 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             if (bounds is null && display == "")
             { bounds = [0, 0, 0, 0]; } // A53/A54: empty property text has no visible ink.
 
-            using MultiLangString? contents = ReadOptional(() => placement switch { PropertyPlacement p => p.Contents, Text t => t.Contents, _ => null });
+            using MultiLangString? contents = ReadOptional(() => placement switch { PropertyPlacement p => p.Contents, HyperLink h => h.Contents, Text t => t.Contents, _ => null });
             string? text = ReadOptional(() => contents?.GetAsString());
             string? angle = ReadOptional(() => placement is TextBase angleText ? EplanTextFormat.Angle(angleText.Rotation) : null);
             string? height = ReadOptional(() => placement is PathText { Height: -16002 } ? "-16002"
                 : placement is TextBase heightText ? EplanTextFormat.Height(heightText.Height) : null);
-            string? name = ReadOptional(() => placement is Block namedBlock ? namedBlock.Name : (placement as FunctionBase)?.Name);
+            string? name = ReadOptional(() => placement is Block namedBlock ? namedBlock.Name : placement is PlaceHolder holder ? holder.Name : (placement as FunctionBase)?.Name);
             int? count = ReadOptional(() => placement is Block countedBlock ? countedBlock.Count : (int?)null);
             long? group = ReadOptional(() => (long?)placement.Group?.ObjectIdentifier);
             bool? grouped = ReadOptional(() => (bool?)(placement.Group is not null));
@@ -163,6 +163,11 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             {
                 graphics = placement switch
                 {
+                    HyperLink hyperlink => new() { ["link"] = hyperlink.Link },
+                    QRCode code => new() { ["text"] = code.GetQRCode() },
+                    DimensionItem dimension => new() { ["dimension_text"] = dimension.DimensionText },
+                    DimensionCircle dimension => new() { ["dimension_text"] = dimension.DimensionText },
+                    MacroBox macro => new() { ["macro_name"] = macro.MacroName },
                     PolyLine polyline => new() { ["points"] = JsonConvert.SerializeObject(Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i)))), ["closed"] = polyline.Closed.ToString().ToLowerInvariant() },
                     Arc arc => new()
                     {

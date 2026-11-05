@@ -24,6 +24,20 @@ public sealed class PlacementRemoverTests
     }
 
     [Fact]
+    public void ExecutionResolvesFreshNativeWrappersInsteadOfRetainingPreviewObjects()
+    {
+        var page = new Page();
+        var preview = new Line(1) { Page = page };
+        page.AllPlacements = [preview];
+        EplanProjects.Project = new(page);
+        Action remove = new EplanPlacementRemover().Prepare("project", page.Name, [Locator(preview)]);
+        var execution = new Line(1) { Page = page };
+        page.AllPlacements = [execution];
+        remove();
+        Assert.Empty(page.AllPlacements);
+    }
+
+    [Fact]
     public void UnreadableBlockOnThePageDoesNotStopDeletingAnotherGraphic()
     {
         // Live 2026-11-04: =K1+A2&EFA1/5 holds an empty nested block whose SubPlacements throws.

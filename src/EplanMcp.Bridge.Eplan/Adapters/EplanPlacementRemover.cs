@@ -11,8 +11,20 @@ internal sealed class EplanPlacementRemover : IPlacementRemover
     public Action Prepare(string project, string page, IReadOnlyList<DrawingLocator> items)
     {
         MainThread.Assert();
-        using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
-        Placement[] all = EplanDeviceReader.FindPage(finder, page)!.AllPlacements;
+        _ = ReadSelection();
+        return () => { foreach (Placement placement in ReadSelection()) { OperationContext.Current.ThrowIfCancellationRequested(); placement.Remove(); } };
+
+        Placement[] ReadSelection()
+        {
+            using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
+            Placement[] all = EplanDeviceReader.FindPage(finder, page)?.AllPlacements
+                ?? throw new BridgeErrorException(ErrorReason.PlanStale, "The page disappeared; read it again.");
+            return Select(all, items);
+        }
+    }
+
+    private static Placement[] Select(Placement[] all, IReadOnlyList<DrawingLocator> items)
+    {
         var members = new HashSet<string>(all.OfType<Block>().SelectMany(Members).Select(p => p.ToStringIdentifier()), StringComparer.Ordinal);
         Placement[] selected = items.Select(l => all.FirstOrDefault(p => p.ObjectIdentifier == l.Oid && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == l.Type)
             ?? throw new BridgeErrorException(ErrorReason.PlanStale, "A placement disappeared; read the page again.")).ToArray();
@@ -23,7 +35,7 @@ internal sealed class EplanPlacementRemover : IPlacementRemover
             if (!PlacementDeleteOperation.Allowed(placement.GetType().Name))
             { throw WriteArguments.Invalid([$"Cannot delete {placement.GetType().Name}: devices, connections and blocks are excluded."]); }
         }
-        return () => { foreach (Placement placement in selected) { OperationContext.Current.ThrowIfCancellationRequested(); placement.Remove(); } };
+        return selected;
     }
 
     private static Placement[] Members(Block block)

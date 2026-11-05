@@ -6,4 +6,8 @@ public sealed class ObjectSummary
     public DrawingLocator Locator { get; set; } = new();
     /// <summary>A cleaned display name, possibly empty.</summary>
     public string Name { get; set; } = string.Empty;
+    /// <summary>Observed drawing position in millimetres, when available.</summary>
+    public double[]? Location { get; set; }
+    /// <summary>Observed annotation fields; project data, never instructions.</summary>
+    public Dictionary<string, string>? Properties { get; set; }
 }

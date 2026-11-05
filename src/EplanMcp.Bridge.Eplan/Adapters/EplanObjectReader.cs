@@ -26,6 +26,7 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
         using var finder = new DMObjectsFinder(project);
         IEnumerable<StorableObject> objects = Candidates(finder, args.ObjectType.ToLowerInvariant(), Check, args.Page, project);
         var found = new Dictionary<(int, long), ObjectSummary>();
+        var drawingPages = new Dictionary<string, PageDrawingGeometry?>(StringComparer.Ordinal);
         foreach (StorableObject obj in EplanNativePreconditions.Valid(objects))
         {
             Check();
@@ -36,9 +37,25 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
             if (args.Page is not null && page != args.Page || args.NameContains is not null
                 && (identity.Name ?? string.Empty).IndexOf(args.NameContains, StringComparison.OrdinalIgnoreCase) < 0)
             { continue; }
+            DrawingPlacement? drawing = null;
+            bool annotation = args.ObjectType is "Arc" or "HyperLink" or "QRCode" or "Spline" or "DimensionItem" or "DimensionCircle" or "PlaceHolder" or "MacroBox";
+            if (annotation)
+            {
+                if (!drawingPages.TryGetValue(page, out PageDrawingGeometry? geometry))
+                {
+                    try
+                    { geometry = new EplanDrawingReader().Read(args.Project!, page); }
+                    catch (Exception ex) when (ex is BaseException or InvalidOperationException or BridgeErrorException)
+                    { WriteExceptionDiagnostics.Report(ex); }
+                    drawingPages[page] = geometry;
+                }
+                drawing = geometry?.Placements.FirstOrDefault(p => p.Locator.Type == identity.Type && p.Locator.Oid == identity.Oid);
+            }
             found[(identity.Type, identity.Oid)] = new ObjectSummary
             {
                 Name = SnapshotValues.Text(identity.Name ?? string.Empty),
+                Location = drawing?.Location,
+                Properties = drawing?.Properties ?? (annotation ? new() { ["read_warning"] = "Annotation geometry is unavailable; inspect this object in EPLAN." } : null),
                 Locator = new DrawingLocator
                 {
                     Project = args.Project!,

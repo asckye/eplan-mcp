@@ -9,7 +9,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class AnnotationCreateTests
 {
     internal static readonly string[] AllKinds = ["hyperlink", "qr_code", "spline", "sector", "placeholder", "macro_box", "linear", "angular", "baseline", "incremental", "continued", "circle"];
-    public static TheoryData<string> Kinds => new() { "hyperlink", "qr_code", "spline", "sector", "placeholder", "macro_box", "linear", "angular", "baseline", "incremental", "continued", "circle" };
+    public static TheoryData<string> Kinds => new(AllKinds);
 
     [Theory]
     [MemberData(nameof(Kinds))]

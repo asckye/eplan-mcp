@@ -1,5 +1,7 @@
 # 工具规格：`eplan_object_find`
 
+注释类型 HyperLink、QRCode、Spline、Arc、DimensionItem、DimensionCircle、DimensionGroup、PlaceHolder、MacroBox 已支持。返回可选 location/properties，含链接、二维码文字、尺寸文字、占位符名称及宏名称；locator 保持本工具的身份摘要，可供圆尺寸标注引用。
+
 | 项 | 内容 |
 |---|---|
 | 状态 | Implemented (Unreleased) |

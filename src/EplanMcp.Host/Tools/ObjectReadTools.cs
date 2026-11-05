@@ -12,7 +12,7 @@ internal sealed class ObjectReadTools
 {
     internal const string FindTool = "eplan_object_find", GetTool = "eplan_object_get";
     [McpServerTool(Name = FindTool, Title = "Find EPLAN objects", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Finds one dictionary object type in an open project. Returns exact locators and names, or unsupported with a reason. Repeat filters with cursor to continue. Example: {\"object_type\":\"Function\",\"page\":\"=AP+ST1/3\"}. Related: eplan_object_get.")]
+    [Description("Finds one dictionary object type in an open project. Returns locators, names and available annotation positions and fields, or unsupported with a reason. Repeat filters with cursor to continue. Example: {\"object_type\":\"Function\",\"page\":\"=AP+ST1/3\"}. Related: eplan_object_get.")]
     public static Task<CallToolResult> FindAsync(IBridgeClient bridge, PropertyGetPaging paging, RequestContext<CallToolRequestParams> context, CancellationToken cancellationToken) =>
         ReadAsync(bridge, paging.For(context.Server), false, JsonSerializer.SerializeToElement(context.Params?.Arguments, HostJson.Options), cancellationToken);
     [McpServerTool(Name = GetTool, Title = "Read EPLAN object", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
@@ -97,7 +97,13 @@ internal sealed class ObjectReadTools
                     row.Remove("query"); row.Remove("target");
                     row["property_name"] = PropertyCatalog.Find(ObjectReadTypes.DictionaryType(args.ObjectType), r.PropertyId)?.PropertyName;
                     return row;
-                })] : [.. block.Objects.Select(o => new JsonObject { ["locator"] = JsonSerializer.SerializeToNode(o.Locator, HostJson.Options), ["name"] = ResultShaper.CleanText(o.Name) })];
+                })] : [.. block.Objects.Select(o =>
+                {
+                    var row = new JsonObject { ["locator"] = JsonSerializer.SerializeToNode(o.Locator, HostJson.Options), ["name"] = ResultShaper.CleanText(o.Name) };
+                    if (o.Location is not null) { row["location"] = JsonSerializer.SerializeToNode(o.Location, HostJson.Options); }
+                    if (o.Properties is not null) { row["properties"] = JsonSerializer.SerializeToNode(o.Properties.ToDictionary(p => p.Key, p => ResultShaper.CleanFullText(p.Value), StringComparer.Ordinal), HostJson.Options); }
+                    return row;
+                })];
                 if (rows.Length > 200 || JsonSerializer.SerializeToUtf8Bytes(block, HostJson.Options).Length > 1024 * 1024 || block.NextOffset is { } next
                     && (next < args.Offset || next == args.Offset && nextIndex <= args.IndexOffset))
                 { return ToolResults.InvalidArguments(["Invalid Bridge continuation block. Ask the engineer to update the add-in."]); }

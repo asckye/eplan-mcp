@@ -15,6 +15,12 @@ public sealed class PlacementDeleteTests
     [InlineData("PathText")]
     [InlineData("Image")]
     [InlineData("MacroBox")]
+    [InlineData("HyperLink")]
+    [InlineData("QRCode")]
+    [InlineData("Spline")]
+    [InlineData("DimensionItem")]
+    [InlineData("DimensionCircle")]
+    [InlineData("PlaceHolder")]
     public void PreviewDoesNotWrite_ExecutionDeletesOnlySelectedKindInOneTransaction(string kind)
     {
         var world = new World(kind);

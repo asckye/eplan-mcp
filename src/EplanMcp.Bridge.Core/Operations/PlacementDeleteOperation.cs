@@ -8,7 +8,8 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
 {
     public const string Tool = "eplan_placement_delete";
     public override string Name => execute ? OperationNames.PlacementDeleteExecute : OperationNames.PlacementDeletePlan;
-    public static bool Allowed(string kind) => kind is "Line" or "Arc" or "PolyLine" or "Rectangle" or "Text" or "PathText" or "Image" or "MacroBox";
+    public static bool Allowed(string kind) => kind is "Line" or "Arc" or "PolyLine" or "Spline" or "Rectangle" or "Text" or "PathText" or "Image" or "MacroBox"
+        or "HyperLink" or "QRCode" or "DimensionItem" or "DimensionCircle" or "PlaceHolder";
     protected override JObject Execute(JObject args)
     {
         JObject input = execute ? args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["Supply request."])) : args;

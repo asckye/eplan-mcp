@@ -7,6 +7,7 @@
 | 插入菜单 01（2026-11-04，A97，`feat/insert-annotations`） | `AnnotationCreateTests` | NOT RUN：禁止 EPLAN。待 LargeWrite 同页验证超链接、二维码、样条、扇形、默认/显式预览、逐项读回与整批一次撤销。 |
 | 插入菜单 02（2026-11-04，A97） | `AnnotationCreateTests` | NOT RUN：待六种尺寸的 EPLAN 计算文字、角度三点与整圆前置校验、整批撤销。 |
 | 插入菜单 03（2026-11-04，A97） | `AnnotationCreateTests` | NOT RUN：待占位符名称/记录/变量及宏名称实际显示与撤销。 |
+| 插入菜单 04（2026-11-04，A97） | `AnnotationCreateTests`、`PlacementDeleteTests` | NOT RUN：待 page_get/object_find 全类型读回、删除后两入口消失、撤销快照恢复及 export_image PNG 显示。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite Overview 页验证 PXC.2861344 的对象、PLC 盒、总览点、部件引用及撤销恢复；默认预览迁移后的旧宏断言保留。 |
 | G9 图形创建（2026-11-03，负责人 brief） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | NOT RUN：本次禁止 EPLAN。新增折线、圆弧、路径功能文本、imports 图片混合批次；待核对原生类型、全部点、角度/端点与外框、文字、图片路径和一次撤销恢复快照。XML 仅证明签名，不证明角度方向或实际图片行为。 |
 | S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 待运行：本次禁止 EPLAN；需验证写入未知结果、真实回滚及原有写入安全回归。Small 假对象覆盖未分类异常、回滚证据、结果查询与不重放；未改 Large 断言，不宣称实机通过。 |

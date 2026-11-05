@@ -1,5 +1,7 @@
 # 工具规格：`eplan_placement_delete`
 
+注释类型 HyperLink、QRCode、Spline、Arc、DimensionItem、DimensionCircle、PlaceHolder、MacroBox 已支持。实际删除在执行事务内重新解析定位器，不保留预检阶段的原生包装对象。
+
 | 项目字段 | 记录 |
 |---|---|
 | 工具名 / 注册入口 / 契约快照 | `eplan_placement_delete` / `PlacementDeleteTools` / `server-contract.verified.json` |

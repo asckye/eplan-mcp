@@ -821,6 +821,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "AnnotationCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/AnnotationCreateTests.cs"
           }
         ],
         "operationTests": [
@@ -8890,6 +8895,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ImportDxfToolTests.cs"
           },
           {
+            "name": "AnnotationCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/AnnotationCreateTests.cs"
+          },
+          {
             "name": "CableDefinitionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
@@ -11384,6 +11394,11 @@
             "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
           },
           {
+            "name": "AnnotationCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/AnnotationCreateTests.cs"
+          },
+          {
             "name": "ApiTryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
@@ -13135,6 +13150,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "AnnotationCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/AnnotationCreateTests.cs"
           },
           {
             "name": "BlockCreateTests",
@@ -15648,6 +15668,11 @@
             "file": "tests/EplanMcp.Large.Tests/ActionTryTests.cs"
           },
           {
+            "name": "AnnotationCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/AnnotationCreateTests.cs"
+          },
+          {
             "name": "BlockCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/BlockCreateTests.cs"
@@ -15795,6 +15820,11 @@
             "name": "PlacementDeleteProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementDeleteProtocolTests.cs"
+          },
+          {
+            "name": "AnnotationCreateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/AnnotationCreateTests.cs"
           },
           {
             "name": "MacroGroupedPlacementTests",

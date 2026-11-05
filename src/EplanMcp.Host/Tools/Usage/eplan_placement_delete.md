@@ -15,3 +15,5 @@ Use 1–100 distinct locators for Line, Arc, PolyLine, Rectangle, Text, PathText
 ## Errors
 
 `PLAN_STALE` means a locator or page changed: read fresh locators. `INVALID_ARGUMENT` identifies an unsupported target. A committed result must not be replayed; after `OUTCOME_UNKNOWN`, inspect the page before any new write. Native execution is pending live verification.
+
+HyperLink, QRCode, Spline, Arc (including sectors), DimensionItem, DimensionCircle, PlaceHolder and MacroBox are supported. Refresh drawing locators before deletion.
