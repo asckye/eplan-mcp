@@ -197,6 +197,24 @@ public sealed class PageExportRoundFourTests
         Assert.Equal(subset == 0 ? 0 : 2, comparison.SubsetDifferences.Count);
     }
 
+    [Theory]
+    [InlineData("\"0\"", null, true)]
+    [InlineData("\"FALSE\"", "\"\"", true)]
+    [InlineData("0", null, true)]
+    [InlineData("{}", null, true)]
+    [InlineData("\"1\"", null, false)]
+    [InlineData("\"0\"", "\"1\"", false)]
+    public void Compare_ExplicitDefaultAgainstEmpty_IsListedOutsideTheDifferences(string source, string? target, bool isDefault)
+    {
+        string Object(string? value) => "{\"placements\":[{\"type\":\"Terminal\",\"oid\":1,\"location\":{\"x\":1,\"y\":1},\"properties\":["
+            + (value is null ? "" : "{\"id\":20904,\"index\":0,\"value\":" + value + "}") + "]}]}";
+
+        PageExportComparison comparison = PageExportComparer.Compare(Object(source), Object(target));
+
+        Assert.Equal(isDefault ? 0 : 1, comparison.Types["Terminal"].Different.Count);
+        Assert.Equal(isDefault ? 1 : 0, comparison.DefaultDifferences.Count);
+    }
+
     [Fact]
     public void Compare_Blocks_PairByNameWhateverTheirOrder()
     {

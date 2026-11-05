@@ -133,6 +133,7 @@ internal static class PageExportComparer
             Differences(Normalize(pair.Source, "", sourceIds), Normalize(pair.Target, "", targetIds), "", differences);
             if (comparedPages is not null)
             { SeparatePairedDifferences(pair, differences, sourcePlacements, comparedPages, result); }
+            SeparateDefaultDifferences(pair, differences, result);
             PageExportTypeComparison group = Group(result, pair.Type);
             if (differences.Count == 0)
             {
@@ -190,6 +191,30 @@ internal static class PageExportComparer
             result.SubsetDifferences.Add(new(difference.Field, rule.Name, rule.Reason, difference.Source, difference.Target));
         }
     }
+
+    /// <summary>The owner's rule of 2026-11-04: an explicit default against an empty value means the same in EPLAN; listed, not counted.</summary>
+    private static void SeparateDefaultDifferences(ObjectPair pair, List<PageExportFieldDifference> differences, PageExportComparison result)
+    {
+        foreach (PageExportFieldDifference difference in differences.ToArray())
+        {
+            if (difference.Field.StartsWith("properties[", StringComparison.Ordinal) && IsDefaultValue(difference.Source) && IsDefaultValue(difference.Target))
+            {
+                differences.Remove(difference);
+                result.DefaultDifferences.Add(new(pair.Type + " " + pair.Source["oid"] + ": " + difference.Field, difference.Source, difference.Target));
+            }
+        }
+    }
+
+    private static bool IsDefaultValue(JToken? value) => value switch
+    {
+        null => true,
+        JObject languages => !languages.HasValues,
+        JValue { Value: null } => true,
+        JValue { Value: bool flag } => !flag,
+        JValue { Value: string text } => text.Trim().Length == 0 || text.Trim() is "0" or "0.0" || text.Trim().Equals("false", StringComparison.OrdinalIgnoreCase),
+        JValue { Type: JTokenType.Integer or JTokenType.Float } number => (double)number == 0,
+        _ => false,
+    };
 
     private static void SeparatePairedDifferences(ObjectPair pair, List<PageExportFieldDifference> differences, List<JObject> placements,
         IReadOnlySet<string> comparedPages, PageExportComparison result)
@@ -719,6 +744,7 @@ internal sealed class PageExportComparison
     public List<PageExportFieldDifference> PageDifferences { get; } = [];
     public List<PageExportSubsetDifference> SubsetDifferences { get; } = [];
     public int SubsetDifferenceCount => SubsetDifferences.Count;
+    public List<PageExportFieldDifference> DefaultDifferences { get; } = [];
     public PageExportReportRows? ReportRows { get; set; }
     public List<PageExportReadWarning> Warnings { get; } = [];
     public bool HasDifferences => PageDifferences.Count > 0 || Types.Values.Any(type => type.Missing.Count > 0 || type.Extra.Count > 0 || type.Different.Count > 0);

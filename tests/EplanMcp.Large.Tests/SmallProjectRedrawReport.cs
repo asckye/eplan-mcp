@@ -135,6 +135,8 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
             ["groupStructureDifferences"] = new JArray(comparison.PageDifferences.Where(field => IsGroupField(field.Field)).Select(Field)),
             ["subsetDifferenceCount"] = comparison.SubsetDifferenceCount,
             ["subsetDifferences"] = new JArray(comparison.SubsetDifferences.Select(SubsetField)),
+            ["defaultDifferenceCount"] = comparison.DefaultDifferences.Count,
+            ["defaultDifferences"] = new JArray(comparison.DefaultDifferences.Select(Field)),
             ["reportRows"] = comparison.ReportRows is { } rows ? new JObject
             {
                 ["matched"] = rows.Matched,
@@ -223,6 +225,7 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
                 .Select(field => new JObject { ["page"] = page["name"]!.DeepClone(), ["difference"] = field.DeepClone() }))),
             ["ignoredFields"] = new JArray(PageExportComparer.Ignored.Select(rule => new JObject { ["field"] = rule.Member, ["reason"] = rule.Reason })),
             ["subsetFields"] = new JArray(PageExportComparer.SubsetFields.Select(rule => new JObject { ["field"] = rule.Member, ["name"] = rule.Name, ["reason"] = rule.Reason })),
+            ["defaultDifferenceCount"] = _pages.Sum(page => (int)page["defaultDifferenceCount"]!),
             ["subsetDifferenceCount"] = _pages.Sum(page => (int)page["subsetDifferenceCount"]!),
             ["subsetDifferences"] = new JArray(_pages.SelectMany(page => ((JArray)page["subsetDifferences"]!).OfType<JObject>()
                 .Select(field => new JObject { ["page"] = page["name"]!.DeepClone(), ["difference"] = field.DeepClone() }))),
@@ -304,6 +307,10 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
             text.AppendLine("- " + Escape((string)item["page"]!) + " / " + Escape((string)item["objectType"]!) + " " + item["oid"]
                 + ": " + Escape((string)item["requestedMacro"]!) + " → " + Escape((string)item["actualMacro"]!) + "; " + Escape((string)item["reason"]!));
         }
+        text.AppendLine();
+        text.AppendLine("## Default value differences (" + report["defaultDifferenceCount"] + ")");
+        text.AppendLine();
+        text.AppendLine("An explicit default in one project against an empty value in the other; the page reports list them, outside the matching rate.");
         text.AppendLine();
         text.AppendLine("## Subset differences (" + report["subsetDifferenceCount"] + ")");
         text.AppendLine();
