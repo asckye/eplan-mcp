@@ -97,9 +97,9 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
             if (string.IsNullOrEmpty(obj.Category) || (obj.Main != true || entry.PropertyId is not (20011 or 20027))
                 && !PropertyWriteWhitelist.Entries.ContainsKey((version, "Function", entry.PropertyId, obj.Category!))
                 || obj.Main == true && entry.PropertyId is not (20011 or 20027) && obj.Category != "PLCBox"
-                || obj.Main != true && (obj.Category is not ("PLCTerminal" or "BusTerminal") || target.Locator is null))
+                || obj.Main != true && (obj.Category is not ("PLCTerminal" or "BusTerminal" or "Terminal" or "Busbar") || target.Locator is null))
             {
-                Add(at + "/target", "Use a supported category; non-main PLC points require an exact locator.", ErrorReason.PolicyDenied);
+                Add(at + "/target", "Use a supported category; non-main functions require an exact locator.", ErrorReason.PolicyDenied);
             }
 
             resolved.Add((obj, change, entry.PropertyId, i));
@@ -195,7 +195,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                     {
                         Language = TextLanguages.Independent,
                         Text = propertyId == 20027 ? value.Display!
-                        : propertyId == 20308 ? ((long)value.ReadStoredValue()).ToString(CultureInfo.InvariantCulture) : (string)value.ReadStoredValue()
+                        : metadata.ValueType == "integer" ? ((long)value.ReadStoredValue()).ToString(CultureInfo.InvariantCulture) : (string)value.ReadStoredValue()
                     });
                 }
                 else

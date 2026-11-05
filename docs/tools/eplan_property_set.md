@@ -19,11 +19,12 @@
 | dry_run | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 | response_format | concise / detailed | 否 | concise | detailed 增加副作用守卫说明；完整变更清单始终保留 |
 
-所有对象拒绝未知字段。target 与 property_get 共用互斥地址联合和 selector：设备全名（可限定页）或当前会话 function locator；其他对象不在白名单；非主 PLC 点必须使用完整 locator，不能按同名点替代。selector 恰选正整数 property_id 或正式 property_name，可带 index，但 `B1` 非索引属性拒绝 index。
+所有对象拒绝未知字段。target 与 property_get 共用互斥地址联合和 selector：设备全名（可限定页）或当前会话 function locator；其他对象不在白名单；非主功能必须使用完整 locator，不能按同名点替代。selector 恰选正整数 property_id 或正式 property_name，可带 index，但 `B1` 非索引属性拒绝 index。
 value 为 JSON 标量；`B1` 只接受最多 500 字符的字符串（仍受运行时更严格上限限制）。null/reset/delete 拒绝，空串可清空一个值。
 20011 必须指定项目已有的 language（如 zh_CN）或语言无关的 `??_??`，合并并保留其他译文；其他属性不接受 language。同一真实对象/属性/index/语言重复拒绝。总输入不超过 64 KiB，不自动分批。
 
 第 8 批（PLC，类型见 B13）：主 PLCBox 支持 20161、20408、20409、20410、20411、20427、20308；非主 PLCTerminal/BusTerminal 支持 20400、20402、20407、20011。20308 是 JSON 整数（XML 枚举 0–51），其余新增字段是字符串。数值写入、读回按定义类型比较；不转换数字字符串。
+端子与母线扩展（A95）：非主 Terminal 支持 20367（端子设备位置）、20809（排序码）字符串和 20035（设备标识搜索方向）JSON 整数；20035 按 EPLAN Long 的 Int32 范围读写，不接受数字字符串。非主 Busbar 支持 20011 多语言文本，仍须明确 language。两类均精确定位；不开放端子 20054、20044。
 完整功能清单内已发布直接属性参与守卫；A90 的总览功能文本计算值和盒子到点的只读继承允许随源值变化。不可读数据告警并跳过，不授权未核实赋值。
 
 ## 3. 输出
@@ -61,4 +62,5 @@ dry-run 返回全部实际变化，跳过审批、审计及写事务；无变化
 - Medium：真实 MCP Server + Fake Bridge 的 dry-run、无变化、审批、策略、stale、回滚错误、审计和 recovered 契约。
 - Large：WriteHost 在 writes/LargeWrite 经工具写 20011 zh_CN 和 20027，用 eplan_property_get 独立读回，再经工具恢复原值；撤销/故障回滚复用 PropertySetWriteTests，不重复测试。
 - PLC 批次 Large：PXC.2861344 总览和多线宏并入同卡，写地址、功能文本、配置项目、站号；读 PropertyDefinition、关联值并一步撤销（待实机）。
+- 端子/母线 Large：LargeWrite 新页写端子 20367 和 BCP 20011，逐项读回并一步撤销比较快照（待实机）；Small/Medium 覆盖类型、精确定位、类别拒绝和不可读告警。
 - Agent 评测：先查 schema，预览后修改中文功能文本并保留德文；拒绝未发布属性；遇到属性内提示注入仍只完成用户指定赋值。

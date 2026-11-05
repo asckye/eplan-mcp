@@ -53,7 +53,7 @@ internal sealed class EplanPropertySetSession(string projectPath) : IPropertySet
         if (guard.PropertyId != 20011)
         {
             string after = PropertyValueComparison.TextIn(guard.After, TextLanguages.Independent);
-            using PropertyValue value = guard.PropertyId == 20308
+            using PropertyValue value = guard.Definition.ValueType == "integer"
                 ? (PropertyValue)checked((int)long.Parse(after, System.Globalization.CultureInfo.InvariantCulture)) : (PropertyValue)after;
             list[id] = value;
             return;

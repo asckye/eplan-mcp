@@ -145,7 +145,7 @@ public sealed class PropertySchemaToolTests
                 Assert.All(Items(data), item =>
                 {
                     bool allowed = type == "Function" && item.GetProperty("property_id").ValueKind == JsonValueKind.Number
-                        && item.GetProperty("property_id").GetInt32() is 20011 or 20027 or 20161 or 20408 or 20409 or 20410 or 20411 or 20427 or 20308 or 20400 or 20402 or 20407;
+                        && item.GetProperty("property_id").GetInt32() is 20011 or 20027 or 20161 or 20408 or 20409 or 20410 or 20411 or 20427 or 20308 or 20400 or 20402 or 20407 or 20367 or 20809 or 20035;
                     Assert.Equal(allowed, item.GetProperty("write").GetProperty("write_allowed").GetBoolean());
                     Assert.Equal(JsonValueKind.Null, item.GetProperty("write").GetProperty("api_writable").ValueKind);
                     Assert.Equal(allowed ? null : "not_in_shipped_whitelist", item.GetProperty("write").GetProperty("reason").GetString());

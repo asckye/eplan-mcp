@@ -75,7 +75,7 @@ internal sealed class FakePropertySetSession : IPropertySetSession
         if (guard.PropertyId != 20011)
         {
             property.Display = PropertyValueComparison.TextIn(guard.After, TextLanguages.Independent);
-            property.Stored = guard.PropertyId == 20308 ? long.Parse(property.Display, System.Globalization.CultureInfo.InvariantCulture) : property.Display;
+            property.Stored = guard.Definition.ValueType == "integer" ? long.Parse(property.Display, System.Globalization.CultureInfo.InvariantCulture) : property.Display;
         }
         else
         {

@@ -99,6 +99,32 @@ public sealed class PropertySetContractTests
     }
 
     [Theory]
+    [InlineData(20367, "\"1\"", "text", null)]
+    [InlineData(20809, "\"1\"", "text", null)]
+    [InlineData(20035, "60", "integer", 60L)]
+    [InlineData(20035, "-2147483648", "integer", -2147483648L)]
+    [InlineData(20035, "2147483647", "integer", 2147483647L)]
+    public void TerminalPrimitives_PreservePublishedTypes(int id, string value, string type, long? number)
+    {
+        PropertySetChange parsed = Assert.Single(PropertySetRequest.Parse(Input(
+            "{\"project\":\"Line1\",\"changes\":[{\"target\":{\"device_tag\":\"+A1-XQ10:1\"},\"property\":{\"property_id\":" + id + "},\"value\":" + value + "}]}")).Changes);
+        Assert.Equal(type, parsed.Value.ValueType);
+        Assert.Equal(number, parsed.Value.IntegerValue);
+    }
+
+    [Theory]
+    [InlineData("\"60\"")]
+    [InlineData("2147483648")]
+    [InlineData("-2147483649")]
+    [InlineData("1.5")]
+    [InlineData("true")]
+    public void TerminalInteger_RejectsCoercionAndOverflow(string value)
+    {
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeCallException>(() => PropertySetRequest.Parse(Input(
+            "{\"project\":\"Line1\",\"changes\":[{\"target\":{\"device_tag\":\"+A1-XQ10:1\"},\"property\":{\"property_id\":20035},\"value\":" + value + "}]}"))).Error.Reason);
+    }
+
+    [Theory]
     [InlineData("\"12\"")]
     [InlineData("-1")]
     [InlineData("52")]

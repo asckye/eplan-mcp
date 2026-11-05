@@ -421,3 +421,4 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `RIT.3581000` 的 CreateDevice 抛 S063114；RIT.3450500、RIT.3451500 未放出任何对象。BCP 在首次提交后新事务中可追加 RIT.3451500/1；同名 BBDEF 保持主功能，BCP 为非主 Busbar。
 - 中断点仅赋 Name 时 VisibleName、20002、20010 为空；AdjustVisibleName 返回 true 后 `-2Z3` 可读。示例 `=GAA-2L1` 的显示名为 `-2L1`。
 - 主功能在 SafetyPoint 内追加第二个部件 `AddArticleReference("RIT.9340030", "1", 2)` 读回数量 2；普通 Transaction 或 FunctionTransactionScope 会对第二个部件抛 S063074。本条补充 A93 的已知条件。
+- 非主 Terminal 的 20367、20809 为 String，20035 为 Long，均已写入读回；未附部件的端子写 20054、20044 抛 S063109，不列入白名单。BCP 的 20011 写 PE 读回 `??_??@PE;`。

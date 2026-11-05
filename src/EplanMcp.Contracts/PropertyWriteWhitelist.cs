@@ -2,11 +2,11 @@ using System.Collections.ObjectModel;
 
 namespace EplanMcp.Contracts;
 
-/// <summary>Host authorization data; B1 text and category-scoped B8 PLC assignments.</summary>
+/// <summary>Host authorization data; B1 text and category-scoped assignments.</summary>
 public static class PropertyWriteWhitelist
 {
     /// <summary>Version of the planning rules; included in every property plan fingerprint.</summary>
-    public const string PlanningVersion = "b8-plc/1";
+    public const string PlanningVersion = "b8-terminal-busbar/2";
 
     /// <summary>B1 planning/execution constraints (A44/A48), shared with the published Host whitelist.</summary>
     public static PropertyWriteEntry? PlanningCandidate(int version, string objectType, int id, string category = "") =>
@@ -28,7 +28,7 @@ public static class PropertyWriteWhitelist
             NormalizedComparison = id == 20011 ? "ordinal_per_language" : "ordinal_text",
             SideEffectGuards = ["same_tag_functions", "identity", "unchanged_translations", "parts"],
             ApiNotesEvidence = ["A36", "A42", "A44", "A48"],
-        } : version == 2026 && objectType == "Function" ? PlcEntries().FirstOrDefault(e => e.PropertyId == id
+        } : version == 2026 && objectType == "Function" ? PlcEntries().Concat(TerminalBusbarEntries()).FirstOrDefault(e => e.PropertyId == id
             && (category.Length == 0 || e.ApplicableCategory == category)) : null;
 
     /// <summary>Exact version/object/ID/category keys. No tool, configuration or local data can add entries.</summary>
@@ -39,8 +39,38 @@ public static class PropertyWriteWhitelist
         get;
     } =
         new ReadOnlyDictionary<(int, string, int, string), PropertyWriteEntry>(
-            new[] { 20011, 20027 }.Select(id => PlanningCandidate(2026, "Function", id)!).Concat(PlcEntries())
+            new[] { 20011, 20027 }.Select(id => PlanningCandidate(2026, "Function", id)!).Concat(PlcEntries()).Concat(TerminalBusbarEntries())
                 .ToDictionary(e => (e.EplanMajorVersion, e.ObjectType, e.PropertyId, e.ApplicableCategory)));
+    private static IEnumerable<PropertyWriteEntry> TerminalBusbarEntries()
+    {
+        foreach (int id in new[] { 20367, 20809, 20035, 20011 })
+        {
+            PropertyWriteEntry entry = id == 20011 ? PlanningCandidate(2026, "Function", id)! : new PropertyWriteEntry
+            {
+                EplanMajorVersion = 2026,
+                ObjectType = "Function",
+                PropertyId = id,
+                PropertyName = PropertyCatalog.Find("Function", id)!.PropertyName,
+                Definition = new PropertyDefinitionMetadata
+                {
+                    ValueType = id == 20035 ? "integer" : "text",
+                    MaximumLength = 500,
+                    EmptyAllowed = true,
+                    IsIndexed = false,
+                    Unit = "",
+                    LanguageMode = "none",
+                    LowerBound = id == 20035 ? new("integer", integerValue: int.MinValue) : null,
+                    UpperBound = id == 20035 ? new("integer", integerValue: int.MaxValue) : null,
+                },
+                NormalizedComparison = "ordinal_stored_value",
+                SideEffectGuards = ["same_tag_functions", "identity", "parts"],
+            };
+            entry.ApplicableCategory = id == 20011 ? "Busbar" : "Terminal";
+            entry.ApiNotesEvidence = ["A95"];
+            yield return entry;
+        }
+    }
+
     private static IEnumerable<PropertyWriteEntry> PlcEntries()
     {
         foreach (string category in new[] { "PLCBox", "PLCTerminal", "BusTerminal" })

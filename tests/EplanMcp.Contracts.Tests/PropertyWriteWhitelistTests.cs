@@ -34,7 +34,7 @@ public sealed class PropertyWriteWhitelistTests
         var dictionary = Assert.IsAssignableFrom<IDictionary<(int, string, int, string), PropertyWriteEntry>>(PropertyWriteWhitelist.Entries);
         Assert.True(dictionary.IsReadOnly);
         Assert.Throws<NotSupportedException>(() => dictionary.Add((2026, "Function", 20011, "Terminal"), new()));
-        Assert.Equal(17, PropertyWriteWhitelist.Entries.Count);
+        Assert.Equal(21, PropertyWriteWhitelist.Entries.Count);
     }
 
     [Fact]
@@ -51,6 +51,21 @@ public sealed class PropertyWriteWhitelistTests
                 Assert.Equal(id == 20011 ? "multi_language" : id == 20308 ? "integer" : "text", entry.Definition.ValueType);
             }
         }
+    }
+
+    [Theory]
+    [InlineData("Terminal", 20367, "text")]
+    [InlineData("Terminal", 20809, "text")]
+    [InlineData("Terminal", 20035, "integer")]
+    [InlineData("Busbar", 20011, "multi_language")]
+    public void TerminalBusbar_ExactCategoryKeysAndTypes_ArePublished(string category, int id, string type)
+    {
+        PropertyWriteEntry entry = PropertyWriteWhitelist.Entries[(2026, "Function", id, category)];
+        Assert.Equal(PropertyCatalog.Find("Function", id)!.PropertyName, entry.PropertyName);
+        Assert.Equal(type, entry.Definition.ValueType);
+        Assert.Contains("A95", entry.ApiNotesEvidence);
+        Assert.NotNull(PropertyWriteWhitelist.PlanningCandidate(2026, "Function", id, category));
+        Assert.Null(PropertyWriteWhitelist.PlanningCandidate(2027, "Function", id, category));
     }
 
     [Theory]
