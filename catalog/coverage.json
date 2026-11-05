@@ -66,11 +66,11 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 1977,
-      "byTools": 1969,
-      "partial": 181,
-      "automatedTest": 1969,
-      "liveVerified": 841,
+      "implemented": 1990,
+      "byTools": 1982,
+      "partial": 178,
+      "automatedTest": 1982,
+      "liveVerified": 856,
       "envBlocked": 21,
       "undocumented": 134
     },
@@ -86,9 +86,9 @@
       "denominator": 1799,
       "implemented": 762,
       "byTools": 755,
-      "partial": 94,
+      "partial": 91,
       "automatedTest": 755,
-      "liveVerified": 165,
+      "liveVerified": 170,
       "envBlocked": 18,
       "undocumented": 66
     },
@@ -102,21 +102,21 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 1215,
-      "byTools": 1214,
+      "implemented": 1228,
+      "byTools": 1227,
       "partial": 87,
-      "automatedTest": 1214,
-      "liveVerified": 676,
+      "automatedTest": 1227,
+      "liveVerified": 686,
       "envBlocked": 3,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 1942,
+    "used": 1943,
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 60,
+    "used": 62,
     "registered": 8585
   },
   "actionNames": {
@@ -139,8 +139,8 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 792,
-      "liveVerified": 369
+      "implemented": 797,
+      "liveVerified": 371
     },
     {
       "scope": "Eplan.EplApi.DataModel.E3D",
@@ -157,8 +157,8 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 314,
-      "liveVerified": 147
+      "implemented": 320,
+      "liveVerified": 156
     },
     {
       "scope": "Eplan.EplApi.DataModel.Helpers",
@@ -169,8 +169,8 @@
     {
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
-      "implemented": 40,
-      "liveVerified": 17
+      "implemented": 42,
+      "liveVerified": 19
     },
     {
       "scope": "Eplan.EplApi.DataModel.Planning",
@@ -206,7 +206,7 @@
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
       "implemented": 186,
-      "liveVerified": 36
+      "liveVerified": 38
     },
     {
       "scope": "Eplan.EplApi.HEServices.Exceptions",
@@ -780,10 +780,10 @@
         "placement.text.create.plan",
         "project.get"
       ],
-      "apiIds": 197,
-      "operationGroups": 116,
-      "dataDictionary": 1,
-      "dependencies": 80,
+      "apiIds": 322,
+      "operationGroups": 196,
+      "dataDictionary": 2,
+      "dependencies": 123,
       "actions": 0,
       "spec": "docs/tools/eplan_annotation_create.md",
       "small": 1,
@@ -834,8 +834,8 @@
         "api.try.plan",
         "project.get"
       ],
-      "apiIds": 3830,
-      "operationGroups": 1798,
+      "apiIds": 3836,
+      "operationGroups": 1802,
       "dataDictionary": 59,
       "dependencies": 1808,
       "actions": 0,
@@ -1088,10 +1088,10 @@
         "connection.create.plan",
         "project.get"
       ],
-      "apiIds": 268,
-      "operationGroups": 156,
-      "dataDictionary": 5,
-      "dependencies": 103,
+      "apiIds": 379,
+      "operationGroups": 224,
+      "dataDictionary": 7,
+      "dependencies": 138,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 4,
@@ -1275,10 +1275,10 @@
         "device.place.plan",
         "project.get"
       ],
-      "apiIds": 329,
-      "operationGroups": 184,
-      "dataDictionary": 5,
-      "dependencies": 114,
+      "apiIds": 391,
+      "operationGroups": 227,
+      "dataDictionary": 6,
+      "dependencies": 130,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
       "small": 12,
@@ -1333,10 +1333,10 @@
         "device.update.execute",
         "device.update.plan"
       ],
-      "apiIds": 105,
-      "operationGroups": 55,
+      "apiIds": 117,
+      "operationGroups": 57,
       "dataDictionary": 3,
-      "dependencies": 43,
+      "dependencies": 47,
       "actions": 0,
       "spec": "docs/tools/eplan_device_update.md",
       "small": 2,
@@ -1520,10 +1520,10 @@
         "import.dxf.execute",
         "import.dxf.plan"
       ],
-      "apiIds": 181,
-      "operationGroups": 103,
-      "dataDictionary": 1,
-      "dependencies": 77,
+      "apiIds": 229,
+      "operationGroups": 133,
+      "dataDictionary": 2,
+      "dependencies": 93,
       "actions": 0,
       "spec": "docs/tools/eplan_import_dxf.md",
       "small": 1,
@@ -1661,10 +1661,10 @@
       "operations": [
         "macro.get"
       ],
-      "apiIds": 39,
-      "operationGroups": 20,
+      "apiIds": 43,
+      "operationGroups": 23,
       "dataDictionary": 0,
-      "dependencies": 17,
+      "dependencies": 18,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_get.md",
       "small": 1,
@@ -1682,10 +1682,10 @@
         "macro.insert.execute",
         "macro.insert.plan"
       ],
-      "apiIds": 197,
-      "operationGroups": 113,
-      "dataDictionary": 1,
-      "dependencies": 81,
+      "apiIds": 264,
+      "operationGroups": 158,
+      "dataDictionary": 3,
+      "dependencies": 99,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
       "small": 6,
@@ -1756,10 +1756,10 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 381,
-      "operationGroups": 219,
+      "apiIds": 447,
+      "operationGroups": 277,
       "dataDictionary": 63,
-      "dependencies": 160,
+      "dependencies": 166,
       "actions": 0,
       "spec": "docs/tools/eplan_object_find.md",
       "small": 3,
@@ -1778,10 +1778,10 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 462,
-      "operationGroups": 300,
+      "apiIds": 528,
+      "operationGroups": 358,
       "dataDictionary": 63,
-      "dependencies": 160,
+      "dependencies": 166,
       "actions": 0,
       "spec": "docs/tools/eplan_object_get.md",
       "small": 2,
@@ -1903,10 +1903,10 @@
         "page.create.execute",
         "page.create.plan"
       ],
-      "apiIds": 79,
-      "operationGroups": 32,
+      "apiIds": 85,
+      "operationGroups": 36,
       "dataDictionary": 1,
-      "dependencies": 39,
+      "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
       "small": 11,
@@ -1958,10 +1958,10 @@
         "page.get",
         "project.get"
       ],
-      "apiIds": 142,
-      "operationGroups": 91,
-      "dataDictionary": 1,
-      "dependencies": 50,
+      "apiIds": 189,
+      "operationGroups": 121,
+      "dataDictionary": 2,
+      "dependencies": 65,
       "actions": 0,
       "spec": "docs/tools/eplan_page_get.md",
       "small": 7,
@@ -2059,10 +2059,10 @@
       "operations": [
         "page.review"
       ],
-      "apiIds": 157,
-      "operationGroups": 103,
-      "dataDictionary": 1,
-      "dependencies": 53,
+      "apiIds": 205,
+      "operationGroups": 133,
+      "dataDictionary": 2,
+      "dependencies": 69,
       "actions": 0,
       "spec": "docs/tools/eplan_page_review.md",
       "small": 4,
@@ -2103,8 +2103,8 @@
         "page.update.execute",
         "page.update.plan"
       ],
-      "apiIds": 80,
-      "operationGroups": 40,
+      "apiIds": 81,
+      "operationGroups": 41,
       "dataDictionary": 1,
       "dependencies": 38,
       "actions": 0,
@@ -2347,10 +2347,10 @@
         "placement.text.create.plan",
         "project.get"
       ],
-      "apiIds": 197,
-      "operationGroups": 116,
-      "dataDictionary": 1,
-      "dependencies": 80,
+      "apiIds": 322,
+      "operationGroups": 196,
+      "dataDictionary": 2,
+      "dependencies": 123,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_create.md",
       "small": 4,
@@ -2368,10 +2368,10 @@
         "placement.delete.execute",
         "placement.delete.plan"
       ],
-      "apiIds": 0,
-      "operationGroups": 0,
-      "dataDictionary": 0,
-      "dependencies": 0,
+      "apiIds": 160,
+      "operationGroups": 94,
+      "dataDictionary": 1,
+      "dependencies": 64,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_delete.md",
       "small": 0,
@@ -2388,10 +2388,10 @@
         "placement.edit.execute",
         "placement.edit.plan"
       ],
-      "apiIds": 190,
-      "operationGroups": 118,
-      "dataDictionary": 1,
-      "dependencies": 71,
+      "apiIds": 458,
+      "operationGroups": 280,
+      "dataDictionary": 3,
+      "dependencies": 173,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_edit.md",
       "small": 3,
@@ -2406,10 +2406,10 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 248,
-      "operationGroups": 144,
-      "dataDictionary": 5,
-      "dependencies": 95,
+      "apiIds": 360,
+      "operationGroups": 212,
+      "dataDictionary": 7,
+      "dependencies": 131,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
       "small": 6,
@@ -2630,7 +2630,7 @@
         "property.set.execute",
         "property.set.plan"
       ],
-      "apiIds": 421,
+      "apiIds": 422,
       "operationGroups": 237,
       "dataDictionary": 1,
       "dependencies": 181,
@@ -2733,10 +2733,10 @@
         "plan.names",
         "project.snapshot"
       ],
-      "apiIds": 249,
-      "operationGroups": 136,
-      "dataDictionary": 6,
-      "dependencies": 78,
+      "apiIds": 297,
+      "operationGroups": 166,
+      "dataDictionary": 7,
+      "dependencies": 92,
       "actions": 0,
       "spec": "docs/tools/eplan_rule_check.md",
       "small": 2,
@@ -3014,10 +3014,10 @@
         "plan.macro.inspect",
         "project.snapshot"
       ],
-      "apiIds": 250,
-      "operationGroups": 137,
-      "dataDictionary": 6,
-      "dependencies": 78,
+      "apiIds": 298,
+      "operationGroups": 167,
+      "dataDictionary": 7,
+      "dependencies": 92,
       "actions": 0,
       "spec": "docs/tools/eplan_workflow_plan.md",
       "small": 3,
@@ -3455,9 +3455,12 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_part_search",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ]
@@ -3693,9 +3696,22 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
         "eplan_object_find",
-        "eplan_object_get"
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ]
     },
     {
@@ -3798,6 +3814,7 @@
         "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ]
@@ -4355,6 +4372,7 @@
         "eplan_part_search",
         "eplan_part_sync",
         "eplan_placement_create",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_create",
         "eplan_project_translate",
@@ -4430,9 +4448,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_report_create",
@@ -4468,6 +4489,7 @@
         "eplan_import_pdf_comments",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_page_create",
         "eplan_page_text_replace",
         "eplan_page_update",
         "eplan_placement_create",
@@ -4698,16 +4720,28 @@
       "unit": "O:Eplan.EplApi.Base.PathMap.SubstitutePath",
       "layer": "operation",
       "status": "live_verified",
-      "partial": true,
+      "partial": false,
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
         "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_macro_list",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
         "eplan_part_import",
         "eplan_part_sync",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_translation_import",
         "eplan_workflow_plan"
@@ -4735,6 +4769,7 @@
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
@@ -4768,6 +4803,7 @@
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
@@ -4832,9 +4868,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -4874,9 +4913,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -5427,9 +5469,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -5721,6 +5766,7 @@
         "eplan_object_get",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
@@ -5799,11 +5845,15 @@
       "tools": [
         "eplan_api_try",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_device_update",
         "eplan_import_list",
+        "eplan_macro_insert",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -5872,13 +5922,16 @@
         "eplan_cable_generate",
         "eplan_cable_get",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_place",
         "eplan_device_update",
         "eplan_import_list",
+        "eplan_macro_insert",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placement_update",
         "eplan_plc_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -5924,11 +5977,15 @@
       "tools": [
         "eplan_api_try",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_device_get",
+        "eplan_device_place",
         "eplan_device_update",
         "eplan_import_list",
+        "eplan_macro_insert",
         "eplan_part_list",
         "eplan_part_sync",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -5950,9 +6007,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Block.Create",
@@ -5960,9 +6032,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Block.Name",
@@ -5970,9 +6044,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Block.Properties",
@@ -5982,10 +6071,11 @@
       "tools": [
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Block.RefCount",
@@ -6003,9 +6093,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.BlockPropertyList.Property",
@@ -6023,9 +6128,20 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_device_place"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.BoxedDevice.FunctionCategory",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_device_place"
+      ],
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.BoxedDevice.FunctionsInside",
@@ -6033,9 +6149,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_device_place"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.BoxedDevice.IsFunctionInside",
@@ -6093,9 +6210,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Connection.Articles",
@@ -6196,6 +6315,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -6209,6 +6329,7 @@
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_review",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -6350,6 +6471,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -6366,6 +6488,7 @@
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_review",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -6474,6 +6597,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -6487,6 +6611,7 @@
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_review",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -6563,11 +6688,13 @@
       "unit": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPoint.AddArticleReference",
       "layer": "operation",
       "status": "automated_test",
-      "partial": true,
+      "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPoint.ArticleReferences",
@@ -6575,9 +6702,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPoint.Articles",
@@ -6628,12 +6757,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
+        "eplan_placement_update",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPoint.Shielding",
@@ -6994,10 +7126,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionPointsInfo.Remove",
@@ -7448,6 +7581,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_create",
@@ -7761,6 +7895,7 @@
         "eplan_action_run",
         "eplan_action_try",
         "eplan_api_try",
+        "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
         "eplan_property_get",
@@ -7832,10 +7967,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.DaisyChain.RemoveConnectionPoint",
@@ -7856,10 +7992,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Property",
@@ -7890,10 +8027,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.DeviceGroupPropertyList.Property",
@@ -7925,10 +8063,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.DeviceListEntry.Remove",
@@ -7956,9 +8095,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.DimensionGroup.DimensionType",
@@ -7979,10 +8120,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.DimensionGroupPropertyList.Property",
@@ -8003,10 +8145,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.DocumentBasePropertyList.Property",
@@ -8208,10 +8351,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.DynamicConnectionLine.SetGraphics",
@@ -8252,10 +8396,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Area.Size",
@@ -8306,10 +8451,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.AuxiliaryLine.StartPoint",
@@ -8350,10 +8496,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.BarBasePropertyList.Property",
@@ -8504,10 +8651,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.BusBar.SetBendingRadiusAt",
@@ -8618,10 +8766,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.BusBarSystemPropertyList.Property",
@@ -8642,10 +8791,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.CabinetPropertyList.Property",
@@ -8666,10 +8816,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.ComponentPropertyList.Property",
@@ -8770,10 +8921,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Connection3D.RouteNodes",
@@ -8844,10 +8996,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.CopperBundle.SetParent",
@@ -9008,10 +9161,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Drilling.updateDrilling",
@@ -9042,10 +9196,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.DuctPropertyList.Property",
@@ -9196,10 +9351,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Function3D.SetPlanningSegment",
@@ -9340,10 +9496,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Group3D.Remove",
@@ -9468,10 +9625,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.InstallationSpace.UpdateInheritDrillings",
@@ -9672,10 +9830,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.MountingPanelPropertyList.Property",
@@ -9706,10 +9865,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.MountingRailPropertyList.Property",
@@ -9990,10 +10150,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.RemoveInvalidObjectReferences",
@@ -10474,10 +10635,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Placement3D.PropertyPlacements",
@@ -10738,10 +10900,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Plane.VisibleName",
@@ -10812,10 +10975,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingAccessoryPropertyList.Property",
@@ -10836,10 +11000,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingHose.RouteNodes",
@@ -10930,10 +11095,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingSegment.RoutedConnections",
@@ -11014,10 +11180,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.RoutingSpline.Spline",
@@ -11211,6 +11378,7 @@
         "eplan_connection_create",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
         "eplan_property_set"
@@ -11341,9 +11509,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -11374,6 +11545,7 @@
         "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_plc_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -11439,10 +11611,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.PlugStrip.AddLocalFunctionTemplates",
@@ -11503,10 +11676,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.Shield.FunctionCategory",
@@ -11618,10 +11792,12 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set",
@@ -11819,6 +11995,7 @@
         "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
@@ -11855,7 +12032,9 @@
       "partial": true,
       "tools": [
         "eplan_api_try",
-        "eplan_device_update"
+        "eplan_device_place",
+        "eplan_device_update",
+        "eplan_macro_insert"
       ],
       "route": "dedicated"
     },
@@ -11905,6 +12084,7 @@
         "eplan_device_list",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_page_get",
         "eplan_placement_create",
         "eplan_plc_get",
@@ -11930,9 +12110,10 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_device_place"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Function.BmkSearchDirection",
@@ -12010,7 +12191,9 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_update"
       ],
       "route": "dedicated"
     },
@@ -12030,6 +12213,7 @@
         "eplan_device_get",
         "eplan_device_list",
         "eplan_device_place",
+        "eplan_device_update",
         "eplan_import_dxf",
         "eplan_import_plc",
         "eplan_macro_get",
@@ -12039,6 +12223,7 @@
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -12267,9 +12452,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -12353,6 +12541,7 @@
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
+        "eplan_connection_create",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_place",
@@ -12360,6 +12549,8 @@
         "eplan_language_remove",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
+        "eplan_placement_update",
         "eplan_plc_get",
         "eplan_project_translate",
         "eplan_property_get",
@@ -12405,9 +12596,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_device_place",
+        "eplan_placement_edit"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Function.SubFunctions",
@@ -12433,8 +12626,10 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
-        "eplan_page_review"
+        "eplan_page_review",
+        "eplan_placement_update"
       ],
       "route": "dedicated"
     },
@@ -12495,16 +12690,19 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_connection_list",
         "eplan_context_get",
         "eplan_device_place",
         "eplan_import_dxf",
+        "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_review",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
@@ -12555,6 +12753,7 @@
         "eplan_part_list",
         "eplan_part_sync",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -12594,10 +12793,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
@@ -12675,6 +12875,7 @@
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -12699,6 +12900,7 @@
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -12732,6 +12934,7 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -12746,6 +12949,7 @@
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -12759,6 +12963,7 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -12853,6 +13058,7 @@
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -12877,10 +13083,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.FunctionPropertyList.Property",
@@ -12906,10 +13113,7 @@
         "eplan_connection_list",
         "eplan_device_get",
         "eplan_device_place",
-        "eplan_device_update",
-        "eplan_plc_get",
-        "eplan_rule_check",
-        "eplan_workflow_plan"
+        "eplan_plc_get"
       ],
       "route": "dedicated"
     },
@@ -12942,10 +13146,7 @@
         "eplan_connection_list",
         "eplan_device_get",
         "eplan_device_place",
-        "eplan_device_update",
-        "eplan_plc_get",
-        "eplan_rule_check",
-        "eplan_workflow_plan"
+        "eplan_plc_get"
       ],
       "route": "dedicated"
     },
@@ -12974,9 +13175,11 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.ElipseAngle",
@@ -12984,9 +13187,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.EndAngle",
@@ -12994,9 +13212,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.FirstRadius",
@@ -13004,9 +13237,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.IsSurfaceFilled",
@@ -13024,9 +13272,35 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.Location",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_annotation_create",
+        "eplan_placement_create"
+      ],
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.Properties",
@@ -13037,10 +13311,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.Radius",
@@ -13048,9 +13323,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.SecondRadius",
@@ -13058,9 +13348,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.Sector",
@@ -13068,9 +13373,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.SetArc",
@@ -13078,9 +13398,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.SetCircle",
@@ -13088,9 +13410,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.SetEllipse",
@@ -13098,9 +13422,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Arc.StartAngle",
@@ -13108,9 +13434,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Property",
@@ -13183,6 +13524,7 @@
         "eplan_import_pdf_comments",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
@@ -13304,9 +13646,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.DimensionCalculated",
@@ -13394,9 +13738,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.DimensionUnit",
@@ -13414,9 +13760,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.Properties",
@@ -13427,10 +13775,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextFontInfo",
@@ -13468,9 +13817,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.CreateAngular",
@@ -13478,9 +13829,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.DimensionCalculated",
@@ -13588,9 +13941,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.DimensionUnit",
@@ -13618,9 +13973,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.ExtensionLineFirst",
@@ -13648,9 +14005,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.GetAngleInRad",
@@ -13668,9 +14027,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.OffsetFromFirstExtensionLine",
@@ -13701,10 +14062,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.SecondPoint",
@@ -13712,9 +14074,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.SuppressDimensionLine",
@@ -13805,6 +14169,20 @@
         "eplan_api_try"
       ],
       "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Id",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_annotation_create",
+        "eplan_connection_create",
+        "eplan_placement_create",
+        "eplan_placement_edit",
+        "eplan_placement_update"
+      ],
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Is3D",
@@ -14012,9 +14390,14 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_placement_create",
+        "eplan_placement_edit",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.MergeLayers",
@@ -14078,9 +14461,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -14094,9 +14480,39 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_placement_create",
+        "eplan_placement_edit",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.LayerId",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
+      ],
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Pen",
@@ -14104,8 +14520,22 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
       "route": "dedicated"
     },
@@ -14118,10 +14548,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.SetVisibilityDependingOnLayer",
@@ -14156,12 +14587,27 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLink.Contents",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLink.Create",
@@ -14169,19 +14615,36 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLink.Link",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLink.Properties",
@@ -14192,10 +14655,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Property",
@@ -14213,9 +14677,11 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Image.FileName",
@@ -14223,9 +14689,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Image.GetPhysicalDimensionOfImage",
@@ -14266,10 +14747,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Image.SetArea",
@@ -14365,9 +14847,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -14404,10 +14889,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Line.StartArrow",
@@ -14431,9 +14917,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -14490,10 +14979,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.LockedMountingAreaPropertyList.Property",
@@ -14509,11 +14999,13 @@
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PathText.Create",
       "layer": "operation",
       "status": "automated_test",
-      "partial": true,
+      "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PathText.Properties",
@@ -14524,10 +15016,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PathText.ToPathText",
@@ -14550,14 +15043,79 @@
       "route": "api_try_only"
     },
     {
-      "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.PatternLength",
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.ColorId",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.LineEndType",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.PatternLength",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
+      ],
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.StyleFactor",
@@ -14572,22 +15130,52 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.StyleId",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_device_place"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
       "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.Width",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddRecord",
@@ -14595,9 +15183,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddReference",
@@ -14615,9 +15205,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord",
@@ -14658,9 +15250,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteRecord",
@@ -14822,9 +15416,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name",
@@ -14833,16 +15429,28 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
+        "eplan_placement_update",
         "eplan_property_get",
         "eplan_property_set",
+        "eplan_rule_check",
         "eplan_selection_get",
-        "eplan_selection_set"
+        "eplan_selection_set",
+        "eplan_workflow_plan"
       ],
       "route": "dedicated"
     },
@@ -14852,9 +15460,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_placeholder_apply",
-        "eplan_placeholder_list"
+        "eplan_placeholder_list",
+        "eplan_placement_create"
       ],
       "route": "dedicated"
     },
@@ -14864,9 +15474,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_placeholder_apply",
-        "eplan_placeholder_list"
+        "eplan_placeholder_list",
+        "eplan_placement_create"
       ],
       "route": "dedicated"
     },
@@ -14900,10 +15512,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.PropertyPlacements",
@@ -14983,8 +15596,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_placeholder_apply",
-        "eplan_placeholder_list"
+        "eplan_placeholder_list",
+        "eplan_placement_create"
       ],
       "route": "dedicated"
     },
@@ -15004,9 +15619,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLine.Create",
@@ -15014,9 +15644,11 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLine.FillPattern",
@@ -15041,12 +15673,27 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLine.GetPointAt",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLine.IsSurfaceFilled",
@@ -15074,9 +15721,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLine.Properties",
@@ -15087,10 +15749,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLine.SetBulgeAt",
@@ -15108,9 +15771,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PolyLinePropertyList.Property",
@@ -15154,10 +15819,13 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_page_text_replace",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -15187,9 +15855,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -15211,9 +15882,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -15233,9 +15907,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -15265,9 +15942,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -15341,9 +16021,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.QRCode.GetQRCode",
@@ -15351,9 +16033,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.QRCode.Properties",
@@ -15361,13 +16045,26 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
         "eplan_property_get",
-        "eplan_property_set"
+        "eplan_property_set",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.QRCode.Scale",
@@ -15415,8 +16112,22 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
-        "eplan_placement_edit"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
       "route": "dedicated"
     },
@@ -15483,6 +16194,17 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.Rectangle.Location",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_annotation_create",
+        "eplan_placement_create"
+      ],
+      "route": "dedicated"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Rectangle.LowerLeftCorner",
       "layer": "operation",
       "status": "live_verified",
@@ -15503,10 +16225,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Rectangle.SetArea",
@@ -15538,9 +16261,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Property",
@@ -15571,10 +16296,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Shielding.SetArea",
@@ -15612,9 +16338,11 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Spline.Properties",
@@ -15625,10 +16353,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.SplinePropertyList.Property",
@@ -15652,10 +16381,13 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_page_text_replace",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -15694,10 +16426,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Text.ToPathText",
@@ -15785,8 +16518,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
-        "eplan_page_text_replace"
+        "eplan_page_text_replace",
+        "eplan_placement_create"
       ],
       "route": "dedicated"
     },
@@ -15942,9 +16677,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -15974,9 +16712,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -16000,8 +16741,22 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
-        "eplan_device_place"
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
       "route": "dedicated"
     },
@@ -16062,10 +16817,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.TextBase.Rotation",
@@ -16079,9 +16835,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -16151,10 +16910,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.TopologyLinePropertyList.Property",
@@ -16265,10 +17025,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.Rectangle",
@@ -16485,9 +17246,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Group.Move",
@@ -16508,10 +17271,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Group.Remove",
@@ -16555,10 +17319,13 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_page_text_replace",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -16928,9 +17695,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -17011,6 +17781,7 @@
         "eplan_connection_create",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
         "eplan_property_set"
@@ -17117,10 +17888,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Location.Remove",
@@ -17190,12 +17962,14 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.LocationBoxPropertyList.Property",
@@ -17233,9 +18007,11 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_placement_create"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MacroBox.GenerateProtectedGroup",
@@ -17303,9 +18079,24 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MacroBox.Properties",
@@ -17316,10 +18107,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MacroBox.ReferencedPlacements",
@@ -17450,10 +18242,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MacroEntry.RelatedObject",
@@ -17484,6 +18277,7 @@
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -17517,10 +18311,11 @@
       "tools": [
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibraryPropertyList.Property",
@@ -17563,10 +18358,11 @@
       "tools": [
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.PlotFrame.Size",
@@ -17580,9 +18376,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -17602,10 +18401,13 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_page_text_replace",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -17663,6 +18465,7 @@
         "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -17758,10 +18561,11 @@
       "tools": [
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolLibrary.Symbols",
@@ -17801,6 +18605,7 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -17814,6 +18619,7 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -17827,6 +18633,7 @@
       "tools": [
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -17860,10 +18667,11 @@
       "tools": [
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.SymbolVariant.SymbolLibraryName",
@@ -17872,8 +18680,11 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_device_place",
-        "eplan_page_review"
+        "eplan_page_review",
+        "eplan_placement_edit",
+        "eplan_placement_update"
       ],
       "route": "dedicated"
     },
@@ -17889,9 +18700,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -17943,6 +18757,19 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.Location",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
+      ],
+      "route": "dedicated"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.Objects",
       "layer": "operation",
       "status": "live_verified",
@@ -17960,6 +18787,19 @@
       "layer": "operation",
       "status": "live_verified",
       "partial": true,
+      "tools": [
+        "eplan_macro_get",
+        "eplan_macro_insert",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.WindowMacro.ReferencePoint",
+      "layer": "operation",
+      "status": "live_verified",
+      "partial": false,
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
@@ -18129,10 +18969,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Property",
@@ -18223,10 +19064,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MergedFunction.Create",
@@ -18307,10 +19149,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.NetDefinitionPoint.AddDaisyChain",
@@ -18391,10 +19234,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.NetDefinitionPoint.RemoveConnections",
@@ -18495,10 +19339,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Option.Remove",
@@ -18539,10 +19384,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.OptionFragment.Create",
@@ -18563,10 +19409,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.OptionFragment.Remove",
@@ -18637,10 +19484,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.OptionGroup.Remove",
@@ -18716,6 +19564,7 @@
         "eplan_page_review",
         "eplan_page_text_replace",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
@@ -18800,9 +19649,14 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
+        "eplan_page_create",
         "eplan_page_get",
         "eplan_page_review",
+        "eplan_page_update",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -18888,6 +19742,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -19011,6 +19866,7 @@
         "eplan_page_text_replace",
         "eplan_page_update",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
@@ -19047,6 +19903,7 @@
         "eplan_page_list",
         "eplan_page_update",
         "eplan_placement_create",
+        "eplan_placement_edit",
         "eplan_project_translate",
         "eplan_property_get",
         "eplan_property_set",
@@ -19114,9 +19971,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -19188,6 +20048,7 @@
         "eplan_macro_insert",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_page_create",
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_open",
@@ -19196,6 +20057,7 @@
         "eplan_page_text_replace",
         "eplan_page_update",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -19231,6 +20093,7 @@
         "eplan_macro_insert",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_page_create",
         "eplan_page_delete",
         "eplan_page_get",
         "eplan_page_list",
@@ -19240,6 +20103,7 @@
         "eplan_page_text_replace",
         "eplan_page_update",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -19340,6 +20204,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -19352,6 +20217,7 @@
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_review",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_plc_get",
         "eplan_property_get",
@@ -19381,6 +20247,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -19394,6 +20261,7 @@
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_review",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -19607,10 +20475,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PipingDefinition.Substance",
@@ -19701,10 +20570,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PlaceHolderText.Relation",
@@ -19759,9 +20629,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -19783,9 +20656,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -19835,6 +20711,7 @@
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
@@ -19853,6 +20730,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -19874,6 +20752,7 @@
         "eplan_page_review",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -19897,19 +20776,24 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Placement.Remove",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try",
-        "eplan_placement_edit"
+        "eplan_connection_create",
+        "eplan_macro_insert",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update"
       ],
       "route": "dedicated"
     },
@@ -19952,10 +20836,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Planning.PCTLoopFunction.Properties",
@@ -19966,10 +20851,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSet.AvailableValueSetNames",
@@ -20130,10 +21016,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Planning.PlanningSegment.AddArticleReference",
@@ -20504,10 +21391,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Planning.PlanningSegment.Remove",
@@ -20728,10 +21616,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentDefinition.PropertiesConfigurations",
@@ -20822,10 +21711,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentPlacement.Segment",
@@ -20916,10 +21806,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentTemplate.Remove",
@@ -20970,10 +21861,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Planning.Vessel.Properties",
@@ -20984,10 +21876,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PlcIO.Address",
@@ -21048,10 +21941,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PlcIO.SymbolicAddress",
@@ -21079,9 +21973,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PotentialDefinition.Properties",
@@ -21090,12 +21986,15 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
+        "eplan_placement_update",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PotentialDefinition.SignalName",
@@ -21103,9 +22002,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Property",
@@ -21339,6 +22240,7 @@
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_symbol_search"
       ],
@@ -21530,6 +22432,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -21560,9 +22463,14 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
-        "eplan_api_try"
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_placement_create",
+        "eplan_placement_edit",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Project.LockAllObjects",
@@ -21598,6 +22506,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -21646,11 +22555,12 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.Project.ParseNameAndProps",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try",
-        "eplan_device_place"
+        "eplan_device_place",
+        "eplan_device_update"
       ],
       "route": "dedicated"
     },
@@ -21732,6 +22642,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -21839,6 +22750,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -21871,6 +22783,7 @@
         "eplan_context_get",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_project_create",
         "eplan_property_get",
         "eplan_property_set",
@@ -22107,6 +23020,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -22211,6 +23125,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -22372,6 +23287,7 @@
         "eplan_language_remove",
         "eplan_language_set",
         "eplan_placement_create",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
         "eplan_property_set",
@@ -22729,6 +23645,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -22840,9 +23757,11 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_update",
         "eplan_property_get",
         "eplan_property_set"
       ],
@@ -22943,6 +23862,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -22967,10 +23887,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Property",
@@ -23170,10 +24091,11 @@
       "tools": [
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ReportBlock.SortSchemaData",
@@ -23236,10 +24158,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ReportBlockReference.ReportBlock",
@@ -23310,10 +24233,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Revisions.Comparison.RevisionMarker",
@@ -23404,10 +24328,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.OldPropertyValue",
@@ -23428,10 +24353,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.PropertyId",
@@ -23487,6 +24413,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -23531,6 +24458,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -23575,6 +24503,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -23699,6 +24628,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -23744,6 +24674,7 @@
         "eplan_page_review",
         "eplan_page_text_replace",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_property_get",
@@ -23789,6 +24720,7 @@
         "eplan_object_get",
         "eplan_page_get",
         "eplan_placement_create",
+        "eplan_placement_edit",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set"
@@ -23839,6 +24771,7 @@
         "eplan_page_text_replace",
         "eplan_page_update",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -23863,10 +24796,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Property",
@@ -23887,10 +24821,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.StrandInterConnectorPropertyList.Property",
@@ -23956,9 +24891,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -24127,11 +25065,13 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_connection_create",
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
         "eplan_page_review",
+        "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -24168,10 +25108,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements",
@@ -24185,13 +25126,68 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_edit",
+        "eplan_placement_update"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemas",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_edit",
+        "eplan_placement_update"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.All",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_edit",
+        "eplan_placement_update"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Selected",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_edit",
+        "eplan_placement_update"
       ],
       "route": "dedicated"
     },
@@ -24292,9 +25288,12 @@
         "eplan_device_place",
         "eplan_import_dxf",
         "eplan_macro_insert",
+        "eplan_object_find",
+        "eplan_object_get",
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_rule_check",
@@ -24375,10 +25374,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Topology.RoutedConnection.RouteHints",
@@ -24451,10 +25451,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Topology.Segment.StartPoint",
@@ -24520,6 +25521,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -24564,6 +25566,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -24608,6 +25611,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -24652,6 +25656,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -24696,6 +25701,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -24740,6 +25746,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -24784,6 +25791,7 @@
         "eplan_part_sync",
         "eplan_placeholder_apply",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_project_translate",
@@ -24858,9 +25866,13 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_placement_edit",
+        "eplan_placement_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Parent",
@@ -24879,12 +25891,16 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
+        "eplan_placement_update",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.UserDefinedPropertyDefinition.Category",
@@ -25105,10 +26121,11 @@
         "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacements",
@@ -25794,12 +26811,13 @@
     {
       "unit": "O:Eplan.EplApi.HEServices.DeviceService.UpdateDevice",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_device_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.HEServices.DrawingService.CreateDisplayList",
@@ -26280,7 +27298,9 @@
       "partial": true,
       "tools": [
         "eplan_api_try",
-        "eplan_macro_insert"
+        "eplan_connection_create",
+        "eplan_macro_insert",
+        "eplan_placement_update"
       ],
       "route": "dedicated"
     },
@@ -26440,11 +27460,12 @@
     {
       "unit": "O:Eplan.EplApi.HEServices.NameService.RenameDevice",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try",
-        "eplan_device_place"
+        "eplan_device_place",
+        "eplan_device_update"
       ],
       "route": "dedicated"
     },
@@ -27075,6 +28096,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
@@ -27537,12 +28559,15 @@
         "eplan_action_run",
         "eplan_action_try",
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -27555,9 +28580,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
         "eplan_part_search",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -27569,9 +28596,12 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_part_search",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -27610,12 +28640,15 @@
         "eplan_action_run",
         "eplan_action_try",
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -27663,8 +28696,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_macro_insert",
         "eplan_part_export",
-        "eplan_translation_export"
+        "eplan_rule_check",
+        "eplan_translation_export",
+        "eplan_workflow_plan"
       ],
       "route": "dedicated"
     },
@@ -27699,12 +28735,15 @@
         "eplan_action_run",
         "eplan_action_try",
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -27717,9 +28756,12 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_part_search",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -27734,12 +28776,15 @@
         "eplan_action_run",
         "eplan_action_try",
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -27755,12 +28800,14 @@
         "eplan_action_run",
         "eplan_action_try",
         "eplan_api_try",
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
         "eplan_part_export",
         "eplan_part_import",
         "eplan_part_search",
         "eplan_part_sync",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_translation_import",
@@ -27774,9 +28821,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
         "eplan_part_search",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -27788,9 +28837,11 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
         "eplan_part_search",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -27802,9 +28853,12 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_connection_create",
         "eplan_device_place",
         "eplan_device_update",
+        "eplan_macro_insert",
         "eplan_part_search",
+        "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -50718,9 +51772,9 @@
   "reachability": {
     "operation": {
       "denominator": 4014,
-      "tools": 1977,
+      "tools": 1990,
       "apiTry": 1700,
-      "callable": 1982,
+      "callable": 1995,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -50742,7 +51796,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel",
-        "callable": 797,
+        "callable": 802,
         "refused_unsafe": 4
       },
       {
@@ -50757,7 +51811,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.Graphics",
-        "callable": 314,
+        "callable": 320,
         "refused_unsafe": 0
       },
       {
@@ -50767,7 +51821,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.MasterData",
-        "callable": 40,
+        "callable": 42,
         "refused_unsafe": 0
       },
       {
@@ -50824,19 +51878,19 @@
   },
   "routes": {
     "api_try_only": {
-      "count": 1387,
-      "live_verified": 505
+      "count": 1322,
+      "live_verified": 475
     },
     "dedicated": {
-      "count": 357,
-      "live_verified": 270
+      "count": 535,
+      "live_verified": 378
     },
     "generic_read": {
-      "count": 225,
-      "live_verified": 66
+      "count": 125,
+      "live_verified": 3
     },
     "none": {
-      "count": 2032,
+      "count": 2019,
       "live_verified": 0
     },
     "other": {
@@ -50853,19 +51907,19 @@
       "denominator": 5983,
       "routes": {
         "api_try_only": {
-          "count": 1591,
-          "live_verified": 510
+          "count": 1511,
+          "live_verified": 480
         },
         "dedicated": {
-          "count": 500,
-          "live_verified": 347
+          "count": 695,
+          "live_verified": 457
         },
         "generic_read": {
-          "count": 412,
-          "live_verified": 67
+          "count": 310,
+          "live_verified": 4
         },
         "none": {
-          "count": 3467,
+          "count": 3454,
           "live_verified": 0
         },
         "other": {
@@ -50882,12 +51936,12 @@
       "denominator": 3109,
       "routes": {
         "api_try_only": {
-          "count": 773,
-          "live_verified": 80
+          "count": 730,
+          "live_verified": 79
         },
         "dedicated": {
-          "count": 271,
-          "live_verified": 160
+          "count": 314,
+          "live_verified": 168
         },
         "generic_read": {
           "count": 37,
@@ -50911,19 +51965,19 @@
       "denominator": 2636,
       "routes": {
         "api_try_only": {
-          "count": 818,
-          "live_verified": 430
+          "count": 781,
+          "live_verified": 401
         },
         "dedicated": {
-          "count": 229,
-          "live_verified": 187
+          "count": 381,
+          "live_verified": 289
         },
         "generic_read": {
-          "count": 375,
-          "live_verified": 65
+          "count": 273,
+          "live_verified": 2
         },
         "none": {
-          "count": 1213,
+          "count": 1200,
           "live_verified": 0
         },
         "other": {
