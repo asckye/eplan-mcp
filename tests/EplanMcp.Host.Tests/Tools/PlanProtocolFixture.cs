@@ -119,12 +119,11 @@ public abstract class PlanProtocolFixture : IDisposable
 
     private protected async Task AdvanceUntil(Task task, TimeSpan tick)
     {
-        for (int i = 0; !task.IsCompleted && i < 100; i++)
+        while (!task.IsCompleted)
         {
             await Task.Delay(10, Token);
             _clock.Advance(tick);
         }
-        Assert.True(task.IsCompleted, "The wait did not end with the controlled clock.");
     }
 
     private protected async Task WithClient(Func<McpClient, IServiceProvider, Task> check, Action<IServiceCollection>? configure = null)

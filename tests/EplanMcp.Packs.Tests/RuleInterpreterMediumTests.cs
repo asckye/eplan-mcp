@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using static EplanMcp.Packs.Tests.RuleInterpreterFixture;
 
 namespace EplanMcp.Packs.Tests;
@@ -31,7 +30,7 @@ public sealed class RuleInterpreterMediumTests
     }
 
     [Fact]
-    public async Task Evaluation_500Rules_CompletesWithinBudget()
+    public async Task Evaluation_500Rules_ReadsEachFactOncePerRule()
     {
         var fixture = new RuleInterpreterFixture();
         fixture.Kinds["function"] = [.. Enumerable.Range(1, 20).Select(i => "-M" + i.ToString(System.Globalization.CultureInfo.InvariantCulture))];
@@ -42,12 +41,12 @@ public sealed class RuleInterpreterMediumTests
 
         RuleDefinition rule = fixture.Rule("{\"property\":\"function.main\"}");
         RuleDefinition[] rules = [.. Enumerable.Range(1, 500).Select(i => rule with { Rule = "rule/" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) })];
-        var timer = Stopwatch.StartNew();
-        IReadOnlyList<RuleResult> results = await new RuleInterpreter().EvaluateAsync(rules, fixture, fixture.Config, fixture.Parameters, TestContext.Current.CancellationToken);
+        // A clock that stands still: the budgets are the interpreter's own and have tests of their own, so a busy machine must not reach them here.
+        IReadOnlyList<RuleResult> results = await new RuleInterpreter(new ManualRuleClock()).EvaluateAsync(rules, fixture, fixture.Config, fixture.Parameters, TestContext.Current.CancellationToken);
 
         Assert.Equal(10_000, results.Count);
         Assert.All(results, r => Assert.Equal(RuleStatus.Pass, r.Status));
         Assert.Equal(500, results.Select(r => r.Rule).Distinct(StringComparer.Ordinal).Count());
-        Assert.True(timer.Elapsed < TimeSpan.FromSeconds(5));
+        Assert.Equal(10_000, fixture.Reads); // what the time depends on: no rule makes the others read again
     }
 }

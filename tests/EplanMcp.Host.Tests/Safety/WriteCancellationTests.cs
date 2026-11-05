@@ -36,7 +36,9 @@ namespace EplanMcp.Host.Tests.Safety;
 public sealed class WriteCancellationTests : IAsyncDisposable
 {
     private const string Tool = "test_write";
-    private static readonly TimeSpan _patience = TimeSpan.FromSeconds(10);
+
+    /// <summary>For the limits of the real client and pipeline: this test waits for none, and a busy machine must not reach one.</summary>
+    private static readonly TimeSpan _noLimit = TimeSpan.FromDays(1);
 
     private readonly string _prefix = "EplanMcpTest." + Guid.NewGuid().ToString("N") + ".";
     private readonly HostDataLocations _locations = new(Directory.CreateTempSubdirectory("eplanmcp-cancel-").FullName);
@@ -63,7 +65,7 @@ public sealed class WriteCancellationTests : IAsyncDisposable
             router,
             new NullLog());
         _server.Start();
-        _bridge = new BridgeClient(new PipeBridgeDiscovery(_prefix), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(20));
+        _bridge = new BridgeClient(new PipeBridgeDiscovery(_prefix), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance, _noLimit, _noLimit, TimeSpan.FromMilliseconds(20));
     }
 
     public async ValueTask DisposeAsync()
@@ -95,7 +97,7 @@ public sealed class WriteCancellationTests : IAsyncDisposable
             var id = new RequestId("call-1");
             using var giveUp = new CancellationTokenSource();
             Task call = client.SendRequestAsync<CallToolRequestParams, CallToolResult>(RequestMethods.ToolsCall, new CallToolRequestParams { Name = Tool }, requestId: id, cancellationToken: giveUp.Token).AsTask();
-            await _started.Task.WaitAsync(_patience, cancellationToken);
+            await _started.Task.WaitAsync(cancellationToken);
 
             // What a client sends when its user cancels the call; the SDK's client (2.2.0) does not send it when its token fires.
             await client.SendNotificationAsync(NotificationMethods.CancelledNotification, new CancelledNotificationParams { RequestId = id }, cancellationToken: cancellationToken);
@@ -117,15 +119,13 @@ public sealed class WriteCancellationTests : IAsyncDisposable
     {
         OperationContext context = OperationContext.Current;
         _started.TrySetResult();
-        SpinWait.SpinUntil(() => context.IsCancellationRequested, _patience);
+        SpinWait.SpinUntil(() => context.IsCancellationRequested);
         return true;
     }).Result;
 
     /// <summary>The audit's execution_result record, once the cancelled call has settled in the background.</summary>
     private async Task<JsonObject> ResultRecordAsync(CancellationToken cancellationToken)
     {
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(_patience);
         while (true)
         {
             // The Host may be writing the audit right now: read it shared, and try again after a half-written line.
@@ -142,7 +142,7 @@ public sealed class WriteCancellationTests : IAsyncDisposable
             {
             }
 
-            await Task.Delay(20, timeout.Token);
+            await Task.Delay(20, cancellationToken);
         }
     }
 
@@ -166,7 +166,7 @@ public sealed class WriteCancellationTests : IAsyncDisposable
         [Description("A write in scratch, for the test.")]
         public static async Task<string> WriteAsync(WritePipeline pipeline, IProgress<ProgressNotificationValue> progress, CancellationToken cancellationToken)
         {
-            var request = new WriteRequest<object, object>(Tool, ToolTier.Write, "test.plan", "test.execute", new { pages = 1 }, plan => new { plan.Fingerprint }, DryRun: false, TimeSpan.FromSeconds(10));
+            var request = new WriteRequest<object, object>(Tool, ToolTier.Write, "test.plan", "test.execute", new { pages = 1 }, plan => new { plan.Fingerprint }, DryRun: false, _noLimit);
             return (await pipeline.RunAsync<object, object, JsonObject>(request, progress, cancellationToken)).Execution;
         }
     }

@@ -21,13 +21,15 @@ namespace EplanMcp.Host.Tests.Bridge;
 [Trait("Size", "Medium")]
 public sealed class ProgressCancelInteropTests : IAsyncDisposable
 {
-    private static readonly TimeSpan _patience = TimeSpan.FromSeconds(10);
+    /// <summary>For the limits of the real client: no test here waits for one, and a busy machine must not reach it.</summary>
+    private static readonly TimeSpan _noLimit = TimeSpan.FromDays(1);
+
     private static readonly string[] _stepMessages = ["Step 1 of 3", "Step 2 of 3", "Step 3 of 3"];
 
     private readonly string _prefix = "EplanMcpTest." + Guid.NewGuid().ToString("N") + ".";
     private readonly RecordedReports<ProgressNotification> _reports = new();
     private readonly TaskCompletionSource _started = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private readonly TaskCompletionSource<bool> _stopped = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource _stopped = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly ConcurrentQueue<string> _transactions = new();
     private readonly BridgeServer _server;
     private readonly BridgeClient _client;
@@ -55,7 +57,7 @@ public sealed class ProgressCancelInteropTests : IAsyncDisposable
             router,
             new NullLog());
         _server.Start();
-        _client = new BridgeClient(new PipeBridgeDiscovery(_prefix), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(20));
+        _client = new BridgeClient(new PipeBridgeDiscovery(_prefix), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance, _noLimit, _noLimit, TimeSpan.FromMilliseconds(20));
     }
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
@@ -69,7 +71,7 @@ public sealed class ProgressCancelInteropTests : IAsyncDisposable
     [Fact]
     public async Task TheProgressOfARead_ReachesTheCaller()
     {
-        await _client.InvokeAsync<object, JsonObject>("test.steps", new { }, _patience, _reports, Token);
+        await _client.InvokeAsync<object, JsonObject>("test.steps", new { }, _noLimit, _reports, Token);
 
         AssertSteps();
     }
@@ -77,7 +79,7 @@ public sealed class ProgressCancelInteropTests : IAsyncDisposable
     [Fact]
     public async Task TheProgressOfAWrite_ReachesTheCaller()
     {
-        WriteResult<JsonObject> result = await _client.InvokeWriteAsync<object, JsonObject>("test.report", new { }, "w0", _patience, _reports, Token);
+        WriteResult<JsonObject> result = await _client.InvokeWriteAsync<object, JsonObject>("test.report", new { }, "w0", _noLimit, _reports, Token);
 
         Assert.Equal((3, false), ((int)result.Data!["steps"]!, result.Recovered));
         AssertSteps("w0");
@@ -88,20 +90,20 @@ public sealed class ProgressCancelInteropTests : IAsyncDisposable
     {
         using var cancel = new CancellationTokenSource();
         Task call = _client.InvokeAsync<object, JsonObject>("test.wait", new { }, cancel.Token);
-        await _started.Task.WaitAsync(_patience, Token);
+        await _started.Task.WaitAsync(Token);
 
         await cancel.CancelAsync();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => call);
-        Assert.True(await _stopped.Task.WaitAsync(_patience, Token), "the Bridge never saw the cancel");
+        await _stopped.Task.WaitAsync(Token); // the Bridge saw the cancel
     }
 
     [Fact]
     public async Task AWriteCancelledBeforeItsCommit_IsRolledBack()
     {
         using var cancel = new CancellationTokenSource();
-        Task<WriteResult<JsonObject>> call = _client.InvokeWriteAsync<object, JsonObject>("test.write", new { }, "w1", _patience, null, cancel.Token);
-        await _started.Task.WaitAsync(_patience, Token);
+        Task<WriteResult<JsonObject>> call = _client.InvokeWriteAsync<object, JsonObject>("test.write", new { }, "w1", _noLimit, null, cancel.Token);
+        await _started.Task.WaitAsync(Token);
 
         await cancel.CancelAsync();
 
@@ -114,13 +116,13 @@ public sealed class ProgressCancelInteropTests : IAsyncDisposable
     public async Task AWriteCancelledAfterItsCommit_StaysCommitted()
     {
         using var cancel = new CancellationTokenSource();
-        Task<WriteResult<JsonObject>> call = _client.InvokeWriteAsync<object, JsonObject>("test.commit", new { }, "w2", _patience, null, cancel.Token);
-        await _started.Task.WaitAsync(_patience, Token);
+        Task<WriteResult<JsonObject>> call = _client.InvokeWriteAsync<object, JsonObject>("test.commit", new { }, "w2", _noLimit, null, cancel.Token);
+        await _started.Task.WaitAsync(Token);
 
         await cancel.CancelAsync();
 
         Assert.True((await call).Recovered);
-        Assert.True(await _stopped.Task.WaitAsync(_patience, Token), "the Bridge never saw the cancel");
+        await _stopped.Task.WaitAsync(Token); // the Bridge saw the cancel
         Assert.Equal(["Begin", "Commit", "CloseUndo", "Dispose"], _transactions.ToArray());
     }
 
@@ -144,7 +146,7 @@ public sealed class ProgressCancelInteropTests : IAsyncDisposable
 
             // The Bridge keeps only the newest report: wait until this one went out, as the test is about forwarding.
             int sent = step;
-            SpinWait.SpinUntil(() => _reports.Values.Count >= sent, _patience);
+            SpinWait.SpinUntil(() => _reports.Values.Count >= sent);
         }
 
         return new { steps = 3 };
@@ -155,7 +157,8 @@ public sealed class ProgressCancelInteropTests : IAsyncDisposable
     {
         OperationContext context = OperationContext.Current;
         _started.TrySetResult();
-        _stopped.TrySetResult(SpinWait.SpinUntil(() => context.IsCancellationRequested, _patience));
+        SpinWait.SpinUntil(() => context.IsCancellationRequested);
+        _stopped.TrySetResult();
         context.ThrowIfCancellationRequested();
         return new { };
     }
@@ -166,7 +169,8 @@ public sealed class ProgressCancelInteropTests : IAsyncDisposable
         bool committed = TransactionRunner.Run(new Transactions(_transactions), "test_write", () => true).Result;
         OperationContext context = OperationContext.Current;
         _started.TrySetResult();
-        _stopped.TrySetResult(SpinWait.SpinUntil(() => context.IsCancellationRequested, _patience));
+        SpinWait.SpinUntil(() => context.IsCancellationRequested);
+        _stopped.TrySetResult();
         return committed;
     }
 

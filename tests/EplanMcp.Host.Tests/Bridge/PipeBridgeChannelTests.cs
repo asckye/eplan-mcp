@@ -109,7 +109,7 @@ public sealed class PipeBridgeChannelTests
         await using var client = new BridgeClient(discovery, new PipeBridgeConnector(), log);
         Task connected = server.WaitForConnectionAsync(TestContext.Current.CancellationToken);
         Task<BridgeStatus> statusTask = client.GetStatusAsync(TestContext.Current.CancellationToken);
-        await connected.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        await connected.WaitAsync(TestContext.Current.CancellationToken);
         await RespondAsync(server, ["""{"jsonrpc":"2.0","id":1,"result":{},"extra":true}"""]);
 
         BridgeStatus status = await statusTask;

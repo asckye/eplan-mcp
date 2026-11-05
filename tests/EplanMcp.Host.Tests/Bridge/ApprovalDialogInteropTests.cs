@@ -56,20 +56,20 @@ public sealed class ApprovalDialogInteropTests : IAsyncDisposable
     public async Task AnAnswerAfterTheUsualCallTimeout_StillArrives_AndOtherCallsMeanwhileAreBusy()
     {
         var plan = new WritePlan { Project = "项目 一", ProjectPath = @"D:\项目\一", Changes = [new PlannedChange { Action = "create", Kind = "page", Name = "=A1&EFS1/5" }], Fingerprint = "f1" };
-        var question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, [], DateTimeOffset.UtcNow + TimeSpan.FromMinutes(1)) { Tier = ToolTier.Write, Eplan = null };
+        // As long as a question may wait: the answer below comes when this test gives it, however busy the machine is.
+        var question = new ApprovalQuestion("r1", "eplan_page_create", "h1", plan, [], DateTimeOffset.UtcNow + ApprovalAskOperation.MaxTimeout) { Tier = ToolTier.Write, Eplan = null };
 
         // The channel asks only a Bridge it has shaken hands with; on a busy machine the first status may come too early.
-        for (int i = 0; i < 50 && (await _client.GetStatusAsync(TestContext.Current.CancellationToken)).Handshake is null; i++)
+        while ((await _client.GetStatusAsync(TestContext.Current.CancellationToken)).Handshake is null)
         {
             await Task.Delay(200, TestContext.Current.CancellationToken);
         }
 
         Task<ApprovalAnswer?> asking = new EplanDialogChannel(_client, TimeProvider.System).AskAsync(question, TestContext.Current.CancellationToken);
-        if (!_dialog.Shown.Wait(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken))
+        // A question that ended without reaching the dialog ends the wait too, and must not hang the run (this held CI runs for up to an hour).
+        if (await Task.WhenAny(asking, _dialog.Shown.Task) == asking)
         {
-            // Never hang on a question that did not reach the dialog (this held CI runs for up to an hour): fail with why.
-            await asking;
-            Assert.Fail("The question did not reach the dialog within 30 s.");
+            Assert.Fail($"The question did not reach the dialog: the channel answered {(await asking)?.Decision.ToString() ?? "nothing"}.");
         }
 
         BridgeCallException busy = await Assert.ThrowsAsync<BridgeCallException>(() =>
@@ -89,7 +89,7 @@ public sealed class ApprovalDialogInteropTests : IAsyncDisposable
         private readonly ManualResetEventSlim _answered = new();
         private string _decision = ApprovalDecisions.Cancelled;
 
-        public ManualResetEventSlim Shown { get; } = new();
+        public TaskCompletionSource Shown { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public ApprovalAskArgs? Question { get; private set; }
 
@@ -102,16 +102,12 @@ public sealed class ApprovalDialogInteropTests : IAsyncDisposable
         public string Ask(ApprovalAskArgs question, TimeSpan timeout)
         {
             Question = question;
-            Shown.Set();
+            Shown.TrySetResult();
             _answered.Wait(timeout);
             return _decision;
         }
 
-        public void Dispose()
-        {
-            _answered.Dispose();
-            Shown.Dispose();
-        }
+        public void Dispose() => _answered.Dispose();
     }
 
     private sealed class NoProjects : IProjectCatalog

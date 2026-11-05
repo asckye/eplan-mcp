@@ -50,7 +50,8 @@ public sealed class ChineseRoundTripTests : IAsyncLifetime
             Arguments = ["serve"],
             EnvironmentVariables = new Dictionary<string, string?> { [PipeBridgeDiscovery.PrefixVariable] = _prefix },
         });
-        _client = await McpClient.CreateAsync(transport, cancellationToken: TestContext.Current.CancellationToken);
+        // The SDK allows the server 60 s to start; on a busy machine a real process may take longer, and no test here depends on how long.
+        _client = await McpClient.CreateAsync(transport, new McpClientOptions { InitializationTimeout = Timeout.InfiniteTimeSpan }, cancellationToken: TestContext.Current.CancellationToken);
     }
 
     public async ValueTask DisposeAsync()

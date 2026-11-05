@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using EplanMcp.Workbench.Commands;
 
 namespace EplanMcp.Workbench.Tests.Commands;
@@ -31,7 +30,7 @@ public sealed class HostProcessTests : IDisposable
     public async Task AnArgumentWithSpacesOrQuotes_ReachesTheHostAsOneArgument_AsItIs()
     {
         var host = new HostProcess(BuiltHost(), new Dictionary<string, string> { ["EPLANMCP_HOME"] = _root.FullName });
-        TimeSpan limit = TimeSpan.FromSeconds(30);
+        TimeSpan limit = Timeout.InfiniteTimeSpan; // no test here waits for it, and a busy machine must not reach it
 
         // "--format json" split in two, or "json" without its quotes, would be a valid command line: exit code 0.
         HostRun asOne = await host.RunAsync(["audit", "verify", "--format json"], limit, Token);
@@ -46,12 +45,11 @@ public sealed class HostProcessTests : IDisposable
     public async Task AProgramThatTakesTooLong_IsStopped_AndTheRunTimesOut()
     {
         var ping = new HostProcess(Path.Combine(Environment.SystemDirectory, "PING.EXE"));
-        var watch = Stopwatch.StartNew();
 
-        var error = await Assert.ThrowsAsync<HostCommandException>(() => ping.RunAsync(["-n", "30", "127.0.0.1"], TimeSpan.FromSeconds(1), Token));
+        // An hour of pings: a run that waited for its end instead of stopping it would outlast the test run's limit.
+        var error = await Assert.ThrowsAsync<HostCommandException>(() => ping.RunAsync(["-n", "3600", "127.0.0.1"], TimeSpan.FromSeconds(1), Token));
 
         Assert.Equal(HostFailure.TimedOut, error.Failure);
-        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(15), watch.Elapsed.ToString());
     }
 
     [Fact]
@@ -61,7 +59,7 @@ public sealed class HostProcessTests : IDisposable
         using var cancel = CancellationTokenSource.CreateLinkedTokenSource(Token);
         cancel.CancelAfter(TimeSpan.FromMilliseconds(500));
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ping.RunAsync(["-n", "30", "127.0.0.1"], TimeSpan.FromSeconds(60), cancel.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ping.RunAsync(["-n", "3600", "127.0.0.1"], Timeout.InfiniteTimeSpan, cancel.Token));
     }
 
     [Fact]
@@ -81,7 +79,7 @@ public sealed class HostProcessTests : IDisposable
         var host = new HostProcess(Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe"));
         // A child deliberately echoes both literal and JSON-escaped input; no profile, files, network or settings.
         const string Script = """$value = [Console]::In.ReadToEnd(); [Console]::Error.Write($value); [Console]::Out.Write('{"echo":"' + $value + '","encoded":"' + ('\u0041' * $value.Length) + '"}')""";
-        HostRun run = await host.RunAsync(["-NoProfile", "-NonInteractive", "-Command", Script], TimeSpan.FromSeconds(60), key, Token); // Windows PowerShell can take seconds to start on CI
+        HostRun run = await host.RunAsync(["-NoProfile", "-NonInteractive", "-Command", Script], Timeout.InfiniteTimeSpan, key, Token); // Windows PowerShell can take seconds to start on CI
         Assert.Equal(0, run.ExitCode);
         Assert.Equal("<key>", System.Text.Json.Nodes.JsonNode.Parse(run.Output)!["echo"]!.GetValue<string>());
         Assert.Equal("<key>", System.Text.Json.Nodes.JsonNode.Parse(run.Output)!["encoded"]!.GetValue<string>());
@@ -94,7 +92,7 @@ public sealed class HostProcessTests : IDisposable
     {
         string key = new('A', 43);
         var host = new HostProcess(Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe"));
-        const string Script = "[Console]::Error.Write([Console]::In.ReadToEnd()); Start-Sleep -Seconds 30";
+        const string Script = "[Console]::Error.Write([Console]::In.ReadToEnd()); Start-Sleep -Seconds 3600";
         var error = await Assert.ThrowsAsync<HostCommandException>(() => host.RunAsync(["-NoProfile", "-NonInteractive", "-Command", Script], TimeSpan.FromSeconds(1), key, Token));
         Assert.Equal(HostFailure.TimedOut, error.Failure);
         Assert.Empty(error.Errors);

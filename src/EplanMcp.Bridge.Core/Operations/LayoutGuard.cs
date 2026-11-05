@@ -30,6 +30,8 @@ public static class LayoutGuard
         // Attribute-level intent survives measurement without treating symbol defaults as requested formatting.
         [Newtonsoft.Json.JsonIgnore]
         public Func<DrawingPlacement, string, bool>? SetsTextAttribute { get; set; }
+        /// <summary>For tests: how long the free-position search has run, in place of the wall clock.</summary>
+        internal Func<TimeSpan>? SearchElapsed { get; set; }
     }
     public sealed class Segment
     {
@@ -185,9 +187,10 @@ public static class LayoutGuard
         }
         if (suggest)
         {
-            var searchTimer = searchBudget.HasValue ? System.Diagnostics.Stopwatch.StartNew() : null;
+            var searchTimer = System.Diagnostics.Stopwatch.StartNew();
+            Func<TimeSpan> searched = model.SearchElapsed ?? (() => searchTimer.Elapsed);
             bool searchExpired = false;
-            bool Expired() => searchExpired |= searchTimer is not null && searchTimer.Elapsed >= searchBudget!.Value;
+            bool Expired() => searchExpired |= searched() >= searchBudget!.Value;
             string NoPosition() => searchExpired ? " Free-position search stopped at the time limit; check the page with eplan_page_review."
                 : " No free position found within the bounded search.";
             foreach (DrawingPlacement p in changed.Where(p => searchViolations && result.Any(v => !v.Warning && v.Objects[0] == p.Locator)))

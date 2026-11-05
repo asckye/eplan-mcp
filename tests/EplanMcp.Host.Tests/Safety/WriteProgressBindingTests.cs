@@ -60,7 +60,7 @@ public sealed class WriteProgressBindingTests : IDisposable
             Wait = () =>
             {
                 _time.Advance(TimeSpan.FromSeconds(31));
-                SpinWait.SpinUntil(() => progress.Values.Count >= 2, TimeSpan.FromSeconds(10));
+                SpinWait.SpinUntil(() => progress.Values.Count >= 2);
             },
         };
 
@@ -71,7 +71,7 @@ public sealed class WriteProgressBindingTests : IDisposable
         Assert.Equal(ExecutionState.Committed, Assert.IsType<TextContentBlock>(Assert.Single(result.Content)).Text);
         Assert.Equal(
             ["Waiting for the engineer's approval in EPLAN (15 s of 120 s)", "Waiting for the engineer's approval in EPLAN (30 s of 120 s)"],
-            await MessagesAsync(progress, 2, TestContext.Current.CancellationToken));
+            Messages(progress));
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public sealed class WriteProgressBindingTests : IDisposable
         {
             bridge!.Report(new ProgressNotification { RequestId = "r", Progress = 0, Total = 2, Message = "Exporting page 1 of 2" });
             _time.Advance(TimeSpan.FromSeconds(6));
-            SpinWait.SpinUntil(() => progress.Values.Count >= 2, TimeSpan.FromSeconds(10)); // as above: before the result
+            SpinWait.SpinUntil(() => progress.Values.Count >= 2); // as above: before the result
         };
 
         (_, CallToolResult result) = await CallAsync(new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted), progress);
@@ -90,7 +90,7 @@ public sealed class WriteProgressBindingTests : IDisposable
         Assert.NotEqual(true, result.IsError);
         Assert.Equal(
             ["Exporting page 1 of 2", "Exporting page 1 of 2 (5 s)"],
-            await MessagesAsync(progress, 2, TestContext.Current.CancellationToken));
+            Messages(progress));
     }
 
     /// <summary>Calls the test tool through an MCP client, which sends a progress token, while the engineer is asked in <paramref name="dialog"/>.</summary>
@@ -125,20 +125,11 @@ public sealed class WriteProgressBindingTests : IDisposable
     }
 
     /// <summary>
-    /// The messages, sorted, once <paramref name="count"/> have arrived: the SDK sends each report on its own, so two
-    /// made at once (as the manual clock does) may overtake each other or the result. Fifteen seconds apart they do not.
+    /// The messages, sorted: the SDK sends each report on its own, so two made at once (as the manual clock does) may
+    /// overtake each other. Fifteen seconds apart they do not. Both arrived before the result, as the tests wait for them.
     /// </summary>
-    private static async Task<IEnumerable<string?>> MessagesAsync(RecordedProgress progress, int count, CancellationToken cancellationToken)
-    {
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(10));
-        while (progress.Values.Count < count && !timeout.IsCancellationRequested)
-        {
-            await Task.Delay(20, CancellationToken.None);
-        }
-
-        return progress.Values.Select(v => v.Message).Order(StringComparer.Ordinal);
-    }
+    private static IEnumerable<string?> Messages(RecordedProgress progress) =>
+        progress.Values.Select(v => v.Message).Order(StringComparer.Ordinal);
 
     [McpServerToolType]
     private sealed class TestWriteTools

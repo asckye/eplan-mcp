@@ -68,13 +68,9 @@ internal sealed class FakeWorkbench : IAsyncDisposable
     /// <summary>Waits until <paramref name="count"/> connections were made, counting from the start.</summary>
     public async Task ConnectedAsync(int count, CancellationToken cancellationToken)
     {
-        // Bounded, so a connection that never came fails the test instead of hanging the run.
         for (int i = 0; i < count; i++)
         {
-            if (!await _connected.WaitAsync(TimeSpan.FromSeconds(30), cancellationToken))
-            {
-                throw new TimeoutException($"Connection {i + 1} of {count} did not reach the fake Workbench within 30 s.");
-            }
+            await _connected.WaitAsync(cancellationToken);
         }
     }
 

@@ -24,9 +24,6 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
 {
     private static readonly TimeSpan _timeout = HostConfig.DefaultApprovalTimeout;
 
-    /// <summary>How long the fake Workbench may take to see something happen; a failing test fails rather than hangs.</summary>
-    private static readonly TimeSpan _patience = TimeSpan.FromSeconds(5);
-
     private readonly HostDataLocations _locations = new(Directory.CreateTempSubdirectory("eplanmcp-workbench-").FullName);
     private readonly ManualTime _clock = new(new DateTimeOffset(2026, 10, 21, 8, 0, 0, TimeSpan.Zero));
     private readonly FakeWorkbench _workbench;
@@ -61,7 +58,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     {
         await using var busy = new FakeWorkbench(WorkbenchPipeName.ForCurrentUser(Path.Combine(_locations.Root, "busy")), instances: 1);
         using var other = new NamedPipeClientStream(".", busy.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-        await other.ConnectAsync(TimeSpan.FromSeconds(5), Token);
+        await other.ConnectAsync(Token);
         await busy.ConnectedAsync(1, Token);
 
         Assert.Null(await Channel(busy.PipeName).AskAsync(Question(), Token));
@@ -110,7 +107,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         _workbench.HandshakeReply = _ => null;
 
         Task<ApprovalAnswer?> asking = Channel().AskAsync(Question(), Token);
-        await _workbench.Greeted.Task.WaitAsync(_patience, Token);
+        await _workbench.Greeted.Task.WaitAsync(Token);
         _clock.Advance(WorkbenchChannel.ReplyTimeout);
 
         Assert.Null(await asking);
@@ -209,7 +206,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
 
         Assert.Equal(answered == WorkbenchDecision.Approved, answer!.Outcome is not null);
         Assert.Equal(new ApprovalAnswer("r1", "f1", "h1", Enum.Parse<ApprovalDecision>(decision)), Released(answer));
-        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
     }
 
     [Fact]
@@ -218,13 +215,13 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         _workbench.Answer = _silent;
 
         Task<ApprovalAnswer?> asking = Channel().AskAsync(Question(), Token);
-        await _workbench.Asked.Task.WaitAsync(_patience, Token);
+        await _workbench.Asked.Task.WaitAsync(Token);
         _clock.Advance(_timeout + WorkbenchChannel.Slack - TimeSpan.FromSeconds(1));
         Assert.False(asking.IsCompleted);
         _clock.Advance(TimeSpan.FromSeconds(1));
 
         Assert.Equal(new ApprovalAnswer("r1", "f1", "h1", ApprovalDecision.Expired), await asking);
-        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
     }
 
     [Fact]
@@ -283,7 +280,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
         };
 
         Task<ApprovalResult> asking = Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, null, Token);
-        await _workbench.Asked.Task.WaitAsync(_patience, Token);
+        await _workbench.Asked.Task.WaitAsync(Token);
         _clock.Advance(_timeout + TimeSpan.FromSeconds(1));
         late.SetResult();
 
@@ -354,7 +351,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     {
         var discovery = new FakeDiscovery();
         discovery.Endpoints.Add(new BridgeEndpoint("EplanMcp.Bridge.42.a1", 42));
-        await using var bridge = new BridgeClient(discovery, new FakeConnector(endpoint => new FakeChannel(endpoint)), NullLogger<BridgeClient>.Instance, TimeSpan.FromMilliseconds(200), TimeSpan.FromSeconds(5));
+        await using var bridge = new BridgeClient(discovery, new FakeConnector(endpoint => new FakeChannel(endpoint)), NullLogger<BridgeClient>.Instance, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
         ProjectListData? meanwhile = null;
         _workbench.Answer = async (ask, id, stop) =>
         {
@@ -405,7 +402,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     {
         await Write(Bridge(), Channel());
 
-        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
         Assert.Equal(new ApprovalOutcomeParams(_workbench.Asks.Single().RequestId, WriteExecution.Committed, null), Shown());
     }
 
@@ -420,7 +417,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
 
         await Assert.ThrowsAsync<BridgeCallException>(() => Write(bridge, Channel()));
 
-        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
         Assert.Equal(new ApprovalOutcomeParams(_workbench.Asks.Single().RequestId, shown, reason), Shown());
     }
 
@@ -435,7 +432,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
 
         Assert.Equal(ErrorReason.AuditUnavailable, error.Reason);
         Assert.Empty(bridge.Writes);
-        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
         Assert.Equal(new ApprovalOutcomeParams(_workbench.Asks.Single().RequestId, WriteExecution.NotStarted, ErrorReason.AuditUnavailable), Shown());
     }
 
@@ -444,7 +441,7 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     {
         _workbench.Answer = (_, id, _) => Task.FromResult<IReadOnlyList<byte[]>?>([WorkbenchJson.Result(id, new ApprovalAskResult("earlier", "f1", "h1", WorkbenchDecision.Approved))]);
         ApprovalResult other = await Service(Channel()).AskAsync("r1", "eplan_page_create", ToolTier.Write, "h1", _plan, Eplan(), null, null, null, Token);
-        await _workbench.HungUp.Task.WaitAsync(_patience, Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
         _workbench.Answer = FakeWorkbench.Decide(WorkbenchDecision.Approved);
         var suspension = new Suspension(@"D:\Projects\Line1", null, null, "eplan_page_create", "earlier", _clock.Now, SuspensionReason.OutcomeUnknown, []);
 

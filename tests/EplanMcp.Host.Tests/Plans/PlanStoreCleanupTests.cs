@@ -15,17 +15,16 @@ public sealed class PlanStoreCleanupTests
         var clock = new ManualClock(f.Definition.ExpiresAt.AddDays(30).AddHours(-1));
         var store = new PlanStore(f.Locations, f.Audit) { Clock = clock };
         using var worker = new PlanStoreCleanup(store, NullLogger<PlanStoreCleanup>.Instance);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(3));
-        await worker.StartAsync(deadline.Token);
-        ManualTimer first = await clock.Timers.Reader.ReadAsync(deadline.Token);
+        CancellationToken token = TestContext.Current.CancellationToken;
+        await worker.StartAsync(token);
+        ManualTimer first = await clock.Timers.Reader.ReadAsync(token);
         Assert.Equal(TimeSpan.FromHours(1), first.DueTime);
         Assert.True(File.Exists(f.Record));
         clock.Now = clock.Now.AddHours(1);
         first.Fire();
-        _ = await clock.Timers.Reader.ReadAsync(deadline.Token); // The next delay starts after cleanup finished.
+        _ = await clock.Timers.Reader.ReadAsync(token); // The next delay starts after cleanup finished.
         Assert.False(File.Exists(f.Record));
-        await worker.StopAsync(deadline.Token);
+        await worker.StopAsync(token);
     }
 
     private sealed class ManualClock(DateTimeOffset now) : TimeProvider

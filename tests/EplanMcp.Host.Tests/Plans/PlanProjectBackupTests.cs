@@ -91,7 +91,7 @@ public sealed class PlanProjectBackupTests : IAsyncDisposable
         {
             FinishSuccess();
         }
-        await result.Settlement.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        await result.Settlement.WaitAsync(TestContext.Current.CancellationToken);
 
         Assert.False(result.Backup!.Usable);
         Assert.False(Directory.Exists(Folder));
@@ -114,7 +114,7 @@ public sealed class PlanProjectBackupTests : IAsyncDisposable
         Assert.False(result.Settlement.IsCompleted);
         Assert.False(_nativeToken.IsCancellationRequested);
         FinishSuccess();
-        await result.Settlement.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        await result.Settlement.WaitAsync(TestContext.Current.CancellationToken);
         Assert.True(Directory.Exists(Folder + BackupFolders.FailedSuffix));
     }
 

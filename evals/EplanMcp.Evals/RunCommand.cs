@@ -193,7 +193,7 @@ internal static class RunCommand
     {
         try
         {
-            return await EplanMcpClient.StartAsync(eplanmcp, null, cancellationToken).ConfigureAwait(false);
+            return await EplanMcpClient.StartAsync(eplanmcp, null, null, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

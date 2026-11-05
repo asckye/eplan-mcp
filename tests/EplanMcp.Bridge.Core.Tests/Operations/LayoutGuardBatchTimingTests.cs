@@ -7,8 +7,11 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Medium")]
 public sealed class LayoutGuardBatchTimingTests(ITestOutputHelper output)
 {
+    /// <summary>Each look at the search's clock costs this much, so the budget buys a known number of candidates on any machine.</summary>
+    private static readonly TimeSpan _candidate = TimeSpan.FromMilliseconds(100);
+
     [Fact]
-    public void TwoHundredExistingAndFiftyConflictingNewObjects_RefusesWithinTenSeconds()
+    public void TwoHundredExistingAndFiftyConflictingNewObjects_RefuseOnOneSharedSearchBudget()
     {
         static DrawingPlacement Row(int id, double x, double y) => new()
         {
@@ -17,17 +20,17 @@ public sealed class LayoutGuardBatchTimingTests(ITestOutputHelper output)
             Location = [x, y],
             Bounds = [x, y, x + 8, y + 8]
         };
-        var model = new LayoutGuard.Model { Page = new() { PageSize = [840, 594], GridSize = 4 } };
+        int looks = 0;
+        var model = new LayoutGuard.Model { Page = new() { PageSize = [840, 594], GridSize = 4 }, SearchElapsed = () => ++looks * _candidate };
         model.Page.Placements = Enumerable.Range(0, 200).Select(i => Row(i + 1, 20 + i % 20 * 32, 20 + i / 20 * 24)).ToList();
         DrawingPlacement[] proposed = [.. Enumerable.Range(0, 50).Select(i => Row(-i - 1, 20 + i % 20 * 32, 20 + i / 20 * 24))];
 
-        var timer = Stopwatch.StartNew();
         BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => LayoutGuard.Enforce(model, proposed));
-        timer.Stop();
         List<LayoutGuard.Violation> findings = Newtonsoft.Json.JsonConvert.DeserializeObject<List<LayoutGuard.Violation>>(error.Error.Metadata!["layoutViolations"])!;
 
-        output.WriteLine($"LayoutGuard existing=200 new=50 all_conflicting=true elapsed_ms={timer.Elapsed.TotalMilliseconds:F3} findings={findings.Count}");
-        Assert.True(timer.Elapsed < TimeSpan.FromSeconds(10), $"Before-write layout check took {timer.Elapsed}.");
+        // One look per candidate until the budget is spent, then one per object that goes without a search: a budget per object would look 20 times per object.
+        int budget = (int)(LayoutGuard.FreePositionSearchBudget / _candidate);
+        Assert.InRange(looks, budget, budget + proposed.Length);
         Assert.Equal(ErrorReason.InvalidArgument, error.Error.Reason);
         Assert.Equal(50, findings.Count);
         Assert.All(findings, finding =>

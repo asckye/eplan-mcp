@@ -23,8 +23,11 @@ internal sealed class EplanMcpClient : IToolClient, IAsyncDisposable
 
     private EplanMcpClient(McpClient client) => _client = client;
 
-    /// <summary><paramref name="environment"/> adds variables for eplanmcp, such as the test-only pipe prefix.</summary>
-    public static async Task<EplanMcpClient> StartAsync(string eplanmcp, IDictionary<string, string?>? environment, CancellationToken cancellationToken)
+    /// <summary>
+    /// <paramref name="environment"/> adds variables for eplanmcp, such as the test-only pipe prefix;
+    /// <paramref name="startLimit"/> replaces the SDK's 60 s for it to start.
+    /// </summary>
+    public static async Task<EplanMcpClient> StartAsync(string eplanmcp, IDictionary<string, string?>? environment, TimeSpan? startLimit, CancellationToken cancellationToken)
     {
         var transport = new StdioClientTransport(new StdioClientTransportOptions
         {
@@ -33,7 +36,8 @@ internal sealed class EplanMcpClient : IToolClient, IAsyncDisposable
             Arguments = ["serve"],
             EnvironmentVariables = environment,
         });
-        return new EplanMcpClient(await McpClient.CreateAsync(transport, cancellationToken: cancellationToken).ConfigureAwait(false));
+        McpClientOptions? options = startLimit is { } limit ? new McpClientOptions { InitializationTimeout = limit } : null;
+        return new EplanMcpClient(await McpClient.CreateAsync(transport, options, cancellationToken: cancellationToken).ConfigureAwait(false));
     }
 
     public async Task<IReadOnlyList<string>> ListToolsAsync(CancellationToken cancellationToken) =>

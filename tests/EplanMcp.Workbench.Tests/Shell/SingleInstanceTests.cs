@@ -35,7 +35,7 @@ public sealed class SingleInstanceTests
         {
             using var second = new SingleInstance(_name);
             second.SignalFirst();
-            Assert.True(woken.Wait(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken), $"start {i + 2} did not wake the first");
+            woken.Wait(TestContext.Current.CancellationToken);
         }
     }
 

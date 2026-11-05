@@ -40,7 +40,8 @@ public sealed class PackResourcesEndToEndTests : IAsyncLifetime
                 [PipeBridgeDiscovery.PrefixVariable] = "EplanMcpPackE2E." + Guid.NewGuid().ToString("N") + ".",
             },
         });
-        _client = await McpClient.CreateAsync(transport, cancellationToken: Cancel);
+        // The SDK allows the server 60 s to start; on a busy machine a real process may take longer, and no test here depends on how long.
+        _client = await McpClient.CreateAsync(transport, new McpClientOptions { InitializationTimeout = Timeout.InfiniteTimeSpan }, cancellationToken: Cancel);
     }
 
     public async ValueTask DisposeAsync()

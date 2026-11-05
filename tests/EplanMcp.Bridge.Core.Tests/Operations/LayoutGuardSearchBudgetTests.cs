@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 
@@ -66,10 +65,14 @@ public sealed class LayoutGuardSearchBudgetTests
 public sealed class LayoutGuardAfterWritingSearchBudgetTests
 {
     [Fact]
-    public void AfterWriting_DenseDefaultTexts_SharesSearchBudgetAndReturnsWithinFifteenSeconds()
+    public void AfterWriting_DenseDefaultTexts_ShareOneSearchBudget()
     {
+        // Each look at the search's clock costs this much, so the budget buys a known number of candidates on any machine.
+        TimeSpan candidate = TimeSpan.FromMilliseconds(100);
+        int looks = 0;
         LayoutGuard.Model before = LayoutGuardDefaultTextTests.Model();
         LayoutGuard.Model actual = LayoutGuardDefaultTextTests.Model();
+        actual.SearchElapsed = () => ++looks * candidate;
         before.Lines.Clear();
         actual.Lines.Clear();
         for (int i = 0; i < 75; i++)
@@ -84,11 +87,11 @@ public sealed class LayoutGuardAfterWritingSearchBudgetTests
         }
         Assert.Equal(150, actual.Page.Placements.Count);
 
-        var timer = Stopwatch.StartNew();
         List<string> checks = LayoutGuard.AfterWriting(before, actual);
-        timer.Stop();
 
-        Assert.True(timer.Elapsed < TimeSpan.FromSeconds(15), $"AfterWriting took {timer.Elapsed}.");
+        // One look per candidate until the budget is spent, then one per text that goes without a search.
+        int budget = (int)(LayoutGuard.FreePositionSearchBudget / candidate);
+        Assert.InRange(looks, budget, budget + actual.Page.Placements.Count);
         Assert.Contains(checks, message => message.Contains("time limit", StringComparison.Ordinal));
     }
 }

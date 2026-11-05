@@ -265,7 +265,7 @@ public sealed partial class PlanOrchestratorTests : IAsyncDisposable
         var channel = new DeferredChannel();
         _deferred = channel;
         Task<PlanPreparation> first = Prepare();
-        ApprovalQuestion question = await channel.Seen.Task.WaitAsync(TimeSpan.FromSeconds(3), Token);
+        ApprovalQuestion question = await channel.Seen.Task.WaitAsync(Token);
         try
         {
             BridgeCallException replay = await Assert.ThrowsAsync<BridgeCallException>(() => Prepare());

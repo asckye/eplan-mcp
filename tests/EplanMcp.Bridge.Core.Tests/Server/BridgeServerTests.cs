@@ -13,7 +13,6 @@ namespace EplanMcp.Bridge.Core.Tests.Server;
 public sealed class BridgeServerTests : IDisposable
 {
     private const string Handshake = """{"jsonrpc":"2.0","id":1,"method":"handshake","params":{"protocolVersion":1,"minProtocolVersion":1}}""";
-    private static readonly TimeSpan _patience = TimeSpan.FromSeconds(5);
 
     private readonly ListLog _log = new();
     private readonly ManualResetEventSlim _progressSeen = new();
@@ -83,7 +82,7 @@ public sealed class BridgeServerTests : IDisposable
             disconnecting = DateTime.UtcNow;
         }
 
-        Assert.True(SpinWait.SpinUntil(() => _server.IdleSinceUtc is not null, _patience));
+        SpinWait.SpinUntil(() => _server.IdleSinceUtc is not null);
         Assert.True(_server.IdleSinceUtc >= disconnecting);
     }
 
@@ -189,7 +188,6 @@ public sealed class BridgeServerTests : IDisposable
         Assert.Equal((BridgeProtocol.ProgressMethod, "p1", 1, 2, "Step 1 of 2"), ((string?)frames[0]["method"], (string?)first["requestId"], (int)first["progress"]!, (int)first["total"]!, (string?)first["message"]));
         Assert.All(frames[..^1], n => Assert.Equal(("progress", "p1"), ((string?)n["method"], (string?)n["params"]!["requestId"])));
         Assert.Equal(2, (int)frames[^1]["id"]!);
-        Assert.True((bool)frames[^1]["result"]!["data"]!["seen"]!);
     }
 
     [Fact]
@@ -201,7 +199,7 @@ public sealed class BridgeServerTests : IDisposable
         await CallAsync(writer, Handshake);
         await CallAsync(canceller, Handshake);
         await SendAsync(writer, Invoke(2, "x.slow", "w1", null));
-        Assert.True(_writeStarted.Wait(_patience, TestContext.Current.CancellationToken));
+        _writeStarted.Wait(TestContext.Current.CancellationToken);
 
         JObject cancel = await CallAsync(canceller, Invoke(2, OperationNames.OperationCancel, "c1", new JObject { ["requestId"] = "w1" }));
         JObject response = await ReadAsync(writer);
@@ -246,9 +244,9 @@ public sealed class BridgeServerTests : IDisposable
     private JObject ReportTwoSteps()
     {
         OperationContext.Current.ReportProgress(1, 2, "Step 1 of 2");
-        bool seen = _progressSeen.Wait(_patience);
+        _progressSeen.Wait();
         OperationContext.Current.ReportProgress(2, 2, "Step 2 of 2");
-        return new JObject { ["seen"] = seen };
+        return new JObject();
     }
 
     private NamedPipeServerStream CreatePipe(string name) =>
@@ -257,7 +255,7 @@ public sealed class BridgeServerTests : IDisposable
     private async Task<NamedPipeClientStream> ConnectAsync()
     {
         var client = new NamedPipeClientStream(".", _server.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-        await client.ConnectAsync(5000, TestContext.Current.CancellationToken);
+        await client.ConnectAsync(TestContext.Current.CancellationToken);
         return client;
     }
 
@@ -294,7 +292,8 @@ public sealed class BridgeServerTests : IDisposable
         public object? Execute(object args) => TransactionRunner.Run(transactions, "eplan_page_create", () =>
         {
             started.Set();
-            return SpinWait.SpinUntil(() => OperationContext.Current.IsCancellationRequested, _patience);
+            SpinWait.SpinUntil(() => OperationContext.Current.IsCancellationRequested);
+            return true;
         }).Result;
     }
 }

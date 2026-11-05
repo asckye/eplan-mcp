@@ -33,8 +33,8 @@ public sealed class TaskRegistryWaitTests : IAsyncDisposable
         Assert.False(first.IsCompleted);
         Assert.False(second.IsCompleted);
         TaskRecord terminal = registry.Complete(_server, task.TaskId, TaskTestData.Result(), 1);
-        Assert.Same(terminal, await Bounded(first));
-        Assert.Same(terminal, await Bounded(second));
+        Assert.Same(terminal, await first);
+        Assert.Same(terminal, await second);
         Assert.True(WaitAsync(registry, task.TaskId).IsCompletedSuccessfully);
     }
 
@@ -50,7 +50,7 @@ public sealed class TaskRegistryWaitTests : IAsyncDisposable
         Assert.False(wait.IsCompleted);
         registry.TryStart(_server, task.TaskId);
         _clock.Advance(TimeSpan.FromSeconds(1));
-        Assert.Equal(TaskStatus.Running, (await Bounded(wait)).Status);
+        Assert.Equal(TaskStatus.Running, (await wait).Status);
         TaskRecord terminal = registry.Complete(_server, task.TaskId, TaskTestData.Result(), 1);
         Assert.Same(terminal, await WaitAsync(registry, task.TaskId, 0));
     }
@@ -82,12 +82,12 @@ public sealed class TaskRegistryWaitTests : IAsyncDisposable
         _clock.Advance(TimeSpan.FromSeconds(5));
         cancelWait.Cancel();
         _clock.Advance(TimeSpan.FromSeconds(10));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Bounded(cancelled));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => cancelled);
         Assert.Single(client.Values);
         Assert.False(observer.IsCompleted);
         Assert.Equal(TaskStatus.Running, registry.Get(_server, task.TaskId).Status);
         TaskRecord terminal = registry.Complete(_server, task.TaskId, TaskTestData.Result(), 1);
-        Assert.Same(terminal, await Bounded(observer));
+        Assert.Same(terminal, await observer);
         _clock.Advance(TimeSpan.FromMinutes(1));
         Assert.Single(client.Values);
     }
@@ -119,7 +119,7 @@ public sealed class TaskRegistryWaitTests : IAsyncDisposable
         registry.Complete(_server, task.TaskId, TaskTestData.Result(), 1);
         int reports = client.Values.Count;
         _clock.Advance(TimeSpan.FromSeconds(20));
-        await Bounded(wait);
+        await wait;
         Assert.Equal(reports, client.Values.Count);
     }
 
@@ -132,10 +132,10 @@ public sealed class TaskRegistryWaitTests : IAsyncDisposable
         TaskRecord task = registry.Create(_server, "plan", "PROJECT", 1);
         Task<TaskRecord> first = WaitAsync(registry, task.TaskId, 10, CallProgress.For(oldClient));
         _clock.Advance(TimeSpan.FromSeconds(10));
-        await Bounded(first);
+        await first;
         Task<TaskRecord> second = WaitAsync(registry, task.TaskId, 10, CallProgress.For(nextClient));
         _clock.Advance(TimeSpan.FromSeconds(10));
-        await Bounded(second);
+        await second;
         Assert.Equal([5f], oldClient.Values.Select(v => v.Progress));
         Assert.Equal([5f], nextClient.Values.Select(v => v.Progress));
         Assert.Same(task, registry.Get(_server, task.TaskId));
@@ -153,7 +153,7 @@ public sealed class TaskRegistryWaitTests : IAsyncDisposable
         Assert.All(tasks, t => Assert.Equal(t.TaskId, registry.Get(_server, t.TaskId).TaskId));
         Assert.False(wait.IsCompleted);
         registry.Complete(_server, tasks[0].TaskId, TaskTestData.Result(), 1);
-        await Bounded(wait);
+        await wait;
         Assert.Equal(TaskStatus.Queued, registry.Create(_server, "admitted", "OTHER", 1).Status);
     }
 
@@ -192,12 +192,10 @@ public sealed class TaskRegistryWaitTests : IAsyncDisposable
         _clock.Advance(TimeSpan.FromSeconds(5));
         wallClock.Offset = TimeSpan.FromHours(-2);
         _clock.Advance(TimeSpan.FromSeconds(10));
-        await Bounded(wait);
+        await wait;
         Assert.Equal([5f, 10f], client.Values.Select(v => v.Progress));
         Assert.Same(task, registry.Get(_server, task.TaskId));
     }
-
-    private static Task<TaskRecord> Bounded(Task<TaskRecord> task) => task.WaitAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
 
     private Task<TaskRecord> WaitAsync(TaskRegistry registry, string taskId, int seconds = 90, CallProgress? progress = null) =>
         registry.WaitAsync(_server, taskId, seconds, progress, TestContext.Current.CancellationToken);

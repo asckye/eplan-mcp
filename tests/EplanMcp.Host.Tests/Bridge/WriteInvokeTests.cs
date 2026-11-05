@@ -16,6 +16,9 @@ public sealed class WriteInvokeTests
     private const string Execute = "page.create.execute";
     private const string RequestId = "r1";
 
+    /// <summary>For a limit that is not what the test is about, which a busy machine must not reach.</summary>
+    private static readonly TimeSpan _noLimit = TimeSpan.FromDays(1);
+
     private readonly FakeDiscovery _discovery = new();
     private readonly BridgeEndpoint _bridge = new("EplanMcp.Bridge.42.a1", 42);
     private readonly Queue<OutcomeGetData> _outcomes = new();
@@ -98,7 +101,7 @@ public sealed class WriteInvokeTests
             return new JsonObject { ["data"] = new JsonObject { ["pages"] = 3 } };
         };
 
-        WriteResult<JsonObject> result = await Write();
+        WriteResult<JsonObject> result = await Write(limit: _noLimit);
 
         Assert.Equal((3, false), ((int)result.Data!["pages"]!, result.Recovered));
         Assert.Equal((1, 0), (Executes, OutcomeQuestions));
@@ -315,11 +318,11 @@ public sealed class WriteInvokeTests
         {
             Handshake = (_, _, _) => Task.FromResult(FakeChannel.CompatibleHandshake(endpoint.ProcessId, operations: _operations)),
         });
-        await using var client = new BridgeClient(_discovery, connector, NullLogger<BridgeClient>.Instance, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(10));
+        await using var client = new BridgeClient(_discovery, connector, NullLogger<BridgeClient>.Instance, _noLimit, _noLimit, TimeSpan.FromMilliseconds(10));
         using var cancel = new CancellationTokenSource();
 
         Task<JsonObject> read = client.InvokeAsync<object, JsonObject>("x.read", new { }, TestContext.Current.CancellationToken);
-        Task<WriteResult<JsonObject>> write = client.InvokeWriteAsync<object, JsonObject>(Execute, new { }, RequestId, TimeSpan.FromSeconds(5), null, cancel.Token);
+        Task<WriteResult<JsonObject>> write = client.InvokeWriteAsync<object, JsonObject>(Execute, new { }, RequestId, _noLimit, null, cancel.Token);
         await cancel.CancelAsync();
         BridgeError error = (await Assert.ThrowsAsync<BridgeCallException>(() => write)).Error;
         release.SetResult(new JsonObject { ["data"] = new JsonObject() });

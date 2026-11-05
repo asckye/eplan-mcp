@@ -45,7 +45,7 @@ public sealed class PlanApprovalTests : IAsyncDisposable
 
         Assert.Equal(new ApprovalResult("workbench", Enum.Parse<ApprovalDecision>(decision)), result);
         Assert.Null(result.Outcome);
-        await _workbench.HungUp.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
         Assert.Empty(_workbench.Notifications);
         Assert.Empty(dialog.Questions);
         Assert.Equal(1, _workbench.Connections);
@@ -107,7 +107,7 @@ public sealed class PlanApprovalTests : IAsyncDisposable
 
         Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Error.Reason, error.Error.Execution));
         Assert.Single(_workbench.Asks);
-        await _workbench.HungUp.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+        await _workbench.HungUp.Task.WaitAsync(Token);
         Assert.Empty(_workbench.Notifications);
     }
 

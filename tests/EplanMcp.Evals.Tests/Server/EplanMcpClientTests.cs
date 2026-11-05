@@ -15,7 +15,8 @@ public sealed class EplanMcpServerFixture : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         var environment = new Dictionary<string, string?> { ["EPLANMCP_PIPE_PREFIX"] = "EplanMcpEvals." + Guid.NewGuid().ToString("N") + "." };
-        Client = await EplanMcpClient.StartAsync(Path.Combine(AppContext.BaseDirectory, "eplanmcp.exe"), environment, TestContext.Current.CancellationToken);
+        // No limit: on a busy machine a real process may take longer than the SDK's 60 s to start, and no test here depends on how long.
+        Client = await EplanMcpClient.StartAsync(Path.Combine(AppContext.BaseDirectory, "eplanmcp.exe"), environment, Timeout.InfiniteTimeSpan, TestContext.Current.CancellationToken);
     }
 
     public ValueTask DisposeAsync() => Client.DisposeAsync();

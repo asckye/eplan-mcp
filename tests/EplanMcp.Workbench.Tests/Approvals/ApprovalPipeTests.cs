@@ -20,9 +20,6 @@ namespace EplanMcp.Workbench.Tests.Approvals;
 [Trait("Size", "Medium")]
 public sealed class ApprovalPipeTests : IAsyncDisposable
 {
-    /// <summary>How long a step may take before the test fails instead of hanging.</summary>
-    private static readonly TimeSpan _patience = TimeSpan.FromSeconds(10);
-
     /// <summary>
     /// The owner the test servers give their pipes: the token's, which the Host's CurrentUserOnly compares with. It is
     /// the user, unless the tests run elevated, as on CI; the real owner is checked on its own.
@@ -50,17 +47,17 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> asking = Channel().AskAsync(HostQuestion(), Token);
-        Question question = await arrival.WaitAsync(_patience, Token);
+        Question question = await arrival.WaitAsync(Token);
 
         Assert.Equal(("r1", "eplan_page_create", QuestionTier.Write, "claude-code"), (question.RequestId, question.Ask.Tool, question.Ask.Tier, question.Ask.ClientName));
         Assert.True(_queue.Answer(question, approve: true));
-        ApprovalAnswer answer = (await asking.WaitAsync(_patience, Token))!;
+        ApprovalAnswer answer = (await asking.WaitAsync(Token))!;
         Assert.Equal(new ApprovalAnswer("r1", "f1", "h1", ApprovalDecision.Granted), answer with { Outcome = null });
 
         Task shown = Changed(question, q => q.Execution != QuestionExecution.Running);
         await answer.Outcome!.ReportAsync(ExecutionState.Committed, null);
         answer.Outcome.Dispose();
-        await shown.WaitAsync(_patience, Token);
+        await shown.WaitAsync(Token);
         Assert.Equal((QuestionEnd.Approved, QuestionExecution.Committed), (question.End, question.Execution));
     }
 
@@ -69,17 +66,17 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> rejected = Channel().AskAsync(HostQuestion("r1"), Token);
-        _queue.Answer(await arrival.WaitAsync(_patience, Token), approve: false);
-        Assert.Equal(ApprovalDecision.Denied, (await rejected.WaitAsync(_patience, Token))!.Decision);
+        _queue.Answer(await arrival.WaitAsync(Token), approve: false);
+        Assert.Equal(ApprovalDecision.Denied, (await rejected.WaitAsync(Token))!.Decision);
 
         arrival = Arrival();
         Task<ApprovalAnswer?> approved = Channel().AskAsync(HostQuestion("r2"), Token);
-        Question question = await arrival.WaitAsync(_patience, Token);
+        Question question = await arrival.WaitAsync(Token);
         Task closed = Changed(question, q => q.Execution == QuestionExecution.NotReceived);
         _queue.Answer(question, approve: true);
-        (await approved.WaitAsync(_patience, Token))!.Outcome!.Dispose();
+        (await approved.WaitAsync(Token))!.Outcome!.Dispose();
 
-        await closed.WaitAsync(_patience, Token);
+        await closed.WaitAsync(Token);
     }
 
     [Fact]
@@ -87,13 +84,13 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> asking = Channel().AskAsync(HostQuestion(), Token);
-        Question question = await arrival.WaitAsync(_patience, Token);
+        Question question = await arrival.WaitAsync(Token);
 
         _clock.Advance(TimeSpan.FromSeconds(119));
         Assert.Null(question.End);
         _clock.Advance(TimeSpan.FromSeconds(1));
 
-        Assert.Equal(ApprovalDecision.Expired, (await asking.WaitAsync(_patience, Token))!.Decision);
+        Assert.Equal(ApprovalDecision.Expired, (await asking.WaitAsync(Token))!.Decision);
         Assert.Equal(QuestionEnd.Expired, question.End);
         Assert.False(_queue.Answer(question, approve: true));
     }
@@ -104,13 +101,13 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         using var client = CancellationTokenSource.CreateLinkedTokenSource(Token);
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> asking = Channel().AskAsync(HostQuestion(), client.Token);
-        Question question = await arrival.WaitAsync(_patience, Token);
+        Question question = await arrival.WaitAsync(Token);
         Task ended = Changed(question, q => q.End is not null);
 
         await client.CancelAsync();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => asking);
-        await ended.WaitAsync(_patience, Token);
+        await ended.WaitAsync(Token);
         Assert.Equal(QuestionEnd.Cancelled, question.End);
         Assert.Empty(_queue.Pending);
     }
@@ -120,21 +117,21 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> other = Channel().AskAsync(HostQuestion("r1"), Token);
-        Question waiting = await arrival.WaitAsync(_patience, Token);
+        Question waiting = await arrival.WaitAsync(Token);
         arrival = Arrival();
         Question gone;
         await using (NamedPipeClientStream pipe = await ConnectAsync())
         {
             await HandshakeAsync(pipe);
             await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, Asks.Write("r2")));
-            gone = await arrival.WaitAsync(_patience, Token);
+            gone = await arrival.WaitAsync(Token);
         }
 
-        await Changed(gone, q => q.End is not null).WaitAsync(_patience, Token);
+        await Changed(gone, q => q.End is not null).WaitAsync(Token);
         Assert.Equal(QuestionEnd.Disconnected, gone.End);
         Assert.Equal([waiting], _queue.Pending);
         _queue.Answer(waiting, approve: false);
-        Assert.Equal(ApprovalDecision.Denied, (await other.WaitAsync(_patience, Token))!.Decision);
+        Assert.Equal(ApprovalDecision.Denied, (await other.WaitAsync(Token))!.Decision);
     }
 
     [Fact]
@@ -146,16 +143,16 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         // question goes to the EPLAN dialog, as it should, but then this test would depend on how fast the machine is.
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> first = Channel().AskAsync(HostQuestion("r1"), Token);
-        Question askedFirst = await arrival.WaitAsync(_patience, Token);
+        Question askedFirst = await arrival.WaitAsync(Token);
         arrival = Arrival();
         Task<ApprovalAnswer?> second = Channel().AskAsync(HostQuestion("r2"), Token);
-        Question askedSecond = await arrival.WaitAsync(_patience, Token);
+        Question askedSecond = await arrival.WaitAsync(Token);
 
         _queue.Answer(askedSecond, approve: true);
         _queue.Answer(askedFirst, approve: false);
 
-        ApprovalAnswer one = (await first.WaitAsync(_patience, Token))!;
-        ApprovalAnswer two = (await second.WaitAsync(_patience, Token))!;
+        ApprovalAnswer one = (await first.WaitAsync(Token))!;
+        ApprovalAnswer two = (await second.WaitAsync(Token))!;
         two.Outcome?.Dispose();
         Assert.Equal(("r1", ApprovalDecision.Denied), (one.RequestId, one.Decision));
         Assert.Equal(("r2", ApprovalDecision.Granted), (two.RequestId, two.Decision));
@@ -170,13 +167,13 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         Assert.True(server.Start());
         Task<Question> arrival = Arrival(queue);
         Task<ApprovalAnswer?> first = Channel(pipe).AskAsync(HostQuestion("r1"), Token);
-        Question waiting = await arrival.WaitAsync(_patience, Token);
+        Question waiting = await arrival.WaitAsync(Token);
 
         Assert.Null(await Channel(pipe).AskAsync(HostQuestion("r2"), Token));
 
         Assert.Equal([waiting], queue.Pending);
         queue.Answer(waiting, approve: false);
-        await first.WaitAsync(_patience, Token);
+        await first.WaitAsync(Token);
     }
 
     [Fact]
@@ -186,7 +183,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         await using ApprovalServer server = Server(_queue, pipe, expectedClient: Path.Combine(AppContext.BaseDirectory, "eplanmcp.exe"));
         Assert.True(server.Start());
         await using var raw = new NamedPipeClientStream(".", pipe, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-        await raw.ConnectAsync(TimeSpan.FromSeconds(5), Token);
+        await raw.ConnectAsync(Token);
 
         // The Workbench hangs up at once, so even sending the handshake may fail.
         await SendOrEndAsync(raw, WorkbenchJson.Request(1, WorkbenchProtocol.HandshakeMethod, new WorkbenchHandshake(1, 1, "test", Environment.ProcessId)));
@@ -217,7 +214,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         await using var server = new ApprovalServer(_queue, pipe, Environment.ProcessPath!, _clock, NullLogger.Instance);
         Assert.True(server.Start());
         await using var probe = new NamedPipeClientStream(".", pipe, PipeDirection.InOut, PipeOptions.Asynchronous);
-        await probe.ConnectAsync(TimeSpan.FromSeconds(5), Token);
+        await probe.ConnectAsync(Token);
         PipeSecurity security = probe.GetAccessControl();
         using WindowsIdentity me = WindowsIdentity.GetCurrent();
         AuthorizationRule[] rules = [.. security.GetAccessRules(true, true, typeof(SecurityIdentifier)).Cast<AuthorizationRule>()];
@@ -233,14 +230,14 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> waiting = Channel().AskAsync(HostQuestion("r0"), Token);
-        await arrival.WaitAsync(_patience, Token);
+        await arrival.WaitAsync(Token);
         Task<ApprovalAnswer?>[] asking = [waiting, .. Enumerable.Range(1, 4).Select(i => Channel().AskAsync(HostQuestion($"r{i}"), Token))];
 
         await _server.DisposeAsync();
 
         foreach (Task<ApprovalAnswer?> each in asking)
         {
-            ApprovalAnswer? answer = await each.WaitAsync(_patience, Token);
+            ApprovalAnswer? answer = await each.WaitAsync(Token);
             Assert.True(answer is null || answer.Decision == ApprovalDecision.Cancelled, answer?.ToString());
         }
 
@@ -256,12 +253,12 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> asking = Channel().AskAsync(HostQuestion(), Token);
-        Question question = await arrival.WaitAsync(_patience, Token);
+        Question question = await arrival.WaitAsync(Token);
 
         await _server.DisposeAsync();
 
         Assert.Equal(QuestionEnd.Closed, question.End);
-        Assert.Equal(ApprovalDecision.Cancelled, (await asking.WaitAsync(_patience, Token))!.Decision);
+        Assert.Equal(ApprovalDecision.Cancelled, (await asking.WaitAsync(Token))!.Decision);
     }
 
     public static TheoryData<string> BrokenQuestions => new()
@@ -289,7 +286,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         // An error when the message could be read, else the connection closes (a duplicate field breaks the frame).
         RpcMessage? reply = await ReceiveOrEndAsync(pipe);
         Assert.True(reply is null || reply.Error?.Code == -32602, reply?.ToString());
-        await freed.WaitAsync(_patience, Token); // the server's finally has run
+        await freed.WaitAsync(Token); // the server's finally has run
         Assert.Empty(queue.Pending);
         Assert.True(queue.TryReserve(), "the place the handshake promised is free again");
     }
@@ -309,7 +306,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
             await SendAsync(pipe, WorkbenchJson.Request(1, WorkbenchProtocol.HandshakeMethod, new WorkbenchHandshake(1, 1, "test", Environment.ProcessId)));
         }
 
-        await freed.WaitAsync(_patience, Token);
+        await freed.WaitAsync(Token);
         Assert.True(queue.IsAccepting);
         Assert.True(queue.TryReserve(), "the place is free for the next Host");
     }
@@ -348,7 +345,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
 
         await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, release with { Suspension = release.Suspension! with { TimeUnixMs = null } }));
 
-        Assert.Null((await arrival.WaitAsync(_patience, Token)).Ask.Suspension!.TimeUnixMs);
+        Assert.Null((await arrival.WaitAsync(Token)).Ask.Suspension!.TimeUnixMs);
     }
 
     [Theory]
@@ -371,18 +368,18 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> releasing = Channel().AskAsync(HostQuestion("r1") with { Release = Suspended("earlier") }, Token);
-        Question release = await arrival.WaitAsync(_patience, Token);
+        Question release = await arrival.WaitAsync(Token);
         Assert.Equal(QuestionKind.SuspensionRelease, release.Ask.Kind);
         _queue.Answer(release, approve: true);
-        Assert.Equal(ApprovalDecision.Granted, (await releasing.WaitAsync(_patience, Token))!.Decision);
+        Assert.Equal(ApprovalDecision.Granted, (await releasing.WaitAsync(Token))!.Decision);
 
         arrival = Arrival();
         Task<ApprovalAnswer?> approving = Channel().AskAsync(HostQuestion("r1"), Token);
-        Question approval = await arrival.WaitAsync(_patience, Token);
+        Question approval = await arrival.WaitAsync(Token);
 
         Assert.Equal((QuestionKind.Approval, "r1"), (approval.Ask.Kind, approval.RequestId));
         Assert.True(_queue.Answer(approval, approve: true));
-        ApprovalAnswer answer = (await approving.WaitAsync(_patience, Token))!;
+        ApprovalAnswer answer = (await approving.WaitAsync(Token))!;
         Assert.Equal(ApprovalDecision.Granted, answer.Decision);
         answer.Outcome!.Dispose();
     }
@@ -395,8 +392,8 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         {
             Task<Question> arrival = Arrival();
             Task<ApprovalAnswer?> asking = Channel().AskAsync(HostQuestion("r1") with { Release = release }, Token);
-            _queue.Answer(await arrival.WaitAsync(_patience, Token), approve: true);
-            ApprovalAnswer answer = (await asking.WaitAsync(_patience, Token))!;
+            _queue.Answer(await arrival.WaitAsync(Token), approve: true);
+            ApprovalAnswer answer = (await asking.WaitAsync(Token))!;
             decisions.Add(answer.Decision);
             answer.Outcome?.Dispose();
         }
@@ -410,7 +407,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> first = Channel().AskAsync(HostQuestion("r1"), Token);
-        Question waiting = await arrival.WaitAsync(_patience, Token);
+        Question waiting = await arrival.WaitAsync(Token);
         await using NamedPipeClientStream pipe = await ConnectAsync();
         await HandshakeAsync(pipe);
 
@@ -419,7 +416,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         Assert.Equal(-32600, (await ReceiveAsync(pipe))!.Error!.Code);
         Assert.Equal([waiting], _queue.Pending);
         _queue.Answer(waiting, approve: false);
-        await first.WaitAsync(_patience, Token);
+        await first.WaitAsync(Token);
     }
 
     [Fact]
@@ -481,22 +478,22 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> other = Channel().AskAsync(HostQuestion("r2"), Token);
-        Question theirs = await arrival.WaitAsync(_patience, Token);
+        Question theirs = await arrival.WaitAsync(Token);
         arrival = Arrival();
         await using NamedPipeClientStream pipe = await ConnectAsync();
         await HandshakeAsync(pipe);
         await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, Asks.Write("r1")));
-        Question mine = await arrival.WaitAsync(_patience, Token);
+        Question mine = await arrival.WaitAsync(Token);
         Task ended = Changed(mine, q => q.End is not null);
 
         await SendAsync(pipe, WorkbenchJson.Notification(WorkbenchProtocol.CancelMethod, new CancelParams("r2")));
 
         // A message that is not this question's cancel breaks this connection only (APR-13).
-        await ended.WaitAsync(_patience, Token);
+        await ended.WaitAsync(Token);
         Assert.Equal(QuestionEnd.Disconnected, mine.End);
         Assert.Null(theirs.End);
         _queue.Answer(theirs, approve: false);
-        Assert.Equal(ApprovalDecision.Denied, (await other.WaitAsync(_patience, Token))!.Decision);
+        Assert.Equal(ApprovalDecision.Denied, (await other.WaitAsync(Token))!.Decision);
     }
 
     [Fact]
@@ -504,21 +501,21 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     {
         Task<Question> arrival = Arrival();
         Task<ApprovalAnswer?> other = Channel().AskAsync(HostQuestion("r2"), Token);
-        Question theirs = await arrival.WaitAsync(_patience, Token);
+        Question theirs = await arrival.WaitAsync(Token);
         _queue.Answer(theirs, approve: true);
-        ApprovalAnswer theirAnswer = (await other.WaitAsync(_patience, Token))!;
+        ApprovalAnswer theirAnswer = (await other.WaitAsync(Token))!;
         arrival = Arrival();
         await using NamedPipeClientStream pipe = await ConnectAsync();
         await HandshakeAsync(pipe);
         await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, Asks.Write("r1")));
-        Question mine = await arrival.WaitAsync(_patience, Token);
+        Question mine = await arrival.WaitAsync(Token);
         Task closed = Changed(mine, q => q.Execution == QuestionExecution.NotReceived);
         _queue.Answer(mine, approve: true);
         Assert.Equal(WorkbenchDecision.Approved, WorkbenchJson.As<ApprovalAskResult>((await ReceiveAsync(pipe))!.Result).Decision);
 
         await SendAsync(pipe, WorkbenchJson.Notification(WorkbenchProtocol.ApprovalOutcomeMethod, new ApprovalOutcomeParams("r2", WriteExecution.Committed, null)));
 
-        await closed.WaitAsync(_patience, Token);
+        await closed.WaitAsync(Token);
         Assert.Equal(QuestionExecution.Running, theirs.Execution);
         theirAnswer.Outcome!.Dispose();
     }
@@ -530,12 +527,12 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
         await using NamedPipeClientStream pipe = await ConnectAsync();
         await HandshakeAsync(pipe);
         await SendAsync(pipe, WorkbenchJson.Request(2, WorkbenchProtocol.ApprovalAskMethod, Asks.Write("r1")));
-        Question question = await arrival.WaitAsync(_patience, Token);
+        Question question = await arrival.WaitAsync(Token);
         Task ended = Changed(question, q => q.End is not null);
 
         await SendAsync(pipe, WorkbenchJson.Notification(WorkbenchProtocol.ApprovalOutcomeMethod, new ApprovalOutcomeParams("r1", WriteExecution.Committed, null)));
 
-        await ended.WaitAsync(_patience, Token);
+        await ended.WaitAsync(Token);
         Assert.Equal((QuestionEnd.Disconnected, QuestionExecution.None), (question.End, question.Execution));
         Assert.Null(await ReceiveOrEndAsync(pipe));
     }
@@ -611,7 +608,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     private async Task<NamedPipeClientStream> ConnectAsync(string? name = null)
     {
         var pipe = new NamedPipeClientStream(".", name ?? _pipe, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-        await pipe.ConnectAsync(TimeSpan.FromSeconds(5), Token);
+        await pipe.ConnectAsync(Token);
         return pipe;
     }
 
@@ -642,7 +639,7 @@ public sealed class ApprovalPipeTests : IAsyncDisposable
     }
 
     private static async Task<RpcMessage?> ReceiveAsync(Stream pipe) =>
-        await WorkbenchFraming.ReadAsync(pipe, Token).WaitAsync(_patience, Token) is { } frame ? WorkbenchJson.Read(frame) : null;
+        await WorkbenchFraming.ReadAsync(pipe, Token).WaitAsync(Token) is { } frame ? WorkbenchJson.Read(frame) : null;
 
     /// <summary>The next message; null when the Workbench closed the connection instead.</summary>
     private static async Task<RpcMessage?> ReceiveOrEndAsync(Stream pipe)
