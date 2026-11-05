@@ -44,6 +44,7 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
     public async Task<ActionCatalogData> ReadAsync(CancellationToken cancellationToken)
     {
         var items = new List<ActionCatalogItem>(Official());
+        var registry = new List<ActionCatalogItem>();
         var gaps = new List<string>();
         string? version = null;
         try
@@ -51,7 +52,7 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
             (string? bin, version) = installation();
             if (bin is null || !Directory.Exists(bin))
             {
-                gaps.Add("No unambiguous local EPLAN Bin installation was found; UI actions are unavailable. Check the installation with doctor.");
+                gaps.Add("No unambiguous local EPLAN Bin installation was found; UI and registry definitions are unavailable. Check the installation with doctor.");
             }
             else
             {
@@ -59,6 +60,24 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
                 if (version != ActionRunCatalog.Document["verification"]!["version"]!.GetValue<string>())
                 {
                     gaps.Add("Installation version differs from the verified catalog build or is unknown; UI structure and whitelist behavior are unverified for this version.");
+                }
+                foreach (string name in new[] { "regPlatform.xml", "regMinimal.xml" })
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    try
+                    {
+                        using var stream = File.OpenRead(Path.Combine(Path.GetDirectoryName(bin)!, "Cfg", name));
+                        using var xml = XmlReader.Create(stream, new XmlReaderSettings { Async = true, DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersInDocument = 8 * 1024 * 1024 });
+                        var doc = await XDocument.LoadAsync(xml, LoadOptions.None, cancellationToken).ConfigureAwait(false);
+                        ActionCatalogItem[] parsed = ParseRegistry(doc, "Cfg/" + name, cancellationToken);
+                        registry.AddRange(parsed);
+                        if (parsed.Length == 0)
+                        { gaps.Add(name + ": no recognized registry definitions; unknown structure was skipped."); }
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or XmlException)
+                    {
+                        gaps.Add(name + ": registry could not be read; check file presence, access, XML format and size.");
+                    }
                 }
                 var options = new EnumerationOptions { RecurseSubdirectories = true, MaxRecursionDepth = 3, AttributesToSkip = FileAttributes.ReparsePoint, IgnoreInaccessible = false };
                 string[] files = [.. new[] { bin, Path.Combine(Path.GetDirectoryName(bin)!, "Cfg") }.Where(Directory.Exists)
@@ -91,17 +110,54 @@ internal sealed class ActionCatalogReader(Func<(string? Bin, string? Version)> i
         {
             gaps.Add("Installation definitions could not be enumerated; check installation access with doctor.");
         }
+        var registered = registry.GroupBy(i => i.Name, StringComparer.Ordinal).ToDictionary(g => g.Key,
+            g => (g.FirstOrDefault(i => i.RegistryKind == "interaction") ?? g.First()) with
+            { Module = g.Select(i => i.Module).FirstOrDefault(m => !string.IsNullOrWhiteSpace(m)) }, StringComparer.Ordinal);
+        var names = items.Select(i => i.Name).ToHashSet(StringComparer.Ordinal);
+        items = [.. items.Select(i => registered.TryGetValue(i.Name, out ActionCatalogItem? entry) ? i with
+        {
+            RegistryKind = entry.RegistryKind,
+            Module = entry.Module,
+            Tier = entry.RegistryKind == "interaction" ? "excluded" : i.Tier,
+            ExcludedReason = entry.RegistryKind == "interaction" ? entry.ExcludedReason : i.ExcludedReason,
+        } : i), .. registered.Values.Where(i => !names.Contains(i.Name))];
         if (items.Any(i => i.Source == "ui" && (i.Location is null || i.UiText is null)))
         {
             gaps.Add("Some UI labels or menu/ribbon locations are unavailable; resource and category IDs are not translated or treated as menu locations.");
         }
         return new([.. items.DistinctBy(i => JsonSerializer.Serialize(i, HostJson.Options)).OrderBy(i => i.Name, StringComparer.Ordinal)
             .ThenBy(i => i.Source, StringComparer.Ordinal).ThenBy(i => i.Type, StringComparer.Ordinal).ThenBy(i => i.Reference, StringComparer.Ordinal)], ResultShaper.CleanText(version),
-            [.. gaps.Distinct(StringComparer.Ordinal).Take(8).Select(g => ResultShaper.CleanText(g)!), .. gaps.Count > 8 ? Enumerable.Repeat("Additional definition gaps omitted; the UI catalog is incomplete.", 1) : []]);
+            [.. gaps.Distinct(StringComparer.Ordinal).Take(8).Select(g => ResultShaper.CleanText(g)!), .. gaps.Count > 8 ? Enumerable.Repeat("Additional definition gaps omitted; the local catalog is incomplete.", 1) : []]);
     }
 
     private static bool IsDefinition(string name) => name.Equals("MFTools.xml", StringComparison.OrdinalIgnoreCase)
         || name.Contains("ribbon", StringComparison.OrdinalIgnoreCase) || name.Contains("menu", StringComparison.OrdinalIgnoreCase);
+
+    internal static ActionCatalogItem[] ParseRegistry(XDocument document, string reference, CancellationToken cancellationToken = default)
+    {
+        var rows = new List<ActionCatalogItem>();
+        foreach (XElement category in document.Elements("Settings").Elements("CAT").Elements("MOD").Elements("LEV1")
+            .Where(e => (string?)e.Attribute("name") == "Services").Elements("LEV2"))
+        {
+            string? kind = (string?)category.Attribute("name") switch
+            { "Actions" => "action", "Interactions" => "interaction", "AsmActions" => "asm_action", _ => null };
+            if (kind is null)
+            { continue; }
+            foreach (XElement element in category.Elements("LEV3"))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                string? name = (string?)element.Attribute("name");
+                if (string.IsNullOrWhiteSpace(name))
+                { continue; }
+                string? module = element.Elements("LEV4").Elements("Setting").Where(e => (string?)e.Attribute("name") == "ModuleName")
+                    .Elements("Val").Select(e => e.Value).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+                ActionCatalogItem row = Create(name, "registry", null, null, null, [],
+                    kind == "interaction" ? "interaction: not callable by name; use a drawing tool" : null, reference + ":Services/" + (string?)category.Attribute("name"));
+                rows.Add(row with { RegistryKind = kind, Module = ResultShaper.CleanText(module), Tier = kind == "interaction" ? "excluded" : row.Tier });
+            }
+        }
+        return [.. rows];
+    }
 
     internal static ActionCatalogItem[] Parse(XDocument document, string reference, CancellationToken cancellationToken = default)
     {

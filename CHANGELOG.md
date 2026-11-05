@@ -11,6 +11,7 @@
 - 注释创建支持线性、角度、基线、递增、连续和圆尺寸标注；尺寸文字由 EPLAN 计算，写前拒绝重合的角度点与非整圆引用。
 - 注释创建支持占位符及宏框，可设置名称、记录和变量。
 - `eplan_page_get`、`eplan_object_find` 补齐注释的位置与关键字段；`eplan_placement_delete` 支持删除这些对象，并在执行事务内重新取得原生对象。
+- action 目录新增本机注册表来源及类别、模块信息，支持 `source:"registry"` 和 `registry_kind` 筛选；同名合并，交互项标为不可按名调用，缺失文件报告缺口。
 
 - `eplan_symbol_search` 每行增加 `variantLabel`：变量编号 0–7 对应 A–H，其他编号返回空字符串。
 

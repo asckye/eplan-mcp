@@ -23,5 +23,14 @@ public sealed class ActionCatalogTests
         Assert.NotEqual(true, get.IsError);
         Assert.Contains(get.StructuredContent!.Value.GetProperty("items").EnumerateArray(), i =>
             i.GetProperty("type").GetString() == "MASTERDATA" && i.GetProperty("tier").GetString() == "A");
+        var registry = await ActionCatalogTools.SearchAsync(reader, source: "registry", limit: 1, cancellationToken: TestContext.Current.CancellationToken);
+        Assert.NotEqual(true, registry.IsError);
+        Assert.True(registry.StructuredContent!.Value.GetProperty("total").GetInt32() > 1300);
+        var setting = await ActionCatalogTools.GetAsync(reader, "AfGetSettingAction", cancellationToken: TestContext.Current.CancellationToken);
+        Assert.NotEqual(true, setting.IsError);
+        Assert.NotEmpty(setting.StructuredContent!.Value.GetProperty("items").EnumerateArray());
+        var interaction = await ActionCatalogTools.GetAsync(reader, "XCabIaChangeAngle", cancellationToken: TestContext.Current.CancellationToken);
+        Assert.NotEqual(true, interaction.IsError);
+        Assert.All(interaction.StructuredContent!.Value.GetProperty("items").EnumerateArray(), i => Assert.Equal("excluded", i.GetProperty("tier").GetString()));
     }
 }

@@ -54,6 +54,14 @@ public sealed class ActionCatalogTests
     }
 
     [Fact]
+    public async Task RegistrySourceFilter_WithoutInstallation_ReturnsGapRatherThanInvalidArguments()
+    {
+        JsonElement data = ApiToolTests.Data(await ActionCatalogTools.SearchAsync(Missing, source: "registry", cancellationToken: Token));
+        Assert.Equal(0, data.GetProperty("total").GetInt32());
+        Assert.NotEmpty(data.GetProperty("gaps").EnumerateArray());
+    }
+
+    [Fact]
     public async Task MissingInstallation_ReturnsOfficialDataAndExplicitGapWithoutMachinePaths()
     {
         JsonElement data = ApiToolTests.Data(await ActionCatalogTools.SearchAsync(Missing, source: "ui", cancellationToken: Token));

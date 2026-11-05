@@ -6,7 +6,8 @@ internal sealed record ActionCatalogItem(string Name, string Source, string? Typ
     JsonElement[] Parameters, string Tier, string? ExcludedReason, string? WhitelistEntry, string? VerificationReference, string Reference,
     [property: System.Text.Json.Serialization.JsonPropertyName("try_template")] System.Text.Json.Nodes.JsonObject? TryTemplate = null,
     [property: System.Text.Json.Serialization.JsonIgnore] string[]? Context = null,
-    [property: System.Text.Json.Serialization.JsonIgnore] JsonElement[]? Examples = null);
+    [property: System.Text.Json.Serialization.JsonIgnore] JsonElement[]? Examples = null,
+    string? RegistryKind = null, string? Module = null);
 internal sealed record ActionCatalogData(ActionCatalogItem[] Items, string? InstallationVersion, string[] Gaps)
 {
     internal string Fingerprint => PageCursor.Fingerprint("action_catalog", JsonSerializer.Serialize(this, HostJson.Options));
