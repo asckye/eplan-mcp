@@ -15,4 +15,6 @@ public sealed class PlacementTextCreateArgs
     public string? Fingerprint { get; set; }
     /// <summary>Use warn to reproduce existing drawings; refuse is the default.</summary>
     public string? LayoutGuard { get; set; }
+    /// <summary>Selects annotation validation while retaining the same planning and transaction protocol.</summary>
+    public bool Annotations { get; set; }
 }

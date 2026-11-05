@@ -17,6 +17,7 @@ public static class LayoutGuard
     }
     public sealed class Model
     {
+        public bool AllowUnknownGeometry { get; set; }
         public PageDrawingGeometry Page { get; set; } = new();
         public double[]? DrawingArea { get; set; }
         public Options Config { get; set; } = new();
@@ -52,10 +53,12 @@ public static class LayoutGuard
     public static double[] Area(Model model)
     {
         Options c = model.Config;
-        if (new[] { c.SymbolClearanceMm, c.ParallelSpacingMm ?? model.Page.GridSize, c.MinimumTextHeightMm, c.MarginMm }.Any(n => !Finite(n) || n < 0)
-            || !Finite(model.Page.GridSize) || model.Page.GridSize <= 0 || c.MinimumTextHeightMm <= 0)
+        if (new[] { c.SymbolClearanceMm, c.ParallelSpacingMm ?? (model.AllowUnknownGeometry && (!Finite(model.Page.GridSize) || model.Page.GridSize <= 0) ? 0 : model.Page.GridSize), c.MinimumTextHeightMm, c.MarginMm }.Any(n => !Finite(n) || n < 0)
+            || !model.AllowUnknownGeometry && (!Finite(model.Page.GridSize) || model.Page.GridSize <= 0) || c.MinimumTextHeightMm <= 0)
         { throw WriteArguments.Invalid(["layout: use finite nonnegative distances, positive text height and page grid."]); }
-        double[]? area = model.DrawingArea ?? (model.Page.PageSize is { Length: 2 } s ? [c.MarginMm, c.MarginMm, s[0] - c.MarginMm, s[1] - c.MarginMm] : null);
+        double[]? area = model.DrawingArea ?? (model.Page.PageSize is { Length: 2 } s && s.All(n => Finite(n) && n > 0) ? [c.MarginMm, c.MarginMm, s[0] - c.MarginMm, s[1] - c.MarginMm] : null);
+        if (model.AllowUnknownGeometry && area is null)
+        { return [double.MinValue, double.MinValue, double.MaxValue, double.MaxValue]; }
         return DrawingCoordinates.ValidBounds(area) && area![0] < area[2] && area[1] < area[3] ? area
             : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: reliable drawing area unavailable; read page geometry before drawing.");
     }
@@ -104,7 +107,7 @@ public static class LayoutGuard
                 bool inPage = p.Kind == "Macro" && model.Page.PageSize is { Length: 2 } size && b[0] >= 0 && b[1] >= 0 && b[2] <= size[0] && b[3] <= size[1];
                 Add("R1", p, null, inPage ? "The macro's declared outline leaves the drawing area; its objects are checked after the write." : "Keep the full outline inside the drawing area.", advisory: inPage);
             }
-            if (p.Parent is null && p.Location.Any(n => !OnGrid(n, model.Page.GridSize)))
+            if (p.Parent is null && (!model.AllowUnknownGeometry || Finite(model.Page.GridSize) && model.Page.GridSize > 0) && p.Location.Any(n => !OnGrid(n, model.Page.GridSize)))
             { Add("R7", p, null, "Placement points and bends must lie on the page grid; pins are exempt."); }
             // A text whose height or angle EPLAN does not report is not a violation: only a reported bad value refuses.
             bool badHeight = Height(p, out double height) && height < model.Config.MinimumTextHeightMm;
@@ -171,7 +174,7 @@ public static class LayoutGuard
             }
             if (!line.Changed)
             { continue; }
-            if (line.Points.Any(p => !model.Pins.Values.Any(pin => pin.Location.SequenceEqual(p)) && p.Any(n => !OnGrid(n, model.Page.GridSize))))
+            if ((!model.AllowUnknownGeometry || Finite(model.Page.GridSize) && model.Page.GridSize > 0) && line.Points.Any(p => !model.Pins.Values.Any(pin => pin.Location.SequenceEqual(p)) && p.Any(n => !OnGrid(n, model.Page.GridSize))))
             { Add("R7", row, null, "Line bends must lie on the page grid; pin endpoints are exempt."); }
             foreach (Segment other in model.Lines.Where(s => !ReferenceEquals(s, line) && (line.Net is null || s.Net is null || line.Net != s.Net)))
             {
@@ -214,9 +217,12 @@ public static class LayoutGuard
     {
         radius = Math.Min(12, Math.Max(0, radius));
         double g = model.Page.GridSize;
+        if (model.AllowUnknownGeometry && (!Finite(g) || g <= 0))
+        { return null; }
         var search = new Model
         {
             Page = model.Page,
+            AllowUnknownGeometry = model.AllowUnknownGeometry,
             DrawingArea = model.DrawingArea,
             Config = model.Config,
             Pins = model.Pins,
@@ -248,9 +254,11 @@ public static class LayoutGuard
     public static List<string> Enforce(Model model, IReadOnlyList<DrawingPlacement> changed, string at = "", bool measured = false, string mode = "refuse")
     {
         List<Violation> violations = Check(model, changed, measured: measured);
+        if (model.AllowUnknownGeometry && (model.Page.PageSize is null || !Finite(model.Page.GridSize) || model.Page.GridSize <= 0))
+        { OperationContext.Current.Warn("Layout page size or grid is unreadable; unavailable checks were skipped."); }
         if (mode == "warn")
         {
-            foreach (Violation violation in violations.Where(v => v.Rule != "R1" || !OffPage(v.Geometry, model.Page.PageSize)))
+            foreach (Violation violation in violations.Where(v => v.Rule != "R1" || !OffPage(v.Geometry, model.Page.PageSize, model.AllowUnknownGeometry)))
             { violation.Warning = true; }
         }
         if (violations.Any(v => !v.Warning))
@@ -265,7 +273,8 @@ public static class LayoutGuard
     public static string Report(Model model, bool measured) => (measured
         ? "Layout after write: R1-R9 on measured bounds, text metadata and routes. "
         : "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. ")
-        + (model.DrawingArea is null ? "Boundary fallback: Page.Size minus layout.marginMm." : "Boundary: plot-frame drawing area.");
+        + (model.AllowUnknownGeometry && model.Page.PageSize is null ? "Boundary unverified: page size is unreadable. " : model.DrawingArea is null ? "Boundary fallback: Page.Size minus layout.marginMm." : "Boundary: plot-frame drawing area.")
+        + (model.AllowUnknownGeometry && (!Finite(model.Page.GridSize) || model.Page.GridSize <= 0) ? " Grid unverified: snapping and R7 were skipped." : "");
     internal const int SummaryLines = 20;
     internal static readonly TimeSpan FreePositionSearchBudget = TimeSpan.FromSeconds(2);
     public static string Summary(IEnumerable<string?> messages)
@@ -282,6 +291,7 @@ public static class LayoutGuard
     {
         actual ??= before.ReadActual?.Invoke() ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Actual layout reader is unavailable; roll back the write.");
         actual.SetsTextAttribute = before.SetsTextAttribute;
+        actual.AllowUnknownGeometry = before.AllowUnknownGeometry;
         var previous = new HashSet<string>(before.Page.Placements.Select(Newtonsoft.Json.JsonConvert.SerializeObject), StringComparer.Ordinal);
         DrawingPlacement[] changed = actual.Page.Placements.Where(p => !previous.Contains(Newtonsoft.Json.JsonConvert.SerializeObject(p))).ToArray();
         // A54: empty property texts report all-zero bounds and have no visible ink; they are not unmeasured objects.
@@ -308,9 +318,9 @@ public static class LayoutGuard
         List<Violation> violations = Check(actual, changed, measured: true, searchViolations: false, searchBudget: FreePositionSearchBudget);
         if (timer.ElapsedMilliseconds > 2000)
         { OperationContext.Current.Warn(FormattableString.Invariant($"layout after write took {timer.ElapsedMilliseconds} ms for {changed.Length} changed objects and {violations.Count} findings")); }
-        if (violations.Any(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize)))
+        if (violations.Any(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize, actual.AllowUnknownGeometry)))
         {
-            List<Violation> offPage = [.. Check(actual, changed, measured: true, searchBudget: FreePositionSearchBudget).Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize))];
+            List<Violation> offPage = [.. Check(actual, changed, measured: true, searchBudget: FreePositionSearchBudget).Where(v => !v.Warning && v.Rule == "R1" && OffPage(v.Geometry, actual.Page.PageSize, actual.AllowUnknownGeometry))];
             BridgeErrorException error = WriteArguments.Invalid([.. offPage.Select(v => "S2: the new object lies outside the page. " + v.Message)]);
             error.Error.Metadata!["layoutViolations"] = Newtonsoft.Json.JsonConvert.SerializeObject(offPage);
             throw WriteArguments.NotStarted(error);
@@ -322,8 +332,8 @@ public static class LayoutGuard
                 + string.Join(", ", v.Geometry.Select(n => n.ToString("0.##", CultureInfo.InvariantCulture))) + "]; adjust with eplan_placement_update or check with eplan_page_review.")];
     }
     // S2 (ADR-0046): without a known page size an outline outside the drawing area cannot be cleared, so it still refuses.
-    private static bool OffPage(double[] geometry, double[]? size) => size is not { Length: 2 }
-        || geometry.Where((_, i) => i % 2 == 0).Any(x => x < 0 || x > size[0]) || geometry.Where((_, i) => i % 2 == 1).Any(y => y < 0 || y > size[1]);
+    private static bool OffPage(double[] geometry, double[]? size, bool allowUnknown = false) => size is not { Length: 2 } ? !allowUnknown
+        : geometry.Where((_, i) => i % 2 == 0).Any(x => x < 0 || x > size[0]) || geometry.Where((_, i) => i % 2 == 1).Any(y => y < 0 || y > size[1]);
     public static DrawingPlacement Shift(DrawingPlacement p, double[] delta) => new()
     {
         Locator = p.Locator,
@@ -336,8 +346,8 @@ public static class LayoutGuard
     public static Model From(ConnectionCreatePlanner.Scene scene) => new() { Page = scene.Page, Config = scene.Layout, Pins = new(scene.Pins), PointRoutes = scene.PointRoutes, PointRouteGaps = scene.PointRouteGaps, Lines = scene.Graphical.Select((s, i) => new Segment { Points = s, Net = null, Locator = new() { Oid = -i - 1 } }).ToList() };
     public static DrawingPlacement Proposed(string kind, double[] location, double[]? bounds, int index = 0) => new() { Kind = kind, Location = location, Bounds = bounds, Locator = new() { Oid = -index - 1 } };
     public static bool Overlaps(double[] a, double[] b, double clearance = 0) => a[0] < b[2] + clearance && a[2] + clearance > b[0] && a[1] < b[3] + clearance && a[3] + clearance > b[1];
-    private static bool Text(DrawingPlacement p) => p.Kind is "Text" or "PathText" or "PropertyPlacement";
-    private static bool Graphic(DrawingPlacement p) => p.Kind is "PolyLine" or "Arc" or "Image";
+    private static bool Text(DrawingPlacement p) => p.Kind is "Text" or "PathText" or "PropertyPlacement" or "HyperLink" or "DimensionItem" or "DimensionCircle";
+    private static bool Graphic(DrawingPlacement p) => p.Kind is "PolyLine" or "Arc" or "Image" or "Spline" or "QRCode" or "PlaceHolder" or "MacroBox";
     private static bool Container(DrawingPlacement p) => p.Properties.TryGetValue("layout_container", out string? value) && value == "true" || p.Kind is "LocationBox" or "PLC" or "PLCBox" or "Box";
     private static bool Symbol(DrawingPlacement p) => p.Kind != "DynamicConnectionLine" && !Container(p) && (p.Kind is "Function" or "SymbolReference" or "PotentialDefinition" or "ConnectionDefinitionPoint" or "Macro" || p.Properties.ContainsKey("layout_symbol"));
     private static bool OwnerId(DrawingLocator a, DrawingLocator b) => ProjectResolver.SamePath(a.Project, b.Project) && a.Page == b.Page && a.Type == b.Type && a.Oid == b.Oid;

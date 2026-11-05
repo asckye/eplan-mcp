@@ -8,7 +8,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>S42/A54: TEXT in SafetyPoint; no property lists or native references survive Abort (A55).</summary>
-internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
+internal sealed partial class EplanPlacementTextWriter : IPlacementTextWriter
 {
     public string? Validate(string projectPath, string page, PlacementText text, bool warn = false)
     {
@@ -17,7 +17,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
         DocumentTypeManager.DocumentType[] allowed = [DocumentTypeManager.DocumentType.Circuit, DocumentTypeManager.DocumentType.Overview, DocumentTypeManager.DocumentType.Graphics];
         if (!allowed.Contains(Find(projectPath, page).PageType))
         { throw WriteArguments.Invalid(["/page requires a Circuit, Overview or Graphics page from eplan_page_list."]); }
-        if (text.Kind is not ("text" or "path_text"))
+        if (text.Kind is not ("text" or "path_text" or "hyperlink"))
         { return null; }
         foreach (string language in text.Contents.Keys)
         {
@@ -25,7 +25,16 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
             if (language != "??_??" && (!code.IsValid() || code.GetString() != language))
             { throw WriteArguments.Invalid(["/text/contents requires known EPLAN ISO language codes."]); }
         }
-        if (!text.Contents.ContainsKey("??_??") && !LanguageCodes.Split(new EplanProjectLanguages().Read(projectPath).Display).Any(text.Contents.ContainsKey))
+        if (text.Contents.ContainsKey("??_??"))
+        { return null; }
+        string display;
+        try
+        { display = new EplanProjectLanguages().Read(projectPath).Display; }
+        catch (BridgeErrorException ex) when (text.Kind == "hyperlink" && ex.Error.Reason is ErrorReason.EplanOperationFailed or ErrorReason.CapabilityMissing)
+        { return "Project display language is unreadable; hyperlink visibility was not checked."; }
+        if (text.Kind == "hyperlink" && string.IsNullOrWhiteSpace(display))
+        { return "Project display language is unreadable; hyperlink visibility was not checked."; }
+        if (!text.Contents.ContainsKey("??_??") && !LanguageCodes.Split(display).Any(text.Contents.ContainsKey))
         {
             const string message = "/text/contents must include the project display language or ??_?? so the text is visible (A54).";
             if (warn)
@@ -67,6 +76,8 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
             EplanPlacementStyle.Apply(placement, EplanProjects.ByPath(projectPath), text.Layer, text.Pen);
             return () => EplanPlacementStyle.Read(placement, text, read());
         }
+        if (AnnotationCreation.Known(text.Kind) && text.Kind != "sector")
+        { return Annotation(projectPath, page, text, Styled); }
         if (text.Kind is not ("text" or "path_text"))
         {
 #pragma warning disable CA2000 // A39/A54/A55: placements belong to the project, including on rollback.
@@ -79,19 +90,21 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
                 polyline.Closed = text.Closed;
                 return Styled(polyline, () => new() { Kind = "polyline", Closed = polyline.Closed, Position = XY(polyline.GetPointAt(0)), Points = Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i))).ToArray() });
             }
-            if (text.Kind is "arc" or "ellipse")
+            if (text.Kind is "arc" or "ellipse" or "sector")
             {
                 var arc = new Arc();
                 arc.Create(Find(projectPath, page));
-                bool ellipse = text.Kind == "ellipse", circle = !ellipse && DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle);
+                bool ellipse = text.Kind == "ellipse", circle = text.Kind == "arc" && DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle);
                 if (ellipse)
                 { arc.SetEllipse(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusXmm), DrawingCoordinates.MillimetresToApi(text.RadiusYmm), text.Angle * (Math.PI / 180)); }
                 else if (circle && text.StartAngle != text.EndAngle)
                 { arc.SetCircle(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm)); }
                 else
-                { arc.SetArc(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm), text.StartAngle * (Math.PI / 180), text.EndAngle * (Math.PI / 180), false); }
+                { arc.SetArc(Point(text.Position), DrawingCoordinates.MillimetresToApi(text.RadiusMm), text.StartAngle * (Math.PI / 180), text.EndAngle * (Math.PI / 180), text.Kind == "sector"); }
                 return Styled(arc, () =>
                 {
+                    if (text.Kind == "sector" && !arc.Sector)
+                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Sector did not read back."); }
                     if ((ellipse || circle) && arc.Kind.ToString() != (ellipse ? "Ellipse" : "Circle"))
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Native arc Kind did not read back as the requested Circle or Ellipse."); }
                     return new()
@@ -150,7 +163,7 @@ internal sealed class EplanPlacementTextWriter : IPlacementTextWriter
     private static double Radians(double degrees) => degrees == -16002 ? degrees : degrees * Math.PI / 180;
     private static double Degrees(double radians) => radians == -16002 ? radians : radians * 180 / Math.PI;
 
-    private static PlacementText Read(Text created)
+    private static PlacementText Read(TextBase created)
     {
         using MultiLangString stored = created.Contents;
         var languages = new LanguageList();

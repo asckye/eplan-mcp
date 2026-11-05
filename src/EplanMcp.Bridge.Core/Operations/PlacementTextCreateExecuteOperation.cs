@@ -31,8 +31,10 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             { if (obj[name] is null) { throw InvalidArgument(at + "/" + name + " is required."); } }
         }
         bool batch = (args as JObject)?["items"] is { Type: not JTokenType.Null };
-        Members(args, "", "project page", "text items fingerprint layoutGuard");
+        Members(args, "", "project page", "text items fingerprint layoutGuard annotations");
         LayoutGuard.Mode(args!["layoutGuard"]);
+        if (args["annotations"] is { Type: not JTokenType.Boolean })
+        { throw InvalidArgument("/annotations must be boolean."); }
         foreach (string name in new[] { "project", "page" })
         { if (args![name]?.Type != JTokenType.String) { throw InvalidArgument("/" + name + " must be a string."); } }
         if (batch && (args!["items"] is not JArray list || list.Count is < 1 or > 50))
@@ -44,7 +46,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             string at = batch ? "/items/" + (index++).ToString(CultureInfo.InvariantCulture) : "/text";
             if (row is JObject blockRow && (string?)blockRow["kind"] == "block")
             {
-                Members(row, at, "kind members", "name position endPosition heightMm contents points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256 pen layer alignment closed count");
+                Members(row, at, "kind members", "name position endPosition heightMm contents points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256 pen layer alignment closed count link text sizeMm dimensionType arc dimensionText records variables");
                 if (row["members"] is not JArray { Count: >= 2 and <= 1000 } members || row["name"] is { Type: not JTokenType.Null and not JTokenType.String })
                 { throw InvalidArgument(at + "/members requires 2..1000 locators and an optional name."); }
                 foreach (JToken member in members)
@@ -61,7 +63,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
                 foreach (string field in new[] { "members", "name", "count" })
                 { if (primitive[field]?.Type == JTokenType.Null) { primitive.Remove(field); } }
             }
-            Members(row, at, "position heightMm contents", "kind endPosition points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256 pen layer alignment closed");
+            Members(row, at, "position heightMm contents", "kind endPosition points radiusMm radiusXmm radiusYmm angle startAngle endAngle file filePath sha256 pen layer alignment closed name count members link text sizeMm dimensionType arc dimensionText records variables");
+            AnnotationCreation.Parse(row, at);
             string kind = row["kind"]?.Type == JTokenType.String ? (string)row["kind"]! : "text";
             if (row["kind"] is not null && row["kind"]!.Type != JTokenType.String || !KnownKind(kind))
             { throw InvalidArgument(at + "/kind is not a supported primitive."); }
@@ -126,6 +129,9 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
                 || item.Kind == "arc" && (!Finite(item.RadiusMm) || item.RadiusMm <= 0 || !Finite(item.StartAngle) || !Finite(item.EndAngle))
                 || item.Kind == "ellipse" && (!Finite(item.RadiusXmm) || item.RadiusXmm <= 0 || !Finite(item.RadiusYmm) || item.RadiusYmm <= 0 || !Finite(item.Angle)))
             { throw WriteArguments.NotStarted(InvalidArgument("/items: invalid kind or endpoint coordinates.")); }
+            if (args.Annotations && !AnnotationCreation.Known(item.Kind) || !args.Annotations && AnnotationCreation.Known(item.Kind))
+            { throw WriteArguments.NotStarted(InvalidArgument("/items: kind belongs to another creation tool.")); }
+            AnnotationCreation.Validate(item);
             if (item.Kind == "image")
             {
                 var violations = new List<string>();
@@ -143,8 +149,10 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             { textWarnings.Add(textWarning); }
         }
         PageDrawingGeometry geometry = drawings?.Read(WriteArguments.Writable(catalog, args.Project).Path, args.Page)
+            ?? (args.Annotations ? new PageDrawingGeometry { Project = args.Project, Page = args.Page } : null)
             ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "R1/R3: read complete page bounds before creating placements."));
         LayoutGuard.Model layout = layoutReader?.Invoke(geometry.Project, args.Page) ?? new() { Page = geometry };
+        layout.AllowUnknownGeometry = args.Annotations;
         layout.SetsTextAttribute = (row, attribute) => attribute is "height_mm" or "position" && row.Kind is "Text" or "PathText" && row.Parent is null
             && items.Any(p => IsText(p) && p.Position.SequenceEqual(row.Location))
             && !geometry.Placements.Any(p => p.Locator.Type == row.Locator.Type && p.Locator.Oid == row.Locator.Oid);
@@ -154,10 +162,10 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         {
             double[][] points = p.Kind == "polyline" ? p.Points : [p.Position, p.EndPosition];
             double radius = p.Kind == "ellipse" ? Math.Max(p.RadiusXmm, p.RadiusYmm) : p.RadiusMm;
-            double[]? bounds = IsText(p) ? measureText?.Invoke(p) : p.Kind is "arc" or "ellipse"
+            double[]? bounds = AnnotationCreation.Known(p.Kind) ? AnnotationCreation.Bounds(p) : IsText(p) ? measureText?.Invoke(p) : p.Kind is "arc" or "ellipse"
                 ? [p.Position[0] - radius, p.Position[1] - radius, p.Position[0] + radius, p.Position[1] + radius]
                 : [points.Min(q => q[0]), points.Min(q => q[1]), points.Max(q => q[0]), points.Max(q => q[1])];
-            string kind = p.Kind switch { "path_text" => "PathText", "polyline" => "PolyLine", "ellipse" => "Arc", _ => char.ToUpperInvariant(p.Kind[0]) + p.Kind.Substring(1) };
+            string kind = AnnotationCreation.Known(p.Kind) ? AnnotationCreation.NativeKind(p.Kind) : p.Kind switch { "path_text" => "PathText", "polyline" => "PolyLine", "ellipse" => "Arc", _ => char.ToUpperInvariant(p.Kind[0]) + p.Kind.Substring(1) };
             DrawingPlacement row = LayoutGuard.Proposed(kind, p.Position, bounds, i);
             row.Properties = new() { ["height_mm"] = p.HeightMm.ToString("R", CultureInfo.InvariantCulture), ["angle"] = "0" };
             return row;
@@ -165,7 +173,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         warnings.InsertRange(0, textWarnings);
         if (planning)
         { return new() { Text = items[0], Items = items, Warning = LayoutGuard.Summary(warnings) }; }
-        Committed<List<PlacementText>> batch = TransactionRunner.Run(transactions, "eplan_placement_create", () =>
+        Committed<List<PlacementText>> batch = TransactionRunner.Run(transactions, args.Annotations ? "eplan_annotation_create" : "eplan_placement_create", () =>
         {
             foreach (ImportSource image in images)
             { image.Read(hash: true); }
@@ -187,7 +195,7 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
             if (string.IsNullOrWhiteSpace(args.Project) || string.IsNullOrWhiteSpace(args.Page))
             { throw InvalidArgument("/project and /page must be explicit nonempty names."); }
             if (text is null || !Point(text.Position)
-                || IsText(text) && ((!Finite(text.HeightMm) || text.HeightMm is < 0.5 or > 100) && !(text.Kind == "path_text" && text.HeightMm == -16002) || text.Contents is null || text.Contents.Count == 0
+                || IsText(text) && ((!Finite(text.HeightMm) || text.HeightMm is < 0.5 or > 100) && !(text.Kind == "path_text" && text.HeightMm == -16002) && text.Kind != "hyperlink" || text.Contents is null || text.Contents.Count == 0
                 || text.Contents.Any(p => (p.Key != "??_??" && (p.Key.Length != 5 || !LanguageCodes.IsCode(p.Key))) || string.IsNullOrWhiteSpace(p.Value))
                 || text.Contents.Any(p => p.Value.Length > 500)))
             { throw InvalidArgument("/text requires finite 0..10000 mm coordinates, heightMm in 0.5..100 (path_text also accepts its default -16002), and 1..500 characters per language."); }
@@ -230,10 +238,12 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         Expect("layer", actual.Layer == text.Layer, text.Layer, actual.Layer);
         Expect("alignment", actual.Alignment == text.Alignment, text.Alignment, actual.Alignment);
         Expect("pen", text.Pen is null || actual.Pen is not null && text.Pen.All(p => actual.Pen.TryGetValue(p.Key, out double value) && Close(p.Value, value)), text.Pen, actual.Pen);
-        Expect("endPosition", Close(actual.EndPosition, end), end, actual.EndPosition);
+        bool dimension = text.Kind == "dimension";
+        Expect("annotation", !AnnotationCreation.Known(text.Kind) || AnnotationCreation.Matches(text, actual), text.Kind, actual.Kind);
+        Expect("endPosition", dimension || Close(actual.EndPosition, end), end, actual.EndPosition);
         Expect("heightMm", actual.HeightMm == text.HeightMm, text.HeightMm, actual.HeightMm);
-        Expect("position", Close(actual.Position, text.Position), text.Position, actual.Position);
-        Expect("points", actual.Points.Length == text.Points.Length && !actual.Points.Zip(text.Points, Close).Any(equal => !equal), text.Points, actual.Points);
+        Expect("position", dimension || Close(actual.Position, text.Position), text.Position, actual.Position);
+        Expect("points", dimension && text.DimensionType is not ("linear" or "angular") || actual.Points.Length == text.Points.Length && !actual.Points.Zip(text.Points, Close).Any(equal => !equal), text.Points, actual.Points);
         Expect("radiusMm", Close(actual.RadiusMm, text.RadiusMm), text.RadiusMm, actual.RadiusMm);
         Expect("angles", Finite(actual.StartAngle) && Finite(actual.EndAngle) && (text.StartAngle != text.EndAngle && DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle)
             || SameAngle(text.StartAngle, actual.StartAngle) && SameAngle(text.EndAngle, actual.EndAngle)), new[] { text.StartAngle, text.EndAngle }, new[] { actual.StartAngle, actual.EndAngle });
@@ -255,8 +265,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         "width_mm" or "pattern_length" => true,
         _ => false
     });
-    private static bool KnownKind(string kind) => kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "ellipse" or "path_text" or "image";
-    private static bool IsText(PlacementText p) => p.Kind is "text" or "path_text";
+    private static bool KnownKind(string kind) => AnnotationCreation.Known(kind) || kind is "text" or "line" or "rectangle" or "polyline" or "arc" or "ellipse" or "path_text" or "image";
+    private static bool IsText(PlacementText p) => p.Kind is "text" or "path_text" or "hyperlink";
     private static bool Finite(double n) => !double.IsNaN(n) && !double.IsInfinity(n);
     private static bool Point(double[]? p) => p is { Length: 2 } && p.All(n => Finite(n) && n is >= 0 and <= 10000);
 }

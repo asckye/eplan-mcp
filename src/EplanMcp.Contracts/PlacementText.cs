@@ -8,6 +8,14 @@ public sealed class PlacementText
     public List<DrawingLocator>? Members { get; set; }
     public string? Name { get; set; }
     public int? Count { get; set; }
+    public string? Link { get; set; }
+    public string? Text { get; set; }
+    public double SizeMm { get; set; }
+    public string? DimensionType { get; set; }
+    public DrawingLocator? Arc { get; set; }
+    public string[]? DimensionText { get; set; }
+    public string[]? Records { get; set; }
+    public string[]? Variables { get; set; }
     /// <summary>Second endpoint or normalized upper-right corner; empty for text.</summary>
     public double[] EndPosition { get; set; } = [];
     /// <summary>Absolute [x,y], lower-left origin, y upwards.</summary>

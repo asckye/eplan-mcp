@@ -2,6 +2,7 @@ using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.DataModel.Graphics;
+using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
 using Newtonsoft.Json;
@@ -27,11 +28,16 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         {
             Page = page.Name,
             Project = projectPath,
-            GridSize = DrawingCoordinates.ApiToMillimetres(page.GridSize),
+            GridSize = Optional(() => [page.GridSize])?[0] ?? 0,
             PageSize = Optional(() => XY(page.Size)),
             PlotFrameSize = Optional(() => page.PlotFrame is { } frame ? XY(frame.Size) : null),
         };
-        DrawingCoordinates.Snap(0, result.GridSize);
+        if (double.IsNaN(result.GridSize) || double.IsInfinity(result.GridSize) || result.GridSize <= 0)
+        { result.GridSize = 0; OperationContext.Current.Warn("Page grid is unavailable; grid checks remain unverified."); }
+        if (result.PageSize is not { Length: 2 } || result.PageSize.Any(n => double.IsNaN(n) || double.IsInfinity(n) || n <= 0))
+        { result.PageSize = null; OperationContext.Current.Warn("Page size is unavailable; boundary checks remain unverified."); }
+        if (result.PlotFrameSize is not { Length: 2 } || result.PlotFrameSize.Any(n => double.IsNaN(n) || double.IsInfinity(n) || n <= 0))
+        { result.PlotFrameSize = null; }
         Placement[] native = [.. page.AllPlacements, .. created];
         var cardOwners = new Dictionary<string, string>(StringComparer.Ordinal);
         // A55: Terminal.PLC may be null even when PLCTerminals reports the card membership.
@@ -301,7 +307,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         {
             return read();
         }
-        catch (Exception ex) when (ex is BaseException or InvalidOperationException)
+        catch (Exception ex) when (ex is BaseException or InvalidOperationException or BridgeErrorException)
         {
             WriteExceptionDiagnostics.Report(ex);
             return null; // A14/S42: unavailable size or default empty property text bounds.
