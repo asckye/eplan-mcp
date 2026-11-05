@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_device_place` 的部件路线可只传 `symbol_variant`，使用部件模板提供的库和符号；变量不存在时回滚。
+
 - `eplan_device_place` 两条放置路线及 `eplan_connection_create.interruption_point` 支持可选 `property_arrangement`，在放置事务内设置并读回；省略时沿用原行为。
 
 - `eplan_placement_edit` 新增 `set_arrangement`：精确匹配符号提供的本地化属性排列名，读回排列与 19307；不存在的名称在写入前拒绝。

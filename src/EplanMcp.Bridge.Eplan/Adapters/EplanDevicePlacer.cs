@@ -56,7 +56,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         }
 
         Function? main = created.FirstOrDefault(f => f.IsMainFunction) ?? created.OfType<Terminal>().FirstOrDefault();
-        if (main is null && options?.PropertyArrangement is not null)
+        if (main is null && (options?.PropertyArrangement is not null || options?.SymbolVariant is not null))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The created part has no main symbol for the requested selection; nothing was committed."); }
         DevicePlaceData? terminalResult = null;
         TerminalPlacementData? terminalData = null;
@@ -65,6 +65,16 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             var replacement = project.SymbolLibraries.Single(l => string.Equals(l.Name, library, StringComparison.OrdinalIgnoreCase))
                 .Symbols.Single(s => string.Equals(s.Name, options.Symbol, StringComparison.OrdinalIgnoreCase)).Variants.Single(v => v.VariantNr == options.SymbolVariant);
             main.SetSymbolVariant(replacement, false);
+        }
+        if (main is not null && options?.Library is null && options?.SymbolVariant is { } number)
+        {
+            var current = main.SymbolVariant;
+            var candidates = project.SymbolLibraries.Single(l => l.Name == current.SymbolLibraryName).Symbols.Single(s => s.Name == current.SymbolName).Variants;
+            var replacement = candidates.SingleOrDefault(v => v.VariantNr == number)
+                ?? throw WriteArguments.Invalid(["/symbol_variant: unavailable for the template symbol. Available variants: " + string.Join(", ", candidates.Select(v => v.VariantNr))]);
+            main.SetSymbolVariant(replacement, false);
+            if (main.SymbolVariant.VariantNr != number)
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The template symbol variant did not match the request; nothing was committed."); }
         }
         if (main is Terminal terminal && options?.TerminalStrip is not null)
         {
@@ -95,7 +105,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
 
         if (main is not null && options?.PropertyArrangement is { } arrangement && terminalData is null)
         { EplanSymbolArrangement.Select(main, arrangement); }
-        var result = new PlacedDevice { PropertyArrangement = options?.PropertyArrangement, OnPage = OnPage(project, page).Count(id => !before.Contains(id)), Terminal = terminalData };
+        var result = new PlacedDevice { SymbolVariant = options?.SymbolVariant, PropertyArrangement = options?.PropertyArrangement, OnPage = OnPage(project, page).Count(id => !before.Contains(id)), Terminal = terminalData };
         Read(created, result, terminalData is null);
         if (terminalData is not null)
         { result.PropertyArrangement = terminalResult!.PropertyArrangement; result.ActivePropertySet = terminalResult.ActivePropertySet; }
@@ -119,6 +129,8 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         Function? main = ordered.FirstOrDefault(f => f.IsMainFunction) ?? ordered.OfType<Terminal>().FirstOrDefault();
         if (readArrangement && main is not null && result.PropertyArrangement is not null)
         { using FunctionPropertyList properties = main.Properties; result.PropertyArrangement = EplanSymbolArrangement.SelectedName(main); result.ActivePropertySet = EplanSymbolArrangement.ReadActive(properties); }
+        if (result.SymbolVariant is not null && main is not null)
+        { result.SymbolVariant = main.SymbolVariant.VariantNr; }
         result.Names = [.. ordered.Select(f => f.Name ?? string.Empty)];
         result.MainName = main?.Name ?? string.Empty;
         result.VisibleName = main?.VisibleName ?? string.Empty;

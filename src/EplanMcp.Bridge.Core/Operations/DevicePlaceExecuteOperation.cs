@@ -132,6 +132,7 @@ public sealed class DevicePlaceExecuteOperation(
             Category = placed.Category,
             Functions = placed.Names.Count + (placed.Terminal?.StripCreated == true ? 1 : 0),
             Terminal = placed.Terminal,
+            SymbolVariant = placed.SymbolVariant,
             PropertyArrangement = placed.PropertyArrangement,
             ActivePropertySet = placed.ActivePropertySet,
             Unplaced = placed.Unplaced,

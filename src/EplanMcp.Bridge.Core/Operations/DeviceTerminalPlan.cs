@@ -20,7 +20,7 @@ internal static class DeviceTerminalPlan
             { throw WriteArguments.Invalid(["/terminal_strip: terminal_number and terminal_strip_text require a terminal source."]); }
             return;
         }
-        if (args.Variant is not null && args.Part is null || args.Part is not null && args.Library is null && args.SymbolVariant is not null || args.Tag is not null
+        if (args.Variant is not null && args.Part is null || args.Tag is not null
             || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null
             || args.SymbolVariant is < 0)
         { throw WriteArguments.Invalid(["/terminal_strip: use an exclusive terminal source with optional library/symbol and symbol_variant; omit tag and other sources."]); }

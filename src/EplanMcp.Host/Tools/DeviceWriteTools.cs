@@ -279,6 +279,7 @@ internal sealed class DeviceWriteTools
                 Type = ResultShaper.CleanText(data?.Type),
                 IsMainFunction = data?.IsMainFunction,
             },
+            SymbolVariant = data?.SymbolVariant,
             PropertyArrangement = ResultShaper.CleanText(data?.PropertyArrangement),
             ActivePropertySet = ResultShaper.CleanText(data?.ActivePropertySet),
             Terminal = terminalData,

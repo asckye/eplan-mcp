@@ -9,6 +9,8 @@ namespace EplanMcp.Host.Tools;
 internal sealed class DevicePlaceResult
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? SymbolVariant { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? PropertyArrangement { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ActivePropertySet { get; set; }

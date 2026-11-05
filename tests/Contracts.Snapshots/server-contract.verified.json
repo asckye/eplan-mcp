@@ -6831,6 +6831,12 @@
       "outputSchema": {
         "type": "object",
         "properties": {
+          "symbolVariant": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "propertyArrangement": {
             "type": [
               "string",

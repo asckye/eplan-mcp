@@ -22,7 +22,7 @@ public sealed class DevicePlaceArgs
     public string? Library { get; set; }
     /// <summary>Exact symbol name from the project library.</summary>
     public string? Symbol { get; set; }
-    /// <summary>Native variant number; terminal sources default to 0, other symbol sources require it.</summary>
+    /// <summary>Native variant number; without library/symbol a part retains its template symbol and changes only the variant.</summary>
     public int? SymbolVariant { get; set; }
     /// <summary>Exact localized property arrangement name; omitted preserves the symbol default.</summary>
     public string? PropertyArrangement { get; set; }

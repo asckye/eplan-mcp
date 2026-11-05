@@ -80,7 +80,7 @@ internal static partial class DevicePlaceInputs
         }
         if (args.TerminalStrip is not null)
         {
-            if (args.Variant is not null && args.Part is null || args.Part is not null && args.Library is null && args.SymbolVariant is not null || args.Tag is not null
+            if (args.Variant is not null && args.Part is null || args.Tag is not null
                 || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null || args.SymbolVariant is < 0)
             { problems.Add("/terminal_strip: use an exclusive terminal source with optional library/symbol and symbol_variant; omit tag and other sources."); }
             if ((args.Library is not null || args.Symbol is not null) && (string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
@@ -119,11 +119,11 @@ internal static partial class DevicePlaceInputs
         { problems.Add("/display_properties: black boxes do not accept display or pin options."); }
         if (!blackBox && (args.CornerX is not null || args.CornerY is not null))
         { problems.Add("/location_box: corner_x and corner_y require a location_box or SPECIAL/DC source."); }
-        bool symbol = args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null;
         bool part = !string.IsNullOrWhiteSpace(args.Part);
+        bool symbol = args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null && !part;
         if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))
         { problems.Add("/x: x and y must be finite millimetre coordinates."); }
-        if (symbol ? args.Variant is not null && !part || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol) || args.SymbolVariant is null or < 0 : !part)
+        if (symbol ? args.Variant is not null && !part || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol) || args.SymbolVariant is null or < 0 : !part || args.SymbolVariant is < 0)
         { problems.Add("/part: specify part with optional variant and complete symbol override, or library, symbol and nonnegative symbol_variant."); }
         if (!symbol && (display is not null || args.ConnectionDesignations is not null))
         { problems.Add("/display_properties: display_properties and connection_designations require a symbol source."); }
