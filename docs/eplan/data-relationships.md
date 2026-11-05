@@ -300,6 +300,12 @@
 
 ---
 
+## R11. 图形对象：组、块、绘制顺序、画笔
+
+- **组和块不一样：** 成员进组后还在 `Page.AllPlacements` 里，只是 `Placement.Group` 非空，可以包含 `Function`。成员进块后从 `AllPlacements` 消失，由一个 `Block` 代替，`Function` 进不去，而且不报错（A101）。
+- **绘制顺序是相对的：** `DrawingOrder` 只在页内比较，置顶、置底按当前页的最大、最小值加减 1（A101）。
+- **画笔和图层：** 没单独设过的图形，`Pen.ColorId`、`Pen.Width` 读出 -16002。**[推断]** 这个值表示跟随图层，待实测：改图层画笔后，这些对象读到什么、显示是否变化。
+
 # 三、文档和实测的冲突（以实测为准）
 
 1. **PLC 地址是否参与识别。** `H:plcgui_k_arbeitsweise`：前四项相同时再用地址区分。`H:xessettingsgui_h_spsquerverweiseerzeugen`：地址不识别、没有作用。`XML:FUNC_PLCADDRESS`：不是识别属性。文档之间矛盾，要实测。

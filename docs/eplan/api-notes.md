@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A101、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A102、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -455,3 +455,14 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 功能区：12 个选项卡、339 个入口（313 个命令 ID），其中 330 个能通过 `MFTools.xml` 的 `UsedActions/neutral|mm` 映射到命令，9 个云入口没有映射，25 个是下拉标题 `MfDropdownMenuDummyAction`。
 - 名单本身不进仓库（ADR-0030）。
 — 读安装文件，探针 `ActionFindSpikeTests`、`RibbonSpikeTests`（未合入）。
+
+### A101. 编辑选项卡的图形命令有 API，都只占一步撤销（2026-11-05，EPLAN 2026.0.3，Pro Panel，LargeWrite 新页）
+- **缩放：** `Placement.Scale(x,y,origin)` 对线、矩形、文字、组有效，原点不动。不传原点是绕页面原点缩放，矩形 (120,40) 乘 2 跑到 (240,80)。文字高度随比例变。原理图页的 `Function` 抛 S063188。
+- **绘制顺序：** `Placement.DrawingOrder` 可写，范围 0–127，新对象实测 64，XML 写的 67 不对。`Edit.BringToFront` 得当前页最大值 +1，已在最前时不变；`Edit.SendToBack` 对称。不需要打开页面。
+- **组：** `Group.Create` 可以同时收 `Function` 和图形；`Group.Move`、`Group.Scale` 带动全部成员；`DeepUnGroup(true)` 取消。
+- **块：** `Block.Create` 后成员从 `Page.AllPlacements` 消失，换成一个 `Block`。传入 `Function` 会被静默丢掉，不报错。`BreakUp()` 返回成员，几何不变。
+- **矩形圆角：** `HasChamfers`、`ChamferRadius` 都可写，XML 只写了读。
+- **文字固定：** `TextBase.DockText(target)`、`UndockText()` 都不改位置；`DockingDirection` 可写，取 `DockToBottom/Top/Right/Left`。属性文字未实测。
+- **修剪：** `Edit.CutOff(Page, PointD)` 不需要打开页面，去掉点所在的那一段，到最近的交点为止：线 (40,40)-(100,40) 被 x=70 穿过，点 (55,40) 得 (70,40)-(100,40)。
+- **格式：** `target.Pen = source.Pen` 和 `Layer` 可写。没单独设过的图形 `ColorId`、`Width` 读出 -16002。
+— 探针 `EditSpikeTests`（未合入），逐项做了一次撤销。
