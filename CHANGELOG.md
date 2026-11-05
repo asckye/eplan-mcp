@@ -13,6 +13,8 @@
 - `eplan_page_get`、`eplan_object_find` 补齐注释的位置与关键字段；`eplan_placement_delete` 支持删除这些对象，并在执行事务内重新取得原生对象。
 - action 目录新增本机注册表来源及类别、模块信息，支持 `source:"registry"` 和 `registry_kind` 筛选；同名合并，交互项标为不可按名调用，缺失文件报告缺口。
 
+- 同步 action 目录工具规格与用法，说明注册元数据、筛选和交互项排除；目录总数以本机安装注册表为准，完整名单不入库（ADR-0030）。
+
 - `eplan_symbol_search` 每行增加 `variantLabel`：变量编号 0–7 对应 A–H，其他编号返回空字符串。
 
 - `eplan_device_place` 的部件路线可只传 `symbol_variant`，使用部件模板提供的库和符号；变量不存在时回滚。
