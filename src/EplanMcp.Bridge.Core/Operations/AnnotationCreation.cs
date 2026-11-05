@@ -6,7 +6,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Annotation-specific constraints inside the shared primitive transaction.</summary>
 public static class AnnotationCreation
 {
-    public static bool Known(string kind) => kind is "hyperlink" or "qr_code" or "spline" or "sector";
+    public static bool Known(string kind) => kind is "hyperlink" or "qr_code" or "spline" or "sector" or "dimension";
 
     internal static void Parse(JToken row, string at)
     {
@@ -17,8 +17,16 @@ public static class AnnotationCreation
         string? kind = (string?)row["kind"];
         bool Number(JToken? n) => n?.Type is JTokenType.Integer or JTokenType.Float && !double.IsNaN((double)n) && !double.IsInfinity((double)n);
         bool Point(JToken? p) => p is JArray { Count: 2 } xy && xy.All(Number);
-        if ((kind == "spline") && (row["points"] is not JArray points || points.Count < 2 || !points.All(Point)))
+        if ((kind == "spline" || kind == "dimension" && row["dimensionType"]?.ToString() != "circle") && (row["points"] is not JArray points || points.Count < 2 || !points.All(Point)))
         { throw WriteArguments.Invalid([at + "/points requires finite coordinate pairs."]); }
+        if (kind == "dimension" && !Point(row["endPosition"]))
+        { throw WriteArguments.Invalid([at + "/endPosition requires a finite coordinate pair."]); }
+        if (kind == "dimension" && row["dimensionType"]?.ToString() == "circle")
+        {
+            if (row["arc"] is not JObject arc || arc.Properties().Count() != 5 || arc["project"]?.Type != JTokenType.String || arc["page"]?.Type != JTokenType.String
+                || arc["type"]?.Type != JTokenType.Integer || arc["oid"]?.Type != JTokenType.Integer || arc["digest"]?.Type != JTokenType.String)
+            { throw WriteArguments.Invalid([at + "/arc requires a complete uncoerced locator."]); }
+        }
         if (row["dimensionText"] is { Type: not JTokenType.Null })
         { throw WriteArguments.Invalid([at + "/dimensionText is computed by EPLAN."]); }
         if (row["sizeMm"] is { Type: not (JTokenType.Float or JTokenType.Integer) })
@@ -29,12 +37,22 @@ public static class AnnotationCreation
     {
         bool Point(double[] p) => p is { Length: 2 } && p.All(n => !double.IsNaN(n) && !double.IsInfinity(n) && n is >= 0 and <= 10000);
         bool Nonempty(string? s) => !string.IsNullOrWhiteSpace(s);
+        if (item.Kind is "dimension" && (item.Layer is not null || item.Pen is not null))
+        { throw WriteArguments.Invalid(["/items: style fields apply to hyperlink, qr_code, spline and sector."]); }
         bool valid = item.Kind switch
         {
             "hyperlink" => Nonempty(item.Link) && item.Contents.Count > 0,
             "qr_code" => Nonempty(item.Text) && item.SizeMm is > 0 and <= 10000,
             "spline" => item.Points.Length >= 2 && item.Points.All(Point),
             "sector" => item.RadiusMm is > 0 and <= 10000 && !double.IsNaN(item.StartAngle) && !double.IsInfinity(item.StartAngle) && !double.IsNaN(item.EndAngle) && !double.IsInfinity(item.EndAngle),
+            "dimension" => Point(item.EndPosition) && (item.DimensionType switch
+            {
+                "circle" => item.Arc is { Type: > 0, Oid: > 0 } arc && Nonempty(arc.Project) && Nonempty(arc.Page) && arc.Digest is { Length: 64 },
+                "linear" => item.Points.Length == 2 && item.Points.All(Point),
+                "angular" => item.Points.Length == 2 && item.Points.All(Point) && !item.Points[0].SequenceEqual(item.Points[1]) && item.Points.All(p => !p.SequenceEqual(item.EndPosition)),
+                "baseline" or "incremental" or "continued" => item.Points.Length >= 2 && item.Points.All(Point),
+                _ => false
+            }),
             _ => true
         };
         if (!valid)
@@ -44,13 +62,20 @@ public static class AnnotationCreation
     internal static bool Matches(PlacementText expected, PlacementText actual)
     {
         bool Strings(string[]? a, string[]? b) => a is null || b is not null && a.SequenceEqual(b);
+        if (expected.Kind == "dimension")
+        {
+            int count = expected.DimensionType is "baseline" or "incremental" or "continued" ? expected.Points.Length - 1 : 1;
+            return actual.Position.Length == 2 && actual.Position.All(n => !double.IsNaN(n) && !double.IsInfinity(n))
+                && (expected.DimensionType is not ("linear" or "angular") || actual.EndPosition.Length == 2 && actual.EndPosition.All(n => !double.IsNaN(n) && !double.IsInfinity(n)))
+                && actual.DimensionType == expected.DimensionType && actual.DimensionText?.Length == count && actual.DimensionText.All(s => !string.IsNullOrWhiteSpace(s));
+        }
         return expected.Link == actual.Link && expected.Text == actual.Text && expected.Name == actual.Name
             && Math.Abs(expected.SizeMm - actual.SizeMm) < 1e-6 && Strings(expected.Records, actual.Records) && Strings(expected.Variables, actual.Variables);
     }
 
     internal static double[]? Bounds(PlacementText p)
     {
-        if (p.Kind is "hyperlink")
+        if (p.Kind is "hyperlink" or "dimension")
         { return null; }
         if (p.Kind == "qr_code")
         { return [p.Position[0], p.Position[1], p.Position[0] + p.SizeMm, p.Position[1] + p.SizeMm]; }

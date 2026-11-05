@@ -1004,7 +1004,7 @@
     {
       "name": "eplan_annotation_create",
       "title": "Create page annotations",
-      "description": "Creates hyperlinks, QR codes, splines, sectors on a Circuit, Overview or Graphics page. Coordinates: mm, bottom left, y up; angles: degrees. Omit dry_run to preview; false executes. One undo; approval outside scratch. layout_guard defaults to refuse; use warn for reproduction. Use eplan_tool_usage for item fields. Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"spline\",\"points\":[[10,10],[20,20]]}]}",
+      "description": "Creates hyperlinks, QR codes, splines, sectors and dimensions on a Circuit, Overview or Graphics page. Coordinates: mm, bottom left, y up; angles: degrees. Omit dry_run to preview; false executes. One undo; approval outside scratch. layout_guard defaults to refuse; use warn for reproduction. Dimension values are calculated by EPLAN: linear/angular use first, second, end; baseline/incremental/continued use points and end; circle uses an existing full-circle arc locator and end. Use eplan_tool_usage for item fields. Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"spline\",\"points\":[[10,10],[20,20]]}]}",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1036,12 +1036,16 @@
                     "hyperlink",
                     "qr_code",
                     "spline",
-                    "sector"
+                    "sector",
+                    "dimension"
                   ]
                 },
                 "position": {},
                 "points": {},
                 "center": {},
+                "first": {},
+                "second": {},
+                "end": {},
                 "contents": {},
                 "radius_mm": {},
                 "start_angle": {},
@@ -1049,6 +1053,17 @@
                 "link": {},
                 "size_mm": {},
                 "text": {},
+                "dimension_type": {
+                  "enum": [
+                    "linear",
+                    "angular",
+                    "baseline",
+                    "incremental",
+                    "continued",
+                    "circle"
+                  ]
+                },
+                "arc": {},
                 "pen": {},
                 "layer": {}
               }
@@ -1210,12 +1225,16 @@
                   "hyperlink",
                   "qr_code",
                   "spline",
-                  "sector"
+                  "sector",
+                  "dimension"
                 ]
               },
               "position": {},
               "points": {},
               "center": {},
+              "first": {},
+              "second": {},
+              "end": {},
               "contents": {},
               "radius_mm": {},
               "start_angle": {},
@@ -1223,8 +1242,25 @@
               "link": {},
               "size_mm": {},
               "text": {},
+              "dimension_type": {
+                "enum": [
+                  "linear",
+                  "angular",
+                  "baseline",
+                  "incremental",
+                  "continued",
+                  "circle"
+                ]
+              },
+              "arc": {},
               "pen": {},
-              "layer": {}
+              "layer": {},
+              "dimension_text": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
             }
           }
         }

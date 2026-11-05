@@ -17,6 +17,8 @@ internal sealed partial class EplanPlacementTextWriter : IPlacementTextWriter
         DocumentTypeManager.DocumentType[] allowed = [DocumentTypeManager.DocumentType.Circuit, DocumentTypeManager.DocumentType.Overview, DocumentTypeManager.DocumentType.Graphics];
         if (!allowed.Contains(Find(projectPath, page).PageType))
         { throw WriteArguments.Invalid(["/page requires a Circuit, Overview or Graphics page from eplan_page_list."]); }
+        if (text.DimensionType == "circle")
+        { Circle(projectPath, page, text.Arc!); }
         if (text.Kind is not ("text" or "path_text" or "hyperlink"))
         { return null; }
         foreach (string language in text.Contents.Keys)

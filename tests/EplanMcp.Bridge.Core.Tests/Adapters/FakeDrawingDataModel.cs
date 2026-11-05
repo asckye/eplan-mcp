@@ -59,9 +59,9 @@ internal sealed class Block() : Placement(901)
     }
 }
 
-internal sealed class Group(long oid, params Placement[] children) : Placement(oid)
+internal class Group(long oid, params Placement[] children) : Placement(oid)
 {
-    public Placement[] SubPlacements { get; } = children;
+    public Placement[] SubPlacements { get; protected set; } = children;
 }
 
 internal interface IPropertyPlacementsContainer

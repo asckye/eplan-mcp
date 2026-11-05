@@ -99,8 +99,62 @@ public sealed class AnnotationWriterTests
         Assert.Equal(end, actual.EndAngle, 9);
     }
 
+    [Theory]
+    [InlineData("kind", ErrorReason.InvalidArgument)]
+    [InlineData("missing", ErrorReason.PlanStale)]
+    [InlineData("digest", ErrorReason.PlanStale)]
+    [InlineData("page", ErrorReason.InvalidArgument)]
+    public void CircleRequiresFreshWholeCircleOnTargetPageBeforeAnyCreate(string changed, string reason)
+    {
+        var page = new Page();
+        EplanProjects.Project = new(page);
+        PlacementText request = AnnotationCreateTests.Item("circle");
+        request.Arc = AddCircle(page);
+        switch (changed)
+        {
+            case "kind":
+                Assert.IsType<Arc>(page.AllPlacements[0]).Kind = "Arc";
+                break;
+            case "missing":
+                page.AllPlacements = [];
+                break;
+            case "digest":
+                request.Arc.Digest = new('b', 64);
+                break;
+            case "page":
+                request.Arc.Page = "different";
+                break;
+        }
+        int before = page.AllPlacements.Length;
+        Assert.Equal(reason, Assert.Throws<BridgeErrorException>(() => new EplanPlacementTextWriter().Validate("project", page.Name, request)).Error.Reason);
+        Assert.Equal(before, page.AllPlacements.Length);
+    }
 
+    [Fact]
+    public void DimensionGroupReadsEveryGeneratedChildsCalculatedText()
+    {
+        var page = new Page();
+        EplanProjects.Project = new(page);
+        PlacementText request = AnnotationCreateTests.Item("baseline");
+        PlacementText actual = new EplanPlacementTextWriter().Create("project", page.Name, request);
+        DimensionItem[] children = page.AllPlacements.OfType<DimensionItem>().ToArray();
+        Assert.Equal(2, children.Length);
+        Assert.Equal(children.Select(child => child.DimensionText), actual.DimensionText!);
+    }
 
+    [Fact]
+    public void CircleIsResolvedAgainAfterPreviewBeforeNativeCreation()
+    {
+        var page = new Page();
+        EplanProjects.Project = new(page);
+        PlacementText request = AnnotationCreateTests.Item("circle");
+        request.Arc = AddCircle(page);
+        var writer = new EplanPlacementTextWriter();
+        writer.Validate("project", page.Name, request);
+        page.AllPlacements = [new Arc { Page = page, Kind = "Arc" }];
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => writer.Create("project", page.Name, request)).Error.Reason);
+        Assert.Single(page.AllPlacements);
+    }
 
     private static DrawingLocator AddCircle(Page page)
     {

@@ -6,11 +6,13 @@ Preview a mixed annotation batch. Omit `dry_run` or use `true` to preview; send 
 {"project":"P","page":"1","items":[{"kind":"hyperlink","position":[20,30],"link":"https://example.test/reference","contents":{"??_??":"Reference"}},{"kind":"qr_code","position":[50,30],"size_mm":10,"text":"Panel A"},{"kind":"spline","points":[[80,30],[90,40],[100,30]]},{"kind":"sector","center":[120,40],"radius_mm":10,"start_angle":0,"end_angle":90}]}
 ```
 
-
+```json
+{"project":"P","page":"1","layout_guard":"warn","items":[{"kind":"dimension","dimension_type":"linear","first":[20,60],"second":[50,60],"end":[50,75]}]}
+```
 
 ## workflow
 
-Use `eplan_project_list` and `eplan_page_list` to choose an open project and a Circuit, Overview or Graphics page. Read existing objects with `eplan_page_get` or `eplan_object_find`.
+Use `eplan_project_list` and `eplan_page_list` to choose an open project and a Circuit, Overview or Graphics page. Read existing objects with `eplan_page_get` or `eplan_object_find`. For a circle dimension, pass the fresh locator of an existing full-circle Arc on the target page.
 
 Review the preview's complete changes, actual coordinates, bounds and warnings. Set `dry_run:false` to execute; writes outside scratch require approval. The batch uses the same creation planner, write protocol, transaction, readback and layout guard as `eplan_placement_create`. One Ctrl+Z undoes the whole batch. Refresh locators after any modification. Discovery and deletion of annotations are added in the fourth change set.
 
@@ -24,10 +26,11 @@ Each item has one closed `kind` and only its corresponding fields:
 - `qr_code`: `position`, positive `size_mm` up to 10000, and nonempty `text`.
 - `spline`: `points`, an array of at least two `[x,y]` points.
 - `sector`: `center`, positive `radius_mm` up to 10000, `start_angle`, `end_angle`.
+- `dimension`: `dimension_type`. `linear` and `angular` require `first`, `second`, `end` (the first point, second point and end point). The three angular points must be distinct after snapping. `baseline`, `incremental` and `continued` require at least two `points` and an `end`. `circle` requires `arc` (a complete locator from discovery) and `end`; the Arc must have `Kind=Circle`.
 
 The first four kinds (`hyperlink`, `qr_code`, `spline`, `sector`) accept `layer` (nonnegative integer ID) and `pen:{color,width_mm,style,pattern_length,line_end}` with the same defaults and native sentinel values as `eplan_placement_create`. Pen fields are optional; color/style are signed 16-bit integers, line_end is 0–2, and `-16002` selects the EPLAN default for the other supported pen fields. Dimension, placeholder and macro_box items reject pen and layer fields.
 
-Results contain `project`, `page`, `execution`, `dryRun`, `gridSize`, `boundarySource`, `items`, `changes`, and empty `connectionChanges`. Every item contains `requested`, `actual`, `bounds`, and `snapped`. A preview adds the page `fingerprint` and execution hint. Execution adds `warning` and `recovered`. Unreadable bounds or grid are reported as warnings and null evidence; missing evidence is never a layout violation.
+Results contain `project`, `page`, `execution`, `dryRun`, `gridSize`, `boundarySource`, `items`, `changes`, and empty `connectionChanges`. Every item contains `requested`, `actual`, `bounds`, and `snapped`. A preview adds the page `fingerprint` and execution hint. Execution adds `warning` and `recovered`; dimension `actual.dimension_text` is an array of EPLAN-calculated strings, one per generated dimension. Callers cannot supply dimension text or values. Unreadable bounds or grid are reported as warnings and null evidence; missing evidence is never a layout violation.
 
 ## errors
 

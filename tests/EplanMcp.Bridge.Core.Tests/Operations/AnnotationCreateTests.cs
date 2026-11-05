@@ -8,8 +8,8 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class AnnotationCreateTests
 {
-    internal static readonly string[] AllKinds = ["hyperlink", "qr_code", "spline", "sector"];
-    public static TheoryData<string> Kinds => new() { "hyperlink", "qr_code", "spline", "sector" };
+    internal static readonly string[] AllKinds = ["hyperlink", "qr_code", "spline", "sector", "linear", "angular", "baseline", "incremental", "continued", "circle"];
+    public static TheoryData<string> Kinds => new() { "hyperlink", "qr_code", "spline", "sector", "linear", "angular", "baseline", "incremental", "continued", "circle" };
 
     [Theory]
     [MemberData(nameof(Kinds))]
@@ -31,6 +31,14 @@ public sealed class AnnotationCreateTests
     [InlineData("spline", "nan")]
     [InlineData("sector", "zero")]
     [InlineData("sector", "nan")]
+    [InlineData("linear", "one")]
+    [InlineData("angular", "coincident")]
+    [InlineData("angular", "end_first")]
+    [InlineData("angular", "end_second")]
+    [InlineData("baseline", "one")]
+    [InlineData("incremental", "one")]
+    [InlineData("continued", "one")]
+    [InlineData("circle", "locator")]
     public void InvalidAnnotationFailsBeforeTransaction(string kind, string invalid)
     {
         var world = new World();
@@ -74,9 +82,24 @@ public sealed class AnnotationCreateTests
         Assert.Empty(world.Stored);
     }
 
+    [Theory]
+    [InlineData("linear")]
+    [InlineData("angular")]
+    [InlineData("baseline")]
+    [InlineData("circle")]
+    public void CallerCannotProvideDimensionText(string kind)
+    {
+        var world = new World();
+        var json = (JObject)BridgeJson.FromObject(Request(kind));
+        json["items"]![0]!["dimensionText"] = new JArray("123 mm");
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => world.Operation().ParseArgs(json)).Error.Reason);
+        Assert.Empty(world.Transactions.Calls);
+    }
 
     [Theory]
     [InlineData("spline", "points")]
+    [InlineData("linear", "points")]
+    [InlineData("linear", "endPosition")]
     public void BridgeRejectsStringCoordinatesWithoutCoercion(string kind, string field)
     {
         var world = new World();
@@ -170,6 +193,29 @@ public sealed class AnnotationCreateTests
 [Trait("Size", "Medium")]
 public sealed class AnnotationBatchTests
 {
+    [Theory]
+    [InlineData("linear", "first")]
+    [InlineData("linear", "second")]
+    [InlineData("linear", "end")]
+    [InlineData("angular", "first")]
+    [InlineData("angular", "second")]
+    [InlineData("angular", "end")]
+    public void DimensionGeometryDeviationRollsBack(string kind, string field)
+    {
+        var world = new AnnotationCreateTests.World
+        {
+            Readback = item =>
+            {
+                if (field == "end")
+                { item.EndPosition[0] = double.NaN; }
+                else
+                { item.Points[field == "first" ? 0 : 1][0] += 1; }
+                return item;
+            }
+        };
+        Assert.Equal(ExecutionState.RolledBack, Assert.Throws<BridgeErrorException>(() => world.Operation().Execute(AnnotationCreateTests.Request(kind))).Error.Execution);
+        Assert.Empty(world.Stored);
+    }
 
     [Fact]
     public void MixedBatchCommitsOnceWithAllComputedDimensionTexts()
@@ -178,8 +224,9 @@ public sealed class AnnotationBatchTests
         PlacementTextCreateArgs args = AnnotationCreateTests.Request("hyperlink");
         args.Items = AnnotationCreateTests.AllKinds.Select(AnnotationCreateTests.Item).ToList();
         PlacementTextCreateData result = Assert.IsType<PlacementTextCreateData>(world.Operation().Execute(args));
-        Assert.Equal(4, result.Items.Count);
+        Assert.Equal(10, result.Items.Count);
         Assert.Equal(["Begin AI: eplan_annotation_create", "Commit", "CloseUndo", "Dispose"], world.Transactions.Calls);
+        Assert.All(result.Items.Where(i => i.Kind == "dimension"), item => Assert.All(item.DimensionText!, text => Assert.Equal("12 mm", text)));
     }
 
     [Fact]
@@ -205,6 +252,7 @@ public sealed class AnnotationBatchTests
 
     [Theory]
     [InlineData("qr_code")]
+    [InlineData("linear")]
     public void ReadbackMismatchRollsBack(string kind)
     {
         var world = new AnnotationCreateTests.World

@@ -6,6 +6,38 @@ namespace EplanMcp.Host.Tests.Tools;
 
 public sealed partial class PlacementCreateProtocolTests
 {
+    [Theory]
+    [InlineData("linear", null)]
+    [InlineData("angular", true)]
+    [InlineData("baseline", false)]
+    [InlineData("incremental", false)]
+    [InlineData("continued", false)]
+    [InlineData("circle", false)]
+    public async Task AnnotationDimensions_MapOfficialArgumentsAndReadCalculatedText(string type, bool? dryRun)
+    {
+        await WithClient(async (client, harness, store) =>
+        {
+            Dictionary<string, object?> args = Args();
+            if (dryRun.HasValue)
+            { args["dry_run"] = dryRun.Value; }
+            else
+            { args.Remove("dry_run"); }
+            string fields = type == "circle" ? "\"arc\":{\"project\":\"Line1\",\"page\":\"P\",\"type\":1,\"oid\":2,\"digest\":\"" + new string('a', 64) + "\"}"
+                : type is "linear" or "angular" ? "\"first\":[10,20],\"second\":[30,20]" : "\"points\":[[10,20],[30,20],[50,20]]";
+            args["items"] = JsonSerializer.Deserialize<JsonElement>("[{\"kind\":\"dimension\",\"dimension_type\":\"" + type + "\",\"end\":[30,40]," + fields + "}]");
+            JsonElement data = WriteToolHarness.Structured(await client.CallToolAsync(AnnotationCreateTools.Tool, args, cancellationToken: Token));
+            PlacementTextCreateArgs request = Assert.IsType<PlacementTextCreateArgs>(harness.Bridge.Calls.Single(c => c.Operation == OperationNames.PlacementTextCreatePlan).Args);
+            PlacementText dimension = Assert.Single(request.Items!);
+            Assert.Equal(type, dimension.DimensionType);
+            Assert.Equal([30d, 40d], dimension.EndPosition);
+            Assert.Equal(type == "circle" ? 0 : type is "linear" or "angular" ? 2 : 3, dimension.Points.Length);
+            Assert.Null(dimension.DimensionText);
+            if (dryRun == false)
+            { Assert.Equal(type == "circle" ? 1 : 2, data.GetProperty("items")[0].GetProperty("actual").GetProperty("dimension_text").GetArrayLength()); }
+            else
+            { Assert.Empty(store.Items); Assert.Empty(harness.Bridge.Writes); }
+        });
+    }
 
     [Theory]
     [InlineData(null)]
@@ -22,7 +54,7 @@ public sealed partial class PlacementCreateProtocolTests
             { args.Remove("dry_run"); }
             args["response_format"] = "detailed";
             args["items"] = JsonSerializer.Deserialize<JsonElement>("""
-                [{"kind":"hyperlink","position":[10,10],"link":"https://example.test","contents":{"??_??":"Reference"}},{"kind":"qr_code","position":[25,10],"size_mm":5,"text":"Panel"},{"kind":"spline","points":[[40,10],[45,15],[50,10]]},{"kind":"sector","center":[60,15],"radius_mm":5,"start_angle":0,"end_angle":90}]
+                [{"kind":"hyperlink","position":[10,10],"link":"https://example.test","contents":{"??_??":"Reference"}},{"kind":"qr_code","position":[25,10],"size_mm":5,"text":"Panel"},{"kind":"spline","points":[[40,10],[45,15],[50,10]]},{"kind":"sector","center":[60,15],"radius_mm":5,"start_angle":0,"end_angle":90},{"kind":"dimension","dimension_type":"linear","first":[10,30],"second":[20,30],"end":[20,40]}]
                 """);
             JsonElement data = WriteToolHarness.Structured(await client.CallToolAsync(AnnotationCreateTools.Tool, args, cancellationToken: Token));
             bool preview = dryRun != false;

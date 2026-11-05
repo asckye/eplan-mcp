@@ -5,7 +5,7 @@ namespace EplanMcp.Host.Tools;
 
 internal static class AnnotationCreatePlanning
 {
-    internal static readonly string[] Kinds = ["hyperlink", "qr_code", "spline", "sector"];
+    internal static readonly string[] Kinds = ["hyperlink", "qr_code", "spline", "sector", "dimension"];
     internal static readonly string[] DimensionTypes = ["linear", "angular", "baseline", "incremental", "continued", "circle"];
     private static readonly string[] _textFields = ["link", "text", "name", "macro_name"];
     private static readonly string[] _listFields = ["records", "variables"];
@@ -48,12 +48,33 @@ internal static class AnnotationCreatePlanning
         }
         if (kind == "qr_code")
         { Check(item.TryGetProperty("size_mm", out JsonElement size) && size.ValueKind == JsonValueKind.Number && size.TryGetDouble(out double n) && double.IsFinite(n) && n > 0 && n <= 10000, "/size_mm", "requires a finite positive size up to 10000 mm."); }
-        var primitive = new Dictionary<string, object?> { ["kind"] = kind == "spline" ? "polyline" : kind == "sector" ? "arc" : "path_text" };
+        if (kind == "dimension")
+        {
+            Check(DimensionTypes.Contains(type, StringComparer.Ordinal), "/dimension_type", "unsupported dimension type.");
+            if (type == "circle")
+            { Check(item.TryGetProperty("arc", out JsonElement arc) && PlacementCreatePlanning.ValidLocator(arc), "/arc", "requires a complete drawing locator."); }
+            if (type is "baseline" or "incremental" or "continued")
+            { Check(item.TryGetProperty("points", out JsonElement group) && group.ValueKind == JsonValueKind.Array && group.GetArrayLength() >= 2, "/points", "requires at least two points."); }
+        }
+        var primitive = new Dictionary<string, object?> { ["kind"] = kind is "spline" or "dimension" ? "polyline" : kind == "sector" ? "arc" : "path_text" };
         foreach (string field in _geometryFields)
         { if (item.TryGetProperty(field, out JsonElement value)) { primitive[field] = value; } }
-        if (kind is not ("spline" or "sector"))
+        if (kind is not ("spline" or "sector" or "dimension"))
         { primitive["contents"] = item.TryGetProperty("contents", out JsonElement contents) ? contents : new Dictionary<string, string> { ["??_??"] = "annotation" }; }
         var pointPaths = new List<string>();
+        if (kind == "dimension")
+        {
+            var points = new List<JsonElement>();
+            if (item.TryGetProperty("points", out JsonElement many) && many.ValueKind == JsonValueKind.Array)
+            { points.AddRange(many.EnumerateArray()); pointPaths.AddRange(Enumerable.Range(0, points.Count).Select(i => "/points/" + i)); Check(points.Count >= 2, "/points", "requires at least two points."); }
+            foreach (string field in _dimensionPoints)
+            { if (item.TryGetProperty(field, out JsonElement point)) { points.Add(point); pointPaths.Add("/" + field); } }
+            if (type == "circle" && points.Count == 1)
+            { points.Add(points[0]); pointPaths.Add(pointPaths[0]); }
+            primitive["points"] = points;
+            if (type == "angular" && points.Count == 3)
+            { Check(!JsonElement.DeepEquals(points[0], points[1]) && !JsonElement.DeepEquals(points[0], points[2]) && !JsonElement.DeepEquals(points[1], points[2]), "", "angular dimension points must be distinct."); }
+        }
         JsonElement request = JsonSerializer.SerializeToElement(new { project = "P", page = "P", items = new[] { primitive } });
         foreach (string problem in PlacementCreatePlanning.Validate(request))
         {

@@ -31,8 +31,16 @@
 | qr_code | position、size_mm、text | size_mm 为正数 |
 | spline | points | 至少两点，调用 Spline.SetPointAt |
 | sector | center、radius_mm、start_angle、end_angle | 半径为正；角度为度，复用 arc 换算，SetArc 末参数 true |
+| dimension | dimension_type | 见下表；数值由 EPLAN 计算，不接受调用方指定 |
 
-结果沿用 placement 的 requested/actual/bounds/snapped、完整 changes、空 connectionChanges、fingerprint、execution、warning/recovered。注释发现和删除由第 4 项补齐。Comment 的 Text.Create 抛 S063126，不开放 kind；使用 `eplan_import_pdf_comments`。
+| dimension_type | 参数（对应官方 XML） | 调用与写前校验 |
+|---|---|---|
+| linear | first、second、end：第一点、第二点、结束点 | DimensionItem.Create |
+| angular | first、second、end：第一点、第二点、结束点 | CreateAngular；任意两点相同拒绝 |
+| baseline / incremental / continued | points（至少两点）、end | DimensionGroup.Create，枚举 BaseLine / Incremental / Continued |
+| circle | arc（eplan_object_find 的 locator）、end | DimensionCircle.Create；目标须为同页 Arc 且 Kind=Circle，否则写前拒绝 |
+
+结果沿用 placement 的 requested/actual/bounds/snapped、完整 changes、空 connectionChanges、fingerprint、execution、warning/recovered；尺寸结果补 EPLAN 计算的 `dimension_text` 数组（单个尺寸也返回一项）。注释发现和删除由第 4 项补齐。Comment 的 Text.Create 抛 S063126，不开放 kind；使用 `eplan_import_pdf_comments`。
 
 ## 影响、错误与测试计划
 
