@@ -4,16 +4,6 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| R10-05 变量字母（2026-11-04 brief） | `SymbolSearchTests` | NOT RUN：本次禁止 EPLAN。无新增写入 Large；现有符号查询待实机回归。A–H 和范围外空字符串由 Small/Medium 覆盖。 |
-| R10-04 部件模板换变量（2026-11-04 brief） | `PartVariantPlacementTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待以 PXC.3211813 仅指定 symbol_variant，核对模板符号、变量、部件和单步撤销；不存在变量须完整回滚。 |
-| R10-03 放置时属性排列（2026-11-04 brief） | `PlacementArrangementTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对普通符号、部件与中断点的指定属性排列读回及一步撤销快照；本次不宣称原生 Selected 行为已验证。 |
-| R10-02 属性排列（2026-11-04 brief） | `PlacementSymbolEditTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 BP 变量 A 的“左,0°”、19307 与 20010 文字 x<0，不存在名称不改页，以及一步撤销。Selected 写入未实测，实测后按下一可用编号补 api-notes。 |
-| R10-01 换符号变量（2026-11-04 brief） | `PlacementSymbolEditTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 BP 0→4、19307，SIE.3VA1032-2ED32-0AA0 / Q_3LI 0→6 的部件和连接点不变，线对象拒绝及单步撤销快照。 |
-| R9-01 部件优先放置（2026-11-04 brief） | `DevicePlaceTests.PartPriority` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 PXC.3212140 + XTR1/1 的名称、符号与 20188；SIE.5SY4106-7 + FAH1、SIE.3VA1032-2ED32-0AA0 + Q_3LI/6、PXC.3211813 默认模板、PXC.2277019 + LSW2C 及各自一步撤销快照。 |
-| R9-02 符号附带部件（2026-11-04 brief） | `DevicePlaceTests.SymbolPart` | NOT RUN：本次禁止 EPLAN。LargeWrite 待在 BBDEF 后放 BCP/2 并追加 RIT.3451500，读取 BCP 自身 ArticleReferences，核对一次撤销恢复快照及失败回滚。 |
-| R9-03 中断点显示名（2026-11-04 brief） | `InterruptionVisibleNameTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对新中断点显示名与一次撤销快照。 |
-| R9-04 部件数量（2026-11-04 brief） | `DevicePlaceTests.Count` | NOT RUN：本次禁止 EPLAN。LargeWrite 待在 BBDEF 追加 RIT.3581000 后追加 RIT.9340030 ×2，核对数量与逐次单步撤销快照。 |
-| R9-05 端子与母排属性（2026-11-04 brief） | `TerminalBusbarPropertyTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待写端子 20367、BCP 20011，核对读回、旁对象不变和逐次撤销快照。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | NOT RUN：本次禁止 EPLAN。待在 LargeWrite Overview 页验证 PXC.2861344 的对象、PLC 盒、总览点、部件引用及撤销恢复；默认预览迁移后的旧宏断言保留。 |
 | G9 图形创建（2026-11-03，负责人 brief） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | NOT RUN：本次禁止 EPLAN。新增折线、圆弧、路径功能文本、imports 图片混合批次；待核对原生类型、全部点、角度/端点与外框、文字、图片路径和一次撤销恢复快照。XML 仅证明签名，不证明角度方向或实际图片行为。 |
 | S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 待运行：本次禁止 EPLAN；需验证写入未知结果、真实回滚及原有写入安全回归。Small 假对象覆盖未分类异常、回滚证据、结果查询与不重放；未改 Large 断言，不宣称实机通过。 |

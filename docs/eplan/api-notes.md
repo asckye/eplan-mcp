@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A95、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A99、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -422,3 +422,19 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 中断点仅赋 Name 时 VisibleName、20002、20010 为空；AdjustVisibleName 返回 true 后 `-2Z3` 可读。示例 `=GAA-2L1` 的显示名为 `-2L1`。
 - 主功能在 SafetyPoint 内追加第二个部件 `AddArticleReference("RIT.9340030", "1", 2)` 读回数量 2；普通 Transaction 或 FunctionTransactionScope 会对第二个部件抛 S063074。本条补充 A93 的已知条件。
 - 非主 Terminal 的 20367、20809 为 String，20035 为 Long，均已写入读回；未附部件的端子写 20054、20044 抛 S063109，不列入白名单。BCP 的 20011 写 PE 读回 `??_??@PE;`。
+
+### A96. 符号变量和属性排列可以在放好后修改（2026-11-04，EPLAN 2026.0.3，LargeWrite）
+- 主功能用 `Function.SetSymbolVariant(variant, false)`：部件 `SIE.3VA1032-2ED32-0AA0` 的 `Q_3LI` 变量 0→6，部件和连接点不变，一次撤销后快照还原。
+- 中断点用 `SymbolReference.SymbolVariant`：`BP` 变量 0→4，一次撤销后快照还原。
+- 写 `SymbolReference.PropertyPlacementsSchemas.Selected` 后，`Selected.Name` 和属性 19307 读回相同。可选排列随符号不同：`BP` 有 `左,0°` 等方向排列，普通线圈 `K` 只有 `默认`、`用户定义`。
+— Large `PlacementSymbolEditTests`、`PlacementArrangementTests`、`PartVariantPlacementTests`。
+
+### A97. 插入菜单的文字和图形对象可以用 API 创建，批注除外（2026-11-04，EPLAN 2026.0.3，LargeWrite 探针）
+- 都能创建并读回：`HyperLink.Create(page, link, MultiLangString)`、`QRCode.Create(page, point, size, text)`、`Spline.Create` 加 `SetPointAt`、`Arc.SetArc(圆心, 半径, 起, 止, true)`（读回 `Arc.Sector` 为 true）、`PlaceHolder.Create`、`MacroBox.Create`。
+- 尺寸标注的数值由 EPLAN 计算：`DimensionItem.Create` 读回 `60 mm`，`CreateAngular` 读回 `45°`，`DimensionCircle.Create(page, arc, point)` 读回 `12 mm`；`DimensionGroup.Create` 用 3 个点和 `Incremental` 生成 2 个 `DimensionItem`（`30 mm`、`70 mm`）。类型还有 `BaseLine`、`Continued`。
+- `Comment` 没有自己的 `Create`，继承的 `Text.Create` 抛 S063126（对象类型不对）。批注目前只确认能走 PDF 批注导入。
+— Large `AnnotationSpikeTests`（未合入）。
+
+### A98. 触点放好后再分配部件，触点映像会重复（2026-11-04，EPLAN 2026.0.3，新建 scratch 项目）
+- 用同一标识放好线圈和 4 个触点（`1/L1`、`3/L2`、`5/L3`、`13`），再用 `eplan_device_update` 分配 `SIE.3RT2015-1BB41-1AA0`：线圈的触点映像除了已放置的 4 行（带页码引用），还多出部件模板带来的同名触点行（没有引用）。不分配部件时没有这些重复行。只观察到一次，原因和修法未验证。
+- 官方 XML：`Function.Place(page, location, copyProperties, copyAlsoNameProperties, setPropertyPlacementsSchema)` 的行为类似把功能拖到页面上，`Function.Assign(target)` 对应设备导航器的“分配”。两者都还没有实测。

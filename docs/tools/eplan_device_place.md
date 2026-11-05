@@ -178,4 +178,4 @@ SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功�
 
 ### 放置时选择属性排列
 
-符号路线与部件路线可选 `property_arrangement`，按当前符号的本地化排列名精确匹配，例如 `左,0°`，与 `symbol_variant` 独立。省略时保留默认行为。放置后在同一事务设置；名称不存在时回滚并列出可用名称。结果 `propertyArrangement`、`activePropertySet` 分别读回 `Selected.Name` 和属性 19307；19307 不可读时警告。
+符号路线与部件路线可选 `property_arrangement`，按当前符号的本地化排列名精确匹配，例如 `左,0°`，与 `symbol_variant` 独立。省略时保留默认行为。放置后在同一事务设置；名称不存在时回滚并列出可用名称。结果 `propertyArrangement`、`activePropertySet` 分别读回 `Selected.Name` 和属性 19307；19307 不可读时警告。同时给 `display_properties` 时，先选排列，再添加显示属性。
