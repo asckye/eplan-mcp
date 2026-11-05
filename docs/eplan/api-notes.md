@@ -435,6 +435,9 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `Comment` 没有自己的 `Create`，继承的 `Text.Create` 抛 S063126（对象类型不对）。批注目前只确认能走 PDF 批注导入。
 — Large `AnnotationSpikeTests`（未合入）。
 
-### A98. 触点放好后再分配部件，触点映像会重复（2026-11-04，EPLAN 2026.0.3，新建 scratch 项目）
-- 用同一标识放好线圈和 4 个触点（`1/L1`、`3/L2`、`5/L3`、`13`），再用 `eplan_device_update` 分配 `SIE.3RT2015-1BB41-1AA0`：线圈的触点映像除了已放置的 4 行（带页码引用），还多出部件模板带来的同名触点行（没有引用）。不分配部件时没有这些重复行。只观察到一次，原因和修法未验证。
-- 官方 XML：`Function.Place(page, location, copyProperties, copyAlsoNameProperties, setPropertyPlacementsSchema)` 的行为类似把功能拖到页面上，`Function.Assign(target)` 对应设备导航器的“分配”。两者都还没有实测。
+### A98. 部件的未放置功能用 `Function.Assign` 放到符号上（2026-11-04，EPLAN 2026.0.3，LargeWrite 探针和 Large）
+- 部件路线放置后，线圈已放置，其余功能未放置（`IsPlaced` false，读 `SymbolVariant` 抛 NullReferenceException），`Pins` 已有名称。
+- 三个入口实测：`Function.Place` 放出红叉，原功能保留；`Function.PlaceAt` 符号正常，但原功能保留、标识文字重叠；**`unplaced.Assign(target)`** 让已放置的符号得到模板的引脚名，未放置功能消失，标识只显示一次，触点映像干净。`Assign` 要在符号提交后的下一个事务里调用。
+- 先放符号、后分配部件时，`AddArticleReference` 不产生未放置功能对象，`eplan_device_get` 只列出已放置的功能。但线圈的触点映像会多出部件模板里没有匹配上的触点行：模板的主触点是主触点符号，普通常开 `S` 匹配不上，`13/14` 能匹配。所以这个顺序不推荐，应先放部件，再用 `join_device` 放其余符号。
+— Large `DevicePlaceTests.UnplacedAssignment`、探针 `FunctionPlaceSpikeTests`（未合入）。
+- `DimensionItem.CreateAngular` 之后同一事务读 `SecondPoint` 得到 (0,0)，EPLAN 计算的角度文字正常；角度标注不用这个读回做核对。
