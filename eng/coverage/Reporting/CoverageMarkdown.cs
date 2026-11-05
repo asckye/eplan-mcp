@@ -146,6 +146,22 @@ internal static class CoverageMarkdown
         }
 
         Line();
+        if (report.SdkCatalog)
+        {
+            Line("### 全量 API");
+            Line();
+            Line("全量分母保留目录中全部公开方法、普通属性、运算符和委托成员，不扣机械或 overlay 排除项，按成员而非重载组计数；排除组记为到不了。同组的每个重载沿用组的路线和实机状态，实机数是组级证据的上限，不表示每个签名都独立实测。表中路线单元格为成员数 / 实机验证数。");
+            Line();
+            Line("| 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |");
+            Line("|---|---:|---:|---:|---:|---:|---:|---:|---:|");
+            FullApiCoverage full = report.FullApi!;
+            foreach ((string label, ApiBaseline row) in new[] { ("方法", full.Methods), ("普通属性", full.Properties), ("其他成员", full.Other), ("合计", full.Total) })
+            {
+                string cells = string.Join(" | ", CoverageRoutes.Names.Select(route => $"{row.Routes[route].Count} / {row.Routes[route].LiveVerified}"));
+                Line($"| {label} | {row.Denominator} | {cells} | {row.Routes.Values.Sum(c => c.LiveVerified)} |");
+            }
+            Line();
+        }
         if (report.Unmatched.Count > 0)
         {
             Line($"Bridge 用到、目录中却没有的 ID（{report.Unmatched.Count} 个）：{string.Join("、", report.Unmatched.Select(id => $"`{id}`"))}。");

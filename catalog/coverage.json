@@ -50847,5 +50847,123 @@
       "count": 8,
       "live_verified": 0
     }
+  },
+  "fullApi": {
+    "total": {
+      "denominator": 5917,
+      "routes": {
+        "api_try_only": {
+          "count": 1591,
+          "live_verified": 510
+        },
+        "dedicated": {
+          "count": 500,
+          "live_verified": 347
+        },
+        "generic_read": {
+          "count": 412,
+          "live_verified": 67
+        },
+        "none": {
+          "count": 3401,
+          "live_verified": 0
+        },
+        "other": {
+          "count": 5,
+          "live_verified": 0
+        },
+        "state_only": {
+          "count": 8,
+          "live_verified": 0
+        }
+      }
+    },
+    "methods": {
+      "denominator": 3046,
+      "routes": {
+        "api_try_only": {
+          "count": 773,
+          "live_verified": 80
+        },
+        "dedicated": {
+          "count": 271,
+          "live_verified": 160
+        },
+        "generic_read": {
+          "count": 37,
+          "live_verified": 2
+        },
+        "none": {
+          "count": 1953,
+          "live_verified": 0
+        },
+        "other": {
+          "count": 5,
+          "live_verified": 0
+        },
+        "state_only": {
+          "count": 7,
+          "live_verified": 0
+        }
+      }
+    },
+    "properties": {
+      "denominator": 2633,
+      "routes": {
+        "api_try_only": {
+          "count": 818,
+          "live_verified": 430
+        },
+        "dedicated": {
+          "count": 229,
+          "live_verified": 187
+        },
+        "generic_read": {
+          "count": 375,
+          "live_verified": 65
+        },
+        "none": {
+          "count": 1210,
+          "live_verified": 0
+        },
+        "other": {
+          "count": 0,
+          "live_verified": 0
+        },
+        "state_only": {
+          "count": 1,
+          "live_verified": 0
+        }
+      }
+    },
+    "other": {
+      "denominator": 238,
+      "routes": {
+        "api_try_only": {
+          "count": 0,
+          "live_verified": 0
+        },
+        "dedicated": {
+          "count": 0,
+          "live_verified": 0
+        },
+        "generic_read": {
+          "count": 0,
+          "live_verified": 0
+        },
+        "none": {
+          "count": 238,
+          "live_verified": 0
+        },
+        "other": {
+          "count": 0,
+          "live_verified": 0
+        },
+        "state_only": {
+          "count": 0,
+          "live_verified": 0
+        }
+      }
+    }
   }
 }

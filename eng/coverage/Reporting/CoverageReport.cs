@@ -83,6 +83,8 @@ internal sealed class CoverageReport
 
     public SortedDictionary<string, RouteCount>? Routes { get; init; }
 
+    public FullApiCoverage? FullApi { get; init; }
+
     public static CoverageReport Build(string repositoryRoot, bool includeReachability = true)
     {
         BridgeUsage usage = CoverageJson.Read<BridgeUsage>(Path.Combine(repositoryRoot, BridgeUsage.RelativePath));
@@ -201,6 +203,10 @@ internal sealed class CoverageReport
             Reachability = reachability,
             Routes = includeReachability ? CoverageRoutes.Count(all.Where(u => u.Layer == ApiCatalog.Operation && Counted(u))
                 .Select(u => (Route(u), status[u.Key] == "live_verified"))) : null,
+            FullApi = includeReachability ? FullApiCoverage.Build(catalog.Groups.SelectMany(group =>
+                Enumerable.Repeat(new FullApiMember(catalog.Units[group.Key].Kind,
+                    Counted(catalog.Units[group.Key]) ? Route(catalog.Units[group.Key]) : "none",
+                    status[group.Key] == "live_verified"), group.Value.Count))) : null,
         };
     }
 
