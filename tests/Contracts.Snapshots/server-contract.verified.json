@@ -7497,7 +7497,7 @@
     {
       "name": "eplan_device_update",
       "title": "Update a device in an EPLAN project",
-      "description": "Renames a device; terminal-only PLC modules may join a PLC box. Appends a part to its main function or one exact terminal. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.",
+      "description": "Renames a device; PLC-only modules may join a PLC box. Appends a part to its main or exact terminal. Give new_tag, part, or both. One undo. Omit/true dry_run previews; false executes. Approval outside scratch. See usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -7506,11 +7506,11 @@
             "type": "string"
           },
           "tag": {
-            "description": "Current tag, full or as shown, e.g. -KF1",
+            "description": "Current full or shown tag",
             "type": "string"
           },
           "new_tag": {
-            "description": "Full new tag, or from '-' to keep the structure",
+            "description": "New tag; '-' keeps structure",
             "type": [
               "string",
               "null"
@@ -7531,7 +7531,7 @@
             "default": null
           },
           "variant": {
-            "description": "Part variant, default 1",
+            "description": "Variant, default 1",
             "type": [
               "string",
               "null"
@@ -7539,9 +7539,17 @@
             "default": null
           },
           "update_from_parts": {
-            "description": "Alone, after the last part: parts' data",
+            "description": "Alone: parts' data",
             "type": "boolean",
             "default": false
+          },
+          "count": {
+            "description": "Positive count with part; default 1",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
           }
         },
         "required": [
@@ -22766,17 +22774,25 @@
                       "type": "object",
                       "properties": {
                         "tag": {
-                          "description": "Current tag, full or as shown, e.g. -KF1",
+                          "description": "Current full or shown tag",
                           "type": "string"
                         },
                         "new_tag": {
-                          "description": "Full new tag, or from '-' to keep the structure",
+                          "description": "New tag; '-' keeps structure",
                           "type": "string"
                         },
                         "update_from_parts": {
-                          "description": "Alone, after the last part: parts' data",
+                          "description": "Alone: parts' data",
                           "type": "boolean",
                           "default": false
+                        },
+                        "count": {
+                          "description": "Positive count with part; default 1",
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "default": null
                         }
                       },
                       "required": [

@@ -6,6 +6,19 @@ namespace EplanMcp.Contracts.Tests;
 [Trait("Size", "Small")]
 public sealed class DeviceUpdateDtoTests
 {
+    [Theory]
+    [InlineData(null)]
+    [InlineData(2)]
+    public void CountRoundTripsAndIsOptional(int? count)
+    {
+        var args = new DeviceUpdateArgs { Part = "RIT.9340030", Count = count };
+        DeviceUpdateArgs bridge = JsonConvert.DeserializeObject<DeviceUpdateArgs>(System.Text.Json.JsonSerializer.Serialize(args, JsonSerializerOptions.Web))!;
+        DeviceUpdateArgs host = System.Text.Json.JsonSerializer.Deserialize<DeviceUpdateArgs>(JsonConvert.SerializeObject(bridge))!;
+        Assert.Equal(count, bridge.Count);
+        Assert.Equal(count, host.Count);
+        Assert.Null(new DeviceUpdateArgs().Count);
+    }
+
     [Fact]
     public void PartAssignmentArgumentsRoundTripAcrossPipeSerializers()
     {

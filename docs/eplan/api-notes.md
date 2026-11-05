@@ -420,3 +420,4 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `DeviceService.CreateDevice` 为 PXC.3211813、3212140、3036563、3211822 建出非主 Terminal，模板 X2_2/0、20188 为 100/6/1 或 100/6/3；PXC.3211819 为 X/0、100/6/2。默认名称 `+-X1` 可在同一事务改为 `+A1-XQ10:1`，`NameService(page).AdjustVisibleName` 返回 true，显示名为 `-XQ10`。这些是负责人已实测的行为；工具集成及主功能替换 FAH1、Q_3LI/6、LSW2C 仍待本轮 Large。
 - `RIT.3581000` 的 CreateDevice 抛 S063114；RIT.3450500、RIT.3451500 未放出任何对象。BCP 在首次提交后新事务中可追加 RIT.3451500/1；同名 BBDEF 保持主功能，BCP 为非主 Busbar。
 - 中断点仅赋 Name 时 VisibleName、20002、20010 为空；AdjustVisibleName 返回 true 后 `-2Z3` 可读。示例 `=GAA-2L1` 的显示名为 `-2L1`。
+- 主功能在 SafetyPoint 内追加第二个部件 `AddArticleReference("RIT.9340030", "1", 2)` 读回数量 2；普通 Transaction 或 FunctionTransactionScope 会对第二个部件抛 S063074。本条补充 A93 的已知条件。

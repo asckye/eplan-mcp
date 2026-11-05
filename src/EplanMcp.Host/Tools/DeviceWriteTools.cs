@@ -33,16 +33,17 @@ internal sealed class DeviceWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(DeviceUpdateResult))]
-    [Description("Renames a device; terminal-only PLC modules may join a PLC box. Appends a part to its main function or one exact terminal. Give new_tag, part, or both. One Ctrl+Z undoes it. Omit/true dry_run previews; false executes. Outside scratch needs approval. See usage.")]
+    [Description("Renames a device; PLC-only modules may join a PLC box. Appends a part to its main or exact terminal. Give new_tag, part, or both. One undo. Omit/true dry_run previews; false executes. Approval outside scratch. See usage.")]
     public static async Task<CallToolResult> DeviceUpdateAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,
-        [Description("Current tag, full or as shown, e.g. -KF1")] string tag,
-        [Description("Full new tag, or from '-' to keep the structure")] string? new_tag = null,
+        [Description("Current full or shown tag")] string tag,
+        [Description("New tag; '-' keeps structure")] string? new_tag = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description("Part number")] string? part = null,
-        [Description("Part variant, default 1")] string? variant = null,
-        [Description("Alone, after the last part: parts' data")] bool update_from_parts = false,
+        [Description("Variant, default 1")] string? variant = null,
+        [Description("Alone: parts' data")] bool update_from_parts = false,
+        [Description("Positive count with part; default 1")] int? count = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -52,14 +53,14 @@ internal sealed class DeviceWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new DeviceUpdateArgs { Project = project, Tag = tag ?? string.Empty, NewTag = new_tag ?? string.Empty, Part = part, Variant = variant, UpdateFromParts = update_from_parts };
+        var args = new DeviceUpdateArgs { Project = project, Tag = tag ?? string.Empty, NewTag = new_tag ?? string.Empty, Part = part, Variant = variant, Count = count, UpdateFromParts = update_from_parts };
         var request = new WriteRequest<DeviceUpdateArgs, DeviceUpdateArgs>(
             UpdateTool,
             ToolTier.Write,
             OperationNames.DeviceUpdatePlan,
             OperationNames.DeviceUpdateExecute,
             args,
-            plan => new DeviceUpdateArgs { Project = args.Project, Tag = args.Tag, NewTag = args.NewTag, Part = args.Part, Variant = args.Variant, UpdateFromParts = args.UpdateFromParts, Fingerprint = plan.Fingerprint },
+            plan => new DeviceUpdateArgs { Project = args.Project, Tag = args.Tag, NewTag = args.NewTag, Part = args.Part, Variant = args.Variant, Count = args.Count, UpdateFromParts = args.UpdateFromParts, Fingerprint = plan.Fingerprint },
             dry_run,
             PageWriteTools.DefaultLimit,
             "Updating the device");

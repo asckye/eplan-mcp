@@ -6,8 +6,8 @@ public interface IDevicePartAssigner
     /// <summary>Main functions matching the device tag; optionally exact terminal names, including unplaced functions.</summary>
     public IReadOnlyList<DevicePartTarget> ReadMainFunctions(string projectPath, string tag, bool includeTerminals = false);
 
-    /// <summary>Adds one reference to the checked function identified within this EPLAN session.</summary>
-    public void AddPart(string projectPath, string mainId, string part, string variant);
+    /// <summary>Adds a reference with the requested quantity to the checked function identified within this EPLAN session.</summary>
+    public void AddPart(string projectPath, string mainId, string part, string variant, int count = 1);
 
     /// <summary>The scope whose undo step spans the commit and the data transfer after it (A93).</summary>
     public ITransactionScopeFactory PartTransactions(string projectPath);

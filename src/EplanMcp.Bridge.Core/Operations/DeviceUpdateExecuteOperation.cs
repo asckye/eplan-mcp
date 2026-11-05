@@ -55,7 +55,7 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
                 && !(request.PointsOnly && DeviceUpdateRequest.BelongsTo(back.MainName, request.NewTag)))
             { throw Misnamed(request, back.MainName); }
             if (request.Part is { } part)
-            { assigner!.AddPart(request.Project.Path, request.Main!.Id, part.PartNumber, part.Variant!); }
+            { assigner!.AddPart(request.Project.Path, request.Main!.Id, part.PartNumber, part.Variant!, request.Count); }
             return back;
         }, verifyCommitted: back =>
         {
@@ -75,7 +75,7 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             // A79/A82: reacquire the target function and its ArticleReferences after commit.
             DevicePartTarget main = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.NewTag, includeTerminals: !request.Rename);
             if (main.IsMain != request.Main!.IsMain || main.Category != request.Main.Category || !request.Rename && main.Id != request.Main!.Id || main.Name != request.ResultTag || DeviceUpdateRequest.ReferencesFingerprint(main.Parts)
-                != DeviceUpdateRequest.ReferencesFingerprint(request.Main!.Parts.Append(new DevicePart { PartNumber = part.PartNumber, Variant = part.Variant, Count = 1 })))
+                != DeviceUpdateRequest.ReferencesFingerprint(request.Main!.Parts.Append(new DevicePart { PartNumber = part.PartNumber, Variant = part.Variant, Count = request.Count })))
             { throw InvalidArgument("The committed function or added part reference did not match the plan; the change was rolled back."); }
         }, verifyRollback: () =>
         {

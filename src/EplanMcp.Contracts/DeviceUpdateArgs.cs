@@ -18,6 +18,9 @@ public sealed class DeviceUpdateArgs
     /// <summary>The part variant; defaults to 1 and requires <see cref="Part"/>.</summary>
     public string? Variant { get; set; }
 
+    /// <summary>Positive quantity of the appended part; defaults to 1 and requires Part.</summary>
+    public int? Count { get; set; }
+
     /// <summary>Transfers the data of the parts already referenced to the function, as EPLAN's device update does (A93). Stands alone.</summary>
     public bool UpdateFromParts { get; set; }
 

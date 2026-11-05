@@ -34,6 +34,7 @@ internal sealed class DeviceUpdateRequest
     public bool PointsOnly => Device.Functions.Count > 0 && Device.Functions.All(f => !f.IsMain && f.Category == "PLCTerminal");
     public DevicePartTarget? Main { get; private set; }
     public PartSearchItem? Part { get; private set; }
+    public int Count { get; private set; } = 1;
     public bool UpdateFromParts { get; private set; }
     public string ResultTag => !Rename && Main is not null ? Main.Name : NewTag;
     public string PreviousTag => !Rename && Main is not null ? Main.Name : Device.Tag;
@@ -58,6 +59,7 @@ internal sealed class DeviceUpdateRequest
         AddIf(violations, newTag.Length > 0 && NewTagProblem(newTag) is not null, "'new_tag' " + NewTagProblem(newTag));
         AddIf(violations, part is not null && (part.Length == 0 || part.Any(char.IsControl)), "'part' must be a nonempty part number without control characters.");
         AddIf(violations, args.Variant is not null && (part is null || string.IsNullOrWhiteSpace(args.Variant) || args.Variant.Any(char.IsControl)), "'variant' requires 'part' and must be nonempty without control characters.");
+        AddIf(violations, args.Count.HasValue && (part is null || args.Count <= 0), "'count' requires 'part' and must be a positive integer.");
         AddIf(violations, part is not null && (parts is null || assigner is null), "Use eplan_device_update for part assignment; this execution path accepts renaming only.");
         if (violations.Count > 0)
         {
@@ -116,6 +118,7 @@ internal sealed class DeviceUpdateRequest
             Rename = newTag.Length > 0,
             Main = main,
             Part = selected,
+            Count = args.Count ?? 1,
             UpdateFromParts = args.UpdateFromParts,
             MergeTarget = destination?.Functions.Any(f => f.Category == "PLCBox") == true ? destination : null,
         };
@@ -127,6 +130,7 @@ internal sealed class DeviceUpdateRequest
             .Concat(MergeTarget?.Functions.Select(f => f.Name + "\t" + f.Id + "\t" + f.IsMain + "\t" + f.Category) ?? [])
             .Concat(Main is null ? [] : Main.Parts.Select(p => FormattableString.Invariant($"{p.PartNumber}\t{p.Variant}\t{p.Count}")).Append(Main.Id).Append(Main.Name))
             .Concat(Part is null ? [] : new[] { Part.PartNumber, Part.Variant ?? string.Empty })
+            .Concat(Part is null || Count == 1 ? [] : ["count " + Count.ToString(CultureInfo.InvariantCulture)])
             .Concat(UpdateFromParts ? ["update from parts"] : []));
 
     internal static string ReferencesFingerprint(IEnumerable<DevicePart> references) =>

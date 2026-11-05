@@ -34,6 +34,7 @@ public sealed class DeviceUpdatePlanOperation(IProjectCatalog catalog, IDeviceRe
                 ["previousTag"] = request.PreviousTag,
                 ["part"] = request.Part?.PartNumber ?? string.Empty,
                 ["variant"] = request.Part?.Variant ?? string.Empty,
+                ["count"] = request.Count.ToString(CultureInfo.InvariantCulture),
             },
         };
     }

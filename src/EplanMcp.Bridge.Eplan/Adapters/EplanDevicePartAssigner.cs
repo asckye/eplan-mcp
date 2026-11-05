@@ -41,12 +41,12 @@ internal sealed class EplanDevicePartAssigner : IDevicePartAssigner
         return targets;
     }
 
-    public void AddPart(string projectPath, string mainId, string part, string variant)
+    public void AddPart(string projectPath, string mainId, string part, string variant, int count = 1)
     {
         MainThread.Assert();
         Function main = Find(EplanProjects.ByPath(projectPath)).Single(f => (f.IsMainFunction || f.FunctionCategory.ToString() == "Terminal") && f.ToStringIdentifier() == mainId);
         // A82: AddArticleReference appends the checked part and is read back through ArticleReferences.
-        main.AddArticleReference(part, variant, 1);
+        main.AddArticleReference(part, variant, checked((uint)count));
         GC.KeepAlive(main);
     }
 

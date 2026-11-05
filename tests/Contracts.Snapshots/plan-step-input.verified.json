@@ -180,17 +180,25 @@
                 "type": "object",
                 "properties": {
                   "tag": {
-                    "description": "Current tag, full or as shown, e.g. -KF1",
+                    "description": "Current full or shown tag",
                     "type": "string"
                   },
                   "new_tag": {
-                    "description": "Full new tag, or from '-' to keep the structure",
+                    "description": "New tag; '-' keeps structure",
                     "type": "string"
                   },
                   "update_from_parts": {
-                    "description": "Alone, after the last part: parts' data",
+                    "description": "Alone: parts' data",
                     "type": "boolean",
                     "default": false
+                  },
+                  "count": {
+                    "description": "Positive count with part; default 1",
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "default": null
                   }
                 },
                 "required": [

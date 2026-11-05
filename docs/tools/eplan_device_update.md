@@ -19,6 +19,7 @@
 | `new_tag` | string | 否 | — | 新标识：完整标识（如 `=GAA+A1-KF10`）；或以 `-` 开头的短标识（如 `-KF10`），表示保留设备现在的结构 |
 | `part` | string | 否 | — | 要追加的部件号；与 `new_tag`、`update_from_parts` 至少一个；按部件库精确或唯一不区分大小写匹配 |
 | `variant` | string | 否 | "1" | 部件变体；只能随 `part` 提供，必须在库中存在 |
+| `count` | integer | 否 | 1 | 追加部件数量，必须为正整数，只能随 `part` 提供 |
 | `update_from_parts` | boolean | 否 | false | 把已引用部件的数据写到功能上；必须单独调用（A93） |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
@@ -113,8 +114,8 @@
 ### 部件赋值（FP3）
 - 例如 `{"project":"Line1","tag":"=GAA+A1-SF91","part":"SIE.3SB3400-0B","variant":"1"}`；`new_tag` 可同时提供。
 - 规划按 `FUNC_IDENTDEVICETAG` 查找唯一主功能（已放置或未放置），数量不为 1 时返回 `INVALID_ARGUMENT` 并报告数量；只赋值部件时允许功能名称带连接点后缀。已引用相同部件和变体时拒绝 `nothing to change`。
-- 变更清单增加 `add part <part> (variant <v>) to <tag>`；指纹包含主功能身份、现有部件引用和所选库部件，执行前重新核对。
-- 同一事务内先执行请求的改名，再以 `Function.AddArticleReference(part, variant, 1)` 追加引用（A82）。提交后按设备标识重新获取主功能及 `ArticleReferences`（A79）；缺少新引用时回滚。原有引用保持不变。
+- 变更清单增加 `add part <part> (variant <v>) to <tag>`；指纹包含主功能身份、现有部件引用和所选库部件与数量，执行前重新核对。
+- 同一事务内先执行请求的改名，再以 `Function.AddArticleReference(part, variant, count)` 追加引用（A82）。提交后按设备标识重新获取主功能及 `ArticleReferences`（A79）；缺少新引用或数量不符时回滚。原有引用保持不变。
 - `{"tag":...,"update_from_parts":true}` 单独调用，放在最后一个部件之后：用 `DeviceService.UpdateDevice` 把已引用部件的功能定义、连接点数据和技术参数写到功能上，和 EPLAN 的设备更新相同（A93）。必须单独调用，不能和 `part`、`new_tag` 同时给；功能没有部件引用时拒绝。一步撤销还原这些数据。
 - `device.part`、`device.variant` 返回本次赋值的部件和变体；只改名时为 null。只赋值部件时，`tag` 与 `previousTag` 都返回主功能的实际完整名称（可能带 `:1` 等连接点后缀），主功能可直接交给 `eplan_device_get`；端子用 `eplan_terminal_strip_get` 定位；`functions=1`，`pages` 只含目标功能所在页。
 - 主线程目标为 2 秒，端到端默认时限 60 秒；部件库较大时可能超过目标，支持既有进度与取消。
@@ -122,5 +123,7 @@
 
 ### 非主端子的部件
 - 仅 `part` 赋值且不改名时，`tag` 可为恰好一个已有 `FunctionCategory.Terminal` 的完整名称（如 `+A1-XD5:1`）；不按端子排名、前缀或短标识猜选。其他非主功能、重名端子与同时改名均拒绝。
-- 端子已由之前的放置事务提交；本次沿用 `Function.AddArticleReference(part, variant, 1)`，提交后按原完整名称重新读取身份、类别、主功能标志及 `ArticleReferences`，保留已有引用，一个撤销步骤恢复。A87 的新建连接定义点限制不扩展为本次新建对象。
+- 端子已由之前的放置事务提交；本次沿用 `Function.AddArticleReference(part, variant, count)`，提交后按原完整名称重新读取身份、类别、主功能标志及 `ArticleReferences`，保留已有引用，一个撤销步骤恢复。A87 的新建连接定义点限制不扩展为本次新建对象。
 - 新增 Small/Medium 覆盖精确端子、歧义、其他类别、改名拒绝与默认预览；Large `ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores` 在 LargeWrite 放置 `IEC_symbol/X2_2/0` 后追加 `PXC.3211813`，独立读回并撤销，待实测。
+
+- `count` 省略为 1；只追加指定数量的一条引用，已有引用不变。`BusbarMain_SecondPartWithCountTwo_ReadsQuantity_OneUndoRestores` 在 LargeWrite 的 BBDEF 主功能已有 `RIT.3581000` 后追加 `RIT.9340030` 数量 2，读回并比较一步撤销快照，NOT RUN。

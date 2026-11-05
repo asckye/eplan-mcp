@@ -4,7 +4,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
 [Trait("Size", "Small")]
-public sealed class DevicePartAssignmentTests
+public sealed partial class DevicePartAssignmentTests
 {
     private const string Tag = "=GAA+A1-SF91";
     private const string Part = "SIE.3SB3400-0B";
@@ -365,6 +365,7 @@ public sealed class DevicePartAssignmentTests
         public PartsDatabaseContent Database { get; } = new() { Parts = [new PartSearchItem { PartNumber = Part, Variant = "1" }] };
         public List<DevicePartTarget> Targets { get; } = [];
         public List<(string Id, string Part, string Variant)> Adds { get; } = [];
+        public List<int> Counts { get; } = [];
         public List<string> Transfers { get; } = [];
         public int Reads { get; private set; }
         public bool ReadAfterCommit { get; private set; }
@@ -386,14 +387,15 @@ public sealed class DevicePartAssignmentTests
                 Name = committed && Mismatch == "name" ? "wrong" : renamer.Renames.Count > 0 && !transactions.Calls.Contains("Rollback") ? renamer.Renames[^1].NewTag : m.Name,
                 Tag = renamer.Renames.Count > 0 && !transactions.Calls.Contains("Rollback") ? renamer.Renames[^1].NewTag : m.Tag,
                 VisibleName = m.VisibleName, Page = m.Page,
-                Parts = committed && Mismatch == "part" ? [] : [.. m.Parts.Select(p => new DevicePart { PartNumber = p.PartNumber, Variant = p.Variant, Count = p.Count })],
+                Parts = committed && Mismatch == "part" ? [] : [.. m.Parts.Select(p => new DevicePart { PartNumber = p.PartNumber, Variant = p.Variant, Count = committed && Mismatch == "count" ? 1 : p.Count })],
             })];
         }
-        public void AddPart(string projectPath, string mainId, string part, string variant)
+        public void AddPart(string projectPath, string mainId, string part, string variant, int count = 1)
         {
             Assert.DoesNotContain("Commit", transactions.Calls);
             Adds.Add((mainId, part, variant));
-            Targets.Single(m => m.Id == mainId).Parts.Add(new DevicePart { PartNumber = part, Variant = variant, Count = 1 });
+            Counts.Add(count);
+            Targets.Single(m => m.Id == mainId).Parts.Add(new DevicePart { PartNumber = part, Variant = variant, Count = count });
         }
         public ITransactionScopeFactory PartTransactions(string projectPath) => transactions;
         public void TransferPartData(string projectPath, string functionId)
