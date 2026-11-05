@@ -5,6 +5,54 @@
 
 ## [Unreleased]
 
+### 破坏性变化
+
+0.5.0 按 ADR-0049 / MIG-02 完成下表 38 个工具的默认值迁移；省略或传 `dry_run: true` 均只预览，不请求审批、不修改项目或文件，返回 `execution: not_started` 与执行提示。执行须显式传 `dry_run: false`，审批、读回和撤销规则不变；`eplan_plan_apply` 输入已审阅计划，作为例外，保持现有执行语义。
+
+| 工具 | 旧：省略 `dry_run` | 新：省略 `dry_run` | 执行方式 |
+|---|---|---|---|
+| `eplan_device_place` | 执行 | 预览 | `dry_run: false` |
+| `eplan_connection_create` | 执行 | 预览 | `dry_run: false` |
+| `eplan_placement_create` | 执行 | 预览 | `dry_run: false` |
+| `eplan_placement_update` | 执行 | 预览 | `dry_run: false` |
+| `eplan_placement_edit` | 执行 | 预览 | `dry_run: false` |
+| `eplan_macro_insert` | 执行 | 预览 | `dry_run: false` |
+| `eplan_page_create` | 执行 | 预览 | `dry_run: false` |
+| `eplan_page_update` | 执行 | 预览 | `dry_run: false` |
+| `eplan_page_text_replace` | 执行 | 预览 | `dry_run: false` |
+| `eplan_page_delete` | 执行 | 预览 | `dry_run: false` |
+| `eplan_page_renumber` | 执行 | 预览 | `dry_run: false` |
+| `eplan_device_update` | 执行 | 预览 | `dry_run: false` |
+| `eplan_property_set` | 执行 | 预览 | `dry_run: false` |
+| `eplan_device_renumber` | 执行 | 预览 | `dry_run: false` |
+| `eplan_cable_renumber` | 执行 | 预览 | `dry_run: false` |
+| `eplan_terminal_renumber` | 执行 | 预览 | `dry_run: false` |
+| `eplan_connection_number` | 执行 | 预览 | `dry_run: false` |
+| `eplan_connection_generate` | 执行 | 预览 | `dry_run: false` |
+| `eplan_cable_generate` | 执行 | 预览 | `dry_run: false` |
+| `eplan_report_update` | 执行 | 预览 | `dry_run: false` |
+| `eplan_check_run` | 执行 | 预览 | `dry_run: false` |
+| `eplan_import_dxf` | 执行 | 预览 | `dry_run: false` |
+| `eplan_import_pdf_comments` | 执行 | 预览 | `dry_run: false` |
+| `eplan_import_list` | 执行 | 预览 | `dry_run: false` |
+| `eplan_import_plc` | 执行 | 预览 | `dry_run: false` |
+| `eplan_import_pxf` | 执行 | 预览 | `dry_run: false` |
+| `eplan_language_set` | 执行 | 预览 | `dry_run: false` |
+| `eplan_language_remove` | 执行 | 预览 | `dry_run: false` |
+| `eplan_project_translate` | 执行 | 预览 | `dry_run: false` |
+| `eplan_part_import` | 执行 | 预览 | `dry_run: false` |
+| `eplan_part_sync` | 执行 | 预览 | `dry_run: false` |
+| `eplan_translation_import` | 执行 | 预览 | `dry_run: false` |
+| `eplan_placeholder_apply` | 执行 | 预览 | `dry_run: false` |
+| `eplan_action_run` | 执行 | 预览 | `dry_run: false` |
+| `eplan_action_try` | 执行 | 预览 | `dry_run: false` |
+| `eplan_api_try` | 执行（含读取 API） | 预览 | `dry_run: false` |
+| `eplan_project_create` | 执行 | 预览 | `dry_run: false` |
+| `eplan_cabinet_bind` | 执行 | 预览 | `dry_run: false` |
+| `eplan_plan_apply` | 申请执行已审计划 | 保持申请执行已审计划（例外） | 省略或 `dry_run: false`；true 仅重核预览 |
+
+### 新增与改进
+
 - `eplan_device_place` 的 `join_device:true` 自动分配同类未放置功能，显式引脚名按序精确匹配；结果返回 `assignedFunction`、分配后的 `pins` 和未放置数量，读回偏差提交并警告。
 - `eplan_device_place` 的提示、工具说明和用法改为以同一标识配合 `join_device` 放置其余未放置功能。
 - 新增 `eplan_annotation_create`（full）：批量插入超链接、二维码、样条曲线和扇形，默认预览，复用布局护栏、审批、读回与一次撤销。
@@ -45,7 +93,7 @@
 - `eplan_placement_delete` 不再因页面上有不可读的空块而失败。
 
 - `eplan_macro_get` 支持选择表达和变体，返回宏参考点与功能位置；位置不可读时返回 null 并告警。
-- `eplan_device_update` 允许将全部为非主功能 PLC 点的器件并入已有 PLC 盒，保留后缀并核对两侧读回；其它重名仍拒绝。新增 Large 验证待实测。
+- `eplan_device_update` 允许将全部为非主功能 PLC 点的器件并入已有 PLC 盒，保留后缀并核对两侧读回；其它重名仍拒绝。
 
 - `eplan_connection_create` 新增 `generate:false`，可先放节点和中断点，最后统一生成；默认生成策略不变。
 - 建块和删除允许普通组内对象，仍拒绝块成员及属性文字。
@@ -116,72 +164,26 @@
 - `eplan_macro_insert` 可用 `part` / `part_variant` 代替 `macro`：插入部件的组符号宏，在同一事务中给主功能补上部件引用，提交后读回。
 - `eplan_macro_insert`：宏的声明外框超出可绘制区但仍在已知幅面的页内时只给警告（部件总览宏铺满 A3 页）；插入的对象仍在写入后实测检查。
 
-- `eplan_placement_create` 新增折线、圆弧、路径功能文本和 imports 图片，沿用默认预览、布局守卫、批量读回与单步撤销；EPLAN 实机验证 NOT RUN。
+- `eplan_placement_create` 新增折线、圆弧、路径功能文本和 imports 图片，沿用默认预览、布局守卫、批量读回与单步撤销。
 - Host 审计记录通过共享规则去除敏感键值、认证凭据、URL 用户信息及 PEM 块；审批指纹继续绑定原始参数，审计链基于去敏后的记录计算。
 - Host 控制台、Bridge（含离线 stderr 与启动失败后备日志）及 Workbench 文件日志在写出前复用同一凭据脱敏规则。
 - `eplan_connection_create` 中断点内置默认改为 EPLAN 插入命令使用的 `BP`，支持 SPECIAL 中含一个或多个连接点的全部中断点符号；按匹配连接点选择变体及定位，双连接点读回不再失败。可显式选择 `BPIN`、`BPOUT`、`BPF` 等符号。
-- 新增 `eplan_report_create`：按报表块生成报表页，支持筛选、排序与页描述，返回同类型和表格的报表页及本次新增页；默认预览，沿用审批、单步撤销与审计。正式工具实机验证 NOT RUN。
-- `eplan_page_get` 返回报表页的 `report` 设置：类型、表格、方案名、器件标识与页描述；单字段不可读时只记录警告。正式工具的实机验证待运行。
+- 新增 `eplan_report_create`：按报表块生成报表页，支持筛选、排序与页描述，返回同类型和表格的报表页及本次新增页；默认预览，沿用审批、单步撤销与审计。
+- `eplan_page_get` 返回报表页的 `report` 设置：类型、表格、方案名、器件标识与页描述；单字段不可读时只记录警告。
 - 全局插件配置可按启用顺序参与默认值解析，保留胜出与被覆盖来源；项目绑定锁定的插件跳过全局层，缺失数据只给告警。
 - `eplan_pack_list` / `eplan_pack_get` 显示插件分类、提供项、标准标签和每个精确版本的全局启用标记。
 - 新增 `eplan_pack_enable`：经现有 EPLAN 审批全局启停已安装的精确插件版本，保留启用顺序，以 revision 校验防止覆盖并发变更。
 - 新增 `eplan_pack_install`：从插件库安装精确版本，核对索引摘要；内置库免审批，其它来源沿用安装审批，相同内容重复安装不变更。
 - 工程包新增插件种类、提供项与标准标签，旧包保持原摘要；新增离线工具 `eplan_pack_library_list`，可浏览内置、本地及登记的只读共享库，查看已安装版本和更新候选。
-- `eplan_device_update` can assign a part to an existing device's unique main function, together with an optional rename; planning validates the part and variant, and readback verifies the references. Large verification NOT RUN.
-- `eplan_device_place` supports parts with macros or function templates; an optional tag renames all device functions together, including unplaced functions. Omitting it retains EPLAN numbering; `unplaced_functions` lists full names read back after commit. Large verification NOT RUN.
+- `eplan_device_update` 可以给已有器件的唯一主功能分配部件，可同时改名；规划时校验部件和变量，提交后读回核对引用。
+- `eplan_device_place` 支持带宏或功能模板的部件；可选 `tag` 会一起改名器件的全部功能，包括未放置的功能，省略时沿用 EPLAN 的编号；`unplaced_functions` 列出提交后读回的完整名称。
 
-- `eplan_connection_create` 支持用 `t_node.variant` 选择同方向引脚的 SPECIAL 变体，以及用 `interruption_point.sort_code` 在放置事务中设置排序码 24809 并读回；省略参数沿用原行为。D1/D2 的变体流向及跨页配对 Spike 已补，待实机运行。
-
-### 破坏性变化
-
-0.5.0 按 ADR-0049 / MIG-02 完成下表 38 个工具的默认值迁移；省略或传 `dry_run: true` 均只预览，不请求审批、不修改项目或文件，返回 `execution: not_started` 与执行提示。执行须显式传 `dry_run: false`，审批、读回和撤销规则不变；`eplan_plan_apply` 输入已审阅计划，作为例外，保持现有执行语义。
-
-| 工具 | 旧：省略 `dry_run` | 新：省略 `dry_run` | 执行方式 |
-|---|---|---|---|
-| `eplan_device_place` | 执行 | 预览 | `dry_run: false` |
-| `eplan_connection_create` | 执行 | 预览 | `dry_run: false` |
-| `eplan_placement_create` | 执行 | 预览 | `dry_run: false` |
-| `eplan_placement_update` | 执行 | 预览 | `dry_run: false` |
-| `eplan_placement_edit` | 执行 | 预览 | `dry_run: false` |
-| `eplan_macro_insert` | 执行 | 预览 | `dry_run: false` |
-| `eplan_page_create` | 执行 | 预览 | `dry_run: false` |
-| `eplan_page_update` | 执行 | 预览 | `dry_run: false` |
-| `eplan_page_text_replace` | 执行 | 预览 | `dry_run: false` |
-| `eplan_page_delete` | 执行 | 预览 | `dry_run: false` |
-| `eplan_page_renumber` | 执行 | 预览 | `dry_run: false` |
-| `eplan_device_update` | 执行 | 预览 | `dry_run: false` |
-| `eplan_property_set` | 执行 | 预览 | `dry_run: false` |
-| `eplan_device_renumber` | 执行 | 预览 | `dry_run: false` |
-| `eplan_cable_renumber` | 执行 | 预览 | `dry_run: false` |
-| `eplan_terminal_renumber` | 执行 | 预览 | `dry_run: false` |
-| `eplan_connection_number` | 执行 | 预览 | `dry_run: false` |
-| `eplan_connection_generate` | 执行 | 预览 | `dry_run: false` |
-| `eplan_cable_generate` | 执行 | 预览 | `dry_run: false` |
-| `eplan_report_update` | 执行 | 预览 | `dry_run: false` |
-| `eplan_check_run` | 执行 | 预览 | `dry_run: false` |
-| `eplan_import_dxf` | 执行 | 预览 | `dry_run: false` |
-| `eplan_import_pdf_comments` | 执行 | 预览 | `dry_run: false` |
-| `eplan_import_list` | 执行 | 预览 | `dry_run: false` |
-| `eplan_import_plc` | 执行 | 预览 | `dry_run: false` |
-| `eplan_import_pxf` | 执行 | 预览 | `dry_run: false` |
-| `eplan_language_set` | 执行 | 预览 | `dry_run: false` |
-| `eplan_language_remove` | 执行 | 预览 | `dry_run: false` |
-| `eplan_project_translate` | 执行 | 预览 | `dry_run: false` |
-| `eplan_part_import` | 执行 | 预览 | `dry_run: false` |
-| `eplan_part_sync` | 执行 | 预览 | `dry_run: false` |
-| `eplan_translation_import` | 执行 | 预览 | `dry_run: false` |
-| `eplan_placeholder_apply` | 执行 | 预览 | `dry_run: false` |
-| `eplan_action_run` | 执行 | 预览 | `dry_run: false` |
-| `eplan_action_try` | 执行 | 预览 | `dry_run: false` |
-| `eplan_api_try` | 执行（含读取 API） | 预览 | `dry_run: false` |
-| `eplan_project_create` | 执行 | 预览 | `dry_run: false` |
-| `eplan_cabinet_bind` | 执行 | 预览 | `dry_run: false` |
-| `eplan_plan_apply` | 申请执行已审计划 | 保持申请执行已审计划（例外） | 省略或 `dry_run: false`；true 仅重核预览 |
+- `eplan_connection_create` 支持用 `t_node.variant` 选择同方向引脚的 SPECIAL 变体，以及用 `interruption_point.sort_code` 在放置事务中设置排序码 24809 并读回；省略参数沿用原行为。
 
 ### Fixed
 - 写操作异常缺少执行状态且没有回滚证据时，报告 `OUTCOME_UNKNOWN` / `unknown`，保留已证实回滚的结果，避免误报为已回滚并引发重试。
 - Host 与 Bridge 双向拒绝 JSON-RPC 协议信封中的重复成员和未知成员，并附诊断编号；保持协议版本与 16 MiB 帧上限，升级时需同时更新 Host 与插件。
-- `eplan_page_get` 返回四项原始报表方案数据（每项最多 4000 字符，超出截断并警告），`eplan_report_create` 可接收这些数据并设置报表块，修复来源方案名在目标项目中不存在时的端子图生成失败；审批只展示数据长度。Small/Medium 与契约覆盖随改动更新，修复后 Large 待运行。
+- `eplan_page_get` 返回四项原始报表方案数据（每项最多 4000 字符，超出截断并警告），`eplan_report_create` 可接收这些数据并设置报表块，修复来源方案名在目标项目中不存在时的端子图生成失败；审批只展示数据长度。
 - 带偏移引脚的 T 节点变体（TLRO/TLRU/TOUL/TOUR 变体 0–3）：预测连线从真实引脚出发，不再被布局 R4 误判穿过自身外框；连线与中断点规划都把这类节点识别为节点并连通其各引脚。同页两个同名中断点按 EPLAN 规则互相配对，不再拒绝。提交后读回失败时，错误信息附带原因。2026-11-02 客户页重绘实机通过（`AcceptanceRedrawTests`，客户清单）。
 
 ## [0.4.1] - 2026-11-02
