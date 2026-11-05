@@ -202,8 +202,15 @@ public sealed class GraphicEditTests(LiveEplan eplan, WriteHost host) : IClassFi
         string before = (await session.SnapshotAsync(page)).Hash;
         await Call("eplan_graphic_edit", new()
         {
-            ["project"] = host.Writable, ["page"] = page, ["operation"] = "scale", ["locators"] = new[] { lines[0], texts[0], group },
-            ["scale_x"] = 1.5, ["scale_y"] = 1.5, ["origin_mm"] = _scaleOrigin, ["layout_guard"] = "warn", ["dry_run"] = false,
+            ["project"] = host.Writable,
+            ["page"] = page,
+            ["operation"] = "scale",
+            ["locators"] = new[] { lines[0], texts[0], group },
+            ["scale_x"] = 1.5,
+            ["scale_y"] = 1.5,
+            ["origin_mm"] = _scaleOrigin,
+            ["layout_guard"] = "warn",
+            ["dry_run"] = false,
         });
         JsonElement after = await Call("eplan_page_get", new() { ["project"] = host.Writable, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" });
         JsonElement[] rows = [.. after.GetProperty("drawings").GetProperty("items").EnumerateArray()];
