@@ -1,0 +1,18 @@
+id: draw-plc-inputs
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 的 =GAA+A1 下新建 EFS1 第 9913 页多线原理图，画 PLC 卡 -KF9 的三个数字量输入：
+  连接点 1，地址 I0.0，符号地址 Start；连接点 2，地址 I0.1，符号地址 Stop；连接点 3，地址 I0.2，符号地址 Estop。
+  布局要整齐，不能重叠。
+answer: { type: object, required: [done], properties: { done: { type: boolean, description: true when all three points are on the page } } }
+after:
+  addresses: { tool: eplan_plc_get, args: { project: "{project}", plc: "=GAA+A1-KF9" }, pick: "$.channels[*].address" }
+  symbolic: { tool: eplan_plc_get, args: { project: "{project}", plc: "=GAA+A1-KF9" }, pick: "$.channels[*].symbolicAddress" }
+  overlaps: { tool: eplan_page_review, args: { project: "{project}", page: "=GAA+A1&EFS1/9913", checks: [overlaps] }, pick: $.summary.clean }
+checks:
+  - { answer: $.done, equals: true }
+  - { after: addresses, set_equals: [I0.0, I0.1, I0.2] }
+  - { after: symbolic, set_equals: [Start, Stop, Estop] }
+  - { after: overlaps, equals: true }
+budget: { max_tool_calls: 50, max_minutes: 20, max_usd: 3 }

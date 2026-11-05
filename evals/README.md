@@ -54,6 +54,12 @@ Destructive 工具（删页、页面重编号、设备编号，以及 M4c 的端
 
 运行：`run --tasks evals/tasks-attended --set all`。工程师照常打开副本；作答中 EPLAN 弹出审批对话框时，核对变更清单后点"批准"。每次审批前都会先做备份（ADR-0013）；备份放在运行器的数据根目录 `.local/evals/<运行>/eplanmcp/backups/` 中，随运行目录一起清理。
 
+### 绘图题：`evals/tasks-drawing/`
+
+这一组让模型按文字需求画图，或照样例重画一页，再按器件、连接、PLC 地址和重叠检查判分。题目比较贵，也都要新副本，所以不放进默认任务集。
+
+运行：`run --tasks evals/tasks-drawing --set all`。一共 5 道题，费用上限合计 17 美元，要打开 5 份副本。判分只看结果对不对，不看画得是否好看。
+
 ### 导出题：作答中导出的文件
 模型那一侧的 eplanmcp 把导出的文件写在它的数据根目录下，`.local/evals/<运行>/eplanmcp/exports/<项目名>/<UTC 时间>-<后缀>/`（M4 设计 4.4），成功的导出不会被删除。运行器在每次作答前后各列一次这个目录，新出现的文件就是这次作答导出的。事后调用 `exported_files` 读的就是它们：它不是 eplanmcp 的工具，运行器自己回答，不调用工具，也不能用作标准调用。
 - 结果是 `{ "files": [{ "path", "name", "bytes" }], "count" }`：`path` 相对于 `exports\`（以项目名开头），`name` 是文件名，按 `path` 排序；

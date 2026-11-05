@@ -1,0 +1,26 @@
+id: draw-control-circuit
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 的 =GAA+A1 下新建 EFS1 第 9912 页多线原理图，画一条接触器控制回路，从上到下串联：
+  中断点 24V、停止按钮 -S1（常闭）、启动按钮 -S2（常开）、接触器线圈 -K2、中断点 0V。
+  布局要整齐，不能重叠。画完后确认连接已经生成。
+answer: { type: object, required: [done], properties: { done: { type: boolean, description: true when the page is drawn and connected } } }
+after:
+  s1: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9912", tag_contains: "-S1" }, pick: $.total }
+  s2: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9912", tag_contains: "-S2" }, pick: $.total }
+  k2: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9912", tag_contains: "-K2" }, pick: $.total }
+  interruptions: { tool: eplan_object_find, args: { project: "{project}", page: "=GAA+A1&EFS1/9912", object_type: InterruptionPoint }, pick: $.total }
+  wires: { tool: eplan_connection_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9912" }, pick: $.total }
+  through_s2: { tool: eplan_connection_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9912", device: "=GAA+A1-S2" }, pick: $.total }
+  overlaps: { tool: eplan_page_review, args: { project: "{project}", page: "=GAA+A1&EFS1/9912", checks: [overlaps] }, pick: $.summary.clean }
+checks:
+  - { answer: $.done, equals: true }
+  - { after: s1, at_least: 1 }
+  - { after: s2, at_least: 1 }
+  - { after: k2, at_least: 1 }
+  - { after: interruptions, equals: 2 }
+  - { after: wires, at_least: 3 }
+  - { after: through_s2, equals: 2 }
+  - { after: overlaps, equals: true }
+budget: { max_tool_calls: 50, max_minutes: 20, max_usd: 3 }

@@ -1,0 +1,27 @@
+id: draw-motor-starter
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 的 =GAA+A1 下新建 EFS1 第 9911 页多线原理图，画一个三相电机直接启动主回路，从上到下依次是：
+  断路器 -Q1（3 个主触点）、接触器 -K1（3 个主触点）、电机 -M1。
+  Q1 的三相输出接 K1 的三相输入，K1 的三相输出接 M1 的三相。
+  电气元件优先用部件库里的部件，没有合适的部件再用符号。布局要整齐，不能重叠。画完后确认连接已经生成。
+answer: { type: object, required: [done], properties: { done: { type: boolean, description: true when the page is drawn and connected } } }
+after:
+  type: { tool: eplan_page_get, args: { project: "{project}", page: "=GAA+A1&EFS1/9911" }, pick: $.page.type }
+  q1: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", tag_contains: "-Q1" }, pick: $.total }
+  k1: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", tag_contains: "-K1" }, pick: $.total }
+  m1: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", tag_contains: "-M1" }, pick: $.total }
+  wires: { tool: eplan_connection_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911" }, pick: $.total }
+  through_k1: { tool: eplan_connection_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", device: "=GAA+A1-K1" }, pick: $.total }
+  overlaps: { tool: eplan_page_review, args: { project: "{project}", page: "=GAA+A1&EFS1/9911", checks: [overlaps] }, pick: $.summary.clean }
+checks:
+  - { answer: $.done, equals: true }
+  - { after: type, equals: Circuit }
+  - { after: q1, at_least: 1 }
+  - { after: k1, at_least: 1 }
+  - { after: m1, at_least: 1 }
+  - { after: wires, at_least: 6 }
+  - { after: through_k1, at_least: 6 }
+  - { after: overlaps, equals: true }
+budget: { max_tool_calls: 60, max_minutes: 20, max_usd: 3 }

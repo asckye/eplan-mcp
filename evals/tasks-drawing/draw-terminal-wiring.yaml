@@ -1,0 +1,19 @@
+id: draw-terminal-wiring
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 的 =GAA+A1 下新建 EFS1 第 9914 页多线原理图，上面一排放端子排 -X9 的端子 1、2、3，下面放电机 -M9。
+  端子 1、2、3 分别接到电机的三相。布局要整齐，不能重叠。画完后确认连接已经生成。
+answer: { type: object, required: [done], properties: { done: { type: boolean, description: true when the page is drawn and connected } } }
+after:
+  terminals: { tool: eplan_object_find, args: { project: "{project}", page: "=GAA+A1&EFS1/9914", object_type: Terminal }, pick: $.total }
+  motor: { tool: eplan_device_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9914", tag_contains: "-M9" }, pick: $.total }
+  wires: { tool: eplan_connection_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9914" }, pick: $.total }
+  overlaps: { tool: eplan_page_review, args: { project: "{project}", page: "=GAA+A1&EFS1/9914", checks: [overlaps] }, pick: $.summary.clean }
+checks:
+  - { answer: $.done, equals: true }
+  - { after: terminals, equals: 3 }
+  - { after: motor, at_least: 1 }
+  - { after: wires, at_least: 3 }
+  - { after: overlaps, equals: true }
+budget: { max_tool_calls: 50, max_minutes: 20, max_usd: 3 }

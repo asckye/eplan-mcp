@@ -1,0 +1,24 @@
+id: draw-redraw-page
+set: dev
+fixture: copy
+prompt: |
+  项目 {project} 里有一页 =GAA+A1&EFS1/2。先读这一页，再新建多线原理图页 =GAA+A1&EFS1/9915，照着它重画一份：
+  符号、位置和连接都一样，器件标识在原来的名字后面加 R，比如 -QA1 写成 -QA1R，避免和原来的重名。
+  位置标注框和中断点也要画。画完后确认连接已经生成。
+answer: { type: object, required: [done], properties: { done: { type: boolean, description: true when the new page is drawn } } }
+oracle:
+  functions: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/2", object_type: Function }, pick: $.total }
+  interruptions: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/2", object_type: InterruptionPoint }, pick: $.total }
+  wires: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/2" }, pick: $.total }
+after:
+  functions: { tool: eplan_object_find, args: { project: "{project}", page: "=GAA+A1&EFS1/9915", object_type: Function }, pick: $.total }
+  interruptions: { tool: eplan_object_find, args: { project: "{project}", page: "=GAA+A1&EFS1/9915", object_type: InterruptionPoint }, pick: $.total }
+  wires: { tool: eplan_connection_list, args: { project: "{project}", page: "=GAA+A1&EFS1/9915" }, pick: $.total }
+  boxes: { tool: eplan_object_find, args: { project: "{project}", page: "=GAA+A1&EFS1/9915", object_type: LocationBox }, pick: $.total }
+checks:
+  - { answer: $.done, equals: true }
+  - { after: functions, equals: oracle.functions }
+  - { after: interruptions, equals: oracle.interruptions }
+  - { after: wires, equals: oracle.wires }
+  - { after: boxes, at_least: 1 }
+budget: { max_tool_calls: 120, max_minutes: 30, max_usd: 5 }
