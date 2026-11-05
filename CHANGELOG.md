@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_device_place` 的 `join_device:true` 自动分配同类未放置功能，显式引脚名按序精确匹配；结果返回 `assignedFunction`、分配后的 `pins` 和未放置数量，读回偏差提交并警告。
+
 - `eplan_symbol_search` 每行增加 `variantLabel`：变量编号 0–7 对应 A–H，其他编号返回空字符串。
 
 - `eplan_device_place` 的部件路线可只传 `symbol_variant`，使用部件模板提供的库和符号；变量不存在时回滚。

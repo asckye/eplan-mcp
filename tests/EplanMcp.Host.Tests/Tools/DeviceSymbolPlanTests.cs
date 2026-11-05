@@ -284,6 +284,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
 
     private sealed class Placement(Store store) : IDeviceSymbolPlacement, IDeviceSymbolCommittedReadback
     {
+        public void AssignUnplacedFunction(DevicePlaceArgs args, DevicePlaceData data) { }
         public List<string> Calls { get; } = [];
         public string? FailAt { get; set; }
         public DevicePlaceArgs? Args { get; private set; }

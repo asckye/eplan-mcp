@@ -35,6 +35,8 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 
 可选 `join_device` 默认 false，原有重复标识仍返回 `ALREADY_EXISTS`。true 时目标标识必须已存在（否则 `DEVICE_NOT_FOUND`），新功能沿用该名称且不是主功能；提交后按对象号读回名称和主功能状态。此参数仅支持库符号路线，可同时指定部件；支持端口列表（`connection_designations`/`connection_descriptions`），端子或 PLC 路线仍不支持 `join_device`。
 
+`join_device:true` 创建符号提交后，在同一个撤销步骤的新事务中，按 `ObjectIdentifier` 升序匹配同一标识下 `FunctionCategory` 相同的未放置功能。提供 `connection_designations` 时要求引脚名称序列完全相同；省略时取第一个同类功能，用 `Assign` 将它分配到新符号。没有匹配时保留原有新增符号行为，不报错。只保留对象标识跨事务，不复用原生包装对象。
+
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
@@ -83,11 +85,12 @@ SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功�
 ```
 - `unplaced_functions`：提交后按器件标识重新读回的未放置功能完整名称数组；没有时或预览/恢复时为 `[]`。模板 PLC 保留 `:1/:2` 等连接点后缀；`device.tag` 沿用主功能完整名称，可用返回名称查询设备。
 - `functions`：设备的全部功能数；`unplaced`：其中没有放置的（S20：线圈放置，4 个触点未放置）。
+- `assignedFunction`：已提交分配未放置功能时返回 true，否则省略；`pins`：分配后按原生顺序读回的引脚名称数组，未分配或无法读取时省略。分配后重读 `unplaced` 和 `unplaced_functions`；引脚与模板不符或原未放置功能仍存在时按 ADR-0046 保留提交，在 `hint` 给出警告，先检查设备再继续。
 - `undo`、`recovered`：同 `eplan_page_create`。标识按项目数据处理，经过 ResultShaper。
 - `hint`：说明其余功能保持未放置，以及 PLC 组符号宏和同标识多个符号的绘制方式；页的幅面未知时（新建的空页，A14）说明只检查了 x、y 不小于 0。
 - PLC 已确认提交后，无法定位对象或完成回读核对时仍返回 `execution=committed`；`hint` 警告列明未能验证的点身份/页、卡归属、原生属性或显示布局，提示读取页面与 `eplan_plc_get` 后再决定后续操作。保留已读到的 PLC 值及撤销步骤警告，不暂停写入；只有提交本身或执行结果确实不明时才返回 `OUTCOME_UNKNOWN`。
 - 一行摘要：`Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.` / `Dry run: would place one device. Nothing was changed.`
-- 符号来源另带 `symbol`（解析后的库/符号/变体及局部引脚）和 `changes`（审批清单）；`functions=1,unplaced=0` 在 dry-run 为预测、提交后为读回，未带部件时 `part,variant` 为空，带部件时返回选定部件和变体。dry-run 不猜 `visibleTag/category`；提交后显示标识取请求的带前缀属性实际显示串，未请求时为空。20214 由 EPLAN 计算；默认空的 20029[2] 不算请求的属性。
+- 符号来源另带 `symbol`（解析后的库/符号/变体及局部引脚）和 `changes`（审批清单）；dry-run 预测 `functions=1,unplaced=0`，`join_device` 分配后读回实际未放置数。未带部件时 `part,variant` 为空，带部件时返回选定部件和变体。dry-run 不猜 `visibleTag/category`；提交后显示标识取请求的带前缀属性实际显示串，未请求时为空。20214 由 EPLAN 计算；默认空的 20029[2] 不算请求的属性。
 
 - 位置框来源返回 `locationBox={structure,bounds:[minX,minY,maxX,maxY],outline:"dashed",affectedDevices:[]}`：dry-run 和 recovered 为预测，正常提交后为实际读回；`functions=0,unplaced=0`，兼容字段 `device.tag/category` 为位置标识/LocationBox（dry-run category 为空），不作为 `eplan_device_get` 的设备键；`symbol` 为解析后的 SPECIAL/SC。框内设备保持原结构，工具不重命名设备。
 

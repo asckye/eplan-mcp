@@ -62,7 +62,7 @@ public sealed class DevicePlaceExecuteOperation(
             if (!DevicePlacementRoute.UsesPart(args))
             {
                 SymbolSearchItem symbol = Newtonsoft.Json.Linq.JObject.Parse(plan.Details!["symbol"]).ToObject<SymbolSearchItem>(BridgeJson.Serializer)!;
-                symbolSession = openSymbol!(request.Project.Path, request.Page.Name, symbol, args.Part is not null);
+                symbolSession = openSymbol!(request.Project.Path, request.Page.Name, symbol, args.Part is not null || args.JoinDevice == true);
             }
         }
         catch (BridgeErrorException ex)
@@ -80,11 +80,14 @@ public sealed class DevicePlaceExecuteOperation(
                 return data;
             }, _ => true, verifyCommitted: data =>
             {
-                if (args.Part is null)
+                if (args.Part is null && args.JoinDevice != true)
                 { return; }
                 if (symbolSession is not IDeviceSymbolCommittedReadback readback)
                 { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The placed function cannot read back its part reference."); }
-                readback.AttachPart(args, data);
+                if (args.Part is not null)
+                { readback.AttachPart(args, data); }
+                if (args.JoinDevice == true)
+                { readback.AssignUnplacedFunction(args, data); }
             });
             string? warning = result.Warning;
             if ((args.JoinDevice == true || args.PlcConnectionPoint is not null || DeviceSymbolPlan.BlackBox(args) || DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args)) && symbolSession is IDeviceSymbolCommittedReadback committedReadback)

@@ -80,7 +80,9 @@ internal class SymbolReference(long oid) : GraphicalPlacement(oid, 17)
         public PropertyPlacementsSchema Selected { get => _selected; set { _selected = value; OnSelect?.Invoke(value); } }
     }
     public PropertyPlacementsSchemasList PropertyPlacementsSchemas { get; } = new();
-    public BoxSymbolVariant SymbolVariant { get; } = new();
+    private readonly BoxSymbolVariant _symbolVariant = new();
+    public Exception? SymbolVariantReadError { get; set; }
+    public BoxSymbolVariant SymbolVariant => SymbolVariantReadError is { } error ? throw error : _symbolVariant;
     public PinBase[] GraphicalConnectionPoints { get; set; } = [];
     public GraphicalConnection[] GraphicalConnections { get; set; } = [];
     public PropertyPlacement[] PropertyPlacements { get; set; } = [];
@@ -164,7 +166,11 @@ internal partial class Function(long oid = 1) : FunctionBase(oid)
     public ArticleReference[] ArticleReferences { get { CheckNative?.Invoke(); return _articleReferences; } set { CheckNative?.Invoke(); _articleReferences = value; } }
     public Function[] SubFunctions { get; set; } = [];
     public Function? ParentFunction { get; set; }
-    public Pin[] Pins { get; set; } = [];
+    private Pin[] _pins = [];
+    public Exception? PinsReadError { get; set; }
+    public Pin[] Pins { get => PinsReadError is { } error ? throw error : _pins; set => _pins = value; }
+    public Action<Function>? OnAssign { get; set; }
+    public void Assign(Function target) => OnAssign!(target);
 }
 
 internal sealed class PlotFrame(params Placement[] children)

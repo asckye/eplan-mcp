@@ -21,6 +21,8 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolArrangement.cs" Link="Adapters\EplanSymbolArrangement.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolReader.cs" Link="Adapters\EplanSymbolReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.cs" Link="Adapters\EplanDeviceSymbolPlacement.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Assignment.cs" Link="Adapters\EplanDeviceSymbolPlacement.Assignment.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanFunctionAssignment.cs" Link="Adapters\EplanFunctionAssignment.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Plc.cs" Link="Adapters\EplanDeviceSymbolPlacement.Plc.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Terminal.cs" Link="Adapters\EplanDeviceSymbolPlacement.Terminal.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Displays.cs" Link="Adapters\EplanDeviceSymbolPlacement.Displays.cs" />

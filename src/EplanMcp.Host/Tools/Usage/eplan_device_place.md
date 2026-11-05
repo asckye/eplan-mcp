@@ -18,7 +18,7 @@ dry_run omitted/true: preview only, execution=not_started. false executes.
 3. part + symbol_variant changes the template variant; invalid rolls back.
 4. Prefer part templates: eplan_part_search, variant 1. library/symbol/symbol_variant overrides graphics, preserving logical definition; others stay unplaced. PLC module: eplan_macro_insert part. Symbols: eplan_symbol_search.
 
-join_device:true adds a secondary symbol to an existing tag (else DEVICE_NOT_FOUND); no terminal/PLC join.
+join_device:true adds a secondary symbol to an existing tag (else DEVICE_NOT_FOUND) and assigns the next same-category unplaced function, ordered by ObjectIdentifier. Given connection_designations must match its ordered pins exactly; otherwise the first match is used. No match keeps the new symbol. No terminal/PLC join.
 
 SPECIAL/DC: tag + upper-right corner_x/y. DCP/DCPP3: same tag + one connection_designations pin; name=tag:pin. blackBox=tag/bounds/functionsInside (preview membership unknown); native device.type/isMainFunction.
 
@@ -28,10 +28,11 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 
 - device: tag/visibleTag/category (preview=requested tag); functions/unplaced=count; unplaced_functions=names+PLC suffixes, [] if unknown.
 - execution=committed/not_started; dryRun=preview; undo="AI: eplan_device_place"; recovered=confirmed lost reply; hint=checks.
-- Symbols: symbol=variant/pins, changes=approval; part/variant=empty unless assigned; functions/unplaced=1/0.
+- Symbols: symbol=variant/pins, changes=approval; part/variant=empty unless assigned; preview functions/unplaced=1/0.
+- assignedFunction=true when an unplaced function was assigned; omitted otherwise. pins=assigned symbol's readback; unplaced=count after assignment. Readback mismatch: committed+warning, inspect eplan_device_get before repeating.
 - Symbol-route display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm}. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite relative offsets, negatives allowed; 20214=prefixed tag. Part templates allow only symbol selection.
 - connection_designations: one nonblank pin/search order, <=64 chars, no controls; indexed 20022 verifies names.
-- Mismatch/cancel: rollback. One Ctrl+Z. visibleTag=null without tag display.
+- Creation mismatch/cancel: rollback; assignment readback mismatch: committed+warning. One Ctrl+Z. visibleTag=null without tag display.
 - location_box: + and 1-64 letters/digits/_/dots; no tag/part/symbol. SPECIAL/SC/0, dashed. x/y lower-left, corner_x/y upper-right; positive area.
 - locationBox: structure/bounds[minX,minY,maxX,maxY]/outline=dashed/affectedDevices=[]; preview predicted. functions/unplaced=0; device.tag/category=structure/LocationBox. No duplicate structure. Recovery: eplan_page_get include_drawings.
 

@@ -163,8 +163,39 @@ public sealed class DeviceJoinPlanTests
         public void ReadCommitted(string projectPath, PlacedDevice result) => throw new NotSupportedException();
     }
 
-    private sealed class Placement(FakeTransactions transactions, bool main) : IDeviceSymbolPlacement
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void JoinContact_AssignsAfterCommitBeforeReadback(bool withPins)
     {
+        Existing("=F+A1-K2");
+        DevicePlaceArgs args = Args();
+        args.Symbol = _source.Symbol.Name = "S";
+        _source.Symbol.ConnectionPoints = [new() { Location = [0, 0] }, new() { Location = [0, 4] }];
+        args.ConnectionDesignations = withPins ? ["1/L1", "2/T1"] : null;
+        args.Fingerprint = Plan(args).Fingerprint;
+        var placement = new Placement(_transactions, false);
+        var operation = new DevicePlaceExecuteOperation(_catalog, _pages, _names, _parts, _source, _transactions, _source, (_, _, _, _) => placement);
+        var result = Assert.IsType<DevicePlaceData>(operation.Execute(args));
+        Assert.True(result.AssignedFunction);
+        Assert.Equal(["1/L1", "2/T1"], result.Pins!);
+        Assert.True(placement.ReadBack);
+    }
+
+    private sealed class Placement(FakeTransactions transactions, bool main) : IDeviceSymbolPlacement, IDeviceSymbolCommittedReadback
+    {
+        public bool ReadBack { get; private set; }
+        public void AttachPart(DevicePlaceArgs args, DevicePlaceData data) { }
+        public void AssignUnplacedFunction(DevicePlaceArgs args, DevicePlaceData data)
+        {
+            Assert.Contains("Commit", transactions.Calls);
+            Assert.DoesNotContain("CloseUndo", transactions.Calls);
+            Assert.False(ReadBack);
+            data.AssignedFunction = true;
+            data.Pins = args.ConnectionDesignations ?? ["1/L1", "2/T1"];
+        }
+        public void ReadCommitted(DevicePlaceArgs args, DevicePlaceData data)
+        { Assert.Contains("CloseUndo", transactions.Calls); ReadBack = true; }
         public ITransactionScope Begin(string undoDescription) => transactions.Begin(undoDescription);
         public DevicePlaceData Place(DevicePlaceArgs args, string tag) => new() { Tag = tag, Page = args.Page, IsMainFunction = main, Functions = 1 };
         public IReadOnlyList<DeviceSymbolDisplay> ReadDisplays() => [];

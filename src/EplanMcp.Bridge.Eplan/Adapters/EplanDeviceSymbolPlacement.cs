@@ -15,7 +15,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
     private readonly string _projectPath;
     private readonly string _pageName;
     private readonly SymbolSearchItem _symbol;
-    private readonly bool _hasPart;
+    private readonly bool _commitBeforeReadback;
     private IReadOnlyList<DeviceSymbolDisplay> _placedDisplays = [];
     private long? _placedFunctionId;
     private long? _plcCardId;
@@ -28,10 +28,10 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         _projectPath = path;
         _pageName = page;
         _symbol = symbol;
-        _hasPart = hasPart;
+        _commitBeforeReadback = hasPart;
     }
 
-    public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(_projectPath), undoDescription, undoCommitted: _hasPart);
+    public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(_projectPath), undoDescription, undoCommitted: _commitBeforeReadback);
 
     public DevicePlaceData Place(DevicePlaceArgs args, string tag)
     {

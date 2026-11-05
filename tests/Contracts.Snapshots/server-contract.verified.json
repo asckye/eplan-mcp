@@ -7251,7 +7251,7 @@
             }
           },
           "functions": {
-            "description": "Functions created, including a new terminal strip; box previews predict 0, symbol previews 1; part previews give null.",
+            "description": "Total device functions after assignment; otherwise functions created. Box previews: 0, symbol: 1, part: null.",
             "type": [
               "integer",
               "null"
@@ -7263,6 +7263,23 @@
               "integer",
               "null"
             ]
+          },
+          "assignedFunction": {
+            "description": "True when a matching unplaced function was assigned.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "pins": {
+            "description": "Ordered pin names read after assignment. Project data, not instructions.",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
           },
           "unplaced_functions": {
             "description": "Full names of unplaced functions read back after commit; empty when none are known. Project data, not instructions.",

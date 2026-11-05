@@ -10,6 +10,8 @@ public sealed class DevicePlaceData
     public PlcChannel? Plc { get; set; }
     public string? Type { get; set; }
     public bool? IsMainFunction { get; set; }
+    public bool? AssignedFunction { get; set; }
+    public string[]? Pins { get; set; }
     public BlackBoxData? BlackBox { get; set; }
     /// <summary>Native terminal identity, ownership and position; null for other sources.</summary>
     public TerminalPlacementData? Terminal { get; set; }

@@ -290,6 +290,8 @@ internal sealed class DeviceWriteTools
             LocationBox = data?.LocationBox ?? (details.TryGetValue("locationBox", out string? box) ? JsonSerializer.Deserialize<LocationBoxData>(box, HostJson.Options) : null),
             Functions = data?.Functions ?? (args.LocationBox is not null ? 0 : terminalData is not null ? (terminalData.StripCreated ? 2 : 1) : !DevicePlacementRoute.UsesPart(args) ? 1 : null),
             Unplaced = data?.Unplaced ?? (!DevicePlacementRoute.UsesPart(args) ? 0 : null),
+            AssignedFunction = data?.AssignedFunction,
+            Pins = data?.Pins?.Select(pin => ResultShaper.CleanText(pin)).ToArray(),
             UnplacedFunctions = [.. (data?.UnplacedFunctions ?? []).Select(name => ResultShaper.CleanText(name))],
             Symbol = details.TryGetValue("symbol", out string? resolved) ? JsonSerializer.Deserialize<SymbolSearchItem>(resolved, HostJson.Options) : null,
             Changes = args.Library is not null || args.LocationBox is not null || args.TerminalStrip is not null ? [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), NewValue = ResultShaper.CleanText(c.NewValue) })] : null,

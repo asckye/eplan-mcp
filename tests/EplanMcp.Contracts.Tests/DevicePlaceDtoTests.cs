@@ -7,6 +7,17 @@ namespace EplanMcp.Contracts.Tests;
 public sealed class DevicePlaceDtoTests
 {
     [Fact]
+    public void AssignmentReadback_RoundTripsAcrossPipeSerializers()
+    {
+        var data = new DevicePlaceData { AssignedFunction = true, Pins = ["1/L1", "2/T1"], Unplaced = 3 };
+        DevicePlaceData bridge = JsonConvert.DeserializeObject<DevicePlaceData>(System.Text.Json.JsonSerializer.Serialize(data, JsonSerializerOptions.Web))!;
+        DevicePlaceData host = System.Text.Json.JsonSerializer.Deserialize<DevicePlaceData>(JsonConvert.SerializeObject(bridge))!;
+        Assert.True(host.AssignedFunction);
+        Assert.Equal(data.Pins, host.Pins);
+        Assert.Equal(3, host.Unplaced);
+    }
+
+    [Fact]
     public void UnplacedFunctionNames_RoundTripAcrossPipeSerializers()
     {
         var data = new DevicePlaceData { UnplacedFunctions = ["=GAA+A1-KF20:2", "=GAA+A1-KF20:3"] };

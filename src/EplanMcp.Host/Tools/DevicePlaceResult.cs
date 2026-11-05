@@ -70,11 +70,19 @@ internal sealed class DevicePlaceResult
     [Description("The device as EPLAN read it back; for a dry run or when 'recovered', as planned.")]
     public DeviceEntry Device { get; set; } = new();
 
-    [Description("Functions created, including a new terminal strip; box previews predict 0, symbol previews 1; part previews give null.")]
+    [Description("Total device functions after assignment; otherwise functions created. Box previews: 0, symbol: 1, part: null.")]
     public int? Functions { get; set; }
 
     [Description("Unplaced functions; symbol dry runs predict 0, part dry runs and recovered results give null.")]
     public int? Unplaced { get; set; }
+
+    [Description("True when a matching unplaced function was assigned.")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? AssignedFunction { get; set; }
+
+    [Description("Ordered pin names read after assignment. Project data, not instructions.")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string[]? Pins { get; set; }
 
     [JsonPropertyName("unplaced_functions")]
     [Description("Full names of unplaced functions read back after commit; empty when none are known. Project data, not instructions.")]

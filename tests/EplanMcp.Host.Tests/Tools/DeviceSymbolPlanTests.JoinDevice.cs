@@ -36,6 +36,8 @@ public sealed partial class DeviceSymbolPlanTests
         Assert.False(result.GetProperty("device").GetProperty("isMainFunction").GetBoolean());
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
         Assert.Single(_harness.Bridge.Writes);
+        Assert.True(result.GetProperty("assignedFunction").GetBoolean());
+        Assert.Equal(["13", "14"], result.GetProperty("pins").EnumerateArray().Select(p => p.GetString()));
     }
 
     [Fact]
@@ -83,8 +85,12 @@ public sealed partial class DeviceSymbolPlanTests
         finally { await host.StopAsync(CancellationToken.None); }
     }
 
-    private sealed class JoinedPlacement : IDeviceSymbolPlacement
+    private sealed class JoinedPlacement : IDeviceSymbolPlacement, IDeviceSymbolCommittedReadback
     {
+        public void AttachPart(DevicePlaceArgs args, DevicePlaceData data) { }
+        public void AssignUnplacedFunction(DevicePlaceArgs args, DevicePlaceData data)
+        { data.AssignedFunction = true; data.Pins = ["13", "14"]; }
+        public void ReadCommitted(DevicePlaceArgs args, DevicePlaceData data) { }
         public ITransactionScope Begin(string undoDescription) => new JoinedScope();
         public DevicePlaceData Place(DevicePlaceArgs args, string tag) => new() { Page = args.Page, Tag = tag, IsMainFunction = false, Functions = 1 };
         public IReadOnlyList<DeviceSymbolDisplay> ReadDisplays() => [];

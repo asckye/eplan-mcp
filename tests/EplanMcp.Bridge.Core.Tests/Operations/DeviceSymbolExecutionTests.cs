@@ -230,6 +230,7 @@ public sealed partial class DeviceSymbolExecutionTests
         private PlcChannel? _channel;
         public bool ReadCommittedCalled { get; private set; }
         public void AttachPart(DevicePlaceArgs args, DevicePlaceData data) { }
+        public void AssignUnplacedFunction(DevicePlaceArgs args, DevicePlaceData data) { }
         public ITransactionScope Begin(string undoDescription) => transactions.Begin(undoDescription);
         public DevicePlaceData Place(DevicePlaceArgs args, string tag)
         {
