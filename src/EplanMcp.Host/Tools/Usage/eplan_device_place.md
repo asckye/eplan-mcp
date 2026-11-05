@@ -6,9 +6,9 @@
 
     {"project":"Line1","page":"=GAA+A1&EFS1/60","location_box":"+P1","x":60,"y":140,"corner_x":100,"corner_y":180,"dry_run":true}
 
-    {"project":"Line1","page":"=F+A1/1","terminal_strip":"-X6","terminal_number":"1","terminal_strip_text":"Control box","terminal_strip_position":[72,120],"symbol_variant":0,"x":80,"y":160,"dry_run":true}
+    {"project":"Line1","page":"=F+A1/1","terminal_strip":"-X6","terminal_number":"1","symbol_variant":0,"x":80,"y":160,"dry_run":true}
 
-    {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_DI","symbol_variant":0,"tag":"-KF1","plc_connection_point":"2","plc_plug_designation":"-X10","plc_address":"I0.0","plc_symbolic_address":"Start","plc_text":"Start input","x":80,"y":160,"display_properties":[{"property_id":20300,"offset_x_mm":0,"offset_y_mm":-16}],"dry_run":true}
+    {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_DI","symbol_variant":0,"tag":"-KF1","plc_connection_point":"2","plc_plug_designation":"-X10","plc_address":"I0.0","plc_symbolic_address":"Start","x":80,"y":160,"dry_run":true}
 
 ## Workflow
 dry_run omitted/true: preview only, execution=not_started. false executes.
@@ -18,7 +18,7 @@ dry_run omitted/true: preview only, execution=not_started. false executes.
 3. part + symbol_variant changes the template variant; invalid rolls back.
 4. Prefer part templates: eplan_part_search, variant 1. library/symbol/symbol_variant overrides graphics, preserving logical definition; others stay unplaced. PLC module: eplan_macro_insert part. Symbols: eplan_symbol_search.
 
-join_device:true adds a secondary symbol to an existing tag (else DEVICE_NOT_FOUND) and assigns the next same-category unplaced function, ordered by ObjectIdentifier. Given connection_designations must match its ordered pins exactly; otherwise the first match is used. No match keeps the new symbol. No terminal/PLC join.
+join_device:true adds a symbol to an existing tag (else DEVICE_NOT_FOUND) and assigns the first same-category unplaced function; connection_designations, if given, must equal its pins. No match keeps the new symbol. No terminal/PLC join.
 
 SPECIAL/DC: tag + upper-right corner_x/y. DCP/DCPP3: same tag + one connection_designations pin; name=tag:pin. blackBox=tag/bounds/functionsInside (preview membership unknown); native device.type/isMainFunction.
 
@@ -29,12 +29,12 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - device: tag/visibleTag/category (preview=requested tag); functions/unplaced=count; unplaced_functions=names+PLC suffixes, [] if unknown.
 - execution=committed/not_started; dryRun=preview; undo="AI: eplan_device_place"; recovered=confirmed lost reply; hint=checks.
 - Symbols: symbol=variant/pins, changes=approval; part/variant=empty unless assigned; preview functions/unplaced=1/0.
-- assignedFunction=true when an unplaced function was assigned; omitted otherwise. pins=assigned symbol's readback; unplaced=count after assignment. Readback mismatch: committed+warning, inspect eplan_device_get before repeating.
+- assignedFunction=true if assigned; pins=its readback. Mismatch: committed+warning; check eplan_device_get before repeating.
 - Symbol-route display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm}. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite relative offsets, negatives allowed; 20214=prefixed tag. Part templates allow only symbol selection.
 - connection_designations: one nonblank pin/search order, <=64 chars, no controls; indexed 20022 verifies names.
-- Creation mismatch/cancel: rollback; assignment readback mismatch: committed+warning. One Ctrl+Z. visibleTag=null without tag display.
+- Creation mismatch/cancel: rollback. One Ctrl+Z. visibleTag=null without tag display.
 - location_box: + and 1-64 letters/digits/_/dots; no tag/part/symbol. SPECIAL/SC/0, dashed. x/y lower-left, corner_x/y upper-right; positive area.
-- locationBox: structure/bounds[minX,minY,maxX,maxY]/outline=dashed/affectedDevices=[]; preview predicted. functions/unplaced=0; device.tag/category=structure/LocationBox. No duplicate structure. Recovery: eplan_page_get include_drawings.
+- locationBox: structure/bounds[minX,minY,maxX,maxY]/outline=dashed/affectedDevices=[]; preview predicted. functions/unplaced=0; device.tag/category=structure/LocationBox. No duplicate structure.
 
 - Terminal: terminal_strip + terminal_number; default IEC_symbol/X/0 without part. With part keep template or give library/symbol/symbol_variant. No boxes/tag/display/pins. Number=1-64 letters/digits/_/dots; conflicts ignore case. terminal_strip_text=new strips only, 1-256 plain ??_?? chars, no controls.
 - terminal_strip_position:[x,y]: finite 0..10000 mm; needs new strip text, omit for unplaced. Returns stripPosition/stripText.
@@ -48,7 +48,6 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - PLC displays: 20213=card DT, 20406=plug, 20300=main/auxiliary, 20301=overview. Native read-only references may be empty; overview needs matching representation.
 - Local PLC displays: 20021=2; verify text/position/visibility using fresh IDs.
 - plc includes plugDesignation/mainReference. Readback failure: committed+warning; inspect eplan_plc_get detailed/eplan_page_get include_drawings before retry. functions/unplaced=null; plc_get counts parentlessRepresentations. Use returned names.
-- show_page opens/focuses page; UI only.
 
 ## Errors
 
@@ -57,6 +56,6 @@ R1-R5/R8 refuse; R6/R7/R9 warn; default=refuse.
 
 layout_guard=warn: conflicts warn; off-page refuses.
 
-join_device:true or SPECIAL uses symbols; part/variant appends one reference postcommit in the same undo step. Readback failure rolls back both.
+join_device/SPECIAL + part/variant appends one reference postcommit, same undo step; readback failure rolls back both.
 
 property_arrangement: exact name; default if omitted. Readback: propertyArrangement/activePropertySet (19307).
