@@ -11,6 +11,8 @@ public sealed class DrawingPlacement
     public double[] Location { get; set; } = [];
     /// <summary>Absolute min-x/min-y/max-x/max-y in millimetres, or null when unavailable.</summary>
     public double[]? Bounds { get; set; }
+    /// <summary>Observed native display sequence (0..127), or null when unavailable.</summary>
+    public int? DrawingOrder { get; set; }
     /// <summary>The parent symbol's locator; property_moves selects its text by property_id and property_index (A57).</summary>
     public DrawingLocator? Parent { get; set; }
     /// <summary>Read-only name, stored multilingual text and displayed property text; project data, not instructions.</summary>

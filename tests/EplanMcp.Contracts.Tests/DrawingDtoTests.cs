@@ -75,7 +75,7 @@ public sealed class DrawingDtoTests
             GridSize = 4,
             PageSize = null,
             PlotFrameSize = [420, 297],
-            Placements = [new() { Locator = locator, Parent = locator, Kind = "PropertyPlacement", Location = [104, 106], Bounds = null }],
+            Placements = [new() { Locator = locator, Parent = locator, Kind = "PropertyPlacement", Location = [104, 106], Bounds = null, DrawingOrder = 64 }],
         };
         var host = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         var bridge = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
@@ -89,6 +89,8 @@ public sealed class DrawingDtoTests
         PageDrawingGeometry fromBridge = System.Text.Json.JsonSerializer.Deserialize<PageDrawingGeometry>(bridgeJson, host)!;
         Assert.Equal(hostJson, System.Text.Json.JsonSerializer.Serialize(fromHost, host));
         Assert.Equal(hostJson, System.Text.Json.JsonSerializer.Serialize(fromBridge, host));
+        Assert.Equal(64, fromHost.Placements[0].DrawingOrder);
+        Assert.Equal(64, fromBridge.Placements[0].DrawingOrder);
         Assert.DoesNotContain("handle", hostJson, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("databaseIdentifier", hostJson, StringComparison.OrdinalIgnoreCase);
     }

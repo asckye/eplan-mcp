@@ -26,6 +26,7 @@ internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
     public long ObjectIdentifier { get { CheckNative?.Invoke(); return oid; } }
     public string Prefix { get; set; } = "53";
     public int IdentifierType { get; set; } = type;
+    public short DrawingOrder { get; set; } = 64;
     private PointD _location;
     public Exception? LocationError { get; set; }
     public PointD Location { get => LocationError is { } error ? throw error : _location; set => _location = value; }

@@ -150,6 +150,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             int? count = ReadOptional(() => placement is Block countedBlock ? countedBlock.Count : (int?)null);
             long? group = ReadOptional(() => (long?)placement.Group?.ObjectIdentifier);
             bool? grouped = ReadOptional(() => (bool?)(placement.Group is not null));
+            int? drawingOrder = ReadOptional(() => (int?)placement.DrawingOrder);
             double? rotation = ReadOptional(() => (placement as PropertyPlacement)?.Rotation);
             bool? docked = ReadOptional(() => (placement as PropertyPlacement)?.IsDocked);
             bool? visible = ReadOptional(() => (placement as PropertyPlacement)?.IsVisible);
@@ -234,6 +235,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 rotation,
                 docked,
                 group,
+                drawingOrder,
                 location,
                 bounds,
                 content = text,
@@ -276,6 +278,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 Kind = placement is PropertyPlacement ? nameof(PropertyPlacement) : placement.GetType().Name, // ContextPropertyPlacement too
                 Location = blockChild ? [] : location,
                 Bounds = blockChild ? null : bounds,
+                DrawingOrder = drawingOrder,
                 Parent = parent,
                 // A57: default library texts become local context copies when edited. Identify both by
                 // their parent and slot/content digest so copying does not change the drawing identity.

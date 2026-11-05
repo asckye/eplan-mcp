@@ -1408,7 +1408,7 @@
     "generation": "One call commits placement then generation: 2 undo steps. Generation failure undoes placement automatically.",
     "undoSteps": 2,
     "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
-    "fingerprint": "e650dd142d711cd39d3f6d8b2be8beefa7c27dd9d80fb96e5bf2cbb7add1767f"
+    "fingerprint": "eb1cba7432b5c64bfb461fd1e6979de70bd15f82606335d12a710b27a2053234"
   },
   "interruptionExample": {
     "project": "Line1",
@@ -1700,6 +1700,7 @@
                   8.0,
                   10.0
                 ],
+                "drawingOrder": null,
                 "parent": null,
                 "properties": {}
               },
@@ -1722,6 +1723,7 @@
                   26.0,
                   28.0
                 ],
+                "drawingOrder": null,
                 "parent": null,
                 "properties": {}
               }
@@ -1779,6 +1781,7 @@
                   8.0,
                   10.0
                 ],
+                "drawingOrder": null,
                 "parent": null,
                 "properties": {}
               },
@@ -1801,6 +1804,7 @@
                   26.0,
                   28.0
                 ],
+                "drawingOrder": null,
                 "parent": null,
                 "properties": {}
               }
@@ -1815,7 +1819,7 @@
       ],
       "preservedEndpoints": []
     },
-    "fingerprint": "350d5a8e17d2069e63d2c830a1dbeaf950593c3176a9bd455db62ed89b386f1c"
+    "fingerprint": "a2927f11b4cf123ba8decd15ecbf427e8886617d76b3739f67602ca2bef46d83"
   },
   "interruptionReadback": [
     {
@@ -2703,7 +2707,7 @@
         "before": null
       }
     ],
-    "fingerprint": "732d1cf54726b6a052960585d0f24136287d8d1d4d0ae8435d531ffb5b4f014d"
+    "fingerprint": "8c643869d480d5c032dfc7c77693a4cd9e90225fa115f441da14cd2dac294e78"
   },
   "definitionPointExample": {
     "project": "Line1",
@@ -2864,7 +2868,7 @@
         "articles": null
       }
     ],
-    "fingerprint": "e8bce851b51abafe728d7e808cac6964a2b2919038138d97081186713ce99e23"
+    "fingerprint": "21337e362896f3b2d4da606f1a3ba6ddf6dd7c7d074299b5b189b03c25de213d"
   },
   "potentialDefinitionExample": {
     "project": "Line1",
@@ -2927,7 +2931,7 @@
         }
       }
     ],
-    "fingerprint": "8597f196d3a72cd68db2e37d61c2da5f2ab319d72f126c465632ed9289d1b105"
+    "fingerprint": "34a045a627d5a95c2224caefad3c634903143df49c1347db1efbc16f23fd489e"
   },
   "partOnlyDefinitionExample": {
     "project": "Line1",
@@ -3091,7 +3095,7 @@
     "generation": "Deferred: place and read back objects; call eplan_connection_generate after all placements. 1 undo step.",
     "undoSteps": 1,
     "warning": "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary fallback: Page.Size minus layout.marginMm.",
-    "fingerprint": "67c9d76bca5086b20d2c7dcf0e8ec5c8bf945fffd6b053bbfa92d673471a02d4"
+    "fingerprint": "11b41de3e9e5113f19983f058557e001f71f20ad1392641f96fcb5d763a3597d"
   },
   "emptyDefinitionExample": {
     "project": "Line1",
