@@ -43,7 +43,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
         harness.Bridge.Handlers[OperationNames.DevicePlaceExecute] = sent =>
         {
             try
-            { return new DevicePlaceExecuteOperation(_store, _store, _store, _store, _store, null!, _store, (_, _, symbol) => { _placement.Resolved = symbol; return _placement; }, _store).Execute(sent!)!; }
+            { return new DevicePlaceExecuteOperation(_store, _store, _store, _store, _store, null!, _store, (_, _, symbol, _) => { _placement.Resolved = symbol; return _placement; }, _store).Execute(sent!)!; }
             catch (BridgeErrorException ex) { throw new BridgeCallException(ex.Error); }
         };
     }
@@ -389,13 +389,15 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
                     store.Channels.Add(channel);
                     return new() { Tag = tag, Page = args.Page, Functions = 1, Category = "PLCTerminal", Plc = channel };
                 }
-                return new() { Tag = tag, VisibleTag = "-K2", Page = args.Page, Functions = 1, Category = Resolved?.FunctionCategory ?? "Coil" };
+                return new() { Tag = tag, VisibleTag = "-K2", Page = args.Page, Functions = 1, Category = Resolved?.FunctionCategory ?? "Coil", IsMainFunction = args.JoinDevice == true ? false : null };
             }
             finally { Calls.Add("ReleaseLists"); }
         }
         public void ReadCommitted(DevicePlaceArgs args, DevicePlaceData data)
         {
             Calls.Add("CommittedReadback");
+            if (args.Part is not null)
+            { data.Part = args.Part; data.Variant = args.Variant ?? "1"; }
             if (FailAt == "CommittedReadback")
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Display lost after commit."); }
             if (FailAt == "CommittedNameLookup")
@@ -416,7 +418,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
             public void CloseUndo() => owner.Calls.Add("CloseUndo");
             public void Rollback()
             {
-                Assert.True(owner.Calls[^1] is "ReleaseLists" or "ReadDisplays");
+                Assert.True(owner.Calls[^1] is "ReleaseLists" or "ReadDisplays" || owner.Args?.Part is not null && owner.Calls[^1] == "CommittedReadback");
                 owner.Calls.Add("Abort");
                 store.Names.Clear();
                 store.Names.AddRange(names);

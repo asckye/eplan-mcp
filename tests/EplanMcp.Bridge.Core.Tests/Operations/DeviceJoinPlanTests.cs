@@ -116,7 +116,7 @@ public sealed class DeviceJoinPlanTests
         args.Fingerprint = Plan(args).Fingerprint;
         args.JoinDevice = false;
         var operation = new DevicePlaceExecuteOperation(_catalog, _pages, _names, _parts, _source, _transactions, _source,
-            (_, _, _) => throw new InvalidOperationException("A stale plan must not open native objects."));
+            (_, _, _, _) => throw new InvalidOperationException("A stale plan must not open native objects."));
 
         BridgeError error = Assert.Throws<BridgeErrorException>(() => operation.Execute(args)).Error;
 
@@ -133,7 +133,7 @@ public sealed class DeviceJoinPlanTests
         DevicePlaceArgs args = Args();
         args.Fingerprint = Plan(args).Fingerprint;
         var placement = new Placement(_transactions, main);
-        var operation = new DevicePlaceExecuteOperation(_catalog, _pages, _names, _parts, _source, _transactions, _source, (_, _, _) => placement);
+        var operation = new DevicePlaceExecuteOperation(_catalog, _pages, _names, _parts, _source, _transactions, _source, (_, _, _, _) => placement);
         if (main)
         {
             BridgeError error = Assert.Throws<BridgeErrorException>(() => operation.Execute(args)).Error;

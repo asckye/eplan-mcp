@@ -18,7 +18,7 @@ public sealed class DevicePlaceExecuteOperation(
     IDevicePlacer placer,
     ITransactionScopeFactory transactions,
     ISymbolReader? symbols = null,
-    Func<string, string, SymbolSearchItem, IDeviceSymbolPlacement>? openSymbol = null,
+    Func<string, string, SymbolSearchItem, bool, IDeviceSymbolPlacement>? openSymbol = null,
     IPlcReader? plc = null)
     : Operation<DevicePlaceArgs, DevicePlaceData>, IWriteOperation
 {
@@ -62,7 +62,7 @@ public sealed class DevicePlaceExecuteOperation(
             if (!DevicePlacementRoute.UsesPart(args))
             {
                 SymbolSearchItem symbol = Newtonsoft.Json.Linq.JObject.Parse(plan.Details!["symbol"]).ToObject<SymbolSearchItem>(BridgeJson.Serializer)!;
-                symbolSession = openSymbol!(request.Project.Path, request.Page.Name, symbol);
+                symbolSession = openSymbol!(request.Project.Path, request.Page.Name, symbol, args.Part is not null);
             }
         }
         catch (BridgeErrorException ex)
@@ -78,9 +78,16 @@ public sealed class DevicePlaceExecuteOperation(
                 DevicePlaceData data = PlaceSymbol(symbolSession, args, request.Tag, request.Page.Name);
                 data.Warning = LayoutGuard.Summary(request.LayoutWarnings.Concat(LayoutGuard.AfterWriting(request.Page.Layout!, (symbolSession as LayoutGuard.IMeasurement)?.ReadLayout())));
                 return data;
-            }, _ => true);
+            }, _ => true, verifyCommitted: data =>
+            {
+                if (args.Part is null)
+                { return; }
+                if (symbolSession is not IDeviceSymbolCommittedReadback readback)
+                { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The placed function cannot read back its part reference."); }
+                readback.ReadCommitted(args, data);
+            });
             string? warning = result.Warning;
-            if ((args.JoinDevice == true || args.PlcConnectionPoint is not null || DeviceSymbolPlan.BlackBox(args) || DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args)) && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
+            if (args.Part is null && (args.JoinDevice == true || args.PlcConnectionPoint is not null || DeviceSymbolPlan.BlackBox(args) || DeviceSymbolPlan.ConnectionPoint(args) || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args)) && symbolSession is IDeviceSymbolCommittedReadback committedReadback)
             {
                 try
                 { committedReadback.ReadCommitted(args, result.Result); }

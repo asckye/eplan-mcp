@@ -33,7 +33,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 
 注册参数使用 `x`/`y` 和必填库变体 `symbol_variant`；坐标单位为毫米，原点在页左下角，y 向上。该示例由 Host 的用法示例测试校验参数形状；原生放置的实机状态见本页第 7 节与[待验台账](../process/large-pending.md)。
 
-可选 `join_device` 默认 false，原有重复标识仍返回 `ALREADY_EXISTS`。true 时目标标识必须已存在（否则 `DEVICE_NOT_FOUND`），新功能沿用该名称且不是主功能；提交后按对象号读回名称和主功能状态。此参数仅支持库符号路线；支持端口列表（`connection_designations`/`connection_descriptions`），端子或 PLC 路线仍不支持 `join_device`。
+可选 `join_device` 默认 false，原有重复标识仍返回 `ALREADY_EXISTS`。true 时目标标识必须已存在（否则 `DEVICE_NOT_FOUND`），新功能沿用该名称且不是主功能；提交后按对象号读回名称和主功能状态。此参数仅支持库符号路线，可同时指定部件；支持端口列表（`connection_designations`/`connection_descriptions`），端子或 PLC 路线仍不支持 `join_device`。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
@@ -171,3 +171,5 @@ SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功�
 共享布局守卫：R1–R5、R8 拒绝并给出规则与可用时的空位建议；R6/R7/R9 默认警告，layout.strict 时拒绝。图框可用区无法读取时继续使用页尺寸减 layout.marginMm 回退并在结果中说明。预测未知不拒绝：写前校验插入点、已知外框及路由；写后在原事务内测量符号与属性文字外框，再校验 R1–R9：按 [ADR-0046](../adr/0046-readback-deviation-warnings.md)，只有新对象超出页面（S2）才整次回滚；其余违规照常提交，warning 中逐条给出 `Readback deviation: …`（规则、对象、实测外框和修复工具；偏差不搜索空位，回滚时才给最近空位），外框无法测量记为未验证。warning/hint 报告写前与写后检查；拒绝的 metadata.layoutViolations/layoutChecks 提供几何和阶段。连接提交后才生效的几何沿用原撤销补偿。参数与限制见 [布局守卫设计](../design/2026-11-01-layout-guard.md)。
 
 `layout_guard` 可选 `refuse`（默认）或 `warn`：复现已有图纸时用 `warn`，布局冲突写入 `warning`；超出页面始终拒绝。
+
+符号附带 `part` 时，规划检查部件及变体；创建符号提交后，在仍打开的撤销步骤内开启新事务，按对象标识重新取得该功能并追加数量 1 的部件引用，读回 `ArticleReferences`。失败撤回整次放置。SPECIAL/BCP 示例：`{"library":"SPECIAL","symbol":"BCP","symbol_variant":2,"tag":"+A1-WE1","join_device":true,"part":"RIT.3451500","variant":"1"}`；新增 `DevicePlaceTests.SymbolPart` 在 LargeWrite 验证 BBDEF 后的 BCP 部件及单步撤销，本次未运行。

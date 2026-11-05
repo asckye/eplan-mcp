@@ -77,7 +77,7 @@ public sealed partial class DeviceSymbolExecutionTests
         args.Fingerprint = ((WritePlan)new DevicePlacePlanOperation(_catalog, _pages, _names, _parts, _source, _source, _source).Execute(args)!).Fingerprint;
         var placement = new CommittedPlacement(_transactions, lookupMiss);
         _transactions.FailAt = transactionFailure;
-        var operation = new DevicePlaceExecuteOperation(_catalog, _pages, _names, _parts, _source, _transactions, _source, (_, _, _) => placement, _source);
+        var operation = new DevicePlaceExecuteOperation(_catalog, _pages, _names, _parts, _source, _transactions, _source, (_, _, _, _) => placement, _source);
 
         if (transactionFailure == "Commit")
         {
@@ -211,7 +211,7 @@ public sealed partial class DeviceSymbolExecutionTests
         Assert.Empty(_transactions.Calls);
     }
     private object? Execute(DevicePlaceArgs args) => new DevicePlaceExecuteOperation(_catalog, _pages, _names, _parts, _source, _transactions, _source,
-        (_, _, _) => throw new InvalidOperationException("Must reject before resolving native objects.")).Execute(args);
+        (_, _, _, _) => throw new InvalidOperationException("Must reject before resolving native objects.")).Execute(args);
     private static DevicePlaceArgs Args() => new() { Project = "Line1", Page = "=F+A1/1", Library = "IEC_symbol", Symbol = "K", SymbolVariant = 0, Tag = "-K1", Fingerprint = "old" };
 
     private sealed class Source : IDevicePlacer, ISymbolReader, IPlcReader

@@ -23,7 +23,7 @@ public sealed partial class DeviceSymbolPlanTests
         {
             executed = (DevicePlaceArgs)value!;
             return new DevicePlaceExecuteOperation(_store, _store, _store, _store, _store, null!, _store,
-                (_, _, _) => new JoinedPlacement()).Execute(executed)!;
+                (_, _, _, _) => new JoinedPlacement()).Execute(executed)!;
         };
 
         JsonElement result = WriteToolHarness.Structured(await DeviceWriteTools.DevicePlaceAsync(

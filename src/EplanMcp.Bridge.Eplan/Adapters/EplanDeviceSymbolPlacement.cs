@@ -15,21 +15,23 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
     private readonly string _projectPath;
     private readonly string _pageName;
     private readonly SymbolSearchItem _symbol;
+    private readonly bool _hasPart;
     private IReadOnlyList<DeviceSymbolDisplay> _placedDisplays = [];
     private long? _placedFunctionId;
     private long? _plcCardId;
     private LayoutGuard.Model? _placedLayout;
     public LayoutGuard.Model ReadLayout() => _placedLayout ?? EplanLayout.Measure(_projectPath, _pageName, []);
 
-    public EplanDeviceSymbolPlacement(string path, string page, SymbolSearchItem symbol)
+    public EplanDeviceSymbolPlacement(string path, string page, SymbolSearchItem symbol, bool hasPart = false)
     {
         MainThread.Assert();
         _projectPath = path;
         _pageName = page;
         _symbol = symbol;
+        _hasPart = hasPart;
     }
 
-    public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(_projectPath), undoDescription);
+    public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(_projectPath), undoDescription, undoCommitted: _hasPart);
 
     public DevicePlaceData Place(DevicePlaceArgs args, string tag)
     {
