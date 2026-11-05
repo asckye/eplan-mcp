@@ -74,12 +74,6 @@ public sealed class CallableCoverageTests
     }
 
     [Fact]
-    public void Headline_ShowsTheSharedDenominatorAllThreeCountsAndLiveEvidence()
-    {
-        Assert.Equal("操作层 6 组：可调用 5（工具 2，api_try 4），实机验证 1", FakeCatalog().Headline(1));
-    }
-
-    [Fact]
     public void Json_AddsAnIndependentSummaryWithoutChangingUnitStatuses()
     {
         using JsonDocument json = JsonDocument.Parse(CoverageJson.Serialize(FakeCatalog()));

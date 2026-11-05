@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EplanMcp.Contracts;
@@ -16,6 +15,9 @@ internal sealed record NamespaceReachability(string Scope, int Callable, [proper
 
 internal sealed record CallableCoverage(OperationReachability Operation, ActionReachability Action, IReadOnlyList<NamespaceReachability> OperationsByNamespace)
 {
+    [JsonIgnore]
+    internal IReadOnlySet<string> CallableGroups { get; init; } = new HashSet<string>();
+
     internal static CallableCoverage Build(IEnumerable<Unit> units, IReadOnlyDictionary<string, string> status,
         string trials, IEnumerable<string> propertyGroups, IEnumerable<string> actionWhitelist, IReadOnlyList<ApiRule>? rules = null, IEnumerable<string>? writablePropertyGroups = null)
     {
@@ -42,7 +44,8 @@ internal sealed record CallableCoverage(OperationReachability Operation, ActionR
         return new(new(denominator.Count, tools.Count, apiTry.Count, callable.Count, outside, refusedGroups.Count),
             new(actions.Length, actions.Count(Implemented), actions.Count(Trial)),
             [.. operations.GroupBy(u => u.Scope).OrderBy(g => g.Key, StringComparer.Ordinal)
-                .Select(g => new NamespaceReachability(g.Key, g.Count(u => callable.Contains(u.Key)), g.Count(u => refusedGroups.Contains(u.Key))))]);
+                .Select(g => new NamespaceReachability(g.Key, g.Count(u => callable.Contains(u.Key)), g.Count(u => refusedGroups.Contains(u.Key))))])
+        { CallableGroups = callable };
     }
 
     internal static HashSet<string> ApiTryGroups(string trials, IEnumerable<string> propertyGroups, IReadOnlyList<ApiRule>? refused = null, IEnumerable<string>? writablePropertyGroups = null) => trials.Split('\n')
@@ -62,6 +65,4 @@ internal sealed record CallableCoverage(OperationReachability Operation, ActionR
             + (e.GetProperty("fixed").TryGetProperty("TYPE", out JsonElement type) ? "/" + type.GetString() : ""))];
     }
 
-    internal string Headline(int liveVerified) => string.Create(CultureInfo.InvariantCulture,
-        $"操作层 {Operation.Denominator} 组：可调用 {Operation.Callable}（工具 {Operation.Tools}，api_try {Operation.ApiTry}），实机验证 {liveVerified}");
 }

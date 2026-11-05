@@ -19,7 +19,7 @@ internal sealed record UsedCount(int Used, int Registered);
 internal sealed record ScopeCount(string Scope, int Denominator, int Implemented, int LiveVerified);
 
 /// <summary>A unit the Bridge implements, its status and the tools that reach it (none: infrastructure only).</summary>
-internal sealed record UnitCoverage(string Unit, string Layer, string Status, bool Partial, IReadOnlyList<string> Tools);
+internal sealed record UnitCoverage(string Unit, string Layer, string Status, bool Partial, IReadOnlyList<string> Tools, string? Route = null);
 
 /// <summary>What one tool covers and what backs it: the engineering-task view.</summary>
 internal sealed record ToolCoverage(
@@ -80,6 +80,8 @@ internal sealed class CoverageReport
     public IReadOnlyDictionary<string, VerificationRecord> Verification { get; init; } = new Dictionary<string, VerificationRecord>();
 
     public CallableCoverage? Reachability { get; init; }
+
+    public SortedDictionary<string, RouteCount>? Routes { get; init; }
 
     public static CoverageReport Build(string repositoryRoot, bool includeReachability = true)
     {
@@ -157,6 +159,14 @@ internal sealed class CoverageReport
         bool Counted(Unit u) => !status[u.Key].StartsWith("excluded", StringComparison.Ordinal);
         Unit[] all = [.. catalog.Units.Values];
         LayerCount Count(Func<Unit, bool> filter) => CountLayer([.. all.Where(filter)], status, used, Partial);
+        CallableCoverage? reachability = includeReachability ? CallableCoverage.Build(all, status,
+            File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.Report(repositoryRoot) : "",
+            File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.PropertyGroups(repositoryRoot) : [],
+            CallableCoverage.ActionWhitelist(), overlay.Api,
+            File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) && overlay.Api.Any(r => r.Status == "refused" && r.Sides!.Contains("read", StringComparer.Ordinal))
+                ? ApiTryGenerator.PropertyGroups(repositoryRoot, writableOnly: true) : []) : null;
+        string Route(Unit unit) => CoverageRoutes.Classify(used.TryGetValue(unit.Key, out var use) ? [.. use.Tools] : [],
+            status[unit.Key], reachability?.CallableGroups.Contains(unit.Key) == true);
         return new CoverageReport
         {
             EplanApi = usage.EplanApi,
@@ -180,19 +190,17 @@ internal sealed class CoverageReport
             DataDictionaryByObject = [.. Scopes(all.Where(u => u.Layer == ApiCatalog.DataDictionary && Counted(u)), status).Where(s => s.Implemented > 0)],
             Tools = [.. mapping.Tools.Select(t => Tool(t, catalog))],
             Units = [.. used.Where(u => Counted(catalog.Units[u.Key]))
-                .Select(u => new UnitCoverage(u.Key, catalog.Units[u.Key].Layer, status[u.Key], Partial(u.Key), [.. u.Value.Tools]))
+                .Select(u => new UnitCoverage(u.Key, catalog.Units[u.Key].Layer, status[u.Key], Partial(u.Key), [.. u.Value.Tools],
+                    catalog.Units[u.Key].Layer == ApiCatalog.Operation ? Route(catalog.Units[u.Key]) : null))
                 .OrderBy(u => u.Layer, StringComparer.Ordinal).ThenBy(u => u.Unit, StringComparer.Ordinal)],
             Unmatched = unmatched,
             OverlayRules = overlay.Api,
             ReachedByTool = overlay.ReachedByTool,
             Availability = overlay.Availability,
             Verification = verification,
-            Reachability = includeReachability ? CallableCoverage.Build(all, status,
-                File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.Report(repositoryRoot) : "",
-                File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.PropertyGroups(repositoryRoot) : [],
-                CallableCoverage.ActionWhitelist(), overlay.Api,
-                File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) && overlay.Api.Any(r => r.Status == "refused" && r.Sides!.Contains("read", StringComparer.Ordinal))
-                    ? ApiTryGenerator.PropertyGroups(repositoryRoot, writableOnly: true) : []) : null,
+            Reachability = reachability,
+            Routes = includeReachability ? CoverageRoutes.Count(all.Where(u => u.Layer == ApiCatalog.Operation && Counted(u))
+                .Select(u => (Route(u), status[u.Key] == "live_verified"))) : null,
         };
     }
 

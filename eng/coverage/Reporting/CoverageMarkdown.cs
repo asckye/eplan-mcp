@@ -41,7 +41,7 @@ internal static class CoverageMarkdown
 
         if (report.SdkCatalog)
         {
-            Line($"**{report.Reachability!.Headline(report.Layers["operation"].LiveVerified)}**");
+            Line($"**{CoverageRoutes.Headline(report.Layers["operation"].Denominator, report.Routes!)}**");
             Line();
         }
 
@@ -52,6 +52,16 @@ internal static class CoverageMarkdown
         Line("- 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。");
         Line("- action_try 只统计已提交 action 目录中、分母内符合 ActionTryTools.Check 离线规则的行：合法名称与 TYPE、未被 ActionTryPolicy 拒绝、未排除、且不在已发布 action 白名单。未计本机 UI 动态目录，运行时上下文、参数与审批仍须满足；与工具到达的行可能重叠，不直接相加。");
         OperationReachability operationReachability = report.Reachability!.Operation;
+        Line("- 路线按 tools 互斥分类：专用工具优先，其次通用读取（含 property_set），再其次通用入口；无工具但已有覆盖状态为 state_only，仅额外试调用清单可达为 other，其余为 none。路线不改变原有状态；实机验证沿用组级证据。");
+        Line();
+        Line($"| 路线 | 组数 | 占 {operationReachability.Denominator} 的比例 | 实机验证组数 |");
+        Line("|---|---:|---:|---:|");
+        foreach ((string route, int i) in CoverageRoutes.Names.Select((name, i) => (name, i)))
+        {
+            RouteCount count = report.Routes![route];
+            Line($"| {CoverageRoutes.Labels[i]}（{route}） | {count.Count} | {Pct(count.Count, operationReachability.Denominator)} | {count.LiveVerified} |");
+        }
+        Line();
         Line("- refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。");
         Line();
         Line("| 操作层分母 | tools | api_try | callable | refused_unsafe |");

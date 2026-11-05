@@ -7,6 +7,8 @@
 
 状态图例：⬜ 计划中　🟡 进行中　✅ 已实现　➖ 暂不覆盖（写明原因）
 
+[覆盖报告](coverage-report.md)按调用路线互斥拆分操作层：专用工具、通用读取（包括 `eplan_property_set`）、仅通用入口依次优先；无工具但已有覆盖状态记为 `state_only`，仅额外试调用清单可达记为 `other`，其余为 `none`。路线沿用 overlay 排除后的重载组分母，实机数沿用组级证据；原 tools / api_try / callable 汇总仍保留，不能相加当作专用工具覆盖。
+
 `eplan_placement_create` 已注册 `full` 入口（[规格](../tools/eplan_placement_create.md)，T4c）：TEXT/LINE/RECTANGLE 在同一事务创建并逐项读回，失败整批回滚，成功一次撤销。文字语言与完整外框的限制见规格；新增混合 Large 测试已编写、尚未运行，不将注册或离线测试视为实机通过。
 
 `eplan_connection_create` 已于 T3b 注册 `full` 入口，提供单页显式路径与连接符号的规划和执行（[规格](../tools/eplan_connection_create.md)）；图形与生成后逻辑端点分别核验，提交与撤销边界见规格及 A52/A55。

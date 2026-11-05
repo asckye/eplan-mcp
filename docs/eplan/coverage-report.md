@@ -2,7 +2,7 @@
 
 > **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-11-03 按 Bridge 源码 7b1211e9 + uncommitted changes 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
 
-**操作层 4014 组：可调用 1982（工具 1977，api_try 1700），实机验证 841**
+**操作层 4014 组：专用工具 357，通用读取 225，仅通用入口 1387，仅状态覆盖 8，其他可调用 5，到不了 2032；实机验证 841**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-03 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 7b1211e9 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
@@ -10,6 +10,17 @@
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
 - action_try 只统计已提交 action 目录中、分母内符合 ActionTryTools.Check 离线规则的行：合法名称与 TYPE、未被 ActionTryPolicy 拒绝、未排除、且不在已发布 action 白名单。未计本机 UI 动态目录，运行时上下文、参数与审批仍须满足；与工具到达的行可能重叠，不直接相加。
+- 路线按 tools 互斥分类：专用工具优先，其次通用读取（含 property_set），再其次通用入口；无工具但已有覆盖状态为 state_only，仅额外试调用清单可达为 other，其余为 none。路线不改变原有状态；实机验证沿用组级证据。
+
+| 路线 | 组数 | 占 4014 的比例 | 实机验证组数 |
+|---|---:|---:|---:|
+| 专用工具（dedicated） | 357 | 357 / 4014（8.9%） | 270 |
+| 通用读取（generic_read） | 225 | 225 / 4014（5.6%） | 66 |
+| 仅通用入口（api_try_only） | 1387 | 1387 / 4014（34.6%） | 505 |
+| 仅状态覆盖（state_only） | 8 | 8 / 4014（0.2%） | 0 |
+| 其他可调用（other） | 5 | 5 / 4014（0.1%） | 0 |
+| 到不了（none） | 2032 | 2032 / 4014（50.6%） | 0 |
+
 - refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。
 
 | 操作层分母 | tools | api_try | callable | refused_unsafe |
