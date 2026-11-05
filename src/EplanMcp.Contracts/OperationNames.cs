@@ -16,6 +16,10 @@ public static class OperationNames
     public const string PlacementEditPlan = "placement.edit.plan";
     /// <summary>Approved placement editing with readback and one undo step.</summary>
     public const string PlacementEditExecute = "placement.edit.execute";
+    /// <summary>Read-only page graphic edit planning.</summary>
+    public const string GraphicEditPlan = "graphic.edit.plan";
+    /// <summary>Approved page graphic editing in one undo transaction.</summary>
+    public const string GraphicEditExecute = "graphic.edit.execute";
     /// <summary>Read-only layout preflight for primitive creation.</summary>
     public const string PlacementTextCreatePlan = "placement.text.create.plan";
     /// <summary>Read-only page issues and detached target comparison evidence.</summary>
