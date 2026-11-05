@@ -8553,6 +8553,11 @@
             "file": "tests/EplanMcp.Large.Tests/EmptyConnectionDefinitionTests.cs"
           },
           {
+            "name": "GraphicEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/GraphicEditTests.cs"
+          },
+          {
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
@@ -9758,6 +9763,44 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectExportOperationTests.cs"
           }
         ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_graphic_edit",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/GraphicEditTools.cs",
+      "operations": [
+        "graphic.edit.execute",
+        "graphic.edit.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_graphic_edit.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A99"
+        ],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "GraphicEditProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/GraphicEditProtocolTests.cs"
+          },
+          {
+            "name": "GraphicEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/GraphicEditTests.cs"
+          }
+        ],
+        "operationTests": []
       },
       "live": [],
       "dataDictionary": []
@@ -11935,6 +11978,11 @@
             "file": "tests/EplanMcp.Large.Tests/GenericObjectReadTests.cs"
           },
           {
+            "name": "GraphicEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/GraphicEditTests.cs"
+          },
+          {
             "name": "MacroOverviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
@@ -13830,6 +13878,11 @@
             "name": "FullPropertyReadTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/FullPropertyReadTests.cs"
+          },
+          {
+            "name": "GraphicEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/GraphicEditTests.cs"
           },
           {
             "name": "InterruptionPairingSpikeTests",
@@ -16490,6 +16543,11 @@
             "name": "BlockCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/BlockCreateTests.cs"
+          },
+          {
+            "name": "GraphicEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/GraphicEditTests.cs"
           },
           {
             "name": "LayoutGuardTests",
