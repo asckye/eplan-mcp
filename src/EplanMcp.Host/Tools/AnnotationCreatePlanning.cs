@@ -5,7 +5,7 @@ namespace EplanMcp.Host.Tools;
 
 internal static class AnnotationCreatePlanning
 {
-    internal static readonly string[] Kinds = ["hyperlink", "qr_code", "spline", "sector", "dimension"];
+    internal static readonly string[] Kinds = ["hyperlink", "qr_code", "spline", "sector", "dimension", "placeholder", "macro_box"];
     internal static readonly string[] DimensionTypes = ["linear", "angular", "baseline", "incremental", "continued", "circle"];
     private static readonly string[] _textFields = ["link", "text", "name", "macro_name"];
     private static readonly string[] _listFields = ["records", "variables"];
@@ -27,8 +27,8 @@ internal static class AnnotationCreatePlanning
             "qr_code" => "kind position size_mm text",
             "spline" => "kind points",
             "sector" => "kind center radius_mm start_angle end_angle",
-            
-            
+            "placeholder" => "kind position name",
+            "macro_box" => "kind position macro_name",
             "dimension" => "kind dimension_type end " + (type == "circle" ? "arc" : type is "linear" or "angular" ? "first second" : "points"),
             _ => "kind"
         };

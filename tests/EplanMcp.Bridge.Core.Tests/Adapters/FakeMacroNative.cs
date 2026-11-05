@@ -103,8 +103,10 @@ namespace Eplan.EplApi.HEServices
 
 namespace Eplan.EplApi.DataModel
 {
-    internal sealed class MacroBox(long oid) : Placement(oid)
+    internal sealed class MacroBox(long oid = 112) : Placement(oid)
     {
+        public string MacroName { get; set; } = "";
+        public void Create(Page page) { Page = page; page.AllPlacements = [.. page.AllPlacements, this]; }
         public Placement[] ReferencedObjects { get; set; } = [];
         public Exception? RemoveError { get; set; }
         public new void Remove()

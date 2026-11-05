@@ -6,7 +6,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Annotation-specific constraints inside the shared primitive transaction.</summary>
 public static class AnnotationCreation
 {
-    public static bool Known(string kind) => kind is "hyperlink" or "qr_code" or "spline" or "sector" or "dimension";
+    public static bool Known(string kind) => kind is "hyperlink" or "qr_code" or "spline" or "sector" or "dimension" or "placeholder" or "macro_box";
 
     internal static void Parse(JToken row, string at)
     {
@@ -37,7 +37,7 @@ public static class AnnotationCreation
     {
         bool Point(double[] p) => p is { Length: 2 } && p.All(n => !double.IsNaN(n) && !double.IsInfinity(n) && n is >= 0 and <= 10000);
         bool Nonempty(string? s) => !string.IsNullOrWhiteSpace(s);
-        if (item.Kind is "dimension" && (item.Layer is not null || item.Pen is not null))
+        if (item.Kind is "dimension" or "placeholder" or "macro_box" && (item.Layer is not null || item.Pen is not null))
         { throw WriteArguments.Invalid(["/items: style fields apply to hyperlink, qr_code, spline and sector."]); }
         bool valid = item.Kind switch
         {
@@ -45,6 +45,8 @@ public static class AnnotationCreation
             "qr_code" => Nonempty(item.Text) && item.SizeMm is > 0 and <= 10000,
             "spline" => item.Points.Length >= 2 && item.Points.All(Point),
             "sector" => item.RadiusMm is > 0 and <= 10000 && !double.IsNaN(item.StartAngle) && !double.IsInfinity(item.StartAngle) && !double.IsNaN(item.EndAngle) && !double.IsInfinity(item.EndAngle),
+            "placeholder" => Nonempty(item.Name) && (item.Records ?? []).All(Nonempty) && (item.Variables ?? []).All(Nonempty),
+            "macro_box" => Nonempty(item.Name),
             "dimension" => Point(item.EndPosition) && (item.DimensionType switch
             {
                 "circle" => item.Arc is { Type: > 0, Oid: > 0 } arc && Nonempty(arc.Project) && Nonempty(arc.Page) && arc.Digest is { Length: 64 },
@@ -75,7 +77,7 @@ public static class AnnotationCreation
 
     internal static double[]? Bounds(PlacementText p)
     {
-        if (p.Kind is "hyperlink" or "dimension")
+        if (p.Kind is "hyperlink" or "placeholder" or "macro_box" or "dimension")
         { return null; }
         if (p.Kind == "qr_code")
         { return [p.Position[0], p.Position[1], p.Position[0] + p.SizeMm, p.Position[1] + p.SizeMm]; }
@@ -85,5 +87,5 @@ public static class AnnotationCreation
     }
 
     internal static string NativeKind(string kind) => kind switch
-    { "hyperlink" => "HyperLink", "qr_code" => "QRCode", "spline" => "Spline", "sector" => "Arc", _ => "DimensionItem" };
+    { "hyperlink" => "HyperLink", "qr_code" => "QRCode", "spline" => "Spline", "sector" => "Arc", "placeholder" => "PlaceHolder", "macro_box" => "MacroBox", _ => "DimensionItem" };
 }

@@ -8,8 +8,8 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class AnnotationCreateTests
 {
-    internal static readonly string[] AllKinds = ["hyperlink", "qr_code", "spline", "sector", "linear", "angular", "baseline", "incremental", "continued", "circle"];
-    public static TheoryData<string> Kinds => new() { "hyperlink", "qr_code", "spline", "sector", "linear", "angular", "baseline", "incremental", "continued", "circle" };
+    internal static readonly string[] AllKinds = ["hyperlink", "qr_code", "spline", "sector", "placeholder", "macro_box", "linear", "angular", "baseline", "incremental", "continued", "circle"];
+    public static TheoryData<string> Kinds => new() { "hyperlink", "qr_code", "spline", "sector", "placeholder", "macro_box", "linear", "angular", "baseline", "incremental", "continued", "circle" };
 
     [Theory]
     [MemberData(nameof(Kinds))]
@@ -31,6 +31,9 @@ public sealed class AnnotationCreateTests
     [InlineData("spline", "nan")]
     [InlineData("sector", "zero")]
     [InlineData("sector", "nan")]
+    [InlineData("placeholder", "empty")]
+    [InlineData("placeholder", "record")]
+    [InlineData("macro_box", "empty")]
     [InlineData("linear", "one")]
     [InlineData("angular", "coincident")]
     [InlineData("angular", "end_first")]
@@ -224,7 +227,7 @@ public sealed class AnnotationBatchTests
         PlacementTextCreateArgs args = AnnotationCreateTests.Request("hyperlink");
         args.Items = AnnotationCreateTests.AllKinds.Select(AnnotationCreateTests.Item).ToList();
         PlacementTextCreateData result = Assert.IsType<PlacementTextCreateData>(world.Operation().Execute(args));
-        Assert.Equal(10, result.Items.Count);
+        Assert.Equal(12, result.Items.Count);
         Assert.Equal(["Begin AI: eplan_annotation_create", "Commit", "CloseUndo", "Dispose"], world.Transactions.Calls);
         Assert.All(result.Items.Where(i => i.Kind == "dimension"), item => Assert.All(item.DimensionText!, text => Assert.Equal("12 mm", text)));
     }
@@ -252,6 +255,7 @@ public sealed class AnnotationBatchTests
 
     [Theory]
     [InlineData("qr_code")]
+    [InlineData("placeholder")]
     [InlineData("linear")]
     public void ReadbackMismatchRollsBack(string kind)
     {

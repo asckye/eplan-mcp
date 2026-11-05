@@ -1004,7 +1004,7 @@
     {
       "name": "eplan_annotation_create",
       "title": "Create page annotations",
-      "description": "Creates hyperlinks, QR codes, splines, sectors and dimensions on a Circuit, Overview or Graphics page. Coordinates: mm, bottom left, y up; angles: degrees. Omit dry_run to preview; false executes. One undo; approval outside scratch. layout_guard defaults to refuse; use warn for reproduction. Dimension values are calculated by EPLAN: linear/angular use first, second, end; baseline/incremental/continued use points and end; circle uses an existing full-circle arc locator and end. Use eplan_tool_usage for item fields. Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"spline\",\"points\":[[10,10],[20,20]]}]}",
+      "description": "Creates hyperlinks, QR codes, splines, sectors, dimensions, placeholders and macro boxes on a Circuit, Overview or Graphics page. Coordinates: mm, bottom left, y up; angles: degrees. Omit dry_run to preview; false executes. One undo; approval outside scratch. layout_guard defaults to refuse; use warn for reproduction. Dimension values are calculated by EPLAN: linear/angular use first, second, end; baseline/incremental/continued use points and end; circle uses an existing full-circle arc locator and end. Use eplan_tool_usage for item fields. Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"spline\",\"points\":[[10,10],[20,20]]}]}",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -1037,7 +1037,9 @@
                     "qr_code",
                     "spline",
                     "sector",
-                    "dimension"
+                    "dimension",
+                    "placeholder",
+                    "macro_box"
                   ]
                 },
                 "position": {},
@@ -1064,6 +1066,10 @@
                   ]
                 },
                 "arc": {},
+                "name": {},
+                "records": {},
+                "variables": {},
+                "macro_name": {},
                 "pen": {},
                 "layer": {}
               }
@@ -1226,7 +1232,9 @@
                   "qr_code",
                   "spline",
                   "sector",
-                  "dimension"
+                  "dimension",
+                  "placeholder",
+                  "macro_box"
                 ]
               },
               "position": {},
@@ -1253,6 +1261,10 @@
                 ]
               },
               "arc": {},
+              "name": {},
+              "records": {},
+              "variables": {},
+              "macro_name": {},
               "pen": {},
               "layer": {},
               "dimension_text": {

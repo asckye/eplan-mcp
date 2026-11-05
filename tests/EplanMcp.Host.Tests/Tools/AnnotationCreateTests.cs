@@ -21,6 +21,8 @@ public sealed class AnnotationCreateTests
         """{"kind":"dimension","dimension_type":"incremental","points":[[12.5,22.5],[30,40]],"end":[30,50]}""",
         """{"kind":"dimension","dimension_type":"continued","points":[[12.5,22.5],[30,40]],"end":[30,50]}""",
         """{"kind":"dimension","dimension_type":"circle","arc":{"project":"P","page":"1","type":1,"oid":2,"digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"end":[30,50]}""",
+        """{"kind":"placeholder","position":[12.5,22.5],"name":"Options","records":["A","B"],"variables":["Part"]}""",
+        """{"kind":"macro_box","position":[12.5,22.5],"macro_name":"Panel.ema"}"""
     ];
 
     [Theory]
@@ -60,6 +62,10 @@ public sealed class AnnotationCreateTests
     [InlineData("""{"kind":"dimension","dimension_type":"linear","first":[1,2],"second":[2,3],"end":[3,4],"dimension_text":"5 mm"}""", "/dimension_text")]
     [InlineData("""{"kind":"dimension","dimension_type":"continued","points":"bad","end":[3,4]}""", "/points")]
     [InlineData("""{"kind":"dimension","dimension_type":"circle","arc":{},"end":[3,4]}""", "/arc")]
+    [InlineData("""{"kind":"placeholder","position":[1,2],"name":"P","records":[1]}""", "/records")]
+    [InlineData("""{"kind":"macro_box","position":[1,2],"macro_name":"P","macro_name":"Q"}""", "/macro_name")]
+    [InlineData("""{"kind":"macro_box","position":[1,2],"macro_name":"P","layer":7}""", "/layer")]
+    [InlineData("""{"kind":"placeholder","position":[1,2],"name":"P","pen":{"color":7}}""", "/pen")]
     [InlineData("""{"kind":"dimension","dimension_type":"linear","first":[1,2],"second":[2,3],"end":[3,4],"layer":7}""", "/layer")]
     public async Task InvalidInput_ReturnsPointerBeforeReadingOrWriting(string item, string path)
     {

@@ -45,6 +45,29 @@ internal sealed partial class EplanPlacementTextWriter
                 for (int i = 0; i < request.Points.Length; i++)
                 { PointD point = Point(request.Points[i]); spline.SetPointAt(i, ref point); }
                 return styled(spline, () => new() { Kind = request.Kind, Position = XY(spline.GetPointAt(0)), Points = Enumerable.Range(0, spline.NumberOfPoints).Select(i => XY(spline.GetPointAt(i))).ToArray() });
+            case "placeholder":
+                var placeholder = new PlaceHolder();
+                placeholder.Create(target);
+                placeholder.Location = Point(request.Position);
+                placeholder.Name = request.Name!;
+                foreach (string record in request.Records ?? [])
+                { placeholder.AddRecord(record); }
+                foreach (string variable in request.Variables ?? [])
+                { placeholder.AddVariable(variable); }
+                return styled(placeholder, () => new()
+                {
+                    Kind = request.Kind,
+                    Position = XY(placeholder.Location),
+                    Name = placeholder.Name,
+                    Records = request.Records is null ? null : Enumerable.Range(0, placeholder.NumberOfRecords).Select(placeholder.get_NameOfRecord).ToArray(),
+                    Variables = request.Variables is null ? null : placeholder.VariableNames.Cast<string>().ToArray()
+                });
+            case "macro_box":
+                var box = new MacroBox();
+                box.Create(target);
+                box.Location = Point(request.Position);
+                box.MacroName = request.Name!;
+                return () => new() { Kind = request.Kind, Position = XY(box.Location), Name = box.MacroName };
             case "dimension" when request.DimensionType is "linear" or "angular":
                 var dimension = new DimensionItem();
                 if (request.DimensionType == "linear")

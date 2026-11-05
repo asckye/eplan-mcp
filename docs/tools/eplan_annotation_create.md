@@ -32,6 +32,8 @@
 | spline | points | 至少两点，调用 Spline.SetPointAt |
 | sector | center、radius_mm、start_angle、end_angle | 半径为正；角度为度，复用 arc 换算，SetArc 末参数 true |
 | dimension | dimension_type | 见下表；数值由 EPLAN 计算，不接受调用方指定 |
+| placeholder | position、name | records、variables 为字符串数组 |
+| macro_box | position、macro_name | 创建 MacroBox 并设置 Location、MacroName |
 
 | dimension_type | 参数（对应官方 XML） | 调用与写前校验 |
 |---|---|---|

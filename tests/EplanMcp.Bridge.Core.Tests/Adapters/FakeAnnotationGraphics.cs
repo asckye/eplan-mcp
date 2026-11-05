@@ -39,6 +39,18 @@ namespace Eplan.EplApi.DataModel.Graphics
         { Assert.Equal("Circle", arc.Kind); Page = page; Location = end; page.AllPlacements = [.. page.AllPlacements, this]; }
     }
 
+    internal sealed class PlaceHolder(long oid = 111) : GraphicalPlacement(oid)
+    {
+        public string Name { get; set; } = "";
+        public List<string> Records { get; } = [];
+        public List<string> Variables { get; } = [];
+        public int NumberOfRecords => Records.Count;
+        public string get_NameOfRecord(int index) => Records[index];
+        public string[] VariableNames => Variables.ToArray();
+        public void Create(Page page) { Page = page; page.AllPlacements = [.. page.AllPlacements, this]; }
+        public void AddRecord(string name) => Records.Add(name);
+        public void AddVariable(string name) => Variables.Add(name);
+    }
 }
 
 namespace Eplan.EplApi.DataModel

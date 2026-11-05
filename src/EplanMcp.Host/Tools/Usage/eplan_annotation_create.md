@@ -7,7 +7,7 @@ Preview a mixed annotation batch. Omit `dry_run` or use `true` to preview; send 
 ```
 
 ```json
-{"project":"P","page":"1","layout_guard":"warn","items":[{"kind":"dimension","dimension_type":"linear","first":[20,60],"second":[50,60],"end":[50,75]}]}
+{"project":"P","page":"1","layout_guard":"warn","items":[{"kind":"dimension","dimension_type":"linear","first":[20,60],"second":[50,60],"end":[50,75]},{"kind":"placeholder","position":[80,70],"name":"Variant","records":["A","B"],"variables":["Part"]},{"kind":"macro_box","position":[110,70],"macro_name":"Panel.ema"}]}
 ```
 
 ## workflow
@@ -27,6 +27,8 @@ Each item has one closed `kind` and only its corresponding fields:
 - `spline`: `points`, an array of at least two `[x,y]` points.
 - `sector`: `center`, positive `radius_mm` up to 10000, `start_angle`, `end_angle`.
 - `dimension`: `dimension_type`. `linear` and `angular` require `first`, `second`, `end` (the first point, second point and end point). The three angular points must be distinct after snapping. `baseline`, `incremental` and `continued` require at least two `points` and an `end`. `circle` requires `arc` (a complete locator from discovery) and `end`; the Arc must have `Kind=Circle`.
+- `placeholder`: `position`, nonempty `name`, optional `records` and `variables` arrays of nonempty strings.
+- `macro_box`: `position`, nonempty `macro_name`.
 
 The first four kinds (`hyperlink`, `qr_code`, `spline`, `sector`) accept `layer` (nonnegative integer ID) and `pen:{color,width_mm,style,pattern_length,line_end}` with the same defaults and native sentinel values as `eplan_placement_create`. Pen fields are optional; color/style are signed 16-bit integers, line_end is 0–2, and `-16002` selects the EPLAN default for the other supported pen fields. Dimension, placeholder and macro_box items reject pen and layer fields.
 
