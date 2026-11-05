@@ -17,6 +17,12 @@ internal sealed partial class EplanPlacementTextWriter : IPlacementTextWriter
         DocumentTypeManager.DocumentType[] allowed = [DocumentTypeManager.DocumentType.Circuit, DocumentTypeManager.DocumentType.Overview, DocumentTypeManager.DocumentType.Graphics];
         if (!allowed.Contains(Find(projectPath, page).PageType))
         { throw WriteArguments.Invalid(["/page requires a Circuit, Overview or Graphics page from eplan_page_list."]); }
+        if (text.Kind == "block" && text.Members is { } members)
+        {
+            Placement[] placements = Find(projectPath, page).AllPlacements;
+            if (members.Any(locator => placements.Any(p => p.ObjectIdentifier == locator.Oid && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == locator.Type && p is SymbolReference)))
+            { throw WriteArguments.Invalid(["Block members cannot be functions or symbol references; EPLAN can silently drop functions instead of including them in the block."]); }
+        }
         if (text.DimensionType == "circle")
         { Circle(projectPath, page, text.Arc!); }
         if (text.Kind is not ("text" or "path_text" or "hyperlink"))

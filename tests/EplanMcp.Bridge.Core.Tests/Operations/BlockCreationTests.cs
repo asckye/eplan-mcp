@@ -24,6 +24,7 @@ public sealed class BlockCreationTests
     [InlineData("duplicate", ErrorReason.InvalidArgument)]
     [InlineData("mixed", ErrorReason.InvalidArgument)]
     [InlineData("short", ErrorReason.InvalidArgument)]
+    [InlineData("symbol", ErrorReason.InvalidArgument)]
     public void InvalidMembersNeverWrite(string problem, string reason)
     {
         var f = new Fixture();
@@ -39,6 +40,8 @@ public sealed class BlockCreationTests
         { f.Args.Items!.Add(new() { Kind = "line" }); }
         if (problem == "short")
         { f.Args.Items![0].Members!.RemoveAt(0); }
+        if (problem == "symbol")
+        { f.Page.Placements[0].Kind = "Function"; }
         Assert.Equal(reason, Assert.Throws<BridgeErrorException>(() => f.Run(false)).Error.Reason);
         Assert.Empty(f.Transactions.Calls);
         Assert.Equal(0, f.Writes);

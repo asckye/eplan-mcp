@@ -30,6 +30,8 @@ internal static class BlockCreation
                 ?? throw WriteArguments.NotStarted(new(ErrorReason.PlanStale, "A member locator is stale; call eplan_page_get with include_drawings again."));
             if (row.Parent is not null)
             { Invalid("A block member already belongs to a block or property owner."); }
+            if (row.Kind is "Function" or "SymbolReference")
+            { Invalid("Block members cannot contain Function or SymbolReference: EPLAN silently omits symbols. Use eplan_graphic_edit group instead."); }
         }
         writer.Validate(project.Path, args.Page, block);
         if (planning)
