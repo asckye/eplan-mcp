@@ -9,11 +9,18 @@ namespace Eplan.EplApi.DataModel.Graphics
         { Link = link; Page = page; Contents = new(contents.GetAsString()); page.AllPlacements = [.. page.AllPlacements, this]; }
     }
 
+    internal sealed class QRCodePropertyList(QRCode owner) : IDisposable
+    {
+        public PropertyValue QRCODE_BLOCK_VALUE => owner.TextError is { } error ? throw error : new(owner.Text);
+        public void Dispose() { }
+    }
+
     internal sealed class QRCode(long oid = 107) : Rectangle(oid)
     {
         public string Text { get; set; } = "";
         public Exception? TextError { get; set; }
         public string GetQRCode() => TextError is { } error ? throw error : Text;
+        public QRCodePropertyList Properties => new(this);
         public void Create(Page page, PointD point, double size, string text)
         { Page = page; base.Create(page); Location = point; SetArea(point, new(point.X + size, point.Y + size)); Text = text; }
     }

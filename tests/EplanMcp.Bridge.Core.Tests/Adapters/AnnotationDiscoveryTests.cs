@@ -37,8 +37,9 @@ public sealed class AnnotationDiscoveryTests
         Assert.Equal("QR payload", Row("QRCode").Properties["text"]);
         Assert.Equal([60d, 24d, 80d, 36d], Newtonsoft.Json.Linq.JArray.Parse(Row("Spline").Properties["points"]).SelectMany(p => p.Select(v => (double)v)).ToArray());
         Assert.Equal("true", Row("Arc").Properties["sector"]);
-        Assert.Equal("60 mm", Row("DimensionItem").Properties["dimension_text"]);
-        Assert.Equal("12 mm", Row("DimensionCircle").Properties["dimension_text"]);
+        // Live 2026-11-04: reading DimensionText after the commit makes EPLAN's undo fail.
+        Assert.False(Row("DimensionItem").Properties.ContainsKey("dimension_text"));
+        Assert.False(Row("DimensionCircle").Properties.ContainsKey("dimension_text"));
         Assert.Equal("Motor", Row("PlaceHolder").Properties["name"]);
         Assert.Equal("Motor.ema", Row("MacroBox").Properties["macro_name"]);
         Assert.All(found.Placements, row => { Assert.Equal(64, row.Locator.Digest.Length); Assert.Equal(2, row.Location.Length); });
