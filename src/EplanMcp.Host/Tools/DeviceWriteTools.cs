@@ -111,7 +111,7 @@ internal sealed class DeviceWriteTools
         OutputSchemaType = typeof(DevicePlaceResult))]
     [Description(
         "Places part devices, library symbols (including NO/NC, PLC), terminals, SPECIAL/DC black boxes, SPECIAL/BBDEF busbar definitions or dashed location boxes on circuit pages. " +
-        "Devices inside a location box keep their own structure; no devices are renamed. x/y: mm, bottom left, y up. " +
+        "Location-box contents keep their own structure. join_device assigns the next same-category unplaced function. x/y: mm, bottom left, y up. " +
         "One Ctrl+Z undoes it. Omit dry_run to preview; false executes. Engineer approval outside scratch; denial: APPROVAL_DENIED. See usage.")]
     public static async Task<CallToolResult> DevicePlaceAsync(
         WritePipeline pipeline,
@@ -354,7 +354,7 @@ internal sealed class DeviceWriteTools
         }
         else if (data is { Unplaced: > 0 } placed)
         {
-            hints.Add($"{ToolResults.Count(placed.Unplaced, "function")} of the device remain unplaced, as with EPLAN Insert Device. For a whole PLC module, use eplan_macro_insert with part for its assembly macro. For multiple symbols, place them with the same tag, then assign part with eplan_device_update.");
+            hints.Add($"{ToolResults.Count(placed.Unplaced, "function")} of the device remain unplaced. Place their symbols with the same tag and join_device:true to assign the next unplaced function of the same category. For a whole PLC module, use eplan_macro_insert with part for its assembly macro.");
         }
 
         if (!(data?.PageSizeKnown ?? details.GetValueOrDefault("pageSizeKnown") == "true"))

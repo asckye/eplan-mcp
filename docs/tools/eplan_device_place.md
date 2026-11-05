@@ -17,7 +17,7 @@ T7d 回归修复：`plc_text`、`terminal_strip_text` 均接收普通文本，�
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-"在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。工具通过部件自带的宏或功能模板放置；传 `tag` 时在同一事务内一次重命名器件全部功能，含未放置功能（A85），省略则保留 EPLAN 自动标识。其余功能保持未放置，与 EPLAN“插入设备”相同。PLC 模块用 `eplan_macro_insert` 的 `part` 插入部件的组符号宏；需要画成多个符号时，先创建器件，再用 `library`/`symbol` 配合 `join_device:true` 向已有标识加入非主功能符号，最后用 `eplan_device_update` 的 `part` 指定部件（A82 第 5 条）。
+"在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。工具通过部件自带的宏或功能模板放置；传 `tag` 时在同一事务内一次重命名器件全部功能，含未放置功能（A85），省略则保留 EPLAN 自动标识。其余功能保持未放置，与 EPLAN“插入设备”相同。再以同一标识和 `join_device:true` 放置所需符号，自动分配下一个同类未放置功能。PLC 模块用 `eplan_macro_insert` 的 `part` 插入部件的组符号宏。
 
 第九轮：`part` 优先从部件模板放置，可同时用 `terminal_strip` + `terminal_number` 命名端子，父端子排按原端子规则创建或复用；可同时指定完整 `library`/`symbol`/`symbol_variant`，规划时查验符号，放置后保留逻辑定义换符号。`join_device:true` 或 SPECIAL 库则使用符号路线。部件放不出来仍返回原错误，由调用方回退到符号。新增 LargeWrite 尚未运行。
 
@@ -80,7 +80,7 @@ SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功�
   "unplaced_functions": ["=GAA+A1-KF20", "=GAA+A1-KF20", "=GAA+A1-KF20", "=GAA+A1-KF20"],
   "undo": "AI: eplan_device_place",
   "recovered": false,
-  "hint": "4 functions of the device remain unplaced, as with EPLAN Insert Device. For a whole PLC module, use eplan_macro_insert with part for its assembly macro. For multiple symbols, place them with the same tag, then assign part with eplan_device_update."
+  "hint": "4 functions of the device remain unplaced. Place their symbols with the same tag and join_device:true to assign the next unplaced function of the same category. For a whole PLC module, use eplan_macro_insert with part for its assembly macro."
 }
 ```
 - `unplaced_functions`：提交后按器件标识重新读回的未放置功能完整名称数组；没有时或预览/恢复时为 `[]`。模板 PLC 保留 `:1/:2` 等连接点后缀；`device.tag` 沿用主功能完整名称，可用返回名称查询设备。

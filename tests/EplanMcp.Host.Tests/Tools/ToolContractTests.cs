@@ -164,6 +164,7 @@ public sealed class ToolContractTests : IDisposable
     public void DevicePlace_OffersPartPriorityAndClosedDisplayProperties()
     {
         Tool tool = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
+        Assert.Contains("join_device assigns the next same-category unplaced function", tool.Description, StringComparison.Ordinal);
         JsonElement input = tool.InputSchema;
         Assert.Equal(["project", "page", "x", "y"], input.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         Assert.Equal(4, input.GetProperty("oneOf").GetArrayLength());

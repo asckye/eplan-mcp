@@ -73,7 +73,7 @@ public sealed class DevicePlaceToolTests : IDisposable
         Assert.Equal(("committed", "AI: eplan_device_place", 5, 4), (data.GetProperty("execution").GetString(), data.GetProperty("undo").GetString(), data.GetProperty("functions").GetInt32(), data.GetProperty("unplaced").GetInt32()));
         JsonElement device = data.GetProperty("device");
         Assert.Equal(("=GAA+A1-KF20", "-KF20", "Coil"), (device.GetProperty("tag").GetString(), device.GetProperty("visibleTag").GetString(), device.GetProperty("category").GetString()));
-        Assert.Equal("4 functions of the device remain unplaced, as with EPLAN Insert Device. For a whole PLC module, use eplan_macro_insert with part for its assembly macro. For multiple symbols, place them with the same tag, then assign part with eplan_device_update.", data.GetProperty("hint").GetString());
+        Assert.Equal("4 functions of the device remain unplaced. Place their symbols with the same tag and join_device:true to assign the next unplaced function of the same category. For a whole PLC module, use eplan_macro_insert with part for its assembly macro.", data.GetProperty("hint").GetString());
         Assert.Equal(Enumerable.Repeat("=GAA+A1-KF20", 4), data.GetProperty("unplaced_functions").EnumerateArray().Select(f => f.GetString()));
         Assert.Equal("Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.", WriteToolHarness.Text(result, 0));
         var executed = (DevicePlaceArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.DevicePlaceExecute).Args!;

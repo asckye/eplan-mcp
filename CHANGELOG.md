@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 - `eplan_device_place` 的 `join_device:true` 自动分配同类未放置功能，显式引脚名按序精确匹配；结果返回 `assignedFunction`、分配后的 `pins` 和未放置数量，读回偏差提交并警告。
+- `eplan_device_place` 的提示、工具说明和用法改为以同一标识配合 `join_device` 放置其余未放置功能。
 
 - `eplan_symbol_search` 每行增加 `variantLabel`：变量编号 0–7 对应 A–H，其他编号返回空字符串。
 
