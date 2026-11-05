@@ -16268,7 +16268,7 @@
     {
       "name": "eplan_placement_edit",
       "title": "Edit placements on one EPLAN page",
-      "description": "Deletes, copies, rotates, mirrors, aligns or distributes eplan_object_find locators on one Circuit page of an open project. mm, bottom left, y up. Rotation: 90-degree steps, positive counterclockwise. Copy preserves tags and may associate devices. Delete always needs approval and backup; other edits need approval outside scratch. Denial: APPROVAL_DENIED. Omit dry_run to preview; false executes. One undo. See eplan_tool_usage.",
+      "description": "Edits symbols or deletes, copies, rotates, mirrors, aligns or distributes eplan_object_find locators on one Circuit page of an open project. mm, bottom left, y up. Rotation: 90-degree steps, positive counterclockwise. Copy preserves tags and may associate devices. Delete always needs approval and backup; other edits need approval outside scratch. Denial: APPROVAL_DENIED. Omit dry_run to preview; false executes. One undo. See eplan_tool_usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -16294,7 +16294,8 @@
               "rotate",
               "mirror",
               "align",
-              "distribute"
+              "distribute",
+              "set_variant"
             ]
           },
           "locators": {
@@ -16304,6 +16305,10 @@
             "items": {
               "$ref": "#/$defs/locator"
             }
+          },
+          "symbol_variant": {
+            "type": "integer",
+            "minimum": 0
           },
           "offset_mm": {
             "$ref": "#/$defs/point"
@@ -16446,7 +16451,8 @@
               "rotate",
               "mirror",
               "align",
-              "distribute"
+              "distribute",
+              "set_variant"
             ]
           },
           "execution": {

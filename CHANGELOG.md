@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_placement_edit` 新增 `set_variant`：按当前库和符号预检变量，保留符号与功能定义，返回变量和位置；同页批量一次撤销，并提示按需生成连接。
+
 - `eplan_device_place` 的部件路线支持端子排/端子编号及可选符号替换，保留部件模板的逻辑定义；无主功能的端子也能正确命名和读回。
 - `eplan_device_place` 的 `join_device:true` 或 SPECIAL 符号路线可同时追加部件；提交后重新定位功能，追加与放置合为一个撤销步骤。
 - `eplan_connection_create` 为中断点设置名称后调整显示名；调整返回 false 时继续保留既有写入行为。

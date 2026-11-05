@@ -3,15 +3,16 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Core.Operations;
 
-public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFactory transactions, bool execute, Action<OpenProject, BackupTarget?> backup) : Operation<JObject, JObject>
+public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFactory transactions, bool execute, Action<OpenProject, BackupTarget?> backup, ISymbolReader? symbols = null) : Operation<JObject, JObject>
 {
     public override string Name => execute ? OperationNames.PlacementEditExecute : OperationNames.PlacementEditPlan;
     protected override JObject Execute(JObject args)
     {
         JObject input = execute ? args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["Supply request."])) : args;
+        bool symbolEdit = (string?)input["operation"] == "set_variant";
         JObject before, plan;
         try
-        { before = editor.Inspect((string?)input["project"] ?? "", (string?)input["page"] ?? ""); plan = PlacementEditPlanner.Plan(input, before, execute ? (string?)args["fingerprint"] ?? "" : null); }
+        { before = editor.Inspect((string?)input["project"] ?? "", (string?)input["page"] ?? "", symbolEdit); plan = symbolEdit ? PlacementSymbolEdit.Plan(input, before, symbols, execute ? (string?)args["fingerprint"] ?? "" : null) : PlacementEditPlanner.Plan(input, before, execute ? (string?)args["fingerprint"] ?? "" : null); }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         if (!execute)
         {
@@ -36,10 +37,10 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
             { change = editor.PrepareEdit(input, before); }
             catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
             void Verify()
-            { after = editor.Inspect((string)input["project"]!, (string)input["page"]!); VerifyResult(before, after, plan); }
-            Action restore = () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { if (!JToken.DeepEquals(before, editor.Inspect((string)input["project"]!, (string)input["page"]!))) { throw Mismatch(); } return true; });
+            { after = editor.Inspect((string)input["project"]!, (string)input["page"]!, symbolEdit); if (symbolEdit) { PlacementSymbolEdit.Verify(before, after, plan); } else { VerifyResult(before, after, plan); } }
+            Action restore = () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { if (!JToken.DeepEquals(before, editor.Inspect((string)input["project"]!, (string)input["page"]!, symbolEdit))) { throw Mismatch(); } return true; });
             Committed<bool> result = TransactionRunner.Run(transactions, PlacementEditPlanner.Tool, () => { change(); Verify(); return true; }, _ => true, _ => Verify(), restore);
-            plan["warning"] = result.Warning;
+            plan["warning"] = string.Join(" ", new[] { (string?)plan["warning"], result.Warning }.Where(w => !string.IsNullOrEmpty(w)));
         }
         if ((string?)input["response_format"] == "detailed" && after is not null)
         { plan["before"] = before; plan["after"] = after; }

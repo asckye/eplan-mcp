@@ -56,7 +56,7 @@ internal sealed class PlacementEditFixture : IPlacementEditor, ITransactionScope
         ["operation"] = op,
         ["locators"] = new JArray((indices.Length == 0 ? [0] : indices).Select(i => Data["objects"]![i]!["locator"]!.DeepClone()))
     };
-    public JObject Inspect(string project, string page) => (JObject)Data.DeepClone();
+    public JObject Inspect(string project, string page, bool symbolEdit = false) => (JObject)Data.DeepClone();
     public ConnectionCreatePlanner.Scene Read(string project, string page) => Data["scene"]!.ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
     public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
     {

@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R10-01 换符号变量（2026-11-04 brief） | `PlacementSymbolEditTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 BP 0→4、19307，SIE.3VA1032-2ED32-0AA0 / Q_3LI 0→6 的部件和连接点不变，线对象拒绝及单步撤销快照。 |
 | R9-01 部件优先放置（2026-11-04 brief） | `DevicePlaceTests.PartPriority` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 PXC.3212140 + XTR1/1 的名称、符号与 20188；SIE.5SY4106-7 + FAH1、SIE.3VA1032-2ED32-0AA0 + Q_3LI/6、PXC.3211813 默认模板、PXC.2277019 + LSW2C 及各自一步撤销快照。 |
 | R9-02 符号附带部件（2026-11-04 brief） | `DevicePlaceTests.SymbolPart` | NOT RUN：本次禁止 EPLAN。LargeWrite 待在 BBDEF 后放 BCP/2 并追加 RIT.3451500，读取 BCP 自身 ArticleReferences，核对一次撤销恢复快照及失败回滚。 |
 | R9-03 中断点显示名（2026-11-04 brief） | `InterruptionVisibleNameTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对新中断点显示名与一次撤销快照。 |

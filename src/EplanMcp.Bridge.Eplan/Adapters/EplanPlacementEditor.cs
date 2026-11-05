@@ -9,13 +9,15 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>A39/A54/A57: borrowed roots and children are never disposed. New behaviour: PlacementEditSpikeTests.</summary>
-internal sealed class EplanPlacementEditor : IPlacementEditor
+internal sealed partial class EplanPlacementEditor : IPlacementEditor
 {
     public ConnectionCreatePlanner.Scene Read(string project, string page) => new EplanPlacementMover().Read(project, page);
     public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => new EplanPlacementMover().Prepare(scene, moves);
-    public JObject Inspect(string project, string page)
+    public JObject Inspect(string project, string page, bool symbolEdit = false)
     {
         MainThread.Assert();
+        if (symbolEdit)
+        { return InspectSymbols(project, page); }
         var scene = Read(project, page);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(scene.Project.Path));
         Placement[] placements = EplanDeviceReader.FindPage(finder, page)!.AllPlacements;
@@ -53,6 +55,8 @@ internal sealed class EplanPlacementEditor : IPlacementEditor
     }
     public Action PrepareEdit(JObject input, JObject before)
     {
+        if ((string?)input["operation"] == "set_variant")
+        { return () => EditSymbols(input, before); }
         using var finder = new DMObjectsFinder(EplanProjects.ByPath((string)before["scene"]!["project"]!["path"]!));
         Page page = EplanDeviceReader.FindPage(finder, (string)input["page"]!)!;
         Placement[] roots = input["locators"]!.Select(l => page.AllPlacements.Single(p => p is not PropertyPlacement && p.ObjectIdentifier == (long)l["oid"]! && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == (int)l["type"]!)).ToArray();

@@ -24,3 +24,6 @@ INVALID_ARGUMENT：修正参数/几何；PLAN_STALE：重新 find 和预览；CA
 WritePipeline 执行计划→scratch 策略→审批→审计；delete 在事务前 Snapshot 备份。审批逐项列动作、页、位置/角度、复制同名关联风险和被删连接。执行前复核 find 摘要和完整场景；LockingStep→SafetyPoint→UndoStep→QuietModeStep，事务内读回、提交后独立重查，再 CloseUndo；失败证明恢复，不证明则 unknown。进度、逐项取消、outcome.get 和不重发沿用现有链。审计记参数、指纹、变更、结果和备份。连接另行生成，保持一次编辑一个撤销步。
 ## 7. 测试
 Small：分支/枚举/参数、数学、首对象对齐、等间隙、边界和 stale；Medium：Fake Bridge 的 dry-run、拒绝、备份失败、批次/读回失败、unknown/暂停、审计和契约。Large：仅 LargeWrite 新页，独立原生 spike 打印并检查删除功能/子项/连接、复制标识/子项、旋转单位/支点/角度、镜像文字和引脚、回滚和单次撤销哨兵；仅编写和编译，不记录实测成功。开发集将页数/设备数合并后加入复制题，保持 30/10。
+
+## 符号变量
+`operation:"set_variant"` 与非负整数 `symbol_variant` 对 1–50 个同页符号生效；保持库、符号、位置、功能逻辑与属性排列选择。规划按当前库/符号查询可用变量，不存在时列出编号并在写入前拒绝；线、文字等无符号对象拒绝。全部未变返回 noOp，不留撤销步。默认排列由 EPLAN 随新变量重排；读回变量及位置，并返回需要时运行 `eplan_connection_generate` 的 warning。一次事务、一步撤销，主功能使用 `SetSymbolVariant(variant,false)`。LargeWrite 待验证 BP 0→4 及 Q_3LI 0→6。
