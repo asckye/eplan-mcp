@@ -113,12 +113,12 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     public System.Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null)
     {
         AssertCurrent(project);
-        Page target = Page(project, page);
-        SymbolVariant[] variants = Variants(project).ToArray();
-        var selected = symbols.Select(s => (Row: s, Variant: variants.Single(v => v.SymbolName == (string)s["symbol"]!["name"]! && v.VariantNr == (int)s["symbol"]!["variant"]!))).ToArray();
         _createdSymbols.Clear();
         return () =>
         {
+            Page target = Page(project, page);
+            SymbolVariant[] variants = Variants(project).ToArray();
+            var selected = symbols.Select(s => (Row: s, Variant: variants.Single(v => v.SymbolName == (string)s["symbol"]!["name"]! && v.VariantNr == (int)s["symbol"]!["variant"]!))).ToArray();
             var created = new List<Placement>();
             foreach (var item in selected)
             {
@@ -130,10 +130,17 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     if (placed is not InterruptionPoint point)
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The interruption symbol did not create an interruption point."); }
                     NameInterruption(target, point, (string)interruption["name"]!);
-                    if (interruption["sort_code"] is { } sortCode)
+                    if (interruption["sort_code"] is not null || interruption["property_arrangement"] is not null)
                     {
                         using InterruptionPointPropertyList properties = point.Properties;
-                        properties[(Properties.InterruptionPoint)24809] = (long)sortCode;
+                        if (interruption["sort_code"] is { } sortCode)
+                        { properties[(Properties.InterruptionPoint)24809] = (long)sortCode; }
+                        if (interruption["property_arrangement"] is { } arrangement)
+                        {
+                            EplanSymbolArrangement.Select(point, arrangement.Value<string>()!);
+                            item.Row["propertyArrangement"] = EplanSymbolArrangement.SelectedName(point);
+                            item.Row["activePropertySet"] = EplanSymbolArrangement.ReadActive(properties);
+                        }
                     }
                     if (point.Name != (string)interruption["name"]!)
                     { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs; supply the exact full name."); }
@@ -177,6 +184,8 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             { throw SymbolMismatch("created symbol library changed"); }
             if (symbols[i]["interruption"] is { } expected)
             {
+                if (expected["property_arrangement"] is { } arrangement && EplanSymbolArrangement.SelectedName(symbol) is { } selectedArrangement && selectedArrangement != arrangement.Value<string>())
+                { throw SymbolMismatch("created interruption arrangement changed"); }
                 if (symbol is not InterruptionPoint point || point.Name != (string)expected["name"]!)
                 { throw SymbolMismatch("created interruption name changed"); }
                 if (expected["sort_code"] is { } sort)

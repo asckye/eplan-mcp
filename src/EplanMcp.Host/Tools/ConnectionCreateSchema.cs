@@ -41,6 +41,7 @@ internal static class ConnectionCreateSchema
         interruption["required"] = new JsonArray("kind", "name", "position", "direction");
         interruption["properties"]!["sort_code"] = new JsonObject { ["type"] = "integer", ["minimum"] = 0 };
         interruption["properties"]!["symbol"] = Text(64);
+        interruption["properties"]!["property_arrangement"] = Text();
         interruption["properties"]!["symbol_variant"] = new JsonObject { ["type"] = "integer" };
         JsonObject tNode = Node("t_node", 3);
         tNode["properties"]!["variant"] = new JsonObject { ["type"] = "integer" };

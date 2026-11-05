@@ -76,6 +76,8 @@ internal sealed partial class EplanDeviceSymbolPlacement
             CheckTerminal(create && strip.IsPlaced && strip.Page.Name == page.Name && strip.Location.X == expected[0] && strip.Location.Y == expected[1], "strip definition page or position differs");
             EplanVisibleNames.Adjust(page, strip);
         }
+        if (args.PropertyArrangement is { } arrangement)
+        { EplanSymbolArrangement.Select(terminal, arrangement); }
         // A55: release the cached list before TransactionRunner can Abort; never access these objects afterwards.
         using FunctionPropertyList values = terminal.Properties;
         values.FUNC_PINORTERMINALNUMBER = args.TerminalNumber!;
@@ -107,6 +109,8 @@ internal sealed partial class EplanDeviceSymbolPlacement
         _placedLayout = EplanLayout.Measure(_projectPath, _pageName, [terminal]);
         return new()
         {
+            PropertyArrangement = args.PropertyArrangement is null ? null : EplanSymbolArrangement.SelectedName(terminal),
+            ActivePropertySet = args.PropertyArrangement is null ? null : EplanSymbolArrangement.ReadActive(values),
             Page = page.Name,
             Tag = terminal.Name,
             Category = "Terminal",

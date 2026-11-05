@@ -78,8 +78,8 @@ public sealed class PageDisplayToolTests
                     Tool definition = Assert.Single(await client.ListToolsAsync(cancellationToken: Token), t => t.Name == tool).ProtocolTool;
                     JsonElement parameter = definition.InputSchema.GetProperty("properties").GetProperty("show_page");
                     Assert.False(parameter.GetProperty("default").GetBoolean());
-                    Assert.Equal(tool == ConnectionCreateTools.Tool ? "Open page" : tool == PlacementCreateTools.Tool ? PlacementCreateTools.ShowPageDescription : tool == DeviceWriteTools.PlaceTool ? "Open page first; UI only." : PageDisplay.Description,
-                        parameter.GetProperty("description").GetString());
+                    Assert.Equal(tool == ConnectionCreateTools.Tool ? null : tool == PlacementCreateTools.Tool ? PlacementCreateTools.ShowPageDescription : tool == DeviceWriteTools.PlaceTool ? "Open page." : PageDisplay.Description,
+                        parameter.TryGetProperty("description", out JsonElement description) ? description.GetString() : null);
                     Assert.Contains("boolean", definition.OutputSchema!.Value.GetProperty("properties").GetProperty("pageShown").GetProperty("type").ToString(), StringComparison.Ordinal);
                 }
                 harness.Bridge.Calls.Clear();

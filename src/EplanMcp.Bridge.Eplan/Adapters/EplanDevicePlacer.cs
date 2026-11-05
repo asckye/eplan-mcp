@@ -56,6 +56,9 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         }
 
         Function? main = created.FirstOrDefault(f => f.IsMainFunction) ?? created.OfType<Terminal>().FirstOrDefault();
+        if (main is null && options?.PropertyArrangement is not null)
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The created part has no main symbol for the requested selection; nothing was committed."); }
+        DevicePlaceData? terminalResult = null;
         TerminalPlacementData? terminalData = null;
         if (main is not null && options?.Library is { } library)
         {
@@ -66,7 +69,8 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         if (main is Terminal terminal && options?.TerminalStrip is not null)
         {
             var symbol = new SymbolSearchItem { Library = terminal.SymbolVariant.SymbolLibraryName, Name = terminal.SymbolVariant.SymbolName, Variant = terminal.SymbolVariant.VariantNr, FunctionCategory = "Terminal" };
-            terminalData = new EplanDeviceSymbolPlacement(projectPath, pageName, symbol).CreateTerminal(options, tag, project, page, terminal.SymbolVariant, terminal).Terminal;
+            terminalResult = new EplanDeviceSymbolPlacement(projectPath, pageName, symbol).CreateTerminal(options, tag, project, page, terminal.SymbolVariant, terminal);
+            terminalData = terminalResult.Terminal;
         }
         else if (tag.Length > 0 && main is not null)
         {
@@ -89,8 +93,12 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             service.RenameDevice(main, newName, false, true);
         }
 
-        var result = new PlacedDevice { OnPage = OnPage(project, page).Count(id => !before.Contains(id)), Terminal = terminalData };
-        Read(created, result);
+        if (main is not null && options?.PropertyArrangement is { } arrangement && terminalData is null)
+        { EplanSymbolArrangement.Select(main, arrangement); }
+        var result = new PlacedDevice { PropertyArrangement = options?.PropertyArrangement, OnPage = OnPage(project, page).Count(id => !before.Contains(id)), Terminal = terminalData };
+        Read(created, result, terminalData is null);
+        if (terminalData is not null)
+        { result.PropertyArrangement = terminalResult!.PropertyArrangement; result.ActivePropertySet = terminalResult.ActivePropertySet; }
         return result;
     }
 
@@ -105,10 +113,12 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             .Where(f => f.Name == tag || result.Category != "Terminal" && f.Name.StartsWith(tag + ":", StringComparison.Ordinal))], result);
     }
 
-    private static void Read(Function[] functions, PlacedDevice result)
+    private static void Read(Function[] functions, PlacedDevice result, bool readArrangement = true)
     {
         Function[] ordered = [.. functions.Where(f => f.IsMainFunction), .. functions.Where(f => !f.IsMainFunction)];
         Function? main = ordered.FirstOrDefault(f => f.IsMainFunction) ?? ordered.OfType<Terminal>().FirstOrDefault();
+        if (readArrangement && main is not null && result.PropertyArrangement is not null)
+        { using FunctionPropertyList properties = main.Properties; result.PropertyArrangement = EplanSymbolArrangement.SelectedName(main); result.ActivePropertySet = EplanSymbolArrangement.ReadActive(properties); }
         result.Names = [.. ordered.Select(f => f.Name ?? string.Empty)];
         result.MainName = main?.Name ?? string.Empty;
         result.VisibleName = main?.VisibleName ?? string.Empty;

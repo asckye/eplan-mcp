@@ -27,3 +27,5 @@ articles/connectionArticles verify point/generated connection references.
 layout_guard:"warn" reproduces drawings; default "refuse" draws freely. Off-page R1 still refuses; post-write ADR-0046 is unchanged.
 
 Interruption names are adjusted for display (`=GAA-2L1` shows `-2L1`); false adjustment does not fail placement.
+
+interruption_point.property_arrangement: exact name; omitted=default; readback includes 19307.

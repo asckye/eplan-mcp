@@ -74,6 +74,8 @@ internal static class DeviceSymbolPlan
                 ? FormattableString.Invariant($"{request.Tag}, corners ({args.X}, {args.Y}) to ({args.CornerX}, {args.CornerY}); dashed; affected devices: none; devices keep their own structure")
                 : FormattableString.Invariant($"{symbol.Library}/{symbol.Name}, variant {symbol.Variant} as {request.Tag} at ({args.X}, {args.Y}); {(args.Part is null ? "no part" : request.Part + ", variant " + request.Variant)}") },
         };
+        if (args.PropertyArrangement is { } arrangement)
+        { changes[0].NewValue += "; property arrangement " + arrangement; }
         if (args.JoinDevice == true)
         { changes[0].NewValue += "; join existing device as a secondary function"; }
         foreach (DeviceDisplayProperty p in args.DisplayProperties ?? [])

@@ -173,3 +173,7 @@ SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功�
 `layout_guard` 可选 `refuse`（默认）或 `warn`：复现已有图纸时用 `warn`，布局冲突写入 `warning`；超出页面始终拒绝。
 
 符号附带 `part` 时，规划检查部件及变体；创建符号提交后，在仍打开的撤销步骤内开启新事务，按对象标识重新取得该功能并追加数量 1 的部件引用，读回 `ArticleReferences`。失败撤回整次放置。SPECIAL/BCP 示例：`{"library":"SPECIAL","symbol":"BCP","symbol_variant":2,"tag":"+A1-WE1","join_device":true,"part":"RIT.3451500","variant":"1"}`；新增 `DevicePlaceTests.SymbolPart` 在 LargeWrite 验证 BBDEF 后的 BCP 部件及单步撤销，本次未运行。
+
+### 放置时选择属性排列
+
+符号路线与部件路线可选 `property_arrangement`，按当前符号的本地化排列名精确匹配，例如 `左,0°`，与 `symbol_variant` 独立。省略时保留默认行为。放置后在同一事务设置；名称不存在时回滚并列出可用名称。结果 `propertyArrangement`、`activePropertySet` 分别读回 `Selected.Name` 和属性 19307；19307 不可读时警告。

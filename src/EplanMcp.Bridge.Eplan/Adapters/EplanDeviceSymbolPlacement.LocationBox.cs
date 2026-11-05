@@ -57,9 +57,14 @@ internal sealed partial class EplanDeviceSymbolPlacement
         Check(box.SymbolVariant.SymbolLibraryName == _symbol.Library && box.SymbolVariant.SymbolName == _symbol.Name && box.SymbolVariant.VariantNr == _symbol.Variant,
             $"symbol read back as {box.SymbolVariant.SymbolLibraryName}/{box.SymbolVariant.SymbolName}/{box.SymbolVariant.VariantNr}");
         Check(before.All(f => f.Function.Name == f.Name), "an existing device was renamed");
+        if (args.PropertyArrangement is { } arrangement)
+        { EplanSymbolArrangement.Select(box, arrangement); }
+        using UniversalPropertyList? values = args.PropertyArrangement is null ? null : box.Properties;
         _placedLayout = EplanLayout.Measure(_projectPath, _pageName, [box]);
         return new DevicePlaceData
         {
+            PropertyArrangement = args.PropertyArrangement is null ? null : EplanSymbolArrangement.SelectedName(box),
+            ActivePropertySet = args.PropertyArrangement is null ? null : EplanSymbolArrangement.ReadActive(values!),
             Page = page.Name,
             Tag = structure,
             Category = "LocationBox",
@@ -84,9 +89,12 @@ internal sealed partial class EplanDeviceSymbolPlacement
         Require(box.IsMainFunction == (args.JoinDevice != true) && category.ToString() == "Blackbox" && DevicePlaceRequest.SameName(tag, box.Name));
         RectangleD area = box.GetLogicalArea();
         Require(area.LowerLeft.X == args.X && area.LowerLeft.Y == args.Y && area.UpperRight.X == args.CornerX && area.UpperRight.Y == args.CornerY);
+        if (args.PropertyArrangement is { } arrangement)
+        { EplanSymbolArrangement.Select(box, arrangement); }
+        using UniversalPropertyList? values = args.PropertyArrangement is null ? null : box.Properties;
         _placedFunctionId = box.ObjectIdentifier;
         _placedLayout = EplanLayout.Measure(_projectPath, _pageName, [box]);
-        return new() { Page = page.Name, Tag = box.Name, Category = category.ToString(), Functions = 1, IsMainFunction = args.JoinDevice == true ? box.IsMainFunction : null };
+        return new() { PropertyArrangement = args.PropertyArrangement is null ? null : EplanSymbolArrangement.SelectedName(box), ActivePropertySet = args.PropertyArrangement is null ? null : EplanSymbolArrangement.ReadActive(values!), Page = page.Name, Tag = box.Name, Category = category.ToString(), Functions = 1, IsMainFunction = args.JoinDevice == true ? box.IsMainFunction : null };
     }
 
     private void ReadSpecialCommitted(DevicePlaceArgs args, DevicePlaceData data)

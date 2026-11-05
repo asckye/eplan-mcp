@@ -27,7 +27,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             place = plan["cableDefinitions"] is null ? creator.Prepare(scene.Project.Path, scene.Page.Page, (JArray)plan["symbols"]!, actual =>
             {
                 actual.Lines = generate ? ConnectionCreatePlanner.ExpectedGraphical(scene, plan).Select(s => new LayoutGuard.Segment { Points = s }).ToList() : [];
-                plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }.Concat(LayoutGuard.AfterWriting(LayoutGuard.From(scene), actual)));
+                plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"], plan["symbols"]!.Any(s => s["interruption"]?["property_arrangement"] is not null && (s["activePropertySet"]?.Type != JTokenType.String || s["propertyArrangement"]?.Type != JTokenType.String)) ? "Property 19307 could not be read; verify the selected arrangement in EPLAN." : null }.Concat(LayoutGuard.AfterWriting(LayoutGuard.From(scene), actual)));
             }) : () => { };
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }

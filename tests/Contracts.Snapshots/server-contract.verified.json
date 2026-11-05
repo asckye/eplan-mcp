@@ -4587,6 +4587,9 @@
                       "minLength": 1,
                       "maxLength": 64
                     },
+                    "property_arrangement": {
+                      "$ref": "#/$defs/t"
+                    },
                     "symbol_variant": {
                       "type": "integer"
                     }
@@ -4794,7 +4797,6 @@
             ]
           },
           "show_page": {
-            "description": "Open page",
             "type": "boolean",
             "default": false
           },
@@ -6468,7 +6470,7 @@
             ]
           },
           "dry_run": {
-            "description": "Omit/true previews; false executes.",
+            "description": "False executes.",
             "type": "boolean",
             "default": true
           },
@@ -6490,6 +6492,13 @@
               "null"
             ],
             "minimum": 0
+          },
+          "property_arrangement": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
           },
           "display_properties": {
             "type": [
@@ -6648,7 +6657,7 @@
             "maxLength": 64
           },
           "show_page": {
-            "description": "Open page first; UI only.",
+            "description": "Open page.",
             "type": "boolean",
             "default": false
           },
@@ -6822,6 +6831,18 @@
       "outputSchema": {
         "type": "object",
         "properties": {
+          "propertyArrangement": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "activePropertySet": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "metadata": {
             "type": "object",
             "additionalProperties": false,

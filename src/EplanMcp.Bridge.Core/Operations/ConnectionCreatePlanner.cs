@@ -153,7 +153,8 @@ public static class ConnectionCreatePlanner
             bool wire = (string?)item["kind"] == "wire";
             if ((string?)item["kind"] == "interruption_point")
             {
-                Members(item, at, "kind name direction position", "counterpart_pages sort_code symbol symbol_variant");
+                Members(item, at, "kind name direction position", "counterpart_pages sort_code symbol symbol_variant property_arrangement");
+                Require(item["property_arrangement"] is null || item["property_arrangement"]!.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)item["property_arrangement"]) && !((string)item["property_arrangement"]!).Any(char.IsControl), at + "/property_arrangement", "Supply an exact nonblank arrangement name without controls.");
                 Require(item["sort_code"] is null || item["sort_code"]!.Type == JTokenType.Integer
                     && long.TryParse(item["sort_code"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out _), at + "/sort_code", "Supply a nonnegative Int64 integer.");
                 Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])

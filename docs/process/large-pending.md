@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| R10-03 放置时属性排列（2026-11-04 brief） | `PlacementArrangementTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对普通符号、部件与中断点的指定属性排列读回及一步撤销快照；本次不宣称原生 Selected 行为已验证。 |
 | R10-02 属性排列（2026-11-04 brief） | `PlacementSymbolEditTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 BP 变量 A 的“左,0°”、19307 与 20010 文字 x<0，不存在名称不改页，以及一步撤销。Selected 写入未实测，实测后按下一可用编号补 api-notes。 |
 | R10-01 换符号变量（2026-11-04 brief） | `PlacementSymbolEditTests` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 BP 0→4、19307，SIE.3VA1032-2ED32-0AA0 / Q_3LI 0→6 的部件和连接点不变，线对象拒绝及单步撤销快照。 |
 | R9-01 部件优先放置（2026-11-04 brief） | `DevicePlaceTests.PartPriority` | NOT RUN：本次禁止 EPLAN。LargeWrite 待核对 PXC.3212140 + XTR1/1 的名称、符号与 20188；SIE.5SY4106-7 + FAH1、SIE.3VA1032-2ED32-0AA0 + Q_3LI/6、PXC.3211813 默认模板、PXC.2277019 + LSW2C 及各自一步撤销快照。 |

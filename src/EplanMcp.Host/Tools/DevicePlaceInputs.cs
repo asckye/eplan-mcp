@@ -41,6 +41,7 @@ internal static partial class DevicePlaceInputs
         schema["properties"]!["terminal_strip_position"] = JsonNode.Parse("""{"type":["array","null"],"minItems":2,"maxItems":2,"items":{"type":"number","minimum":0,"maximum":10000}}""");
         schema["dependentRequired"]!["terminal_strip_position"] = JsonNode.Parse("""["terminal_strip","terminal_strip_text"]""");
         schema["properties"]!["symbol_variant"]!["minimum"] = 0;
+        schema["properties"]!["property_arrangement"]!["minLength"] = 1;
         schema["properties"]!["connection_designations"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
         schema["properties"]!["connection_descriptions"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
         foreach (JsonObject property in schema["properties"]!.AsObject().Select(p => p.Value).OfType<JsonObject>())
@@ -50,6 +51,8 @@ internal static partial class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        if (args.PropertyArrangement is { } arrangement && (string.IsNullOrWhiteSpace(arrangement) || arrangement.Any(char.IsControl)))
+        { problems.Add("/property_arrangement: supply an exact nonblank arrangement name without control characters."); }
         if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
         { problems.Add("/part: display and pin options require the symbol route."); }
         if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))

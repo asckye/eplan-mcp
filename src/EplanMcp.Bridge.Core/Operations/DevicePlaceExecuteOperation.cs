@@ -76,7 +76,7 @@ public sealed class DevicePlaceExecuteOperation(
             Committed<DevicePlaceData> result = TransactionRunner.Run(symbolSession, Tool, () =>
             {
                 DevicePlaceData data = PlaceSymbol(symbolSession, args, request.Tag, request.Page.Name);
-                data.Warning = LayoutGuard.Summary(request.LayoutWarnings.Concat(LayoutGuard.AfterWriting(request.Page.Layout!, (symbolSession as LayoutGuard.IMeasurement)?.ReadLayout())));
+                data.Warning = LayoutGuard.Summary(new[] { data.Warning }.Concat(request.LayoutWarnings).Concat(LayoutGuard.AfterWriting(request.Page.Layout!, (symbolSession as LayoutGuard.IMeasurement)?.ReadLayout())));
                 return data;
             }, _ => true, verifyCommitted: data =>
             {
@@ -103,7 +103,7 @@ public sealed class DevicePlaceExecuteOperation(
             }
             result.Result.Project = request.Project.Name;
             result.Result.PageSizeKnown = request.Page.Width is not null;
-            result.Result.Warning = LayoutGuard.Summary([result.Result.Warning, warning]);
+            result.Result.Warning = LayoutGuard.Summary([result.Result.Warning, warning, ArrangementWarning(args, result.Result.PropertyArrangement, result.Result.ActivePropertySet)]);
             return result.Result;
         }
 
@@ -132,12 +132,16 @@ public sealed class DevicePlaceExecuteOperation(
             Category = placed.Category,
             Functions = placed.Names.Count + (placed.Terminal?.StripCreated == true ? 1 : 0),
             Terminal = placed.Terminal,
+            PropertyArrangement = placed.PropertyArrangement,
+            ActivePropertySet = placed.ActivePropertySet,
             Unplaced = placed.Unplaced,
             UnplacedFunctions = placed.UnplacedFunctions,
             PageSizeKnown = request.Page.Width is not null,
-            Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(committed.Warning)),
+            Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(committed.Warning).Append(ArrangementWarning(args, placed.PropertyArrangement, placed.ActivePropertySet))),
         };
     }
+
+    private static string? ArrangementWarning(DevicePlaceArgs args, string? selected, string? active) => args.PropertyArrangement is not null && (selected is null || active is null) ? "Selected.Name or property 19307 could not be read; verify the selected arrangement in EPLAN." : null;
 
     private static DevicePlaceData PlaceSymbol(IDeviceSymbolPlacement session, DevicePlaceArgs args, string tag, string page)
     {

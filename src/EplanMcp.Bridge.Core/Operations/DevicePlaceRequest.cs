@@ -19,8 +19,10 @@ internal sealed class DevicePlaceRequest
     private bool _joinsDevice;
     private bool _requiresExistingDevice;
     private string? _plcWarning;
+    private readonly string? _arrangement;
     private DevicePlaceRequest(OpenProject project, MacroTargetPage page, PartSearchItem part, DevicePlaceArgs args, string tag, string[] taken, string[] existing)
     {
+        _arrangement = args.PropertyArrangement;
         Project = project;
         Page = page;
         Part = part.PartNumber;
@@ -57,6 +59,8 @@ internal sealed class DevicePlaceRequest
     /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the part.</summary>
     public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, IPlcReader? plc = null)
     {
+        if (args.PropertyArrangement is { } arrangement && (string.IsNullOrWhiteSpace(arrangement) || arrangement.Any(char.IsControl)))
+        { throw WriteArguments.Invalid(["/property_arrangement: supply an exact nonblank arrangement name without controls."]); }
         if (DeviceJoinMode.Problem(args) is { } joinProblem)
         { throw WriteArguments.Invalid([joinProblem]); }
         if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
@@ -174,7 +178,7 @@ internal sealed class DevicePlaceRequest
     }
 
     /// <summary>The one change, for the dry run, the approval form and the audit (tool spec 5).</summary>
-    public PlannedChange Change() => new() { Action = "create", Kind = "device", Name = Page.Name, NewValue = Describe(Part, Variant, Tag, X, Y) };
+    public PlannedChange Change() => new() { Action = "create", Kind = "device", Name = Page.Name, NewValue = Describe(Part, Variant, Tag, X, Y) + (_arrangement is null ? "" : "; property arrangement " + _arrangement) };
 
     /// <summary>The change's value as the tool spec words it: <c>SIE.3RH2122-1HB40 as =GAA+A1-KF20 at (80, 160)</c>.</summary>
     internal static string Describe(string part, string variant, string tag, double x, double y) => string.Format(
@@ -188,7 +192,7 @@ internal sealed class DevicePlaceRequest
 
     /// <summary>The plan's state (tool spec 5): the objects on the page, and how many functions carry the tag.</summary>
     public string StateFingerprint() =>
-        Fingerprint.Of(Page.Objects.Select(id => "object\t" + id).Concat(Existing.Select(n => "name\t" + n)).Concat(Page.LocationBoxStructures.Select(n => "box\t" + n)).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture)).Append(Protocol.BridgeJson.FromObject(new { Page.Layout, LayoutWarnings }).ToString()));
+        Fingerprint.Of(Page.Objects.Select(id => "object\t" + id).Concat(Existing.Select(n => "name\t" + n)).Concat(Page.LocationBoxStructures.Select(n => "box\t" + n)).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture)).Append(Protocol.BridgeJson.FromObject(new { Page.Layout, LayoutWarnings }).ToString()).Concat(_arrangement is null ? [] : new[] { "arrangement\t" + _arrangement }));
 
     /// <summary>ALREADY_EXISTS when a device carries the tag: EPLAN would merge the two (A13: it does not check).</summary>
     public void CheckFree()

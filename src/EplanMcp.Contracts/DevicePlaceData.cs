@@ -3,6 +3,8 @@ namespace EplanMcp.Contracts;
 /// <summary>Result of <see cref="OperationNames.DevicePlaceExecute"/>: the placed device as read back. Tags are project data.</summary>
 public sealed class DevicePlaceData
 {
+    public string? PropertyArrangement { get; set; }
+    public string? ActivePropertySet { get; set; }
     /// <summary>PLC point readback, including pending parent/reference; null for other sources.</summary>
     public PlcChannel? Plc { get; set; }
     public string? Type { get; set; }

@@ -24,6 +24,8 @@ public sealed class DevicePlaceArgs
     public string? Symbol { get; set; }
     /// <summary>Native variant number; terminal sources default to 0, other symbol sources require it.</summary>
     public int? SymbolVariant { get; set; }
+    /// <summary>Exact localized property arrangement name; omitted preserves the symbol default.</summary>
+    public string? PropertyArrangement { get; set; }
     /// <summary>Requested property placements relative to the symbol (A53/A54).</summary>
     public List<DeviceDisplayProperty>? DisplayProperties { get; set; }
     /// <summary>One designation per connection point in native array order (A55).</summary>

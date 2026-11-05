@@ -32,7 +32,7 @@ internal sealed class ConnectionCreateTools
         string project, string page,
         [Description("See usage")] JsonElement[] items,
         bool dry_run = WriteToolDefaults.Preview, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
-        [Description("Open page")] bool show_page = false,
+        bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null, PackLibrary? packs = null,
         [AllowedValues("refuse", "warn")] string layout_guard = "refuse", bool generate = true, CancellationToken cancellationToken = default)
     {

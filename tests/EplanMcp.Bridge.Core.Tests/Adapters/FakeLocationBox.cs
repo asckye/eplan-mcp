@@ -4,6 +4,7 @@ namespace Eplan.EplApi.DataModel;
 
 internal sealed class LocationBox(long oid) : FunctionBase(oid)
 {
+    public FunctionPropertyList Properties { get; } = new();
     [ThreadStatic]
     public static Func<object, Page, SymbolReference>? Factory;
     public static SymbolReference CreateBox(object variant, Page page) => Factory!(variant, page);

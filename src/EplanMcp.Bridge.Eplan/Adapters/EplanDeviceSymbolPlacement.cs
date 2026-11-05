@@ -78,6 +78,8 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         // (fictional acceptance 2026-11-02).
         if (args.DisplayProperties is not { Count: > 0 } && _symbol.Kind != "plc_box")
         { EplanVisibleNames.Adjust(page, function); }
+        if (args.PropertyArrangement is { } arrangement)
+        { EplanSymbolArrangement.Select(function, arrangement); }
         // A55: the only cached list is released while unwinding Place, BEFORE TransactionRunner can Abort.
         using FunctionPropertyList properties = function.Properties;
         WritePlcPoint(properties, args);
@@ -141,7 +143,7 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         // A55: only managed identity, values and display snapshots may outlive this transaction.
         if (args.DisplayProperties is { Count: > 0 })
         { _placedDisplays = ReadDisplays(function); }
-        return new DevicePlaceData { Page = page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc, IsMainFunction = args.JoinDevice == true ? function.IsMainFunction : null };
+        return new DevicePlaceData { PropertyArrangement = args.PropertyArrangement is null ? null : EplanSymbolArrangement.SelectedName(function), ActivePropertySet = args.PropertyArrangement is null ? null : EplanSymbolArrangement.ReadActive(properties), Page = page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc, IsMainFunction = args.JoinDevice == true ? function.IsMainFunction : null };
     }
 
     private static void Require(bool matches)

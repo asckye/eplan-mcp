@@ -56,3 +56,5 @@ R1-R5/R8 refuse; R6/R7/R9 warn; default=refuse.
 layout_guard=warn: conflicts warn; off-page refuses.
 
 join_device:true or SPECIAL uses symbols; part/variant appends one reference postcommit in the same undo step. Readback failure rolls back both.
+
+property_arrangement: exact name; default if omitted. Readback: propertyArrangement/activePropertySet (19307).

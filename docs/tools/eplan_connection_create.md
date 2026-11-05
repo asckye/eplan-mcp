@@ -96,3 +96,5 @@ D5 新增 Small 图形缺失、名称/位置/引脚/方向不符、取消、正�
 省略 `counterpart_pages` 仅放置中断点，不检查配对页；允许对端位于本次范围外。提供时仍执行原有完整范围与配对核验。
 
 - 中断点赋完整名称后调用 `NameService.AdjustVisibleName`，让 EPLAN 推导显示名；返回 false 不报错。新增 `InterruptionVisibleNameTests` 在 LargeWrite 读回 `=GAA-2L1` → `-2L1`、`=GAA-2Z3` → `-2Z3` 并比较一步撤销后的快照，NOT RUN。
+
+`interruption_point` 可带 `property_arrangement`（如 `左,0°`）：对当前符号可用排列按本地化名称精确匹配，与 `symbol_variant` 独立；省略时不改默认行为。设置与放置在同一事务，名称不存在则回滚并列可用名。`symbols[].propertyArrangement`/`activePropertySet` 读回 `Selected.Name`/19307；缺少 19307 仅警告。
