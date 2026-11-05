@@ -5,6 +5,14 @@
 
 ## [Unreleased]
 
+### 新增与改进
+
+### 新增
+- 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
+- `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
+### 修复
+- `eplan_placement_create` 创建块时在规划阶段拒绝 Function 成员，避免 EPLAN 静默丢弃符号。
+
 ### Changed
 
 - 发布包改为在维护者开发机上打包。从 v0.5.0 起不再附 GitHub 构建证明（attestation）；用 `SHA256SUMS.txt` 和逐文件清单校验。
