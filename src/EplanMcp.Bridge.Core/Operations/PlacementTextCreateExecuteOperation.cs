@@ -243,7 +243,8 @@ public sealed class PlacementTextCreateExecuteOperation(IProjectCatalog catalog,
         Expect("endPosition", dimension || Close(actual.EndPosition, end), end, actual.EndPosition);
         Expect("heightMm", actual.HeightMm == text.HeightMm, text.HeightMm, actual.HeightMm);
         Expect("position", dimension || Close(actual.Position, text.Position), text.Position, actual.Position);
-        Expect("points", dimension && text.DimensionType is not ("linear" or "angular") || actual.Points.Length == text.Points.Length && !actual.Points.Zip(text.Points, Close).Any(equal => !equal), text.Points, actual.Points);
+        // Live 2026-11-04: an angular dimension reads back SecondPoint (0,0) although EPLAN computes its angle.
+        Expect("points", dimension && text.DimensionType != "linear" || actual.Points.Length == text.Points.Length && !actual.Points.Zip(text.Points, Close).Any(equal => !equal), text.Points, actual.Points);
         Expect("radiusMm", Close(actual.RadiusMm, text.RadiusMm), text.RadiusMm, actual.RadiusMm);
         Expect("angles", Finite(actual.StartAngle) && Finite(actual.EndAngle) && (text.StartAngle != text.EndAngle && DrawingCoordinates.IsCircle(text.StartAngle, text.EndAngle)
             || SameAngle(text.StartAngle, actual.StartAngle) && SameAngle(text.EndAngle, actual.EndAngle)), new[] { text.StartAngle, text.EndAngle }, new[] { actual.StartAngle, actual.EndAngle });

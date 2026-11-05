@@ -200,8 +200,6 @@ public sealed class AnnotationBatchTests
     [InlineData("linear", "first")]
     [InlineData("linear", "second")]
     [InlineData("linear", "end")]
-    [InlineData("angular", "first")]
-    [InlineData("angular", "second")]
     [InlineData("angular", "end")]
     public void DimensionGeometryDeviationRollsBack(string kind, string field)
     {
