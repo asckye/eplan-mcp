@@ -100,8 +100,13 @@ internal static class GraphicEditVerification
     }
     private static void CompareGeometry(JToken expected, JToken actual, JObject plan)
     {
+        // Live 2026-11-05: only a rectangle's bounds equal its geometry; lines and text add their pen and metrics, and a group's location follows them.
+        string kind = (string?)expected["kind"] ?? "";
         foreach (string field in new[] { "location", "bounds", "points", "angle", "pen", "layer" })
-        { Compare(expected[field], actual[field], plan, field); }
+        {
+            if ((field != "bounds" || kind == "Rectangle") && (field != "location" || kind != "Group"))
+            { Compare(expected[field], actual[field], plan, field); }
+        }
     }
     internal static void Compare(JToken? expected, JToken? actual, JObject plan, string field)
     {

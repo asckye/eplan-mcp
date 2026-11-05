@@ -48,7 +48,7 @@ internal static class PageDrawingDiscovery
                 Total = geometry.Placements.Count,
                 Items = [.. geometry.Placements.Skip(offset).Take(limit).Select(row => new DrawingPlacement
                 {
-                    Locator = row.Locator, Kind = row.Kind, Location = row.Location, Bounds = row.Bounds, Parent = row.Parent,
+                    Locator = row.Locator, Kind = row.Kind, Location = row.Location, Bounds = row.Bounds, DrawingOrder = row.DrawingOrder, Parent = row.Parent,
                     Properties = row.Properties.ToDictionary(p => p.Key, p => ResultShaper.CleanFullText(p.Value), StringComparer.Ordinal),
                 })],
             };

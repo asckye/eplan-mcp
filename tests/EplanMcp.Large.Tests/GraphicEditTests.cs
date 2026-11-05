@@ -183,6 +183,39 @@ public sealed class GraphicEditTests(LiveEplan eplan, WriteHost host) : IClassFi
         Assert.Equal(before, (await session.SnapshotAsync()).Hash);
     }
 
+    private static readonly int[] _scaleOrigin = [40, 40];
+
+    [Fact]
+    public async Task Scale_LineTextAndGroup_ReadsBackAndOneUndoRestoresTheScale()
+    {
+        Assert.Equal(eplan.ProcessId, host.ProcessId);
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = Assert.Single(await session.CreatePagesAsync(1));
+        await Create(page,
+            new { kind = "line", points = (double[][])[[40, 40], [100, 40]] },
+            new { kind = "line", points = (double[][])[[40, 80], [100, 80]] },
+            new { kind = "rectangle", corners = (double[][])[[120, 40], [160, 80]] },
+            new { kind = "text", position = (double[])[200, 100], height_mm = 3.5, contents = new Dictionary<string, string> { ["??_??"] = "Graphic scale" } });
+        JsonElement[] lines = await Find(page, "Line"), texts = await Find(page, "Text");
+        JsonElement rectangle = Assert.Single(await Find(page, "Rectangle"));
+        JsonElement group = (await Edit(page, "group", [lines[1], rectangle])).GetProperty("newLocators")[0].Clone();
+        string before = (await session.SnapshotAsync(page)).Hash;
+        await Call("eplan_graphic_edit", new()
+        {
+            ["project"] = host.Writable, ["page"] = page, ["operation"] = "scale", ["locators"] = new[] { lines[0], texts[0], group },
+            ["scale_x"] = 1.5, ["scale_y"] = 1.5, ["origin_mm"] = _scaleOrigin, ["layout_guard"] = "warn", ["dry_run"] = false,
+        });
+        JsonElement after = await Call("eplan_page_get", new() { ["project"] = host.Writable, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" });
+        JsonElement[] rows = [.. after.GetProperty("drawings").GetProperty("items").EnumerateArray()];
+        JsonElement Row(JsonElement locator) => Assert.Single(rows, r => SameId(r.GetProperty("locator"), locator));
+        Assert.Equal([40d, 40d], Values(Row(lines[0]).GetProperty("location")));
+        Assert.Equal([40d, 100d], Values(Row(lines[1]).GetProperty("location")));
+        Assert.Equal([160d, 40d, 220d, 100d], Values(Row(rectangle).GetProperty("bounds")));
+        Assert.Equal([280d, 130d], Values(Row(texts[0]).GetProperty("location")));
+        await session.UndoAsync();
+        Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
+    }
+
     private static void Verify(string operation, JsonElement result, JsonElement page, JsonElement rectangle)
     {
         JsonElement[] rows = page.GetProperty("drawings").GetProperty("items").EnumerateArray().ToArray();
@@ -256,7 +289,7 @@ public sealed class GraphicEditTests(LiveEplan eplan, WriteHost host) : IClassFi
         ["library"] = "IEC_symbol",
         ["symbol"] = "Q_3LI",
         ["symbol_variant"] = 0,
-        ["x"] = 40,
+        ["x"] = 52,
         ["y"] = 160,
         ["tag"] = "-QGRAPHIC" + Guid.NewGuid().ToString("N")[..6].ToUpperInvariant(),
         ["dry_run"] = false,

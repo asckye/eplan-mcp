@@ -51,7 +51,12 @@ internal sealed partial class EplanGraphicEditor
         {
             Group[] groups = roots.Select(p => p as Group ?? p.Group).Where(g => g is not null).Cast<Group>().GroupBy(g => g.ToStringIdentifier()).Select(g => g.First()).ToArray();
             foreach (Group group in groups)
-            { group.DeepUnGroup(true); }
+            {
+                group.DeepUnGroup(true);
+                // Live 2026-11-05: DeepUnGroup leaves the emptied group on the page.
+                if (group.IsValid)
+                { group.Remove(); }
+            }
         }
         else if (operation == "explode_block")
         { foreach (Block block in roots.Cast<Block>()) { block.BreakUp(); } }
