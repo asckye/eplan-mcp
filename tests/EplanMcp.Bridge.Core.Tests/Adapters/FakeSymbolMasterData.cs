@@ -20,7 +20,7 @@ internal sealed class Symbol
     public enum SymbolType { Function, BoxFunction, CableDefinitionLine }
 }
 
-internal sealed class SymbolVariant
+internal class SymbolVariant
 {
     public string SymbolLibraryName { get; set; } = "IEC_symbol";
     public string SymbolName { get; set; } = "PLC_CBOX";

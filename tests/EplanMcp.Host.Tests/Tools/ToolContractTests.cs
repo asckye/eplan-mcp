@@ -161,7 +161,7 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
-    public void DevicePlace_OffersExclusiveSourcesAndClosedDisplayProperties()
+    public void DevicePlace_OffersPartPriorityAndClosedDisplayProperties()
     {
         Tool tool = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
         JsonElement input = tool.InputSchema;
@@ -169,9 +169,8 @@ public sealed class ToolContractTests : IDisposable
         Assert.Equal(4, input.GetProperty("oneOf").GetArrayLength());
         Assert.Equal(["part"], input.GetProperty("oneOf")[0].GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         string excluded = input.GetProperty("oneOf")[0].GetProperty("propertyNames").GetProperty("not").GetProperty("pattern").GetString()!;
-        foreach (string field in new[] { "terminal_strip", "terminal_number", "terminal_strip_text", "terminal_strip_position", "library", "symbol", "symbol_variant", "display_properties", "connection_designations", "connection_descriptions", "location_box", "corner_x", "corner_y" })
-        { Assert.Matches(excluded, field); }
-        foreach (string field in new[] { "project", "page", "part", "variant", "tag", "x", "y", "dry_run", "show_page" })
+        Assert.Matches(excluded, "location_box");
+        foreach (string field in new[] { "project", "page", "part", "variant", "tag", "x", "y", "dry_run", "show_page", "terminal_strip", "terminal_number", "terminal_strip_text", "terminal_strip_position", "library", "symbol", "symbol_variant", "corner_x", "corner_y" })
         { Assert.DoesNotMatch(excluded, field); }
         Assert.Equal(64, input.GetProperty("properties").GetProperty("plc_connection_point").GetProperty("maxLength").GetInt32());
         Assert.Equal(["library", "symbol", "symbol_variant", "tag"], input.GetProperty("dependentRequired").GetProperty("plc_connection_point").EnumerateArray().Select(p => p.GetString()));

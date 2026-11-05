@@ -145,7 +145,7 @@ public sealed partial class DeviceSpecialPlanTests
         public MacroTargetPage? ReadPage(string projectPath, string pageName) =>
             LayoutFixture.Target(new() { Name = pageName, Type = "Circuit", Width = 420, Height = 297 });
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => [Symbol];
-        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag) => throw new NotSupportedException();
+        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, DevicePlaceArgs? options = null) => throw new NotSupportedException();
         public void ReadCommitted(string projectPath, PlacedDevice result) => throw new NotSupportedException();
     }
 }

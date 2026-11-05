@@ -16,9 +16,14 @@ public sealed class DevicePlacePlanOperation(IProjectCatalog catalog, IPageReade
     {
         var request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer, plc);
         request.CheckFree();
-        if (args.Library is not null || args.LocationBox is not null || args.TerminalStrip is not null)
+        return Create(args, request, symbols);
+    }
+
+    internal static WritePlan Create(DevicePlaceArgs args, DevicePlaceRequest request, ISymbolReader? symbols)
+    {
+        if (!DevicePlacementRoute.UsesPart(args) || args.Library is not null)
         { return DeviceSymbolPlan.Create(args, request, symbols); }
-        return new WritePlan
+        var plan = new WritePlan
         {
             Project = request.Project.Name,
             ProjectPath = request.Project.Path,
@@ -33,5 +38,11 @@ public sealed class DevicePlacePlanOperation(IProjectCatalog catalog, IPageReade
                 ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true",
             },
         };
+        if (args.TerminalStrip is not null)
+        {
+            plan.Details!["terminal"] = Protocol.BridgeJson.FromObject(DeviceTerminalPlan.Describe(args, request, plan.Changes)).ToString(Newtonsoft.Json.Formatting.None);
+            plan.Fingerprint = Fingerprint.Of([plan.Fingerprint, plan.Details["terminal"], Protocol.BridgeJson.FromObject(args.StripDefinition).ToString(Newtonsoft.Json.Formatting.None)]);
+        }
+        return plan;
     }
 }

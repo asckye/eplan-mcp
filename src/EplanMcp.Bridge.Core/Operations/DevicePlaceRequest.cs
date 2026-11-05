@@ -59,6 +59,8 @@ internal sealed class DevicePlaceRequest
     {
         if (DeviceJoinMode.Problem(args) is { } joinProblem)
         { throw WriteArguments.Invalid([joinProblem]); }
+        if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
+        { throw WriteArguments.Invalid(["/display_properties: part templates accept symbol selection; display and pin overrides require the symbol route."]); }
         bool box = args.LocationBox is not null;
         bool blackBox = DeviceSymbolPlan.BlackBox(args);
         bool terminal = args.TerminalStrip is not null;
@@ -68,6 +70,7 @@ internal sealed class DevicePlaceRequest
         if (!box && !terminal && args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null || args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
         { throw WriteArguments.Invalid(["/library: symbol, display properties and pin designations or descriptions require a complete symbol source."]); }
         var violations = new List<string>();
+        AddIf(violations, DevicePlacementRoute.UsesPart(args) && (args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null), "Part placement accepts a symbol override; display and pin options require the symbol route.");
         WriteArguments.RequireProject(args.Project, violations);
         string tag = terminal ? args.TerminalStrip! : args.Tag?.Trim() ?? string.Empty;
         string part = args.Part?.Trim() ?? string.Empty;
@@ -88,7 +91,7 @@ internal sealed class DevicePlaceRequest
                 "No page has this name, so nothing was placed. Use eplan_page_list with name_prefix to find the exact page name.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = project.Name, ["page"] = args.Page });
-        PartSearchItem? chosen = box || terminal || args.Library is not null ? new PartSearchItem() : ChooseVariant(FindPart(parts.Read(null), part), args.Variant?.Trim() is { Length: > 0 } variant ? variant : null, violations);
+        PartSearchItem? chosen = args.Part is null && (box || terminal || args.Library is not null) ? new PartSearchItem() : ChooseVariant(FindPart(parts.Read(null), part), args.Variant?.Trim() is { Length: > 0 } variant ? variant : null, violations);
         violations.AddRange(PageProblems(page, args.X, args.Y));
         if (box || blackBox)
         {
@@ -152,7 +155,7 @@ internal sealed class DevicePlaceRequest
         };
         if (args.Fingerprint is null)
         { request.CheckFree(); }
-        if (args.Library is null && args.LocationBox is null && args.TerminalStrip is null)
+        if (DevicePlacementRoute.UsesPart(args) && args.Library is null)
         { request.CheckLayout(args); }
         return request;
     }

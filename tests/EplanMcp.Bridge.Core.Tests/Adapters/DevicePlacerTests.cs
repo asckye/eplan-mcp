@@ -79,7 +79,7 @@ public sealed class DevicePlacerTests
     {
         var page = new Page { Name = "=GAA+A1&EFS1/85" };
         const string tag = "=GAA+A1-KR85";
-        var before = new Function(1) { Name = tag + ":1", IsMainFunction = true, Page = page };
+        var before = new Function(1) { Name = tag + ":1", IsMainFunction = true, Page = page, FunctionCategory = FunctionCategory.PLCTerminal };
         page.AllPlacements = [before];
         var project = new Project(page);
         EplanProjects.Project = project;
@@ -88,8 +88,8 @@ public sealed class DevicePlacerTests
         {
             var placer = new EplanDevicePlacer();
             PlacedDevice result = placer.Place("project", page.Name, "SIE.6ES7131-4BD01-0AA0", "1", 80, 160, "");
-            page.AllPlacements = [new Function(100) { Name = tag + ":1", IsMainFunction = true, Page = page }];
-            project.UnplacedFunctions = [.. _suffixes.Skip(1).Select(suffix => new Function(100 + suffix) { Name = tag + ":" + suffix })];
+            page.AllPlacements = [new Function(100) { Name = tag + ":1", IsMainFunction = true, Page = page, FunctionCategory = FunctionCategory.PLCTerminal }];
+            project.UnplacedFunctions = [.. _suffixes.Skip(1).Select(suffix => new Function(100 + suffix) { Name = tag + ":" + suffix, FunctionCategory = FunctionCategory.PLCTerminal })];
             before.CheckNative = () => throw new InvalidOperationException("Transaction wrapper was reused after commit.");
 
             placer.ReadCommitted("project", result);

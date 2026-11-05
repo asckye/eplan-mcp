@@ -3,6 +3,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Managed placement values, refreshed by tag after commit without retaining native objects.</summary>
 public sealed class PlacedDevice
 {
+    public EplanMcp.Contracts.TerminalPlacementData? Terminal { get; set; }
     /// <summary>The name of every function <c>CreateDevice</c> returned, main function first; none when it placed nothing.</summary>
     public List<string> Names { get; set; } = [];
 

@@ -222,7 +222,7 @@ public sealed partial class DeviceSymbolExecutionTests
         public SymbolSearchItem Symbol { get; } = new() { Library = "IEC_symbol", Name = "K", Type = "Function", Kind = "function", ConnectionPoints = [new() { Location = [0, 0] }] };
         public PlcRecord? ReadPlc(string projectPath, string tag, string? language, bool detailed = false) => new() { Plc = new() { Tag = tag } };
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => [Symbol];
-        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag) => throw new NotSupportedException();
+        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, DevicePlaceArgs? options = null) => throw new NotSupportedException();
     }
 
     private sealed class CommittedPlacement(FakeTransactions transactions, bool lookupMiss) : IDeviceSymbolPlacement, IDeviceSymbolCommittedReadback

@@ -31,7 +31,7 @@ internal static class EplanLayout
         { DrawingPlacement box = LayoutGuard.Proposed("BoxedDevice", [args.X, args.Y], [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value]); box.Properties["layout_container"] = "true"; return [box]; }
         if (args.LocationBox is not null)
         { return [LayoutGuard.Proposed("LocationBox", [args.X, args.Y], [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value])]; }
-        string? library = args.TerminalStrip is null ? args.Library : "IEC_symbol", name = args.TerminalStrip is null ? args.Symbol : "X";
+        string? library = args.Library ?? (args.TerminalStrip is null ? null : "IEC_symbol"), name = args.Symbol ?? (args.TerminalStrip is null ? null : "X");
         var variant = EplanProjects.ByPath(project).SymbolLibraries.Where(l => string.Equals(l.Name, library, StringComparison.OrdinalIgnoreCase))
             .SelectMany(l => l.Symbols).Where(s => string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase))
             .SelectMany(s => s.Variants).FirstOrDefault(v => v.VariantNr == (args.SymbolVariant ?? 0));

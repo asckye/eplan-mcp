@@ -29,7 +29,7 @@ internal static class DevicePlcPlan
         { throw WriteArguments.Invalid(["/plc_text: use plain language-independent text (??_??), without serialized language entries; do not mix it with real languages (A54)."]); }
         if (args.PlcConnectionPoint is null && args.PlcAddress is null && args.PlcSymbolicAddress is null && args.PlcText is null)
         { return; }
-        if (args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
+        if (args.Part is not null || args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
             || string.IsNullOrWhiteSpace(args.PlcConnectionPoint)
                 || new[] { args.PlcConnectionPoint, args.PlcAddress, args.PlcSymbolicAddress, args.PlcText }.Any(s => s is not null && (string.IsNullOrWhiteSpace(s) || s.Length > 256 || s.Any(char.IsControl)))
             || args.PlcConnectionPoint is { Length: > 64 } || args.PlcConnectionPoint!.StartsWith(":", StringComparison.Ordinal))

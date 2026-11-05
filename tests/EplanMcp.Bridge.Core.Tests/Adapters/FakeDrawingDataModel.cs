@@ -140,6 +140,13 @@ internal partial class Function(long oid = 1) : FunctionBase(oid)
         if (this is EObjects.Terminal terminal)
         { EObjects.Terminal.OnCreate?.Invoke(terminal); }
     }
+    public void SetSymbolVariant(MasterData.SymbolVariant variant, bool useLogicalDefinition)
+    {
+        Assert.False(useLogicalDefinition);
+        SymbolVariant.Library = variant.SymbolLibraryName;
+        SymbolVariant.Name = variant.SymbolName;
+        SymbolVariant.Variant = variant.VariantNr;
+    }
     public string? VisibleName { get; set; }
     private FunctionCategory _category = FunctionCategory.Terminal;
     public Exception? CategoryReadError { get; set; }
@@ -210,6 +217,10 @@ internal static class DocumentTypeManager
 internal sealed class DMObjectsFinder(Project project) : IDisposable
 {
     public EObjects.TerminalStrip[] GetTerminalStrips(object? filter) => [.. project.Pages.SelectMany(p => p.AllPlacements).OfType<EObjects.TerminalStrip>()];
+    public EObjects.Terminal[] GetTerminals(FunctionsFilter? filter) =>
+        [.. project.Pages.SelectMany(p => p.AllPlacements).Concat(project.UnplacedFunctions).OfType<EObjects.Terminal>()
+            .Where(f => (filter?.Name is not { } name || (filter.ExactNameMatching ? f.Name == name : f.Name.StartsWith(name, StringComparison.Ordinal)))
+                && (filter?.Page is null || f.Page == filter.Page))];
     public Function[] GetFunctions(FunctionsFilter? filter)
     {
         Assert.False(project.RejectUnfilteredFunctions && filter is null, "A whole-project function scan is forbidden for this read.");

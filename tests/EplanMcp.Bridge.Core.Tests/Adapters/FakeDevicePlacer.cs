@@ -17,6 +17,9 @@ namespace Eplan.EplApi.HEServices
     {
         [ThreadStatic]
         public static Action<Function, FunctionBasePropertyList, bool, bool>? Rename;
+        [ThreadStatic]
+        public static Func<Page, FunctionBase, bool>? Adjust;
+        public bool AdjustVisibleName(Page page, FunctionBase function) => Adjust?.Invoke(page, function) ?? false;
         public void RenameDevice(Function main, FunctionBasePropertyList name, bool cdps, bool keep) => Rename!(main, name, cdps, keep);
         public void Dispose() { }
     }

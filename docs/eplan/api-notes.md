@@ -415,3 +415,6 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 
 ### B16. 电位定义点四字段类型（2026-11-04，安装版 2026.0.3 XML 与字典）
 - `PotentialDefinitionPropertyList` 与字典一致：33003 `POTENTIAL_VALUE`、31004 `CONNECTION_WIRENUMBER`（Connection color / number）、31002 `CONNECTION_WIRECROSSSECTION` 返回 `System.String`；31006 `POTENTIAL_TYPE` 返回 `System.Int64`。`PropertyValue` 文档仅提供 Int32 整数隐式写入和 `ToInt()` 读回，故整数输入限制于该原生入口可表示范围，不经字符串写入。文档未给 31006 枚举值映射，本轮不推测数字对应的电位语义；四字段持久化和撤销仍待 Large 实测。
+
+### A95. 部件优先路线与名称/数量补充（2026-11-04，负责人 LargeWrite 探针，EPLAN 2026.0.3）
+- `DeviceService.CreateDevice` 为 PXC.3211813、3212140、3036563、3211822 建出非主 Terminal，模板 X2_2/0、20188 为 100/6/1 或 100/6/3；PXC.3211819 为 X/0、100/6/2。默认名称 `+-X1` 可在同一事务改为 `+A1-XQ10:1`，`NameService(page).AdjustVisibleName` 返回 true，显示名为 `-XQ10`。这些是负责人已实测的行为；工具集成及主功能替换 FAH1、Q_3LI/6、LSW2C 仍待本轮 Large。

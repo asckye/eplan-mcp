@@ -21,7 +21,7 @@ internal static class DeviceSymbolPlan
         bool terminal = args.TerminalStrip is not null;
         string? library = box ? "SPECIAL" : terminal ? args.Library ?? "IEC_symbol" : args.Library, name = box ? "SC" : terminal ? args.Symbol ?? "X" : args.Symbol;
         int? variant = box ? 0 : terminal ? args.SymbolVariant ?? 0 : args.SymbolVariant;
-        if (!box && !terminal && (!string.IsNullOrWhiteSpace(args.Part) || args.Variant is not null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
+        if (!box && !terminal && (args.Variant is not null && args.Part is null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
             || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.SymbolVariant is null or < 0))
         { throw WriteArguments.Invalid(["/library: specify an exclusive library, symbol and nonnegative symbol_variant source."]); }
         if (args.DisplayProperties is { } displays && (displays.Count > 8 || displays.Any(p => p is null
@@ -72,7 +72,7 @@ internal static class DeviceSymbolPlan
         {
             new() { Action = "create", Kind = box ? "location_box" : "function", Name = request.Page.Name, NewValue = box
                 ? FormattableString.Invariant($"{request.Tag}, corners ({args.X}, {args.Y}) to ({args.CornerX}, {args.CornerY}); dashed; affected devices: none; devices keep their own structure")
-                : FormattableString.Invariant($"{symbol.Library}/{symbol.Name}, variant {symbol.Variant} as {request.Tag} at ({args.X}, {args.Y}); no part") },
+                : FormattableString.Invariant($"{symbol.Library}/{symbol.Name}, variant {symbol.Variant} as {request.Tag} at ({args.X}, {args.Y}); {(args.Part is null ? "no part" : request.Part + ", variant " + request.Variant)}") },
         };
         if (args.JoinDevice == true)
         { changes[0].NewValue += "; join existing device as a secondary function"; }
@@ -101,6 +101,8 @@ internal static class DeviceSymbolPlan
         { request.LayoutWarnings.Add("Busbar definition metadata is incomplete; verify native type and category after placement."); }
         string resolved = BridgeJson.FromObject(symbol).ToString(Formatting.None);
         var details = new Dictionary<string, string> { ["symbol"] = resolved, ["tag"] = request.Tag, ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true" };
+        if (args.Part is not null)
+        { details["part"] = request.Part; details["variant"] = request.Variant; }
         details["layoutWarnings"] = string.Join("\n", request.LayoutWarnings);
         if (box)
         { details["locationBox"] = BridgeJson.FromObject(new LocationBoxData { Structure = request.Tag, Bounds = [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value] }).ToString(Formatting.None); }

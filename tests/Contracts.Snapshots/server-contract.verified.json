@@ -6607,7 +6607,7 @@
             }
           },
           "plc_connection_point": {
-            "description": "PLC point suffix; tag is existing card",
+            "description": "PLC pin; tag=card",
             "type": [
               "string",
               "null"
@@ -6653,7 +6653,7 @@
             "default": false
           },
           "join_device": {
-            "description": "Join existing tag as secondary symbol.",
+            "description": "Secondary symbol",
             "type": "boolean",
             "default": false
           },
@@ -6680,8 +6680,16 @@
             ],
             "propertyNames": {
               "not": {
-                "pattern": "^(terminal_|library$|symbol|display_|connection_|location_box$|corner_)"
+                "pattern": "^location_box$"
               }
+            },
+            "dependentRequired": {
+              "library": [
+                "symbol_variant"
+              ],
+              "terminal_strip": [
+                "terminal_number"
+              ]
             }
           },
           {

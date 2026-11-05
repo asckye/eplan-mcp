@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_device_place` 的部件路线支持端子排/端子编号及可选符号替换，保留部件模板的逻辑定义；无主功能的端子也能正确命名和读回。
+
 - `eplan_connection_create` 的电位定义点新增电位值、电位类型、颜色和截面字段；按字符串或原生整数类型写入，并与名称在同一事务读回校验。
 - `eplan_page_create`、`eplan_page_update` 新增 `pages[].grid_size_mm` 有限正数参数，通过 `Page.GridSize` 写入并读回；省略时行为不变，批量仍一次撤销。
 - `eplan_device_update` 支持按完整名称为唯一已有非主端子追加部件；不改名，提交后核对 `ArticleReferences`，保留一步撤销。

@@ -14,7 +14,7 @@ internal static partial class DevicePlaceInputs
         schema["properties"]!["join_device"]!["type"] = "boolean";
         schema["properties"]!["join_device"]!["default"] = false;
         schema["oneOf"] = JsonNode.Parse("""
-            [{"required":["part"],"propertyNames":{"not":{"pattern":"^(terminal_|library$|symbol|display_|connection_|location_box$|corner_)"}}},
+            [{"required":["part"],"propertyNames":{"not":{"pattern":"^location_box$"}},"dependentRequired":{"library":["symbol_variant"],"terminal_strip":["terminal_number"]}},
              {"required":["library","symbol","symbol_variant","tag"],"propertyNames":{"not":{"pattern":"^(terminal_.*|part|variant|location_box)$"}}},
              {"required":["location_box","corner_x","corner_y"],"propertyNames":{"not":{"pattern":"^(terminal_.*|tag|part|variant|library|symbol.*|display_.*|connection_.*)$"}}},
              {"required":["terminal_strip","terminal_number"],"propertyNames":{"not":{"pattern":"^(tag|part|variant|location_box|corner_.*|display_.*|connection_.*)$"}}}]
@@ -50,6 +50,10 @@ internal static partial class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
+        { problems.Add("/part: display and pin options require the symbol route."); }
+        if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
+        { problems.Add("/display_properties: part templates accept symbol selection; display and pin overrides require the symbol route."); }
         if (DeviceJoinMode.Problem(args) is { } joinProblem)
         { problems.Add(joinProblem); }
         if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Any(s => string.IsNullOrWhiteSpace(s) || s.Length > 64 || s.Any(char.IsControl))))
@@ -65,7 +69,7 @@ internal static partial class DevicePlaceInputs
         }
         if (args.PlcConnectionPoint is not null || args.PlcAddress is not null || args.PlcSymbolicAddress is not null || args.PlcText is not null)
         {
-            if (args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
+            if (args.Part is not null || args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
                 || string.IsNullOrWhiteSpace(args.PlcConnectionPoint)
                 || new[] { args.PlcConnectionPoint, args.PlcAddress, args.PlcSymbolicAddress, args.PlcText }.Any(s => s is not null && (string.IsNullOrWhiteSpace(s) || s.Length > 256 || s.Any(char.IsControl)))
                 || args.PlcConnectionPoint is { Length: > 64 } || args.PlcConnectionPoint!.StartsWith(':'))
@@ -73,11 +77,11 @@ internal static partial class DevicePlaceInputs
         }
         if (args.TerminalStrip is not null)
         {
-            if (args.Part is not null || args.Variant is not null || args.Tag is not null
+            if (args.Variant is not null && args.Part is null || args.Part is not null && args.Library is null && args.SymbolVariant is not null || args.Tag is not null
                 || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null || args.SymbolVariant is < 0)
             { problems.Add("/terminal_strip: use an exclusive terminal source with optional library/symbol and symbol_variant; omit tag and other sources."); }
             if ((args.Library is not null || args.Symbol is not null) && (string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
-                || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl)))
+                || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.Part is not null && args.SymbolVariant is null))
             { problems.Add("/library: terminal symbols require a complete library/symbol pair without controls."); }
             if (args.TerminalStrip.Length is < 2 or > 128 || args.TerminalStrip.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == ':')
                 || args.TerminalStrip.LastIndexOf('-') < 0 || args.TerminalStrip[args.TerminalStrip.Length - 1] == '-')
@@ -116,8 +120,8 @@ internal static partial class DevicePlaceInputs
         bool part = !string.IsNullOrWhiteSpace(args.Part);
         if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))
         { problems.Add("/x: x and y must be finite millimetre coordinates."); }
-        if (symbol ? part || args.Variant is not null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol) || args.SymbolVariant is null or < 0 : !part)
-        { problems.Add("/part: specify either part with optional variant, or library, symbol and nonnegative symbol_variant, exclusively."); }
+        if (symbol ? args.Variant is not null && !part || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol) || args.SymbolVariant is null or < 0 : !part)
+        { problems.Add("/part: specify part with optional variant and complete symbol override, or library, symbol and nonnegative symbol_variant."); }
         if (!symbol && (display is not null || args.ConnectionDesignations is not null))
         { problems.Add("/display_properties: display_properties and connection_designations require a symbol source."); }
         if (args.Library?.Any(char.IsControl) == true || args.Symbol?.Any(char.IsControl) == true)

@@ -12,7 +12,7 @@ public sealed class DevicePlaceInputTests
     [InlineData("P", null, null, null, null, true)]
     [InlineData("P", "2", null, null, null, true)]
     [InlineData(null, null, "IEC_symbol", "K", 0, true)]
-    [InlineData("P", null, "IEC_symbol", "K", 0, false)]
+    [InlineData("P", null, "IEC_symbol", "K", 0, true)]
     [InlineData(null, "2", "IEC_symbol", "K", 0, false)]
     [InlineData(null, null, "IEC_symbol", "K", null, false)]
     [InlineData(null, null, null, "K", 0, false)]
@@ -112,7 +112,7 @@ public sealed class DevicePlaceInputTests
     [Fact]
     public async Task InvalidSource_IsRejectedBeforeAnyPipelineCall()
     {
-        var result = await DeviceWriteTools.DevicePlaceAsync(null!, null!, "Line1", "/1", 80, 160, "-K1", part: "P", library: "IEC_symbol", symbol: "K", symbol_variant: 0, cancellationToken: TestContext.Current.CancellationToken);
+        var result = await DeviceWriteTools.DevicePlaceAsync(null!, null!, "Line1", "/1", 80, 160, "-K1", part: "P", library: "IEC_symbol", symbol: "K", symbol_variant: -1, cancellationToken: TestContext.Current.CancellationToken);
         JsonElement error = WriteToolHarness.Error(result);
         Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
     }

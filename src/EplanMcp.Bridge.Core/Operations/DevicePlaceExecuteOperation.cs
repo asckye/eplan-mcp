@@ -39,8 +39,8 @@ public sealed class DevicePlaceExecuteOperation(
             }
 
             request = DevicePlaceRequest.Check(args, catalog, pages, names, parts, placer, plc);
-            WritePlan? symbolPlan = args.Library is null && args.LocationBox is null && args.TerminalStrip is null ? null : DeviceSymbolPlan.Create(args, request, symbols);
-            if (!string.Equals(symbolPlan?.Fingerprint ?? request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
+            WritePlan plan = DevicePlacePlanOperation.Create(args, request, symbols);
+            if (!string.Equals(plan.Fingerprint, args.Fingerprint, StringComparison.Ordinal))
             {
                 throw new BridgeErrorException(
                     ErrorReason.PlanStale,
@@ -50,9 +50,18 @@ public sealed class DevicePlaceExecuteOperation(
             }
 
             request.CheckFree();
-            if (symbolPlan is not null)
+            if (args.Part is not null)
+            { args.Part = request.Part; args.Variant = request.Variant; }
+            if (DevicePlacementRoute.UsesPart(args) && plan.Details!.TryGetValue("symbol", out string? resolved))
             {
-                SymbolSearchItem symbol = Newtonsoft.Json.Linq.JObject.Parse(symbolPlan.Details!["symbol"]).ToObject<SymbolSearchItem>(BridgeJson.Serializer)!;
+                SymbolSearchItem symbol = Newtonsoft.Json.Linq.JObject.Parse(resolved).ToObject<SymbolSearchItem>(BridgeJson.Serializer)!;
+                args.Library = symbol.Library;
+                args.Symbol = symbol.Name;
+                args.SymbolVariant = symbol.Variant;
+            }
+            if (!DevicePlacementRoute.UsesPart(args))
+            {
+                SymbolSearchItem symbol = Newtonsoft.Json.Linq.JObject.Parse(plan.Details!["symbol"]).ToObject<SymbolSearchItem>(BridgeJson.Serializer)!;
                 symbolSession = openSymbol!(request.Project.Path, request.Page.Name, symbol);
             }
         }
@@ -93,7 +102,7 @@ public sealed class DevicePlaceExecuteOperation(
 
         Committed<PlacedDevice> committed = TransactionRunner.Run(transactions, Tool, () =>
         {
-            PlacedDevice data = Place(request);
+            PlacedDevice data = Place(request, args);
             request.LayoutWarnings.AddRange(LayoutGuard.AfterWriting(request.Page.Layout!));
             return data;
         }, verifyCommitted: data =>
@@ -114,7 +123,8 @@ public sealed class DevicePlaceExecuteOperation(
             Tag = placed.MainName,
             VisibleTag = DeviceTags.Shown(placed.VisibleName),
             Category = placed.Category,
-            Functions = placed.Names.Count,
+            Functions = placed.Names.Count + (placed.Terminal?.StripCreated == true ? 1 : 0),
+            Terminal = placed.Terminal,
             Unplaced = placed.Unplaced,
             UnplacedFunctions = placed.UnplacedFunctions,
             PageSizeKnown = request.Page.Width is not null,
@@ -151,9 +161,9 @@ public sealed class DevicePlaceExecuteOperation(
     }
 
     /// <summary>The tool spec's steps in the transaction: place and rename (one adapter call), then check what EPLAN did.</summary>
-    private PlacedDevice Place(DevicePlaceRequest request)
+    private PlacedDevice Place(DevicePlaceRequest request, DevicePlaceArgs args)
     {
-        PlacedDevice placed = placer.Place(request.Project.Path, request.Page.Name, request.Part, request.Variant, request.X, request.Y, request.Tag);
+        PlacedDevice placed = placer.Place(request.Project.Path, request.Page.Name, request.Part, request.Variant, request.X, request.Y, request.Tag, args);
         Verify(placed, request, committed: false);
         return placed;
     }
@@ -170,7 +180,7 @@ public sealed class DevicePlaceExecuteOperation(
         }
 
         // A82: PLC template functions carry the device tag followed by a connection-point suffix.
-        bool Belongs(string name) => string.Equals(name, request.Tag, StringComparison.Ordinal) || name.StartsWith(request.Tag + ":", StringComparison.Ordinal);
+        bool Belongs(string name) => placed.Terminal is not null ? DevicePlaceRequest.SameName(request.Tag, name) : string.Equals(name, request.Tag, StringComparison.Ordinal) || name.StartsWith(request.Tag + ":", StringComparison.Ordinal);
         // Live 2026-11-03 (A85): before the commit the other functions' wrappers still show the old tag; they are read again by
         // the new tag after the commit, where every function must carry it.
         string? other = committed ? placed.Names.FirstOrDefault(name => !Belongs(name)) : null;

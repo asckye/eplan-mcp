@@ -19,6 +19,8 @@ T7d 回归修复：`plc_text`、`terminal_strip_text` 均接收普通文本，�
 ## 1. 这个工具解决什么任务
 "在 `=GAA+A1&EFS1/60` 上放一个 3RH2122-1HB40 接触器，标识 `-KF20`"。工具通过部件自带的宏或功能模板放置；传 `tag` 时在同一事务内一次重命名器件全部功能，含未放置功能（A85），省略则保留 EPLAN 自动标识。其余功能保持未放置，与 EPLAN“插入设备”相同。PLC 模块用 `eplan_macro_insert` 的 `part` 插入部件的组符号宏；需要画成多个符号时，先创建器件，再用 `library`/`symbol` 配合 `join_device:true` 向已有标识加入非主功能符号，最后用 `eplan_device_update` 的 `part` 指定部件（A82 第 5 条）。
 
+第九轮：`part` 优先从部件模板放置，可同时用 `terminal_strip` + `terminal_number` 命名端子，父端子排按原端子规则创建或复用；可同时指定完整 `library`/`symbol`/`symbol_variant`，规划时查验符号，放置后保留逻辑定义换符号。`join_device:true` 或 SPECIAL 库则使用符号路线。部件放不出来仍返回原错误，由调用方回退到符号。新增 LargeWrite 尚未运行。
+
 M8 T7a 增加原生位置框：框内设备保留自己的结构，不继承框的结构（A55）；工具不重命名任何既有设备，受影响设备恒为空。仅支持 `+` 位置标识，固定 SPECIAL/SC 变体 0 与虚线，不提供装置段或任意外观配置。Large 验收代码已补，尚未运行。
 
 M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿既有写入策略、审批和审计，按部件调用保持兼容。产品 Large 验收代码已补，尚未运行。
@@ -31,16 +33,16 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 
 注册参数使用 `x`/`y` 和必填库变体 `symbol_variant`；坐标单位为毫米，原点在页左下角，y 向上。该示例由 Host 的用法示例测试校验参数形状；原生放置的实机状态见本页第 7 节与[待验台账](../process/large-pending.md)。
 
-可选 `join_device` 默认 false，原有重复标识仍返回 `ALREADY_EXISTS`。true 时目标标识必须已存在（否则 `DEVICE_NOT_FOUND`），新功能沿用该名称且不是主功能；提交后按对象号读回名称和主功能状态。此参数仅支持库符号路线，与 `part`、端口列表（`connection_designations`/`connection_descriptions`）、端子或 PLC 路线同时出现均返回 `INVALID_ARGUMENT`。
+可选 `join_device` 默认 false，原有重复标识仍返回 `ALREADY_EXISTS`。true 时目标标识必须已存在（否则 `DEVICE_NOT_FOUND`），新功能沿用该名称且不是主功能；提交后按对象号读回名称和主功能状态。此参数仅支持库符号路线；支持端口列表（`connection_designations`/`connection_descriptions`），端子或 PLC 路线仍不支持 `join_device`。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `page` | string | 是 | — | 完整页名，必须是电路图页（`Circuit`） |
-| `part` | string | 来源三选一 | — | 部件号，如 `SIE.3RH2122-1HB40`；部件必须在部件库中；可使用宏或功能模板（A82）。部件号先精确匹配，没有时再不区分大小写匹配 |
+| `part` | string | 部件路线必填 | — | 部件号，如 `SIE.3RH2122-1HB40`；部件必须在部件库中；可使用宏或功能模板（A82）。部件号先精确匹配，没有时再不区分大小写匹配 |
 | `variant` | string | 否 | `"1"`，部件没有变体 1 而只有一个变体时取那一个 | 部件的变体 |
-| `library`、`symbol`、`symbol_variant` | string、string、integer | 库符号来源三项必填 | — | 与 `part,variant` 互斥；项目已有库、完整符号名、非负原生变体号，来自 `eplan_symbol_search`；先精确匹配，无精确匹配时仅接受唯一的不区分大小写匹配；首批限普通 `Function`，专用元素留后续任务 |
+| `library`、`symbol`、`symbol_variant` | string、string、integer | 库符号来源三项必填 | — | 可与部件同时给出，使用 `SetSymbolVariant(..., false)` 替换模板符号；项目已有库、完整符号名、非负原生变体号，来自 `eplan_symbol_search`；先精确匹配，无精确匹配时仅接受唯一的不区分大小写匹配；普通器件可指定图形变体，端子保留 Terminal 逻辑定义 |
 | `display_properties` | object[] | 否 | 不新增显示属性 | 最多 8 项；严格成员 `{property_id,offset_x_mm,offset_y_mm}`，ID 封闭为 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301；偏移为有限数，可为负，是相对父符号的位置，不是页坐标 |
 | `connection_descriptions` | string[] | 否 | 不写 | 每个连接点的描述，按连接点数组顺序，数量必须相等；每项非空、最多 64 字符；写一基索引的 20023，PLC 点以只读的 20029 显示（例如 `DI a.0`）。只用于库符号来源 |
 | `connection_designations` | string[] | 否 | 保留默认代号 | 按 T1 连接点数组顺序，每引脚一项，数量必须相等；每项非空、无控制字符且最多 64 字符；T2b 写入带一基索引的 20022，不使用汇总属性 20038 或 `Pin.Designation` |
@@ -48,11 +50,11 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `corner_x`、`corner_y` | number | 位置框/黑盒必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；也用于 SPECIAL/DC |
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
 | `tag` | string | 库符号来源必填，部件来源可选 | EPLAN 自动标识 | 以 `-` 开头的短标识（如 `-KF20`）取页结构但去掉 `&` 文档类型；或完整标识（如 `=GAA+A1-KF20`）。部件来源指定时一起重命名全部功能 |
-| `join_device` | boolean | 否 | false | 仅库符号：向已有标识添加非主功能；与部件、端子、PLC 路线互斥；可带连接点代号和描述 |
+| `join_device` | boolean | 否 | false | 仅库符号：向已有标识添加非主功能；可同时附带部件；与端子、PLC 路线互斥，可带连接点代号和描述 |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行传 `dry_run: false` |
 
-- 部件来源省略 `tag` 时保留 EPLAN 自动编号；指定时规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。库符号来源仍要求 `tag`。
+- 部件来源省略 `tag` 时保留 EPLAN 自动编号；指定时规则同 `eplan_device_update` 的 `new_tag`，已被其他设备使用（不区分大小写）时返回 `ALREADY_EXISTS`。普通库符号来源仍要求 `tag`；端子使用 `terminal_strip` + `terminal_number`，不传 `tag`。
 - 变体不存在时 EPLAN 会静默改用第一个变体（XML），所以规划时先确认变体存在。
 - 显示属性和连接点代号仅用于库符号来源；不提供任意属性写入，也不改变功能文本及其现有语言（A53）。
 
@@ -85,7 +87,7 @@ SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功�
 - `hint`：说明其余功能保持未放置，以及 PLC 组符号宏和同标识多个符号的绘制方式；页的幅面未知时（新建的空页，A14）说明只检查了 x、y 不小于 0。
 - PLC 已确认提交后，无法定位对象或完成回读核对时仍返回 `execution=committed`；`hint` 警告列明未能验证的点身份/页、卡归属、原生属性或显示布局，提示读取页面与 `eplan_plc_get` 后再决定后续操作。保留已读到的 PLC 值及撤销步骤警告，不暂停写入；只有提交本身或执行结果确实不明时才返回 `OUTCOME_UNKNOWN`。
 - 一行摘要：`Placed a device with 5 functions; Ctrl+Z in EPLAN undoes this step.` / `Dry run: would place one device. Nothing was changed.`
-- 符号来源另带 `symbol`（解析后的库/符号/变体及局部引脚）和 `changes`（审批清单）；`functions=1,unplaced=0` 在 dry-run 为预测、提交后为读回，`part,variant` 为空。dry-run 不猜 `visibleTag/category`；提交后显示标识取请求的带前缀属性实际显示串，未请求时为空。20214 由 EPLAN 计算；默认空的 20029[2] 不算请求的属性。
+- 符号来源另带 `symbol`（解析后的库/符号/变体及局部引脚）和 `changes`（审批清单）；`functions=1,unplaced=0` 在 dry-run 为预测、提交后为读回，未带部件时 `part,variant` 为空，带部件时返回选定部件和变体。dry-run 不猜 `visibleTag/category`；提交后显示标识取请求的带前缀属性实际显示串，未请求时为空。20214 由 EPLAN 计算；默认空的 20029[2] 不算请求的属性。
 
 - 位置框来源返回 `locationBox={structure,bounds:[minX,minY,maxX,maxY],outline:"dashed",affectedDevices:[]}`：dry-run 和 recovered 为预测，正常提交后为实际读回；`functions=0,unplaced=0`，兼容字段 `device.tag/category` 为位置标识/LocationBox（dry-run category 为空），不作为 `eplan_device_get` 的设备键；`symbol` 为解析后的 SPECIAL/SC。框内设备保持原结构，工具不重命名设备。
 
@@ -147,7 +149,7 @@ SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功�
 
 - D6：可选 `terminal_strip_position:[x,y]` 是新父排定义的页面绝对毫米位置；必须同时给 `terminal_strip_text`，仅首次新建父排可用，页界未知或越界拒绝。此时 `TerminalStrip.Create(Page)` 后设置 Location；省略仍建不放置定义（A55）。与首个端子共用一个事务和撤销步，读回排名、页、位置及语言无关功能文本；返回 terminal.stripPosition/stripText（预览为预测）。审批清单和指纹含位置及文本。LargeWrite 新页读回、导图和一步撤销仅编写，未运行。
 
-- 端子来源 `terminal_strip`（短标识如 `-X6` 或完整标识）和 `terminal_number`（1–64 个字母、数字、下划线或点）；省略 `tag/part/variant/location_box` 和显示/引脚选项。可成对传 `library` + `symbol`，按符号库读出的 `FunctionCategory=Terminal` 校验，不设名称名单；类别不可读只警告，创建后仍核对原生类别。省略库名/符号时保留 IEC_symbol/X，`symbol_variant` 默认 0。支持 IEC_symbol/X2_2、XTR1、XFD 与 GRAPHICS/KA1_PE 中实际存在的 Terminal 变体。坐标沿既有页类型、有限数与页界检查。
+- 端子来源 `terminal_strip`（短标识如 `-X6` 或完整标识）和 `terminal_number`（1–64 个字母、数字、下划线或点）；省略 `tag/location_box` 和显示/引脚选项；可附带 `part/variant`，此时未指定符号则保留部件模板。可成对传 `library` + `symbol`，按符号库读出的 `FunctionCategory=Terminal` 校验，不设名称名单；类别不可读只警告，创建后仍核对原生类别。无部件且省略库名/符号时保留 IEC_symbol/X，`symbol_variant` 默认 0；部件路线的符号覆盖须同时给完整三项。支持 IEC_symbol/X2_2、XTR1、XFD 与 GRAPHICS/KA1_PE 中实际存在的 Terminal 变体。坐标沿既有页类型、有限数与页界检查。
 - `terminal_strip_text` 为可选的 1–256 字符无控制符功能文本，按语言无关 `??_??` 写入并读回；仅新建父排时允许，追加端子须省略，不覆盖已有排文本。示例：`{"project":"Line1","page":"=F+A1/1","terminal_strip":"-X6","terminal_number":"1","terminal_strip_text":"操作控制盒","symbol_variant":0,"x":80,"y":160,"dry_run":true}`。
 - 父排按完整名称复用（忽略大小写，沿用已有拼写），不存在时先建立不放置的定义；给定 `terminal_strip_position` 时改用 `TerminalStrip.Create(page)` 并设置 Location，均设为主功能，再 `Terminal.Create(strip,page,variant)`、命名 `<排>:<号>`、设置 20030。全项目同复合键忽略大小写拒绝；普通器件占用父排名也不能冒充端子排。审批逐项列父排/文本和端子；指纹覆盖全项目名称、页对象、实际库变体、坐标与全部变更。
 - 沿 `FunctionTransactionScope` 一次提交；事务内核对实际排名、主功能、20030、原生 owner 对象及名称、位置、页和库变体。父关系为空视为提交前尚未建立（S43 relationPendingCommit，T7c 实测），读到非目标排才回滚，提交后用 `eplan_terminal_strip_get` 核实；不推测已归属；属性列表只取一次并在 Abort 前释放，Abort 后不碰新对象。成功一步撤销；不生成连接（A52/A55）。允许 LockAllObjects，负责人已确认无多用户编辑。

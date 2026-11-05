@@ -21,17 +21,17 @@ public sealed class TerminalPlaceInputTests
     }
 
     [Theory]
-    [InlineData("part")]
-    [InlineData("tag")]
-    [InlineData("box")]
-    [InlineData("symbol")]
-    [InlineData("display")]
-    [InlineData("pins")]
-    [InlineData("variant")]
-    [InlineData("nan")]
-    [InlineData("text")]
-    [InlineData("strip")]
-    public void Source_RejectsMixedOrInvalidArguments(string field)
+    [InlineData("part", true)]
+    [InlineData("tag", false)]
+    [InlineData("box", false)]
+    [InlineData("symbol", false)]
+    [InlineData("display", false)]
+    [InlineData("pins", false)]
+    [InlineData("variant", false)]
+    [InlineData("nan", false)]
+    [InlineData("text", false)]
+    [InlineData("strip", false)]
+    public void Source_AcceptsPartAndRejectsInvalidArguments(string field, bool valid)
     {
         DevicePlaceArgs args = Args();
         switch (field)
@@ -64,7 +64,7 @@ public sealed class TerminalPlaceInputTests
                 args.TerminalStrip = "-X6:1";
                 break;
         }
-        Assert.NotEmpty(DevicePlaceInputs.Check(args, field == "display" ? [] : null));
+        Assert.Equal(valid, DevicePlaceInputs.Check(args, field == "display" ? [] : null).Count == 0);
     }
 
     [Fact]

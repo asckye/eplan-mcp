@@ -159,7 +159,7 @@ public sealed class DeviceJoinPlanTests
         internal SymbolSearchItem Symbol { get; } = new() { Library = "IEC_symbol", Name = "K", Type = "Function", Kind = "function" };
         public MacroTargetPage? ReadPage(string projectPath, string pageName) => LayoutFixture.Target(new() { Name = pageName, Type = "Circuit" });
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => [Symbol];
-        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag) => throw new NotSupportedException();
+        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, DevicePlaceArgs? options = null) => throw new NotSupportedException();
         public void ReadCommitted(string projectPath, PlacedDevice result) => throw new NotSupportedException();
     }
 

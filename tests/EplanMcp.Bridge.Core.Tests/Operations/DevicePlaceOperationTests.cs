@@ -10,7 +10,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 /// and empty, so EPLAN cannot tell its size; page /1 has the sample's size and a device <c>=GAA+A1-KF1</c>.
 /// </summary>
 [Trait("Size", "Small")]
-public sealed class DevicePlaceOperationTests
+public sealed partial class DevicePlaceOperationTests
 {
     private const string Part = "SIE.3RH2122-1HB40";
     private const string NewPage = "=GAA+A1&EFS1/60";
@@ -465,7 +465,7 @@ public sealed class DevicePlaceOperationTests
 
         public MacroTargetPage? ReadPage(string projectPath, string pageName) => LayoutFixture.Target(Pages.GetValueOrDefault(pageName));
 
-        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag)
+        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, DevicePlaceArgs? options = null)
         {
             Places.Add((pageName, part, variant, x, y, tag));
             PlacedDevice placed = Result(tag);

@@ -11,7 +11,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanDeviceSymbolPlacement
 {
-    private DevicePlaceData CreateTerminal(DevicePlaceArgs args, string tag, Project project, Page page, SymbolVariant variant)
+    internal DevicePlaceData CreateTerminal(DevicePlaceArgs args, string tag, Project project, Page page, SymbolVariant variant, Terminal? placed = null)
     {
         MainThread.Assert();
         string name = tag.Substring(0, tag.LastIndexOf(':'));
@@ -43,16 +43,16 @@ internal sealed partial class EplanDeviceSymbolPlacement
             strip.IsMainFunction = true;
             strip.Name = name;
         }
-        var terminal = new Terminal();
+        var terminal = placed ?? new Terminal();
 #pragma warning restore CA2000
         CheckTerminal(!strip.Terminals.Any(t => Same(tag.ToUpperInvariant(), t.Name.ToUpperInvariant())), "the strip already has this terminal");
-        if (_symbol.FunctionCategory is { } category && category != "Terminal")
+        if (placed is null && _symbol.FunctionCategory is { } category && category != "Terminal")
         {
             SymbolVariant plain = project.SymbolLibraries.Single(l => l.Name == "IEC_symbol").Symbols.Single(s => s.Name == "X2_2").Variants.Single(v => v.VariantNr == 0);
             terminal.Create(strip, page, plain);
             terminal.SetSymbolVariant(variant, false);
         }
-        else
+        else if (placed is null)
         { terminal.Create(strip, page, variant); }
         terminal.Name = tag;
         terminal.Location = new PointD(args.X, args.Y);
@@ -100,7 +100,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         CheckTerminal(terminal.FunctionCategory.ToString() == "Terminal", $"category reads back as {terminal.FunctionCategory}");
         CheckTerminal(terminal.IsPlaced && terminal.Page.Name == page.Name, "terminal is not placed on the page");
         CheckTerminal(terminal.Location.X == args.X && terminal.Location.Y == args.Y, FormattableString.Invariant($"position reads back as {terminal.Location.X},{terminal.Location.Y}"));
-        CheckTerminal(terminal.ArticleReferences.Length == 0, "terminal has parts");
+        CheckTerminal(args.Part is not null || terminal.ArticleReferences.Length == 0, "terminal has parts");
         CheckTerminal(terminal.SymbolVariant.SymbolLibraryName == _symbol.Library && terminal.SymbolVariant.SymbolName == _symbol.Name && terminal.SymbolVariant.VariantNr == _symbol.Variant,
             $"symbol reads back as {terminal.SymbolVariant.SymbolLibraryName}/{terminal.SymbolVariant.SymbolName}/{terminal.SymbolVariant.VariantNr}");
         OperationContext.Current.ThrowIfCancellationRequested();

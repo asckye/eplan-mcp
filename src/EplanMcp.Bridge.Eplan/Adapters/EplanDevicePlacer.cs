@@ -1,5 +1,6 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.HEServices;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
@@ -31,7 +32,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         return result;
     }
 
-    public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag)
+    public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, DevicePlaceArgs? options = null)
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
@@ -54,8 +55,20 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             throw failed;
         }
 
-        Function? main = created.FirstOrDefault(f => f.IsMainFunction);
-        if (tag.Length > 0 && main is not null)
+        Function? main = created.FirstOrDefault(f => f.IsMainFunction) ?? created.OfType<Terminal>().FirstOrDefault();
+        TerminalPlacementData? terminalData = null;
+        if (main is not null && options?.Library is { } library)
+        {
+            var replacement = project.SymbolLibraries.Single(l => string.Equals(l.Name, library, StringComparison.OrdinalIgnoreCase))
+                .Symbols.Single(s => string.Equals(s.Name, options.Symbol, StringComparison.OrdinalIgnoreCase)).Variants.Single(v => v.VariantNr == options.SymbolVariant);
+            main.SetSymbolVariant(replacement, false);
+        }
+        if (main is Terminal terminal && options?.TerminalStrip is not null)
+        {
+            var symbol = new SymbolSearchItem { Library = terminal.SymbolVariant.SymbolLibraryName, Name = terminal.SymbolVariant.SymbolName, Variant = terminal.SymbolVariant.VariantNr, FunctionCategory = "Terminal" };
+            terminalData = new EplanDeviceSymbolPlacement(projectPath, pageName, symbol).CreateTerminal(options, tag, project, page, terminal.SymbolVariant, terminal).Terminal;
+        }
+        else if (tag.Length > 0 && main is not null)
         {
             using var parsed = new FunctionPropertyList();
             using var additional = new FunctionPropertyList();
@@ -76,7 +89,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             service.RenameDevice(main, newName, false, true);
         }
 
-        var result = new PlacedDevice { OnPage = OnPage(project, page).Count(id => !before.Contains(id)) };
+        var result = new PlacedDevice { OnPage = OnPage(project, page).Count(id => !before.Contains(id)), Terminal = terminalData };
         Read(created, result);
         return result;
     }
@@ -84,16 +97,18 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
     public void ReadCommitted(string projectPath, PlacedDevice result)
     {
         MainThread.Assert();
-        string tag = result.MainName.Split(':')[0];
+        string tag = result.Category == "Terminal" ? result.MainName : result.MainName.Split(':')[0];
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        Read([.. EplanNativePreconditions.Valid(finder.GetFunctions(null))
-            .Where(f => f.Name == tag || f.Name.StartsWith(tag + ":", StringComparison.Ordinal))], result);
+        IEnumerable<Function> functions = result.Category == "Terminal"
+            ? EplanNativePreconditions.Valid(finder.GetTerminals(null)) : EplanNativePreconditions.Valid(finder.GetFunctions(null));
+        Read([.. functions
+            .Where(f => f.Name == tag || result.Category != "Terminal" && f.Name.StartsWith(tag + ":", StringComparison.Ordinal))], result);
     }
 
     private static void Read(Function[] functions, PlacedDevice result)
     {
         Function[] ordered = [.. functions.Where(f => f.IsMainFunction), .. functions.Where(f => !f.IsMainFunction)];
-        Function? main = ordered.FirstOrDefault(f => f.IsMainFunction);
+        Function? main = ordered.FirstOrDefault(f => f.IsMainFunction) ?? ordered.OfType<Terminal>().FirstOrDefault();
         result.Names = [.. ordered.Select(f => f.Name ?? string.Empty)];
         result.MainName = main?.Name ?? string.Empty;
         result.VisibleName = main?.VisibleName ?? string.Empty;

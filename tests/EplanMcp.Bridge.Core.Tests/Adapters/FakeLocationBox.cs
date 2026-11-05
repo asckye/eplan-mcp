@@ -2,7 +2,7 @@ using Eplan.EplApi.Base;
 
 namespace Eplan.EplApi.DataModel;
 
-internal sealed class LocationBox(long oid) : SymbolReference(oid)
+internal sealed class LocationBox(long oid) : FunctionBase(oid)
 {
     [ThreadStatic]
     public static Func<object, Page, SymbolReference>? Factory;
@@ -49,12 +49,10 @@ internal sealed class PropertyValue(string text, Action? checkAlive = null) : ID
     public void Dispose() { checkAlive?.Invoke(); Disposed = true; }
 }
 
-internal sealed class BoxSymbolVariant
+internal sealed class BoxSymbolVariant : MasterData.SymbolVariant
 {
-    public string Library { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public int Variant { get; set; }
-    public string SymbolLibraryName => Library;
-    public string SymbolName => Name;
-    public int VariantNr => Variant;
+    public BoxSymbolVariant() { SymbolLibraryName = string.Empty; SymbolName = string.Empty; }
+    public string Library { get => SymbolLibraryName; set => SymbolLibraryName = value; }
+    public string Name { get => SymbolName; set => SymbolName = value; }
+    public int Variant { get => VariantNr; set => VariantNr = value; }
 }

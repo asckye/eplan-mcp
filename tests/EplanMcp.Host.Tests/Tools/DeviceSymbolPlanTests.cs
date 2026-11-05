@@ -458,13 +458,14 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
             return Page;
         }
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) { Search = args; return Symbols; }
-        public PartsDatabaseContent Read(string? database) { PartReads++; throw new NotSupportedException(); }
+        public PartsDatabaseContent Parts { get; } = new();
+        public PartsDatabaseContent Read(string? database) { PartReads++; return Parts; }
         public DeviceNames? ReadDevice(string projectPath, string tag) => new()
         { Tag = tag, Functions = [.. Channels.Select(c => new DeviceNames.NamedFunction { Name = c.Name, Category = "PLCTerminal", Page = c.Page, IsMain = c.Main })] };
         public RenameReadBack Rename(string projectPath, string tag, string newTag) => throw new NotSupportedException();
         public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language) => throw new NotSupportedException();
         public PageContent? ReadPage(string projectPath, string pageName, bool includeProperties, string? language) => throw new NotSupportedException();
-        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag) => throw new NotSupportedException();
+        public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, DevicePlaceArgs? options = null) => throw new NotSupportedException();
         public void ReadCommitted(string projectPath, PlacedDevice result) { }
     }
 }

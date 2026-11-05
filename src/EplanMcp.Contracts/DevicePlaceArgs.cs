@@ -18,7 +18,7 @@ public sealed class DevicePlaceArgs
     /// <summary>The part's variant; null for variant 1, or for the part's only variant.</summary>
     public string? Variant { get; set; }
 
-    /// <summary>Project symbol library; mutually exclusive with Part and Variant.</summary>
+    /// <summary>Project symbol library; can override a part's template symbol.</summary>
     public string? Library { get; set; }
     /// <summary>Exact symbol name from the project library.</summary>
     public string? Symbol { get; set; }
@@ -36,7 +36,7 @@ public sealed class DevicePlaceArgs
     public double? CornerX { get; set; }
     /// <summary>Opposite corner y in millimetres; required for LocationBox or SPECIAL/DC.</summary>
     public double? CornerY { get; set; }
-    /// <summary>Exclusive terminal source: parent strip designation, short or full (A55).</summary>
+    /// <summary>Parent strip designation, short or full; also supported for a part terminal.</summary>
     public string? TerminalStrip { get; set; }
     /// <summary>Single terminal designation, appended to the strip with ':'.</summary>
     public string? TerminalNumber { get; set; }

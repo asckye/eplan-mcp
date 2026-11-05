@@ -24,10 +24,24 @@ public sealed class TerminalPartReadbackAction : IEplAction
                 || !string.Equals(project.ProjectFullName, (string?)input["project"], StringComparison.OrdinalIgnoreCase))
             { throw new InvalidOperationException("Only the current scratch LargeWrite may be read."); }
             Page page = project.Pages.Single(p => p.Name == (string?)input["page"]);
-            Function function = page.AllPlacements.OfType<Function>().Single(f => f.Name == (string?)input["tag"] && f.FunctionCategory.ToString() == "Terminal");
+            Function function = page.AllPlacements.OfType<Function>().Single(f => f.Name == (string?)input["tag"]
+                && f.FunctionCategory.ToString() == ((string?)input["category"] ?? "Terminal")
+                && (input["x"] is null || f.Location.X == (double)input["x"]! && f.Location.Y == (double)input["y"]!));
             result["name"] = function.Name;
             result["category"] = function.FunctionCategory.ToString();
             result["main"] = function.IsMainFunction;
+            result["visibleName"] = function.VisibleName;
+            result["symbol"] = new JObject
+            {
+                ["library"] = function.SymbolVariant.SymbolLibraryName,
+                ["name"] = function.SymbolVariant.SymbolName,
+                ["variant"] = function.SymbolVariant.VariantNr
+            };
+            using (FunctionPropertyList properties = function.Properties)
+            {
+                using PropertyValue definition = properties[(Properties.Function)20188];
+                result["definition"] = definition.ToString();
+            }
             result["parts"] = new JArray(function.ArticleReferences.Select(r => new JObject
             { ["part"] = r.PartNr, ["variant"] = r.VariantNr, ["count"] = r.Count }));
             result["success"] = true;

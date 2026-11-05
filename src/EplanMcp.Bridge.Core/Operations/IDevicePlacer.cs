@@ -16,7 +16,7 @@ public interface IDevicePlacer
     /// and returns its functions (A82); when tag is nonempty, renames the whole device using NameService (A85).
     /// Throws EPLAN_OPERATION_FAILED when EPLAN refuses.
     /// </summary>
-    public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag);
+    public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, EplanMcp.Contracts.DevicePlaceArgs? options = null);
 
     /// <summary>Reacquires all functions by tag after commit; unplaced function IDs may change (A85).</summary>
     public void ReadCommitted(string projectPath, PlacedDevice result);
