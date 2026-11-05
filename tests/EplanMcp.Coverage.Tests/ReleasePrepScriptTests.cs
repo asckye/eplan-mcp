@@ -75,16 +75,20 @@ public sealed class ReleasePrepScriptTests
     }
 
     [Theory]
-    [InlineData("0.4.11", "v0.4.9,v0.4.10,v0.5.0,v0.4.12-preview", true)]
+    [InlineData("0.4.11", "v0.4.9,v0.4.10,v0.4.12-preview", true)]
     [InlineData("0.4.1", "v0.4.0", true)]
     [InlineData("0.4.2", "v0.4.0", false)]
     [InlineData("0.4.0", "v0.4.0", false)]
-    [InlineData("0.5.0", "v0.4.0", false)]
+    [InlineData("0.5.0", "v0.4.0", true)]
     [InlineData("v0.4.1", "v0.4.0", false)]
     [InlineData("0.4.01", "v0.4.0", false)]
     [InlineData("0.4.1-preview", "v0.4.0", false)]
     [InlineData("0.4.1", "v0.3.9", false)]
-    public async Task Version_RequiresCanonicalNextPatch(string version, string tags, bool expected)
+    [InlineData("0.4.0", "v0.3.9", true)]
+    [InlineData("0.5.1", "v0.4.0", false)]
+    [InlineData("0.6.0", "v0.4.0", false)]
+    [InlineData("0.4.1", "v0.5.0", false)]
+    public async Task Version_RequiresCanonicalNextPatchOrMinor(string version, string tags, bool expected)
     {
         using JsonDocument result = await RunAsync($"$accepted = try {{ Assert-ReleaseVersion {Ps(version)} ({Ps(tags)}.Split(',')); $true }} catch {{ $false }}; $accepted | ConvertTo-Json");
         Assert.Equal(expected, result.RootElement.GetBoolean());

@@ -4,12 +4,12 @@ param([string]$Version)
 $ErrorActionPreference = 'Stop'
 
 function Assert-ReleaseVersion([string]$Version, [string[]]$Tags) {
-    if ($Version -cnotmatch '^0\.4\.(0|[1-9][0-9]*)$') { throw 'Expected a canonical 0.4.x version without v.' }
-    $latest = @($Tags | Where-Object { $_ -cmatch '^v0\.4\.(0|[1-9][0-9]*)$' } |
+    if ($Version -cnotmatch '^0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') { throw 'Expected a canonical 0.x.y version without v.' }
+    $latest = @($Tags | Where-Object { $_ -cmatch '^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' } |
         ForEach-Object { [version]$_.Substring(1) } | Sort-Object -Descending)[0]
-    if (-not $latest) { throw 'No v0.4.x tag found; fetch origin and tags first.' }
-    $next = '0.4.' + ($latest.Build + 1)
-    if ($Version -cne $next) { throw "Expected $next after v$latest; got $Version." }
+    if (-not $latest) { throw 'No v0.x.y tag found; fetch origin and tags first.' }
+    $allowed = @("0.$($latest.Minor).$($latest.Build + 1)", "0.$($latest.Minor + 1).0")
+    if ($Version -cnotin $allowed) { throw "Expected $($allowed -join ' or ') after v$latest; got $Version." }
 }
 
 function Get-ReleaseChangelog([string]$Text, [string]$Version, [string]$Date) {
@@ -60,7 +60,7 @@ function Invoke-ReleasePrep([string]$Root, [string]$Version) {
     if (Read-ReleaseGit $Root @('status', '--porcelain', '--untracked-files=all')) { throw 'The working tree must be clean, including untracked files.' }
     $head = Read-ReleaseGit $Root @('rev-parse', 'HEAD')
     if ($head -cne (Read-ReleaseGit $Root @('rev-parse', 'origin/main'))) { throw 'HEAD must equal origin/main.' }
-    Assert-ReleaseVersion $Version @(Read-ReleaseGit $Root @('tag', '--list', 'v0.4.*'))
+    Assert-ReleaseVersion $Version @(Read-ReleaseGit $Root @('tag', '--list', 'v0.*'))
     $projects = @('Host', 'Workbench', 'Bridge.Eplan') | ForEach-Object { "src/EplanMcp.$_/EplanMcp.$_.csproj" }
     $updates = @{}
     foreach ($project in $projects) {
