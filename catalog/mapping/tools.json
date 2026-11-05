@@ -19,6 +19,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionCatalogTests.cs"
           },
           {
+            "name": "ActionRegistryTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionRegistryTests.cs"
+          },
+          {
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
@@ -55,6 +60,11 @@
             "name": "ActionCatalogFileTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionCatalogFileTests.cs"
+          },
+          {
+            "name": "ActionRegistryTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ActionRegistryTests.cs"
           },
           {
             "name": "ApiProtocolTests",
@@ -8154,6 +8164,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/PlcCommittedReadbackTests.cs"
           },
           {
+            "name": "SymbolFunctionAssignmentTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/SymbolFunctionAssignmentTests.cs"
+          },
+          {
             "name": "SymbolPartPlacementTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/SymbolPartPlacementTests.cs"
@@ -13725,6 +13740,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "ActionCensus",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ActionCensus.cs"
           },
           {
             "name": "ApiTryTests",
