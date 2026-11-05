@@ -6,13 +6,13 @@
 
 当前 MCP SDK 固定版本、协议 revision 及客户端兼容注释以 [`Directory.Packages.props`](../../Directory.Packages.props) 为来源；运行时绑定见[架构协议说明](../architecture/architecture.md)。
 
-负责人于 2026-11-01 决定：每周五从 main 发布预览版，首班为 **2026-11-06 的 v0.4.1**，此后按 0.4.x 递增 patch，直到里程碑版 **v0.5.0**；里程碑验收目标保持不变。发布列车不引入破坏性契约变化，此类变化仍归 v0.5.0。`release.yml` 的 `tags: ['v*']` 和 `^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$` 校验均接受 v0.4.1、v0.4.2 等标签；无需改 workflow，也不增加定时发布。
+负责人于 2026-11-01 决定每周五从 main 发布预览版，11-02 决定有已验证内容就提前发布。2026-11-04 决定：main 带 ADR-0049 的破坏性变化，按 **v0.5.0 预览版**发布，原 v0.5.0 的验收目标（小项目 16 页完全一致、客户页精确重绘）顺延到 **v0.6.0**。此后按 0.5.x 递增 patch；patch 不带破坏性契约变化，此类变化进入下一个次版本。`release.yml` 的 `tags: ['v*']` 和 `^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$` 校验均接受 v0.5.0、v0.5.1 等标签；无需改 workflow，也不增加定时发布。
 
 只有受影响 Large 类已通过的功能可默认开启。逐行审阅 [待验台账](large-pending.md)：未关闭项保持默认关闭，或在发布说明中逐项明确标为“未实机验证”，不能将其算作已验证发布范围；`apiTry`、`actionTry` 已默认关闭，继续保持。随包携带待验实现不代表发布验收通过，也不改变发布范围内的 Large、Agent 评测和支持矩阵要求。
 
 每班由维护者完成：
 
-1. 同步 main 和标签（`git fetch origin main --tags`），在干净且 `HEAD == origin/main` 的检出中运行 `pwsh eng/scripts/release-prep.ps1 -Version 0.4.1`（后续换为下一 patch）。脚本只更新三个产品项目的构建版本及 Claude 插件模板版本、将 CHANGELOG Unreleased 移入带当天日期的新版本节，并生成 `.local/release/v0.4.1-notes.md`；留下空的 Unreleased。它只读取本地 Git 引用，不联网、不提交、不打标签、不推送、不创建发布。
+1. 同步 main 和标签（`git fetch origin main --tags`），在干净且 `HEAD == origin/main` 的检出中运行 `pwsh eng/scripts/release-prep.ps1 -Version 0.5.0`（后续换为下一 patch；带破坏性变化时换为下一个次版本，脚本只接受这两种）。脚本只更新三个产品项目的构建版本及 Claude 插件模板版本、将 CHANGELOG Unreleased 移入带当天日期的新版本节，并生成 `.local/release/v0.5.0-notes.md`；留下空的 Unreleased。它只读取本地 Git 引用，不联网、不提交、不打标签、不推送、不创建发布。
 2. 审阅从 Unreleased 生成的中文说明和台账未关闭行，核对默认开关、受影响 Large 通过证据及明确排除的待验范围；补齐支持矩阵、Agent 与界面验收记录。台账缺失或格式不明仅提示证据缺口，由维护者核对。
 3. 审阅并提交准备改动，在干净工作区执行 `pwsh eng/scripts/local-gate.ps1 -Full -Push`；必须是最终发布提交关卡全绿且已落到 main，不能沿用旧提交结果。准备脚本后的提交与关卡均为人工步骤；关卡若变基，重新核对该提交的验证证据。
 4. 在该提交的 Release 构建上执行 `pwsh eng/scripts/smoke.ps1`（可用 `-HostPath` 指定已构建的 Host），完成 `doctor --offline`（未安装 EPLAN 只记警告）、stdio initialize 与 tools/list 往返；离线自检明确标记未检查实时 Bridge 与授权，不需要 EPLAN，任何失败均须处理，不能替代实机 Large。
@@ -31,29 +31,29 @@
 
 ## 标签、草稿与插件交接
 
-以下命令由维护者执行；示例版本为 `v0.4.1`，在仓库根目录的 PowerShell 中运行。
+以下命令由维护者执行；示例版本为 `v0.5.0`，在仓库根目录的 PowerShell 中运行。
 
 ```powershell
-git tag v0.4.1 HEAD
-git push origin v0.4.1
-gh release create v0.4.1 --repo asckye/eplan-mcp --verify-tag --draft --prerelease --title 'v0.4.1 preview' --notes-file .local/release/v0.4.1-notes.md
-eng/scripts/release-addin.ps1 -Tag v0.4.1 -WhatIf
-eng/scripts/release-addin.ps1 -Tag v0.4.1
+git tag v0.5.0 HEAD
+git push origin v0.5.0
+gh release create v0.5.0 --repo asckye/eplan-mcp --verify-tag --draft --prerelease --title 'v0.5.0 preview' --notes-file .local/release/v0.5.0-notes.md
+eng/scripts/release-addin.ps1 -Tag v0.5.0 -WhatIf
+eng/scripts/release-addin.ps1 -Tag v0.5.0
 ```
 
 `-WhatIf` 只显示计划，不联网、不建 worktree、不构建、不启动 EPLAN、不上传。实际执行会核对本地标签与远端标签（含附注标签的提交），在系统临时目录建立新的 detached worktree，确认干净，按标签版本构建 Release 插件（`EplanSign=false`、锁定还原）。工作区中的未提交修改不会进入产物。
 
 脚本还从该 worktree 构建离线宿主及 Large 测试，将示例复制到该 worktree 的 scratch，在隔离管道上运行 `--filter-trait 'Host=Offline'`。无通过测试、有失败或跳过时不上传。临时进程环境恢复后退出，不修改 PATH、全局环境、插件注册或工程师的项目。
 
-成功后输出 `EplanMcp-addin-v0.4.1.zip`，并只上传这个文件到**已有草稿**；禁止覆盖已有插件附件。ZIP 仅含三个产品 DLL、插件 SBOM 和标签/提交/测试数量记录，不含 EPLAN 程序集、授权、项目和测试日志。构建、测试输出及包保留在打印出的临时 worktree，供核查；保存需要的内容后，按脚本打印的 `git worktree remove --force -- ...` 命令清理。
+成功后输出 `EplanMcp-addin-v0.5.0.zip`，并只上传这个文件到**已有草稿**；禁止覆盖已有插件附件。ZIP 仅含三个产品 DLL、插件 SBOM 和标签/提交/测试数量记录，不含 EPLAN 程序集、授权、项目和测试日志。构建、测试输出及包保留在打印出的临时 worktree，供核查；保存需要的内容后，按脚本打印的 `git worktree remove --force -- ...` 命令清理。
 
 将脚本打印的以下整行原样粘贴到 GitHub 草稿发布说明中，用实际哈希替换占位符；不要放进列表、行内代码或代码围栏：
 
 ```text
-Add-in SHA-256: <64 位小写十六进制 SHA-256>  EplanMcp-addin-v0.4.1.zip
+Add-in SHA-256: <64 位小写十六进制 SHA-256>  EplanMcp-addin-v0.5.0.zip
 ```
 
-发布说明还须写明“插件由维护者在开发机上从标签 v0.4.1 构建”，附提交号、离线 Large 结果、其他实机和 Agent 评测结果，并按以下清单列出“支持矩阵”（版本边界见 [ADR-0009](../adr/0009-supported-eplan-versions.md) 和[版本兼容性](../eplan/eplan-versions.md)）：
+发布说明还须写明“插件由维护者在开发机上从标签 v0.5.0 构建”，附提交号、离线 Large 结果、其他实机和 Agent 评测结果，并按以下清单列出“支持矩阵”（版本边界见 [ADR-0009](../adr/0009-supported-eplan-versions.md) 和[版本兼容性](../eplan/eplan-versions.md)）：
 
 - [ ] 已验证 EPLAN 年份、完整构建号与变体：2026，实测 2026.0.3.25421，Electric P8、Pro Panel。
 - [ ] 尚未验证：2024、2025、2027，留待 M7；与已验证版本分开列出。
@@ -66,7 +66,7 @@ Add-in SHA-256: <64 位小写十六进制 SHA-256>  EplanMcp-addin-v0.4.1.zip
 标签 push 会立即触发 workflow；此时草稿或附件尚未就绪，addin 作业会明确失败。这是有意的交接关卡，不轮询开发机，也不使用自托管 runner。补齐上述附件和发布说明后，重跑该标签的整次执行：
 
 ```powershell
-gh run list --repo asckye/eplan-mcp --workflow release.yml --branch v0.4.1
+gh run list --repo asckye/eplan-mcp --workflow release.yml --branch v0.5.0
 gh run rerun <上一步的运行 ID> --repo asckye/eplan-mcp
 ```
 
@@ -76,21 +76,21 @@ gh run rerun <上一步的运行 ID> --repo asckye/eplan-mcp
 
 Host 为 win-x64 自包含单文件；Workbench 为 win-x64 自包含目录，附经固定哈希验证的 Maple Mono CN 字体及许可证。发布使用独立的 `packages.win-x64.lock.json`，常规 CI 继续使用原锁文件，两者都保持 locked mode。CycloneDX 6.0.0（Apache-2.0，仅构建工具）生成三个项目的 SBOM 后合并，并补充随包运行时、字体和 TIA 主题。暂存 `app\` 的全部内容打进唯一顶层目录 `EplanMcp-<version>\`，包括点目录；不套 `app\`，不调用 Inno Setup。
 
-以 `v0.4.1` 为例，发布保留以下 8 个附件：
+以 `v0.5.0` 为例，发布保留以下 8 个附件：
 
-- `EplanMcp-0.4.1.zip`：工程师下载的完整程序包，顶层目录 `EplanMcp-0.4.1\`；打开其中 `workbench\EplanMcp.Workbench.exe`。
+- `EplanMcp-0.5.0.zip`：工程师下载的完整程序包，顶层目录 `EplanMcp-0.5.0\`；打开其中 `workbench\EplanMcp.Workbench.exe`。
 - `SHA256SUMS.txt`：所有其他附件的 SHA-256，包括插件 ZIP、manifest、安装文件清单和两个证明包；不计算自身的哈希。
-- `EplanMcp-v0.4.1.cdx.json`：合并的 CycloneDX SBOM。
-- `EplanMcp-v0.4.1-provenance.sigstore.json`：来源证明包。
-- `EplanMcp-v0.4.1-sbom.sigstore.json`：SBOM 证明包。
-- `EplanMcp-v0.4.1-files.sha256`：ZIP 内每个文件的路径和 SHA-256（含版本顶层目录），供解压后逐文件核查。
-- `EplanMcp-addin-v0.4.1.zip`：维护者构建的插件包。
-- `EplanMcp-addin-v0.4.1.json`：从插件包提取的标签、提交和测试记录（manifest）。
+- `EplanMcp-v0.5.0.cdx.json`：合并的 CycloneDX SBOM。
+- `EplanMcp-v0.5.0-provenance.sigstore.json`：来源证明包。
+- `EplanMcp-v0.5.0-sbom.sigstore.json`：SBOM 证明包。
+- `EplanMcp-v0.5.0-files.sha256`：ZIP 内每个文件的路径和 SHA-256（含版本顶层目录），供解压后逐文件核查。
+- `EplanMcp-addin-v0.5.0.zip`：维护者构建的插件包。
+- `EplanMcp-addin-v0.5.0.json`：从插件包提取的标签、提交和测试记录（manifest）。
 
 不为每个附件单独生成 `.sha256` 文件。逐文件清单作为附件；来源证明的完整 subject 清单另存于工作区 `.local-subjects.sha256`，不上传。ZIP 及其每个文件均纳入来源证明，SBOM 证明绑定这个完整 ZIP；插件证明不能证明维护者开发机的源码构建过程。插件 ZIP 仅用于 ADR-0020 交接和核查，工程师无需另下。
 
 ```powershell
-$asset = 'EplanMcp-0.4.1.zip'
+$asset = 'EplanMcp-0.5.0.zip'
 $expected = @(Get-Content .\SHA256SUMS.txt | Where-Object { $_ -cmatch "^[0-9a-f]{64}  $([regex]::Escape($asset))$" })
 if ($expected.Count -ne 1) { throw 'Missing or duplicate SHA-256 entry.' }
 $actual = (Get-FileHash -LiteralPath ".\$asset" -Algorithm SHA256).Hash.ToLowerInvariant()

@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A99、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A101、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -441,3 +441,17 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 先放符号、后分配部件时，`AddArticleReference` 不产生未放置功能对象，`eplan_device_get` 只列出已放置的功能。但线圈的触点映像会多出部件模板里没有匹配上的触点行：模板的主触点是主触点符号，普通常开 `S` 匹配不上，`13/14` 能匹配。所以这个顺序不推荐，应先放部件，再用 `join_device` 放其余符号。
 — Large `DevicePlaceTests.UnplacedAssignment`、探针 `FunctionPlaceSpikeTests`（未合入）。
 - `DimensionItem.CreateAngular` 之后同一事务读 `SecondPoint` 得到 (0,0)，EPLAN 计算的角度文字正常；角度标注不用这个读回做核对。
+
+### A99. 提交后读二维码内容或尺寸文字会让撤销失败（2026-11-04，EPLAN 2026.0.3，Electric P8，LargeWrite 探针和 Large）
+- 提交后读 `QRCode.GetQRCode()`、`DimensionItem.DimensionText` 或 `DimensionCircle.DimensionText`，之后 `XEsUndoAction` 弹“撤销冲突，步骤不存在”，对象留在页面上。
+- 同样在提交后读标识符、位置、属性 ID、画笔、边界、分组不受影响；二维码内容改读属性 `QRCODE_BLOCK_VALUE` 也不受影响。
+- 所以 `eplan_annotation_create` 只在创建事务内读尺寸文字，`eplan_page_get` 不返回 `dimension_text`。
+— Large `AnnotationCreateTests`、探针 `AnnotationUndoProbeTests`（未合入）。
+
+### A100. action 的真实数量来自注册表，功能区入口由 `MFTools.xml` 映射（2026-11-04，EPLAN 2026.0.3.25421，安装文件和 Electric P8 实测）
+- `Cfg/regPlatform.xml` 和 `regMinimal.xml` 的 `Settings/CAT/MOD/LEV1[@name='Services']/LEV2/LEV3`：`LEV2` 为 `Actions` 2213 个、`Interactions` 268 个、`AsmActions` 49 个，去重 2498 个；所属模块在 `LEV3/LEV4/Setting[@name='ModuleName']/Val`。
+- `ActionManager.FindAction(name, true)`：注册表、`MFTools.xml` 和官方表合计 2666 个候选，找到 2266 个；官方 99 个全部能找到。`Interactions` 基本不能按名称找到，`XGedIa…` 要经 `XGedStartInteractionAction2D /Name:…` 启动并等鼠标。只有 20 个声明了参数。
+- `MFTools.xml` 的 `Dialogs`、`Shortcuts` 区段基本不是 action。其他项目说的“约 1050 个”是 `MFTools.xml` 全部区段去掉官方后的数量，不是总数。
+- 功能区：12 个选项卡、339 个入口（313 个命令 ID），其中 330 个能通过 `MFTools.xml` 的 `UsedActions/neutral|mm` 映射到命令，9 个云入口没有映射，25 个是下拉标题 `MfDropdownMenuDummyAction`。
+- 名单本身不进仓库（ADR-0030）。
+— 读安装文件，探针 `ActionFindSpikeTests`、`RibbonSpikeTests`（未合入）。
