@@ -43,8 +43,10 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             throw WriteArguments.NotStarted(ex);
         }
 
-        // A93: part transfer and template assignment need fresh transactions inside the same undo step.
-        ITransactionScopeFactory scope = request.UpdateFromParts || request.Part is not null ? assigner!.PartTransactions(request.Project.Path) : transactions;
+        // A93: part transfer and template assignment need fresh transactions inside the same undo step; a further
+        // part still needs the SafetyPoint (S063074 otherwise), and the first part already brought the templates.
+        bool assignTemplates = request.Part is not null && request.Main!.Parts.Count == 0;
+        ITransactionScopeFactory scope = request.UpdateFromParts || assignTemplates ? assigner!.PartTransactions(request.Project.Path) : transactions;
         int assignedFunctions = 0;
         string? assignmentWarning = null;
         Committed<RenameReadBack> committed = TransactionRunner.Run(scope, Tool, () =>
@@ -79,7 +81,8 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             if (main.IsMain != request.Main!.IsMain || main.Category != request.Main.Category || !request.Rename && main.Id != request.Main!.Id || main.Name != request.ResultTag || DeviceUpdateRequest.ReferencesFingerprint(main.Parts)
                 != DeviceUpdateRequest.ReferencesFingerprint(request.Main!.Parts.Append(new DevicePart { PartNumber = part.PartNumber, Variant = part.Variant, Count = request.Count })))
             { throw InvalidArgument("The committed function or added part reference did not match the plan; the change was rolled back."); }
-            (assignedFunctions, assignmentWarning) = assigner!.AssignUnplacedFunctions(request.Project.Path, request.NewTag);
+            if (assignTemplates)
+            { (assignedFunctions, assignmentWarning) = assigner!.AssignUnplacedFunctions(request.Project.Path, request.NewTag); }
         }, verifyRollback: () =>
         {
             if (request.Rename && renamer.ReadDevice(request.Project.Path, request.Device.Tag) is null)
