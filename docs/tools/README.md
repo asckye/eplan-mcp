@@ -1,6 +1,6 @@
 # 已注册工具索引
 
-以 [server-contract.verified.json](../../tests/Contracts.Snapshots/server-contract.verified.json) 的 102 个工具及 `readOnlyHint` 为准；Profile 按 [ToolProfiles.Core](../../src/EplanMcp.Host/Tools/ToolProfiles.cs) 补齐（快照不含 Profile 字段）。`full` 包含全部登记工具，默认关闭的工具仍须配置启用。
+以 [server-contract.verified.json](../../tests/Contracts.Snapshots/server-contract.verified.json) 的 103 个工具及 `readOnlyHint` 为准；Profile 按 [ToolProfiles.Core](../../src/EplanMcp.Host/Tools/ToolProfiles.cs) 补齐（快照不含 Profile 字段）。`full` 包含全部登记工具，默认关闭的工具仍须配置启用。
 
 “写入”表示 `readOnlyHint: false`，包含项目写入、本地数据和导出文件；具体安全级别、审批及验证边界见规格。规格状态括号记录首次发布版本，标签中尚无该工具时记 `Unreleased`；Implemented 不代表已经通过实机验收。未注册规格不列入此表，里程碑状态见[路线图](../roadmap.md)。
 
@@ -10,6 +10,7 @@
 | `eplan_action_catalog_search` | full | 只读 | [eplan_action_catalog_search.md](eplan_action_catalog_search.md) |
 | `eplan_action_run` | full | 写入 | [eplan_action_run.md](eplan_action_run.md) |
 | `eplan_action_try` | full | 写入 | [eplan_action_try.md](eplan_action_try.md) |
+| `eplan_annotation_create` | full | 写入 | [eplan_annotation_create.md](eplan_annotation_create.md) |
 | `eplan_api_get` | full | 只读 | [eplan_api_get.md](eplan_api_get.md) |
 | `eplan_api_search` | full | 只读 | [eplan_api_search.md](eplan_api_search.md) |
 | `eplan_api_try` | full | 写入 | [eplan_api_try.md](eplan_api_try.md) |

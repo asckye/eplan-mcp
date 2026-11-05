@@ -36,7 +36,7 @@ internal class Text(long oid = 99) : TextBase(oid)
 
 internal sealed class PathText(long oid = 102) : Text(oid);
 
-internal sealed class PolyLine(long oid = 103) : GraphicalPlacement(oid)
+internal class PolyLine(long oid = 103) : GraphicalPlacement(oid)
 {
     private readonly List<PointD> _points = [];
     public int NumberOfPoints => _points.Count;
@@ -116,6 +116,8 @@ internal sealed class Line(long oid = 100) : GraphicalPlacement(oid)
 internal class Rectangle(long oid = 101) : GraphicalPlacement(oid)
 {
     public double Angle { get; set; }
+    public double Width => UpperRightCorner.X - LowerLeftCorner.X;
+    public double Height => UpperRightCorner.Y - LowerLeftCorner.Y;
     public PointD LowerLeftCorner { get; private set; }
     public PointD UpperRightCorner { get; private set; }
     public void Create(Page page) => page.AllPlacements = [.. page.AllPlacements, this];

@@ -24,12 +24,23 @@ internal static class MainThread
     public static void Assert() { }
 }
 
+internal static class EplanObjectReader
+{
+    internal static EplanMcp.Contracts.SnapshotObject Describe(StorableObject obj, string kind)
+    {
+        var placement = Assert.IsAssignableFrom<Placement>(obj);
+        return new() { Type = placement.IdentifierType, Oid = placement.ObjectIdentifier, Kind = kind, Page = placement.Page?.Name, Name = "" };
+    }
+}
+
 internal sealed class EplanProjectLanguages
 {
     private readonly Project _project = EplanProjects.Project!;
     public LanguageSettings Read(string projectPath)
     {
         Assert.Same(_project, EplanProjects.ByPath(projectPath));
+        if (_project.DisplayError is { } error)
+        { throw error; }
         return new() { Display = _project.Display };
     }
 }

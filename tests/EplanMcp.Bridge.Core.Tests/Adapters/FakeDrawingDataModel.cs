@@ -185,7 +185,9 @@ internal sealed class Page : StorableObject, IWriteProtection, IDisposable
     public bool WriteProtected { get; set; }
     public DocumentTypeManager.DocumentType PageType { get; set; } = DocumentTypeManager.DocumentType.Circuit;
     public string Name { get; set; } = "+A1/1";
-    public double GridSize { get; set; } = 4;
+    private double _gridSize = 4;
+    public Exception? GridError { get; set; }
+    public double GridSize { get => GridError is { } error ? throw error : _gridSize; set => _gridSize = value; }
     public PointD StoredSize { get; set; } = new(420, 297);
     public Exception? SizeError { get; set; }
     public PointD Size => SizeError is { } error ? throw error : StoredSize;
@@ -213,6 +215,7 @@ internal sealed class Project(params Page[] pages) : StorableObject
     public Page[] Pages { get; } = pages;
     public LayerTable LayerTable { get; } = new();
     public string Display { get; set; } = "zh_CN;";
+    public Exception? DisplayError { get; set; }
     public Function[] UnplacedFunctions { get; set; } = [];
     public bool RejectUnfilteredFunctions { get; set; }
     public bool OmitTerminalsFromFunctions { get; set; }

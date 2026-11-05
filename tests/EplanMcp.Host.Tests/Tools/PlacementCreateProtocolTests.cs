@@ -305,6 +305,11 @@ public sealed partial class PlacementCreateProtocolTests
         public PlacementText Create(string projectPath, string page, PlacementText text)
         {
             Writes++;
+            if (text.Kind == "dimension")
+            {
+                text = JsonSerializer.Deserialize<PlacementText>(JsonSerializer.Serialize(text))!;
+                text.DimensionText = Enumerable.Repeat("10 mm", text.DimensionType is "baseline" or "incremental" or "continued" ? text.Points.Length - 1 : 1).ToArray();
+            }
             Items.Add(text);
             if (Fail && Writes == 2)
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Forced mid-batch failure."); }

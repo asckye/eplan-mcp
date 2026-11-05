@@ -105,16 +105,16 @@ public sealed class DrawingReaderTests
     }
 
     [Fact]
-    public void FakeBridge_ExactPageAndFiniteGrid_AreRequired()
+    public void FakeBridge_ExactPageIsRequiredAndUnavailableGridStaysUnverified()
     {
         var page = new Page();
         var bridge = new FakeDrawingBridge(page);
         Assert.Null(bridge.Read("+a1/1"));
         Assert.Null(bridge.Read("+A1"));
         page.GridSize = double.NaN;
-        Assert.Throws<BridgeErrorException>(() => bridge.Read("+A1/1"));
+        Assert.Equal(0, bridge.Read("+A1/1")!.GridSize);
         page.GridSize = 0;
-        Assert.Throws<BridgeErrorException>(() => bridge.Read("+A1/1"));
+        Assert.Equal(0, bridge.Read("+A1/1")!.GridSize);
     }
 
     [Fact]

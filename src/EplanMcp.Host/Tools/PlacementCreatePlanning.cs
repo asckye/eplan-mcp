@@ -15,10 +15,12 @@ internal static class PlacementCreatePlanning
 {
     internal static readonly string[] AllowedPageTypes = ["Circuit", "Overview", "Graphics"];
     internal const string AllowedPageMessage = "/page requires a Circuit, Overview or Graphics page from eplan_page_list.";
+    private static readonly string[] _pointFields = ["position", "center", "first", "second", "end"];
+    private static readonly string[] _pointArrayFields = ["points", "corners"];
     internal static async Task<CallToolResult> PreviewAsync(IBridgeClient bridge, JsonElement input, string? displayLanguage = null,
-        Func<JsonElement, double[]?>? measureText = null, ImportFiles? files = null, CancellationToken cancellationToken = default)
+        Func<JsonElement, double[]?>? measureText = null, ImportFiles? files = null, bool annotations = false, CancellationToken cancellationToken = default)
     {
-        List<string> problems = Validate(input);
+        List<string> problems = Validate(input, annotations);
         if (problems.Count > 0)
         { return Invalid(problems); }
         if (!WriteToolDefaults.IsPreview(input))
@@ -37,15 +39,15 @@ internal static class PlacementCreatePlanning
             string? layoutWarnings = null;
             if (measureText is null)
             {
-                var preflight = new PlacementTextCreateArgs { Project = args.Project!, Page = args.Page, Items = [], LayoutGuard = input.TryGetProperty("layout_guard", out JsonElement guard) ? guard.GetString() : null };
+                var preflight = new PlacementTextCreateArgs { Project = args.Project!, Page = args.Page, Items = [], Annotations = annotations, LayoutGuard = input.TryGetProperty("layout_guard", out JsonElement guard) ? guard.GetString() : null };
                 foreach (JsonElement item in input.GetProperty("items").EnumerateArray())
                 {
-                    JsonNode actual = Snap(item, geometry.GridSize, !input.TryGetProperty("snap_to_grid", out JsonElement s) || s.GetBoolean(), normalizeRectangle: false);
+                    JsonNode actual = Snap(item, geometry.GridSize, !input.TryGetProperty("snap_to_grid", out JsonElement s) || s.GetBoolean(), normalizeRectangle: false, annotations: annotations);
                     preflight.Items.Add(await RequestAsync(JsonSerializer.SerializeToElement(actual), files, cancellationToken).ConfigureAwait(false));
                 }
                 layoutWarnings = (await bridge.InvokeAsync<PlacementTextCreateArgs, PlacementTextCreateData>(OperationNames.PlacementTextCreatePlan, preflight, PlacementCreateTools.CallLimit, null, cancellationToken).ConfigureAwait(false)).Warning;
             }
-            return Plan(input, geometry, displayLanguage, measureText, layoutWarnings);
+            return Plan(input, geometry, displayLanguage, measureText, layoutWarnings, annotations);
         }
         catch (ImportFileException ex) { return ToolResults.Error(ex.Error); }
         catch (BridgeCallException ex)
@@ -55,7 +57,7 @@ internal static class PlacementCreatePlanning
         }
     }
 
-    internal static List<string> Validate(JsonElement input)
+    internal static List<string> Validate(JsonElement input, bool annotations = false)
     {
         var problems = new List<string>();
         void Check(bool valid, string at, string message)
@@ -96,6 +98,11 @@ internal static class PlacementCreatePlanning
         {
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
             string? kind = item.ValueKind == JsonValueKind.Object && item.TryGetProperty("kind", out JsonElement k) && k.ValueKind == JsonValueKind.String ? k.GetString() : null;
+            if (annotations)
+            {
+                AnnotationCreatePlanning.Validate(item, at, problems);
+                continue;
+            }
             if (kind == "block")
             {
                 Check(items.GetArrayLength() == 1, "/items", "a block must be the only item in its call.");
@@ -165,29 +172,33 @@ internal static class PlacementCreatePlanning
         return problems;
     }
 
-    private static CallToolResult Plan(JsonElement input, PageDrawingGeometry page, string? displayLanguage, Func<JsonElement, double[]?>? measureText, string? layoutWarnings = null)
+    private static CallToolResult Plan(JsonElement input, PageDrawingGeometry page, string? displayLanguage, Func<JsonElement, double[]?>? measureText, string? layoutWarnings = null, bool annotations = false)
     {
-        if (page.PageSize is not { Length: 2 } size || size.Any(n => !double.IsFinite(n) || n <= 0) || !double.IsFinite(page.GridSize) || page.GridSize <= 0)
+        bool reliableSize = page.PageSize is { Length: 2 } && page.PageSize.All(n => double.IsFinite(n) && n > 0);
+        bool reliableGrid = double.IsFinite(page.GridSize) && page.GridSize > 0;
+        if (!annotations && (!reliableSize || !reliableGrid))
         { return Missing("placement.page_geometry", "Reliable Page.Size and grid are required; plot-frame size is not a fallback."); }
+        double[] size = reliableSize ? page.PageSize! : [double.PositiveInfinity, double.PositiveInfinity];
         bool snap = !input.TryGetProperty("snap_to_grid", out JsonElement s) || s.GetBoolean();
         var rows = new JsonArray();
         var changes = new List<string>();
         var problems = new List<string>();
         var warnings = new List<string>();
+        if (annotations && (!reliableSize || !reliableGrid))
+        { warnings.Add("Page size or grid is unreadable; unavailable geometry checks or snapping were skipped."); }
         bool warn = input.TryGetProperty("layout_guard", out JsonElement guard) && guard.GetString() == "warn";
         foreach ((JsonElement item, int i) in input.GetProperty("items").EnumerateArray().Select((item, i) => (item, i)))
         {
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
             string kind = item.GetProperty("kind").GetString()!;
-            JsonNode actual = Snap(item, page.GridSize, snap, normalizeRectangle: false);
+            JsonNode actual = Snap(item, page.GridSize, snap, normalizeRectangle: false, annotations: annotations);
             if (kind == "block")
             {
                 rows.Add(new JsonObject { ["requested"] = BlockSummary(item), ["actual"] = BlockSummary(item), ["bounds"] = null, ["snapped"] = false });
                 changes.Add("create block with " + item.GetProperty("members").GetArrayLength().ToString(CultureInfo.InvariantCulture) + " members");
                 continue;
             }
-            string field = Field(kind);
-            JsonArray[] points = IsText(kind) || kind is "arc" or "ellipse" ? [actual[field]!.AsArray()] : [.. actual[field]!.AsArray().Select(p => p!.AsArray())];
+            JsonArray[] points = Coordinates(actual);
             if (points.SelectMany(p => p).Any(n => !double.IsFinite(n!.GetValue<double>()) || n.GetValue<double>() is < 0 or > 10000))
             { problems.Add(at + ": snapping must produce finite coordinates in 0..10000 mm."); continue; }
             if (measureText is not null && IsText(kind) && !item.GetProperty("contents").TryGetProperty("??_??", out _))
@@ -203,8 +214,8 @@ internal static class PlacementCreatePlanning
                     { problems.Add(message); continue; }
                 }
             }
-            double radius = kind == "arc" ? item.GetProperty("radius_mm").GetDouble() : kind == "ellipse" ? Math.Max(item.GetProperty("radius_x_mm").GetDouble(), item.GetProperty("radius_y_mm").GetDouble()) : 0;
-            double[]? bounds = IsText(kind) ? measureText?.Invoke(JsonSerializer.SerializeToElement(actual)) : kind is "arc" or "ellipse" ?
+            double radius = kind is "arc" or "sector" ? item.GetProperty("radius_mm").GetDouble() : kind == "ellipse" ? Math.Max(item.GetProperty("radius_x_mm").GetDouble(), item.GetProperty("radius_y_mm").GetDouble()) : 0;
+            double[]? bounds = IsText(kind) ? measureText?.Invoke(JsonSerializer.SerializeToElement(actual)) : annotations && kind is not ("spline" or "sector") ? null : kind is "arc" or "ellipse" or "sector" ?
                 [points[0][0]!.GetValue<double>() - radius, points[0][1]!.GetValue<double>() - radius, points[0][0]!.GetValue<double>() + radius, points[0][1]!.GetValue<double>() + radius] :
                 [points.Min(p => p[0]!.GetValue<double>()), points.Min(p => p[1]!.GetValue<double>()), points.Max(p => p[0]!.GetValue<double>()), points.Max(p => p[1]!.GetValue<double>())];
             if (bounds is not null && (bounds.Length != 4 || bounds.Any(n => !double.IsFinite(n)) || bounds[0] > bounds[2] || bounds[1] > bounds[3]))
@@ -216,7 +227,7 @@ internal static class PlacementCreatePlanning
         }
         if (problems.Count > 0)
         { return Invalid(problems); }
-        var result = new JsonObject { ["project"] = ResultShaper.CleanText(page.Project), ["page"] = ResultShaper.CleanText(page.Page), ["execution"] = ExecutionState.NotStarted, ["dryRun"] = true, ["gridSize"] = page.GridSize, ["boundarySource"] = "Page.Size", ["items"] = rows, ["changes"] = JsonSerializer.SerializeToNode(changes), ["connectionChanges"] = new JsonArray() };
+        var result = new JsonObject { ["project"] = ResultShaper.CleanText(page.Project), ["page"] = ResultShaper.CleanText(page.Page), ["execution"] = ExecutionState.NotStarted, ["dryRun"] = true, ["gridSize"] = reliableGrid ? JsonValue.Create(page.GridSize) : null, ["boundarySource"] = reliableSize ? "Page.Size" : "unverified", ["items"] = rows, ["changes"] = JsonSerializer.SerializeToNode(changes), ["connectionChanges"] = new JsonArray() };
         result["fingerprint"] = page.Fingerprint();
         result["hint"] = WriteToolDefaults.ExecutionHint;
         if (!string.IsNullOrEmpty(layoutWarnings))
@@ -231,24 +242,29 @@ internal static class PlacementCreatePlanning
     internal static readonly string[] ImageExtensions = [".png", ".jpg", ".jpeg", ".bmp", ".emf", ".wmf"];
     internal static bool IsText(string? kind) => kind is "text" or "path_text";
     private static string Field(string kind) => IsText(kind) ? "position" : kind is "arc" or "ellipse" ? "center" : kind is "line" or "polyline" ? "points" : "corners";
-    internal static JsonNode Snap(JsonElement item, double grid, bool snap, bool normalizeRectangle = true)
+    internal static JsonNode Snap(JsonElement item, double grid, bool snap, bool normalizeRectangle = true, bool annotations = false)
     {
         if (item.GetProperty("kind").GetString() == "block")
         { return JsonNode.Parse(item.GetRawText())!; }
-        if (!double.IsFinite(grid) || grid <= 0)
+        if ((!double.IsFinite(grid) || grid <= 0) && !annotations)
         { throw new BridgeCallException(new BridgeError { Reason = ErrorReason.CapabilityMissing, Message = "A reliable page grid is required." }); }
         JsonNode actual = JsonNode.Parse(item.GetRawText())!;
         string kind = item.GetProperty("kind").GetString()!, field = Field(kind);
-        JsonArray[] points = IsText(kind) || kind is "arc" or "ellipse" ? [actual[field]!.AsArray()] : [.. actual[field]!.AsArray().Select(p => p!.AsArray())];
+        snap &= double.IsFinite(grid) && grid > 0;
+        JsonArray[] points = Coordinates(actual);
         foreach (JsonArray point in points)
         { for (int i = 0; i < 2; i++) { double n = point[i]!.GetValue<double>(); double value = snap ? Math.Round(n / grid, MidpointRounding.AwayFromZero) * grid : n; if (!double.IsFinite(value) || value is < 0 or > 10000) { throw new BridgeCallException(ToolResults.InvalidArgumentError(["/items: snapped coordinates must be finite and in 0..10000 mm."])); } point[i] = value; } }
         if (kind == "image" || kind == "rectangle" && normalizeRectangle)
         { actual[field] = JsonSerializer.SerializeToNode(new[] { new[] { points.Min(p => p[0]!.GetValue<double>()), points.Min(p => p[1]!.GetValue<double>()) }, new[] { points.Max(p => p[0]!.GetValue<double>()), points.Max(p => p[1]!.GetValue<double>()) } }); }
         return actual;
     }
+    private static JsonArray[] Coordinates(JsonNode item) => [.. _pointFields.Where(n => item[n] is JsonArray).Select(n => item[n]!.AsArray()),
+        .. _pointArrayFields.Where(n => item[n] is JsonArray).SelectMany(n => item[n]!.AsArray().Select(p => p!.AsArray()))];
     internal static PlacementText Request(JsonElement item)
     {
         string kind = item.GetProperty("kind").GetString()!, field = Field(kind);
+        if (AnnotationCreatePlanning.Kinds.Contains(kind, StringComparer.Ordinal))
+        { return AnnotationCreatePlanning.Request(item); }
         if (kind == "block")
         { return new() { Kind = kind, Name = item.TryGetProperty("name", out JsonElement name) ? name.GetString() : null, Members = item.GetProperty("members").Deserialize<List<DrawingLocator>>(_blockJson) }; }
         double[][] points = IsText(kind) || kind is "arc" or "ellipse" ? [item.GetProperty(field).Deserialize<double[]>()!] : item.GetProperty(field).Deserialize<double[][]>()!;
@@ -293,7 +309,7 @@ internal static class PlacementCreatePlanning
     private static readonly JsonSerializerOptions _blockJson = new(JsonSerializerDefaults.Web);
     private static readonly string[] _locatorStrings = ["project", "page", "digest"];
     private static readonly string[] _locatorNumbers = ["type", "oid"];
-    private static bool ValidLocator(JsonElement locator) => locator.ValueKind == JsonValueKind.Object
+    internal static bool ValidLocator(JsonElement locator) => locator.ValueKind == JsonValueKind.Object
         && locator.EnumerateObject().Count() == 5 && _locatorStrings.All(n => locator.TryGetProperty(n, out JsonElement p) && p.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(p.GetString()))
         && _locatorNumbers.All(n => locator.TryGetProperty(n, out JsonElement p) && p.ValueKind == JsonValueKind.Number && p.TryGetInt64(out long v) && v > 0 && (n != "type" || v <= int.MaxValue))
         && locator.GetProperty("digest").GetString() is { Length: 64 } digest && digest.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');

@@ -35,6 +35,7 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanConnectionScene.cs" Link="Adapters\EplanConnectionScene.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPageReviewReader.Evidence.cs" Link="Adapters\EplanPageReviewReader.Evidence.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementStyle.cs" Link="Adapters\EplanPlacementStyle.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementTextWriter.Annotations.cs" Link="Adapters\EplanPlacementTextWriter.Annotations.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementTextWriter.cs" Link="Adapters\EplanPlacementTextWriter.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementRemover.cs" Link="Adapters\EplanPlacementRemover.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementMover.cs" Link="Adapters\EplanPlacementMover.cs" />

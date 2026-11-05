@@ -34,7 +34,7 @@ internal static class UnknownArgumentFilter
                 error.Execution = ExecutionState.NotStarted;
                 return InvalidAsync(context, error, cancellationToken);
             }
-            if (tool?.ProtocolTool.Name is PropertyGetTools.Tool or PropertySetTools.Tool or PlacementCreateTools.Tool)
+            if (tool?.ProtocolTool.Name is PropertyGetTools.Tool or PropertySetTools.Tool or PlacementCreateTools.Tool or AnnotationCreateTools.Tool)
             {
                 // The raw-argument handler runs P5a validation before SDK coercion, with JSON Pointer violations.
                 return next(context, cancellationToken);

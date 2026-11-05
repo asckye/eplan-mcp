@@ -771,6 +771,30 @@
       ]
     },
     {
+      "name": "eplan_annotation_create",
+      "safety": "write",
+      "operations": [
+        "page.drawing.get",
+        "page.get",
+        "placement.text.create.execute",
+        "placement.text.create.plan",
+        "project.get"
+      ],
+      "apiIds": 197,
+      "operationGroups": 116,
+      "dataDictionary": 1,
+      "dependencies": 80,
+      "actions": 0,
+      "spec": "docs/tools/eplan_annotation_create.md",
+      "small": 1,
+      "medium": 0,
+      "large": 0,
+      "apiNotes": [
+        "A93",
+        "A97"
+      ]
+    },
+    {
       "name": "eplan_api_get",
       "safety": "read",
       "operations": [],
@@ -3510,6 +3534,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_context_get",
         "eplan_language_remove",
@@ -4032,6 +4057,7 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -4078,6 +4104,7 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_annotation_create",
         "eplan_export_labels",
         "eplan_object_find",
         "eplan_object_get",
@@ -4096,6 +4123,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -4206,6 +4234,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_text_replace",
@@ -4220,6 +4249,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -4268,6 +4298,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -4318,6 +4349,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_device_place",
         "eplan_page_create",
@@ -4361,6 +4393,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -4382,6 +4415,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_text_replace",
@@ -4396,6 +4430,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_import_pdf_comments",
         "eplan_object_find",
@@ -4415,6 +4450,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -4632,6 +4668,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_connection_list",
@@ -4663,6 +4700,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_connection_list",
@@ -4729,6 +4767,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -4767,6 +4806,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -5269,6 +5309,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -5291,6 +5332,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -6776,6 +6818,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -6854,6 +6897,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -6902,6 +6946,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -7092,6 +7137,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -10653,6 +10699,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -11162,6 +11209,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -11276,6 +11324,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_get",
         "eplan_cable_renumber",
@@ -11395,6 +11444,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -11496,6 +11546,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -11737,6 +11788,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -11815,6 +11867,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -12136,6 +12189,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_device_list",
         "eplan_device_place",
         "eplan_device_renumber",
@@ -13144,6 +13198,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -13384,6 +13439,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_placement_create"
       ]
@@ -13403,6 +13459,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -13463,6 +13520,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14118,6 +14176,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14148,6 +14207,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14170,6 +14230,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14190,6 +14251,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14219,6 +14281,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14379,6 +14442,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_placement_create"
       ]
@@ -14425,6 +14489,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_placement_create"
       ]
@@ -14448,6 +14513,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_placement_create"
       ]
@@ -14458,6 +14524,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_placement_create"
       ]
@@ -14566,6 +14633,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14587,6 +14655,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_placement_create"
       ]
@@ -14827,6 +14896,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14856,6 +14926,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14904,6 +14975,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -14951,6 +15023,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -15382,6 +15455,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -15718,6 +15792,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -16309,6 +16384,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -16329,6 +16405,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -16595,6 +16672,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -17336,6 +17414,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_connection_create",
@@ -17423,6 +17502,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -17471,6 +17551,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_get",
@@ -17552,6 +17633,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -17583,6 +17665,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create"
@@ -17612,6 +17695,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -17647,6 +17731,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_context_get",
         "eplan_language_remove",
@@ -17681,6 +17766,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -17712,6 +17798,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -17770,6 +17857,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_check_run",
         "eplan_connection_create",
@@ -17811,6 +17899,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_check_run",
         "eplan_connection_create",
@@ -18306,6 +18395,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -18328,6 +18418,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -18371,6 +18462,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -19874,6 +19966,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -19963,6 +20056,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -20065,6 +20159,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -20169,6 +20264,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -20420,6 +20516,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -20521,6 +20618,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -20710,6 +20808,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -20766,6 +20865,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -20788,6 +20888,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -20874,6 +20975,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -20940,6 +21042,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -20989,6 +21092,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -21016,6 +21120,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -21066,6 +21171,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -21162,6 +21268,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -21217,6 +21324,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -21317,6 +21425,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21329,6 +21438,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21341,6 +21451,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21353,6 +21464,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21365,6 +21477,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21377,6 +21490,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21389,6 +21503,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21401,6 +21516,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21422,6 +21538,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21434,6 +21551,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_page_get",
         "eplan_placement_create",
         "eplan_report_create"
@@ -21457,6 +21575,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21469,6 +21588,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21481,6 +21601,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_page_get",
         "eplan_placement_create",
@@ -21709,6 +21830,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -21751,6 +21873,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -21793,6 +21916,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -21892,6 +22016,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -21961,6 +22086,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_connection_list",
@@ -22008,6 +22134,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -22040,6 +22167,7 @@
       "partial": false,
       "tools": [
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -22168,6 +22296,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -22381,6 +22510,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -22478,6 +22608,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
@@ -22667,6 +22798,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -22709,6 +22841,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -22751,6 +22884,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -22793,6 +22927,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -22835,6 +22970,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -22877,6 +23013,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -22919,6 +23056,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cable_generate",
         "eplan_cable_renumber",
@@ -22968,6 +23106,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -22990,6 +23129,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
@@ -24968,6 +25108,7 @@
       "tools": [
         "eplan_action_run",
         "eplan_action_try",
+        "eplan_annotation_create",
         "eplan_api_try",
         "eplan_cabinet_bind",
         "eplan_cabinet_list",
