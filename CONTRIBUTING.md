@@ -41,6 +41,18 @@ $env:DISABLE_TELEMETRY = "1"; $env:DO_NOT_TRACK = "1"; npx -y skills add tt-a1i/
 node eng/scripts/apply-archify-font.mjs
 ```
 
+## 开发文档
+
+| 想了解 | 读这里 |
+|---|---|
+| 工具怎么设计 | [手册 MCP 条款](docs/standards/engineering-handbook.html#pa) |
+| 代码怎么写 | [手册第 3 章](docs/standards/engineering-handbook.html#code) |
+| 怎么测试 | [手册第 12 章](docs/standards/engineering-handbook.html#testing) |
+| Workbench 界面怎么做 | [手册界面条款](docs/standards/engineering-handbook.html#ui) · [Workbench 实现记录](docs/design/2026-10-20-m5-operability.md#workbench-implementation) |
+| 怎么协作、怎么发布 | [手册开发流程条款](docs/standards/engineering-handbook.html#review) · [CONTRIBUTING.md](CONTRIBUTING.md) · [预览版发布流程](docs/process/release.md) |
+| 借鉴了哪些业界实践 | [参考资料与落地对照](docs/references.md) |
+| 模板 | [设计文档](docs/templates/design-doc.md) · [工具规格](docs/templates/tool-spec.md) · [ADR](docs/adr/template.md) |
+
 ## 命令与输出目录
 
 常用构建、测试、自检、插件命令和输出目录说明见 [CLAUDE.md](CLAUDE.md#常用命令)。本地关卡入口：
