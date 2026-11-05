@@ -1,6 +1,6 @@
 # 工具规格：`eplan_page_get`
 
-`drawings.items` 包含 HyperLink、QRCode、Spline、Arc（含扇形）、DimensionItem、DimensionCircle、PlaceHolder、MacroBox；位置与 locator 随行返回，关键字段位于 properties（link、text、dimension_text、name、macro_name）。
+`drawings.items` 包含 HyperLink、QRCode、Spline、Arc（含扇形）、DimensionItem、DimensionCircle、PlaceHolder、MacroBox；位置与 locator 随行返回，关键字段位于 properties（link、text、name、macro_name）。
 
 绘图读取遇到空块等对象的不可读名称或元数据时，保留对象；不可读字段按原有格式省略（未知），并在 `properties.read_warning` 附告警。不会把缺失数据视为空对象或终止整页读取。第四轮 PXC.2861289 插入后的读回 Large 待实测。
 

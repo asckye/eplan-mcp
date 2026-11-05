@@ -164,9 +164,8 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 graphics = placement switch
                 {
                     HyperLink hyperlink => new() { ["link"] = hyperlink.Link },
-                    QRCode code => new() { ["text"] = code.GetQRCode() },
-                    DimensionItem dimension => new() { ["dimension_text"] = dimension.DimensionText },
-                    DimensionCircle dimension => new() { ["dimension_text"] = dimension.DimensionText },
+                    // Live 2026-11-04: GetQRCode and DimensionText after the commit make EPLAN's undo fail with "step does not exist".
+                    QRCode code => new() { ["text"] = QrValue(code) },
                     MacroBox macro => new() { ["macro_name"] = macro.MacroName },
                     PolyLine polyline => new() { ["points"] = JsonConvert.SerializeObject(Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i)))), ["closed"] = polyline.Closed.ToString().ToLowerInvariant() },
                     Arc arc => new()
@@ -296,6 +295,13 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
 
         Walk(EplanNativePreconditions.Valid(native).OrderByDescending(p => p is Block).ToArray(), excluded: false); // A13: include returned objects which are not yet visible to page enumeration.
         return result;
+    }
+
+    private static string? QrValue(QRCode code)
+    {
+        using QRCodePropertyList properties = code.Properties;
+        using PropertyValue value = properties.QRCODE_BLOCK_VALUE;
+        return value.IsEmpty ? null : value.ToString();
     }
 
     private static int DisplayedId(PropertyPlacement placement)
