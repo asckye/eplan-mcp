@@ -6078,7 +6078,8 @@
           "A52",
           "A55",
           "A86",
-          "A93"
+          "A93",
+          "A94"
         ],
         "tests": [
           {
@@ -6197,9 +6198,24 @@
             "file": "tests/EplanMcp.Large.Tests/InterruptionVariantSpikeTests.cs"
           },
           {
+            "name": "InterruptionVisibleNameTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/InterruptionVisibleNameTests.cs"
+          },
+          {
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PlacementArrangementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementArrangementTests.cs"
+          },
+          {
+            "name": "PlacementSymbolEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementSymbolEditTests.cs"
           },
           {
             "name": "PotentialEngineeringTests",
@@ -6390,6 +6406,11 @@
             "name": "AcceptanceRedrawDriverTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
+          },
+          {
+            "name": "PlacementSymbolEditTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementSymbolEditTests.cs"
           },
           {
             "name": "ConnectionGenerateToolTests",
@@ -7203,6 +7224,11 @@
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
           },
           {
+            "name": "PlacementSymbolEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementSymbolEditTests.cs"
+          },
+          {
             "name": "PlcModuleMergeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcModuleMergeTests.cs"
@@ -7821,9 +7847,24 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MeasuredRefusalTransactionTests.cs"
           },
           {
+            "name": "PartArrangementAdapterTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/PartArrangementAdapterTests.cs"
+          },
+          {
+            "name": "PartVariantAdapterTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/PartVariantAdapterTests.cs"
+          },
+          {
             "name": "PlcCommittedReadbackTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/PlcCommittedReadbackTests.cs"
+          },
+          {
+            "name": "SymbolPartPlacementTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/SymbolPartPlacementTests.cs"
           },
           {
             "name": "TerminalPlacementTests",
@@ -7859,6 +7900,16 @@
             "name": "PageDisplayToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
+          },
+          {
+            "name": "PartVariantToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PartVariantToolTests.cs"
+          },
+          {
+            "name": "PlacementArrangementToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlacementArrangementToolTests.cs"
           },
           {
             "name": "CableBusStarSpikeTests",
@@ -7911,9 +7962,19 @@
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
           },
           {
+            "name": "PartVariantPlacementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PartVariantPlacementTests.cs"
+          },
+          {
             "name": "PartsFirstSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PartsFirstSpikeTests.cs"
+          },
+          {
+            "name": "PlacementArrangementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementArrangementTests.cs"
           },
           {
             "name": "PlacementDeleteTests",
@@ -7929,6 +7990,11 @@
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
+          },
+          {
+            "name": "PlacementSymbolEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementSymbolEditTests.cs"
           },
           {
             "name": "PlcDisplaySpikeTests",
@@ -7954,6 +8020,11 @@
             "name": "SpecialObjectsSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SpecialObjectsSpikeTests.cs"
+          },
+          {
+            "name": "TerminalBusbarPropertyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/TerminalBusbarPropertyTests.cs"
           }
         ],
         "operationTests": [
@@ -11061,6 +11132,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
           },
           {
+            "name": "PlacementSymbolEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementSymbolEditTests.cs"
+          },
+          {
             "name": "PlcDisplaySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
@@ -12294,6 +12370,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
           },
           {
+            "name": "TerminalBusbarPropertyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/TerminalBusbarPropertyTests.cs"
+          },
+          {
             "name": "WriteSafetyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/WriteSafetyTests.cs"
@@ -12857,6 +12938,16 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PartVariantPlacementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PartVariantPlacementTests.cs"
+          },
+          {
+            "name": "PlacementArrangementTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementArrangementTests.cs"
           },
           {
             "name": "PlacementDeleteTests",
@@ -15320,6 +15411,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlacementRotationRound4Tests.cs"
           },
           {
+            "name": "PlacementSymbolEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementSymbolEditTests.cs"
+          },
+          {
             "name": "PlacementTextCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
@@ -15656,12 +15752,27 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementEditProtocolTests.cs"
           },
           {
+            "name": "PlacementSymbolProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlacementSymbolProtocolTests.cs"
+          },
+          {
             "name": "PlacementEditSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementEditSpikeTests.cs"
+          },
+          {
+            "name": "PlacementSymbolEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementSymbolEditTests.cs"
           }
         ],
         "operationTests": [
+          {
+            "name": "PlacementArrangementTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementArrangementTests.cs"
+          },
           {
             "name": "PlacementEditObservedGeometryTests",
             "size": "Small",
@@ -15673,9 +15784,19 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementEditTests.cs"
           },
           {
+            "name": "PlacementSymbolEditTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementSymbolEditTests.cs"
+          },
+          {
             "name": "PlacementEditProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementEditProtocolTests.cs"
+          },
+          {
+            "name": "PlacementSymbolProtocolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlacementSymbolProtocolTests.cs"
           }
         ]
       },
@@ -17505,6 +17626,11 @@
             "name": "PropertySetToolTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PropertySetToolTests.cs"
+          },
+          {
+            "name": "TerminalBusbarPropertyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/TerminalBusbarPropertyTests.cs"
           }
         ],
         "operationTests": [
@@ -18031,6 +18157,7 @@
           "A36",
           "A44",
           "A48",
+          "A95",
           "B13"
         ],
         "tests": [
@@ -18058,6 +18185,11 @@
             "name": "PropertySetToolTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PropertySetToolTests.cs"
+          },
+          {
+            "name": "TerminalBusbarPropertyTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/TerminalBusbarPropertyTests.cs"
           }
         ],
         "operationTests": [
@@ -19610,6 +19742,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PlacementSymbolEditTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementSymbolEditTests.cs"
           },
           {
             "name": "PlcDisplaySpikeTests",
