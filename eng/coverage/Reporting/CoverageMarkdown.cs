@@ -46,7 +46,7 @@ internal static class CoverageMarkdown
         }
 
         Line("> 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。");
-        Line($"> 输入：目录 `{report.Catalog}/`（SDK 部分{(report.SdkCatalog ? "已提交" : "**尚未提交**")}，action 部分{(report.ActionCatalog ? "已提交" : "**尚未提交**")}）；`catalog/mapping/bridge-usage.json`（{usage.ScannedOn} 在 EPLAN {usage.EplanApi} 的程序集上扫描，Bridge 源码 {usage.ScannedSources}）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。");
+        Line($"> 输入：目录 `{report.Catalog}/`（SDK 部分{(report.SdkCatalog ? "已提交" : "**尚未提交**")}，action 部分{(report.ActionCatalog ? "已提交" : "**尚未提交**")}）；`catalog/mapping/bridge-usage.json`（{usage.ScannedOn} 在 EPLAN {usage.EplanApi} 的程序集上扫描，Bridge 源码 {usage.ScannedSources}）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`{ApiTotals.RelativePath}`。");
         Line();
         Line("## 口径");
         Line("- 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。");
@@ -150,6 +150,14 @@ internal static class CoverageMarkdown
         {
             Line("### 全量 API");
             Line();
+            ApiTotals totals = report.InstallationTotals!;
+            UndocumentedAssemblies undocumented = totals.UndocumentedAssemblies;
+            Line($"安装级基线（EPLAN {totals.EplanBuild}，由 `{ApiTotals.RelativePath}` 人工记录）：{totals.Assemblies} 个程序集，公开元素 {totals.PublicElements} 个。其中 {undocumented.Names.Count} 个程序集没有 XML，不在目录里，共 {undocumented.Types} 个类型、{undocumented.Methods} 个方法、{undocumented.Properties} 个属性；全量分母额外加入这 {undocumented.Methods + undocumented.Properties} 个成员，全部计为到不了。目录还计入了 {totals.PrivateDmClassIdEnums} 个私有 `DMClassId` 枚举。这里只报告计数，不分发成员或 action 名单（ADR-0030）。");
+            Line();
+            ActionTotals actions = totals.Actions;
+            Line($"action 注册总数 {actions.Registered}；Actions 区段 {actions.ActionsSection}、交互 {actions.Interactions}、程序集 action {actions.AsmActions}（来源计数不相加）。在 {actions.FoundVariant} 中按名称能找到 {actions.FoundByName} 个。安装级 action 数与下文已提交目录的 action 行数是不同分母。");
+            Line();
+            Line($"目录操作层原始成员 {report.FullApi!.Total.Denominator - undocumented.Methods - undocumented.Properties} 个，补充后本节全量分母 {report.FullApi.Total.Denominator} 个。");
             Line("全量分母保留目录中全部公开方法、普通属性、运算符和委托成员，不扣机械或 overlay 排除项，按成员而非重载组计数；排除组记为到不了。同组的每个重载沿用组的路线和实机状态，实机数是组级证据的上限，不表示每个签名都独立实测。表中路线单元格为成员数 / 实机验证数。");
             Line();
             Line("| 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |");

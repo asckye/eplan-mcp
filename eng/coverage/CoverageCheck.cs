@@ -40,6 +40,7 @@ internal static class CoverageCheck
     /// <summary>Writes every derived file, wrappers first, removes generated files no longer selected; returns the paths written.</summary>
     public static List<string> Generate(string repositoryRoot)
     {
+        _ = ApiTotals.Load(repositoryRoot);
         SortedDictionary<string, string> wrappers = WrapperGenerator.Files(repositoryRoot);
         Orphans(repositoryRoot, wrappers).ForEach(path => File.Delete(Path.Combine(repositoryRoot, path)));
         foreach ((string path, string content) in wrappers)
@@ -80,6 +81,11 @@ internal static class CoverageCheck
         if (Scan(repositoryRoot) is null)
         {
             return [.. wrapperProblems, $"{BridgeUsage.RelativePath} is missing. On a machine with EPLAN installed: {ScanCommand}"];
+        }
+
+        if (!File.Exists(Path.Combine(repositoryRoot, ApiTotals.RelativePath)))
+        {
+            return [.. wrapperProblems, $"{ApiTotals.RelativePath} is missing; restore the installation totals before generating coverage."];
         }
 
         return [.. wrapperProblems, .. Generated

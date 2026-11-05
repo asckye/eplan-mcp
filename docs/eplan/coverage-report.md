@@ -5,7 +5,7 @@
 **操作层 4014 组：专用工具 357，通用读取 225，仅通用入口 1387，仅状态覆盖 8，其他可调用 5，到不了 2032；实机验证 841**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-03 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 7b1211e9 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-03 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 7b1211e9 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -78,14 +78,19 @@ Bridge 共用到 4134 个 ID（方法 1048，属性 1202，类型 480，字段�
 
 ### 全量 API
 
+安装级基线（EPLAN 2026.0.3.25421，由 `catalog/mapping/api-totals.json` 人工记录）：15 个程序集，公开元素 43323 个。其中 4 个程序集没有 XML，不在目录里，共 9 个类型、63 个方法、3 个属性；全量分母额外加入这 66 个成员，全部计为到不了。目录还计入了 117 个私有 `DMClassId` 枚举。这里只报告计数，不分发成员或 action 名单（ADR-0030）。
+
+action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 49（来源计数不相加）。在 Electric P8 中按名称能找到 2266 个。安装级 action 数与下文已提交目录的 action 行数是不同分母。
+
+目录操作层原始成员 5917 个，补充后本节全量分母 5983 个。
 全量分母保留目录中全部公开方法、普通属性、运算符和委托成员，不扣机械或 overlay 排除项，按成员而非重载组计数；排除组记为到不了。同组的每个重载沿用组的路线和实机状态，实机数是组级证据的上限，不表示每个签名都独立实测。表中路线单元格为成员数 / 实机验证数。
 
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 方法 | 3046 | 271 / 160 | 37 / 2 | 773 / 80 | 7 / 0 | 5 / 0 | 1953 / 0 | 242 |
-| 普通属性 | 2633 | 229 / 187 | 375 / 65 | 818 / 430 | 1 / 0 | 0 / 0 | 1210 / 0 | 682 |
+| 方法 | 3109 | 271 / 160 | 37 / 2 | 773 / 80 | 7 / 0 | 5 / 0 | 2016 / 0 | 242 |
+| 普通属性 | 2636 | 229 / 187 | 375 / 65 | 818 / 430 | 1 / 0 | 0 / 0 | 1213 / 0 | 682 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5917 | 500 / 347 | 412 / 67 | 1591 / 510 | 8 / 0 | 5 / 0 | 3401 / 0 | 924 |
+| 合计 | 5983 | 500 / 347 | 412 / 67 | 1591 / 510 | 8 / 0 | 5 / 0 | 3467 / 0 | 924 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 

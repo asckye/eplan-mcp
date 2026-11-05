@@ -85,8 +85,11 @@ internal sealed class CoverageReport
 
     public FullApiCoverage? FullApi { get; init; }
 
+    public ApiTotals? InstallationTotals { get; init; }
+
     public static CoverageReport Build(string repositoryRoot, bool includeReachability = true)
     {
+        ApiTotals? totals = includeReachability ? ApiTotals.Load(repositoryRoot) : null;
         BridgeUsage usage = CoverageJson.Read<BridgeUsage>(Path.Combine(repositoryRoot, BridgeUsage.RelativePath));
         ToolMapping mapping = ToolMapping.Build(repositoryRoot);
         Overlay overlay = Overlay.Load(repositoryRoot, [.. mapping.Tools.Select(t => t.Name)]);
@@ -206,7 +209,9 @@ internal sealed class CoverageReport
             FullApi = includeReachability ? FullApiCoverage.Build(catalog.Groups.SelectMany(group =>
                 Enumerable.Repeat(new FullApiMember(catalog.Units[group.Key].Kind,
                     Counted(catalog.Units[group.Key]) ? Route(catalog.Units[group.Key]) : "none",
-                    status[group.Key] == "live_verified"), group.Value.Count))) : null,
+                    status[group.Key] == "live_verified"), group.Value.Count)),
+                totals!.UndocumentedAssemblies.Methods, totals.UndocumentedAssemblies.Properties) : null,
+            InstallationTotals = totals,
         };
     }
 

@@ -11,6 +11,12 @@ internal static class FakeRepository
     public static TempRepository Create()
     {
         var repository = new TempRepository()
+            .Write("catalog/mapping/api-totals.json", """
+                {"eplanBuild":"2026.0.3.25421","publicElements":20,"assemblies":2,
+                 "undocumentedAssemblies":{"names":["Example.Extra"],"types":1,"methods":0,"properties":0},
+                 "privateDmClassIdEnums":1,
+                 "actions":{"registered":3,"actionsSection":2,"interactions":1,"asmActions":1,"foundByName":2,"foundVariant":"Example"}}
+                """)
             .Write(PropertyDictionaryGenerator.SourcePath, string.Empty)
             .Write("src/EplanMcp.Bridge.Eplan/Adapters/A.cs", "class A { }")
             .Write("src/EplanMcp.Bridge.Core/B.cs", "class B { }")

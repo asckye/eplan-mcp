@@ -50850,7 +50850,7 @@
   },
   "fullApi": {
     "total": {
-      "denominator": 5917,
+      "denominator": 5983,
       "routes": {
         "api_try_only": {
           "count": 1591,
@@ -50865,7 +50865,7 @@
           "live_verified": 67
         },
         "none": {
-          "count": 3401,
+          "count": 3467,
           "live_verified": 0
         },
         "other": {
@@ -50879,7 +50879,7 @@
       }
     },
     "methods": {
-      "denominator": 3046,
+      "denominator": 3109,
       "routes": {
         "api_try_only": {
           "count": 773,
@@ -50894,7 +50894,7 @@
           "live_verified": 2
         },
         "none": {
-          "count": 1953,
+          "count": 2016,
           "live_verified": 0
         },
         "other": {
@@ -50908,7 +50908,7 @@
       }
     },
     "properties": {
-      "denominator": 2633,
+      "denominator": 2636,
       "routes": {
         "api_try_only": {
           "count": 818,
@@ -50923,7 +50923,7 @@
           "live_verified": 65
         },
         "none": {
-          "count": 1210,
+          "count": 1213,
           "live_verified": 0
         },
         "other": {
@@ -50964,6 +50964,31 @@
           "live_verified": 0
         }
       }
+    }
+  },
+  "installationTotals": {
+    "eplanBuild": "2026.0.3.25421",
+    "publicElements": 43323,
+    "assemblies": 15,
+    "undocumentedAssemblies": {
+      "names": [
+        "Communication",
+        "RecorderTools",
+        "WebServices",
+        "WebService"
+      ],
+      "types": 9,
+      "methods": 63,
+      "properties": 3
+    },
+    "privateDmClassIdEnums": 117,
+    "actions": {
+      "registered": 2498,
+      "actionsSection": 2213,
+      "interactions": 268,
+      "asmActions": 49,
+      "foundByName": 2266,
+      "foundVariant": "Electric P8"
     }
   }
 }

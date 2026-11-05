@@ -28,6 +28,7 @@ dotnet run --project eng\catalog\EplanMcp.Catalog -- extract --sdk "<EPLAN 安�
 |---|---|---|
 | `mapping/bridge-usage.json` | Bridge 用到的每个 EPLAN 成员（文档注释 ID）和 action（`A:` ID），以及使用点和到达它的 Bridge 操作 | `scan`，需要装有 EPLAN 的机器 |
 | `mapping/overlay.yaml` | 实机记录、人工排除、环境阻断、可用性，以及扫描漏记的可执行别名，每条写明出处 | 人工维护 |
+| `mapping/api-totals.json` | 安装级公开元素、无 XML 程序集、私有 DMClassId 枚举及 action 的计数；生成所需，不分发成员或 action 名单 | 人工维护 |
 | `mapping/tools.json` | 每个 MCP 工具 → Bridge 操作 → EPLAN API，附规格、测试、api-notes 引用和实机记录 | `generate` |
 | `coverage.json`、`../docs/eplan/coverage-report.md` | 按层次、命名空间、对象类型、工具的覆盖统计，口径见设计文档第 3、4 节 | `generate` |
 

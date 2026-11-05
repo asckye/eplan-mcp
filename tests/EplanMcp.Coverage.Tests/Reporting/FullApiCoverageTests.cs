@@ -67,6 +67,18 @@ public sealed class FullApiCoverageTests
         });
     }
 
+    [Fact]
+    public void Build_UndocumentedMembersOnlyIncreaseTheUnreachableDenominators()
+    {
+        FullApiCoverage full = FullApiCoverage.Build([new("method", "dedicated", true)], 63, 3);
+
+        Assert.Equal((67, 64, 3, 0), (full.Total.Denominator, full.Methods.Denominator, full.Properties.Denominator, full.Other.Denominator));
+        Assert.Equal(new RouteCount(66, 0), full.Total.Routes["none"]);
+        Assert.Equal(new RouteCount(63, 0), full.Methods.Routes["none"]);
+        Assert.Equal(new RouteCount(3, 0), full.Properties.Routes["none"]);
+        Assert.Equal(new RouteCount(1, 1), full.Total.Routes["dedicated"]);
+    }
+
     private static int Live(ApiBaseline row) => row.Routes.Values.Sum(c => c.LiveVerified);
 
     private static FullApiMember[] Members() =>

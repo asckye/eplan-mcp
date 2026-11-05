@@ -7,9 +7,11 @@ internal sealed record FullApiMember(string? Kind, string Route, bool LiveVerifi
 /// <summary>Counts raw catalog members, including every overload and excluded group, by call route.</summary>
 internal sealed record FullApiCoverage(ApiBaseline Total, ApiBaseline Methods, ApiBaseline Properties, ApiBaseline Other)
 {
-    internal static FullApiCoverage Build(IEnumerable<FullApiMember> members)
+    internal static FullApiCoverage Build(IEnumerable<FullApiMember> members, int undocumentedMethods = 0, int undocumentedProperties = 0)
     {
-        FullApiMember[] all = [.. members];
+        FullApiMember[] all = [.. members,
+            .. Enumerable.Repeat(new FullApiMember("method", "none", false), undocumentedMethods),
+            .. Enumerable.Repeat(new FullApiMember("property", "none", false), undocumentedProperties)];
         static ApiBaseline Count(IEnumerable<FullApiMember> source)
         {
             FullApiMember[] row = [.. source];
