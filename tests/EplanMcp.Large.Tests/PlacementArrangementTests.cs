@@ -33,7 +33,7 @@ public sealed class PlacementArrangementTests(LiveEplan eplan, WriteHost host) :
             request["tag"] = "-R10K";
             request["x"] = 100;
             request["y"] = 100;
-            request["property_arrangement"] = "左,0°";
+            request["property_arrangement"] = "用户定义";
         }
         TestContext.Current.TestOutputHelper!.WriteLine("request: " + JsonSerializer.Serialize(request));
         (bool ok, JsonElement result) = await eplan.CallOrErrorAsync(tool, request);
@@ -43,8 +43,10 @@ public sealed class PlacementArrangementTests(LiveEplan eplan, WriteHost host) :
         Assert.True(ok, result.GetRawText());
         Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
         JsonElement values = interruption ? Assert.Single(result.GetProperty("symbols").EnumerateArray()) : result;
-        Assert.Equal("左,0°", values.GetProperty("propertyArrangement").GetString());
-        Assert.Equal("左,0°", values.GetProperty("activePropertySet").GetString());
+        // An ordinary K offers only 默认 and 用户定义; BP also offers the directional arrangements.
+        string arrangement = interruption ? "左,0°" : "用户定义";
+        Assert.Equal(arrangement, values.GetProperty("propertyArrangement").GetString());
+        Assert.Equal(arrangement, values.GetProperty("activePropertySet").GetString());
         await session.UndoAsync();
         Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
     }

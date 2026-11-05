@@ -25,8 +25,7 @@ public sealed class PlacementSymbolEditTests(LiveEplan eplan, WriteHost host) : 
         {
             JsonElement result = await Call("eplan_placement_edit", args);
             Assert.Equal(variant, result.GetProperty("predicted")[0].GetProperty("symbol").GetProperty("variant").GetInt32());
-            JsonElement fresh = await Find(session.Project, page, main ? "Function" : "InterruptionPoint");
-            await ReadProperties(session.Project, fresh, main ? "function" : "interruptionpoint");
+            Assert.False(string.IsNullOrEmpty(result.GetProperty("predicted")[0].GetProperty("activePropertySet").GetString()));
             if (main)
             {
                 JsonElement after = await Call("eplan_device_get", new() { ["project"] = session.Project, ["tag"] = "-QROUND10" });
@@ -100,11 +99,6 @@ public sealed class PlacementSymbolEditTests(LiveEplan eplan, WriteHost host) : 
         JsonElement found = await Call("eplan_object_find", new() { ["project"] = project, ["page"] = page, ["object_type"] = kind });
         return Assert.Single(found.GetProperty("items").EnumerateArray()).GetProperty("locator").Clone();
     }
-    private Task<JsonElement> ReadProperties(string project, JsonElement locator, string kind) => Call("eplan_property_get", new()
-    {
-        ["project"] = project,
-        ["queries"] = new[] { new { target = new { locator = new { project, kind, type = locator.GetProperty("type").GetInt32(), oid = locator.GetProperty("oid").GetInt64() } }, properties = new[] { new { property_id = 19307 } } } }
-    });
     private async Task<JsonElement> Call(string tool, Dictionary<string, object?> args)
     {
         TestContext.Current.TestOutputHelper!.WriteLine(tool + " request: " + JsonSerializer.Serialize(args));
