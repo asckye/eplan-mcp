@@ -367,6 +367,7 @@ public sealed partial class DevicePartAssignmentTests
         public List<(string Id, string Part, string Variant)> Adds { get; } = [];
         public List<int> Counts { get; } = [];
         public List<string> Transfers { get; } = [];
+        public Func<(int Count, string? Warning)>? AssignFunctions { get; set; }
         public int Reads { get; private set; }
         public bool ReadAfterCommit { get; private set; }
         public string? Mismatch { get; set; }
@@ -398,6 +399,12 @@ public sealed partial class DevicePartAssignmentTests
             Targets.Single(m => m.Id == mainId).Parts.Add(new DevicePart { PartNumber = part, Variant = variant, Count = count });
         }
         public ITransactionScopeFactory PartTransactions(string projectPath) => transactions;
+        public (int Count, string? Warning) AssignUnplacedFunctions(string projectPath, string tag)
+        {
+            Assert.Contains("Commit", transactions.Calls);
+            Assert.DoesNotContain("CloseUndo", transactions.Calls);
+            return AssignFunctions?.Invoke() ?? (0, null);
+        }
         public void TransferPartData(string projectPath, string functionId)
         {
             Assert.Contains("Commit", transactions.Calls); // A93: only committed references carry part data.

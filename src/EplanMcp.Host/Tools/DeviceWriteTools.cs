@@ -83,6 +83,7 @@ internal sealed class DeviceWriteTools
             Fingerprint = outcome.Plan.Fingerprint,
             Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Device = outcome.Data is { } data ? Device(data) : Planned(outcome.Plan),
+            AssignedFunctions = outcome.Data?.AssignedFunctions ?? 0,
             Undo = committed ? "AI: " + UpdateTool : null,
             Recovered = outcome.Recovered,
             Hint = dry_run ? WriteToolDefaults.ExecutionHint : outcome.Recovered

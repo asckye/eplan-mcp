@@ -24,6 +24,9 @@ internal sealed class DeviceUpdateResult
     [Description("The device as EPLAN read it back; for a dry run or when 'recovered', as planned.")]
     public DeviceEntry Device { get; set; } = new();
 
+    [Description("Unplaced part functions assigned to placed functions.")]
+    public int AssignedFunctions { get; set; }
+
     [Description("The step in EPLAN's undo list (Ctrl+Z) that reverts the update; null for a dry run.")]
     public string? Undo { get; set; }
 

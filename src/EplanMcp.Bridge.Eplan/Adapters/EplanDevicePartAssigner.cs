@@ -7,7 +7,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>Appends references to a unique part target without retaining native objects across requests or commit.</summary>
-internal sealed class EplanDevicePartAssigner : IDevicePartAssigner
+internal sealed partial class EplanDevicePartAssigner : IDevicePartAssigner
 {
     public IReadOnlyList<DevicePartTarget> ReadMainFunctions(string projectPath, string tag, bool includeTerminals = false)
     {

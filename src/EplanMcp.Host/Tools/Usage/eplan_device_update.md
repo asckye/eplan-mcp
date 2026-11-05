@@ -30,6 +30,7 @@ Omitted/true `dry_run` previews without approval/writes, returning `fingerprint`
    PLC points and other function suffixes are preserved: `=K1+A2-A0015:3.1` becomes `=K1+A2-KE1:3.1` when the device is renamed to `=K1+A2-KE1`. Readback reacquires every function after commit; a PLC join also checks the existing box and overview points are unchanged. The function count covers only moved points.
 4. For part assignment, use eplan_part_search to find a part and variant in the current database. `variant` requires `part` and defaults to `"1"`. `count` requires `part`, must be a positive integer, and defaults to 1. Target: one main function, or (without new_tag) one exact Terminal. Duplicate terminals and other non-main functions refuse. `tag` remains the device tag; the main function itself may have a connection-point suffix. Existing references are kept.
 5. The plan names each change, including `add part <part> (variant <v>) to <tag>`. Combined updates rename first, then append; one Ctrl+Z reverts the step. Committed references and quantities are read back from fresh objects.
+   After part assignment, unplaced functions with the same category and exact ordered pin names as a placed non-main function are assigned to it. Different pins stay unplaced.
 6. Repeating a rename fails with DEVICE_NOT_FOUND because the old tag no longer exists; repeating a part assignment fails with INVALID_ARGUMENT because the reference already exists. Never repeat a call that ended in OUTCOME_UNKNOWN; check with eplan_device_get instead.
 
 ## Fields
@@ -46,6 +47,7 @@ Omitted/true `dry_run` previews without approval/writes, returning `fingerprint`
 - `undo`: the step in EPLAN's undo list, `AI: eplan_device_update`; null for a dry run.
 - `recovered`: true for a commit recovered after response loss; check with eplan_device_get.
 - `hint`: next check, or null.
+- `assignedFunctions`: number of unplaced functions assigned to matching placed functions after part assignment.
 
 Summary uses counts only: `Renamed a device and its 2 auxiliary functions; Ctrl+Z in EPLAN undoes this step.`
 

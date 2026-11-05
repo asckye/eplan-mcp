@@ -8205,6 +8205,10 @@
               }
             }
           },
+          "assignedFunctions": {
+            "description": "Unplaced part functions assigned to placed functions.",
+            "type": "integer"
+          },
           "undo": {
             "description": "The step in EPLAN's undo list (Ctrl+Z) that reverts the update; null for a dry run.",
             "type": [

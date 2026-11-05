@@ -14,4 +14,7 @@ public interface IDevicePartAssigner
 
     /// <summary>Transfers the referenced parts' data to the committed function, as EPLAN's own device update does (A93).</summary>
     public void TransferPartData(string projectPath, string functionId);
+
+    /// <summary>Assigns matching unplaced templates to placed secondary functions after the part commit, within its undo step.</summary>
+    public (int Count, string? Warning) AssignUnplacedFunctions(string projectPath, string tag);
 }

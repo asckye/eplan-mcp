@@ -48,6 +48,7 @@
 - `device.functions`：改名时为全部改名功能数；只赋值部件时为唯一主功能或端子的 1。`device.pages`：这些受影响功能所在的页，最多 20 个，按 EPLAN 的顺序列出；只赋值部件时只列目标功能所在页，未放置则为空。
 - 提交后是读回的值；`dry_run` 时是将要得到的值，`visibleTag` 为 `null`。
 - `undo`、`recovered`：同 `eplan_page_create`。
+- `assignedFunctions`：追加部件后，分配到已有已放置非主功能上的未放置功能数量；没有匹配时为 0。
 - 标识按项目数据处理，经过 ResultShaper。
 - 一行摘要（只有计数，不回显项目名，架构 8.5）：
   - `Renamed a device and its 2 auxiliary functions; Ctrl+Z in EPLAN undoes this step.`
@@ -116,6 +117,7 @@
 - 规划按 `FUNC_IDENTDEVICETAG` 查找唯一主功能（已放置或未放置），数量不为 1 时返回 `INVALID_ARGUMENT` 并报告数量；只赋值部件时允许功能名称带连接点后缀。已引用相同部件和变体时拒绝 `nothing to change`。
 - 变更清单增加 `add part <part> (variant <v>) to <tag>`；指纹包含主功能身份、现有部件引用和所选库部件与数量，执行前重新核对。
 - 同一事务内先执行请求的改名，再以 `Function.AddArticleReference(part, variant, count)` 追加引用（A82）。提交后按设备标识重新获取主功能及 `ArticleReferences`（A79）；缺少新引用或数量不符时回滚。原有引用保持不变。
+- 追加部件产生未放置功能时，仅将类别及引脚名称序列与已有已放置非主功能完全相同的项 `Assign` 到该功能；引脚不同的不动。每次事务重新取得原生对象，分配和部件追加保留同一个撤销步骤，返回 `assignedFunctions` 数量。
 - `{"tag":...,"update_from_parts":true}` 单独调用，放在最后一个部件之后：用 `DeviceService.UpdateDevice` 把已引用部件的功能定义、连接点数据和技术参数写到功能上，和 EPLAN 的设备更新相同（A93）。必须单独调用，不能和 `part`、`new_tag` 同时给；功能没有部件引用时拒绝。一步撤销还原这些数据。
 - `device.part`、`device.variant` 返回本次赋值的部件和变体；只改名时为 null。只赋值部件时，`tag` 与 `previousTag` 都返回主功能的实际完整名称（可能带 `:1` 等连接点后缀），主功能可直接交给 `eplan_device_get`；端子用 `eplan_terminal_strip_get` 定位；`functions=1`，`pages` 只含目标功能所在页。
 - 主线程目标为 2 秒，端到端默认时限 60 秒；部件库较大时可能超过目标，支持既有进度与取消。

@@ -32,10 +32,11 @@ public sealed class DeviceUpdateDtoTests
     [Fact]
     public void AppendedPartResultRoundTripsAcrossPipeSerializers()
     {
-        var data = new DeviceUpdateData { Part = "SIE.3SB3400-0B", Variant = "1" };
+        var data = new DeviceUpdateData { Part = "SIE.3SB3400-0B", Variant = "1", AssignedFunctions = 4 };
         DeviceUpdateData bridge = JsonConvert.DeserializeObject<DeviceUpdateData>(System.Text.Json.JsonSerializer.Serialize(data, JsonSerializerOptions.Web))!;
         DeviceUpdateData host = System.Text.Json.JsonSerializer.Deserialize<DeviceUpdateData>(JsonConvert.SerializeObject(bridge))!;
         Assert.Equal((data.Part, data.Variant), (host.Part, host.Variant));
+        Assert.Equal(4, host.AssignedFunctions);
         Assert.Null(new DeviceUpdateData().Part);
     }
 }

@@ -27,6 +27,9 @@ public sealed class DeviceUpdateData
     /// <summary>The appended part variant, read back after commit; null for a rename only.</summary>
     public string? Variant { get; set; }
 
+    /// <summary>The number of unplaced part functions assigned to matching placed secondary functions.</summary>
+    public int AssignedFunctions { get; set; }
+
     /// <summary>A problem after the commit, for example an undo step EPLAN did not close; null when there was none.</summary>
     public string? Warning { get; set; }
 }
