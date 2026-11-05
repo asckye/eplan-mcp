@@ -705,7 +705,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_action_catalog_get.md",
       "small": 1,
-      "medium": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": []
     },
@@ -720,7 +720,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_action_catalog_search.md",
       "small": 1,
-      "medium": 2,
+      "medium": 3,
       "large": 1,
       "apiNotes": []
     },
@@ -1281,7 +1281,7 @@
       "dependencies": 114,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
-      "small": 11,
+      "small": 12,
       "medium": 7,
       "large": 23,
       "apiNotes": [
@@ -2017,7 +2017,7 @@
       "spec": "docs/tools/eplan_page_open.md",
       "small": 4,
       "medium": 2,
-      "large": 5,
+      "large": 6,
       "apiNotes": [
         "A54"
       ]
