@@ -459,7 +459,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 ### A101. 编辑选项卡的图形命令有 API，都只占一步撤销（2026-11-05，EPLAN 2026.0.3，Pro Panel，LargeWrite 新页）
 - **缩放：** `Placement.Scale(x,y,origin)` 对线、矩形、文字、组有效，原点不动。不传原点是绕页面原点缩放，矩形 (120,40) 乘 2 跑到 (240,80)。文字高度随比例变。原理图页的 `Function` 抛 S063188。
 - **绘制顺序：** `Placement.DrawingOrder` 可写，范围 0–127，新对象实测 64，XML 写的 67 不对。`Edit.BringToFront` 得当前页最大值 +1，已在最前时不变；`Edit.SendToBack` 对称。不需要打开页面。
-- **组：** `Group.Create` 可以同时收 `Function` 和图形；`Group.Move`、`Group.Scale` 带动全部成员；`DeepUnGroup(true)` 取消。
+- **组：** `Group.Create` 可以同时收 `Function` 和图形；`Group.Move`、`Group.Scale` 带动全部成员；`DeepUnGroup(true)` 取消，但空组还留在页面上，要再调用 `Remove()`。
 - **块：** `Block.Create` 后成员从 `Page.AllPlacements` 消失，换成一个 `Block`。传入 `Function` 会被静默丢掉，不报错。`BreakUp()` 返回成员，几何不变。
 - **矩形圆角：** `HasChamfers`、`ChamferRadius` 都可写，XML 只写了读。
 - **文字固定：** `TextBase.DockText(target)`、`UndockText()` 都不改位置；`DockingDirection` 可写，取 `DockToBottom/Top/Right/Left`。属性文字未实测。

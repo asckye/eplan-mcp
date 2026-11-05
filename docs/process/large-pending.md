@@ -4,7 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| T.4 graphic-edit 第 1 批（2026-11-05 负责人 brief；`.local/change-sets/series.txt`） | `GraphicEditTests` | 待运行：只在 LargeWrite 新页；15 个 operation 各读回并一次撤销恢复，group 含符号，block 含符号在规划时拒绝。底层逐项探针事实由 brief 提供，工具端到端未运行；本批不启动 EPLAN。 |
+| T.4 graphic-edit 第 1 批（2026-11-05 负责人 brief；`.local/change-sets/series.txt`） | `GraphicEditTests` | 已通过：2026-11-05，B 槽 Pro Panel，分支 `feat/graphic-edit-land`：`GraphicEditTests` 15 个操作和块拒绝用例共 16 项通过；缩放线、文字和组的用例调整坐标后单独通过。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | 已通过：2026-11-04，A 槽：`MacroOverviewTests` 2/2、`MacroInsertTests` 2/2。 |
 | G9 图形创建（2026-11-03，负责人 brief） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | 部分通过：2026-11-03 `PlacementGraphicsCreateTests` 3/3；2026-11-05（main `9faf3790`）`PlacementTextCreateTests` 3 过 1 败。失败的 `ForcedMidBatchFailure` 是测试辅助程序 `DrawingHelper` 没跟上布局护栏，写入前就被 R1/R3 拒绝。未完成：批内中途失败回滚没有实机结果。 |
 | S01 写失败状态（2026-11-03 负责人 brief；ERR-01、P-05） | `WriteSafetyTests`、`SnapshotWriteTests` 及使用公共事务的页面、设备、属性、导入、action、API 试写类 | 已通过：2026-11-04 `WriteSafetyTests` 4/4、2026-11-03 `SnapshotWriteTests` 1/1，覆盖真实回滚和写入回归。写入结果未知没有实机用例，只有 Small 假对象覆盖。 |
