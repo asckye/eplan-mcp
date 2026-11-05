@@ -55,7 +55,7 @@ internal sealed partial class EplanPlacementEditor : IPlacementEditor
     }
     public Action PrepareEdit(JObject input, JObject before)
     {
-        if ((string?)input["operation"] == "set_variant")
+        if ((string?)input["operation"] is "set_variant" or "set_arrangement")
         { return () => EditSymbols(input, before); }
         using var finder = new DMObjectsFinder(EplanProjects.ByPath((string)before["scene"]!["project"]!["path"]!));
         Page page = EplanDeviceReader.FindPage(finder, (string)input["page"]!)!;

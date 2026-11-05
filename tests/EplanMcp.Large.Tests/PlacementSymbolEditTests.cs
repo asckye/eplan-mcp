@@ -39,6 +39,40 @@ public sealed class PlacementSymbolEditTests(LiveEplan eplan, WriteHost host) : 
         catch { await Find(session.Project, page, main ? "Function" : "InterruptionPoint"); throw; }
     }
     [Fact]
+    public async Task BpArrangement_ReadsLeftPropertyText_RejectsMissingNameAndRestoresWithOneUndo()
+    {
+        Assert.NotNull(host);
+        await using var session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = Assert.Single(await session.CreatePagesAsync(1));
+        await Call("eplan_connection_create", await BpRequest(session.Project, page));
+        JsonElement locator = await Find(session.Project, page, "InterruptionPoint");
+        string baseline = (await session.SnapshotAsync(page)).Hash;
+        var request = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["operation"] = "set_arrangement", ["property_arrangement"] = "左,0°", ["locators"] = new[] { locator }, ["dry_run"] = false };
+        try
+        {
+            JsonElement result = await Call("eplan_placement_edit", request);
+            Assert.Equal("左,0°", result.GetProperty("predicted")[0].GetProperty("arrangement").GetString());
+            Assert.Equal("左,0°", result.GetProperty("predicted")[0].GetProperty("activePropertySet").GetString());
+            await using var bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+            PageDrawingGeometry drawing = await bridge.InvokeAsync<PageGetArgs, PageDrawingGeometry>(OperationNames.PageDrawingGet, new() { Project = session.Project, Page = page }, TestContext.Current.CancellationToken);
+            TestContext.Current.TestOutputHelper!.WriteLine("property text readback: " + JsonSerializer.Serialize(drawing));
+            DrawingPlacement text = Assert.Single(drawing.Placements, p => p.Parent?.Oid == locator.GetProperty("oid").GetInt64() && p.Properties.GetValueOrDefault("property_id") == "20010");
+            DrawingPlacement root = Assert.Single(drawing.Placements, p => p.Parent is null && p.Locator.Oid == locator.GetProperty("oid").GetInt64());
+            Assert.True(text.Location[0] - root.Location[0] < 0);
+            await session.UndoAsync();
+            Assert.Equal(baseline, (await session.SnapshotAsync(page)).Hash);
+            request["locators"] = new[] { await Find(session.Project, page, "InterruptionPoint") };
+            request["property_arrangement"] = "__missing_arrangement__";
+            TestContext.Current.TestOutputHelper.WriteLine("request: " + JsonSerializer.Serialize(request));
+            (bool ok, JsonElement error) = await eplan.CallOrErrorAsync("eplan_placement_edit", request);
+            TestContext.Current.TestOutputHelper.WriteLine("result: " + error.GetRawText());
+            await Find(session.Project, page, "InterruptionPoint");
+            Assert.False(ok);
+            Assert.Equal(baseline, (await session.SnapshotAsync(page)).Hash);
+        }
+        catch { await Find(session.Project, page, "InterruptionPoint"); throw; }
+    }
+    [Fact]
     public async Task LineHasNoSymbol_RefusedWithoutPageChange()
     {
         Assert.NotNull(host);

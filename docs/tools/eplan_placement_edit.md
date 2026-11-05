@@ -27,3 +27,6 @@ Small：分支/枚举/参数、数学、首对象对齐、等间隙、边界和 
 
 ## 符号变量
 `operation:"set_variant"` 与非负整数 `symbol_variant` 对 1–50 个同页符号生效；保持库、符号、位置、功能逻辑与属性排列选择。规划按当前库/符号查询可用变量，不存在时列出编号并在写入前拒绝；线、文字等无符号对象拒绝。全部未变返回 noOp，不留撤销步。默认排列由 EPLAN 随新变量重排；读回变量及位置，并返回需要时运行 `eplan_connection_generate` 的 warning。一次事务、一步撤销，主功能使用 `SetSymbolVariant(variant,false)`。LargeWrite 待验证 BP 0→4 及 Q_3LI 0→6。
+
+## 属性排列
+`operation:"set_arrangement"` 与 `property_arrangement` 按该符号 `PropertyPlacementsSchemas.All` 的 Name 精确匹配（含本地化文字）；不存在时列出可用名称并在写入前拒绝。例如 BP 变量 A 可选 `左,0°`；不改变符号变量。设置 Selected 后旧属性放置失效，重新获取并读回 Selected.Name 和属性 19307（无法读取只警告）；一次事务、一步撤销，当前名称相同为 noOp。该写入与默认属性文字位置仍待 LargeWrite 实测。

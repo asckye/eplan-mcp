@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+- `eplan_placement_edit` 新增 `set_arrangement`：精确匹配符号提供的本地化属性排列名，读回排列与 19307；不存在的名称在写入前拒绝。
+
 - `eplan_placement_edit` 新增 `set_variant`：按当前库和符号预检变量，保留符号与功能定义，返回变量和位置；同页批量一次撤销，并提示按需生成连接。
 
 - `eplan_device_place` 的部件路线支持端子排/端子编号及可选符号替换，保留部件模板的逻辑定义；无主功能的端子也能正确命名和读回。

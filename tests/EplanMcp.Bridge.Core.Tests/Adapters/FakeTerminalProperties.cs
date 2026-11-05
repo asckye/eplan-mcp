@@ -2,8 +2,15 @@ namespace Eplan.EplApi.DataModel;
 
 internal sealed class PropertyNotFoundException : Exception;
 
-internal sealed class FunctionPropertyList(FakeCableStore? store = null, Dictionary<int, string>? values = null) : NativeCableList(store)
+internal abstract class UniversalPropertyList(FakeCableStore? store = null) : NativeCableList(store)
 {
+    public abstract PropertyValue this[AnyPropertyId id] { get; }
+    public virtual bool Exists(AnyPropertyId id) => true;
+}
+
+internal sealed class FunctionPropertyList(FakeCableStore? store = null, Dictionary<int, string>? values = null) : UniversalPropertyList(store)
+{
+    public override PropertyValue this[AnyPropertyId id] => this[(Properties.Function)id.AsInt];
     public PropertyValue FUNC_DEVICETAG_FULLNAME { get; set; } = new("K1");
     public PropertyValue FUNC_IDENTDEVICETAG { get; set; } = new("");
     public PropertyValue DESIGNATION_PLANT { get; set; } = new("");

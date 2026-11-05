@@ -71,6 +71,15 @@ internal interface IPropertyPlacementsContainer
 
 internal class SymbolReference(long oid) : GraphicalPlacement(oid, 17)
 {
+    public sealed class PropertyPlacementsSchema(string name) { public string Name { get; } = name; }
+    public sealed class PropertyPlacementsSchemasList
+    {
+        public PropertyPlacementsSchema[] All { get; set; } = [];
+        public Action<PropertyPlacementsSchema>? OnSelect { get; set; }
+        private PropertyPlacementsSchema _selected = new("default");
+        public PropertyPlacementsSchema Selected { get => _selected; set { _selected = value; OnSelect?.Invoke(value); } }
+    }
+    public PropertyPlacementsSchemasList PropertyPlacementsSchemas { get; } = new();
     public BoxSymbolVariant SymbolVariant { get; } = new();
     public PinBase[] GraphicalConnectionPoints { get; set; } = [];
     public GraphicalConnection[] GraphicalConnections { get; set; } = [];

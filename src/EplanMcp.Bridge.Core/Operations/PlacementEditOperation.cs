@@ -9,7 +9,7 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
     protected override JObject Execute(JObject args)
     {
         JObject input = execute ? args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["Supply request."])) : args;
-        bool symbolEdit = (string?)input["operation"] == "set_variant";
+        bool symbolEdit = (string?)input["operation"] is "set_variant" or "set_arrangement";
         JObject before, plan;
         try
         { before = editor.Inspect((string?)input["project"] ?? "", (string?)input["page"] ?? "", symbolEdit); plan = symbolEdit ? PlacementSymbolEdit.Plan(input, before, symbols, execute ? (string?)args["fingerprint"] ?? "" : null) : PlacementEditPlanner.Plan(input, before, execute ? (string?)args["fingerprint"] ?? "" : null); }

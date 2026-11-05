@@ -18,6 +18,7 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanReportCreator.Schemes.cs" Link="Adapters\EplanReportCreator.Schemes.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanTextFormat.cs" Link="Adapters\EplanTextFormat.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlcReader.cs" Link="Adapters\EplanPlcReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolArrangement.cs" Link="Adapters\EplanSymbolArrangement.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolReader.cs" Link="Adapters\EplanSymbolReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.cs" Link="Adapters\EplanDeviceSymbolPlacement.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Plc.cs" Link="Adapters\EplanDeviceSymbolPlacement.Plc.cs" />

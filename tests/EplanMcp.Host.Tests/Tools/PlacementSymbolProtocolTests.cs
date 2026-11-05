@@ -20,15 +20,20 @@ namespace EplanMcp.Host.Tests.Tools;
 public sealed class PlacementSymbolProtocolTests
 {
     [Theory]
-    [InlineData(null, 4, false)]
-    [InlineData(false, 4, true)]
-    [InlineData(false, 99, false)]
-    public async Task VariantThroughRegisteredTool_PreservesDefaultPreviewAndRejectsBeforeWrite(bool? dryRun, int variant, bool committed)
+    [InlineData(null, 4, false, "set_variant")]
+    [InlineData(false, 4, true, "set_variant")]
+    [InlineData(false, 99, false, "set_variant")]
+    [InlineData(null, 4, false, "set_arrangement")]
+    [InlineData(false, 4, true, "set_arrangement")]
+    [InlineData(false, 99, false, "set_arrangement")]
+    public async Task VariantThroughRegisteredTool_PreservesDefaultPreviewAndRejectsBeforeWrite(bool? dryRun, int variant, bool committed, string operation)
     {
         using var harness = new WriteToolHarness();
         var fake = new PlacementEditFixture(harness.ProjectPath);
         fake.Data["objects"]![0]!["symbol"] = new JObject { ["library"] = "IEC_symbol", ["name"] = "BP", ["variant"] = 0 };
-        fake.Mutation = () => fake.Data["objects"]![0]!["symbol"]!["variant"] = variant;
+        fake.Data["objects"]![0]!["arrangements"] = new JArray("left", "right");
+        fake.Data["objects"]![0]!["arrangement"] = "right";
+        fake.Mutation = () => { if (operation == "set_variant") { fake.Data["objects"]![0]!["symbol"]!["variant"] = variant; } else { fake.Data["objects"]![0]!["arrangement"] = "left"; } };
         var reader = new Symbols();
         var plan = new PlacementEditOperation(fake, fake, false, fake.Backup, reader);
         var execute = new PlacementEditExecuteOperation(fake, fake, fake.Backup, reader);
@@ -56,8 +61,11 @@ public sealed class PlacementSymbolProtocolTests
         try
         {
             await using var client = await McpClient.CreateAsync(new StreamClientTransport(incoming.Writer.AsStream(), outgoing.Reader.AsStream()), cancellationToken: Token);
-            JObject input = fake.Input("set_variant");
-            input["symbol_variant"] = variant;
+            JObject input = fake.Input(operation);
+            if (operation == "set_variant")
+            { input["symbol_variant"] = variant; }
+            else
+            { input["property_arrangement"] = variant == 99 ? "missing" : "left"; }
             if (dryRun is not null)
             { input["dry_run"] = dryRun.Value; }
             CallToolResult result = await client.CallToolAsync(PlacementEditTools.Tool, JsonSerializer.Deserialize<Dictionary<string, object?>>(input.ToString())!, cancellationToken: Token);
