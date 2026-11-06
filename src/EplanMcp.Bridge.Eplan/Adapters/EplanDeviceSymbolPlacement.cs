@@ -15,23 +15,21 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
     private readonly string _projectPath;
     private readonly string _pageName;
     private readonly SymbolSearchItem _symbol;
-    private readonly bool _commitBeforeReadback;
     private IReadOnlyList<DeviceSymbolDisplay> _placedDisplays = [];
     private long? _placedFunctionId;
     private long? _plcCardId;
     private LayoutGuard.Model? _placedLayout;
     public LayoutGuard.Model ReadLayout() => _placedLayout ?? EplanLayout.Measure(_projectPath, _pageName, []);
 
-    public EplanDeviceSymbolPlacement(string path, string page, SymbolSearchItem symbol, bool hasPart = false)
+    public EplanDeviceSymbolPlacement(string path, string page, SymbolSearchItem symbol)
     {
         MainThread.Assert();
         _projectPath = path;
         _pageName = page;
         _symbol = symbol;
-        _commitBeforeReadback = hasPart;
     }
 
-    public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(_projectPath), undoDescription, undoCommitted: _commitBeforeReadback);
+    public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(_projectPath), undoDescription, undoCommitted: true, undoAbandoned: true);
 
     public DevicePlaceData Place(DevicePlaceArgs args, string tag)
     {
@@ -122,15 +120,16 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
 
         // A13: finder cannot see uncommitted functions. Check the returned function and its pins directly.
         Pin[] pins = function.Pins;
-        Require(_symbol.FunctionCategory is null || function.FunctionCategory.ToString() == _symbol.FunctionCategory);
-        Require(function.IsPlaced && function.Page.Name == page.Name && (DevicePlaceRequest.SameName(tag, function.Name) || DeviceSymbolPlan.ConnectionPoint(args) && DevicePlaceRequest.SameName(tag, function.Name.Split(':')[0])) && function.ArticleReferences.Length == 0
-            && function.Location.X == args.X && function.Location.Y == args.Y && pins.Length == _symbol.ConnectionPoints.Count
+        Require(_symbol.FunctionCategory is null || function.FunctionCategory.ToString() == _symbol.FunctionCategory, "category " + function.FunctionCategory);
+        Require(function.IsPlaced && function.Page.Name == page.Name && (DevicePlaceRequest.SameName(tag, function.Name) || DeviceSymbolPlan.ConnectionPoint(args) && DevicePlaceRequest.SameName(tag, function.Name.Split(':')[0])) && function.ArticleReferences.Length == 0,
+            "tag " + function.Name);
+        Require(function.Location.X == args.X && function.Location.Y == args.Y && pins.Length == _symbol.ConnectionPoints.Count
             && function.SymbolVariant.SymbolLibraryName == _symbol.Library && function.SymbolVariant.SymbolName == _symbol.Name
-            && function.SymbolVariant.VariantNr == _symbol.Variant);
+            && function.SymbolVariant.VariantNr == _symbol.Variant, FormattableString.Invariant($"position {function.Location.X},{function.Location.Y}, {pins.Length} pins, variant {function.SymbolVariant.VariantNr}"));
         for (int i = 0; i < (requested?.Length ?? 0); i++)
         {
             using PropertyValue value = properties[(Properties.Function)20022, i + 1];
-            Require(!value.IsEmpty && value.ToString() == requested![i] && pins[i].Name == requested[i]);
+            Require(!value.IsEmpty && value.ToString() == requested![i] && pins[i].Name == requested[i], FormattableString.Invariant($"pin {i + 1}: requested {requested![i]}, property {(value.IsEmpty ? "" : value.ToString())}, name {pins[i].Name}"));
         }
         for (int i = 0; i < (descriptions?.Length ?? 0); i++)
         {
@@ -146,9 +145,9 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         return new DevicePlaceData { PropertyArrangement = args.PropertyArrangement is null ? null : EplanSymbolArrangement.SelectedName(function), ActivePropertySet = args.PropertyArrangement is null ? null : EplanSymbolArrangement.ReadActive(properties), Page = page.Name, Tag = function.Name, VisibleTag = DeviceTags.Shown(visible), Category = function.FunctionCategory.ToString(), Functions = 1, Unplaced = 0, Plc = plc, IsMainFunction = args.JoinDevice == true ? function.IsMainFunction : null };
     }
 
-    private static void Require(bool matches)
+    private static void Require(bool matches, string? differs = null)
     {
         if (!matches)
-        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Symbol, tag, position, display or pin readback differs. Nothing was committed; read the page and re-plan."); }
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Symbol, tag, position, display or pin readback differs" + (differs is null ? "" : " (" + differs + ")") + ". Nothing was committed; read the page and re-plan."); }
     }
 }

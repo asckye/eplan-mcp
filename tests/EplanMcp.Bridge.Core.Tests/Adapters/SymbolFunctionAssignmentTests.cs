@@ -48,7 +48,7 @@ public sealed class SymbolFunctionAssignmentTests
             Y = 160
         };
         var adapter = new EplanDeviceSymbolPlacement("project", page.Name,
-            new() { Library = "IEC_symbol", Name = "S", Variant = 0, Kind = "function", Type = "Function" }, true);
+            new() { Library = "IEC_symbol", Name = "S", Variant = 0, Kind = "function", Type = "Function" });
         first.OnAssign = target =>
         {
             Assert.True(FakeMoveNative.Calls.IndexOf("Commit") < FakeMoveNative.Calls.LastIndexOf("Transaction"));
@@ -138,7 +138,7 @@ public sealed class SymbolFunctionAssignmentTests
         var variant = new SymbolVariant { SymbolLibraryName = "IEC_symbol", SymbolName = "S", VariantNr = 0 };
         var project = new Project(page) { SymbolLibraries = [new() { Name = "IEC_symbol", Symbols = [new() { Name = "S", Variants = [variant] }] }] };
         EplanProjects.Project = project;
-        var adapter = new EplanDeviceSymbolPlacement("project", page.Name, new() { Library = "IEC_symbol", Name = "S", Type = "Function" }, true);
+        var adapter = new EplanDeviceSymbolPlacement("project", page.Name, new() { Library = "IEC_symbol", Name = "S", Type = "Function" });
         var args = new DevicePlaceArgs { Tag = "-K1", JoinDevice = true };
         DevicePlaceData data = adapter.Place(args, args.Tag);
         if (unreadable)

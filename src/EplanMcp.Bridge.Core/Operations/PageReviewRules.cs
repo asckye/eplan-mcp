@@ -71,7 +71,8 @@ public static class PageReviewRules
             { continue; }
             foreach (DrawingPlacement q in placements.SkipWhile(q => !ReferenceEquals(q, p)).Skip(1))
             {
-                if (q.Bounds is { Length: 4 } b && a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1] && (p.Properties.ContainsKey("name") || p.Kind == "Text") && (q.Properties.ContainsKey("name") || q.Kind == "Text"))
+                // Agent eval 2026-11-06: PLC boxes 24 mm apart touch; EPLAN read one edge as 235.9999999999999.
+                if (q.Bounds is { Length: 4 } b && a[0] < b[2] - 1e-6 && a[2] > b[0] + 1e-6 && a[1] < b[3] - 1e-6 && a[3] > b[1] + 1e-6 && (p.Properties.ContainsKey("name") || p.Kind == "Text") && (q.Properties.ContainsKey("name") || q.Kind == "Text"))
                 { Add("overlap", "warning", p.Location, [p.Locator, q.Locator], "Symbol or text bounds overlap.", "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(q.Locator) }); }
             }
         }

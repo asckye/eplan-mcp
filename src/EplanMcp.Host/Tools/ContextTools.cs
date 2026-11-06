@@ -34,7 +34,7 @@ internal sealed class ContextTools
     public static async Task<CallToolResult> GetAsync(
         IBridgeClient bridge,
         PackLibrary packs,
-        JsonElement scope,
+        JsonElement? scope = null,
         string? project = null,
         string? cabinet = null,
         JsonElement? include = null,
@@ -43,7 +43,9 @@ internal sealed class ContextTools
         CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
-        CheckScope(scope, violations);
+        // Agent eval 2026-11-06: every model called this with include alone, as the server instructions say.
+        JsonElement selected = scope ?? JsonSerializer.SerializeToElement(new { });
+        CheckScope(selected, violations);
         JsonElement sections = include ?? JsonSerializer.SerializeToElement(ContextBuilder.Defaults);
         CheckNames(sections, "/include", violations, ContextBuilder.Sections);
         if (max_tokens is < 1 or > 20000)
@@ -59,7 +61,7 @@ internal sealed class ContextTools
         using BridgeProgress? reporting = BridgeProgress.Start(CallProgress.For(progress), "Reading engineering context", packs.Clock, cancellationToken);
         try
         {
-            JsonObject result = await ContextBuilder.ReadAsync(bridge, packs, ToolArguments.Optional(project), scope, sections.Deserialize<string[]>()!, max_tokens, cabinet, cancellationToken).ConfigureAwait(false);
+            JsonObject result = await ContextBuilder.ReadAsync(bridge, packs, ToolArguments.Optional(project), selected, sections.Deserialize<string[]>()!, max_tokens, cabinet, cancellationToken).ConfigureAwait(false);
             return ToolResults.Success(ContextBuilder.Summary(result), result);
         }
         catch (BridgeCallException ex)

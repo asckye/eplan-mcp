@@ -18,6 +18,17 @@ public sealed class PageReviewRulesTests
         Assert.Null(issue["fix"]!["args"]!["moves"]![0]!["locator"]!["Oid"]);
     }
 
+    /// <summary>Agent eval 2026-11-06: PLC boxes 24 mm apart touch; EPLAN read one edge as 235.9999999999999.</summary>
+    [Fact]
+    public void Overlap_TouchingWithFloatingPointNoise_IsNotReported()
+    {
+        DrawingPlacement upper = Placement(1, 8, "Function", "-K1");
+        DrawingPlacement lower = Placement(2, 8, "Function", "-K2");
+        upper.Bounds = [0, 235.9999999999999, 10, 260];
+        lower.Bounds = [0, 212, 10, 236];
+        Assert.Empty(Review("overlaps"));
+    }
+
     private const string Page = "=F+A1/1";
     private readonly ConnectionCreatePlanner.Scene _scene = new() { Project = new() { Name = "Line1" }, Page = new() { Page = Page, GridSize = 4 } };
     private readonly JObject _actual = JObject.Parse("""{"devices":[],"connections":[],"cables":[],"interruptions":[],"texts":[],"messages":[]}""");

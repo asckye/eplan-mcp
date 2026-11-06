@@ -173,7 +173,7 @@ internal static class BridgeHost
             new DeviceUpdateExecuteOperation(catalog, devices, renamer, transactions, partsDatabase, new EplanDevicePartAssigner()),
             new DevicePlacePlanOperation(catalog, pages, renamer, partsDatabase, placer, new EplanSymbolReader(), new EplanPlcReader()),
             new DevicePlaceExecuteOperation(catalog, pages, renamer, partsDatabase, placer, transactions, new EplanSymbolReader(),
-                (path, page, symbol, hasPart) => new EplanDeviceSymbolPlacement(path, page, symbol, hasPart), new EplanPlcReader()),
+                (path, page, symbol, _) => new EplanDeviceSymbolPlacement(path, page, symbol), new EplanPlcReader()),
             new ConnectionGeneratePlanOperation(catalog, pages, generator),
             new ConnectionCreatePlanOperation(connectionCreator),
             new PlacementEditOperation(new EplanPlacementEditor(), transactions, false, (project, target) => ProjectBackups.Make(backup, pages, project, target), new EplanSymbolReader()),

@@ -46,7 +46,8 @@ internal static class PageDrawingDiscovery
                 PlotFrameSize = geometry.PlotFrameSize,
                 BoundarySource = geometry.PageSize is null ? "unknown" : "Page.Size",
                 Total = geometry.Placements.Count,
-                Items = [.. geometry.Placements.Skip(offset).Take(limit).Select(row => new DrawingPlacement
+                // Agent eval 2026-11-06: property texts came first and filled the size budget, so wiring could not find its symbols.
+                Items = [.. geometry.Placements.OrderBy(row => row.Parent is null ? 0 : 1).Skip(offset).Take(limit).Select(row => new DrawingPlacement
                 {
                     Locator = row.Locator, Kind = row.Kind, Location = row.Location, Bounds = row.Bounds, DrawingOrder = row.DrawingOrder, Parent = row.Parent,
                     Properties = row.Properties.ToDictionary(p => p.Key, p => ResultShaper.CleanFullText(p.Value), StringComparer.Ordinal),

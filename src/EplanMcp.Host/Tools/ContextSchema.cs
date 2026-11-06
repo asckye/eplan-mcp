@@ -25,7 +25,7 @@ internal static class ContextSchema
     {
         McpServerTool tool = tools.Single(t => t.ProtocolTool.Name == ContextTools.GetTool);
         var input = JsonNode.Parse("""
-            {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","additionalProperties":false,"required":["scope"],"properties":{
+            {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","additionalProperties":false,"properties":{
               "project":{"type":["string","null"]},"cabinet":{"type":"string","minLength":1},"scope":{},"include":{},"max_tokens":{"type":"integer","minimum":1,"maximum":20000,"default":5000}}}
             """)!;
         input["properties"]!["scope"] = JsonNode.Parse(_scopeSchema.GetRawText());

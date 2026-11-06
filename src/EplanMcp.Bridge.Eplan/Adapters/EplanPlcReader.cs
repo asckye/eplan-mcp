@@ -96,7 +96,8 @@ internal sealed class EplanPlcReader : IPlcReader
             CardReference = detailed ? EplanText.Read(properties.FUNC_PLCPAIRCROSSREFERENCE, language) : null,
             ManualSymbolicAddress = detailed ? EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_MANUAL, language) : null,
             Address = EplanText.Read(properties.FUNC_PLCADDRESS, language),
-            SymbolicAddress = EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_CALCULATED, language),
+            // Agent eval 2026-11-06: the calculated value repeats the address; the name the engineer gave is the manual one.
+            SymbolicAddress = EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_MANUAL, language) is { Length: > 0 } manual ? manual : EplanText.Read(properties.FUNC_PLCSYMBOLICADDRESS_CALCULATED, language),
             DataType = EplanText.Read(properties.FUNC_PLCDATATYPE, language),
             Text = text,
             TextLanguage = textLanguage,

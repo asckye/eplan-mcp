@@ -10,6 +10,8 @@ Generate the connections on two pages at once:
 
 ## Workflow
 
+EPLAN draws a line by itself between two symbol pins that face each other in one column or row, as soon as both are placed, so aligned symbols need no wire items. Those lines are not connections yet: call this tool once the page's symbols are placed, then check with eplan_connection_list. An interruption point without a counterpart gives no logical connection, so a wire from a device to a lone point is not listed.
+
 Omitted `dry_run` and `true` preview without approval or writes; call again with the same arguments and `dry_run: false` to execute. The preview includes `fingerprint` and `execution: not_started`.
 
 1. A line drawn between two connection points is not a connection until EPLAN generates it: wire lists, terminal diagrams and eplan_connection_list do not show it. Call this tool after placing macros or devices on a page.

@@ -58,6 +58,9 @@ internal sealed class SymbolTools
         int next = args.Offset + data.Items.Count;
         var result = new SymbolSearchResult { Project = ResultShaper.CleanText(data.Project), Symbols = items, Total = data.Total, NextCursor = next < data.Total ? PageCursor.Encode(next, fingerprint) : null };
         ResultShaper.FitPage(result, args.Offset, fingerprint);
+        // Agent eval 2026-11-06: "pushbutton" finds nothing on a Chinese project; the model could not tell why.
+        if (result.Total == 0 && !string.IsNullOrWhiteSpace(text_contains) && string.IsNullOrWhiteSpace(language))
+        { result.Hint = "Descriptions are compared in the project's display language; repeat with language:\"en_US\" or text in that language."; }
         return ToolResults.Success(string.Create(CultureInfo.InvariantCulture, $"Found {result.Symbols.Count} of {result.Total} symbol variants."), result);
     }
 }

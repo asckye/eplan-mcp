@@ -8,12 +8,12 @@
 
     {"project":"Line1","page":"=F+A1/1","terminal_strip":"-X6","terminal_number":"1","symbol_variant":0,"x":80,"y":160,"dry_run":true}
 
-    {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_DI","symbol_variant":0,"tag":"-KF1","plc_connection_point":"2","plc_plug_designation":"-X10","plc_address":"I0.0","plc_symbolic_address":"Start","x":80,"y":160,"dry_run":true}
+    {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_CBOX","symbol_variant":1,"tag":"-KF1","plc_connection_point":"2","plc_plug_designation":"-X10","plc_address":"I0.0","plc_symbolic_address":"Start","x":80,"y":160,"dry_run":true}
 
 ## Workflow
 dry_run omitted/true: preview only, execution=not_started. false executes.
 
-1. Circuit page: eplan_page_list/create/get. mm, bottom-left, y up.
+1. Circuit page: eplan_page_list/create/get. mm, bottom-left, y up. Align facing pins (eplan_symbol_search gives pin offsets per variant) and EPLAN draws the lines; finish with eplan_connection_generate.
 2. eplan_device_list: free tags. Short tags inherit page structure; part tag renames all functions, omitted=auto. Approval outside scratch.
 3. part + symbol_variant changes the template variant; invalid rolls back.
 4. Prefer part templates: eplan_part_search, variant 1. library/symbol/symbol_variant overrides graphics, preserving logical definition; others stay unplaced. PLC module: eplan_macro_insert part. Symbols: eplan_symbol_search.

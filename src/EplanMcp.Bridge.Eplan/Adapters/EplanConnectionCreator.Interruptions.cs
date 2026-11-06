@@ -6,7 +6,8 @@ internal sealed partial class EplanConnectionCreator
 {
     internal static void NameInterruption(Page page, FunctionBase point, string name)
     {
-        point.Name = name;
+        // PDF redraw 2026-11-06: on a page without a higher-level function EPLAN stored +S1-L1 as =-+S1-L1; the full form starts with '='.
+        point.Name = name.StartsWith("=", StringComparison.Ordinal) ? name : "=" + name;
         EplanVisibleNames.Adjust(page, point);
     }
 

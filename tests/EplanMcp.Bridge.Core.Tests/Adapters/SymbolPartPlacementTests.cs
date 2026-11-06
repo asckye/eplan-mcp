@@ -35,7 +35,7 @@ public sealed class SymbolPartPlacementTests
             Y = 160
         };
         var adapter = new EplanDeviceSymbolPlacement("project", page.Name,
-            new() { Library = "SPECIAL", Name = "BCP", Variant = 2, Kind = "function", Type = "Function" }, withPart);
+            new() { Library = "SPECIAL", Name = "BCP", Variant = 2, Kind = "function", Type = "Function" });
         Function? placed = null;
         DevicePlaceData Change()
         {
