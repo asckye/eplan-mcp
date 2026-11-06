@@ -6722,6 +6722,11 @@
             "file": "tests/EplanMcp.Large.Tests/DeferredConnectionTests.cs"
           },
           {
+            "name": "DeferredInterruptionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeferredInterruptionTests.cs"
+          },
+          {
             "name": "EmptyConnectionDefinitionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/EmptyConnectionDefinitionTests.cs"
@@ -8541,6 +8546,11 @@
             "name": "DeferredConnectionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DeferredConnectionTests.cs"
+          },
+          {
+            "name": "DeferredInterruptionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeferredInterruptionTests.cs"
           },
           {
             "name": "DevicePlaceTests",
@@ -11966,6 +11976,11 @@
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
+          },
+          {
+            "name": "DeferredInterruptionTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeferredInterruptionTests.cs"
           },
           {
             "name": "DevicePlaceTests",
