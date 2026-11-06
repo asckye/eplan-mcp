@@ -9,6 +9,21 @@ namespace EplanMcp.Bridge.Core.Tests.Adapters;
 public sealed class SymbolReaderTests
 {
     [Theory]
+    [InlineData("PDEF", true)]
+    [InlineData("OTHER", false)]
+    public void TextFunction_ReadsCategoryOnlyForSpecialPlugDefinition(string name, bool readsCategory)
+    {
+        var symbol = new Symbol { Name = name, Type = Symbol.SymbolType.TextFunction, Variants = [new()] };
+        symbol.StoredProperties.Definition = FormattableString.Invariant($"{((int)global::Eplan.EplApi.Base.Enums.FunctionCategory.ConnectorDefText)}/1/1");
+        EplanProjects.Project = new() { SymbolLibraries = [new() { Name = "SPECIAL", Symbols = [symbol] }] };
+
+        SymbolSearchItem item = Assert.Single(new EplanSymbolReader().Read("project", new()));
+
+        Assert.Equal(readsCategory ? "ConnectorDefText" : null, item.FunctionCategory);
+        Assert.Equal("other", item.Kind);
+    }
+
+    [Theory]
     [InlineData("en_US", "zh_CN;", "de_DE@First;en_US@Requested;zh_CN@Display;", "Requested")]
     [InlineData(null, "zh_CN;en_US;", "de_DE@First;en_US@English;zh_CN@Display;", "Display")]
     [InlineData("zh_CN", "en_US;", "de_DE@First;en_US@Display;", "Display")]

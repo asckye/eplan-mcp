@@ -11284,6 +11284,11 @@
             "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
           },
           {
+            "name": "MacroStoreTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroStoreTests.cs"
+          },
+          {
             "name": "PlanDependencyPredictionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlanDependencyPredictionTests.cs"
@@ -11388,6 +11393,36 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MacroListOperationTests.cs"
           }
         ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_macro_store",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/MacroStoreTools.cs",
+      "operations": [
+        "macro.store"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_macro_store.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "MacroStoreTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroStoreTests.cs"
+          }
+        ],
+        "operationTests": []
       },
       "live": [],
       "dataDictionary": []
@@ -12006,6 +12041,11 @@
             "name": "MacroOverviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
+          },
+          {
+            "name": "MacroStoreTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroStoreTests.cs"
           },
           {
             "name": "ObjectReadTests",
@@ -16588,6 +16628,11 @@
             "name": "MacroGroupedPlacementTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroGroupedPlacementTests.cs"
+          },
+          {
+            "name": "MacroStoreTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/MacroStoreTests.cs"
           },
           {
             "name": "PlacementDeleteTests",

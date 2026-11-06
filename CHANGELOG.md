@@ -12,6 +12,8 @@
 - `eplan_language_set` 新增 `show_missing_translation`，控制缺译文时是否显示占位符。
 - `eplan_connection_create` 新增 `autoconnect_break`（`SPECIAL/ACBP`）：对应 EPLAN 插入菜单的中断自动连线，打印时不可见，阻止不需要的自动连线。
 - `eplan_device_place` 的 `plc_text`、`terminal_strip_text` 接受多语言写法 `zh_CN@文字;en_US@text;`，标识可以只有位置（如 `+F1`）。
+- `eplan_device_place` 支持 `SPECIAL/PDEF` 插头定义，必须省略连接点代号；插针用普通符号 `IEC_symbol/XBS`。
+- 新增 `eplan_macro_store`，默认预览，将同页对象存为窗口宏或将指定页存为页宏；导出文件名禁止覆盖，写后校验文件与项目业务快照。
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
 ### 修复

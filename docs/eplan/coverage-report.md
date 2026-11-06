@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 104（28.8%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 105（28.6%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -249,8 +249,9 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 75 | 35 | 2 | 38 | 0 | 1/1/1 | A28 | — |
 | eplan_language_set | write | language.set.execute<br>language.set.plan | 50 | 22 | 0 | 28 | 0 | 2/1/4 | A28 | — |
 | eplan_macro_get | read | macro.get | 43 | 23 | 0 | 18 | 0 | 1/0/4 | A14 A89 | — |
-| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 264 | 158 | 3 | 99 | 0 | 6/2/8 | A12 A13 A14 A79 A82 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 264 | 158 | 3 | 99 | 0 | 6/2/9 | A12 A13 A14 A79 A82 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 1/0/4 | A4 | — |
+| eplan_macro_store | write | macro.store | 0 | 0 | 0 | 0 | 0 | 1/0/1 | — | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
 | eplan_object_find | read | object.find<br>object.get<br>project.get | 447 | 277 | 63 | 166 | 0 | 3/1/15 | A57 A60 | — |
 | eplan_object_get | read | object.find<br>object.get<br>project.get | 528 | 358 | 63 | 166 | 0 | 2/1/4 | — | — |
@@ -277,7 +278,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 120 | 54 | 1 | 62 | 1 | 1/1/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 73 | 39 | 0 | 34 | 0 | 0/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
 | eplan_placeholder_list | read | placeholder.list | 45 | 27 | 0 | 18 | 0 | 1/0/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
-| eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 322 | 196 | 2 | 123 | 0 | 4/3/16 | A54 A88 | — |
+| eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 322 | 196 | 2 | 123 | 0 | 4/3/17 | A54 A88 | — |
 | eplan_placement_delete | destructive | placement.delete.execute<br>placement.delete.plan | 160 | 94 | 1 | 64 | 0 | 0/1/3 | A87 | — |
 | eplan_placement_edit | destructive | placement.edit.execute<br>placement.edit.plan | 458 | 280 | 3 | 173 | 0 | 3/3/2 | — | — |
 | eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 360 | 212 | 7 | 131 | 0 | 6/3/4 | A57 A72 A76 | — |

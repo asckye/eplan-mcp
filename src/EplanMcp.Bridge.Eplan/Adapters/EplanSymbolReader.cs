@@ -29,7 +29,7 @@ internal sealed class EplanSymbolReader : ISymbolReader
                 string type = symbol.Type.ToString();
                 // A36/A39: category and description share one property list for every symbol type.
                 using SymbolPropertyList properties = symbol.Properties;
-                string? category = type is "Function" or "BoxFunction" ? Category(properties) : null;
+                string? category = type is "Function" or "BoxFunction" || type == "TextFunction" && library.Name == "SPECIAL" && symbol.Name == "PDEF" ? Category(properties) : null;
                 string? description = Description(properties, requested, display);
                 string kind = SymbolKinds.From(type, category);
                 if (!SymbolKinds.Matches(args, library.Name, symbol.Name, kind))

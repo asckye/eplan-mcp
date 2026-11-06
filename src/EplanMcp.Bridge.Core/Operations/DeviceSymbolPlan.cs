@@ -11,6 +11,7 @@ internal static class DeviceSymbolPlan
     internal static bool BlackBox(DevicePlaceArgs args) => Special(args, "DC");
     internal static bool BusBarDefinition(DevicePlaceArgs args) => Special(args, "BBDEF");
     internal static bool BusBarPoint(DevicePlaceArgs args) => Special(args, "BCP");
+    internal static bool PlugSymbol(DevicePlaceArgs args) => Special(args, "PDEF");
     internal static bool ConnectionPoint(DevicePlaceArgs args) => Special(args, "DCP") || Special(args, "DCPP3");
     internal static bool Special(DevicePlaceArgs args, string symbol) => args.TerminalStrip is null && string.Equals(args.Library, "SPECIAL", StringComparison.OrdinalIgnoreCase) && string.Equals(args.Symbol, symbol, StringComparison.OrdinalIgnoreCase);
     internal static WritePlan Create(DevicePlaceArgs args, DevicePlaceRequest request, ISymbolReader? reader)
@@ -40,6 +41,11 @@ internal static class DeviceSymbolPlan
         if (found.Count > 1)
         { throw ProjectResolver.Ambiguous("symbol", name!, found.Select(s => s.Library + "/" + s.Name), "Select the exact library and symbol spelling from eplan_symbol_search."); }
         SymbolSearchItem symbol = found[0];
+        if (PlugSymbol(args) && ((symbol.Type.Length > 0 && symbol.Type != "TextFunction")
+            || (symbol.FunctionCategory is not null && symbol.FunctionCategory != "ConnectorDefText")))
+        { throw WriteArguments.Invalid(["/symbol: SPECIAL/PDEF requires a TextFunction with ConnectorDefText category."]); }
+        if (Special(args, "PDEF") && args.ConnectionDesignations is not null)
+        { throw WriteArguments.Invalid(["/connection_designations: omit for SPECIAL/PDEF, which has no connection points."]); }
         if (args.JoinDevice.HasValue && (symbol.Kind is "terminal" or "plc_box" || symbol.FunctionCategory is "Terminal" or "PLCTerminal" or "PLCBox"))
         { throw WriteArguments.Invalid(["/join_device: use library/symbol for the second symbol; terminal and PLC routes are not supported."]); }
         // The sample proves other categories work as terminals (XTR1); only a box can never be one.
@@ -61,8 +67,8 @@ internal static class DeviceSymbolPlan
         { throw WriteArguments.Invalid(["/symbol: SPECIAL/DC requires a BoxFunction with Blackbox category."]); }
         if (BusBarDefinition(args) && ((symbol.Type.Length > 0 && symbol.Type != "TextFunction") || (symbol.FunctionCategory is not null && symbol.FunctionCategory != "BusBarDefText")))
         { throw WriteArguments.Invalid(["/symbol: SPECIAL/BBDEF requires a TextFunction with BusBarDefText category."]); }
-        if (BlackBox(args) || BusBarDefinition(args) ? false : box ? symbol.Type != "LocationBox" : terminal ? symbol.Type.Length > 0 && symbol.Type != "Function" : symbol.Kind == "plc_box" ? symbol.Library != "SPECIAL" || symbol.Name != "PLCC" : symbol.Kind != "function" || symbol.Type != "Function")
-        { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Select an ordinary function, verified SPECIAL/DC black box, SPECIAL/BBDEF busbar definition, SPECIAL/SC location box or IEC_symbol/X terminal.", metadata: new Dictionary<string, string> { ["missing"] = box ? "device.place.location_box" : terminal ? "device.place.terminal" : "device.place.symbol.function" }); }
+        if (BlackBox(args) || BusBarDefinition(args) || PlugSymbol(args) ? false : box ? symbol.Type != "LocationBox" : terminal ? symbol.Type.Length > 0 && symbol.Type != "Function" : symbol.Kind == "plc_box" ? symbol.Library != "SPECIAL" || symbol.Name != "PLCC" : symbol.Kind != "function" || symbol.Type != "Function")
+        { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Select an ordinary function, SPECIAL/PDEF plug definition, SPECIAL/DC black box, SPECIAL/BBDEF busbar definition, SPECIAL/SC location box or IEC_symbol/X terminal.", metadata: new Dictionary<string, string> { ["missing"] = box ? "device.place.location_box" : terminal ? "device.place.terminal" : "device.place.symbol.function" }); }
         if (args.ConnectionDesignations is { } pins && pins.Length != symbol.ConnectionPoints.Count)
         { throw WriteArguments.Invalid(["/connection_designations: supply exactly one designation per symbol connection point."]); }
         if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Length != symbol.ConnectionPoints.Count
@@ -101,6 +107,8 @@ internal static class DeviceSymbolPlan
         { request.LayoutWarnings.Add("Black box metadata is incomplete; verify native type and category after placement."); }
         if (BusBarDefinition(args) && (symbol.Type.Length == 0 || symbol.FunctionCategory is null))
         { request.LayoutWarnings.Add("Busbar definition metadata is incomplete; verify native type and category after placement."); }
+        if (PlugSymbol(args) && (symbol.Type.Length == 0 || symbol.FunctionCategory is null))
+        { request.LayoutWarnings.Add("Plug symbol metadata is incomplete; verify native type and category after placement."); }
         string resolved = BridgeJson.FromObject(symbol).ToString(Formatting.None);
         var details = new Dictionary<string, string> { ["symbol"] = resolved, ["tag"] = request.Tag, ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true" };
         if (args.Part is not null)

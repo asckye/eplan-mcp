@@ -6,6 +6,7 @@ namespace EplanMcp.Contracts;
 /// </summary>
 public static class OperationNames
 {
+    public const string MacroStore = "macro.store";
     public const string PlacementDeletePlan = "placement.delete.plan";
     public const string PlacementDeleteExecute = "placement.delete.execute";
     /// <summary>Read current UI context and a bounded selection block.</summary>

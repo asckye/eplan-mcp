@@ -201,6 +201,8 @@ src\EplanMcp.Bridge.Offline\bin\Release\net481\EplanMcp.Bridge.Offline.exe --var
 
 ## 写测试
 
+`MacroStoreTests` 默认只验证存宏。把 `EPLANMCP_LARGE_MACRO_ROOT` 指向 EPLAN 当前配置的宏目录后，才会把存出的窗口宏临时复制过去、经 `eplan_macro_insert` 插入，结束时删除本次唯一命名的副本。这一步写在 scratch 之外，要工程师自己决定是否设置。
+
 - `ImportPlcTests` 经 `DestructiveHost` 对 `LargeWrite` 验证事务内重复保护：当前没有 PLC 总线导出工具，可把这份写副本的 `Phoenix1` 标准格式自导出文件路径放进 `EPLANMCP_LARGE_PLC_PBF`；未设置时查找 `%USERPROFILE%\EplanMcp\scratch\spikes\s34\**\export-00\roundtrip.pbf` 中最新的 S34 示例项目自导出文件，两者都没有才跳过。预检不完整仍经审批、备份执行，期望 `ALREADY_EXISTS/rolled_back`、保留备份、冲突名单含 `=F+A2-KE1`，前后功能/PLC 盒/部件引用数相同（S34 新副本为 2,876 / 20 / 2,900；其他写测试可改变基线）。
 - PLC 无冲突目标的正向导入、新增对象之间同名的实际含义、提交后一次 Ctrl+Z 和备份恢复仍待 Large 验证；本测试不宣称覆盖这些发布门槛。
 

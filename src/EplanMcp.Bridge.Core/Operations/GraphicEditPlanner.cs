@@ -134,6 +134,16 @@ public static class GraphicEditPlanner
     }
     internal static JToken Resolve(JToken? locator, JObject before)
     {
+        CheckLocator(locator);
+        JToken? found = before["objects"]!.SingleOrDefault(r => JToken.DeepEquals(r["locator"], locator));
+        if (found is not null)
+        { return found; }
+        if (before["objects"]!.SelectMany(r => r["children"] as JArray ?? new JArray()).Any(r => JToken.DeepEquals(r["locator"], locator)))
+        { throw Invalid("Property text is excluded; use independent Line Rectangle Text Arc Circle Ellipse PolyLine Spline or Group."); }
+        throw Stale();
+    }
+    internal static void CheckLocator(JToken? locator)
+    {
         ConnectionCreatePlanner.Members(locator, "/locator", "project page type oid digest", "");
         Require(locator!["project"]?.Type == JTokenType.String && locator["page"]?.Type == JTokenType.String
             && locator["type"]?.Type == JTokenType.Integer && locator["oid"]?.Type == JTokenType.Integer
@@ -141,12 +151,6 @@ public static class GraphicEditPlanner
             && long.TryParse(locator["oid"]!.ToString(), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out long oid) && oid > 0
             && locator["digest"]?.Type == JTokenType.String && ((string)locator["digest"]!).Length == 64
             && ((string)locator["digest"]!).All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f'), "Use complete unmodified eplan_object_find locators.");
-        JToken? found = before["objects"]!.SingleOrDefault(r => JToken.DeepEquals(r["locator"], locator));
-        if (found is not null)
-        { return found; }
-        if (before["objects"]!.SelectMany(r => r["children"] as JArray ?? new JArray()).Any(r => JToken.DeepEquals(r["locator"], locator)))
-        { throw Invalid("Property text is excluded; use independent Line Rectangle Text Arc Circle Ellipse PolyLine Spline or Group."); }
-        throw Stale();
     }
     internal static double Number(JObject input, string field, double minimum, double maximum = double.MaxValue)
     {

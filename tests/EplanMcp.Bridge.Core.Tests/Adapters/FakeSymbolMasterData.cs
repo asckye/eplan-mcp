@@ -17,7 +17,7 @@ internal sealed class Symbol
     public int PropertyListReads { get; private set; }
     public SymbolPropertyList Properties { get { PropertyListReads++; return StoredProperties; } }
     public SymbolVariant[] Variants { get; set; } = [];
-    public enum SymbolType { Function, BoxFunction, CableDefinitionLine }
+    public enum SymbolType { Function, BoxFunction, CableDefinitionLine, TextFunction }
 }
 
 internal class SymbolVariant
@@ -37,6 +37,7 @@ internal sealed class NativeSymbolPoint
 internal sealed class SymbolPropertyList : IDisposable
 {
     public bool HasDefinition { get; set; } = true;
+    public string? Definition { get; set; }
     public string? Description { get; set; }
     public List<PropertyValue> Values { get; } = [];
     public List<Properties.Symbol> Reads { get; } = [];
@@ -48,7 +49,7 @@ internal sealed class SymbolPropertyList : IDisposable
         {
             Reads.Add(id);
             int disposals = Disposals;
-            var value = new PropertyValue(id == Properties.Symbol.SYMB_DESC ? Description! : FormattableString.Invariant($"{(int)FunctionCategory.PLCTerminal}/1/1"), () => Assert.Equal(disposals, Disposals));
+            var value = new PropertyValue(id == Properties.Symbol.SYMB_DESC ? Description! : Definition ?? FormattableString.Invariant($"{(int)FunctionCategory.PLCTerminal}/1/1"), () => Assert.Equal(disposals, Disposals));
             Values.Add(value);
             return value;
         }

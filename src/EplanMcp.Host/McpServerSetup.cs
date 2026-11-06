@@ -81,6 +81,7 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => PlacementUpdateContract.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlacementEditTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => GraphicEditTools.Configure(options.ToolCollection ?? []));
+        services.PostConfigure<McpServerOptions>(options => MacroStoreTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlacementDeleteTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => ContextSchema.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => CabinetTools.Configure(options.ToolCollection ?? []));
@@ -163,6 +164,7 @@ internal static class McpServerSetup
             .WithTools<ProjectDestructiveTools>(HostJson.Options)
             .WithTools<MacroTools>(HostJson.Options)
             .WithTools<MacroWriteTools>(HostJson.Options)
+            .WithTools<MacroStoreTools>(HostJson.Options)
             .WithTools<PlaceholderTools>(HostJson.Options)
             .WithTools<PlaceholderWriteTools>(HostJson.Options)
             .WithTools<ExportTools>(HostJson.Options)

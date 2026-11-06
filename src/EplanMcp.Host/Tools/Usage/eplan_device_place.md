@@ -22,6 +22,8 @@ SPECIAL/DC: tag + upper-right corner_x/y. DCP/DCPP3: same tag + one connection_d
 
 SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag joins device.
 
+SPECIAL/PDEF: no connection_designations. Plug pins: IEC_symbol/XBS.
+
 ## Fields
 
 - device: tag/visibleTag/category (preview=requested tag); functions/unplaced=count; unplaced_functions=names+PLC suffixes, [] if unknown.
@@ -44,8 +46,8 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - plc_connection_point=20022; must match connection_designations. 20400/20402/20011=address/manual symbolic address/??_?? text; calculated 20403/20301 read-only.
 - plc_plug_designation: manual 20406, 1-64 nonblank chars, no controls; requires PLC point. Name=card:point.
 - PLC displays: 20213=card DT, 20406=plug, 20300=main/auxiliary, 20301=overview. Native read-only references may be empty; overview needs matching representation.
-- Local PLC displays: 20021=2; verify text/position/visibility using fresh IDs.
-- plc includes plugDesignation/mainReference. Readback failure: committed+warning; inspect eplan_plc_get detailed/eplan_page_get include_drawings before retry. functions/unplaced=null; plc_get counts parentlessRepresentations. Use returned names.
+- Local PLC displays: 20021=2; verify using fresh IDs.
+- plc includes plugDesignation/mainReference. Readback failure: committed+warning; inspect eplan_plc_get before retry. functions/unplaced=null; plc_get counts parentlessRepresentations. Use returned names.
 
 ## Errors
 
@@ -54,6 +56,6 @@ R1-R5/R8 refuse; R6/R7/R9 warn; default=refuse.
 
 layout_guard=warn: conflicts warn; off-page refuses.
 
-join_device/SPECIAL + part/variant appends one reference postcommit, same undo step; readback failure rolls back both.
+join_device/SPECIAL + part/variant appends one reference postcommit; readback failure rolls back both.
 
 property_arrangement: exact name; default if omitted. Readback: propertyArrangement/activePropertySet (19307).
