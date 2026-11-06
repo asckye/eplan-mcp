@@ -5,6 +5,56 @@ namespace EplanMcp.Large.Tests;
 
 public sealed partial class DevicePlaceTests
 {
+    private static readonly double[] _partStripPosition = [60.0, 160.0];
+
+    [Fact]
+    public async Task TerminalFromPart_CreatesItsStripWithTextAndPosition_NextJoins_UndoRestores()
+    {
+        // A13: the strip definition cannot be created in a SafetyPoint; this route runs in a Transaction.
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string project = session.Project;
+        string page = await NewPageAsync(project);
+        string strip = "-XP7" + page[Prefix.Length..];
+        string before = (await session.SnapshotAsync()).Hash;
+        JsonElement first = await PartsCallAsync("eplan_device_place", new()
+        {
+            ["project"] = project,
+            ["page"] = page,
+            ["part"] = "PXC.3211813",
+            ["library"] = "IEC_symbol",
+            ["symbol"] = "X2_2",
+            ["symbol_variant"] = 0,
+            ["terminal_strip"] = strip,
+            ["terminal_number"] = "1",
+            ["terminal_strip_text"] = "zh_CN@电源;en_US@Power;",
+            ["terminal_strip_position"] = _partStripPosition,
+            ["x"] = 80,
+            ["y"] = 160,
+            ["dry_run"] = false
+        });
+        Assert.Equal(ExecutionState.Committed, first.GetProperty("execution").GetString());
+        JsonElement next = await PartsCallAsync("eplan_device_place", new()
+        {
+            ["project"] = project,
+            ["page"] = page,
+            ["part"] = "PXC.3211813",
+            ["library"] = "IEC_symbol",
+            ["symbol"] = "X2_2",
+            ["symbol_variant"] = 0,
+            ["terminal_strip"] = strip,
+            ["terminal_number"] = "2",
+            ["x"] = 88,
+            ["y"] = 160,
+            ["dry_run"] = false
+        });
+        Assert.Equal(ExecutionState.Committed, next.GetProperty("execution").GetString());
+        JsonElement read = await eplan.CallAsync("eplan_terminal_strip_get", new() { ["project"] = project, ["strip"] = strip });
+        Assert.Equal(2, read.GetProperty("terminals").GetArrayLength());
+        await session.UndoAsync();
+        await session.UndoAsync();
+        Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+    }
+
     [Fact]
     public async Task ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores()
     {

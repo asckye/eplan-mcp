@@ -38,7 +38,7 @@ internal sealed partial class EplanConnectionCreator
                 using FunctionPropertyList properties = cable.Properties;
                 properties[(Properties.Function)20040] = (string)definition["type_text"]!;
                 properties[(Properties.Function)20042] = (string)definition["core_count"]!;
-                properties[(Properties.Function)20043] = (string)definition["cross_section_mm2"]!;
+                properties[(Properties.Function)20043] = (string?)definition["cross_section_text"] ?? (string)definition["cross_section_mm2"]!;
                 if ((string?)definition["voltage"] is { } voltage)
                 { properties[(Properties.Function)20044] = voltage; }
             }
@@ -150,8 +150,10 @@ internal sealed partial class EplanConnectionCreator
             {
                 using ConnectionPropertyList properties = runs[i].Properties;
                 properties[(Properties.Connection)31011] = (string)cores[i]["label"]!;
-                properties[(Properties.Connection)31004] = (string)cores[i]["colour"]!;
-                properties[(Properties.Connection)31002] = (string)definition["cross_section_mm2"]!;
+                if ((string?)cores[i]["colour"] is { } colour)
+                { properties[(Properties.Connection)31004] = colour; }
+                if ((bool?)definition["core_labels_only"] != true)
+                { properties[(Properties.Connection)31002] = (string)definition["cross_section_mm2"]!; }
             }
             cable.AddLocalFunctionTemplates(runs);
             Connection[] templates = cable.FunctionTemplates.OfType<Connection>().ToArray();
@@ -190,7 +192,7 @@ internal sealed partial class EplanConnectionCreator
                 }
                 using ConnectionPropertyList core = run.Properties;
                 Check(CableDefinitionPlanner.SameName(cable.Name, CableText(core, 20005) ?? "", page), $"core membership: expected '{cable.Name}'; actual '{CableText(core, 20005) ?? "<empty>"}'");
-                Check(SameSection(CableText(core, 31002), (double)definition["cross_section_mm2"]!), $"core cross_section_mm2: expected '{definition["cross_section_mm2"]}'; actual '{CableText(core, 31002) ?? "<empty>"}'");
+                Check((bool?)definition["core_labels_only"] == true || SameSection(CableText(core, 31002), (double)definition["cross_section_mm2"]!), $"core cross_section_mm2: expected '{definition["cross_section_mm2"]}'; actual '{CableText(core, 31002) ?? "<empty>"}'");
                 result.Add(new JObject { ["designation"] = cable.Name, ["type"] = type.ToString(), ["oid"] = run.ObjectIdentifier, ["pins"] = JArray.FromObject(CablePins(run)), ["label"] = CableText(core, 31011), ["colour"] = CableText(core, 31004) });
             }
         }

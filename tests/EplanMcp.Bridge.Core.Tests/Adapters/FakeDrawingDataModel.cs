@@ -230,7 +230,7 @@ internal sealed class Project(params Page[] pages) : StorableObject
 
 internal static class DocumentTypeManager
 {
-    public enum DocumentType { Circuit, Graphics, TableOfContents, Overview }
+    public enum DocumentType { Circuit, CircuitSingleLine, Graphics, TableOfContents, Overview }
 }
 
 internal sealed class DMObjectsFinder(Project project) : IDisposable

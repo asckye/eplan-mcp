@@ -6,15 +6,13 @@
 
     {"project":"Line1","page":"=GAA+A1&EFS1/60","location_box":"+P1","x":60,"y":140,"corner_x":100,"corner_y":180,"dry_run":true}
 
-    {"project":"Line1","page":"=F+A1/1","terminal_strip":"-X6","terminal_number":"1","symbol_variant":0,"x":80,"y":160,"dry_run":true}
-
-    {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_CBOX","symbol_variant":1,"tag":"-KF1","plc_connection_point":"2","plc_plug_designation":"-X10","plc_address":"I0.0","plc_symbolic_address":"Start","x":80,"y":160,"dry_run":true}
+    {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_CBOX","symbol_variant":1,"tag":"-KF1","plc_connection_point":"2","plc_address":"I0.0","plc_symbolic_address":"Start","x":80,"y":160,"dry_run":true}
 
 ## Workflow
 dry_run omitted/true: preview only, execution=not_started. false executes.
 
 1. Circuit page: eplan_page_list/create/get. mm, bottom-left, y up. Align facing pins (eplan_symbol_search gives pin offsets per variant) and EPLAN draws the lines; finish with eplan_connection_generate.
-2. eplan_device_list: free tags. Short tags inherit page structure; part tag renames all functions, omitted=auto. Approval outside scratch.
+2. eplan_device_list: free tags. Short tags inherit page structure; +F1 = location only; part tag renames all functions, omitted=auto. Approval outside scratch.
 3. part + symbol_variant changes the template variant; invalid rolls back.
 4. Prefer part templates: eplan_part_search, variant 1. library/symbol/symbol_variant overrides graphics, preserving logical definition; others stay unplaced. PLC module: eplan_macro_insert part. Symbols: eplan_symbol_search.
 
@@ -33,7 +31,7 @@ SPECIAL/BBDEF: tag required; main TextFunction/BusBarDefText. BCP with same tag 
 - Symbol-route display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm}. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite relative offsets, negatives allowed; 20214=prefixed tag. Part templates allow only symbol selection.
 - connection_designations: one nonblank pin/search order, <=64 chars, no controls; indexed 20022 verifies names.
 - Creation mismatch/cancel: rollback. One Ctrl+Z. visibleTag=null without tag display.
-- location_box: + and 1-64 letters/digits/_/dots; no tag/part/symbol. SPECIAL/SC/0, dashed. x/y lower-left, corner_x/y upper-right; positive area.
+- location_box: + and 1-64 letters/digits/_/dots; no tag/part/symbol. SPECIAL/SC/0, dashed; location_box_polyline: SC2. x/y lower-left, corner_x/y upper-right; positive area.
 - locationBox: structure/bounds[minX,minY,maxX,maxY]/outline=dashed/affectedDevices=[]; preview predicted. functions/unplaced=0; device.tag/category=structure/LocationBox. No duplicate structure.
 
 - Terminal: terminal_strip + terminal_number; default IEC_symbol/X/0 without part. With part keep template or give library/symbol/symbol_variant. No boxes/tag/display/pins. Number=1-64 letters/digits/_/dots; conflicts ignore case. terminal_strip_text=new strips only, 1-256 plain ??_?? chars, no controls.

@@ -153,7 +153,7 @@ public sealed class ConnectionCreateContractTests
         {
             ["project"] = Text(),
             ["page"] = Text(),
-            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable, definition, potential) }, 1, 50),
+            ["items"] = Array(new JObject { ["oneOf"] = new JArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, new JObject { ["type"] = "object", ["additionalProperties"] = false, ["properties"] = new JObject { ["kind"] = new JObject { ["const"] = "autoconnect_break" }, ["position"] = Point() }, ["required"] = new JArray("kind", "position") }, cable, definition, potential) }, 1, 50),
             ["dry_run"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["snap_to_grid"] = new JObject { ["type"] = "boolean", ["default"] = true },
             ["generate"] = new JObject { ["type"] = "boolean", ["default"] = true },

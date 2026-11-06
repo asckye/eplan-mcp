@@ -38,6 +38,8 @@ public sealed class DevicePlaceArgs
     public double? CornerX { get; set; }
     /// <summary>Opposite corner y in millimetres; required for LocationBox or SPECIAL/DC.</summary>
     public double? CornerY { get; set; }
+    /// <summary>True selects SPECIAL/SC2, the polyline location box with the symbol's own pen, instead of the dashed SPECIAL/SC.</summary>
+    public bool? LocationBoxPolyline { get; set; }
     /// <summary>Parent strip designation, short or full; also supported for a part terminal.</summary>
     public string? TerminalStrip { get; set; }
     /// <summary>Single terminal designation, appended to the strip with ':'.</summary>

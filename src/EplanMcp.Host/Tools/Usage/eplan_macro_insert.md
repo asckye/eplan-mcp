@@ -16,8 +16,8 @@ A part's group symbol macro on a sufficiently large Overview page (preview):
 `dry_run` omitted/true previews without approval or writes (`execution=not_started`); false executes.
 
 1. Choose exactly one of `macro` (path from eplan_macro_list) or `part` (read-only ARTICLE_GROUPSYMBOLMACRO lookup). `part_variant` defaults to "1" or the sole available variant. A part without a group symbol macro can use eplan_device_place.
-2. Choose `representation: "MultiLine"` (default) on a Circuit page, or `"Overview"` on an Overview page. The macro must contain the selected representation and integer `variant` (default 0).
-3. `x` and `y` are millimetres from the page's bottom left corner, y up, and put the macro's top left corner there, so the macro takes `[x, x + width]` across and `[y - height, y]` up. On a page whose size EPLAN can tell, the macro must lie within it; on a new, empty page only `x >= 0` and `y >= 0` are checked.
+2. Choose `representation`: `"MultiLine"` (default) on Circuit, `"Overview"` on Overview, `"SingleLine"` on CircuitSingleLine pages. The macro must contain the selected representation and integer `variant` (default 0).
+3. `x` and `y` are millimetres from the page's bottom left corner, y up, and put the macro's `reference_point` (eplan_macro_get) there. Objects may lie left of or above that point. On a page whose size EPLAN can tell, the macro must lie within it; on a new, empty page only `x >= 0` and `y >= 0` are checked.
 4. Keep the default `numbering: "number"`: EPLAN gives the devices tags no device has, in the page's structure. With `keep` the devices keep the macro's tags, and the insert is refused when that merges them with existing devices. To get particular tags, insert with `number` and rename with eplan_device_update using `dry_run: false`.
 5. `macro_box` defaults to true (project settings). Set false to remove the inserted macro boxes in the insertion transaction, retaining their referenced objects.
 6. One Ctrl+Z in EPLAN undoes the complete insertion.

@@ -14,7 +14,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// (A82), including persistent unplaced functions. A85 renames the whole device with NameService before commit;
 /// committed readback reacquires every function by its new tag because unplaced IDs change (A79/A80/A85).
 /// </summary>
-internal sealed class EplanDevicePlacer : IDevicePlacer
+internal sealed class EplanDevicePlacer : IDevicePlacer, IDeviceStripTransactions
 {
     public MacroTargetPage? ReadPage(string projectPath, string pageName)
     {
@@ -32,12 +32,18 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
         return result;
     }
 
+    public ITransactionScopeFactory StripTransactions(string projectPath) => new StripFactory(projectPath);
+
+    private sealed class StripFactory(string project) : ITransactionScopeFactory
+    { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription, undoCommitted: true, undoAbandoned: true); }
+
     public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, DevicePlaceArgs? options = null)
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
         Page page = Find(project, pageName) ?? throw new InvalidOperationException("The planned page is gone.");
         var before = new HashSet<string>(OnPage(project, page), StringComparer.Ordinal);
+        (TerminalStrip Strip, bool Created)? strip = options?.TerminalStrip is null ? null : EplanDeviceSymbolPlacement.PrepareStrip(options, tag, project, page);
         Function[] created;
         try
         {
@@ -76,36 +82,22 @@ internal sealed class EplanDevicePlacer : IDevicePlacer
             if (main.SymbolVariant.VariantNr != number)
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The template symbol variant did not match the request; nothing was committed."); }
         }
-        if (main is Terminal terminal && options?.TerminalStrip is not null)
+        if (strip is not null && main is not Terminal)
+        { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The part created no terminal for the requested strip; nothing was committed."); }
+        if (main is Terminal terminal && strip is { } ready)
         {
             var symbol = new SymbolSearchItem { Library = terminal.SymbolVariant.SymbolLibraryName, Name = terminal.SymbolVariant.SymbolName, Variant = terminal.SymbolVariant.VariantNr, FunctionCategory = "Terminal" };
-            terminalResult = new EplanDeviceSymbolPlacement(projectPath, pageName, symbol).CreateTerminal(options, tag, project, page, terminal.SymbolVariant, terminal);
+            terminalResult = new EplanDeviceSymbolPlacement(projectPath, pageName, symbol).CreateTerminal(options!, tag, project, page, terminal.SymbolVariant, ready.Strip, ready.Created, terminal);
             terminalData = terminalResult.Terminal;
         }
         else if (tag.Length > 0 && main is not null)
         {
-            using var parsed = new FunctionPropertyList();
-            using var additional = new FunctionPropertyList();
-            using var newName = new FunctionBasePropertyList();
-            project.ParseNameAndProps((int)main.FunctionCategory, tag, parsed, additional);
-            using PropertyValue plant = parsed.DESIGNATION_PLANT;
-            using PropertyValue location = parsed.DESIGNATION_LOCATION;
-            using PropertyValue code = parsed.FUNC_CODE;
-            using PropertyValue counter = parsed.FUNC_COUNTER;
-            // A tag without a plant or location parses to an empty value, which the list refuses (S063111).
-            if (!plant.IsEmpty)
-            { newName.DESIGNATION_PLANT = plant; }
-            if (!location.IsEmpty)
-            { newName.DESIGNATION_LOCATION = location; }
-            newName.FUNC_CODE = code;
-            newName.FUNC_COUNTER = counter;
-            using var service = new NameService();
-            service.RenameDevice(main, newName, false, true);
+            EplanDeviceRename.Apply(project, main, tag);
         }
 
         if (main is not null && options?.PropertyArrangement is { } arrangement && terminalData is null)
         { EplanSymbolArrangement.Select(main, arrangement); }
-        var result = new PlacedDevice { SymbolVariant = options?.SymbolVariant, PropertyArrangement = options?.PropertyArrangement, OnPage = OnPage(project, page).Count(id => !before.Contains(id)), Terminal = terminalData };
+        var result = new PlacedDevice { SymbolVariant = options?.SymbolVariant, PropertyArrangement = options?.PropertyArrangement, OnPage = terminalData is null ? OnPage(project, page).Count(id => !before.Contains(id)) : 1, Terminal = terminalData };
         Read(created, result, terminalData is null);
         if (terminalData is not null)
         { result.PropertyArrangement = terminalResult!.PropertyArrangement; result.ActivePropertySet = terminalResult.ActivePropertySet; }

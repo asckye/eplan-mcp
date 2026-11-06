@@ -37,6 +37,32 @@ public sealed class ConnectionDeferredGenerationTests
         Assert.Equal(1, creator.Transactions.Calls.Count(c => c == "CloseUndo"));
     }
 
+    [Fact]
+    public void AutoconnectBreak_Deferred_PlacesTheInvisibleBreakPoint()
+    {
+        var creator = new Creator();
+        creator.Fixture.Symbols.Add(ConnectionCreateFixture.Variant("ACBP", "ConnectionBreakpoint", 0, "Left", "Down", "Right", "Up"));
+        creator.Fixture.Request["generate"] = false;
+        creator.Fixture.Request["items"] = new JArray(JObject.Parse("""{"kind":"autoconnect_break","position":[64,64]}"""));
+
+        JObject result = creator.Execute();
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal("placement_only", (string?)result["coverage"]);
+        Assert.Single(result["actualPlacements"]!);
+    }
+
+    [Fact]
+    public void AutoconnectBreak_WithGeneration_IsRefused()
+    {
+        var creator = new Creator();
+        creator.Fixture.Request["items"] = new JArray(JObject.Parse("""{"kind":"autoconnect_break","position":[64,64]}"""));
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => creator.Execute());
+
+        Assert.Contains("generate:false", error.Error.Message, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData(true)]
@@ -79,13 +105,13 @@ public sealed class ConnectionDeferredGenerationTests
         Assert.False(result.ContainsKey("interruptionScope"));
     }
 
-    /// <summary>Agent eval 2026-11-05: EPLAN stores a bare 24V as =-24V, so a short name takes the page's structure before writing.</summary>
+    /// <summary>PDF redraw 2026-11-06: =GAA-2L1 on =GAA+A1 shows -2L1; a location in the tag makes EPLAN show the full name.</summary>
     [Theory]
-    [InlineData("24V", "=F+A1-24V")]
-    [InlineData("-24V", "=F+A1-24V")]
+    [InlineData("24V", "=F-24V")]
+    [InlineData("-24V", "=F-24V")]
     [InlineData("=G+B2-24V", "=G+B2-24V")]
     [InlineData("+B2-24V", "+B2-24V")]
-    public void InterruptionName_ShortFormsTakeThePageStructure(string requested, string planned)
+    public void InterruptionName_ShortFormsTakeTheHigherLevelFunction(string requested, string planned)
     {
         var creator = new Creator();
         creator.Fixture.Symbols.Add(ConnectionCreateFixture.Variant("BP", "InterruptionPoint", 0, "Up"));

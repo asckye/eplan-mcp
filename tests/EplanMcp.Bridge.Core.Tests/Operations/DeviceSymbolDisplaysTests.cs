@@ -72,6 +72,15 @@ public sealed class DeviceSymbolDisplaysTests
     };
 
     [Fact]
+    public void Verify_CalculatedAddressMayDifferFromTheManualName()
+    {
+        // 20403 is EPLAN's calculated value: the sensor tag, or the address when none is found.
+        List<DeviceSymbolDisplay> displays = Displays();
+        displays[1].Text = "I0.0";
+        Verify(displays);
+    }
+
+    [Fact]
     public void Verify_NativeCalculatedAddressAndEmptyReference_AllowsDefaultsAndEnumerationOrder()
     {
         List<DeviceSymbolDisplay> displays = Displays();
@@ -103,7 +112,6 @@ public sealed class DeviceSymbolDisplaysTests
     [InlineData("position")]
     [InlineData("format")]
     [InlineData("address")]
-    [InlineData("calculated")]
     [InlineData("text")]
     [InlineData("reference")]
     [InlineData("nonfinite")]
@@ -136,9 +144,6 @@ public sealed class DeviceSymbolDisplaysTests
                 break;
             case "address":
                 displays[0].Text = "";
-                break;
-            case "calculated":
-                displays[1].Text = _plc.ManualSymbolicAddress!;
                 break;
             case "text":
                 displays[2].Text = "";

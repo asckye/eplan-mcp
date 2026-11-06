@@ -387,6 +387,29 @@
               "additionalProperties": false,
               "properties": {
                 "kind": {
+                  "const": "autoconnect_break"
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "kind",
+                "position"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
                   "type": "string",
                   "const": "cable_definition"
                 },

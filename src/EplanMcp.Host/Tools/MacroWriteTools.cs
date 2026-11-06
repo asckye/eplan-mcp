@@ -45,7 +45,7 @@ internal sealed class MacroWriteTools
         [AllowedValues("number", "keep")] string numbering = "number",
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
-        [AllowedValues("MultiLine", "Overview")] string representation = "MultiLine",
+        [AllowedValues("MultiLine", "Overview", "SingleLine")] string representation = "MultiLine",
         string? part = null,
         string? part_variant = null,
         bool macro_box = true,

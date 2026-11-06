@@ -95,6 +95,25 @@ public sealed class CableDefinitionPlannerTests
     }
 
     [Fact]
+    public void CrossSectionText_AndCoreLabelsOnly_TravelWithTheDefinition()
+    {
+        // PDF redraw: the definition shows "0,75" as the drawing writes it, and the cores carry only their labels.
+        var f = new CableDefinitionFixture();
+        f.Cable["cross_section_text"] = "0,75";
+        f.Cable["core_labels_only"] = true;
+        JToken definition = Assert.Single((JArray)f.Plan()["cableDefinitions"]!);
+        Assert.Equal(("0,75", true), ((string?)definition["cross_section_text"], (bool?)definition["core_labels_only"]));
+    }
+
+    [Fact]
+    public void CoreLabelsOnly_MustBeABoolean()
+    {
+        var f = new CableDefinitionFixture();
+        f.Cable["core_labels_only"] = "yes";
+        Assert.Contains("core_labels_only", Assert.Throws<BridgeErrorException>(() => f.Plan()).Error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SameCallWire_ForwardReference_PredictsExplicitCoreWithoutWriting()
     {
         var f = new CableDefinitionFixture();

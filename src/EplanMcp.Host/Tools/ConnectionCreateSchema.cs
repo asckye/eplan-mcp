@@ -49,7 +49,10 @@ internal static class ConnectionCreateSchema
         JsonObject core = Object(new() { ["connection"] = reference, ["label"] = Text(32), ["colour"] = new JsonObject { ["enum"] = new JsonArray("BK", "BN", "RD", "OG", "YE", "GN", "BU", "VT", "GY", "WH", "PK", "TQ", "GNYE") } });
         JsonObject cable = Object(new() { ["kind"] = Kind("cable_definition"), ["points"] = Array(Point(), 2, 2), ["designation"] = Text(128), ["type_text"] = Text(), ["core_count"] = Integer(1, 50), ["cross_section_mm2"] = new JsonObject { ["type"] = "number", ["exclusiveMinimum"] = 0 }, ["cores"] = Array(core, 1, 50) });
         cable["properties"]!["voltage"] = Text(64);
-        JsonObject items = Array(new() { ["oneOf"] = new JsonArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, cable, definition, potential) }, 1, 50);
+        cable["properties"]!["cross_section_text"] = Text(32);
+        cable["properties"]!["core_labels_only"] = new JsonObject { ["type"] = "boolean" };
+        core["required"] = new JsonArray("connection", "label");
+        JsonObject items = Array(new() { ["oneOf"] = new JsonArray(wire, Node("corner", 2), tNode, Node("potential_point", 1), interruption, Object(new() { ["kind"] = Kind("autoconnect_break"), ["position"] = Point() }), cable, definition, potential) }, 1, 50);
         items["items"]!["type"] = "object";
         items["items"]!["additionalProperties"] = true; // Each alternative below enforces its own closed member set.
         foreach (JsonNode? branch in items["items"]!["oneOf"]!.AsArray())

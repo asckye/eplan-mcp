@@ -25,8 +25,8 @@ internal static class DevicePlcPlan
     {
         if (args.PlcPlugDesignation is { } plug && (args.PlcConnectionPoint is null || string.IsNullOrWhiteSpace(plug) || plug.Length > 64 || plug.Any(char.IsControl)))
         { throw WriteArguments.Invalid(["/plc_plug_designation: require a complete PLC source and 1..64 nonblank characters without controls."]); }
-        if (args.PlcText is { } text && TextLanguages.Stored(text).Count > 0)
-        { throw WriteArguments.Invalid(["/plc_text: use plain language-independent text (??_??), without serialized language entries; do not mix it with real languages (A54)."]); }
+        if (args.PlcText is { } text && TextLanguages.Stored(text).Count > 0 && !TextLanguages.IsSerialized(text))
+        { throw WriteArguments.Invalid(["/plc_text: use plain language-independent text (??_??) or only real languages such as zh_CN@text;en_US@text; do not mix them (A54)."]); }
         if (args.PlcConnectionPoint is null && args.PlcAddress is null && args.PlcSymbolicAddress is null && args.PlcText is null)
         { return; }
         if (args.Part is not null || args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null

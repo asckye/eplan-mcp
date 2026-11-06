@@ -67,13 +67,13 @@ internal sealed class MacroInsertRequest
         string numbering = string.IsNullOrWhiteSpace(args.Numbering) ? "number" : args.Numbering!.Trim();
         bool number = string.Equals(numbering, "number", StringComparison.OrdinalIgnoreCase);
         string representation = string.IsNullOrWhiteSpace(args.Representation) ? MultiLine : args.Representation!.Trim();
-        representation = representation.Equals("Overview", StringComparison.OrdinalIgnoreCase) ? "Overview" : representation.Equals(MultiLine, StringComparison.OrdinalIgnoreCase) ? MultiLine : representation;
+        representation = representation.Equals("SingleLine", StringComparison.OrdinalIgnoreCase) ? "SingleLine" : representation.Equals("Overview", StringComparison.OrdinalIgnoreCase) ? "Overview" : representation.Equals(MultiLine, StringComparison.OrdinalIgnoreCase) ? MultiLine : representation;
         bool hasMacro = !string.IsNullOrWhiteSpace(args.Macro), hasPart = !string.IsNullOrWhiteSpace(args.Part);
         AddIf(violations, string.IsNullOrEmpty(args.Page), "'page' is required: a full page name such as =GAA+A1&EFS1/60, as eplan_page_list returns it.");
         AddIf(violations, hasMacro == hasPart, "'macro' is required when 'part' is omitted; supply exactly one of 'macro' and 'part'.");
         AddIf(violations, hasPart && args.Part!.Any(char.IsControl), "'part' must be a part number without control characters.");
         AddIf(violations, args.PartVariant is not null && !hasPart, "'part_variant' requires 'part'.");
-        AddIf(violations, representation is not MultiLine and not "Overview", "'representation' must be MultiLine or Overview.");
+        AddIf(violations, representation is not MultiLine and not "Overview" and not "SingleLine", "'representation' must be MultiLine, Overview or SingleLine.");
         AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
         AddIf(violations, args.Variant < 0, "'variant' must be 0 or more: a variant number that eplan_macro_get lists.");
         AddIf(violations, !number && !string.Equals(numbering, "keep", StringComparison.OrdinalIgnoreCase), "'numbering' must be number or keep.");
@@ -266,7 +266,7 @@ internal sealed class MacroInsertRequest
     }
     internal static IEnumerable<string> RepresentationProblems(MacroTargetPage page, MacroContent content, string representation, int variant)
     {
-        string pageType = representation == "Overview" ? "Overview" : "Circuit";
+        string pageType = representation == "Overview" ? "Overview" : representation == "SingleLine" ? "CircuitSingleLine" : "Circuit";
         if (page.Type != pageType)
         { yield return $"'page' must be {pageType} for {representation}, but '{page.Name}' is {page.Type}."; }
         List<int>? variants = content.Representations.FirstOrDefault(r => r.Key == representation).Value;

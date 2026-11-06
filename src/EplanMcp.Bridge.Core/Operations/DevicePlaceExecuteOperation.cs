@@ -110,7 +110,8 @@ public sealed class DevicePlaceExecuteOperation(
             return result.Result;
         }
 
-        Committed<PlacedDevice> committed = TransactionRunner.Run(transactions, Tool, () =>
+        ITransactionScopeFactory scopes = args.TerminalStrip is not null && placer is IDeviceStripTransactions strips ? strips.StripTransactions(request.Project.Path) : transactions;
+        Committed<PlacedDevice> committed = TransactionRunner.Run(scopes, Tool, () =>
         {
             PlacedDevice data = Place(request, args);
             request.LayoutWarnings.AddRange(LayoutGuard.AfterWriting(request.Page.Layout!));
@@ -158,7 +159,7 @@ public sealed class DevicePlaceExecuteOperation(
             || args.PlcPlugDesignation is not null && channel.PlugDesignation != args.PlcPlugDesignation
             || args.PlcAddress is not null && channel.Address != args.PlcAddress
             || args.PlcSymbolicAddress is not null && channel.ManualSymbolicAddress != args.PlcSymbolicAddress
-            || args.PlcText is not null && channel.Text != args.PlcText))
+            || args.PlcText is not null && !TextLanguages.ReadsBackAs(args.PlcText, channel.Text)))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "PLC point identity, owner, plug, address or text readback differs; nothing was committed."); }
         if (args.LocationBox is not null && (data.LocationBox is not { } box || box.Structure != args.LocationBox
             || box.Outline != "dashed" || box.AffectedDevices.Length != 0 || !box.Bounds.SequenceEqual(new[] { args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value })))
@@ -168,7 +169,7 @@ public sealed class DevicePlaceExecuteOperation(
         if (args.TerminalStrip is not null && (data.Terminal is not { } terminal || !DevicePlaceRequest.SameName(tag, data.Tag) || data.Page != page
             || !DevicePlaceRequest.SameName(tag.Substring(0, tag.LastIndexOf(':')), terminal.Strip) || terminal.Owner is not null && terminal.Owner != terminal.Strip || terminal.Number != args.TerminalNumber
             || !terminal.Position.SequenceEqual(new[] { args.X, args.Y }) || args.TerminalStripPosition is { } position
-                && (terminal.StripPosition is null || !terminal.StripPosition.SequenceEqual(position) || terminal.StripText != args.TerminalStripText)))
+                && (terminal.StripPosition is null || !terminal.StripPosition.SequenceEqual(position) || !TextLanguages.ReadsBackAs(args.TerminalStripText!, terminal.StripText))))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Terminal identity, ownership or position differs; nothing was committed."); }
         if (args.DisplayProperties is { Count: > 0 })
         { DeviceSymbolDisplays.Verify(args, tag, page, data.Plc, session.ReadDisplays()); }
@@ -195,7 +196,9 @@ public sealed class DevicePlaceExecuteOperation(
         }
 
         // A82: PLC template functions carry the device tag followed by a connection-point suffix.
-        bool Belongs(string name) => placed.Terminal is not null ? DevicePlaceRequest.SameName(request.Tag, name) : string.Equals(name, request.Tag, StringComparison.Ordinal) || name.StartsWith(request.Tag + ":", StringComparison.Ordinal);
+        string tag = DevicePlaceRequest.WithoutEmptyFunction(request.Tag);
+        bool Belongs(string name) => placed.Terminal is not null ? DevicePlaceRequest.SameName(request.Tag, name)
+            : DevicePlaceRequest.WithoutEmptyFunction(name) is var own && (own == tag || own.StartsWith(tag + ":", StringComparison.Ordinal));
         // Live 2026-11-03 (A85): before the commit the other functions' wrappers still show the old tag; they are read again by
         // the new tag after the commit, where every function must carry it.
         string? other = committed ? placed.Names.FirstOrDefault(name => !Belongs(name)) : null;

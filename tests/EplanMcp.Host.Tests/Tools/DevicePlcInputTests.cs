@@ -33,8 +33,8 @@ public sealed class DevicePlcInputTests
     [Theory]
     [InlineData("??_??@Start;en_US@Start;")]
     [InlineData("en_US@Start;??_??@Start;")]
-    [InlineData("en_US@Start;")]
-    public void FunctionTexts_SerializedLanguageEntries_AreRejectedBeforeCallingTheBridge(string raw)
+    [InlineData("en_US@Start")]
+    public void FunctionTexts_MixedOrUnclosedLanguageEntries_AreRejectedBeforeCallingTheBridge(string raw)
     {
         DevicePlaceArgs plc = Args();
         plc.PlcText = raw;

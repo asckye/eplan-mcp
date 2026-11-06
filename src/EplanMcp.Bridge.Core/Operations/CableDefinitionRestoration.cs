@@ -19,10 +19,11 @@ internal static class CableDefinitionRestoration
         var pins = scene.Pins.ToDictionary(p => p.Key, p =>
         {
             string[] parts = p.Key.Split('/');
-            return new JArray(owners[string.Join("/", parts.Take(2))], parts.Last(), BridgeJson.FromObject(p.Value)).ToString(Formatting.None);
+            return new JArray(owners.TryGetValue(string.Join("/", parts.Take(2)), out string? owner) ? owner : "<grouped>", parts.Last(), BridgeJson.FromObject(p.Value)).ToString(Formatting.None);
         }, StringComparer.Ordinal);
-        string? Pin(string? key) => key is null ? null : pins.TryGetValue(key, out string? value) ? value
-            : throw new InvalidOperationException("Restoration endpoint has no pin geometry: " + key);
+        // PDF redraw 2026-11-06: a converter macro's inner point or a point on another page has no pin here. Its identifier may change
+        // on undo, so only the fact is compared; the failure used to report an unknown outcome although nothing had started.
+        string? Pin(string? key) => key is null ? null : pins.TryGetValue(key, out string? value) ? value : "<no geometry>";
         JArray Sorted(IEnumerable<string?> values) => new(values.OrderBy(v => v, StringComparer.Ordinal));
         string Pair(IEnumerable<string?> keys) => Sorted(keys.Select(Pin)).ToString(Formatting.None);
         return new JObject

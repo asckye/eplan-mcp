@@ -6,16 +6,31 @@
 ## [Unreleased]
 
 ### 新增
+- `eplan_report_create` 新增类型 `InterconnectDiagram`（电缆图，F09 表格）；表格不在项目里时自动从系统表格目录复制。
+- `eplan_connection_create` 的 `cable_definition` 新增 `cross_section_text`、`core_labels_only`，芯线的 `colour` 改为可选。
+- `eplan_device_place` 新增 `location_box_polyline`（`SPECIAL/SC2`）；`eplan_macro_insert` 的 `representation` 支持 `SingleLine`；`eplan_placement_create` 可以写到单线页。
+- `eplan_language_set` 新增 `show_missing_translation`，控制缺译文时是否显示占位符。
+- `eplan_connection_create` 新增 `autoconnect_break`（`SPECIAL/ACBP`）：对应 EPLAN 插入菜单的中断自动连线，打印时不可见，阻止不需要的自动连线。
+- `eplan_device_place` 的 `plc_text`、`terminal_strip_text` 接受多语言写法 `zh_CN@文字;en_US@text;`，标识可以只有位置（如 `+F1`）。
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
 ### 修复
+- 从部件放端子时，新建端子排不再报 `LOCK_FAILED`，端子排名称也只在第一个端子上显示。
+- 设备改名保留前缀（`-5Q1` 不再变成 `-Q1`）；没有高层代号的页上，`=+S1-5Q1` 和 `+S1-5Q1` 按同一标识校验。
+- 不含结构的标识格式下，中断点名称不再多出一个 `-`。
+- 原理图上的 PLC 点使用总览同名点的功能定义，总览不再出现空行。
 - `eplan_device_place` 放置失败时改用撤销回滚：之前报告已回滚，器件却可能留在页面上；读回不符时说明是哪一项不符。
 - `eplan_page_get` 的绘图项先列符号和图形，属性文字放在后面，不再占满预算；`eplan_context_get` 的 `scope` 可省略。
 - `eplan_plc_get` 的 `symbolicAddress` 优先返回手工填写的符号地址；`eplan_page_review` 不再把浮点误差造成的边缘相接报成重叠。
 - `eplan_symbol_search` 没有匹配时提示描述按项目显示语言比较；工具用法说明写明对齐的连接点由 EPLAN 自动连线，之后调用 `eplan_connection_generate`。
-- `eplan_connection_create` 的中断点接受短名称：`24V`、`-24V` 取本页结构，`=F+A1-24V` 按原样写入。之前短名称读回不一致，且失败后中断点留在页上，工具报 `OUTCOME_UNKNOWN` 并暂停之后的写入。
+- `eplan_connection_create` 的中断点接受短名称：`24V`、`-24V` 取本页高层代号，`=F-24V` 按原样写入。之前短名称读回不一致，且失败后中断点留在页上，工具报 `OUTCOME_UNKNOWN` 并暂停之后的写入。
 - `eplan_connection_create` 放置中断点失败时改用撤销回滚，`Transaction.Abort` 留下的对象不再残留；`OUTCOME_UNKNOWN` 的消息同时说明写入失败和回滚核对失败的原因。
 - `eplan_placement_create` 创建块时在规划阶段拒绝 Function 成员，避免 EPLAN 静默丢弃符号。
+- `eplan_device_place` 和 `eplan_device_update` 改名时保留标识前缀：`-5Q1` 之前会变成 `-Q1`。没有高层代号的页上，按部件放置和端子放置不再把 `=+S1-5Q1` 误报成名称不符。
+- `eplan_device_place` 放 PLC 点时沿用总览点的功能定义，输出通道才能和总览配对、显示 `&EFA1/4.2` 这样的引用。
+- `eplan_device_update` 能把宏带来的、还没有主功能的 PLC 盒和连接点并入总览的 PLC 盒。
+- `eplan_connection_create` 支持中断点不带结构的项目（如 EES 基本项目），之前 `=-L1` 被存成 `-=-L1`。
+- `eplan_macro_insert` 的说明改正：`x`、`y` 放的是宏的 `reference_point`，不一定是外框左上角。
 
 ### Changed
 

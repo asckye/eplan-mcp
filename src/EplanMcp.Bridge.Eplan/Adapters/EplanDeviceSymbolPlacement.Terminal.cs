@@ -11,7 +11,11 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanDeviceSymbolPlacement
 {
-    internal DevicePlaceData CreateTerminal(DevicePlaceArgs args, string tag, Project project, Page page, SymbolVariant variant, Terminal? placed = null)
+    /// <summary>
+    /// Finds the terminal's strip or creates it with its text and position, inside a Transaction (A13: Function.Create
+    /// always fails in a SafetyPoint). A terminal placed from its part then joins the strip by name, as on an existing strip.
+    /// </summary>
+    internal static (TerminalStrip Strip, bool Created) PrepareStrip(DevicePlaceArgs args, string tag, Project project, Page page)
     {
         MainThread.Assert();
         string name = tag.Substring(0, tag.LastIndexOf(':'));
@@ -43,6 +47,44 @@ internal sealed partial class EplanDeviceSymbolPlacement
             strip.IsMainFunction = true;
             strip.Name = name;
         }
+#pragma warning restore CA2000
+        if (args.TerminalStripText is { } text)
+        {
+            CheckTerminal(create, "strip text is only set on a new strip");
+            using TerminalStripPropertyListComplete properties = strip.Properties;
+            using var multilingual = new MultiLangString();
+            if (TextLanguages.IsSerialized(text))
+            { multilingual.SetAsString(text); }
+            else
+            { multilingual.AddString(ISOCode.Language.L___, text); }
+            properties.FUNC_TEXT = multilingual;
+            using PropertyValue value = properties.FUNC_TEXT;
+            CheckTerminal(!value.IsEmpty, "strip text is empty after writing");
+            using MultiLangString actual = value.ToMultiLangString();
+            string read = TextLanguages.IsSerialized(text) ? actual.GetAsString() : actual.GetStringToDisplay(ISOCode.Language.L___);
+            CheckTerminal(TextLanguages.ReadsBackAs(text, read), "strip text reads back as '" + read + "'");
+        }
+        // Customer redraw 2026-11-02: the strip definition keeps its symbol's default property arrangement ("-X6 =
+        // text"); it only lacked a visible name. Creating or undocking texts switched it to a user-defined arrangement.
+        if (args.TerminalStripPosition is { } expected)
+        {
+            CheckTerminal(create && strip.IsPlaced && strip.Page.Name == page.Name && strip.Location.X == expected[0] && strip.Location.Y == expected[1], "strip definition page or position differs");
+            EplanVisibleNames.Adjust(page, strip);
+        }
+        return (strip, create);
+    }
+
+    private DevicePlaceData CreateTerminal(DevicePlaceArgs args, string tag, Project project, Page page, SymbolVariant variant)
+    {
+        (TerminalStrip strip, bool create) = PrepareStrip(args, tag, project, page);
+        return CreateTerminal(args, tag, project, page, variant, strip, create);
+    }
+
+    internal DevicePlaceData CreateTerminal(DevicePlaceArgs args, string tag, Project project, Page page, SymbolVariant variant, TerminalStrip strip, bool create, Terminal? placed = null)
+    {
+        MainThread.Assert();
+        string name = tag.Substring(0, tag.LastIndexOf(':'));
+#pragma warning disable CA2000 // A39/A55: persistent terminals belong to EPLAN, also after Abort.
         var terminal = placed ?? new Terminal();
 #pragma warning restore CA2000
         CheckTerminal(!strip.Terminals.Any(t => Same(tag.ToUpperInvariant(), t.Name.ToUpperInvariant())), "the strip already has this terminal");
@@ -56,26 +98,10 @@ internal sealed partial class EplanDeviceSymbolPlacement
         { terminal.Create(strip, page, variant); }
         terminal.Name = tag;
         terminal.Location = new PointD(args.X, args.Y);
+        // PDF redraw 2026-11-06: CreateDevice leaves its own visible name, which shows the strip on every terminal.
+        if (placed is not null)
+        { terminal.VisibleName = string.Empty; }
         EplanVisibleNames.Adjust(page, terminal);
-        if (args.TerminalStripText is { } text)
-        {
-            CheckTerminal(create, "strip text is only set on a new strip");
-            using TerminalStripPropertyListComplete properties = strip.Properties;
-            using var multilingual = new MultiLangString();
-            multilingual.AddString(ISOCode.Language.L___, text);
-            properties.FUNC_TEXT = multilingual;
-            using PropertyValue value = properties.FUNC_TEXT;
-            CheckTerminal(!value.IsEmpty, "strip text is empty after writing");
-            using MultiLangString actual = value.ToMultiLangString();
-            CheckTerminal(actual.GetStringToDisplay(ISOCode.Language.L___) == text, "strip text reads back as '" + actual.GetStringToDisplay(ISOCode.Language.L___) + "'");
-        }
-        // Customer redraw 2026-11-02: the strip definition keeps its symbol's default property arrangement ("-X6 =
-        // text"); it only lacked a visible name. Creating or undocking texts switched it to a user-defined arrangement.
-        if (args.TerminalStripPosition is { } expected)
-        {
-            CheckTerminal(create && strip.IsPlaced && strip.Page.Name == page.Name && strip.Location.X == expected[0] && strip.Location.Y == expected[1], "strip definition page or position differs");
-            EplanVisibleNames.Adjust(page, strip);
-        }
         if (args.PropertyArrangement is { } arrangement)
         { EplanSymbolArrangement.Select(terminal, arrangement); }
         // A55: release the cached list before TransactionRunner can Abort; never access these objects afterwards.
@@ -133,9 +159,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
     /// Live T7c: the sample project's structure settings leave the higher-level function out of terminal strip and
     /// terminal names (=GAA+A1-XT4 reads back as +A1-XT4). Only that leading segment may be missing.
     /// </summary>
-    private static bool Same(string requested, string actual) =>
-        requested == actual || (requested.Length > 0 && requested[0] == '=' && requested.EndsWith(actual, StringComparison.Ordinal)
-            && actual.Length > 0 && actual[0] is '+' or '-' && requested.Substring(0, requested.Length - actual.Length).IndexOfAny(['+', '-', ':', '&']) < 0);
+    private static bool Same(string requested, string actual) => DevicePlaceRequest.SameName(requested, actual);
 
     private static void CheckTerminal(bool matches, string what)
     {

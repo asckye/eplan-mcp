@@ -21,3 +21,9 @@ public interface IDevicePlacer
     /// <summary>Reacquires all functions by tag after commit; unplaced function IDs may change (A85).</summary>
     public void ReadCommitted(string projectPath, PlacedDevice result);
 }
+
+public interface IDeviceStripTransactions
+{
+    /// <summary>A13: a terminal strip definition cannot be created in a SafetyPoint; a terminal from its part runs in this Transaction scope.</summary>
+    public ITransactionScopeFactory StripTransactions(string projectPath);
+}

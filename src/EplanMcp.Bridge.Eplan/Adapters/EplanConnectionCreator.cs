@@ -26,7 +26,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     private static string Key(SymbolReference owner, int index) => FormattableString.Invariant($"{SnapshotCanonical.TypeOf(owner.ToStringIdentifier())}/{owner.ObjectIdentifier}/{index}");
     private static double[] XY(PointD point) => [point.X, point.Y];
     private static IEnumerable<SymbolVariant> Variants(string project) => EplanProjects.ByPath(project).SymbolLibraries.Where(l => l.Name == "SPECIAL")
-        .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP" || s.Type == Symbol.SymbolType.InterruptionPoint).SelectMany(s => s.Variants);
+        .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP" or "ACBP" || s.Type == Symbol.SymbolType.InterruptionPoint).SelectMany(s => s.Variants);
     public ConnectionCreatePlanner.Scene Read(string project, string page) => Read(project, page, []);
     public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(new EplanConnectionCreator(false).Read(project, page));
     internal ConnectionCreatePlanner.Scene Read(string project, string page, IReadOnlyList<Placement> created)
@@ -186,7 +186,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             {
                 if (expected["property_arrangement"] is { } arrangement && EplanSymbolArrangement.SelectedName(symbol) is { } selectedArrangement && selectedArrangement != arrangement.Value<string>())
                 { throw SymbolMismatch("created interruption arrangement changed"); }
-                if (symbol is not InterruptionPoint point || point.Name != (string)expected["name"]!)
+                if (symbol is not InterruptionPoint point || !DrawingNames.SameName((string)expected["name"]!, point.Name, page))
                 { throw SymbolMismatch("created interruption name changed"); }
                 if (expected["sort_code"] is { } sort)
                 {

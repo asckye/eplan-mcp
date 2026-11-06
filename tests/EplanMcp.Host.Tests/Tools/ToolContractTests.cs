@@ -80,7 +80,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.True(properties.GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.Equal("integer", properties.GetProperty("variant").GetProperty("type").GetString());
         Assert.Equal("MultiLine", properties.GetProperty("representation").GetProperty("default").GetString());
-        Assert.Equal(["MultiLine", "Overview"], properties.GetProperty("representation").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["MultiLine", "Overview", "SingleLine"], properties.GetProperty("representation").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
     }
 
     [Fact]
@@ -101,12 +101,12 @@ public sealed class ToolContractTests : IDisposable
         Assert.DoesNotContain(ConnectionCreateTools.Tool, ToolProfiles.Core);
         Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.InRange(tool.Description!.Length, 1, 600);
-        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5300);
+        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5650);
         Assert.Contains("string", tool.OutputSchema!.Value.GetProperty("properties").GetProperty("warning").GetProperty("type").ToString(), StringComparison.Ordinal);
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
         JsonElement itemBranches = tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("oneOf");
-        Assert.Equal(["wire", "corner", "t_node", "potential_point", "interruption_point", "cable_definition", "definition_point", "potential_definition"],
+        Assert.Equal(["wire", "corner", "t_node", "potential_point", "interruption_point", "autoconnect_break", "cable_definition", "definition_point", "potential_definition"],
             itemBranches.EnumerateArray().Select(b => b.GetProperty("properties").GetProperty("kind").GetProperty("const").GetString()));
         foreach (JsonElement branch in itemBranches.EnumerateArray())
         { Assert.False((branch.TryGetProperty("$ref", out _) ? tool.InputSchema.GetProperty("$defs").GetProperty("d") : branch).GetProperty("additionalProperties").GetBoolean()); }
@@ -391,7 +391,7 @@ public sealed class ToolContractTests : IDisposable
         JsonElement schema = tool.InputSchema;
         JsonElement properties = schema.GetProperty("properties");
         Assert.Equal(["project", "type", "form", "first_page"], schema.GetProperty("required").EnumerateArray().Select(r => r.GetString()));
-        Assert.Equal(["TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview"], Enum(properties.GetProperty("type")));
+        Assert.Equal(["TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "InterconnectDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview"], Enum(properties.GetProperty("type")));
         Assert.True(properties.GetProperty("dry_run").GetProperty("default").GetBoolean());
         Assert.False(properties.TryGetProperty("device_tag", out _));
         Assert.False(tool.Annotations!.ReadOnlyHint);
@@ -504,14 +504,14 @@ public sealed class ToolContractTests : IDisposable
         Assert.InRange(review.InputSchema.GetRawText().Length, 1, 3500);
         Tool connection = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
         Assert.InRange(connection.Description!.Length + Descriptions(connection.InputSchema), 1, 1000);
-        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 5300); // +cable voltage, customer redraw 2026-11-02
+        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 5650); // +cable voltage 2026-11-02, +autoconnect_break 2026-11-06
         Tool move = Tools.Single(t => t.Name == PlacementUpdateTools.Tool);
         Assert.InRange(move.Description!.Length, 1, 600);
         Assert.InRange(move.Description.Length + Descriptions(move.InputSchema), 1, 1000);
         Assert.InRange(move.InputSchema.GetRawText().Length, 1, 3000);
         Tool place = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
         Assert.InRange(place.Description!.Length + Descriptions(place.InputSchema), 1, 1000);
-        Assert.InRange(place.InputSchema.GetRawText().Length, 1, 3700);
+        Assert.InRange(place.InputSchema.GetRawText().Length, 1, 3750);
         Tool bind = Tools.Single(t => t.Name == CabinetTools.BindTool);
         Assert.InRange(bind.Description!.Length + Descriptions(bind.InputSchema), 1, 1000);
         Assert.InRange(bind.InputSchema.GetRawText().Length, 1, 4000);

@@ -12,8 +12,8 @@ internal static class DeviceTerminalPlan
         if (args.TerminalStripPosition is { } position && (args.TerminalStrip is null || args.TerminalStripText is null || position.Length != 2
             || position.Any(n => double.IsNaN(n) || double.IsInfinity(n) || n is < 0 or > 10000)))
         { throw WriteArguments.Invalid(["/terminal_strip_position: require a terminal source, new strip text and two finite page coordinates 0..10000 mm."]); }
-        if (args.TerminalStripText is { } raw && TextLanguages.Stored(raw).Count > 0)
-        { throw WriteArguments.Invalid(["/terminal_strip_text: use plain language-independent text (??_??), without serialized language entries; do not mix it with real languages (A54)."]); }
+        if (args.TerminalStripText is { } raw && TextLanguages.Stored(raw).Count > 0 && !TextLanguages.IsSerialized(raw))
+        { throw WriteArguments.Invalid(["/terminal_strip_text: use plain language-independent text (??_??) or only real languages such as zh_CN@text;en_US@text; do not mix them (A54)."]); }
         if (args.TerminalStrip is null)
         {
             if (args.TerminalNumber is not null || args.TerminalStripText is not null)
@@ -28,7 +28,8 @@ internal static class DeviceTerminalPlan
             || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.Part is not null && args.SymbolVariant is null))
         { throw WriteArguments.Invalid(["/library: terminal symbols require a complete library/symbol pair without controls."]); }
         if (args.TerminalStrip.Length is < 2 or > 128 || args.TerminalStrip.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == ':')
-            || args.TerminalStrip.LastIndexOf('-') < 0 || args.TerminalStrip[args.TerminalStrip.Length - 1] == '-')
+            // PDF redraw 2026-11-06: -X1- is a real strip name; only a name with nothing before its last '-' lacks an identifier.
+            || args.TerminalStrip.TrimEnd('-').LastIndexOf('-') < 0)
         { throw WriteArguments.Invalid(["/terminal_strip: require a short or full device tag, at most 128 characters, without whitespace, controls or colon."]); }
         if (args.TerminalNumber is not { Length: > 0 and <= 64 } number || number.Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.')))
         { throw WriteArguments.Invalid(["/terminal_number: require 1-64 letters, digits, '_' or '.'."]); }

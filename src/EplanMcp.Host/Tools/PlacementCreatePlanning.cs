@@ -13,8 +13,8 @@ namespace EplanMcp.Host.Tools;
 /// <summary>Read-only preview. Display language and absolute text outlines must come from trusted readers, never arguments.</summary>
 internal static class PlacementCreatePlanning
 {
-    internal static readonly string[] AllowedPageTypes = ["Circuit", "Overview", "Graphics"];
-    internal const string AllowedPageMessage = "/page requires a Circuit, Overview or Graphics page from eplan_page_list.";
+    internal static readonly string[] AllowedPageTypes = ["Circuit", "CircuitSingleLine", "Overview", "Graphics"];
+    internal const string AllowedPageMessage = "/page requires a Circuit, CircuitSingleLine, Overview or Graphics page from eplan_page_list.";
     private static readonly string[] _pointFields = ["position", "center", "first", "second", "end"];
     private static readonly string[] _pointArrayFields = ["points", "corners"];
     internal static async Task<CallToolResult> PreviewAsync(IBridgeClient bridge, JsonElement input, string? displayLanguage = null,

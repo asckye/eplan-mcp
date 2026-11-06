@@ -132,7 +132,10 @@ public static class CableDefinitionPlanner
             if ((string?)item["kind"] != "cable_definition")
             { continue; }
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
-            Members(item, at, "kind points designation type_text core_count cross_section_mm2 cores", "voltage");
+            Members(item, at, "kind points designation type_text core_count cross_section_mm2 cores", "voltage cross_section_text core_labels_only");
+            Require(item["core_labels_only"] is null || item["core_labels_only"]!.Type == JTokenType.Boolean, at + "/core_labels_only", "Supply a boolean.");
+            if (item["cross_section_text"] is not null)
+            { Text(item["cross_section_text"], at + "/cross_section_text", 32); }
             Require(item["points"] is JArray { Count: 2 }, at + "/points", "Supply the definition line's two points.");
             double[][] line = item["points"]!.Select((p, n) => point(p, at + "/points/" + n.ToString(CultureInfo.InvariantCulture))).ToArray();
             Require((line[0][0] == line[1][0]) != (line[0][1] == line[1][1]), at + "/points", "Supply a nonzero orthogonal definition line.");
@@ -149,12 +152,12 @@ public static class CableDefinitionPlanner
             foreach (JToken core in (JArray)item["cores"]!)
             {
                 string path = at + "/cores/" + ((JArray)item["cores"]!).IndexOf(core).ToString(CultureInfo.InvariantCulture);
-                Members(core, path, "connection label colour", "");
+                Members(core, path, "connection label", "colour");
                 string label = Text(core["label"], path + "/label", 32);
                 Require(label.All(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '0' and <= '9' or '_' or '.' or '-')
                     && (label[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z' || int.TryParse(label, NumberStyles.None, CultureInfo.InvariantCulture, out int number) && number >= 1 && number <= (int)item["core_count"]! && label == number.ToString(CultureInfo.InvariantCulture)), path + "/label", "Use a literal label or a canonical core number within the declared count.");
                 Require(keys.Add((designation, label)), path + "/label", "Duplicate cable designation + core label.");
-                Require(core["colour"]?.Type == JTokenType.String && Colours.Split(' ').Contains((string)core["colour"]!, StringComparer.Ordinal), path + "/colour", "Use an explicit colour code: " + Colours + ".");
+                Require(core["colour"] is null || core["colour"]!.Type == JTokenType.String && Colours.Split(' ').Contains((string)core["colour"]!, StringComparer.Ordinal), path + "/colour", "Use a colour code: " + Colours + ".");
                 Require(impact.Count < 50, path, "At most 50 cores are allowed across the entire call.");
                 Members(core["connection"], path + "/connection", core["connection"] is JObject connection && connection["item_index"] is not null ? "item_index" : "locator", "");
                 if (core["connection"]!["item_index"] is { } reference)
@@ -167,7 +170,7 @@ public static class CableDefinitionPlanner
                         && locator["oid"]?.Type == JTokenType.Integer && long.TryParse(locator["oid"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out long oid) && oid > 0
                         && locator["digest"]?.Type == JTokenType.String && ((string)locator["digest"]!).Length == 64 && ((string)locator["digest"]!).All(c => c is >= 'a' and <= 'f' or >= '0' and <= '9'), path + "/connection/locator", "Use an observed connection locator with positive type/oid and lowercase SHA-256 digest.");
                 }
-                impact.Add(new JObject { ["connection"] = core["connection"]!.DeepClone(), ["designation"] = designation, ["label"] = label, ["colour"] = core["colour"]!.DeepClone(), ["crossSectionMm2"] = item["cross_section_mm2"]!.DeepClone() });
+                impact.Add(new JObject { ["connection"] = core["connection"]!.DeepClone(), ["designation"] = designation, ["label"] = label, ["colour"] = core["colour"]?.DeepClone(), ["crossSectionMm2"] = item["cross_section_mm2"]!.DeepClone() });
             }
             var definition = (JObject)item.DeepClone();
             // Live T8b: EPLAN gives a cable no page structure (stored as +-W9), unlike devices; name it like a device on this page.

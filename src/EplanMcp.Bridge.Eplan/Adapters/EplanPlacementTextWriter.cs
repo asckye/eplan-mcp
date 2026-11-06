@@ -14,9 +14,9 @@ internal sealed partial class EplanPlacementTextWriter : IPlacementTextWriter
     {
         MainThread.Assert();
         EplanPlacementStyle.Validate(EplanProjects.ByPath(projectPath), text.Layer, text.Alignment);
-        DocumentTypeManager.DocumentType[] allowed = [DocumentTypeManager.DocumentType.Circuit, DocumentTypeManager.DocumentType.Overview, DocumentTypeManager.DocumentType.Graphics];
+        DocumentTypeManager.DocumentType[] allowed = [DocumentTypeManager.DocumentType.Circuit, DocumentTypeManager.DocumentType.CircuitSingleLine, DocumentTypeManager.DocumentType.Overview, DocumentTypeManager.DocumentType.Graphics];
         if (!allowed.Contains(Find(projectPath, page).PageType))
-        { throw WriteArguments.Invalid(["/page requires a Circuit, Overview or Graphics page from eplan_page_list."]); }
+        { throw WriteArguments.Invalid(["/page requires a Circuit, CircuitSingleLine, Overview or Graphics page from eplan_page_list."]); }
         if (text.Kind == "block" && text.Members is { } members)
         {
             Placement[] placements = Find(projectPath, page).AllPlacements;

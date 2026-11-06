@@ -67,8 +67,8 @@ public sealed class DevicePlcPlanTests
     [Theory]
     [InlineData("??_??@Start;en_US@Start;")]
     [InlineData("en_US@Start;??_??@Start;")]
-    [InlineData("en_US@Start;")]
-    public void FunctionTexts_SerializedLanguageEntries_AreRejectedAtBothWriteBoundaries(string raw)
+    [InlineData("en_US@Start")]
+    public void FunctionTexts_MixedOrUnclosedLanguageEntries_AreRejectedAtBothWriteBoundaries(string raw)
     {
         var plc = new DevicePlaceArgs { PlcText = raw };
         var strip = new DevicePlaceArgs { TerminalStripText = raw };
@@ -79,7 +79,8 @@ public sealed class DevicePlcPlanTests
     [Theory]
     [InlineData("Start input")]
     [InlineData("Contact a@b; start input")]
-    public void FunctionTexts_PlainIndependentText_IsAccepted(string text)
+    [InlineData("zh_CN@启动;en_US@Start;")]
+    public void FunctionTexts_PlainTextOrRealLanguages_AreAccepted(string text)
     {
         DevicePlcPlan.Check(new() { Library = "IEC_symbol", PlcConnectionPoint = "1", PlcAddress = "I0.0", PlcSymbolicAddress = "Start", PlcText = text });
         DeviceTerminalPlan.Check(new() { TerminalStrip = "-X1", TerminalNumber = "1", TerminalStripText = text });
@@ -124,5 +125,12 @@ public sealed class DevicePlcPlanTests
     [InlineData("=GAA+A1-KF1:X10:2", "+A1-KF1:X10:3", false)]
     [InlineData("=GAA+A1-KF1:X10:2", "=OTHER+A1-KF1:X10:2", false)]
     public void PlcIdentity_ToleratesOnlyTheMissingLeadingHigherLevelFunction(string requested, string actual, bool matches) =>
+        Assert.Equal(matches, DevicePlaceRequest.SameName(requested, actual));
+
+    [Theory]
+    [InlineData("+S1-5Q1", "=+S1-5Q1", true)]
+    [InlineData("-5Q1", "=-5Q1", true)]
+    [InlineData("+S1-5Q1", "=+S1-Q1", false)]
+    public void Identity_IgnoresAnEmptyLeadingFunction(string requested, string actual, bool matches) =>
         Assert.Equal(matches, DevicePlaceRequest.SameName(requested, actual));
 }

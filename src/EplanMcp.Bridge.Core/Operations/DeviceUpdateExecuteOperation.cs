@@ -103,7 +103,9 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
 
     private void VerifyRename(DeviceUpdateRequest request, RenameReadBack back)
     {
-        DeviceNames? actual = renamer.ReadDevice(request.Project.Path, request.NewTag);
+        // PDF redraw 2026-11-06: without a higher-level function EPLAN stores +F1-21BG1 as =+F1-21BG1; the empty '=' is the same tag.
+        DeviceNames? actual = renamer.ReadDevice(request.Project.Path, request.NewTag)
+            ?? (DevicePlaceRequest.WithoutEmptyFunction(back.MainName) == request.NewTag ? renamer.ReadDevice(request.Project.Path, back.MainName) : null);
         if (actual is null)
         {
             throw Misnamed(request, back.MainName);

@@ -27,8 +27,12 @@ internal sealed partial class EplanDeviceSymbolPlacement
         PLC[] cards = [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().OfType<PLC>().Where(p => p.IsMainFunction && DevicePlaceRequest.SameName(parent, p.Name))];
         Require(cards.Length == 1);
         _plcCardId = cards[0].ObjectIdentifier;
-        FunctionDefinition definition = project.FunctionDefinitionLibrary.FunctionDefinitions.Single(d => d.FunctionCategory == FunctionCategory.PLCTerminal
-            && FormattableString.Invariant($"{d.Group}/{d.Id}") == _symbol.PlcInputDefinition);
+        // PDF redraw 2026-11-06: EPLAN pairs a point with its overview point by card, function definition, plug and designation, so an
+        // output channel takes the definition of its overview point; a point without one stays the symbol's digital input.
+        using var twins = new FunctionsFilter { Name = tag, ExactNameMatching = true, FunctionCategory = FunctionCategory.PLCTerminal };
+        FunctionDefinition definition = EplanNativePreconditions.Valid(finder.GetFunctions(twins)).FirstOrDefault(f => f.FunctionCategory == FunctionCategory.PLCTerminal && f.IsPlaced && f.Page.PageType == DocumentTypeManager.DocumentType.Overview)?.FunctionDefinition
+            ?? project.FunctionDefinitionLibrary.FunctionDefinitions.Single(d => d.FunctionCategory == FunctionCategory.PLCTerminal
+                && FormattableString.Invariant($"{d.Group}/{d.Id}") == _symbol.PlcInputDefinition);
         Require(definition.ConnectionPoints.Length == _symbol.ConnectionPoints.Count);
         var terminal = new Terminal();
 #pragma warning restore CA2000
@@ -62,7 +66,10 @@ internal sealed partial class EplanDeviceSymbolPlacement
         if (args.PlcText is { } value)
         {
             using var text = new MultiLangString();
-            text.AddString(ISOCode.Language.L___, value);
+            if (TextLanguages.IsSerialized(value))
+            { text.SetAsString(value); }
+            else
+            { text.AddString(ISOCode.Language.L___, value); }
             properties.FUNC_TEXT = text;
         }
     }

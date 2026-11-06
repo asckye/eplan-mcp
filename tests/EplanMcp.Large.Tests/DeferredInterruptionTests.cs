@@ -32,12 +32,15 @@ public sealed class DeferredInterruptionTests(LiveEplan eplan, WriteHost host) :
             : new { kind = "interruption_point", name, position = new[] { 100, y }, direction, symbol, symbol_variant = variant };
         (bool ok, JsonElement result) = await eplan.CallOrErrorAsync("eplan_connection_create", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["generate"] = false, ["dry_run"] = false,
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["generate"] = false,
+            ["dry_run"] = false,
             ["items"] = new[] { Item("24V" + suffix, 250, top), Item("-0V" + suffix, 130, bottom) },
         });
         TestContext.Current.TestOutputHelper?.WriteLine("result: " + result.GetRawText());
         Assert.True(ok, result.GetRawText());
-        string structure = page[..page.IndexOf('&', StringComparison.Ordinal)];
+        string structure = "=" + page[1..page.IndexOf('+', StringComparison.Ordinal)];
         Assert.Equal([structure + "-0V" + suffix, structure + "-24V" + suffix],
             result.GetProperty("symbols").EnumerateArray().Select(s => s.GetProperty("interruption").GetProperty("name").GetString()!).Order(StringComparer.Ordinal));
         JsonElement drawn = await eplan.CallAsync("eplan_object_find", new() { ["project"] = session.Project, ["page"] = page, ["object_type"] = "InterruptionPoint" });
@@ -60,7 +63,10 @@ public sealed class DeferredInterruptionTests(LiveEplan eplan, WriteHost host) :
         string before = (await session.SnapshotAsync(page)).Hash;
         (bool ok, JsonElement error) = await eplan.CallOrErrorAsync("eplan_connection_create", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["generate"] = generate, ["dry_run"] = false,
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["generate"] = generate,
+            ["dry_run"] = false,
             ["items"] = new[] { new { kind = "interruption_point", name = "BAD" + suffix, position = _top, direction = "Down", property_arrangement = "No such arrangement" } },
         });
         TestContext.Current.TestOutputHelper?.WriteLine("result: " + error.GetRawText());
@@ -70,7 +76,10 @@ public sealed class DeferredInterruptionTests(LiveEplan eplan, WriteHost host) :
         Assert.Equal(before, (await session.SnapshotAsync(page)).Hash);
         (bool next, JsonElement placed) = await eplan.CallOrErrorAsync("eplan_connection_create", new()
         {
-            ["project"] = session.Project, ["page"] = page, ["generate"] = false, ["dry_run"] = false,
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["generate"] = false,
+            ["dry_run"] = false,
             ["items"] = new[] { new { kind = "interruption_point", name = "NEXT" + suffix, position = _top, direction = "Down" } },
         });
         Assert.True(next, placed.GetRawText());
@@ -82,8 +91,15 @@ public sealed class DeferredInterruptionTests(LiveEplan eplan, WriteHost host) :
         {
             (bool placed, JsonElement device) = await eplan.CallOrErrorAsync("eplan_device_place", new()
             {
-                ["project"] = session.Project, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = name, ["symbol_variant"] = 0,
-                ["x"] = 100, ["y"] = y, ["tag"] = tag + "X" + suffix, ["dry_run"] = false,
+                ["project"] = session.Project,
+                ["page"] = page,
+                ["library"] = "IEC_symbol",
+                ["symbol"] = name,
+                ["symbol_variant"] = 0,
+                ["x"] = 100,
+                ["y"] = y,
+                ["tag"] = tag + "X" + suffix,
+                ["dry_run"] = false,
             });
             Assert.True(placed, device.GetRawText());
         }

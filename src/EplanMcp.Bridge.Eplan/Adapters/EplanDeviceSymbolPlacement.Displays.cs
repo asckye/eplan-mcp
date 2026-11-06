@@ -66,7 +66,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
             channel.Owner = card!.Name;
             Require((args.PlcAddress is null || channel.Address == args.PlcAddress)
                 && (args.PlcSymbolicAddress is null || channel.ManualSymbolicAddress == args.PlcSymbolicAddress)
-                && (args.PlcText is null || channel.Text == args.PlcText)
+                && (args.PlcText is null || TextLanguages.ReadsBackAs(args.PlcText, channel.Text))
                 && (args.PlcPlugDesignation is null || channel.PlugDesignation == args.PlcPlugDesignation));
             data.Plc = channel;
 

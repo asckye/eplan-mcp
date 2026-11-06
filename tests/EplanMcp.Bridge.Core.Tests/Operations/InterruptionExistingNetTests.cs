@@ -189,10 +189,11 @@ public sealed class InterruptionExistingNetTests
                 ["counterpart_pages"] = new JArray(InterruptionPointFixture.PeerPage),
             });
             JObject point = InterruptionPointFixture.Point(ConnectionCreateFixture.PageName, 1000 + _points.Count, at, direction);
-            point["name"] = name;
+            // The planner gives a short name this page's higher-level function, as EPLAN stores it.
+            point["name"] = "=F-" + name;
             _points.Add(point);
             _added.Add([at, to]);
-            Generated.Add([device, InterruptionPointPlanning.Endpoint(ConnectionCreateFixture.PageName, name)]);
+            Generated.Add([device, InterruptionPointPlanning.Endpoint(ConnectionCreateFixture.PageName, "=F-" + name)]);
         }
         internal JObject Plan() => ConnectionCreatePlanner.Plan(Fixture.Request.ToString(), Fixture.Scene, this);
         internal JObject Execute() => Assert.IsType<JObject>(new OperationContext("live-rehearsal", true, null).Run(() =>
@@ -204,7 +205,7 @@ public sealed class InterruptionExistingNetTests
         {
             foreach (JToken row in symbols.Where(s => s["interruption"] is not null))
             {
-                JToken point = _points.Single(p => (string?)p["name"] == (string?)row["interruption"]!["name"]);
+                JToken point = _points.Single(p => DrawingNames.SameName((string)row["interruption"]!["name"]!, (string)p["name"]!, ConnectionCreateFixture.PageName));
                 point["position"] = row["position"]!.DeepClone();
             }
             State = 1;

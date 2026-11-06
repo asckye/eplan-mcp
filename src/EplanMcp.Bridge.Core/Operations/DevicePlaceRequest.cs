@@ -141,7 +141,7 @@ internal sealed class DevicePlaceRequest
         [
             .. (box ? page.LocationBoxStructures : terminal || args.PlcConnectionPoint is not null ? existing : names.FunctionNames(project.Path))
                 .Where(n => full.Length > 0 && ((box || terminal || args.PlcConnectionPoint is not null
-                    ? SameName(full, n, ignoreCase: true) : string.Equals(full, n, StringComparison.OrdinalIgnoreCase)) || n.StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
+                    ? SameName(full, n, ignoreCase: true) : string.Equals(full, WithoutEmptyFunction(n), StringComparison.OrdinalIgnoreCase)) || WithoutEmptyFunction(n).StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
         if (args.JoinDevice == true && taken.FirstOrDefault(n => SameName(full, n, ignoreCase: true)) is { } joinedTag)
@@ -206,7 +206,7 @@ internal sealed class DevicePlaceRequest
         {
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
-                Tag.StartsWith("+", StringComparison.Ordinal) ? "A location box already uses this structure on the page; choose another location_box identifier." : $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
+                Tag.StartsWith("+", StringComparison.Ordinal) && Tag.IndexOf('-') < 0 ? "A location box already uses this structure on the page; choose another location_box identifier." : $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = Project.Name, ["existing"] = string.Join("\n", Taken.Take(ProjectResolver.MaxCandidates)) });
         }
@@ -280,7 +280,8 @@ internal sealed class DevicePlaceRequest
         tag.Length == 0 ? "is required: from '-' (-KF20) for the page's structure, or in full (=GAA+A1-KF20)."
         : tag.Any(c => char.IsWhiteSpace(c) || char.IsControl(c)) ? "must not contain white space or control characters."
         : tag.IndexOf(':') >= 0 ? "must not contain ':'; connection point suffixes are EPLAN's."
-        : tag.LastIndexOf('-') is int dash && (dash < 0 || dash == tag.Length - 1) ? "needs a device part after '-', such as -KF20."
+        // PDF redraw 2026-11-06: a device can have only a location, as the heaters named +F1 in a location box.
+        : tag.TrimEnd('-').LastIndexOf('-') < 0 && (tag[0] is not ('+' or '=') || tag.IndexOf('-') >= 0) ? "needs a device part after '-', such as -KF20."
         : null;
 
     private static bool Finite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
@@ -297,11 +298,15 @@ internal sealed class DevicePlaceRequest
     /// Live T7c: the project's structure settings can drop the higher-level function from strip and terminal names
     /// (=GAA+A1-XT3 is stored as +A1-XT3). Only that leading segment may be missing.
     /// </summary>
+    /// <summary>PDF redraw 2026-11-06: on a page without a higher-level function EPLAN stores +S1-K1 as =+S1-K1; the empty '=' adds nothing.</summary>
+    internal static string WithoutEmptyFunction(string name) => name.Length > 1 && name[0] == '=' && name[1] is '+' or '-' ? name.Substring(1) : name;
+
     internal static bool SameName(string requested, string? actual, bool ignoreCase = false)
     {
         if (actual is null)
         { return false; }
         StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        actual = WithoutEmptyFunction(actual);
         return string.Equals(requested, actual, comparison)
             || (requested.Length > 0 && requested[0] == '=' && actual.Length > 0 && actual[0] is '+' or '-'
                 && requested.EndsWith(actual, comparison) && requested.Substring(0, requested.Length - actual.Length).IndexOfAny(['+', '-', ':', '&']) < 0);

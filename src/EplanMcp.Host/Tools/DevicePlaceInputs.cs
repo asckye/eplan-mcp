@@ -43,7 +43,7 @@ internal static partial class DevicePlaceInputs
         schema["properties"]!["symbol_variant"]!["minimum"] = 0;
         schema["properties"]!["property_arrangement"]!["minLength"] = 1;
         schema["properties"]!["connection_designations"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
-        schema["properties"]!["connection_descriptions"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
+        schema["properties"]!["connection_descriptions"]!["items"] = JsonNode.Parse("""{"type":"string","maxLength":64}""");
         foreach (JsonObject property in schema["properties"]!.AsObject().Select(p => p.Value).OfType<JsonObject>())
         { if (property["default"] is null) { property.Remove("default"); } }
     }
@@ -59,16 +59,16 @@ internal static partial class DevicePlaceInputs
         { problems.Add("/display_properties: part templates accept symbol selection; display and pin overrides require the symbol route."); }
         if (DeviceJoinMode.Problem(args) is { } joinProblem)
         { problems.Add(joinProblem); }
-        if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Any(s => string.IsNullOrWhiteSpace(s) || s.Length > 64 || s.Any(char.IsControl))))
-        { problems.Add("/connection_descriptions: require a symbol source and nonempty text of at most 64 characters without controls per pin."); }
+        if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Any(s => s is null || s.Length > 64 || s.Any(char.IsControl))))
+        { problems.Add("/connection_descriptions: require a symbol source and text of at most 64 characters without controls per pin; empty leaves a pin without one."); }
         if (args.TerminalStripPosition is { } position && (args.TerminalStrip is null || args.TerminalStripText is null || position.Length != 2 || position.Any(n => !double.IsFinite(n) || n is < 0 or > 10000)))
         { problems.Add("/terminal_strip_position: require a terminal source, new strip text and two finite page coordinates 0..10000 mm."); }
         if (args.PlcPlugDesignation is { } plug && (args.PlcConnectionPoint is null || string.IsNullOrWhiteSpace(plug) || plug.Length > 64 || plug.Any(char.IsControl)))
         { problems.Add("/plc_plug_designation: require a complete PLC source and 1..64 nonblank characters without controls."); }
         foreach ((string field, string? text) in new[] { ("plc_text", args.PlcText), ("terminal_strip_text", args.TerminalStripText) })
         {
-            if (text is not null && StoredLanguage().IsMatch(text))
-            { problems.Add("/" + field + ": use plain language-independent text (??_??), without serialized language entries; do not mix it with real languages (A54)."); }
+            if (text is not null && StoredLanguage().IsMatch(text) && !SerializedLanguages().IsMatch(text))
+            { problems.Add("/" + field + ": use plain language-independent text (??_??) or only real languages such as zh_CN@text;en_US@text; do not mix them (A54)."); }
         }
         if (args.PlcConnectionPoint is not null || args.PlcAddress is not null || args.PlcSymbolicAddress is not null || args.PlcText is not null)
         {
@@ -87,7 +87,7 @@ internal static partial class DevicePlaceInputs
                 || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.Part is not null && args.SymbolVariant is null))
             { problems.Add("/library: terminal symbols require a complete library/symbol pair without controls."); }
             if (args.TerminalStrip.Length is < 2 or > 128 || args.TerminalStrip.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == ':')
-                || args.TerminalStrip.LastIndexOf('-') < 0 || args.TerminalStrip[args.TerminalStrip.Length - 1] == '-')
+                || args.TerminalStrip.TrimEnd('-').LastIndexOf('-') < 0)
             { problems.Add("/terminal_strip: require a short or full device tag, at most 128 characters, without whitespace, controls or colon."); }
             if (args.TerminalNumber is not { Length: > 0 and <= 64 } number || number.Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.')))
             { problems.Add("/terminal_number: require 1-64 letters, digits, '_' or '.'."); }
@@ -119,6 +119,8 @@ internal static partial class DevicePlaceInputs
         { problems.Add("/display_properties: black boxes do not accept display or pin options."); }
         if (!blackBox && (args.CornerX is not null || args.CornerY is not null))
         { problems.Add("/location_box: corner_x and corner_y require a location_box or SPECIAL/DC source."); }
+        if (args.LocationBoxPolyline is not null && args.LocationBox is null)
+        { problems.Add("/location_box_polyline: requires a location_box source."); }
         bool part = !string.IsNullOrWhiteSpace(args.Part);
         bool symbol = args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null && !part;
         if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))
@@ -160,4 +162,7 @@ internal static partial class DevicePlaceInputs
 
     [GeneratedRegex(@"(?:^|;)([A-Za-z]{2}_[A-Za-z]{2}|\?\?_\?\?)@", RegexOptions.CultureInvariant)]
     private static partial Regex StoredLanguage();
+
+    [GeneratedRegex(@"^(?:[A-Za-z]{2}_[A-Za-z]{2}@[^;]*;)+$", RegexOptions.CultureInvariant)]
+    private static partial Regex SerializedLanguages();
 }

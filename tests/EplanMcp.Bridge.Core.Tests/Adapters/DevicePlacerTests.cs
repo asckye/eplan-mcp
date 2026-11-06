@@ -37,6 +37,7 @@ public sealed class DevicePlacerTests
             Assert.Equal(tag, name);
             parsed.DESIGNATION_PLANT = "GAA";
             parsed.DESIGNATION_LOCATION = "A1";
+            parsed.FUNC_PREFIX = "5";
             parsed.FUNC_CODE = "KR";
             parsed.FUNC_COUNTER = "85";
         };
@@ -57,7 +58,7 @@ public sealed class DevicePlacerTests
             Assert.Same(functions[0], main);
             Assert.False(cdps);
             Assert.True(keep);
-            Assert.Equal(("GAA", "A1", "KR", "85"), (name.DESIGNATION_PLANT.Text, name.DESIGNATION_LOCATION.Text, name.FUNC_CODE.Text, name.FUNC_COUNTER.Text));
+            Assert.Equal(("GAA", "A1", "5", "KR", "85"), (name.DESIGNATION_PLANT.Text, name.DESIGNATION_LOCATION.Text, name.FUNC_PREFIX.Text, name.FUNC_CODE.Text, name.FUNC_COUNTER.Text));
         };
         try
         {

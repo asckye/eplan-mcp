@@ -1,6 +1,5 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
-using Eplan.EplApi.HEServices;
 using EplanMcp.Bridge.Core.Operations;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
@@ -55,23 +54,11 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         using var finder = new DMObjectsFinder(project);
         Function[] named = Named(finder, tag);
         Function main = Representative(named) ?? throw new InvalidOperationException("The planned device has no main function or terminal-only representative any more.");
-        using var parsed = new FunctionPropertyList();
-        using var additional = new FunctionPropertyList();
-        using var newName = new FunctionBasePropertyList();
-        project.ParseNameAndProps((int)main.FunctionCategory, newTag, parsed, additional);
-        using PropertyValue plant = parsed.DESIGNATION_PLANT;
-        using PropertyValue location = parsed.DESIGNATION_LOCATION;
-        using PropertyValue code = parsed.FUNC_CODE;
-        using PropertyValue counter = parsed.FUNC_COUNTER;
-        // A tag without a plant or location parses to an empty value, which the list refuses (S063111).
-        if (!plant.IsEmpty)
-        { newName.DESIGNATION_PLANT = plant; }
-        if (!location.IsEmpty)
-        { newName.DESIGNATION_LOCATION = location; }
-        newName.FUNC_CODE = code;
-        newName.FUNC_COUNTER = counter;
-        using var service = new NameService();
-        service.RenameDevice(main, newName, false, true);
+        bool hasMain = named.Any(f => f.IsMainFunction) || Named(finder, newTag).Any(f => f.IsMainFunction);
+        EplanDeviceRename.Apply(project, main, newTag);
+        // PDF redraw 2026-11-06: a macro's PLC box without a main function shows -?K1 and takes no part; with a real tag and no other box it is the device.
+        if (!hasMain && named.FirstOrDefault(f => Category(f) == "PLCBox") is { } box)
+        { box.IsMainFunction = true; }
         return new RenameReadBack { MainName = main.Name ?? string.Empty, VisibleName = main.VisibleName ?? string.Empty };
     }
 
@@ -84,5 +71,5 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
     /// <summary>The main function (A12), or the first point of a terminal-only PLC module (A89).</summary>
     private static Function? Representative(Function[] named) =>
         named.FirstOrDefault(f => f.IsMainFunction && DeviceTags.Shown(f.VisibleName) is not null) ?? named.FirstOrDefault(f => f.IsMainFunction)
-        ?? (named.Length > 0 && named.All(f => !f.IsMainFunction && Category(f) == "PLCTerminal") ? named[0] : null);
+        ?? (named.Length > 0 && named.All(f => !f.IsMainFunction && Category(f) is "PLCTerminal" or "PLCBox") ? named.FirstOrDefault(f => Category(f) == "PLCTerminal") ?? named[0] : null);
 }

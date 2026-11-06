@@ -65,7 +65,9 @@ public static class ConnectionCreatePlanner
         Require(input["items"] is JArray { Count: >= 1 and <= 50 }, "/items", "Supply 1..50 items.");
         bool generate = (bool?)input["generate"] ?? true;
         if (!generate)
-        { Require(input["items"]!.All(i => i is JObject && (string?)i["kind"] is "corner" or "t_node" or "potential_point" or "interruption_point" or "potential_definition"), "/items", "generate:false accepts only corner, t_node, potential_point, interruption_point and potential_definition."); }
+        { Require(input["items"]!.All(i => i is JObject && (string?)i["kind"] is "corner" or "t_node" or "potential_point" or "interruption_point" or "potential_definition" or "autoconnect_break"), "/items", "generate:false accepts only corner, t_node, potential_point, interruption_point, potential_definition and autoconnect_break."); }
+        else
+        { Require(!input["items"]!.Any(i => i is JObject && (string?)i["kind"] == "autoconnect_break"), "/items", "An autoconnect_break changes which lines EPLAN draws: place it with generate:false, then call eplan_connection_generate."); }
         bool definitionsOnly = input["items"]!.All(i => i is JObject && (string?)i["kind"] is "definition_point" or "potential_definition");
         if (SceneGap(scene, generate && !definitionsOnly) is { } gap)
         { throw Missing("Read a complete Circuit page inventory with verified bounds and pin geometry: " + gap + "."); }
@@ -129,7 +131,7 @@ public static class ConnectionCreatePlanner
         void Node(double[] point, string[] directions, string kind, string at)
         {
             Require(directions.Distinct(StringComparer.Ordinal).Count() == directions.Length && directions.All(d => d is "Up" or "Down" or "Left" or "Right"), at, "Supply distinct cardinal directions.");
-            Require(kind switch { "corner" => directions.Length == 2 && directions[0] != Opposite(directions[1]), "t_node" => directions.Length == 3, "potential_point" or "interruption_point" => directions.Length == 1, _ => false }, at, "Directions must match the node kind.");
+            Require(kind switch { "corner" => directions.Length == 2 && directions[0] != Opposite(directions[1]), "t_node" => directions.Length == 3, "potential_point" or "interruption_point" => directions.Length == 1, "autoconnect_break" => directions.Length == 4, _ => false }, at, "Directions must match the node kind.");
             Require(!nodes.ContainsKey(Key(point)), at, "Duplicate nodes are not allowed.");
             nodes.Add(Key(point), (point, directions, kind));
         }
@@ -139,7 +141,13 @@ public static class ConnectionCreatePlanner
             string at = "/items/" + (index++).ToString(CultureInfo.InvariantCulture);
             if (item is JObject && (string?)item["kind"] == "cable_definition")
             { continue; }
-            Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node, potential_point, interruption_point, cable_definition or definition_point.");
+            Require(item is JObject && item["kind"]?.Type == JTokenType.String, at + "/kind", "Supply wire, corner, t_node, potential_point, interruption_point, autoconnect_break, cable_definition or definition_point.");
+            if ((string?)item["kind"] == "autoconnect_break")
+            {
+                Members(item, at, "kind position", "");
+                Node(Point(item["position"], at + "/position"), ["Down", "Left", "Right", "Up"], "autoconnect_break", at);
+                continue;
+            }
             if ((string?)item["kind"] == "potential_definition")
             {
                 definitions.Add(ConnectionDefinitionPoints.PlanPotential(item, at, Point(item["position"], at + "/position"), index - 1));
@@ -158,7 +166,7 @@ public static class ConnectionCreatePlanner
                 Require(item["sort_code"] is null || item["sort_code"]!.Type == JTokenType.Integer
                     && long.TryParse(item["sort_code"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out _), at + "/sort_code", "Supply a nonnegative Int64 integer.");
                 Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])
-                    && !((string)item["name"]!).Any(char.IsControl), at + "/name", "Supply the shared name, 1..200 characters: 24V or -24V takes this page's structure, =F+A1-24V stays as written.");
+                    && !((string)item["name"]!).Any(char.IsControl), at + "/name", "Supply the shared name, 1..200 characters: 24V or -24V takes this page's higher-level function, =F-24V stays as written.");
                 Require(item["direction"]?.Type == JTokenType.String, at + "/direction", "Supply Up, Down, Left or Right.");
                 Require(item["counterpart_pages"] is null || item["counterpart_pages"] is JArray { Count: >= 1 and <= 20 } scope && scope.All(p => p.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)p))
                     && scope.Values<string>().Distinct(StringComparer.Ordinal).Count() == scope.Count, at + "/counterpart_pages", "Supply 1..20 distinct exact counterpart pages.");
@@ -175,9 +183,10 @@ public static class ConnectionCreatePlanner
                     requestedVariants.Add(Key(point), ((int)explicitVariant, at + "/symbol_variant"));
                 }
                 var interruption = (JObject)item.DeepClone();
-                // Agent eval 2026-11-05: a model writes 24V as an engineer would; EPLAN stores that as =-24V, without the page's structure.
+                // PDF redraw 2026-11-06: an interruption point's tag carries the higher-level function only, as in the sample (=GAA-2L1
+                // on =GAA+A1 shows -2L1). On a page without one, =-L1 shows L1; a location in the tag makes EPLAN show the full name.
                 string shared = (string)item["name"]!;
-                interruption["name"] = shared[0] is '=' or '+' ? shared : DrawingNames.DeviceStructureOf(scene.Page.Page) + (shared[0] == '-' ? "" : "-") + shared;
+                interruption["name"] = shared[0] is '=' or '+' ? shared : "=" + DrawingNames.HigherLevelFunctionOf(scene.Page.Page) + (shared[0] == '-' ? "" : "-") + shared;
                 interruptions.Add(Key(point), interruption);
                 continue;
             }
@@ -249,6 +258,7 @@ public static class ConnectionCreatePlanner
             SymbolSearchItem[] matches = variants.Where(s => s.Library == "SPECIAL" && (node.Kind switch
             {
                 "corner" => s.Name == "CO" && s.Type == "Routing",
+                "autoconnect_break" => s.Name == "ACBP" && s.Type == "ConnectionBreakpoint",
                 "t_node" => s.Type == (s.Name switch { "TLRO" => "TNodeUp", "TLRU" => "TNodeDown", "TOUL" => "TNodeLeft", "TOUR" => "TNodeRight", _ => "" }),
                 "interruption_point" => s.Type == "InterruptionPoint" && s.Name == (interruptionSymbols.TryGetValue(Key(node.Point), out string? named) ? named : "BP"),
                 _ => s.Name == "PCP" && s.Type == "PotentialTerminal",
@@ -464,7 +474,7 @@ public static class ConnectionCreatePlanner
     {
         if (!scene.Complete)
         { return "a page placement has no drawing record"; }
-        if (scene.PageType != "Circuit")
+        if (scene.PageType is not ("Circuit" or "CircuitSingleLine"))
         { return "page type " + scene.PageType; }
         if (scene.Page.Project != scene.Project.Path || scene.Page.PageSize is null)
         { return "page geometry is unavailable"; }

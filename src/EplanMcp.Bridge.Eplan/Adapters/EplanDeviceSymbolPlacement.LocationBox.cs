@@ -37,11 +37,14 @@ internal sealed partial class EplanDeviceSymbolPlacement
         foreach (GraphicalPlacement graphic in graphics)
         {
             OperationContext.Current.ThrowIfCancellationRequested();
-            Pen pen = graphic.Pen;
-            pen.StyleId = 1; // S43/A55: installed style 1 is dashed.
-            graphic.Pen = pen;
+            if (args.LocationBoxPolyline != true)
+            {
+                Pen pen = graphic.Pen;
+                pen.StyleId = 1; // S43/A55: installed style 1 is dashed.
+                graphic.Pen = pen;
+                Check(graphic.Pen.StyleId == 1, "dashed pen did not read back");
+            }
             PointD[] bounds = graphic.GetBoundingBox();
-            Check(graphic.Pen.StyleId == 1, "dashed pen did not read back");
             // Live T7a: graphic bounds are relative to the box (0,-40;40,0); the page extent is the logical area below.
             Check(bounds.Length >= 2 && bounds.All(p => !double.IsNaN(p.X) && !double.IsInfinity(p.X) && !double.IsNaN(p.Y) && !double.IsInfinity(p.Y)),
                 "outline is not finite");

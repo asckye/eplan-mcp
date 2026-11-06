@@ -45,6 +45,7 @@ public sealed class MacroInsertOperationTests : IDisposable
         _inserter.Pages[NewPage] = new MacroTargetPage { Name = NewPage, Type = "Circuit" };
         _inserter.Pages[SamplePage] = new MacroTargetPage { Name = SamplePage, Type = "Circuit", Width = 420, Height = 297.02, Objects = ["1/1/1/0", "1/1/2/0"] };
         _inserter.Pages["=GAA+A1&EFS2/1"] = new MacroTargetPage { Name = "=GAA+A1&EFS2/1", Type = "Overview" };
+        _inserter.Pages["=GAA+A1&EFA2/1"] = new MacroTargetPage { Name = "=GAA+A1&EFA2/1", Type = "CircuitSingleLine" };
         _pages.Pages.AddRange(_inserter.Pages.Keys.Select(name => new PageSummary { Name = name }));
         _devices.Functions.Add(new FunctionRecord { Name = "+A1-WG6", IsMain = true, Category = "Cable" });
         _inserter.Placed = Numbered;
@@ -177,6 +178,20 @@ public sealed class MacroInsertOperationTests : IDisposable
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
 
         Assert.Equal("'variant' 6 does not exist; the macro's MultiLine variants are 0, 1, 2, 3, 4, 5.", error.Metadata!["violations"]);
+    }
+
+    [Fact]
+    public void SingleLine_GoesOnACircuitSingleLinePage()
+    {
+        MacroInsertArgs args = Args("=GAA+A1&EFA2/1", 40, 200);
+        args.Representation = "SingleLine";
+        _macros.ReadSelection = (_, _) => new MacroContent { Representations = [new("SingleLine", [0])], Width = 20, Height = 20, ObjectCount = 196 };
+        args.Fingerprint = Plan(args).Fingerprint;
+        Execute(args);
+        Assert.Equal(("SingleLine", null, null), _inserter.Source);
+        MacroInsertArgs circuit = Args(NewPage, 40, 280);
+        circuit.Representation = "SingleLine";
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(circuit)).Error.Reason);
     }
 
     [Fact]

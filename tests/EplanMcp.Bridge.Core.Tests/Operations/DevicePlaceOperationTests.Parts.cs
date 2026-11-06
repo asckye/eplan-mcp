@@ -29,6 +29,34 @@ public sealed partial class DevicePlaceOperationTests
     }
 
     [Fact]
+    public void PartTerminal_RunsInTheStripScope_BecauseASafetyPointCannotCreateTheStripDefinition()
+    {
+        // A13: Function.Create always throws S063176 in a SafetyPoint, whatever is locked first.
+        _parts.Content.Parts.Add(new() { PartNumber = "PXC.3212140", Variant = "1" });
+        var args = Args(NewPage, "", "PXC.3212140");
+        args.Tag = null;
+        args.TerminalStrip = "+A1-XQ10";
+        args.TerminalNumber = "1";
+        _placer.Result = tag => new() { MainName = tag, Names = [tag], OnPage = 1, Category = "Terminal", Terminal = new() { Strip = "+A1-XQ10", Number = "1" } };
+        var symbols = new PartSymbols();
+        args.Fingerprint = ((WritePlan)new DevicePlacePlanOperation(_catalog, _pages, _names, _parts, _placer, symbols).Execute(args)!).Fingerprint;
+        new DevicePlaceExecuteOperation(_catalog, _pages, _names, _parts, _placer, _transactions, symbols).Execute(args);
+        Assert.Contains("Commit", _placer.StripScopes.Calls);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
+    public void PartDevice_StaysInTheSafetyPointScope()
+    {
+        _parts.Content.Parts.Add(new() { PartNumber = "PXC.3212140", Variant = "1" });
+        var args = Args(NewPage, "-Q20", "PXC.3212140");
+        args.Fingerprint = Plan(args).Fingerprint;
+        Execute(args);
+        Assert.Contains("Commit", _transactions.Calls);
+        Assert.Empty(_placer.StripScopes.Calls);
+    }
+
+    [Fact]
     public void PartSymbol_NotFoundRefusesBeforePlacement()
     {
         var args = Args(NewPage, "-Q20");

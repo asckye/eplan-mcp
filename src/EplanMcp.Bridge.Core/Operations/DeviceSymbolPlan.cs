@@ -19,7 +19,7 @@ internal static class DeviceSymbolPlan
         { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Symbol discovery is unavailable; use a Bridge with symbol search.", metadata: new Dictionary<string, string> { ["missing"] = "symbol.search" }); }
         bool box = args.LocationBox is not null;
         bool terminal = args.TerminalStrip is not null;
-        string? library = box ? "SPECIAL" : terminal ? args.Library ?? "IEC_symbol" : args.Library, name = box ? "SC" : terminal ? args.Symbol ?? "X" : args.Symbol;
+        string? library = box ? "SPECIAL" : terminal ? args.Library ?? "IEC_symbol" : args.Library, name = box ? args.LocationBoxPolyline == true ? "SC2" : "SC" : terminal ? args.Symbol ?? "X" : args.Symbol;
         int? variant = box ? 0 : terminal ? args.SymbolVariant ?? 0 : args.SymbolVariant;
         if (!box && !terminal && (args.Variant is not null && args.Part is null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
             || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.SymbolVariant is null or < 0))
@@ -66,8 +66,8 @@ internal static class DeviceSymbolPlan
         if (args.ConnectionDesignations is { } pins && pins.Length != symbol.ConnectionPoints.Count)
         { throw WriteArguments.Invalid(["/connection_designations: supply exactly one designation per symbol connection point."]); }
         if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Length != symbol.ConnectionPoints.Count
-            || descriptions.Any(p => string.IsNullOrWhiteSpace(p) || p.Length > 64 || p.Any(char.IsControl))))
-        { throw WriteArguments.Invalid(["/connection_descriptions: supply a symbol source and one nonempty description (at most 64 characters) per symbol connection point."]); }
+            || descriptions.Any(p => p is null || p.Length > 64 || p.Any(char.IsControl))))
+        { throw WriteArguments.Invalid(["/connection_descriptions: supply a symbol source and one description (at most 64 characters, empty for none) per symbol connection point."]); }
         var changes = new List<PlannedChange>
         {
             new() { Action = "create", Kind = box ? "location_box" : "function", Name = request.Page.Name, NewValue = box

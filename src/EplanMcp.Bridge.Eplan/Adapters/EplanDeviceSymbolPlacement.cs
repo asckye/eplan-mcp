@@ -75,7 +75,12 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         // tag would show twice. A PLC card keeps it too: its points' 20300 main references then read back differently
         // (fictional acceptance 2026-11-02).
         if (args.DisplayProperties is not { Count: > 0 } && _symbol.Kind != "plc_box")
-        { EplanVisibleNames.Adjust(page, function); }
+        {
+            EplanVisibleNames.Adjust(page, function);
+            // PDF redraw 2026-11-06: EPLAN takes the tag over from the point before it and leaves this one's row empty; each PLC point shows its card.
+            if (args.PlcConnectionPoint is not null && string.IsNullOrEmpty(function.VisibleName))
+            { string card = DevicePlcPlan.Parent(args, tag); function.VisibleName = card.Substring(card.LastIndexOf('-')); }
+        }
         if (args.PropertyArrangement is { } arrangement)
         { EplanSymbolArrangement.Select(function, arrangement); }
         // A55: the only cached list is released while unwinding Place, BEFORE TransactionRunner can Abort.
@@ -87,7 +92,10 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         // Customer redraw: a PLC point's first table row (20029, read-only) shows these descriptions.
         string[]? descriptions = args.ConnectionDescriptions;
         for (int i = 0; i < (descriptions?.Length ?? 0); i++)
-        { properties[(Properties.Function)20023, i + 1] = descriptions![i]; }
+        {
+            if (descriptions![i].Length > 0)
+            { properties[(Properties.Function)20023, i + 1] = descriptions[i]; }
+        }
         // A78: local placements are independent of the symbol variant (documentation only).
         if (args.PlcConnectionPoint is not null && args.DisplayProperties is { Count: > 0 })
         { function.SwitchLocalPropertyPlacements(true); Require(function.UseLocalPropertyPlacements); }

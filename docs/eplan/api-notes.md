@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A104、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A106、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -479,3 +479,20 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 这样运行 `eplan_part_import`、`eplan_part_sync`、`eplan_translation_import`，正在用的两个库 29 个文件（`.lck` 除外）的 SHA-256 不变，包括 `User.eod`、`User.eox`；副本的 `Translate.db` 变了。A30 说的“副本隔离不了导入”只针对按路径打开另一个库。
 - 设置是每个变体各一份，用文件备份还原后哈希一致。
 — `MasterDataOnCopyTests`。
+
+### A105. 复刻一套 71 页图纸时验证的绘图和报表事实（2026-11-06，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 新项目上）
+- **从部件放端子并新建端子排：** `Function.Create` 在 `SafetyPoint` 中抛 S063176，A13 的结论再次成立；先 `LockAllObjects`、把新建挪到 `DeviceService.CreateDevice` 之前都没有用。整个调用改用 `FunctionTransactionScope` 后，`CreateDevice` 同样可用，160 个端子全部提交。端子排先建好，端子再按名称加入，和已有端子排的路径一样。
+- **`CreateDevice` 放的端子自带可见名称，** 每个端子都显示端子排名。先清空 `VisibleName` 再 `NameService.AdjustVisibleName`，只有第一个端子显示，和图纸一致。
+- **设备标识里的前缀在 `FUNC_PREFIX`（20012）：** `NameService.RenameDevice` 只写其他部分时，`-5Q1` 会变成 `-Q1`。要连同位置、高层代号、20012、20013、20014、20015 一起写。没有高层代号的页上，设备存成 `=+S1-5Q1`，空的 `=` 和 `+S1-5Q1` 是同一个标识。
+- **宏的 `x,y` 放的是 `reference_point`，** 不是外框角点，由 `eplan_macro_get` 给出。宏里的盒子名称是 `-?K1`，没有主功能时改名不生效，要把盒子设为主功能。
+- **中断点名称：** 项目的标识格式 10051 是 `<20012><20013><20014><20015>`，不含结构时，`=-L1` 会存成 `-=-L1`；这种项目要写设备部分。朝上的箭头要 `snap_to_grid:false`：位置是引脚，原点在引脚 +1 mm 的栅格上。
+- **`SPECIAL/ACBP`（类型 ConnectionBreakpoint）** 让自动连线在此断开，打印时不显示。图纸上两个引脚相对却没有连线的地方用它。
+- **总览和原理图的 PLC 点** 按卡、功能定义、插头、连接点代号配对。原理图的点要用总览同名点的功能定义，否则总览那一行是空的。地址写在总览点上。
+- **项目设置 `TRANSLATEGUI.MISSING_TRANSLATION.SHOW`（以及 `.TEXT`，默认 `<<???>>`）** 为 false 时，缺译文的行不再显示占位符。
+- **自由文字的插入点是文字的顶部。** PDF 给的是基线，实测 y = 基线 + 1.4 × 字高。一个文字只写一种语言；语言无关的文字在显示两种语言的页上会下移一行。
+- **报表类型和表格扩展名：** `.f09` 是 `InterconnectDiagram`（cable diagram），不是 `CableConnectionDiagram` 或 `CableLayout`。同一轮还确认：`.f01` PartsList、`.f02` PartsSumList、`.f06` TableOfContents、`.f10` CableOverview、`.f13` TerminalDiagram、`.f14` TerminalStripOverview、`.f24` StructIdentifierOverview、`.f26` TitlePage。
+- **表格必须在项目里，** 否则 `CreateReport` 抛 S029153。`Masterdata.AddToProjectEx(project, {文件名})` 从 `$(MD_FORMS)` 复制进来，和报表对话框的做法一样；系统主数据只读取。
+- `PartsList` 用表格 `[EES]_F01_002_V01` 生成的后续页是子页（`/1.1`、`/1.2`），其他报表是 `/2`、`/3`。
+- `SPECIAL/SC2`（结构盒，折线）的画笔来自符号，是点划线；`SetLogicalArea` 之后仍是矩形，图纸上标签处的切角没有自动出现。
+- **端子和电缆的功能文本 20011 会显示在原理图上。** `X2_2` 只有“默认”和“用户定义”两种属性排列，默认就显示它，电缆定义线上的文字还会被顶上去一行。这份图纸的报表列了这些文字，原理图却不显示，图纸是怎么隐藏的还没查明，所以这轮没有写入。
+- **注册插件：** `eplan-addin.ps1` 异步启动 EPLAN，要等它做完再启动下一个，否则加载的还是旧版本。EPLAN 按进程把插件影子复制到 `%APPDATA%\EPLAN\ShadowCopyAssemblies\<pid>`，比较哈希就知道加载的是否最新。

@@ -186,6 +186,7 @@ public sealed partial class DevicePlaceOperationTests
     [Theory]
     [InlineData("KF20", "'tag' needs a device part after '-'")]
     [InlineData("=GAA+A1-", "'tag' needs a device part after '-'")]
+    [InlineData("+A1-", "'tag' needs a device part after '-'")]
     [InlineData("-KF20:13", "'tag' must not contain ':'")]
     public void Plan_ATagWithoutADevicePart_IsInvalid(string tag, string violation)
     {
@@ -445,8 +446,10 @@ public sealed partial class DevicePlaceOperationTests
     /// <c>CreateDevice</c> as S20 saw it (A26), renamed: by default 5 functions, the coil placed on the page and 4
     /// contacts unplaced. <see cref="Result"/> replaces what is read back; the project's functions follow it.
     /// </summary>
-    private sealed class Placer(FakeDeviceRenamer project) : IDevicePlacer
+    private sealed class Placer(FakeDeviceRenamer project) : IDevicePlacer, IDeviceStripTransactions
     {
+        public FakeTransactions StripScopes { get; } = new();
+        public ITransactionScopeFactory StripTransactions(string projectPath) => StripScopes;
         public Action<PlacedDevice>? Committed { get; set; }
         public void ReadCommitted(string projectPath, PlacedDevice result) => Committed?.Invoke(result);
         public Dictionary<string, MacroTargetPage> Pages { get; } = new(StringComparer.Ordinal);

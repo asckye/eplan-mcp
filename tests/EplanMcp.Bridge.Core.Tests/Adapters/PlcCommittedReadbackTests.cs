@@ -112,6 +112,8 @@ public sealed class PlcCommittedReadbackTests
         project.FunctionDefinitionLibrary.Definitions = [new()];
         project.FindFunctions = filter =>
         {
+            if (filter?.FunctionCategory == FunctionCategory.PLCTerminal)
+            { return []; }
             Assert.Equal(FunctionCategory.PLCBox, filter?.FunctionCategory);
             if (!ended)
             { return [originalCard]; }
@@ -221,8 +223,9 @@ public sealed class PlcCommittedReadbackTests
         Assert.Equal(0, staleTouches);
         AssertNoNativeFields(adapter);
         Assert.Equal(fault is not ("not_found" or "page" or "main" or "ownership" or "foreign_card" or "card_id"), point.Properties.Disposed);
-        Assert.All(project.FunctionQueries, query => Assert.Equal(FunctionCategory.PLCBox, query.Category));
-        Assert.Equal(fault is "not_found" or "page" or "main" ? 1 : 2, project.FunctionQueries.Count);
+        // One more query looks for the point's overview twin, whose function definition it takes.
+        Assert.Single(project.FunctionQueries, query => query.Category == FunctionCategory.PLCTerminal);
+        Assert.Equal(fault is "not_found" or "page" or "main" ? 1 : 2, project.FunctionQueries.Count(query => query.Category == FunctionCategory.PLCBox));
     }
 
     private static void AssertNoNativeFields(EplanDeviceSymbolPlacement adapter) =>

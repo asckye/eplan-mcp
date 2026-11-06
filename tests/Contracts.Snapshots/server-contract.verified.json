@@ -4929,6 +4929,21 @@
                   "additionalProperties": false,
                   "properties": {
                     "kind": {
+                      "const": "autoconnect_break"
+                    },
+                    "position": {
+                      "$ref": "#/$defs/p"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "position"
+                  ]
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
                       "const": "cable_definition"
                     },
                     "points": {
@@ -5017,8 +5032,7 @@
                         },
                         "required": [
                           "connection",
-                          "label",
-                          "colour"
+                          "label"
                         ]
                       },
                       "minItems": 1,
@@ -5028,6 +5042,14 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 64
+                    },
+                    "cross_section_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 32
+                    },
+                    "core_labels_only": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -6880,7 +6902,6 @@
             ],
             "items": {
               "type": "string",
-              "minLength": 1,
               "maxLength": 64
             }
           },
@@ -6899,6 +6920,12 @@
           "corner_y": {
             "type": [
               "number",
+              "null"
+            ]
+          },
+          "location_box_polyline": {
+            "type": [
+              "boolean",
               "null"
             ]
           },
@@ -10175,7 +10202,7 @@
     {
       "name": "eplan_language_set",
       "title": "Set the languages of an EPLAN project",
-      "description": "Sets displayed or source languages and adds translation languages; translates no text. Omit/true previews; false executes, with approval outside scratch. Ctrl+Z does not undo settings; restore with before values and dry_run:false. Example: {\"project\":\"Line1\",\"display\":[\"en_US\",\"zh_CN\"]}. Remove: eplan_language_remove.",
+      "description": "Sets displayed or source languages and adds translation languages; translates no text. Approval outside scratch. Ctrl+Z does not undo; restore with before values. Remove: eplan_language_remove.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -10215,6 +10242,14 @@
             "description": "Source language, e.g. de_DE; ##_## clears",
             "type": [
               "string",
+              "null"
+            ],
+            "default": null
+          },
+          "show_missing_translation": {
+            "description": "Show the placeholder for a missing language",
+            "type": [
+              "boolean",
               "null"
             ],
             "default": null
@@ -10583,7 +10618,8 @@
             "default": "MultiLine",
             "enum": [
               "MultiLine",
-              "Overview"
+              "Overview",
+              "SingleLine"
             ]
           },
           "part": {
@@ -20507,7 +20543,7 @@
     {
       "name": "eplan_report_create",
       "title": "Create report pages from a report block",
-      "description": "Preview by default; Ctrl+Z undo. Approval outside scratch (APPROVAL_DENIED).",
+      "description": "Previews by default. Approval outside scratch.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -20525,6 +20561,7 @@
               "PartsList",
               "CableOverview",
               "CableConnectionDiagram",
+              "InterconnectDiagram",
               "TerminalStripOverview",
               "DeviceList",
               "ConnectionList",
