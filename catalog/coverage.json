@@ -1198,7 +1198,7 @@
       "dependencies": 32,
       "actions": 0,
       "spec": "docs/tools/eplan_context_get.md",
-      "small": 2,
+      "small": 3,
       "medium": 5,
       "large": 3,
       "apiNotes": [
@@ -2086,7 +2086,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_review.md",
       "small": 4,
-      "medium": 1,
+      "medium": 2,
       "large": 1,
       "apiNotes": [
         "A41",
@@ -2433,7 +2433,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
       "small": 6,
-      "medium": 2,
+      "medium": 3,
       "large": 4,
       "apiNotes": [
         "A57",
@@ -2657,7 +2657,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_property_set.md",
       "small": 2,
-      "medium": 1,
+      "medium": 2,
       "large": 3,
       "apiNotes": [
         "A36",

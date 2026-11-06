@@ -13785,7 +13785,7 @@
     {
       "name": "eplan_page_review",
       "title": "Review a drawn EPLAN page",
-      "description": "Reviews a completed page for wiring, geometry, pairing, cable and stored check issues; optionally compares targets. Read only; no check run or editor navigation. Coordinates: mm, origin bottom left, y up. See usage for targets and the review/fix loop. Example: {\"project\":\"Line1\",\"page\":\"=F+A1/1\"}.",
+      "description": "Reviews wiring, geometry, targets and plugin rules. rule_packs selects installed plugins; omitted uses enabled rules. Read only. Coordinates: mm, bottom-left origin. See usage for standards and fixes. Example: {\"project\":\"Line1\",\"page\":\"=F+A1/1\"}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -13808,7 +13808,8 @@
                 "interruption_pairing",
                 "cable_cores",
                 "eplan_messages",
-                "expected"
+                "expected",
+                "rules"
               ]
             }
           },
@@ -14074,6 +14075,15 @@
               "concise",
               "detailed"
             ]
+          },
+          "rule_packs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -14145,18 +14155,26 @@
               ],
               "properties": {
                 "code": {
-                  "enum": [
-                    "dangling_end",
-                    "unconnected_pin",
-                    "overlap",
-                    "off_grid",
-                    "unintended_junction",
-                    "interruption_pairing",
-                    "cable_core_segment",
-                    "eplan_message",
-                    "expected_missing",
-                    "expected_extra",
-                    "expected_mismatched"
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "dangling_end",
+                        "unconnected_pin",
+                        "overlap",
+                        "off_grid",
+                        "unintended_junction",
+                        "interruption_pairing",
+                        "cable_core_segment",
+                        "eplan_message",
+                        "expected_missing",
+                        "expected_extra",
+                        "expected_mismatched"
+                      ]
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^rule(?:_unknown)?:[^/]+/[^/]+$"
+                    }
                   ]
                 },
                 "severity": {
@@ -14182,7 +14200,27 @@
                 "objects": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/$defs/locator"
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/locator"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "project",
+                          "page"
+                        ],
+                        "properties": {
+                          "project": {
+                            "type": "string"
+                          },
+                          "page": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    ]
                   }
                 },
                 "message": {
@@ -14209,7 +14247,8 @@
                 },
                 "readback": {
                   "type": "array"
-                }
+                },
+                "reference": {}
               }
             }
           },
@@ -14254,6 +14293,82 @@
           },
           "truncated": {
             "type": "boolean"
+          },
+          "rulePacks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "version",
+                "status",
+                "standards",
+                "rules",
+                "passed",
+                "failed",
+                "unknown",
+                "notApplicable"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "draft",
+                    "signed"
+                  ]
+                },
+                "standards": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "rules": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "passed": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "failed": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "unknown": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "notApplicable": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "plugins": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "$defs": {

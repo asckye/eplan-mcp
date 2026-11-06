@@ -20,7 +20,8 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 已打开项目的名称或路径 |
 | `page` | string | 是 | — | 完整页名，按序数精确匹配 |
-| `checks` | string[]（enum） | 否 | 全部 | 只做这些检查：`dangling_ends`、`unconnected_pins`、`overlaps`、`off_grid`、`unintended_junctions`、`interruption_pairing`、`cable_cores`、`eplan_messages`、`expected` |
+| `checks` | string[]（enum） | 否 | 全部 | 只做这些检查：`dangling_ends`、`unconnected_pins`、`overlaps`、`off_grid`、`unintended_junctions`、`interruption_pairing`、`cable_cores`、`eplan_messages`、`expected`、`rules` |
+| `rule_packs` | string[] | 否 | 当前作用域启用的规则插件 | 1–10 个不重复的已安装插件 ID；显式 `checks` 不含 `rules` 时不评估 |
 | `expected` | object | 否 | — | 目标清单，格式与绘图工具的输入一致：`devices`（名称、符号、位置）、`connections`（两端设备与连接点）、`cables`（名称、芯线与它们应属于的连接、颜色）、`interruptions`（名称、位置）、`texts`（内容、位置、角度）。给出时做 `expected` 检查 |
 | `tolerance_mm` | number | 否 | 0.5 | 位置比较的容差 |
 | `include_image` | boolean | 否 | false | 为 true 时附上这一页的 PNG（图片内容块，受结果预算限制，超出时缩小分辨率） |
@@ -34,6 +35,7 @@
   - `cable_core_segment` 的目标位置需要完整的目标 `drawnPath`、其他连接的路径、Cable 的位置与定义线端点，以及有效页栅格。仅在定义线跨共享主干、目标存在平行独占分支时，沿分支方向平移到中点吸附位置，并与两端各留至少一格，作为 issue 的 `position`（Cable 定位器的绝对坐标）给出。A75 的 `(120,160)–(120,100)` 主干与 `(120,220)–(120,160)` 分支、栅格 4、水平定义线 `y=128`，得到 `(80,192)`。A73：实机移动电缆后芯线归属丢失、生成连接也不恢复，所以这个坐标只是建议，`fix` 是用 `eplan_connection_create` 重画电缆，不给移动参数；目前没有工具重新分配已有电缆的芯线。证据不足或没有平行分支时只给重画提示，不给坐标。
   - `expected`（给了 `expected` 时）：`{missing[], extra[], mismatched[]}`，每项带目标项的路径（如 `/cables/0/cores/1`）和实际读回
   - `cursor`、`total`、`truncated`
+  - `rulePacks[]`（实际评估规则时）：`{id,version,status,standards,rules,passed,failed,unknown,notApplicable}`；计数只覆盖本页，后四项按对象评估结果计数。`metadata.plugins` 列出实际使用的 `ID@版本`，不可读数据在 `metadata.warnings` 中说明。
 - 文本摘要第一行：`<page>: <errors> errors, <warnings> warnings` 或 `<page>: clean`，随后列出最多 5 条最严重的问题
 - 问题代码与判定依据：
 
@@ -48,12 +50,15 @@
 | `cable_core_segment` | error | 芯线归属与目标不符：电缆画在主干段时，经过该段的全部逻辑连接共用一个连接定义点（A64） |
 | `eplan_message` | 按消息级别 | 该页上已有的 EPLAN 检查消息（只读取，不运行检查） |
 | `expected_*` | error | 与目标清单的缺失、多余、不一致 |
+| `rule:<插件ID>/<规则名>` | mandatory 为 error，recommended 为 warning | 现有语法树解释器评估失败；附规则 `spec.source` 原样作为 `reference` |
+| `rule_unknown:<插件ID>/<规则名>` | mandatory 为 warning，recommended 为 info | 空值或覆盖不足；每条规则合并一个问题，说明缺值对象数与字段，定位符最多 20 个；不是违规 |
 
 ## 4. 错误
 | 错误码 | 什么时候发生 | 返回给模型的提示 |
 |---|---|---|
 | `PROJECT_NOT_OPEN` / `PAGE_NOT_FOUND` | 项目未打开或页不存在 | 用 `eplan_page_list` 取得准确页名 |
 | `INVALID_ARGUMENT` | `expected` 结构不对、`checks` 含未知值 | 指出 JSON 路径，按第 2 节格式重写 |
+| `INVALID_ARGUMENT` | 指定插件未安装或没有 v2 规则；草稿用于 scratch 外 | 列出已安装的规则插件，或提示需工程师签核 |
 | `EPLAN_BUSY` | EPLAN 正被对话框或另一调用占用 | 稍后重试 |
 | `TIMEOUT` | 页面对象过多，超过 20 秒 | 减少 `checks` 或分批 |
 
@@ -76,6 +81,8 @@
 1. 绘图工具执行完一页后调用 `eplan_page_review`（有目标清单时带上 `expected`）。
 2. `clean` 为 false 时，按 `issues[].fix` 用已有工具逐条修复。
 3. 再次调用审查；最多 3 轮。仍有问题时停止修复，把剩余问题原样报告给工程师。
+
+按标准审图时，先用 `eplan_pack_library_list` 的 `kind:"standard"` 查找插件，安装后在审图中传 `rule_packs`。省略则使用当前作用域启用的规则插件；无规则时行为不变。`pack.json.signoff` 省略视为 `draft`，只能审 scratch；`signed` 需有 `signedBy` 和 `signedAt`。本审查不要求柜体绑定、standing 或 official 提升。规则只查插件收录的项目，不代表符合整部标准，最终由工程师判断。`fix` 指向要用的工具：导线用 `eplan_connection_create` 放 `definition_point`，设备用 `eplan_device_update` 改 `new_tag`，取值看 `message`；忽略 `spec.fix` 工作流。分页指纹包含 `rule_packs`。
 
 ## 9. 首片细节（2026-10-31）
 - 首片完成规则与目标比较；`include_image=true` 返回 `INVALID_ARGUMENT`，提示用 `eplan_export_image` 的 `inline`，图片预算与临时文件清理留后续。

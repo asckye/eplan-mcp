@@ -25,6 +25,11 @@
 - `eplan_symbol_search` 没有匹配时提示描述按项目显示语言比较；工具用法说明写明对齐的连接点由 EPLAN 自动连线，之后调用 `eplan_connection_generate`。
 - `eplan_connection_create` 的中断点接受短名称：`24V`、`-24V` 取本页高层代号，`=F-24V` 按原样写入。之前短名称读回不一致，且失败后中断点留在页上，工具报 `OUTCOME_UNKNOWN` 并暂停之后的写入。
 - `eplan_connection_create` 放置中断点失败时改用撤销回滚，`Transaction.Abort` 留下的对象不再残留；`OUTCOME_UNKNOWN` 的消息同时说明写入失败和回滚核对失败的原因。
+- `eplan_page_review` 支持通过 `rule_packs` 或已启用插件按规则审图，返回条款引用、缺值提示和本页统计；草稿规则仅用于 scratch，工程师签核后可用于其他项目。
+- 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
+- `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
+### 修复
+- `eplan_context_get` 只请求插件汇总时不再附带全部页面证据，页数多的项目可使用默认预算；插件汇总显示实际规则数与签核状态。
 - `eplan_placement_create` 创建块时在规划阶段拒绝 Function 成员，避免 EPLAN 静默丢弃符号。
 - `eplan_device_place` 和 `eplan_device_update` 改名时保留标识前缀：`-5Q1` 之前会变成 `-Q1`。没有高层代号的页上，按部件放置和端子放置不再把 `=+S1-5Q1` 误报成名称不符。
 - `eplan_device_place` 放 PLC 点时沿用总览点的功能定义，输出通道才能和总览配对、显示 `&EFA1/4.2` 这样的引用。

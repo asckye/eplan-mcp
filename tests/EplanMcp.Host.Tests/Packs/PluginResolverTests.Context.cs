@@ -1,16 +1,64 @@
+using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.Packs;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Tools;
 using EplanMcp.Host.Tools;
 using EplanMcp.Packs;
+using EplanMcp.Packs.Knowledge;
 
 namespace EplanMcp.Host.Tests.Packs;
 
 public sealed partial class PluginResolverTests
 {
     private static readonly string[] _pluginInclude = ["plugins"];
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PluginContext_CountsV2RulesAndReportsEffectiveSignoff(bool isSigned)
+    {
+        WritePack("plugin.rules", "1.0.0", 7);
+        string folder = Path.Combine(_locations.Packs, "plugin.rules", "1.0.0");
+        string manifestPath = Path.Combine(folder, PackManifest.FileName);
+        PackManifest manifest = PackJson.ReadManifest(await File.ReadAllBytesAsync(manifestPath, Cancel));
+        var resources = manifest.Resources.ToList();
+        foreach ((KnowledgeKind kind, string version) in new[] { (KnowledgeKind.Rule, KnowledgeDocument.V2ApiVersion), (KnowledgeKind.Candidate, KnowledgeDocument.CurrentApiVersion) })
+        {
+            var document = new KnowledgeDocument
+            {
+                ApiVersion = version,
+                Kind = kind,
+                Metadata = new() { Name = "example" },
+                Spec = JsonNode.Parse("""{"severity":"mandatory","source":{"standard":"test","clause":"1"},"scope":{"kind":"function","where":{"literal":true}},"check":{"literal":true},"message":{"en":"Review example"}}""")!.AsObject()
+            };
+            string path = KnowledgeDocument.PathOf(kind, document.Metadata.Name);
+            byte[] content = PackJson.Serialize(document);
+            Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(folder, path))!);
+            await File.WriteAllBytesAsync(Path.Combine(folder, path), content, Cancel);
+            resources.Add(new() { Path = path, Kind = ResourceKind.Rule, Storage = ResourceStorage.Bundled, Bytes = content.Length, Files = 1, Sha256 = Convert.ToHexStringLower(SHA256.HashData(content)) });
+        }
+        await File.WriteAllBytesAsync(manifestPath, PackJson.Serialize(manifest with
+        {
+            Resources = [.. resources.OrderBy(resource => resource.Path, StringComparer.Ordinal)],
+            Signoff = isSigned ? new() { Status = "signed", SignedBy = "Engineer", SignedAt = "2026-11-06" } : null
+        }), Cancel);
+        await EnableAsync(new PluginIdentity("plugin.rules", "1.0.0"));
+        var packs = new PackLibrary(_locations, HostConfig.Defaults(_locations), new AuditLog(_locations.Audit, TimeProvider.System), TimeProvider.System);
+
+        JsonObject result = await PluginContextProjection.OfflineAsync(packs, JsonSerializer.SerializeToElement(new { }), 5000, Cancel);
+
+        JsonNode plugin = Assert.Single(result["plugins"]!.AsArray())!;
+        Assert.Equal(1, plugin["ruleCount"]!.GetValue<int>());
+        Assert.Equal(isSigned ? "signed" : "draft", plugin["signoff"]!["status"]!.GetValue<string>());
+        if (isSigned)
+        {
+            Assert.Equal("Engineer", plugin["signoff"]!["signedBy"]!.GetValue<string>());
+            Assert.Equal("2026-11-06", plugin["signoff"]!["signedAt"]!.GetValue<string>());
+        }
+    }
     [Fact]
     public async Task PluginContext_OfflineHasNoBridgeCallsAndReportsMissingData()
     {

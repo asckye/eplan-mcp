@@ -1,8 +1,13 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
+using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Packs;
+using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using EplanMcp.Packs;
 
@@ -12,6 +17,55 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Small")]
 public sealed class ContextBudgetTests
 {
+    private static readonly string[] _pluginsOnly = ["plugins"];
+
+    [Fact]
+    public async Task ProjectPluginsOnly_DefaultBudgetFitsRegardlessOfPageCount()
+    {
+        var locations = new HostDataLocations(Path.Combine(Path.GetTempPath(), "eplanmcp-context-budget-" + Guid.NewGuid().ToString("N")));
+        var packs = new PackLibrary(locations, HostConfig.Defaults(locations), new AuditLog(locations.Audit, TimeProvider.System), TimeProvider.System);
+        var bridge = new FakeBridgeClient { Status = new([], new() { Operations = [OperationNames.ProjectSnapshot] }, null) };
+        bridge.Handlers[OperationNames.ProjectSnapshot] = _ => ManyPages();
+
+        JsonElement result = ContextToolTests.Data(await ContextTools.GetAsync(bridge, packs,
+            JsonSerializer.SerializeToElement(new { }), project: "Line1", include: JsonSerializer.SerializeToElement(_pluginsOnly),
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("Line1", result.GetProperty("project").GetProperty("name").GetString());
+        Assert.Empty(result.GetProperty("coverage").GetProperty("pages").EnumerateArray());
+        Assert.Empty(result.GetProperty("sources").EnumerateArray());
+        Assert.Empty(result.GetProperty("plugins").EnumerateArray());
+        Assert.False(result.TryGetProperty("objects", out _));
+        Assert.False(result.GetProperty("truncated").GetBoolean());
+        Assert.InRange(result.GetProperty("budget").GetProperty("estimatedTokens").GetInt32(), 1, 5000);
+        Assert.Single(bridge.Calls);
+        Assert.Empty(bridge.Writes);
+        Assert.False(Directory.Exists(locations.Root));
+    }
+
+    private static ProjectSnapshotData ManyPages()
+    {
+        List<SnapshotPage> pages = [.. Enumerable.Range(1, 300).Select(index =>
+        {
+            string name = "+A1/" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var page = new SnapshotObject { Kind = "page", Type = 4, Oid = index, Name = name, PageType = "Circuit" };
+            page.Hash = SnapshotCanonical.Sha256(SnapshotCanonical.Text(page));
+            return new SnapshotPage { Name = name, Type = 4, Oid = index, Objects = [page], Hash = SnapshotCanonical.PageHash("standard", [page]) };
+        })];
+        return new()
+        {
+            Project = "Line1",
+            ProjectPath = ContextTestSnapshot.ProjectPath,
+            ProjectGuid = "sample@1",
+            Profile = "standard",
+            Format = SnapshotProfiles.Format,
+            PageCount = pages.Count,
+            Pages = pages,
+            Complete = true,
+            SnapshotHash = SnapshotCanonical.SnapshotHash("standard", pages)
+        };
+    }
+
     [Fact]
     public void NullBinding_DoesNotInventRevisionLockOrGeneration()
     {

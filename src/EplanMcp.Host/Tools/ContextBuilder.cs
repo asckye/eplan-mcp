@@ -20,7 +20,8 @@ internal static class ContextBuilder
 
     public static async Task<JsonObject> ReadAsync(IBridgeClient bridge, PackLibrary packs, string? project, JsonElement scope, string[] include, int tokens, string? cabinet, CancellationToken cancellationToken)
     {
-        if (project is null && include.SequenceEqual(["plugins"]))
+        bool pluginsOnly = include.SequenceEqual(["plugins"]);
+        if (project is null && pluginsOnly)
         { return await PluginContextProjection.OfflineAsync(packs, scope, tokens, cancellationToken).ConfigureAwait(false); }
         string[]? Strings(string key) => scope.TryGetProperty(key, out JsonElement value) ? value.Deserialize<string[]>() : null;
         BridgeStatus status = await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false);
@@ -75,14 +76,20 @@ internal static class ContextBuilder
             {
                 snapshot.Profile,
                 snapshot.Format,
-                Pages = pages.Select(p => new { p.Name, p.Type, p.Oid, p.Hash }),
-                Missing = _gaps
-                .Concat(binding is null ? ["config:binding"] : []).Concat(snapshot.SkippedConnections > 0 ? ["snapshot:skipped_connections"] : [])
+                Pages = (pluginsOnly ? Enumerable.Empty<SnapshotPage>() : pages).Select(p => new { p.Name, p.Type, p.Oid, p.Hash }),
+                Missing = pluginsOnly ? [] : _gaps
+                .Concat(binding is null ? ["config:binding"] : []).Concat(snapshot.SkippedConnections > 0 ? ["snapshot:skipped_connections"] : []).ToArray()
             }),
         };
         var items = Sections.ToDictionary(s => s, _ => new List<(JsonObject Item, JsonObject Source)>(), StringComparer.Ordinal);
         if (include.Contains("plugins", StringComparer.Ordinal))
         { await PluginContextProjection.AddAsync(packs, project is null ? null : snapshot.Project.Path, selected.Id, items, result, cancellationToken).ConfigureAwait(false); }
+        if (pluginsOnly)
+        {
+            if (items["plugins"].Count == 0)
+            { result["coverage"]!["missing"]!.AsArray().Add("plugins:no_material"); }
+            return Fit(Clean(result).AsObject(), items, include, tokens);
+        }
         foreach (JsonObject value in config.OfType<JsonObject>())
         {
             JsonObject source = Node(new { snapshot.Project.Path, BindingRevision = binding!.Revision, Cabinet = selected.Id });

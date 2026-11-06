@@ -16,6 +16,18 @@ public sealed class PageReviewEvidenceTests
         Assert.Equal(JTokenType.Null, connection["drawnPath"]!.Type);
     }
 
+    [Theory]
+    [InlineData("1.5", "PE", "6")]
+    [InlineData("", "", "")]
+    public void ConnectionReviewFields_PreserveRawTextAndEmptyStrings(string crossSection, string potentialName, string potentialType)
+    {
+        JObject connection = EplanPageReviewReader.ConnectionRow(new CableDefinitionPlanner.Wire(), null, null, [], crossSection, potentialName, potentialType);
+
+        Assert.Equal(crossSection, (string?)connection["crossSection"]);
+        Assert.Equal(potentialName, (string?)connection["potentialName"]);
+        Assert.Equal(potentialType, (string?)connection["potentialType"]);
+    }
+
     [Fact]
     public void AcceptanceCableWithMembers_SelectsOnlyItsConnections_UsingPublishedLocatorNames()
     {

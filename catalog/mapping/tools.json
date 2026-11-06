@@ -7517,6 +7517,11 @@
         ],
         "tests": [
           {
+            "name": "ContextBudgetTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ContextBudgetTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -14876,6 +14881,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewContractTests.cs"
           },
           {
+            "name": "PageReviewRulePackTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
+          },
+          {
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
@@ -17864,6 +17874,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
+            "name": "PageReviewRulePackTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
+          },
+          {
             "name": "PlacementUpdateTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementUpdateTests.cs"
@@ -19927,6 +19942,11 @@
             "name": "ToolProfileTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
+            "name": "PageReviewRulePackTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
           },
           {
             "name": "PropertySetProtocolTests",

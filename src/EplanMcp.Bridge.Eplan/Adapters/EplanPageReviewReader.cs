@@ -26,7 +26,7 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
             OperationContext.Current.ThrowIfCancellationRequested();
             JObject Row() => new() { ["position"] = new JArray(p.Location), ["locator"] = BridgeJson.FromObject(p.Locator) };
             if (EplanNativePreconditions.Valid(native.AllPlacements).OfType<Function>().FirstOrDefault(f => f.ObjectIdentifier == p.Locator.Oid) is { } f && f is not Cable)
-            { JObject row = Row(); row["tag"] = f.Name; row["library"] = f.SymbolVariant?.SymbolLibraryName; row["symbol"] = f.SymbolVariant?.SymbolName; row["symbol_variant"] = f.SymbolVariant?.VariantNr; row["pins"] = JObject.FromObject(f.Pins.ToDictionary(p => p.Index.ToString(System.Globalization.CultureInfo.InvariantCulture), p => p.Name ?? "")); row["placement"] = BridgeJson.FromObject(p); ((JArray)actual["devices"]!).Add(row); }
+            { JObject row = Row(); row["tag"] = f.Name; row["category"] = f.FunctionCategory.ToString(); row["main"] = f.IsMainFunction; row["library"] = f.SymbolVariant?.SymbolLibraryName; row["symbol"] = f.SymbolVariant?.SymbolName; row["symbol_variant"] = f.SymbolVariant?.VariantNr; row["pins"] = JObject.FromObject(f.Pins.ToDictionary(p => p.Index.ToString(System.Globalization.CultureInfo.InvariantCulture), p => p.Name ?? "")); row["placement"] = BridgeJson.FromObject(p); ((JArray)actual["devices"]!).Add(row); }
             if (p.Kind == "Text")
             { JObject row = Row(); row["text"] = p.Properties["text"]; row["angle"] = p.Properties.TryGetValue("angle", out string? angle) && double.TryParse(angle, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double degrees) ? degrees : null; ((JArray)actual["texts"]!).Add(row); }
         }
@@ -37,7 +37,11 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
             static JToken? End(Pin? pin) => pin?.ParentFunction is { } f ? new JObject { ["device"] = f.Name, ["pin"] = pin.Name ?? "" } : null;
             CableDefinitionPlanner.Wire wire = inventory.Wires.FirstOrDefault(w => w.Locator.Oid == c.ObjectIdentifier) ?? EplanConnectionCreator.ReadCableWire(target.Path, page, c);
             wire.Path = wire.Points.Length == 2 && wire.Points.All(p => p.Length == 2) ? CableDefinitionPlanner.DrawnPath(scene, wire.Points[0], wire.Points[1]) : null;
-            ((JArray)actual["connections"]!).Add(ConnectionRow(wire, End(c.StartPin), End(c.EndPin), c.ConnectionDefPoints.Select(p => p.ObjectIdentifier)));
+            using ConnectionPropertyList properties = c.Properties;
+            static string Raw(PropertyValue value)
+            { using (value) { return value.IsEmpty ? "" : value.ToString(); } }
+            ((JArray)actual["connections"]!).Add(ConnectionRow(wire, End(c.StartPin), End(c.EndPin), c.ConnectionDefPoints.Select(p => p.ObjectIdentifier),
+                Raw(properties.CONNECTION_WIRECROSSSECTION), Raw(properties.POTENTIAL_NAME), Raw(properties.POTENTIAL_TYPE)));
         }
         foreach (Cable cable in EplanNativePreconditions.Valid(native.AllPlacements).OfType<Cable>())
         {

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Host.Packs;
+using EplanMcp.Packs;
+using EplanMcp.Packs.Knowledge;
 
 namespace EplanMcp.Host.Tools;
 
@@ -13,6 +15,8 @@ internal static class PluginContextProjection
         PluginResolution resolution = await new PluginResolver(packs).ResolveAsync(project, cancellationToken, cabinet).ConfigureAwait(false);
         foreach (PluginDescriptor plugin in resolution.Enabled)
         {
+            IReadOnlyList<AssetEntry> assets = plugin.Manifest is { } manifest
+                ? await AssetIndex.ReadAsync(packs.Installed.FolderOf(plugin.Id, plugin.Version), manifest, cancellationToken).ConfigureAwait(false) : [];
             string identity = $"{plugin.Id}@{plugin.Version}";
             string[] keys = [.. (plugin.Manifest?.Provides ?? []).Concat(resolution.Values.EnumerateArray()
                 .Where(value => value.GetProperty("trace").EnumerateArray().Any(trace => trace.TryGetProperty("source", out JsonElement source)
@@ -29,8 +33,10 @@ internal static class PluginContextProjection
                 Standards = plugin.Manifest?.Standards ?? [],
                 ProvidedDefaults = keys,
                 Defaults = defaults,
-                RuleCount = 0,
-                Warnings = plugin.Warnings
+                RuleCount = assets.Count(entry => entry.Document is { Kind: KnowledgeKind.Rule, ApiVersion: KnowledgeDocument.V2ApiVersion }),
+                Signoff = plugin.Manifest?.Signoff ?? new PackSignoff { Status = "draft" },
+                Warnings = plugin.Warnings.Concat(assets.Where(entry => entry.DocumentProblem is not null)
+                    .Select(entry => $"{identity}:{entry.Resource.Path}: {entry.DocumentProblem}"))
             }), new JsonObject()));
         }
         foreach (string warning in resolution.Warnings)
