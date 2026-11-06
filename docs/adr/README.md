@@ -58,3 +58,4 @@
 | [0049](0049-write-tools-preview-by-default.md) | 写入工具默认只预览，执行须显式 `dry_run: false`（MCP-23） | Accepted | 单向门 |
 | [0050](0050-bridge-frames-reject-unknown-members.md) | Bridge 管道消息拒绝未知字段和重复字段（SEC-14） | Accepted | 单向门 |
 | [0051](0051-build-release-packages-locally.md) | 发布包在开发机上打包，不经发布工作流 | Accepted | 双向门 |
+| [0052](0052-write-title-block-project-properties.md) | 允许 `eplan_property_set` 写标题栏用到的项目属性 | Proposed | 双向门 |
