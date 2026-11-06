@@ -26,8 +26,16 @@ public sealed class PageReviewRulePackTests(LiveEplan eplan, WriteHost host) : I
         {
             await eplan.CallAsync("eplan_device_place", new()
             {
-                ["project"] = session.Project, ["page"] = page, ["library"] = "IEC_symbol", ["symbol"] = "K", ["symbol_variant"] = 0,
-                ["x"] = 80, ["y"] = y, ["tag"] = tag + "R" + suffix, ["connection_designations"] = pins, ["dry_run"] = false,
+                ["project"] = session.Project,
+                ["page"] = page,
+                ["library"] = "IEC_symbol",
+                ["symbol"] = "K",
+                ["symbol_variant"] = 0,
+                ["x"] = 80,
+                ["y"] = y,
+                ["tag"] = tag + "R" + suffix,
+                ["connection_designations"] = pins,
+                ["dry_run"] = false,
             });
         }
         await eplan.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page }, ["dry_run"] = false });
@@ -62,7 +70,9 @@ public sealed class PageReviewRulePackTests(LiveEplan eplan, WriteHost host) : I
 
     private async Task DefineColourAsync(PlanStepLiveSession session, string page, string colour) => _ = await eplan.CallAsync("eplan_connection_create", new()
     {
-        ["project"] = session.Project, ["page"] = page, ["dry_run"] = false,
+        ["project"] = session.Project,
+        ["page"] = page,
+        ["dry_run"] = false,
         ["items"] = new[] { new { kind = "definition_point", position = _wire, color = colour } },
     });
 

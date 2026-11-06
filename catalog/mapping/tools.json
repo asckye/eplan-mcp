@@ -6692,6 +6692,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageDisplayToolTests.cs"
           },
           {
+            "name": "PageReviewRulePackTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
+          },
+          {
             "name": "PotentialEngineeringToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PotentialEngineeringToolTests.cs"
@@ -6750,6 +6755,11 @@
             "name": "InterruptionVisibleNameTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionVisibleNameTests.cs"
+          },
+          {
+            "name": "PageReviewRulePackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewRulePackTests.cs"
           },
           {
             "name": "PageReviewTests",
@@ -7000,6 +7010,11 @@
             "name": "InterruptionPairingSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/InterruptionPairingSpikeTests.cs"
+          },
+          {
+            "name": "PageReviewRulePackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewRulePackTests.cs"
           },
           {
             "name": "PageReviewTests",
@@ -8588,6 +8603,11 @@
             "file": "tests/EplanMcp.Large.Tests/LayoutGuardWarningTests.cs"
           },
           {
+            "name": "PageReviewRulePackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewRulePackTests.cs"
+          },
+          {
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
@@ -9004,6 +9024,11 @@
             "name": "DeviceUpdateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/DeviceUpdateToolTests.cs"
+          },
+          {
+            "name": "PageReviewRulePackTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
           },
           {
             "name": "DevicePlaceTests",
@@ -12984,6 +13009,11 @@
             "name": "PluginInstallTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/PluginInstallTests.cs"
+          },
+          {
+            "name": "PageReviewRulePackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewRulePackTests.cs"
           }
         ],
         "operationTests": []
@@ -14924,6 +14954,11 @@
             "name": "PageReviewRulePackTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
+          },
+          {
+            "name": "PageReviewRulePackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewRulePackTests.cs"
           },
           {
             "name": "PageReviewTests",
@@ -19987,11 +20022,6 @@
             "name": "ToolProfileTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
-          },
-          {
-            "name": "PageReviewRulePackTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
           },
           {
             "name": "PropertySetProtocolTests",

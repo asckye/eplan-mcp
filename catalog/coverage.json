@@ -1095,8 +1095,8 @@
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
       "small": 4,
-      "medium": 10,
-      "large": 16,
+      "medium": 11,
+      "large": 17,
       "apiNotes": [
         "A52",
         "A55",
@@ -1120,7 +1120,7 @@
       "spec": "docs/tools/eplan_connection_generate.md",
       "small": 2,
       "medium": 2,
-      "large": 9,
+      "large": 10,
       "apiNotes": [
         "A3",
         "A11",
@@ -1283,7 +1283,7 @@
       "spec": "docs/tools/eplan_device_place.md",
       "small": 12,
       "medium": 7,
-      "large": 25,
+      "large": 26,
       "apiNotes": [
         "A13",
         "A14",
@@ -1340,7 +1340,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_device_update.md",
       "small": 2,
-      "medium": 1,
+      "medium": 2,
       "large": 5,
       "apiNotes": [
         "A3",
@@ -1801,7 +1801,7 @@
       "spec": "docs/tools/eplan_object_find.md",
       "small": 3,
       "medium": 1,
-      "large": 15,
+      "large": 16,
       "apiNotes": [
         "A57",
         "A60"
@@ -1900,7 +1900,7 @@
       "spec": "docs/tools/eplan_pack_install.md",
       "small": 1,
       "medium": 1,
-      "large": 0,
+      "large": 1,
       "apiNotes": []
     },
     {
@@ -2104,7 +2104,7 @@
       "spec": "docs/tools/eplan_page_review.md",
       "small": 4,
       "medium": 2,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A41",
         "A64",
@@ -2674,7 +2674,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_property_set.md",
       "small": 2,
-      "medium": 2,
+      "medium": 1,
       "large": 3,
       "apiNotes": [
         "A36",
