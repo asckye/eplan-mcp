@@ -10,7 +10,7 @@ after:
   s1: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9912", tag_contains: "-S1" }, pick: $.total }
   s2: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9912", tag_contains: "-S2" }, pick: $.total }
   k2: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9912", tag_contains: "-K2" }, pick: $.total }
-  kinds: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/9912", include_drawings: true }, pick: "$.drawings.items[*].kind" }
+  breaks: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/9912", object_type: InterruptionPoint }, pick: "$.items[*].name" }
   wires: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9912" }, pick: $.total }
   through_s2: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9912", device: "=GAA+A1-S2" }, pick: $.total }
   overlaps: { tool: eplan_page_review, args: { page: "=GAA+A1&EFS1/9912", checks: [overlaps] }, pick: $.summary.clean }
@@ -19,8 +19,8 @@ checks:
   - { after: s1, at_least: 1 }
   - { after: s2, at_least: 1 }
   - { after: k2, at_least: 1 }
-  - { after: kinds, contains: InterruptionPoint }
-  - { after: wires, at_least: 3 }
+  - { after: breaks, set_equals: ["=GAA+A1-24V", "=GAA+A1-0V"] }
+  - { after: wires, equals: 2 }
   - { after: through_s2, equals: 2 }
   - { after: overlaps, equals: true }
 budget: { max_tool_calls: 50, max_minutes: 20, max_usd: 3 }

@@ -6,7 +6,7 @@ prompt: |
   端子 1、2、3 分别接到电机的三相。布局要整齐，不能重叠。画完后确认连接已经生成。
 answer: { type: object, required: [done], properties: { done: { type: boolean, description: true when the page is drawn and connected } } }
 after:
-  terminals: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9914", tag_contains: "-X9" }, pick: $.total }
+  terminals: { tool: eplan_terminal_strip_get, args: { strip: "-X9" }, pick: $.total }
   motor: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9914", tag_contains: "-M9" }, pick: $.total }
   wires: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9914" }, pick: $.total }
   overlaps: { tool: eplan_page_review, args: { page: "=GAA+A1&EFS1/9914", checks: [overlaps] }, pick: $.summary.clean }
