@@ -1,0 +1,59 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "converter-letter"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 81346-2:2019",
+      "clause": "letter code table; clause number to be confirmed at sign-off",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "function",
+      "where": {
+        "all": [
+          {
+            "eq": [
+              {
+                "property": "function.main"
+              },
+              {
+                "literal": true
+              }
+            ]
+          },
+          {
+            "in": [
+              {
+                "property": "function.category"
+              },
+              {
+                "literal": [
+                  "Converter",
+                  "Source"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "matches": [
+        {
+          "property": "function.letters"
+        },
+        {
+          "literal": "^[T]"
+        }
+      ]
+    },
+    "message": {
+      "zh": "变换器和电源的标识字母以 T 开头。",
+      "en": "Converter and power supply designations start with T."
+    }
+  }
+}

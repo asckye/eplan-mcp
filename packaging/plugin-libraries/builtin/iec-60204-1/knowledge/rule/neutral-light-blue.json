@@ -1,0 +1,80 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "neutral-light-blue"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 60204-1:2016",
+      "clause": "13.2.3",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "connection",
+      "where": {
+        "any": [
+          {
+            "all": [
+              {
+                "exists": [
+                  {
+                    "property": "connection.potential_name"
+                  }
+                ]
+              },
+              {
+                "matches": [
+                  {
+                    "property": "connection.potential_name"
+                  },
+                  {
+                    "literal": "^N$"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "exists": [
+                  {
+                    "property": "connection.pins"
+                  }
+                ]
+              },
+              {
+                "matches": [
+                  {
+                    "property": "connection.pins"
+                  },
+                  {
+                    "literal": "(^|\\|)(N)(\\||$)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "in": [
+        {
+          "property": "connection.colour"
+        },
+        {
+          "literal": [
+            "BU"
+          ]
+        }
+      ]
+    },
+    "message": {
+      "zh": "中性导体用浅蓝色，颜色代码 BU。",
+      "en": "Neutral conductors use light blue, colour code BU."
+    }
+  }
+}

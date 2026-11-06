@@ -1,0 +1,80 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "pe-green-yellow"
+  },
+  "spec": {
+    "severity": "mandatory",
+    "source": {
+      "standard": "IEC 60204-1:2016",
+      "clause": "13.2.2",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "connection",
+      "where": {
+        "any": [
+          {
+            "all": [
+              {
+                "exists": [
+                  {
+                    "property": "connection.potential_name"
+                  }
+                ]
+              },
+              {
+                "matches": [
+                  {
+                    "property": "connection.potential_name"
+                  },
+                  {
+                    "literal": "^PEN?$"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "exists": [
+                  {
+                    "property": "connection.pins"
+                  }
+                ]
+              },
+              {
+                "matches": [
+                  {
+                    "property": "connection.pins"
+                  },
+                  {
+                    "literal": "(^|\\|)(PE)(\\||$)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "in": [
+        {
+          "property": "connection.colour"
+        },
+        {
+          "literal": [
+            "GNYE"
+          ]
+        }
+      ]
+    },
+    "message": {
+      "zh": "保护导体要用绿黄双色，颜色代码 GNYE。",
+      "en": "Protective conductors use green-and-yellow, colour code GNYE."
+    }
+  }
+}

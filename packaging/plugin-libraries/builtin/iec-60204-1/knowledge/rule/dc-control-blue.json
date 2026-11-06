@@ -1,0 +1,55 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "dc-control-blue"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 60204-1:2016",
+      "clause": "13.2.4",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "connection",
+      "where": {
+        "all": [
+          {
+            "exists": [
+              {
+                "property": "connection.potential_name"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "property": "connection.potential_name"
+              },
+              {
+                "literal": "^(\\+?24 ?[Vv][+-]?|0 ?[Vv]|L\\+|L-)$"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "in": [
+        {
+          "property": "connection.colour"
+        },
+        {
+          "literal": [
+            "BU"
+          ]
+        }
+      ]
+    },
+    "message": {
+      "zh": "直流控制回路用蓝色，颜色代码 BU。",
+      "en": "DC control circuits use blue, colour code BU."
+    }
+  }
+}

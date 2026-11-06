@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 3,
+  "id": "iec-81346",
+  "name": "IEC 81346 设备标识字母（草稿）",
+  "version": "0.1.0",
+  "kind": "standard",
+  "provides": [
+    "rules"
+  ],
+  "standards": [
+    "IEC 81346-2:2019"
+  ],
+  "description": "按功能类别检查标识首字母的审图规则，只有参数；未经工程师签核，只用于 scratch 项目。",
+  "compatibility": {},
+  "resources": [],
+  "signoff": {
+    "status": "draft"
+  },
+  "provenance": {
+    "createdBy": "EplanMcp builtin library builder",
+    "createdAt": "2026-11-06T00:00:00Z"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "plc-letter"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 81346-2:2019",
+      "clause": "letter code table; clause number to be confirmed at sign-off",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "function",
+      "where": {
+        "all": [
+          {
+            "eq": [
+              {
+                "property": "function.main"
+              },
+              {
+                "literal": true
+              }
+            ]
+          },
+          {
+            "in": [
+              {
+                "property": "function.category"
+              },
+              {
+                "literal": [
+                  "PLCBox"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "matches": [
+        {
+          "property": "function.letters"
+        },
+        {
+          "literal": "^[KA]"
+        }
+      ]
+    },
+    "message": {
+      "zh": "PLC的标识字母以 K、A 开头。",
+      "en": "PLC designations start with K or A."
+    }
+  }
+}

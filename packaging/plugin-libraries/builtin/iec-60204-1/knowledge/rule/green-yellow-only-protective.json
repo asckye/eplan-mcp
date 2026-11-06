@@ -1,0 +1,89 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "green-yellow-only-protective"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 60204-1:2016",
+      "clause": "13.2.2",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "connection",
+      "where": {
+        "all": [
+          {
+            "exists": [
+              {
+                "property": "connection.colour"
+              }
+            ]
+          },
+          {
+            "eq": [
+              {
+                "property": "connection.colour"
+              },
+              {
+                "literal": "GNYE"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "any": [
+        {
+          "all": [
+            {
+              "exists": [
+                {
+                  "property": "connection.potential_name"
+                }
+              ]
+            },
+            {
+              "matches": [
+                {
+                  "property": "connection.potential_name"
+                },
+                {
+                  "literal": "^PEN?$"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "all": [
+            {
+              "exists": [
+                {
+                  "property": "connection.pins"
+                }
+              ]
+            },
+            {
+              "matches": [
+                {
+                  "property": "connection.pins"
+                },
+                {
+                  "literal": "(^|\\|)(PE)(\\||$)"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "message": {
+      "zh": "绿黄只能用于保护导体；这根线没有 PE 电位，也没有接 PE 连接点。如果它就是保护导体，请给它定义 PE 电位。",
+      "en": "Green-and-yellow is only for protective conductors; this wire has no PE potential or PE pin. If it is one, define its PE potential."
+    }
+  }
+}

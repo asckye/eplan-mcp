@@ -1,0 +1,59 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "cable-letter"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 81346-2:2019",
+      "clause": "letter code table; clause number to be confirmed at sign-off",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "function",
+      "where": {
+        "all": [
+          {
+            "eq": [
+              {
+                "property": "function.main"
+              },
+              {
+                "literal": true
+              }
+            ]
+          },
+          {
+            "in": [
+              {
+                "property": "function.category"
+              },
+              {
+                "literal": [
+                  "Cable",
+                  "BusBarDefText"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "matches": [
+        {
+          "property": "function.letters"
+        },
+        {
+          "literal": "^[W]"
+        }
+      ]
+    },
+    "message": {
+      "zh": "电缆和母线的标识字母以 W 开头。",
+      "en": "Cable and busbar designations start with W."
+    }
+  }
+}

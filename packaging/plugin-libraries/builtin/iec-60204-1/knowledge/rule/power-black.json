@@ -1,0 +1,80 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "power-black"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 60204-1:2016",
+      "clause": "13.2.4",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "connection",
+      "where": {
+        "any": [
+          {
+            "all": [
+              {
+                "exists": [
+                  {
+                    "property": "connection.potential_name"
+                  }
+                ]
+              },
+              {
+                "matches": [
+                  {
+                    "property": "connection.potential_name"
+                  },
+                  {
+                    "literal": "^L[123]$"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "all": [
+              {
+                "exists": [
+                  {
+                    "property": "connection.pins"
+                  }
+                ]
+              },
+              {
+                "matches": [
+                  {
+                    "property": "connection.pins"
+                  },
+                  {
+                    "literal": "(^|\\|)(L[123]|T[123]|U1?|V1?|W1?)(\\||$)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "in": [
+        {
+          "property": "connection.colour"
+        },
+        {
+          "literal": [
+            "BK"
+          ]
+        }
+      ]
+    },
+    "message": {
+      "zh": "交直流动力回路用黑色，颜色代码 BK。",
+      "en": "AC and DC power circuits use black, colour code BK."
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "protection-letter"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 81346-2:2019",
+      "clause": "letter code table; clause number to be confirmed at sign-off",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "function",
+      "where": {
+        "all": [
+          {
+            "eq": [
+              {
+                "property": "function.main"
+              },
+              {
+                "literal": true
+              }
+            ]
+          },
+          {
+            "in": [
+              {
+                "property": "function.category"
+              },
+              {
+                "literal": [
+                  "Overload",
+                  "MotorOverloadSwitch",
+                  "CircuitBreaker",
+                  "CurrentCircuitBreaker"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "matches": [
+        {
+          "property": "function.letters"
+        },
+        {
+          "literal": "^[FQ]"
+        }
+      ]
+    },
+    "message": {
+      "zh": "保护器件的标识字母以 F、Q 开头。",
+      "en": "Protective device designations start with F or Q."
+    }
+  }
+}

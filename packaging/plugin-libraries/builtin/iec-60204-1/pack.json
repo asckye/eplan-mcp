@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 3,
+  "id": "iec-60204-1",
+  "name": "IEC 60204-1 导线颜色（草稿）",
+  "version": "0.1.0",
+  "kind": "standard",
+  "provides": [
+    "rules"
+  ],
+  "standards": [
+    "IEC 60204-1:2016"
+  ],
+  "description": "导线颜色的审图规则，只有参数和条款号；未经工程师签核，只用于 scratch 项目。",
+  "compatibility": {},
+  "resources": [],
+  "signoff": {
+    "status": "draft"
+  },
+  "provenance": {
+    "createdBy": "EplanMcp builtin library builder",
+    "createdAt": "2026-11-06T00:00:00Z"
+  }
+}
