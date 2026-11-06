@@ -496,3 +496,10 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `SPECIAL/SC2`（结构盒，折线）的画笔来自符号，是点划线；`SetLogicalArea` 之后仍是矩形，图纸上标签处的切角没有自动出现。
 - **端子和电缆的功能文本 20011 会显示在原理图上。** `X2_2` 只有“默认”和“用户定义”两种属性排列，默认就显示它，电缆定义线上的文字还会被顶上去一行。这份图纸的报表列了这些文字，原理图却不显示，图纸是怎么隐藏的还没查明，所以这轮没有写入。
 - **注册插件：** `eplan-addin.ps1` 异步启动 EPLAN，要等它做完再启动下一个，否则加载的还是旧版本。EPLAN 按进程把插件影子复制到 `%APPDATA%\EPLAN\ShadowCopyAssemblies\<pid>`，比较哈希就知道加载的是否最新。
+
+### A104. 宏文件、连接符号和交换源目标（2026-11-05，EPLAN 2026.0.3，Pro Panel，LargeWrite 新页）
+- `WindowMacro.Create(路径, RepresentationType.MultiLine, 0, Placement[], MultiLangString, PointD)` 写出 `.ema`；`PageMacro.Create(路径, Page[], MultiLangString)` 写出 `.emp`。路径可以在 scratch 下。
+- `FunctionDefinition` 的基础符号：插针 101.2.1 是 `XBS`（2 个连接点），插头定义 103.1.1 是 `PDEF`（0 个），部件定义点 10.1.1 是 `ADP`（0 个）。`Function.Create(page, definition)` 能创建并设位置，但 `SymbolVariant` 读出 null，要放符号应走 `Function.Create(page, variant)`。
+- `XCMSwapSourceTargetAction`：全选后执行，连接的起止端对调（`XS4:1 -> XS4:2` 变成 `XS4:2 -> XS4:1`），同时在线中间自动放一个 `ConnectionDefinitionPoint`（120,140.625）；一次 `XEsUndoAction` 恢复。只选两端的端子再执行，EPLAN 不返回，大概率在等界面操作，原因没有查清。
+- 屏蔽：`Shield.Create(page, variant, p1, p2)` 抛 S063176（无法锁定对象），先 `Project.LockAllObjects()` 也一样；`Function.Create(page, variant, p1, p2)` 抛 S063226。用的是 `FunctionDefinition` 401.1.1 的基础符号。还没有可用的做法。
+— 探针 `ConnToolsSpikeTests`（未合入）。
