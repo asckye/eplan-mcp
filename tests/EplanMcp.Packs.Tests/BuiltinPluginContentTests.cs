@@ -17,7 +17,7 @@ public sealed class BuiltinPluginContentTests
         string output = Path.Combine(temporary.Root, "library");
         await PluginLibraryBuilder.BuildAsync(Source, output, Cancel);
         PluginLibraryIndex index = PluginLibraryReader.Read(await File.ReadAllBytesAsync(Path.Combine(output, "library.json"), Cancel));
-        PluginLibraryEntry entry = Assert.Single(index.Plugins);
+        PluginLibraryEntry entry = Assert.Single(index.Plugins, plugin => plugin.Id == "iec-base");
         Assert.Equal("builtin", index.Name);
         Assert.Equal("iec-base", entry.Id);
         Assert.Equal(PackKind.Standard, entry.Kind);
@@ -52,7 +52,7 @@ public sealed class BuiltinPluginContentTests
         string output = Path.Combine(temporary.Root, "library");
         await PluginLibraryBuilder.BuildAsync(Source, output, Cancel);
         byte[] firstIndex = await File.ReadAllBytesAsync(Path.Combine(output, "library.json"), Cancel);
-        PluginLibraryEntry entry = Assert.Single(PluginLibraryReader.Read(firstIndex).Plugins);
+        PluginLibraryEntry entry = Assert.Single(PluginLibraryReader.Read(firstIndex).Plugins, plugin => plugin.Id == "iec-base");
         byte[] firstArchive = await File.ReadAllBytesAsync(Path.Combine(output, entry.File), Cancel);
         await PluginLibraryBuilder.BuildAsync(Source, output, Cancel);
         Assert.Equal(firstIndex, await File.ReadAllBytesAsync(Path.Combine(output, "library.json"), Cancel));
