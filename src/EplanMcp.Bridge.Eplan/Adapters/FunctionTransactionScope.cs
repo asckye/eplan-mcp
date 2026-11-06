@@ -13,13 +13,15 @@ internal sealed class FunctionTransactionScope : ITransactionScope
     private QuietModeStep? _quietMode;
     private bool _disposed;
     private readonly bool _undoCommitted;
+    private readonly bool _undoAbandoned;
     private bool _committed;
     private bool _transactionDisposed;
 
-    public FunctionTransactionScope(Project project, string description, bool undoCommitted = false)
+    public FunctionTransactionScope(Project project, string description, bool undoCommitted = false, bool undoAbandoned = false)
     {
         MainThread.Assert();
         _undoCommitted = undoCommitted;
+        _undoAbandoned = undoAbandoned;
 #pragma warning disable RS0030 // A13/A52/S41: explicit locks are required for Function.Create under Transaction.
         project.LockAllObjects();
 #pragma warning restore RS0030
@@ -64,6 +66,9 @@ internal sealed class FunctionTransactionScope : ITransactionScope
     public void Rollback()
     {
         EndQuietMode();
+        // Agent eval 2026-11-05, live T8b: Abort leaves interruption points and cable lines on the page; undo removes them once committed.
+        if (!_committed && _undoAbandoned)
+        { _transaction.Commit(); _committed = true; _transaction.Dispose(); _transactionDisposed = true; }
         // UndoStep's documented lifetime spans committed transactions; D5 keeps generation in that same step.
         if (_committed && _undoCommitted)
         { using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs); _undoStep.DoUndo(); }

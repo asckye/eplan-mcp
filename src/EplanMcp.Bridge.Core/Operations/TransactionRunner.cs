@@ -35,7 +35,7 @@ public static class TransactionRunner
         catch (Exception failure)
         {
             WriteExceptionDiagnostics.Report(failure);
-            Abandon(scope, tool, closeUndo: shouldCommit is null, verifyRollback);
+            Abandon(scope, tool, closeUndo: shouldCommit is null, verifyRollback, failure);
             // P-05, ERR-01: retain completed rollback evidence without replacing the original exception.
             OperationContext.RecordRollback(failure);
             if (failure is BridgeErrorException known)
@@ -70,7 +70,7 @@ public static class TransactionRunner
         catch (Exception failure)
         {
             WriteExceptionDiagnostics.Report(failure);
-            Abandon(scope, tool, closeUndo: false, verifyRollback);
+            Abandon(scope, tool, closeUndo: false, verifyRollback, failure);
             if (failure is BridgeErrorException { Error.Reason: ErrorReason.InvalidArgument } refusal)
             {
                 refusal.Error.Execution = ExecutionState.RolledBack;
@@ -115,7 +115,7 @@ public static class TransactionRunner
     /// Rolls back; legacy writes close first (S1/S2), PDF imports leave the step unclosed as verified in S44.
     /// A failed close leaves the data alone; a failed rollback or release leaves the project in an unknown state.
     /// </summary>
-    private static void Abandon(ITransactionScope scope, string tool, bool closeUndo, Action? verifyRollback = null)
+    private static void Abandon(ITransactionScope scope, string tool, bool closeUndo, Action? verifyRollback = null, Exception? original = null)
     {
         try
         {
@@ -140,7 +140,7 @@ public static class TransactionRunner
         {
             WriteExceptionDiagnostics.Report(ex);
             DisposeAfterFailure(scope);
-            throw Unknown(tool, "rolling back", ex);
+            throw Unknown(tool, "rolling back", ex, original);
         }
     }
 
@@ -157,13 +157,16 @@ public static class TransactionRunner
         }
     }
 
-    private static BridgeErrorException Unknown(string tool, string step, Exception cause)
+    private static BridgeErrorException Unknown(string tool, string step, Exception cause, Exception? original = null)
     {
         var error = new BridgeErrorException(
             ErrorReason.OutcomeUnknown,
             $"EPLAN failed while {step} the change of {tool}, so whether the project changed is unknown; it may hold all, part or none of it. Do not call this tool again; ask the engineer to check the project in EPLAN.",
             cause);
         error.Error.Execution = ExecutionState.Unknown;
+        // Agent eval 2026-11-05: the rollback check replaced the reason the write failed in the first place.
+        if (original is not null)
+        { error.Error.Message += " The write had failed with: " + original.Message + " Rollback check: " + cause.Message; }
         return error;
     }
 }

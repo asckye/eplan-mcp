@@ -79,6 +79,21 @@ public sealed class ConnectionDeferredGenerationTests
         Assert.False(result.ContainsKey("interruptionScope"));
     }
 
+    /// <summary>Agent eval 2026-11-05: EPLAN stores a bare 24V as =-24V, so a short name takes the page's structure before writing.</summary>
+    [Theory]
+    [InlineData("24V", "=F+A1-24V")]
+    [InlineData("-24V", "=F+A1-24V")]
+    [InlineData("=G+B2-24V", "=G+B2-24V")]
+    [InlineData("+B2-24V", "+B2-24V")]
+    public void InterruptionName_ShortFormsTakeThePageStructure(string requested, string planned)
+    {
+        var creator = new Creator();
+        creator.Fixture.Symbols.Add(ConnectionCreateFixture.Variant("BP", "InterruptionPoint", 0, "Up"));
+        creator.Fixture.Request["generate"] = false;
+        creator.Fixture.Request["items"] = new JArray(new JObject { ["kind"] = "interruption_point", ["position"] = new JArray(64, 64), ["direction"] = "Up", ["name"] = requested });
+        Assert.Equal(planned, (string?)creator.Execute()["symbols"]![0]!["interruption"]!["name"]);
+    }
+
     [Theory]
     [InlineData("wire")]
     [InlineData("definition_point")]

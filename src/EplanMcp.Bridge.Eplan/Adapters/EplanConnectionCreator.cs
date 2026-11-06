@@ -142,8 +142,8 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                             item.Row["activePropertySet"] = EplanSymbolArrangement.ReadActive(properties);
                         }
                     }
-                    if (point.Name != (string)interruption["name"]!)
-                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs; supply the exact full name."); }
+                    if (!DrawingNames.SameName((string)interruption["name"]!, point.Name, page))
+                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs: requested '" + (string)interruption["name"]! + "', EPLAN stored '" + point.Name + "'. Supply the exact full name."); }
                 }
                 // Owner 2026-11-02: the symbol's default arrangement shows the cross-reference, as after EPLAN's insert
                 // command; an extra 24300 text switched the point to a user-defined arrangement.
@@ -202,7 +202,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     private static BridgeErrorException SymbolMismatch(string detail) => new(ErrorReason.EplanOperationFailed, "Created symbol readback differs: " + detail + ".");
 
     private sealed class PlacementFactory(string project, bool undoCommitted) : ITransactionScopeFactory
-    { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription, undoCommitted); }
+    { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription, undoCommitted, undoAbandoned: undoCommitted); }
     public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => new PlacementFactory(project, undoCommitted);
 
     public JObject Interruptions(string project, IReadOnlyList<string> pages)

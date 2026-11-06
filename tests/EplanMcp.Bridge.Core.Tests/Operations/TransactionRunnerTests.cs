@@ -98,6 +98,18 @@ public sealed class TransactionRunnerTests
         Assert.IsType<InvalidOperationException>(error.InnerException);
     }
 
+    /// <summary>Agent eval 2026-11-05: the rollback check's message replaced the reason the write failed.</summary>
+    [Fact]
+    public void AFailedRollbackCheck_ReportsWhyTheWriteFailedAndWhyTheCheckFailed()
+    {
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => TransactionRunner.Run<int>(_transactions, Tool,
+            () => throw new InvalidOperationException("name differs"), _ => true, null, () => throw new InvalidOperationException("page changed"))).Error;
+
+        Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Reason, error.Execution));
+        Assert.Contains("name differs", error.Message, StringComparison.Ordinal);
+        Assert.Contains("page changed", error.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void ACommitThatFails_MakesTheOutcomeUnknownAndIsNeverRolledBack()
     {

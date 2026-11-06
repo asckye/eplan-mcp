@@ -158,7 +158,7 @@ public static class ConnectionCreatePlanner
                 Require(item["sort_code"] is null || item["sort_code"]!.Type == JTokenType.Integer
                     && long.TryParse(item["sort_code"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out _), at + "/sort_code", "Supply a nonnegative Int64 integer.");
                 Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])
-                    && !((string)item["name"]!).Any(char.IsControl), at + "/name", "Supply the exact shared full business name (1..200 characters).");
+                    && !((string)item["name"]!).Any(char.IsControl), at + "/name", "Supply the shared name, 1..200 characters: 24V or -24V takes this page's structure, =F+A1-24V stays as written.");
                 Require(item["direction"]?.Type == JTokenType.String, at + "/direction", "Supply Up, Down, Left or Right.");
                 Require(item["counterpart_pages"] is null || item["counterpart_pages"] is JArray { Count: >= 1 and <= 20 } scope && scope.All(p => p.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)p))
                     && scope.Values<string>().Distinct(StringComparer.Ordinal).Count() == scope.Count, at + "/counterpart_pages", "Supply 1..20 distinct exact counterpart pages.");
@@ -174,7 +174,11 @@ public static class ConnectionCreatePlanner
                     Require(explicitVariant.Type == JTokenType.Integer && int.TryParse(explicitVariant.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _), at + "/symbol_variant", "Supply an Int32 variant number.");
                     requestedVariants.Add(Key(point), ((int)explicitVariant, at + "/symbol_variant"));
                 }
-                interruptions.Add(Key(point), (JObject)item.DeepClone());
+                var interruption = (JObject)item.DeepClone();
+                // Agent eval 2026-11-05: a model writes 24V as an engineer would; EPLAN stores that as =-24V, without the page's structure.
+                string shared = (string)item["name"]!;
+                interruption["name"] = shared[0] is '=' or '+' ? shared : DrawingNames.DeviceStructureOf(scene.Page.Page) + (shared[0] == '-' ? "" : "-") + shared;
+                interruptions.Add(Key(point), interruption);
                 continue;
             }
             Members(item, at, wire ? "kind from to points" : "kind position directions", wire ? "definition_point" : (string?)item["kind"] == "t_node" ? "variant" : "");

@@ -9,6 +9,8 @@
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
 ### 修复
+- `eplan_connection_create` 的中断点接受短名称：`24V`、`-24V` 取本页结构，`=F+A1-24V` 按原样写入。之前短名称读回不一致，且失败后中断点留在页上，工具报 `OUTCOME_UNKNOWN` 并暂停之后的写入。
+- `eplan_connection_create` 放置中断点失败时改用撤销回滚，`Transaction.Abort` 留下的对象不再残留；`OUTCOME_UNKNOWN` 的消息同时说明写入失败和回滚核对失败的原因。
 - `eplan_placement_create` 创建块时在规划阶段拒绝 Function 成员，避免 EPLAN 静默丢弃符号。
 
 ### Changed
