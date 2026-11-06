@@ -45,6 +45,17 @@ public sealed class LanguageSetOperationTests
     }
 
     [Fact]
+    public void ShowMissingTranslation_IsPlannedAndWritten()
+    {
+        LanguageSetArgs args = Args();
+        args.ShowMissingTranslation = false;
+        Assert.EndsWith("placeholder: False", Assert.Single(Plan(args).Changes).NewValue, StringComparison.Ordinal);
+        Execute(args);
+        Assert.Contains("SetMissingShown False", _languages.Calls);
+        Assert.False(_languages.Settings.MissingShown);
+    }
+
+    [Fact]
     public void Plan_Source_IsPartOfTheUpdateBetweenTheAddedLanguagesAndTheDisplay()
     {
         WritePlan plan = Plan(Args(display: ["en_US"], add: ["sv_SE"], source: "de_DE"));
@@ -138,7 +149,7 @@ public sealed class LanguageSetOperationTests
     {
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(new LanguageSetArgs { Project = "Line1" })).Error;
 
-        Assert.Equal((ErrorReason.InvalidArgument, "Give at least one of 'display', 'add' and 'source'."), (error.Reason, error.Metadata!["violations"]));
+        Assert.Equal((ErrorReason.InvalidArgument, "Give at least one of 'display', 'add', 'source' and 'show_missing_translation'."), (error.Reason, error.Metadata!["violations"]));
     }
 
     [Fact]

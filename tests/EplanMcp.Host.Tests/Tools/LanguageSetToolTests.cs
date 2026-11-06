@@ -276,12 +276,12 @@ public sealed class LanguageSetToolTests : IDisposable
 
     [Theory]
     [InlineData(" ", new[] { "en_US" }, null, "'project' is required")]
-    [InlineData("Line1", null, null, "Give at least one of 'display', 'add' and 'source'.")]
+    [InlineData("Line1", null, null, "Give at least one of 'display', 'add', 'source' and 'show_missing_translation'.")]
     [InlineData("Line1", new string[0], null, "'display' must hold 1 to 10 language codes such as en_US; omit it to leave it out.")]
     [InlineData("Line1", null, new[] { "aa_AA", "ab_AA", "ac_AA", "ad_AA", "ae_AA", "af_AA", "ag_AA", "ah_AA", "ai_AA", "aj_AA", "ak_AA" }, "'add' must hold 1 to 10 language codes such as en_US; omit it to leave it out.")]
     public async Task HostChecks_FailBeforeTheBridgeIsAsked(string project, string[]? display, string[]? add, string violation)
     {
-        JsonElement error = WriteToolHarness.Error(await LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), project, display, add, null, false, TestContext.Current.CancellationToken));
+        JsonElement error = WriteToolHarness.Error(await LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), project, display, add, null, null, false, TestContext.Current.CancellationToken));
 
         Assert.Contains(violation, error.GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
         Assert.Equal(0, _harness.Bridge.Invocations);
@@ -292,7 +292,7 @@ public sealed class LanguageSetToolTests : IDisposable
     {
         JsonElement error = WriteToolHarness.Error(await Set(source: string.Empty));
 
-        Assert.Contains("Give at least one of 'display', 'add' and 'source'.", error.GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
+        Assert.Contains("Give at least one of 'display', 'add', 'source' and 'show_missing_translation'.", error.GetProperty("metadata").GetProperty("violations").GetString(), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -332,5 +332,5 @@ public sealed class LanguageSetToolTests : IDisposable
     private static List<string?> Codes(JsonElement list) => [.. list.EnumerateArray().Select(code => code.GetString())];
 
     private Task<CallToolResult> Set(string[]? display = null, string[]? add = null, string? source = null, bool dryRun = false) =>
-        LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), "Line1", display, add, source, dryRun, TestContext.Current.CancellationToken);
+        LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), "Line1", display, add, source, null, dryRun, TestContext.Current.CancellationToken);
 }

@@ -39,8 +39,7 @@ internal sealed class LanguageWriteTools
         OutputSchemaType = typeof(LanguageSetResult))]
     [Description(
         "Sets displayed or source languages and adds translation languages; translates no text. " +
-        "Omit/true previews; false executes, with approval outside scratch. Ctrl+Z does not undo settings; restore with before values and dry_run:false. " +
-        "Example: {\"project\":\"Line1\",\"display\":[\"en_US\",\"zh_CN\"]}. Remove: eplan_language_remove.")]
+        "Approval outside scratch. Ctrl+Z does not undo; restore with before values. Remove: eplan_language_remove.")]
     public static async Task<CallToolResult> LanguageSetAsync(
         WritePipeline pipeline,
         IProgress<ProgressNotificationValue> progress,
@@ -48,6 +47,7 @@ internal sealed class LanguageWriteTools
         [Description("1-10 codes to show, in order; ##_## alone clears")] string[]? display = null,
         [Description("1-10 codes to add, e.g. en_US")] string[]? add = null,
         [Description("Source language, e.g. de_DE; ##_## clears")] string? source = null,
+        [Description("Show the placeholder for a missing language")] bool? show_missing_translation = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
@@ -59,9 +59,9 @@ internal sealed class LanguageWriteTools
         }
 
         source = ToolArguments.Optional(source);
-        if (display is null && add is null && source is null)
+        if (display is null && add is null && source is null && show_missing_translation is null)
         {
-            violations.Add("Give at least one of 'display', 'add' and 'source'.");
+            violations.Add("Give at least one of 'display', 'add', 'source' and 'show_missing_translation'.");
         }
 
         foreach ((string name, string[]? codes) in new[] { ("display", display), ("add", add) })
@@ -83,6 +83,7 @@ internal sealed class LanguageWriteTools
             Display = display is null ? null : [.. display.Select(code => code ?? string.Empty)],
             Add = add is null ? null : [.. add.Select(code => code ?? string.Empty)],
             Source = source,
+            ShowMissingTranslation = show_missing_translation,
         };
         var request = new WriteRequest<LanguageSetArgs, LanguageSetArgs>(
             SetTool,
@@ -90,7 +91,7 @@ internal sealed class LanguageWriteTools
             OperationNames.LanguageSetPlan,
             OperationNames.LanguageSetExecute,
             args,
-            plan => new LanguageSetArgs { Project = args.Project, Display = args.Display, Add = args.Add, Source = args.Source, Fingerprint = plan.Fingerprint },
+            plan => new LanguageSetArgs { Project = args.Project, Display = args.Display, Add = args.Add, Source = args.Source, ShowMissingTranslation = args.ShowMissingTranslation, Fingerprint = plan.Fingerprint },
             dry_run,
             Limit,
             "Setting languages");

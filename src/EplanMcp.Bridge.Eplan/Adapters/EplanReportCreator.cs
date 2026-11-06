@@ -29,6 +29,7 @@ internal sealed partial class EplanReportCreator : IReportCreator
         MainThread.Assert();
         try
         {
+            EplanReportForms.Ensure(EplanProjects.ByPath(projectPath), args.Form!);
             using var block = new ReportBlock();
             block.Create(EplanProjects.ByPath(projectPath));
             block.Type = (DocumentTypeManager.DocumentType)Enum.Parse(typeof(DocumentTypeManager.DocumentType), args.Type!);

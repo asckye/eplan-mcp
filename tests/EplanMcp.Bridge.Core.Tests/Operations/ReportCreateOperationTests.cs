@@ -150,6 +150,7 @@ public sealed class ReportCreateOperationTests
     [InlineData("PartsList")]
     [InlineData("CableOverview")]
     [InlineData("CableConnectionDiagram")]
+    [InlineData("InterconnectDiagram")]
     [InlineData("TerminalStripOverview")]
     [InlineData("DeviceList")]
     [InlineData("ConnectionList")]

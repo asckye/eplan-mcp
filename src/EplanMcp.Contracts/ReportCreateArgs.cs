@@ -4,7 +4,7 @@ namespace EplanMcp.Contracts;
 public sealed class ReportCreateArgs
 {
     /// <summary>Supported DocumentType names from the EPLAN 2026 XML.</summary>
-    public static readonly string[] Types = ["TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview"];
+    public static readonly string[] Types = ["TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "InterconnectDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview"];
     /// <summary>Explicit project name or path.</summary>
     public string? Project { get; set; }
     /// <summary>DocumentType name.</summary>

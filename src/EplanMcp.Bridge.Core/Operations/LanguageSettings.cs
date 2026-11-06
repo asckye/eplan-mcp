@@ -6,6 +6,9 @@ public sealed class LanguageSettings
     /// <summary><c>TRANSLATEGUI.TRANSLATE_LANGUAGES</c>.</summary>
     public string Translation { get; set; } = string.Empty;
 
+    /// <summary><c>TRANSLATEGUI.MISSING_TRANSLATION.SHOW</c>.</summary>
+    public bool MissingShown { get; set; } = true;
+
     /// <summary><c>TRANSLATEGUI.DISPLAYED_LANGUAGES</c>.</summary>
     public string Display { get; set; } = string.Empty;
 

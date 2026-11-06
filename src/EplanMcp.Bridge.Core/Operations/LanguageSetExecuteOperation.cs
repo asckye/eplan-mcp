@@ -73,6 +73,9 @@ public sealed class LanguageSetExecuteOperation(IProjectCatalog catalog, IProjec
                 languages.SetDisplayed(path, LanguageCodes.ForDisplay(display));
             }
 
+            if (request.SetsMissing)
+            { languages.SetMissingShown(path, request.ShowMissing!.Value); }
+
             LanguageSettings after = languages.Read(path);
             return request.Differs(after) is { } problem
                 ? throw new BridgeErrorException(

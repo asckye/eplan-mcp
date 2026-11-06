@@ -11,6 +11,9 @@ public interface IProjectLanguages
     /// <summary>The language settings as the project stores them.</summary>
     public LanguageSettings Read(string projectPath);
 
+    /// <summary>Whether a text without the displayed language shows the placeholder.</summary>
+    public void SetMissingShown(string projectPath, bool shown);
+
     /// <summary>Adds <paramref name="language"/> to the translation languages (<c>Translate.AddProjectLanguage</c>).</summary>
     public void Add(string projectPath, string language);
 

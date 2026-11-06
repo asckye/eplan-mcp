@@ -18,6 +18,27 @@ public sealed class TextLanguagesTests
         Assert.Equal(expected, string.Join(",", TextLanguages.Fallbacks(raw)));
     }
 
+    [Theory]
+    [InlineData("zh_CN@加热器;en_US@Heater;", true)]
+    [InlineData("en_US@Start;", true)]
+    [InlineData("??_??@Start;en_US@Start;", false)]
+    [InlineData("en_US@Start;??_??@Start;", false)]
+    [InlineData("zh_CN@加热器", false)]
+    [InlineData("Contact a@b; start input", false)]
+    [InlineData(null, false)]
+    public void IsSerialized_AcceptsOnlyRealLanguagesInClosedEntries(string? text, bool expected) =>
+        Assert.Equal(expected, TextLanguages.IsSerialized(text));
+
+    [Theory]
+    [InlineData("Heater", "Heater", true)]
+    [InlineData("Heater", "加热器", false)]
+    [InlineData("zh_CN@加热器;en_US@Heater;", "zh_CN@加热器;en_US@Heater;", true)]
+    [InlineData("zh_CN@加热器;en_US@Heater;", "加热器", true)]
+    [InlineData("zh_CN@加热器;en_US@Heater;", "Motor", false)]
+    [InlineData("zh_CN@加热器;en_US@Heater;", null, false)]
+    public void ReadsBackAs_AllowsTheWholeTextOrOneOfItsLanguages(string requested, string? actual, bool expected) =>
+        Assert.Equal(expected, TextLanguages.ReadsBackAs(requested, actual));
+
     [Fact]
     public void Fallbacks_ReadsOnlyCodesThatStartAnEntry()
     {

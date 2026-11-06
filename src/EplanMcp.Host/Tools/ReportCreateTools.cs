@@ -15,10 +15,10 @@ internal sealed class ReportCreateTools
     public const string Tool = "eplan_report_create";
 
     [McpServerTool(Name = Tool, Title = "Create report pages from a report block", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ReportCreateResult))]
-    [Description("Preview by default; Ctrl+Z undo. Approval outside scratch (APPROVAL_DENIED).")]
+    [Description("Previews by default. Approval outside scratch.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IProgress<ProgressNotificationValue> progress,
         string project,
-        [AllowedValues("TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview")] string type,
+        [AllowedValues("TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "InterconnectDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview")] string type,
         string form, string first_page,
         string? filter_scheme = null, string? sort_scheme = null,
         string? page_description = null,

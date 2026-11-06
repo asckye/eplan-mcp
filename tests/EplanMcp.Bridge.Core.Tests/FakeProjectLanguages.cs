@@ -44,6 +44,12 @@ internal sealed class FakeProjectLanguages : IProjectLanguages
         }
     }
 
+    public void SetMissingShown(string projectPath, bool shown)
+    {
+        Change("SetMissingShown " + shown);
+        Settings.MissingShown = shown;
+    }
+
     public void SetDisplayed(string projectPath, string languages)
     {
         Change("SetDisplayed " + languages);

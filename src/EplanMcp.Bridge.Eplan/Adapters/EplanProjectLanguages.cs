@@ -21,6 +21,7 @@ internal sealed class EplanProjectLanguages : IProjectLanguages
     private const string TranslationNode = "TRANSLATEGUI.TRANSLATE_LANGUAGES";
     private const string DisplayNode = "TRANSLATEGUI.DISPLAYED_LANGUAGES";
     private const string SourceNode = "TRANSLATEGUI.SOURCE_LANGUAGE";
+    private const string MissingNode = "TRANSLATEGUI.MISSING_TRANSLATION.SHOW";
 
     public LanguageSettings Read(string projectPath)
     {
@@ -34,7 +35,20 @@ internal sealed class EplanProjectLanguages : IProjectLanguages
                 Translation = settings.GetStringSetting(TranslationNode, 0) ?? string.Empty,
                 Display = settings.GetStringSetting(DisplayNode, 0) ?? string.Empty,
                 Source = settings.GetStringSetting(SourceNode, 0) ?? string.Empty,
+                MissingShown = settings.GetBoolSetting(MissingNode, 0),
             };
+        });
+    }
+
+    public void SetMissingShown(string projectPath, bool shown)
+    {
+        MainThread.Assert();
+        Project project = EplanProjects.ByPath(projectPath);
+        Run("EPLAN could not change the missing translation setting, so nothing was changed.", () =>
+        {
+            using var settings = new ProjectSettings(project);
+            settings.SetBoolSetting(MissingNode, shown, 0);
+            return true;
         });
     }
 
@@ -102,6 +116,7 @@ internal sealed class EplanProjectLanguages : IProjectLanguages
             using var stored = new ProjectSettings(project);
             stored.SetStringSetting(TranslationNode, settings.Translation, 0);
             stored.SetStringSetting(DisplayNode, settings.Display, 0);
+            stored.SetBoolSetting(MissingNode, settings.MissingShown, 0);
             if (!string.Equals(stored.GetStringSetting(SourceNode, 0) ?? string.Empty, settings.Source, StringComparison.Ordinal))
             {
                 stored.SetStringSetting(SourceNode, settings.Source, 0);

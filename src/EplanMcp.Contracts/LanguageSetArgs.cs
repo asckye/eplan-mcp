@@ -21,6 +21,9 @@ public sealed class LanguageSetArgs
     /// </summary>
     public string? Source { get; set; }
 
+    /// <summary>Whether a text without the displayed language shows the project's placeholder (&lt;&lt;???&gt;&gt;); null leaves it as it is.</summary>
+    public bool? ShowMissingTranslation { get; set; }
+
     /// <summary>For the execute operation: the plan's <see cref="WritePlan.Fingerprint"/>. Null for the plan.</summary>
     public string? Fingerprint { get; set; }
 }

@@ -36,6 +36,12 @@ internal sealed class LanguageSetRequest
     public IReadOnlyList<string> Translation { get; }
 
     /// <summary>True when the displayed languages are to be cleared, which EPLAN's SetDisplayedLanguages cannot do (A28).</summary>
+    /// <summary>The placeholder switch the call asks for; null leaves it.</summary>
+    public bool? ShowMissing { get; set; }
+
+    /// <summary>True when the placeholder switch changes.</summary>
+    public bool SetsMissing => ShowMissing is { } show && show != Before.MissingShown;
+
     public bool ClearsDisplay => Display is { Count: 1 } display && display[0] == LanguageCodes.Unset;
 
     /// <summary>True when <see cref="Source"/> is given and differs from the source language now.</summary>
@@ -50,9 +56,9 @@ internal sealed class LanguageSetRequest
     {
         var violations = new List<string>();
         WriteArguments.RequireProject(args.Project, violations);
-        if (args.Display is null && args.Add is null && args.Source is null)
+        if (args.Display is null && args.Add is null && args.Source is null && args.ShowMissingTranslation is null)
         {
-            violations.Add("Give at least one of 'display', 'add' and 'source'.");
+            violations.Add("Give at least one of 'display', 'add', 'source' and 'show_missing_translation'.");
         }
 
         LanguageCodes.Check(args.Display, "display", violations, unsetAlone: true);
@@ -86,7 +92,7 @@ internal sealed class LanguageSetRequest
             violations.Add("'source' is not a translation language of the project; add it with 'add', or use one of metadata.candidates.");
         }
 
-        return violations.Count > 0 ? throw LanguageCodes.Invalid(violations, translation) : new LanguageSetRequest(project, before, display, toAdd, args.Source);
+        return violations.Count > 0 ? throw LanguageCodes.Invalid(violations, translation) : new LanguageSetRequest(project, before, display, toAdd, args.Source) { ShowMissing = args.ShowMissingTranslation };
     }
 
     /// <summary>The displayed languages after the change.</summary>
@@ -100,7 +106,7 @@ internal sealed class LanguageSetRequest
     /// those now, in the same order, and the source language given is the one now.
     /// </summary>
     public bool ChangesNothing() =>
-        ToAdd.Count == 0 && !SetsSource && (Display is null || Display.SequenceEqual(LanguageCodes.Split(Before.Display), StringComparer.Ordinal));
+        !SetsMissing && ToAdd.Count == 0 && !SetsSource && (Display is null || Display.SequenceEqual(LanguageCodes.Split(Before.Display), StringComparer.Ordinal));
 
     /// <summary>The plan's state (tool spec 5): the three settings as they are stored now.</summary>
     public string StateFingerprint() => Fingerprint.Of(["translation\t" + Before.Translation, "display\t" + Before.Display, "source\t" + Before.Source]);

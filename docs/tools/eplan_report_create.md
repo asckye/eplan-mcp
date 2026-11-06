@@ -25,7 +25,7 @@
 | `dry_run` | boolean | 否 | true | 仅规划；实际执行显式传 false |
 
 `project`、`type`、`form`、`first_page` 必填；表格名不含扩展名，首页必须不存在或是报表页。
-`type`：TitlePage、TableOfContents、PLCDiagram、TerminalDiagram、PartsSumList、PartsList、CableOverview、CableConnectionDiagram、TerminalStripOverview、DeviceList、ConnectionList、StructIdentifierOverview（本机 DocumentType 枚举）。
+`type`：TitlePage、TableOfContents、PLCDiagram、TerminalDiagram、PartsSumList、PartsList、CableOverview、CableConnectionDiagram、InterconnectDiagram（电缆图，F09 表格）、TerminalStripOverview、DeviceList、ConnectionList、StructIdentifierOverview（本机 DocumentType 枚举）。
 方案有效性由 EPLAN 判断，不预先枚举目标项目的方案名称；名称不存在但提供非空方案数据时允许传入适配器。读取端每项数据上限为 4000 字符，截断警告表示返回值并非完整方案。
 
 ## 3. 输出
