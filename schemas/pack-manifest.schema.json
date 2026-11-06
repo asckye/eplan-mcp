@@ -64,6 +64,67 @@
       "maxItems": 64,
       "uniqueItems": true
     },
+    "signoff": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "draft or signed; signed requires signedBy and signedAt.",
+          "pattern": "^(draft|signed)$"
+        },
+        "signedBy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$"
+        },
+        "signedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": "Engineering signoff for review rules; omitted means draft, usable only on scratch projects.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "signed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "signedBy",
+              "signedAt"
+            ],
+            "properties": {
+              "signedBy": {
+                "type": "string"
+              },
+              "signedAt": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
     "description": {
       "type": [
         "string",

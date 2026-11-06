@@ -37,6 +37,9 @@ public sealed record PackManifest
     [Description("Standard identifiers and editions, only for standard plugins. Up to 64 unique labels of 1 to 128 characters.")]
     public IReadOnlyList<string>? Standards { get; init; }
 
+    [Description("Engineering signoff for review rules; omitted means draft, usable only on scratch projects.")]
+    public PackSignoff? Signoff { get; init; }
+
     public string? Description { get; init; }
 
     public required PackCompatibility Compatibility { get; init; }

@@ -30,6 +30,15 @@ public static class PackSchema
             labels["items"]!["maxLength"] = 128;
             labels["items"]!["pattern"] = @"^[^\u0000-\u001f\u007f-\u009f]+$";
         }
+        JsonNode signoff = schema["properties"]!["signoff"]!;
+        foreach (string name in new[] { "signedBy", "signedAt" })
+        {
+            JsonNode text = signoff["properties"]![name]!;
+            text["minLength"] = 1;
+            text["maxLength"] = PackManifestValidator.MaxTextLength;
+            text["pattern"] = @"^[^\u0000-\u001f\u007f-\u009f]+$";
+        }
+        signoff["allOf"] = JsonNode.Parse("""[{"if":{"properties":{"status":{"const":"signed"}}},"then":{"required":["signedBy","signedAt"],"properties":{"signedBy":{"type":"string"},"signedAt":{"type":"string"}}}}]""");
         schema["allOf"] = JsonNode.Parse("""
             [{"if":{"properties":{"schemaVersion":{"const":3}}},"then":{"required":["kind"]}},
              {"if":{"not":{"properties":{"kind":{"const":"standard"}},"required":["kind"]}},"then":{"not":{"required":["standards"]}}}]

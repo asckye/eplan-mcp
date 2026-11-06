@@ -121,6 +121,23 @@ public sealed class RuleValidatorTests
         Assert.Equal(RuleStatus.Unknown, RuleValidator.MissingFactStatus);
     }
 
+    [Theory]
+    [InlineData("connection", "colour")]
+    [InlineData("connection", "cross_section")]
+    [InlineData("connection", "potential_name")]
+    [InlineData("connection", "potential_type")]
+    [InlineData("connection", "label")]
+    [InlineData("function", "letters")]
+    public void Registry_ReviewProperty_ExposesTextAndReviewCoverage(string kind, string field)
+    {
+        string property = kind + "." + field;
+        RuleNode node = Check($$"""{"exists":[{"property":"{{property}}"}]}""", kind).Check.Operands[0];
+
+        Assert.Equal(new RuleValueType("text"), node.Type);
+        Assert.Equal("review." + field, RuleValidator.Properties[property].Coverage);
+        Assert.Equal(RuleStatus.Unknown, RuleValidator.MissingFactStatus);
+    }
+
     [Fact]
     public void References_ExplicitTypeContext_IsUsedWithoutCoercion()
     {

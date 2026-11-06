@@ -30,6 +30,13 @@ public static partial class PackManifestValidator
         CheckPluginLabels("provides", manifest.Provides, Add);
         if (manifest.Standards is { } standards)
         { CheckPluginLabels("standards", standards, Add); }
+        if (manifest.Signoff is { } signoff)
+        {
+            if (signoff.Status is not ("draft" or "signed"))
+            { Add("signoff.status", "must be draft or signed"); }
+            CheckText("signoff.signedBy", signoff.SignedBy, required: signoff.Status == "signed", Add);
+            CheckText("signoff.signedAt", signoff.SignedAt, required: signoff.Status == "signed", Add);
+        }
 
         CheckId("id", manifest.Id, Add);
         CheckText("name", manifest.Name, required: true, Add);

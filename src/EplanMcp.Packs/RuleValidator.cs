@@ -18,7 +18,7 @@ public static class RuleValidator
     public const RegexOptions PatternOptions = RegexOptions.NonBacktracking | RegexOptions.CultureInvariant;
     public const RuleStatus MissingFactStatus = RuleStatus.Unknown;
 
-    /// <summary>Only direct snapshot fields; absent values or incomplete coverage remain unknown.</summary>
+    /// <summary>Registered snapshot and review fields; absent values or incomplete coverage remain unknown.</summary>
     public static IReadOnlyDictionary<string, (RuleValueType Type, string Coverage)> Properties { get; } =
         new Dictionary<string, (RuleValueType, string)>(StringComparer.Ordinal)
         {
@@ -28,6 +28,13 @@ public static class RuleValidator
             ["page.name"] = (new("text"), "snapshot.name"),
             ["page.type"] = (new("text"), "snapshot.pageType"),
             ["connection.name"] = (new("text"), "snapshot.name"),
+            ["connection.colour"] = (new("text"), "review.colour"),
+            ["connection.cross_section"] = (new("text"), "review.cross_section"),
+            ["connection.potential_name"] = (new("text"), "review.potential_name"),
+            ["connection.potential_type"] = (new("text"), "review.potential_type"),
+            ["connection.label"] = (new("text"), "review.label"),
+            ["connection.pins"] = (new("text"), "review.pins"),
+            ["function.letters"] = (new("text"), "review.letters"),
         }.ToFrozenDictionary(StringComparer.Ordinal);
 
     /// <summary>Reverse lookup also requires complete direct endpoint coverage; no electrical tracing.</summary>
