@@ -1,10 +1,20 @@
 # 路线图
 
-截至 2026-11-04，里程碑状态只在本页维护；设计与 ADR 保留方案和决策历史。状态：已完成（done）、进行中（in progress）、计划中（planned）、等待负责人（waiting on owner）、暂停（paused）。全路线图目标为 **2027 年 1 月底**；以下日期为估计。
+截至 2026-11-06，里程碑状态只在本页维护；设计与 ADR 保留方案和决策历史。状态：已完成（done）、进行中（in progress）、计划中（planned）、等待负责人（waiting on owner）、暂停（paused）。全路线图目标为 **2027 年 1 月底**；以下日期为估计。
 
 v0.4.1 于 **2026-11-02** 发布（预览版）。下一版是 **v0.5.0 预览版**（负责人 2026-11-04 决定）：它带 ADR-0049 的破坏性变化，按次版本发布。原 v0.5.0 的验收目标顺延到 **v0.6.0**。发布范围和未实机验证项见 CHANGELOG 和[待验台账](process/large-pending.md)。
 
-| 当前主线（负责人 2026-11-04 决定） | 状态 | 发布 / 预计时间 | 设计依据 | ADR |
+| 当前主线（负责人 2026-11-06 决定） | 状态 | 发布 / 预计时间 | 设计依据 | ADR |
+|---|---|---|---|---|
+| **AI 按文字描述、按选定国家的标准画图。** 验收用 `evals/tasks-drawing/`，每个标准一组题。下面三个阶段的日期是估计 | 进行中 | 见下 | [M12](design/2026-10-31-m12-review-and-generation.md) | [0047](adr/0047-plugin-libraries.md) |
+| 第 1 阶段：修中断点写入的回滚错误，跑 5 道绘图题，把绘图经验写进工具用法 | 进行中 | 约 2026-11-10 | — | — |
+| 第 2 阶段：IEC 60204-1、IEC 81346 规则插件，`eplan_page_review` 按规则审图；AI 画图、审图、修正的循环 | 进行中 | 约 2026-11-17 | [M12](design/2026-10-31-m12-review-and-generation.md) | [0047](adr/0047-plugin-libraries.md) |
+| 第 3 阶段：GB/T 5226.1、NFPA 79 规则插件；同一描述按不同标准出图，差异符合规则 | 计划中 | 约 2026-11-24 | 同上 | 同上 |
+| 规则插件未经工程师签核时保持草稿，只用于 scratch；工具只检查收录的规则，不保证符合标准。签核人由负责人指定 | 等待负责人（第 2 阶段结束前指定） | — | [M12 第 6 节](design/2026-10-31-m12-review-and-generation.md) | — |
+
+下面这些不再卡住当前主线，只在画图需要时做；普查暂停，空闲时再跑。
+
+| 原主线（负责人 2026-11-04 决定） | 状态 | 发布 / 预计时间 | 设计依据 | ADR |
 |---|---|---|---|---|
 | 全部 action：每个名称都要落到三种结果之一：可直接调用（实测后进白名单）、由工具覆盖、明确不做并说明原因。EPLAN 2026.0.3 注册 2498 个名称，Electric P8 按名称能找到 2266 个；普查已跑 310 个，分批继续 | 进行中 | 随预览版持续交付；时间等普查分批结果后重估 | [M10](design/2026-10-30-m10-capability-expansion.md)、[API Actions](eplan/api-actions.md) | [0021](adr/0021-action-run-whitelist.md)、[0030](adr/0030-action-catalog-tiers.md) |
 | 按任务做专用工具：普查结果按任务族汇总成工具，API 优先，没有 API 用 action，都不行就写明阻塞。6 批顺序：① 页面编辑、宏、连接 ② 端子排、电缆、PLC ③ 修订、编号、翻译、报表 ④ 部件库、项目管理 ⑤ 预规划、符号与图框表格编辑器 ⑥ 3D。功能区 339 个入口是实用清单（按用途判断，未逐个实测）：有工具 70、部分有 28、只影响显示 36、要做 55、第 5 批 16、3D 91、做不了或不自动做 8、标题或云入口 34、待判断 1；逐项明细只留本机（ADR-0030） | 进行中（第 1 批已盘点） | 分批进预览版 | 本页 | [0006](adr/0006-tool-surface-design.md)、[0030](adr/0030-action-catalog-tiers.md) |
@@ -19,7 +29,7 @@ v0.4.1 于 **2026-11-02** 发布（预览版）。下一版是 **v0.5.0 预览�
 |---|---|---|---|---|
 | M9 主数据与报表余项；EDZ 导入等待负责人样本；`eplan_part_build` 已实现，实机测试延后 | 等待负责人（EDZ）；其余计划中 | v0.6.0 之后，版本待定 | [API 主数据补齐](design/2026-10-31-api-completion.md)、[能力扩展](design/2026-10-30-m10-capability-expansion.md)（独立设计待写） | [0019](adr/0019-master-data-writes.md)、[0032](adr/0032-generic-api-layer.md) |
 | M10 能力扩展：吸收 Canary 有益功能，action 部分已并入当前主线；其余 Canary 有益功能按 A/B/C 分级 | 计划中 | v0.6.0 之后，版本待定 | [M10](design/2026-10-30-m10-capability-expansion.md) | [0030](adr/0030-action-catalog-tiers.md)、[0031](adr/0031-private-extension-modules.md) |
-| M12 国家规则包：IEC 60204-1 + IEC 81346 → GB/T 5226.1 → NFPA 79，另有公司默认包；每包经工程师签核，不复制标准正文 | 计划中 | v0.6.0 之后，版本待定 | [M12](design/2026-10-31-m12-review-and-generation.md) | [0005](adr/0005-safety-model.md)、[0024](adr/0024-pack-trust-and-container.md)、[0029](adr/0029-phase3-engineering-records.md) |
+| M12 国家规则包：IEC 60204-1 + IEC 81346 → GB/T 5226.1 → NFPA 79 已提到当前主线；这里只剩公司默认包和从 IO 清单生成 PLC 页。每包经工程师签核，不复制标准正文 | 计划中 | v0.6.0 之后，版本待定 | [M12](design/2026-10-31-m12-review-and-generation.md) | [0005](adr/0005-safety-model.md)、[0024](adr/0024-pack-trust-and-container.md)、[0029](adr/0029-phase3-engineering-records.md) |
 | M11 PDF 图纸集转 EPLAN 项目：在 M9/M10 之后 | 计划中 | v0.6.0 之后，版本待定 | [M8 绘图基础](design/2026-10-27-m8-drawing.md)（独立设计待写） | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |
 | Workbench 改版：现在做 mock-ups，v0.6.0 后实施 | 进行中（mock-ups）；实施计划中 | v0.6.0 之后，版本待定 | [M5 界面设计](design/2026-10-20-m5-operability.md#45-界面技术fluent-2-的实现方式q1adr-0015)、[Workbench 实现记录](design/2026-10-20-m5-operability.md#workbench-implementation) | [0017](adr/0017-workbench-wpf-tia-theme.md)（2026-10-20 Accepted）；[0027](adr/0027-workbench-plan-review.md) 仍为 Proposed |
 
