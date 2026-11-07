@@ -11305,6 +11305,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/DevicePlaceOperationTests.cs"
           },
           {
+            "name": "MacroInsertRawInputTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/MacroInsertRawInputTests.cs"
+          },
+          {
             "name": "MacroNativeAdapterTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MacroNativeAdapterTests.cs"
@@ -16313,6 +16318,11 @@
             "name": "PlaceholderListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlaceholderListToolTests.cs"
+          },
+          {
+            "name": "MacroInsertToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/MacroInsertToolTests.cs"
           },
           {
             "name": "PlaceholderListTests",

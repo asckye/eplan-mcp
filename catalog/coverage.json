@@ -1726,7 +1726,7 @@
       "dependencies": 99,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
-      "small": 6,
+      "small": 7,
       "medium": 2,
       "large": 10,
       "apiNotes": [
@@ -2392,7 +2392,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_placeholder_list.md",
       "small": 1,
-      "medium": 0,
+      "medium": 1,
       "large": 1,
       "apiNotes": [
         "A11",

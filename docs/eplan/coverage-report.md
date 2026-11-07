@@ -250,7 +250,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 75 | 35 | 2 | 38 | 0 | 1/1/1 | A28 | — |
 | eplan_language_set | write | language.set.execute<br>language.set.plan | 50 | 22 | 0 | 28 | 0 | 2/1/4 | A28 | — |
 | eplan_macro_get | read | macro.get | 43 | 23 | 0 | 18 | 0 | 1/0/4 | A14 A89 | — |
-| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 264 | 158 | 3 | 99 | 0 | 6/2/10 | A12 A13 A14 A79 A82 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 264 | 158 | 3 | 99 | 0 | 7/2/10 | A12 A13 A14 A79 A82 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 1/0/4 | A4 | — |
 | eplan_macro_store | write | macro.store | 0 | 0 | 0 | 0 | 0 | 1/0/1 | — | — |
 | eplan_masterdata_update | destructive | masterdata.update.execute<br>masterdata.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
@@ -279,7 +279,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_part_search | read | part.search | 36 | 16 | 1 | 15 | 0 | 2/2/4 | — | 2026-10-21 pass（api-notes A30） |
 | eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 120 | 54 | 1 | 62 | 1 | 1/1/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 73 | 39 | 0 | 34 | 0 | 1/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
-| eplan_placeholder_list | read | placeholder.list | 45 | 27 | 0 | 18 | 0 | 1/0/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
+| eplan_placeholder_list | read | placeholder.list | 45 | 27 | 0 | 18 | 0 | 1/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
 | eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 322 | 196 | 2 | 123 | 0 | 4/3/17 | A54 A88 | — |
 | eplan_placement_delete | destructive | placement.delete.execute<br>placement.delete.plan | 160 | 94 | 1 | 64 | 0 | 0/1/3 | A87 | — |
 | eplan_placement_edit | destructive | placement.edit.execute<br>placement.edit.plan | 458 | 280 | 3 | 173 | 0 | 3/3/2 | — | — |
