@@ -170,7 +170,7 @@ public sealed class PotentialDefinitionTests
         }
         public List<string?[]> Endpoints(string project, string page) => _fixture.Scene.Logical.Select(c => new[] { c.StartDevice, c.EndDevice }).ToList();
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => Transactions;
-        public void Generate(string project, IReadOnlyList<string> pages) => throw new InvalidOperationException("A standalone potential must not generate connections.");
+        public void Generate(string project, IReadOnlyList<string> pages, bool rebuild = false) => throw new InvalidOperationException("A standalone potential must not generate connections.");
         public void Undo(string project) => throw new NotSupportedException();
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => throw new NotSupportedException();
         public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string project, IReadOnlyList<string> pages) => throw new NotSupportedException();

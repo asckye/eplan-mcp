@@ -22,7 +22,7 @@ internal sealed class ProjectCreateTools
         OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ProjectCreateResult))]
     [Description("Creates a closed project from an imports .zw9 basic project or .zw1 backup. " +
         "Target must not exist, even empty; default scratch/projects/name. Outside scratch needs " +
-        "per-call approval (APPROVAL_DENIED). Checks compatibility; no automatic upgrade. " +
+        "per-call approval (APPROVAL_DENIED). If an older basic project fails, upgrades a scratch copy and retries once. " +
         WriteToolDefaults.Description + " Example: {\"mode\":\"basic_project\",\"file\":\"basics/GB_bas001.zw9\",\"name\":\"Line1\",\"dry_run\":true}.")]
     public static async Task<CallToolResult> CreateAsync(
         WritePipeline pipeline, ImportFiles files, HostConfig config,
@@ -61,6 +61,7 @@ internal sealed class ProjectCreateTools
             return ToolResults.Error(error);
         }
 
+        string? upgradeFolder = null;
         try
         {
             var clock = Stopwatch.StartNew();
@@ -81,7 +82,17 @@ internal sealed class ProjectCreateTools
                     clock.Start();
                     CheckDestination(target, destination is not null, config);
                     RecheckSource(files, source);
-                    return new NewProjectArgs { File = args.File, FilePath = args.FilePath, Sha256 = args.Sha256, Name = name, Destination = target, Fingerprint = plan.Fingerprint };
+                    upgradeFolder = mode == "basic_project" ? PrepareUpgradeFolder(config) : null;
+                    return new NewProjectArgs
+                    {
+                        File = args.File,
+                        FilePath = args.FilePath,
+                        Sha256 = args.Sha256,
+                        Name = name,
+                        Destination = target,
+                        Fingerprint = plan.Fingerprint,
+                        UpgradeFolder = upgradeFolder,
+                    };
                 }, dry_run, TimeSpan.FromSeconds(mode == "backup" ? 180 : 120), mode == "backup" ? "Restoring the backup" : "Creating the project");
             WriteOutcome<NewProjectData> outcome = await pipeline.RunAsync<NewProjectArgs, NewProjectArgs, NewProjectData>(request, progress, cancellationToken).ConfigureAwait(false);
             clock.Stop();
@@ -97,11 +108,16 @@ internal sealed class ProjectCreateTools
                 Pages = outcome.Data?.Pages,
                 ProjectGuid = ResultShaper.CleanText(outcome.Data?.ProjectGuid),
                 DatabaseVersion = ResultShaper.CleanText(outcome.Data?.DatabaseVersion),
+                Upgraded = outcome.Data?.Upgraded ?? false,
                 Seconds = clock.Elapsed.TotalSeconds,
                 Hint = dry_run ? "Compatibility will be checked during creation or restore. " + WriteToolDefaults.ExecutionHint : outcome.Recovered
                     ? "The new project is closed. The commit was recovered after a lost response; project metadata is unavailable." : "The new project is closed.",
                 Changes = dry_run ? [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), NewValue = ResultShaper.CleanText(c.NewValue) })] : null,
             };
+            if (result.Upgraded)
+            {
+                result.Hint += " EPLAN upgraded a copy of the basic project from an older version; the original file is unchanged.";
+            }
             string summary = mode == "backup" ? $"Restored backup as new project '{result.Project.Name}'; it is closed."
                 : $"Created project '{result.Project.Name}' from a basic project; it is closed.";
             return ToolResults.Success(dry_run ? "Dry run: would create a closed new project. Nothing was changed." : summary, result);
@@ -112,6 +128,21 @@ internal sealed class ProjectCreateTools
         }
         catch (BridgeCallException ex)
         {
+            if (ex.Error.Execution == ExecutionState.NotStarted && upgradeFolder is { Length: <= 80 })
+            {
+                try
+                {
+                    if (Directory.Exists(upgradeFolder))
+                    {
+                        Directory.Delete(upgradeFolder);
+                    }
+                }
+                catch (Exception cleanup) when (cleanup is IOException or UnauthorizedAccessException)
+                {
+                    ex.Error.Metadata ??= [];
+                    ex.Error.Metadata["warning"] = "The unused basic-project upgrade folder could not be deleted.";
+                }
+            }
             return ToolResults.Error(ex.Error);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -125,6 +156,33 @@ internal sealed class ProjectCreateTools
     internal static string? DestinationProblem(string path) => !Path.IsPathFullyQualified(path) || path.StartsWith('\\') || path.Length <= 3
         ? "'destination' must be the full local path of a new folder, without UNC or device paths."
         : ImportFiles.PathProblem("destination", path[3..].TrimEnd('\\', '/'), "a local drive", "projects/Line1");
+
+    internal static string? PrepareUpgradeFolder(HostConfig config)
+    {
+        string? root = config.ScratchRoots
+            .Select(path => Path.TrimEndingDirectorySeparator(Path.GetFullPath(path)))
+            .OrderBy(path => path.Length)
+            .FirstOrDefault();
+        if (root is null)
+        {
+            return null;
+        }
+
+        string folder = Path.Combine(root, ".up", Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(3)));
+        if (folder.Length <= 80)
+        {
+            try
+            {
+                CheckDestination(folder, explicitParent: false, config);
+                Directory.CreateDirectory(folder);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or BridgeCallException)
+            {
+                return null;
+            }
+        }
+        return folder;
+    }
 
     private static void CheckDestination(string target, bool explicitParent, HostConfig config)
     {

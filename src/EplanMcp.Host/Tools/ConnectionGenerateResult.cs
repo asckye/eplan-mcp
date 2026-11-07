@@ -20,6 +20,9 @@ internal sealed class ConnectionGenerateResult
     [Description("True when only the connections now were counted.")]
     public bool DryRun { get; set; }
 
+    [Description("True when the requested connections were rebuilt, including a potential-colour refresh with unchanged connection properties.")]
+    public bool Rebuilt { get; set; }
+
     [Description("Fingerprint of the previewed plan.")]
     public string Fingerprint { get; set; } = string.Empty;
 
@@ -29,7 +32,7 @@ internal sealed class ConnectionGenerateResult
     [Description("The pages in the order given.")]
     public List<PageEntry> Pages { get; set; } = [];
 
-    [Description("The step in EPLAN's undo list (Ctrl+Z) that reverts the generation; null for a dry run and when nothing was added or removed.")]
+    [Description("The step in EPLAN's undo list (Ctrl+Z) that reverts the generation; null for a dry run and unchanged connections without a rebuild.")]
     public string? Undo { get; set; }
 
     [Description("True when the response was lost and EPLAN reported the commit afterwards; 'after', 'added' and 'removed' are then null.")]

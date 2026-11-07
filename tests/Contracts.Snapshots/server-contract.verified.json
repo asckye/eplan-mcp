@@ -5592,6 +5592,11 @@
             "description": "Open or focus this page in the EPLAN editor before drawing so the user can watch; UI only, no data change.",
             "type": "boolean",
             "default": false
+          },
+          "rebuild": {
+            "description": "Rebuild connections to refresh autoconnect lines' potential colours; default false.",
+            "type": "boolean",
+            "default": false
           }
         },
         "required": [
@@ -5620,6 +5625,10 @@
           },
           "dryRun": {
             "description": "True when only the connections now were counted.",
+            "type": "boolean"
+          },
+          "rebuilt": {
+            "description": "True when the requested connections were rebuilt, including a potential-colour refresh with unchanged connection properties.",
             "type": "boolean"
           },
           "fingerprint": {
@@ -5755,7 +5764,7 @@
             }
           },
           "undo": {
-            "description": "The step in EPLAN's undo list (Ctrl+Z) that reverts the generation; null for a dry run and when nothing was added or removed.",
+            "description": "The step in EPLAN's undo list (Ctrl+Z) that reverts the generation; null for a dry run and unchanged connections without a rebuild.",
             "type": [
               "string",
               "null"
@@ -19334,7 +19343,7 @@
     {
       "name": "eplan_project_create",
       "title": "Create project",
-      "description": "Creates a closed project from an imports .zw9 basic project or .zw1 backup. Target must not exist, even empty; default scratch/projects/name. Outside scratch needs per-call approval (APPROVAL_DENIED). Checks compatibility; no automatic upgrade. Omit/true previews; false executes. Example: {\"mode\":\"basic_project\",\"file\":\"basics/GB_bas001.zw9\",\"name\":\"Line1\",\"dry_run\":true}.",
+      "description": "Creates a closed project from an imports .zw9 basic project or .zw1 backup. Target must not exist, even empty; default scratch/projects/name. Outside scratch needs per-call approval (APPROVAL_DENIED). If an older basic project fails, upgrades a scratch copy and retries once. Omit/true previews; false executes. Example: {\"mode\":\"basic_project\",\"file\":\"basics/GB_bas001.zw9\",\"name\":\"Line1\",\"dry_run\":true}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -19443,6 +19452,9 @@
               "string",
               "null"
             ]
+          },
+          "upgraded": {
+            "type": "boolean"
           },
           "seconds": {
             "type": "number",

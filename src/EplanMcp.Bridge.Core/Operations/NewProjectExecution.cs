@@ -90,7 +90,7 @@ internal static class NewProjectExecution
         if (!string.Equals(compatibility.status, ClosedProject.Compatible, StringComparison.Ordinal))
         {
             throw new BridgeErrorException(ErrorReason.InvalidArgument,
-                "The material is incompatible. Use compatible material; no automatic upgrade is supported. The files created by this call will be deleted.");
+                "The material is incompatible after creation or restore. Use compatible material. The files created by this call will be deleted.");
         }
 
         return compatibility.version;

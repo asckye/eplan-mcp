@@ -16,11 +16,14 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array of string，1–50 项 | 是 | — | 完整页名，如 `=GAA+A1&EFS1/60`（用 `eplan_page_list` 查） |
+| `rebuild` | boolean | 否 | false | true 时重建指定页的连接，使自动连线采用电位颜色；读回属性相同时仍提交显示刷新 |
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页；只打开 `pages[0]` |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - 页名的查找规则与 `eplan_page_get` 相同；同一页出现两次时返回 `INVALID_ARGUMENT`。
-- 只做"更新"（`bRebuildAllConnections = false`），不提供"重建全部"，也不对整个项目执行（Q4）。
+- 默认只做"更新"（`bRebuildAllConnections = false`）；`rebuild: true` 重建指定页的连接，不对整个项目执行。
+
+画完页后调用一次 `rebuild: true`。新自动连线即使已接入带颜色的电位，普通生成后仍可能保持红色；重建才会采用电位定义的颜色。没有颜色的电位仍保持红色（A119）。
 
 ## 3. 输出
 省略或 `dry_run: true` 返回计划范围变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
@@ -30,6 +33,7 @@
   "project": "Line1",
   "execution": "committed",
   "dryRun": false,
+  "rebuilt": false,
   "pages": [
     {
       "page": "=GAA+A1&EFS1/60",
@@ -47,7 +51,8 @@
 ```
 - `before`、`after`：执行前后页上的连接数（2D 连接，在内存中按页过滤，A11）。
 - `added`、`removed`：执行前后比较得出的连接，端点的写法同 `eplan_connection_list`。所有页合计最多列出 100 条，删除的优先（"只更新会不会删除连接"没有验证，见第 5 节），超出时 `truncated = true`，`hint` 给出总数，提示用 `eplan_connection_list` 的 `page` 查看。
-- 没有任何增删时（连接已经齐全，S10），按 ADR-0010 第 1 节返回 `not_started`，`added`、`removed` 为空，`undo` 为 `null`：实机验证中 EPLAN 不为这样的生成留下撤销步骤，也就没有改动数据（api-notes A19）。`hint` 用中性的措辞：EPLAN 没有增删连接，如果图上的线仍不是连接，请工程师查看这些页的消息。
+- `rebuilt` 为 boolean，执行重建时为 true。`rebuild: true` 即使连接读回未变化也提交，以保留显示刷新（A119）。
+- 默认更新没有任何增删时（连接已经齐全，S10），按 ADR-0010 第 1 节返回 `not_started`，`added`、`removed` 为空，`undo` 为 `null`：实机验证中 EPLAN 不为这样的生成留下撤销步骤，也就没有改动数据（api-notes A19）。`hint` 用中性的措辞：EPLAN 没有增删连接，如果图上的线仍不是连接，请工程师查看这些页的消息。
 - **`dry_run`**：无法预先算出 EPLAN 会生成哪些连接，所以只返回 `before`。`added`、`removed`、`after` 为 `null`，`hint` 说明这一点。
 - 标识按项目数据处理，经过 ResultShaper。
 - 一行摘要（只有计数，不回显项目名，架构 8.5）：
@@ -73,7 +78,7 @@
   - 指纹包括两部分，排序后取 SHA-256：各页上的连接（两端的标识和连接点）；页上全部对象的会话内标识。
 - **执行**：在 `TransactionScope` 中执行：
   1. 记下各页的连接；
-  2. `new Generate().Connections(pages, false)`；
+  2. `new Generate().Connections(pages, rebuild)`；
   3. 再读各页的连接，比较出新增和删除的连接。一条连接按两端的（功能，连接点）比较，不分起止方向，重复的按次数计：S10 只验证了已齐全的页连接数不变，没有验证连接对象和方向是否保持；
   4. `Commit()`，再 `CloseUndo()`。
 - **已验证**（S9、S10，api-notes A13、A14）：

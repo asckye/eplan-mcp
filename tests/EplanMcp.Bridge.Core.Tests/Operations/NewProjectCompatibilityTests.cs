@@ -22,12 +22,12 @@ public sealed class NewProjectCompatibilityTests
     [InlineData("IsOlder")]
     [InlineData("iscompatible")]
     [InlineData("")]
-    public void Incompatible_IsInvalidArgument_WithoutPromisingAnUpgrade(string status)
+    public void Incompatible_IsInvalidArgument_AfterCreationOrRestore(string status)
     {
         var files = new Files(_ => (status, "19.0"));
         BridgeErrorException failure = Assert.Throws<BridgeErrorException>(() => NewProjectExecution.CheckCompatibility(files, "new.elk"));
         Assert.Equal(ErrorReason.InvalidArgument, failure.Error.Reason);
-        Assert.Contains("no automatic upgrade", failure.Error.Message, StringComparison.Ordinal);
+        Assert.Contains("incompatible after creation or restore", failure.Error.Message, StringComparison.Ordinal);
     }
 
     [Theory]

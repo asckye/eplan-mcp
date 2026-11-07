@@ -163,6 +163,6 @@ public sealed class CableDefinitionPlanTests : IDisposable
         public void Undo(string project) => throw new InvalidOperationException("No undo expected.");
         public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) => throw new InvalidOperationException("No write expected.");
         public IReadOnlyList<IReadOnlyList<string>> ObjectIds(string projectPath, IReadOnlyList<string> pages) => throw new InvalidOperationException("No write expected.");
-        public void Generate(string projectPath, IReadOnlyList<string> pages) => throw new InvalidOperationException("No generation expected.");
+        public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false) => throw new InvalidOperationException("No generation expected.");
     }
 }

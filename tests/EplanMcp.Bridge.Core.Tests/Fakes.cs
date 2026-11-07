@@ -510,15 +510,18 @@ internal sealed class FakeConnectionGenerator : IConnectionGenerator
 
     public List<string[]> Generates { get; } = [];
 
+    public List<bool> Rebuilds { get; } = [];
+
     public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) =>
         [.. pages.Select(page => (IReadOnlyList<ConnectionRecord>)[.. Connections.GetValueOrDefault(page) ?? []])];
 
     public IReadOnlyList<IReadOnlyList<string>> ObjectIds(string projectPath, IReadOnlyList<string> pages) =>
         [.. pages.Select(page => (IReadOnlyList<string>)[.. Objects.GetValueOrDefault(page) ?? []])];
 
-    public void Generate(string projectPath, IReadOnlyList<string> pages)
+    public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false)
     {
         Generates.Add([.. pages]);
+        Rebuilds.Add(rebuild);
         foreach (string page in pages)
         {
             if (!Connections.TryGetValue(page, out List<ConnectionRecord>? connections))

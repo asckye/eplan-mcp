@@ -251,7 +251,7 @@ public sealed class ConnectionDeferredGenerationTests
         public List<string?[]> Endpoints(string project, string page) => throw new InvalidOperationException("Deferred placement must not inspect endpoints.");
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => throw new InvalidOperationException("Deferred placement must not inspect pairing.");
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => Transactions;
-        public void Generate(string projectPath, IReadOnlyList<string> pages) => throw new InvalidOperationException("Deferred placement must not generate connections.");
+        public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false) => throw new InvalidOperationException("Deferred placement must not generate connections.");
         public void Undo(string project) => _written = false;
         public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) => throw new NotSupportedException();
         public IReadOnlyList<IReadOnlyList<string>> ObjectIds(string projectPath, IReadOnlyList<string> pages) => throw new NotSupportedException();

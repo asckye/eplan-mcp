@@ -33,6 +33,8 @@
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
 ### 修复
+- `eplan_connection_generate` 支持 `rebuild: true`，让新自动连线采用电位颜色，连接读回未变化时也保留刷新。
+- `eplan_project_create` 从旧版基本项目创建失败后自动升级 scratch 副本并重试，保留 imports 原文件。
 - `eplan_placeholder_list` 的 `detailed` 遇到引用无效属性的占位符不再整体报内部错误，只对该占位符省略当前值。
 - `eplan_connection_create` 省略 `symbol_variant` 时，中断点箭头按电流方向（从左到右、从上到下）：左端和顶端画成进线（BP 变体 E、H），右端和底端画成出线。
 - `eplan_connection_create` 不再拒绝直角交叉的线：EPLAN 在交叉处不连接，三相母线和往下的分支本来就这样画。

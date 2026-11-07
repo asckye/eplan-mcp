@@ -11,7 +11,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// The connection write tools (docs/tools/eplan_connection_generate.md), through <see cref="WritePipeline"/> like every
-/// write. Connections are generated on given pages only and updated, never rebuilt (M3b design 4.3, Q4).
+/// write. Connections are generated on given pages only, optionally rebuilding them to refresh potential colours (A119).
 /// </summary>
 [McpServerToolType]
 internal sealed class ConnectionWriteTools
@@ -35,6 +35,7 @@ internal sealed class ConnectionWriteTools
         [Description("1-50 full page names")] string[] pages,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
+        [Description("Rebuild connections to refresh autoconnect lines' potential colours; default false.")] bool rebuild = false,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -55,14 +56,14 @@ internal sealed class ConnectionWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new ConnectionGenerateArgs { Project = project, Pages = [.. pages!.Select(p => p ?? string.Empty)] };
+        var args = new ConnectionGenerateArgs { Project = project, Pages = [.. pages!.Select(p => p ?? string.Empty)], Rebuild = rebuild };
         var request = new WriteRequest<ConnectionGenerateArgs, ConnectionGenerateArgs>(
             GenerateTool,
             ToolTier.Write,
             OperationNames.ConnectionGeneratePlan,
             OperationNames.ConnectionGenerateExecute,
             args,
-            plan => new ConnectionGenerateArgs { Project = args.Project, Pages = args.Pages, Fingerprint = plan.Fingerprint },
+            plan => new ConnectionGenerateArgs { Project = args.Project, Pages = args.Pages, Rebuild = args.Rebuild, Fingerprint = plan.Fingerprint },
             dry_run,
             PageWriteTools.Limit(args.Pages.Count),
             "Generating connections");
@@ -77,7 +78,7 @@ internal sealed class ConnectionWriteTools
             return display.Apply(ToolResults.Error(ex.Error));
         }
 
-        return display.Apply(outcome.Data is { } data ? Generated(data, outcome.Plan) : Planned(outcome, dry_run));
+        return display.Apply(outcome.Data is { } data ? Generated(data, outcome.Plan) : Planned(outcome, dry_run, rebuild));
     }
 
     /// <summary>A commit that answered in time: the pages as read back, at most 100 connections listed (tool spec 3).</summary>
@@ -86,13 +87,15 @@ internal sealed class ConnectionWriteTools
         int added = data.Pages.Sum(p => p.AddedCount);
         int removed = data.Pages.Sum(p => p.RemovedCount);
         int listed = data.Pages.Sum(p => p.Added.Count + p.Removed.Count);
+        bool changed = data.Rebuilt || added + removed > 0;
         var result = new ConnectionGenerateResult
         {
             Project = ResultShaper.CleanText(data.Project),
             Fingerprint = plan.Fingerprint,
             Changes = [.. plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
-            // Nothing added or removed is no change (ADR-0010 section 1); EPLAN then keeps no undo step (live check, A19).
-            Execution = added + removed == 0 ? ExecutionState.NotStarted : ExecutionState.Committed,
+            // A rebuild commits its drawing refresh even when readback is unchanged (A119).
+            Execution = changed ? ExecutionState.Committed : ExecutionState.NotStarted,
+            Rebuilt = data.Rebuilt,
             Pages =
             [
                 .. data.Pages.Select(p => new ConnectionGenerateResult.PageEntry
@@ -104,27 +107,27 @@ internal sealed class ConnectionWriteTools
                     Removed = [.. p.Removed.Select(Connection)],
                 }),
             ],
-            Undo = added + removed == 0 ? null : "AI: " + GenerateTool,
+            Undo = changed ? "AI: " + GenerateTool : null,
             Truncated = listed < added + removed,
         };
         string?[] hints =
         [
             ResultShaper.CleanText(data.Warning),
-            added + removed == 0 ? "EPLAN added and removed no connections on these pages. If lines drawn there still do not show as connections, ask the engineer to check EPLAN's messages for these pages." : null,
+            !changed ? "EPLAN added and removed no connections on these pages. If lines drawn there still do not show as connections, ask the engineer to check EPLAN's messages for these pages." : null,
             result.Truncated
                 ? string.Create(CultureInfo.InvariantCulture, $"Listed {listed} of {added + removed} added and removed connections, the removed ones first; eplan_connection_list with 'page' shows all connections of a page.")
                 : null,
         ];
         result.Hint = Join(hints);
         return ToolResults.Success(
-            added + removed == 0
+            !changed
                 ? $"Generated connections on {ToolResults.Count(result.Pages.Count, "page")}: nothing added or removed, so nothing was changed."
                 : string.Create(CultureInfo.InvariantCulture, $"Generated connections on {ToolResults.Count(result.Pages.Count, "page")}: {added} added, {removed} removed; Ctrl+Z in EPLAN undoes this step."),
             result);
     }
 
     /// <summary>A dry run, or a commit whose response was lost: only the counts before, from the plan's changes.</summary>
-    private static CallToolResult Planned(WriteOutcome<ConnectionGenerateData> outcome, bool dryRun)
+    private static CallToolResult Planned(WriteOutcome<ConnectionGenerateData> outcome, bool dryRun, bool rebuild)
     {
         bool committed = outcome.Execution == ExecutionState.Committed;
         var result = new ConnectionGenerateResult
@@ -132,6 +135,7 @@ internal sealed class ConnectionWriteTools
             Project = ResultShaper.CleanText(outcome.Plan.Project),
             Execution = outcome.Execution,
             DryRun = dryRun,
+            Rebuilt = committed && rebuild,
             Fingerprint = outcome.Plan.Fingerprint,
             Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
             Pages =

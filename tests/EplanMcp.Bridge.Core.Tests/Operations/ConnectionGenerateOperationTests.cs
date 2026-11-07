@@ -207,6 +207,36 @@ public sealed class ConnectionGenerateOperationTests
     }
 
     [Fact]
+    public void Execute_RebuildWithUnchangedConnections_CommitsThePotentialColourRefresh()
+    {
+        // A119: L1/L2/L3/N lines acquire their potential colours on rebuild although every connection property is unchanged.
+        ConnectionGenerateArgs args = Args(FullPage);
+        args.Rebuild = true;
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        ConnectionGenerateData data = Execute(args);
+
+        Assert.True(data.Rebuilt);
+        Assert.Equal([true], _generator.Rebuilds);
+        ConnectionGeneratePage page = Assert.Single(data.Pages);
+        Assert.Equal((2, 2, 0, 0), (page.Before, page.After, page.AddedCount, page.RemovedCount));
+        Assert.Equal(["Begin AI: eplan_connection_generate", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+    }
+
+    [Fact]
+    public void Execute_DefaultGenerationWithUnchangedConnections_DoesNotRebuild()
+    {
+        ConnectionGenerateArgs args = Args(FullPage);
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        ConnectionGenerateData data = Execute(args);
+
+        Assert.False(data.Rebuilt);
+        Assert.Equal([false], _generator.Rebuilds);
+        Assert.Equal(["Begin AI: eplan_connection_generate", "Rollback", "Dispose"], _transactions.Calls);
+    }
+
+    [Fact]
     public void Execute_WithoutAFingerprint_IsNotStarted()
     {
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(Args(FullPage))).Error;

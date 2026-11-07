@@ -127,6 +127,31 @@ public sealed class ConnectionGenerateToolTests : IDisposable
     }
 
     [Fact]
+    public async Task RebuildWithUnchangedConnections_IsPassedThroughAndReportedCommitted()
+    {
+        _harness.Bridge.Handlers[OperationNames.ConnectionGenerateExecute] = _ => new ConnectionGenerateData
+        {
+            Project = "Line1",
+            Rebuilt = true,
+            Pages = [new ConnectionGeneratePage { Page = FullPage, Before = 40, After = 40 }],
+        };
+
+        CallToolResult result = await ConnectionWriteTools.ConnectionGenerateAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", [FullPage], dry_run: false, rebuild: true,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        JsonElement data = WriteToolHarness.Structured(result);
+        Assert.True(data.GetProperty("rebuilt").GetBoolean());
+        Assert.Equal("committed", data.GetProperty("execution").GetString());
+        Assert.Equal("AI: eplan_connection_generate", data.GetProperty("undo").GetString());
+        Assert.Equal(JsonValueKind.Null, data.GetProperty("hint").ValueKind);
+        Assert.All(_harness.Bridge.Calls.Where(call => call.Args is ConnectionGenerateArgs), call =>
+        {
+            Assert.True(((ConnectionGenerateArgs)call.Args!).Rebuild);
+        });
+    }
+
+    [Fact]
     public async Task MoreThan100Changes_AreTruncatedWithTheTotal()
     {
         _harness.Bridge.Handlers[OperationNames.ConnectionGenerateExecute] = _ => Data(

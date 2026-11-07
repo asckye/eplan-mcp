@@ -12,7 +12,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>
 /// Generates connections on pages the way spikes S9 and S10 did (api-notes A13, A14): <c>Generate.Connections(pages,
-/// false)</c>, which updates and never rebuilds all. A page's connections are read as connection.list reads them: all
+/// rebuild)</c>, optionally rebuilding them to refresh potential colours (A119). A page's connections are read as connection.list reads them: all
 /// connections once, kept by <c>Connection.Page</c> in memory (A11). Main thread, inside the dispatcher's LockingStep;
 /// <see cref="Generate"/> inside the write's TransactionScope. Only the objects this class creates are disposed.
 /// </summary>
@@ -57,7 +57,7 @@ internal sealed class EplanConnectionGenerator : IConnectionGenerator
     /// BaseException with its message (EPLAN XML docs), which goes back with EPLAN_OPERATION_FAILED; what the exception
     /// mapper knows (locks, a missing licence) stays for it.
     /// </summary>
-    public void Generate(string projectPath, IReadOnlyList<string> pages)
+    public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false)
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
@@ -65,7 +65,7 @@ internal sealed class EplanConnectionGenerator : IConnectionGenerator
         using var generate = new Generate();
         try
         {
-            generate.Connections(targets, false);
+            generate.Connections(targets, rebuild);
         }
         catch (BaseException ex) when (new EplanExceptionMapper().Map(ex) is null)
         {

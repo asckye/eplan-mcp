@@ -86,7 +86,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
         _connected = true;
         Base.AddPin(3, [60, 76], "Down", [58, 76, 62, 80]);
     }
-    public void Generate(string projectPath, IReadOnlyList<string> pages)
+    public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false)
     {
         Assert.Equal(1, State);
         Assert.Contains("Commit", Placement.Calls);

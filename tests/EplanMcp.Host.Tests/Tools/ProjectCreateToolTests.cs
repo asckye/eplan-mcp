@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using EplanMcp.Bridge.Core;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Safety;
@@ -85,10 +86,63 @@ public sealed class ProjectCreateToolTests : IDisposable
         Assert.Equal(["make:" + link, "compatibility:" + link], _adapter.Events);
         Assert.Equal(TimeSpan.FromSeconds(limit), Assert.Single(_harness.Bridge.Writes).Limit);
         Assert.Equal(before, System.IO.File.ReadAllBytes(Source(_harness, mode)));
+        Assert.False(data.GetProperty("upgraded").GetBoolean());
         JsonElement[] audit = Audit(_harness);
         Assert.Equal(["execution_started", "execution_result"], audit.Select(r => r.GetProperty("kind").GetString()));
         Assert.Equal("committed", audit[^1].GetProperty("execution").GetString());
         AssertError(await Create(mode), ErrorReason.AlreadyExists, ExecutionState.NotStarted);
+    }
+
+    [Fact]
+    public async Task OlderBasicProject_UsesShortestScratchRoot_ReportsUpgradeAndPreservesImports()
+    {
+        string shortRoot = Directory.CreateTempSubdirectory("up-").FullName;
+        try
+        {
+            byte[] original = System.IO.File.ReadAllBytes(Source(_harness, "basic_project"));
+            Directory.CreateDirectory(Path.GetDirectoryName(Target)!);
+            _adapter.CreateFailure = new BridgeErrorException(ErrorReason.EplanOperationFailed, "Older basic project");
+            var config = new HostConfig([_harness.Locations.DefaultScratch, shortRoot], OutsideScratchWrites.Deny);
+
+            JsonElement data = WriteToolHarness.Structured(await ProjectCreateTools.CreateAsync(
+                _harness.Pipeline, new(_harness.Locations), config, "basic_project", "material.zw9", "Line1",
+                destination: Target, dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
+
+            Assert.Equal("committed", data.GetProperty("execution").GetString());
+            Assert.True(data.GetProperty("upgraded").GetBoolean());
+            Assert.Contains("EPLAN upgraded a copy of the basic project from an older version; the original file is unchanged.",
+                data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+            string folder = Assert.Single(_adapter.UpgradeFolders);
+            Assert.Equal(Path.Combine(shortRoot, ".up"), Path.GetDirectoryName(folder));
+            Assert.False(Directory.Exists(folder));
+            Assert.Equal(original, System.IO.File.ReadAllBytes(Source(_harness, "basic_project")));
+            NewProjectArgs plan = Assert.IsType<NewProjectArgs>(_harness.Bridge.Calls.Single(c => c.Operation == Plan("basic_project")).Args);
+            Assert.Null(plan.UpgradeFolder);
+        }
+        finally
+        {
+            Directory.Delete(shortRoot, recursive: true);
+        }
+    }
+
+    [Theory]
+    [InlineData("basic_project")]
+    [InlineData("backup")]
+    public async Task SuccessfulCreation_LeavesNoUpgradeFolder_AndBackupNeverGetsOne(string mode)
+    {
+        await Create(mode);
+
+        NewProjectArgs args = Assert.IsType<NewProjectArgs>(_harness.Bridge.Calls.Single(c => c.Operation == Execute(mode)).Args);
+        Assert.Empty(_adapter.UpgradeFolders);
+        if (mode == "backup")
+        {
+            Assert.Null(args.UpgradeFolder);
+        }
+        else
+        {
+            Assert.NotNull(args.UpgradeFolder);
+            Assert.False(Directory.Exists(args.UpgradeFolder));
+        }
     }
 
     [Theory]

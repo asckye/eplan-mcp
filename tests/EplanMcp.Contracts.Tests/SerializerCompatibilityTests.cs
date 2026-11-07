@@ -18,6 +18,18 @@ public sealed class SerializerCompatibilityTests
         ContractResolver = new CamelCasePropertyNamesContractResolver(),
     };
 
+    [Fact]
+    public void ConnectionGeneration_OlderJsonDefaultsToNoRebuild()
+    {
+        const string args = "{\"project\":\"Line1\",\"pages\":[\"=GAA+A1&EFS1/1\"]}";
+        const string data = "{\"project\":\"Line1\",\"pages\":[]}";
+
+        Assert.False(System.Text.Json.JsonSerializer.Deserialize<ConnectionGenerateArgs>(args, _stj)!.Rebuild);
+        Assert.False(JsonConvert.DeserializeObject<ConnectionGenerateArgs>(args, _newtonsoft)!.Rebuild);
+        Assert.False(System.Text.Json.JsonSerializer.Deserialize<ConnectionGenerateData>(data, _stj)!.Rebuilt);
+        Assert.False(JsonConvert.DeserializeObject<ConnectionGenerateData>(data, _newtonsoft)!.Rebuilt);
+    }
+
     public static TheoryData<object> Samples() =>
     [
         new PageCreateItem { Name = "/1", DescriptionTranslations = new() { ["en_US"] = "Panel", ["de_DE"] = "Schrank" } },
@@ -205,11 +217,12 @@ public sealed class SerializerCompatibilityTests
         new ImportPxfArgs(),
         new ImportPxfData { Name = "项目_imported", Path = @"C:\Users\u\EplanMcp\scratch\imported\项目_imported.elk", Seconds = 58 },
         new ImportPxfData(),
-        new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Fingerprint = "f" },
+        new ConnectionGenerateArgs { Project = "Line1", Pages = ["=GAA+A1&EFS1/60", "=GAA+A1&EFS1/1"], Rebuild = true, Fingerprint = "f" },
         new ConnectionGenerateArgs(),
         new ConnectionGenerateData
         {
             Project = "Line1",
+            Rebuilt = true,
             Pages =
             [
                 new ConnectionGeneratePage

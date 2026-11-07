@@ -20,6 +20,7 @@ internal sealed class ProjectCreateResult
     public int? Pages { get; set; }
     public string? ProjectGuid { get; set; }
     public string? DatabaseVersion { get; set; }
+    public bool Upgraded { get; set; }
     [Range(0, double.MaxValue)]
     public double Seconds { get; set; }
     public string? Hint { get; set; }

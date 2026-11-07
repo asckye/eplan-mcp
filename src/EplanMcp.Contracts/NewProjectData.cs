@@ -18,6 +18,9 @@ public sealed class NewProjectData
     /// <summary>The database version verified compatible inside creation or restore, without opening it (A31: <c>18.0</c>).</summary>
     public string? DatabaseVersion { get; set; }
 
+    /// <summary>Whether creation succeeded after EPLAN upgraded a copy of an older basic project.</summary>
+    public bool Upgraded { get; set; }
+
     /// <summary>How long EPLAN took, in whole seconds (S27: 3.5 to create, 6 to restore the sample project).</summary>
     public int Seconds { get; set; }
 }

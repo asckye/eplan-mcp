@@ -4,6 +4,8 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| 连接重建与电位颜色（2026-11-07，负责人 brief；A119） | `CheckAndReportTests`、`AcceptanceRedrawTests` | NOT RUN，待实机复验工具路径。在 scratch 新画页执行 `rebuild: true`，核对 L1/L2/L3 黑色、N 蓝色、未设颜色的 24V 红色；连接读回不变仍提交并返回 `rebuilt: true`，默认更新仍保持原无变化语义。负责人已验证 `generate` action 的整项目与按页重建。 |
+| 旧版基本项目升级副本重试（2026-11-07，负责人 brief；A118） | `ProjectCreateTests`、`ProjectCreateToolTests` | NOT RUN，待实机复验工具路径。用 2023 `.zw9` 触发首次创建失败，核对短 scratch 目录中副本升级后成功、`upgraded: true`、imports 原件哈希不变、临时目录清理；无需升级保留原始错误，长目录跳过并说明，`.zw1` 不升级。负责人已验证升级 action 及随后创建成功。 |
 | 结构标识符、标题栏、打开和关闭项目、PLC 编址（2026-11-06，负责人要求） | `StructureToolsTests`、`ProjectUpdateTests`、`ProjectToolsTests` | 已通过：2026-11-06，B 槽 Pro Panel，EPLAN 2026.0.3.25421，LargeWrite。待验：在有"主数据已经陈旧"提示的 P8 项目上打开时是否免弹窗；词典里有的词经 `translate` 补语言后的结果 |
 | T.4 graphic-edit 第 1 批（2026-11-05 负责人 brief；`.local/change-sets/series.txt`） | `GraphicEditTests` | 已通过：2026-11-05，B 槽 Pro Panel，分支 `feat/graphic-edit-land`：`GraphicEditTests` 15 个操作和块拒绝用例共 16 项通过；缩放线、文字和组的用例调整坐标后单独通过。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | 已通过：2026-11-04，A 槽：`MacroOverviewTests` 2/2、`MacroInsertTests` 2/2。 |

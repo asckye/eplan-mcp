@@ -26,6 +26,12 @@ public sealed class NewProjectArgs
     /// </summary>
     public string? Destination { get; set; }
 
+    /// <summary>
+    /// For basic-project execution only, an empty folder under the Host's shortest scratch root for an upgrade copy.
+    /// Paths longer than 80 characters are reported as skipped, because EPLAN expands the archive below this folder (A118).
+    /// </summary>
+    public string? UpgradeFolder { get; set; }
+
     /// <summary>For the execute operations: the plan's <see cref="WritePlan.Fingerprint"/>. Null for the plans.</summary>
     public string? Fingerprint { get; set; }
 }

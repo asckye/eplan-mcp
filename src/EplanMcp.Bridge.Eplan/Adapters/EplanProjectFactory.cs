@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Security;
+using System.Security.Cryptography;
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
@@ -116,5 +117,41 @@ internal sealed class EplanProjectFactory(IBridgeLog log) : IProjectFactory
                 ErrorReason.EplanOperationFailed,
                 "EPLAN's restore action reported a failure: the backup may be damaged, or from a newer EPLAN. EPLAN's system messages may say why.");
         }
+    }
+
+    /// <summary>Upgrades only the copy in the Host's short, empty scratch folder (api-notes A118).</summary>
+    public bool UpgradeBasicProject(string basicProject, string folder)
+    {
+        MainThread.Assert();
+        string copy = Path.Combine(folder, Path.GetFileName(basicProject));
+        File.Copy(basicProject, copy);
+        using SHA256 hash = SHA256.Create();
+        byte[] before;
+        using (FileStream stream = File.OpenRead(copy))
+        {
+            before = hash.ComputeHash(stream);
+        }
+
+        using var context = new ActionCallingContext();
+        context.AddParameter("Folder", folder);
+        context.AddParameter("BaseProject", "true");
+        context.AddParameter("NoBackup", "true");
+        context.AddParameter("PackOriginalProject", "false");
+        try
+        {
+            using var quiet = new QuietModeStep(QuietModes.ShowNoDialogs);
+#pragma warning disable RS0030 // Upgrades only a copy of a basic project in the Host's empty scratch folder (A118).
+            var action = new ActionManager().FindAction("XPrjActionUpgradeProjects")
+                ?? throw new InvalidOperationException("EPLAN has no 'XPrjActionUpgradeProjects' action.");
+#pragma warning restore RS0030
+            action.Execute(context);
+        }
+        catch (BaseException ex)
+        {
+            throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not upgrade the basic-project copy.", ex);
+        }
+
+        using FileStream after = File.OpenRead(copy);
+        return !before.SequenceEqual(hash.ComputeHash(after));
     }
 }

@@ -14,6 +14,12 @@ public interface IProjectFactory
     public (int Pages, string? ProjectGuid) Create(string linkFile, string basicProject);
 
     /// <summary>
+    /// Copies the basic project into the Host's empty scratch folder and runs XPrjActionUpgradeProjects there (A118).
+    /// Returns whether the copy's bytes changed. The original basic project is opened only for reading.
+    /// </summary>
+    public bool UpgradeBasicProject(string basicProject, string folder);
+
+    /// <summary>
     /// Restores the project backup <paramref name="archive"/> as the project <paramref name="linkFile"/>, which is not
     /// opened (S27: about 6 s for the sample project). Throws EPLAN_OPERATION_FAILED when EPLAN reports a failure.
     /// </summary>

@@ -9,6 +9,9 @@ public sealed class ConnectionGenerateData
     /// <summary>The pages in the order given.</summary>
     public List<ConnectionGeneratePage> Pages { get; set; } = [];
 
+    /// <summary>Whether connections were rebuilt, including a drawing refresh with unchanged connection properties.</summary>
+    public bool Rebuilt { get; set; }
+
     /// <summary>A problem after the commit, for example an undo step EPLAN did not close; null when there was none.</summary>
     public string? Warning { get; set; }
 }

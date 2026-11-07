@@ -337,7 +337,7 @@ public sealed class CableDefinitionExecutionTests
             return new JArray(row);
         }
         public List<string?[]> Endpoints(string project, string page) => Fixture.Base.Request["items"]!.Count() == 1 ? [["17/3/0", "17/4/0"]] : [["17/1/0", "17/2/0"]];
-        public void Generate(string projectPath, IReadOnlyList<string> pages)
+        public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false)
         {
             _generates++;
             Stage("generate");

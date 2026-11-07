@@ -46,15 +46,17 @@ public sealed class ConnectionGenerateExecuteOperation(IProjectCatalog catalog, 
         // The connections before are the ones just read for the fingerprint, in this same main-thread call.
         Committed<IReadOnlyList<IReadOnlyList<ConnectionRecord>>> committed = TransactionRunner.Run(transactions, Tool, () =>
         {
-            generator.Generate(request.Project.Path, request.Pages);
+            generator.Generate(request.Project.Path, request.Pages, args.Rebuild);
             return generator.ReadConnections(request.Project.Path, request.Pages);
         },
-        // Live T5b: a generation that changes nothing must not leave an undo step (the Host reports not_started).
-        after => !BridgeJson.FromObject(after).ToString(Newtonsoft.Json.Formatting.None).Equals(BridgeJson.FromObject(before).ToString(Newtonsoft.Json.Formatting.None), StringComparison.Ordinal));
+        // A119: rebuilding refreshes potential colours even when the connection properties stay unchanged.
+        // Without a rebuild, preserve T5b's rollback of a generation that changes nothing.
+        after => args.Rebuild || !BridgeJson.FromObject(after).ToString(Newtonsoft.Json.Formatting.None).Equals(BridgeJson.FromObject(before).ToString(Newtonsoft.Json.Formatting.None), StringComparison.Ordinal));
         return new ConnectionGenerateData
         {
             Project = request.Project.Name,
             Pages = ConnectionChanges.Compare(request.Pages, before, committed.Result),
+            Rebuilt = args.Rebuild,
             Warning = committed.Warning,
         };
     }

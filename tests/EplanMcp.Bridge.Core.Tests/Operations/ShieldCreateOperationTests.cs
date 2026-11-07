@@ -118,7 +118,7 @@ public sealed class ShieldCreateOperationTests
 
         public ShieldCreateData Read(string projectPath, string page, ShieldObjects objects) => new() { Page = page, Name = Created.Single(), Symbol = "SH", Connections = Covers };
 
-        public void Generate(string projectPath, IReadOnlyList<string> pages) => Calls.Add("generate");
+        public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false) => Calls.Add("generate");
 
         public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) => [[]];
 

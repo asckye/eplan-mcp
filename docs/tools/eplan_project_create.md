@@ -43,13 +43,15 @@
   "pages": 1,
   "projectGuid": "GB_bas001@<unix-seconds>",
   "databaseVersion": "18.0",
+  "upgraded": false,
   "seconds": 9,
   "hint": "The new project is closed."
 }
 ```
 
-- `outputSchema`：上述字段均声明；`execution` 为 ADR-0010 的四值枚举，`dryRun`、`project.opened` 为 boolean，`mode` 同输入枚举；`file`、路径和名称为 string，`sha256` 为 64 位小写十六进制；`pages` 为非负 integer 或 null，`projectGuid`、`databaseVersion`、`hint` 为 string 或 null，`seconds` 为非负数。示例中的哈希、时间是占位值。
-- `basic_project` 的 `pages`、`projectGuid` 来自同次 Bridge 创建调用；`backup` 当前的 `NewProjectData` 两字段为 null，不能捏造页数或为填字段自动打开项目。两种模式的 `databaseVersion` 均来自 Bridge execute 内的兼容性检查，通过后写入 `NewProjectData`。`dry_run` 返回 `execution: not_started`、计划 `fingerprint`、目标路径、源哈希和 `changes[]`，这三个未读取的项目字段均为 null。响应丢失后 `outcome.get` 只恢复执行状态，没有项目元数据；此时上述字段仍为 null，hint 明示，不重做兼容性检查或执行。
+- `outputSchema`：上述字段均声明；`execution` 为 ADR-0010 的四值枚举，`dryRun`、`project.opened`、`upgraded` 为 boolean，`mode` 同输入枚举；`file`、路径和名称为 string，`sha256` 为 64 位小写十六进制；`pages` 为非负 integer 或 null，`projectGuid`、`databaseVersion`、`hint` 为 string 或 null，`seconds` 为非负数。示例中的哈希、时间是占位值。
+- `upgraded: true` 表示 EPLAN 升级了旧版基本项目的副本并据此创建成功，`hint` 包含 `EPLAN upgraded a copy of the basic project from an older version; the original file is unchanged.`。
+- `basic_project` 的 `pages`、`projectGuid` 来自同次 Bridge 创建调用；`backup` 当前的 `NewProjectData` 两字段为 null，不能捏造页数或为填字段自动打开项目。两种模式的 `databaseVersion` 均来自 Bridge execute 内的兼容性检查，通过后写入 `NewProjectData`。`dry_run` 返回 `execution: not_started`、计划 `fingerprint`、目标路径、源哈希和 `changes[]`，这三个未读取的项目字段均为 null。响应丢失后 `outcome.get` 只恢复执行状态，没有项目元数据；此时上述字段仍为 null，`upgraded` 为 false，实际是否升级须视为未知，hint 明示恢复情况，不重做兼容性检查或执行。
 - `projectGuid` 是原样读出的 `PROJ_GUID`，形如“名称@Unix 秒数”，不是全局唯一 GUID；还原及文件副本会沿用原值（[A34](../eplan/api-notes/reads-and-snapshots.md#a34-对象编号与项目生命周期spike-s302026-10-21eplan-20260325421electric-p8在调度器中)，S30）。对象编号也不能单独区分项目副本（A32、A34）。
 - `seconds` 为 Host 本次处理用时（不含等待人工审批）；Bridge 的 `NewProjectData.Seconds` 只测 EPLAN 阶段，不冒充整个调用用时。结果给实际目标路径；错误不泄露本机路径（SEC-12）。名称等数据经过 ResultShaper。
 - 返回 `structuredContent`、同内容 JSON 文本块和一行摘要：`Created project 'Line1' from a basic project; it is closed.`；还原时用 `Restored backup as new project 'Line1'; it is closed.`。结果很小，不分页，不设 `response_format`。
@@ -59,7 +61,7 @@
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
 | `INVALID_ARGUMENT` | 模式、扩展名、名称、路径、大小不合规 | `not_started` | `metadata.violations` 列出全部问题 |
-| `INVALID_ARGUMENT` | 创建/还原后的兼容性不是 `compatible: true` / `IsCompatible`，且本次产物已全部清理 | `rolled_back` | 说明材料不兼容、新建产物已删除；提示使用兼容材料，不声称支持自动升级 |
+| `INVALID_ARGUMENT` | 创建/还原后的兼容性不是 `compatible: true` / `IsCompatible`，且本次产物已全部清理 | `rolled_back` | 说明材料不兼容、新建产物已删除；提示使用兼容材料 |
 | `FILE_NOT_FOUND` | imports 中找不到文件 | `not_started` | 提示把材料放进数据目录下的 imports；只回显相对源路径 |
 | `ALREADY_EXISTS` | Host 接到调用时目标已存在（空目录也拒绝）；规划后或执行前目标出现别人的文件 | `not_started` | `Choose a new destination; existing folders and projects are never reused.` |
 | `PLAN_STALE` | 源文件大小、修改时间、SHA-256 或目标前置条件变化 | `not_started` | 提示重新规划，不复用批准；Host 应在执行前重新核对源哈希 |
@@ -76,7 +78,7 @@
 
 - **已有合同**：[NewProjectArgs](../../src/EplanMcp.Contracts/NewProjectArgs.cs)、[NewProjectData](../../src/EplanMcp.Contracts/NewProjectData.cs)。`basic_project` 对应 `project.create.plan` / `.execute`；`backup` 对应 `project.restore.plan` / `.execute`，都经 Host 写入流水线的策略、审批、审计和结果恢复。不发明 `project.copy`、`project.open`、`project.close` 操作。
 - **创建/还原后检查兼容性**：`NewProjectExecution` 在 `make(request)` 及 `.elk`/`.edb` 检查之后、返回成功之前，通过注入的 `IProjectFiles` 检查新 `.elk`，与 `project.compatibility` 使用同一状态判定：`IsCompatible` 才对应 `compatible: true`。检查不打开项目（[A31](../eplan/api-notes/reads-and-snapshots.md#a31-新建项目还原项目判断项目版本spike-s272026-10-21eplan-20260325421electric-p8在调度器中)，0.02–0.3 秒），版本写入两种模式的 `NewProjectData.DatabaseVersion`。不兼容抛 `INVALID_ARGUMENT`，检查失败抛 `EPLAN_OPERATION_FAILED`，都进入现有执行清理路径；清理不全为 `OUTCOME_UNKNOWN`。Host 不再另发兼容性调用，普通写流水线审计的就是完整执行结果。
-- **未验证的跨版本行为**：从较旧或较新材料创建/还原时是否升级、弹对话框或失败均**未验证**（A31、S30）；现有 Large 基线只用 `GB_bas001.zw9` 和数据库版本 `18.0` 的示例备份，不能外推跨版本支持。不主动请求升级，不依据 `ProjectInfo.xml` 的版本文字宣称兼容（A35：10043/10088 不一定随写入更新）；7z 归档预检只作为 Q1 的后续可选改进。
+- **旧版基本项目**：仅 `basic_project` 首次创建失败后，复制 `.zw9` 到 Host 选定的 `<最短 scratch 根目录>\.up\<6 位小写十六进制>` 空目录，通过 `XPrjActionUpgradeProjects` 升级一次，参数分别为 `Folder`、`BaseProject=true`、`NoBackup=true`、`PackOriginalProject=false`（A118）。副本字节发生变化才重试创建；未变化时保留原始错误并返回 `metadata.upgrade = "unchanged"`。目录路径超过 80 字符时跳过并在错误元数据说明；结束后尝试删除目录，删除失败只给警告。imports 原文件不写入，`.zw1` 不走此路径。2023 基本项目的 action 行为已实测，工具完整路径仍待实机复验；更高版本材料不据此保证可用。
 - **目录**：默认在 `<scratch>\projects\<name>\` 中生成 `<name>.elk` 和 `<name>.edb`。Host 校验目标不存在，执行参数生成时再次复核目标及源哈希，直接使用 Bridge 返回的指纹。Bridge 规划不创建目录；执行在同次主线程调用中重核前置状态和指纹，再 `Directory.CreateDirectory`，记录目录是否由本次执行创建并负责失败清理。默认缺失父目录也由此创建；Host 对显式 destination 保留父目录必须存在的校验。
 - **EPLAN 调用**：[EplanProjectFactory](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanProjectFactory.cs) 在主线程调度器的 `LockingStep` 中，用 `QuietModeStep(ShowNoDialogs)` 调 `Eplan.EplApi.DataModel.ProjectManager.CreateProject(linkFile, basicProject)`；还原用 `Eplan.EplApi.ApplicationFramework.ActionManager.FindAction("restore").Execute(context)`，逐项加入 `TYPE=PROJECT`、`ARCHIVENAME`、`PROJECTNAME`，不拼命令行。创建行为见 A31、A34；restore 的进程内路径由现有 Large 测试覆盖，是否已实际运行不能由“测试已合入”推断，仍标为**未验证**。
 - **关闭状态**：A34 的 2026-10-22 补充优先于 Bridge 设计 4.8 的早期观察：Bridge 创建之后项目仍打开。适配器先在创建用的 `ProjectManager` 生命周期内读页数和 `PROJ_GUID`，再用新的 manager 从 `OpenProjects` 按链接路径重新取得对象并 `Close()`（S30 r3）；不对旧对象 Close，不再重复 Open。成功响应须确认项目未留在打开列表中。还原路径不主动打开项目（A31；进程内路径以上述 Large 验证为准）。

@@ -211,7 +211,7 @@ public sealed class InterruptionExistingNetTests
             State = 1;
         };
         public List<string?[]> Endpoints(string project, string page) => page == ConnectionCreateFixture.PageName ? Generated : [];
-        public void Generate(string projectPath, IReadOnlyList<string> pages) => State = 2;
+        public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false) => State = 2;
         public void Undo(string project) { State--; Undos++; }
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => Transactions;
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => new()

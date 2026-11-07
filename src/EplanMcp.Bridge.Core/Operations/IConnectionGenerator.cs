@@ -15,8 +15,8 @@ public interface IConnectionGenerator
     public IReadOnlyList<IReadOnlyList<string>> ObjectIds(string projectPath, IReadOnlyList<string> pages);
 
     /// <summary>
-    /// Turns the connections drawn on the pages into connections, updating only and never rebuilding all (A13, A14;
-    /// tool spec 2). EPLAN's failure is EPLAN_OPERATION_FAILED.
+    /// Turns the connections drawn on the pages into connections, optionally rebuilding them to refresh potential
+    /// colours (A13, A14, A119). EPLAN's failure is EPLAN_OPERATION_FAILED.
     /// </summary>
-    public void Generate(string projectPath, IReadOnlyList<string> pages);
+    public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false);
 }

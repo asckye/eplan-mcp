@@ -340,7 +340,7 @@ public sealed class ConnectionCreateExecutionTests
         }
         public List<double[][]> Graphical(string project, string page) => Failure == "graphical" ? [] : Drawn ?? Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!;
         public List<string?[]> Endpoints(string project, string page) => Failure == "endpoints" ? [["17/1/0", "17/9/0"]] : GeneratedEndpoints ?? [["17/1/0", "17/2/0"]];
-        public void Generate(string projectPath, IReadOnlyList<string> pages)
+        public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false)
         {
             Assert.Equal(1, State);
             Assert.Equal(1, Transactions.Calls.Count(c => c == "Commit"));

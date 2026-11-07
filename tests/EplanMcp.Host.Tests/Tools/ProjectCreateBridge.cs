@@ -12,6 +12,9 @@ internal sealed class ProjectCreateBridge : IProjectFactory, IProjectFiles
     public Exception? CheckFailure { get; set; }
     public bool MakeFiles { get; set; } = true;
     public Action<string>? BeforeCheck { get; set; }
+    public BridgeErrorException? CreateFailure { get; set; }
+    public bool UpgradeChangesCopy { get; set; } = true;
+    public List<string> UpgradeFolders { get; } = [];
     public List<string> Events { get; } = [];
 
     public static object Plan(NewProjectArgs args, string mode)
@@ -26,8 +29,26 @@ internal sealed class ProjectCreateBridge : IProjectFactory, IProjectFiles
 
     public (int Pages, string? ProjectGuid) Create(string linkFile, string basicProject)
     {
+        if (CreateFailure is { } failure)
+        {
+            CreateFailure = null;
+            throw failure;
+        }
         Make(linkFile);
         return (1, "basic@1");
+    }
+
+    public bool UpgradeBasicProject(string source, string folder)
+    {
+        Assert.Empty(Directory.EnumerateFileSystemEntries(folder));
+        UpgradeFolders.Add(folder);
+        string copy = Path.Combine(folder, Path.GetFileName(source));
+        File.Copy(source, copy);
+        if (UpgradeChangesCopy)
+        {
+            File.AppendAllText(copy, "upgraded");
+        }
+        return UpgradeChangesCopy;
     }
 
     public void Restore(string archive, string linkFile) => Make(linkFile);

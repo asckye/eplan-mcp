@@ -615,7 +615,7 @@ public sealed class ConnectionDefinitionPointTests
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => { Events.Add("place"); State = 1; };
         public Action PrepareDefinitionPoints(string project, string page, JArray planned) => () => { Assert.Equal(1, State); Events.Add("define"); State = 2; };
-        public void Generate(string project, IReadOnlyList<string> pages)
+        public void Generate(string project, IReadOnlyList<string> pages, bool rebuild = false)
         {
             Assert.Equal(2, State);
             Assert.Contains("Commit", Transactions.Calls); // A52: generation only sees committed placement.
