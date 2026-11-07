@@ -138,6 +138,7 @@ public sealed partial class DevicePlaceOperationTests
     [InlineData("&EFS1/3", "")]
     [InlineData("==F1=GAA++P1+A1&EFS1/3", "==F1=GAA++P1+A1")]
     [InlineData("=GAA&EFS1#X1/3", "=GAA#X1")]
+    [InlineData("4", "")]
     public void DeviceStructureOf_IsThePagesStructureWithoutTheDocumentType(string page, string structure)
     {
         Assert.Equal(structure, DevicePlaceRequest.DeviceStructureOf(page));

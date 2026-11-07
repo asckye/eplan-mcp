@@ -186,7 +186,9 @@ public static class ConnectionCreatePlanner
                 // PDF redraw 2026-11-06: an interruption point's tag carries the higher-level function only, as in the sample (=GAA-2L1
                 // on =GAA+A1 shows -2L1). On a page without one, =-L1 shows L1; a location in the tag makes EPLAN show the full name.
                 string shared = (string)item["name"]!;
-                interruption["name"] = shared[0] is '=' or '+' ? shared : "=" + DrawingNames.HigherLevelFunctionOf(scene.Page.Page) + (shared[0] == '-' ? "" : "-") + shared;
+                // A121: a project without page structure (NFPA basic projects) shows a leading '=' as written, so none is added there.
+                string function = scene.Page.Page.Contains('/') ? "=" + DrawingNames.HigherLevelFunctionOf(scene.Page.Page) : string.Empty;
+                interruption["name"] = shared[0] is '=' or '+' ? shared : function + (shared[0] == '-' ? "" : "-") + shared;
                 interruptions.Add(Key(point), interruption);
                 continue;
             }

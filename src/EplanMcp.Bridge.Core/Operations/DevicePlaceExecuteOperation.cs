@@ -197,8 +197,11 @@ public sealed class DevicePlaceExecuteOperation(
 
         // A82: PLC template functions carry the device tag followed by a connection-point suffix.
         string tag = DevicePlaceRequest.WithoutEmptyFunction(request.Tag);
+        // A121: in a project without structure (NFPA basic projects) EPLAN stores -DI2 as DI2 and its points as DI2:1.
+        string bare = tag.StartsWith("-", StringComparison.Ordinal) ? tag.Substring(1) : tag;
         bool Belongs(string name) => placed.Terminal is not null ? DevicePlaceRequest.SameName(request.Tag, name)
-            : DevicePlaceRequest.WithoutEmptyFunction(name) is var own && (own == tag || own.StartsWith(tag + ":", StringComparison.Ordinal));
+            : DevicePlaceRequest.WithoutEmptyFunction(name) is var own && (own == tag || own.StartsWith(tag + ":", StringComparison.Ordinal)
+                || own.IndexOfAny(['=', '+', '-']) < 0 && (own == bare || own.StartsWith(bare + ":", StringComparison.Ordinal)));
         // Live 2026-11-03 (A85): before the commit the other functions' wrappers still show the old tag; they are read again by
         // the new tag after the commit, where every function must carry it.
         string? other = committed ? placed.Names.FirstOrDefault(name => !Belongs(name)) : null;

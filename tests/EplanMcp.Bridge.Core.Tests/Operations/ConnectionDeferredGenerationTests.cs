@@ -120,6 +120,21 @@ public sealed class ConnectionDeferredGenerationTests
         Assert.Equal(planned, (string?)creator.Execute()["symbols"]![0]!["interruption"]!["name"]);
     }
 
+    /// <summary>A121: an NFPA basic project's page 4 has no structure, and EPLAN shows a leading '=' as written (=-L1).</summary>
+    [Theory]
+    [InlineData("L1", "-L1")]
+    [InlineData("-L1", "-L1")]
+    public void InterruptionName_OnAPageWithoutStructure_GetsNoEquals(string requested, string planned)
+    {
+        var creator = new Creator();
+        creator.Fixture.Scene.Page.Page = "4";
+        creator.Fixture.Request["page"] = "4";
+        creator.Fixture.Symbols.Add(ConnectionCreateFixture.Variant("BP", "InterruptionPoint", 0, "Up"));
+        creator.Fixture.Request["generate"] = false;
+        creator.Fixture.Request["items"] = new JArray(new JObject { ["kind"] = "interruption_point", ["position"] = new JArray(64, 64), ["direction"] = "Up", ["name"] = requested });
+        Assert.Equal(planned, (string?)creator.Execute()["symbols"]![0]!["interruption"]!["name"]);
+    }
+
     [Theory]
     [InlineData("wire")]
     [InlineData("definition_point")]

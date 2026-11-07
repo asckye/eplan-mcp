@@ -118,6 +118,20 @@ public sealed class DeviceUpdateOperationTests
     }
 
     [Fact]
+    public void ProjectWithoutStructure_RenamesCB11ToCB12()
+    {
+        // A121: the NFPA basic projects store -CB11 as CB11.
+        _renamer.Functions.Add(("CB11", "2/9/1/0", true, "4", "CB11"));
+        DeviceUpdateArgs args = Args("CB11", "-CB12");
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        DeviceUpdateData result = Execute(args);
+
+        Assert.Equal("CB12", result.Tag);
+        Assert.Contains(_renamer.Functions, f => f.Name == "CB12");
+    }
+
+    [Fact]
     public void SuffixChangesInvalidateThePlan()
     {
         _renamer.Functions.Add(("=F+A2-KF1:13", "2/1/1/0", false, null, ""));

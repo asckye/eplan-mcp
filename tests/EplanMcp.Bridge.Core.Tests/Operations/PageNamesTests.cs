@@ -55,6 +55,7 @@ public sealed class PageNamesTests
     [InlineData("/5", "")]
     [InlineData("=A/1.1/2", "=A/1.1")]
     [InlineData("=A", "=A")]
+    [InlineData("4", "")]
     public void StructureOf_IsEverythingBeforeTheLastSlash(string name, string structure)
     {
         Assert.Equal(structure, PageNames.StructureOf(name));

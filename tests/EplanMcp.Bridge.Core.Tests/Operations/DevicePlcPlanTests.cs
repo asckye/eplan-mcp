@@ -131,6 +131,10 @@ public sealed class DevicePlcPlanTests
     [InlineData("+S1-5Q1", "=+S1-5Q1", true)]
     [InlineData("-5Q1", "=-5Q1", true)]
     [InlineData("+S1-5Q1", "=+S1-Q1", false)]
+    [InlineData("-DI2", "DI2", true)]
+    [InlineData("-DI2", "DI3", false)]
+    [InlineData("=GAA-DI2", "DI2", false)]
+    [InlineData("-DI2", "+S1DI2", false)]
     public void Identity_IgnoresAnEmptyLeadingFunction(string requested, string actual, bool matches) =>
         Assert.Equal(matches, DevicePlaceRequest.SameName(requested, actual));
 }

@@ -485,6 +485,14 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A121. 没有页结构的项目：NFPA 基本项目的代号和页名（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，从 `NFPA_mm_bas001.zw9` 建的 scratch 项目 TPL_NFPA_mm、MX_NFPA）
+- NFPA 基本项目的页名就是 `1`、`2`、`3`，页结构里没有 `=`、`+`、`&`；`=PWR+CP/5` 建出来是 `5`。`eplan_page_create` 给 `/4` 时 EPLAN 建出 `4`，工具现在视为一致。
+- 工具原来把不带 `/` 的页名整个当成结构，`-CB1` 被拼成 `4-CB1`。`Project.ParseNameAndProps` 把 `4-CB9` 拆成计数器 `4`、标识字母为空，`FUNC_CODE` 写空值时 EPLAN 抛 `EmptyPropertyException`（S063111），所以按部件放置一律失败；符号放置直接写 `Name`，得到 `4-CR1`。现在只有以 `=`、`+`、`&`、`#` 开头的才算结构，纯页号没有结构。
+- 不带结构时 EPLAN 把 `-CB11` 存成 `CB11`，PLC 点存成 `DI2:1` 这样的形式；放置和改名的读回按此比较。`PropertyValue.ToString()` 对空值也抛 S063111，读诊断时先判 `IsEmpty`。
+- 中断点名称：带结构的页上 `=-L1` 显示为 `L1`，在这种项目里 `=` 原样显示，所以不加 `=`，写成 `-L1`。
+- 实测：GV2P08 按部件放置、代号 `-CB11`，得到 `CB11`（4 个功能），改名为 `CB12` 成功；中断点 `L9` 建成 `-L9`。
+- 🔴 未解决：PLC 卡（`SIE.6ES7131-6BH01-0BA0`）用 `eplan_device_place` 按部件放置时，提交后读回只找到 1 个功能（应为 3 个），工具判失败并自动撤销，但项目里留下一个未放置、挂着部件的 PLCBox 主功能（`DI2`）。PLC 模块按用法说明用 `eplan_macro_insert` 的 `part` 插组宏。
+
 ### A120. 宏里的占位符与插入时套用值集（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，从公司基本项目建的 scratch 项目 EES1）
 - `eplan_macro_get` 不插入就读出占位符和值集：P8 数据目录的官方宏库 `EPLAN_Macro` 136 个窗口宏中 36 个带值集。例如 `203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema` 的 `#<Function_text>` 有 8 个值集（Forward control、Reverse control、Feed Forward……），变量 `DI_Drive_Control`（功能文字）和 `DT`（设备代号）。
 - `eplan_macro_insert` 带 `values: {"#<Function_text>": "Reverse control"}`：插入和 `ApplyRecord` 在同一事务中提交，读回的当前值正好是该值集的值（`驱动装置"给料,向后"`、`{{QA2}}`）；写错的值集在预览时就被拒绝，并列出可选的值集。`Insert.WindowMacro` 返回的放置对象里包含插入的 `PlaceHolder`。

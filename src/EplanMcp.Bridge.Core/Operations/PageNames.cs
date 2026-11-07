@@ -1,4 +1,5 @@
 using System.Globalization;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
@@ -21,11 +22,11 @@ public static class PageNames
         return problem is null ? new PageName(name!, values[0], values[1], values[2], counter) : null;
     }
 
-    /// <summary>The part of a full page name before its last <c>/</c>: the structure the page is in.</summary>
+    /// <summary>The part of a full page name before its last <c>/</c>: the structure the page is in; empty for a bare page number (A121).</summary>
     public static string StructureOf(string pageName)
     {
         int slash = pageName.LastIndexOf('/');
-        return slash < 0 ? pageName : pageName.Substring(0, slash);
+        return slash >= 0 ? pageName.Substring(0, slash) : DrawingNames.IsStructure(pageName) ? pageName : string.Empty;
     }
 
     private static string? Problem(string? name, out string?[] values, out int counter)

@@ -10,12 +10,17 @@ public static class DrawingNames
         actual = WithoutEmptyStructure(actual);
         string full = WithoutEmptyStructure(requested.StartsWith("-", StringComparison.Ordinal) ? DeviceStructureOf(page) + requested : requested);
         int end = full.IndexOfAny(['+', '-', '&', '#']);
-        return requested == actual || full == actual || full.StartsWith("=", StringComparison.Ordinal) && end > 0 && full.Substring(end) == actual;
+        // A121: on a bare page number (no structure) EPLAN stores -DI2 as DI2.
+        bool bare = !page.Contains('/') && !IsStructure(page) && full.StartsWith("-", StringComparison.Ordinal) && full.Substring(1) == actual;
+        return requested == actual || full == actual || bare || full.StartsWith("=", StringComparison.Ordinal) && end > 0 && full.Substring(end) == actual;
     }
-    /// <summary>A55: device structure excludes the document type but retains a following structure segment.</summary>
+    /// <summary>
+    /// A55: device structure excludes the document type but retains a following structure segment. A bare page number
+    /// without '/' has no structure (A121: the NFPA basic projects name pages 1, 2, 3).
+    /// </summary>
     public static string DeviceStructureOf(string page)
     {
-        string structure = page.LastIndexOf('/') is var slash && slash >= 0 ? page.Substring(0, slash) : page;
+        string structure = page.LastIndexOf('/') is var slash && slash >= 0 ? page.Substring(0, slash) : IsStructure(page) ? page : string.Empty;
         int type = structure.IndexOf('&'), end = type < 0 ? -1 : structure.IndexOf('#', type);
         return type < 0 ? structure : structure.Substring(0, type) + (end < 0 ? string.Empty : structure.Substring(end));
     }
@@ -33,6 +38,9 @@ public static class DrawingNames
         }
         return string.Empty;
     }
+    /// <summary>Whether a name without '/' is a structure (=GAA+A1) rather than a bare page number (4).</summary>
+    public static bool IsStructure(string name) => name.Length > 0 && "=+&#".Contains(name[0]);
+
     private static string WithoutEmptyStructure(string name)
     {
         var result = new System.Text.StringBuilder();

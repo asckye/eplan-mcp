@@ -1,5 +1,7 @@
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.HEServices;
+using EplanMcp.Bridge.Core;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
@@ -18,6 +20,12 @@ internal static class EplanDeviceRename
         using PropertyValue code = parsed.FUNC_CODE;
         using PropertyValue counter = parsed.FUNC_COUNTER;
         using PropertyValue suffix = parsed.FUNC_SUFFIX;
+        if (code.IsEmpty)
+        {
+            // A121: an empty FUNC_CODE is refused by the list (S063111); say what EPLAN parsed instead of failing natively.
+            throw new BridgeErrorException(ErrorReason.InvalidArgument, $"EPLAN finds no identifier letters in the tag '{tag}' for this project's tag format (plant '{Text(plant)}', location '{Text(location)}', prefix '{Text(prefix)}', counter '{Text(counter)}'); give a tag such as -CB1 without a page number in front.");
+        }
+
         // A tag part that parses to an empty value is refused by the list (S063111).
         if (!plant.IsEmpty)
         { newName.DESIGNATION_PLANT = plant; }
@@ -32,4 +40,7 @@ internal static class EplanDeviceRename
         using var service = new NameService();
         service.RenameDevice(main, newName, false, true);
     }
+
+    // ToString() of an empty value throws EmptyPropertyException (S063111).
+    private static string Text(PropertyValue value) => value.IsEmpty ? string.Empty : value.ToString();
 }

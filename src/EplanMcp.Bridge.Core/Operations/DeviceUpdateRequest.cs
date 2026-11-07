@@ -174,6 +174,12 @@ internal sealed class DeviceUpdateRequest
             return newTag;
         }
 
+        // A121: in a project without structure (NFPA basic projects) a device is just CB11, and -CB12 is stored as CB12.
+        if (device.Tag.Length > 0 && device.Tag.IndexOfAny(['=', '+', '-']) < 0)
+        {
+            return newTag.Substring(1);
+        }
+
         string own = "-" + device.DeviceTag;
         return device.DeviceTag.Length > 0 && device.Tag.EndsWith(own, StringComparison.Ordinal)
             ? device.Tag.Substring(0, device.Tag.Length - own.Length) + newTag

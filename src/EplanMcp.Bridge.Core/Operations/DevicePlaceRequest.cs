@@ -307,6 +307,9 @@ internal sealed class DevicePlaceRequest
         { return false; }
         StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         actual = WithoutEmptyFunction(actual);
+        // A121: in a project without structure (NFPA basic projects) EPLAN stores -DI2 as DI2.
+        if (requested.Length > 1 && requested[0] == '-' && actual.IndexOfAny(['=', '+', '-']) < 0 && string.Equals(requested.Substring(1), actual, comparison))
+        { return true; }
         return string.Equals(requested, actual, comparison)
             || (requested.Length > 0 && requested[0] == '=' && actual.Length > 0 && actual[0] is '+' or '-'
                 && requested.EndsWith(actual, comparison) && requested.Substring(0, requested.Length - actual.Length).IndexOfAny(['+', '-', ':', '&']) < 0);
