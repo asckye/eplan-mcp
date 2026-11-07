@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A107、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A108、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -479,6 +479,15 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 这样运行 `eplan_part_import`、`eplan_part_sync`、`eplan_translation_import`，正在用的两个库 29 个文件（`.lck` 除外）的 SHA-256 不变，包括 `User.eod`、`User.eox`；副本的 `Translate.db` 变了。A30 说的“副本隔离不了导入”只针对按路径打开另一个库。
 - 设置是每个变体各一份，用文件备份还原后哈希一致。
 — `MasterDataOnCopyTests`。
+
+### A107. 打开和关闭项目、结构标识符的顺序和改名、PLC 编址（2026-11-06，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
+- **打开和关闭：** `QuietModeStep(ShowNoDialogs)` 内 `ProjectManager.OpenProject(路径, OpenMode.Exclusive)` 打开，`EplanProjects.ByPath(路径).Close()` 关闭。重开后页数不变，写入和一次撤销都正常；只有它一个项目打开时它就是当前项目。— `ProjectToolsTests`。
+- **不要在打开后调用 `Edit.SelectProjectInPagesNavigator`：** 调用过之后，`ProjectOpen` 再打开的项目不再成为当前项目，Large 夹具靠开页恢复当前项目，下一次 `XPrjActionProjectClose` 弹"项目选择"对话框，EPLAN 随后返回 EPLAN_BUSY。去掉这一步后不再出现。因果关系只由这一次对比支持。
+- **结构标识符的顺序：** `Project.GetLocationObjects(块)` 和 `GetLocations(块)` 按顺序返回，`GetLocationObjects()` 不是（读回校验曾因此失败）。`SortId` 是负的小数，越小越靠前。`SetSortedLocations` 把传入的放在最前面，排在该块的空标识之前，`SafetyPoint` 能回滚，返回 true；其余标识之间的顺序可能被 EPLAN 改变（`C2`、`B4` 变成 `B4`、`C2`），所以位置重要的都要传。名称用 `GetLocations` 的写法（`B1.X1`）；`Location.Name` 只是最后一段（`X1`）。— spike S21 探针。
+- **`Project.ChangeLocationName(Location, 名称)`：** 名称传最后一段，用到它的页名一起变，一次撤销恢复。— `ProjectToolsTests`。
+- **`PlcService.ReaddressTerminals`：** 起始地址要和项目的地址格式一致。示例项目是 `%IX2.7`，传 `I100.0` 抛 `ArgumentException`（S029035，参数 `strDigitalInputStartAddress`），传 `%IX100.0` 把地址整体平移（`%IX2.7` → `%IX102.7`），846 个连接点，一次撤销恢复。— `ProjectToolsTests`。
+- **`Translate.TranslateText(文本, 项目)` 返回 `MultiLangString`：** 词典里没有的词只有一种语言（`zh_CN@Schaltplan;`）。词典里有的词在 P8 上的结果待补。
+- **崩溃（2026-11-06 18:06，Electric P8）：** 探针把同一个 `PropertyValue` 先写给 `Location`、再写给 `ProjectPropertyList.PROJ_INSTALLATIONNAME`，在 `UniversalPropertyList.setProp` 里 `AccessViolationException`。写入工具每次都新建 `PropertyValue`，没有这个问题。是否正是复用导致，没有再试。EPLAN 带 `/RestartOnCrash` 自动重启后，`eplremote --list` 找不到它（`NO EPLAN <pid>`），要重新启动才能远程调用。
 
 ### A106. 结构标识符、标题栏和预规划（2026-11-06，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 新建项目和 LargeWrite 上）
 - **结构标识符的官方 API 词是 `Location`，** 搜 structure identifier 搜不到：`Project.GetLocationObjects()`、`Project.GetLocationObjects(Hierarchy)`、`Project.CreateLocation(Hierarchy, string, LocationSortOrder)`、`Project.SetSortedLocations`、`Project.ChangeLocationName`，`Location.IsUsed`、`Location.Remove()`、`Location.Properties`。`Hierarchy`：`Plant` =，`Functional` ==，`Place` ++，`Location` +，`Document` &，`UserDef` #。

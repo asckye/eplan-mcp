@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| 结构标识符、标题栏、打开和关闭项目、PLC 编址（2026-11-06，负责人要求） | `StructureToolsTests`、`ProjectUpdateTests`、`ProjectToolsTests` | 已通过：2026-11-06，B 槽 Pro Panel，EPLAN 2026.0.3.25421，LargeWrite。待验：在有"主数据已经陈旧"提示的 P8 项目上打开时是否免弹窗；词典里有的词经 `translate` 补语言后的结果 |
 | T.4 graphic-edit 第 1 批（2026-11-05 负责人 brief；`.local/change-sets/series.txt`） | `GraphicEditTests` | 已通过：2026-11-05，B 槽 Pro Panel，分支 `feat/graphic-edit-land`：`GraphicEditTests` 15 个操作和块拒绝用例共 16 项通过；缩放线、文字和组的用例调整坐标后单独通过。 |
 | G2 M1/M2（2026-11-03 负责人 brief，A33/A79/A82） | `MacroOverviewTests`、`MacroInsertTests` | 已通过：2026-11-04，A 槽：`MacroOverviewTests` 2/2、`MacroInsertTests` 2/2。 |
 | G9 图形创建（2026-11-03，负责人 brief） | `PlacementGraphicsCreateTests`、`PlacementTextCreateTests` | 部分通过：2026-11-03 `PlacementGraphicsCreateTests` 3/3；2026-11-05（main `9faf3790`）`PlacementTextCreateTests` 3 过 1 败。失败的 `ForcedMidBatchFailure` 是测试辅助程序 `DrawingHelper` 没跟上布局护栏，写入前就被 R1/R3 拒绝。未完成：批内中途失败回滚没有实机结果。 |
