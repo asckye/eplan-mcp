@@ -141,7 +141,7 @@ internal sealed class DevicePlaceRequest
         [
             .. (box ? page.LocationBoxStructures : terminal || args.PlcConnectionPoint is not null ? existing : names.FunctionNames(project.Path))
                 .Where(n => full.Length > 0 && ((box || terminal || args.PlcConnectionPoint is not null
-                    ? SameName(full, n, ignoreCase: true) : string.Equals(full, WithoutEmptyFunction(n), StringComparison.OrdinalIgnoreCase)) || WithoutEmptyFunction(n).StartsWith(full + ":", StringComparison.OrdinalIgnoreCase)))
+                    ? SameName(full, n, ignoreCase: true) : string.Equals(BareOf(full, n), WithoutEmptyFunction(n), StringComparison.OrdinalIgnoreCase)) || WithoutEmptyFunction(n).StartsWith(BareOf(full, n) + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
         if (args.JoinDevice == true && taken.FirstOrDefault(n => SameName(full, n, ignoreCase: true)) is { } joinedTag)
@@ -300,6 +300,10 @@ internal sealed class DevicePlaceRequest
     /// </summary>
     /// <summary>PDF redraw 2026-11-06: on a page without a higher-level function EPLAN stores +S1-K1 as =+S1-K1; the empty '=' adds nothing.</summary>
     internal static string WithoutEmptyFunction(string name) => name.Length > 1 && name[0] == '=' && name[1] is '+' or '-' ? name.Substring(1) : name;
+
+    /// <summary>A121: in a project without structure EPLAN stores -M1 as M1, so a device named M1 takes -M1 (join_device, ALREADY_EXISTS).</summary>
+    private static string BareOf(string full, string actual) =>
+        full.Length > 1 && full[0] == '-' && WithoutEmptyFunction(actual).IndexOfAny(['=', '+', '-']) < 0 ? full.Substring(1) : full;
 
     internal static bool SameName(string requested, string? actual, bool ignoreCase = false)
     {

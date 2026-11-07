@@ -6,6 +6,13 @@ internal sealed partial class EplanConnectionCreator
 {
     internal static void NameInterruption(Page page, FunctionBase point, string name)
     {
+        // A121: a project without page structure (NFPA basic projects) keeps =-L1C as written; devices there read CB1, so -L1C becomes L1C.
+        if (EplanMcp.Contracts.DrawingNames.IsBarePage(page.Name))
+        {
+            point.Name = name.Length > 1 && name[0] == '-' ? name.Substring(1) : name;
+            EplanVisibleNames.Adjust(page, point);
+            return;
+        }
         // PDF redraw 2026-11-06: on a page without a higher-level function EPLAN stored +S1-L1 as =-+S1-L1; the full form starts with '='.
         string full = name.Length > 0 && name[0] == '=' ? name : "=" + name;
         point.Name = full;

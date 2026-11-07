@@ -98,6 +98,28 @@ public sealed class DeviceJoinPlanTests
         Assert.Empty(_parts.Reads);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ProjectWithoutStructure_BareTagCountsAsTheDashedTag(bool join)
+    {
+        _pages.Pages.Add(new() { Name = "5" });
+        _names.Functions.Add(("M1", "1/17/1/0", true, "4", "M1"));
+        DevicePlaceArgs args = Args();
+        args.Page = "5";
+        args.Tag = "-M1";
+        args.JoinDevice = join;
+        if (join)
+        {
+            Assert.Equal("M1", Plan(args).Details!["tag"]);
+        }
+        else
+        {
+            Assert.Equal(ErrorReason.AlreadyExists, Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Reason);
+        }
+        Assert.Empty(_transactions.Calls);
+    }
+
     [Fact]
     public void Join_ReadsResolvedPlcCategoryBeforeOpeningATransaction()
     {
