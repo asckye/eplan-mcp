@@ -100,7 +100,7 @@ public sealed class PlaceholderListToolTests
             Assert.Single(placeholder.GetProperty("values").EnumerateArray());
             Assert.False(placeholder.TryGetProperty("currentValues", out _));
         });
-        Assert.Equal($"EPLAN gave no current values for {count}: it reads them only for a locked placeholder. eplan_placeholder_apply reports them before and after a change.", data.GetProperty("hint").GetString());
+        Assert.Equal($"EPLAN gave no current values for {count}: it reads them only for a locked placeholder whose referenced properties are all valid. eplan_placeholder_apply reports them before and after a change.", data.GetProperty("hint").GetString());
     }
 
     [Fact]

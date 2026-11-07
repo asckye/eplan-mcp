@@ -485,6 +485,9 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A117. 占位符引用无效属性时读不出当前值（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，官方 EES 码垛系统示例副本）
+- `PlaceHolder.GetAllCurrentValues()` 对引用了无效属性的占位符抛 `PropertyNotFoundException`（`S063109属性无效`），不是 A33 里的 `LockingException`。`eplan_placeholder_list` 的 `detailed` 原来因此整体报 INTERNAL；工具改为把这样的占位符和未锁定的一样标记为取不到当前值，值集和变量照常返回（待实机复验）。`eplan_placeholder_apply` 在事务里读前后值，遇到这种占位符仍会失败，还没有处理。
+
 ### A116. T 节点的画法和自动连线的颜色（2026-11-07，EPLAN 2026.0.3.25421，Electric P8 与 Pro Panel，示例项目副本）
 - **T 节点：** 示例页的 T 节点是 `TLRU/0`、`TOUR/1`、`TLRO/0`（变体 A/B，`FUNC_SYMBOL` 读出 `SPECIAL;0;64;0`），画成斜折角。工具省略 `t_node.variant` 时只在连接点都在中心的变体里选，结果是变体 8（`SPECIAL;0;64;8`），画成圆点。照着已有页重画时，把 `eplan_page_get` 读回的变体传给 `t_node.variant`。
 - **自动连线的颜色来自电位：** 示例项目第 1 页的电位定义点上有 31005 `CONNECTION_ACL_COLOR`：L1/L2/L3 为 0（黑），N 为 5（蓝），PE 为 3，示例页的线正好是黑和蓝。官方帮助的连接属性继承顺序是项目、层、……、电位、……、连接定义点，后者覆盖前者。

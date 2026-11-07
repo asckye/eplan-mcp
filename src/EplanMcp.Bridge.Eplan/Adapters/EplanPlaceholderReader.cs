@@ -66,10 +66,11 @@ internal sealed class EplanPlaceholderReader : IPlaceholderReader
             {
                 record.CurrentValues = CurrentValues(holder, language);
             }
-            catch (LockingException nativeFailure)
+            catch (Exception nativeFailure) when (nativeFailure is LockingException or PropertyNotFoundException)
             {
                 WriteExceptionDiagnostics.Report(nativeFailure);
-                // The placeholder is not locked, as in a read (api-notes A33); the tool says so instead of failing.
+                // The placeholder is not locked, as in a read (api-notes A33), or it references a property EPLAN calls
+                // invalid (A117); the tool says so instead of failing the whole list.
                 record.CurrentValuesRefused = true;
             }
         }

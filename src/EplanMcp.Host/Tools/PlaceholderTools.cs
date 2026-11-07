@@ -91,7 +91,7 @@ internal sealed class PlaceholderTools
             Total = data.Total,
             NextCursor = next < data.Total ? PageCursor.Encode(next, fingerprint) : null,
             Hint = data.Total == 0 ? "No placeholders: they come into a project with macros that have value sets (eplan_macro_insert)."
-                : data.CurrentValuesUnavailable > 0 ? $"EPLAN gave no current values for {ToolResults.Count(data.CurrentValuesUnavailable, "placeholder")}: it reads them only for a locked placeholder. eplan_placeholder_apply reports them before and after a change."
+                : data.CurrentValuesUnavailable > 0 ? $"EPLAN gave no current values for {ToolResults.Count(data.CurrentValuesUnavailable, "placeholder")}: it reads them only for a locked placeholder whose referenced properties are all valid. eplan_placeholder_apply reports them before and after a change."
                 : null,
         };
         ResultShaper.FitPage(result, args.Offset, fingerprint);

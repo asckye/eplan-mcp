@@ -23,7 +23,7 @@ Values in English, next page: repeat the same arguments and add the `nextCursor`
 
 - `project`; `page`: the page the list is limited to, or null.
 - `placeholders`, by page and then name: `name` (empty when none), `page`, `valueSets` and `variables` in EPLAN's order, `assignedObjects` (how many objects it references).
-- detailed only: `values` (`valueSet`, `variable`, `text`) and, when available, `currentValues` (`text`), one per referenced property. EPLAN gives current values only for a locked placeholder; when unavailable, `currentValues` is omitted, `values` are still returned, and `hint` explains how many placeholders were affected. This read does not lock them. EPLAN does not tell which current value belongs to which variable or which value set is applied. `textLanguage` names another language a text was read in.
+- detailed only: `values` (`valueSet`, `variable`, `text`) and, when available, `currentValues` (`text`), one per referenced property. EPLAN gives current values only for a locked placeholder whose referenced properties are all valid; when unavailable, `currentValues` is omitted, `values` are still returned, and `hint` explains how many placeholders were affected. This read does not lock them. EPLAN does not tell which current value belongs to which variable or which value set is applied. `textLanguage` names another language a text was read in.
 - eplan_placeholder_apply reads current values inside its transaction and reports them before and after applying a value set; its dry run does not read them.
 - `total`; `nextCursor`, `truncated`, `hint`: as for eplan_page_list.
 
