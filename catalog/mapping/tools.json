@@ -18652,6 +18652,11 @@
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
           },
           {
+            "name": "ProjectUpdateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectUpdateTests.cs"
+          },
+          {
             "name": "SampleProjectInventorySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SampleProjectInventorySpikeTests.cs"
@@ -19033,6 +19038,32 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectTranslateOperationTests.cs"
           }
         ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_project_update",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ProjectWriteTools.cs",
+      "operations": [
+        "project.update.execute",
+        "project.update.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_project_update.md",
+        "specStatus": "Implemented",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ProjectUpdateTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectUpdateTests.cs"
+          }
+        ],
+        "operationTests": []
       },
       "live": [],
       "dataDictionary": []
@@ -21500,6 +21531,83 @@
         }
       ],
       "note": "只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作",
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_structure_delete",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/StructureTools.cs",
+      "operations": [
+        "structure.delete.execute",
+        "structure.delete.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_structure_delete.md",
+        "specStatus": "Implemented",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "StructureToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/StructureToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_structure_list",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/StructureTools.cs",
+      "operations": [
+        "structure.list"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_structure_list.md",
+        "specStatus": "Implemented",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "StructureToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/StructureToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_structure_update",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/StructureTools.cs",
+      "operations": [
+        "structure.update.execute",
+        "structure.update.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_structure_update.md",
+        "specStatus": "Implemented",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "StructureToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/StructureToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
       "dataDictionary": []
     },
     {

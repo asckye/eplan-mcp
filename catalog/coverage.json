@@ -2558,7 +2558,7 @@
       "spec": "docs/tools/eplan_project_get.md",
       "small": 5,
       "medium": 3,
-      "large": 8,
+      "large": 9,
       "apiNotes": [
         "A11"
       ],
@@ -2622,6 +2622,24 @@
         "A25",
         "A28"
       ]
+    },
+    {
+      "name": "eplan_project_update",
+      "safety": "write",
+      "operations": [
+        "project.update.execute",
+        "project.update.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_project_update.md",
+      "small": 0,
+      "medium": 0,
+      "large": 1,
+      "apiNotes": []
     },
     {
       "name": "eplan_property_get",
@@ -2867,6 +2885,59 @@
         "note": "变体读取正确；对话框打开时仍显示已连接",
         "verifies": true
       }
+    },
+    {
+      "name": "eplan_structure_delete",
+      "safety": "destructive",
+      "operations": [
+        "structure.delete.execute",
+        "structure.delete.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_structure_delete.md",
+      "small": 0,
+      "medium": 0,
+      "large": 1,
+      "apiNotes": []
+    },
+    {
+      "name": "eplan_structure_list",
+      "safety": "read",
+      "operations": [
+        "structure.list"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_structure_list.md",
+      "small": 0,
+      "medium": 0,
+      "large": 1,
+      "apiNotes": []
+    },
+    {
+      "name": "eplan_structure_update",
+      "safety": "write",
+      "operations": [
+        "structure.update.execute",
+        "structure.update.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_structure_update.md",
+      "small": 0,
+      "medium": 0,
+      "large": 1,
+      "apiNotes": []
     },
     {
       "name": "eplan_symbol_search",
