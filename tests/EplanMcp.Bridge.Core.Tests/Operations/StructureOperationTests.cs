@@ -81,6 +81,70 @@ public sealed class StructureOperationTests
     }
 
     [Fact]
+    public void Update_Order_SortsTheBlock_KeepingTheOthersBehind_AndReadsBack()
+    {
+        var args = new StructureUpdateArgs { Project = "Line1", Order = ["+OLD"] };
+        WritePlan plan = UpdatePlan(args);
+        PlannedChange change = Assert.Single(plan.Changes);
+        Assert.Equal(("+", "order", "+S1 +OLD", "+OLD"), (change.Name, change.Property, change.OldValue, change.NewValue));
+        args.Fingerprint = plan.Fingerprint;
+        UpdateExecute(args);
+        Assert.Equal(["+OLD", "+S1"], _identifiers.Stored.Select(i => i.Name).Where(n => StructureNames.Prefix(n) == "+"));
+    }
+
+    [Fact]
+    public void Update_OrderAlreadyThere_PlansNothing()
+    {
+        Assert.Empty(UpdatePlan(new StructureUpdateArgs { Project = "Line1", Order = ["+S1"] }).Changes);
+    }
+
+    [Fact]
+    public void Update_OrderOfAnIdentifierNobodyHas_IsInvalid()
+    {
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => UpdatePlan(new StructureUpdateArgs { Project = "Line1", Order = ["+NOTHERE"] }));
+        Assert.Equal(ErrorReason.InvalidArgument, error.Error.Reason);
+    }
+
+    [Fact]
+    public void Update_OrderMayNameOneThisCallCreates()
+    {
+        StructureUpdateArgs args = Update(("+NEW", null));
+        args.Order = ["+NEW", "+S1"];
+        args.Fingerprint = UpdatePlan(args).Fingerprint;
+        UpdateExecute(args);
+        Assert.Equal(["+NEW", "+S1", "+OLD"], _identifiers.Stored.Select(i => i.Name).Where(n => StructureNames.Prefix(n) == "+"));
+    }
+
+    [Fact]
+    public void Update_Translate_FillsOneLanguageDescriptionsOnly()
+    {
+        StructureUpdateArgs args = Update(("&EFS", "Plan"), ("+F1", "en_US@Field;"));
+        args.Translate = true;
+        Assert.Equal(["zh_CN@Plan;en_US@Plan;", "en_US@Field;"], UpdatePlan(args).Changes.Select(c => c.NewValue));
+    }
+
+    [Fact]
+    public void Rename_RenamesReadsBackAndCommitsOnce()
+    {
+        var args = new StructureRenameArgs { Project = "Line1", Renames = [new() { Name = "+S1", NewName = "+CAB" }], Backup = Backup() };
+        args.Fingerprint = RenamePlan(args).Fingerprint;
+        StructureRenameData data = RenameExecute(args);
+        Assert.Equal(["+CAB"], data.Identifiers.Select(i => i.Name));
+        Assert.Equal(1, _transactions.Calls.Count(c => c == "Commit"));
+    }
+
+    [Theory]
+    [InlineData("+S1", "&S1")]
+    [InlineData("+S1", "+OLD")]
+    [InlineData("+NOTHERE", "+X")]
+    [InlineData("+A.B", "+C.B")]
+    public void Rename_OtherBlockTakenUnknownOrOtherParent_IsInvalid(string name, string newName)
+    {
+        var args = new StructureRenameArgs { Project = "Line1", Renames = [new() { Name = name, NewName = newName }] };
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => RenamePlan(args)).Error.Reason);
+    }
+
+    [Fact]
     public void Delete_WithoutNames_TakesEveryUnused()
     {
         WritePlan plan = DeletePlan(new StructureDeleteArgs { Project = "Line1" });
@@ -131,11 +195,16 @@ public sealed class StructureOperationTests
 
     private ListData<StructureIdentifier> List(StructureListArgs args) => (ListData<StructureIdentifier>)new StructureListOperation(_catalog, _identifiers).Execute(args)!;
 
-    private WritePlan UpdatePlan(StructureUpdateArgs args) => (WritePlan)new StructureUpdatePlanOperation(_catalog, _identifiers).Execute(args)!;
+    private WritePlan UpdatePlan(StructureUpdateArgs args) => (WritePlan)new StructureUpdatePlanOperation(_catalog, _identifiers, new FakeTranslator()).Execute(args)!;
+
+    private WritePlan RenamePlan(StructureRenameArgs args) => (WritePlan)new StructureRenamePlanOperation(_catalog, _identifiers).Execute(args)!;
+
+    private StructureRenameData RenameExecute(StructureRenameArgs args) =>
+        (StructureRenameData)new StructureRenameExecuteOperation(_catalog, _identifiers, _pages, new FakeProjectBackup(_pages), _transactions).Execute(args)!;
 
     private WritePlan DeletePlan(StructureDeleteArgs args) => (WritePlan)new StructureDeletePlanOperation(_catalog, _identifiers).Execute(args)!;
 
-    private StructureUpdateData UpdateExecute(StructureUpdateArgs args) => (StructureUpdateData)new StructureUpdateExecuteOperation(_catalog, _identifiers, _transactions).Execute(args)!;
+    private StructureUpdateData UpdateExecute(StructureUpdateArgs args) => (StructureUpdateData)new StructureUpdateExecuteOperation(_catalog, _identifiers, new FakeTranslator(), _transactions).Execute(args)!;
 
     private StructureDeleteData DeleteExecute(StructureDeleteArgs args) =>
         (StructureDeleteData)new StructureDeleteExecuteOperation(_catalog, _identifiers, _pages, new FakeProjectBackup(_pages), _transactions).Execute(args)!;
@@ -168,6 +237,22 @@ public sealed class StructureOperationTests
         {
             Calls.Add("describe " + name);
             Stored.Single(i => i.Name == name).Description = StoreDescription(description);
+        }
+
+        public void Sort(string projectPath, IReadOnlyList<string> names)
+        {
+            Calls.Add("sort " + string.Join(" ", names));
+            string prefix = StructureNames.Prefix(names[0]);
+            List<StructureIdentifier> block = [.. Stored.Where(i => StructureNames.Prefix(i.Name) == prefix)];
+            List<StructureIdentifier> sorted = [.. names.Select(n => block.Single(i => i.Name == n)), .. block.Where(i => !names.Contains(i.Name))];
+            Stored.RemoveAll(block.Contains);
+            Stored.InsertRange(0, sorted);
+        }
+
+        public void Rename(string projectPath, string name, string newName)
+        {
+            Calls.Add("rename " + name);
+            Stored.Single(i => i.Name == name).Name = newName;
         }
 
         public void Remove(string projectPath, string name)

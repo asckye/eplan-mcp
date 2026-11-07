@@ -90,12 +90,26 @@ public sealed class ProjectUpdateOperationTests
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => Plan(new ProjectUpdateArgs { Project = "Line1", Properties = [] })).Error.Reason);
     }
 
+    [Fact]
+    public void Plan_Translate_FillsOnlyMultilingualValuesInOneLanguage()
+    {
+        WritePlan plan = Plan(new ProjectUpdateArgs { Project = "Line1", Translate = true, Properties = [new() { Id = 10011, Value = "Line" }, new() { Id = 10015, Value = "ACME" }] });
+        Assert.Equal(["zh_CN@Line;en_US@Line;", "ACME"], plan.Changes.Select(c => c.NewValue));
+    }
+
+    [Fact]
+    public void Plan_AllListedAndTemplateProperties_FitOneCall()
+    {
+        var args = new ProjectUpdateArgs { Project = "Line1", Properties = [.. ProjectUpdateArgs.TitleBlock.Keys.Select(id => new ProjectPropertyValue { Id = id, Value = "x" }), new() { Name = "ESS.Project.Control_Voltage", Value = "24 V DC" }] };
+        Assert.Equal(18, Plan(args).Changes.Count);
+    }
+
     private static ProjectUpdateArgs Args(params (int Id, string Value)[] values) =>
         new() { Project = "Line1", Properties = [.. values.Select(v => new ProjectPropertyValue { Id = v.Id, Value = v.Value })] };
 
-    private WritePlan Plan(ProjectUpdateArgs args) => (WritePlan)new ProjectUpdatePlanOperation(_catalog, _properties).Execute(args)!;
+    private WritePlan Plan(ProjectUpdateArgs args) => (WritePlan)new ProjectUpdatePlanOperation(_catalog, _properties, new FakeTranslator()).Execute(args)!;
 
-    private ProjectUpdateData Execute(ProjectUpdateArgs args) => (ProjectUpdateData)new ProjectUpdateExecuteOperation(_catalog, _properties, _transactions).Execute(args)!;
+    private ProjectUpdateData Execute(ProjectUpdateArgs args) => (ProjectUpdateData)new ProjectUpdateExecuteOperation(_catalog, _properties, new FakeTranslator(), _transactions).Execute(args)!;
 
     private sealed class Properties : IProjectProperties
     {

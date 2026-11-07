@@ -148,7 +148,7 @@ internal static class ApprovalTexts
             return $"Write {Value(change.Name, zh)}: " + string.Join("; ", parameters.Select(p => Value(p.Name, zh) + "=" + Value(p.Name is "PROJECTNAME" or "Project" ? Path.GetFileName(p.Value) : p.Value, zh)))
                 + "; " + string.Join("; ", (details?.GetValueOrDefault("effects") ?? string.Empty).Split(';').Select(s => Value(s, zh)));
         }
-        string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", "structure" => "结构标识符", _ => change.Kind } : change.Kind;
+        string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", "structure" => "结构标识符", "project" => "项目", _ => change.Kind } : change.Kind;
         string property = zh ? change.Property switch { "description" => "描述", "tag" => "标识", _ => change.Property ?? string.Empty } : change.Property ?? string.Empty;
         string name = Value(change.Name, zh);
         if (change.Kind == "UI selection")
@@ -177,6 +177,8 @@ internal static class ApprovalTexts
             "create" when change.Kind == "report" => (zh ? $"从 {name} 创建 {property} 报表（{Value(change.NewValue ?? string.Empty, zh)}）" : $"Create {property} report ({Value(change.NewValue ?? string.Empty, zh)}) from {name}") + ReportSchemes(details, zh),
             "create" when change.Kind == "project" => zh ? $"新建项目 {name}：{Value(change.NewValue ?? string.Empty, zh)}" : $"Create project {name}: {Value(change.NewValue ?? string.Empty, zh)}",
             "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
+            "open" => zh ? $"打开{kind} {name}" : $"Open {kind} {name}",
+            "close" => zh ? $"关闭{kind} {name}" : $"Close {kind} {name}",
             "delete" => (zh ? $"删除{kind} {name}" : $"Delete {kind} {name}") + (change.OldValue is null ? string.Empty : zh ? $"（{Value(change.OldValue, zh)}）" : $" ({Value(change.OldValue, zh)})"),
             // Only EPLAN can tell which connections it adds or removes (eplan_connection_generate, tool spec 5).
             // Only EPLAN's numbering rules give the new tags (eplan_device_renumber, tool spec 5): the scope, worded by the Bridge.

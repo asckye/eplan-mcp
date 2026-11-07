@@ -32,6 +32,7 @@ internal sealed class ProjectWriteTools
         WritePipeline pipeline,
         [Description("Open project")] string project,
         [Description("Properties to set")] ProjectPropertyInput[] properties,
+        [Description("Fill languages from the dictionary")] bool translate = false,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -40,6 +41,7 @@ internal sealed class ProjectWriteTools
         {
             Project = project,
             Properties = properties is null ? null : [.. properties.Select(p => new ProjectPropertyValue { Id = p.Id ?? 0, Name = p.Name, Value = p.Value })],
+            Translate = translate,
         };
         var request = new WriteRequest<ProjectUpdateArgs, ProjectUpdateArgs>(
             UpdateTool,
@@ -47,7 +49,7 @@ internal sealed class ProjectWriteTools
             OperationNames.ProjectUpdatePlan,
             OperationNames.ProjectUpdateExecute,
             args,
-            plan => new ProjectUpdateArgs { Project = args.Project, Properties = args.Properties, Fingerprint = plan.Fingerprint },
+            plan => new ProjectUpdateArgs { Project = args.Project, Properties = args.Properties, Translate = args.Translate, Fingerprint = plan.Fingerprint },
             dry_run,
             Limit,
             "Setting project properties");
@@ -89,7 +91,7 @@ internal sealed class ProjectWriteTools
         [JsonPropertyName("id")]
         public int? Id { get; set; }
 
-        [Description("Template property by identifying name, ESS.Project.*")]
+        [Description("Template property: ESS.Project.*")]
         [JsonPropertyName("name")]
         public string? Name { get; set; }
 

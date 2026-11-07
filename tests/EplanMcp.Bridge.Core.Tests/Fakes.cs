@@ -821,3 +821,9 @@ internal sealed class FakeTerminalReader : ITerminalReader
         return strip is null ? null : new TerminalStripRecord { Strip = strip, Terminals = Terminals.TryGetValue(name, out List<TerminalItem>? terminals) ? terminals : [] };
     }
 }
+
+/// <summary>A translation database that knows every word, in two languages.</summary>
+internal sealed class FakeTranslator : ITextTranslator
+{
+    public string Translate(string projectPath, string text) => "zh_CN@" + text + ";en_US@" + text + ";";
+}

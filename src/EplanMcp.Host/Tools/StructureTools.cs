@@ -94,11 +94,13 @@ internal sealed class StructureTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(StructureWriteResult))]
-    [Description("Sets the descriptions of structure identifiers in one call and creates those the project lacks. Previews by default. One undo; approval outside scratch.")]
+    [Description("Sets the descriptions and order of structure identifiers in one call and creates those the project lacks. Previews by default. One undo; approval outside scratch.")]
     public static async Task<CallToolResult> UpdateAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,
-        [Description("1-200 identifiers")] StructureInput[] identifiers,
+        [Description("1-200 identifiers")] StructureInput[]? identifiers = null,
+        [Description("Full names, wanted order")] string[]? order = null,
+        [Description("Fill languages from the dictionary")] bool translate = false,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
@@ -107,6 +109,8 @@ internal sealed class StructureTools
         {
             Project = project,
             Identifiers = identifiers is null ? null : [.. identifiers.Select(i => new StructureIdentifierValue { Name = i.Name, Description = i.Description })],
+            Order = order is null ? null : [.. order.Select(n => n ?? string.Empty)],
+            Translate = translate,
         };
         var request = new WriteRequest<StructureUpdateArgs, StructureUpdateArgs>(
             UpdateTool,
@@ -114,7 +118,7 @@ internal sealed class StructureTools
             OperationNames.StructureUpdatePlan,
             OperationNames.StructureUpdateExecute,
             args,
-            plan => new StructureUpdateArgs { Project = args.Project, Identifiers = args.Identifiers, Fingerprint = plan.Fingerprint },
+            plan => new StructureUpdateArgs { Project = args.Project, Identifiers = args.Identifiers, Order = args.Order, Translate = args.Translate, Fingerprint = plan.Fingerprint },
             dry_run,
             UpdateLimit,
             "Setting structure identifiers");
@@ -184,6 +188,9 @@ internal sealed class StructureTools
         return ToolResults.Success(summary, result);
     }
 
+    internal static StructureWriteResult Written(WritePlan plan, string tool, string execution, bool dryRun, bool recovered, string? project, string? warning) =>
+        Written(tool, plan, execution, dryRun, recovered, project, warning);
+
     private static StructureListResult.IdentifierEntry Entry(StructureIdentifier identifier) => new()
     {
         Name = ResultShaper.CleanText(identifier.Name),
@@ -209,11 +216,11 @@ internal sealed class StructureTools
     internal sealed class StructureInput
     {
         [Required]
-        [Description("Full name with prefix: =A, ==A, ++A, +S1, &EFS, #A")]
+        [Description("Full name with prefix, e.g. +S1")]
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
-        [Description("Max 500 chars, plain or zh_CN@text;en_US@text;. Empty clears; omit to keep")]
+        [Description("Plain or zh_CN@text;en_US@text;. Empty clears")]
         [JsonPropertyName("description")]
         public string? Description { get; set; }
     }
