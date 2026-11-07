@@ -51,7 +51,10 @@ public sealed class PageCreateExecuteOperation(IProjectCatalog catalog, IPageRea
     private PageSummary Create(PageCreateRequest request, PageCreateRequest.Page page)
     {
         PageSummary created = writer.Create(request.Project.Path, page.Name, page.Type, page.Description, request.Language);
-        if (!string.Equals(created.Name, page.Name.Text, StringComparison.Ordinal))
+        // A project without page structure (the NFPA basic projects) names '/4' just '4'.
+        bool unstructured = page.Name.Text.StartsWith("/", StringComparison.Ordinal)
+            && string.Equals(created.Name, page.Name.Text.Substring(1), StringComparison.Ordinal);
+        if (!unstructured && !string.Equals(created.Name, page.Name.Text, StringComparison.Ordinal))
         {
             throw ReadBack(
                 $"This project's page structure does not use every part of '{page.Name.Text}'; EPLAN would have named it '{created.Name}', so nothing was created. Use the parts that existing page names use (eplan_page_list).",

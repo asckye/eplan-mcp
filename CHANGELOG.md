@@ -33,6 +33,7 @@
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
 ### 修复
+- `eplan_page_create` 支持没有页结构的项目（如 NFPA 基本项目）：`/4` 建出名为 `4` 的页。
 - `eplan_connection_generate` 支持 `rebuild: true`，让新自动连线采用电位颜色，连接读回未变化时也保留刷新。
 - `eplan_project_create` 从旧版基本项目创建失败后自动升级 scratch 副本并重试，保留 imports 原文件。
 - `eplan_object_get` 接受同一对象的绘图定位符，返回当前对象定位符并提示摘要差异。

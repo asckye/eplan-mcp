@@ -19,7 +19,7 @@ A multilingual description (native execution of this extension is pending Large 
 Omitting `dry_run` or passing true only previews; pass `dry_run: false` with the same arguments to execute. Previews return `fingerprint`, the planned changes, and `execution: not_started` without approval or writes.
 
 1. List the existing pages with eplan_page_list (`name_prefix` such as `=GAA+A1&EFS1/`) and copy their structure: the parts before the page number must be the ones the project uses.
-2. Pick page numbers that are not in use. Names are `[=plant][+location][&document type]/number`, in this order; `==`, `++` and `#` are not supported.
+2. Pick page numbers that are not in use. Names are `[=plant][+location][&document type]/number`, in this order; `==`, `++` and `#` are not supported. A project without page structure (pages named `1`, `2`, as in the NFPA basic projects) takes `/4` and names the page `4`.
 3. Call with `dry_run: true` to see the plan when unsure, then with `dry_run: false` to execute. All pages are created in one step: one Ctrl+Z in EPLAN removes them all, and a failure on any page creates none.
 4. Never repeat a call that ended in OUTCOME_UNKNOWN; check with eplan_page_list instead.
 

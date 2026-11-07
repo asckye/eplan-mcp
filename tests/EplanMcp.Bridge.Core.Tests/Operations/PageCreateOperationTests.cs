@@ -225,6 +225,22 @@ public sealed class PageCreateOperationTests
     }
 
     [Fact]
+    public void Execute_ProjectWithoutPageStructure_NamesSlashFourJustFour()
+    {
+        // The NFPA basic projects have no page structure: EPLAN names '/4' just '4' (live, MX_HotAir).
+        _reader.Pages.Clear();
+        _reader.Pages.AddRange([Page("1"), Page("2"), Page("3")]);
+        PageCreateArgs args = Args(Item("/4"));
+        args.Fingerprint = Plan(args).Fingerprint;
+        _writer.Drop = "/";
+
+        PageCreateData data = Execute(args);
+
+        Assert.Equal("4", Assert.Single(data.Pages).Name);
+        Assert.Contains(_reader.Pages, p => p.Name == "4");
+    }
+
+    [Fact]
     public void Execute_ThroughTheRouter_RecordsTheOutcome()
     {
         PageCreateArgs args = Args(Item("=GAA+A1&EFS1/5"));
