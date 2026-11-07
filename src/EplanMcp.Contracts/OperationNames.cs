@@ -497,6 +497,33 @@ public static class OperationNames
     /// </summary>
     public const string ProjectUpdateExecute = "project.update.execute";
 
+    /// <summary>The structure identifiers of a project, filtered and sliced in the Bridge. Arguments: <see cref="StructureListArgs"/>; data: a list of <see cref="StructureIdentifier"/>.</summary>
+    public const string StructureList = "structure.list";
+
+    /// <summary>
+    /// What eplan_structure_update would create and describe. Reads only.
+    /// Arguments: <see cref="StructureUpdateArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string StructureUpdatePlan = "structure.update.plan";
+
+    /// <summary>
+    /// Creates and describes structure identifiers and reads them back. Arguments: <see cref="StructureUpdateArgs"/> with the
+    /// fingerprint; data: <see cref="StructureUpdateData"/>.
+    /// </summary>
+    public const string StructureUpdateExecute = "structure.update.execute";
+
+    /// <summary>
+    /// What eplan_structure_delete would remove. Reads only.
+    /// Arguments: <see cref="StructureDeleteArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string StructureDeletePlan = "structure.delete.plan";
+
+    /// <summary>
+    /// Backs the project up and removes unused structure identifiers. Arguments: <see cref="StructureDeleteArgs"/> with the
+    /// fingerprint and backup target; data: <see cref="StructureDeleteData"/>.
+    /// </summary>
+    public const string StructureDeleteExecute = "structure.delete.execute";
+
     /// <summary>
     /// The plan of eplan_language_set: reads the project's language settings and works out the new ones, never writes.
     /// Arguments: <see cref="LanguageSetArgs"/>; data: <see cref="WritePlan"/> with details.

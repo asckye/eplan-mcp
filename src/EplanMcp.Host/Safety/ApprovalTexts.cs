@@ -148,7 +148,7 @@ internal static class ApprovalTexts
             return $"Write {Value(change.Name, zh)}: " + string.Join("; ", parameters.Select(p => Value(p.Name, zh) + "=" + Value(p.Name is "PROJECTNAME" or "Project" ? Path.GetFileName(p.Value) : p.Value, zh)))
                 + "; " + string.Join("; ", (details?.GetValueOrDefault("effects") ?? string.Empty).Split(';').Select(s => Value(s, zh)));
         }
-        string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", _ => change.Kind } : change.Kind;
+        string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", "structure" => "结构标识符", _ => change.Kind } : change.Kind;
         string property = zh ? change.Property switch { "description" => "描述", "tag" => "标识", _ => change.Property ?? string.Empty } : change.Property ?? string.Empty;
         string name = Value(change.Name, zh);
         if (change.Kind == "UI selection")

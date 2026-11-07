@@ -103,6 +103,9 @@
 | `eplan_selection_set` | full | 只读 | [eplan_selection_set.md](eplan_selection_set.md) |
 | `eplan_session_select` | core、full | 只读 | [eplan_session_select.md](eplan_session_select.md) |
 | `eplan_session_status` | core、full | 只读 | [eplan_session_status.md](eplan_session_status.md) |
+| `eplan_structure_delete` | full | 写入 | [eplan_structure_delete.md](eplan_structure_delete.md) |
+| `eplan_structure_list` | full | 只读 | [eplan_structure_list.md](eplan_structure_list.md) |
+| `eplan_structure_update` | full | 写入 | [eplan_structure_update.md](eplan_structure_update.md) |
 | `eplan_symbol_search` | full | 只读 | [eplan_symbol_search.md](eplan_symbol_search.md) |
 | `eplan_task_get` | full | 只读 | [eplan_task_get.md](eplan_task_get.md) |
 | `eplan_terminal_renumber` | full | 写入 | [eplan_terminal_renumber.md](eplan_terminal_renumber.md) |
@@ -131,6 +134,7 @@
 | `cable` | 电缆 | `Cable` |
 | `terminal` | 端子 | `Terminal` |
 | `terminal_strip` | 端子排（如 `eplan_terminal_strip_list`） | `TerminalStrip` |
+| `structure` | 结构标识符（`=`、`==`、`++`、`+`、`&`、`#`） | `Location` |
 | `plc` | PLC 卡、地址 | `PLC` 相关功能 |
 | `part` | 部件（物料）；也指系统部件库本身（`eplan_part_export`） | 部件库 `MDPart`、`MDPartsDatabase` |
 | `macro` | 宏 | 窗口宏、页面宏 |
