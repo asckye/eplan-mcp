@@ -15,7 +15,8 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path` |
-| `properties` | array，1–17 项 | 是 | — | 每项 `{id 或 name, value}`，同一属性只能出现一次 |
+| `properties` | array，1–50 项 | 是 | — | 每项 `{id 或 name, value}`，同一属性只能出现一次 |
+| `translate` | boolean | 否 | false | 多语言属性只给一种语言时，按翻译库补其他语言 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false |
 
 `id` 只能是下面这些，其他项目属性返回 `POLICY_DENIED`：

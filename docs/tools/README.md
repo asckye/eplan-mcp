@@ -51,6 +51,9 @@
 | `eplan_language_remove` | full | 写入 | [eplan_language_remove.md](eplan_language_remove.md) |
 | `eplan_language_set` | full | 写入 | [eplan_language_set.md](eplan_language_set.md) |
 | `eplan_project_update` | full | 写入 | [eplan_project_update.md](eplan_project_update.md) |
+| `eplan_project_open` | full | 写入 | [eplan_project_open.md](eplan_project_open.md) |
+| `eplan_project_close` | full | 写入 | [eplan_project_close.md](eplan_project_close.md) |
+| `eplan_plc_readdress` | full | 写入 | [eplan_plc_readdress.md](eplan_plc_readdress.md) |
 | `eplan_macro_get` | core、full | 只读 | [eplan_macro_get.md](eplan_macro_get.md) |
 | `eplan_macro_insert` | core、full | 写入 | [eplan_macro_insert.md](eplan_macro_insert.md) |
 | `eplan_macro_list` | core、full | 只读 | [eplan_macro_list.md](eplan_macro_list.md) |
@@ -105,6 +108,7 @@
 | `eplan_session_status` | core、full | 只读 | [eplan_session_status.md](eplan_session_status.md) |
 | `eplan_structure_delete` | full | 写入 | [eplan_structure_delete.md](eplan_structure_delete.md) |
 | `eplan_structure_list` | full | 只读 | [eplan_structure_list.md](eplan_structure_list.md) |
+| `eplan_structure_rename` | full | 写入 | [eplan_structure_rename.md](eplan_structure_rename.md) |
 | `eplan_structure_update` | full | 写入 | [eplan_structure_update.md](eplan_structure_update.md) |
 | `eplan_symbol_search` | full | 只读 | [eplan_symbol_search.md](eplan_symbol_search.md) |
 | `eplan_task_get` | full | 只读 | [eplan_task_get.md](eplan_task_get.md) |
@@ -164,7 +168,7 @@
 | `plan` | 编译后的有序计划及执行、校验、差异结果 | Host 计划模型，步骤映射到封闭的 Bridge 操作目录 |
 | `task` | 长任务的状态与结果引用；当前同一 Host 内存查询 | Host 任务，不是 EPLAN 对象或 Bridge 请求 ID |
 
-已发布动作的具体语义见相应工具：`replace` 是页面自由文本的字面替换，`set`/`remove` 用于项目语言等集合操作，`try` 是目录条目的未验证试执行，`open` 是编辑器页面聚焦。`eplan_export_<格式>` 与 `eplan_import_<格式或类别>` 使用格式/类别作为末段，其中 `eplan_import_list` 的 `list` 是交换清单类别。`schema` 返回定义，`find` 按数据字典类型、页面和名称查找对象。命名背景见 [ADR-0006](../adr/0006-tool-surface-design.md)，现有安全分类决定见 [ADR-0005](../adr/0005-safety-model.md)。
+已发布动作的具体语义见相应工具：`replace` 是页面自由文本的字面替换，`set`/`remove` 用于项目语言等集合操作，`try` 是目录条目的未验证试执行，`open` 是编辑器页面聚焦。`eplan_export_<格式>` 与 `eplan_import_<格式或类别>` 使用格式/类别作为末段，其中 `eplan_import_list` 的 `list` 是交换清单类别。`schema` 返回定义，`find` 按数据字典类型、页面和名称查找对象。命名背景见 [ADR-0006](../adr/0006-tool-surface-design.md)，现有安全分类决定见 [ADR-0005](../adr/0005-safety-model.md)。`eplan_project_open` 打开项目，`close` 关闭项目，`rename` 改结构标识符的名称，`readdress` 按起始地址给 PLC 连接点编址。
 
 ## 共享结果与模型用法
 

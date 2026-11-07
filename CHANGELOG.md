@@ -6,6 +6,10 @@
 ## [Unreleased]
 
 ### 新增
+- 新增 `eplan_project_open`、`eplan_project_close`：不弹对话框地打开和关闭项目，一个项目从创建到导出不再需要工具之外的步骤。
+- 新增 `eplan_plc_readdress`：按起始地址批量给 PLC 连接点编址。
+- 新增 `eplan_structure_rename`：给结构标识符改名，用到它的页和设备一起变；`eplan_structure_update` 新增 `order` 排序。
+- `eplan_structure_update`、`eplan_project_update` 新增 `translate`：只给一种语言时按翻译库补其他语言。`eplan_project_update` 一次最多 50 项。
 - 新增 `eplan_structure_list`、`eplan_structure_update`、`eplan_structure_delete`：一次调用读出、批量新建和描述、清除未使用的结构标识符，不再需要操作 EPLAN 的对话框。
 - 新增 `eplan_project_update`：写封面和标题栏用到的项目属性（公司、地址、项目描述、创建者等，以及模板自定义的 `ESS.Project.*`），默认预览，一次撤销。
 - `eplan_report_create` 新增类型 `InterconnectDiagram`（电缆图，F09 表格）；表格不在项目里时自动从系统表格目录复制。

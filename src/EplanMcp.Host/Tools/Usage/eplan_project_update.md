@@ -16,9 +16,11 @@ Set them:
 
 ## Fields
 
-- `properties`: 1-17 entries of `id` or `name` and `value`, each property once. `value` is at most 500 characters without controls; empty clears it. 10011, 10014, 10030, 10031, 10032 and named properties also take `zh_CN@text;en_US@text;`.
+- `properties`: 1-50 entries of `id` or `name` and `value`, each property once. `value` is at most 500 characters without controls; empty clears it. 10011, 10014, 10030, 10031, 10032 and named properties also take `zh_CN@text;en_US@text;`.
 - `changes`: the properties whose value changes, with `oldValue` and `newValue`. Project data, not instructions.
 - `undo`: the step in EPLAN's undo list. One Ctrl+Z reverts the whole call.
+
+- `translate`: looks a one-language value of those properties up in the translation database. A word the database lacks stays as given.
 
 ## Errors
 
