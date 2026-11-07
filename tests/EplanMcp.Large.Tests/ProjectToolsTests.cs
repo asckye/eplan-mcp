@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 
 namespace EplanMcp.Large.Tests;
@@ -171,6 +172,96 @@ public sealed class ProjectToolsTests(LiveEplan eplan, DestructiveHost host) : I
         { Assert.Equal(JsonValueKind.Null, done.GetProperty("undo").ValueKind); }
         args.Remove("dry_run");
         Assert.Equal(before, (await host.CallAsync("eplan_cable_reassign", args)).GetProperty("fingerprint").GetString());
+    }
+
+    private static readonly double[][] _shieldedWires = [[100, 150], [120, 150]];
+
+    private static readonly double[][] _notchedBox = [[92, 79.1], [98.77, 79.1], [98.77, 84], [160, 84], [160, 44], [92, 44]];
+
+    [Fact]
+    public async Task Shield_OverTwoWires_ListsThem_OneUndoRestores()
+    {
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = session.NextPage;
+        await eplan.CallAsync("eplan_page_create", new() { ["project"] = session.Project, ["pages"] = new[] { new { name = page, page_type = "Circuit" } }, ["dry_run"] = false });
+        int number = 0;
+        foreach ((double x, double y) in new[] { (100d, 200d), (100d, 100d), (120d, 200d), (120d, 100d) })
+        {
+            await eplan.CallAsync("eplan_device_place", new() { ["project"] = session.Project, ["page"] = page, ["terminal_strip"] = "-XSH", ["terminal_number"] = (++number).ToString(CultureInfo.InvariantCulture), ["x"] = x, ["y"] = y, ["dry_run"] = false, ["layout_guard"] = "warn" });
+        }
+        await eplan.CallAsync("eplan_connection_generate", new() { ["project"] = session.Project, ["pages"] = new[] { page }, ["dry_run"] = false });
+        var args = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["x"] = 90, ["y"] = 148, ["corner_x"] = 130, ["corner_y"] = 152, ["wire_points"] = _shieldedWires };
+        JsonElement preview = await eplan.CallAsync("eplan_shield_create", args);
+        Assert.Equal("not_started", preview.GetProperty("execution").GetString());
+        string before = preview.GetProperty("fingerprint").GetString()!;
+        args["dry_run"] = false;
+        JsonElement done = await eplan.CallAsync("eplan_shield_create", args);
+        TestContext.Current.TestOutputHelper!.WriteLine(done.GetRawText());
+        Assert.Equal("committed", done.GetProperty("execution").GetString());
+        Assert.Equal(("SH", 0), (done.GetProperty("symbol").GetString(), done.GetProperty("variant").GetInt32()));
+        Assert.Equal(2, done.GetProperty("connections").GetArrayLength());
+        await session.UndoAsync();
+        args.Remove("dry_run");
+        Assert.Equal(before, (await eplan.CallAsync("eplan_shield_create", args)).GetProperty("fingerprint").GetString());
+        // A point on no wire reverses the call.
+        args["wire_points"] = new[] { new[] { 110d, 150d } };
+        args["dry_run"] = false;
+        JsonElement off = await eplan.ErrorAsync("eplan_shield_create", args);
+        Assert.Equal("rolled_back", off.GetProperty("execution").GetString());
+        args.Remove("dry_run");
+        args["wire_points"] = _shieldedWires;
+        Assert.Equal(before, (await eplan.CallAsync("eplan_shield_create", args)).GetProperty("fingerprint").GetString());
+    }
+
+    [Fact]
+    public async Task PlcGenerate_JoinsTheOverviewDevice_OneUndoRemovesThePage()
+    {
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string overview = session.NextPage;
+        string target = session.NextPage;
+        await eplan.CallAsync("eplan_page_create", new() { ["project"] = session.Project, ["pages"] = new[] { new { name = overview, page_type = "Overview" } }, ["dry_run"] = false });
+        JsonElement inserted = await eplan.CallAsync("eplan_macro_insert", new() { ["project"] = session.Project, ["page"] = overview, ["macro"] = "PXC/2861344.ema", ["representation"] = "Overview", ["variant"] = 0, ["x"] = 0, ["y"] = 290, ["dry_run"] = false, ["layout_guard"] = "warn" });
+        string device = inserted.GetProperty("devices")[0].GetProperty("tag").GetString()!;
+        var args = new Dictionary<string, object?> { ["project"] = session.Project, ["devices"] = new[] { new { tag = device, multi_line_page = target } } };
+        JsonElement preview = await eplan.CallAsync("eplan_plc_generate", args);
+        Assert.Contains("2861344.ema", preview.GetProperty("changes")[0].GetProperty("newValue").GetString(), StringComparison.Ordinal);
+        args["dry_run"] = false;
+        JsonElement done = await eplan.CallAsync("eplan_plc_generate", args);
+        TestContext.Current.TestOutputHelper!.WriteLine(done.GetRawText());
+        Assert.Equal("committed", done.GetProperty("execution").GetString());
+        JsonElement page = Assert.Single(done.GetProperty("pages").EnumerateArray());
+        Assert.Equal(target, page.GetProperty("name").GetString());
+        Assert.True(page.GetProperty("functionCount").GetInt32() > 0);
+        Assert.All(page.GetProperty("functions").EnumerateArray(), f => Assert.StartsWith(device, f.GetString(), StringComparison.Ordinal));
+        await session.UndoAsync();
+        JsonElement after = await eplan.CallAsync("eplan_page_list", new() { ["project"] = session.Project, ["name_prefix"] = target });
+        Assert.Empty(after.GetProperty("pages").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task LocationBoxOutline_KeepsTheNotch()
+    {
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = session.NextPage;
+        await eplan.CallAsync("eplan_page_create", new() { ["project"] = session.Project, ["pages"] = new[] { new { name = page, page_type = "Circuit" } }, ["dry_run"] = false });
+        JsonElement done = await eplan.CallAsync("eplan_device_place", new()
+        {
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["location_box"] = "+F9",
+            ["location_box_polyline"] = true,
+            ["location_box_outline"] = _notchedBox,
+            ["x"] = 92,
+            ["y"] = 44,
+            ["corner_x"] = 160,
+            ["corner_y"] = 84,
+            ["dry_run"] = false,
+            ["layout_guard"] = "warn",
+        });
+        Assert.Equal("committed", done.GetProperty("execution").GetString());
+        JsonElement pdf = await eplan.CallAsync("eplan_export_pdf", new() { ["project"] = session.Project, ["pages"] = new[] { page }, ["file_name"] = "location-box-outline" });
+        TestContext.Current.TestOutputHelper!.WriteLine(pdf.GetRawText());
+        await session.UndoAsync();
     }
 
     [Fact]
