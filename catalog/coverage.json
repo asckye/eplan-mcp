@@ -2361,7 +2361,7 @@
       "dependencies": 34,
       "actions": 0,
       "spec": "docs/tools/eplan_placeholder_apply.md",
-      "small": 0,
+      "small": 1,
       "medium": 1,
       "large": 1,
       "apiNotes": [

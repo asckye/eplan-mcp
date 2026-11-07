@@ -16208,6 +16208,11 @@
         ],
         "tests": [
           {
+            "name": "PlaceholderApplyCurrentValuesTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PlaceholderApplyToolTests.cs"
+          },
+          {
             "name": "PlaceholderApplyToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlaceholderApplyToolTests.cs"
@@ -18647,6 +18652,11 @@
           }
         ],
         "operationTests": [
+          {
+            "name": "ProjectCreateUpgradeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/ProjectCreateUpgradeTests.cs"
+          },
           {
             "name": "ProjectCreateOperationTests",
             "size": "Medium",
