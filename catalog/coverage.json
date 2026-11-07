@@ -990,6 +990,24 @@
       ]
     },
     {
+      "name": "eplan_cable_reassign",
+      "safety": "destructive",
+      "operations": [
+        "cable.reassign.execute",
+        "cable.reassign.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_cable_reassign.md",
+      "small": 0,
+      "medium": 0,
+      "large": 1,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_cable_renumber",
       "safety": "destructive",
       "operations": [
@@ -1251,7 +1269,7 @@
       "spec": "docs/tools/eplan_device_list.md",
       "small": 7,
       "medium": 2,
-      "large": 10,
+      "large": 11,
       "apiNotes": [
         "A11",
         "A12"

@@ -5766,6 +5766,32 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_cable_reassign",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/CableReassignTools.cs",
+      "operations": [
+        "cable.reassign.execute",
+        "cable.reassign.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_cable_reassign.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_cable_renumber",
       "safety": "destructive",
       "host": "src/EplanMcp.Host/Tools/CableDestructiveTools.cs",
@@ -7987,6 +8013,11 @@
             "name": "PlcTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcTests.cs"
+          },
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
           },
           {
             "name": "SampleProjectInventorySpikeTests",
