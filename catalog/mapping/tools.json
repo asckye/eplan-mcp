@@ -7056,6 +7056,11 @@
             "name": "PlacementMoveTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementMoveTests.cs"
+          },
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
           }
         ],
         "operationTests": [
@@ -8694,6 +8699,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
           },
           {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
+          {
             "name": "SelectionSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SelectionSpikeTests.cs"
@@ -9646,6 +9656,11 @@
             "name": "ExportToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolTests.cs"
+          },
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
           }
         ],
         "operationTests": [
@@ -11363,6 +11378,11 @@
             "name": "PlcRepresentationTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
+          },
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
           }
         ],
         "operationTests": [
@@ -18289,6 +18309,32 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_plc_generate",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/PlcGenerateTools.cs",
+      "operations": [
+        "plc.generate.execute",
+        "plc.generate.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_plc_generate.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_plc_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/PlcTools.cs",
@@ -21713,6 +21759,32 @@
         }
       ],
       "note": "只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作",
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_shield_create",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ShieldTools.cs",
+      "operations": [
+        "shield.create.execute",
+        "shield.create.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_shield_create.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
       "dataDictionary": []
     },
     {

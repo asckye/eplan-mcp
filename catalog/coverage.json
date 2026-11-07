@@ -1138,7 +1138,7 @@
       "spec": "docs/tools/eplan_connection_generate.md",
       "small": 2,
       "medium": 2,
-      "large": 10,
+      "large": 11,
       "apiNotes": [
         "A3",
         "A11",
@@ -1301,7 +1301,7 @@
       "spec": "docs/tools/eplan_device_place.md",
       "small": 12,
       "medium": 7,
-      "large": 26,
+      "large": 27,
       "apiNotes": [
         "A13",
         "A14",
@@ -1485,7 +1485,7 @@
       "spec": "docs/tools/eplan_export_pdf.md",
       "small": 1,
       "medium": 1,
-      "large": 0,
+      "large": 1,
       "apiNotes": [
         "A16"
       ]
@@ -1728,7 +1728,7 @@
       "spec": "docs/tools/eplan_macro_insert.md",
       "small": 6,
       "medium": 2,
-      "large": 9,
+      "large": 10,
       "apiNotes": [
         "A12",
         "A13",
@@ -2529,6 +2529,24 @@
       "apiNotes": []
     },
     {
+      "name": "eplan_plc_generate",
+      "safety": "write",
+      "operations": [
+        "plc.generate.execute",
+        "plc.generate.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_plc_generate.md",
+      "small": 0,
+      "medium": 0,
+      "large": 1,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_plc_get",
       "safety": "read",
       "operations": [
@@ -2999,6 +3017,24 @@
         "note": "变体读取正确；对话框打开时仍显示已连接",
         "verifies": true
       }
+    },
+    {
+      "name": "eplan_shield_create",
+      "safety": "write",
+      "operations": [
+        "shield.create.execute",
+        "shield.create.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_shield_create.md",
+      "small": 0,
+      "medium": 0,
+      "large": 1,
+      "apiNotes": []
     },
     {
       "name": "eplan_structure_delete",
