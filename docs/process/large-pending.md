@@ -67,6 +67,8 @@
 
 ## 最近移出（已实机通过）
 
+- 2026-11-07，第二批工具：`ProjectToolsTests` 的屏蔽（`Shield_OverTwoWires_ListsThem_OneUndoRestores`）、PLC 生成（`PlcGenerate_JoinsTheOverviewDevice_OneUndoRemovesThePage`）、位置框轮廓（`LocationBoxOutline_KeepsTheNotch`）各 1/1（B 槽）
+- 2026-11-06，结构标识符排序和主数据更新：`ProjectToolsTests` 的 `Order_SortsTheBlock_ReadsBack_OneUndoRestores`、`MasterDataUpdate_NoDialog_ProjectStaysReadable` 各 1/1（B 槽），main 553abd80
 - 2026-11-02，页面审查第 1 片（含 Cable 定义点修复、电缆建议改为重画）：`PageReviewTests` 8 项通过、cable 修复步骤按设计跳过，`PlacementMoveTests` 1/1，`AcceptanceRedrawTests` 按已知跳过结束（B 槽 Pro Panel），main 714d6200
 - 2026-11-01，句柄链与设置文本修复：`ApiTryTests` 13/13（A 槽 Electric P8，变基到含生命周期的 main 后），main c5672ab9
 - 2026-11-01，原生前置条件、无效对象枚举与事务诊断：`ApiTryTests` 10/10、`DevicePlaceTests` 8/8（B 槽 Pro Panel，合并设置/句柄后）；此前 A 槽 8/8、7/7、`ConnectionCreateTests` 14/14、`PlacementMoveTests` 1/1，main 0113de9d

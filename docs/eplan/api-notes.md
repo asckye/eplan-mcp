@@ -485,6 +485,20 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A113. PLC 原理图生成（2026-11-07，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
+- **`PlcService.ExportGenerateSchematicConfiguration(project, 文件)`** 导出项目自己的配置：每个 PLC 设备一个 `DEVICE`，下面每个功能一个 `Function`，主功能带 `Macro`（来自部件，如 `$(MD_MACROS)\PXC\2861344.ema`），已放置的表达带 `MultiLinePage`、`OverviewPage`、`SingleLinePage`。
+- **`PlcService.GenerateSchematic(project, 文件, 单线, 多线, 总览, 机架)`：** 在总览里插入宏之后，给导出的配置写上不存在的多线页名再生成：EPLAN 自己建页（类型 Circuit，页描述来自宏），放 39 个对象、8 个功能，功能并入总览的设备（`=GAA+A1-A1:1.1` 等），不用再改名合并（对比 A90）。返回生成的页。
+- 🔴 配置里有项目中不存在的设备时，EPLAN 弹模态对话框"一个或多个设备在项目中不存在"，调用挂起，`QuietModeStep` 也没试过能否挡住。工具预先检查设备，不让它走到这一步。
+- 放在 `UndoStep` 里时一次撤销能删掉生成的页；只放在裸 `Transaction` 里没有撤销步骤，撤销报"'撤销'冲突"。
+- 官方帮助：只使用尚未放置在对应表达里的功能；已存在的表达保留。通道级接线宏（`Function` 的 `Macro`）和占位符变量（`Variable`）还没有实机验证。— 探针、`ProjectToolsTests`。
+
+### A112. 屏蔽和折线位置框（2026-11-07，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
+- **创建屏蔽：** A104 试的 `Shield.Create(page, SymbolVariant, p1, p2)` 官方已说明不能再创建屏蔽。要用 `Shield.Create(page, Symbol, 起点, 对角)`，符号类型 `Symbol.SymbolType.Shielding`（SPECIAL 库有 `SH`、`SH2`，各 4 个变体）。变体由 EPLAN 按起点决定：起点在左为 0，在右为 2。默认名字是 `+`。
+- **屏蔽靠定义点关联连接：** 官方帮助说明 EPLAN 的命令会在范围内每条连接上放连接定义点。API 不放，所以只创建屏蔽时 `ShieldedConnections` 是 0；之后 `Generate.Connections` 更新或重建（同一事务或下一事务，4 种组合都试过）都还是 0。屏蔽之后放 `SPECIAL/CDP` 并生成连接，才读到连接。定义点要在屏蔽之后放。
+- **生成只看已提交的放置（A52）：** 定义点和生成放在同一事务时，定义点不会归到连接上；先提交再生成才对。
+- **同一条线上的定义点会让所有覆盖它的屏蔽都关联上：** 两个屏蔽横跨同样两条线，只在其中一个范围内放定义点，另一个也读到 2 条。原因没有查明。
+- **折线位置框：** `LocationBox.GetGraphics()` 返回 `PolyLine`，闭合，4 个点，坐标相对范围的左上角（`(0,0) (68,0) (68,-40) (0,-40)`）。`SetPointAt` 下标超出时追加点，读回和导出都对，导出线段和 PDF 的切角完全一致。`NumberOfPoints` 只增不减，所以至少给 4 个点。读 `GetLogicalArea` 要在事务里并先 `LockAllObjects`，否则报"未打开任何任务"或"写存取前没有加锁"。— 探针、`ProjectToolsTests`。
+
 ### A111. 从模板新建的项目存的是模板里的旧表格（2026-11-06，EPLAN 2026.0.3.25421，Electric P8，复刻 71 页图纸）
 - **现象：** 新项目的报表表头和 PDF 不同（`自由布线的导线`、`定位源`；PDF 是 `空闲芯线`、`位置来源`），旧项目却和 PDF 一样。两个项目的设置和表格名都相同，`Form.eod` 大小也相同，但内容不同：`F09_001`、`F13_001` 两条记录的未压缩大小都不一样。系统目录的 `.f09` 用的是 PDF 的词。
 - **原因：** 旧流程在打开项目时对"主数据已经陈旧"按了按钮，新流程用 `eplan_project_open`（`QuietModeStep(ShowNoDialogs)`）不弹对话框，所以项目没有更新。`eplan_report_create` 只在项目缺表格时才从系统复制，已有的同名表格不替换（A105）。
@@ -545,5 +559,5 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `WindowMacro.Create(路径, RepresentationType.MultiLine, 0, Placement[], MultiLangString, PointD)` 写出 `.ema`；`PageMacro.Create(路径, Page[], MultiLangString)` 写出 `.emp`。路径可以在 scratch 下。
 - `FunctionDefinition` 的基础符号：插针 101.2.1 是 `XBS`（2 个连接点），插头定义 103.1.1 是 `PDEF`（0 个），部件定义点 10.1.1 是 `ADP`（0 个）。`Function.Create(page, definition)` 能创建并设位置，但 `SymbolVariant` 读出 null，要放符号应走 `Function.Create(page, variant)`。
 - `XCMSwapSourceTargetAction`：全选后执行，连接的起止端对调（`XS4:1 -> XS4:2` 变成 `XS4:2 -> XS4:1`），同时在线中间自动放一个 `ConnectionDefinitionPoint`（120,140.625）；一次 `XEsUndoAction` 恢复。只选两端的端子再执行，EPLAN 不返回，大概率在等界面操作，原因没有查清。
-- 屏蔽：`Shield.Create(page, variant, p1, p2)` 抛 S063176（无法锁定对象），先 `Project.LockAllObjects()` 也一样；`Function.Create(page, variant, p1, p2)` 抛 S063226。用的是 `FunctionDefinition` 401.1.1 的基础符号。还没有可用的做法。
+- 屏蔽：`Shield.Create(page, variant, p1, p2)` 抛 S063176（无法锁定对象），先 `Project.LockAllObjects()` 也一样；`Function.Create(page, variant, p1, p2)` 抛 S063226。用的是 `FunctionDefinition` 401.1.1 的基础符号。可用的做法见 A112。
 — 探针 `ConnToolsSpikeTests`（未合入）。

@@ -6,6 +6,11 @@
 ## [Unreleased]
 
 ### 新增
+- 新增 `eplan_shield_create`：在连接上画屏蔽，对应 EPLAN"插入"菜单的"屏蔽"。
+- 新增 `eplan_plc_generate`：从项目里已有的 PLC 设备生成原理图页，功能并入设备，不用再改名合并。
+- `eplan_device_place` 新增 `location_box_outline`：位置框可以画成带缺口或其他形状的折线。
+- `eplan_structure_update` 的描述长度改为每种语言 500 字符，模板带 20 种语言的描述也能写入。
+- Bridge 日志在每次调用 EPLAN 之前记录一行，原生崩溃后能查到最后在做哪一步。
 - 新增 `eplan_masterdata_update`：用系统主数据更新项目里存的表格、图框和符号，从模板新建的项目报表用词才和系统表格一致。
 - 新增 `eplan_report_configure`：设置部件列表是否合并同标识、同部件号的设备，以及是否列出部件组、端子排和插头排定义上的部件。
 - 新增 `eplan_cable_reassign`：对应 EPLAN 的"全部重新分配"，把电缆的连接分配到部件的芯线，电缆图表和端子图表才会列出芯线和连接的对应关系。
