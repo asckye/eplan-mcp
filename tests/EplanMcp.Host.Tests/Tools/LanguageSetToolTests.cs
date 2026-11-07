@@ -326,6 +326,14 @@ public sealed class LanguageSetToolTests : IDisposable
         Assert.Equal("Dry run: would add sv_SE to the translation languages, clear the source language and clear the displayed languages. Nothing was changed.", WriteToolHarness.Text(result, 0));
     }
 
+    [Fact]
+    public async Task PlaceholderSwitchAlone_ReturnsASummary()
+    {
+        _changes = [Display("display: en_US placeholder: True", "display: en_US placeholder: False")];
+        CallToolResult result = await LanguageWriteTools.LanguageSetAsync(_harness.Pipeline, new RecordedProgress(), "Line1", null, null, null, false, true, TestContext.Current.CancellationToken);
+        Assert.Equal("Dry run: would change the missing translation placeholder. Nothing was changed.", WriteToolHarness.Text(result, 0));
+    }
+
     private static PlannedChange Display(string before, string after) =>
         new() { Action = "update", Kind = "project", Name = "Line1", Property = "languages", OldValue = before, NewValue = after };
 

@@ -169,6 +169,8 @@ internal sealed class LanguageWriteTools
         };
         string? source = after.Source != before.Source ? args.Source : null;
         string change = Change(added, source, args.Display, committed);
+        if (change.Length == 0)
+        { change = committed ? "changed the missing translation placeholder" : "change the missing translation placeholder"; }
         string summary = nothing
             ? "Nothing to change: the project already has these languages."
             : committed
