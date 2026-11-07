@@ -1,12 +1,12 @@
 ## Examples
 
-    {"project":"Line1","page":"=GAA+A1&EFS1/60","part":"SIE.3RH2122-1HB40","x":80,"y":160,"tag":"-KF20","dry_run":true}
+    {"project":"Line1","page":"=GAA+A1&EFS1/60","part":"SIE.3RH2122-1HB40","x":80,"y":160,"tag":"-KF20"}
 
-    {"project":"Line1","page":"=GAA+A1&EFS1/60","library":"IEC_symbol","symbol":"K","symbol_variant":0,"x":80,"y":160,"tag":"-K2","display_properties":[{"property_id":20214,"offset_x_mm":4,"offset_y_mm":4}],"connection_designations":["A1","A2"],"dry_run":true}
+    {"project":"Line1","page":"=GAA+A1&EFS1/60","library":"IEC_symbol","symbol":"K","symbol_variant":0,"x":80,"y":160,"tag":"-K2","display_properties":[{"property_id":20214,"offset_x_mm":4,"offset_y_mm":4}],"connection_designations":["A1","A2"]}
 
-    {"project":"Line1","page":"=GAA+A1&EFS1/60","location_box":"+P1","x":60,"y":140,"corner_x":100,"corner_y":180,"dry_run":true}
+    {"project":"Line1","page":"=GAA+A1&EFS1/60","location_box":"+P1","x":60,"y":140,"corner_x":100,"corner_y":180}
 
-    {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_CBOX","symbol_variant":1,"tag":"-KF1","plc_connection_point":"2","plc_address":"I0.0","plc_symbolic_address":"Start","x":80,"y":160,"dry_run":true}
+    {"project":"Line1","page":"=F+A1/1","library":"IEC_symbol","symbol":"PLC_CBOX","symbol_variant":1,"tag":"-KF1","plc_connection_point":"2","plc_address":"I0.0","plc_symbolic_address":"Start","x":80,"y":160}
 
 ## Workflow
 dry_run omitted/true: preview only, execution=not_started. false executes.
@@ -33,7 +33,7 @@ SPECIAL/PDEF: no connection_designations. Plug pins: IEC_symbol/XBS.
 - Symbol-route display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm}. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite relative offsets, negatives allowed; 20214=prefixed tag. Part templates allow only symbol selection.
 - connection_designations: one nonblank pin/search order, <=64 chars, no controls; indexed 20022 verifies names.
 - Creation mismatch/cancel: rollback. One Ctrl+Z. visibleTag=null without tag display.
-- location_box: + and 1-64 letters/digits/_/dots; no tag/part/symbol. SPECIAL/SC/0, dashed; location_box_polyline: SC2. x/y lower-left, corner_x/y upper-right; positive area.
+- location_box: + and 1-64 letters/digits/_/dots; no tag/part/symbol. SPECIAL/SC/0, dashed; location_box_polyline: SC2. location_box_outline (needs polyline): 4-64 corners, bounds = area. x/y lower-left, corner_x/y upper-right; positive area.
 - locationBox: structure/bounds[minX,minY,maxX,maxY]/outline=dashed/affectedDevices=[]; preview predicted. functions/unplaced=0; device.tag/category=structure/LocationBox. No duplicate structure.
 
 - Terminal: terminal_strip + terminal_number; default IEC_symbol/X/0 without part. With part keep template or give library/symbol/symbol_variant. No boxes/tag/display/pins. Number=1-64 letters/digits/_/dots; conflicts ignore case. terminal_strip_text=new strips only, 1-256 plain ??_?? chars, no controls.

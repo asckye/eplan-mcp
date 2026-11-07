@@ -49,6 +49,8 @@ internal sealed partial class EplanDeviceSymbolPlacement
             Check(bounds.Length >= 2 && bounds.All(p => !double.IsNaN(p.X) && !double.IsInfinity(p.X) && !double.IsNaN(p.Y) && !double.IsInfinity(p.Y)),
                 "outline is not finite");
         }
+        if (args.LocationBoxOutline is { } outline)
+        { SetOutline(graphics.OfType<PolyLine>().Single(), outline, args.X, args.CornerY!.Value); }
         using FunctionBasePropertyList actual = box.NameParts;
         using PropertyValue location = actual.DESIGNATION_LOCATION;
         string structure = location.IsEmpty ? string.Empty : "+" + location.ToString();
@@ -130,6 +132,17 @@ internal sealed partial class EplanDeviceSymbolPlacement
     {
         if (!matches)
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Location box readback differs (" + what + "). Nothing was committed; read the page and re-plan."); }
+    }
+
+    /// <summary>A112: the box's polyline holds points relative to the area's upper left corner; setting an index past the end adds a point, and EPLAN closes the line.</summary>
+    private static void SetOutline(PolyLine line, double[][] outline, double left, double top)
+    {
+        for (int i = 0; i < outline.Length; i++)
+        {
+            var point = new PointD(outline[i][0] - left, outline[i][1] - top);
+            line.SetPointAt(i, ref point);
+        }
+        Check(line.NumberOfPoints == outline.Length, FormattableString.Invariant($"the outline has {line.NumberOfPoints} points"));
     }
 
     private static IEnumerable<GraphicalPlacement> BoxGraphics(Placement? root)

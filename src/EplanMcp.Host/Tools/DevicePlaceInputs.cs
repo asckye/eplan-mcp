@@ -48,6 +48,21 @@ internal static partial class DevicePlaceInputs
         { if (property["default"] is null) { property.Remove("default"); } }
     }
 
+    private static IEnumerable<string> OutlineProblems(DevicePlaceArgs args, double[][] outline)
+    {
+        const double Tolerance = 0.001;
+        if (args.LocationBoxPolyline != true)
+        { yield return "/location_box_outline: requires location_box_polyline:true."; }
+        if (outline.Length is < 4 or > 64 || outline.Any(p => p is not { Length: 2 } || !double.IsFinite(p[0]) || !double.IsFinite(p[1])))
+        {
+            yield return "/location_box_outline: give 4 to 64 [x, y] corners.";
+            yield break;
+        }
+        if (Math.Abs(outline.Min(p => p[0]) - args.X) > Tolerance || Math.Abs(outline.Min(p => p[1]) - args.Y) > Tolerance
+            || Math.Abs(outline.Max(p => p[0]) - args.CornerX!.Value) > Tolerance || Math.Abs(outline.Max(p => p[1]) - args.CornerY!.Value) > Tolerance)
+        { yield return "/location_box_outline: its bounds must be x, y, corner_x and corner_y."; }
+    }
+
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
@@ -108,6 +123,8 @@ internal static partial class DevicePlaceInputs
             if (!double.IsFinite(args.X) || !double.IsFinite(args.Y) || args.X < 0 || args.Y < 0
                 || args.CornerX is not { } x || args.CornerY is not { } y || !double.IsFinite(x) || !double.IsFinite(y) || x <= args.X || y <= args.Y)
             { problems.Add("/corner_x: require finite lower-left x/y and upper-right corner_x/corner_y, with positive width and height."); }
+            else if (args.LocationBoxOutline is { } outline)
+            { problems.AddRange(OutlineProblems(args, outline)); }
             return problems;
         }
         bool blackBox = string.Equals(args.Library, "SPECIAL", StringComparison.OrdinalIgnoreCase) && string.Equals(args.Symbol, "DC", StringComparison.OrdinalIgnoreCase);
@@ -121,6 +138,8 @@ internal static partial class DevicePlaceInputs
         { problems.Add("/location_box: corner_x and corner_y require a location_box or SPECIAL/DC source."); }
         if (args.LocationBoxPolyline is not null && args.LocationBox is null)
         { problems.Add("/location_box_polyline: requires a location_box source."); }
+        if (args.LocationBoxOutline is not null)
+        { problems.Add("/location_box_outline: requires a location_box source."); }
         bool part = !string.IsNullOrWhiteSpace(args.Part);
         bool symbol = args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null && !part;
         if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))

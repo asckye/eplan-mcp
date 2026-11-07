@@ -40,6 +40,8 @@ public sealed class DevicePlaceArgs
     public double? CornerY { get; set; }
     /// <summary>True selects SPECIAL/SC2, the polyline location box with the symbol's own pen, instead of the dashed SPECIAL/SC.</summary>
     public bool? LocationBoxPolyline { get; set; }
+    /// <summary>The outline of a polyline location box as page coordinates, 4 to 64 corners, closed by EPLAN; its bounds are the area x, y, CornerX, CornerY.</summary>
+    public double[][]? LocationBoxOutline { get; set; }
     /// <summary>Parent strip designation, short or full; also supported for a part terminal.</summary>
     public string? TerminalStrip { get; set; }
     /// <summary>Single terminal designation, appended to the strip with ':'.</summary>

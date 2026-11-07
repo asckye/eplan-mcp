@@ -49,6 +49,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `connection_descriptions` | string[] | 否 | 不写 | 每个连接点的描述，按连接点数组顺序，数量必须相等；每项非空、最多 64 字符；写一基索引的 20023，PLC 点以只读的 20029 显示（例如 `DI a.0`）。只用于库符号来源 |
 | `connection_designations` | string[] | 否 | 保留默认代号 | 按 T1 连接点数组顺序，每引脚一项，数量必须相等；每项非空、无控制字符且最多 64 字符；T2b 写入带一基索引的 20022，不使用汇总属性 20038 或 `Pin.Designation` |
 | `location_box` | string | 位置框来源 | — | 与部件、库符号、tag、显示属性和引脚代号互斥；如 `+P1`，`+` 后 1–64 个字母、数字、下划线或点；不含通配、空白、设备段或页名 |
+| `location_box_outline` | array of [x, y] | 否 | — | 折线位置框（须 `location_box_polyline:true`）的轮廓：页面坐标，4–64 个角点，范围必须等于 `x`、`y`、`corner_x`、`corner_y`。用来画标签处的缺口或 L 形（A112） |
 | `corner_x`、`corner_y` | number | 位置框/黑盒必填 | — | 右上角毫米坐标；x/y 为左下角，必须有限且 corner_x>x、corner_y>y；也用于 SPECIAL/DC |
 | `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上；页的幅面已知时必须在页内 |
 | `tag` | string | 库符号来源必填，部件来源可选 | EPLAN 自动标识 | 以 `-` 开头的短标识（如 `-KF20`）取页结构但去掉 `&` 文档类型；或完整标识（如 `=GAA+A1-KF20`）。部件来源指定时一起重命名全部功能 |

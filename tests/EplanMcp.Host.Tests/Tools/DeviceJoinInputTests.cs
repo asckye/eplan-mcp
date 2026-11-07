@@ -34,6 +34,32 @@ public sealed class DeviceJoinInputTests
         Assert.Contains("symbol", error, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData(true, new double[] { 92, 79.1, 98.77, 79.1, 98.77, 84, 160, 84, 160, 44, 92, 44 }, null)]
+    [InlineData(null, new double[] { 92, 79.1, 98.77, 79.1, 98.77, 84, 160, 84, 160, 44, 92, 44 }, "requires location_box_polyline")]
+    [InlineData(true, new double[] { 92, 44, 160, 84 }, "4 to 64")]
+    [InlineData(true, new double[] { 92, 44, 150, 44, 150, 84, 92, 84 }, "bounds")]
+    public void LocationBoxOutline_IsCheckedAgainstTheArea(bool? polyline, double[] flat, string? expected)
+    {
+        var args = new DevicePlaceArgs
+        {
+            Project = "p",
+            Page = "=A+B/1",
+            LocationBox = "+F1",
+            LocationBoxPolyline = polyline,
+            LocationBoxOutline = [.. flat.Chunk(2)],
+            X = 92,
+            Y = 44,
+            CornerX = 160,
+            CornerY = 84,
+        };
+        List<string> problems = DevicePlaceInputs.Check(args, null);
+        if (expected is null)
+        { Assert.Empty(problems); }
+        else
+        { Assert.Contains(problems, p => p.Contains(expected, StringComparison.Ordinal)); }
+    }
+
     [Fact]
     public void JoinDevice_AcceptsConnectionDesignationsAndDescriptions()
     {
