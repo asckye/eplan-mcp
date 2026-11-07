@@ -81,7 +81,7 @@
 1. **选基本项目建项目。** 每个项目都基于基本项目；它决定页结构和设备结构。— `H:projects_h_projekteerstellen`、`H:projectstructure_k_hinterg`
 2. **准备主数据。** 部件管理里给每个部件建设备定义（功能模板），或给部件指定符号、宏。— `H:devicelistgui_k_prinzip`。官方建议用准备好的宏来标准化；宏不是必需的，但宏里的功能必须和部件的功能模板对得上。— `TT-PLC主数据 p21`
 3. **（可选）宏工程。** 帮助里的说法是宏项目、宏框、变体、占位符对象，没有 macro technology 这个章节（只有 3D 宏一页，`H2.9:cabinetgui_k_3dmakros`，**[搜索摘要]**）。宏项目专门管理和生成宏，不支持跨页连接和全局编辑。— `H:macrosgui_k_makroprojekte`、`H:macrosgui_k_makrokaesten`。每种表达最多 26 个变体。— `H:macrosgui_h_makroserzeugen`。占位符对象让同一个宏带多组值。— `H:macrosgui_k_start`
-4. **（可选）预规划。** 需要单独的模块；开发机授权里 `Preplanning` 不可用（A24）。五步是配置、建预规划、做详细规划（从预规划导航器拖到原理图页）、出报表、检查。— `H:planninggui_k_vorgehensweise`、`H:planninggui_k_start`
+4. **（可选）预规划。** 需要单独的模块；开发机授权里 `Preplanning` 不可用（A24），但 API 能建预规划页和管段（A106）。五步是配置、建预规划、做详细规划（从预规划导航器拖到原理图页）、出报表、检查。— `H:planninggui_k_vorgehensweise`、`H:planninggui_k_start`
 5. **设备法的详细设计。** 预定义设备、用导航器、用预定义或导入的设备清单、使用现有功能、再和预定义设备比对。— `H:devicelistgui_k_start`
 6. **原理图。** 先把连接点定义为相连，后面才定义走线和材料，从笼统走向精确。— `H:connectionbrowsergui_k_arbeitsweiseverbindungen`
 7. **PLC。** 见 1.6。机架结构用单线页且 PLC 盒为主功能；I/O 用多线；总览作为通道分配的图形化核对。— `TT-PLC主数据 p21-23`。也可以由宏自动生成：依次生成单线、多线、I/O 总览、机架总览。— `H2022:plcgui_k_spsschaltplanprinzip`

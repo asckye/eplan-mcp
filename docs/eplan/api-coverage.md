@@ -37,7 +37,7 @@ M6 第 3 阶段 M2：已增加 [模块只读检查内部服务](../design/2026-1
 | `Eplan.EplApi.ApplicationFramework` | 37 | action、插件、授权、静默模式 | 基础设施；受控 action 白名单 | M1；action 白名单在 M4 之后 | 🟡 |
 | `Eplan.EplApi.EServices` / `.Ged` | 29 / 12 | 消息管理、图形编辑器交互 | 检查消息；交互式插入不做（需要人在界面上操作） | M2 | ✅ 项目消息与检查结果的读取 |
 | `Eplan.EplApi.DataModel.MasterData` | 25 | 项目内的主数据（项目自带的符号库、表格） | 符号目录 | M3；符号目录在 M4 之后 | 🟡 窗口宏的读取和插入用到其中的宏类型 |
-| `Eplan.EplApi.DataModel.Planning` | 25 | 预规划（规划对象、管段） | 预规划 | ➖ | 当前授权中 Preplanning 不可用，暂不覆盖 |
+| `Eplan.EplApi.DataModel.Planning` | 25 | 预规划（规划对象、管段） | 预规划 | ➖ | 当前授权中 Preplanning 不可用，但 API 能建预规划页和管段（A106），暂无工具；暂不覆盖 |
 | `Eplan.EplApi.DataModel.EObjects` | 24 | 电气对象的扩展（如 PLC 卡、端子排定义） | 并入设备 / 端子 / PLC | M4 之后 | ⬜ |
 | `Eplan.EplApi.DataModel.Revisions` | 4 | 修订管理 | 修订 | M4 之后 | ⬜ |
 | `Eplan.EplApi.DataModel.Topology` | 4 | 布线路径拓扑 | 拓扑 | M4b | ⬜ |

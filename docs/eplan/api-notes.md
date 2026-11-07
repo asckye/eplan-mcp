@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；分支先追加到文末“新条目”。
-- 当前下一个可用编号：**A106、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
+- 当前下一个可用编号：**A107、B17**。并行分支先协调编号；合入后由维护者移入对应主题、按字母及数字编号排序，并更新下表和下一个编号。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -479,6 +479,16 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 这样运行 `eplan_part_import`、`eplan_part_sync`、`eplan_translation_import`，正在用的两个库 29 个文件（`.lck` 除外）的 SHA-256 不变，包括 `User.eod`、`User.eox`；副本的 `Translate.db` 变了。A30 说的“副本隔离不了导入”只针对按路径打开另一个库。
 - 设置是每个变体各一份，用文件备份还原后哈希一致。
 — `MasterDataOnCopyTests`。
+
+### A106. 结构标识符、标题栏和预规划（2026-11-06，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 新建项目和 LargeWrite 上）
+- **结构标识符的官方 API 词是 `Location`，** 搜 structure identifier 搜不到：`Project.GetLocationObjects()`、`Project.GetLocationObjects(Hierarchy)`、`Project.CreateLocation(Hierarchy, string, LocationSortOrder)`、`Project.SetSortedLocations`、`Project.ChangeLocationName`，`Location.IsUsed`、`Location.Remove()`、`Location.Properties`。`Hierarchy`：`Plant` =，`Functional` ==，`Place` ++，`Location` +，`Document` &，`UserDef` #。
+- **`Location` 的属性（实测）：** 1000 名称，1001 全名，1002 描述（多语言），1003 带前缀的全名（`+S1`），1004 块名，1005 使用次数（文本，如 `527`），1006 块编号（10002 =，10004 +，10006 &）。每个块有一个名称为空的对象，1003 只有前缀，1005 是 `*`。
+- **读写行为（LargeWrite，`StructureToolsTests`）：** `CreateLocation(块, "A", Back)` 和 `CreateLocation(块, "A.B", Back)` 都成功，后者同时有 `A`、`A.B` 两个对象。新建的标识 `IsUsed` 为 false，但有子标识的父标识为 true，所以要先删子标识；`GetLocationObjects` 不带参数时按块依次返回。一次调用多个 `CreateLocation` 和写描述，一次 Ctrl+Z 全部撤销；`Location.Remove()` 同样一次撤销恢复。创建、撤销、再创建、审批删除、撤销删除之后，再撤销一次（想撤销第二次创建）时弹"'撤销'冲突"（"步骤不存在"），EPLAN 随后阻塞；原因没有查明，不要假定能撤销过删除之前的步骤。
+- **结构标识符管理对话框：** `XPLEditorStart` 打开。输入中文时 EPLAN 按词典自动补其他语言，有歧义时弹"已找到的字"；API 写描述不会翻译，只存传入的语言。对话框只在没有工具时才值得驱动。
+- **标题栏字段的类型取自 XML 的 `ProjectPropertyList`：** 10011、10014、10030、10031、10032 多语言，其余文本；模板自定义的 `ESS.Project.*` 按 `IdentifyingName` 从 `Project.UserDefinedPropertyDefinitions` 取 ID，多语言。写入后报表页要 `eplan_report_update` 才变。
+- **写项目属性 1230（只读的 `DESIGNATION_LOCATION_DESCR`）** 的探针运行时 EPLAN 崩溃（`0xc0000374`），具体哪一步没有查明。不要写只读的结构属性，也不要重复这个探针。
+- **预规划（新建 scratch 项目 CorePrePlan，已提交）：** 授权项 `Preplanning` 在 P8 和 Pro Panel 上都是 False，`PreplanningExport`、`PreplanningObjectsBase`、`PreplanningObjectsPID`、`PreplanningPID` 是 True（`new License().GetLicenseModules`：共 3214 项，2683 项可用）。尽管如此，20 个管段定义可读；`Page.Create(project, DocumentType.Planning, names)` 建 `&PRE/1`；`LockAllObjects` 后在 Transaction 内 `PlanningSegment.Create(definition)`、`new SegmentPlacement().Create(segment, page)`（放在 0,0）、`new SegmentDefinition().Create(name, parent)` 都成功，管段数 0→1。导入没有测试。
+- **`EPLREMOTE_PID` 指向已退出的进程时，** 远程客户端会连到另一个 EPLAN，读写的就是别的实例。先确认进程还在。
 
 ### A105. 复刻一套 71 页图纸时验证的绘图和报表事实（2026-11-06，EPLAN 2026.0.3.25421，Electric P8，只在 scratch 新项目上）
 - **从部件放端子并新建端子排：** `Function.Create` 在 `SafetyPoint` 中抛 S063176，A13 的结论再次成立；先 `LockAllObjects`、把新建挪到 `DeviceService.CreateDevice` 之前都没有用。整个调用改用 `FunctionTransactionScope` 后，`CreateDevice` 同样可用，160 个端子全部提交。端子排先建好，端子再按名称加入，和已有端子排的路径一样。
