@@ -10,7 +10,9 @@ after:
   s1: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9912", tag_contains: "-S1" }, pick: $.total }
   s2: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9912", tag_contains: "-S2" }, pick: $.total }
   k2: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9912", tag_contains: "-K2" }, pick: $.total }
-  breaks: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/9912", object_type: InterruptionPoint }, pick: "$.items[*].name" }
+  # A break named 24V takes the page's higher-level function (=GAA-24V, as the sample project names them); one named in full stays as written.
+  break_24v: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/9912", object_type: InterruptionPoint, name_contains: "-24V" }, pick: "$.items[*].locator.type" }
+  break_0v: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/9912", object_type: InterruptionPoint, name_contains: "-0V" }, pick: "$.items[*].locator.type" }
   wires: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9912" }, pick: $.total }
   through_s2: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9912", device: "=GAA+A1-S2" }, pick: $.total }
   overlaps: { tool: eplan_page_review, args: { page: "=GAA+A1&EFS1/9912", checks: [overlaps] }, pick: $.summary.clean }
@@ -19,7 +21,8 @@ checks:
   - { after: s1, at_least: 1 }
   - { after: s2, at_least: 1 }
   - { after: k2, at_least: 1 }
-  - { after: breaks, set_equals: ["=GAA+A1-24V", "=GAA+A1-0V"] }
+  - { after: break_24v, contains: [70] }
+  - { after: break_0v, contains: [70] }
   - { after: wires, equals: 2 }
   - { after: through_s2, equals: 2 }
   - { after: overlaps, equals: true }
