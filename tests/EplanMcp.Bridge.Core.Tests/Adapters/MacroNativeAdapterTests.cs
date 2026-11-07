@@ -232,10 +232,10 @@ public sealed partial class MacroNativeAdapterTests : IDisposable
         var transactions = new FakeTransactions();
         TransactionRunner.Run(transactions, "eplan_macro_insert", () =>
         {
-            PlacedMacro placed = new EplanMacroInserter().Insert(request.Project!, request.Page, "PXC/2861289.ema", request.Variant,
-                request.X, request.Y, true, request.Representation!, request.Part, request.PartVariant, request.MacroBox);
+            PlacedMacro placed = new EplanMacroInserter().Insert(request.Project!, request.Page!, "PXC/2861289.ema", request.Variant ?? 0,
+                request.X ?? 0, request.Y ?? 0, true, request.Representation!, request.Part, request.PartVariant, request.MacroBox ?? true);
             Assert.Equal(2, placed.ObjectCount);
-            PageDrawingGeometry drawing = new EplanDrawingReader().Read(request.Project!, request.Page)!;
+            PageDrawingGeometry drawing = new EplanDrawingReader().Read(request.Project!, request.Page!)!;
             DrawingPlacement block = Assert.Single(drawing.Placements, p => p.Kind == "Block");
             Assert.False(block.Properties.ContainsKey("name"));
             Assert.Contains("unavailable", block.Properties["read_warning"], StringComparison.Ordinal);

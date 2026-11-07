@@ -697,6 +697,200 @@ public sealed class MacroInsertOperationTests : IDisposable
         Assert.Contains(OperationNames.MacroInsertExecute, router.SupportedOperations);
     }
 
+    [Fact]
+    public void Single_OmittedScalarFieldsKeepTheirPreviousDefaults()
+    {
+        var args = new MacroInsertArgs { Project = "Line1", Page = NewPage, Macro = Macro };
+
+        MacroInsertRequest request = MacroInsertRequest.Check(args, _catalog, _pages, _macros, _inserter, enforceLayout: false);
+
+        Assert.Equal((0d, 0d, 0, true), (request.X, request.Y, request.Variant, request.MacroBox));
+    }
+
+    [Fact]
+    public void Batch_ReportsEachItemsArgumentAndPlaceholderProblemsTogether()
+    {
+        _macros.Content.Placeholders = [new() { Name = "#<Function_text>", ValueSets = ["Forward control", "Reverse control"] }];
+        MacroInsertArgs args = Batch();
+        args.Items![0].Page = string.Empty;
+        args.Items[0].Variant = -1;
+        args.Items[1].Numbering = "invalid";
+        args.Items[2].Values = new() { ["missing/name"] = "Reverse control" };
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("/items/0/page", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/0/variant", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/1/numbering", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/2/values/missing~1name", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Empty(_inserter.Inserts);
+    }
+
+    [Fact]
+    public void Batch_MixedErrorsKeepFirstSpecificReasonAndAllItemViolations()
+    {
+        MacroInsertArgs args = Batch();
+        args.Items![0].Variant = -1;
+        args.Items[1].Page = "=MA1+UC1&EFS1/404";
+        args.Items[2].Numbering = "invalid";
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
+
+        Assert.Equal(ErrorReason.PageNotFound, error.Reason);
+        Assert.Equal("1", error.Metadata!["item"]);
+        Assert.Equal("=MA1+UC1&EFS1/404", error.Metadata["page"]);
+        Assert.StartsWith("No page has this name", error.Message, StringComparison.Ordinal);
+        Assert.Contains("/items/0/variant", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/1:", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/2/numbering", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Empty(_inserter.Inserts);
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
+    public void Batch_OverlappingItemsOnOnePageAreRefused()
+    {
+        MacroInsertArgs args = Batch();
+        args.Items![1].X = args.Items[2].X;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("R2", error.Message, StringComparison.Ordinal);
+        Assert.Contains("/items/1:", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/2:", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.False(string.IsNullOrWhiteSpace(error.Metadata["layoutChecks"]));
+        Assert.Empty(_transactions.Calls);
+    }
+
+    [Fact]
+    public void Batch_OverlappingItemsOnOnePageWarnWhenRequested()
+    {
+        MacroInsertArgs args = Batch();
+        args.Items![1].X = args.Items[2].X;
+        args.LayoutGuard = "warn";
+
+        Assert.Contains("R2", Plan(args).Details!["layoutWarnings"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Batch_LayoutViolationsAcrossPagesAreReportedTogether()
+    {
+        MacroInsertArgs args = Batch();
+        args.Items!.Insert(1, new() { Page = NewPage, Macro = Macro, X = 24, Y = 280 });
+        args.Items[2].X = args.Items[3].X;
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
+
+        Assert.Contains("/items/0:", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/1:", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/2:", error.Metadata["violations"], StringComparison.Ordinal);
+        Assert.Contains("/items/3:", error.Metadata["violations"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Batch_EqualOutlinesOnDifferentPagesPass()
+    {
+        MacroInsertArgs args = Batch();
+        args.Items!.RemoveAt(2);
+        args.Items[1].X = args.Items[0].X;
+
+        Assert.Equal(2, Plan(args).Changes.Count);
+    }
+
+    [Fact]
+    public void Batch_ThreeInsertionsCommitOnceAndReadBackEachItemsAppliedValues()
+    {
+        _macros.Content.Placeholders = [new() { Name = "#<Function_text>", ValueSets = ["Forward control", "Reverse control"] }];
+        MacroInsertArgs args = Batch();
+        args.Items![1].Values = new() { ["#<Function_text>"] = "Forward control" };
+        args.Items[2].Values = new() { ["#<Function_text>"] = "Reverse control" };
+        var applied = new List<string>();
+        _inserter.ApplyValues = values => applied.Add(values["#<Function_text>"]);
+        int readbacks = 0;
+        _inserter.CommittedReadback = placed =>
+        {
+            Assert.Contains("Commit", _transactions.Calls);
+            readbacks++;
+            return placed;
+        };
+        WritePlan plan = Plan(args);
+        Assert.Equal([NewPage, SamplePage, SamplePage + " #<Function_text>", SamplePage, SamplePage + " #<Function_text>"], plan.Changes.Select(change => change.Name));
+        args.Fingerprint = plan.Fingerprint;
+
+        MacroInsertData data = Execute(args);
+
+        Assert.Equal(["Forward control", "Reverse control"], applied);
+        Assert.Equal(3, readbacks);
+        Assert.Equal(3, data.ItemCount);
+        Assert.Equal(9, data.DeviceCount);
+        Assert.Equal([NewPage, SamplePage, SamplePage], data.Items!.Select(item => item.Page));
+        Assert.Equal([0, 1, 1], data.Items!.Select(item => item.ValueCount));
+        Assert.All(data.Items!, item =>
+        {
+            Assert.Empty(item.Values);
+            Assert.Empty(item.Devices);
+        });
+        Assert.Equal(["Begin AI: eplan_macro_insert", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Batch_FailureInThirdItemRollsBackEverythingWithZeroBasedItem(bool knownFailure)
+    {
+        MacroInsertArgs args = Batch();
+        args.Fingerprint = Plan(args).Fingerprint;
+        _inserter.Placed = number =>
+        {
+            if (_inserter.Inserts.Count == 3)
+            {
+                if (knownFailure)
+                {
+                    throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Third item failed");
+                }
+                throw new InvalidOperationException("Third item failed");
+            }
+            return Numbered(number);
+        };
+        string[] existingObjects = [.. _inserter.Pages[SamplePage].Objects];
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Equal("2", error.Metadata!["item"]);
+        Assert.Equal("Third item failed", error.Message);
+        Assert.Empty(_inserter.Pages[NewPage].Objects);
+        Assert.Equal(existingObjects, _inserter.Pages[SamplePage].Objects);
+        Assert.Equal(["+A1-WG6"], _devices.Functions.Select(function => function.Name));
+        Assert.Equal(["Begin AI: eplan_macro_insert", "CloseUndo", "Rollback", "Dispose"], _transactions.Calls);
+    }
+
+    [Fact]
+    public void Batch_FingerprintIncludesItemOrderAndCoordinates()
+    {
+        MacroInsertArgs args = Batch();
+        string original = Plan(args).Fingerprint;
+        args.Items![2].X += 4;
+        string moved = Plan(args).Fingerprint;
+        Assert.NotEqual(original, moved);
+        args.Items[2].X -= 4;
+        args.Items.Reverse();
+        Assert.NotEqual(original, Plan(args).Fingerprint);
+    }
+
+    private static MacroInsertArgs Batch() => new()
+    {
+        Project = "Line1",
+        Items =
+        [
+            new() { Page = NewPage, Macro = Macro, X = 24, Y = 280 },
+            new() { Page = SamplePage, Macro = Macro, X = 24, Y = 280 },
+            new() { Page = SamplePage, Macro = Macro, X = 76, Y = 280 },
+        ],
+    };
+
     private static MacroInsertArgs Args(string page, double x, double y) => new() { Project = "Line1", Page = page, Macro = Macro, X = x, Y = y };
 
     /// <summary>What S10 read back after inserting the macro again with Number (A14); with None the cable keeps +A1-WG6.</summary>

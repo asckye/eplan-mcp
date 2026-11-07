@@ -3,6 +3,15 @@ namespace EplanMcp.Contracts;
 /// <summary>Result of <see cref="OperationNames.MacroInsertExecute"/>: the inserted devices as read back. Tags are project data.</summary>
 public sealed class MacroInsertData
 {
+    /// <summary>Per-item results in insertion order, present only for a batch.</summary>
+    public List<MacroInsertData>? Items { get; set; }
+
+    /// <summary>Number of requested insertions, present only for a batch.</summary>
+    public int? ItemCount { get; set; }
+
+    /// <summary>Value sets selected for this batch item.</summary>
+    public int? ValueCount { get; set; }
+
     /// <summary>The name of the project the macro was inserted in.</summary>
     public string Project { get; set; } = string.Empty;
 

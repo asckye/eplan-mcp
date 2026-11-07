@@ -147,7 +147,7 @@ public sealed class PlanStepExecuteOperation(
 
     private void CheckMacro(MacroInsertArgs args, PlanMacroConstraint? constraint, FileStream file)
     {
-        if (constraint is null || args.Variant != 0 || args.Numbering != "keep")
+        if (constraint is null || (args.Variant ?? 0) != 0 || args.Numbering != "keep")
         {
             throw InvalidArgument("Plan insertion requires a complete compiled macro constraint, variant 0 and numbering keep.");
         }
@@ -161,7 +161,7 @@ public sealed class PlanStepExecuteOperation(
         }
 
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
-        MacroTargetPage page = inserter.ReadPage(project.Path, args.Page) ?? throw Stale();
+        MacroTargetPage page = inserter.ReadPage(project.Path, args.Page ?? string.Empty) ?? throw Stale();
         if (page.Type != "Circuit" || page.Objects.Count != 0
             || !Equal(PlanMacroInspectOperation.Describe(macros.ReadMacro(project.Path, file.Name, defaultMultiLine: true), hash), expected))
         {

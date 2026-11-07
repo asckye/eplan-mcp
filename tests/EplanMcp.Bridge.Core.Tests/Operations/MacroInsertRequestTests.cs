@@ -1,4 +1,7 @@
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Bridge.Core.Protocol;
+using EplanMcp.Contracts;
+using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
@@ -9,6 +12,59 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class MacroInsertRequestTests
 {
+    [Theory]
+    [InlineData(0)]
+    [InlineData(21)]
+    public void Batch_RequiresOneToTwentyItems(int count)
+    {
+        var args = new MacroInsertArgs { Project = "EES1", Items = [.. Enumerable.Range(0, count).Select(_ => new MacroInsertItem())] };
+
+        Assert.Contains(MacroInsertRequest.BatchProblems(args), problem => problem.StartsWith("/items:", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData("page", "\"=MA1+UC1&EFS1/1\"")]
+    [InlineData("macro", "\"Motor.ema\"")]
+    [InlineData("part", "\"PXC.2861344\"")]
+    [InlineData("partVariant", "\"1\"")]
+    [InlineData("representation", "\"MultiLine\"")]
+    [InlineData("x", "0")]
+    [InlineData("y", "0")]
+    [InlineData("variant", "0")]
+    [InlineData("numbering", "\"number\"")]
+    [InlineData("macroBox", "true")]
+    [InlineData("values", "{\"#<Function_text>\":\"Forward control\"}")]
+    public void Batch_RefusesEverySuppliedSingleItemField(string field, string value)
+    {
+        var json = JObject.Parse("{\"project\":\"EES1\",\"items\":[{}],\"" + field + "\":" + value + "}");
+        MacroInsertArgs args = json.ToObject<MacroInsertArgs>(BridgeJson.Serializer)!;
+        string expected = field == "partVariant" ? "part_variant" : field == "macroBox" ? "macro_box" : field;
+
+        Assert.Contains(MacroInsertRequest.BatchProblems(args), problem => problem.StartsWith("/" + expected + ":", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Batch_Ees1DriveInputKeepsThreeOrderedMacroPlacementsAndValueSets()
+    {
+        const string json = """
+            {
+              "project": "EES1",
+              "items": [
+                {"page":"=MA1+UC1&EFS1/1","macro":"EPLAN_Macro/203_Electrical_Engine/101_01_Variant_1/Reverse_Contactor_Control.ema","x":4,"y":288},
+                {"page":"=MA1+UC1&EFS1/2","macro":"EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema","x":24,"y":276,"values":{"#<Function_text>":"Forward control"}},
+                {"page":"=MA1+UC1&EFS1/2","macro":"EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema","x":76,"y":276,"values":{"#<Function_text>":"Reverse control"}}
+              ]
+            }
+            """;
+        MacroInsertArgs args = JObject.Parse(json).ToObject<MacroInsertArgs>(BridgeJson.Serializer)!;
+
+        Assert.Empty(MacroInsertRequest.BatchProblems(args));
+        Assert.Equal([4d, 24d, 76d], args.Items!.Select(item => item.X));
+        Assert.Equal("=MA1+UC1&EFS1/1", args.Items![0].Page);
+        Assert.Equal("Forward control", args.Items[1].Values!["#<Function_text>"]);
+        Assert.Equal("Reverse control", args.Items[2].Values!["#<Function_text>"]);
+    }
+
     [Fact]
     public void Values_SelectiveModuleChannelAcceptsAnExactValueSet()
     {
@@ -100,7 +156,7 @@ public sealed class MacroInsertRequestTests
         var args = new EplanMcp.Contracts.MacroInsertArgs { Part = "PXC.2861344", Representation = "Overview", Variant = 0 };
         var observed = new MacroContent { Representations = [new("MultiLine", [0]), new("Overview", [0])] };
 
-        Assert.Empty(MacroInsertRequest.RepresentationProblems(new() { Type = "Overview" }, observed, args.Representation, args.Variant));
+        Assert.Empty(MacroInsertRequest.RepresentationProblems(new() { Type = "Overview" }, observed, args.Representation, args.Variant ?? 0));
     }
 
     [Theory]

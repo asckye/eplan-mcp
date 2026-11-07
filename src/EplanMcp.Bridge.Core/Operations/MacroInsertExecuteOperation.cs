@@ -1,3 +1,4 @@
+using System.Globalization;
 using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
@@ -24,7 +25,8 @@ public sealed class MacroInsertExecuteOperation(
 
     protected override MacroInsertData Execute(MacroInsertArgs args)
     {
-        MacroInsertRequest request;
+        List<MacroInsertRequest> requests;
+        bool batch = args.Items is not null;
         try
         {
             if (string.IsNullOrEmpty(args.Fingerprint))
@@ -32,14 +34,14 @@ public sealed class MacroInsertExecuteOperation(
                 throw InvalidArgument("'fingerprint' is required: the one macro.insert.plan returned.");
             }
 
-            request = MacroInsertRequest.Check(args, catalog, pages, macros, inserter);
-            if (!string.Equals(request.StateFingerprint(devices), args.Fingerprint, StringComparison.Ordinal))
+            requests = MacroInsertRequest.CheckAll(args, catalog, pages, macros, inserter);
+            if (!string.Equals(MacroInsertRequest.FingerprintFor(requests, devices, batch), args.Fingerprint, StringComparison.Ordinal))
             {
                 throw new BridgeErrorException(
                     ErrorReason.PlanStale,
                     "The objects on the page, the macro file or, with numbering keep, the tags in use changed after the plan was made, so nothing was inserted. Call eplan_macro_insert again for a new plan.",
                     retryable: false,
-                    new Dictionary<string, string> { ["project"] = request.Project.Name });
+                    new Dictionary<string, string> { ["project"] = requests[0].Project.Name });
             }
         }
         catch (BridgeErrorException ex)
@@ -47,34 +49,81 @@ public sealed class MacroInsertExecuteOperation(
             throw WriteArguments.NotStarted(ex);
         }
 
-        Committed<PlacedMacro> committed = TransactionRunner.Run(transactions, Tool, () =>
+        Committed<List<PlacedMacro>> committed = TransactionRunner.Run(transactions, Tool, () =>
         {
-            PlacedMacro placed = Insert(request);
-            // AfterWriting refuses objects measured off the page (S2), so reproducing without a box needs no outline check.
-            request.LayoutWarnings.AddRange(MacroInsertRequest.Layout(() => request.Page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.AfterWriting(request.Page.Layout)));
+            var placed = new List<PlacedMacro>();
+            for (int index = 0; index < requests.Count; index++)
+            {
+                MacroInsertRequest request = requests[index];
+                try
+                {
+                    placed.Add(Insert(request));
+                    // AfterWriting refuses objects measured off the page (S2).
+                    request.LayoutWarnings.AddRange(MacroInsertRequest.Layout(() => request.Page.Layout is null
+                        ? ["Layout unverified: page geometry is unavailable."]
+                        : LayoutGuard.AfterWriting(request.Page.Layout)));
+                }
+                catch (Exception failure) when (batch)
+                {
+                    var error = failure as BridgeErrorException
+                        ?? new BridgeErrorException(ErrorReason.EplanOperationFailed, failure.Message, failure);
+                    error.Error.Metadata ??= new Dictionary<string, string>();
+                    error.Error.Metadata["item"] = index.ToString(CultureInfo.InvariantCulture);
+                    throw error;
+                }
+            }
             return placed;
         });
-        PlacedMacro readback = committed.Result;
+        var items = new List<MacroInsertData>();
+        for (int index = 0; index < requests.Count; index++)
+        {
+            items.Add(Readback(requests[index], committed.Result[index], committed.Warning, batch));
+        }
+        if (!batch)
+        {
+            return items[0];
+        }
+
+        return new MacroInsertData
+        {
+            Project = requests[0].Project.Name,
+            Items = items,
+            ItemCount = items.Count,
+            DeviceCount = items.Sum(item => item.DeviceCount),
+            Warning = LayoutGuard.Summary(items.Select(item => item.Warning)),
+        };
+    }
+
+    private MacroInsertData Readback(MacroInsertRequest request, PlacedMacro readback, string? warning, bool batch)
+    {
         try
-        { readback = inserter.ReadCommitted(request.Project.Path, request.Page.Name, readback); }
+        {
+            readback = inserter.ReadCommitted(request.Project.Path, request.Page.Name, readback);
+        }
         catch (Exception failure)
-        { WriteExceptionDiagnostics.Report(failure); request.LayoutWarnings.Add("The macro was committed, but its objects and article references could not be read back. Inspect the page before repeating the insertion."); }
+        {
+            WriteExceptionDiagnostics.Report(failure);
+            request.LayoutWarnings.Add("The macro was committed, but its objects and article references could not be read back. Inspect the page before repeating the insertion.");
+        }
         if (request.Source is not null && readback.ArticleReferences.Count == 0)
-        { request.LayoutWarnings.Add("The macro was committed, but no main-function article reference could be read. Inspect the page before repeating the insertion."); }
+        {
+            request.LayoutWarnings.Add("The macro was committed, but no main-function article reference could be read. Inspect the page before repeating the insertion.");
+        }
         List<PageDevice> inserted = MacroInsertRequest.Devices(readback.Functions);
         return new MacroInsertData
         {
             Project = request.Project.Name,
             Page = request.Page.Name,
             Macro = request.Macro,
-            Devices = [.. inserted.Take(MacroInsertRequest.MaxDevices)],
+            Devices = batch ? [] : [.. inserted.Take(MacroInsertRequest.MaxDevices)],
             DeviceCount = inserted.Count,
             ObjectCount = readback.ObjectCount,
-            ArticleReferences = readback.ArticleReferences,
-            Values = [.. (request.Values ?? new Dictionary<string, string>()).OrderBy(value => value.Key, StringComparer.Ordinal)
+            ArticleReferences = batch ? [] : readback.ArticleReferences,
+            ValueCount = batch ? request.Values?.Count ?? 0 : null,
+            Values = batch ? [] : [.. (request.Values ?? new Dictionary<string, string>()).OrderBy(value => value.Key, StringComparer.Ordinal)
                 .Select(value => new MacroValueApplication { Placeholder = value.Key, ValueSet = value.Value })],
             PageSizeKnown = request.Page.Width is not null,
-            Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(committed.Warning)),
+            Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(warning)),
         };
     }
 

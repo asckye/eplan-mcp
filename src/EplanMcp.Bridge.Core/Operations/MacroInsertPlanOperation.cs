@@ -15,23 +15,54 @@ public sealed class MacroInsertPlanOperation(IProjectCatalog catalog, IPageReade
 
     protected override WritePlan Execute(MacroInsertArgs args)
     {
-        var request = MacroInsertRequest.Check(args, catalog, pages, macros, inserter);
-        List<PageDevice> inMacro = request.MacroDevices();
-        return new WritePlan
+        List<MacroInsertRequest> requests = MacroInsertRequest.CheckAll(args, catalog, pages, macros, inserter);
+        bool batch = args.Items is not null;
+        var plan = new WritePlan
         {
-            Project = request.Project.Name,
-            ProjectPath = request.Project.Path,
-            Changes = [request.Change(inMacro.Count), .. request.ValueChanges()],
-            Fingerprint = request.StateFingerprint(devices),
-            Details = new Dictionary<string, string>
-            {
-                ["macro"] = request.Macro,
-                ["layoutWarnings"] = string.Join("\n", request.LayoutWarnings),
-                ["deviceCount"] = inMacro.Count.ToString(CultureInfo.InvariantCulture),
-                ["devices"] = string.Join("\n", inMacro.Take(MacroInsertRequest.MaxDevices).Select(d => d.Tag + "\t" + d.VisibleTag + "\t" + d.Category)),
-                ["objectCount"] = (request.Content.ObjectCount - (request.MacroBox ? 0 : request.Content.MacroBoxCount)).ToString(CultureInfo.InvariantCulture),
-                ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true",
-            },
+            Project = requests[0].Project.Name,
+            ProjectPath = requests[0].Project.Path,
+            Fingerprint = MacroInsertRequest.FingerprintFor(requests, devices, batch),
         };
+        var items = new List<MacroInsertData>();
+        foreach (MacroInsertRequest request in requests)
+        {
+            List<PageDevice> inMacro = request.MacroDevices();
+            int objectCount = request.Content.ObjectCount - (request.MacroBox ? 0 : request.Content.MacroBoxCount);
+            plan.Changes.Add(request.Change(inMacro.Count));
+            plan.Changes.AddRange(request.ValueChanges(includePage: batch));
+            if (batch)
+            {
+                items.Add(new MacroInsertData
+                {
+                    Page = request.Page.Name,
+                    Macro = request.Macro,
+                    ValueCount = request.Values?.Count ?? 0,
+                    DeviceCount = inMacro.Count,
+                    ObjectCount = objectCount,
+                });
+            }
+            else
+            {
+                plan.Details = new Dictionary<string, string>
+                {
+                    ["macro"] = request.Macro,
+                    ["layoutWarnings"] = string.Join("\n", request.LayoutWarnings),
+                    ["deviceCount"] = inMacro.Count.ToString(CultureInfo.InvariantCulture),
+                    ["devices"] = string.Join("\n", inMacro.Take(MacroInsertRequest.MaxDevices).Select(d => d.Tag + "\t" + d.VisibleTag + "\t" + d.Category)),
+                    ["objectCount"] = objectCount.ToString(CultureInfo.InvariantCulture),
+                    ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true",
+                };
+            }
+        }
+        if (batch)
+        {
+            plan.Details = new Dictionary<string, string>
+            {
+                ["items"] = Protocol.BridgeJson.FromObject(items).ToString(Newtonsoft.Json.Formatting.None),
+                ["layoutWarnings"] = string.Join("\n", requests.SelectMany(request => request.LayoutWarnings).Distinct(StringComparer.Ordinal)),
+                ["deviceCount"] = items.Sum(item => item.DeviceCount).ToString(CultureInfo.InvariantCulture),
+            };
+        }
+        return plan;
     }
 }

@@ -23,13 +23,13 @@ internal sealed class MacroInsertRequest
         Macro = MacroFiles.Normalized(macro);
         MacroPath = macroPath;
         Content = content;
-        X = args.X;
-        Y = args.Y;
-        Variant = args.Variant;
+        X = args.X ?? 0;
+        Y = args.Y ?? 0;
+        Variant = args.Variant ?? 0;
         Number = number;
         Representation = representation;
         Source = source;
-        MacroBox = args.MacroBox;
+        MacroBox = args.MacroBox ?? true;
         Values = args.Values is null ? null : new Dictionary<string, string>(args.Values, StringComparer.Ordinal);
         _guard = args.LayoutGuard;
     }
@@ -62,7 +62,7 @@ internal sealed class MacroInsertRequest
     public IReadOnlyDictionary<string, string>? Values { get; }
 
     /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the macro.</summary>
-    public static MacroInsertRequest Check(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter)
+    public static MacroInsertRequest Check(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter, bool enforceLayout = true)
     {
         var violations = new List<string>();
         WriteArguments.RequireProject(args.Project, violations);
@@ -76,7 +76,7 @@ internal sealed class MacroInsertRequest
         AddIf(violations, hasPart && args.Part!.Any(char.IsControl), "'part' must be a part number without control characters.");
         AddIf(violations, args.PartVariant is not null && !hasPart, "'part_variant' requires 'part'.");
         AddIf(violations, representation is not MultiLine and not "Overview" and not "SingleLine", "'representation' must be MultiLine, Overview or SingleLine.");
-        AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
+        AddIf(violations, !(Finite(args.X ?? 0) && Finite(args.Y ?? 0) && (args.X ?? 0) >= 0 && (args.Y ?? 0) >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
         AddIf(violations, args.Variant < 0, "'variant' must be 0 or more: a variant number that eplan_macro_get lists.");
         AddIf(violations, !number && !string.Equals(numbering, "keep", StringComparison.OrdinalIgnoreCase), "'numbering' must be number or keep.");
         if (violations.Count > 0)
@@ -85,7 +85,7 @@ internal sealed class MacroInsertRequest
         }
 
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
-        MacroTargetPage page = FindPage(pages, inserter, project, args.Page);
+        MacroTargetPage page = FindPage(pages, inserter, project, args.Page!);
         string root = macros.MacroRoot() is { } resolved && Directory.Exists(resolved)
             ? resolved
             : throw new BridgeErrorException(ErrorReason.EplanOperationFailed, MacroListOperation.NoMacroDirectory);
@@ -94,13 +94,183 @@ internal sealed class MacroInsertRequest
         if (string.IsNullOrWhiteSpace(macro))
         { throw WriteArguments.Invalid(["'part' has no ARTICLE_GROUPSYMBOLMACRO; use eplan_device_place when the part has a suitable device template."]); }
         string path = MacroFiles.Resolve(root, macro);
-        var request = new MacroInsertRequest(project, page, macro, path, macros.ReadMacro(project.Path, path, representation: representation, variant: args.Variant), args, number, representation, source);
+        var request = new MacroInsertRequest(project, page, macro, path, macros.ReadMacro(project.Path, path, representation: representation, variant: args.Variant ?? 0), args, number, representation, source);
         violations.AddRange(request.Problems());
         violations.AddRange(ValueProblems(request.Content, request.Values));
-        if (violations.Count == 0)
-        { request.LayoutWarnings = Layout(() => page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [args.X, args.Y], request.ProposedOutline())], mode: args.LayoutGuard ?? "refuse")); }
+        if (violations.Count == 0 && enforceLayout)
+        {
+            request.LayoutWarnings = Layout(() => page.Layout is null
+                ? ["Layout unverified: page geometry is unavailable."]
+                : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [request.X, request.Y], request.ProposedOutline())], mode: args.LayoutGuard ?? "refuse"));
+        }
         return violations.Count > 0 ? throw WriteArguments.Invalid(violations) : request;
     }
+    /// <summary>Checks every insertion before any write and compares all proposed outlines on each page together.</summary>
+    public static List<MacroInsertRequest> CheckAll(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter)
+    {
+        if (args.Items is null)
+        {
+            return [Check(args, catalog, pages, macros, inserter)];
+        }
+
+        List<string> violations = BatchProblems(args);
+        if (violations.Count > 0)
+        {
+            throw WriteArguments.Invalid(violations);
+        }
+
+        var requests = new List<MacroInsertRequest>();
+        BridgeErrorException? firstFailure = null;
+        for (int index = 0; index < args.Items.Count; index++)
+        {
+            MacroInsertItem? item = args.Items[index];
+            string prefix = "/items/" + index.ToString(CultureInfo.InvariantCulture);
+            if (item is null)
+            {
+                violations.Add(prefix + ": Supply an insertion object.");
+                continue;
+            }
+
+            var single = new MacroInsertArgs
+            {
+                Project = args.Project,
+                Page = item.Page,
+                Macro = item.Macro,
+                Part = item.Part,
+                PartVariant = item.PartVariant,
+                Representation = item.Representation,
+                X = item.X,
+                Y = item.Y,
+                Variant = item.Variant,
+                Numbering = item.Numbering,
+                MacroBox = item.MacroBox,
+                Values = item.Values,
+                LayoutGuard = args.LayoutGuard,
+            };
+            try
+            {
+                requests.Add(Check(single, catalog, pages, macros, inserter, enforceLayout: false));
+            }
+            catch (BridgeErrorException error) when (error.Error.Reason == ErrorReason.InvalidArgument)
+            {
+                string problems = error.Error.Metadata?.TryGetValue("violations", out string? found) == true ? found : error.Error.Message;
+                violations.AddRange(problems.Split('\n').Select(problem => Prefix(prefix, problem)));
+            }
+            catch (BridgeErrorException error)
+            {
+                error.Error.Metadata ??= new Dictionary<string, string>();
+                error.Error.Metadata["item"] = index.ToString(CultureInfo.InvariantCulture);
+                firstFailure ??= error;
+                violations.Add(Prefix(prefix, error.Error.Message));
+            }
+        }
+
+        if (firstFailure is not null)
+        {
+            firstFailure.Error.Metadata!["violations"] = string.Join("\n", violations);
+            throw firstFailure;
+        }
+        if (violations.Count > 0)
+        {
+            throw WriteArguments.Invalid(violations);
+        }
+
+        var layoutViolations = new List<LayoutGuard.Violation>();
+        var layoutChecks = new List<string>();
+        foreach (var group in requests.Select((request, index) => (Request: request, Index: index)).GroupBy(item => item.Request.Page.Name, StringComparer.Ordinal))
+        {
+            MacroTargetPage page = group.First().Request.Page;
+            try
+            {
+                List<string> warnings = Layout(() => page.Layout is null
+                    ? ["Layout unverified: page geometry is unavailable."]
+                    : LayoutGuard.Enforce(page.Layout,
+                        [.. group.Select(item => LayoutGuard.Proposed("Macro", [item.Request.X, item.Request.Y], item.Request.ProposedOutline(), index: item.Index))],
+                        mode: args.LayoutGuard ?? "refuse"));
+                foreach (var item in group)
+                {
+                    item.Request.LayoutWarnings.AddRange(warnings);
+                }
+            }
+            catch (BridgeErrorException error) when (error.Error.Reason == ErrorReason.InvalidArgument)
+            {
+                if (error.Error.Metadata?.TryGetValue("layoutChecks", out string? checks) == true)
+                {
+                    layoutChecks.Add(checks);
+                }
+                if (error.Error.Metadata?.TryGetValue("layoutViolations", out string? json) == true)
+                {
+                    List<LayoutGuard.Violation> found = Newtonsoft.Json.JsonConvert.DeserializeObject<List<LayoutGuard.Violation>>(json)!;
+                    layoutViolations.AddRange(found);
+                    violations.AddRange(found.Where(violation => !violation.Warning).Select(violation =>
+                        "/items/" + (-violation.Objects[0].Oid - 1).ToString(CultureInfo.InvariantCulture) + ": " + violation.Message));
+                }
+                else
+                {
+                    string prefix = "/items/" + group.First().Index.ToString(CultureInfo.InvariantCulture);
+                    violations.Add(Prefix(prefix, error.Error.Message));
+                }
+            }
+        }
+        if (violations.Count > 0)
+        {
+            BridgeErrorException error = WriteArguments.Invalid(violations);
+            error.Error.Metadata!["layoutViolations"] = Newtonsoft.Json.JsonConvert.SerializeObject(layoutViolations);
+            error.Error.Metadata["layoutChecks"] = string.Join("\n", layoutChecks);
+            throw error;
+        }
+        return requests;
+    }
+
+    internal static List<string> BatchProblems(MacroInsertArgs args)
+    {
+        var violations = new List<string>();
+        WriteArguments.RequireProject(args.Project, violations);
+        AddIf(violations, args.Items is { Count: < 1 or > 20 }, "/items: Supply between 1 and 20 insertions.");
+        (string Name, bool Supplied)[] fields =
+        [
+            ("page", args.Page is not null),
+            ("macro", args.Macro is not null),
+            ("part", args.Part is not null),
+            ("part_variant", args.PartVariant is not null),
+            ("representation", args.Representation is not null),
+            ("x", args.X is not null),
+            ("y", args.Y is not null),
+            ("variant", args.Variant is not null),
+            ("numbering", args.Numbering is not null),
+            ("macro_box", args.MacroBox is not null),
+            ("values", args.Values is not null),
+        ];
+        foreach (var field in fields.Where(field => field.Supplied))
+        {
+            violations.Add("/" + field.Name + ": Omit this top-level field when 'items' is supplied.");
+        }
+        return violations;
+    }
+
+    private static string Prefix(string prefix, string problem)
+    {
+        if (problem.StartsWith("/", StringComparison.Ordinal))
+        {
+            return prefix + problem;
+        }
+
+        int end = problem.StartsWith("'", StringComparison.Ordinal) ? problem.IndexOf('\'', 1) : -1;
+        return prefix + (end > 1 ? "/" + problem.Substring(1, end - 1) : string.Empty) + ": " + problem;
+    }
+
+    public static string FingerprintFor(IReadOnlyList<MacroInsertRequest> requests, IDeviceReader devices, bool batch) => batch
+        ? Fingerprint.Of(requests.Select((request, index) => index.ToString(CultureInfo.InvariantCulture) + "\t"
+            + request.StateFingerprint(devices) + "\t" + Protocol.BridgeJson.FromObject(new
+            {
+                request.Page.Name,
+                request.X,
+                request.Y,
+                request.Number,
+                Guard = request._guard ?? "refuse",
+            }).ToString(Newtonsoft.Json.Formatting.None)))
+        : requests[0].StateFingerprint(devices);
+
     public List<string> LayoutWarnings { get; private set; } = [];
 
     /// <summary>How far the outline's top left corner lies from the reference point that (x, y) places (A89).</summary>
@@ -131,13 +301,13 @@ internal sealed class MacroInsertRequest
     public PlannedChange Change(int devices) =>
         new() { Action = "create", Kind = "macro", Name = Page.Name, NewValue = Describe(Macro, X, Y, Variant, Number, devices) + (Representation == MultiLine ? "" : ", representation " + Representation) + (MacroBox ? "" : ", without macro box") + (Source is null ? "" : ", part " + Source.Part + ", part variant " + Source.PartVariant) };
 
-    public IEnumerable<PlannedChange> ValueChanges() =>
+    public IEnumerable<PlannedChange> ValueChanges(bool includePage = false) =>
         (Values ?? new Dictionary<string, string>()).OrderBy(value => value.Key, StringComparer.Ordinal)
             .Select(value => new PlannedChange
             {
                 Action = "update",
                 Kind = "placeholder",
-                Name = value.Key,
+                Name = includePage ? Page.Name + " " + value.Key : value.Key,
                 Property = "value set",
                 NewValue = value.Value,
             });
