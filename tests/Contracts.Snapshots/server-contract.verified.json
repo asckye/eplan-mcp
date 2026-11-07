@@ -17449,8 +17449,8 @@
     },
     {
       "name": "eplan_placement_delete",
-      "title": "Delete independent drawing placements",
-      "description": "Deletes 1-100 graphics, including grouped objects, by eplan_page_get drawing locators. Refuses devices, connections, property text and block members. dry_run defaults true; false needs approval and backup. One undo. See eplan_tool_usage.",
+      "title": "Delete drawing and function placements",
+      "description": "Deletes 1-100 graphics or function placements by eplan_page_get locators. Refuses connections, property text and block members. Deleting the last placed function removes its device and part references. dry_run defaults true; false needs approval and backup. One undo. See eplan_tool_usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -17594,7 +17594,7 @@
         }
       },
       "annotations": {
-        "title": "Delete independent drawing placements",
+        "title": "Delete drawing and function placements",
         "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false,

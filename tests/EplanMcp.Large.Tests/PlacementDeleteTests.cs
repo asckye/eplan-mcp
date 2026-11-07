@@ -5,7 +5,7 @@ namespace EplanMcp.Large.Tests;
 public sealed class PlacementDeleteTests(LiveEplan eplan, DestructiveHost host) : IClassFixture<DestructiveHost>
 {
     [Fact]
-    public async Task LineAndTextDeletionHasOneUndo_AndDeviceIsRefused()
+    public async Task LineAndTextDeletionHasOneUndo_AndFunctionDeletionRemovesOwnedText()
     {
         Assert.Equal(eplan.ProcessId, host.ProcessId);
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
@@ -41,10 +41,14 @@ public sealed class PlacementDeleteTests(LiveEplan eplan, DestructiveHost host) 
         JsonElement before = await host.CallAsync("eplan_page_get", read);
         JsonElement[] rows = [.. before.GetProperty("drawings").GetProperty("items").EnumerateArray()];
         JsonElement device = Assert.Single(rows, p => p.GetProperty("kind").GetString() == "Function");
-        var invalid = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["items"] = new[] { device.GetProperty("locator") }, ["dry_run"] = false };
-        Evidence("device deletion request", invalid);
+        JsonElement deviceLocator = device.GetProperty("locator");
+        JsonElement[] propertyTexts = [.. rows.Where(p => p.GetProperty("kind").GetString() == "PropertyPlacement"
+            && p.TryGetProperty("parent", out JsonElement parent) && parent.ValueKind == JsonValueKind.Object && HasIdentity(parent, deviceLocator))];
+        Assert.NotEmpty(propertyTexts);
+        var invalid = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["items"] = new[] { propertyTexts[0].GetProperty("locator") }, ["dry_run"] = false };
+        Evidence("property text deletion request", invalid);
         JsonElement refused = await host.ErrorAsync("eplan_placement_delete", invalid);
-        Evidence("device deletion result", refused);
+        Evidence("property text deletion result", refused);
         Assert.Equal("INVALID_ARGUMENT", refused.GetProperty("reason").GetString());
         Assert.Equal("not_started", refused.GetProperty("execution").GetString());
         JsonElement[] targets = [.. rows.Where(p => p.GetProperty("kind").GetString() is "Line" or "Text").Select(p => p.GetProperty("locator"))];
@@ -64,6 +68,32 @@ public sealed class PlacementDeleteTests(LiveEplan eplan, DestructiveHost host) 
         JsonElement restored = await host.CallAsync("eplan_page_get", read);
         Evidence("undo readback", restored);
         Assert.Equal(before.GetProperty("drawings").GetProperty("items").GetArrayLength(), restored.GetProperty("drawings").GetProperty("items").GetArrayLength());
+
+        JsonElement[] restoredRows = [.. restored.GetProperty("drawings").GetProperty("items").EnumerateArray()];
+        device = Assert.Single(restoredRows, p => p.GetProperty("kind").GetString() == "Function");
+        deviceLocator = device.GetProperty("locator");
+        var deleteFunction = new Dictionary<string, object?> { ["project"] = session.Project, ["page"] = page, ["items"] = new[] { deviceLocator } };
+        JsonElement functionPreview = await host.CallAsync("eplan_placement_delete", deleteFunction);
+        Assert.Equal("not_started", functionPreview.GetProperty("execution").GetString());
+        host.Approvals.Approve("eplan_placement_delete", session.Project,
+            [$"delete function {device.GetProperty("properties").GetProperty("name").GetString()} (Function) (Removing the last placed function also deletes its device and part references.)"]);
+        deleteFunction["dry_run"] = false;
+        JsonElement functionResult = await Write("eplan_placement_delete", deleteFunction);
+        Assert.Equal("committed", functionResult.GetProperty("execution").GetString());
+        JsonElement[] afterFunction = [.. (await host.CallAsync("eplan_page_get", read)).GetProperty("drawings").GetProperty("items").EnumerateArray()];
+        Assert.DoesNotContain(afterFunction, p => HasIdentity(p.GetProperty("locator"), deviceLocator));
+        Assert.DoesNotContain(afterFunction, p => p.TryGetProperty("parent", out JsonElement parent)
+            && parent.ValueKind == JsonValueKind.Object && HasIdentity(parent, deviceLocator));
+        foreach (JsonElement graphic in restoredRows.Where(p => p.GetProperty("kind").GetString() is "Line" or "Text"))
+        {
+            JsonElement kept = Assert.Single(afterFunction, p => HasIdentity(p.GetProperty("locator"), graphic.GetProperty("locator")));
+            Assert.Equal(graphic.GetProperty("locator").GetProperty("digest").GetString(), kept.GetProperty("locator").GetProperty("digest").GetString());
+        }
     }
+
+    private static bool HasIdentity(JsonElement locator, JsonElement expected) =>
+        locator.GetProperty("type").GetInt32() == expected.GetProperty("type").GetInt32()
+        && locator.GetProperty("oid").GetInt64() == expected.GetProperty("oid").GetInt64();
+
     private static void Evidence(string label, object value) => TestContext.Current.TestOutputHelper!.WriteLine(label + ": " + JsonSerializer.Serialize(value));
 }

@@ -51,16 +51,241 @@ public sealed class PlacementDeleteTests
 
     [Theory]
     [InlineData("Function")]
+    [InlineData("Terminal")]
+    [InlineData("InterruptionPoint")]
+    [InlineData("BoxedDevice")]
+    [InlineData("PLC")]
+    [InlineData("SymbolReference")]
+    public void FunctionKindsAreAcceptedAndPreviewTheirNameAndKind(string kind)
+    {
+        var world = new World(kind);
+        world.Page.Placements[0].Properties["name"] = "CB6";
+
+        WritePlan plan = world.Plan(world.Input());
+
+        PlannedChange change = Assert.Single(plan.Changes);
+        Assert.Equal("delete", change.Action);
+        Assert.Equal("function", change.Kind);
+        Assert.Equal($"CB6 ({kind})", change.Name);
+        Assert.Equal("Removing the last placed function also deletes its device and part references.", change.OldValue);
+        Assert.Empty(world.Transactions.Calls);
+        Assert.Equal(0, world.Backups);
+    }
+
+    [Theory]
+    [InlineData("SPECIAL/CO/0")]
+    [InlineData("SPECIAL/TLRO/0")]
+    [InlineData("SPECIAL/DCP/0")]
+    public void SpecialNodeFunctionsAreAccepted(string symbol)
+    {
+        var world = new World("Function");
+        world.Page.Placements[0].Properties["symbol"] = symbol;
+
+        WritePlan plan = world.Plan(world.Input());
+
+        Assert.Equal("function", Assert.Single(plan.Changes).Kind);
+    }
+
+    [Fact]
+    public void HotAirDeviceSymbolRequestDeletesTheFunctionAndItsPropertyText()
+    {
+        const string projectPath = @"C:\Users\x\scratch\MX_HotAir\MX_HotAir";
+        var world = new World("Function", "MX_HotAir", projectPath, "4");
+        DrawingPlacement function = world.Page.Placements[0];
+        function.Locator.Type = 17;
+        function.Locator.Oid = 2001;
+        function.Properties["name"] = "4-CR1";
+        function.Properties["symbol"] = "NFPA_symbol/K/1";
+        DrawingPlacement property = World.Row("PropertyPlacement", 2001);
+        property.Locator = new DrawingLocator
+        {
+            Project = projectPath,
+            Page = "4",
+            Type = 17,
+            Oid = 2001,
+            Digest = new string('b', 64)
+        };
+        property.Parent = function.Locator;
+        world.Page.Placements.Add(property);
+        JObject input = JObject.Parse("""
+            {
+              "project": "MX_HotAir",
+              "page": "4",
+              "items": [{
+                "project": "C:\\Users\\x\\scratch\\MX_HotAir\\MX_HotAir",
+                "page": "4",
+                "type": 17,
+                "oid": 2001,
+                "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }],
+              "dry_run": false
+            }
+            """);
+
+        JObject result = world.Execute(input, world.Plan(input));
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(2, Assert.Single(world.Page.Placements).Locator.Oid);
+        Assert.Equal("Call eplan_connection_generate for the page so connections follow the removed symbols.", (string?)result["hint"]);
+    }
+
+    [Theory]
+    [InlineData("DynamicConnectionLine", false)]
+    [InlineData("DynamicConnectionLine", true)]
+    [InlineData("Connection", false)]
+    public void FunctionDeletionAllowsConnectionChangesAndRemovesOnlyOwnedProperties(string connectionKind, bool removeConnection)
+    {
+        var world = new World("Function")
+        {
+            AfterRemove = page =>
+            {
+                DrawingPlacement connection = page.Placements.Single(p => p.Locator.Oid == 3);
+                if (removeConnection)
+                {
+                    page.Placements.Remove(connection);
+                }
+                else
+                {
+                    connection.Locator.Digest = new string('c', 64);
+                }
+            }
+        };
+        DrawingPlacement property = World.Row("PropertyPlacement", 1);
+        property.Locator.Digest = new string('b', 64);
+        property.Parent = world.Page.Placements[0].Locator;
+        DrawingPlacement otherProperty = World.Row("PropertyPlacement", 2);
+        otherProperty.Locator.Digest = new string('d', 64);
+        otherProperty.Parent = world.Page.Placements[1].Locator;
+        world.Page.Placements.AddRange([property, otherProperty, World.Row(connectionKind, 3)]);
+        JObject input = world.Input();
+
+        JObject result = world.Execute(input, world.Plan(input));
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.DoesNotContain(world.Page.Placements, p => p.Locator.Oid == 1);
+        Assert.Equal(new string('a', 64), world.Page.Placements.Single(p => p.Kind == "Line").Locator.Digest);
+        Assert.Equal(new string('d', 64), world.Page.Placements.Single(p => p.Kind == "PropertyPlacement").Locator.Digest);
+        Assert.Equal(["Begin AI: eplan_placement_delete", "Commit", "CloseUndo", "Dispose"], world.Transactions.Calls);
+    }
+
+    [Fact]
+    public void MixedFunctionAndGraphicDeletionAllowsNewAutoconnectDrawing()
+    {
+        var world = new World("Function")
+        {
+            AfterRemove = page => page.Placements.Add(World.Row("DynamicConnectionLine", 3))
+        };
+        world.Page.Placements.Add(World.Row("Text", 4));
+        JObject input = world.Input();
+        ((JArray)input["items"]!).Add(JObject.FromObject(world.Page.Placements[1].Locator, Bridge.Core.Protocol.BridgeJson.Serializer));
+
+        JObject result = world.Execute(input, world.Plan(input));
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal([3L, 4L], world.Page.Placements.Select(p => p.Locator.Oid).Order());
+        Assert.Equal(new string('a', 64), world.Page.Placements.Single(p => p.Kind == "Text").Locator.Digest);
+    }
+
+    [Theory]
+    [InlineData("change")]
+    [InlineData("remove")]
+    [InlineData("add")]
+    [InlineData("target")]
+    [InlineData("target_connection")]
+    [InlineData("property")]
+    public void FunctionDeletionRollsBackUnrelatedChangesOrRemainingTargets(string mutation)
+    {
+        var world = new World("Function")
+        {
+            AfterRemove = page =>
+            {
+                switch (mutation)
+                {
+                    case "change":
+                        page.Placements[0].Locator.Digest = new string('c', 64);
+                        break;
+                    case "remove":
+                        page.Placements.Clear();
+                        break;
+                    case "add":
+                        page.Placements.Add(World.Row("Text", 4));
+                        break;
+                    case "target":
+                        DrawingPlacement target = World.Row("Function", 1);
+                        target.Locator.Digest = new string('c', 64);
+                        page.Placements.Add(target);
+                        break;
+                    case "target_connection":
+                        DrawingPlacement reclassifiedTarget = World.Row("DynamicConnectionLine", 1);
+                        reclassifiedTarget.Locator.Digest = new string('c', 64);
+                        page.Placements.Add(reclassifiedTarget);
+                        break;
+                    case "property":
+                        DrawingPlacement property = World.Row("PropertyPlacement", 1);
+                        property.Parent = World.Row("Function", 1).Locator;
+                        property.Locator.Digest = new string('c', 64);
+                        page.Placements.Add(property);
+                        break;
+                }
+            }
+        };
+        JObject input = world.Input();
+        WritePlan plan = world.Plan(input);
+        string before = world.Page.Fingerprint();
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => world.Execute(input, plan)).Error;
+
+        Assert.Equal(ErrorReason.EplanOperationFailed, error.Reason);
+        Assert.Equal(ExecutionState.RolledBack, error.Execution);
+        Assert.Equal(before, world.Page.Fingerprint());
+    }
+
+    [Fact]
+    public void GraphicsOnlyDeletionStillRollsBackAutoconnectChanges()
+    {
+        var world = new World("Line")
+        {
+            AfterRemove = page => page.Placements.Single(p => p.Locator.Oid == 3).Locator.Digest = new string('c', 64)
+        };
+        world.Page.Placements.Add(World.Row("DynamicConnectionLine", 3));
+        JObject input = world.Input();
+        WritePlan plan = world.Plan(input);
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => world.Execute(input, plan)).Error;
+
+        Assert.Equal(ErrorReason.EplanOperationFailed, error.Reason);
+        Assert.Equal(ExecutionState.RolledBack, error.Execution);
+        Assert.Equal(plan.Fingerprint, world.Page.Fingerprint());
+    }
+
+    [Theory]
     [InlineData("Connection")]
+    [InlineData("DynamicConnectionLine")]
+    [InlineData("PropertyPlacement")]
     [InlineData("ContextPropertyPlacement")]
     [InlineData("Block")]
-    [InlineData("PLC")]
     public void UnsupportedObjectsAreRefusedWithReasonBeforeBackup(string kind)
     {
         var world = new World(kind);
         BridgeError error = Assert.Throws<BridgeErrorException>(() => world.Plan(world.Input())).Error;
         Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
         Assert.Contains(kind, error.Message, StringComparison.Ordinal);
+        Assert.Empty(world.Transactions.Calls);
+        Assert.Equal(0, world.Backups);
+    }
+
+    [Theory]
+    [InlineData("Function")]
+    [InlineData("PropertyPlacement")]
+    public void FunctionBlockMembersAndPropertyChildrenKeepTheirRejectionMessage(string kind)
+    {
+        var world = new World(kind);
+        world.Page.Placements[0].Parent = new DrawingLocator { Type = 4, Oid = 99 };
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => world.Plan(world.Input())).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Equal("Invalid arguments: Block members and property text cannot be deleted separately.", error.Message);
         Assert.Empty(world.Transactions.Calls);
         Assert.Equal(0, world.Backups);
     }
@@ -185,23 +410,36 @@ public sealed class PlacementDeleteTests
         public bool Unexpected { get; init; }
         public bool ThrowAfterRemove { get; init; }
         public bool MissingPage { get; set; }
-        public World(string kind)
+        public Action<PageDrawingGeometry>? AfterRemove { get; init; }
+        private string ProjectName { get; }
+        public World(string kind, string projectName = "project", string projectPath = "project", string pageName = "page")
         {
-            Page = new() { Project = "project", Page = "page", GridSize = 4, Placements = [Row(kind, 1), Row("Line", 2)] };
-            Transactions.Snapshot = () => { PageDrawingGeometry old = Read("project", "page")!; return () => Page = old; };
+            ProjectName = projectName;
+            Page = new() { Project = projectPath, Page = pageName, GridSize = 4, Placements = [Row(kind, 1), Row("Line", 2)] };
+            foreach (DrawingPlacement placement in Page.Placements)
+            {
+                placement.Locator.Project = projectPath;
+                placement.Locator.Page = pageName;
+            }
+            Transactions.Snapshot = () =>
+            {
+                PageDrawingGeometry old = Read(projectPath, pageName)!;
+                return () => Page = old;
+            };
         }
         public static DrawingPlacement Row(string kind, long id) => new() { Kind = kind, Locator = new() { Project = "project", Page = "page", Type = 4, Oid = id, Digest = new string('a', 64) } };
         public PageDrawingGeometry? Read(string projectPath, string pageName) => MissingPage ? null : JObject.FromObject(Page).ToObject<PageDrawingGeometry>()!;
         public Action Prepare(string project, string page, IReadOnlyList<DrawingLocator> items) => () =>
         {
             Page.Placements.RemoveAll(p => items.Any(l => DrawingLocators.Matches(l, p.Locator) || p.Parent is { } parent && parent.Type == l.Type && parent.Oid == l.Oid));
+            AfterRemove?.Invoke(Page);
             if (Unexpected)
             { Page.Placements[0].Locator.Digest = new string('c', 64); }
             if (ThrowAfterRemove)
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Injected failure."); }
         };
-        public JObject Input(bool all = false) => new() { ["project"] = "project", ["page"] = "page", ["items"] = JArray.FromObject(Page.Placements.Take(all ? 100 : 1).Select(p => p.Locator), Bridge.Core.Protocol.BridgeJson.Serializer) };
-        private PlacementDeleteOperation Operation(bool execute) => new(new FakeCatalog(new OpenProject { Name = "project", Path = "project" }), this, this, Transactions, execute, (_, _) => Backups++);
+        public JObject Input(bool all = false) => new() { ["project"] = ProjectName, ["page"] = Page.Page, ["items"] = JArray.FromObject(Page.Placements.Take(all ? 100 : 1).Select(p => p.Locator), Bridge.Core.Protocol.BridgeJson.Serializer) };
+        private PlacementDeleteOperation Operation(bool execute) => new(new FakeCatalog(new OpenProject { Name = ProjectName, Path = Page.Project }), this, this, Transactions, execute, (_, _) => Backups++);
         public WritePlan Plan(JObject input) => ((JObject)Operation(false).Execute(input)!).ToObject<WritePlan>()!;
         public JObject Execute(JObject input, WritePlan plan) => (JObject)Operation(true).Execute(new JObject { ["request"] = input.DeepClone(), ["fingerprint"] = plan.Fingerprint })!;
     }

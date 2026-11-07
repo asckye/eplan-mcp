@@ -1,5 +1,6 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Eplan.Adapters;
 using EplanMcp.Contracts;
@@ -52,19 +53,62 @@ public sealed class PlacementRemoverTests
         Assert.Same(block, Assert.Single(page.AllPlacements));
     }
 
-    [Fact]
-    public void FunctionAndBlockMemberAreRefusedNatively()
+    [Theory]
+    [InlineData("Function")]
+    [InlineData("Terminal")]
+    [InlineData("InterruptionPoint")]
+    [InlineData("BoxedDevice")]
+    [InlineData("PLC")]
+    public void FunctionKindsCanBeRemovedNatively(string kind)
     {
         var page = new Page();
-        var function = new Function { Page = page };
+        Function function = kind switch
+        {
+            "Terminal" => new Terminal(),
+            "InterruptionPoint" => new InterruptionPoint(),
+            "BoxedDevice" => new BoxedDevice(),
+            "PLC" => new PLC(),
+            _ => new Function()
+        };
+        function.Page = page;
         page.AllPlacements = [function];
         EplanProjects.Project = new(page);
-        Assert.Contains("Function", Assert.Throws<BridgeErrorException>(() => new EplanPlacementRemover().Prepare("project", "+A1/1", [Locator(function)])).Message, StringComparison.Ordinal);
+
+        Action remove = new EplanPlacementRemover().Prepare("project", page.Name, [Locator(function)]);
+
+        Assert.Same(function, Assert.Single(page.AllPlacements));
+        remove();
+        Assert.Empty(page.AllPlacements);
+    }
+
+    [Fact]
+    public void BlockMembersAreRefusedNatively()
+    {
+        var page = new Page();
         var line = new Line { Page = page };
         var block = new Block();
         block.Create(page, [line, new Line(2)]);
         page.AllPlacements = [line, block];
+        EplanProjects.Project = new(page);
         Assert.Contains("members", Assert.Throws<BridgeErrorException>(() => new EplanPlacementRemover().Prepare("project", "+A1/1", [Locator(line)])).Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PropertyTextAndAutoconnectAreRefusedNatively()
+    {
+        var page = new Page();
+        var property = new PropertyPlacement { Page = page };
+        var connection = new DynamicConnectionLine(2) { Page = page };
+        page.AllPlacements = [property, connection];
+        EplanProjects.Project = new(page);
+
+        BridgeError propertyError = Assert.Throws<BridgeErrorException>(() => new EplanPlacementRemover().Prepare("project", page.Name, [Locator(property)])).Error;
+        BridgeError connectionError = Assert.Throws<BridgeErrorException>(() => new EplanPlacementRemover().Prepare("project", page.Name, [Locator(connection)])).Error;
+
+        Assert.Equal("Invalid arguments: Block members and property text cannot be deleted separately.", propertyError.Message);
+        Assert.Equal("Invalid arguments: Cannot delete DynamicConnectionLine: devices, connections and blocks are excluded.", connectionError.Message);
+        Assert.Equal(ErrorReason.InvalidArgument, propertyError.Reason);
+        Assert.Equal(ErrorReason.InvalidArgument, connectionError.Reason);
     }
 
     [Fact]
@@ -78,6 +122,9 @@ public sealed class PlacementRemoverTests
         Assert.Single(page.AllPlacements);
         remove();
         Assert.Empty(page.AllPlacements);
+    }
+    private sealed class InterruptionPoint : Function
+    {
     }
     private static DrawingLocator Locator(Placement placement) => new() { Type = placement.IdentifierType, Oid = placement.ObjectIdentifier };
 }

@@ -12,7 +12,7 @@ namespace EplanMcp.Host.Tools;
 internal sealed class PlacementDeleteTools
 {
     internal const string Tool = "eplan_placement_delete";
-    [McpServerTool(Name = Tool, Title = "Delete independent drawing placements", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
+    [McpServerTool(Name = Tool, Title = "Delete drawing and function placements", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     public static async Task<CallToolResult> DeleteAsync(WritePipeline pipeline, RequestContext<CallToolRequestParams> context,
         IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
@@ -48,7 +48,7 @@ internal sealed class PlacementDeleteTools
     internal static void Configure(IEnumerable<McpServerTool> tools)
     {
         ModelContextProtocol.Protocol.Tool tool = tools.Single(t => t.ProtocolTool.Name == Tool).ProtocolTool;
-        tool.Description = "Deletes 1-100 graphics, including grouped objects, by eplan_page_get drawing locators. Refuses devices, connections, property text and block members. dry_run defaults true; false needs approval and backup. One undo. See eplan_tool_usage.";
+        tool.Description = "Deletes 1-100 graphics or function placements by eplan_page_get locators. Refuses connections, property text and block members. Deleting the last placed function removes its device and part references. dry_run defaults true; false needs approval and backup. One undo. See eplan_tool_usage.";
         JsonNode schema = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"type":"string","minLength":1},"page":{"type":"string","minLength":1},"items":{"type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/$defs/locator"}},"dry_run":{"type":"boolean","default":true}}}""")!;
         schema["$defs"] = JsonNode.Parse(PlacementUpdateContract.Input.GetProperty("$defs").GetRawText());
         tool.InputSchema = JsonSerializer.SerializeToElement(schema);
