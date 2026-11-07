@@ -7,6 +7,7 @@ using Eplan.EplApi.Base;
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
+using Eplan.EplApi.DataModel.Planning;
 using Eplan.EplApi.HEServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -137,6 +138,9 @@ public sealed class SpikeS21Action : IEplAction
                 report["select"] = new Edit().SelectProjectInPagesNavigator(project);
                 report["current"] = Try(() => new SelectionSet().GetCurrentProject(false)?.ProjectName);
                 break;
+            case "preplanning":
+                report["preplanning"] = Preplanning(project);
+                break;
             case "inventory":
                 report["inventory"] = Timed(() => Inventory(project));
                 break;
@@ -190,6 +194,56 @@ public sealed class SpikeS21Action : IEplAction
         }
 
         return new JObject { ["options"] = modules.Count, ["available"] = modules.Count(m => m.Value), ["matching"] = matching };
+    }
+
+    /// <summary>Whether pre-planning objects can really be made without the Preplanning licence option; each step reports its own failure. On a throwaway scratch project.</summary>
+    private static JObject Preplanning(Project project)
+    {
+        var result = new JObject();
+        using var finder = new DMObjectsFinder(project);
+        SegmentDefinition[] definitions = [];
+        result["definitions"] = Try(() => { definitions = finder.GetSegmentDefinitions(null); return definitions.Length; });
+        result["definitionNames"] = Try(() => string.Join(" | ", definitions.Take(12).Select(d => d.IdentifyingName)));
+        result["segmentsBefore"] = Try(() => finder.GetPlanningSegments(null).Length);
+        using var undoManager = new UndoManager();
+        using UndoStep undo = undoManager.CreateUndoStep();
+        Page? page = null;
+        PlanningSegment? segment = null;
+        using (Transaction transaction = new TransactionManager().CreateTransaction())
+        {
+            result["lock"] = Try(() => { project.LockAllObjects(); return "locked"; });
+            result["page"] = Try(() =>
+            {
+                using var names = new PagePropertyList();
+                names.DESIGNATION_DOCTYPE = "PRE";
+                names.PAGE_COUNTER = "1";
+                page = new Page();
+                page.Create(project, DocumentTypeManager.DocumentType.Planning, names);
+                return page.Name + " type " + page.PageType;
+            });
+            SegmentDefinition? chosen = definitions.FirstOrDefault();
+            result["segment"] = Try(() =>
+            {
+                segment = PlanningSegment.Create(chosen!);
+                return "created with " + chosen!.IdentifyingName;
+            });
+            result["placement"] = Try(() =>
+            {
+                var placement = new SegmentPlacement();
+                placement.Create(segment!, page!);
+                return "placed at " + placement.Location.X + "," + placement.Location.Y;
+            });
+            result["newDefinition"] = Try(() =>
+            {
+                var definition = new SegmentDefinition();
+                definition.Create("EplanMcpProbe", chosen!);
+                return definition.IdentifyingName;
+            });
+            result["commit"] = Try(() => { transaction.Commit(); return "committed"; });
+        }
+        result["segmentsAfter"] = Try(() => finder.GetPlanningSegments(null).Length);
+        result["pages"] = Try(() => string.Join(" | ", project.Pages.Where(p => p.PageType == DocumentTypeManager.DocumentType.Planning).Select(p => p.Name)));
+        return result;
     }
 
     private static JObject Inventory(Project project)
