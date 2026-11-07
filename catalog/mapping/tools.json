@@ -19054,7 +19054,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_project_update.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -21545,7 +21545,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_structure_delete.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -21570,7 +21570,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_structure_list.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
@@ -21596,7 +21596,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_structure_update.md",
-        "specStatus": "Implemented",
+        "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
           {
