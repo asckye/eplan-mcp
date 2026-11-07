@@ -87,7 +87,10 @@ internal sealed class CoverageReport
 
     public ApiTotals? InstallationTotals { get; init; }
 
-    public static CoverageReport Build(string repositoryRoot, bool includeReachability = true)
+    public static CoverageReport Build(string repositoryRoot, bool includeReachability = true) =>
+        RunCache.Get(repositoryRoot + "|" + includeReachability, () => BuildCore(repositoryRoot, includeReachability));
+
+    private static CoverageReport BuildCore(string repositoryRoot, bool includeReachability)
     {
         ApiTotals? totals = includeReachability ? ApiTotals.Load(repositoryRoot) : null;
         BridgeUsage usage = CoverageJson.Read<BridgeUsage>(Path.Combine(repositoryRoot, BridgeUsage.RelativePath));

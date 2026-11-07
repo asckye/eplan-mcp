@@ -43,7 +43,10 @@ internal sealed class ApiCatalog
     /// <summary>Types and type-layer members (constructors, lifecycle, fields, constants, events, enum values): dependencies only.</summary>
     public int Dependencies => _dependencies.Count;
 
-    public static ApiCatalog Load(string directory)
+    public static ApiCatalog Load(string directory) =>
+        RunCache.Get(directory, () => LoadCore(directory));
+
+    private static ApiCatalog LoadCore(string directory)
     {
         var catalog = new ApiCatalog();
         string types = Path.Combine(directory, "types.jsonl");

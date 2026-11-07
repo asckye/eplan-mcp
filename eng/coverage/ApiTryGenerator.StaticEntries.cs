@@ -29,7 +29,10 @@ internal static partial class ApiTryGenerator
     internal static bool PublicEntryType(string type, IReadOnlyDictionary<string, JsonElement> types) => types.TryGetValue(type, out JsonElement t)
         && !t.TryGetProperty("excluded", out _) && !t.TryGetProperty("access", out _)
         && (!t.TryGetProperty("outer", out JsonElement outer) || PublicEntryType(outer.GetString()![2..], types));
-    private static EntryModel EntryData(string root)
+    private static EntryModel EntryData(string root) =>
+        RunCache.Get(root, () => EntryDataCore(root));
+
+    private static EntryModel EntryDataCore(string root)
     {
         ApiIndexData data = Data(root);
         Dictionary<string, string[]> kinds = ObjectKindGenerator.Kinds(root);

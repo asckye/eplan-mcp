@@ -40,6 +40,7 @@ internal static class CoverageCheck
     /// <summary>Writes every derived file, wrappers first, removes generated files no longer selected; returns the paths written.</summary>
     public static List<string> Generate(string repositoryRoot)
     {
+        using IDisposable run = RunCache.Begin();
         _ = ApiTotals.Load(repositoryRoot);
         SortedDictionary<string, string> wrappers = WrapperGenerator.Files(repositoryRoot);
         Orphans(repositoryRoot, wrappers).ForEach(path => File.Delete(Path.Combine(repositoryRoot, path)));
@@ -71,6 +72,7 @@ internal static class CoverageCheck
     /// <summary>Failures: files that are missing or do not match what their inputs give.</summary>
     public static List<string> Problems(string repositoryRoot)
     {
+        using IDisposable run = RunCache.Begin();
         SortedDictionary<string, string> wrappers = WrapperGenerator.Files(repositoryRoot);
         string[] wrapperProblems =
         [

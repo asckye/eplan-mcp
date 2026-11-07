@@ -13,7 +13,10 @@ internal static class ApiIndexGenerator
     private static readonly JsonSerializerOptions _json = new(CoverageJson.Options) { WriteIndented = false };
 
     internal static string Render(string root) => Encode(Data(root));
-    internal static ApiIndexData Data(string root)
+    internal static ApiIndexData Data(string root) =>
+        RunCache.Get(root, () => DataCore(root));
+
+    private static ApiIndexData DataCore(string root)
     {
         // Trial selection depends on this index; only the outer report computes reachability.
         CoverageReport report = CoverageReport.Build(root, includeReachability: false);

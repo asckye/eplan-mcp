@@ -41,7 +41,10 @@ internal sealed partial class ToolMapping
     /// <summary>IDs only generated building blocks use, and no operation reaches: not implemented (BridgeUsage.Counts).</summary>
     public required IReadOnlyList<string> UnreachedGenerated { get; init; }
 
-    public static ToolMapping Build(string repositoryRoot)
+    public static ToolMapping Build(string repositoryRoot) =>
+        RunCache.Get(repositoryRoot, () => BuildCore(repositoryRoot));
+
+    private static ToolMapping BuildCore(string repositoryRoot)
     {
         BridgeUsage usage = CoverageJson.Read<BridgeUsage>(Path.Combine(repositoryRoot, BridgeUsage.RelativePath));
         (List<HostTool> hostTools, Dictionary<string, string> references) = HostTools.Read(repositoryRoot);

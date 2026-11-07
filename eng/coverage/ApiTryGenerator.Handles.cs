@@ -66,7 +66,10 @@ internal static partial class ApiTryGenerator
                 && !data.Entries.Where(e => e == s.Entry).SelectMany(e => e.Details).Any(d => existing.Contains(d.Id) && Names(d) == Names(s.Member))).ToArray();
         return new(types, reachable, members);
     }
-    private static HandleModel Handles(string root)
+    private static HandleModel Handles(string root) =>
+        RunCache.Get(root, () => HandlesCore(root));
+
+    private static HandleModel HandlesCore(string root)
     {
         string typesFile = Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl");
         HandleModel model = BuildHandles(Data(root), [.. (File.Exists(typesFile) ? File.ReadLines(typesFile) : []).Select(l => JsonSerializer.Deserialize<JsonElement>(l))], ObjectKindGenerator.Kinds(root), Enums(root), ApiTryServices.Load(root));

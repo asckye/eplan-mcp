@@ -9,7 +9,10 @@ internal static partial class ApiTryGenerator
     internal const string CatalogPath = "src/EplanMcp.Contracts/Generated/ApiTryCatalog.g.cs";
     internal const string DispatchPath = "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs";
     internal const string ReportPath = "catalog/api-try.g.tsv";
-    private static ApiIndexData Data(string root)
+    private static ApiIndexData Data(string root) =>
+        RunCache.Get("try|" + root, () => DataCore(root));
+
+    private static ApiIndexData DataCore(string root)
     {
         string path = Path.Combine(root, "src/EplanMcp.Bridge.Eplan/BannedSymbols.txt");
         var banned = (File.Exists(path) ? File.ReadLines(path).Where(l => !l.StartsWith("//", StringComparison.Ordinal) && l.Contains(';', StringComparison.Ordinal)).Select(l => l.Split(';')[0]) : []).ToHashSet(StringComparer.Ordinal);
