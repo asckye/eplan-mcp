@@ -43,8 +43,8 @@ internal sealed class StructureUpdateRequest
             { violations.Add(at + "/name: give the full name with its block's prefix (=, ==, ++, +, &, #), such as +S1."); }
             else if (!seen.Add(given[i].Name!))
             { violations.Add(at + "/name: give each identifier once."); }
-            if (given[i].Description is { } text && (text.Length > MaxLength || text.Any(char.IsControl)))
-            { violations.Add(at + "/description: supply text of at most 500 characters without controls; empty clears it."); }
+            if (given[i].Description is { } text && (TextLanguages.LongestEntry(text) > MaxLength || text.Any(char.IsControl)))
+            { violations.Add(at + "/description: supply text of at most 500 characters per language without controls; empty clears it."); }
         }
         if (violations.Count > 0)
         { throw WriteArguments.Invalid(violations); }

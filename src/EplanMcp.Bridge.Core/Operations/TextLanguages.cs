@@ -29,6 +29,9 @@ public static class TextLanguages
     /// <summary>True for <c>zh_CN@…;en_US@…;</c>. A54 still refuses mixing real languages with <c>??_??</c>.</summary>
     public static bool IsSerialized(string? text) => text is not null && _serialized.IsMatch(text);
 
+    /// <summary>The length of the longest language's text in a serialized value; for plain text, its length.</summary>
+    public static int LongestEntry(string text) => IsSerialized(text) ? _entry.Matches(text).Cast<Match>().Max(m => m.Groups[2].Length) : text.Length;
+
     /// <summary>Whether two stored values hold the same texts: the language order and empty entries do not count, and plain text is language-independent.</summary>
     public static bool SameValue(string first, string second) => Entries(first).SequenceEqual(Entries(second));
 
