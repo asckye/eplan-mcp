@@ -215,13 +215,14 @@ public sealed class ConnectionCreatePlannerTests
     }
 
     [Fact]
-    public void Path_AmbiguousCrossingWithoutExplicitTNode_Rejects()
+    public void Path_PlainCrossing_PlansSeparateConnections()
     {
+        // A114: EPLAN joins nothing where two lines cross at right angles.
         var fixture = new ConnectionCreateFixture();
         JObject from = fixture.AddPin(3, [16, 0], "Up", [14, 0, 18, 0]);
         JObject to = fixture.AddPin(4, [16, 16], "Down", [14, 16, 18, 20]);
         ((JArray)fixture.Request["items"]!).Add(ConnectionCreateFixture.Wire(from, to, [16, 0], [16, 16]));
-        Invalid(fixture, "/items");
+        Assert.All(fixture.Plan()["logicalAfterGenerate"]!, group => Assert.Equal(2, group["pins"]!.Count()));
     }
 
     [Fact]

@@ -327,7 +327,7 @@ public static class ConnectionCreatePlanner
             double[][] s = segments[i];
             // Replacement halves inherit the old segment's contacts at its original endpoints.
             bool replacement = splits.Any(split => s.Any(p => p.SequenceEqual(split.Point)) && s.Any(p => split.Segment.Any(end => end.SequenceEqual(p))));
-            double[][]? conflict = replacement ? null : existingSegments.FirstOrDefault(e => Intersects(s, e) && !MeetsAtNode(s, e) && !splits.Any(split => ReferenceEquals(split.Segment, e)
+            double[][]? conflict = replacement ? null : existingSegments.FirstOrDefault(e => Intersects(s, e) && !MeetsAtNode(s, e) && !Crossing(s, e) && !splits.Any(split => ReferenceEquals(split.Segment, e)
                 && s.Any(p => p.SequenceEqual(split.Point)) && (s[0][0] == s[1][0]) != (e[0][0] == e[1][0])));
             Require(conflict is null, "/items", conflict is null ? "" : "The path " + FormatPoint(s[0]) + " -> " + FormatPoint(s[1]) + " conflicts with the existing autoconnect line "
                 + FormatPoint(conflict[0]) + " -> " + FormatPoint(conflict[1]) + "; plan an explicit replacement separately.");
@@ -341,7 +341,7 @@ public static class ConnectionCreatePlanner
             { Require(s.Where(p => !p.SequenceEqual(node.Point)).All(p => node.Directions.Contains(Direction(node.Point, p), StringComparer.Ordinal)), "/items", "A node's directions do not support this path."); }
             for (int j = 0; j < i; j++)
             {
-                if (!Intersects(s, segments[j]))
+                if (!Intersects(s, segments[j]) || Crossing(s, segments[j]))
                 { continue; }
                 double[][] ends = s.Concat(segments[j]).Concat(nodes.Values.Select(n => n.Point)).Where(p => On(p, s) && On(p, segments[j])).GroupBy(Key, StringComparer.Ordinal).Select(g => g.First()).ToArray();
                 Require(ends.Length == 1 && (nodes.TryGetValue(Key(ends[0]), out var junction) && junction.Kind == "t_node" || s.Any(p => p.SequenceEqual(ends[0])) && segments[j].Any(p => p.SequenceEqual(ends[0]))), "/items", "Reject ambiguous crossings or overlapping segments; declare a T-node explicitly.");
@@ -466,6 +466,12 @@ public static class ConnectionCreatePlanner
     private static string Direction(double[] a, double[] b) => a[0] == b[0] ? b[1] > a[1] ? "Up" : "Down" : b[0] > a[0] ? "Right" : "Left";
     private static double Distance(double[] a, double[] b) => Math.Abs(a[0] - b[0]) + Math.Abs(a[1] - b[1]);
     private static double[] Box(double[][] s) => [Math.Min(s[0][0], s[1][0]), Math.Min(s[0][1], s[1][1]), Math.Max(s[0][0], s[1][0]), Math.Max(s[0][1], s[1][1])];
+    /// <summary>
+    /// Two lines that cross at right angles, neither ending on the other: EPLAN joins nothing there. The sample project's
+    /// supply rails cross the drops to their breakers this way (api-notes A114).
+    /// </summary>
+    internal static bool Crossing(double[][] a, double[][] b) => (a[0][0] == a[1][0]) != (b[0][0] == b[1][0]) && !a.Any(p => On(p, b)) && !b.Any(p => On(p, a));
+
     internal static bool On(double[] p, double[][] s) => p[0] >= Box(s)[0] && p[0] <= Box(s)[2] && p[1] >= Box(s)[1] && p[1] <= Box(s)[3];
     internal static bool Intersects(double[][] a, double[][] b) => Box(a)[0] <= Box(b)[2] && Box(a)[2] >= Box(b)[0] && Box(a)[1] <= Box(b)[3] && Box(a)[3] >= Box(b)[1];
     internal static void Require(bool valid, string at, string message) { if (!valid) { throw WriteArguments.Invalid([at + ": " + message]); } }

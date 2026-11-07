@@ -69,6 +69,33 @@ public sealed class ConnectionCreatePlanTests : IDisposable
     }
 
     [Fact]
+    public void DryRun_TwoWiresCrossingAtRightAngles_StayTwoConnections()
+    {
+        _fixture.Scene.Pins.Clear();
+        _fixture.Scene.Page.Placements.Clear();
+        JObject left = _fixture.AddPin(1, [8, 16], "Right", [4, 14, 8, 18]);
+        JObject right = _fixture.AddPin(2, [40, 16], "Left", [40, 14, 44, 18]);
+        JObject top = _fixture.AddPin(3, [24, 40], "Down", [22, 40, 26, 44]);
+        JObject bottom = _fixture.AddPin(4, [24, 0], "Up", [22, -4, 26, 0]);
+        _fixture.Request["items"] = new JArray(ConnectionCreateFixture.Wire(left, right, [8, 16], [40, 16]), ConnectionCreateFixture.Wire(top, bottom, [24, 40], [24, 0]));
+        JObject plan = RoundTripPlan();
+        Assert.Equal(2, ((JArray)plan["logicalAfterGenerate"]!).Count);
+        Assert.All(plan["logicalAfterGenerate"]!, group => Assert.Equal(2, group["pins"]!.Count()));
+    }
+
+    [Fact]
+    public void DryRun_AWireEndingOnAnotherWithoutANode_IsStillRefused()
+    {
+        _fixture.Scene.Pins.Clear();
+        _fixture.Scene.Page.Placements.Clear();
+        JObject left = _fixture.AddPin(1, [8, 16], "Right", [4, 14, 8, 18]);
+        JObject right = _fixture.AddPin(2, [40, 16], "Left", [40, 14, 44, 18]);
+        JObject top = _fixture.AddPin(3, [24, 40], "Down", [22, 40, 26, 44]);
+        _fixture.Request["items"] = new JArray(ConnectionCreateFixture.Wire(left, right, [8, 16], [40, 16]), ConnectionCreateFixture.Wire(top, left, [24, 40], [24, 16], [8, 16]));
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Reason);
+    }
+
+    [Fact]
     public void DryRun_PotentialPoint_PredictsNullLogicalStartAndActualPinEnd()
     {
         _fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("potential_point", [24, 8], "Up"));

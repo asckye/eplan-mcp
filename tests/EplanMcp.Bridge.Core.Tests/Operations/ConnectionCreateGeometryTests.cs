@@ -42,8 +42,6 @@ public sealed class ConnectionCreateGeometryTests
     [InlineData("two_nodes", "At most one node")]
     [InlineData("endpoint", "strictly inside")]
     [InlineData("crossing", "one existing autoconnect segment")]
-    [InlineData("other_line", "conflicts with the existing autoconnect line")]
-    [InlineData("branch_on_line", "conflicts with the existing autoconnect line")]
     [InlineData("diagonal", "both aligned directions")]
     public void Node_UnsupportedExistingLineIntersection_RefusesWithReason(string scenario, string reason)
     {
@@ -68,23 +66,23 @@ public sealed class ConnectionCreateGeometryTests
             case "crossing":
                 fixture.Scene.Graphical.Add([[8, 24], [40, 24]]);
                 break;
-            case "other_line":
-                fixture.Scene.Graphical.Add([[24, 16], [24, 32]]);
-                break;
             case "diagonal":
                 fixture.Scene.Graphical[0] = [[8, 8], [24, 40]];
-                break;
-            case "branch_on_line":
-                // A branch from another same-call corner meets the old line away from the declared split.
-                items.Add(ConnectionCreateFixture.Node("corner", [8, 16], "Right", "Up"));
-                fixture.Symbols.Add(ConnectionCreateFixture.Variant("CO", "Routing", 1, "Right", "Up"));
-                fixture.Scene.SymbolBounds["CO/1"] = [-1, -1, 1, 1];
-                fixture.AddPin(3, [32, 16], "Left", [32, 14, 36, 18]);
                 break;
         }
         BridgeError error = Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error;
         Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Reason, error.Execution));
         Assert.Contains(reason, error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Node_BranchCrossingAnotherExistingLine_IsNotAConflict()
+    {
+        // A114: the branch crosses the other line at right angles, which EPLAN does not join.
+        var fixture = new ConnectionCreateFixture();
+        fixture.SplitLine();
+        fixture.Scene.Graphical.Add([[24, 16], [24, 32]]);
+        Assert.NotNull(fixture.Plan()["logicalAfterGenerate"]);
     }
 
     [Fact]
