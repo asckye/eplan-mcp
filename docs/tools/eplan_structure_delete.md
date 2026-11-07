@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `structure` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented |
+| 状态 | Implemented (Unreleased) |
 
 ## 1. 这个工具解决什么任务
 清除未使用的结构标识符。典型场景是模板带来的标识：页删掉之后它们还留在结构总览里。

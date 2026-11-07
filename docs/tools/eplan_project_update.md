@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project` / `full` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented |
+| 状态 | Implemented (Unreleased) |
 
 ## 1. 这个工具解决什么任务
 填封面和标题栏：公司、地址、项目描述、创建者等。这些字段来自项目属性，决策见 [ADR-0052](../adr/0052-write-title-block-project-properties.md)。
