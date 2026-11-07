@@ -492,14 +492,14 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 ### A119. 重建连接后自动连线采用电位颜色（2026-11-07，EPLAN 2026.0.3，Electric P8，scratch 示例副本）
 - 工具画出的新页连接已到达 L1/L2/L3/N，电位定义设置了 31005 `CONNECTION_ACL_COLOR`（A116），连接的 1175 个属性与示例页全部相同，自动连线仍为红色。
 - 通过 EPLAN 的 `generate` action 执行 `generate /TYPE:CONNECTIONS /REBUILDALLCONNECTIONS:1` 后，L1/L2/L3 变黑，N 变蓝，与示例页相同；加 `/PAGENAME:` 只重建一页也有效。未设置颜色的 24V 电位仍为红色。
-- 原适配器调用 `Generate.Connections(targets, false)`，且连接读回未变化时回滚，显示刷新随之丢失。工具新增 `rebuild`（默认 false），传入 `Generate.Connections(Page[], bool)` 的 `bRebuildAllConnections`；true 时即使连接读回相同也提交，并返回 `rebuilt: true`。action 的结果是 2026-11-07 在 scratch 副本上实测的，工具的完整路径待实机复验。
+- 原适配器调用 `Generate.Connections(targets, false)`，且连接读回未变化时回滚，显示刷新随之丢失。工具新增 `rebuild`（默认 false），传入 `Generate.Connections(Page[], bool)` 的 `bRebuildAllConnections`；true 时即使连接读回相同也提交，并返回 `rebuilt: true`。action 的结果是 2026-11-07 在 scratch 副本上实测的；同日用工具 `rebuild: true` 复验（CodexEval5b 第 9915 页）：顶部 L1–L3 由红变黑，与同一页用官方 action 重建的结果完全相同。该页底部的线仍为红色，因为它们接到的母线连接点 `-WE2:8` 不在 N 电位上，是数据问题，不是工具问题。
 
 ### A118. 旧版基本项目不能直接建项目（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，官方 EES 资料）
 - 用 2023 版的 `.zw9`（IEC 原理图块和部件宏项目的 DE/EN 版、HVAC 项目模板）建项目时，EPLAN 报"无法创建项目。必须更新所使用的项目模板或基本项目。"，`eplan_project_create` 回滚并在 `metadata.eplanMessage` 给出这句话。2026 版的 `.zw9` 和各版本的 `.zw1` 备份都能用。工具现在仅在基本项目创建失败后，通过 `XPrjActionUpgradeProjects` 升级副本再重试，imports 原件不变，升级目录路径必须保持短小。
 - 2026-11-07 在 scratch 副本上以 `Folder=<folder>`、`BaseProject=true`、`NoBackup=true`、`PackOriginalProject=false` 执行 action，27 MB 的 2023 `.zw9` 约 17 秒原地升级，随后 `CreateProject` 成功。长目录下 action 解包到 `<Folder>\temp\<内部项目名>.edb\...`，完整路径超过 255 字符时报"完整文件名超出字符的最大长度 255"、"无法转换为新版本"；短路径 `<scratch>\.up\<6 位小写十六进制>` 可用。官方说明基本项目只跨主要版本升级，无需升级时不做更改。— [XPrjActionUpgradeProjects 官方帮助](https://www.eplan.help/en-us/Infoportal/Content/api/2026/XPrjActionUpgradeProjects.html)。
 
 ### A117. 占位符引用无效属性时读不出当前值（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，官方 EES 码垛系统示例副本）
-- `PlaceHolder.GetAllCurrentValues()` 对引用了无效属性的占位符抛 `PropertyNotFoundException`（`S063109属性无效`），不是 A33 里的 `LockingException`。`eplan_placeholder_list` 的 `detailed` 原来因此整体报 INTERNAL；工具改为把这样的占位符和未锁定的一样标记为取不到当前值，值集和变量照常返回（2026-11-07 实机复验：码垛示例 7 个占位符，3 个取不到当前值，列表正常返回）。`eplan_placeholder_apply` 现对这种占位符照常应用值集，省略当前值及其变化标记并给出提示（待实机复验）。
+- `PlaceHolder.GetAllCurrentValues()` 对引用了无效属性的占位符抛 `PropertyNotFoundException`（`S063109属性无效`），不是 A33 里的 `LockingException`。`eplan_placeholder_list` 的 `detailed` 原来因此整体报 INTERNAL；工具改为把这样的占位符和未锁定的一样标记为取不到当前值，值集和变量照常返回（2026-11-07 实机复验：码垛示例 7 个占位符，3 个取不到当前值，列表正常返回）。`eplan_placeholder_apply` 现对这种占位符照常应用值集，省略当前值及其变化标记并给出提示（2026-11-07 实机复验：码垛示例 `=GAB+S1&EFS/1` 的 `#<EES_COM>` 套用 `DC O.K.` 已提交，结果带提示）。
 
 ### A116. T 节点的画法和自动连线的颜色（2026-11-07，EPLAN 2026.0.3.25421，Electric P8 与 Pro Panel，示例项目副本）
 - **T 节点：** 示例页的 T 节点是 `TLRU/0`、`TOUR/1`、`TLRO/0`（变体 A/B，`FUNC_SYMBOL` 读出 `SPECIAL;0;64;0`），画成斜折角。工具省略 `t_node.variant` 时只在连接点都在中心的变体里选，结果是变体 8（`SPECIAL;0;64;8`），画成圆点。照着已有页重画时，把 `eplan_page_get` 读回的变体传给 `t_node.variant`。
