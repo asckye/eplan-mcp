@@ -9,13 +9,18 @@ answer: { type: object, required: [done], properties: { done: { type: boolean, d
 oracle:
   devices: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/2" }, pick: $.deviceCount }
   wires: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/2" }, pick: $.total }
+  breaks: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/2", object_type: InterruptionPoint }, pick: "$.items[*].name" }
+  boxes: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/2", object_type: LocationBox }, pick: "$.items[*].name" }
 after:
   devices: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/9915" }, pick: $.deviceCount }
-  kinds: { tool: eplan_page_get, args: { page: "=GAA+A1&EFS1/9915", include_drawings: true, drawing_limit: 200 }, pick: "$.drawings.items[*].kind" }
+  # The drawing list comes in pages under a size budget, so its first page may not reach the breaks: ask for them by type.
+  breaks: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/9915", object_type: InterruptionPoint }, pick: "$.items[*].name" }
+  boxes: { tool: eplan_object_find, args: { page: "=GAA+A1&EFS1/9915", object_type: LocationBox }, pick: "$.items[*].name" }
   wires: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9915" }, pick: $.total }
 checks:
   - { answer: $.done, equals: true }
   - { after: devices, equals: oracle.devices }
   - { after: wires, equals: oracle.wires }
-  - { after: kinds, contains: [InterruptionPoint, LocationBox] }
+  - { after: breaks, set_equals: oracle.breaks }
+  - { after: boxes, set_equals: oracle.boxes }
 budget: { max_tool_calls: 120, max_minutes: 30, max_usd: 5 }

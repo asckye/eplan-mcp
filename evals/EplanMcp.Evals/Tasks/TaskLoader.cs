@@ -61,7 +61,8 @@ internal static partial class TaskLoader
         return new TaskFile(name, reader.Problems.Count == 0 ? task : null, reader.Problems);
     }
 
-    [GeneratedRegex(@"^eplan_[a-z]+_[a-z]+\z", RegexOptions.CultureInvariant)]
+    // The names the server's tool contract allows (ToolContractTests): a few families and verbs have two words.
+    [GeneratedRegex(@"^eplan_([a-z]+|terminal_strip|page_text|action_catalog|pack_library)_([a-z]+|pdf_comments)\z", RegexOptions.CultureInvariant)]
     private static partial Regex ToolName();
 
     private sealed class Reader : YamlReader
