@@ -62,7 +62,7 @@ public sealed class PageReviewFactsTests
             check = new { eq = new object[] { new { property = "connection.label" }, new { literal = "A" } } },
             message = new { en = "Label must be A" }
         }));
-        IReadOnlyList<RuleResult> results = await new RuleInterpreter().EvaluateAsync([new("exists", "1.0.0", "connection", scope, check), new("compare", "1.0.0", "connection", scope, comparison)], facts,
+        IReadOnlyList<RuleResult> results = await RuleInterpreters.Untimed().EvaluateAsync([new("exists", "1.0.0", "connection", scope, check), new("compare", "1.0.0", "connection", scope, comparison)], facts,
             new Dictionary<string, RuleValue>(), new Dictionary<string, RuleValue>(), TestContext.Current.CancellationToken);
         Assert.Equal([RuleStatus.Fail, RuleStatus.Unknown], results.Select(r => r.Status));
     }

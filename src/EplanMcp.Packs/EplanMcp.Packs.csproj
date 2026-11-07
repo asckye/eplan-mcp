@@ -10,5 +10,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="EplanMcp.Packs.Tests" />
+    <!-- Rule meaning tests there replace the pattern matcher, as RuleInterpreter.Match allows. -->
+    <InternalsVisibleTo Include="EplanMcp.Host.Tests" />
   </ItemGroup>
 </Project>

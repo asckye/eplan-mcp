@@ -113,7 +113,7 @@ public sealed class StandardRulePackTests
         JsonElement spec = document.RootElement.GetProperty("spec");
         (RuleNode scope, RuleNode check) = RuleValidator.Validate(spec);
         var definition = new RuleDefinition(rule, "0.1.0", spec.GetProperty("scope").GetProperty("kind").GetString()!, scope, check);
-        IReadOnlyList<RuleResult> results = await new RuleInterpreter().EvaluateAsync([definition], new PageReviewFacts(actual, new JsonObject()),
+        IReadOnlyList<RuleResult> results = await RuleInterpreters.Untimed().EvaluateAsync([definition], new PageReviewFacts(actual, new JsonObject()),
             new Dictionary<string, RuleValue>(), new Dictionary<string, RuleValue>(), TestContext.Current.CancellationToken);
         return Assert.Single(results).Status;
     }
