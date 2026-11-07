@@ -101,7 +101,7 @@ public sealed class ProjectUpdateOperationTests
     public void Plan_AllListedAndTemplateProperties_FitOneCall()
     {
         var args = new ProjectUpdateArgs { Project = "Line1", Properties = [.. ProjectUpdateArgs.TitleBlock.Keys.Select(id => new ProjectPropertyValue { Id = id, Value = "x" }), new() { Name = "ESS.Project.Control_Voltage", Value = "24 V DC" }] };
-        Assert.Equal(18, Plan(args).Changes.Count);
+        Assert.Equal(ProjectUpdateArgs.TitleBlock.Count + 1, Plan(args).Changes.Count);
     }
 
     private static ProjectUpdateArgs Args(params (int Id, string Value)[] values) =>

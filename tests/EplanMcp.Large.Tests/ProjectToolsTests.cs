@@ -173,6 +173,22 @@ public sealed class ProjectToolsTests(LiveEplan eplan, DestructiveHost host) : I
         Assert.Equal(before, (await host.CallAsync("eplan_cable_reassign", args)).GetProperty("fingerprint").GetString());
     }
 
+    [Fact]
+    public async Task ReportSettings_SetAndReadBack_ThenRestored()
+    {
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        var off = new Dictionary<string, object?> { ["project"] = session.Project, ["summarize_parts_of_same_device"] = false };
+        JsonElement preview = await eplan.CallAsync("eplan_report_configure", off);
+        bool wasOn = preview.GetProperty("changes").GetArrayLength() == 1;
+        var on = new Dictionary<string, object?> { ["project"] = session.Project, ["summarize_parts_of_same_device"] = true };
+        Dictionary<string, object?> flip = wasOn ? off : on;
+        Dictionary<string, object?> restore = wasOn ? on : off;
+        Assert.Equal("committed", (await eplan.CallAsync("eplan_report_configure", new(flip) { ["dry_run"] = false })).GetProperty("execution").GetString());
+        Assert.Empty((await eplan.CallAsync("eplan_report_configure", flip)).GetProperty("changes").EnumerateArray());
+        Assert.Equal("committed", (await eplan.CallAsync("eplan_report_configure", new(restore) { ["dry_run"] = false })).GetProperty("execution").GetString());
+        Assert.Empty((await eplan.CallAsync("eplan_report_configure", restore)).GetProperty("changes").EnumerateArray());
+    }
+
     private async Task<List<string>> OpenAsync() =>
         [.. (await eplan.CallAsync("eplan_project_list", new() { ["limit"] = 200 })).GetProperty("projects").EnumerateArray().Select(p => p.GetProperty("path").GetString()!)];
 

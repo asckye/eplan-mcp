@@ -17,6 +17,7 @@ public sealed class ProjectUpdateArgs
         [10030] = true, // PROJ_MAKE
         [10031] = true, // PROJ_TYPE
         [10032] = true, // PROJ_LOCATIONOFINSTALLATION
+        [10042] = false, // PROJ_MANUFACTURINGDATE
         [10100] = false, // PROJ_CUSTOMERID
         [10232] = false, // PROJ_CREATORNAME1
         [10235] = false, // PROJ_CREATORSTREET

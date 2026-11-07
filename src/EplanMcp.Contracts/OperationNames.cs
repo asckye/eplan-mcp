@@ -563,6 +563,12 @@ public static class OperationNames
     /// </summary>
     public const string CableReassignExecute = "cable.reassign.execute";
 
+    /// <summary>What eplan_report_configure would change. Reads only. Arguments: <see cref="ReportSettingsArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string ReportSettingsPlan = "report.settings.plan";
+
+    /// <summary>Sets report settings and reads them back. Arguments: <see cref="ReportSettingsArgs"/> with the fingerprint; data: <see cref="ReportSettingsData"/>.</summary>
+    public const string ReportSettingsExecute = "report.settings.execute";
+
     /// <summary>
     /// The plan of eplan_language_set: reads the project's language settings and works out the new ones, never writes.
     /// Arguments: <see cref="LanguageSetArgs"/>; data: <see cref="WritePlan"/> with details.

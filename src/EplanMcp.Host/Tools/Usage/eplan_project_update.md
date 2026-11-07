@@ -11,7 +11,7 @@ Set them:
 ## Workflow
 
 1. Omitted or true dry_run previews (execution=not_started) and writes nothing. Execute with dry_run:false.
-2. Only these properties can be set: 10011 project description, 10013 job number, 10014 commission, 10015 company name, 10016 and 10017 company address, 10020 creator, 10025 responsible for project, 10030 make, 10031 project type, 10032 place of installation, 10100 customer short name, 10232 creator name, 10235 creator street, 10237 creator zip code, 10238 creator city, 10240 creator phone. A template's own properties go by `name`, such as `ESS.Project.Control_Voltage`. Structure and format properties stay out of reach.
+2. Only these properties can be set: 10011 project description, 10013 job number, 10014 commission, 10015 company name, 10016 and 10017 company address, 10020 creator, 10025 responsible for project, 10030 make, 10031 project type, 10032 place of installation, 10042 manufacturing date, 10100 customer short name, 10232 creator name, 10235 creator street, 10237 creator zip code, 10238 creator city, 10240 creator phone. A template's own properties go by `name`, such as `ESS.Project.Control_Voltage`. Structure and format properties stay out of reach.
 3. Report pages show new values after eplan_report_update.
 
 ## Fields

@@ -98,6 +98,7 @@ internal static class BridgeHost
         var projectProperties = new EplanProjectProperties();
         var structureIdentifiers = new EplanStructureIdentifiers();
         var projectSessions = new EplanProjectSessions();
+        var reportSettings = new EplanReportSettings();
         var textTranslator = new EplanTextTranslator();
         var plcAddressing = new EplanPlcAddressing();
         var languageRemover = new EplanLanguageRemover();
@@ -246,6 +247,8 @@ internal static class BridgeHost
             new ProjectCloseExecuteOperation(catalog, projectSessions),
             new PlcReaddressPlanOperation(catalog, plcAddressing),
             new PlcReaddressExecuteOperation(catalog, plcAddressing, pages, backup, transactions),
+            new ReportSettingsPlanOperation(catalog, reportSettings),
+            new ReportSettingsExecuteOperation(catalog, reportSettings),
             new CableReassignPlanOperation(catalog, cableRenumberer, new EplanCableReader()),
             new CableReassignExecuteOperation(catalog, cableRenumberer, new EplanCableReader(), new EplanCableReassigner(), pages, backup, transactions),
             new LanguageSetPlanOperation(catalog, languages),
