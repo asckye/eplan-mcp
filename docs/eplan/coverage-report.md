@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 114（26.3%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 115（26.1%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -297,6 +297,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_property_get | read | project.get<br>property.read | 382 | 220 | 1 | 160 | 0 | 3/2/4 | A36 A44 | — |
 | eplan_property_schema | read | — | 0 | 0 | 0 | 0 | 0 | 3/1/0 | — | — |
 | eplan_property_set | write | project.get<br>property.set.execute<br>property.set.plan | 422 | 237 | 1 | 181 | 0 | 2/1/3 | A36 A44 A48 A95 B13 | — |
+| eplan_report_configure | write | report.settings.execute<br>report.settings.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | A28 | — |
 | eplan_report_create | write | report.create.execute<br>report.create.plan | 80 | 40 | 0 | 40 | 0 | 2/1/1 | A84 | — |
 | eplan_report_update | write | report.update.execute<br>report.update.plan | 59 | 27 | 0 | 32 | 0 | 0/1/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
 | eplan_revision_list | read | revision.list | 48 | 22 | 2 | 18 | 0 | 1/0/1 | A28 | — |

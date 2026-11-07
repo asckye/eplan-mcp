@@ -2779,6 +2779,26 @@
       ]
     },
     {
+      "name": "eplan_report_configure",
+      "safety": "write",
+      "operations": [
+        "report.settings.execute",
+        "report.settings.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_report_configure.md",
+      "small": 0,
+      "medium": 0,
+      "large": 1,
+      "apiNotes": [
+        "A28"
+      ]
+    },
+    {
       "name": "eplan_report_create",
       "safety": "write",
       "operations": [

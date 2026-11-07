@@ -20245,6 +20245,34 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_report_configure",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ReportSettingsTools.cs",
+      "operations": [
+        "report.settings.execute",
+        "report.settings.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_report_configure.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A28"
+        ],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_report_create",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/ReportCreateTools.cs",
