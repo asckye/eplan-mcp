@@ -132,6 +132,17 @@ public sealed class DeviceUpdateOperationTests
     }
 
     [Fact]
+    public void ProjectWithoutStructure_DropsAnOldPageNumberPrefix()
+    {
+        // A121: devices placed before the fix are named 4-CB1; the page number is no structure.
+        _renamer.Functions.Add(("4-CB1", "2/9/2/0", true, "4", ""));
+        DeviceUpdateArgs args = Args("4-CB1", "-CB1");
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        Assert.Equal("CB1", Execute(args).Tag);
+    }
+
+    [Fact]
     public void SuffixChangesInvalidateThePlan()
     {
         _renamer.Functions.Add(("=F+A2-KF1:13", "2/1/1/0", false, null, ""));

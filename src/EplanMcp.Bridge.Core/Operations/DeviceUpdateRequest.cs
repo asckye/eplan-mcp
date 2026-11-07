@@ -180,6 +180,13 @@ internal sealed class DeviceUpdateRequest
             return newTag.Substring(1);
         }
 
+        // A121: a tag written before that fix carries the page number as if it were structure (4-CB1); it is none.
+        int dash = device.Tag.IndexOf('-');
+        if (dash > 0 && device.Tag.Substring(0, dash).All(char.IsDigit))
+        {
+            return newTag.Substring(1);
+        }
+
         string own = "-" + device.DeviceTag;
         return device.DeviceTag.Length > 0 && device.Tag.EndsWith(own, StringComparison.Ordinal)
             ? device.Tag.Substring(0, device.Tag.Length - own.Length) + newTag
