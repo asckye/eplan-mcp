@@ -1,5 +1,12 @@
 namespace EplanMcp.Bridge.Core.Operations;
 
+/// <summary>Looks up a text in the translation database by the project's settings, implemented by the EPLAN adapter layer. Reads only.</summary>
+public interface ITextTranslator
+{
+    /// <summary>The text as <c>zh_CN@text;en_US@text;</c>, with every language the database has.</summary>
+    public string Translate(string projectPath, string text);
+}
+
 /// <summary>
 /// Reads and sets a project's title block properties for eplan_project_update (ADR-0052), implemented by the EPLAN
 /// adapter layer. Main thread only; <see cref="Write"/> only inside the write's transaction.

@@ -7,6 +7,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 internal sealed class ProjectUpdateRequest
 {
     private const int MaxLength = 500;
+    private const int MaxProperties = 50;
 
     private ProjectUpdateRequest(OpenProject project, List<(string Key, string Before, string After)> all)
     {
@@ -22,13 +23,13 @@ internal sealed class ProjectUpdateRequest
     /// <summary>The properties whose value differs.</summary>
     public IEnumerable<(string Key, string Before, string After)> Changing => All.Where(p => !TextLanguages.SameValue(p.Before, p.After));
 
-    public static ProjectUpdateRequest Check(ProjectUpdateArgs args, IProjectCatalog catalog, IProjectProperties properties)
+    public static ProjectUpdateRequest Check(ProjectUpdateArgs args, IProjectCatalog catalog, IProjectProperties properties, ITextTranslator translator)
     {
         var violations = new List<string>();
         WriteArguments.RequireProject(args.Project, violations);
         List<ProjectPropertyValue> given = args.Properties ?? [];
-        if (given.Count < 1 || given.Count > ProjectUpdateArgs.TitleBlock.Count)
-        { violations.Add(FormattableString.Invariant($"'properties' must hold 1 to {ProjectUpdateArgs.TitleBlock.Count} entries.")); }
+        if (given.Count < 1 || given.Count > MaxProperties)
+        { violations.Add(FormattableString.Invariant($"'properties' must hold 1 to {MaxProperties} entries.")); }
         var seen = new HashSet<string>(StringComparer.Ordinal);
         bool denied = false;
         for (int i = 0; i < given.Count; i++)
@@ -57,7 +58,9 @@ internal sealed class ProjectUpdateRequest
         if (violations.Count > 0)
         { throw WriteArguments.Invalid(violations); }
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
-        return new ProjectUpdateRequest(project, [.. given.Select(p => (Key(p), properties.Read(project.Path, Key(p)), p.Value!))]);
+        string Value(ProjectPropertyValue p) => args.Translate && p.Value is { Length: > 0 } text && !TextLanguages.IsSerialized(text)
+            && (p.Id == 0 || ProjectUpdateArgs.TitleBlock[p.Id]) ? translator.Translate(project.Path, text) : p.Value!;
+        return new ProjectUpdateRequest(project, [.. given.Select(p => (Key(p), properties.Read(project.Path, Key(p)), Value(p)))]);
     }
 
     private static string Key(ProjectPropertyValue p) => p.Id == 0 ? p.Name ?? string.Empty : p.Id.ToString(CultureInfo.InvariantCulture);

@@ -13,12 +13,16 @@ internal sealed class EplanStructureIdentifiers : IStructureIdentifiers
     {
         MainThread.Assert();
         var read = new List<StructureIdentifier>();
-        foreach (Location location in EplanProjects.ByPath(projectPath).GetLocationObjects())
+        Project project = EplanProjects.ByPath(projectPath);
+        foreach (string prefix in StructureNames.Prefixes)
         {
-            string name = FullName(location);
-            if (StructureNames.Prefix(name).Length == name.Length)
-            { continue; }
-            read.Add(new StructureIdentifier { Name = name, Description = Description(location), Used = location.IsUsed });
+            // By block because only then EPLAN returns them in the order SetSortedLocations gave (api-notes A107).
+            foreach (Location location in project.GetLocationObjects(Block(prefix)))
+            {
+                string name = FullName(location);
+                if (name.Length > prefix.Length)
+                { read.Add(new StructureIdentifier { Name = name, Description = Description(location), Used = location.IsUsed }); }
+            }
         }
         return read;
     }
@@ -56,6 +60,31 @@ internal sealed class EplanStructureIdentifiers : IStructureIdentifiers
     {
         MainThread.Assert();
         Change(() => Find(projectPath, name).Remove());
+    }
+
+    public void Sort(string projectPath, IReadOnlyList<string> names)
+    {
+        MainThread.Assert();
+        Change(() =>
+        {
+            string prefix = StructureNames.Prefix(names[0]);
+            if (!EplanProjects.ByPath(projectPath).SetSortedLocations(Block(prefix), [.. names.Select(n => n.Substring(prefix.Length))]))
+            {
+                throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN did not sort the block, so nothing was committed.",
+                    retryable: false, new Dictionary<string, string> { ["identifier"] = prefix });
+            }
+        });
+    }
+
+    public void Rename(string projectPath, string name, string newName)
+    {
+        MainThread.Assert();
+        Change(() =>
+        {
+            int parent = newName.LastIndexOf('.');
+            string segment = parent >= 0 ? newName.Substring(parent + 1) : newName.Substring(StructureNames.Prefix(newName).Length);
+            EplanProjects.ByPath(projectPath).ChangeLocationName(Find(projectPath, name), segment);
+        });
     }
 
     private static void Change(Action change)

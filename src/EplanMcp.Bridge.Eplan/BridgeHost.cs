@@ -97,6 +97,9 @@ internal static class BridgeHost
         var languages = new EplanProjectLanguages();
         var projectProperties = new EplanProjectProperties();
         var structureIdentifiers = new EplanStructureIdentifiers();
+        var projectSessions = new EplanProjectSessions();
+        var textTranslator = new EplanTextTranslator();
+        var plcAddressing = new EplanPlcAddressing();
         var languageRemover = new EplanLanguageRemover();
         var partsDatabase = new EplanPartsDatabase();
         var placer = new EplanDevicePlacer();
@@ -228,13 +231,21 @@ internal static class BridgeHost
             new DeviceRenumberExecuteOperation(catalog, pages, renumberer, backup, transactions),
             new PageRenumberPlanOperation(catalog, pages, pageRenumberer),
             new PageRenumberExecuteOperation(catalog, pages, pageRenumberer, backup, transactions),
-            new ProjectUpdatePlanOperation(catalog, projectProperties),
-            new ProjectUpdateExecuteOperation(catalog, projectProperties, transactions),
+            new ProjectUpdatePlanOperation(catalog, projectProperties, textTranslator),
+            new ProjectUpdateExecuteOperation(catalog, projectProperties, textTranslator, transactions),
             new StructureListOperation(catalog, structureIdentifiers),
-            new StructureUpdatePlanOperation(catalog, structureIdentifiers),
-            new StructureUpdateExecuteOperation(catalog, structureIdentifiers, transactions),
+            new StructureUpdatePlanOperation(catalog, structureIdentifiers, textTranslator),
+            new StructureUpdateExecuteOperation(catalog, structureIdentifiers, textTranslator, transactions),
             new StructureDeletePlanOperation(catalog, structureIdentifiers),
             new StructureDeleteExecuteOperation(catalog, structureIdentifiers, pages, backup, transactions),
+            new StructureRenamePlanOperation(catalog, structureIdentifiers),
+            new StructureRenameExecuteOperation(catalog, structureIdentifiers, pages, backup, transactions),
+            new ProjectOpenPlanOperation(catalog),
+            new ProjectOpenExecuteOperation(catalog, projectSessions),
+            new ProjectClosePlanOperation(catalog),
+            new ProjectCloseExecuteOperation(catalog, projectSessions),
+            new PlcReaddressPlanOperation(catalog, plcAddressing),
+            new PlcReaddressExecuteOperation(catalog, plcAddressing, pages, backup, transactions),
             new LanguageSetPlanOperation(catalog, languages),
             new LanguageSetExecuteOperation(catalog, languages, transactions),
             new LanguageRemovePlanOperation(catalog, languages, languageRemover),

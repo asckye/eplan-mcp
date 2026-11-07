@@ -16,4 +16,10 @@ public interface IStructureIdentifiers
     public void Describe(string projectPath, string name, string description);
 
     public void Remove(string projectPath, string name);
+
+    /// <summary>Puts <paramref name="names"/> first in their block, all with the same prefix, and the block's others after them.</summary>
+    public void Sort(string projectPath, IReadOnlyList<string> names);
+
+    /// <summary>Renames an identifier, with everything in the project that uses it.</summary>
+    public void Rename(string projectPath, string name, string newName);
 }

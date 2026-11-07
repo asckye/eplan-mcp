@@ -6,7 +6,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <see cref="OperationNames.ProjectUpdateExecute"/>: checks the plan's fingerprint again, sets the properties in one
 /// transaction and reads them back (ADR-0052). A read-back that differs rolls the write back.
 /// </summary>
-public sealed class ProjectUpdateExecuteOperation(IProjectCatalog catalog, IProjectProperties properties, ITransactionScopeFactory transactions)
+public sealed class ProjectUpdateExecuteOperation(IProjectCatalog catalog, IProjectProperties properties, ITextTranslator translator, ITransactionScopeFactory transactions)
     : Operation<ProjectUpdateArgs, ProjectUpdateData>, IWriteOperation
 {
     public const string Tool = "eplan_project_update";
@@ -20,7 +20,7 @@ public sealed class ProjectUpdateExecuteOperation(IProjectCatalog catalog, IProj
         {
             if (string.IsNullOrEmpty(args.Fingerprint))
             { throw InvalidArgument("'fingerprint' is required: the one project.update.plan returned."); }
-            request = ProjectUpdateRequest.Check(args, catalog, properties);
+            request = ProjectUpdateRequest.Check(args, catalog, properties, translator);
             if (!string.Equals(request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
             {
                 throw new BridgeErrorException(ErrorReason.PlanStale, "The project's properties changed after the plan was made, so nothing was changed. Call eplan_project_update again for a new plan.",
