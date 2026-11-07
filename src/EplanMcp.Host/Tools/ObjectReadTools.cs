@@ -91,6 +91,17 @@ internal sealed class ObjectReadTools
                 int nextIndex = block.Properties?.NextIndexOffset ?? 0;
                 if (block.Unsupported is { } reason)
                 { result["status"] = "unsupported"; result["reason"] = reason; return Page(false); }
+                if (get)
+                {
+                    if (block.Locator is not null)
+                    {
+                        result["locator"] = JsonSerializer.SerializeToNode(block.Locator, HostJson.Options);
+                    }
+                    if (block.Hint is not null)
+                    {
+                        result["hint"] = block.Hint;
+                    }
+                }
                 JsonObject[] rows = get ? [.. block.Properties!.Items.Select(r =>
                 {
                     JsonObject row = PropertyGetRows.Map(r, 0, args.Detailed);

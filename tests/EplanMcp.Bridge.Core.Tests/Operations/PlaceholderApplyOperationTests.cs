@@ -115,8 +115,33 @@ public sealed class PlaceholderApplyOperationTests
         Assert.Equal(["Begin AI: eplan_placeholder_apply", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
         Assert.Equal(("Line1", Tm1, "", "mA", true), (data.Project, data.Page, data.Placeholder, data.ValueSet, data.CurrentValuesChanged));
         Assert.Equal([("T1", "4-20 mA"), ("T2", "20 mA")], data.Values.Select(v => (v.Variable, v.Text)));
+        Assert.NotNull(data.CurrentValuesBefore);
+        Assert.NotNull(data.CurrentValuesAfter);
         Assert.Equal(["0-10 V", "10 V"], data.CurrentValuesBefore.Select(c => c.Text));
         Assert.Equal(["4-20 mA", "20 mA"], data.CurrentValuesAfter.Select(c => c.Text));
+        Assert.Null(data.Hint);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void Execute_InvalidReferencedProperty_CommitsWithoutCurrentValues(bool beforeUnavailable, bool afterUnavailable)
+    {
+        // A117: GetAllCurrentValues throws PropertyNotFoundException (S063109属性无效) in the official EES sample.
+        _writer.CurrentValuesBeforeUnavailable = beforeUnavailable;
+        _writer.CurrentValuesAfterUnavailable = afterUnavailable;
+        PlaceholderApplyArgs args = Args("mA");
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        PlaceholderApplyData data = Execute(args);
+
+        Assert.Equal([(Tm1, "", "mA")], _writer.Applied);
+        Assert.Equal(["Begin AI: eplan_placeholder_apply", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
+        Assert.Null(data.CurrentValuesBefore);
+        Assert.Null(data.CurrentValuesAfter);
+        Assert.Null(data.CurrentValuesChanged);
+        Assert.Equal("EPLAN gave no current values for this placeholder: it references a property EPLAN calls invalid; the value set was applied.", data.Hint);
     }
 
     [Fact]
@@ -177,6 +202,10 @@ public sealed class PlaceholderApplyOperationTests
 
         public bool LoseValueSet { get; set; }
 
+        public bool CurrentValuesBeforeUnavailable { get; set; }
+
+        public bool CurrentValuesAfterUnavailable { get; set; }
+
         /// <summary>The current values inside the transaction, where EPLAN gives them: the placeholder's.</summary>
         public PlaceholderApplied Apply(string projectPath, string page, string name, string valueSet)
         {
@@ -189,9 +218,9 @@ public sealed class PlaceholderApplyOperationTests
                 ValueSets = LoseValueSet ? [.. placeholder.ValueSets.Skip(1)] : placeholder.ValueSets,
                 AssignedObjects = placeholder.AssignedObjects,
                 Values = placeholder.Values,
-                CurrentValues = [.. placeholder.Values.Where(v => v.ValueSet == valueSet).Select(v => new PlaceholderText { Text = v.Value.Text, Raw = v.Value.Raw })],
+                CurrentValues = CurrentValuesAfterUnavailable ? null : [.. placeholder.Values.Where(v => v.ValueSet == valueSet).Select(v => new PlaceholderText { Text = v.Value.Text, Raw = v.Value.Raw })],
             };
-            return new PlaceholderApplied { Before = placeholder.CurrentValues!, After = after };
+            return new PlaceholderApplied { Before = CurrentValuesBeforeUnavailable ? null : placeholder.CurrentValues, After = after };
         }
     }
 }

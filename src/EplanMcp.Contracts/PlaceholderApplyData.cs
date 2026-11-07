@@ -18,14 +18,17 @@ public sealed class PlaceholderApplyData
     /// <summary>The value set's value of each variable, in the variables' order.</summary>
     public List<PlaceholderValue> Values { get; set; } = [];
 
-    /// <summary>The placeholder's current values before the change.</summary>
-    public List<PlaceholderValue> CurrentValuesBefore { get; set; } = [];
+    /// <summary>The placeholder's current values before the change; null when either read was unavailable.</summary>
+    public List<PlaceholderValue>? CurrentValuesBefore { get; set; }
 
-    /// <summary>Its current values read again after the change.</summary>
-    public List<PlaceholderValue> CurrentValuesAfter { get; set; } = [];
+    /// <summary>Its current values read again after the change; null when either read was unavailable.</summary>
+    public List<PlaceholderValue>? CurrentValuesAfter { get; set; }
 
     /// <summary>Whether the current values as stored, with all their languages, differ after the change.</summary>
-    public bool CurrentValuesChanged { get; set; }
+    public bool? CurrentValuesChanged { get; set; }
+
+    /// <summary>Why the current values are unavailable; null when both reads succeeded.</summary>
+    public string? Hint { get; set; }
 
     /// <summary>A problem after the commit, such as an undo step EPLAN did not close; null when none (ADR-0010).</summary>
     public string? Warning { get; set; }

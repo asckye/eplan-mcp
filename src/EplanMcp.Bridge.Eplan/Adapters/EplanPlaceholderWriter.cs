@@ -31,10 +31,27 @@ internal sealed class EplanPlaceholderWriter : IPlaceholderWriter
 
         // The current values before and after: only here, where the SafetyPoint locks the placeholder (A14, A33); a
         // LockingException would roll back and become LOCK_FAILED.
-        List<PlaceholderText> before = EplanPlaceholderReader.CurrentValues(found[0], language);
+        List<PlaceholderText>? before = null;
+        try
+        {
+            before = EplanPlaceholderReader.CurrentValues(found[0], language);
+        }
+        catch (PropertyNotFoundException ex)
+        {
+            WriteExceptionDiagnostics.Report(ex);
+        }
+
         PlaceHolderApi.ApplyRecord(found[0], valueSet);
         PlaceholderRecord after = EplanPlaceholderReader.Record(found[0], language, currentValues: false);
-        after.CurrentValues = EplanPlaceholderReader.CurrentValues(found[0], language);
+        try
+        {
+            after.CurrentValues = EplanPlaceholderReader.CurrentValues(found[0], language);
+        }
+        catch (PropertyNotFoundException ex)
+        {
+            WriteExceptionDiagnostics.Report(ex);
+        }
+
         return new PlaceholderApplied { Before = before, After = after };
     }
 

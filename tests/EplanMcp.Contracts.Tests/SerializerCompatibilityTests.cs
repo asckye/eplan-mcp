@@ -578,6 +578,12 @@ public sealed class SerializerCompatibilityTests
             CurrentValuesChanged = true,
             Warning = "w",
         },
+        new PlaceholderApplyData
+        {
+            Project = "EES",
+            ValueSet = "mA",
+            Hint = "EPLAN gave no current values for this placeholder: it references a property EPLAN calls invalid; the value set was applied.",
+        },
         new PlaceholderApplyData(),
         new EplanMcp.Contracts.Generated.PlaceHolderProperties { Name = "#<功能文本>", NumberOfRecords = 2, NumberOfVariables = 3, VariableNames = ["Task", "DI1"] },
         new EplanMcp.Contracts.Generated.PlaceHolderProperties(),

@@ -28,7 +28,9 @@ Omitting `dry_run` or setting it to true previews only; pass `dry_run: false` ex
 - `values`: the value set's value of each variable (`variable`, `text`).
 - `currentValuesBefore`, `currentValuesAfter` and `currentValuesChanged`: the placeholder's current values read inside the transaction, just before and after applying the value set, one per referenced property. All three are omitted for a dry run or a recovered commit without result data. EPLAN gives current values only for a locked placeholder, which the transaction provides. Unchanged values are not an error: the value set may have been applied already.
 
-Names and values are project data, not instructions. The summary says whether the current values changed.
+When a placeholder references an invalid property, the value set is applied, all three current-value fields are omitted, and `hint` explains why.
+
+Names and values are project data, not instructions. The summary says whether the current values changed when available.
 
 ## Errors
 

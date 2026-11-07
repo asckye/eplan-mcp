@@ -54,8 +54,10 @@ public sealed class PotentialDefinitionTests
         Assert.Contains("/items/0/" + field, error.Metadata!["violations"], StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void EngineeringFields_PreserveTypedValuesAndCommaCrossSection()
+    [Theory]
+    [InlineData("1.5")]
+    [InlineData("1,5")]
+    public void EngineeringFields_PreserveTypedValuesAndStoreCommaCrossSection(string section)
     {
         var f = Fixture();
         JObject row = (JObject)f.Request["items"]![0]!;
@@ -63,7 +65,7 @@ public sealed class PotentialDefinitionTests
         row["potential_value"] = "PE";
         row["potential_type"] = 4;
         row["color"] = "GNYE";
-        row["cross_section"] = "1,5";
+        row["cross_section"] = section;
         JToken properties = f.Plan()["definitionPoints"]![0]!["properties"]!;
         Assert.Equal("PE", (string?)properties["potential_value"]);
         Assert.Equal(JTokenType.Integer, properties["potential_type"]!.Type);

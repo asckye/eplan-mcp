@@ -33,7 +33,14 @@ internal static class ObjectReadSchema
             fields["items"]!["items"] = JsonNode.Parse(PropertyGetContract.Output.GetRawText())!["properties"]!["items"]!["items"]!.DeepClone();
             JsonNode row = fields["items"]!["items"]!;
             if (get)
-            { row["required"] = new JsonArray("property_id", "property_name", "index", "status", "value", "language"); row["properties"]!.AsObject().Remove("query"); row["properties"]!.AsObject().Remove("target"); row["properties"]!["property_name"] = new JsonObject { ["type"] = "string" }; }
+            {
+                row["required"] = new JsonArray("property_id", "property_name", "index", "status", "value", "language");
+                row["properties"]!.AsObject().Remove("query");
+                row["properties"]!.AsObject().Remove("target");
+                row["properties"]!["property_name"] = new JsonObject { ["type"] = "string" };
+                fields["locator"] = JsonNode.Parse(Input(true).GetRawText())!["properties"]!["locator"]!.DeepClone();
+                fields["hint"] = new JsonObject { ["type"] = "string" };
+            }
             else
             { fields["items"]!["items"] = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["locator","name"],"properties":{"name":{"type":"string"},"location":{"type":"array","items":{"type":"number"}},"properties":{"type":"object","additionalProperties":{"type":"string"}}}}"""); fields["items"]!["items"]!["properties"]!["locator"] = JsonNode.Parse(Input(true).GetRawText())!["properties"]!["locator"]!.DeepClone(); }
             tool.ProtocolTool.OutputSchema = JsonSerializer.SerializeToElement(output);

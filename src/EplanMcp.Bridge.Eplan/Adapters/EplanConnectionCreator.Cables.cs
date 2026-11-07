@@ -38,7 +38,7 @@ internal sealed partial class EplanConnectionCreator
                 using FunctionPropertyList properties = cable.Properties;
                 properties[(Properties.Function)20040] = (string)definition["type_text"]!;
                 properties[(Properties.Function)20042] = (string)definition["core_count"]!;
-                properties[(Properties.Function)20043] = (string?)definition["cross_section_text"] ?? (string)definition["cross_section_mm2"]!;
+                properties[(Properties.Function)20043] = (string?)definition["cross_section_text"] ?? CrossSections.Format((double)definition["cross_section_mm2"]!);
                 if ((string?)definition["voltage"] is { } voltage)
                 { properties[(Properties.Function)20044] = voltage; }
             }
@@ -153,7 +153,9 @@ internal sealed partial class EplanConnectionCreator
                 if ((string?)cores[i]["colour"] is { } colour)
                 { properties[(Properties.Connection)31004] = colour; }
                 if ((bool?)definition["core_labels_only"] != true)
-                { properties[(Properties.Connection)31002] = (string)definition["cross_section_mm2"]!; }
+                {
+                    properties[(Properties.Connection)31002] = CrossSections.Format((double)definition["cross_section_mm2"]!);
+                }
             }
             cable.AddLocalFunctionTemplates(runs);
             Connection[] templates = cable.FunctionTemplates.OfType<Connection>().ToArray();

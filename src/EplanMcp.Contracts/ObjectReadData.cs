@@ -8,6 +8,10 @@ public sealed class ObjectReadData
     public List<ObjectSummary> Objects { get; set; } = [];
     /// <summary>At most 200 property rows for get.</summary>
     public PropertyReadData? Properties { get; set; }
+    /// <summary>The current object locator for a successful get.</summary>
+    public DrawingLocator? Locator { get; set; }
+    /// <summary>Explains when a get resolved an identity whose supplied digest differed.</summary>
+    public string? Hint { get; set; }
     /// <summary>The next object or selector position, or null at completion.</summary>
     public int? NextOffset { get; set; }
 }

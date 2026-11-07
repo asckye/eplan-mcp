@@ -54,11 +54,11 @@ public sealed class PotentialEngineeringTests(LiveEplan eplan, WriteHost host) :
         Assert.Equal("N", properties.GetProperty("potential_value").GetString());
         Assert.Equal(2, properties.GetProperty("potential_type").GetInt32());
         Assert.Equal("BU", properties.GetProperty("color").GetString());
-        Assert.Equal("1.5", properties.GetProperty("cross_section").GetString());
+        Assert.Equal("1,5", properties.GetProperty("cross_section").GetString());
         Assert.Equal("N", values[33003].GetString());
         Assert.Equal(2, values[31006].GetInt32());
         Assert.Equal("BU", values[31004].GetString());
-        Assert.Equal("1.5", values[31002].GetString());
+        Assert.Equal("1,5", values[31002].GetString());
         Assert.Single(drawing.Placements, p => p.Kind == "PotentialDefinition");
         Assert.Equal(1, result.GetProperty("undoSteps").GetInt32());
         await session.UndoAsync();

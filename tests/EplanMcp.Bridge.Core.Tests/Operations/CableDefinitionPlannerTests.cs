@@ -106,6 +106,16 @@ public sealed class CableDefinitionPlannerTests
     }
 
     [Fact]
+    public void NumericCrossSection_PreviewsStoredDecimalComma()
+    {
+        var fixture = new CableDefinitionFixture();
+        fixture.Cable["cross_section_mm2"] = 0.75;
+        JToken definition = Assert.Single(fixture.Plan()["cableDefinitions"]!);
+        Assert.Equal("0,75", (string?)definition["cross_section_text"]);
+        Assert.Equal(0.75, (double)definition["cross_section_mm2"]!);
+    }
+
+    [Fact]
     public void CoreLabelsOnly_MustBeABoolean()
     {
         var f = new CableDefinitionFixture();

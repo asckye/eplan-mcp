@@ -35,6 +35,9 @@
 ### 修复
 - `eplan_connection_generate` 支持 `rebuild: true`，让新自动连线采用电位颜色，连接读回未变化时也保留刷新。
 - `eplan_project_create` 从旧版基本项目创建失败后自动升级 scratch 副本并重试，保留 imports 原文件。
+- `eplan_object_get` 接受同一对象的绘图定位符，返回当前对象定位符并提示摘要差异。
+- `eplan_placeholder_apply` 遇到引用无效属性的占位符仍应用值集，省略不可用的当前值并给出提示。
+- `eplan_connection_create` 的数值截面积统一按 EPLAN 存储形式写成小数逗号，显式截面积文本保持原样。
 - `eplan_placeholder_list` 的 `detailed` 遇到引用无效属性的占位符不再整体报内部错误，只对该占位符省略当前值。
 - `eplan_connection_create` 省略 `symbol_variant` 时，中断点箭头按电流方向（从左到右、从上到下）：左端和顶端画成进线（BP 变体 E、H），右端和底端画成出线。
 - `eplan_connection_create` 不再拒绝直角交叉的线：EPLAN 在交叉处不连接，三相母线和往下的分支本来就这样画。

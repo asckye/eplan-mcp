@@ -79,7 +79,7 @@ T8b 新增 Small 空结构段及非空结构/设备标识区分比较，Medium f
 
 **Example:** `{"project":"Line1","page":"=F+A1&EFS1/1","dry_run":true,"items":[{"kind":"t_node","position":[24,16],"directions":["Left","Right","Up"]}]}`
 
-截面 `cross_section` 接受小数点和小数逗号（如 `"1.5"`、`"1,5"`）；写入保留输入文本，定义点及连接读回均按有限数值比较，非数字文本仍拒绝。
+截面 `cross_section` 接受小数点和小数逗号（如 `"1.5"`、`"1,5"`），按 EPLAN 的存储形式写为小数逗号（written with a decimal comma as EPLAN stores it）；定义点及连接读回均按有限数值比较，非数字文本仍拒绝。电缆芯线 `cross_section_mm2` 和未提供 `cross_section_text` 时的电缆截面文字采用相同格式；显式 `cross_section_text` 保持原文。
 
 **Existing connection example:** `{"project":"Line1","page":"=F+A1&EFS1/1","items":[{"kind":"definition_point","position":[40,40],"color":"RD","cross_section":"1.5"}]}`
 

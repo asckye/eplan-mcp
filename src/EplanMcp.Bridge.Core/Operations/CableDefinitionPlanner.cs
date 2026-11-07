@@ -173,6 +173,7 @@ public static class CableDefinitionPlanner
                 impact.Add(new JObject { ["connection"] = core["connection"]!.DeepClone(), ["designation"] = designation, ["label"] = label, ["colour"] = core["colour"]?.DeepClone(), ["crossSectionMm2"] = item["cross_section_mm2"]!.DeepClone() });
             }
             var definition = (JObject)item.DeepClone();
+            definition["cross_section_text"] = (string?)item["cross_section_text"] ?? CrossSections.Format((double)item["cross_section_mm2"]!);
             // Live T8b: EPLAN gives a cable no page structure (stored as +-W9), unlike devices; name it like a device on this page.
             definition["name"] = designation.StartsWith("-", StringComparison.Ordinal) ? DevicePlaceRequest.DeviceStructureOf(scene.Page.Page) + designation : designation;
             definition["points"] = JArray.FromObject(line);

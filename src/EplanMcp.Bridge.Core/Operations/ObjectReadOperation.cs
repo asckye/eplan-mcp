@@ -35,10 +35,22 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
             return result;
         }
         DrawingLocator locator = args.Locator ?? throw InvalidArgument("Supply the locator returned by eplan_object_find.");
-        if (!objects.Any(o => DrawingLocators.Matches(locator, o.Locator)))
-        { throw new BridgeErrorException(ErrorReason.PlanStale, "Object identity changed. Call eplan_object_find for a fresh locator."); }
+        ObjectSummary? selected = objects.FirstOrDefault(o => DrawingLocators.Matches(locator, o.Locator));
+        if (selected is null)
+        {
+            ObjectSummary[] candidates = objects.Where(o => ProjectResolver.SamePath(locator.Project, o.Locator.Project)
+                && (string.IsNullOrEmpty(locator.Page) || locator.Page == o.Locator.Page)
+                && locator.Type == o.Locator.Type && locator.Oid == o.Locator.Oid).Take(2).ToArray();
+            if (candidates.Length != 1)
+            {
+                throw new BridgeErrorException(ErrorReason.PlanStale, "Object identity changed. Call eplan_object_find for a fresh locator.");
+            }
+            selected = candidates[0];
+            result.Hint = "The locator's digest is not this object's identity digest (for example a drawing locator from eplan_page_get); the result's locator is the current object locator.";
+        }
+        result.Locator = selected.Locator;
         var target = new PropertyTarget(locator: new ObjectLocator
-        { Project = args.Project, Kind = args.ObjectType.ToLowerInvariant(), Type = locator.Type, Oid = locator.Oid });
+        { Project = args.Project, Kind = args.ObjectType.ToLowerInvariant(), Type = selected.Locator.Type, Oid = selected.Locator.Oid });
         var read = new PropertyReadArgs
         {
             ProjectPath = args.Project,

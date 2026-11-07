@@ -59,6 +59,8 @@ public sealed class ObjectReadOperationTests
         {
             ObjectReadData block = Execute(reader, args, get: true);
             Assert.Null(block.Unsupported);
+            Assert.Same(reader.Objects[0].Locator, block.Locator);
+            Assert.Null(block.Hint);
             rows.AddRange(block.Properties!.Items);
             Assert.InRange(++blocks, 1, 100);
             if (block.NextOffset is not { } next)
@@ -121,7 +123,6 @@ public sealed class ObjectReadOperationTests
     [InlineData("page")]
     [InlineData("type")]
     [InlineData("oid")]
-    [InlineData("digest")]
     public void Get_StaleIdentityNeverOpensProperties(string changed)
     {
         var reader = new Reader();
@@ -141,11 +142,58 @@ public sealed class ObjectReadOperationTests
             case "oid":
                 supplied.Oid++;
                 break;
-            case "digest":
-                supplied.Digest = new string('b', 64);
-                break;
         }
         BridgeErrorException ex = Assert.Throws<BridgeErrorException>(() => Execute(reader, new() { ObjectType = "Page", Locator = supplied }, true));
+        Assert.Equal(ErrorReason.PlanStale, ex.Error.Reason);
+        Assert.Equal(0, reader.Native.Opens);
+    }
+
+    [Theory]
+    [InlineData("=GAA+A1&EFS1/9912")]
+    [InlineData("")]
+    public void Get_DrawingDigestResolvesUniqueCurrentObjectLocator(string suppliedPage)
+    {
+        var current = new DrawingLocator
+        {
+            Project = Project,
+            Page = "=GAA+A1&EFS1/9912",
+            Type = 17,
+            Oid = 69845,
+            Digest = new string('a', 64),
+        };
+        var supplied = new DrawingLocator
+        {
+            Project = Project,
+            Page = suppliedPage,
+            Type = 17,
+            Oid = 69845,
+            Digest = new string('b', 64),
+        };
+        var reader = new Reader();
+        reader.Objects.Add(new() { Locator = current });
+        reader.Native.ObjectType = "Function";
+        reader.Native.Properties.Add(20011, new() { Stored = "read value" });
+
+        ObjectReadData result = Execute(reader, new() { ObjectType = "Function", Locator = supplied }, true);
+
+        Assert.Same(current, result.Locator);
+        Assert.Equal("The locator's digest is not this object's identity digest (for example a drawing locator from eplan_page_get); the result's locator is the current object locator.", result.Hint);
+        Assert.Equal("read value", Assert.Single(result.Properties!.Items, row => row.PropertyId == 20011).Value!.Text);
+        Assert.Equal((17, 69845L), (reader.Native.Target!.Locator!.Type, reader.Native.Target.Locator.Oid));
+        Assert.Equal(1, reader.Native.Opens);
+    }
+
+    [Fact]
+    public void Get_DifferentDigestWithAmbiguousIdentityNeverOpensProperties()
+    {
+        var reader = new Reader();
+        reader.Objects.Add(new() { Locator = Locator() });
+        reader.Objects.Add(new() { Locator = Locator() });
+        DrawingLocator supplied = Locator();
+        supplied.Digest = new string('b', 64);
+
+        BridgeErrorException ex = Assert.Throws<BridgeErrorException>(() => Execute(reader, new() { ObjectType = "Page", Locator = supplied }, true));
+
         Assert.Equal(ErrorReason.PlanStale, ex.Error.Reason);
         Assert.Equal(0, reader.Native.Opens);
     }

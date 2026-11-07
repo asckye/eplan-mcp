@@ -12062,6 +12062,40 @@
           },
           "truncated": {
             "type": "boolean"
+          },
+          "locator": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "page",
+              "type",
+              "oid",
+              "digest"
+            ],
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "page": {
+                "type": "string"
+              },
+              "type": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "oid": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "digest": {
+                "type": "string"
+              }
+            }
+          },
+          "hint": {
+            "type": "string"
           }
         }
       },
@@ -16153,7 +16187,7 @@
             }
           },
           "currentValuesBefore": {
-            "description": "Its current values just before the change, one per referenced property; omitted for a dry run (EPLAN gives them only inside the change).",
+            "description": "Its current values just before the change, one per referenced property; omitted for a dry run or when either current-values read was unavailable.",
             "type": [
               "array",
               "null"
@@ -16163,7 +16197,7 @@
             }
           },
           "currentValuesAfter": {
-            "description": "Its current values read back after the change; omitted for a dry run or when 'recovered'.",
+            "description": "Its current values read back after the change; omitted for a dry run, when 'recovered', or when either current-values read was unavailable.",
             "type": [
               "array",
               "null"
@@ -16173,7 +16207,7 @@
             }
           },
           "currentValuesChanged": {
-            "description": "Whether the current values changed; omitted for a dry run or when 'recovered'.",
+            "description": "Whether the current values changed; omitted for a dry run, when 'recovered', or when either current-values read was unavailable.",
             "type": [
               "boolean",
               "null"

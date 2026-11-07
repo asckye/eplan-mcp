@@ -254,3 +254,40 @@ public sealed class PlaceholderApplyToolTests : IDisposable
     private Task<CallToolResult> Apply(bool dryRun = false) =>
         PlaceholderWriteTools.PlaceholderApplyAsync(_harness.Pipeline, "Line1", Page, "mA", placeholder: string.Empty, dry_run: dryRun, cancellationToken: TestContext.Current.CancellationToken);
 }
+
+[Trait("Size", "Small")]
+[Collection(typeof(ToolBuildIsolation))]
+public sealed class PlaceholderApplyCurrentValuesTests
+{
+    [Theory]
+    [InlineData(false, null)]
+    [InlineData(true, null)]
+    [InlineData(true, "Undo warning.\u202e")]
+    public async Task CurrentValuesAvailability_IsPreservedInCommittedResult(bool unavailable, string? warning)
+    {
+        const string hint = "EPLAN gave no current values for this placeholder: it references a property EPLAN calls invalid; the value set was applied.";
+        using var harness = new WriteToolHarness(OutsideScratchWrites.Deny, new FakeApprovalChannel("eplan", ApprovalDecision.Granted));
+        harness.Bridge.Handlers[OperationNames.PlaceholderApplyPlan] = _ => harness.Plan([new PlannedChange { Action = "update", Kind = "placeholder", Name = "holder", NewValue = "mA" }]);
+        harness.Bridge.Handlers[OperationNames.PlaceholderApplyExecute] = _ => new PlaceholderApplyData
+        {
+            Project = "Line1",
+            Page = "=TM1+A1&EFS1/1",
+            ValueSet = "mA",
+            CurrentValuesBefore = unavailable ? null : [new PlaceholderValue { Text = "0-10 V" }],
+            CurrentValuesAfter = unavailable ? null : [new PlaceholderValue { Text = "4-20 mA" }],
+            CurrentValuesChanged = unavailable ? null : true,
+            Hint = unavailable ? hint : null,
+            Warning = warning,
+        };
+
+        CallToolResult result = await PlaceholderWriteTools.PlaceholderApplyAsync(harness.Pipeline, "Line1", "=TM1+A1&EFS1/1", "mA", dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
+
+        JsonElement data = WriteToolHarness.Structured(result);
+        Assert.Equal("committed", data.GetProperty("execution").GetString());
+        Assert.Equal(!unavailable, data.TryGetProperty("currentValuesBefore", out _));
+        Assert.Equal(!unavailable, data.TryGetProperty("currentValuesAfter", out _));
+        Assert.Equal(!unavailable, data.TryGetProperty("currentValuesChanged", out _));
+        Assert.Equal(warning is not null ? "Undo warning. " + hint : unavailable ? hint : null, data.GetProperty("hint").GetString());
+        Assert.DoesNotContain("did not change", WriteToolHarness.Text(result, 0), StringComparison.Ordinal);
+    }
+}

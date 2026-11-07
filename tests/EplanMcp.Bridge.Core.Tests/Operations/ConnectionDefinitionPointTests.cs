@@ -39,7 +39,7 @@ public sealed class ConnectionDefinitionPointTests
         Assert.Equal([8d, 24d], point["position"]!.Values<double>());
         Assert.Equal("CDP", (string?)point["symbol"]!["name"]);
         Assert.Equal("RD", (string?)point["properties"]!["color"]);
-        Assert.Equal("1.5", (string?)point["properties"]!["cross_section"]);
+        Assert.Equal("1,5", (string?)point["properties"]!["cross_section"]);
         Assert.Equal(["17/2/0", "17/1/0"], point["endpoints"]!.Values<string>());
         Assert.Empty(plan["symbols"]!);
         Assert.Empty(plan["graphicalAutoconnect"]!);
@@ -264,7 +264,7 @@ public sealed class ConnectionDefinitionPointTests
         JToken pair = Assert.Single(result["actualEndpoints"]!);
         Assert.Equal(["17/2/0", "17/1/0"], pair.Values<string>());
         Assert.Empty(result["symbols"]!);
-        Assert.Equal("1.5", (string?)result["definitionPoints"]![0]!["connectionValues"]!["cross_section"]);
+        Assert.Equal("1,5", (string?)result["definitionPoints"]![0]!["connectionValues"]!["cross_section"]);
     }
 
     [Theory]
@@ -387,19 +387,19 @@ public sealed class ConnectionDefinitionPointTests
     }
 
     [Theory]
-    [InlineData("0")]
-    [InlineData("-1.5")]
-    [InlineData("1e2")]
-    [InlineData(" 1.5 ")]
-    [InlineData("+1.5")]
-    [InlineData(".5")]
-    [InlineData("1,5")]
-    [InlineData(",5")]
-    public void CrossSection_FiniteNumericText_IsPreserved(string value)
+    [InlineData("0", "0")]
+    [InlineData("-1.5", "-1,5")]
+    [InlineData("1e2", "100")]
+    [InlineData(" 1.5 ", "1,5")]
+    [InlineData("+1.5", "1,5")]
+    [InlineData(".5", "0,5")]
+    [InlineData("1,5", "1,5")]
+    [InlineData(",5", "0,5")]
+    public void CrossSection_FiniteNumericText_IsStoredWithDecimalComma(string value, string expected)
     {
         var fixture = Fixture();
         fixture.Request["items"]![0]!["definition_point"]!["cross_section"] = value;
-        Assert.Equal(value, (string?)Assert.Single(fixture.Plan()["definitionPoints"]!)["properties"]!["cross_section"]);
+        Assert.Equal(expected, (string?)Assert.Single(fixture.Plan()["definitionPoints"]!)["properties"]!["cross_section"]);
     }
 
     [Theory]
@@ -411,6 +411,7 @@ public sealed class ConnectionDefinitionPointTests
         var creator = new Creator { ObservedSection = observed };
         creator.Fixture.Request["items"]![0]!["definition_point"]!["cross_section"] = requested;
         JObject result = creator.Execute();
+        Assert.Equal("1,5", creator.WrittenSection);
         Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
         Assert.Equal(observed, (string?)result["definitionPoints"]![0]!["connectionValues"]!["cross_section"]);
         Assert.DoesNotContain("Rollback", creator.Transactions.Calls);
@@ -444,7 +445,7 @@ public sealed class ConnectionDefinitionPointTests
         Assert.Equal([16d, 8d], point["position"]!.Values<double>());
         Assert.Equal((symbol, variant), ((string?)point["symbol"]!["name"], (int)point["symbol"]!["variant"]!));
         Assert.Equal("RD", (string?)point["properties"]!["color"]);
-        Assert.Equal("1.5", (string?)point["properties"]!["cross_section"]);
+        Assert.Equal("1,5", (string?)point["properties"]!["cross_section"]);
         Assert.Equal(1, (int)plan["undoSteps"]!);
         Assert.Empty(fixture.Scene.PointRoutes);
         Assert.Equal((string?)plan["fingerprint"], (string?)fixture.Plan()["fingerprint"]);
@@ -598,6 +599,7 @@ public sealed class ConnectionDefinitionPointTests
         public bool Transferred { get; private set; }
         public string? Mismatch { get; init; }
         public string? ObservedSection { get; init; }
+        public string? WrittenSection { get; private set; }
         public List<string?[]>? GeneratedEndpoints { get; init; }
         public List<double[][]>? Drawn { get; init; }
         public int State { get; private set; }
@@ -614,7 +616,13 @@ public sealed class ConnectionDefinitionPointTests
         public List<SymbolSearchItem> Read(string project, SymbolSearchArgs args) => Fixture.Read(project, args);
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => { Events.Add("place"); State = 1; };
-        public Action PrepareDefinitionPoints(string project, string page, JArray planned) => () => { Assert.Equal(1, State); Events.Add("define"); State = 2; };
+        public Action PrepareDefinitionPoints(string project, string page, JArray planned) => () =>
+        {
+            Assert.Equal(1, State);
+            WrittenSection = (string?)planned[0]?["properties"]?["cross_section"];
+            Events.Add("define");
+            State = 2;
+        };
         public void Generate(string project, IReadOnlyList<string> pages, bool rebuild = false)
         {
             Assert.Equal(2, State);

@@ -495,7 +495,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 负责人在 scratch 副本上以 `Folder=<folder>`、`BaseProject=true`、`NoBackup=true`、`PackOriginalProject=false` 执行 action，27 MB 的 2023 `.zw9` 约 17 秒原地升级，随后 `CreateProject` 成功。长目录下 action 解包到 `<Folder>\temp\<内部项目名>.edb\...`，完整路径超过 255 字符时报"完整文件名超出字符的最大长度 255"、"无法转换为新版本"；短路径 `<scratch>\.up\<6 位小写十六进制>` 可用。官方说明基本项目只跨主要版本升级，无需升级时不做更改。— [XPrjActionUpgradeProjects 官方帮助](https://www.eplan.help/en-us/Infoportal/Content/api/2026/XPrjActionUpgradeProjects.html)。
 
 ### A117. 占位符引用无效属性时读不出当前值（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，官方 EES 码垛系统示例副本）
-- `PlaceHolder.GetAllCurrentValues()` 对引用了无效属性的占位符抛 `PropertyNotFoundException`（`S063109属性无效`），不是 A33 里的 `LockingException`。`eplan_placeholder_list` 的 `detailed` 原来因此整体报 INTERNAL；工具改为把这样的占位符和未锁定的一样标记为取不到当前值，值集和变量照常返回（待实机复验）。`eplan_placeholder_apply` 在事务里读前后值，遇到这种占位符仍会失败，还没有处理。
+- `PlaceHolder.GetAllCurrentValues()` 对引用了无效属性的占位符抛 `PropertyNotFoundException`（`S063109属性无效`），不是 A33 里的 `LockingException`。`eplan_placeholder_list` 的 `detailed` 原来因此整体报 INTERNAL；工具改为把这样的占位符和未锁定的一样标记为取不到当前值，值集和变量照常返回（待实机复验）。`eplan_placeholder_apply` 现对这种占位符照常应用值集，省略当前值及其变化标记并给出提示（待实机复验）。
 
 ### A116. T 节点的画法和自动连线的颜色（2026-11-07，EPLAN 2026.0.3.25421，Electric P8 与 Pro Panel，示例项目副本）
 - **T 节点：** 示例页的 T 节点是 `TLRU/0`、`TOUR/1`、`TLRO/0`（变体 A/B，`FUNC_SYMBOL` 读出 `SPECIAL;0;64;0`），画成斜折角。工具省略 `t_node.variant` 时只在连接点都在中心的变体里选，结果是变体 8（`SPECIAL;0;64;8`），画成圆点。照着已有页重画时，把 `eplan_page_get` 读回的变体传给 `t_node.variant`。

@@ -67,7 +67,10 @@ internal static class ConnectionDefinitionPoints
         else
         { Require(value["part_variant"] is null && value["part_count"] is null, "/part", "Supply part with its variant or count."); }
         if (properties["cross_section"] is { } section)
-        { Require(Number(section, out _), "/cross_section", "Supply finite numeric text, for example 1.5 or 1,5."); }
+        {
+            Require(Number(section, out double number), "/cross_section", "Supply finite numeric text, for example 1.5 or 1,5.");
+            properties["cross_section"] = CrossSections.Format(number);
+        }
         Require(value["symbol"] is null || value["symbol"]!.Type == JTokenType.String, "/symbol", "Use CDP or CDPNG.");
         string name = (string?)value["symbol"] ?? "CDP";
         Require(name is "CDP" or "CDPNG", "/symbol", "Use CDP or CDPNG.");
@@ -133,7 +136,10 @@ internal static class ConnectionDefinitionPoints
             properties["potential_type"] = type.DeepClone();
         }
         if (properties["cross_section"] is { } section)
-        { ConnectionCreatePlanner.Require(Number(section, out _), at + "/cross_section", "Supply finite numeric text, for example 1.5 or 1,5."); }
+        {
+            ConnectionCreatePlanner.Require(Number(section, out double number), at + "/cross_section", "Supply finite numeric text, for example 1.5 or 1,5.");
+            properties["cross_section"] = CrossSections.Format(number);
+        }
         ConnectionCreatePlanner.Require(properties.ContainsKey("potential_name") || properties.ContainsKey("signal_name"), at, "Supply potential_name or signal_name.");
         return new JObject { ["itemIndex"] = index, ["type"] = "PotentialDefinition", ["position"] = new JArray(position), ["properties"] = properties };
     }

@@ -35,6 +35,7 @@ public sealed class ObjectReadToolTests
             var args = (ObjectReadArgs)value!;
             return new ObjectReadData
             {
+                Locator = args.Locator,
                 Properties = new()
                 {
                     Items = [new PropertyReadRow("value", new("text", text: "text"))
@@ -160,11 +161,64 @@ public sealed class ObjectReadToolTests
         JsonElement get = PropertyGetToolTests.Data(await Read(bridge, new(TimeProvider.System), input, true));
         JsonElement row = Assert.Single(get.GetProperty("items").EnumerateArray());
         Assert.Equal((11011, "PAGE_NOMINATIOMN", "zh_CN", "text"), (row.GetProperty("property_id").GetInt32(), row.GetProperty("property_name").GetString(), row.GetProperty("language").GetString(), row.GetProperty("value").GetString()));
+        Assert.Equal(input["locator"]!.ToJsonString(), JsonNode.Parse(get.GetProperty("locator").GetRawText())!.ToJsonString());
+        Assert.False(get.TryGetProperty("hint", out _));
         bridge.Handlers[OperationNames.ObjectFind] = _ => new ObjectReadData { Unsupported = "not_implemented" };
         JsonElement unsupported = PropertyGetToolTests.Data(await Read(bridge, new(TimeProvider.System), new() { ["object_type"] = "Arc" }));
         Assert.Equal("unsupported", unsupported.GetProperty("status").GetString());
         Assert.NotNull(unsupported.GetProperty("reason").GetString());
         Assert.Empty(unsupported.GetProperty("items").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task Get_DrawingDigestReturnsCurrentLocatorAndHintWithinBudget()
+    {
+        FakeBridgeClient bridge = Bridge();
+        var current = new DrawingLocator
+        {
+            Project = Project,
+            Page = "=GAA+A1&EFS1/9912",
+            Type = 17,
+            Oid = 69845,
+            Digest = new string('a', 64),
+        };
+        const string hint = "The locator's digest is not this object's identity digest (for example a drawing locator from eplan_page_get); the result's locator is the current object locator.";
+        bridge.Handlers[OperationNames.ObjectGet] = value =>
+        {
+            var args = Assert.IsType<ObjectReadArgs>(value);
+            Assert.Equal(new string('b', 64), args.Locator!.Digest);
+            Assert.Equal((current.Page, current.Type, current.Oid), (args.Locator.Page, args.Locator.Type, args.Locator.Oid));
+            return new ObjectReadData
+            {
+                Locator = current,
+                Hint = hint,
+                Properties = new()
+                {
+                    Items = [.. Enumerable.Range(0, 200).Select(index => new PropertyReadRow("value", new("text", text: new string('x', 500)))
+                    {
+                        Target = new(projectObject: true),
+                        PropertyId = 20011,
+                        Index = index,
+                    })],
+                },
+            };
+        };
+        JsonNode supplied = JsonSerializer.SerializeToNode(current, HostJson.Options)!;
+        supplied["digest"] = new string('b', 64);
+
+        CallToolResult response = await Read(bridge, new(TimeProvider.System), new()
+        {
+            ["object_type"] = "Function",
+            ["locator"] = supplied,
+            ["limit"] = 200,
+        }, true);
+
+        JsonElement result = PropertyGetToolTests.Data(response);
+        Assert.Equal(new string('a', 64), result.GetProperty("locator").GetProperty("digest").GetString());
+        Assert.Equal(hint, result.GetProperty("hint").GetString());
+        Assert.True(result.GetProperty("truncated").GetBoolean());
+        Assert.InRange(result.GetProperty("items").GetArrayLength(), 1, 199);
+        Assert.InRange(ResultShaper.ResultTokens(result.GetRawText()) + ResultShaper.EstimateTokens(((TextContentBlock)response.Content[0]).Text), 1, 5000);
     }
 
     [Theory]

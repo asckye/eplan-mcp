@@ -70,6 +70,12 @@ internal sealed class PlaceholderWriteTools
         bool committed = outcome.Execution == ExecutionState.Committed;
         Dictionary<string, string> details = outcome.Plan.Details ?? [];
         PlaceholderApplyData? data = outcome.Data;
+        string? hint = data?.Hint;
+        if (data?.Warning is { } warning)
+        {
+            hint = hint is null ? warning : warning + " " + hint;
+        }
+
         var result = new PlaceholderApplyResult
         {
             Project = ResultShaper.CleanText(data?.Project ?? outcome.Plan.Project),
@@ -84,19 +90,19 @@ internal sealed class PlaceholderWriteTools
             },
             ValueSet = ResultShaper.CleanText(data?.ValueSet ?? args.ValueSet),
             Values = data is null ? PlannedValues(details) : [.. data.Values.Select(v => PlaceholderTools.Value(v, withNames: true))],
-            CurrentValuesBefore = data?.CurrentValuesBefore.Select(v => PlaceholderTools.Value(v, withNames: false)).ToList(),
-            CurrentValuesAfter = data?.CurrentValuesAfter.Select(v => PlaceholderTools.Value(v, withNames: false)).ToList(),
+            CurrentValuesBefore = data?.CurrentValuesBefore?.Select(v => PlaceholderTools.Value(v, withNames: false)).ToList(),
+            CurrentValuesAfter = data?.CurrentValuesAfter?.Select(v => PlaceholderTools.Value(v, withNames: false)).ToList(),
             CurrentValuesChanged = data?.CurrentValuesChanged,
             Undo = committed ? "AI: " + ApplyTool : null,
             Recovered = outcome.Recovered,
             Hint = dry_run ? WriteToolDefaults.ExecutionHint : outcome.Recovered
                 ? "The response was lost, but EPLAN reported the value set as applied; check the placeholder with eplan_placeholder_list."
-                : ResultShaper.CleanText(data?.Warning)
+                : ResultShaper.CleanText(hint)
                     ?? (data is { CurrentValuesChanged: false } ? "The current values did not change: the value set may have been applied already. Check the referenced objects in EPLAN if it matters." : null),
         };
         string summary = !committed ? "Dry run: would apply the value set to the placeholder. Nothing was changed."
-            : data is null ? "Applied the value set; Ctrl+Z in EPLAN undoes this step."
-            : $"Applied the value set to the placeholder; its current values {(data.CurrentValuesChanged ? "changed" : "did not change")}. Ctrl+Z in EPLAN undoes this step.";
+            : data?.CurrentValuesChanged is null ? "Applied the value set; Ctrl+Z in EPLAN undoes this step."
+            : $"Applied the value set to the placeholder; its current values {(data.CurrentValuesChanged == true ? "changed" : "did not change")}. Ctrl+Z in EPLAN undoes this step.";
         return ToolResults.Success(summary, result);
     }
 

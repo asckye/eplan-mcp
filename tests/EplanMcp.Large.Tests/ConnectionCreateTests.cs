@@ -405,7 +405,7 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             foreach (string field in new[] { "properties", "connectionValues" })
             {
                 Assert.Equal("RD", point.GetProperty(field).GetProperty("color").GetString());
-                Assert.Equal("1.5", point.GetProperty(field).GetProperty("cross_section").GetString());
+                Assert.Equal("1,5", point.GetProperty(field).GetProperty("cross_section").GetString());
             }
             if (withPart)
             {
