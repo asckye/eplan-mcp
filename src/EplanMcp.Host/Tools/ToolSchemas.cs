@@ -34,16 +34,7 @@ internal static class ToolSchemas
                 { DevicePlaceInputs.Configure(schema); }
                 if (tool.ProtocolTool.Name == MacroWriteTools.InsertTool)
                 {
-                    schema["oneOf"] = JsonNode.Parse("""[{"required":["macro"]},{"required":["part"]}]""");
-                    schema["dependentRequired"] = JsonNode.Parse("""{"part_variant":["part"]}""");
-                    JsonObject values = schema["properties"]!["values"]!.AsObject();
-                    values["type"] = "object";
-                    values.Remove("default");
-                    values["additionalProperties"] = new JsonObject { ["type"] = "string" };
-                    values["minProperties"] = 1;
-                    values["maxProperties"] = 20;
-                    foreach (string field in new[] { "macro", "part", "part_variant" })
-                    { schema["properties"]![field]!.AsObject().Remove("default"); schema["properties"]![field]!["type"] = "string"; }
+                    ConfigureMacroInsert(schema);
                 }
                 if (tool.ProtocolTool.Name is ConnectionCreateTools.Tool or DeviceWriteTools.PlaceTool)
                 {
@@ -80,6 +71,47 @@ internal static class ToolSchemas
                 tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);
             }
         }
+    }
+
+    private static void ConfigureMacroInsert(JsonObject schema)
+    {
+        string[] itemFields = ["page", "macro", "part", "part_variant", "representation", "x", "y", "variant", "numbering", "macro_box", "values"];
+        JsonObject properties = schema["properties"]!.AsObject();
+        foreach (string field in itemFields)
+        {
+            JsonObject property = properties[field]!.AsObject();
+            if (field is not ("variant" or "numbering" or "representation" or "macro_box"))
+            {
+                property.Remove("default");
+            }
+            if (property["type"] is JsonArray nullableTypes)
+            {
+                property["type"] = nullableTypes.First(type => type!.GetValue<string>() != "null")!.DeepClone();
+            }
+        }
+        properties["variant"]!["default"] = 0;
+        properties["numbering"]!["default"] = "number";
+        properties["representation"]!["default"] = "MultiLine";
+        properties["macro_box"]!["default"] = true;
+        properties["values"]!["additionalProperties"] = new JsonObject { ["type"] = "string" };
+        properties["values"]!["minProperties"] = 1;
+        properties["values"]!["maxProperties"] = 20;
+        properties["items"] = JsonNode.Parse("""
+            {"type":"array","minItems":1,"maxItems":20,"items":{
+              "type":"object","properties":{},"required":["page","x","y"],"additionalProperties":false,
+              "oneOf":[{"required":["macro"]},{"required":["part"]}],"dependentRequired":{"part_variant":["part"]}}}
+            """);
+        foreach (string field in itemFields)
+        {
+            properties["items"]!["items"]!["properties"]![field] = properties[field]!.DeepClone();
+        }
+        schema["required"] = new JsonArray("project");
+        schema["dependentRequired"] = properties["items"]!["items"]!["dependentRequired"]!.DeepClone();
+        schema["oneOf"] = JsonNode.Parse("""
+            [{"required":["page","x","y"],"oneOf":[{"required":["macro"]},{"required":["part"]}],"not":{"required":["items"]}},
+             {"required":["items"],"propertyNames":{"not":{"enum":[]}}}]
+            """);
+        schema["oneOf"]![1]!["propertyNames"]!["not"]!["enum"] = new JsonArray([.. itemFields.Select(field => (JsonNode?)JsonValue.Create(field))]);
     }
 
     private static void RequireProperties(JsonObject schema)

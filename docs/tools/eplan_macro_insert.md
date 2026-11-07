@@ -11,7 +11,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-"在 `=GAA+A1&EFS1/60` 页左上方放一个接触器反馈控制回路"。代理先用 `eplan_macro_list` 和 `eplan_macro_get` 选好宏，再用它把宏放到页上的指定位置，得到带标识、在图上显示的设备。这是 M3b 放置设备的唯一方式（M3b 设计 Q1）：一次调用插一个宏，只审批一次，按一次 Ctrl+Z 撤销。
+"在 `=GAA+A1&EFS1/60` 页左上方放一个接触器反馈控制回路"。代理先用 `eplan_macro_list` 和 `eplan_macro_get` 选好宏，再用它把宏放到页上的指定位置，得到带标识、在图上显示的设备。这是 M3b 放置设备的唯一方式（M3b 设计 Q1）：一次调用可插入一个宏或 1–20 项宏，只审批一次，按一次 Ctrl+Z 撤销整次调用。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
@@ -30,7 +30,17 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 
 - `variant` 始终为整数宏变体；`part_variant` 为独立的字符串部件变体。组符号宏路径展开后仍经宏目录安全校验；解析后的部件、宏路径及两个变体和表达均绑定指纹；不使用 `ARTICLE_MACRO`。
 
-`values` 可选，接受 1–20 项“占位符名称 → 现有值集名称”，如 `{"#<EES_F_CH1>": "6A"}`。名称区分大小写，须匹配 `eplan_macro_get` 在所选表达和宏变体中报告的唯一占位符及其值集，部件组符号宏同样适用。计划逐项显示应用并绑定指纹，执行在插入的同一 SafetyPoint 应用值集，失败整体回滚。结果 `values` 列出 `{placeholder, valueSet}`，预览或省略参数时为空。
+`values` 可选，接受 1–20 项“占位符名称 → 现有值集名称”，如 `{"#<EES_F_CH1>": "6A"}`。名称区分大小写，须匹配 `eplan_macro_get` 在所选表达和宏变体中报告的唯一占位符及其值集，部件组符号宏同样适用。计划逐项显示应用并绑定指纹，执行在插入的同一 SafetyPoint 应用值集，失败整体回滚。单项结果 `values` 列出 `{placeholder, valueSet}`，预览或省略参数时为空。
+
+## 2.1 批量模式
+
+`items` 接受 1–20 项，每项填写单次模式的 `page`、`macro` 或 `part`、`part_variant`、`representation`、`x`、`y`、`variant`、`numbering`、`macro_box`、`values`。使用 `items` 时，这些字段必须从顶层省略；`project`、`layout_guard`、`show_page`、`dry_run` 保留在顶层，作用于整批。页可以重复，所有插入按数组顺序执行。同一页的预测外框一起接受布局检查，覆盖项间冲突。缺失或无法读取的几何给出警告。
+
+先用 `eplan_page_create` 创建目标页，一次最多 50 页。选项条从左向右排列，下一项的 x = 当前 x + `eplan_macro_get` 返回的宏宽度。例如 EES1 的页 `=MA1+UC1&EFS1/1` 在 (4, 288) 插入 `EPLAN_Macro/203_Electrical_Engine/101_01_Variant_1/Reverse_Contactor_Control.ema`；页 `/2` 的两条 `EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema` 宽 52 mm，放在 (24, 276) 和 (76, 276)，分别应用 `{"#<Function_text>": "Forward control"}` 与 `{"#<Function_text>": "Reverse control"}`。完整批量输入见工具 usage 的 Examples。
+
+规划收集所有项的问题，`metadata.violations` 中的项路径从 `/items/0` 开始。执行共用一个 SafetyPoint 和 `AI: eplan_macro_insert` 撤销步骤；任意项失败则整批回滚，`metadata.item` 为从 0 开始的项索引，消息保留该项失败原因。每项提交后分别读回。
+
+批量结果的 `items` 与输入同序，每项列出 `page`、`macro`、`deviceCount`、`objectCount`、`valueCount`。`valueCount` 为已应用的值集数，预览时为 0。顶层 `itemCount`、`deviceCount` 分别为项数和设备总数，`undo` 撤销整批。`hint` 提示用 `eplan_page_get`、`eplan_placeholder_list` 查看设备和值集明细。
 
 ## 3. 输出
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
@@ -79,7 +89,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_create` | 同 `eplan_page_create` | 同 `eplan_page_create` |
 
 ## 5. 实现要点
-- **Host**：走 `WritePipeline`，规划操作是 `macro.insert.plan`，执行操作是 `macro.insert.execute`。执行时限为默认的 60 秒。
+- **Host**：走 `WritePipeline`，规划操作是 `macro.insert.plan`，执行操作是 `macro.insert.execute`。单项执行时限为 60 秒，批量为 300 秒。
 - **规划**（只读）：
   - 解析项目、页（规则同 `eplan_page_get`）和宏路径（`MacroFiles.Resolve`，SEC-19）；
   - 打开宏（不插入，A14/A33），按 `representation` 和 `variant` 读取对应外框、对象和设备；

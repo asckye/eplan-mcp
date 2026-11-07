@@ -73,8 +73,11 @@ public sealed class ToolContractTests : IDisposable
     {
         Tool tool = Tools.Single(t => t.Name == MacroWriteTools.InsertTool);
         JsonElement schema = tool.InputSchema;
-        Assert.Equal(["project", "page", "x", "y"], schema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["project"], schema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         Assert.Equal(2, schema.GetProperty("oneOf").GetArrayLength());
+        JsonElement single = schema.GetProperty("oneOf")[0];
+        Assert.Equal(["page", "x", "y"], single.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(2, single.GetProperty("oneOf").GetArrayLength());
         Assert.Equal(["part"], schema.GetProperty("dependentRequired").GetProperty("part_variant").EnumerateArray().Select(v => v.GetString()));
         JsonElement properties = schema.GetProperty("properties");
         Assert.True(properties.GetProperty("dry_run").GetProperty("default").GetBoolean());
@@ -87,6 +90,32 @@ public sealed class ToolContractTests : IDisposable
         Assert.Equal(20, values.GetProperty("maxProperties").GetInt32());
         Assert.Equal("string", values.GetProperty("additionalProperties").GetProperty("type").GetString());
         Assert.DoesNotContain(schema.GetProperty("required").EnumerateArray(), field => field.GetString() == "values");
+    }
+
+    [Fact]
+    public void MacroInsert_BatchHasClosedItemsWithTheSamePropertySchemasAndExclusiveTopLevelFields()
+    {
+        JsonElement schema = Tools.Single(t => t.Name == MacroWriteTools.InsertTool).InputSchema;
+        JsonElement properties = schema.GetProperty("properties");
+        JsonElement items = properties.GetProperty("items");
+        Assert.Equal("array", items.GetProperty("type").GetString());
+        Assert.Equal(1, items.GetProperty("minItems").GetInt32());
+        Assert.Equal(20, items.GetProperty("maxItems").GetInt32());
+        JsonElement item = items.GetProperty("items");
+        Assert.False(item.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(["page", "x", "y"], item.GetProperty("required").EnumerateArray().Select(value => value.GetString()));
+        Assert.Equal(2, item.GetProperty("oneOf").GetArrayLength());
+        Assert.Equal(["part"], item.GetProperty("dependentRequired").GetProperty("part_variant").EnumerateArray().Select(value => value.GetString()));
+        string[] fields = ["page", "macro", "part", "part_variant", "representation", "x", "y", "variant", "numbering", "macro_box", "values"];
+        Assert.Equal(fields, item.GetProperty("properties").EnumerateObject().Select(property => property.Name));
+        foreach (string field in fields)
+        {
+            Assert.True(JsonElement.DeepEquals(properties.GetProperty(field), item.GetProperty("properties").GetProperty(field)), field);
+        }
+        JsonElement batch = schema.GetProperty("oneOf")[1];
+        Assert.Equal(["items"], batch.GetProperty("required").EnumerateArray().Select(value => value.GetString()));
+        Assert.Equal(fields, batch.GetProperty("propertyNames").GetProperty("not").GetProperty("enum").EnumerateArray().Select(value => value.GetString()));
+        Assert.Equal(["items"], schema.GetProperty("oneOf")[0].GetProperty("not").GetProperty("required").EnumerateArray().Select(value => value.GetString()));
     }
 
     [Fact]
@@ -495,11 +524,14 @@ public sealed class ToolContractTests : IDisposable
         Tool edit = Tools.Single(t => t.Name == PlacementEditTools.Tool);
         Assert.InRange(edit.Description!.Length + Descriptions(edit.InputSchema), 1, 1000);
         Assert.InRange(edit.InputSchema.GetRawText().Length, 1, 2500);
-        foreach (Tool drawing in Tools.Where(t => t.Name is PlacementCreateTools.Tool or AnnotationCreateTools.Tool or GraphicEditTools.Tool or MacroStoreTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool))
+        foreach (Tool drawing in Tools.Where(t => t.Name is PlacementCreateTools.Tool or AnnotationCreateTools.Tool or GraphicEditTools.Tool or MacroStoreTools.Tool or ImportTools.DxfTool))
         {
             Assert.InRange(drawing.Description!.Length + Descriptions(drawing.InputSchema), 1, 1000);
             Assert.InRange(drawing.InputSchema.GetRawText().Length, 1, 1000);
         }
+        Tool macroInsert = Tools.Single(t => t.Name == MacroWriteTools.InsertTool);
+        Assert.InRange(macroInsert.Description!.Length + Descriptions(macroInsert.InputSchema), 1, 1000);
+        Assert.InRange(macroInsert.InputSchema.GetRawText().Length, 1, 2500);
         foreach (Tool tool in Tools.Where(t => t.Name is ObjectReadTools.FindTool or ObjectReadTools.GetTool))
         {
             Assert.InRange(tool.Description!.Length + Descriptions(tool.InputSchema), 1, 1000);

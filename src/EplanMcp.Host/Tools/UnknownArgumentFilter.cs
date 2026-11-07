@@ -19,6 +19,17 @@ internal static class UnknownArgumentFilter
         {
             McpServerTool? tool = context.MatchedPrimitive as McpServerTool
                 ?? context.Server.ServerOptions.ToolCollection?.FirstOrDefault(t => t.ProtocolTool.Name == context.Params?.Name);
+            if (tool?.ProtocolTool.Name == MacroWriteTools.InsertTool && context.Params?.Arguments?.ContainsKey("items") == true)
+            {
+                List<string> macroViolations = MacroWriteTools.BatchViolations(tool.ProtocolTool.InputSchema, context.Params.Arguments);
+                if (macroViolations.Count == 0)
+                {
+                    return next(context, cancellationToken);
+                }
+                BridgeError error = ToolResults.InvalidArgumentError(macroViolations);
+                error.Execution = ExecutionState.NotStarted;
+                return ValueTask.FromResult(ToolResults.Error(error));
+            }
             if (tool?.ProtocolTool.Name is SelectionTools.GetTool or SelectionTools.SetTool or ActionTryTools.Tool
                 && (context.Params?.Arguments ?? new Dictionary<string, JsonElement>()).Any(p => p.Key is "locators" or "selection" && (p.Value.ValueKind != JsonValueKind.Array || p.Value.EnumerateArray().Any(l => l.ValueKind != JsonValueKind.Object
                     || l.EnumerateObject().Select(f => f.Name).Distinct(StringComparer.Ordinal).Count() != l.EnumerateObject().Count()
@@ -78,25 +89,27 @@ internal static class UnknownArgumentFilter
     /// each element of an array argument whose items are objects, named like <c>pages[1].page_type</c>, and an element
     /// that is not an object at all (the tool would get null for it).
     /// </summary>
-    internal static List<string> Violations(JsonElement schema, IDictionary<string, JsonElement>? arguments, string prefix = "", bool nestedMembers = true)
+    internal static List<string> Violations(JsonElement schema, IDictionary<string, JsonElement>? arguments, string prefix = "", bool nestedMembers = true, bool jsonPointers = false)
     {
         HashSet<string> allowed = Names(schema, "properties");
         IEnumerable<string> unknown = (arguments?.Keys ?? [])
             .Where(name => !allowed.Contains(name))
             .Order(StringComparer.Ordinal)
-            .Select(name => $"Unknown argument '{prefix}{name}'; valid arguments: {(allowed.Count == 0 ? "none" : string.Join(", ", allowed.Order(StringComparer.Ordinal)))}.");
+            .Select(name => jsonPointers
+                ? $"{prefix}/{name.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal)}: Unknown argument."
+                : $"Unknown argument '{prefix}{name}'; valid arguments: {(allowed.Count == 0 ? "none" : string.Join(", ", allowed.Order(StringComparer.Ordinal)))}.");
         IEnumerable<string> missing = Names(schema, "required")
             .Where(name => arguments is null || !arguments.TryGetValue(name, out JsonElement value) || value.ValueKind == JsonValueKind.Null)
             .Order(StringComparer.Ordinal)
-            .Select(name => $"Missing required argument '{prefix}{name}'.");
+            .Select(name => jsonPointers ? $"{prefix}/{name}: Missing required argument." : $"Missing required argument '{prefix}{name}'.");
         IEnumerable<string> nested = (arguments ?? new Dictionary<string, JsonElement>())
             .Where(a => nestedMembers && a.Value.ValueKind == JsonValueKind.Array && allowed.Contains(a.Key))
             .OrderBy(a => a.Key, StringComparer.Ordinal)
             .SelectMany(a => schema.GetProperty("properties").GetProperty(a.Key) is { ValueKind: JsonValueKind.Object } property
                 && property.TryGetProperty("items", out JsonElement items) && items.ValueKind == JsonValueKind.Object && Names(items, "properties").Count > 0
                 ? a.Value.EnumerateArray().SelectMany((item, i) => item.ValueKind == JsonValueKind.Object
-                    ? Violations(items, item.EnumerateObject().ToDictionary(p => p.Name, p => p.Value), $"{prefix}{a.Key}[{i}].")
-                    : [$"Argument '{prefix}{a.Key}[{i}]' must be an object."])
+                    ? Violations(items, item.EnumerateObject().ToDictionary(p => p.Name, p => p.Value), jsonPointers ? $"{prefix}/{a.Key}/{i}" : $"{prefix}{a.Key}[{i}].", jsonPointers: jsonPointers)
+                    : [jsonPointers ? $"{prefix}/{a.Key}/{i}: Supply an insertion object." : $"Argument '{prefix}{a.Key}[{i}]' must be an object."])
                 : []);
         return [.. unknown, .. missing, .. nested];
     }

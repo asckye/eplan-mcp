@@ -3,6 +3,7 @@ using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
+using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Tools;
@@ -14,6 +15,8 @@ namespace EplanMcp.Host.Tests.Tools;
 [Trait("Size", "Medium")]
 public sealed class MacroInsertToolTests : IDisposable
 {
+    private static readonly JsonSerializerOptions _itemJson = new(HostJson.Options) { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
+
     private const string Macro = "EPLAN_Macro/203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema";
     private const string Page = "=GAA+A1&EFS1/60";
 
@@ -276,6 +279,253 @@ public sealed class MacroInsertToolTests : IDisposable
         Assert.Contains("'project' is required", error.GetProperty("message").GetString(), StringComparison.Ordinal);
         Assert.Equal(0, _harness.Bridge.Invocations);
     }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Batch_PassesItemsThroughOneWriteAndReturnsOrderedResults(bool dryRun)
+    {
+        List<MacroInsertItem> requested = DriveItems();
+        List<MacroInsertData> returned =
+        [
+            new() { Page = requested[0].Page, Macro = requested[0].Macro!, DeviceCount = 0, ObjectCount = 3, PageSizeKnown = true },
+            new()
+            {
+                Page = requested[1].Page,
+                Macro = Macro,
+                DeviceCount = 2,
+                ObjectCount = 10,
+                PageSizeKnown = true,
+                ValueCount = 1,
+            },
+            new()
+            {
+                Page = requested[2].Page,
+                Macro = Macro,
+                DeviceCount = 1,
+                ObjectCount = 4,
+                PageSizeKnown = true,
+                ValueCount = 1,
+            },
+        ];
+        SetBatchResults(returned);
+
+        JsonElement result = WriteToolHarness.Structured(await MacroWriteTools.MacroInsertAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", items: BatchItems(requested), dry_run: dryRun,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal(3, result.GetProperty("itemCount").GetInt32());
+        Assert.Equal(3, result.GetProperty("deviceCount").GetInt32());
+        Assert.Equal(dryRun ? null : "AI: eplan_macro_insert", result.GetProperty("undo").GetString());
+        Assert.False(result.TryGetProperty("page", out _));
+        Assert.False(result.TryGetProperty("devices", out _));
+        JsonElement[] items = [.. result.GetProperty("items").EnumerateArray()];
+        Assert.Equal(requested.Select(item => item.Page), items.Select(item => item.GetProperty("page").GetString()));
+        Assert.Equal([3, 10, 4], items.Select(item => item.GetProperty("objectCount").GetInt32()));
+        Assert.All(items, item => Assert.Equal(["page", "macro", "deviceCount", "objectCount", "valueCount"], item.EnumerateObject().Select(property => property.Name)));
+        Assert.Contains("eplan_page_get", result.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.Contains("eplan_placeholder_list", result.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        if (dryRun)
+        {
+            Assert.All(items, item => Assert.Equal(0, item.GetProperty("valueCount").GetInt32()));
+            Assert.Empty(_harness.Bridge.Writes);
+        }
+        else
+        {
+            Assert.Equal([0, 1, 1], items.Select(item => item.GetProperty("valueCount").GetInt32()));
+            Assert.Equal(TimeSpan.FromSeconds(300), Assert.Single(_harness.Bridge.Writes).Limit);
+        }
+        MacroInsertArgs[] calls = [.. _harness.Bridge.Calls
+            .Where(call => call.Operation is OperationNames.MacroInsertPlan or OperationNames.MacroInsertExecute)
+            .Select(call => Assert.IsType<MacroInsertArgs>(call.Args))];
+        Assert.Equal(dryRun ? 1 : 2, calls.Length);
+        foreach (MacroInsertArgs call in calls)
+        {
+            Assert.Null(call.Page);
+            Assert.Null(call.X);
+            Assert.Null(call.Y);
+            Assert.Null(call.MacroBox);
+            Assert.Equal(3, call.Items!.Count);
+            Assert.Equal(76, call.Items[2].X);
+            Assert.Equal("Reverse control", call.Items[2].Values!["#<Function_text>"]);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Batch_TwentyItemsWithTwentyValuesEachFitTheResultBudget(bool showPage)
+    {
+        _harness.Bridge.Handlers[OperationNames.PageOpen] = _ => new PageOpenData { EditorOpened = true };
+        List<MacroInsertItem> requested = [.. Enumerable.Range(0, 20).Select(index => new MacroInsertItem
+        {
+            Page = "=MA1+UC1&EFS1/" + (index + 1),
+            Macro = Macro,
+            X = 24,
+            Y = 276,
+            Values = Enumerable.Range(0, 20).ToDictionary(value => "#<" + value + ">", value => new string('x', 500) + value),
+        })];
+        SetBatchResults([.. requested.Select(item => new MacroInsertData
+        {
+            Page = item.Page,
+            Macro = Macro,
+            DeviceCount = 50,
+            ObjectCount = 70,
+            ValueCount = 20,
+            PageSizeKnown = true,
+            Values = [.. item.Values!.Select(value => new MacroValueApplication { Placeholder = value.Key, ValueSet = value.Value })],
+        })]);
+
+        CallToolResult response = await MacroWriteTools.MacroInsertAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", items: BatchItems(requested), dry_run: false,
+            show_page: showPage, cancellationToken: TestContext.Current.CancellationToken);
+        JsonElement result = WriteToolHarness.Structured(response);
+
+        Assert.Equal(20, result.GetProperty("itemCount").GetInt32());
+        Assert.Equal(1000, result.GetProperty("deviceCount").GetInt32());
+        Assert.InRange(ResultShaper.EstimateTokens(JsonSerializer.Serialize(response, McpJsonUtilities.DefaultOptions)), 1, ResultShaper.DefaultTokenBudget);
+        JsonElement[] items = [.. result.GetProperty("items").EnumerateArray()];
+        Assert.Equal(20, items.Length);
+        Assert.All(items, item =>
+        {
+            Assert.Equal(20, item.GetProperty("valueCount").GetInt32());
+            Assert.False(item.TryGetProperty("values", out _));
+            Assert.False(item.TryGetProperty("devices", out _));
+        });
+    }
+
+    [Fact]
+    public async Task Batch_ExecutionFailurePreservesTheZeroBasedItemIndex()
+    {
+        SetBatchResults([new() { Page = Page, Macro = Macro }]);
+        _harness.Bridge.WriteFailure = new BridgeError
+        {
+            Reason = ErrorReason.EplanOperationFailed,
+            Message = "Third macro failed.",
+            Execution = ExecutionState.RolledBack,
+            Metadata = new() { ["item"] = "2" },
+        };
+
+        JsonElement error = WriteToolHarness.Error(await MacroWriteTools.MacroInsertAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", items: BatchItems(DriveItems()), dry_run: false,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Equal("rolled_back", error.GetProperty("execution").GetString());
+        Assert.Equal("2", error.GetProperty("metadata").GetProperty("item").GetString());
+        Assert.Equal("Third macro failed.", error.GetProperty("message").GetString());
+    }
+
+    [Fact]
+    public async Task Batch_RecoveredCommitPreservesAppliedValueCounts()
+    {
+        List<MacroInsertItem> requested = DriveItems();
+        SetBatchResults([.. requested.Select(item => new MacroInsertData
+        {
+            Page = item.Page,
+            Macro = item.Macro!,
+            ValueCount = item.Values?.Count ?? 0,
+        })]);
+        _harness.Bridge.WriteRecovered = true;
+
+        JsonElement result = WriteToolHarness.Structured(await MacroWriteTools.MacroInsertAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", items: BatchItems(requested), dry_run: false,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.True(result.GetProperty("recovered").GetBoolean());
+        Assert.Equal("AI: eplan_macro_insert", result.GetProperty("undo").GetString());
+        Assert.Equal([0, 1, 1], result.GetProperty("items").EnumerateArray().Select(item => item.GetProperty("valueCount").GetInt32()));
+        Assert.Contains("response was lost", result.GetProperty("hint").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task BatchInput_BindsSnakeCaseFields()
+    {
+        SetBatchResults([new() { Page = "P", Macro = Macro }]);
+        JsonElement items = JsonDocument.Parse("""[{"page":"P","part":"P1","part_variant":"2","macro_box":false,"x":24,"y":276}]""").RootElement;
+
+        await MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, "Line1", items: items,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        MacroInsertArgs args = Assert.IsType<MacroInsertArgs>(Assert.Single(_harness.Bridge.Calls, call => call.Operation == OperationNames.MacroInsertPlan).Args);
+        MacroInsertItem item = Assert.Single(args.Items!);
+        Assert.Equal("2", item.PartVariant);
+        Assert.False(item.MacroBox);
+        Assert.Equal((24d, 276d), (item.X, item.Y));
+    }
+
+    [Fact]
+    public async Task SingleInput_StillRequiresPageAndBothCoordinates()
+    {
+        JsonElement error = WriteToolHarness.Error(await MacroWriteTools.MacroInsertAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", macro: Macro,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Contains("'page'", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+        Assert.Contains("'x'", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+        Assert.Contains("'y'", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+        Assert.Empty(_harness.Bridge.Calls);
+    }
+
+    [Fact]
+    public async Task SingleInput_PreservesTheOriginalRequestDefaults()
+    {
+        await MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, "Line1", Page, 24, 276, Macro,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        MacroInsertArgs args = Assert.IsType<MacroInsertArgs>(Assert.Single(_harness.Bridge.Calls, call => call.Operation == OperationNames.MacroInsertPlan).Args);
+        Assert.Equal(0, args.Variant);
+        Assert.Equal("number", args.Numbering);
+        Assert.Equal("MultiLine", args.Representation);
+        Assert.Equal(true, args.MacroBox);
+        Assert.Null(args.Items);
+    }
+
+    private void SetBatchResults(List<MacroInsertData> items)
+    {
+        _harness.Bridge.Handlers[OperationNames.MacroInsertPlan] = _ =>
+        {
+            WritePlan plan = _harness.Plan(items.Select(item => new PlannedChange { Action = "create", Kind = "macro", Name = item.Page }));
+            plan.Details = new() { ["items"] = JsonSerializer.Serialize(items, HostJson.Options) };
+            return plan;
+        };
+        _harness.Bridge.Handlers[OperationNames.MacroInsertExecute] = _ => new MacroInsertData
+        {
+            Project = "Line1",
+            Items = items,
+            ItemCount = items.Count,
+            DeviceCount = items.Sum(item => item.DeviceCount),
+        };
+    }
+
+    private static JsonElement BatchItems(List<MacroInsertItem> items) =>
+        JsonSerializer.SerializeToElement(items, _itemJson);
+
+    private static List<MacroInsertItem> DriveItems() =>
+    [
+        new()
+        {
+            Page = "=MA1+UC1&EFS1/1",
+            Macro = "EPLAN_Macro/203_Electrical_Engine/101_01_Variant_1/Reverse_Contactor_Control.ema",
+            X = 4,
+            Y = 288,
+        },
+        new()
+        {
+            Page = "=MA1+UC1&EFS1/2",
+            Macro = Macro,
+            X = 24,
+            Y = 276,
+            Values = new() { ["#<Function_text>"] = "Forward control" },
+        },
+        new()
+        {
+            Page = "=MA1+UC1&EFS1/2",
+            Macro = Macro,
+            X = 76,
+            Y = 276,
+            Values = new() { ["#<Function_text>"] = "Reverse control" },
+        },
+    ];
 
     private Task<CallToolResult> Insert(bool dryRun = false) =>
         MacroWriteTools.MacroInsertAsync(_harness.Pipeline, _harness.Bridge, "Line1", Page, 40, 280, Macro, 2, "keep", dryRun, cancellationToken: TestContext.Current.CancellationToken);

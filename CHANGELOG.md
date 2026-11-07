@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### 新增
+- `eplan_macro_insert` 支持 `items` 一次按序插入 1–20 个宏及各自值集，整批共用事务和撤销步骤，返回逐项计数，批量执行时限为 300 秒。
 - `eplan_macro_get` 返回占位符与值集，`eplan_macro_insert` 支持通过 `values` 在插入的同一事务应用现有值集。
 - `eplan_page_get` 的图形对象带上 `symbol`（库/符号名/变体），照着已有页重画时能放同样的符号。
 - 新增 `eplan_shield_create`：在连接上画屏蔽，对应 EPLAN"插入"菜单的"屏蔽"。

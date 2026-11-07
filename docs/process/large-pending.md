@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| 宏批量插入（2026-11-07，负责人 brief；A120） | `MacroInsertTests` | 待运行：在 EES1 scratch 项目以 `items` 一次插入页 1 的完整驱动变体和页 2 的两条选项条，核对逐项计数、用 `eplan_page_get` 和 `eplan_placeholder_list` 查看设备及值集、设备编号与交叉引用、逐项读回和一次撤销，并验证批量 300 秒执行时限；再在第三项注入失败，确认前两项也回滚且 `metadata.item` 为 2。单项值集路径已有 A120 证据，批量事务尚未实机验证。 |
 | 连接重建与电位颜色（2026-11-07，负责人 brief；A119） | `CheckAndReportTests`、`AcceptanceRedrawTests` | 工具路径已在会话中实机复验（2026-11-07，CodexEval5b 第 9915 页，结果与官方 action 相同）；Large 测试未跑。在 scratch 新画页执行 `rebuild: true`，核对 L1/L2/L3 黑色、N 蓝色、未设颜色的 24V 红色；连接读回不变仍提交并返回 `rebuilt: true`，默认更新仍保持原无变化语义。负责人已验证 `generate` action 的整项目与按页重建。 |
 | 旧版基本项目升级副本重试（2026-11-07，负责人 brief；A118） | `ProjectCreateTests`、`ProjectCreateToolTests` | 工具路径已在会话中实机复验（2026-11-07，2023 版 HVAC 项目模板：`upgraded: true`，临时文件夹已删除）；Large 测试未跑。用 2023 `.zw9` 触发首次创建失败，核对短 scratch 目录中副本升级后成功、`upgraded: true`、imports 原件哈希不变、临时目录清理；无需升级保留原始错误，长目录跳过并说明，`.zw1` 不升级。负责人已验证升级 action 及随后创建成功。 |
 | 三项读写修复（2026-11-07，负责人 brief） | `ObjectReadTests`、`GenericObjectReadTests`、`PlaceholderApplyTests`、`ConnectionCreateTests`、`PotentialEngineeringTests`、`CableDefinitionTests`、`AcceptanceRedrawTests` | 已在会话中实机复验（2026-11-07：object_get 接受 page_get 定位符并返回提示，placeholder_apply 带提示提交，截面读回 `1,5`；Large 测试未跑）（本次未运行 EPLAN）：在 scratch 副本用 CodexEval6 页 `=GAA+A1&EFS1/9912` 的 drawing locator（type 17、oid 69845）确认 `eplan_object_get` 返回当前 locator 和提示；在官方 EES 码垛系统示例副本确认 A117 无效属性占位符仍应用值集，省略当前值及变化标记并提示；确认定义点、电位定义点和电缆芯线的 31002、缺省电缆 20043 写为小数逗号，显式 `cross_section_text` 保持原文，原有读回和撤销检查通过。跨工具 locator 与无效属性场景需另做针对性复验。 |

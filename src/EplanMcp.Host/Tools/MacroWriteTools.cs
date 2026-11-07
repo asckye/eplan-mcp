@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
@@ -19,6 +20,11 @@ internal sealed class MacroWriteTools
 {
     public const string InsertTool = "eplan_macro_insert";
 
+    private static readonly JsonSerializerOptions _itemJson = new(HostJson.Options)
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+    };
+
     [McpServerTool(
         Name = InsertTool,
         Title = "Insert a window macro on an EPLAN page",
@@ -33,6 +39,7 @@ internal sealed class MacroWriteTools
         "its devices tagged and shown. One Ctrl+Z in EPLAN undoes insertion and value sets. macro_box:false removes boxes, true uses project settings. " +
         "x and y place the macro reference point in mm from the page's bottom left, y up. " +
         "values maps 1-20 exact, case-sensitive placeholder names to existing value sets from eplan_macro_get. " +
+        "items inserts 1-20 macros across existing pages in one transaction. " +
         "show_page opens or focuses the editor before drawing, changing only the UI. " +
         "Omit dry_run to preview, false executes. Outside scratch it needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.")]
@@ -40,25 +47,37 @@ internal sealed class MacroWriteTools
         WritePipeline pipeline,
         IBridgeClient bridge,
         string project,
-        string page,
-        double x,
-        double y,
+        string? page = null,
+        double? x = null,
+        double? y = null,
         string? macro = null,
-        int variant = 0,
-        [AllowedValues("number", "keep")] string numbering = "number",
+        int? variant = null,
+        [AllowedValues("number", "keep")] string? numbering = null,
         bool dry_run = WriteToolDefaults.Preview,
         [Description("Open or focus page editor.")] bool show_page = false,
-        [AllowedValues("MultiLine", "Overview", "SingleLine")] string representation = "MultiLine",
+        [AllowedValues("MultiLine", "Overview", "SingleLine")] string? representation = null,
         string? part = null,
         string? part_variant = null,
-        bool macro_box = true,
+        bool? macro_box = null,
         [AllowedValues("refuse", "warn")] string layout_guard = "refuse",
         Dictionary<string, string>? values = null,
+        JsonElement? items = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
         // The page, the macro, the point and the numbering are checked by the Bridge, all at once (macro.insert.plan).
-        if (ToolArguments.WriteProjectViolations(project) is { Count: > 0 } violations)
+        List<string> violations = ToolArguments.WriteProjectViolations(project);
+        if (items is null)
+        {
+            foreach (var field in new (string Name, bool Missing)[] { ("page", page is null), ("x", x is null), ("y", y is null) })
+            {
+                if (field.Missing)
+                {
+                    violations.Add("Missing required argument '" + field.Name + "'.");
+                }
+            }
+        }
+        if (violations.Count > 0)
         {
             return ToolResults.InvalidArguments(violations);
         }
@@ -66,18 +85,19 @@ internal sealed class MacroWriteTools
         var args = new MacroInsertArgs
         {
             Project = project,
-            Page = page ?? string.Empty,
+            Page = items is null ? page ?? string.Empty : page,
             Macro = macro,
-            X = x,
-            Y = y,
-            Variant = variant,
-            Numbering = numbering,
-            Representation = representation,
+            X = items is null ? x ?? 0 : x,
+            Y = items is null ? y ?? 0 : y,
+            Variant = items is null ? variant ?? 0 : variant,
+            Numbering = items is null ? numbering ?? "number" : numbering,
+            Representation = items is null ? representation ?? "MultiLine" : representation,
             Part = part,
             PartVariant = part_variant,
-            MacroBox = macro_box,
+            MacroBox = items is null ? macro_box ?? true : macro_box,
             LayoutGuard = layout_guard,
             Values = values,
+            Items = items?.Deserialize<List<MacroInsertItem>>(_itemJson),
         };
         var request = new WriteRequest<MacroInsertArgs, MacroInsertArgs>(
             InsertTool,
@@ -100,12 +120,24 @@ internal sealed class MacroWriteTools
                 MacroBox = args.MacroBox,
                 LayoutGuard = args.LayoutGuard,
                 Values = args.Values,
+                Items = args.Items,
                 Fingerprint = plan.Fingerprint,
             },
             dry_run,
-            PageWriteTools.DefaultLimit,
+            items is null ? PageWriteTools.DefaultLimit : TimeSpan.FromSeconds(300),
             "Inserting the macro");
-        PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, args.Project, args.Page, cancellationToken).ConfigureAwait(false);
+        PageDisplay display = new();
+        if (show_page)
+        {
+            IEnumerable<string> displayPages = items is null ? [page ?? string.Empty] : args.Items!.Select(item => item.Page).Distinct(StringComparer.Ordinal);
+            foreach (string displayPage in displayPages)
+            {
+                PageDisplay shown = await PageDisplay.ShowAsync(bridge, true, project, displayPage, cancellationToken).ConfigureAwait(false);
+                string hint = string.Join(" ", new[] { display.Hint, shown.Hint }.OfType<string>());
+                display = new PageDisplay(shown.PageShown is null ? null : (display.PageShown ?? true) && shown.PageShown.Value,
+                    hint.Length == 0 ? null : hint);
+            }
+        }
         WriteOutcome<MacroInsertData> outcome;
         try
         {
@@ -125,27 +157,79 @@ internal sealed class MacroWriteTools
             Execution = outcome.Execution,
             DryRun = dry_run,
             Fingerprint = outcome.Plan.Fingerprint,
-            Page = ResultShaper.CleanText(data?.Page ?? outcome.Plan.Changes.FirstOrDefault()?.Name ?? args.Page),
-            Macro = ResultShaper.CleanText(data?.Macro ?? details.GetValueOrDefault("macro") ?? string.Empty),
-            ArticleReferences = data is null ? [] : [.. data.ArticleReferences.Select(r => new MacroPartReference { Tag = ResultShaper.CleanText(r.Tag), PartNumber = ResultShaper.CleanText(r.PartNumber), Variant = ResultShaper.CleanText(r.Variant), Count = r.Count })],
-            Values = data is null ? [] : [.. data.Values.Select(v => new MacroValueApplication
-            {
-                Placeholder = ResultShaper.CleanText(v.Placeholder),
-                ValueSet = ResultShaper.CleanText(v.ValueSet),
-            })],
-            Devices = data is null ? Planned(details) : [.. data.Devices.Select(d => Entry(d.Tag, d.VisibleTag, d.Category))],
-            ObjectCount = data?.ObjectCount ?? Count(details, "objectCount"),
             Undo = committed ? "AI: " + InsertTool : null,
             Recovered = outcome.Recovered,
         };
+        if (items is not null)
+        {
+            return BatchResult(result, outcome, details, display);
+        }
+        result.Page = ResultShaper.CleanText(data?.Page ?? outcome.Plan.Changes.FirstOrDefault()?.Name ?? args.Page);
+        result.Macro = ResultShaper.CleanText(data?.Macro ?? details.GetValueOrDefault("macro") ?? string.Empty);
+        result.ArticleReferences = data is null ? [] : [.. data.ArticleReferences.Select(r => new MacroPartReference { Tag = ResultShaper.CleanText(r.Tag), PartNumber = ResultShaper.CleanText(r.PartNumber), Variant = ResultShaper.CleanText(r.Variant), Count = r.Count })];
+        result.Values = data is null ? [] : [.. data.Values.Select(v => new MacroValueApplication
+        {
+            Placeholder = ResultShaper.CleanText(v.Placeholder),
+            ValueSet = ResultShaper.CleanText(v.ValueSet),
+        })];
+        result.Devices = data is null ? Planned(details) : [.. data.Devices.Select(d => Entry(d.Tag, d.VisibleTag, d.Category))];
+        result.ObjectCount = data?.ObjectCount ?? Count(details, "objectCount");
         int devices = data?.DeviceCount ?? Count(details, "deviceCount");
-        result.Hint = Hint(outcome, details, string.Equals(numbering, "keep", StringComparison.OrdinalIgnoreCase), result.Devices.Count, devices);
+        result.Hint = Hint(outcome, details, string.Equals(numbering, "keep", StringComparison.OrdinalIgnoreCase), result.Devices!.Count, devices);
         if (dry_run)
         { result.Hint = WriteToolDefaults.ExecutionHint + " " + result.Hint; }
         string what = "a macro with " + ToolResults.Count(devices, "device");
         return display.Apply(ToolResults.Success(
             committed ? $"Inserted {what}; Ctrl+Z in EPLAN undoes this step." : $"Dry run: would insert {what}. Nothing was changed.",
             result));
+    }
+
+    private static CallToolResult BatchResult(MacroInsertResult result, WriteOutcome<MacroInsertData> outcome,
+        Dictionary<string, string> details, PageDisplay display)
+    {
+        List<MacroInsertData> data = outcome.Data?.Items
+            ?? JsonSerializer.Deserialize<List<MacroInsertData>>(details.GetValueOrDefault("items") ?? "[]", HostJson.Options)!;
+        result.ItemCount = data.Count;
+        result.DeviceCount = data.Sum(item => item.DeviceCount);
+        result.Items = [.. data.Select(item => new MacroInsertResult.ItemEntry
+        {
+            Page = ResultShaper.CleanText(item.Page),
+            Macro = ResultShaper.CleanText(item.Macro),
+            DeviceCount = item.DeviceCount,
+            ObjectCount = item.ObjectCount,
+            ValueCount = outcome.Execution == ExecutionState.Committed ? item.ValueCount ?? 0 : 0,
+        })];
+        result.Hint = string.Join(" ", new[]
+        {
+            result.DryRun ? WriteToolDefaults.ExecutionHint : null,
+            outcome.Recovered ? "EPLAN reported the batch committed after the response was lost." : null,
+            "Use eplan_page_get for devices and eplan_placeholder_list for applied placeholder values.",
+            ResultShaper.CleanText(outcome.Data?.Warning ?? details.GetValueOrDefault("layoutWarnings")),
+        }.OfType<string>());
+        string count = ToolResults.Count(data.Count, "macro") + " with " + ToolResults.Count(result.DeviceCount ?? 0, "device");
+        return display.Apply(ToolResults.Success(outcome.Execution == ExecutionState.Committed
+            ? $"Inserted {count}; Ctrl+Z in EPLAN undoes this step."
+            : $"Dry run: would insert {count}. Nothing was changed.", result));
+    }
+
+    internal static List<string> BatchViolations(JsonElement schema, IDictionary<string, JsonElement> arguments)
+    {
+        JsonElement items = arguments["items"];
+        List<string> violations = UnknownArgumentFilter.Violations(schema, arguments, jsonPointers: true);
+        JsonElement fields = schema.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("properties");
+        foreach (JsonProperty field in fields.EnumerateObject().Where(field => arguments.ContainsKey(field.Name)))
+        {
+            violations.Add("/" + field.Name + ": Omit this top-level field when 'items' is supplied.");
+        }
+        if (items.ValueKind != JsonValueKind.Array)
+        {
+            violations.Add("/items: Supply an array of 1 to 20 insertion objects.");
+        }
+        else if (items.GetArrayLength() is < 1 or > 20)
+        {
+            violations.Add("/items: Supply between 1 and 20 insertions.");
+        }
+        return violations;
     }
 
     /// <summary>The hints of the tool spec (section 3), each when it applies, in one text.</summary>
@@ -201,4 +285,5 @@ internal sealed class MacroWriteTools
         VisibleTag = ResultShaper.CleanText(visibleTag),
         Category = ResultShaper.CleanText(category),
     };
+
 }
