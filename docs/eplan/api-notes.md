@@ -485,6 +485,9 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A118. 旧版基本项目不能直接建项目（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，官方 EES 资料）
+- 用 2023 版的 `.zw9`（IEC 原理图块和部件宏项目的 DE/EN 版、HVAC 项目模板）建项目时，EPLAN 报"无法创建项目。必须更新所使用的项目模板或基本项目。"，`eplan_project_create` 回滚并在 `metadata.eplanMessage` 给出这句话。2026 版的 `.zw9` 和各版本的 `.zw1` 备份都能用。升级旧基本项目的接口还没有查。
+
 ### A117. 占位符引用无效属性时读不出当前值（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，官方 EES 码垛系统示例副本）
 - `PlaceHolder.GetAllCurrentValues()` 对引用了无效属性的占位符抛 `PropertyNotFoundException`（`S063109属性无效`），不是 A33 里的 `LockingException`。`eplan_placeholder_list` 的 `detailed` 原来因此整体报 INTERNAL；工具改为把这样的占位符和未锁定的一样标记为取不到当前值，值集和变量照常返回（待实机复验）。`eplan_placeholder_apply` 在事务里读前后值，遇到这种占位符仍会失败，还没有处理。
 
