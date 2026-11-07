@@ -79,6 +79,9 @@ public sealed class OperationRouter
         }
     }
 
+    /// <summary>ENG-20: on disk before EPLAN is called, because a native crash leaves nothing else that says which call it was.</summary>
+    private void RecordStart(string operationName, string requestId) => _log.Write(BridgeLogLevel.Information, $"[{requestId}] {operationName} starts");
+
     private JToken InvokeRead(IOperation operation, object parsed, OperationContext context)
     {
         string operationName = operation.Name;
@@ -88,6 +91,7 @@ public sealed class OperationRouter
             {
                 // The first safe point: an invoke cancelled while it waited for the main thread does nothing.
                 context.ThrowIfCancellationRequested();
+                RecordStart(operationName, correlationId);
                 return operation.Execute(parsed);
             }),
             _startTimeout);
@@ -127,6 +131,7 @@ public sealed class OperationRouter
             {
                 context.ThrowIfCancellationRequested(); // not_started: the write never began
                 _outcomes.Update(requestId, OutcomeStatus.Running);
+                RecordStart(operation.Name, requestId);
                 return operation.Execute(parsed);
             }),
             _startTimeout);

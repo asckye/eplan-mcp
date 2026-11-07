@@ -23,6 +23,17 @@ public sealed class OperationRouterTests
         Assert.True((bool)data["projects"]![0]!["current"]!);
     }
 
+    [Fact]
+    public void Invoke_RecordsTheOperationBeforeItRuns()
+    {
+        string? atTheStart = null;
+        var catalog = new RecordingCatalog(() => atTheStart = _log.Entries.LastOrDefault().Message);
+
+        Router(new InlineDispatcher(), null, new ReadRecorded(catalog)).Invoke(ReadRecorded.OperationName, new JObject(), "c");
+
+        Assert.Equal("[c] " + ReadRecorded.OperationName + " starts", atTheStart);
+    }
+
     [Theory]
     [InlineData(BusyReason.ModalDialog, "dialog")]
     [InlineData(BusyReason.MainThreadBusy, "did not respond within 10 s")]
@@ -89,6 +100,24 @@ public sealed class OperationRouterTests
 
         Assert.Equal(ErrorReason.InvalidArgument, ex.Error.Reason);
         Assert.Equal(0, dispatcher.Calls);
+    }
+
+    private sealed class RecordingCatalog(Action onCall)
+    {
+        public void Call() => onCall();
+    }
+
+    private sealed class ReadRecorded(RecordingCatalog catalog) : Operation<ProjectListArgs, ProjectListData>
+    {
+        public const string OperationName = "test.recorded";
+
+        public override string Name => OperationName;
+
+        protected override ProjectListData Execute(ProjectListArgs args)
+        {
+            catalog.Call();
+            return new ProjectListData();
+        }
     }
 
     private OperationRouter Router(IMainThreadDispatcher dispatcher, IExceptionMapper? mapper = null, params IOperation[] extra)
