@@ -11484,6 +11484,32 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_masterdata_update",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/MasterDataUpdateTools.cs",
+      "operations": [
+        "masterdata.update.execute",
+        "masterdata.update.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_masterdata_update.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_message_list",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/MessageTools.cs",
