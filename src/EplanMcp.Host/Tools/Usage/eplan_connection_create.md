@@ -11,7 +11,7 @@ autoconnect_break: {kind,position}, generate:false; SPECIAL/ACBP stops autoconne
 
 generate:false: only corner/t_node/potential_point/interruption_point/potential_definition/autoconnect_break; actualPlacements readback, no endpoint/path/pairing checks, one undo; then eplan_connection_generate once. Default true.
 ## Fields
-Omitted interruption_point.symbol uses defaults.interruption.symbol, else BP; explicit wins. Arrow: default points away from the wire (outgoing); a rail's incoming left end takes symbol_variant 4 (BP E). metadata.plugins records sources; changes stale plans.
+Omitted interruption_point.symbol uses defaults.interruption.symbol, else BP; explicit wins. BP arrow: default away from the wire (outgoing); incoming ends take symbol_variant: left 4, top 7, right 2, bottom 5. metadata.plugins records sources; changes stale plans.
 t_node.variant: SPECIAL variant; 0-7 angled like EPLAN samples, default 8+ dot; interruption_point.sort_code (integer >=0) sets ordering (24809).
 definition_point: on existing autoconnect; INVALID_ARGUMENT gives nearest. May mix wires/nodes; new wires use wire.definition_point.
 Both forms: SPECIAL CDP (default)/CDPNG, symbol_variant=0 by default. Optional color (31004), numeric cross_section (31002; dot/comma), designation (31011), part. part_variant defaults "1", part_count defaults 1 (positive uint); unknown part: PART_NOT_FOUND. Nested position defaults to first segment's snapped midpoint. One undo; definitionPoints returns identity, geometry and values. Separate from cable/interruption definitions.
