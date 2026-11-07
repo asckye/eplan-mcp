@@ -566,6 +566,18 @@ public static class OperationNames
     /// </summary>
     public const string MasterDataUpdateExecute = "masterdata.update.execute";
 
+    /// <summary>The shield eplan_shield_create would draw. Reads only. Arguments: <see cref="ShieldCreateArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string ShieldCreatePlan = "shield.create.plan";
+
+    /// <summary>Draws the shield and generates the page's connections in one transaction. Arguments: <see cref="ShieldCreateArgs"/> with the fingerprint; data: <see cref="ShieldCreateData"/>.</summary>
+    public const string ShieldCreateExecute = "shield.create.execute";
+
+    /// <summary>The pages eplan_plc_generate would create. Reads only. Arguments: <see cref="PlcGenerateArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string PlcGeneratePlan = "plc.generate.plan";
+
+    /// <summary>Generates the PLC schematic pages in one transaction. Arguments: <see cref="PlcGenerateArgs"/> with the fingerprint; data: <see cref="PlcGenerateData"/>.</summary>
+    public const string PlcGenerateExecute = "plc.generate.execute";
+
     /// <summary>
     /// Backs the project up, lets EPLAN assign cable connections to core templates and reads back what changed. Arguments:
     /// <see cref="CableReassignArgs"/> with the fingerprint and backup target; data: <see cref="CableReassignData"/>.
