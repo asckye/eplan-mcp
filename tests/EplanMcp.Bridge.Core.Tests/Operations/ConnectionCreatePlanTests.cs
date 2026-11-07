@@ -217,7 +217,8 @@ public sealed class ConnectionCreatePlanTests : IDisposable
     [Fact]
     public void DryRun_ExistingGraphicalLineOrPlacementConflict_Rejects()
     {
-        _fixture.Scene.Graphical.Add([[12, 0], [12, 16]]);
+        // A line ending on the new wire without a node is a conflict; one crossing it at right angles is not (A114).
+        _fixture.Scene.Graphical.Add([[12, 8], [12, 16]]);
         Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => RoundTripPlan()).Error.Reason);
         _fixture.Scene.Graphical.Clear();
         _fixture.Scene.Page.Placements.Add(new() { Location = [24, 8], Bounds = [22, 6, 26, 10] });
