@@ -34,6 +34,9 @@ public sealed class ProjectUpdateArgs
     /// <summary>The properties to set, each once.</summary>
     public List<ProjectPropertyValue>? Properties { get; set; }
 
+    /// <summary>Fills in the project's other languages from the translation database for multi-language values given in one language.</summary>
+    public bool Translate { get; set; }
+
     /// <summary>Plan state fingerprint, required for execution.</summary>
     public string? Fingerprint { get; set; }
 }

@@ -524,6 +524,36 @@ public static class OperationNames
     /// </summary>
     public const string StructureDeleteExecute = "structure.delete.execute";
 
+    /// <summary>What eplan_project_open would open. Reads only. Arguments: <see cref="ProjectOpenArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string ProjectOpenPlan = "project.open.plan";
+
+    /// <summary>Opens a project without a dialog. Arguments: <see cref="ProjectOpenArgs"/> with the fingerprint; data: <see cref="ProjectSessionData"/>.</summary>
+    public const string ProjectOpenExecute = "project.open.execute";
+
+    /// <summary>What eplan_project_close would close. Reads only. Arguments: <see cref="ProjectCloseArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string ProjectClosePlan = "project.close.plan";
+
+    /// <summary>Closes a project. Arguments: <see cref="ProjectCloseArgs"/> with the fingerprint; data: <see cref="ProjectSessionData"/>.</summary>
+    public const string ProjectCloseExecute = "project.close.execute";
+
+    /// <summary>What eplan_structure_rename would rename. Reads only. Arguments: <see cref="StructureRenameArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string StructureRenamePlan = "structure.rename.plan";
+
+    /// <summary>
+    /// Backs the project up and renames structure identifiers, with everything that uses them. Arguments:
+    /// <see cref="StructureRenameArgs"/> with the fingerprint and backup target; data: <see cref="StructureRenameData"/>.
+    /// </summary>
+    public const string StructureRenameExecute = "structure.rename.execute";
+
+    /// <summary>What eplan_plc_readdress would address. Reads only. Arguments: <see cref="PlcReaddressArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string PlcReaddressPlan = "plc.readdress.plan";
+
+    /// <summary>
+    /// Backs the project up, lets EPLAN address its PLC connection points and reads back what changed. Arguments:
+    /// <see cref="PlcReaddressArgs"/> with the fingerprint and backup target; data: <see cref="PlcReaddressData"/>.
+    /// </summary>
+    public const string PlcReaddressExecute = "plc.readdress.execute";
+
     /// <summary>
     /// The plan of eplan_language_set: reads the project's language settings and works out the new ones, never writes.
     /// Arguments: <see cref="LanguageSetArgs"/>; data: <see cref="WritePlan"/> with details.
