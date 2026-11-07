@@ -18650,7 +18650,7 @@
             "type": "string"
           },
           "digital_input": {
-            "description": "First digital input, e.g. I0.0",
+            "description": "First digital input, project format",
             "type": [
               "string",
               "null"
@@ -18658,7 +18658,7 @@
             "default": null
           },
           "digital_output": {
-            "description": "First digital output, e.g. Q0.0",
+            "description": "First digital output, project format",
             "type": [
               "string",
               "null"
@@ -19277,7 +19277,7 @@
     {
       "name": "eplan_project_open",
       "title": "Open an EPLAN project",
-      "description": "Opens a project's .elk file in EPLAN without dialogs and selects it. Previews by default. Approval outside scratch. Example: {\"path\": \"C:\\\\scratch\\\\projects\\\\Line1\\\\Line1.elk\", \"dry_run\": false}.",
+      "description": "Opens a project's .elk file in EPLAN without dialogs. Previews by default. Approval outside scratch. Example: {\"path\": \"C:\\\\scratch\\\\projects\\\\Line1\\\\Line1.elk\", \"dry_run\": false}.",
       "inputSchema": {
         "type": "object",
         "properties": {

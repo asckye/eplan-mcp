@@ -13398,6 +13398,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
           },
           {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
+          {
             "name": "TerminalBusbarPropertyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/TerminalBusbarPropertyTests.cs"
@@ -14376,6 +14381,11 @@
             "name": "ProjectAndPageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectAndPageTests.cs"
+          },
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
           },
           {
             "name": "ReportBlockSpikeTests",
@@ -18378,6 +18388,60 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_plc_readdress",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/PlcReaddressTools.cs",
+      "operations": [
+        "plc.readdress.execute",
+        "plc.readdress.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_plc_readdress.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_project_close",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ProjectSessionTools.cs",
+      "operations": [
+        "project.close.execute",
+        "project.close.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_project_close.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A34"
+        ],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_project_create",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/ProjectCreateTools.cs",
@@ -18811,6 +18875,11 @@
             "file": "tests/EplanMcp.Large.Tests/ProjectRestoreTests.cs"
           },
           {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
+          {
             "name": "SnapshotCopyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SnapshotCopyTests.cs"
@@ -18916,6 +18985,34 @@
           "verifies": true
         }
       ],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_project_open",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ProjectSessionTools.cs",
+      "operations": [
+        "project.open.execute",
+        "project.open.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_project_open.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A41"
+        ],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
       "dataDictionary": []
     },
     {
@@ -21574,9 +21671,40 @@
         "apiNotes": [],
         "tests": [
           {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
+          {
             "name": "StructureToolsTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/StructureToolsTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_structure_rename",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/StructureRenameTools.cs",
+      "operations": [
+        "structure.rename.execute",
+        "structure.rename.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_structure_rename.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
           }
         ],
         "operationTests": []
@@ -21599,6 +21727,11 @@
         "specStatus": "Implemented (Unreleased)",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "ProjectToolsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
           {
             "name": "StructureToolsTests",
             "size": "Large",

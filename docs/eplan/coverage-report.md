@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 109（27.5%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 113（26.5%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -262,10 +262,10 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_pack_install | write | — | 0 | 0 | 0 | 0 | 0 | 1/1/1 | — | — |
 | eplan_pack_library_list | read | — | 0 | 0 | 0 | 0 | 0 | 1/1/0 | — | — |
 | eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
-| eplan_page_create | write | page.create.execute<br>page.create.plan | 85 | 36 | 1 | 41 | 0 | 11/17/18 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
+| eplan_page_create | write | page.create.execute<br>page.create.plan | 85 | 36 | 1 | 41 | 0 | 11/17/19 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 70 | 35 | 0 | 35 | 0 | 3/10/1 | A15 A18 A24 | — |
 | eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 189 | 121 | 2 | 65 | 0 | 7/6/39 | A11 A12 A57 A80 | — |
-| eplan_page_list | read | page.list | 43 | 20 | 1 | 22 | 0 | 15/5/13 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
+| eplan_page_list | read | page.list | 43 | 20 | 1 | 22 | 0 | 15/5/14 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_open | read | page.open | 27 | 14 | 0 | 13 | 0 | 4/2/6 | A54 | — |
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 71 | 29 | 0 | 42 | 0 | 2/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
 | eplan_page_review | read | page.review | 205 | 133 | 2 | 69 | 0 | 4/2/2 | A41 A64 A65 A72 A73 | — |
@@ -285,9 +285,12 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 2/8/5 | A14 A17 A39 | — |
 | eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/6/3 | — | — |
 | eplan_plc_get | read | plc.get | 83 | 40 | 1 | 31 | 0 | 2/1/3 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
+| eplan_plc_readdress | destructive | plc.readdress.execute<br>plc.readdress.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
+| eplan_project_close | write | project.close.execute<br>project.close.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | A34 | — |
 | eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 37 | 15 | 1 | 18 | 1 | 4/3/1 | A31 A32 A34 A35 | — |
 | eplan_project_get | read | project.get | 58 | 31 | 0 | 27 | 0 | 5/3/9 | A11 | 2026-10-19 pass（api-notes A12） |
-| eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/8 | — | 2026-10-18 pass（api-notes A10） |
+| eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/9 | — | 2026-10-18 pass（api-notes A10） |
+| eplan_project_open | write | project.open.execute<br>project.open.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | A41 | — |
 | eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 81 | 37 | 2 | 42 | 0 | 0/1/1 | A11 A14 A25 A28 | — |
 | eplan_project_update | write | project.update.execute<br>project.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
 | eplan_property_get | read | project.get<br>property.read | 382 | 220 | 1 | 160 | 0 | 3/2/4 | A36 A44 | — |
@@ -302,8 +305,9 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/9 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_structure_delete | destructive | structure.delete.execute<br>structure.delete.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
-| eplan_structure_list | read | structure.list | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
-| eplan_structure_update | write | structure.update.execute<br>structure.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
+| eplan_structure_list | read | structure.list | 0 | 0 | 0 | 0 | 0 | 0/0/2 | — | — |
+| eplan_structure_rename | destructive | structure.rename.execute<br>structure.rename.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
+| eplan_structure_update | write | structure.update.execute<br>structure.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/2 | — | — |
 | eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 4/3/10 | A52 A53 A55 | — |
 | eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/3 | — | — |
 | eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 87 | 37 | 0 | 50 | 0 | 0/1/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
