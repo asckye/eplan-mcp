@@ -486,6 +486,18 @@ public static class OperationNames
     public const string PageRenumberExecute = "page.renumber.execute";
 
     /// <summary>
+    /// The plan of eplan_project_update: reads the title block properties and lists what would change, never writes.
+    /// Arguments: <see cref="ProjectUpdateArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string ProjectUpdatePlan = "project.update.plan";
+
+    /// <summary>
+    /// Sets title block properties and reads them back (ADR-0052). Arguments: <see cref="ProjectUpdateArgs"/> with the
+    /// fingerprint; data: <see cref="ProjectUpdateData"/>.
+    /// </summary>
+    public const string ProjectUpdateExecute = "project.update.execute";
+
+    /// <summary>
     /// The plan of eplan_language_set: reads the project's language settings and works out the new ones, never writes.
     /// Arguments: <see cref="LanguageSetArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>

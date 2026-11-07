@@ -21,11 +21,24 @@ public static class TextLanguages
     // As above, and the language-independent code.
     private static readonly Regex _anyStoredLanguage = new(@"(?:^|;)([A-Za-z]{2}_[A-Za-z]{2}|\?\?_\?\?)@", RegexOptions.CultureInvariant);
 
+    private static readonly Regex _entry = new(@"([A-Za-z]{2}_[A-Za-z]{2}|\?\?_\?\?)@([^;]*);", RegexOptions.CultureInvariant);
+
     // Only real languages, each entry closed by ';': the serialized form of a text written in several languages.
     private static readonly Regex _serialized = new(@"^(?:[A-Za-z]{2}_[A-Za-z]{2}@[^;]*;)+$", RegexOptions.CultureInvariant);
 
     /// <summary>True for <c>zh_CN@…;en_US@…;</c>. A54 still refuses mixing real languages with <c>??_??</c>.</summary>
     public static bool IsSerialized(string? text) => text is not null && _serialized.IsMatch(text);
+
+    /// <summary>Whether two stored values hold the same texts: the language order and empty entries do not count, and plain text is language-independent.</summary>
+    public static bool SameValue(string first, string second) => Entries(first).SequenceEqual(Entries(second));
+
+    private static IEnumerable<KeyValuePair<string, string>> Entries(string value)
+    {
+        MatchCollection found = _entry.Matches(value);
+        return found.Count == 0 || string.Concat(found.Cast<Match>().Select(m => m.Value)) != value
+            ? value.Length == 0 ? [] : [new KeyValuePair<string, string>(Independent, value)]
+            : found.Cast<Match>().Where(m => m.Groups[2].Length > 0).Select(m => new KeyValuePair<string, string>(m.Groups[1].Value, m.Groups[2].Value)).OrderBy(e => e.Key, StringComparer.Ordinal);
+    }
 
     /// <summary>A text that serialized several languages reads back as a whole or in the language EPLAN displays.</summary>
     public static bool ReadsBackAs(string requested, string? actual) =>

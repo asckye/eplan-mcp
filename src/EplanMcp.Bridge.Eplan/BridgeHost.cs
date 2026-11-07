@@ -95,6 +95,7 @@ internal static class BridgeHost
         var connectionNumberer = new EplanConnectionNumberer();
         var backup = new EplanProjectBackup();
         var languages = new EplanProjectLanguages();
+        var projectProperties = new EplanProjectProperties();
         var languageRemover = new EplanLanguageRemover();
         var partsDatabase = new EplanPartsDatabase();
         var placer = new EplanDevicePlacer();
@@ -226,6 +227,8 @@ internal static class BridgeHost
             new DeviceRenumberExecuteOperation(catalog, pages, renumberer, backup, transactions),
             new PageRenumberPlanOperation(catalog, pages, pageRenumberer),
             new PageRenumberExecuteOperation(catalog, pages, pageRenumberer, backup, transactions),
+            new ProjectUpdatePlanOperation(catalog, projectProperties),
+            new ProjectUpdateExecuteOperation(catalog, projectProperties, transactions),
             new LanguageSetPlanOperation(catalog, languages),
             new LanguageSetExecuteOperation(catalog, languages, transactions),
             new LanguageRemovePlanOperation(catalog, languages, languageRemover),

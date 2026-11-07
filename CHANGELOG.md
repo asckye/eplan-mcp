@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### 新增
+- 新增 `eplan_project_update`：写封面和标题栏用到的项目属性（公司、地址、项目描述、创建者等，以及模板自定义的 `ESS.Project.*`），默认预览，一次撤销。
 - `eplan_report_create` 新增类型 `InterconnectDiagram`（电缆图，F09 表格）；表格不在项目里时自动从系统表格目录复制。
 - `eplan_connection_create` 的 `cable_definition` 新增 `cross_section_text`、`core_labels_only`，芯线的 `colour` 改为可选。
 - `eplan_device_place` 新增 `location_box_polyline`（`SPECIAL/SC2`）；`eplan_macro_insert` 的 `representation` 支持 `SingleLine`；`eplan_placement_create` 可以写到单线页。

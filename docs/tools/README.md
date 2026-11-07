@@ -50,6 +50,7 @@
 | `eplan_import_pxf` | full | 写入 | [eplan_import_pxf.md](eplan_import_pxf.md) |
 | `eplan_language_remove` | full | 写入 | [eplan_language_remove.md](eplan_language_remove.md) |
 | `eplan_language_set` | full | 写入 | [eplan_language_set.md](eplan_language_set.md) |
+| `eplan_project_update` | full | 写入 | [eplan_project_update.md](eplan_project_update.md) |
 | `eplan_macro_get` | core、full | 只读 | [eplan_macro_get.md](eplan_macro_get.md) |
 | `eplan_macro_insert` | core、full | 写入 | [eplan_macro_insert.md](eplan_macro_insert.md) |
 | `eplan_macro_list` | core、full | 只读 | [eplan_macro_list.md](eplan_macro_list.md) |
