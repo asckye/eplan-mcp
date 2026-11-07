@@ -246,6 +246,8 @@ internal static class BridgeHost
             new ProjectCloseExecuteOperation(catalog, projectSessions),
             new PlcReaddressPlanOperation(catalog, plcAddressing),
             new PlcReaddressExecuteOperation(catalog, plcAddressing, pages, backup, transactions),
+            new CableReassignPlanOperation(catalog, cableRenumberer, new EplanCableReader()),
+            new CableReassignExecuteOperation(catalog, cableRenumberer, new EplanCableReader(), new EplanCableReassigner(), pages, backup, transactions),
             new LanguageSetPlanOperation(catalog, languages),
             new LanguageSetExecuteOperation(catalog, languages, transactions),
             new LanguageRemovePlanOperation(catalog, languages, languageRemover),

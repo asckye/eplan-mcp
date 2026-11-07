@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### 新增
+- 新增 `eplan_cable_reassign`：对应 EPLAN 的"全部重新分配"，把电缆的连接分配到部件的芯线，电缆图表和端子图表才会列出芯线和连接的对应关系。
 - 新增 `eplan_project_open`、`eplan_project_close`：不弹对话框地打开和关闭项目，一个项目从创建到导出不再需要工具之外的步骤。
 - 新增 `eplan_plc_readdress`：按起始地址批量给 PLC 连接点编址。
 - 新增 `eplan_structure_rename`：给结构标识符改名，用到它的页和设备一起变；`eplan_structure_update` 新增 `order` 排序。

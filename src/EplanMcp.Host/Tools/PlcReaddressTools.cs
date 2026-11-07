@@ -91,7 +91,7 @@ internal sealed class PlcReaddressTools
             Scope = ResultShaper.CleanText(outcome.Plan.Changes.FirstOrDefault()?.OldValue),
             Changed = [.. (outcome.Data?.Changed ?? []).Select(c => new PlcAddressChange { Tag = ResultShaper.CleanText(c.Tag), Previous = ResultShaper.CleanText(c.Previous), Address = ResultShaper.CleanText(c.Address) })],
             ChangedCount = outcome.Data?.ChangedCount ?? 0,
-            Undo = committed ? "AI: " + Tool : null,
+            Undo = committed && outcome.Data is not { ChangedCount: 0 } ? "AI: " + Tool : null,
             Backup = outcome.Backup ?? outcome.Data?.Backup,
             Recovered = outcome.Recovered,
             Hint = outcome.Recovered

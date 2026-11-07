@@ -554,6 +554,15 @@ public static class OperationNames
     /// </summary>
     public const string PlcReaddressExecute = "plc.readdress.execute";
 
+    /// <summary>What eplan_cable_reassign would reach. Reads only. Arguments: <see cref="CableReassignArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string CableReassignPlan = "cable.reassign.plan";
+
+    /// <summary>
+    /// Backs the project up, lets EPLAN assign cable connections to core templates and reads back what changed. Arguments:
+    /// <see cref="CableReassignArgs"/> with the fingerprint and backup target; data: <see cref="CableReassignData"/>.
+    /// </summary>
+    public const string CableReassignExecute = "cable.reassign.execute";
+
     /// <summary>
     /// The plan of eplan_language_set: reads the project's language settings and works out the new ones, never writes.
     /// Arguments: <see cref="LanguageSetArgs"/>; data: <see cref="WritePlan"/> with details.

@@ -148,6 +148,31 @@ public sealed class ProjectToolsTests(LiveEplan eplan, DestructiveHost host) : I
         Assert.Equal(before, (await host.CallAsync("eplan_plc_readdress", probe)).GetProperty("fingerprint").GetString());
     }
 
+    [Fact]
+    public async Task CableReassign_OneCable_CommitsAndOneUndoRestores()
+    {
+        host.Approvals.Forget();
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        JsonElement list = await eplan.CallAsync("eplan_device_list", new() { ["project"] = session.Project, ["category"] = "Cable", ["limit"] = 1 });
+        string cable = list.GetProperty("devices")[0].GetProperty("tag").GetString()!;
+        var args = new Dictionary<string, object?> { ["project"] = host.Writable, ["cables"] = new[] { cable } };
+        JsonElement preview = await host.CallAsync("eplan_cable_reassign", args);
+        Assert.Equal("not_started", preview.GetProperty("execution").GetString());
+        string before = preview.GetProperty("fingerprint").GetString()!;
+        host.Approvals.Approve("eplan_cable_reassign", host.Writable, new[] { $"update cables {WriteHost.WritableName}: cores '{preview.GetProperty("scope").GetString()}' -> 'assigned by EPLAN'" });
+        args["dry_run"] = false;
+        JsonElement done = await host.CallAsync("eplan_cable_reassign", args);
+        Assert.Equal("committed", done.GetProperty("execution").GetString());
+        TestContext.Current.TestOutputHelper!.WriteLine($"{cable}: {done.GetProperty("changedCount").GetInt32()} changed: {done.GetProperty("changed")}");
+        // The sample project's cables are assigned already; EPLAN then adds no undo step, and undoing would raise its conflict dialog (A41).
+        if (done.GetProperty("changedCount").GetInt32() > 0)
+        { await session.UndoAsync(); }
+        else
+        { Assert.Equal(JsonValueKind.Null, done.GetProperty("undo").ValueKind); }
+        args.Remove("dry_run");
+        Assert.Equal(before, (await host.CallAsync("eplan_cable_reassign", args)).GetProperty("fingerprint").GetString());
+    }
+
     private async Task<List<string>> OpenAsync() =>
         [.. (await eplan.CallAsync("eplan_project_list", new() { ["limit"] = 200 })).GetProperty("projects").EnumerateArray().Select(p => p.GetProperty("path").GetString()!)];
 
