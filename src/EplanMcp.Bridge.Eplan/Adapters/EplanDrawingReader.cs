@@ -256,6 +256,7 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
                 {
                     ["coordinate_space"] = blockChild ? "block-relative; absolute geometry unverified" : null,
                     ["layout_symbol"] = placement is SymbolReference && placement.GetType().Name is not ("LocationBox" or "Cable" or "DynamicConnectionLine") ? "true" : null,
+                    ["symbol"] = placement is SymbolReference reference ? SymbolOf(reference) : null,
                     ["layout_container_owner"] = containerOwner,
                     ["layout_container"] = isContainer ? "true" : null,
                     ["grouped"] = grouped?.ToString().ToLowerInvariant(),
@@ -314,6 +315,21 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
     }
 
     private static double[] XY(PointD point) => [DrawingCoordinates.ApiToMillimetres(point.X), DrawingCoordinates.ApiToMillimetres(point.Y)];
+    /// <summary>A114: library/name/variant of the placed symbol, what a redraw needs to place the same one; null when EPLAN cannot tell.</summary>
+    private static string? SymbolOf(SymbolReference reference)
+    {
+        try
+        {
+            var variant = reference.SymbolVariant;
+            return variant is null ? null : variant.SymbolLibraryName + "/" + variant.SymbolName + "/" + variant.VariantNr.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+        catch (BaseException ex)
+        {
+            WriteExceptionDiagnostics.Report(ex);
+            return null;
+        }
+    }
+
     private static string Number(double value) => value.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
     private static double[]? Optional(Func<double[]?> read)
     {
