@@ -485,6 +485,13 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A114. 照着已有页重画：交叉线、符号读回和跨页中断点（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，示例项目副本）
+- **直角交叉不连接：** 示例项目 `=GAA+A1&EFS1/2` 的三相母线（y=284/280/276）和往下接断路器的线交叉，连接列表里没有交叉处的连接。所以 `eplan_connection_create` 允许两条线直角交叉、且都不以对方为端点；以对方中间为端点的仍要显式 T 节点，共线重叠仍拒绝。
+- **读出已放符号：** `SymbolReference.SymbolVariant` 的 `SymbolLibraryName/SymbolName/VariantNr` 能读，`eplan_page_get` 的图形对象属性 `symbol` 给出 `库/名/变体`。示例页：断路器 `IEC_symbol/FA1/0`，指示灯 `IEC_symbol/H/0`，母线连接点 `SPECIAL/BCP/2`，T 节点 `SPECIAL/TLRU/0`、`TOUR/1`、`TLRO/0`，角 `SPECIAL/CO/1`、`CO/2`。
+- **和其他页同名的中断点：** 新页的中断点和其他页同名时会接入原来的链，生成的连接跨到别的页（`FC2R:1 -> =GAB1+A1-FC1:1/L1`），`eplan_connection_create` 的预测只看本页，判为多出的连接而整个撤销。要先用 `generate:false` 放节点和中断点，再 `eplan_connection_generate`。原页的连接也随之从 9 条变成 12 条，因为链延伸到了新页。
+- **对齐放置后要先生成：** 器件对齐放好后它们之间的线只是图形，没有连接；接着放节点时生成会补出这些连接，同样判为多出。先 `eplan_connection_generate`。
+- **一段线属于两条连接时不能放定义点：** EPLAN 生成的 N 线是 `PF2R:X2 -> PF4R:X2`、`PF3R:X2 -> PF4R:X2`（原页是 `PF2-PF3`、`PF3-PF4`），`80..104` 这段两条都经过，工具拒绝在上面放定义点。连接的排列顺序怎么控制还没查明。— 第 5 道绘图题在会话里实画。
+
 ### A113. PLC 原理图生成（2026-11-07，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
 - **`PlcService.ExportGenerateSchematicConfiguration(project, 文件)`** 导出项目自己的配置：每个 PLC 设备一个 `DEVICE`，下面每个功能一个 `Function`，主功能带 `Macro`（来自部件，如 `$(MD_MACROS)\PXC\2861344.ema`），已放置的表达带 `MultiLinePage`、`OverviewPage`、`SingleLinePage`。
 - **`PlcService.GenerateSchematic(project, 文件, 单线, 多线, 总览, 机架)`：** 在总览里插入宏之后，给导出的配置写上不存在的多线页名再生成：EPLAN 自己建页（类型 Circuit，页描述来自宏），放 39 个对象、8 个功能，功能并入总览的设备（`=GAA+A1-A1:1.1` 等），不用再改名合并（对比 A90）。返回生成的页。

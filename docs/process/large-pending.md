@@ -67,6 +67,7 @@
 
 ## 最近移出（已实机通过）
 
+- 2026-11-07，5 道绘图题在会话里用 MCP 工具实画（Electric P8，示例项目副本）：按题目的检查项全部满足；第 5 题先后补了直角交叉和符号读回
 - 2026-11-07，第二批工具：`ProjectToolsTests` 的屏蔽（`Shield_OverTwoWires_ListsThem_OneUndoRestores`）、PLC 生成（`PlcGenerate_JoinsTheOverviewDevice_OneUndoRemovesThePage`）、位置框轮廓（`LocationBoxOutline_KeepsTheNotch`）各 1/1（B 槽）
 - 2026-11-06，结构标识符排序和主数据更新：`ProjectToolsTests` 的 `Order_SortsTheBlock_ReadsBack_OneUndoRestores`、`MasterDataUpdate_NoDialog_ProjectStaysReadable` 各 1/1（B 槽），main 553abd80
 - 2026-11-02，页面审查第 1 片（含 Cable 定义点修复、电缆建议改为重画）：`PageReviewTests` 8 项通过、cable 修复步骤按设计跳过，`PlacementMoveTests` 1/1，`AcceptanceRedrawTests` 按已知跳过结束（B 槽 Pro Panel），main 714d6200
