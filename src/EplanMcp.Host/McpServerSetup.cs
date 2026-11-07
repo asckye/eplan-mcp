@@ -165,6 +165,7 @@ internal static class McpServerSetup
             .WithTools<ProjectSessionTools>(HostJson.Options)
             .WithTools<PlcReaddressTools>(HostJson.Options)
             .WithTools<CableReassignTools>(HostJson.Options)
+            .WithTools<MasterDataUpdateTools>(HostJson.Options)
             .WithTools<ReportSettingsTools>(HostJson.Options)
             .WithTools<LanguageWriteTools>(HostJson.Options)
             .WithTools<LanguageDestructiveTools>(HostJson.Options)

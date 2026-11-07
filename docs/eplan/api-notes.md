@@ -485,6 +485,12 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A111. 从模板新建的项目存的是模板里的旧表格（2026-11-06，EPLAN 2026.0.3.25421，Electric P8，复刻 71 页图纸）
+- **现象：** 新项目的报表表头和 PDF 不同（`自由布线的导线`、`定位源`；PDF 是 `空闲芯线`、`位置来源`），旧项目却和 PDF 一样。两个项目的设置和表格名都相同，`Form.eod` 大小也相同，但内容不同：`F09_001`、`F13_001` 两条记录的未压缩大小都不一样。系统目录的 `.f09` 用的是 PDF 的词。
+- **原因：** 旧流程在打开项目时对"主数据已经陈旧"按了按钮，新流程用 `eplan_project_open`（`QuietModeStep(ShowNoDialogs)`）不弹对话框，所以项目没有更新。`eplan_report_create` 只在项目缺表格时才从系统复制，已有的同名表格不替换（A105）。
+- **`Masterdata.UpdateProject(project)`：** 在 `QuietModeStep(ShowNoDialogs)` 里不弹对话框。这个项目更新前后都是 76 个文件，没有新增。之后 `eplan_report_update` 刷新报表，表头变成 PDF 的词，报表对比从 75.4% 升到 87.3%；25 页原理图的文字和连接对比不变（2222/2246、1177/1187）。工具 `eplan_masterdata_update` 按 Destructive 处理，先备份。
+- **未验证：** 这个调用能不能回滚或撤销，所以它不进事务；中途失败报 OUTCOME_UNKNOWN，靠备份恢复。
+
 ### A110. `eplan_page_review` 读了已释放的属性列表，EPLAN 随后崩溃（2026-11-06，EPLAN 2026.0.3.25421，Electric P8）
 - 🔴 现象：从零绘制时连续 3 次 `0xc0000374`（ntdll，偏移 0x118095），都在第 17、18 页。每次之前都有 `page.review failed unexpectedly`，`PropertyNotFoundException` S063109，堆栈 `ConnectionPropertyList.get_CONNECTION_WIRECROSSSECTION`。一次英文名项目多跑了几步才崩，所以项目名不是原因。
 - 根因：连接不在电缆清单里时，`EplanPageReviewReader` 先调用 `ReadCableWire`，它 `using` 释放了 `connection.Properties`；之后又读同一包装器缓存的列表（`StorableObject.Properties` 只创建一次，A80），违反 A36。异常本身不致命，被破坏的堆在之后几秒的写入中才崩溃，所以崩溃点看起来是随机的。
@@ -495,14 +501,14 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - **部件列表逐个列出：** 项目设置 `PartsListGui.SummarizePartsOfSameDT`（`Cfg/PartsListGui.xml`，默认 true）决定同标识、同部件号是否合并成一行。设为 false 后报表更新，部件列表从 4 页 108 行变成 5 页 162 行，和原图相同。用 `ProjectSettings` 读写，读回一致。
 - **部件更新只改所选的页：** `eplan_report_update` 只更新传入的页。后续页变成子页 `/1.1`，要 `eplan_page_renumber` 的 `to_main` 改回。
 - **端子排定义可以带部件：** 类别 `TerminalDefText` 的设备（如 `=+S1-X0`）用 `eplan_device_update` 加部件，部件列表就有端支架和标记架这两行。
-- **功能文本的两个来源：** `FUNC_TEXT_AUTOMATIC`（20031）取手工的 20011，空时取路径功能文本（`Graphics.PathText`）。官方说明路径文本用于 PLC 交叉参考、端子图和部件列表。所以原图的报表有"加热器"，原理图上却不多显示，原因应该就在这里；A105 提到的隐藏问题可能也是这个，待新项目实测确认。
+- **功能文本的两个来源：** `FUNC_TEXT_AUTOMATIC`（20031）取手工的 20011，空时取路径功能文本（`Graphics.PathText`）。官方说明路径文本用于 PLC 交叉参考、端子图和部件列表。所以原图的报表有"加热器"，原理图上却不多显示；A105 提到的隐藏问题也是这个。新项目实测确认：电机列下放路径功能文本（`eplan_placement_create` 的 `kind:"path_text"`）后，电缆和端子报表的"功能文本"列和 PDF 一致，原理图不多出文字。
 - **报表选项在 `Cfg/FormGeneratorGui.xml`：** 比如 `FuncTextReplace`、`FuncTextReplaceString` 决定相同功能文本是否替换成"="。
 - **未解决：** 原图表格行显示中英文两行、行高 12 mm；本机相同表格只显示第一种语言、行高 8 mm。结构标识符描述存了两种语言，显示语言也是 `zh_CN;en_US`，原因没有查明。
 
 ### A107. 打开和关闭项目、结构标识符的顺序和改名、PLC 编址（2026-11-06，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
 - **打开和关闭：** `QuietModeStep(ShowNoDialogs)` 内 `ProjectManager.OpenProject(路径, OpenMode.Exclusive)` 打开，`EplanProjects.ByPath(路径).Close()` 关闭。重开后页数不变，写入和一次撤销都正常；只有它一个项目打开时它就是当前项目。— `ProjectToolsTests`。
 - **不要在打开后调用 `Edit.SelectProjectInPagesNavigator`：** 调用过之后，`ProjectOpen` 再打开的项目不再成为当前项目，Large 夹具靠开页恢复当前项目，下一次 `XPrjActionProjectClose` 弹"项目选择"对话框，EPLAN 随后返回 EPLAN_BUSY。去掉这一步后不再出现。因果关系只由这一次对比支持。
-- **结构标识符的顺序：** `Project.GetLocationObjects(块)` 和 `GetLocations(块)` 按顺序返回，`GetLocationObjects()` 不是（读回校验曾因此失败）。`SortId` 是负的小数，越小越靠前。`SetSortedLocations` 把传入的放在最前面，排在该块的空标识之前，`SafetyPoint` 能回滚，返回 true；其余标识之间的顺序可能被 EPLAN 改变（`C2`、`B4` 变成 `B4`、`C2`），所以位置重要的都要传。名称用 `GetLocations` 的写法（`B1.X1`）；`Location.Name` 只是最后一段（`X1`）。— spike S21 探针。
+- **结构标识符的顺序：** `Project.GetLocationObjects(块)` 和 `GetLocations(块)` 按顺序返回，`GetLocationObjects()` 不是（读回校验曾因此失败）。`SortId` 是负的小数，越小越靠前。`SetSortedLocations` 把传入的放在最前面，排在该块的空标识之前（所以要把空字符串放在第一个，否则没有这个结构的页会排到最后，目录顺序全错），`SafetyPoint` 能回滚，返回 true；其余标识之间的顺序可能被 EPLAN 改变（`C2`、`B4` 变成 `B4`、`C2`），所以位置重要的都要传。名称用 `GetLocations` 的写法（`B1.X1`）；`Location.Name` 只是最后一段（`X1`）。— spike S21 探针。
 - **`Project.ChangeLocationName(Location, 名称)`：** 名称传最后一段，用到它的页名一起变，一次撤销恢复。— `ProjectToolsTests`。
 - **`PlcService.ReaddressTerminals`：** 起始地址要和项目的地址格式一致。示例项目是 `%IX2.7`，传 `I100.0` 抛 `ArgumentException`（S029035，参数 `strDigitalInputStartAddress`），传 `%IX100.0` 把地址整体平移（`%IX2.7` → `%IX102.7`），846 个连接点，一次撤销恢复。— `ProjectToolsTests`。
 - **`Translate.TranslateText(文本, 项目)` 返回 `MultiLangString`：** 词典里没有的词只有一种语言（`zh_CN@Schaltplan;`）。词典里有的词在 P8 上的结果待补。

@@ -557,6 +557,15 @@ public static class OperationNames
     /// <summary>What eplan_cable_reassign would reach. Reads only. Arguments: <see cref="CableReassignArgs"/>; data: <see cref="WritePlan"/>.</summary>
     public const string CableReassignPlan = "cable.reassign.plan";
 
+    /// <summary>What eplan_masterdata_update would reach. Reads only. Arguments: <see cref="MasterDataUpdateArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string MasterDataUpdatePlan = "masterdata.update.plan";
+
+    /// <summary>
+    /// Backs the project up and replaces its stored master data with the system's, outside a transaction. Arguments:
+    /// <see cref="MasterDataUpdateArgs"/> with the fingerprint and backup target; data: <see cref="MasterDataUpdateData"/>.
+    /// </summary>
+    public const string MasterDataUpdateExecute = "masterdata.update.execute";
+
     /// <summary>
     /// Backs the project up, lets EPLAN assign cable connections to core templates and reads back what changed. Arguments:
     /// <see cref="CableReassignArgs"/> with the fingerprint and backup target; data: <see cref="CableReassignData"/>.

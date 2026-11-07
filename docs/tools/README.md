@@ -53,6 +53,7 @@
 | `eplan_project_update` | full | 写入 | [eplan_project_update.md](eplan_project_update.md) |
 | `eplan_project_open` | full | 写入 | [eplan_project_open.md](eplan_project_open.md) |
 | `eplan_project_close` | full | 写入 | [eplan_project_close.md](eplan_project_close.md) |
+| `eplan_masterdata_update` | full | 写入 | [eplan_masterdata_update.md](eplan_masterdata_update.md) |
 | `eplan_plc_readdress` | full | 写入 | [eplan_plc_readdress.md](eplan_plc_readdress.md) |
 | `eplan_cable_reassign` | full | 写入 | [eplan_cable_reassign.md](eplan_cable_reassign.md) |
 | `eplan_report_configure` | full | 写入 | [eplan_report_configure.md](eplan_report_configure.md) |

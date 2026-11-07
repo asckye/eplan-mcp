@@ -251,6 +251,8 @@ internal static class BridgeHost
             new ReportSettingsExecuteOperation(catalog, reportSettings),
             new CableReassignPlanOperation(catalog, cableRenumberer, new EplanCableReader()),
             new CableReassignExecuteOperation(catalog, cableRenumberer, new EplanCableReader(), new EplanCableReassigner(), pages, backup, transactions),
+            new MasterDataUpdatePlanOperation(catalog, new EplanProjectMasterData()),
+            new MasterDataUpdateExecuteOperation(catalog, new EplanProjectMasterData(), pages, backup),
             new LanguageSetPlanOperation(catalog, languages),
             new LanguageSetExecuteOperation(catalog, languages, transactions),
             new LanguageRemovePlanOperation(catalog, languages, languageRemover),

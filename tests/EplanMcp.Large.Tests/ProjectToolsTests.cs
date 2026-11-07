@@ -174,6 +174,23 @@ public sealed class ProjectToolsTests(LiveEplan eplan, DestructiveHost host) : I
     }
 
     [Fact]
+    public async Task MasterDataUpdate_NoDialog_ProjectStaysReadable()
+    {
+        host.Approvals.Forget();
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        var args = new Dictionary<string, object?> { ["project"] = host.Writable };
+        JsonElement preview = await host.CallAsync("eplan_masterdata_update", args);
+        Assert.Equal("not_started", preview.GetProperty("execution").GetString());
+        host.Approvals.Approve("eplan_masterdata_update", host.Writable, new[] { $"update project {WriteHost.WritableName}: master data '{preview.GetProperty("scope").GetString()}' -> 'the system's versions'" });
+        args["dry_run"] = false;
+        JsonElement done = await host.CallAsync("eplan_masterdata_update", args);
+        Assert.Equal("committed", done.GetProperty("execution").GetString());
+        Assert.True(done.GetProperty("entries").GetInt32() > 0);
+        TestContext.Current.TestOutputHelper!.WriteLine($"{preview.GetProperty("scope").GetString()} -> {done.GetProperty("entries").GetInt32()}, added {done.GetProperty("added")}");
+        Assert.NotEmpty((await eplan.CallAsync("eplan_page_list", new() { ["project"] = session.Project })).GetProperty("pages").EnumerateArray());
+    }
+
+    [Fact]
     public async Task ReportSettings_SetAndReadBack_ThenRestored()
     {
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
