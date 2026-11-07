@@ -201,7 +201,7 @@ public sealed class DevicePlaceExecuteOperation(
         string bare = tag.StartsWith("-", StringComparison.Ordinal) ? tag.Substring(1) : tag;
         bool Belongs(string name) => placed.Terminal is not null ? DevicePlaceRequest.SameName(request.Tag, name)
             : DevicePlaceRequest.WithoutEmptyFunction(name) is var own && (own == tag || own.StartsWith(tag + ":", StringComparison.Ordinal)
-                || own.IndexOfAny(['=', '+', '-']) < 0 && (own == bare || own.StartsWith(bare + ":", StringComparison.Ordinal)));
+                || !DevicePlaceRequest.HasStructure(own) && (own == bare || own.StartsWith(bare + ":", StringComparison.Ordinal)));
         // Live 2026-11-03 (A85): before the commit the other functions' wrappers still show the old tag; they are read again by
         // the new tag after the commit, where every function must carry it.
         string? other = committed ? placed.Names.FirstOrDefault(name => !Belongs(name)) : null;

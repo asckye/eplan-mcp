@@ -303,7 +303,10 @@ internal sealed class DevicePlaceRequest
 
     /// <summary>A121: in a project without structure EPLAN stores -M1 as M1, so a device named M1 takes -M1 (join_device, ALREADY_EXISTS).</summary>
     private static string BareOf(string full, string actual) =>
-        full.Length > 1 && full[0] == '-' && WithoutEmptyFunction(actual).IndexOfAny(['=', '+', '-']) < 0 ? full.Substring(1) : full;
+        full.Length > 1 && full[0] == '-' && !HasStructure(WithoutEmptyFunction(actual)) ? full.Substring(1) : full;
+
+    /// <summary>Whether the device part (before the first ':') carries structure; a pin such as PS1:+ or PS1:- does not count.</summary>
+    internal static bool HasStructure(string name) => (name.IndexOf(':') is var colon and >= 0 ? name.Substring(0, colon) : name).IndexOfAny(['=', '+', '-']) >= 0;
 
     internal static bool SameName(string requested, string? actual, bool ignoreCase = false)
     {
@@ -312,7 +315,7 @@ internal sealed class DevicePlaceRequest
         StringComparison comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         actual = WithoutEmptyFunction(actual);
         // A121: in a project without structure (NFPA basic projects) EPLAN stores -DI2 as DI2.
-        if (requested.Length > 1 && requested[0] == '-' && actual.IndexOfAny(['=', '+', '-']) < 0 && string.Equals(requested.Substring(1), actual, comparison))
+        if (requested.Length > 1 && requested[0] == '-' && !HasStructure(actual) && string.Equals(requested.Substring(1), actual, comparison))
         { return true; }
         return string.Equals(requested, actual, comparison)
             || (requested.Length > 0 && requested[0] == '=' && actual.Length > 0 && actual[0] is '+' or '-'
