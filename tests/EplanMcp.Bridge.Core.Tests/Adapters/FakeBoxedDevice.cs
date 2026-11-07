@@ -38,6 +38,14 @@ internal sealed class BoxedDevice(long oid = 40) : Function(oid)
         OnCreate?.Invoke(this);
     }
 
+    /// <summary>Function.Create(page, variant, start, end): the symbol and the logical area together (MX_NFPA 2026-11-07).</summary>
+    public void Create(Page page, SymbolVariant variant, PointD lowerLeft, PointD upperRight)
+    {
+        Create(page);
+        SymbolVariant = variant;
+        SetLogicalArea(lowerLeft, upperRight);
+    }
+
     public void SetLogicalArea(PointD lowerLeft, PointD upperRight)
     {
         CheckNative?.Invoke();

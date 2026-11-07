@@ -322,6 +322,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - 黑盒：`new BoxedDevice()`，先 `Create(page)`，再设 `SymbolVariant = SPECIAL/DC 变体 0`（在 `Create` 之前设符号抛 S063080），建出 `BoxedDevice`（类别 Blackbox，主功能）；
   `SymbolReference.SetLogicalArea(左下, 右上)` 设外框，读回 `GetLogicalArea` 为 60 × 40。框内用 `Function.Create(page, SPECIAL/DCP)` 建的设备连接点
   命名为"黑盒标识:代号"（示例项目的 `-PF1:1` 连接点代号就是 `1`）后，与黑盒同属一个器件（黑盒的框内功能列表包含它）。— 实测
+- 2026-11-07 补充（MX_NFPA，NFPA 基本项目）：上面 `Create(page)` → `SymbolVariant` → `SetLogicalArea` 的顺序只改了逻辑区域，导出图里 DC 外框仍是符号默认的 8 × 4 mm 小矩形，画在区域左上角；`SetLogicalAreaLocal(..., true)` 不起作用，符号内的 `Rectangle.SetArea` 因图形被锁失败（LOCK_FAILED）。改用 `Function.Create(page, variant, 左下, 右上)`（官方说明：同时设定符号和逻辑区域）后外框覆盖整个区域。直接写 `Name` 后黑盒的标识文字（20010）为空，要像其他符号一样调 `NameService.AdjustVisibleName`。— 实测
 - 母线：`Function.Create(page, SPECIAL/BBDEF)`（符号库类型 TextFunction，对象的 .NET 类型读回为 `Function`，类别 BusBarDefText，主功能）与 `SPECIAL/BCP`（类别 Busbar）给同一标识后属于同一器件；标识只保留位置代号（`-WE9` 读回 `+A1-WE9`，示例项目也是 `+A1-WE1`）。— 实测
 - 端子符号 `GRAPHICS/KA1_PE` 建出的端子读 `FUNC_TERMINALSORTCODE` 抛 `PropertyNotFoundException`（S063109）；`IEC_symbol/X2_2` 没有这个问题。— 实测
 - 对 CDP、CDPNG 的 `SymbolReference.GetLogicalArea()` 抛出 `NotImplementedException`；黑盒上可用。— 实测

@@ -83,13 +83,15 @@ internal sealed partial class EplanDeviceSymbolPlacement
 #pragma warning disable CA2000 // A86: persistent boxes belong to EPLAN, including on Abort.
         var box = new BoxedDevice();
 #pragma warning restore CA2000
-        // A86: the symbol can only be set on a created object (S063080 before Create).
-        box.Create(page);
-        box.SymbolVariant = variant;
+        // A86: the symbol cannot be set before Create (S063080). MX_NFPA 2026-11-07: Create(page), SymbolVariant and then
+        // SetLogicalArea left the DC outline at the symbol's 8 x 4 mm at the upper-left corner, and its graphics are locked
+        // (Rectangle.SetArea fails). Function.Create(page, variant, start, end) sets the symbol together with the logical area.
+        box.Create(page, variant, new PointD(args.X, args.Y), new PointD(args.CornerX!.Value, args.CornerY!.Value));
         if (args.JoinDevice == true)
         { box.IsMainFunction = false; }
         box.Name = tag;
-        box.SetLogicalArea(new PointD(args.X, args.Y), new PointD(args.CornerX!.Value, args.CornerY!.Value));
+        // MX_NFPA 2026-11-07: like other symbols, adjust the visible name, or the tag text (20010) stays empty.
+        EplanVisibleNames.Adjust(page, box);
         var category = box.FunctionCategory;
         Require(box.IsMainFunction == (args.JoinDevice != true) && category.ToString() == "Blackbox" && DevicePlaceRequest.SameName(tag, box.Name));
         RectangleD area = box.GetLogicalArea();
