@@ -5,7 +5,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 /// <summary>
 /// <see cref="OperationNames.MacroInsertPlan"/>: checks the page, the macro and where its outline goes, and returns one
-/// <c>create</c> change with the macro's devices in the details for the dry run (docs/tools/eplan_macro_insert.md,
+/// <c>create</c> change and requested value-set applications, with the macro's devices in the details for the dry run (docs/tools/eplan_macro_insert.md,
 /// section 5). Reads only: the macro is opened without inserting it, which S10 found leaves the project alone (A14).
 /// </summary>
 public sealed class MacroInsertPlanOperation(IProjectCatalog catalog, IPageReader pages, IDeviceReader devices, IMacroReader macros, IMacroInserter inserter)
@@ -21,7 +21,7 @@ public sealed class MacroInsertPlanOperation(IProjectCatalog catalog, IPageReade
         {
             Project = request.Project.Name,
             ProjectPath = request.Project.Path,
-            Changes = [request.Change(inMacro.Count)],
+            Changes = [request.Change(inMacro.Count), .. request.ValueChanges()],
             Fingerprint = request.StateFingerprint(devices),
             Details = new Dictionary<string, string>
             {

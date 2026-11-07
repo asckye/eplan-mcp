@@ -36,6 +36,12 @@ internal static class ToolSchemas
                 {
                     schema["oneOf"] = JsonNode.Parse("""[{"required":["macro"]},{"required":["part"]}]""");
                     schema["dependentRequired"] = JsonNode.Parse("""{"part_variant":["part"]}""");
+                    JsonObject values = schema["properties"]!["values"]!.AsObject();
+                    values["type"] = "object";
+                    values.Remove("default");
+                    values["additionalProperties"] = new JsonObject { ["type"] = "string" };
+                    values["minProperties"] = 1;
+                    values["maxProperties"] = 20;
                     foreach (string field in new[] { "macro", "part", "part_variant" })
                     { schema["properties"]![field]!.AsObject().Remove("default"); schema["properties"]![field]!["type"] = "string"; }
                 }

@@ -29,9 +29,12 @@ internal sealed class MacroWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(MacroInsertResult))]
     [Description(
-        "Inserts a window macro or a part's group symbol macro (give macro or part; MultiLine on Circuit pages, Overview on Overview pages), " +
-        "its devices tagged and shown; one Ctrl+Z in EPLAN undoes it. macro_box:false removes boxes; true uses project settings. x, y: mm " +
-        "from the page's bottom left (y up) to the macro's top left corner. Omit dry_run to preview; false executes. Outside scratch it needs approval. Example: " +
+        "Inserts a window macro or a part's group symbol macro (give macro or part, MultiLine on Circuit pages, Overview on Overview pages), " +
+        "its devices tagged and shown. One Ctrl+Z in EPLAN undoes insertion and value sets. macro_box:false removes boxes, true uses project settings. " +
+        "x and y place the macro reference point in mm from the page's bottom left, y up. " +
+        "values maps 1-20 exact, case-sensitive placeholder names to existing value sets from eplan_macro_get. " +
+        "show_page opens or focuses the editor before drawing, changing only the UI. " +
+        "Omit dry_run to preview, false executes. Outside scratch it needs approval. Example: " +
         "{\"project\": \"Line1\", \"page\": \"=GAA+A1&EFS1/60\", \"macro\": \"EPLAN_Macro/Motor.ema\", \"x\": 40, \"y\": 280}.")]
     public static async Task<CallToolResult> MacroInsertAsync(
         WritePipeline pipeline,
@@ -43,13 +46,14 @@ internal sealed class MacroWriteTools
         string? macro = null,
         int variant = 0,
         [AllowedValues("number", "keep")] string numbering = "number",
-        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
-        [Description(PageDisplay.Description)] bool show_page = false,
+        bool dry_run = WriteToolDefaults.Preview,
+        [Description("Open or focus page editor.")] bool show_page = false,
         [AllowedValues("MultiLine", "Overview", "SingleLine")] string representation = "MultiLine",
         string? part = null,
         string? part_variant = null,
         bool macro_box = true,
         [AllowedValues("refuse", "warn")] string layout_guard = "refuse",
+        Dictionary<string, string>? values = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -59,14 +63,45 @@ internal sealed class MacroWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new MacroInsertArgs { Project = project, Page = page ?? string.Empty, Macro = macro, X = x, Y = y, Variant = variant, Numbering = numbering, Representation = representation, Part = part, PartVariant = part_variant, MacroBox = macro_box, LayoutGuard = layout_guard };
+        var args = new MacroInsertArgs
+        {
+            Project = project,
+            Page = page ?? string.Empty,
+            Macro = macro,
+            X = x,
+            Y = y,
+            Variant = variant,
+            Numbering = numbering,
+            Representation = representation,
+            Part = part,
+            PartVariant = part_variant,
+            MacroBox = macro_box,
+            LayoutGuard = layout_guard,
+            Values = values,
+        };
         var request = new WriteRequest<MacroInsertArgs, MacroInsertArgs>(
             InsertTool,
             ToolTier.Write,
             OperationNames.MacroInsertPlan,
             OperationNames.MacroInsertExecute,
             args,
-            plan => new MacroInsertArgs { Project = args.Project, Page = args.Page, Macro = args.Macro, X = args.X, Y = args.Y, Variant = args.Variant, Numbering = args.Numbering, Representation = args.Representation, Part = args.Part, PartVariant = args.PartVariant, MacroBox = args.MacroBox, LayoutGuard = args.LayoutGuard, Fingerprint = plan.Fingerprint },
+            plan => new MacroInsertArgs
+            {
+                Project = args.Project,
+                Page = args.Page,
+                Macro = args.Macro,
+                X = args.X,
+                Y = args.Y,
+                Variant = args.Variant,
+                Numbering = args.Numbering,
+                Representation = args.Representation,
+                Part = args.Part,
+                PartVariant = args.PartVariant,
+                MacroBox = args.MacroBox,
+                LayoutGuard = args.LayoutGuard,
+                Values = args.Values,
+                Fingerprint = plan.Fingerprint,
+            },
             dry_run,
             PageWriteTools.DefaultLimit,
             "Inserting the macro");
@@ -93,6 +128,11 @@ internal sealed class MacroWriteTools
             Page = ResultShaper.CleanText(data?.Page ?? outcome.Plan.Changes.FirstOrDefault()?.Name ?? args.Page),
             Macro = ResultShaper.CleanText(data?.Macro ?? details.GetValueOrDefault("macro") ?? string.Empty),
             ArticleReferences = data is null ? [] : [.. data.ArticleReferences.Select(r => new MacroPartReference { Tag = ResultShaper.CleanText(r.Tag), PartNumber = ResultShaper.CleanText(r.PartNumber), Variant = ResultShaper.CleanText(r.Variant), Count = r.Count })],
+            Values = data is null ? [] : [.. data.Values.Select(v => new MacroValueApplication
+            {
+                Placeholder = ResultShaper.CleanText(v.Placeholder),
+                ValueSet = ResultShaper.CleanText(v.ValueSet),
+            })],
             Devices = data is null ? Planned(details) : [.. data.Devices.Select(d => Entry(d.Tag, d.VisibleTag, d.Category))],
             ObjectCount = data?.ObjectCount ?? Count(details, "objectCount"),
             Undo = committed ? "AI: " + InsertTool : null,

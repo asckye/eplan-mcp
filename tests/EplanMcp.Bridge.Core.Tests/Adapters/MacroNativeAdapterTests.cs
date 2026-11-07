@@ -1,6 +1,7 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.Graphics;
 using Eplan.EplApi.DataModel.MasterData;
 using Eplan.EplApi.MasterData;
 using EplanMcp.Bridge.Core.Operations;
@@ -24,6 +25,48 @@ public sealed partial class MacroNativeAdapterTests : IDisposable
         NativeInsert.Place = null;
         NativeInsert.Selection = null;
         EplanProjects.Project = null;
+    }
+
+    [Theory]
+    [InlineData(0, "#<EES_F_CH1>")]
+    [InlineData(2, "#<EES_F_CH2>")]
+    public void MacroReader_ReadsOnlyTheSelectedVariantsPlaceholderMetadata(int variant, string name)
+    {
+        Page page = ConfigureMacro();
+        var first = new PlaceHolder { Name = "#<EES_F_CH1>", Page = page };
+        first.Records.AddRange(["3A", "6A"]);
+        first.Variables.Add("Current");
+        var second = new PlaceHolder { Name = "#<EES_F_CH2>", Page = page };
+        second.Records.AddRange(["4A", "10A"]);
+        second.Variables.Add("Label");
+        WindowMacro.State!.Representations[WindowMacro.Enums.RepresentationType.Overview][0] = [first];
+        WindowMacro.State.Representations[WindowMacro.Enums.RepresentationType.Overview][2] = [second];
+
+        MacroContent content = new EplanMacroReader().ReadMacro("project", "module.ema", representation: "Overview", variant: variant);
+
+        MacroPlaceholderRecord placeholder = Assert.Single(content.Placeholders);
+        Assert.Equal(name, placeholder.Name);
+        Assert.Equal(variant == 0 ? ["3A", "6A"] : ["4A", "10A"], placeholder.ValueSets);
+        Assert.Equal(variant == 0 ? ["Current"] : ["Label"], placeholder.Variables);
+        Assert.Equal(0, first.CurrentValueReads);
+        Assert.Equal(0, second.CurrentValueReads);
+    }
+
+    [Fact]
+    public void MacroReader_UnreadablePlaceholdersAreSkippedAndTheOthersRemainAvailable()
+    {
+        Page page = ConfigureMacro();
+        var invalidName = new PlaceHolder { Page = page, NameError = new BaseException("Name unavailable") };
+        var invalidRecords = new PlaceHolder { Name = "unreadable", Page = page, RecordError = new BaseException("Records unavailable") };
+        invalidRecords.Records.Add("6A");
+        var readable = new PlaceHolder { Name = "#<EES_F_CH1>", Page = page };
+        readable.Records.Add("6A");
+        WindowMacro.State!.Representations[WindowMacro.Enums.RepresentationType.Overview][0] = [invalidName, readable, invalidRecords];
+
+        MacroContent content = new EplanMacroReader().ReadMacro("project", "module.ema", representation: "Overview");
+
+        Assert.Equal("#<EES_F_CH1>", Assert.Single(content.Placeholders).Name);
+        Assert.Equal(3, content.ObjectCount);
     }
 
     [Theory]
@@ -201,6 +244,97 @@ public sealed partial class MacroNativeAdapterTests : IDisposable
         });
         Assert.Contains("Commit", transactions.Calls);
         Assert.DoesNotContain("Rollback", transactions.Calls);
+    }
+
+    [Fact]
+    public void Values_OnlyTheInsertedPlaceholderReceivesItsExactRecord()
+    {
+        Page page = ConfigureMacro();
+        var existing = new PlaceHolder(100) { Page = page, Name = "#<EES_F_CH1>" };
+        var inserted = new PlaceHolder(101) { Page = page, Name = "#<EES_F_CH1>" };
+        var otherCase = new PlaceHolder(102) { Page = page, Name = "#<ees_f_ch1>" };
+        page.AllPlacements = [existing];
+        NativeInsert.Place = target =>
+        {
+            target.AllPlacements = [existing, inserted, otherCase];
+            return [inserted, otherCase];
+        };
+        var transactions = new FakeTransactions();
+        inserted.Applying = valueSet =>
+        {
+            Assert.Equal("6A", valueSet);
+            Assert.Contains("Begin AI: eplan_macro_insert", transactions.Calls);
+            Assert.DoesNotContain("Commit", transactions.Calls);
+        };
+
+        TransactionRunner.Run(transactions, "eplan_macro_insert", () => new EplanMacroInserter().Insert(
+            "project", page.Name, "Selective.ema", 0, 20, 296, true, "Overview",
+            values: new Dictionary<string, string> { ["#<EES_F_CH1>"] = "6A" }));
+
+        Assert.Equal(["6A"], inserted.AppliedRecords);
+        Assert.Empty(existing.AppliedRecords);
+        Assert.Empty(otherCase.AppliedRecords);
+        Assert.Contains("Commit", transactions.Calls);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(2)]
+    public void Values_InsertedPlaceholderCountMismatchIsOperationFailedAndRolledBack(int count)
+    {
+        Page page = ConfigureMacro();
+        Placement[] inserted = [.. Enumerable.Range(0, count).Select(i => new PlaceHolder(100 + i)
+        {
+            Page = page,
+            Name = "#<EES_F_CH1>",
+        })];
+        NativeInsert.Place = target =>
+        {
+            target.AllPlacements = inserted;
+            return inserted;
+        };
+        var transactions = new FakeTransactions { Snapshot = () => () => page.AllPlacements = [] };
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => TransactionRunner.Run(transactions, "eplan_macro_insert",
+            () => new EplanMacroInserter().Insert("project", page.Name, "Selective.ema", 0, 20, 296, true, "Overview",
+                values: new Dictionary<string, string> { ["#<EES_F_CH1>"] = "6A" }))).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Empty(page.AllPlacements);
+        Assert.Contains("Rollback", transactions.Calls);
+        Assert.DoesNotContain("Commit", transactions.Calls);
+    }
+
+    [Fact]
+    public void Values_ApplyFailureRollsBackEarlierRecordsAndInsertedObjects()
+    {
+        Page page = ConfigureMacro();
+        var first = new PlaceHolder(100) { Page = page, Name = "#<EES_F_CH1>" };
+        var failing = new PlaceHolder(101) { Page = page, Name = "#<EES_F_CH2>", ApplyError = new BaseException("Cannot apply record") };
+        NativeInsert.Place = target =>
+        {
+            target.AllPlacements = [first, failing];
+            return [first, failing];
+        };
+        var transactions = new FakeTransactions
+        {
+            Snapshot = () => () =>
+            {
+                page.AllPlacements = [];
+                first.AppliedRecords.Clear();
+            },
+        };
+        var values = new Dictionary<string, string> { ["#<EES_F_CH1>"] = "6A", ["#<EES_F_CH2>"] = "3A" };
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => TransactionRunner.Run(transactions, "eplan_macro_insert",
+            () => new EplanMacroInserter().Insert("project", page.Name, "Selective.ema", 0, 20, 296, true, "Overview", values: values)));
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Error.Reason, error.Error.Execution));
+        Assert.Same(failing.ApplyError, error.InnerException);
+        Assert.Empty(page.AllPlacements);
+        Assert.Empty(first.AppliedRecords);
+        Assert.Contains("Rollback", transactions.Calls);
+        Assert.DoesNotContain("Commit", transactions.Calls);
     }
 
     private static Page ConfigureMacro()

@@ -11,6 +11,9 @@ public sealed class MacroGetOperation(IProjectCatalog catalog, IMacroReader read
     /// <summary>The most devices one result lists (tool spec 3).</summary>
     public const int MaxDevices = 50;
 
+    /// <summary>The most placeholders one result lists.</summary>
+    public const int MaxPlaceholders = 50;
+
     /// <summary>The <c>FunctionCategory</c> of a connection line, which is no device.</summary>
     internal const string Wire = "Wire";
 
@@ -49,6 +52,15 @@ public sealed class MacroGetOperation(IProjectCatalog catalog, IMacroReader read
             Height = content.Height,
             ReferencePoint = content.ReferencePoint,
             Devices = [.. devices.Take(MaxDevices)],
+            Placeholders =
+            [
+                .. content.Placeholders.Take(MaxPlaceholders).Select(p => new MacroPlaceholder
+                {
+                    Name = p.Name,
+                    ValueSets = p.ValueSets,
+                    Variables = p.Variables,
+                }),
+            ],
             DeviceCount = devices.Count,
             ObjectCount = content.ObjectCount,
         };

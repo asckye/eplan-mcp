@@ -1,8 +1,10 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.Graphics;
 using Eplan.EplApi.DataModel.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Bridge.Eplan.Adapters.Generated;
 using EplanMcp.Contracts;
 using EplanInsert = Eplan.EplApi.HEServices.Insert;
 
@@ -48,7 +50,7 @@ internal sealed class EplanMacroInserter : IMacroInserter
         };
     }
 
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null, bool macroBox = true)
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null, bool macroBox = true, IReadOnlyDictionary<string, string>? values = null)
     {
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
@@ -78,6 +80,27 @@ internal sealed class EplanMacroInserter : IMacroInserter
                 ex);
             stacked.Error.Metadata = new Dictionary<string, string> { ["page"] = pageName };
             throw stacked;
+        }
+
+        if (values is not null)
+        {
+            foreach (KeyValuePair<string, string> value in values.OrderBy(value => value.Key, StringComparer.Ordinal))
+            {
+                try
+                {
+                    PlaceHolder[] holders = [.. placed.OfType<PlaceHolder>().Where(holder => string.Equals(holder.Name, value.Key, StringComparison.Ordinal))];
+                    if (holders.Length != 1)
+                    {
+                        throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The inserted macro must contain exactly one placeholder named '" + value.Key + "' to apply its value set; nothing was committed.");
+                    }
+
+                    PlaceHolderApi.ApplyRecord(holders[0], value.Value);
+                }
+                catch (Exception failure) when (failure is not BridgeErrorException)
+                {
+                    throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN could not apply the value set to inserted placeholder '" + value.Key + "'; nothing was committed.", failure);
+                }
+            }
         }
 
         int removed = 0;

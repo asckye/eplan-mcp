@@ -30,6 +30,7 @@ internal sealed class MacroInsertRequest
         Representation = representation;
         Source = source;
         MacroBox = args.MacroBox;
+        Values = args.Values is null ? null : new Dictionary<string, string>(args.Values, StringComparer.Ordinal);
         _guard = args.LayoutGuard;
     }
 
@@ -58,6 +59,7 @@ internal sealed class MacroInsertRequest
     public string Representation { get; }
     public PartMacroSource? Source { get; }
     public bool MacroBox { get; }
+    public IReadOnlyDictionary<string, string>? Values { get; }
 
     /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the macro.</summary>
     public static MacroInsertRequest Check(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter)
@@ -94,6 +96,7 @@ internal sealed class MacroInsertRequest
         string path = MacroFiles.Resolve(root, macro);
         var request = new MacroInsertRequest(project, page, macro, path, macros.ReadMacro(project.Path, path, representation: representation, variant: args.Variant), args, number, representation, source);
         violations.AddRange(request.Problems());
+        violations.AddRange(ValueProblems(request.Content, request.Values));
         if (violations.Count == 0)
         { request.LayoutWarnings = Layout(() => page.Layout is null ? ["Layout unverified: page geometry is unavailable."] : LayoutGuard.Enforce(page.Layout, [LayoutGuard.Proposed("Macro", [args.X, args.Y], request.ProposedOutline())], mode: args.LayoutGuard ?? "refuse")); }
         return violations.Count > 0 ? throw WriteArguments.Invalid(violations) : request;
@@ -128,6 +131,17 @@ internal sealed class MacroInsertRequest
     public PlannedChange Change(int devices) =>
         new() { Action = "create", Kind = "macro", Name = Page.Name, NewValue = Describe(Macro, X, Y, Variant, Number, devices) + (Representation == MultiLine ? "" : ", representation " + Representation) + (MacroBox ? "" : ", without macro box") + (Source is null ? "" : ", part " + Source.Part + ", part variant " + Source.PartVariant) };
 
+    public IEnumerable<PlannedChange> ValueChanges() =>
+        (Values ?? new Dictionary<string, string>()).OrderBy(value => value.Key, StringComparer.Ordinal)
+            .Select(value => new PlannedChange
+            {
+                Action = "update",
+                Kind = "placeholder",
+                Name = value.Key,
+                Property = "value set",
+                NewValue = value.Value,
+            });
+
     /// <summary>The change's value as the tool spec words it: <c>Contactor_Feedback_Control.ema at (40, 200), numbering number, 8 devices</c>.</summary>
     internal static string Describe(string macro, double x, double y, int variant, bool number, int devices) => string.Format(
         CultureInfo.InvariantCulture,
@@ -152,6 +166,11 @@ internal sealed class MacroInsertRequest
             .Append("macroBox\t" + MacroBox)
             .Append("source\t" + Macro + "\t" + Representation + "\t" + Variant + "\t" + Source?.Part + "\t" + Source?.PartVariant)
             .Append("macro\t" + file.Length.ToString(CultureInfo.InvariantCulture) + "\t" + file.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture));
+        if (Values is not null)
+        {
+            lines = lines.Append("values\t" + Protocol.BridgeJson.FromObject(Values.OrderBy(value => value.Key, StringComparer.Ordinal)
+                .Select(value => new MacroValueApplication { Placeholder = value.Key, ValueSet = value.Value })));
+        }
         if (!Number)
         {
             var parts = new HashSet<string>(Content.Functions.Select(f => DevicePart(f.Name)).OfType<string>(), StringComparer.OrdinalIgnoreCase);
@@ -278,6 +297,36 @@ internal sealed class MacroInsertRequest
         else if (!variants.Contains(variant))
         {
             yield return $"'variant' {variant.ToString(CultureInfo.InvariantCulture)} does not exist; the macro's {representation} variants are {string.Join(", ", variants.Select(v => v.ToString(CultureInfo.InvariantCulture)))}.";
+        }
+    }
+
+    internal static IEnumerable<string> ValueProblems(MacroContent content, IReadOnlyDictionary<string, string>? values)
+    {
+        if (values is null)
+        {
+            yield break;
+        }
+
+        if (values.Count is < 1 or > 20)
+        {
+            yield return "/values: Supply between 1 and 20 placeholder value sets.";
+            yield break;
+        }
+
+        foreach (KeyValuePair<string, string> value in values.OrderBy(value => value.Key, StringComparer.Ordinal))
+        {
+            string pointer = "/values/" + value.Key.Replace("~", "~0").Replace("/", "~1");
+            MacroPlaceholderRecord[] matches = [.. content.Placeholders.Where(holder => string.Equals(holder.Name, value.Key, StringComparison.Ordinal))];
+            if (matches.Length != 1)
+            {
+                string available = string.Join(", ", content.Placeholders.Select(holder => holder.Name).Distinct(StringComparer.Ordinal).Take(20));
+                yield return pointer + ": The name must match exactly one placeholder in the selected macro variant. Available placeholders: " + (available.Length == 0 ? "none" : available) + ".";
+            }
+            else if (!matches[0].ValueSets.Contains(value.Value, StringComparer.Ordinal))
+            {
+                string available = string.Join(", ", matches[0].ValueSets.Take(20));
+                yield return pointer + ": Choose one of the placeholder's value sets: " + (available.Length == 0 ? "none" : available) + ".";
+            }
         }
     }
 }

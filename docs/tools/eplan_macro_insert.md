@@ -30,6 +30,8 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 
 - `variant` 始终为整数宏变体；`part_variant` 为独立的字符串部件变体。组符号宏路径展开后仍经宏目录安全校验；解析后的部件、宏路径及两个变体和表达均绑定指纹；不使用 `ARTICLE_MACRO`。
 
+`values` 可选，接受 1–20 项“占位符名称 → 现有值集名称”，如 `{"#<EES_F_CH1>": "6A"}`。名称区分大小写，须匹配 `eplan_macro_get` 在所选表达和宏变体中报告的唯一占位符及其值集，部件组符号宏同样适用。计划逐项显示应用并绑定指纹，执行在插入的同一 SafetyPoint 应用值集，失败整体回滚。结果 `values` 列出 `{placeholder, valueSet}`，预览或省略参数时为空。
+
 ## 3. 输出
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 ```json

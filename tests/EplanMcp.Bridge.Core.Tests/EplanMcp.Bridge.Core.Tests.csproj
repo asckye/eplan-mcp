@@ -7,6 +7,7 @@
     <Compile Include="..\Shared\PlacementEditFixture.cs" Link="PlacementEditFixture.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanNativePreconditions.cs" Link="Adapters\EplanNativePreconditions.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanMacroReader.cs" Link="Adapters\EplanMacroReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Generated\PlaceHolderApi.g.cs" Link="Adapters\Generated\PlaceHolderApi.g.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanMacroInserter.cs" Link="Adapters\EplanMacroInserter.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceRenamer.cs" Link="Adapters\EplanDeviceRenamer.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceRename.cs" Link="Adapters\EplanDeviceRename.cs" />

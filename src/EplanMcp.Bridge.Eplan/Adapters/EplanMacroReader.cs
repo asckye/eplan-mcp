@@ -1,10 +1,12 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
+using Eplan.EplApi.DataModel.Graphics;
 using Eplan.EplApi.DataModel.MasterData;
 using Eplan.EplApi.MasterData;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
+using EplanMcp.Bridge.Eplan.Adapters.Generated;
 using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
@@ -109,9 +111,40 @@ internal sealed class EplanMacroReader : IMacroReader
                     Location = Point(() => f.Location),
                 }),
             ],
+            Placeholders = ReadPlaceholders(objects.OfType<PlaceHolder>()),
             ObjectCount = objects.Length,
             MacroBoxCount = objects.OfType<MacroBox>().Count(),
         };
+    }
+
+    private static List<MacroPlaceholderRecord> ReadPlaceholders(IEnumerable<PlaceHolder> holders)
+    {
+        var records = new List<MacroPlaceholderRecord>();
+        foreach (PlaceHolder holder in holders)
+        {
+            try
+            {
+                // A33/S29: metadata is readable before insertion; current values require a lock (A117).
+                var properties = PlaceHolderApi.Read(holder);
+                var record = new MacroPlaceholderRecord
+                {
+                    Name = properties.Name ?? string.Empty,
+                    Variables = properties.VariableNames,
+                };
+                for (int i = 0; i < properties.NumberOfRecords; i++)
+                {
+                    record.ValueSets.Add(holder.get_NameOfRecord(i) ?? string.Empty);
+                }
+
+                records.Add(record);
+            }
+            catch (Exception ex) when (ex is BaseException or InvalidOperationException or ArgumentException)
+            {
+                WriteExceptionDiagnostics.Report(ex);
+            }
+        }
+
+        return records;
     }
 
     private static double[]? Point(Func<PointD> read)

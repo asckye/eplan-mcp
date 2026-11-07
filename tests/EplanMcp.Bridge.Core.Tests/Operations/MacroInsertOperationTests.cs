@@ -67,6 +67,162 @@ public sealed class MacroInsertOperationTests : IDisposable
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
+    [Fact]
+    public void Values_PlanListsApplicationsInNameOrderAndExecuteAppliesTheSameValues()
+    {
+        _macros.Content.Placeholders =
+        [
+            new() { Name = "#<EES_F_CH1>", ValueSets = ["3A", "6A"] },
+            new() { Name = "#<EES_F_CH2>", ValueSets = ["3A", "6A"] },
+        ];
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Values = new() { ["#<EES_F_CH2>"] = "3A", ["#<EES_F_CH1>"] = "6A" };
+        WritePlan plan = Plan(args);
+
+        Assert.Equal(3, plan.Changes.Count);
+        Assert.Equal(
+            [("update", "placeholder", "#<EES_F_CH1>", "value set", "6A"), ("update", "placeholder", "#<EES_F_CH2>", "value set", "3A")],
+            plan.Changes.Skip(1).Select(change => (change.Action, change.Kind, change.Name, change.Property, change.NewValue)));
+        _inserter.ApplyValues = values =>
+        {
+            Assert.Contains("Begin AI: eplan_macro_insert", _transactions.Calls);
+            Assert.DoesNotContain("Commit", _transactions.Calls);
+            Assert.Equal("6A", values["#<EES_F_CH1>"]);
+        };
+        args.Fingerprint = plan.Fingerprint;
+        MacroInsertData data = Execute(args);
+
+        Assert.Equal(args.Values, _inserter.Values);
+        Assert.Equal([("#<EES_F_CH1>", "6A"), ("#<EES_F_CH2>", "3A")], data.Values.Select(value => (value.Placeholder, value.ValueSet)));
+        Assert.Contains("Commit", _transactions.Calls);
+    }
+
+    [Fact]
+    public void Values_ChangeTheFingerprintAndDictionaryOrderDoesNot()
+    {
+        _macros.Content.Placeholders =
+        [
+            new() { Name = "Channel1", ValueSets = ["3A", "6A"] },
+            new() { Name = "Channel2", ValueSets = ["3A", "6A"] },
+        ];
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        string omitted = Plan(args).Fingerprint;
+        args.Values = new() { ["Channel2"] = "3A", ["Channel1"] = "6A" };
+        string requested = Plan(args).Fingerprint;
+        Assert.NotEqual(omitted, requested);
+        args.Values = new() { ["Channel1"] = "6A", ["Channel2"] = "3A" };
+        Assert.Equal(requested, Plan(args).Fingerprint);
+        args.Fingerprint = requested;
+        args.Values["Channel1"] = "3A";
+
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Execute(args)).Error.Reason);
+        Assert.Empty(_inserter.Inserts);
+    }
+
+    [Fact]
+    public void Values_FingerprintKeepsDelimiterCharactersUnambiguous()
+    {
+        _macros.Content.Placeholders =
+        [
+            new() { Name = "A", ValueSets = ["B\tC"] },
+            new() { Name = "A\tB", ValueSets = ["C"] },
+        ];
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Values = new() { ["A"] = "B\tC" };
+        string first = Plan(args).Fingerprint;
+        args.Values = new() { ["A\tB"] = "C" };
+
+        Assert.NotEqual(first, Plan(args).Fingerprint);
+    }
+
+    [Theory]
+    [InlineData("unknown", "6A", false)]
+    [InlineData("#<EES_F_CH1>", "unknown", false)]
+    [InlineData("#<EES_F_CH1>", "6A", true)]
+    public void Values_InvalidSelectionIsRefusedByThePlan(string name, string valueSet, bool duplicate)
+    {
+        var holder = new MacroPlaceholderRecord { Name = "#<EES_F_CH1>", ValueSets = ["6A"] };
+        _macros.Content.Placeholders = duplicate ? [holder, holder] : [holder];
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Values = new() { [name] = valueSet };
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("/values/" + name, error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Empty(_inserter.Inserts);
+    }
+
+    [Fact]
+    public void Values_MoreThanTwentyEntriesIsRefusedByThePlan()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Values = Enumerable.Range(0, 21).ToDictionary(i => i.ToString(System.Globalization.CultureInfo.InvariantCulture), _ => "6A");
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(args)).Error;
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
+        Assert.Contains("/values", error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Empty(_inserter.Inserts);
+    }
+
+    [Fact]
+    public void Values_PartMacroUsesOnlyTheSelectedRepresentationAndVariant()
+    {
+        MacroInsertArgs args = Args("=GAA+A1&EFS2/1", 40, 280);
+        args.Macro = null;
+        args.Part = "PXC.2861344";
+        args.Representation = "Overview";
+        args.Variant = 2;
+        args.Values = new() { ["#<EES_F_CH1>"] = "6A" };
+        _macros.PartSource = (part, _) => new() { Part = part, PartVariant = "1", Macro = Macro };
+        _macros.ReadSelection = (representation, variant) => new MacroContent
+        {
+            Representations = [new("Overview", [2])],
+            Width = 20,
+            Height = 20,
+            Placeholders = representation == "Overview" && variant == 2
+                ? [new() { Name = "#<EES_F_CH1>", ValueSets = ["6A"] }]
+                : [],
+        };
+        args.Fingerprint = Plan(args).Fingerprint;
+
+        MacroInsertData data = Execute(args);
+
+        Assert.Equal(("Overview", 2), _macros.Selection);
+        Assert.Equal("6A", Assert.Single(data.Values).ValueSet);
+        Assert.Equal("6A", _inserter.Values!["#<EES_F_CH1>"]);
+    }
+
+    [Fact]
+    public void Values_ApplyFailureRollsBackTheInsertedMacro()
+    {
+        _macros.Content.Placeholders = [new() { Name = "#<EES_F_CH1>", ValueSets = ["6A"] }];
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Values = new() { ["#<EES_F_CH1>"] = "6A" };
+        args.Fingerprint = Plan(args).Fingerprint;
+        _inserter.ApplyValues = _ => throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Cannot apply record");
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Empty(_inserter.Pages[NewPage].Objects);
+        Assert.Equal(["+A1-WG6"], _devices.Functions.Select(function => function.Name));
+        Assert.Contains("Rollback", _transactions.Calls);
+        Assert.DoesNotContain("Commit", _transactions.Calls);
+    }
+
+    [Fact]
+    public void Values_OmittedLeavesResultEmptyAndDoesNotApplyRecords()
+    {
+        MacroInsertArgs args = Args(NewPage, 40, 280);
+        args.Fingerprint = Plan(args).Fingerprint;
+        _inserter.ApplyValues = _ => throw new InvalidOperationException("Unexpected application");
+
+        Assert.Empty(Execute(args).Values);
+        Assert.Null(_inserter.Values);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

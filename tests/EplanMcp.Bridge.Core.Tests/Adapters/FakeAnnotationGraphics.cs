@@ -48,12 +48,48 @@ namespace Eplan.EplApi.DataModel.Graphics
 
     internal sealed class PlaceHolder(long oid = 111) : GraphicalPlacement(oid)
     {
-        public string Name { get; set; } = "";
+        private string _name = "";
+        public Exception? NameError { get; set; }
+        public Exception? RecordError { get; set; }
+        public Exception? ApplyError { get; set; }
+        public Action<string>? Applying { get; set; }
+        public List<string> AppliedRecords { get; } = [];
+        public int CurrentValueReads { get; private set; }
+        public string Name
+        {
+            get => NameError is { } error ? throw error : _name;
+            set => _name = value;
+        }
         public List<string> Records { get; } = [];
         public List<string> Variables { get; } = [];
         public int NumberOfRecords => Records.Count;
-        public string get_NameOfRecord(int index) => Records[index];
-        public string[] VariableNames => Variables.ToArray();
+        public uint NumberOfVariables => checked((uint)Variables.Count);
+        public string get_NameOfRecord(int index) => RecordError is { } error ? throw error : Records[index];
+        public System.Collections.Specialized.StringCollection VariableNames
+        {
+            get
+            {
+                var names = new System.Collections.Specialized.StringCollection();
+                names.AddRange([.. Variables]);
+                return names;
+            }
+        }
+        public void ApplyRecord(string valueSet)
+        {
+            Applying?.Invoke(valueSet);
+            if (ApplyError is { } error)
+            {
+                throw error;
+            }
+
+            AppliedRecords.Add(valueSet);
+        }
+        public void ApplyRecord(string valueSet, bool applyPageAndProjectData) => ApplyRecord(valueSet);
+        public string[] GetAllCurrentValues()
+        {
+            CurrentValueReads++;
+            throw new InvalidOperationException("Current values must not be read by macro tools.");
+        }
         public void Create(Page page) { Page = page; page.AllPlacements = [.. page.AllPlacements, this]; }
         public void AddRecord(string name) => Records.Add(name);
         public void AddVariable(string name) => Variables.Add(name);

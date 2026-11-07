@@ -36,6 +36,9 @@ public sealed class MacroInsertArgs
     /// </summary>
     public string? Numbering { get; set; }
 
+    /// <summary>Exact placeholder names and the existing value sets to apply in the insertion transaction.</summary>
+    public Dictionary<string, string>? Values { get; set; }
+
     /// <summary>Retain the macro box according to project settings; false removes inserted boxes in the same transaction.</summary>
     public bool MacroBox { get; set; } = true;
 

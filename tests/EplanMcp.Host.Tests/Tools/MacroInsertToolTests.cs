@@ -53,6 +53,55 @@ public sealed class MacroInsertToolTests : IDisposable
 
     public void Dispose() => _harness.Dispose();
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Values_PassThroughPlanAndExecution_AndReportOnlyAppliedSets(bool dryRun)
+    {
+        var values = new Dictionary<string, string> { ["#<EES_F_CH1>"] = "6A" };
+        _harness.Bridge.Handlers[OperationNames.MacroInsertExecute] = _ => new MacroInsertData
+        {
+            Project = "Line1",
+            Page = Page,
+            Macro = Macro,
+            PageSizeKnown = true,
+            Values = [new MacroValueApplication { Placeholder = "#<EES_F_CH1>", ValueSet = "6A" }],
+        };
+
+        JsonElement data = WriteToolHarness.Structured(await MacroWriteTools.MacroInsertAsync(
+            _harness.Pipeline, _harness.Bridge, "Line1", Page, 40, 280, Macro,
+            dry_run: dryRun, values: values, cancellationToken: TestContext.Current.CancellationToken));
+
+        MacroInsertArgs[] calls = [.. _harness.Bridge.Calls
+            .Where(c => c.Operation is OperationNames.MacroInsertPlan or OperationNames.MacroInsertExecute)
+            .Select(c => Assert.IsType<MacroInsertArgs>(c.Args))];
+        Assert.Equal(dryRun ? 1 : 2, calls.Length);
+        Assert.All(calls, args => Assert.Equal(values, args.Values));
+        JsonElement applied = data.GetProperty("values");
+        if (dryRun)
+        {
+            Assert.Empty(applied.EnumerateArray());
+        }
+        else
+        {
+            JsonElement value = Assert.Single(applied.EnumerateArray());
+            Assert.Equal("#<EES_F_CH1>", value.GetProperty("placeholder").GetString());
+            Assert.Equal("6A", value.GetProperty("valueSet").GetString());
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task OmittedValues_RemainAbsentInRequests_AndEmptyInResults(bool dryRun)
+    {
+        JsonElement data = WriteToolHarness.Structured(await Insert(dryRun));
+
+        Assert.All(_harness.Bridge.Calls.Where(c => c.Operation is OperationNames.MacroInsertPlan or OperationNames.MacroInsertExecute),
+            call => Assert.Null(Assert.IsType<MacroInsertArgs>(call.Args).Values));
+        Assert.Empty(data.GetProperty("values").EnumerateArray());
+    }
+
     [Fact]
     public async Task OmittedDryRun_PreviewsWithoutApprovalAndReturnsPlan()
     {

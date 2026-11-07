@@ -10,6 +10,91 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class MacroInsertRequestTests
 {
     [Fact]
+    public void Values_SelectiveModuleChannelAcceptsAnExactValueSet()
+    {
+        var content = new MacroContent
+        {
+            Placeholders = [new() { Name = "#<EES_F_CH1>", ValueSets = ["3A", "6A", "10A"], Variables = ["Current"] }],
+        };
+
+        Assert.Empty(MacroInsertRequest.ValueProblems(content, new Dictionary<string, string> { ["#<EES_F_CH1>"] = "6A" }));
+        Assert.Empty(MacroInsertRequest.ValueProblems(content, null));
+    }
+
+    [Theory]
+    [InlineData("#<UNKNOWN>")]
+    [InlineData("#<ees_f_ch1>")]
+    public void Values_UnknownOrDifferentlyCasedNameListsAvailablePlaceholders(string name)
+    {
+        var content = new MacroContent { Placeholders = [new() { Name = "#<EES_F_CH1>", ValueSets = ["6A"] }] };
+
+        string problem = Assert.Single(MacroInsertRequest.ValueProblems(content, new Dictionary<string, string> { [name] = "6A" }));
+
+        Assert.StartsWith("/values/" + name + ":", problem, StringComparison.Ordinal);
+        Assert.Contains("Available placeholders: #<EES_F_CH1>", problem, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("5A")]
+    [InlineData("6a")]
+    public void Values_UnknownOrDifferentlyCasedRecordListsAvailableValueSets(string valueSet)
+    {
+        var content = new MacroContent { Placeholders = [new() { Name = "#<EES_F_CH1>", ValueSets = ["3A", "6A", "10A"] }] };
+
+        string problem = Assert.Single(MacroInsertRequest.ValueProblems(content, new Dictionary<string, string> { ["#<EES_F_CH1>"] = valueSet }));
+
+        Assert.StartsWith("/values/#<EES_F_CH1>:", problem, StringComparison.Ordinal);
+        Assert.Contains("3A, 6A, 10A", problem, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Values_DuplicateNameIsAmbiguousEvenWhenOneHolderHasTheValueSet()
+    {
+        var content = new MacroContent
+        {
+            Placeholders =
+            [
+                new() { Name = "#<EES_F_CH1>", ValueSets = ["6A"] },
+                new() { Name = "#<EES_F_CH1>", ValueSets = ["10A"] },
+            ],
+        };
+
+        Assert.Contains("exactly one placeholder", Assert.Single(MacroInsertRequest.ValueProblems(content,
+            new Dictionary<string, string> { ["#<EES_F_CH1>"] = "6A" })), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(21)]
+    public void Values_RequireBetweenOneAndTwentyEntries(int count)
+    {
+        var values = Enumerable.Range(0, count).ToDictionary(i => i.ToString(System.Globalization.CultureInfo.InvariantCulture), _ => "6A");
+
+        Assert.Equal("/values: Supply between 1 and 20 placeholder value sets.", Assert.Single(MacroInsertRequest.ValueProblems(new(), values)));
+    }
+
+    [Fact]
+    public void Values_EscapeTheJsonPointerAndLimitAvailableNamesAndRecordsToTwenty()
+    {
+        var content = new MacroContent
+        {
+            Placeholders = [.. Enumerable.Range(0, 21).Select(i => new MacroPlaceholderRecord
+            {
+                Name = "Channel" + i.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ValueSets = [.. Enumerable.Range(0, 21).Select(record => record.ToString(System.Globalization.CultureInfo.InvariantCulture) + "A")],
+            })],
+        };
+        string nameProblem = Assert.Single(MacroInsertRequest.ValueProblems(content, new Dictionary<string, string> { ["a/b~c"] = "6A" }));
+        string recordProblem = Assert.Single(MacroInsertRequest.ValueProblems(content, new Dictionary<string, string> { ["Channel0"] = "unknown" }));
+
+        Assert.StartsWith("/values/a~1b~0c:", nameProblem, StringComparison.Ordinal);
+        Assert.Contains("Channel19", nameProblem, StringComparison.Ordinal);
+        Assert.DoesNotContain("Channel20", nameProblem, StringComparison.Ordinal);
+        Assert.Contains("19A", recordProblem, StringComparison.Ordinal);
+        Assert.DoesNotContain("20A", recordProblem, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Pxc2861344_OverviewVariantZero_OnOverviewPage_AcceptsTheLiveGroupSymbolMacro()
     {
         var args = new EplanMcp.Contracts.MacroInsertArgs { Part = "PXC.2861344", Representation = "Overview", Variant = 0 };

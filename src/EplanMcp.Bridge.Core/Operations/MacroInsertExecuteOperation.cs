@@ -71,6 +71,8 @@ public sealed class MacroInsertExecuteOperation(
             DeviceCount = inserted.Count,
             ObjectCount = readback.ObjectCount,
             ArticleReferences = readback.ArticleReferences,
+            Values = [.. (request.Values ?? new Dictionary<string, string>()).OrderBy(value => value.Key, StringComparer.Ordinal)
+                .Select(value => new MacroValueApplication { Placeholder = value.Key, ValueSet = value.Value })],
             PageSizeKnown = request.Page.Width is not null,
             Warning = LayoutGuard.Summary(request.LayoutWarnings.Append(committed.Warning)),
         };
@@ -84,7 +86,7 @@ public sealed class MacroInsertExecuteOperation(
     private PlacedMacro Insert(MacroInsertRequest request)
     {
         string[] before = request.Number ? [] : MainFunctions(request);
-        PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number, request.Representation, request.Source?.Part, request.Source?.PartVariant, request.MacroBox);
+        PlacedMacro placed = inserter.Insert(request.Project.Path, request.Page.Name, request.MacroPath, request.Variant, request.X, request.Y, request.Number, request.Representation, request.Source?.Part, request.Source?.PartVariant, request.MacroBox, request.Values);
         List<string> merged = request.Number ? [] : MacroInsertRequest.Merged(before, MainFunctions(request));
         return merged.Count == 0
             ? placed

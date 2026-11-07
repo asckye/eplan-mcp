@@ -412,6 +412,8 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
 
     public bool Stacked { get; set; }
     public bool MacroBox { get; private set; }
+    public IReadOnlyDictionary<string, string>? Values { get; private set; }
+    public Action<IReadOnlyDictionary<string, string>>? ApplyValues { get; set; }
     public (string Representation, string? Part, string? PartVariant) Source { get; private set; }
     public Func<PlacedMacro, PlacedMacro>? CommittedReadback { get; set; }
     public List<MacroPartReference> ArticleReferences { get; set; } = [];
@@ -422,10 +424,11 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
 
     public PlacedMacro ReadCommitted(string projectPath, string pageName, PlacedMacro placed) => CommittedReadback?.Invoke(placed) ?? placed;
 
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null, bool macroBox = true)
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null, bool macroBox = true, IReadOnlyDictionary<string, string>? values = null)
     {
         Source = (representation, part, partVariant);
         MacroBox = macroBox;
+        Values = values;
         Inserts.Add((pageName, macroPath, variant, x, y, number));
         if (Stacked)
         {
@@ -435,6 +438,10 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
         List<MacroFunctionRecord> functions = Placed(number);
         project.Functions.AddRange(functions.Where(f => f.Main).Select(f => new FunctionRecord { Name = f.Name, VisibleName = f.VisibleName, IsMain = true, Category = f.Category, Page = pageName }));
         Pages[pageName].Objects.AddRange(functions.Select((f, i) => "9/9/" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/0"));
+        if (values is not null)
+        {
+            ApplyValues?.Invoke(values);
+        }
         return new PlacedMacro { Functions = functions, ObjectCount = functions.Count + 9, ArticleReferences = ArticleReferences };
     }
 }

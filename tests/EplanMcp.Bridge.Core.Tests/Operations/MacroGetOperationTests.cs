@@ -58,6 +58,51 @@ public sealed class MacroGetOperationTests : IDisposable
     }
 
     [Fact]
+    public void Execute_MapsPlaceholdersOfTheSelectedVariant()
+    {
+        _reader.ReadSelection = (representation, variant) => new MacroContent
+        {
+            Representation = "Overview",
+            Variant = 2,
+            Representations = [new("Overview", [0, 2])],
+            Placeholders =
+            [
+                new MacroPlaceholderRecord
+                {
+                    Name = "#<EES_F_CH1>",
+                    ValueSets = ["3A", "6A", "10A"],
+                    Variables = ["Current", "Label"],
+                },
+            ],
+        };
+
+        MacroGetData data = Run(Feedback, "Overview", 2);
+
+        MacroPlaceholder placeholder = Assert.Single(data.Placeholders);
+        Assert.Equal(("Overview", 2), _reader.Selection);
+        Assert.Equal("#<EES_F_CH1>", placeholder.Name);
+        Assert.Equal(["3A", "6A", "10A"], placeholder.ValueSets);
+        Assert.Equal(["Current", "Label"], placeholder.Variables);
+    }
+
+    [Fact]
+    public void Execute_ManyPlaceholders_ListsTheFirstFifty()
+    {
+        _reader.Content.Placeholders = [.. Enumerable.Range(1, 60).Select(i => new MacroPlaceholderRecord
+        {
+            Name = "#<CH" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + ">",
+            ValueSets = ["6A"],
+            Variables = ["Current"],
+        })];
+
+        MacroGetData data = Run(Feedback);
+
+        Assert.Equal(MacroGetOperation.MaxPlaceholders, data.Placeholders.Count);
+        Assert.Equal("#<CH1>", data.Placeholders[0].Name);
+        Assert.Equal("#<CH50>", data.Placeholders[^1].Name);
+    }
+
+    [Fact]
     public void Execute_ManyDevices_ListsTheFirstFiftyAndCountsAll()
     {
         _reader.Content.Functions.AddRange(Enumerable.Range(1, 60).Select(i => Function("-K" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), "", "Coil", main: true)));

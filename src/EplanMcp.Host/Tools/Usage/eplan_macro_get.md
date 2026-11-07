@@ -23,6 +23,7 @@ The same macro, opened in a given project:
 - `macro.representations`: each `type` with its `variants`.
 - `macro.size`: `width` and `height` of the selected macro outline, in mm.
 - `macro.reference_point`: selected WindowMacro.ReferencePoint `[x,y]` in mm, or null when unavailable.
+- `macro.placeholders` lists up to 50 readable placeholders of the selected representation and variant, each with `name`, `valueSets` and `variables`. Use exact names in eplan_macro_insert `values`.
 - `macro.devices`: functions other than wires, one per tag, in the macro's order, at most 50.
   - `tag`, `visibleTag` (null when the drawing shows none), `category`, `main`.
   - `location`: unmodified transient Function.Location `[x,y]` in mm; null when unavailable. Its origin awaits live verification; do not assume it is relative to the reference point.

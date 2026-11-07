@@ -69,11 +69,24 @@ public sealed class MacroContent
     /// <summary>Every function in the macro, in the macro's order.</summary>
     public List<MacroFunctionRecord> Functions { get; set; } = [];
 
+    /// <summary>Readable placeholders of the selected representation and variant.</summary>
+    public List<MacroPlaceholderRecord> Placeholders { get; set; } = [];
+
     /// <summary>How many objects the macro holds in all.</summary>
     public int ObjectCount { get; set; }
 
     /// <summary>Macro boxes among the selected representation's objects.</summary>
     public int MacroBoxCount { get; set; }
+}
+
+/// <summary>A placeholder's name, value set names and variables without reading its current values.</summary>
+public sealed class MacroPlaceholderRecord
+{
+    public string Name { get; set; } = string.Empty;
+
+    public List<string> ValueSets { get; set; } = [];
+
+    public List<string> Variables { get; set; } = [];
 }
 
 /// <summary>A function in a macro, as plain strings.</summary>

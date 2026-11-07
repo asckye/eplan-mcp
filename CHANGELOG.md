@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### 新增
+- `eplan_macro_get` 返回占位符与值集，`eplan_macro_insert` 支持通过 `values` 在插入的同一事务应用现有值集。
 - `eplan_page_get` 的图形对象带上 `symbol`（库/符号名/变体），照着已有页重画时能放同样的符号。
 - 新增 `eplan_shield_create`：在连接上画屏蔽，对应 EPLAN"插入"菜单的"屏蔽"。
 - 新增 `eplan_plc_generate`：从项目里已有的 PLC 设备生成原理图页，功能并入设备，不用再改名合并。

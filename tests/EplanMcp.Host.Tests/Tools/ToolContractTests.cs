@@ -81,6 +81,12 @@ public sealed class ToolContractTests : IDisposable
         Assert.Equal("integer", properties.GetProperty("variant").GetProperty("type").GetString());
         Assert.Equal("MultiLine", properties.GetProperty("representation").GetProperty("default").GetString());
         Assert.Equal(["MultiLine", "Overview", "SingleLine"], properties.GetProperty("representation").GetProperty("enum").EnumerateArray().Select(v => v.GetString()));
+        JsonElement values = properties.GetProperty("values");
+        Assert.Equal("object", values.GetProperty("type").GetString());
+        Assert.Equal(1, values.GetProperty("minProperties").GetInt32());
+        Assert.Equal(20, values.GetProperty("maxProperties").GetInt32());
+        Assert.Equal("string", values.GetProperty("additionalProperties").GetProperty("type").GetString());
+        Assert.DoesNotContain(schema.GetProperty("required").EnumerateArray(), field => field.GetString() == "values");
     }
 
     [Fact]

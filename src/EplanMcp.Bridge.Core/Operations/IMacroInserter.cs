@@ -20,8 +20,9 @@ public interface IMacroInserter
     /// EPLAN gives the devices tags no device has (<c>NumerationMode.Number</c>), otherwise they keep the macro's tags
     /// (<c>None</c>, S10). Returns what EPLAN inserted. Throws INVALID_ARGUMENT when EPLAN refuses to place the same
     /// symbols on top of each other ("S029181", A13).
+    /// Applies requested placeholder value sets to the inserted objects inside the same transaction (A33).
     /// </summary>
-    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null, bool macroBox = true);
+    public PlacedMacro Insert(string projectPath, string pageName, string macroPath, int variant, double x, double y, bool number, string representation = "MultiLine", string? part = null, string? partVariant = null, bool macroBox = true, IReadOnlyDictionary<string, string>? values = null);
 
     /// <summary>Reads inserted identities through fresh native wrappers after commit (A79).</summary>
     public PlacedMacro ReadCommitted(string projectPath, string pageName, PlacedMacro placed);

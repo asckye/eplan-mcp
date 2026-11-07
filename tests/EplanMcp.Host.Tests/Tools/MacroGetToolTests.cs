@@ -56,6 +56,41 @@ public sealed class MacroGetToolTests
     }
 
     [Theory]
+    [InlineData("#<EES_F_CH1>", "6A", "Current")]
+    [InlineData("#<EES_F_CH1>\u202e", "6A\u202e", "Current\u202e")]
+    public async Task MacroGet_MapsAndCleansPlaceholderMetadata(string name, string valueSet, string variable)
+    {
+        _data.Placeholders = [new MacroPlaceholder { Name = name, ValueSets = [valueSet], Variables = [variable] }];
+
+        CallToolResult result = await Get(Feedback);
+
+        JsonElement placeholder = Structured(result).GetProperty("macro").GetProperty("placeholders")[0];
+        Assert.Equal("#<EES_F_CH1>", placeholder.GetProperty("name").GetString());
+        Assert.Equal("6A", placeholder.GetProperty("valueSets")[0].GetString());
+        Assert.Equal("Current", placeholder.GetProperty("variables")[0].GetString());
+        Assert.DoesNotContain("EES_F_CH1", Text(result, 0), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task MacroGet_PlaceholdersStayWithinTheResultBudget()
+    {
+        _data.Placeholders = [.. Enumerable.Range(1, 50).Select(i => new MacroPlaceholder
+        {
+            Name = "#<CH" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + ">",
+            ValueSets = [new string('v', 500)],
+            Variables = [new string('x', 500)],
+        })];
+
+        CallToolResult result = await Get(Feedback);
+
+        JsonElement data = Structured(result);
+        Assert.True(data.GetProperty("truncated").GetBoolean());
+        Assert.True(data.GetProperty("macro").GetProperty("placeholders").GetArrayLength() < 50);
+        Assert.Contains("placeholders", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        Assert.True(ResultShaper.ResultTokens(data.GetRawText()) <= ResultShaper.DefaultTokenBudget);
+    }
+
+    [Theory]
     [InlineData(double.PositiveInfinity, double.NegativeInfinity)]
     [InlineData(double.NaN, 10.0)]
     public async Task MacroGet_AMacroWithoutA2DOutline_ReportsNoSize(double width, double height)

@@ -15,6 +15,9 @@ public sealed class MacroInsertData
     /// <summary>Part references read from the inserted main functions after commit.</summary>
     public List<MacroPartReference> ArticleReferences { get; set; } = [];
 
+    /// <summary>Value sets applied during insertion. Empty when none were requested.</summary>
+    public List<MacroValueApplication> Values { get; set; } = [];
+
     /// <summary>
     /// The inserted functions other than wires, one per tag, in EPLAN's order, at most
     /// <c>MacroInsertRequest.MaxDevices</c>. Tags with <c>?</c> are ones EPLAN could not number (spike S10).
@@ -32,4 +35,14 @@ public sealed class MacroInsertData
 
     /// <summary>A problem after the commit, for example an undo step EPLAN did not close; null when there was none.</summary>
     public string? Warning { get; set; }
+}
+
+/// <summary>An existing value set applied to one inserted placeholder.</summary>
+public sealed class MacroValueApplication
+{
+    /// <summary>The exact placeholder name stored in the macro.</summary>
+    public string Placeholder { get; set; } = string.Empty;
+
+    /// <summary>The name of the value set that was applied.</summary>
+    public string ValueSet { get; set; } = string.Empty;
 }

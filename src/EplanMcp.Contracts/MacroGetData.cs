@@ -27,11 +27,24 @@ public sealed class MacroGetData
     /// <summary>The macro's functions other than wires, one per tag, in the macro's order; at most <c>MacroGetOperation.MaxDevices</c>.</summary>
     public List<MacroDevice> Devices { get; set; } = [];
 
+    /// <summary>Readable placeholders of the selected representation and variant, at most 50.</summary>
+    public List<MacroPlaceholder> Placeholders { get; set; } = [];
+
     /// <summary>How many distinct tags the macro has, before the list was cut.</summary>
     public int DeviceCount { get; set; }
 
     /// <summary>How many objects the macro holds in all (functions, texts, boxes, connection points…).</summary>
     public int ObjectCount { get; set; }
+}
+
+/// <summary>A macro placeholder's available value sets and variable names. Names are macro data.</summary>
+public sealed class MacroPlaceholder
+{
+    public string Name { get; set; } = string.Empty;
+
+    public List<string> ValueSets { get; set; } = [];
+
+    public List<string> Variables { get; set; } = [];
 }
 
 /// <summary>One representation type of a macro (<c>WindowMacro.Enums.RepresentationType</c>) and its variants.</summary>

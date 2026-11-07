@@ -78,7 +78,7 @@ public sealed class PageDisplayToolTests
                     Tool definition = Assert.Single(await client.ListToolsAsync(cancellationToken: Token), t => t.Name == tool).ProtocolTool;
                     JsonElement parameter = definition.InputSchema.GetProperty("properties").GetProperty("show_page");
                     Assert.False(parameter.GetProperty("default").GetBoolean());
-                    Assert.Equal(tool == ConnectionCreateTools.Tool ? null : tool == PlacementCreateTools.Tool ? PlacementCreateTools.ShowPageDescription : tool == DeviceWriteTools.PlaceTool ? "Open page." : PageDisplay.Description,
+                    Assert.Equal(tool == ConnectionCreateTools.Tool ? null : tool == PlacementCreateTools.Tool ? PlacementCreateTools.ShowPageDescription : tool == DeviceWriteTools.PlaceTool ? "Open page." : tool == MacroWriteTools.InsertTool ? "Open or focus page editor." : PageDisplay.Description,
                         parameter.TryGetProperty("description", out JsonElement description) ? description.GetString() : null);
                     Assert.Contains("boolean", definition.OutputSchema!.Value.GetProperty("properties").GetProperty("pageShown").GetProperty("type").ToString(), StringComparison.Ordinal);
                 }
