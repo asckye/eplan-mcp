@@ -42,7 +42,7 @@ public sealed class PageDrawingToolTests
     }
 
     [Theory]
-    [InlineData("concise", 5000)]
+    [InlineData("concise", 20000)]
     [InlineData("detailed", 20000)]
     public async Task Paging_BudgetCuts_ResumeAtFirstOmittedObject(string format, int budget)
     {

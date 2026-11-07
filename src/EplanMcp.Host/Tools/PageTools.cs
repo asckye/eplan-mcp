@@ -213,7 +213,8 @@ internal sealed class PageTools
 
         result.Truncated = hints.Count > 0;
         result.Hint = hints.Count > 0 ? string.Join(" ", hints) : null;
-        int budget = detailed ? ResultShaper.MaxTokenBudget : ResultShaper.DefaultTokenBudget;
+        // Agent eval 2026-11-07: drawings are asked for on purpose, and the default budget took 57 calls to read one page.
+        int budget = detailed || include_drawings ? ResultShaper.MaxTokenBudget : ResultShaper.DefaultTokenBudget;
         if (!ResultShaper.Fits(result, budget))
         {
             hints.Add("Entries at the end of 'properties', or of 'devices' on a very large page, were left out to stay within the size budget.");
