@@ -68,7 +68,8 @@ internal sealed class EplanStructureIdentifiers : IStructureIdentifiers
         Change(() =>
         {
             string prefix = StructureNames.Prefix(names[0]);
-            if (!EplanProjects.ByPath(projectPath).SetSortedLocations(Block(prefix), [.. names.Select(n => n.Substring(prefix.Length))]))
+            // The block's empty identifier stays first: EPLAN puts what it is given ahead of it, and pages without this structure would then sort last (api-notes A107).
+            if (!EplanProjects.ByPath(projectPath).SetSortedLocations(Block(prefix), [string.Empty, .. names.Select(n => n.Substring(prefix.Length))]))
             {
                 throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN did not sort the block, so nothing was committed.",
                     retryable: false, new Dictionary<string, string> { ["identifier"] = prefix });
