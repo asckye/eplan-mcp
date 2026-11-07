@@ -7,10 +7,10 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class InterruptionExplicitVariantTests
 {
     [Fact]
-    public void ExampleRightBp_ExplicitZeroOverridesTailPreference_OmissionKeepsTwo()
+    public void ExampleRightBp_ExplicitZeroOverridesIncomingDefault_OmissionTakesE()
     {
         var f = Fixture();
-        Assert.Equal(2, (int)Assert.Single(f.Plan()["symbols"]!)["symbol"]!["variant"]!);
+        Assert.Equal(4, (int)Assert.Single(f.Plan()["symbols"]!)["symbol"]!["variant"]!);
         f.Request["items"]![0]!["symbol_variant"] = 0;
         Assert.Equal(0, (int)Assert.Single(f.Plan()["symbols"]!)["symbol"]!["variant"]!);
         Assert.Equal("Right", (string?)Assert.Single(f.Plan()["symbols"]!)["interruption"]!["direction"]);

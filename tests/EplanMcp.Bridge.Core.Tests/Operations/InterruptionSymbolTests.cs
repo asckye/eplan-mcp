@@ -7,11 +7,11 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 public sealed class InterruptionSymbolTests
 {
     [Theory]
-    [InlineData("Left", 0, 60)]
-    [InlineData("Down", 1, 61)]
-    [InlineData("Right", 2, 60)]
-    [InlineData("Up", 3, 60)]
-    public void Bp_ChoosesTailThenLowestVariant_AndPositionsMatchingPin(string direction, int variant, double y)
+    [InlineData("Left", 0, 60, 1)]
+    [InlineData("Down", 7, 61, 0)]
+    [InlineData("Right", 4, 60, 0)]
+    [InlineData("Up", 3, 60, 1)]
+    public void Bp_TailForOutgoingEnds_EAndHForIncomingEnds_AndPositionsMatchingPin(string direction, int variant, double y, int pin)
     {
         var fixture = new InterruptionPointFixture();
         fixture.Base.Symbols.Reverse();
@@ -22,7 +22,7 @@ public sealed class InterruptionSymbolTests
         Assert.Equal("BP", (string?)row["symbol"]!["name"]);
         Assert.Equal(variant, (int)row["symbol"]!["variant"]!);
         Assert.Equal([60d, y], row["position"]!.Values<double>());
-        Assert.Equal(direction, (string?)row["symbol"]!["connectionPoints"]![1]!["direction"]);
+        Assert.Equal(direction, (string?)row["symbol"]!["connectionPoints"]![pin]!["direction"]);
     }
 
     [Theory]

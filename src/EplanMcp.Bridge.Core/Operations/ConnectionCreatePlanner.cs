@@ -276,6 +276,11 @@ public static class ConnectionCreatePlanner
                     "Available variants for the requested cardinal pins: " + string.Join(", ", matches.Select(s => s.Variant.ToString(CultureInfo.InvariantCulture)).Distinct(StringComparer.Ordinal)) + ".");
                 matches = matches.Where(s => s.Variant == requestedVariant.Number).ToArray();
             }
+            // A115: current runs left to right and top to bottom, so a BP the wire leaves rightwards or downwards is where it
+            // comes in: arrow into the page, name outside (E, H). The other ends keep the outgoing tail variant.
+            else if (node.Kind == "interruption_point" && matches.FirstOrDefault()?.Name == "BP"
+                && (node.Directions[0] switch { "Right" => 4, "Down" => 7, _ => -1 }) is var incoming && matches.Any(s => s.Variant == incoming))
+            { matches = matches.Where(s => s.Variant == incoming).ToArray(); }
             // A52/S40: PCP has one offset pin and mirrored variants sharing its direction.
             if (node.Kind is "potential_point" or "interruption_point" && matches.Length > 0)
             { matches = matches.Where(s => s.Variant == matches[0].Variant).ToArray(); }
