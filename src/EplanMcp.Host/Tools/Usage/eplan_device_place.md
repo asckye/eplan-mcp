@@ -11,7 +11,7 @@
 ## Workflow
 dry_run omitted/true: preview only, execution=not_started. false executes.
 
-1. Circuit or single-line (CircuitSingleLine) page: eplan_page_list/create/get. mm, bottom-left, y up. Align facing pins (eplan_symbol_search gives pin offsets per variant) and EPLAN draws the lines; finish with eplan_connection_generate.
+1. Circuit/CircuitSingleLine page: eplan_page_list/get. mm, bottom-left, y up. Align facing pins (eplan_symbol_search: pin offsets per variant) and EPLAN draws the lines; finish with eplan_connection_generate.
 2. eplan_device_list: free tags. Short tags inherit page structure; +F1 = location only; part tag renames all functions, omitted=auto. Approval outside scratch.
 3. part + symbol_variant changes the template variant; invalid rolls back.
 4. Prefer part templates: eplan_part_search, variant 1. library/symbol/symbol_variant overrides graphics, preserving logical definition; others stay unplaced. PLC module: eplan_macro_insert part. Symbols: eplan_symbol_search.
