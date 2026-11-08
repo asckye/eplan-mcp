@@ -79,7 +79,12 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
             EplanVisibleNames.Adjust(page, function);
             // PDF redraw 2026-11-06: EPLAN takes the tag over from the point before it and leaves this one's row empty; each PLC point shows its card.
             if (args.PlcConnectionPoint is not null && string.IsNullOrEmpty(function.VisibleName))
-            { string card = DevicePlcPlan.Parent(args, tag); function.VisibleName = card.Substring(card.LastIndexOf('-')); }
+            {
+                // A121: in a project without structure the card is DI1, without '-' (LastIndexOf gave -1 and Substring threw).
+                string card = DevicePlcPlan.Parent(args, tag);
+                int dash = card.LastIndexOf('-');
+                function.VisibleName = dash >= 0 ? card.Substring(dash) : card;
+            }
         }
         if (args.PropertyArrangement is { } arrangement)
         { EplanSymbolArrangement.Select(function, arrangement); }
