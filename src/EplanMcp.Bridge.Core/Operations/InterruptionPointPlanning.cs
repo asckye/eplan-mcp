@@ -96,7 +96,7 @@ public static class InterruptionPointPlanning
         scope["preservedEndpoints"] = new JArray(scope["pages"]!.SelectMany(p => p["logical"]!).Where(c => !affectedPins.Contains((string?)c["startDevice"] ?? "") && !affectedPins.Contains((string?)c["endDevice"] ?? "")).Select(c => new JArray(c["startDevice"]!, c["endDevice"]!)));
     }
 
-    public static JArray Verify(JObject plan, JObject actual)
+    public static JArray Verify(JObject plan, JObject actual, IReadOnlyCollection<string>? requestedNames = null)
     {
         var result = new JArray();
         string Segments(JToken lines) => string.Join(";", lines.Select(s => string.Join("|", s.Select(p => string.Join(",", p.Values<double>().Select(v => v.ToString("R", System.Globalization.CultureInfo.InvariantCulture)))).OrderBy(p => p, StringComparer.Ordinal))).Distinct(StringComparer.Ordinal).OrderBy(s => s, StringComparer.Ordinal));
@@ -115,8 +115,13 @@ public static class InterruptionPointPlanning
         foreach (JToken row in plan["symbols"]!.Where(s => s["interruption"]?["counterpart_pages"] is not null))
         {
             string name = (string)row["interruption"]!["name"]!;
+            JToken? stored = actual["points"]!.FirstOrDefault(point => (string?)point["page"] == (string?)plan["page"]
+                && JToken.DeepEquals(point["position"], row["position"]) && !before.Any(previous => (long?)previous["oid"] == (long?)point["oid"]));
+            var readback = new InterruptionNameReadback(name, (string?)stored?["name"] ?? name);
+            string detail = (requestedNames is null || requestedNames.Contains(name)) && readback.KeepsDeviceWithoutStructure
+                ? " " + readback.StructureWarning : "";
             JToken[] pair = actual["points"]!.Where(p => (string?)p["name"] == name).ToArray();
-            Require(pair.Length is 1 or 2, "Native pairing is missing or ambiguous.");
+            Require(pair.Length is 1 or 2, "Native pairing is missing or ambiguous." + detail);
             JToken? placed = pair.SingleOrDefault(p => (string?)p["page"] == (string?)plan["page"] && JToken.DeepEquals(p["position"], row["position"]));
             JArray pin = Pin(row);
             bool explicitVariant = row["interruption"]!["symbol_variant"] is not null;
@@ -124,7 +129,7 @@ public static class InterruptionPointPlanning
                 ? JToken.DeepEquals(placed["symbol"], new JObject { ["library"] = row["symbol"]!["library"], ["name"] = row["symbol"]!["name"], ["variant"] = row["symbol"]!["variant"] })
                     && placed["pins"]?.Any(p => JToken.DeepEquals(p["position"], pin) && (string?)p["direction"] == (string?)row["interruption"]!["direction"]) == true
                 : JToken.DeepEquals(placed["pin"], pin) && (string?)placed["direction"] == (string?)row["interruption"]!["direction"]),
-                "Interruption name, position, pin or direction readback differs.");
+                "Interruption name, position, pin or direction readback differs." + detail);
             if (row["interruption"]!["sort_code"] is { } sortCode)
             { Require((string?)placed!["sortCode"] == sortCode.ToString(), "Interruption sort code readback differs."); }
             foreach (JToken point in pair)

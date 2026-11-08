@@ -142,8 +142,11 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                             item.Row["activePropertySet"] = EplanSymbolArrangement.ReadActive(properties);
                         }
                     }
-                    if (!DrawingNames.SameName((string)interruption["name"]!, point.Name, page))
-                    { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs: requested '" + (string)interruption["name"]! + "', EPLAN stored '" + point.Name + "'. Supply the exact full name."); }
+                    if (!DrawingNames.SameName((string)interruption["name"]!, point.Name, page)
+                        && !new InterruptionNameReadback((string)interruption["name"]!, point.Name).KeepsDeviceWithoutStructure)
+                    {
+                        throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs: requested '" + (string)interruption["name"]! + "', EPLAN stored '" + point.Name + "'. Supply the exact full name.");
+                    }
                 }
                 // Owner 2026-11-02: the symbol's default arrangement shows the cross-reference, as after EPLAN's insert
                 // command; an extra 24300 text switched the point to a user-defined arrangement.
@@ -168,8 +171,9 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         }
     }
 
-    public void VerifyCreatedSymbols(string project, string page, JArray symbols)
+    public IReadOnlyList<InterruptionNameReadback> VerifyCreatedSymbols(string project, string page, JArray symbols)
     {
+        var names = new List<InterruptionNameReadback>();
         Placement[] placements = EplanNativePreconditions.Valid(Page(project, page).AllPlacements).ToArray();
         if (_createdSymbols.Count != symbols.Count)
         { throw SymbolMismatch("created symbol identity count changed"); }
@@ -186,8 +190,16 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             {
                 if (expected["property_arrangement"] is { } arrangement && EplanSymbolArrangement.SelectedName(symbol) is { } selectedArrangement && selectedArrangement != arrangement.Value<string>())
                 { throw SymbolMismatch("created interruption arrangement changed"); }
-                if (symbol is not InterruptionPoint point || !DrawingNames.SameName((string)expected["name"]!, point.Name, page))
-                { throw SymbolMismatch("created interruption name changed"); }
+                if (symbol is not InterruptionPoint point)
+                {
+                    throw SymbolMismatch("created interruption name changed");
+                }
+                var name = new InterruptionNameReadback((string)expected["name"]!, point.Name);
+                if (!DrawingNames.SameName(name.RequestedName, name.StoredName, page) && !name.KeepsDeviceWithoutStructure)
+                {
+                    throw SymbolMismatch("created interruption name changed");
+                }
+                names.Add(name);
                 if (expected["sort_code"] is { } sort)
                 {
                     using InterruptionPointPropertyList properties = point.Properties;
@@ -197,6 +209,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                 }
             }
         }
+        return names;
     }
 
     private static BridgeErrorException SymbolMismatch(string detail) => new(ErrorReason.EplanOperationFailed, "Created symbol readback differs: " + detail + ".");

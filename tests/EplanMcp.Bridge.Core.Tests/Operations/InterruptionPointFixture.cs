@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Core.Tests.Operations;
 
-internal sealed class InterruptionPointFixture : IConnectionCreator, IConnectionGenerator
+internal sealed class InterruptionPointFixture : IConnectionCreator, IConnectionGenerator, IConnectionPlacementReadback
 {
     internal const string PeerPage = "=F+A1&EFS1/2";
     internal const string BusinessName = "=F+A1-LINK";
@@ -16,6 +16,8 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     internal List<string[]> ScopeReads { get; } = [];
     internal List<string[]> Generates { get; } = [];
     internal string? Failure { get; set; }
+    internal string? StoredInterruptionName { get; set; }
+    internal string ExpectedPlannedName { get; set; } = BusinessName;
     internal List<string?[]>? GeneratedEndpoints { get; set; }
     internal int State { get; private set; }
     internal int Undos { get; private set; }
@@ -64,7 +66,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
     public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
     public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () =>
     {
-        Assert.Contains(symbols, s => (string?)s["interruption"]?["name"] == BusinessName);
+        Assert.Contains(symbols, s => (string?)s["interruption"]?["name"] == ExpectedPlannedName);
         State = 1;
         PlacedSortCode = (long?)Assert.Single(symbols, s => s["interruption"] is not null)["interruption"]!["sort_code"];
         if (Failure == "cancel")
@@ -72,6 +74,12 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
         if (Failure == "placement")
         { throw Failed(); }
     };
+    public IReadOnlyList<InterruptionNameReadback> VerifyCreatedSymbols(string project, string page, JArray symbols)
+    {
+        Assert.Contains("Commit", Placement.Calls.Concat(Generation.Calls));
+        return symbols.Where(symbol => symbol["interruption"] is not null)
+            .Select(symbol => new InterruptionNameReadback((string)symbol["interruption"]!["name"]!, StoredInterruptionName ?? (string)symbol["interruption"]!["name"]!)).ToArray();
+    }
     public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false)
     { Assert.True(undoCommitted); if (Failure == "undo") { Placement.FailAt = "Rollback"; } return Placement; }
     private List<double[][]> Geometry() => Failure == "line" || State == 2 && Failure == "generated_line" ? [] : Isolated ? [] : Dangling ? [[[60, 60], [60, 76]]] : _connected ? [.. BasicGeometry(), new[] { new[] { 60d, 60d }, new[] { 60d, 76d } }] : BasicGeometry();
@@ -113,6 +121,7 @@ internal sealed class InterruptionPointFixture : IConnectionCreator, IConnection
         if (State > 0)
         {
             points.Add(Point(ConnectionCreateFixture.PageName, 91, [60d, 60d], "Up"));
+            points.Last!["name"] = StoredInterruptionName ?? ExpectedPlannedName;
             points.Last!["sortCode"] = Failure == "sort_code" ? "999" : PlacedSortCode?.ToString(System.Globalization.CultureInfo.InvariantCulture);
             if (Request["items"]!.Last!["symbol_variant"] is { } variant)
             {

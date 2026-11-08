@@ -7,6 +7,61 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class ConnectionDeferredGenerationTests
 {
+    [Theory]
+    [InlineData("=GAC-L1", "-L1", true)]
+    [InlineData("-L1", "-L1", false)]
+    [InlineData("L1", "-L1", false)]
+    [InlineData("=GAC-L1", "=GAC-L1", false)]
+    [InlineData("=GAC+UC1-L1", "=GAC-L1", true)]
+    [InlineData("+UC1-L1", "=+UC1-L1", false)]
+    public void Deferred_InterruptionStructureLoss_WarnsOnlyForExplicitStructure(string requested, string stored, bool warning)
+    {
+        var creator = new Creator { StoredInterruptionName = stored };
+        creator.Fixture.Symbols.Add(ConnectionCreateFixture.Variant("BP", "InterruptionPoint", 0, "Up"));
+        creator.Fixture.Request["generate"] = false;
+        creator.Fixture.Request["items"] = new JArray(new JObject
+        {
+            ["kind"] = "interruption_point",
+            ["position"] = new JArray(64, 64),
+            ["direction"] = "Up",
+            ["name"] = requested
+        });
+
+        JObject result = creator.Execute();
+
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal(warning, ((string?)result["warning"])?.Contains("unique without structure", StringComparison.Ordinal) == true);
+        if (warning)
+        {
+            Assert.Contains("Interruption point '" + requested + "' was stored as '" + stored + "'", (string?)result["warning"], StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public void Deferred_DuplicateInterruptionName_WarnsOnceAndKeepsLayoutWarnings()
+    {
+        var creator = new Creator { StoredInterruptionName = "-L1" };
+        creator.Fixture.Symbols.Add(ConnectionCreateFixture.Variant("BP", "InterruptionPoint", 0, "Up"));
+        creator.Fixture.Request["generate"] = false;
+        creator.Fixture.Request["items"] = new JArray(
+            Point(64),
+            Point(80));
+
+        JObject result = creator.Execute();
+
+        string warning = (string)result["warning"]!;
+        Assert.Single(warning.Split('\n'), line => line.Contains("unique without structure", StringComparison.Ordinal));
+        Assert.Contains("Layout before write:", warning, StringComparison.Ordinal);
+
+        static JObject Point(int x) => new()
+        {
+            ["kind"] = "interruption_point",
+            ["position"] = new JArray(x, 64),
+            ["direction"] = "Up",
+            ["name"] = "=GAC-L1"
+        };
+    }
+
     [Fact]
     public void LiveTNodeInput_Deferred_SkipsConflictingLinesAndLogicalEndpoints()
     {
@@ -198,6 +253,7 @@ public sealed class ConnectionDeferredGenerationTests
         private bool _written;
         internal bool MissingNode { get; init; }
         internal string? Mismatch { get; init; }
+        internal string? StoredInterruptionName { get; init; }
         internal int Readbacks { get; private set; }
         internal Creator() => Transactions.Snapshot = () => { bool old = _written; return () => _written = old; };
         internal JObject Execute() => Assert.IsType<JObject>(new OperationContext("deferred", true, null).Run(() =>
@@ -249,7 +305,7 @@ public sealed class ConnectionDeferredGenerationTests
             foreach (JToken point in planned)
             { _created.Add(new() { Locator = new() { Type = 17, Oid = 900 + _created.Count }, Kind = "PotentialDefinition", Location = point["position"]!.Values<double>().ToArray() }); }
         };
-        public void VerifyCreatedSymbols(string project, string page, JArray symbols)
+        public IReadOnlyList<InterruptionNameReadback> VerifyCreatedSymbols(string project, string page, JArray symbols)
         {
             Assert.Contains("Commit", Transactions.Calls);
             Readbacks++;
@@ -259,6 +315,8 @@ public sealed class ConnectionDeferredGenerationTests
                 if (row is null || row.Kind != id.Kind || row.Properties.GetValueOrDefault("variant") != id.Variant)
                 { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Saved symbol identity, kind or variant changed after commit."); }
             }
+            return symbols.Where(symbol => symbol["interruption"] is not null)
+                .Select(symbol => new InterruptionNameReadback((string)symbol["interruption"]!["name"]!, StoredInterruptionName ?? (string)symbol["interruption"]!["name"]!)).ToArray();
         }
         public JArray ReadDefinitionPoints(string project, string page, JArray planned) => (JArray)planned.DeepClone();
         public void AddDefinitionArticles(string project, string page, JArray planned) => throw new NotSupportedException();

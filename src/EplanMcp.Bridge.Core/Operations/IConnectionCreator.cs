@@ -17,5 +17,5 @@ public interface IConnectionCreator : ISymbolReader
 /// <summary>Reacquires this call's symbols by saved identity after commit; never reads logical endpoints or pairing.</summary>
 public interface IConnectionPlacementReadback
 {
-    public void VerifyCreatedSymbols(string project, string page, JArray symbols);
+    public IReadOnlyList<InterruptionNameReadback> VerifyCreatedSymbols(string project, string page, JArray symbols);
 }

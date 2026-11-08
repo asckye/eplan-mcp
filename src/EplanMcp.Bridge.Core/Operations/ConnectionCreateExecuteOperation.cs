@@ -34,6 +34,36 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         if (plan["cableDefinitions"] is not null)
         { return CableDefinitionExecution.Run(creator, generator, transactions, scene, input, plan); }
         string project = scene.Project.Path, page = scene.Page.Page;
+        var requestedNames = new HashSet<string>(input["items"]!.Where(item => (string?)item["kind"] == "interruption_point")
+            .Select(item => (string)item["name"]!), StringComparer.Ordinal);
+        string[] ReadNameWarnings(IConnectionPlacementReadback reader)
+        {
+            IReadOnlyList<InterruptionNameReadback> names = reader.VerifyCreatedSymbols(project, page, (JArray)plan["symbols"]!);
+            return names.Where(name => requestedNames.Contains(name.RequestedName))
+                .GroupBy(name => name.RequestedName, StringComparer.Ordinal)
+                .Select(group => group.Select(name => name.StructureWarning).FirstOrDefault(warning => warning is not null))
+                .Where(warning => warning is not null).Select(warning => warning!).ToArray();
+        }
+        void VerifySymbols(IConnectionPlacementReadback reader)
+        {
+            plan["warning"] = LayoutGuard.Summary(new[] { (string?)plan["warning"] }
+                .Concat(ReadNameWarnings(reader)));
+        }
+        void ReadInterruptionNames()
+        {
+            if (!plan["symbols"]!.Any(symbol => symbol["interruption"] is not null))
+            {
+                return;
+            }
+            if (creator is IConnectionPlacementReadback reader)
+            {
+                VerifySymbols(reader);
+            }
+            else
+            {
+                plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], "Interruption name readback is unavailable. Verify the stored names in EPLAN."]);
+            }
+        }
         bool interruptions = plan["interruptionScope"] is not null, generationCommitted = false;
         string[] pages = interruptions ? InterruptionPointPlanning.Pages(plan) : [page];
         Dictionary<string, LayoutGuard.Model> layouts = pages.ToDictionary(p => p, p => LayoutGuard.From(p == page ? scene : creator.Read(project, p)), StringComparer.Ordinal);
@@ -71,7 +101,9 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                     PageDrawingGeometry actual = creator.Read(project, page).Page;
                     DrawingPlacement[] created = [.. actual.Placements.Where(p => !scene.Page.Placements.Any(b => b.Locator.Type == p.Locator.Type && b.Locator.Oid == p.Locator.Oid))];
                     if (creator is IConnectionPlacementReadback symbols)
-                    { symbols.VerifyCreatedSymbols(project, page, (JArray)plan["symbols"]!); }
+                    {
+                        VerifySymbols(symbols);
+                    }
                     else if (plan["symbols"]!.Any())
                     { throw Mismatch("committed symbol readback is unavailable"); }
                     plan["actualPlacements"] = JArray.FromObject(created);
@@ -103,6 +135,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                     writer.WriteDefinitionSources(project, page, definitions);
                     VerifyGraphical("generation");
                     CheckLayout();
+                    ReadInterruptionNames();
                     plan["definitionPoints"] = ConnectionDefinitionPoints.Verify(definitions, writer.ReadDefinitionPoints(project, page, definitions));
                     return true;
                 }),
@@ -120,11 +153,15 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 {
                     VerifyGraphical();
                     CheckLayout();
+                    if (creator is IConnectionPlacementReadback reader && ReadNameWarnings(reader) is { Length: > 0 } warnings)
+                    {
+                        throw WriteArguments.Invalid(["/items: Interruption name readback differs. " + LayoutGuard.Summary(warnings)]);
+                    }
                     plan["actualEndpoints"] = JArray.FromObject(GenerateAndVerify());
                     VerifyGraphical("generation");
                     CheckLayout();
                     plan["actualGraphicalAutoconnect"] = JArray.FromObject(creator.Read(project, page).Graphical);
-                    plan["interruptionPoints"] = InterruptionPointPlanning.Verify(plan, creator.Interruptions(project, pages));
+                    plan["interruptionPoints"] = InterruptionPointPlanning.Verify(plan, creator.Interruptions(project, pages), requestedNames);
                     return true;
                 }),
                 () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint)));
@@ -134,7 +171,12 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             return plan;
         }
         Committed<bool> placed = TransactionRunner.Run(transactions, "eplan_connection_create", () => { place(); CheckLayout(predicted: true); return true; }, _ => true,
-            _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { CheckLayout(); return true; }),
+            _ => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() =>
+            {
+                CheckLayout();
+                ReadInterruptionNames();
+                return true;
+            }),
             () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), creator.Read(project, page), creator, fingerprint)));
         if (placed.Warning is not null)
         { throw Unknown(); }
