@@ -136,7 +136,10 @@ internal sealed partial class EplanDeviceSymbolPlacement : IDeviceSymbolPlacemen
         Require(_symbol.FunctionCategory is null || function.FunctionCategory.ToString() == _symbol.FunctionCategory, "category " + function.FunctionCategory);
         Require(function.IsPlaced && function.Page.Name == page.Name && (DevicePlaceRequest.SameName(tag, function.Name) || DeviceSymbolPlan.ConnectionPoint(args) && DevicePlaceRequest.SameName(tag, function.Name.Split(':')[0])) && function.ArticleReferences.Length == 0,
             "tag " + function.Name);
-        Require(function.Location.X == args.X && function.Location.Y == args.Y && pins.Length == _symbol.ConnectionPoints.Count
+        // MX_NFPA 2026-11-07: a single-line symbol draws one line for all poles; joined to a three-pole breaker it has 6 pins.
+        bool singleLine = page.PageType.ToString() == "CircuitSingleLine";
+        Require(function.Location.X == args.X && function.Location.Y == args.Y
+            && (singleLine ? pins.Length >= _symbol.ConnectionPoints.Count : pins.Length == _symbol.ConnectionPoints.Count)
             && function.SymbolVariant.SymbolLibraryName == _symbol.Library && function.SymbolVariant.SymbolName == _symbol.Name
             && function.SymbolVariant.VariantNr == _symbol.Variant, FormattableString.Invariant($"position {function.Location.X},{function.Location.Y}, {pins.Length} pins, variant {function.SymbolVariant.VariantNr}"));
         for (int i = 0; i < (requested?.Length ?? 0); i++)
