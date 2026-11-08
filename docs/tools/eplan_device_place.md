@@ -132,7 +132,7 @@ SPECIAL/BBDEF 经 Function.Create 放置 TextFunction（BusBarDefText、主功�
   - 插入点与图上位置的关系（S20 的线圈在 (80, 160) 附近）。
 
 - **显示标识与属性排列**：按符号新建的器件、PLC 点、端子、端子排定义和位置框创建后，都由 EPLAN 按完整标识计算显示标识（`NameService.AdjustVisibleName`），并保留符号的默认属性排列，标识显示在编辑器默认的位置。`display_properties` 只在调用方需要时额外新建文字，新建会使该对象改为用户定义的属性排列；端子排定义像 EPLAN 插入命令一样用 SPECIAL `TDEF`（端子排定义）变体 0 放置，不再新建或解除停靠文字。
-- **位置框规划/执行（A55/S43）**：同页同位置标识（忽略大小写）返回 `ALREADY_EXISTS`；允许包围既有器件。页面边界未知、非有限或两角越界则拒绝。指纹覆盖两角、虚线、库变体、页对象/尺寸、同页框结构和全项目设备名称；审批后变化返回 `PLAN_STALE`。沿同一 `FunctionTransactionScope` 用 `SymbolReference.Create` 取得真实 `LocationBox`，`SetLogicalArea` 后通过 `NameParts.DESIGNATION_LOCATION` 设置位置。递归设置 `GetGraphics` 的笔型 `StyleId=1`，核对实际外框不越页、逻辑两角、结构和变体，并逐对象核对全项目既有功能名称完全不变；不是通过重命名实现结构。缺图形、读回不符或取消即 Abort，缓存列表先释放，不关闭空撤销步；成功只 Commit/CloseUndo 一次。模型说明和审批均明确受影响设备为零。
+- **位置框规划/执行（A55/S43）**：同页同位置标识（忽略大小写）且两角完全相同才返回 `ALREADY_EXISTS`，同一页可以有多个同标识的位置框；允许包围既有器件。页面边界未知、非有限或两角越界则拒绝。指纹覆盖两角、虚线、库变体、页对象/尺寸、同页框结构和全项目设备名称；审批后变化返回 `PLAN_STALE`。沿同一 `FunctionTransactionScope` 用 `SymbolReference.Create` 取得真实 `LocationBox`，`SetLogicalArea` 后通过 `NameParts.DESIGNATION_LOCATION` 设置位置。递归设置 `GetGraphics` 的笔型 `StyleId=1`，核对实际外框不越页、逻辑两角、结构和变体，并逐对象核对全项目既有功能名称完全不变；不是通过重命名实现结构。缺图形、读回不符或取消即 Abort，缓存列表先释放，不关闭空撤销步；成功只 Commit/CloseUndo 一次。模型说明和审批均明确受影响设备为零。
 
 ## 6. 写操作专项
 - **dry-run**：返回第 3 节的结果，`execution = not_started`，`functions` 为 null。

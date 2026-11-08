@@ -137,10 +137,11 @@ internal sealed class DevicePlaceRequest
             { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC card already has the I/O address; choose a free address."); }
             existing = [.. existing, Protocol.BridgeJson.FromObject(state).ToString(Newtonsoft.Json.Formatting.None)];
         }
-        string[] taken =
+        // MX_Dryer 2026-11-08: official pages put each field device in its own +M box, so only an exact repeat conflicts.
+        string[] taken = box ? [.. page.LocationBoxStructures.Where(n => string.Equals(n, MacroTargetPage.BoxKey(full, args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value), StringComparison.OrdinalIgnoreCase))] :
         [
-            .. (box ? page.LocationBoxStructures : terminal || args.PlcConnectionPoint is not null ? existing : names.FunctionNames(project.Path))
-                .Where(n => full.Length > 0 && ((box || terminal || args.PlcConnectionPoint is not null
+            .. (terminal || args.PlcConnectionPoint is not null ? existing : names.FunctionNames(project.Path))
+                .Where(n => full.Length > 0 && ((terminal || args.PlcConnectionPoint is not null
                     ? SameName(full, n, ignoreCase: true) : string.Equals(BareOf(full, n), WithoutEmptyFunction(n), StringComparison.OrdinalIgnoreCase)) || WithoutEmptyFunction(n).StartsWith(BareOf(full, n) + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
@@ -206,7 +207,7 @@ internal sealed class DevicePlaceRequest
         {
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
-                Tag.StartsWith("+", StringComparison.Ordinal) && Tag.IndexOf('-') < 0 ? "A location box already uses this structure on the page; choose another location_box identifier." : $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
+                Tag.StartsWith("+", StringComparison.Ordinal) && Tag.IndexOf('-') < 0 ? "A location box with this identifier already covers this area on the page; choose another area or identifier." : $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = Project.Name, ["existing"] = string.Join("\n", Taken.Take(ProjectResolver.MaxCandidates)) });
         }

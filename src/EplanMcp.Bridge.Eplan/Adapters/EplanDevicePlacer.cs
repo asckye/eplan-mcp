@@ -26,7 +26,8 @@ internal sealed class EplanDevicePlacer : IDevicePlacer, IDeviceStripTransaction
             {
                 using FunctionBasePropertyList parts = box.NameParts;
                 using PropertyValue location = parts.DESIGNATION_LOCATION;
-                result.LocationBoxStructures.Add(location.IsEmpty ? string.Empty : "+" + location.ToString());
+                RectangleD area = box.GetLogicalArea();
+                result.LocationBoxStructures.Add(MacroTargetPage.BoxKey(location.IsEmpty ? string.Empty : "+" + location.ToString(), area.LowerLeft.X, area.LowerLeft.Y, area.UpperRight.X, area.UpperRight.Y));
             }
         }
         return result;

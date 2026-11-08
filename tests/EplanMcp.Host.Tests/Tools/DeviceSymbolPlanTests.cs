@@ -305,7 +305,7 @@ public sealed partial class DeviceSymbolPlanTests : IDisposable
             if (args.LocationBox is null)
             { store.Names.Add(tag); }
             else
-            { store.Page.LocationBoxStructures.Add(args.LocationBox); }
+            { store.Page.LocationBoxStructures.Add(MacroTargetPage.BoxKey(args.LocationBox, args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value)); }
             store.Page.Objects.Add("created");
             try
             {

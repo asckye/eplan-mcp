@@ -7,8 +7,13 @@ public sealed class MacroTargetPage
 {
     public LayoutGuard.Model? Layout { get; set; }
     public Func<DevicePlaceArgs, IReadOnlyList<DrawingPlacement>>? PredictDevice { get; set; }
-    /// <summary>Location identifiers of existing boxes on this page, for duplicate checks (A55).</summary>
+    /// <summary>Existing boxes on this page as <see cref="BoxKey"/>: only an exact repeat (same identifier and area) conflicts (A55).</summary>
     public List<string> LocationBoxStructures { get; set; } = [];
+
+    /// <summary>A location box's identifier and logical area; several boxes may share an identifier on one page.</summary>
+    public static string BoxKey(string structure, double x0, double y0, double x1, double y1) =>
+        FormattableString.Invariant($"{structure}|{x0},{y0},{x1},{y1}");
+
     /// <summary>The page's full name as EPLAN has it.</summary>
     public string Name { get; set; } = string.Empty;
 

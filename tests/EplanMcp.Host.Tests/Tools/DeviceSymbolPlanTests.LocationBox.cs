@@ -26,7 +26,7 @@ public sealed partial class DeviceSymbolPlanTests
     }
 
     [Fact]
-    public async Task LocationBox_CommitKeepsDeviceStructureAndClosesOneUndo_RepeatConflicts()
+    public async Task LocationBox_CommitKeepsDeviceStructureAndClosesOneUndo_OnlyExactRepeatConflicts()
     {
         _store.Names.Add("=F+A1-K1");
         JsonElement result = WriteToolHarness.Structured(await Box(dryRun: false));
@@ -37,6 +37,8 @@ public sealed partial class DeviceSymbolPlanTests
         Assert.Equal(("SPECIAL", "SC", 0), (_placement.Resolved!.Library, _placement.Resolved.Name, _placement.Resolved.Variant));
         Assert.Equal(ErrorReason.AlreadyExists, WriteToolHarness.Error(await Box(structure: "+p1")).GetProperty("reason").GetString());
         Assert.Single(_harness.Bridge.Writes);
+        Assert.Equal("committed", WriteToolHarness.Structured(await Box(dryRun: false, x: 200, cornerX: 240)).GetProperty("execution").GetString());
+        Assert.Equal(2, _harness.Bridge.Writes.Count);
     }
 
     [Theory]
@@ -172,8 +174,8 @@ public sealed partial class DeviceSymbolPlanTests
         Assert.Empty(_placement.Calls);
     }
 
-    private Task<CallToolResult> Box(bool dryRun = true, string structure = "+P1", WriteToolHarness? harness = null) =>
-        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, (harness ?? _harness).Bridge, "Line1", Page, 60, 140, location_box: structure, corner_x: 100, corner_y: 180, dry_run: dryRun, cancellationToken: TestContext.Current.CancellationToken);
+    private Task<CallToolResult> Box(bool dryRun = true, string structure = "+P1", WriteToolHarness? harness = null, double x = 60, double cornerX = 100) =>
+        DeviceWriteTools.DevicePlaceAsync((harness ?? _harness).Pipeline, (harness ?? _harness).Bridge, "Line1", Page, x, 140, location_box: structure, corner_x: cornerX, corner_y: 180, dry_run: dryRun, cancellationToken: TestContext.Current.CancellationToken);
 
     private static DevicePlaceArgs BoxArgs() => new() { Project = "Line1", Page = Page, LocationBox = "+P1", X = 60, Y = 140, CornerX = 100, CornerY = 180 };
 }
