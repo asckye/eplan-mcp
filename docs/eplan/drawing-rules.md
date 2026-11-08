@@ -70,21 +70,21 @@
 |---|---|---|---|
 | 器件 ↔ 部件 | 按部件放置；部件带功能模板、技术数据、触点映像 | `eplan_device_place part`、`eplan_macro_insert`、`eplan_device_update part` | `eplan_device_get` 的 `parts`；部件汇总里没有空行 |
 | PLC 卡 ↔ 总览 ↔ 机架图片 ↔ 功能页的点 | 同一个设备：先总览建卡，再调用（第 6 节） | `eplan_macro_insert`（Overview）、`eplan_device_update`（改名并入）、`eplan_device_place plc_connection_point` | 机架图片上方有回到 `&EFA1` 的交叉引用；点上有卡的交叉引用 |
-| PLC 点的地址 | 编址，不手写 | `eplan_plc_readdress` | `eplan_plc_get` 的 `address`（如 `I2.0`、`Q1.0`）；点上显示地址 |
-| PLC 点的符号地址 | 官方的值是"连线最终到达的设备 + 接点"，如 `MA1+M-MAA1_12`（经端子 `-XD1:6` 到电机的 12 号接点）。**不要手写成自定的名字。** EPLAN 是否在不写时自动算出、还是要执行生成命令，**待在 scratch 实测**，结果补到这里 | 暂不传 `plc_symbolic_address` | `eplan_plc_get` 的 `symbolicAddress` 指向最终设备 |
-| PLC 点的功能文字 | 官方的点 `text` 为空，框里显示的是这一列的路径功能文本 | `eplan_placement_create` 的 `path_text` | 点的框里显示列的说明 |
+| PLC 点的地址 | 编址，不手写；**每次执行都要工程师审批（scratch 也要）**，先说好再发起 | `eplan_plc_readdress` | `eplan_plc_get` 的 `address`（如 `I2.0`、`Q1.0`）；点上显示地址 |
+| PLC 点的符号地址 | **不手写，EPLAN 自动算出**（实测：不传时读到 `MA2+UC1-QA1_14`、`QM+UC1-KF1_A1`），值是"连线最终到达的设备 + 接点"，会穿过端子 | 不传 `plc_symbolic_address` | `eplan_plc_get` 的 `symbolicAddress` 指向最终设备；通讯点（CM PtP）没有符号地址属正常 |
+| PLC 点的功能文字 | 不写；框里显示这一列的路径功能文本（实测确认） | `eplan_placement_create` 的 `path_text` | 点的框里显示列的说明 |
 | 路径功能文本 → 器件功能文字 → 报表 | 每列 y=24、列中心一条路径功能文本（不是普通文字） | `eplan_placement_create` `kind:"path_text"` | 部件表、端子图里有功能文字 |
 | 端子 ↔ 端子排定义 ↔ 端子图 | 端子排定义带说明；端子按部件 | `eplan_device_place terminal_strip … part`（首个端子带 `terminal_strip_text`） | 端子图里每个端子有内外两侧目标和电缆 |
-| 端子 ↔ 电缆芯线 ↔ 现场设备 | 现场接线一律经过电缆；电缆按部件；芯线分配 | 电缆定义（`eplan_connection_create` 电缆定义线）、`eplan_cable_generate`、`eplan_cable_reassign` | 电缆图表有芯线和两端目标；端子图有电缆名 |
-| 导线 ↔ 颜色、截面 | 电位定义（每个电位一个，带颜色）+ 连接定义点（截面、颜色） | `eplan_connection_create` 的 `potential_definition`、`definition_point` | 导线上显示颜色、截面（如 `BK 1,5`、`DBU 0,5`） |
+| 端子 ↔ 电缆芯线 ↔ 现场设备 | 现场接线一律经过电缆，电缆标识取 `+M`（`=MA1+M-WD1`）；芯线按导线对应：导线 locator 用 `eplan_connection_list response_format:"detailed"`（带两端设备和接点）找；端子接点 1 在上、2 在下 | `eplan_connection_create` 的 `cable_definition`；部件用 `eplan_device_update part` | 电缆图表有芯线和两端目标；端子图有电缆名 |
+| 导线 ↔ 颜色、截面 | 电位定义（每个电位一个，带颜色）+ 连接定义点（截面、颜色）；定义点单独调用，不能和 `generate:false` 一起 | `eplan_connection_create` 的 `potential_definition`、`definition_point` | 导线上显示颜色、截面（如 `BK 1,5`、`DBU 0,5`） |
 | 线圈 ↔ 触点 | 同一器件的主、辅功能 | 按部件放置后用 `join_device` 放其余触点 | 触点上有回到线圈的交叉引用；线圈下有触点映像 |
 | 中断点 ↔ 对端 | 同名两两配对 | `eplan_connection_create` 的 `interruption_point` | 每个中断点都有对端交叉引用（脚本统计同名数为偶数） |
-| 现场设备 ↔ `+M` | 放在位置框内并取 `+M` | `eplan_device_place location_box` | 设备标识是 `=功能+M-…` |
+| 现场设备 ↔ `+M` | 器件直接用 `=功能+M-…` 标识放置，再画位置框；画完检查标识，叠成 `+M.M` 的改回 `+M`（实测会出现） | `eplan_device_place location_box`、`eplan_device_update new_tag` | 设备标识是 `=功能+M-…` |
 
 ## 6. PLC
 
 1. **先画总览**：每张卡一页 `&EFA1`，按**宏路径**插入 Overview 表示（变体 0），主设备改名为卡的标识；部件逐个挂：卡、BaseUnit（电位组的第一张卡浅色 `6ES7193-6BP00-0BA0`，其余深色 `-0DA0`）、CPU 的总线适配器（宏里的子设备改名为 `-KEC1`，挂 `6ES7193-6AR00-0AA0`）。不要用 `eplan_macro_insert part=`（会挂到所有主功能，A122）。
-2. **再调用机架图片**：机架页按卡顺序紧挨着插入多线图片，改名并入卡。ET 200SP 图片变体：DI/DQ 浅色 5、深色 6（带 AUX 端子 7/8）；F-DI 6；CPU 1；CM PtP 浅色 3、深色 4（深色待核对）。图片的浅/深色要和 BaseUnit 一致。
+2. **再调用机架图片**：机架页按卡顺序紧挨着插入多线图片，改名并入卡。ET 200SP 图片变体：DI/DQ 浅色 5、深色 6（带 AUX 端子 7/8）；F-DI 6；CPU 1；CM PtP 浅色 3、深色 4（均已实测）。图片的浅/深色要和 BaseUnit 一致。
 3. **机架供电**：每个电位组第一张卡的 L+/M（CPU 为 1L+/1M）向下接分配中断点，流入（BP 5），标签竖排。
 4. **功能页调用点**：点用 `PLC_CBOX_PLUG`（带插头代号）；DQ 在 y=240（变体 2），DI 在 y=72（变体 0），一个点一列。不写自定的符号地址和功能文字（第 5 节）。点框里依次显示：功能文字（列的说明）、符号地址、地址、卡的交叉引用、通道。
 5. 不用 `eplan_plc_generate` 给已经画了图片的卡补总览（会清掉已有表示，A122）。
@@ -95,7 +95,11 @@
 - 自动连线不看电位：上下对齐的两个空引脚会被连起来（24V 端子和 0V 端子对齐时短路）。分配端子两排要错开，或空引脚不要对齐。
 - 一页可以放多个同标识的位置框（已修复，只有两角完全相同才算重复）。
 - `eplan_placement_update` 在引脚很多的页上移动文字会被拒（已提修复），先排好再画，少靠事后移动。
-- 接触器线圈的技术参数文字较长，线圈两侧要留出位置，或把文字竖排放在线圈旁。
+- 接触器线圈的技术参数文字较长（约 55 mm，在线圈左侧），线圈左边至少空出一列；两个线圈不要相邻一列。
+- 同一页里，按部件放置的继电器会接走之前按 `join_device` 放好的接触器辅助触点（13/14 归到了继电器）。**接触器的辅助触点最后放**，放完用 `eplan_device_get` 核对归属。
+- 电缆型号文字放在定义线起点左侧（约 50 mm）：功率回路离左边框至少两列宽，阀等现场器件和左边的继电器列隔开一列，否则文字出框或压线。
+- 一次调用里同一根电缆只能画一条定义线。两根芯线分在器件上下两侧时，把回线绕回下方，让一条定义线横穿所有芯线（同官方电机页）。
+- `eplan_object_find` 不按页过滤时会在 36 条左右截断且不给续读 cursor；查连接用 `eplan_connection_list`（`response_format:"detailed"`）。
 
 ## 8. 工具对照
 
