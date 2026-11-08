@@ -9,7 +9,7 @@
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-给出页名，修改页描述或切换到项目中已被页面使用的图框；可同时修改两项。一次调用只审批一次，在 EPLAN 中按一次 Ctrl+Z 撤销。图框通过页属性 11016 修改，不新增工具、不导入主数据。
+给出页名，修改页描述或切换图框（项目页面在用的图框，或 EPLAN 能按名称找到的图框）；可同时修改两项。一次调用只审批一次，在 EPLAN 中按一次 Ctrl+Z 撤销。图框通过页属性 11016 修改，不新增工具、不导入主数据。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
@@ -19,7 +19,7 @@
 | `pages[].name` | string | 是 | — | 完整页名，如 `=GAA+A1&EFS1/3`（用 `eplan_page_list` 查） |
 | `pages[].description` | string 或语言到文本的 object，每语言最长 500 字符 | 否 | 不修改 | `pages[].grid_size_mm` | number > 0 | 否 | 不修改默认网格 | 页面网格（mm），有限正数；通过 `Page.GridSize` 写入并读回 |
 | `language` 下的新页描述；空串表示清除这种语言的描述 |
-| `pages[].plot_frame` | string | 否 | 不修改 | 项目中已被页面使用的图框名称，Ordinal 精确匹配；不接受空白或导入文件路径 |
+| `pages[].plot_frame` | string | 否 | 不修改 | 图框名称，Ordinal 精确匹配；页面没在用的名称写入后必须由 EPLAN 解析成功；不接受空白或导入文件路径 |
 | `language` | string | 否 | EPLAN 界面语言 | 要修改的语言，如 `zh_CN`、`en_US`。**其他语言的描述保持不变** |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false，不改变审批、读回和撤销规则 |
 
@@ -69,7 +69,7 @@
 | `PAGE_NOT_FOUND` | 有页名找不到 | `not_started` | `metadata.missing` 列出全部找不到的页名，提示用 `eplan_page_list` 的 `name_prefix` 查准确的页名 |
 | `AMBIGUOUS_NAME` | 精确匹配找不到，而不区分大小写时有多个页匹配 | `not_started` | 同 `eplan_page_get` |
 | `PLAN_STALE` | 规划之后，这些页的描述被改动过 | `not_started` | 提示重新调用 |
-| `INVALID_ARGUMENT` | 图框不在可发现集合中 | `not_started` | `metadata.available` 最多 20 名，每名最多 200 字符；`availableCount` 是完整数量，提示选择已有名称重新规划 |
+| `INVALID_ARGUMENT` | 页面没在用的图框写入后 EPLAN 解析不到（2026-11-07 起；原来在规划时按可发现集合拒绝） | `rolled_back` | `metadata.available` 最多 20 名，每名最多 200 字符；`availableCount` 是完整数量，提示选择已有名称重新规划 |
 | `PLAN_STALE` | 图框请求的页面身份、11016、有效图框或可用名称集合变化，或目标图框/页面消失 | `not_started` | 重新生成计划；不建事务 |
 | `EPLAN_OPERATION_FAILED` | 11016 或有效图框读回不等于目标，或写图框改变了描述 | `rolled_back` | 附页面，整批恢复，由工程师检查 |
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_create` | 同 `eplan_page_create` | 同 `eplan_page_create` |
@@ -92,6 +92,9 @@
   - 全部通过后 `Commit()`，再 `CloseUndo()`。
 - **包装**：同 `eplan_page_create`。S2 验证过：修改已有页的描述后回滚，原值能恢复（A7）。
 - **幂等**：同样的调用再来一次时，计划为空，不修改项目。
+
+### 页面没在用的图框（2026-11-07）
+- MX_NFPA 删掉第 4–13 页后，`NFPA_2_Ladder_mm` 不再出现在任何页面上，规划阶段按可发现集合拒绝，重建的页只能用默认图框。现在页面没在用的名称照常规划，执行时写 11016 后要求有效图框等于目标，否则整批回滚并返回可用名称；EPLAN 从项目或系统主数据解析，工具本身仍不枚举、不导入主数据。
 
 ### 图框扩展（v0.4.0）
 - `IPagePlotFrames` 只在请求图框时参与规划；适配器逐页读取 `Page.PlotFrame.Name`，去重排序；读取失败整体拒绝，不把它当成无图框。没有使用任何未验证的主数据枚举或导入 API，因此不能保证发现项目内尚未被任何页使用的图框。

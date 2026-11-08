@@ -26,7 +26,7 @@ Omitting `dry_run` or passing true only previews; pass `dry_run: false` with the
 2. Call with the full page names and the new texts. For a string, only the given `language` changes; every other language of each description stays as it is. An empty `description` removes that language's text.
 3. Pages that already have the text are counted in `unchanged` and not touched; when none changes, nothing is written and no approval is asked.
 4. All changes are one step: one Ctrl+Z in EPLAN reverts them, and a failure on any page changes none.
-5. Each page needs `description`, `plot_frame`, or `grid_size_mm`. Omitted fields stay unchanged. Frame names match exactly; only frames observed on project pages are discoverable. Unknown names return bounded `metadata.available` and complete `availableCount`; unused master data is not enumerated or imported. An already effective frame is left alone, including an inherited frame with empty 11016.
+5. Each page needs `description`, `plot_frame`, or `grid_size_mm`. Omitted fields stay unchanged. Frame names match exactly; frames used on project pages are listed in errors. Another name (e.g. a frame of the basic project no page uses any more) is written and must resolve in EPLAN, or the batch rolls back with INVALID_ARGUMENT, bounded `metadata.available` and complete `availableCount`. An already effective frame is left alone, including an inherited frame with empty 11016.
 
 ## Fields
 

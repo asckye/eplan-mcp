@@ -117,15 +117,14 @@ public sealed class PageUpdateFrameProtocolTests : IDisposable
     }
 
     [Fact]
-    public async Task UnknownFrame_RealMcp_HasAvailableMetadataWithoutAudit()
+    public async Task FrameNotUsedOnAPage_RealMcp_PreviewsWithoutWriting()
     {
         await WithClient(async client =>
         {
-            Dictionary<string, object?> args = Args();
-            args["pages"] = new[] { new { name = PageFrameStore.First, plot_frame = "missing" } };
-            JsonElement error = Error(await client.CallToolAsync(PageWriteTools.UpdateTool, args, cancellationToken: Token));
-            Assert.Equal(("INVALID_ARGUMENT", "not_started"), (error.GetProperty("reason").GetString(), error.GetProperty("execution").GetString()));
-            Assert.Equal("Frame_A\nFrame_B", error.GetProperty("metadata").GetProperty("available").GetString());
+            Dictionary<string, object?> args = Args(true);
+            args["pages"] = new[] { new { name = PageFrameStore.First, plot_frame = "NFPA_2_Ladder_mm" } };
+            JsonElement result = Data(await client.CallToolAsync(PageWriteTools.UpdateTool, args, cancellationToken: Token));
+            Assert.Equal("not_started", result.GetProperty("execution").GetString());
             Assert.Empty(_store.Calls);
             Assert.False(Directory.Exists(_harness.Locations.Audit));
         });

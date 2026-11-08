@@ -92,6 +92,11 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
         {
             OperationContext.Current.ThrowIfCancellationRequested();
             frame = request.FrameChanges(page) ? frames!.Write(request.Project.Path, page.Name, page.PlotFrame) : request.Frames[page.Name];
+            if (frame.Effective != page.PlotFrame && !request.FrameInUse(page.PlotFrame))
+            {
+                throw request.UnknownFrame(page.PlotFrame);
+            }
+
             if (frame.Identifier != request.Frames[page.Name].Identifier || frame.Effective != page.PlotFrame ||
                 (request.FrameChanges(page) && frame.Setting != page.PlotFrame) || descriptions.Read(request.Project.Path, page.Name).Raw != after.Raw)
             {

@@ -108,15 +108,14 @@ internal sealed class PageUpdateRequest
             foreach (Page page in pages.Where(p => p.PlotFrame is not null))
             {
                 OperationContext.Current.ThrowIfCancellationRequested();
-                if (!request.AvailableFrames.Contains(page.PlotFrame!, StringComparer.Ordinal))
+                // MX_NFPA 2026-11-07: after the last page with a frame is deleted the frame is no longer discoverable, yet EPLAN
+                // still resolves it by name. A frame not used on a page is written and must resolve, or the batch rolls back.
+                // A name that differs from a used frame only in case is a typo, refused before writing.
+                if (!request.FrameInUse(page.PlotFrame!) && request.AvailableFrames.Contains(page.PlotFrame!, StringComparer.OrdinalIgnoreCase))
                 {
                     throw new BridgeErrorException(args.Fingerprint is null ? ErrorReason.InvalidArgument : ErrorReason.PlanStale,
-                        "The requested frame is not among frames used by project pages. Choose an available name and make a new plan; nothing was changed.",
-                        metadata: new Dictionary<string, string>
-                        {
-                            ["available"] = string.Join("\n", request.AvailableFrames.Take(20).Select(n => n.Length > 200 ? n.Substring(0, 200) : n)),
-                            ["availableCount"] = request.AvailableFrames.Count.ToString(CultureInfo.InvariantCulture),
-                        });
+                        "The requested frame differs from a frame used by project pages only in case. Use the exact name; nothing was changed.",
+                        metadata: request.UnknownFrame(page.PlotFrame!).Error.Metadata);
                 }
 
                 request.Frames[page.Name] = frames.Read(project.Path, page.Name);
@@ -141,6 +140,18 @@ internal sealed class PageUpdateRequest
     }
 
     public bool GridChanges(Page page) => page.GridSizeMm is double grid && Grids[page.Name] != grid;
+
+    /// <summary>Whether the frame is used on a project page; other names must resolve when written.</summary>
+    public bool FrameInUse(string frame) => AvailableFrames.Contains(frame, StringComparer.Ordinal);
+
+    /// <summary>INVALID_ARGUMENT for a frame EPLAN did not resolve, with the frames used on project pages.</summary>
+    public BridgeErrorException UnknownFrame(string frame) => new(ErrorReason.InvalidArgument,
+        $"EPLAN found no frame named '{frame}' in the project or the system master data; the entire batch was rolled back. Choose an available name or a frame file name.",
+        metadata: new Dictionary<string, string>
+        {
+            ["available"] = string.Join("\n", AvailableFrames.Take(20).Select(n => n.Length > 200 ? n.Substring(0, 200) : n)),
+            ["availableCount"] = AvailableFrames.Count.ToString(CultureInfo.InvariantCulture),
+        });
 
     public bool FrameChanges(Page page) => page.PlotFrame is not null && Frames[page.Name].Effective != page.PlotFrame;
 

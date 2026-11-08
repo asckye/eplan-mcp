@@ -86,16 +86,33 @@ public sealed class PageUpdateFrameTests : IDisposable
     }
 
     [Fact]
-    public void UnknownFrame_HasBoundedAvailableNamesAndCompleteCount()
+    public void FrameNotUsedOnAPage_IsWrittenAndKeptWhenEplanResolvesIt()
+    {
+        PageUpdateArgs args = PageFrameStore.Args(PageFrameStore.Item(frame: "NFPA_2_Ladder_mm"));
+        WritePlan plan = Plan(args);
+
+        PageUpdateData result = Execute(args, plan);
+
+        Assert.Equal("NFPA_2_Ladder_mm", result.Pages[0].PlotFrame);
+        Assert.Contains("Commit", _store.Calls);
+    }
+
+    [Fact]
+    public void UnknownFrame_RollsBackWithBoundedAvailableNamesAndCompleteCount()
     {
         _store.AvailableOverride = [.. Enumerable.Range(0, 35).Select(i => "Frame_" + i.ToString("D2", CultureInfo.InvariantCulture) + new string('x', 250))];
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(PageFrameStore.Args(PageFrameStore.Item(frame: "missing")))).Error;
+        _store.Resolvable = [];
+        PageUpdateArgs args = PageFrameStore.Args(PageFrameStore.Item(frame: "missing"));
+        WritePlan plan = Plan(args);
+
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args, plan)).Error;
 
         Assert.Equal(ErrorReason.InvalidArgument, error.Reason);
         Assert.Equal("35", error.Metadata!["availableCount"]);
         Assert.Equal(20, error.Metadata["available"].Split('\n').Length);
         Assert.All(error.Metadata["available"].Split('\n'), n => Assert.Equal(200, n.Length));
-        Assert.Empty(_store.Calls);
+        Assert.Contains("Rollback", _store.Calls);
+        Assert.DoesNotContain("Commit", _store.Calls);
     }
 
     [Theory]

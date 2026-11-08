@@ -37,6 +37,8 @@ internal sealed class PageFrameStore : IProjectCatalog, IPageReader, IPageDescri
     public List<string> FrameWrites { get; } = [];
     public List<string> DescriptionWrites { get; } = [];
     public IReadOnlyList<string>? AvailableOverride { get; set; }
+    /// <summary>Frames EPLAN resolves by name when written; null resolves every name.</summary>
+    public HashSet<string>? Resolvable { get; set; }
     public Func<PagePlotFrameState, PagePlotFrameState>? Tamper { get; set; }
     public string? FailPage { get; set; }
     public Action? AfterFrameWrite { get; set; }
@@ -65,7 +67,7 @@ internal sealed class PageFrameStore : IProjectCatalog, IPageReader, IPageDescri
     {
         Assert.StartsWith("Begin AI: eplan_page_update", Calls[0], StringComparison.Ordinal);
         FrameWrites.Add(page);
-        var stored = new PagePlotFrameState(Frames[page].Identifier, frame, frame);
+        var stored = new PagePlotFrameState(Frames[page].Identifier, frame, Resolvable is null || Resolvable.Contains(frame) ? frame : Frames[page].Effective);
         Frames[page] = Tamper?.Invoke(stored) ?? stored;
         AfterFrameWrite?.Invoke();
         if (page == FailPage)
