@@ -255,6 +255,63 @@ public sealed class PlacementMovePlannerTests
         Assert.Equal([25, 25], result["graphicalChanges"]![0]!["after"]![0]!.Values<double>());
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RackColumnTextMoves_WithUnpredictablePins_KeepConnections(bool invalidPinGeometry)
+    {
+        MoveFixture fixture = UnpredictableRack(invalidPinGeometry);
+        var moves = new JArray();
+        for (int column = 0; column < 5; column++)
+        {
+            DrawingPlacement text = MoveFixture.Placement(3 + column, 'e', [15 + column * 15, 80]);
+            text.Kind = "Text";
+            fixture.Scene.Page.Placements.Add(text);
+            moves.Add(MoveFixture.Move(text.Locator, [0, 5]));
+        }
+        fixture.Request["moves"] = moves;
+
+        JObject plan = fixture.Plan();
+
+        Assert.Equal(5, plan["moves"]!.Count());
+        Assert.All(plan["moves"]!, move => Assert.Equal(85, (double)move["after"]![1]!));
+        Assert.Empty(plan["graphicalChanges"]!);
+        Assert.Empty(plan["connectionChanges"]!);
+        Assert.Equal(2, fixture.Scene.Graphical.Count);
+        Assert.Equal([20, 20], fixture.Scene.Pins["17/1/0"].Location);
+    }
+
+    [Theory]
+    [InlineData(false, "Autoconnect geometry is not fully predictable from this page's pins.")]
+    [InlineData(true, "Read finite cardinal pin geometry with known owners.")]
+    public void FunctionMove_WithUnpredictableRackPins_StillRequiresPinGeometry(bool invalidPinGeometry, string message)
+    {
+        MoveFixture fixture = UnpredictableRack(invalidPinGeometry);
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => fixture.Plan());
+
+        Assert.Equal(ErrorReason.CapabilityMissing, error.Error.Reason);
+        Assert.Equal(message, error.Message);
+    }
+
+    [Fact]
+    public void ZeroOffsetPinOwner_WithTextMove_DoesNotPredictAutoconnect()
+    {
+        MoveFixture fixture = UnpredictableRack(invalidPinGeometry: true);
+        DrawingPlacement text = MoveFixture.Placement(3, 'e', [20, 80]);
+        text.Kind = "Text";
+        fixture.Scene.Page.Placements.Add(text);
+        fixture.Request["moves"] = new JArray(
+            MoveFixture.Move(fixture.Root.Locator, [0, 0]),
+            MoveFixture.Move(text.Locator, [0, 5]));
+
+        JObject plan = fixture.Plan();
+
+        Assert.False((bool)plan["noOp"]!);
+        Assert.Empty(plan["graphicalChanges"]!);
+        Assert.Empty(plan["connectionChanges"]!);
+    }
+
     [Fact]
     public void MovingTextOntoExistingAutoconnect_IsAConflict()
     {
@@ -323,6 +380,18 @@ public sealed class PlacementMovePlannerTests
         f.Request["dry_run"] = false;
         f.Request["moves"]![0]!["delta_mm"] = new JArray(0, 0);
         Assert.True((bool)f.Plan()["noOp"]!);
+    }
+
+    private static MoveFixture UnpredictableRack(bool invalidPinGeometry)
+    {
+        var fixture = new MoveFixture();
+        fixture.Connect();
+        fixture.Scene.Graphical.Add([[60, 60], [80, 60]]);
+        if (invalidPinGeometry)
+        {
+            fixture.Scene.Pins["17/1/0"].Direction = "Diagonal";
+        }
+        return fixture;
     }
 
     internal static void AssertError(MoveFixture f, string reason, string? pointer = null)
