@@ -207,7 +207,7 @@ public sealed partial class DevicePlaceOperationTests
         Assert.Equal(
             [
                 "'variant' 9 does not exist; part SIE.3RH2122-1HB40 has the variants 1, 2.",
-                "'page' must be a circuit page (Circuit), but '=GAA+A1&EFS2/1' is Overview.",
+                "'page' must be a circuit page (Circuit or CircuitSingleLine), but '=GAA+A1&EFS2/1' is Overview.",
                 "'x' and 'y' must lie on the page, 420 x 297 mm: x from 0 to 420 and y from 0 to 297.",
             ],
             error.Error.Metadata!["violations"].Split('\n'));

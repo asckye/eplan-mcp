@@ -265,9 +265,11 @@ internal sealed class DevicePlaceRequest
     /// <summary>What the page rules out: the page type, and a point outside the page when EPLAN can tell its size.</summary>
     private static IEnumerable<string> PageProblems(MacroTargetPage page, double x, double y)
     {
-        if (!string.Equals(page.Type, Circuit, StringComparison.Ordinal))
+        // MX_NFPA 2026-11-07: single-line pages hold the single-line representation of the same devices (EPLAN takes the
+        // representation from the page type).
+        if (!string.Equals(page.Type, Circuit, StringComparison.Ordinal) && !string.Equals(page.Type, "CircuitSingleLine", StringComparison.Ordinal))
         {
-            yield return $"'page' must be a circuit page (Circuit), but '{page.Name}' is {page.Type}.";
+            yield return $"'page' must be a circuit page (Circuit or CircuitSingleLine), but '{page.Name}' is {page.Type}.";
         }
 
         if (page.Width is { } width && page.Height is { } height && (x > width || y > height))
