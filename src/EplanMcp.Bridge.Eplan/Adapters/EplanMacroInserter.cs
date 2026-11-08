@@ -113,7 +113,9 @@ internal sealed class EplanMacroInserter : IMacroInserter
         if (part is not null)
         {
             // A82: retain existing macro articles; assign only to new main functions in this same transaction.
-            foreach (Function function in added.Where(f => f.IsMainFunction && f.ArticleReferences.Length == 0))
+            Function[] mainFunctions = [.. added.Where(f => f.IsMainFunction)];
+            var targets = new HashSet<string>(MacroPartTargets.Select(mainFunctions.Select(f => f.Name)), StringComparer.Ordinal);
+            foreach (Function function in mainFunctions.Where(f => targets.Contains(f.Name) && f.ArticleReferences.Length == 0))
             {
                 function.AddArticleReference(part, partVariant ?? string.Empty, 1);
                 if (!function.ArticleReferences.Any(a => a.PartNr == part && a.VariantNr == (partVariant ?? string.Empty) && a.Count == 1))
