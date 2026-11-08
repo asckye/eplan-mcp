@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| PLC 生成保留已有表达（2026-11-08，MX_Dryer 重画时发现机架页被清空） | `ProjectToolsTests` | 待实机验证：对已有多线放置的设备执行 `eplan_plc_generate`，核对原放置仍在原页、新增页面只含请求页，以及异常结果在事务内回滚。 |
 | 功能放置删除（2026-11-07，负责人 brief） | `PlacementDeleteTests` | 待实机验证。在 scratch 页删除 `Function`、`Terminal`、`InterruptionPoint`、`BoxedDevice`、`PLC` 和 SPECIAL 节点（`SymbolReference`），核对目标及属性文字消失、自动连线更新、其它对象身份和摘要不变、最后一个已放置功能连同器件及部件引用删除，以及一次撤销完整恢复；纯图形删除保持原核对条件。 |
 | 宏批量插入（2026-11-07，负责人 brief；A120） | `MacroInsertTests` | 待运行：在 EES1 scratch 项目以 `items` 一次插入页 1 的完整驱动变体和页 2 的两条选项条，核对逐项计数、用 `eplan_page_get` 和 `eplan_placeholder_list` 查看设备及值集、设备编号与交叉引用、逐项读回和一次撤销，并验证批量 300 秒执行时限；再在第三项注入失败，确认前两项也回滚且 `metadata.item` 为 2。单项值集路径已有 A120 证据，批量事务尚未实机验证。 |
 | 连接重建与电位颜色（2026-11-07，负责人 brief；A119） | `CheckAndReportTests`、`AcceptanceRedrawTests` | 工具路径已在会话中实机复验（2026-11-07，CodexEval5b 第 9915 页，结果与官方 action 相同）；Large 测试未跑。在 scratch 新画页执行 `rebuild: true`，核对 L1/L2/L3 黑色、N 蓝色、未设颜色的 24V 红色；连接读回不变仍提交并返回 `rebuilt: true`，默认更新仍保持原无变化语义。负责人已验证 `generate` action 的整项目与按页重建。 |

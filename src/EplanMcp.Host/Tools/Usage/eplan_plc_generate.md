@@ -12,7 +12,7 @@ Generate two cards with a chosen macro for the second:
 
 1. The device must be in the project first: insert its overview macro (eplan_macro_insert with representation Overview), or import the PLC data. `eplan_device_list` with category `PLCBox` lists the tags.
 2. Omitted or true dry_run previews (execution=not_started) and writes nothing; `changes` lists each new page with its device and macro. Execute with dry_run:false.
-3. EPLAN creates the pages and places the macro's functions, which join the device: no rename is needed afterwards. Functions already placed in a representation are not placed again.
+3. EPLAN creates the pages and places the macro's functions, which join the device: no rename is needed afterwards. Existing representations are kept and verified before committing.
 4. One Ctrl+Z reverts the whole call. Outside scratch the engineer approves.
 
 ## Fields

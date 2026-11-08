@@ -44,12 +44,26 @@ internal sealed class EplanPlcSchematics : IPlcSchematics
             }
             foreach (XElement function in device.Elements("Function"))
             {
-                function.SetAttributeValue("SingleLinePage", wanted.SingleLinePage);
-                function.SetAttributeValue("MultiLinePage", wanted.MultiLinePage);
-                function.SetAttributeValue("OverviewPage", wanted.OverviewPage);
-                function.SetAttributeValue("RackPage", wanted.RackPage);
+                if (wanted.SingleLinePage is not null)
+                {
+                    function.SetAttributeValue("SingleLinePage", wanted.SingleLinePage);
+                }
+                if (wanted.MultiLinePage is not null)
+                {
+                    function.SetAttributeValue("MultiLinePage", wanted.MultiLinePage);
+                }
+                if (wanted.OverviewPage is not null)
+                {
+                    function.SetAttributeValue("OverviewPage", wanted.OverviewPage);
+                }
+                if (wanted.RackPage is not null)
+                {
+                    function.SetAttributeValue("RackPage", wanted.RackPage);
+                }
                 if (function.Attribute("Name")?.Value == name)
-                { function.SetAttributeValue("Macro", wanted.Macro); }
+                {
+                    function.SetAttributeValue("Macro", wanted.Macro);
+                }
             }
         }
         string file = Temporary();
@@ -57,13 +71,30 @@ internal sealed class EplanPlcSchematics : IPlcSchematics
         {
             configuration.Save(file);
             using var service = new PlcService();
+            Project project = EplanProjects.ByPath(projectPath);
+            // Live 2026-11-08: generation can unplace functions that are already drawn and add pages nobody asked for.
+            Dictionary<long, string?> before = ReadPlacements(project, function => devices.Any(device =>
+                function.Name == device.Tag || function.Name.StartsWith(device.Tag + ":", StringComparison.Ordinal)));
+            string[] pagesBefore = [.. project.Pages.Select(page => page.Name)];
             Page[] pages = service.GenerateSchematic(
-                EplanProjects.ByPath(projectPath),
+                project,
                 file,
                 devices.Any(d => d.SingleLinePage is not null),
                 devices.Any(d => d.MultiLinePage is not null),
                 devices.Any(d => d.OverviewPage is not null),
                 devices.Any(d => d.RackPage is not null));
+            IReadOnlyList<string> problems = PlcGenerationGuard.Problems(
+                before,
+                ReadPlacements(project, function => before.ContainsKey(function.ObjectIdentifier)),
+                pagesBefore,
+                project.Pages.Select(page => page.Name),
+                devices.SelectMany(PlcGenerateRequest.PagesOf));
+            if (problems.Count > 0)
+            {
+                throw new BridgeErrorException(ErrorReason.EplanOperationFailed,
+                    "EPLAN moved or removed existing placements, or created pages that were not asked for, so nothing was generated: "
+                    + string.Join(" ", problems.Take(5)));
+            }
             return [.. (pages ?? []).Select(p => p.Name)];
         }
         catch (BaseException ex)
@@ -75,6 +106,13 @@ internal sealed class EplanPlcSchematics : IPlcSchematics
         {
             File.Delete(file);
         }
+    }
+
+    private static Dictionary<long, string?> ReadPlacements(Project project, Func<Function, bool> include)
+    {
+        using var finder = new DMObjectsFinder(project);
+        return EplanNativePreconditions.Valid(finder.GetFunctions(null)).Where(include)
+            .ToDictionary(function => function.ObjectIdentifier, function => function.IsPlaced ? function.Page.Name : null);
     }
 
     public IReadOnlyList<PlcGeneratedPage> ReadPages(string projectPath, IReadOnlyList<string> pages)
@@ -113,5 +151,7 @@ internal sealed class EplanPlcSchematics : IPlcSchematics
     private static string Temporary() => Path.Combine(Path.GetTempPath(), "eplanmcp-plc-" + Guid.NewGuid().ToString("N") + ".xml");
 
     private sealed class Factory(string project) : ITransactionScopeFactory
-    { public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription); }
+    {
+        public ITransactionScope Begin(string undoDescription) => new FunctionTransactionScope(EplanProjects.ByPath(project), undoDescription);
+    }
 }
