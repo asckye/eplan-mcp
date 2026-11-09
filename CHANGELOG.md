@@ -35,6 +35,8 @@
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
 ### 修复
+- `eplan_connection_generate`、`eplan_connection_list`：连接一端的引脚没有连接点代号时，不再报插件内部错误。
+- `eplan_page_update`：EPLAN 写入某种语言的页描述时会清掉不分语言的文字（如基本项目页上的 `{{Let's start}}`），不再因此判为失败并整批回滚；其他语言丢失时仍整批回滚。
 - `eplan_macro_insert` 的部件只分配给宏的主设备，不再重复分配给子设备。
 - `eplan_connection_create` 在项目丢弃中断点的高层代号或位置代号时返回警告，提示使用去除结构后仍唯一的名称。
 - `eplan_placement_update` 移动不带连接点的文字等对象时，不再因页面连接点几何无法预测而拒绝。

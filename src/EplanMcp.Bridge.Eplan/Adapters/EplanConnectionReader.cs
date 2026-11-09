@@ -121,10 +121,20 @@ internal sealed class EplanConnectionReader : IConnectionReader
         Pin? start = connection.StartPin;
         Pin? end = connection.EndPin;
         record.StartDevice = start?.ParentFunction?.Name;
-        record.StartPin = start?.Name;
+        record.StartPin = PinName(start);
         record.EndDevice = end?.ParentFunction?.Name;
-        record.EndPin = end?.Name;
+        record.EndPin = PinName(end);
         record.Page = PageOf(connection)?.Name;
         return record;
+    }
+
+    // Pin.Name throws EmptyPropertyException (S063111) when the pin has no connection designation (20022), e.g. a library symbol
+    // placed without designations (live 2026-11-08, MX_Dryer11 =GAA/1): connection.generate failed for the whole project.
+    private static string? PinName(Pin? pin)
+    {
+        try
+        { return pin?.Name; }
+        catch (EmptyPropertyException)
+        { return string.Empty; }
     }
 }
