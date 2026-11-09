@@ -486,6 +486,15 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A123. ET 200SP 总览宏的占位符值集和 QUATTRO 分配端子（2026-11-08，EPLAN 2026.0.3.25421，Electric P8，从 `EES_Machine_Schematic_2026.zw9` 建的 scratch 项目 MX_Dryer9、MX_Dryer10）
+- **占位符只在 Overview 表达里：** `eplan_macro_get` 不给 `representation` 时读默认的多线表达，`placeholders` 为空；给 `representation:"Overview"`，变体 0 和 1 才有一个没有名字的占位符对象，变体 4 没有。I/O 卡和 CM PtP 的变量是 `Baseunit`，变体 0 的值集为 `aus / from AML Import (TIA)`、`6ES7193-6BP00-0BA0 (BU15-P16+A0+2B)`、`6ES7193-6BP00-0DA0 (BU15-P16+A0+2D)`（变体 1 是 BP20 系列）。CPU 1510SP-F 的变量是 `Artikelnummer`，有 13 个总线适配器值集。
+- **值集的效果：** `values: {"": "6ES7193-6BP00-0BA0 (BU15-P16+A0+2B)"}` 把这个 BaseUnit 部件挂到卡（PLC 盒）上；CPU 选 `BA 2XRJ45 (6ES7193-6AR00-0AA0)`，部件挂到子设备 `-K1-K1` 上。按宏路径插入时卡本身的部件不会挂上，要单独挂。
+- **QUATTRO 端子符号 `X4_B_1`（IEC_symbol）：** 变体 0 有一个朝上的进线点 (0,2)、三个朝下的出线点 (0,−2)(4,−2)(8,−2)，左右 (−0.75,0)/(8.75,0) 是鞍形跳线点；变体 6 上下相反。`X4_B_2` 有四个出线点。相邻端子放在同一行时，跳线点左右相对，重新生成连接后端子自动连通（MX_Dryer10：XD1:1→2→3）。
+- **编址后再放的 PLC 点不带地址：** 总览编址后，`eplan_device_place plc_connection_point` 在功能页上放的点是这个通道的另一个功能，地址（20400）是空的，点框里的地址行也是空的；`eplan_plc_get` 只列出总览上的点（`main:false`，地址 `I1.0`）。放点时传 `plc_address`（取总览的地址），点框里就显示地址。
+- **符号的变体 2 和 6：** 6 个引脚的三极符号（如 `QL3`），变体 2 是旋转 180°（1 号引脚到了右下，L1 在最右边）；变体 6 是上下翻转（1/3/5 仍从左到右排在下面，2/4/6 在上面），官方进线页倒置的主开关就是这种。
+- **部件模板是黑盒时不要再给库符号：** `eplan_device_place` 同时给 `part` 和 `library`/`symbol` 时，先按部件模板建出黑盒（`SPECIAL/DC` 加 6 个 `DCP5`），再只把主功能换成库符号，结果库符号的 6 个引脚没有代号，黑盒的连接点还在。要用库符号时先按符号放（给 `connection_designations`），再用 `eplan_device_update part` 挂部件。
+- **引脚代号为空时 `Pin.Name` 抛异常：** 读到代号（20022）为空的引脚会抛 `EmptyPropertyException`（S063111），全项目 `eplan_connection_generate` 因此失败；连接读取改为按空代号处理。
+
 ### A122. EES 项目的中断点、PLC 先总览后调用和 ET 200SP 图片变体（2026-11-08，EPLAN 2026.0.3.25421，Electric P8，从 `EES_Machine_Schematic_2026.zw9` 建的 scratch 项目 MX_Dryer2–6、PlcProbe）
 - **中断点不带结构：** EES 基本项目里中断点名全项目通用。请求 `=GAC-L1` 存成 `-L1`，于是和主母线的每个 `-L1` 配对：220 V 控制回路的 L1 接到了进线 L1 上，绕过了控制电源断路器。只有在全项目不带结构时也唯一的名字才可靠，比如分配端子 `-XD3:2`。
 - **中断点一对一配对：** 同名的点按页序两两配对。三个点同名时，第三个没有对端，交叉引用为空。每个用电处用自己的端子号，或者从上一个用电处再引出去。
