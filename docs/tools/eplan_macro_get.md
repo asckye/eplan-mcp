@@ -51,6 +51,7 @@
 - `deviceCount`：宏中不同标识的个数，含没有列出的。设备超过 50 个时 `truncated = true`，`hint` 说明列出了多少。
 - 插入后标识怎样变化（结构跟随目标页、编号），写在字段描述和 `eplan_tool_usage` 中，不放在每次的 `hint` 里。
 - 坐标读不到时保留 null 并在 `hint` 告警；不因此标记截断或使读取失败。
+- 占位符只按所选表达读取。没给 `representation`、默认表达里没有占位符、宏又有多种表达时，`hint` 提示逐个表达再读一次：ET 200SP 的卡把 BaseUnit、总线适配器的占位符放在 Overview 表达里（A123），默认的 MultiLine 读不到。
 - 宏中的名称来自外部数据，经过 ResultShaper。
 - 一行摘要：`Macro found: MultiLine, 6 variants, 8 devices, 52 x 268 mm.`
 

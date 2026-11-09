@@ -192,6 +192,18 @@ public sealed class MacroGetToolTests
     }
 
     [Fact]
+    public async Task MacroGet_DefaultRepresentationWithoutPlaceholders_PointsToTheOtherRepresentations()
+    {
+        // A123: an ET 200SP card keeps its BaseUnit placeholder in Overview; the file default (MultiLine) shows none.
+        _data.Representations.Add(new MacroRepresentation { Type = "Overview", Variants = [0, 1, 4] });
+        string hint = Structured(await Get(Feedback, "Line1")).GetProperty("hint").GetString()!;
+        Assert.Contains("Placeholders are read for the selected representation only; read each representation (MultiLine, Overview)", hint, StringComparison.Ordinal);
+
+        JsonElement chosen = Structured(await MacroTools.MacroGetAsync(_bridge, Feedback, representation: "Overview", cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(JsonValueKind.Null, chosen.GetProperty("hint").ValueKind);
+    }
+
+    [Fact]
     public async Task MacroGet_NegativeVariantIsRejectedBeforeBridge()
     {
         CallToolResult result = await MacroTools.MacroGetAsync(_bridge, Feedback, variant: -1, cancellationToken: TestContext.Current.CancellationToken);

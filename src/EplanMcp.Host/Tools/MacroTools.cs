@@ -192,6 +192,13 @@ internal sealed class MacroTools
         bool missingCoordinates = result.Macro.ReferencePoint is null || result.Macro.Devices.Any(d => d.Location is null);
         if (missingCoordinates)
         { result.Hint = (result.Hint is null ? "" : result.Hint + " ") + "Some macro coordinates are unavailable; see null reference_point or location."; }
+        // A123: placeholders are read for one representation only; the ET 200SP macros keep theirs (BaseUnit, BusAdapter) in
+        // Overview, which the file default (MultiLine) does not show.
+        if (representation is null && data.Placeholders.Count == 0 && data.Representations.Count > 1)
+        {
+            result.Hint = (result.Hint is null ? "" : result.Hint + " ") + "Placeholders are read for the selected representation only; read each representation ("
+                + string.Join(", ", data.Representations.Select(r => ResultShaper.CleanText(r.Type))) + ") with 'representation' before inserting one of them.";
+        }
         if (missingCoordinates && !ResultShaper.Fits(result, ResultShaper.DefaultTokenBudget))
         {
             ResultShaper.FitItems(result, result.Macro.Devices);

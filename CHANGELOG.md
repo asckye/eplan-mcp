@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### 新增
+- `eplan_macro_get`：默认表达里没有占位符而宏还有其他表达时，`hint` 提示按表达再读，避免漏掉放在 Overview 表达里的值集。
 - `eplan_placement_delete` 支持删除器件符号、端子、节点和中断点，连带删除所属属性文字，并提示重新生成连接。
 - `eplan_macro_insert` 支持 `items` 一次按序插入 1–20 个宏及各自值集，整批共用事务和撤销步骤，返回逐项计数，批量执行时限为 300 秒。
 - `eplan_macro_get` 返回占位符与值集，`eplan_macro_insert` 支持通过 `values` 在插入的同一事务应用现有值集。
