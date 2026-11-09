@@ -26,8 +26,11 @@ internal sealed class ProjectOpenRequest
     public static ProjectOpenRequest Check(ProjectOpenArgs args, IProjectCatalog catalog)
     {
         string given = args.Path ?? string.Empty;
-        if (given.Length == 0 || given.StartsWith(@"\\", StringComparison.Ordinal) || !System.IO.Path.IsPathRooted(given)
-            || !string.Equals(System.IO.Path.GetExtension(given), ".elk", StringComparison.OrdinalIgnoreCase))
+        bool local = given.Length > 0 && !given.StartsWith(@"\\", StringComparison.Ordinal) && System.IO.Path.IsPathRooted(given);
+        // eplan_project_list and eplan_project_close report the path without the extension: take the .elk beside it.
+        if (local && !IsElk(given) && File.Exists(given + ".elk"))
+        { given += ".elk"; }
+        if (!local || !IsElk(given))
         { throw WriteArguments.Invalid(["'path' must be the full local path of a project's .elk file."]); }
         string linkFile = System.IO.Path.GetFullPath(given);
         if (!File.Exists(linkFile))
@@ -36,6 +39,8 @@ internal sealed class ProjectOpenRequest
         bool open = catalog.ListOpenProjects().Any(p => string.Equals(p.Path, path, StringComparison.OrdinalIgnoreCase));
         return new ProjectOpenRequest(linkFile, path, open);
     }
+
+    private static bool IsElk(string path) => string.Equals(System.IO.Path.GetExtension(path), ".elk", StringComparison.OrdinalIgnoreCase);
 }
 
 /// <summary><see cref="OperationNames.ProjectOpenPlan"/>: one <c>open</c> unless the project is open already. Reads only.</summary>

@@ -44,6 +44,14 @@ public sealed class ProjectSessionAndPlcTests : IDisposable
     }
 
     [Fact]
+    public void Open_ThePathAsTheProjectListReportsIt_OpensTheElkBesideIt()
+    {
+        string link = LinkFile();
+        var plan = (WritePlan)new ProjectOpenPlanOperation(Catalog).Execute(new ProjectOpenArgs { Path = Path.ChangeExtension(link, null) })!;
+        Assert.Equal(("open", Path.ChangeExtension(link, null)), (Assert.Single(plan.Changes).Action, plan.ProjectPath));
+    }
+
+    [Fact]
     public void Open_AlreadyOpen_PlansNothing()
     {
         string link = LinkFile();
