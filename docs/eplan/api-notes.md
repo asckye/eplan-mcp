@@ -486,6 +486,10 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A127. 项目改名：`CopyProject` + `RemoveProject`（2026-11-09，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 MX_Dryer26、MX_Dryer27）
+- **没有改名 API：** `DataModel.ProjectManager` 只有 `CopyProject`、`RemoveProject` 等，`HEServices.ProjectManagement` 和官方 action 目录里都没有改项目名的方法；官方 `CopyProject`、`RemoveProject` 页面只有签名和异常，没有说明。
+- **实测（`eplan_project_rename`）：** 打开着的项目用 `CopyProject(旧 .elk, 同一文件夹的新 .elk, CopyMode.Snapshot)` 复制，关闭旧项目，`OpenProject(新 .elk, Exclusive)` 打开，再对已关闭的旧项目调 `RemoveProject(旧 .elk)`：旧 `.elk` 和 `.edb` 都被删除，**所在文件夹保留**，同一文件夹里的新项目不受影响。中文项目名（`通过式烘芯炉`）可用。项目描述等属性随复制保留。
+
 ### A126. PROFINET 单线页、带连字符的中断点名称和挂错结构的 PLC 点（2026-11-08，EPLAN 2026.0.3.25421，Electric P8，从 `EES_Machine_Schematic_2026.zw9` 建的 scratch 项目 MX_Dryer25、MX_Dryer27）
 - **单线宏的网口是 `BusTerminal`：** CPU `6ES7510-1SK03-0AB0`（SingleLine 变体 0，X1 P3）、MTP1000（变体 0，X1 P1、X1 P2、X2 P1）、G120C `6SL3210-1KE1x-xUF2_2D_`（变体 1，X150 P1、P2）插入后，网口对象的类型是 `BusTerminal`，名称就是设备标识（不带端口代号），符号 `SPECIAL/NWBCP` 变体 2，连接点在符号下方 (0,−4)、朝下。按 Function/Terminal 找引脚会漏掉它们。
 - **网口之间的连接：** 拐角连线生成后，`eplan_connection_list` 里两端只有设备、`pin` 为空；电缆定义按设备匹配即可。单线宏插入后改名成项目里已有的设备标识（`=K1+UC1-KE1`、HMI、变频器），和多线、总览表达并成同一设备。
