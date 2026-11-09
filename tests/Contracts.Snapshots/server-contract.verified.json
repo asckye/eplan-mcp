@@ -14461,6 +14461,7 @@
                 "unintended_junctions",
                 "interruption_pairing",
                 "cable_cores",
+                "box_crossings",
                 "eplan_messages",
                 "expected",
                 "rules"
