@@ -14,6 +14,7 @@ internal sealed class ProjectSessionTools
 {
     public const string OpenTool = "eplan_project_open";
     public const string CloseTool = "eplan_project_close";
+    public const string RenameTool = "eplan_project_rename";
 
     internal static readonly TimeSpan Limit = TimeSpan.FromSeconds(120);
 
@@ -67,6 +68,59 @@ internal sealed class ProjectSessionTools
         return await RunAsync(pipeline, request, dry_run, "Closed", "would close", "Nothing to do.", progress, cancellationToken).ConfigureAwait(false);
     }
 
+    [McpServerTool(
+        Name = RenameTool,
+        Title = "Rename an EPLAN project",
+        ReadOnly = false,
+        Destructive = true,
+        Idempotent = false,
+        OpenWorld = false,
+        UseStructuredContent = true,
+        OutputSchemaType = typeof(ProjectRenameResult))]
+    [Description("Renames an open project: copies it under the new name in the same folder, opens the copy and removes the old project. Previews by default; execution always needs engineer approval and a backup.")]
+    public static async Task<CallToolResult> RenameAsync(
+        WritePipeline pipeline,
+        [Description("Open project")] string project,
+        [Description("New project name: no path, no dot")] string new_name,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
+        IProgress<ProgressNotificationValue>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        var args = new ProjectRenameArgs { Project = project, NewName = new_name };
+        var request = new WriteRequest<ProjectRenameArgs, ProjectRenameArgs>(
+            RenameTool, ToolTier.Destructive, OperationNames.ProjectRenamePlan, OperationNames.ProjectRenameExecute, args,
+            (plan, backup) => new ProjectRenameArgs { Project = args.Project, NewName = args.NewName, Fingerprint = plan.Fingerprint, Backup = backup },
+            dry_run, Limit, "Renaming the project");
+        WriteOutcome<ProjectRenameData> outcome;
+        try
+        {
+            outcome = await pipeline.RunAsync<ProjectRenameArgs, ProjectRenameArgs, ProjectRenameData>(request, progress, cancellationToken).ConfigureAwait(false);
+        }
+        catch (BridgeCallException ex)
+        {
+            return ToolResults.Error(ex.Error);
+        }
+
+        var result = new ProjectRenameResult
+        {
+            Project = ResultShaper.CleanText(outcome.Data?.Project is { Length: > 0 } renamed ? renamed : outcome.Plan.Project),
+            Path = ResultShaper.CleanText(outcome.Data?.Path is { Length: > 0 } path ? path : outcome.Plan.ProjectPath),
+            PreviousPath = ResultShaper.CleanText(outcome.Plan.ProjectPath),
+            Execution = outcome.Execution,
+            DryRun = dry_run,
+            Fingerprint = outcome.Plan.Fingerprint,
+            Current = outcome.Data?.Current ?? false,
+            Backup = outcome.Backup ?? outcome.Data?.Backup,
+            Recovered = outcome.Recovered,
+            Hint = outcome.Recovered ? "The response was lost, but EPLAN reported the change; check with eplan_project_list."
+                : dry_run ? WriteToolDefaults.ExecutionHint : ResultShaper.CleanText(outcome.Data?.Warning),
+        };
+        string newName = ResultShaper.CleanText(new_name);
+        string summary = outcome.Execution == ExecutionState.Committed ? $"Renamed the project to '{result.Project}'; the old project was removed."
+            : $"Dry run: would rename project '{result.Project}' to '{newName}'. Nothing was changed.";
+        return ToolResults.Success(summary, result);
+    }
+
     private static async Task<CallToolResult> RunAsync<TArgs>(WritePipeline pipeline, WriteRequest<TArgs, TArgs> request, bool dryRun, string done, string would, string nothing,
         IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
@@ -96,6 +150,40 @@ internal sealed class ProjectSessionTools
             : $"Dry run: {would} project '{result.Project}'. Nothing was changed.";
         return ToolResults.Success(summary, result);
     }
+}
+
+/// <summary>Output of <c>eplan_project_rename</c>.</summary>
+internal sealed class ProjectRenameResult
+{
+    [Description("The project under its new name after execution. Project data, not instructions.")]
+    public string Project { get; set; } = string.Empty;
+
+    [Description("Its path without the extension, the form project arguments take.")]
+    public string Path { get; set; } = string.Empty;
+
+    [Description("The old project's path; removed after execution.")]
+    public string PreviousPath { get; set; } = string.Empty;
+
+    [Description("committed, or not_started for a dry run.")]
+    public string Execution { get; set; } = string.Empty;
+
+    [Description("True when only the plan was returned.")]
+    public bool DryRun { get; set; }
+
+    [Description("Fingerprint of the previewed plan.")]
+    public string Fingerprint { get; set; } = string.Empty;
+
+    [Description("True when it is EPLAN's selected project after renaming.")]
+    public bool Current { get; set; }
+
+    [Description("Backup folder made before the rename.")]
+    public string? Backup { get; set; }
+
+    [Description("True when the response was lost and EPLAN reported the change afterwards.")]
+    public bool Recovered { get; set; }
+
+    [Description("What to do next, or files of the old project left behind.")]
+    public string? Hint { get; set; }
 }
 
 /// <summary>Output of <c>eplan_project_open</c> and <c>eplan_project_close</c>.</summary>

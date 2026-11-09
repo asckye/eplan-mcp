@@ -78,6 +78,86 @@ public sealed class ProjectSessionAndPlcTests : IDisposable
         Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.NotStarted), (error.Error.Reason, error.Error.Execution));
     }
 
+    private ProjectRenameArgs RenameArgs(string newName)
+    {
+        string link = LinkFile();
+        _open.Add(new OpenProject { Name = "Line2", Path = Path.ChangeExtension(link, null) });
+        string backup = Directory.CreateDirectory(Path.Combine(_folder, "backup")).FullName; // a new, empty folder, as the Host makes it
+        var args = new ProjectRenameArgs { Project = "Line2", NewName = newName, Backup = new BackupTarget { Path = Path.Combine(backup, "Line2.elk"), MaxSeconds = 150 } };
+        args.Fingerprint = ((WritePlan)new ProjectRenamePlanOperation(Catalog).Execute(args)!).Fingerprint;
+        return args;
+    }
+
+    private ProjectRenameExecuteOperation Rename => new(Catalog, _sessions, new FakeProjectBackup(_pages), _pages);
+
+    [Fact]
+    public void Rename_PlansOneRename()
+    {
+        string link = LinkFile();
+        _open.Add(new OpenProject { Name = "Line2", Path = Path.ChangeExtension(link, null) });
+        var plan = (WritePlan)new ProjectRenamePlanOperation(Catalog).Execute(new ProjectRenameArgs { Project = "Line2", NewName = "Oven 1" })!;
+        PlannedChange change = Assert.Single(plan.Changes);
+        Assert.Equal(("rename", "Line2", "Oven 1", Path.Combine(_folder, "Line2")), (change.Action, change.OldValue, change.NewValue, plan.ProjectPath));
+    }
+
+    [Fact]
+    public void Rename_CopiesClosesOpensTheCopyAndRemovesTheOldProject()
+    {
+        var data = (ProjectRenameData)Rename.Execute(RenameArgs("Oven 1"))!;
+        Assert.Equal(["copy Oven 1", "close Line2", "open Oven 1", "remove Line2"], _sessions.Calls);
+        Assert.Equal(("Oven 1", Path.Combine(_folder, "Oven 1"), Path.Combine(_folder, "Line2")), (data.Project, data.Path, data.PreviousPath));
+        Assert.False(File.Exists(Path.Combine(_folder, "Line2.elk")));
+        Assert.NotNull(data.Backup);
+        Assert.Null(data.Warning);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("Oven.1")]
+    [InlineData(" Oven")]
+    [InlineData("CON")]
+    [InlineData("Line2")]
+    [InlineData("Taken")]
+    public void Rename_BadOrTakenName_IsInvalid(string name)
+    {
+        File.WriteAllText(Path.Combine(_folder, "Taken.elk"), string.Empty);
+        string link = LinkFile();
+        _open.Add(new OpenProject { Name = "Line2", Path = Path.ChangeExtension(link, null) });
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => new ProjectRenamePlanOperation(Catalog).Execute(new ProjectRenameArgs { Project = "Line2", NewName = name }));
+        Assert.Equal(ErrorReason.InvalidArgument, error.Error.Reason);
+    }
+
+    [Fact]
+    public void Rename_CopyNotOpened_PutsTheOldProjectBackAndRemovesTheCopy()
+    {
+        ProjectRenameArgs args = RenameArgs("Oven 1");
+        _sessions.FailOpen = Path.Combine(_folder, "Oven 1.elk");
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Rename.Execute(args));
+        Assert.Equal((ErrorReason.EplanOperationFailed, ExecutionState.NotStarted), (error.Error.Reason, error.Error.Execution));
+        Assert.Contains(_open, p => p.Name == "Line2");
+        Assert.False(File.Exists(Path.Combine(_folder, "Oven 1.elk")));
+        Assert.Equal("remove Oven 1", _sessions.Calls[^1]);
+    }
+
+    [Fact]
+    public void Rename_OldFilesLeft_IsAWarningNotAFailure()
+    {
+        _sessions.KeepOnRemove = true;
+        var data = (ProjectRenameData)Rename.Execute(RenameArgs("Oven 1"))!;
+        Assert.Equal("Oven 1", data.Project);
+        Assert.Contains("left files of the old project", data.Warning, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Rename_NameTakenAfterThePlan_IsStale()
+    {
+        ProjectRenameArgs args = RenameArgs("Oven 1");
+        File.WriteAllText(Path.Combine(_folder, "Oven 1.elk"), string.Empty);
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Rename.Execute(args));
+        Assert.Equal(ExecutionState.NotStarted, error.Error.Execution);
+        Assert.Empty(_sessions.Calls);
+    }
+
     [Fact]
     public void Close_ClosesAndChecks()
     {
@@ -154,16 +234,41 @@ public sealed class ProjectSessionAndPlcTests : IDisposable
     {
         public bool Ignore { get; set; }
 
+        public List<string> Calls { get; } = [];
+
+        /// <summary>The link file EPLAN refuses to open.</summary>
+        public string? FailOpen { get; set; }
+
+        /// <summary>Stands for RemoveProject leaving the files.</summary>
+        public bool KeepOnRemove { get; set; }
+
         public void Open(string linkFile)
         {
+            Calls.Add("open " + Path.GetFileNameWithoutExtension(linkFile));
+            if (string.Equals(linkFile, FailOpen, StringComparison.OrdinalIgnoreCase))
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN refused."); }
             if (!Ignore)
             { open.Add(new OpenProject { Name = Path.GetFileNameWithoutExtension(linkFile), Path = Path.ChangeExtension(linkFile, null), Current = true }); }
         }
 
         public void Close(string projectPath)
         {
+            Calls.Add("close " + Path.GetFileName(projectPath));
             if (!Ignore)
             { open.RemoveAll(p => p.Path == projectPath); }
+        }
+
+        public void Copy(string linkFile, string newLinkFile)
+        {
+            Calls.Add("copy " + Path.GetFileNameWithoutExtension(newLinkFile));
+            File.WriteAllText(newLinkFile, string.Empty);
+        }
+
+        public void Remove(string linkFile)
+        {
+            Calls.Add("remove " + Path.GetFileNameWithoutExtension(linkFile));
+            if (!KeepOnRemove)
+            { File.Delete(linkFile); }
         }
     }
 

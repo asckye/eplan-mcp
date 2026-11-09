@@ -536,6 +536,15 @@ public static class OperationNames
     /// <summary>Closes a project. Arguments: <see cref="ProjectCloseArgs"/> with the fingerprint; data: <see cref="ProjectSessionData"/>.</summary>
     public const string ProjectCloseExecute = "project.close.execute";
 
+    /// <summary>What eplan_project_rename would rename. Reads only. Arguments: <see cref="ProjectRenameArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string ProjectRenamePlan = "project.rename.plan";
+
+    /// <summary>
+    /// Backs the project up, copies it under the new name, closes it, opens the copy and removes the old files. Arguments:
+    /// <see cref="ProjectRenameArgs"/> with the fingerprint and backup target; data: <see cref="ProjectRenameData"/>.
+    /// </summary>
+    public const string ProjectRenameExecute = "project.rename.execute";
+
     /// <summary>What eplan_structure_rename would rename. Reads only. Arguments: <see cref="StructureRenameArgs"/>; data: <see cref="WritePlan"/>.</summary>
     public const string StructureRenamePlan = "structure.rename.plan";
 

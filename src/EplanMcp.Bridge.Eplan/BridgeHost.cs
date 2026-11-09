@@ -245,6 +245,8 @@ internal static class BridgeHost
             new ProjectOpenExecuteOperation(catalog, projectSessions),
             new ProjectClosePlanOperation(catalog),
             new ProjectCloseExecuteOperation(catalog, projectSessions),
+            new ProjectRenamePlanOperation(catalog),
+            new ProjectRenameExecuteOperation(catalog, projectSessions, backup, pages),
             new PlcReaddressPlanOperation(catalog, plcAddressing),
             new PlcReaddressExecuteOperation(catalog, plcAddressing, pages, backup, transactions),
             new ReportSettingsPlanOperation(catalog, reportSettings),

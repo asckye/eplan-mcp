@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### 新增
+- 新增 `eplan_project_rename`：给打开着的项目改名（项目文件名）。EPLAN API 没有改名方法，按新名复制、关闭旧项目、打开副本、删除旧项目；属破坏性操作，总要工程师审批并先备份。
 - `eplan_page_review` 新增检查 `box_crossings`：文字（含电缆文字）压在位置框边线上时报 `text_crosses_box` 警告。
 - `eplan_device_place`：放 PLC 连接点时没给 `plc_address`，就沿用这块卡上同一通道已编好的地址（计划里列出），总览编址后再调用的点直接显示地址。
 - `eplan_macro_get`：默认表达里没有占位符而宏还有其他表达时，`hint` 提示按表达再读，避免漏掉放在 Overview 表达里的值集。
