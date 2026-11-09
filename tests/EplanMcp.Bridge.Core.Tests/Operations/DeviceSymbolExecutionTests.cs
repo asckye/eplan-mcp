@@ -211,8 +211,16 @@ public sealed partial class DeviceSymbolExecutionTests
         // MX_Dryer11 2026-11-08: points placed after the overview was addressed showed an empty address row.
         var args = new DevicePlaceArgs
         {
-            Project = "Line1", Page = "=GAA+A1&EFS1/3", Library = "IEC_symbol", Symbol = "PLC_CBOX", SymbolVariant = 0,
-            Tag = "=GAA+A1-D3KF3", PlcConnectionPoint = "1", PlcAddress = requested, X = 120, Y = 176,
+            Project = "Line1",
+            Page = "=GAA+A1&EFS1/3",
+            Library = "IEC_symbol",
+            Symbol = "PLC_CBOX",
+            SymbolVariant = 0,
+            Tag = "=GAA+A1-D3KF3",
+            PlcConnectionPoint = "1",
+            PlcAddress = requested,
+            X = 120,
+            Y = 176,
         };
         _pages.Pages.Add(new() { Name = args.Page });
         _names.Functions.Add(("=GAA+A1-D3KF3", "1/17/1/0", true, "=GAA+A1&EFS1/4", "D3KF"));
