@@ -29,7 +29,7 @@
 | EPLAN_OPERATION_FAILED | EPLAN 拒绝打开，比如旧版本项目；不自动升级 | not_started |
 
 ## 5. 实现要点
-走 `WritePipeline`：scratch 内自动执行，scratch 外按写入策略处理。Bridge 在 `QuietModeStep(ShowNoDialogs)` 内用 `ProjectManager.OpenProject(路径, OpenMode.Exclusive)` 打开。只有没有其他打开的项目时 EPLAN 才把它设为当前项目，`current` 如实返回；工具按路径找项目，不受影响，但 Ctrl+Z 只作用于当前项目（A41）。不主动选中：`SelectProjectInPagesNavigator` 之后，再用 `ProjectOpen` 打开的项目不会成为当前项目（A107）。没有事务，也不进撤销列表。
+走 `WritePipeline`：scratch 内自动执行，scratch 外按写入策略处理。Bridge 在 `QuietModeStep(ShowNoDialogs)` 内用 `ProjectManager.OpenProject(路径, OpenMode.Standard)` 打开（和工程师在 EPLAN 里打开一样；2026-11-09 前用 `Exclusive`，项目名旁显示“专有”，负责人要求去掉，A128）。只有没有其他打开的项目时 EPLAN 才把它设为当前项目，`current` 如实返回；工具按路径找项目，不受影响，但 Ctrl+Z 只作用于当前项目（A41）。不主动选中：`SelectProjectInPagesNavigator` 之后，再用 `ProjectOpen` 打开的项目不会成为当前项目（A107）。没有事务，也不进撤销列表。
 
 ## 6. 测试
 - Small：`ProjectSessionAndPlcTests`。

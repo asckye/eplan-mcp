@@ -39,6 +39,7 @@
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
 ### 变更
+- `eplan_project_open` 和 `eplan_project_rename` 改为按普通方式打开项目（`OpenMode.Standard`），项目名旁不再显示“专有”。
 - `eplan_connection_create`：T 节点默认画成带方向的样式（同官方 EES 样例），新增 `source` 指定电从哪边来；以前不给 `variant` 时是圆点。项目里没有带方向的变体时仍画圆点。
 
 ### 修复

@@ -9,7 +9,8 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
 /// <summary>
-/// Opens, closes, copies and removes projects with no dialog (api-notes A107): opened exclusively, as the writes need. EPLAN selects the
+/// Opens, closes, copies and removes projects with no dialog (api-notes A107): opened in standard mode as the engineer opens
+/// a project (owner 2026-11-09: no "exclusive" mark; writes work in standard mode, A128). EPLAN selects the
 /// project only when no other is open. The project object is not kept; a later call looks it up again.
 /// </summary>
 internal sealed class EplanProjectSessions : IProjectSessions
@@ -20,7 +21,7 @@ internal sealed class EplanProjectSessions : IProjectSessions
         Guard(() =>
         {
             using var manager = new ProjectManager();
-            manager.OpenProject(linkFile, ProjectManager.OpenMode.Exclusive);
+            manager.OpenProject(linkFile, ProjectManager.OpenMode.Standard);
         });
     }
 

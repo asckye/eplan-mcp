@@ -34,7 +34,7 @@
 ## 5. 实现要点
 - **安全**：会删除旧项目的文件，按 Destructive 处理：scratch 内也要工程师审批，执行前由 `WritePipeline` 备份（ADR-0013）。
 - **复制**：`ProjectManager.CopyProject(旧 .elk, 新 .elk, CopyMode.Snapshot)`。S12、A18 实测：打开着的项目可以这样复制，不到 1 秒，原项目保持打开、不加锁，副本包含刚提交的写入。`CopyMode.All` 会重写锁文件，不用。新项目放在旧项目同一文件夹。
-- **顺序**：复制 → 关闭旧项目 → `OpenProject(新 .elk, Exclusive)` → 确认 EPLAN 列出新项目 → `RemoveProject(旧 .elk)` → 确认旧 `.elk` 不在了。关闭或打开失败时，重新打开原项目、删除副本，返回 not_started。
+- **顺序**：复制 → 关闭旧项目 → `OpenProject(新 .elk, Standard)` → 确认 EPLAN 列出新项目 → `RemoveProject(旧 .elk)` → 确认旧 `.elk` 不在了。关闭或打开失败时，重新打开原项目、删除副本，返回 not_started。
 - **删除**：官方页面没写 `RemoveProject` 删除哪些文件、项目是否必须先关闭，所以在关闭之后调用，并读回旧 `.elk` 和 `.edb` 是否还在；还在就在 `hint` 里说明，不当作失败（新项目已经可用）。实测（A127）：只删除旧 `.elk` 和 `.edb`，所在文件夹保留，同一文件夹里的新项目不受影响。
 - 不改项目属性：项目描述等用 `eplan_project_update`。
 
