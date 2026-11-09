@@ -44,7 +44,7 @@ M8 T2b 接通无部件库符号的规划与执行，依据 A13、A52–A55；沿
 | `page` | string | 是 | — | 完整页名，必须是电路图页（`Circuit`） |
 | `part` | string | 部件路线必填 | — | 部件号，如 `SIE.3RH2122-1HB40`；部件必须在部件库中；可使用宏或功能模板（A82）。部件号先精确匹配，没有时再不区分大小写匹配 |
 | `variant` | string | 否 | `"1"`，部件没有变体 1 而只有一个变体时取那一个 | 部件的变体 |
-| `library`、`symbol`、`symbol_variant` | string、string、integer | 库符号来源三项必填 | — | 可与部件同时给出，使用 `SetSymbolVariant(..., false)` 替换模板符号；项目已有库、完整符号名、非负原生变体号，来自 `eplan_symbol_search`；先精确匹配，无精确匹配时仅接受唯一的不区分大小写匹配；普通器件可指定图形变体，端子保留 Terminal 逻辑定义 |
+| `library`、`symbol`、`symbol_variant` | string、string、integer | 库符号来源三项必填 | — | 可与部件同时给出，使用 `SetSymbolVariant(..., false)` 替换模板符号；部件模板是黑盒（如断路器部件生成 `SPECIAL/DC` 加 `DCP` 连接点）时拒绝并回滚，因为只换掉黑盒、连接点还在，库符号的引脚没有代号，这时先不带 `part` 放库符号，再用 `eplan_device_update` 挂部件；项目已有库、完整符号名、非负原生变体号，来自 `eplan_symbol_search`；先精确匹配，无精确匹配时仅接受唯一的不区分大小写匹配；普通器件可指定图形变体，端子保留 Terminal 逻辑定义 |
 | `display_properties` | object[] | 否 | 不新增显示属性 | 最多 8 项；严格成员 `{property_id,offset_x_mm,offset_y_mm}`，ID 封闭为 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301；偏移为有限数，可为负，是相对父符号的位置，不是页坐标 |
 | `connection_descriptions` | string[] | 否 | 不写 | 每个连接点的描述，按连接点数组顺序，数量必须相等；每项非空、最多 64 字符；写一基索引的 20023，PLC 点以只读的 20029 显示（例如 `DI a.0`）。只用于库符号来源 |
 | `connection_designations` | string[] | 否 | 保留默认代号 | 按 T1 连接点数组顺序，每引脚一项，数量必须相等；每项非空、无控制字符且最多 64 字符；T2b 写入带一基索引的 20022，不使用汇总属性 20038 或 `Pin.Designation` |

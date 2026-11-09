@@ -1,4 +1,5 @@
 using Eplan.EplApi.Base;
+using Eplan.EplApi.Base.Enums;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.HEServices;
@@ -69,6 +70,16 @@ internal sealed class EplanDevicePlacer : IDevicePlacer, IDeviceStripTransaction
         TerminalPlacementData? terminalData = null;
         if (main is not null && options?.Library is { } library)
         {
+            // Live 2026-11-08 (MX_Dryer11 =GAA/1, SE.C16N3TM160): a black-box template keeps its device connection points when
+            // only the box takes the library symbol, which leaves the symbol's pins without designations next to them.
+            if (main.FunctionCategory == FunctionCategory.Blackbox)
+            {
+                throw new BridgeErrorException(
+                    ErrorReason.InvalidArgument,
+                    $"Part '{part}' places a black box with its own connection points, and a library symbol would replace only the box, so nothing was changed. Place the library symbol without 'part' (give connection_designations), then add the part with eplan_device_update.",
+                    retryable: false);
+            }
+
             var replacement = project.SymbolLibraries.Single(l => string.Equals(l.Name, library, StringComparison.OrdinalIgnoreCase))
                 .Symbols.Single(s => string.Equals(s.Name, options.Symbol, StringComparison.OrdinalIgnoreCase)).Variants.Single(v => v.VariantNr == options.SymbolVariant);
             main.SetSymbolVariant(replacement, false);
