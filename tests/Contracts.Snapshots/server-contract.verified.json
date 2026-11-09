@@ -4970,6 +4970,9 @@
                     },
                     "variant": {
                       "type": "integer"
+                    },
+                    "source": {
+                      "$ref": "#/$defs/r"
                     }
                   },
                   "required": [

@@ -457,7 +457,10 @@ public sealed class CableDefinitionPlannerTests
         {
             ["oid"] = long.Parse(r.Oid, System.Globalization.CultureInfo.InvariantCulture),
             ["pins"] = r.Oid == "11" ? new JArray("17/1/0", "17/8/0") : new JArray("17/9/0", "17/2/0"),
-            ["designation"] = "-WG1", ["type"] = "T", ["label"] = r.Oid == "11" ? "BK" : "BN", ["colour"] = r.Colour,
+            ["designation"] = "-WG1",
+            ["type"] = "T",
+            ["label"] = r.Oid == "11" ? "BK" : "BN",
+            ["colour"] = r.Colour,
         }));
         return (plan, actual);
     }
