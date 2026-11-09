@@ -494,6 +494,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - **符号的变体 2 和 6：** 6 个引脚的三极符号（如 `QL3`），变体 2 是旋转 180°（1 号引脚到了右下，L1 在最右边）；变体 6 是上下翻转（1/3/5 仍从左到右排在下面，2/4/6 在上面），官方进线页倒置的主开关就是这种。
 - **部件模板是黑盒时不要再给库符号：** `eplan_device_place` 同时给 `part` 和 `library`/`symbol` 时，先按部件模板建出黑盒（`SPECIAL/DC` 加 6 个 `DCP5`），再只把主功能换成库符号，结果库符号的 6 个引脚没有代号，黑盒的连接点还在。要用库符号时先按符号放（给 `connection_designations`），再用 `eplan_device_update part` 挂部件。
 - **带方向的 T 节点：** `SPECIAL/TLRU`、`TLRO`、`TOUL`、`TOUR` 的变体 0–3 是带方向的画法（支路处一段斜线），变体 8 是圆点。EPLAN 帮助：不带编号的点是来源，目标 1 画直线、目标 2 画斜线。符号的连接点按 [目标 1, 来源, 目标 2] 排列，目标 2 偏 2 mm：TLRU 0 = 来源左、目标 1 下、目标 2 右；1 = 来源右；TOUR/TOUL 2 = 来源上、目标 1 是支路，3 = 来源下。官方 EES_stacking_iec 的母线支路全是 TLRU/0、TLRO/0。`eplan_connection_create` 不给 `variant` 时选变体 8；给 0 后整页实测正常（ProbeMM =GAB/2）。
+- **界面上先画的页不刷新交叉引用：** 逐页画完整个项目后，先画的页上流出的中断点在 EPLAN 界面里仍显示空的交叉引用（`L1 /`），因为画它时对端还不存在；`eplan_export_image` 导出的同一页是对的（`L1 / =GAC/4.0`）。关闭再打开项目后界面显示正确（MX_Dryer19 =GAB/2，窗口截图核对）。
 - **引脚代号为空时 `Pin.Name` 抛异常：** 读到代号（20022）为空的引脚会抛 `EmptyPropertyException`（S063111），全项目 `eplan_connection_generate` 因此失败；连接读取改为按空代号处理。
 
 ### A122. EES 项目的中断点、PLC 先总览后调用和 ET 200SP 图片变体（2026-11-08，EPLAN 2026.0.3.25421，Electric P8，从 `EES_Machine_Schematic_2026.zw9` 建的 scratch 项目 MX_Dryer2–6、PlcProbe）
