@@ -130,6 +130,20 @@ public sealed class PageUpdateOperationTests
     }
 
     [Fact]
+    public void Execute_EplanDropsTheLanguageIndependentPlaceholder_Commits()
+    {
+        _descriptions.Pages["=GAA+A1&EFS1/3"] = [new TextEntry("??_??", "{{Let's start}}")];
+        PageUpdateArgs args = Args(Item("=GAA+A1&EFS1/3", "进线"));
+        args.Fingerprint = Plan(args).Fingerprint;
+        _descriptions.Tamper = entries => [.. entries.Where(e => e.Language != "??_??")];
+
+        PageUpdateData data = Execute(args);
+
+        Assert.Equal("进线", Assert.Single(data.Pages).Description);
+        Assert.Equal(["zh_CN@进线"], _descriptions.Pages["=GAA+A1&EFS1/3"].Select(e => e.Language + "@" + e.Text));
+    }
+
+    [Fact]
     public void Execute_AnotherLanguageEplanLost_RollsEveryPageBack()
     {
         PageUpdateArgs args = Args(Item("=GAA+A1&EFS1/2", "新控制"), Item("=GAA+A1&EFS1/1", "主回路"));
