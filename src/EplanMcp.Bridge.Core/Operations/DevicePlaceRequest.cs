@@ -130,6 +130,10 @@ internal sealed class DevicePlaceRequest
             PlcRecord? state = plc?.ReadPlc(project.Path, parent, TextLanguages.Independent, detailed: true);
             if (state?.Plc is null)
             { throw new BridgeErrorException(ErrorReason.DeviceNotFound, "An existing native PLC card is required; create it explicitly first."); }
+            // MX_Dryer11 2026-11-08: a point placed after the overview was addressed is another function of the channel and stays
+            // without an address unless it takes the overview's; take it when the caller gave none, so the plan lists it.
+            if (args.PlcAddress is null && state.Channels.FirstOrDefault(c => SameName(full, c.Name, ignoreCase: true) && !string.IsNullOrEmpty(c.Address)) is { } addressed)
+            { args.PlcAddress = addressed.Address; }
             if (args.PlcAddress is not null && state.Channels.Any(c => SameName(full, c.Name, ignoreCase: true)
                 && c.Address is not null && !string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
             { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC channel already uses a different address; keep its address for another representation."); }

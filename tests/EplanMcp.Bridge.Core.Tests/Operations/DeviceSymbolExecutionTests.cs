@@ -203,6 +203,28 @@ public sealed partial class DeviceSymbolExecutionTests
         Assert.Empty(_transactions.Calls);
     }
 
+    [Theory]
+    [InlineData(null, "I1.0")]
+    [InlineData("I1.0", "I1.0")]
+    public void PlcPoint_WithoutAnAddress_TakesTheAddressOfItsOverviewChannel(string? requested, string planned)
+    {
+        // MX_Dryer11 2026-11-08: points placed after the overview was addressed showed an empty address row.
+        var args = new DevicePlaceArgs
+        {
+            Project = "Line1", Page = "=GAA+A1&EFS1/3", Library = "IEC_symbol", Symbol = "PLC_CBOX", SymbolVariant = 0,
+            Tag = "=GAA+A1-D3KF3", PlcConnectionPoint = "1", PlcAddress = requested, X = 120, Y = 176,
+        };
+        _pages.Pages.Add(new() { Name = args.Page });
+        _names.Functions.Add(("=GAA+A1-D3KF3", "1/17/1/0", true, "=GAA+A1&EFS1/4", "D3KF"));
+        _source.Symbol.Name = args.Symbol;
+        _source.Symbol.FunctionCategory = "PLCTerminal";
+        _source.Symbol.PlcInputDefinition = "1/2";
+        _source.Channels.Add(new() { Name = "=GAA+A1-D3KF3:1", Address = "I1.0" });
+        var plan = Assert.IsType<WritePlan>(new DevicePlacePlanOperation(_catalog, _pages, _names, _parts, _source, _source, _source).Execute(args));
+        Assert.Contains(plan.Changes, c => (c.Kind, c.Property, c.NewValue) == ("plc_property", "20400", planned));
+        Assert.Equal(planned, args.PlcAddress);
+    }
+
     private void AssertRejected(DevicePlaceArgs args, string pointer)
     {
         BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Execute(args));
@@ -220,7 +242,8 @@ public sealed partial class DeviceSymbolExecutionTests
         internal MacroTargetPage? Target { get; set; }
         public MacroTargetPage? ReadPage(string projectPath, string pageName) => Target ?? LayoutFixture.Target(new() { Name = pageName, Type = "Circuit" });
         public SymbolSearchItem Symbol { get; } = new() { Library = "IEC_symbol", Name = "K", Type = "Function", Kind = "function", ConnectionPoints = [new() { Location = [0, 0] }] };
-        public PlcRecord? ReadPlc(string projectPath, string tag, string? language, bool detailed = false) => new() { Plc = new() { Tag = tag } };
+        public List<PlcChannel> Channels { get; } = [];
+        public PlcRecord? ReadPlc(string projectPath, string tag, string? language, bool detailed = false) => new() { Plc = new() { Tag = tag }, Channels = Channels };
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => [Symbol];
         public PlacedDevice Place(string projectPath, string pageName, string part, string variant, double x, double y, string tag, DevicePlaceArgs? options = null) => throw new NotSupportedException();
     }
