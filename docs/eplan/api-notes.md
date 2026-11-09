@@ -486,6 +486,11 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A125. 自动连线穿过中断点、`ACBP` 断开，以及审批窗口被销毁后 EPLAN 一直被挡住（2026-11-08，EPLAN 2026.0.3.25421，Electric P8，从 `EES_Machine_Schematic_2026.zw9` 建的 scratch 项目 MX_Dryer23）
+- **中断点 `BP` 的两个连接点在同一位置**（变体 0：(0,0) 朝右和朝左），自动连线会穿过它继续走。AC 220V 分配页 L 排（`-XD3`，出线朝下）和 N 排（`-XD4`，出线朝上）对齐放置时，上下相对的出线点穿过两排中断点连在一起，L 和 N 短路（连接列表里有 `XD3:1` 到 `XD4:1` 的连接）。
+- **`SPECIAL/ACBP`（`eplan_connection_create` 的 `autoconnect_break`，要 `generate:false`）放在两排中断点之间**，生成连接后这一段不再画线，也没有连接；两边引脚到各自中断点的线照常。官方 EES_stacking_iec =GAB/5 的 24V、0V 箭头在 x=325 上下对齐也没有连线。
+- **审批窗口被销毁却没走关闭流程：** MX_Dryer23 收尾时删除 `+M.M` 的审批窗口不见了，EPLAN 主线程一直停在 `Window.ShowDialog()` 的消息循环里（ClrMD：窗口对象 `_disposed=True`、`_isClosing=False`，`DispatcherFrame._continue=True`），之后所有调用都是 `EPLAN_BUSY`（Reentrant），只能结束 EPLAN。到期后再调 `Close()` 对已销毁的窗口不起作用。现在计时器发现窗口已不存在，或到期 `Close()` 之后对话框仍未结束，就用 `Dispatcher.ExitAllFrames()` 结束这个模态循环，结果按取消处理。谁销毁了窗口没有查到。
+
 ### A124. 分配端子 `X4_B_2`、HMI 正视图宏和 PLC 盒嵌套已有设备（2026-11-08，EPLAN 2026.0.3.25421，Electric P8，从 `EES_Machine_Schematic_2026.zw9` 建的 scratch 项目 MX_Dryer20）
 - **`X4_B_2`（IEC_symbol）：** 四个接线点都在同一侧，间距 4 mm：变体 0 朝下 (0,−2)(4,−2)(8,−2)(12,−2)，变体 6 朝上 (0,2)…(12,2)，1 号点都在左边；鞍形跳线点 (−0.75,0)/(12.75,0)。变体 2、4 是 1 号点在右边的镜像。官方 EES_stacking_iec =GAB/5：每排端子 1 用 `X4_B_1`（进线点接电源），其余用 `X4_B_2`，只给用到的接线点画线。
 - **MTP1000 宏 `Siemens/Automation_Systems/COMFORT_PANEL/6AV2128-3KB06-0AX1.ema`：** 多线变体 0、1 只有电源或 FE 端子，变体 2 是 80×40 的简单盒子，变体 3 是约 1:1 的正视图（288×220，PLC 盒左上角在基准点，X80 的 1、2 和 FE 在底边，比基准点低 208 mm）；总览有变体 0、4。宏里没有 PROFINET 口。宏里 FE 端子的标识是 `-K1-K1:FE`：插入后先把盒子 `-K1` 改名，FE 跟着变成 `-新标识-K1:FE`，再把 `新标识-K1` 改成新标识，三个引脚才都属于同一个设备。

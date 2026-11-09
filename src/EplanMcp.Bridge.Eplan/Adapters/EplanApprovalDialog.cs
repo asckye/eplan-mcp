@@ -29,6 +29,8 @@ internal sealed class EplanApprovalDialog : IApprovalDialog
         var shown = new Stopwatch();
         string? decision = null;
         bool closing = false;
+        bool closeRequested = false;
+        IntPtr handle = IntPtr.Zero;
 
         Button reject = DecisionButton(question.RejectLabel);
         Button approve = DecisionButton(question.ApproveLabel);
@@ -81,13 +83,25 @@ internal sealed class EplanApprovalDialog : IApprovalDialog
                 return;
             }
 
+            // MX_Dryer23 2026-11-08: the window was destroyed without closing (disposed, no Closing event); Close() then
+            // did nothing and ShowDialog's frame ran on, so EPLAN stayed blocked. A window that is gone, or a deadline
+            // Close() that did not end the dialog, ends the modal loop here.
+            if ((handle != IntPtr.Zero && !NativeMethods.IsWindow(handle)) || closeRequested)
+            {
+                timer.Stop();
+                Dispatcher.ExitAllFrames();
+                return;
+            }
+
             approve.IsEnabled = reject.IsEnabled = countdown.AcceptsClicks(open.Elapsed, Shown());
             left.Text = question.CountdownFormat.Replace("{0}", countdown.Remaining(open.Elapsed));
             if (countdown.HasExpired(open.Elapsed))
             {
+                closeRequested = true;
                 window.Close();
             }
         };
+        window.SourceInitialized += (_, _) => handle = new WindowInteropHelper(window).Handle;
         window.ContentRendered += (_, _) =>
         {
             shown.Start();

@@ -41,6 +41,7 @@
 - `eplan_connection_create`：T 节点默认画成带方向的样式（同官方 EES 样例），新增 `source` 指定电从哪边来；以前不给 `variant` 时是圆点。项目里没有带方向的变体时仍画圆点。
 
 ### 修复
+- 审批窗口被销毁却没有走关闭流程时，EPLAN 不再一直被挡住：窗口不存在了或到期仍未关闭，就结束模态循环，按取消处理。
 - `eplan_project_open` 接受 `eplan_project_list` 返回的不带 `.elk` 的项目路径，关闭后可以直接用列表里的路径重新打开。
 - `eplan_connection_create` 的 `cable_definition`：EPLAN 读回芯线的顺序和请求的顺序不同时，不再误报读回不一致并撤销整次调用；每条芯线按它的连接对应后再核对。
 - `eplan_connection_generate`、`eplan_connection_list`：连接一端的引脚没有连接点代号时，不再报插件内部错误。
