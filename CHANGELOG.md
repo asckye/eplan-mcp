@@ -38,6 +38,7 @@
 - `eplan_connection_create`：T 节点默认画成带方向的样式（同官方 EES 样例），新增 `source` 指定电从哪边来；以前不给 `variant` 时是圆点。项目里没有带方向的变体时仍画圆点。
 
 ### 修复
+- `eplan_connection_create` 的 `cable_definition`：EPLAN 读回芯线的顺序和请求的顺序不同时，不再误报读回不一致并撤销整次调用；每条芯线按它的连接对应后再核对。
 - `eplan_connection_generate`、`eplan_connection_list`：连接一端的引脚没有连接点代号时，不再报插件内部错误。
 - `eplan_page_update`：EPLAN 写入某种语言的页描述时会清掉不分语言的文字（如基本项目页上的 `{{Let's start}}`），不再因此判为失败并整批回滚；其他语言丢失时仍整批回滚。
 - `eplan_device_place`：部件模板是黑盒时，同时给库符号会被拒绝。以前只把黑盒换成库符号，原来的连接点还留着，库符号的引脚没有代号。

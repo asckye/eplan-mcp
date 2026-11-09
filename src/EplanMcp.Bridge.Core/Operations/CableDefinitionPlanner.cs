@@ -83,23 +83,35 @@ public static class CableDefinitionPlanner
         JToken[] expected = plan["coreImpact"]!.ToArray();
         if (actual.Count != expected.Length)
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant($"Cable core count readback: expected {expected.Length}; actual {actual.Count}.")); }
-        var ids = new HashSet<long>();
-        for (int i = 0; i < actual.Count; i++)
+        var used = new HashSet<int>();
+        foreach (JToken core in expected)
         {
+            string Key(JToken pin) => FormattableString.Invariant($"{pin["locator"]!["type"]}/{pin["locator"]!["oid"]}/{pin["pin_index"]}");
+            string[] pins = core["connection"]!["item_index"] is { } index
+                ? [Key(request["items"]![(int)index]!["from"]!), Key(request["items"]![(int)index]!["to"]!)] : core["before"]!["pins"]!.Values<string>().Select(p => p!).ToArray();
+            JToken? locator = core["connection"]!["locator"];
+            // Live 2026-11-08 (MX_Dryer18 =BG/14): EPLAN reads the cores back in its own order (here by terminal designation), not
+            // in the requested one, so each requested core is matched to the read core on its connection, then compared.
+            int i = -1;
+            for (int k = 0; k < actual.Count && i < 0; k++)
+            {
+                long oid = (long?)actual[k]["oid"] ?? 0;
+                if (!used.Contains(k) && oid > 0 && (locator is not null ? oid == (long)locator["oid"]!
+                    : new HashSet<string?>(actual[k]["pins"]!.Values<string>(), StringComparer.Ordinal).SetEquals(pins)))
+                { i = k; }
+            }
+            if (i < 0)
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant($"Core connection identity differs: expected pins {new JArray(pins)}, oid {locator?["oid"]}; no read core has that connection ({actual}).")); }
+            used.Add(i);
+            if (!new HashSet<string?>(actual[i]["pins"]!.Values<string>(), StringComparer.Ordinal).SetEquals(pins))
+            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant($"Core connection identity differs: expected pins {new JArray(pins)}, oid {locator?["oid"]}; actual pins {actual[i]["pins"]}, oid {actual[i]["oid"]}.")); }
             foreach (string field in new[] { "designation", "type", "label", "colour" })
             {
-                string? wanted = (string?)(field == "type" ? plan["cableDefinitions"]!.Single(d => (string?)d["designation"] == (string?)expected[i]["designation"])["type_text"] : expected[i][field]);
+                string? wanted = (string?)(field == "type" ? plan["cableDefinitions"]!.Single(d => (string?)d["designation"] == (string?)core["designation"])["type_text"] : core[field]);
                 string? read = (string?)actual[i][field];
                 if (field == "designation" ? !SameName(wanted!, read ?? "", page) : wanted != read)
                 { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, $"Cable core {field} readback: expected '{wanted}'; actual '{read ?? "<empty>"}'."); }
             }
-            string Key(JToken pin) => FormattableString.Invariant($"{pin["locator"]!["type"]}/{pin["locator"]!["oid"]}/{pin["pin_index"]}");
-            string[] pins = expected[i]["connection"]!["item_index"] is { } index
-                ? [Key(request["items"]![(int)index]!["from"]!), Key(request["items"]![(int)index]!["to"]!)] : expected[i]["before"]!["pins"]!.Values<string>().Select(p => p!).ToArray();
-            long id = (long?)actual[i]["oid"] ?? 0;
-            if (id <= 0 || !ids.Add(id) || !new HashSet<string?>(actual[i]["pins"]!.Values<string>(), StringComparer.Ordinal).SetEquals(pins)
-                || expected[i]["connection"]!["locator"] is { } locator && id != (long)locator["oid"]!)
-            { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, FormattableString.Invariant($"Core connection identity differs: expected pins {new JArray(pins)}, oid {expected[i]["connection"]!["locator"]?["oid"]}; actual pins {actual[i]["pins"]}, oid {id}.")); }
         }
     }
 

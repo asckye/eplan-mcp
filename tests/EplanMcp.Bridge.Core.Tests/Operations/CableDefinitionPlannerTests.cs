@@ -428,4 +428,37 @@ public sealed class CableDefinitionPlannerTests
         f.Cores[0]!["connection"] = CableDefinitionFixture.Reference(wire);
         Assert.Equal(ExecutionState.NotStarted, (string?)f.Plan()["execution"]);
     }
+    [Fact]
+    public void VerifyCores_ReadInAnotherOrder_MatchesEachCoreOnItsConnection()
+    {
+        // Live 2026-11-08 (MX_Dryer18 =BG/14): BN on terminal 2 was requested before BK on terminal 1; EPLAN read BK first.
+        (JObject plan, JArray actual) = Cores(("BK", "11"), ("BN", "12"));
+        EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.VerifyCores(plan, actual, "+A1/1", new JObject());
+    }
+
+    [Fact]
+    public void VerifyCores_WrongColourOnTheMatchedCore_StillFails()
+    {
+        (JObject plan, JArray actual) = Cores(("BU", "11"), ("BN", "12"));
+        BridgeError error = Assert.Throws<BridgeErrorException>(() =>
+            EplanMcp.Bridge.Core.Operations.CableDefinitionPlanner.VerifyCores(plan, actual, "+A1/1", new JObject())).Error;
+        Assert.Equal("Cable core colour readback: expected 'BK'; actual 'BU'.", error.Message);
+    }
+
+    // Requested: BN on connection 12, then BK on connection 11; read back in the order of the given (colour, oid) pairs.
+    private static (JObject Plan, JArray Actual) Cores(params (string Colour, string Oid)[] read)
+    {
+        JObject plan = JObject.Parse("""
+            {"cableDefinitions":[{"designation":"-WG1","type_text":"T"}],
+             "coreImpact":[{"designation":"-WG1","label":"BN","colour":"BN","connection":{"locator":{"oid":12}},"before":{"pins":["17/2/0","17/9/0"]}},
+                           {"designation":"-WG1","label":"BK","colour":"BK","connection":{"locator":{"oid":11}},"before":{"pins":["17/1/0","17/8/0"]}}]}
+            """);
+        var actual = new JArray(read.Select(r => new JObject
+        {
+            ["oid"] = long.Parse(r.Oid, System.Globalization.CultureInfo.InvariantCulture),
+            ["pins"] = r.Oid == "11" ? new JArray("17/1/0", "17/8/0") : new JArray("17/9/0", "17/2/0"),
+            ["designation"] = "-WG1", ["type"] = "T", ["label"] = r.Oid == "11" ? "BK" : "BN", ["colour"] = r.Colour,
+        }));
+        return (plan, actual);
+    }
 }
