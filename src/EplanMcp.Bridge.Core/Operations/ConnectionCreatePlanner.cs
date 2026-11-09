@@ -84,6 +84,7 @@ public static class ConnectionCreatePlanner
         var resolved = new JArray();
         var interruptions = new Dictionary<string, JObject>(StringComparer.Ordinal);
         var requestedVariants = new Dictionary<string, (int Number, string Pointer)>(StringComparer.Ordinal);
+        var directionalVariants = new Dictionary<string, (int Number, bool Explicit, string Pointer)>(StringComparer.Ordinal);
         var definitions = new JArray();
         List<SymbolSearchItem>? variants = null;
         PartsDatabaseContent? partsContent = null;
@@ -192,7 +193,7 @@ public static class ConnectionCreatePlanner
                 interruptions.Add(Key(point), interruption);
                 continue;
             }
-            Members(item, at, wire ? "kind from to points" : "kind position directions", wire ? "definition_point" : (string?)item["kind"] == "t_node" ? "variant" : "");
+            Members(item, at, wire ? "kind from to points" : "kind position directions", wire ? "definition_point" : (string?)item["kind"] == "t_node" ? "variant source" : "");
             if (!wire)
             {
                 Require(item["directions"] is JArray d && d.All(v => v.Type == JTokenType.String), at + "/directions", "Supply a direction array.");
@@ -203,6 +204,8 @@ public static class ConnectionCreatePlanner
                     Require(variant.Type == JTokenType.Integer && int.TryParse(variant.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _), at + "/variant", "Supply an Int32 variant number.");
                     requestedVariants.Add(Key(point), ((int)variant, at + "/variant"));
                 }
+                if ((string?)item["kind"] == "t_node" && DirectionalVariant(item["directions"]!.Values<string>().Select(v => v!).ToArray(), item["source"], item["variant"] is not null, at) is { } directional)
+                { directionalVariants.Add(Key(point), directional); }
                 continue;
             }
             Require(item["points"] is JArray { Count: >= 2 and <= 32 }, at + "/points", "Supply 2..32 orthogonal points.");
@@ -266,7 +269,7 @@ public static class ConnectionCreatePlanner
                 _ => s.Name == "PCP" && s.Type == "PotentialTerminal",
             }) && (node.Kind == "interruption_point" ? s.ConnectionPoints.Count > 0 : s.ConnectionPoints.Count == node.Directions.Length) && s.ConnectionPoints.All(p => p.Location.Length == 2
                 && p.Location.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && (node.Kind == "interruption_point" || Math.Abs(v) <= 2 * grid))
-                && (node.Kind is "potential_point" or "interruption_point" || requestedVariants.ContainsKey(Key(node.Point)) || p.Location.All(v => v == 0)))
+                && (node.Kind is "potential_point" or "interruption_point" || requestedVariants.ContainsKey(Key(node.Point)) || directionalVariants.ContainsKey(Key(node.Point)) || p.Location.All(v => v == 0)))
                 && (node.Kind == "interruption_point" ? s.ConnectionPoints.Any(p => p.Direction == node.Directions[0])
                     : s.ConnectionPoints.Select(p => p.Direction).OrderBy(d => d, StringComparer.Ordinal).SequenceEqual(node.Directions.OrderBy(d => d, StringComparer.Ordinal))))
                 // A83: prefer BP's tail (index 1), then the lowest variant number, regardless of library enumeration order.
@@ -277,6 +280,14 @@ public static class ConnectionCreatePlanner
                 Require(matches.Any(s => s.Variant == requestedVariant.Number), requestedVariant.Pointer,
                     "Available variants for the requested cardinal pins: " + string.Join(", ", matches.Select(s => s.Variant.ToString(CultureInfo.InvariantCulture)).Distinct(StringComparer.Ordinal)) + ".");
                 matches = matches.Where(s => s.Variant == requestedVariant.Number).ToArray();
+            }
+            else if (directionalVariants.TryGetValue(Key(node.Point), out var directional))
+            {
+                // A project without the directional variant keeps the old choice: the one variant with every pin at the node.
+                Require(!directional.Explicit || matches.Any(s => s.Variant == directional.Number), directional.Pointer,
+                    "The project's SPECIAL library has no directional variant " + directional.Number.ToString(CultureInfo.InvariantCulture) + " for these pins.");
+                matches = matches.Any(s => s.Variant == directional.Number) ? matches.Where(s => s.Variant == directional.Number).ToArray()
+                    : matches.Where(s => s.ConnectionPoints.All(p => p.Location.All(v => v == 0))).ToArray();
             }
             // A115: current runs left to right and top to bottom, so a BP the wire leaves rightwards or downwards is where it
             // comes in: arrow into the page, name outside (E, H). The other ends keep the outgoing tail variant.
@@ -461,6 +472,30 @@ public static class ConnectionCreatePlanner
             .. scene.Graphical.Select(p => "graphical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.Logical.Select(p => "logical:" + BridgeJson.FromObject(p).ToString(Formatting.None)), .. scene.SymbolBounds.Select(p => "outline:" + p.Key + BridgeJson.FromObject(p.Value).ToString(Formatting.None)), .. result["interruptionScope"] is { } evidence ? new[] { evidence.ToString(Formatting.None) } : []]);
         result["fingerprint"] = fingerprint;
         return expectedFingerprint is null || expectedFingerprint == fingerprint ? result : throw new BridgeErrorException(ErrorReason.PlanStale, "Page, pins or library geometry changed; create a new dry-run plan.");
+    }
+
+    /// <summary>
+    /// Directional T-node (EPLAN help: the undesignated point is the source, target 1 the straight line, target 2 the diagonal;
+    /// the SPECIAL T-nodes list their points as [target 1, source, target 2]). As on the official EES pages (TLRU/0, TLRO/0)
+    /// the source is where the potential comes from, target 1 the branch and target 2 the continuing line; without a source,
+    /// current runs left to right and top to bottom (A115). Returns null when the directions are not a T (reported elsewhere).
+    /// </summary>
+    private static readonly string[] _cardinals = ["Up", "Down", "Left", "Right"];
+
+    internal static (int Number, bool Explicit, string Pointer)? DirectionalVariant(string[] directions, JToken? source, bool hasVariant, string at)
+    {
+        Require(source is null || !hasVariant, at + "/source", "Give either variant or source, not both.");
+        Require(source is null || source.Type == JTokenType.String, at + "/source", "Supply source as Up, Down, Left or Right.");
+        string[] missing = [.. _cardinals.Where(d => !directions.Contains(d, StringComparer.Ordinal))];
+        if (hasVariant || directions.Length != 3 || directions.Distinct(StringComparer.Ordinal).Count() != 3 || missing.Length != 1)
+        { return null; }
+        string branch = Opposite(missing[0]);
+        bool throughIsHorizontal = branch is "Up" or "Down";
+        string from = source is null ? (throughIsHorizontal ? "Left" : "Up") : (string)source!;
+        Require(from != branch && directions.Contains(from, StringComparer.Ordinal), at + "/source",
+            "The source is one end of the through line: " + string.Join(" or ", directions.Where(d => d != branch)) + ".");
+        int number = throughIsHorizontal ? (from == "Left" ? 0 : 1) : (from == "Up" ? 2 : 3);
+        return (number, source is not null, at + "/source");
     }
 
     private static string Opposite(string d) => d switch { "Up" => "Down", "Down" => "Up", "Left" => "Right", "Right" => "Left", _ => "" };

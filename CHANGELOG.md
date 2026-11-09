@@ -34,6 +34,9 @@
 - 新增 `eplan_macro_store`，默认预览，将同页对象存为窗口宏或将指定页存为页宏；导出文件名禁止覆盖，写后校验文件与项目业务快照。
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
+### 变更
+- `eplan_connection_create`：T 节点默认画成带方向的样式（同官方 EES 样例），新增 `source` 指定电从哪边来；以前不给 `variant` 时是圆点。项目里没有带方向的变体时仍画圆点。
+
 ### 修复
 - `eplan_connection_generate`、`eplan_connection_list`：连接一端的引脚没有连接点代号时，不再报插件内部错误。
 - `eplan_page_update`：EPLAN 写入某种语言的页描述时会清掉不分语言的文字（如基本项目页上的 `{{Let's start}}`），不再因此判为失败并整批回滚；其他语言丢失时仍整批回滚。

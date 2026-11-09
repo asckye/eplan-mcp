@@ -47,12 +47,72 @@ public sealed class ConnectionCreatePlannerTests
     }
 
     [Fact]
-    public void TNode_NoVariant_PreservesUniqueMatchRequirement()
+    public void TNode_NoVariant_TakesTheDirectionalVariantFromTheLeft()
+    {
+        // Official EES pages draw rail branches as TLRU/0: source left, target 1 the branch, target 2 (diagonal) the rail.
+        var fixture = TNodeVariants();
+        fixture.Symbols.Add(ConnectionCreateFixture.Variant("TLRU", "TNodeDown", 8, "Right", "Left", "Down"));
+        Assert.Equal(0, (int)Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!["variant"]!);
+    }
+
+    [Theory]
+    [InlineData("Left", 0)]
+    [InlineData("Right", 1)]
+    public void TNode_Source_OnAHorizontalThroughLine_SelectsTheVariant(string source, int variant)
     {
         var fixture = TNodeVariants();
+        fixture.Request["items"]![0]!["source"] = source;
+        Assert.Equal(variant, (int)Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!["variant"]!);
+    }
+
+    [Theory]
+    [InlineData(null, 2)]
+    [InlineData("Up", 2)]
+    [InlineData("Down", 3)]
+    public void TNode_Source_OnAVerticalThroughLine_SelectsTheVariant(string? source, int variant)
+    {
+        var fixture = TNodeVariants();
+        fixture.Symbols.Clear();
+        fixture.Symbols.AddRange(Enumerable.Range(0, 4).Select(v => ConnectionCreateFixture.Variant("TOUR", "TNodeRight", v, "Down", "Up", "Right")));
+        fixture.Request["items"] = new JArray(ConnectionCreateFixture.Node("t_node", [40, 40], "Up", "Down", "Right"));
+        if (source is not null)
+        { fixture.Request["items"]![0]!["source"] = source; }
+        JToken symbol = Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!;
+        Assert.Equal(("TOUR", variant), ((string?)symbol["name"], (int)symbol["variant"]!));
+    }
+
+    [Theory]
+    [InlineData("\"Down\"")]
+    [InlineData("\"Up\"")]
+    [InlineData("1")]
+    public void TNode_SourceThatIsNotAThroughLineEnd_IsInvalid(string source)
+    {
+        var fixture = TNodeVariants();
+        fixture.Request["items"]![0]!["source"] = JToken.Parse(source);
+        Invalid(fixture, "/items/0/source");
+    }
+
+    [Fact]
+    public void TNode_SourceTogetherWithVariant_IsInvalid()
+    {
+        var fixture = TNodeVariants();
+        fixture.Request["items"]![0]!["source"] = "Left";
+        fixture.Request["items"]![0]!["variant"] = 0;
+        Invalid(fixture, "/items/0/source");
+    }
+
+    [Fact]
+    public void TNode_WithoutDirectionalVariants_KeepsTheUniqueMatchRequirement()
+    {
+        var fixture = TNodeVariants();
+        fixture.Symbols.Clear();
+        fixture.Symbols.AddRange([ConnectionCreateFixture.Variant("TLRU", "TNodeDown", 8, "Right", "Left", "Down"),
+            ConnectionCreateFixture.Variant("TLRU", "TNodeDown", 9, "Right", "Left", "Down")]);
         Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeErrorException>(() => fixture.Plan()).Error.Reason);
-        fixture.Symbols.RemoveRange(1, 3);
-        Assert.Equal(0, (int)Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!["variant"]!);
+        fixture.Symbols.RemoveAt(1);
+        Assert.Equal(8, (int)Assert.Single(fixture.Plan()["symbols"]!)["symbol"]!["variant"]!);
+        fixture.Request["items"]![0]!["source"] = "Left";
+        Invalid(fixture, "/items/0/source");
     }
 
     [Fact]
