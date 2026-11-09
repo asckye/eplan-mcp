@@ -486,6 +486,12 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A124. 分配端子 `X4_B_2`、HMI 正视图宏和 PLC 盒嵌套已有设备（2026-11-08，EPLAN 2026.0.3.25421，Electric P8，从 `EES_Machine_Schematic_2026.zw9` 建的 scratch 项目 MX_Dryer20）
+- **`X4_B_2`（IEC_symbol）：** 四个接线点都在同一侧，间距 4 mm：变体 0 朝下 (0,−2)(4,−2)(8,−2)(12,−2)，变体 6 朝上 (0,2)…(12,2)，1 号点都在左边；鞍形跳线点 (−0.75,0)/(12.75,0)。变体 2、4 是 1 号点在右边的镜像。官方 EES_stacking_iec =GAB/5：每排端子 1 用 `X4_B_1`（进线点接电源），其余用 `X4_B_2`，只给用到的接线点画线。
+- **MTP1000 宏 `Siemens/Automation_Systems/COMFORT_PANEL/6AV2128-3KB06-0AX1.ema`：** 多线变体 0、1 只有电源或 FE 端子，变体 2 是 80×40 的简单盒子，变体 3 是约 1:1 的正视图（288×220，PLC 盒左上角在基准点，X80 的 1、2 和 FE 在底边，比基准点低 208 mm）；总览有变体 0、4。宏里没有 PROFINET 口。宏里 FE 端子的标识是 `-K1-K1:FE`：插入后先把盒子 `-K1` 改名，FE 跟着变成 `-新标识-K1:FE`，再把 `新标识-K1` 改成新标识，三个引脚才都属于同一个设备。
+- **PLC 盒会嵌套框内已有的设备：** 在已有 `-12PF1`（HMI 简单盒子）的页上插入变体 3，它的大 PLC 盒 `-K1` 框住 `-12PF1`，`-12PF1` 变成 `-K1-12PF1`。和现场设备叠成 `+M.M` 是同一类现象：盒子（位置框、PLC 盒）把自己的标识加到框内的设备上。
+- **`eplan_project_list` 的 `path` 不带 `.elk`：** `eplan_project_open` 原来只接受 `.elk` 文件路径，直接用列表里的路径会被拒绝（INVALID_ARGUMENT）；现在旁边有同名 `.elk` 时也接受不带扩展名的路径。
+
 ### A123. ET 200SP 总览宏的占位符值集和 QUATTRO 分配端子（2026-11-08，EPLAN 2026.0.3.25421，Electric P8，从 `EES_Machine_Schematic_2026.zw9` 建的 scratch 项目 MX_Dryer9、MX_Dryer10）
 - **占位符只在 Overview 表达里：** `eplan_macro_get` 不给 `representation` 时读默认的多线表达，`placeholders` 为空；给 `representation:"Overview"`，变体 0 和 1 才有一个没有名字的占位符对象，变体 4 没有。I/O 卡和 CM PtP 的变量是 `Baseunit`，变体 0 的值集为 `aus / from AML Import (TIA)`、`6ES7193-6BP00-0BA0 (BU15-P16+A0+2B)`、`6ES7193-6BP00-0DA0 (BU15-P16+A0+2D)`（变体 1 是 BP20 系列）。CPU 1510SP-F 的变量是 `Artikelnummer`，有 13 个总线适配器值集。
 - **值集的效果：** `values: {"": "6ES7193-6BP00-0BA0 (BU15-P16+A0+2B)"}` 把这个 BaseUnit 部件挂到卡（PLC 盒）上；CPU 选 `BA 2XRJ45 (6ES7193-6AR00-0AA0)`，部件挂到子设备 `-K1-K1` 上。按宏路径插入时卡本身的部件不会挂上，要单独挂。
