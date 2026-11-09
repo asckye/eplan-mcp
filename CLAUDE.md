@@ -10,7 +10,7 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 
 遵循[《工程开发手册》](docs/standards/engineering-handbook.html)（先读★部分与改动涉及的章节）和 [docs/standards/README.md](docs/standards/README.md)；采用范围、提交格式、语言政策、合并门及证据台账均见后者。
 
-**用工具在 EPLAN 里画图之前，先通读 [docs/eplan/drawing-rules.md](docs/eplan/drawing-rules.md)**（作图顺序、行列版式、命名、数据关联、画完检查清单）；画完按其中的检查清单核对，发现规则不对就改这份文档。
+**用工具在 EPLAN 里画图之前，先通读 [docs/eplan/drawing-rules.md](docs/eplan/drawing-rules.md)**（通用规则：作图顺序、行列版式、命名、数据关联、画完检查清单），再读项目所属公司的作图配置（见该文档第 10 节）；画完按其中的检查清单核对，发现规则不对就改对应的文档。
 
 <a id="硬性规则违反任何一条都不能合并"></a>
 
