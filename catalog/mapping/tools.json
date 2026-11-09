@@ -19139,6 +19139,28 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_project_rename",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/ProjectSessionTools.cs",
+      "operations": [
+        "project.rename.execute",
+        "project.rename.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_project_rename.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A18"
+        ],
+        "tests": [],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_project_translate",
       "safety": "destructive",
       "host": "src/EplanMcp.Host/Tools/ProjectDestructiveTools.cs",
