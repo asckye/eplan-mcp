@@ -76,6 +76,25 @@ public static class PageReviewRules
                 { Add("overlap", "warning", p.Location, [p.Locator, q.Locator], "Symbol or text bounds overlap.", "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(q.Locator) }); }
             }
         }
+        // MX_Dryer16 2026-11-08: cable texts ran across the +M location box border; the official pages keep them inside the box.
+        // The box's own texts (its +M label sits on the corner) do not count.
+        if (Enabled("box_crossings"))
+        {
+            static bool Area(double[]? r) => r is { Length: 4 } && r[0] < r[2] && r[1] < r[3];
+            DrawingPlacement[] boxes = [.. scene.Page.Placements.Where(b => b.Kind == "LocationBox" && Area(b.Bounds))];
+            foreach (DrawingPlacement text in scene.Page.Placements.Where(t => t.Kind is "Text" or "PropertyPlacement" && Area(t.Bounds)))
+            {
+                double[] a = text.Bounds!;
+                foreach (DrawingPlacement box in boxes.Where(b => text.Parent is not { } parent || parent.Oid != b.Locator.Oid || parent.Type != b.Locator.Type))
+                {
+                    double[] b = box.Bounds!;
+                    bool touches = a[0] < b[2] - 1e-6 && a[2] > b[0] + 1e-6 && a[1] < b[3] - 1e-6 && a[3] > b[1] + 1e-6;
+                    bool inside = a[0] >= b[0] - 1e-6 && a[2] <= b[2] + 1e-6 && a[1] >= b[1] - 1e-6 && a[3] <= b[3] + 1e-6;
+                    if (touches && !inside)
+                    { Add("text_crosses_box", "warning", text.Location, [text.Locator, box.Locator], "Text runs across a location box border; keep it inside the box, as the official pages do, or outside it.", "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(text.Locator) }); }
+                }
+            }
+        }
         string End(JToken? e)
         { JObject? endpoint = e as JObject; string? name = (string?)endpoint?["device"]; string? resolved = actual["devices"]?.Select(d => (string?)d["tag"]).FirstOrDefault(n => n is not null && name is not null && DrawingNames.SameName(name, n, scene.Page.Page)); return new JArray(resolved ?? name ?? "", (string?)endpoint?["pin"] ?? "").ToString(Newtonsoft.Json.Formatting.None); }
         bool SameEnds(JToken a, JToken b) => new HashSet<string>(new[] { End(a["from"]), End(a["to"]) }, StringComparer.Ordinal).SetEquals(new[] { End(b["from"]), End(b["to"]) });

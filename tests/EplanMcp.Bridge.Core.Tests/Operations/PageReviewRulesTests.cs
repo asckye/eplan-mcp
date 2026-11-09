@@ -29,6 +29,33 @@ public sealed class PageReviewRulesTests
         Assert.Empty(Review("overlaps"));
     }
 
+    [Theory]
+    [InlineData(-20, false)]   // inside the box
+    [InlineData(-36, true)]    // across its left edge
+    [InlineData(-60, false)]   // outside
+    public void TextAcrossALocationBoxBorder_IsReported(double left, bool reported)
+    {
+        DrawingPlacement box = Placement(1, 100, "LocationBox");
+        box.Bounds = [70, 36, 160, 108];
+        DrawingPlacement text = Placement(2, 100 + left, "PropertyPlacement");
+        text.Bounds = [100 + left, 96, 100 + left + 30, 100];
+        JArray issues = Review("box_crossings");
+        Assert.Equal(reported ? 1 : 0, issues.Count);
+        if (reported)
+        { Assert.Equal(("text_crosses_box", "warning"), ((string?)issues[0]!["code"], (string?)issues[0]!["severity"])); }
+    }
+
+    [Fact]
+    public void TheBoxOwnLabelOnItsCorner_IsNotReported()
+    {
+        DrawingPlacement box = Placement(1, 100, "LocationBox");
+        box.Bounds = [70, 36, 160, 108];
+        DrawingPlacement label = Placement(2, 66, "PropertyPlacement");
+        label.Bounds = [64, 104, 74, 110];
+        label.Parent = box.Locator;
+        Assert.Empty(Review("box_crossings"));
+    }
+
     private const string Page = "=F+A1/1";
     private readonly ConnectionCreatePlanner.Scene _scene = new() { Project = new() { Name = "Line1" }, Page = new() { Page = Page, GridSize = 4 } };
     private readonly JObject _actual = JObject.Parse("""{"devices":[],"connections":[],"cables":[],"interruptions":[],"texts":[],"messages":[]}""");

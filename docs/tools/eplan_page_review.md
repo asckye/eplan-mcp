@@ -20,7 +20,7 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 已打开项目的名称或路径 |
 | `page` | string | 是 | — | 完整页名，按序数精确匹配 |
-| `checks` | string[]（enum） | 否 | 全部 | 只做这些检查：`dangling_ends`、`unconnected_pins`、`overlaps`、`off_grid`、`unintended_junctions`、`interruption_pairing`、`cable_cores`、`eplan_messages`、`expected`、`rules` |
+| `checks` | string[]（enum） | 否 | 全部 | 只做这些检查：`dangling_ends`、`unconnected_pins`、`overlaps`、`off_grid`、`unintended_junctions`、`interruption_pairing`、`cable_cores`、`box_crossings`、`eplan_messages`、`expected`、`rules` |
 | `rule_packs` | string[] | 否 | 当前作用域启用的规则插件 | 1–10 个不重复的已安装插件 ID；显式 `checks` 不含 `rules` 时不评估 |
 | `expected` | object | 否 | — | 目标清单，格式与绘图工具的输入一致：`devices`（名称、符号、位置）、`connections`（两端设备与连接点）、`cables`（名称、芯线与它们应属于的连接、颜色）、`interruptions`（名称、位置）、`texts`（内容、位置、角度）。给出时做 `expected` 检查 |
 | `tolerance_mm` | number | 否 | 0.5 | 位置比较的容差 |
@@ -48,6 +48,7 @@
 | `unintended_junction` | error | 交叉或重合的线段使两个本应分开的网络连通（自动连接产生的意外连接） |
 | `interruption_pairing` | error | 同名中断点按页序与页内位置排序后相邻配对（A65），配对结果与目标不符，或出现落单而目标要求连接 |
 | `cable_core_segment` | error | 芯线归属与目标不符：电缆画在主干段时，经过该段的全部逻辑连接共用一个连接定义点（A64） |
+| `text_crosses_box` | warning | 文字（含电缆的属性文字）压在位置框的边线上，一部分在框内一部分在框外；位置框自己的标签不算 |
 | `eplan_message` | 按消息级别 | 该页上已有的 EPLAN 检查消息（只读取，不运行检查） |
 | `expected_*` | error | 与目标清单的缺失、多余、不一致 |
 | `rule:<插件ID>/<规则名>` | mandatory 为 error，recommended 为 warning | 现有语法树解释器评估失败；附规则 `spec.source` 原样作为 `reference` |

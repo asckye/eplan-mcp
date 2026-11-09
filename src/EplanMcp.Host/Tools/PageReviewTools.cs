@@ -18,7 +18,7 @@ internal sealed class PageReviewTools
     private static readonly string[] _differenceKinds = ["missing", "extra", "mismatched"];
     private static readonly string[] _reviewFields = ["category", "main", "crossSection", "potentialName", "potentialType"];
     public const string Tool = "eplan_page_review";
-    internal static readonly string[] Checks = ["dangling_ends", "unconnected_pins", "overlaps", "off_grid", "unintended_junctions", "interruption_pairing", "cable_cores", "eplan_messages", "expected", "rules"];
+    internal static readonly string[] Checks = ["dangling_ends", "unconnected_pins", "overlaps", "off_grid", "unintended_junctions", "interruption_pairing", "cable_cores", "box_crossings", "eplan_messages", "expected", "rules"];
     [McpServerTool(Name = Tool, Title = "Review a drawn EPLAN page", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
     [Description("Reviews wiring, geometry, targets and plugin rules. rule_packs selects installed plugins; omitted uses enabled rules. Read only. Coordinates: mm, bottom-left origin. See usage for standards and fixes. Example: {\"project\":\"Line1\",\"page\":\"=F+A1/1\"}.")]
     public static async Task<CallToolResult> ReviewAsync(IBridgeClient bridge, TimeProvider clock, string project, string page,
