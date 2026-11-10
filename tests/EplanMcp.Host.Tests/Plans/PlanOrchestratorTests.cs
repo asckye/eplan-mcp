@@ -149,7 +149,7 @@ public sealed partial class PlanOrchestratorTests : IAsyncDisposable
     [Theory]
     [InlineData((int)ApprovalDecision.Denied, ErrorReason.ApprovalDenied)]
     [InlineData((int)ApprovalDecision.Expired, ErrorReason.ApprovalExpired)]
-    [InlineData((int)ApprovalDecision.Unavailable, ErrorReason.ApprovalDenied)]
+    [InlineData((int)ApprovalDecision.Unavailable, ErrorReason.ApprovalUnavailable)]
     public async Task Approval_RefusalConsumesPlan_AndReplayPointsToGet(int decision, string reason)
     {
         await Publish(ToolTier.Destructive);

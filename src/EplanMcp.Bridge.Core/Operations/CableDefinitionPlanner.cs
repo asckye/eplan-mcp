@@ -207,7 +207,12 @@ public static class CableDefinitionPlanner
             var selected = matches[0];
             Require(assigned.Add(selected.Reference.ToString(Formatting.None)), "/items", "Assign each connection only once.");
             if (selected.Before is { } old && (HasCable(old.Cable) || old.Locator.Project != scene.Project.Path || old.Locator.Page != scene.Page.Page))
-            { throw Missing($"a selected connection already has cable '{old.Cable}' or is on {old.Locator.Project} / {old.Locator.Page} instead of {scene.Project.Path} / {scene.Page.Page}"); }
+            {
+                BridgeErrorException missing = Missing("a selected connection already has a cable or lies on another project or page; metadata names them");
+                missing.Error.Metadata!["cable"] = old.Cable ?? string.Empty;
+                missing.Error.Metadata["connectionPage"] = old.Locator.Project + " / " + old.Locator.Page;
+                throw missing;
+            }
             row["before"] = selected.Before is null ? JValue.CreateNull() : BridgeJson.FromObject(selected.Before);
         }
         string Segment(double[][] pair) => string.Join("|", pair.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal));

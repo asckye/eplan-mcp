@@ -326,7 +326,9 @@ public sealed partial class DevicePlaceOperationTests
         BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Plan(Args(NewPage, "-KF1")));
 
         Assert.Equal("=GAA+A1-KF2", error.Error.Metadata!["free"]);
-        Assert.Contains("'=GAA+A1-KF2' is free", error.Error.Message, StringComparison.Ordinal);
+        // ADR-0053 (WS-28): the message names the field, not the project text.
+        Assert.Contains("metadata.free is a free tag", error.Error.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("KF", error.Error.Message, StringComparison.Ordinal);
     }
 
     [Theory]

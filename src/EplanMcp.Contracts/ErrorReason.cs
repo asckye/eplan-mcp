@@ -75,8 +75,11 @@ public static class ErrorReason
     /// <summary>The engineer declined or cancelled the approval; nothing was changed.</summary>
     public const string ApprovalDenied = "APPROVAL_DENIED";
 
-    /// <summary>The approval request expired; call again for a new one.</summary>
+    /// <summary>The engineer did not decide in time; tell the engineer, who decides whether to ask again.</summary>
     public const string ApprovalExpired = "APPROVAL_EXPIRED";
+
+    /// <summary>No approval window could ask the engineer (EPLAN or the Workbench is not reachable); nothing was changed (ADR-0053, WS-12).</summary>
+    public const string ApprovalUnavailable = "APPROVAL_UNAVAILABLE";
 
     /// <summary>The planned objects changed after the plan was made; call again for a new plan.</summary>
     public const string PlanStale = "PLAN_STALE";

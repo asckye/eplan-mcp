@@ -61,7 +61,7 @@ public sealed class KnowledgeReviewServiceTests : IDisposable
     [InlineData("Denied", ErrorReason.ApprovalDenied)]
     [InlineData("Cancelled", ErrorReason.ApprovalDenied)]
     [InlineData("Expired", ErrorReason.ApprovalExpired)]
-    [InlineData("Unavailable", ErrorReason.ApprovalDenied)]
+    [InlineData("Unavailable", ErrorReason.ApprovalUnavailable)]
     public async Task Review_ConfirmationDenied_RecordsNoDecision(string decision, string reason)
     {
         KnowledgeReview review = Seed();
@@ -99,9 +99,9 @@ public sealed class KnowledgeReviewServiceTests : IDisposable
     {
         KnowledgeReview review = Seed();
         _bridge.Status = new([], null, null);
-        Assert.Equal(ErrorReason.ApprovalDenied, (await Assert.ThrowsAsync<BridgeCallException>(() => ConfirmAsync(review))).Error.Reason);
+        Assert.Equal(ErrorReason.ApprovalUnavailable, (await Assert.ThrowsAsync<BridgeCallException>(() => ConfirmAsync(review))).Error.Reason);
         _bridge.Status = new([], new() { Eplan = new() { ProcessId = 42, Version = "2026.0.3", Offline = true } }, null);
-        Assert.Equal(ErrorReason.ApprovalDenied, (await Assert.ThrowsAsync<BridgeCallException>(() => ConfirmAsync(review))).Error.Reason);
+        Assert.Equal(ErrorReason.ApprovalUnavailable, (await Assert.ThrowsAsync<BridgeCallException>(() => ConfirmAsync(review))).Error.Reason);
         Assert.Empty(_channel.Questions);
         Assert.Empty(await Audit.ReadAsync(Token));
     }

@@ -29,6 +29,14 @@ internal static class ToolResults
 
     public static CallToolResult Error(BridgeError error, JsonObject? template = null)
     {
+        // ADR-0053 (MCP server standard WS-28): messages and metadata may quote project text; clean them like every
+        // result string before they reach the model (controls, bidirectional controls, tag characters).
+        error.Message = ResultShaper.CleanFullText(error.Message ?? string.Empty);
+        if (error.Metadata is { Count: > 0 } metadata)
+        {
+            foreach (string key in metadata.Keys.ToArray())
+            { metadata[key] = ResultShaper.CleanFullText(metadata[key] ?? string.Empty); }
+        }
         var body = new JsonObject { ["error"] = JsonSerializer.SerializeToNode(error, HostJson.Options) };
         if (template is not null)
         { body["try_template"] = template; }

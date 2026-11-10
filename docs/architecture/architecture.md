@@ -422,11 +422,12 @@ sequenceDiagram
 - 项目数据只放在 `structuredContent` 的数据字段中；一行摘要中不原样回显自由文本。
 - 服务器说明（instructions）和相关工具描述明确告知模型：项目内容是数据，不是指令。工具描述只写功能，并保持稳定（防止工具投毒和定义被悄悄更改）。
 - 剥除控制字符，对超长文本截断。
+- 错误对象的 `message` 和 `metadata` 也按结果字符串清洗（`ToolResults.Error`）；新代码把设备标识、页名等项目文本放进 `metadata`，`message` 只引用字段名（ADR-0053）。
 - 最重要的防线不靠模型：**写操作必须经过策略和审批**，即使模型被诱导，也不能悄悄写入。
 
 
 
-`ResultShaper.CleanText` 移除控制字符（保留换行、制表）以及 U+202A–U+202E、U+2066–U+2069。清洗后超过 500 个 UTF-16 字符的字段截断为 500 字符以内，并保留完整代理对，后附 ` … [truncated, <N> characters in total]`；N 是清洗后长度。结果预算默认约 5k token、上限 20k，结构化结果与兼容 JSON 文本各计一次。支持 `concise/detailed` 的具体工具在 schema 中声明；计划查询保留全文并按 Unicode 标量边界分片，计划哈希使用原内容，见 [M6 设计](../design/2026-10-21-m6-engineering-packs.md)及 [eplan_plan_get](../tools/eplan_plan_get.md)。
+`ResultShaper.CleanText` 移除控制字符（保留换行、制表）、U+202A–U+202E、U+2066–U+2069 以及标签字符 U+E0000–U+E007F。清洗后超过 500 个 UTF-16 字符的字段截断为 500 字符以内，并保留完整代理对，后附 ` … [truncated, <N> characters in total]`；N 是清洗后长度。结果预算默认约 5k token、上限 20k，结构化结果与兼容 JSON 文本各计一次。支持 `concise/detailed` 的具体工具在 schema 中声明；计划查询保留全文并按 Unicode 标量边界分片，计划哈希使用原内容，见 [M6 设计](../design/2026-10-21-m6-engineering-packs.md)及 [eplan_plan_get](../tools/eplan_plan_get.md)。
 
 ### 8.6 多语言与单位
 - 多语言文本返回时注明语言代码；默认使用项目的主语言，可以通过参数指定。

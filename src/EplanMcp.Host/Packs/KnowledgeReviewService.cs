@@ -34,7 +34,7 @@ internal sealed partial class KnowledgeReviewService(PackLibrary packs, AuditLog
         string fingerprint = PlanStore.Hash(PackJson.Serialize(binding));
         EplanInstanceInfo? eplan = (await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false)).Handshake?.Eplan;
         if (eplan is null)
-        { throw Failure(ErrorReason.ApprovalDenied, "/review: connect an engineer's approval channel and review again."); }
+        { throw Failure(ErrorReason.ApprovalUnavailable, "/review: connect an engineer's approval channel and review again."); }
         string requestId = Guid.NewGuid().ToString("N");
         var plan = new WritePlan
         {

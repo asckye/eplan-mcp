@@ -217,7 +217,7 @@ public sealed class TranslationImportToolTests : IDisposable
 
         JsonElement error = WriteToolHarness.Error(await Import());
 
-        Assert.Equal(decision == "expired" ? ErrorReason.ApprovalExpired : ErrorReason.ApprovalDenied, error.GetProperty("reason").GetString());
+        Assert.Equal(decision == "expired" ? ErrorReason.ApprovalExpired : decision is null ? ErrorReason.ApprovalUnavailable : ErrorReason.ApprovalDenied, error.GetProperty("reason").GetString());
         Assert.Equal(ExecutionState.NotStarted, error.GetProperty("execution").GetString());
         Assert.Single(_dialog.Questions);
         Assert.Empty(_backup.Archives);

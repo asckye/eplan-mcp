@@ -57,7 +57,7 @@ internal sealed class BindingService(PackLibrary packs, AuditLog audit, Approval
             EplanInstanceInfo? eplan = (await bridge.GetStatusAsync(cancellationToken).ConfigureAwait(false)).Handshake?.Eplan;
             if (eplan is null)
             {
-                throw Failure(ErrorReason.ApprovalDenied, "Changing project pack locks needs the engineer's confirmation; connect EPLAN and try again.");
+                throw Failure(ErrorReason.ApprovalUnavailable, "Changing project pack locks needs the engineer's confirmation; connect EPLAN and try again.");
             }
             var plan = new WritePlan
             {

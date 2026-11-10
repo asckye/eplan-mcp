@@ -241,8 +241,8 @@ internal sealed class DevicePlaceRequest
         {
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
-                Tag.StartsWith("+", StringComparison.Ordinal) && Tag.IndexOf('-') < 0 ? "A location box with this identifier already covers this area on the page; choose another area or identifier." : $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. "
-                    + (_freeTag is null ? "Choose a free tag; eplan_device_list with tag_contains shows the tags in use." : $"'{_freeTag}' is free; or choose another free tag."),
+                Tag.StartsWith("+", StringComparison.Ordinal) && Tag.IndexOf('-') < 0 ? "A location box with this identifier already covers this area on the page; choose another area or identifier." : "The tag is already used by another device (metadata.existing); a new device with this tag would merge with it in EPLAN, which this tool does not do. "
+                    + (_freeTag is null ? "Choose a free tag; eplan_device_list with tag_contains shows the tags in use." : "metadata.free is a free tag; or choose another free tag."),
                 retryable: false,
                 Metadata());
         }

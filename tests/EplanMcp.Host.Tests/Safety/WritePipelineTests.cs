@@ -123,7 +123,7 @@ public sealed class WritePipelineTests : IDisposable
 
         BridgeError error = await Fails();
 
-        Assert.Equal((ErrorReason.ApprovalDenied, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Equal((ErrorReason.ApprovalUnavailable, ExecutionState.NotStarted), (error.Reason, error.Execution));
         Assert.Empty(_bridge.Writes);
     }
 

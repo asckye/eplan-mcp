@@ -105,7 +105,7 @@ public sealed class WriteApprovalTests : IDisposable
         BridgeError none = await Fails();
         BridgeError cannot = await Fails(unable);
 
-        Assert.All([none, cannot], e => Assert.Equal((ErrorReason.ApprovalDenied, ApprovalService.NoChannel), (e.Reason, e.Message)));
+        Assert.All([none, cannot], e => Assert.Equal((ErrorReason.ApprovalUnavailable, ApprovalService.NoChannel), (e.Reason, e.Message)));
         Assert.Single(unable.Questions);
         Assert.Empty(_bridge.Writes);
         Assert.All(AuditRecords(), r => Assert.Equal((null, "unavailable"), (r["channel"]?.GetValue<string>(), Text(r, "decision"))));
@@ -123,7 +123,7 @@ public sealed class WriteApprovalTests : IDisposable
         _bridge.Handlers[Plan] = _ => PlanFor(Path.Combine(_locations.DefaultScratch, "Line1"));
         WriteOutcome<JsonObject> scratch = await Run(workbench, dialog);
 
-        Assert.Equal((ErrorReason.ApprovalDenied, ApprovalService.NoChannel), (outside.Reason, outside.Message));
+        Assert.Equal((ErrorReason.ApprovalUnavailable, ApprovalService.NoChannel), (outside.Reason, outside.Message));
         Assert.Equal(ExecutionState.Committed, scratch.Execution);
         Assert.Empty(workbench.Questions.Concat(dialog.Questions));
         Assert.Single(_bridge.Writes);

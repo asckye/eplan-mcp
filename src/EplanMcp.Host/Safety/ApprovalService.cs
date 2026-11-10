@@ -26,7 +26,7 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
     public TimeSpan Timeout => config.ApprovalTimeout;
 
     internal const string NoChannel =
-        "This change needs the engineer's approval, but no approval channel can ask the engineer now, so it was not run and nothing was changed.";
+        "This change needs the engineer's approval, but no approval channel can ask the engineer now, so it was not run and nothing was changed. Ask the engineer to open EPLAN with the add-in or the Workbench, then call again.";
 
     private readonly IApprovalChannel[] _channels = [.. channels];
 
@@ -121,9 +121,10 @@ internal sealed partial class ApprovalService(IEnumerable<IApprovalChannel> chan
         ApprovalDecision.Expired => new()
         {
             Reason = ErrorReason.ApprovalExpired,
-            Message = $"The engineer did not approve within {HostConfig.Seconds(Timeout)} seconds, so the change was not run and nothing was changed. Call again to ask again.",
+            Message = $"The engineer did not approve within {HostConfig.Seconds(Timeout)} seconds, so the change was not run and nothing was changed. Tell the engineer; call again only when the engineer asks for it.",
         },
-        _ => new() { Reason = ErrorReason.ApprovalDenied, Message = NoChannel },
+        // ADR-0053 (WS-12): no window is not a denial; the model's next step differs (have the engineer open EPLAN or the Workbench).
+        _ => new() { Reason = ErrorReason.ApprovalUnavailable, Message = NoChannel },
     };
 
     /// <summary>A mismatched answer is denied; a grant that arrives after the deadline has expired.</summary>

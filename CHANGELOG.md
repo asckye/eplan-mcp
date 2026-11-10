@@ -7,6 +7,7 @@
 
 ### 变更
 
+- 新增错误码 `APPROVAL_UNAVAILABLE`：没有可用的审批窗口（没有连接 EPLAN 或 Workbench）时报这个码，不再报 `APPROVAL_DENIED`；工程师关闭窗口或拒绝仍是 `APPROVAL_DENIED`。审批过期（`APPROVAL_EXPIRED`）的提示改成先告诉工程师，只有工程师要求时才重试。
 - 内置规则插件 `iec-60204-1`、`iec-81346` 由项目负责人签核，升到 1.0.0，可以审 scratch 以外的项目。签核时的改动：N 线只认蓝色；多芯电缆的芯线不受动力黑、N 线蓝、交流控制红、直流控制蓝四条颜色规则检查，两条绿黄规则照样检查。审图规则新增事实 `connection.cable`（这根线属于哪根电缆）。签核记录见 `docs/process/rule-pack-signoff-iec.md`。
 - 内置规则插件 `iec-60204-1`、`iec-81346` 升到 0.2.0（仍是草稿，只审 scratch 项目）：用 4 个官方 EES IEC 项目验证后修正误报。颜色规则不把电缆芯号当颜色，放行主开关断开后仍带电回路的橙色 `OG`，直流控制线也接受深蓝 `DBU`、蓝白 `BUWH`；绿黄线接 PE 端子、接地端子排或 PE 母排即算保护导体；继电器的 `T1`/`T3` 不算动力连接点；新增“交流控制回路用红色”。字母代码放宽为开关 `S`/`Q`/`B`、转换器 `T`/`B`、PLC 盒 `K`/`A`/`PH`/`TA`、线圈 `Q`/`K`/`B`。官方项目上的报错从 73 处降到 9 处。
 
@@ -24,6 +25,7 @@
 - `eplan_device_place` 收到 `SPECIAL` 的连接符号（拐角 `CO`、T 节点 `TLRO`/`TLRU`/`TOUL`/`TOUR`、`PCP`、`ACBP`、以 `BP` 开头的中断点）时，直接指向 `eplan_connection_create` 和对应的 item kind，不再报“缺少标识”。
 - `eplan_project_open`、`eplan_project_create` 在审批之前不再访问 scratch 以外的路径（包括检查是否存在）；`eplan_project_open` 规划时拒绝设备名（如 `CON.elk`），文件不存在改在批准后执行时报告。
 - 虚拟机 HTTP 模式校验 `Host` 头，只接受绑定的地址和端口；别的名字（包括 `localhost`）返回 403，防止网页借 DNS 重绑定访问服务。
+- 错误结果的 `message` 和 `metadata` 也按结果字符串清洗；`eplan_device_place`、`eplan_device_update` 标识重复和电缆已存在的报错不再把标识、电缆名写进消息，改放 `metadata`。
 - 项目文本返回给模型、写进审批窗口之前，去掉 Unicode 标签字符（U+E0000–U+E007F）。这些字符在任何字体里都看不见，可以把指令藏进项目文字。
 
 ## [0.5.1] - 2026-11-09

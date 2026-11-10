@@ -45,7 +45,8 @@
 | `LOCK_FAILED` | 是 | `rolled_back` | 对象被其他用户锁定（多用户模式）；`metadata` 列出被锁定的对象 |
 | `POLICY_DENIED` | 否 | `not_started` | 策略禁止，例如 Code 级工具未启用；说明是哪条策略，**不提示如何绕过** |
 | `APPROVAL_DENIED` | 否 | `not_started` | 工程师拒绝或取消了审批；项目未改变 |
-| `APPROVAL_EXPIRED` | 否 | `not_started` | 审批请求过期；需要重新发起调用 |
+| `APPROVAL_EXPIRED` | 否 | `not_started` | 工程师没有及时批准；告诉工程师，由工程师决定是否重新发起 |
+| `APPROVAL_UNAVAILABLE` | 否 | `not_started` | 没有能询问工程师的审批窗口（EPLAN 插件或 Workbench 都不可用）；项目未改变。请工程师打开 EPLAN 或 Workbench 后再调用（ADR-0053，2026-11-10 起，之前报 `APPROVAL_DENIED`） |
 | `PLAN_STALE` | 否 | `not_started` | 审批之后项目已经改变；需要重新发起调用以生成新的计划 |
 | `EPLAN_OPERATION_FAILED` | 视情况 | `rolled_back` | EPLAN 报告失败；`eplanMessages` 中附带 EPLAN 的系统消息；已回滚 |
 | `TIMEOUT` | 是 | `not_started` | 读工具执行超过时限；写工具只在规划阶段超时，或已确认执行请求没有送达时返回。写工具发出执行请求后不再直接返回它，而是先向 Bridge 取回结果（[ADR-0010](../adr/0010-write-outcomes.md)） |

@@ -233,7 +233,7 @@ public sealed class BindingServiceTests : IDisposable
         Assert.False(File.Exists(BindingFile));
         Assert.Equal("denied", Records().Last()["phase"]!.GetValue<string>());
         _bridge.Status = new([], null, null);
-        Assert.Equal(ErrorReason.ApprovalDenied, (await Assert.ThrowsAsync<BridgeCallException>(() => WriteAsync(Proposal("root"), 0))).Error.Reason);
+        Assert.Equal(ErrorReason.ApprovalUnavailable, (await Assert.ThrowsAsync<BridgeCallException>(() => WriteAsync(Proposal("root"), 0))).Error.Reason);
         Assert.False(File.Exists(BindingFile));
     }
 

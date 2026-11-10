@@ -83,7 +83,7 @@ internal sealed class DeviceUpdateRequest
         string target = newTag.Length == 0 ? device.Tag : Full(device, newTag);
         if (newTag.Length > 0 && string.Equals(target, device.Tag, StringComparison.Ordinal))
         {
-            throw Invalid($"'new_tag' gives the tag the device has already, '{device.Tag}'.");
+            throw Invalid("'new_tag' gives the tag the device has already.");
         }
 
         string[] taken = newTag.Length == 0 ? [] :
@@ -157,7 +157,7 @@ internal sealed class DeviceUpdateRequest
         {
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
-                $"'{NewTag}' is already used by another device; giving this device the same tag would merge the two devices in EPLAN, only PLC terminals without a main function may join an existing PLC box. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
+                "'new_tag' is already used by another device (metadata.existing); giving this device the same tag would merge the two devices in EPLAN, only PLC terminals without a main function may join an existing PLC box. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = Project.Name, ["existing"] = string.Join("\n", Taken.Take(ProjectResolver.MaxCandidates)) });
         }

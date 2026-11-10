@@ -73,7 +73,7 @@ public sealed class PackInstallTests : IDisposable
         _bridge.Status = new BridgeStatus([], null, null);
         var channel = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
 
-        Assert.Equal(ErrorReason.ApprovalDenied, Reason(await ImportAsync(channel, "other.pack")));
+        Assert.Equal(ErrorReason.ApprovalUnavailable, Reason(await ImportAsync(channel, "other.pack")));
         Assert.Empty(channel.Questions);
     }
 

@@ -96,7 +96,7 @@ internal sealed class PackInstaller(PackLibrary packs, ApprovalService approvals
                 {
                     return (null, null, new BridgeError
                     {
-                        Reason = ErrorReason.ApprovalDenied,
+                        Reason = ErrorReason.ApprovalUnavailable,
                         Message = "Installing someone else's pack needs the engineer's confirmation in EPLAN's dialog, and no EPLAN is connected, so nothing was installed. Ask the engineer to start EPLAN, then call again.",
                     });
                 }
