@@ -70,7 +70,12 @@ internal sealed class ProjectCreateTools
                 throw Failure(ErrorReason.PolicyDenied, "No scratch root is configured. Ask the engineer to check config.json.");
             }
             string target = Path.TrimEndingDirectorySeparator(Path.GetFullPath(destination ?? Path.Combine(config.ScratchRoots[0], "projects", name)));
-            CheckDestination(target, destination is not null, config);
+            // Outside the scratch roots nothing is touched before approval, not even an existence check (WS-29): the
+            // checks run in the argument factory below, after the engineer has seen the full path.
+            if (InScratch(target, config))
+            {
+                CheckDestination(target, destination is not null, config);
+            }
             ImportFile source = await files.ResolveAsync("file", file, ImportTools.MaxProjectBytes, cancellationToken).ConfigureAwait(false);
             var args = new NewProjectArgs { File = source.Path, FilePath = source.FullPath, Sha256 = source.Sha256, Name = name, Destination = target };
             clock.Stop(); // Resume in the normal argument factory after policy, approval and the started audit record.
@@ -183,6 +188,12 @@ internal sealed class ProjectCreateTools
         }
         return folder;
     }
+
+    internal static bool InScratch(string target, HostConfig config) => config.ScratchRoots.Any(root =>
+    {
+        string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        return target.StartsWith(full + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+    });
 
     private static void CheckDestination(string target, bool explicitParent, HostConfig config)
     {

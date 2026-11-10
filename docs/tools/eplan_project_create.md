@@ -25,6 +25,7 @@
 
 - schema 为对象，`additionalProperties: false`；`mode` 写入 schema 的 `enum`。没有 `project` 参数：`name` 和目标路径显式指定新项目，不使用当前项目（同 `eplan_import_pxf`）。
 - `file` 按 [项目威胁模型](../architecture/architecture.md#13-威胁模型) 用 Host 的 `ImportFiles` 解析：根目录固定为 `<数据根目录>\imports\`；拒绝绝对路径、UNC、盘符、`.`、`..`、保留设备名和根目录以下的符号链接/联接点；根目录本身可以是链接。每个文件上限 2 GB，扩展名须与模式一致（不区分大小写）。Host 算出 SHA-256，不能让客户端提供它。
+- 目标在 scratch 外时，审批之前不访问它（WS-29）：存在性、父目录和链接检查都在批准后生成执行参数时做，没有批准的策略直接返回 `POLICY_DENIED`。
 - 目标规范化后按 SEC-05 判断 scratch；拒绝 UNC、设备路径、`.`/`..`、下级链接/联接点。已存在的文件、目录、链接一律 `ALREADY_EXISTS`，不提供 `overwrite`、合并或复用选项。Host 不创建项目目录；Bridge plan 与 execute 都以目标不存在为前置状态。
 - **pack 资源参数留给后续 PR**：当前 `Host/Packs/PackCommand.cs` 只暴露 `pack scan|check|export|install` CLI，`PackStore` 管理版本，尚无供 MCP 调用解析资源文件的入口；本版不接受 pack URI 或任意包目录路径。以后须按 [ADR-0024](../adr/0024-pack-trust-and-container.md) 核对包版本、资源种类、清单哈希和路径；`referenced` 资源只能来自配置的 `packSources`，不沿用 CLI 的任意路径权限。
 - 不接受 `.elk` + `.edb` 项目副本：当前 `OperationNames` 和 `IProjectFactory` 没有此输入的复制操作（第 8 节 Q2）。

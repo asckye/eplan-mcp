@@ -405,7 +405,9 @@ public sealed class ProjectCreateToolTests : IDisposable
     {
         AssertError(await ProjectCreateTools.CreateAsync(_harness.Pipeline, new(_harness.Locations), new([], OutsideScratchWrites.Deny),
             "basic_project", "material.zw9", "Line1", cancellationToken: TestContext.Current.CancellationToken), ErrorReason.PolicyDenied, ExecutionState.NotStarted);
-        AssertError(await Create(destination: Path.Combine(_harness.Locations.Root, "absent", "Line1")), ErrorReason.InvalidArgument, ExecutionState.NotStarted);
+        AssertError(await Create(destination: Path.Combine(_harness.Locations.DefaultScratch, "absent", "Line1")), ErrorReason.InvalidArgument, ExecutionState.NotStarted);
+        // Outside the scratch roots the path is not touched before approval (WS-29): the policy refuses it first.
+        AssertError(await Create(destination: Path.Combine(_harness.Locations.Root, "absent", "Line1")), ErrorReason.PolicyDenied, ExecutionState.NotStarted);
         Assert.Empty(_harness.Bridge.Writes);
     }
 

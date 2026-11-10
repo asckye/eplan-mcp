@@ -23,7 +23,7 @@
 ## 4. 错误
 | reason | 情形 | execution |
 |---|---|---|
-| INVALID_ARGUMENT | 不是本地 `.elk` 文件，或文件不存在 | not_started |
+| INVALID_ARGUMENT | 不是本地 `.elk` 路径（规划时只查文字：盘符开头、无控制字符、不是设备名）；文件不存在（审批之后执行时才查，审批前不访问路径，WS-29） | not_started |
 | POLICY_DENIED / APPROVAL_DENIED | scratch 外被策略禁止，或工程师拒绝 | not_started |
 | PLAN_STALE | 预览之后项目被打开或关闭 | not_started |
 | EPLAN_OPERATION_FAILED | EPLAN 拒绝打开，比如旧版本项目；不自动升级 | not_started |

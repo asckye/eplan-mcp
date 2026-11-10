@@ -23,22 +23,30 @@ internal sealed class ProjectOpenRequest
 
     public string StateFingerprint() => Fingerprint.Of([LinkFile, AlreadyOpen ? "open" : "closed"]);
 
-    public static ProjectOpenRequest Check(ProjectOpenArgs args, IProjectCatalog catalog)
+    /// <summary>
+    /// Checks the arguments. Planning runs before approval and the path may be outside every scratch root, so it only
+    /// checks the text (MCP server standard WS-29); <paramref name="readFiles"/> adds the existence check after approval.
+    /// </summary>
+    public static ProjectOpenRequest Check(ProjectOpenArgs args, IProjectCatalog catalog, bool readFiles)
     {
         string given = args.Path ?? string.Empty;
-        bool local = given.Length > 0 && !given.StartsWith(@"\\", StringComparison.Ordinal) && System.IO.Path.IsPathRooted(given);
+        bool local = given.Length > 2 && char.IsLetter(given[0]) && given[1] == ':' && (given[2] is '\\' or '/') && !given.Any(char.IsControl)
+            && System.IO.Path.GetInvalidPathChars().All(c => given.IndexOf(c) < 0);
         // eplan_project_list and eplan_project_close report the path without the extension: take the .elk beside it.
-        if (local && !IsElk(given) && File.Exists(given + ".elk"))
+        if (local && !IsElk(given))
         { given += ".elk"; }
-        if (!local || !IsElk(given))
+        if (!local || IsDeviceName(System.IO.Path.GetFileNameWithoutExtension(given)))
         { throw WriteArguments.Invalid(["'path' must be the full local path of a project's .elk file."]); }
         string linkFile = System.IO.Path.GetFullPath(given);
-        if (!File.Exists(linkFile))
+        if (readFiles && !File.Exists(linkFile))
         { throw WriteArguments.Invalid(["'path' names no file. eplan_project_create returns the path of a new project."]); }
         string path = System.IO.Path.ChangeExtension(linkFile, null);
         bool open = catalog.ListOpenProjects().Any(p => string.Equals(p.Path, path, StringComparison.OrdinalIgnoreCase));
         return new ProjectOpenRequest(linkFile, path, open);
     }
+
+    private static bool IsDeviceName(string name) => name.Length is 3 or 4 && (name.ToUpperInvariant() is "CON" or "PRN" or "AUX" or "NUL"
+        || (name.Length == 4 && name[3] is >= '1' and <= '9' && name.Substring(0, 3).ToUpperInvariant() is "COM" or "LPT"));
 
     private static bool IsElk(string path) => string.Equals(System.IO.Path.GetExtension(path), ".elk", StringComparison.OrdinalIgnoreCase);
 }
@@ -50,7 +58,7 @@ public sealed class ProjectOpenPlanOperation(IProjectCatalog catalog) : Operatio
 
     protected override WritePlan Execute(ProjectOpenArgs args)
     {
-        ProjectOpenRequest request = ProjectOpenRequest.Check(args, catalog);
+        ProjectOpenRequest request = ProjectOpenRequest.Check(args, catalog, readFiles: false);
         return new WritePlan
         {
             Project = request.Name,
@@ -73,7 +81,7 @@ public sealed class ProjectOpenExecuteOperation(IProjectCatalog catalog, IProjec
         {
             if (string.IsNullOrEmpty(args.Fingerprint))
             { throw InvalidArgument("'fingerprint' is required: the one project.open.plan returned."); }
-            request = ProjectOpenRequest.Check(args, catalog);
+            request = ProjectOpenRequest.Check(args, catalog, readFiles: true);
             if (!string.Equals(request.StateFingerprint(), args.Fingerprint, StringComparison.Ordinal))
             {
                 throw new BridgeErrorException(ErrorReason.PlanStale, "The project was opened or closed after the plan was made. Call eplan_project_open again for a new plan.",

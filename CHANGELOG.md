@@ -7,6 +7,7 @@
 
 ### 修复
 
+- `eplan_project_open`、`eplan_project_create` 在审批之前不再访问 scratch 以外的路径（包括检查是否存在）；`eplan_project_open` 规划时拒绝设备名（如 `CON.elk`），文件不存在改在批准后执行时报告。
 - 虚拟机 HTTP 模式校验 `Host` 头，只接受绑定的地址和端口；别的名字（包括 `localhost`）返回 403，防止网页借 DNS 重绑定访问服务。
 - 项目文本返回给模型、写进审批窗口之前，去掉 Unicode 标签字符（U+E0000–U+E007F）。这些字符在任何字体里都看不见，可以把指令藏进项目文字。
 

@@ -63,10 +63,26 @@ public sealed class ProjectSessionAndPlcTests : IDisposable
     [InlineData("")]
     [InlineData("Line2.elk")]
     [InlineData(@"\\server\share\Line2.elk")]
+    [InlineData(@"\\?\C:\Line2.elk")]
+    [InlineData(@"C:Line2.elk")]
+    [InlineData(@"C:\projects\CON.elk")]
+    [InlineData("C:\\Line\u00012.elk")]
+    public void Open_NotALocalElkPath_IsInvalidWhenPlanned(string path) =>
+        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => new ProjectOpenPlanOperation(Catalog).Execute(new ProjectOpenArgs { Path = path })).Error.Reason);
+
+    [Theory]
     [InlineData(@"C:\Line2.zw9")]
     [InlineData(@"C:\does\not\exist\Line2.elk")]
-    public void Open_NotALocalExistingElk_IsInvalid(string path) =>
-        Assert.Equal(ErrorReason.InvalidArgument, Assert.Throws<BridgeErrorException>(() => new ProjectOpenPlanOperation(Catalog).Execute(new ProjectOpenArgs { Path = path })).Error.Reason);
+    public void Open_NoSuchFile_IsCheckedOnlyAfterApproval(string path)
+    {
+        // Planning runs before approval and must not touch a path outside the scratch roots (WS-29).
+        var args = new ProjectOpenArgs { Path = path };
+        args.Fingerprint = ((WritePlan)new ProjectOpenPlanOperation(Catalog).Execute(args)!).Fingerprint;
+
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => new ProjectOpenExecuteOperation(Catalog, _sessions).Execute(args));
+
+        Assert.Equal((ErrorReason.InvalidArgument, ExecutionState.NotStarted), (error.Error.Reason, error.Error.Execution));
+    }
 
     [Fact]
     public void Open_EplanDoesNotList_IsFailed_NotStarted()
