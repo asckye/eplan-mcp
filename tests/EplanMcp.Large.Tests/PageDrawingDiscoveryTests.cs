@@ -49,7 +49,8 @@ public sealed class PageDrawingDiscoveryTests(LiveEplan eplan)
             Assert.True(++calls <= expected.Placements.Count);
         }
         while (cursor is not null);
-        Assert.Equal(expected.Placements.Select(p => (p.Locator.Type, p.Locator.Oid, p.Locator.Digest)), locators);
+        // eplan_page_get lists symbols and graphics before property texts (PageDrawingDiscovery, 2026-11-06); the order is otherwise kept.
+        Assert.Equal(expected.Placements.OrderBy(p => p.Parent is null ? 0 : 1).Select(p => (p.Locator.Type, p.Locator.Oid, p.Locator.Digest)), locators);
         Assert.Equal(locators.Count, locators.Distinct().Count());
         LiveSnapshots.Snapshot after = await LiveSnapshots.TakeAsync(bridge, scope);
         Assert.Equal(before.Hash, after.Hash);
