@@ -94,7 +94,7 @@ internal sealed class TerminalRenumberRequest
             ? terminals
             : throw new BridgeErrorException(
                 ErrorReason.DeviceNotFound,
-                $"Project '{Project.Name}' has no terminal strip with exactly these names (letter case counts): {string.Join(", ", missing)}. Nothing was numbered. Use eplan_terminal_strip_list to find the names.",
+                "The project has no terminal strip with exactly these names (letter case counts); metadata.missing lists them. Nothing was numbered. Use eplan_terminal_strip_list to find the names.",
                 retryable: false,
                 new Dictionary<string, string> { ["project"] = Project.Name, ["missing"] = string.Join("\n", missing) });
     }

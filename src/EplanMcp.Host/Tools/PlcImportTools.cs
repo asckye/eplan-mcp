@@ -34,7 +34,7 @@ internal sealed class PlcImportTools
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
         {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
+            violations.Add(ToolArguments.ProjectRequired);
         }
 
         string[] extensions = converter switch { Pbf => [".pbf"], Aml => [".aml"], _ => [".pbf", ".aml"] };
@@ -74,7 +74,7 @@ internal sealed class PlcImportTools
                 Execution = outcome.Execution,
                 DryRun = dry_run,
                 Fingerprint = outcome.Plan.Fingerprint,
-                Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+                Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
                 File = ResultShaper.CleanText(source.Path),
                 Bytes = source.Bytes,
                 Sha256 = source.Sha256,

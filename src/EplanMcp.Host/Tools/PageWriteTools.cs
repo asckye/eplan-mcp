@@ -229,7 +229,7 @@ internal sealed class PageWriteTools
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
         {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
+            violations.Add(ToolArguments.ProjectRequired);
         }
 
         if (pages is null or < 1 or > MaxPages)

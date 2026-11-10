@@ -35,6 +35,17 @@ internal static class ResultShaper
     /// <summary><see cref="CleanText"/> for each string of a list from project data.</summary>
     public static List<string> CleanTexts(IEnumerable<string> texts) => [.. texts.Select(text => CleanText(text))];
 
+    /// <summary>Planned changes as a write result returns them: action and kind as planned, every project string cleaned.</summary>
+    public static IEnumerable<PlannedChange> CleanChanges(IEnumerable<PlannedChange> changes) => changes.Select(c => new PlannedChange
+    {
+        Action = c.Action,
+        Kind = c.Kind,
+        Name = CleanText(c.Name),
+        Property = CleanText(c.Property),
+        OldValue = CleanText(c.OldValue),
+        NewValue = CleanText(c.NewValue),
+    });
+
     /// <summary>
     /// Returns one string from project data in the form a tool may return it: control characters other than
     /// <c>\n</c> and <c>\t</c>, and bidirectional controls, removed (so <c>\r\n</c> becomes <c>\n</c>), and text longer than

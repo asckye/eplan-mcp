@@ -85,11 +85,7 @@ internal sealed class PageRenumberRequest
 
         if (missing.Count > 0)
         {
-            throw new BridgeErrorException(
-                ErrorReason.PageNotFound,
-                $"Project '{Project.Name}' has no page with exactly these names (letter case counts): {string.Join(", ", missing)}. Nothing was renumbered. Use eplan_page_list to find the exact names.",
-                retryable: false,
-                new Dictionary<string, string> { ["project"] = Project.Name, ["missing"] = string.Join("\n", missing) });
+            throw MissingPages.Error(Project.Name, missing, "Nothing was renumbered.");
         }
 
         var structures = new HashSet<string>(Pages.Select(PageNames.StructureOf), StringComparer.OrdinalIgnoreCase);

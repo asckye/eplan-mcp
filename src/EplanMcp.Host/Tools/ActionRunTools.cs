@@ -143,7 +143,7 @@ internal sealed partial class ActionRunTools(IBridgeClient bridge, WritePipeline
             ["parameters"] = new JsonArray([.. data.Parameters.Select(p => (JsonNode)new JsonObject { ["name"] = p.Name, ["value"] = Display(p, plan.Project, locations) })]),
             ["dryRun"] = dry,
             ["fingerprint"] = plan.Fingerprint,
-            ["changes"] = JsonSerializer.SerializeToNode(plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) }), HostJson.Options),
+            ["changes"] = JsonSerializer.SerializeToNode(ResultShaper.CleanChanges(plan.Changes), HostJson.Options),
             ["before"] = Fingerprint(data.Before),
             ["after"] = data.After is null ? null : Fingerprint(data.After),
             ["readback"] = data.After is null ? "not_executed" : "fingerprint",

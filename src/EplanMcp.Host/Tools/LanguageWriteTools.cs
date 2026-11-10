@@ -55,7 +55,7 @@ internal sealed class LanguageWriteTools
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
         {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
+            violations.Add(ToolArguments.ProjectRequired);
         }
 
         source = ToolArguments.Optional(source);
@@ -161,7 +161,7 @@ internal sealed class LanguageWriteTools
             Execution = outcome.Execution,
             DryRun = dryRun,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Before = before,
             After = after,
             Recovered = outcome.Recovered,

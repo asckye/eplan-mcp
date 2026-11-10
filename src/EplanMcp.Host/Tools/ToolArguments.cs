@@ -22,8 +22,11 @@ internal static partial class ToolArguments
     /// <summary>An empty string means the same as an omitted optional argument; models send both.</summary>
     public static string? Optional(string? value) => string.IsNullOrEmpty(value) ? null : value;
 
+    /// <summary>The one wording for a write call without <c>project</c>.</summary>
+    internal const string ProjectRequired = "'project' is required for writes: a name or path from eplan_project_list.";
+
     internal static List<string> WriteProjectViolations(string? project) => string.IsNullOrWhiteSpace(project)
-        ? ["'project' is required for writes: a name or path from eplan_project_list."] : [];
+        ? [ProjectRequired] : [];
 
     /// <summary>Whether <c>response_format</c> asks for detail; an explicit null is the default.</summary>
     public static bool IsDetailed(string? responseFormat, List<string> violations)

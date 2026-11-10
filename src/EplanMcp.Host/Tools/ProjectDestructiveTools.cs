@@ -51,7 +51,7 @@ internal sealed class ProjectDestructiveTools
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
         {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
+            violations.Add(ToolArguments.ProjectRequired);
         }
 
         if (pages is { Length: < 1 or > MaxPages })
@@ -102,7 +102,7 @@ internal sealed class ProjectDestructiveTools
             Execution = unchanged ? ExecutionState.NotStarted : outcome.Execution,
             DryRun = dryRun,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Source = ResultShaper.CleanText(data?.Source ?? details.GetValueOrDefault("source")) ?? string.Empty,
             Languages = data is null ? Lines(details.GetValueOrDefault("languages")) : ResultShaper.CleanTexts(data.Languages),
             TextsChecked = data?.TextsChecked ?? Number(details.GetValueOrDefault("textsChecked")),

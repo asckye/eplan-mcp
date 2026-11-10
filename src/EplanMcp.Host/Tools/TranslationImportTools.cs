@@ -88,7 +88,7 @@ internal sealed class TranslationImportTools
             Execution = outcome.Execution,
             DryRun = dry_run,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Entries = data?.Entries ?? int.Parse(details.GetValueOrDefault("entries") ?? "0", CultureInfo.InvariantCulture),
             ReferenceLanguage = ResultShaper.CleanText(data?.ReferenceLanguage ?? details.GetValueOrDefault("referenceLanguage")) ?? string.Empty,
             Added = data?.Added,

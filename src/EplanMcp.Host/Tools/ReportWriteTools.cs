@@ -43,7 +43,7 @@ internal sealed class ReportWriteTools
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
         {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
+            violations.Add(ToolArguments.ProjectRequired);
         }
 
         if (pages is { Length: < 1 or > PageWriteTools.MaxPages })
@@ -89,7 +89,7 @@ internal sealed class ReportWriteTools
         {
             Project = ResultShaper.CleanText(data.Project),
             Fingerprint = plan.Fingerprint,
-            Changes = [.. plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(plan.Changes)],
             Execution = ExecutionState.Committed,
             Scope = data.Scope,
             ReportPages = new ReportUpdateResult.ReportPagesEntry { Before = data.Before, After = data.After },
@@ -124,7 +124,7 @@ internal sealed class ReportWriteTools
             Execution = outcome.Execution,
             DryRun = dryRun,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Scope = scope,
             ReportPages = new ReportUpdateResult.ReportPagesEntry { Before = before },
             Undo = committed ? "AI: " + UpdateTool : null,

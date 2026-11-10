@@ -73,11 +73,7 @@ internal sealed class PageDeleteRequest
 
         return missing.Count == 0
             ? new PageDeletion(pages, remover.Functions(Project.Path))
-            : throw new BridgeErrorException(
-                ErrorReason.PageNotFound,
-                $"Project '{Project.Name}' has no page with exactly these names (letter case counts): {string.Join(", ", missing)}. Nothing was deleted. Use eplan_page_list to find the exact names.",
-                retryable: false,
-                new Dictionary<string, string> { ["project"] = Project.Name, ["missing"] = string.Join("\n", missing) });
+            : throw MissingPages.Error(Project.Name, missing, "Nothing was deleted.");
     }
 
     private static string Number(int value) => value.ToString(CultureInfo.InvariantCulture);

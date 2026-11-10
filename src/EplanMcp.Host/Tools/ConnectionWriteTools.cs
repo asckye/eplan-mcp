@@ -43,7 +43,7 @@ internal sealed class ConnectionWriteTools
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
         {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
+            violations.Add(ToolArguments.ProjectRequired);
         }
 
         if (pages is null || pages.Length is < 1 or > PageWriteTools.MaxPages)
@@ -92,7 +92,7 @@ internal sealed class ConnectionWriteTools
         {
             Project = ResultShaper.CleanText(data.Project),
             Fingerprint = plan.Fingerprint,
-            Changes = [.. plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(plan.Changes)],
             // A rebuild commits its drawing refresh even when readback is unchanged (A119).
             Execution = changed ? ExecutionState.Committed : ExecutionState.NotStarted,
             Rebuilt = data.Rebuilt,
@@ -137,7 +137,7 @@ internal sealed class ConnectionWriteTools
             DryRun = dryRun,
             Rebuilt = committed && rebuild,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Pages =
             [
                 .. outcome.Plan.Changes.Select(c => new ConnectionGenerateResult.PageEntry

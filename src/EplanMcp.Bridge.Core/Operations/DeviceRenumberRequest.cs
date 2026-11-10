@@ -87,11 +87,7 @@ internal sealed class DeviceRenumberRequest
 
         return missing.Count == 0
             ? functions
-            : throw new BridgeErrorException(
-                ErrorReason.PageNotFound,
-                $"Project '{Project.Name}' has no page with exactly these names (letter case counts): {string.Join(", ", missing)}. Nothing was numbered. Use eplan_page_list to find the exact names.",
-                retryable: false,
-                new Dictionary<string, string> { ["project"] = Project.Name, ["missing"] = string.Join("\n", missing) });
+            : throw MissingPages.Error(Project.Name, missing, "Nothing was numbered.");
     }
 
     /// <summary>The devices EPLAN is asked to number: every one in scope, or with <see cref="OnlyUnnumbered"/> those with '?'.</summary>

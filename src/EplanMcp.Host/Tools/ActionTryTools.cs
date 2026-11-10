@@ -45,7 +45,7 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
                 ["execution"] = outcome.Execution,
                 ["dryRun"] = dry_run,
                 ["fingerprint"] = outcome.Plan.Fingerprint,
-                ["changes"] = JsonSerializer.SerializeToNode(outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) }), HostJson.Options),
+                ["changes"] = JsonSerializer.SerializeToNode(ResultShaper.CleanChanges(outcome.Plan.Changes), HostJson.Options),
                 ["recovered"] = outcome.Recovered,
                 ["before"] = Evidence(before.Before),
                 ["after"] = after is null ? null : Evidence(after),

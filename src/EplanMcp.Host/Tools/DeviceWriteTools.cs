@@ -81,7 +81,7 @@ internal sealed class DeviceWriteTools
             Execution = outcome.Execution,
             DryRun = dry_run,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Device = outcome.Data is { } data ? Device(data) : Planned(outcome.Plan),
             Undo = committed ? "AI: " + UpdateTool : null,
             Recovered = outcome.Recovered,

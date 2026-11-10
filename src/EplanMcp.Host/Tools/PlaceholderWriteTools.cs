@@ -43,7 +43,7 @@ internal sealed class PlaceholderWriteTools
         // The page, the placeholder and the value set are checked by the Bridge, all at once (placeholder.apply.plan).
         if (string.IsNullOrWhiteSpace(project))
         {
-            return ToolResults.InvalidArguments(["'project' is required for writes: a name or path from eplan_project_list."]);
+            return ToolResults.InvalidArguments([ToolArguments.ProjectRequired]);
         }
 
         var args = new PlaceholderApplyArgs { Project = project, Page = page ?? string.Empty, Placeholder = placeholder, ValueSet = value_set ?? string.Empty };
@@ -82,7 +82,7 @@ internal sealed class PlaceholderWriteTools
             Execution = outcome.Execution,
             DryRun = dry_run,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Placeholder = new PlaceholderApplyResult.PlaceholderRef
             {
                 Name = ResultShaper.CleanText(data?.Placeholder ?? details.GetValueOrDefault("placeholder")) ?? string.Empty,

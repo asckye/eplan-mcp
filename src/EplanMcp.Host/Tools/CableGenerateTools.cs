@@ -70,7 +70,7 @@ internal sealed class CableGenerateTools
             Execution = outcome.Execution,
             DryRun = dryRun,
             Fingerprint = outcome.Plan.Fingerprint,
-            PlannedChanges = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            PlannedChanges = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Scope = new()
             {
                 CreationScheme = ResultShaper.CleanText(details.GetValueOrDefault("creationScheme") ?? args.CreationScheme!),

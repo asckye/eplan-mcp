@@ -108,7 +108,7 @@ internal sealed class PartMasterDataTools
             Execution = outcome.Execution,
             DryRun = dryRun,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             File = source.Path,
             Sha256 = source.Sha256,
             Bytes = source.Bytes,
@@ -195,7 +195,7 @@ internal sealed class PartMasterDataTools
     {
         if (string.IsNullOrWhiteSpace(project))
         {
-            return ToolResults.InvalidArguments(["'project' is required for writes: a name or path from eplan_project_list."]);
+            return ToolResults.InvalidArguments([ToolArguments.ProjectRequired]);
         }
 
         var args = new PartSyncArgs { Project = project, Mode = mode };
@@ -235,7 +235,7 @@ internal sealed class PartMasterDataTools
             Execution = outcome.Execution,
             DryRun = dryRun,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Added = Numbers(data?.Added, details, "added"),
             AddedCount = data?.AddedCount ?? Count(details, "addedCount"),
             Overwritten = Numbers(data?.Overwritten, details, "updated"),

@@ -37,7 +37,7 @@ internal sealed class PdfCommentsImportTools
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))
         {
-            violations.Add("'project' is required for writes: a name or path from eplan_project_list.");
+            violations.Add(ToolArguments.ProjectRequired);
         }
 
         if (ImportFiles.Problem("file", file, [".pdf"]) is { } problem)
@@ -84,7 +84,7 @@ internal sealed class PdfCommentsImportTools
             Execution = outcome.Execution,
             DryRun = dry_run,
             Fingerprint = outcome.Plan.Fingerprint,
-            Changes = [.. outcome.Plan.Changes.Select(c => new PlannedChange { Action = c.Action, Kind = c.Kind, Name = ResultShaper.CleanText(c.Name), Property = ResultShaper.CleanText(c.Property), OldValue = ResultShaper.CleanText(c.OldValue), NewValue = ResultShaper.CleanText(c.NewValue) })],
+            Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             File = source.Path,
             Sha256 = source.Sha256,
             Bytes = source.Bytes,
