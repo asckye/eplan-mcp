@@ -24,6 +24,8 @@ dotnet run --project evals\EplanMcp.Evals -- run --task page-count     # 只跑�
 ```
 其他选项：`--tasks <目录>`、`--model <模型>`（默认 `claude-sonnet-5-5`）、`--claude <claude.exe 的路径>`（默认先找 PATH，再找 Claude 桌面版自带的最新版本）、`--eplanmcp <eplanmcp.exe 的路径>`（默认用仓库中的 Release 构建，没有时用 Debug 构建）、`--template <.elk 的路径>`（写入题复制的项目，见下文）。
 
+**用 Codex 作答**（负责人 2026-11-10）：`--agent codex`，或 `--codex <codex.exe 的路径>`（默认先找 PATH，再找 OpenAI Codex 桌面版自带的最新版本）。运行器改用 `codex exec --json`：不读用户配置和规则文件，命令行命令放在只读沙箱里，eplanmcp 是唯一的 MCP 服务器，答案用题目的答案 Schema（转成每个对象都封闭、属性都必填的严格形式）。Codex 用量只报 token，不报美元，所以题目的 `max_usd` 不起作用，只有工具调用次数和时间限制。`--model` 不给时用 Codex 的默认模型。模型调用了 eplanmcp 以外的东西（命令、文件修改、别的 MCP 服务器）时，这次作答记为无效（"not isolated"）。预检改为 `codex login status`。
+
 运行时先显示任务数和费用上限（各任务 `max_usd` 之和乘以次数），然后预检：claude 已登录、EPLAN 通过 eplanmcp 连接、当前项目在 scratch 根目录下。任何一项不满足就停止，不产生费用。每题先执行标准调用，再让模型作答、判分，并逐行显示结果。按 Ctrl+C 会停止当前作答，已完成的部分照样写进报告。
 
 **模型用的 eplanmcp 有自己的数据根目录** `.local/evals/<运行>/eplanmcp/`（`EPLANMCP_HOME`，经 `mcp.json` 中的 `env` 传入）。运行器在其中写一份 `config.json`：唯一的 scratch 根目录是本次运行的可写副本目录 `<scratch 根目录>\evals\<运行>\copies\`，其他项目的写入一律拒绝（`POLICY_DENIED`），不看工程师自己的 `config.json`。所以：

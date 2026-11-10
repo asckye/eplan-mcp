@@ -52,4 +52,14 @@ public sealed class RunOptionsTests
         Assert.Null(RunOptions.Parse(["--set", "dev", "--task"], out string? error));
         Assert.Equal("--task needs a value", error);
     }
+
+    [Fact]
+    public void Parse_Agent_ChoosesCodexAndCodexNamesItsPath()
+    {
+        Assert.True(RunOptions.Parse(["--agent", "codex"], out _)!.Codex);
+        Assert.False(RunOptions.Parse(["--agent", "claude"], out _)!.Codex);
+        Assert.Equal((true, @"C:\codex.exe"), (RunOptions.Parse(["--codex", @"C:\codex.exe"], out _)!.Codex, RunOptions.Parse(["--codex", @"C:\codex.exe"], out _)!.Claude));
+        Assert.Null(RunOptions.Parse(["--agent", "gpt"], out string? error));
+        Assert.Equal("--agent is claude or codex, not gpt", error);
+    }
 }

@@ -6,8 +6,12 @@ using EplanMcp.Evals.Tasks;
 
 namespace EplanMcp.Evals.Agent;
 
-/// <summary>Where claude is and how it is set up for every attempt; <see cref="McpConfigFile"/> holds the MCP configuration.</summary>
-internal sealed record ClaudeSetup(string Claude, string Model, string McpConfigFile);
+/// <summary>
+/// Where the agent is and how it is set up for every attempt; <see cref="McpConfigFile"/> holds claude's MCP
+/// configuration. With <see cref="Codex"/>, <see cref="Claude"/> is codex.exe and eplanmcp is configured on its command
+/// line from <see cref="Eplanmcp"/> and <see cref="Home"/>.
+/// </summary>
+internal sealed record ClaudeSetup(string Claude, string Model, string McpConfigFile, bool Codex = false, string? Eplanmcp = null, string? Home = null);
 
 /// <summary>
 /// Runs one attempt of a task with <c>claude -p</c> and enforces its budget (agent evals design 4.2, steps 3 and 4).
@@ -43,7 +47,15 @@ internal static class ClaudeRunner
             StandardOutputEncoding = _utf8,
             StandardErrorEncoding = _utf8,
         };
-        foreach (string argument in ClaudeCommand.Arguments(task, setup.Model, setup.McpConfigFile))
+        IReadOnlyList<string> arguments = ClaudeCommand.Arguments(task, setup.Model, setup.McpConfigFile);
+        if (setup.Codex)
+        {
+            string schema = Path.Combine(outputDirectory, CodexCommand.SchemaFile);
+            await File.WriteAllTextAsync(schema, CodexCommand.StrictSchema(task.Answer).ToJsonString(), _utf8, cancellationToken).ConfigureAwait(false);
+            arguments = CodexCommand.Arguments(setup, workDirectory, schema);
+        }
+
+        foreach (string argument in arguments)
         {
             start.ArgumentList.Add(argument);
         }
@@ -51,7 +63,7 @@ internal static class ClaudeRunner
         long started = clock.GetTimestamp();
         using Process process = Start(start);
         Task<string> stderr = process.StandardError.ReadToEndAsync(CancellationToken.None);
-        var trace = new AgentTrace();
+        var trace = new AgentTrace(setup.Codex);
         AgentStop? stop = null;
 
         // A silent claude (a long model turn) blocks the read, so the time limit kills the process instead of

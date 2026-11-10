@@ -40,9 +40,16 @@ internal sealed record AgentResult(
 /// the main conversation counts: messages of subagents carry a <c>parent_tool_use_id</c> and are skipped, and the
 /// <c>StructuredOutput</c> call that delivers the answer is not a tool call.
 /// </summary>
-internal sealed partial class AgentTrace
+internal sealed partial class AgentTrace(bool codex = false)
 {
     public const string ServerName = "eplan";
+
+    // codex exec --json items that are neither the model's text nor an eplanmcp call: the model reached past eplanmcp.
+    private static readonly string[] _codexQuiet = ["agent_message", "reasoning", "todo_list", "mcp_tool_call"];
+
+    private string? _codexOther;
+
+    private string? _codexLastMessage;
     public const string AnswerTool = "StructuredOutput";
     private const string ToolPrefix = "mcp__" + ServerName + "__";
 
@@ -84,6 +91,11 @@ internal sealed partial class AgentTrace
     /// </summary>
     public string? IsolationProblem()
     {
+        if (codex)
+        {
+            return _codexOther is null ? null : $"the model could use {_codexOther}, not only eplanmcp";
+        }
+
         if (Tools is null)
         {
             return _calls.Count > 0 ? "a tool call came before the init event" : null;
@@ -114,6 +126,12 @@ internal sealed partial class AgentTrace
         if (message is null)
         {
             Unreadable++;
+            return;
+        }
+
+        if (codex)
+        {
+            ReadCodex(message);
             return;
         }
 
@@ -150,6 +168,72 @@ internal sealed partial class AgentTrace
                 break;
             case "result":
                 Result = ReadResult(message);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// One event of <c>codex exec --json</c> (probed 2026-11-10, codex-cli 0.167): <c>item.started</c> and
+    /// <c>item.completed</c> carry <c>mcp_tool_call</c> items (a failed call has status <c>failed</c>) and the model's
+    /// <c>agent_message</c>s, the last of which is the structured answer; <c>turn.completed</c> ends the run with token usage.
+    /// </summary>
+    private void ReadCodex(JsonObject message)
+    {
+        switch (Text(message["type"]))
+        {
+            case "item.started" or "item.completed" when message["item"] is JsonObject item:
+                string? type = Text(item["type"]);
+                if (type == "mcp_tool_call" && Text(item["server"]) != ServerName)
+                {
+                    _codexOther ??= $"the MCP server {Text(item["server"])}";
+                }
+                else if (type is not null && !_codexQuiet.Contains(type))
+                {
+                    _codexOther ??= type;
+                }
+
+                if (type == "agent_message")
+                {
+                    _codexLastMessage = Text(item["text"]);
+                }
+                else if (type == "mcp_tool_call" && Text(item["id"]) is { } id && Text(item["tool"]) is { } tool)
+                {
+                    ToolCall? call = _calls.FirstOrDefault(c => c.Id == id);
+                    if (call is null)
+                    {
+                        _calls.Add(call = new ToolCall(id, tool));
+                    }
+
+                    if (Text(message["type"]) == "item.completed")
+                    {
+                        string text = ResultText(item["result"]?["content"]) + "\n" + Text(item["error"]?["message"]);
+                        call.IsError = Text(item["status"]) != "completed";
+                        call.ArgumentRejected = call.IsError == true && ArgumentRejection().IsMatch(text);
+                        call.Committed = call.IsError == false && CommittedResult().IsMatch(text);
+                    }
+                }
+
+                break;
+            case "turn.completed":
+                JsonNode? usage = message["usage"];
+                JsonNode? answer = null;
+                try
+                {
+                    answer = _codexLastMessage is null ? null : JsonNode.Parse(_codexLastMessage);
+                }
+                catch (JsonException)
+                {
+                    // Not the structured answer: graded as no answer below.
+                }
+
+                Result = new AgentResult(answer is JsonObject ? "success" : "no_structured_output", false, null, _codexLastMessage, answer as JsonObject, 0,
+                    new TokenUsage((long)Number(usage?["input_tokens"]), (long)Number(usage?["output_tokens"]), (long)Number(usage?["cached_input_tokens"]), 0),
+                    1, TimeSpan.Zero);
+                break;
+            case "turn.failed" or "error":
+                string? reason = Text(message["error"]?["message"]) ?? Text(message["message"]);
+                ApiError ??= "codex_error";
+                Result = new AgentResult("error", true, "api_error", reason, null, 0, new TokenUsage(0, 0, 0, 0), 1, TimeSpan.Zero);
                 break;
         }
     }

@@ -51,20 +51,22 @@ internal static class RunCommand
             }
         }
 
-        string? claude = options.Claude ?? ToolLocator.Claude(
-            Environment.GetEnvironmentVariable("PATH"),
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+        string? claude = options.Claude ?? (options.Codex
+            ? ToolLocator.Codex(Environment.GetEnvironmentVariable("PATH"), Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData))
+            : ToolLocator.Claude(
+                Environment.GetEnvironmentVariable("PATH"),
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)));
         string? eplanmcp = options.Eplanmcp ?? ToolLocator.Eplanmcp(root);
         if (claude is null || eplanmcp is null)
         {
             return Stop(output, claude is null
-                ? "claude.exe is neither on the PATH nor in the Claude desktop app; pass --claude."
+                ? options.Codex ? "codex.exe is neither on the PATH nor in the Codex desktop app; pass --codex." : "claude.exe is neither on the PATH nor in the Claude desktop app; pass --claude."
                 : "There is no eplanmcp build; run dotnet build src\\EplanMcp.Host -c Release, or pass --eplanmcp.");
         }
 
         decimal limit = tasks.Sum(t => t.Budget.MaxUsd) * options.Repeat;
-        await output.WriteLineAsync(string.Create(CultureInfo.InvariantCulture, $"{tasks.Length} tasks x {options.Repeat} = {tasks.Length * options.Repeat} attempts with {options.Model}, spending at most {limit:0.00} USD; {invalidFiles.Length} problems in task files.")).ConfigureAwait(false);
+        await output.WriteLineAsync(string.Create(CultureInfo.InvariantCulture, $"{tasks.Length} tasks x {options.Repeat} = {tasks.Length * options.Repeat} attempts with {(options.Codex ? "codex " : string.Empty)}{options.Model}, spending at most {limit:0.00} USD{(options.Codex ? " (codex reports tokens only; tool-call and time limits apply)" : string.Empty)}; {invalidFiles.Length} problems in task files.")).ConfigureAwait(false);
         if (await Preflight.ClaudeLoginProblemAsync(claude, cancellationToken).ConfigureAwait(false) is { } login)
         {
             return Stop(output, "Preflight: " + login);
@@ -99,7 +101,7 @@ internal static class RunCommand
             string mcpConfig = Path.Combine(run, "mcp.json");
             await File.WriteAllTextAsync(mcpConfig, ClaudeCommand.McpConfig(eplanmcp, home), cancellationToken).ConfigureAwait(false);
             string workRoot = Path.Combine(Path.GetTempPath(), "eplanmcp-evals", name);
-            var attempts = new ClaudeAttempts(new ClaudeSetup(claude, options.Model, mcpConfig), run, workRoot, options.Repeat > 1, EvalsHome.Exports(home));
+            var attempts = new ClaudeAttempts(new ClaudeSetup(claude, options.Model, mcpConfig, options.Codex, eplanmcp, home), run, workRoot, options.Repeat > 1, EvalsHome.Exports(home));
             Dictionary<(string Task, int Attempt), AttemptCopy> copies = [];
             string copiesLeft = $"The copies stay open in EPLAN: close them there, then delete {copiesRoot}.";
             if (template is not null)

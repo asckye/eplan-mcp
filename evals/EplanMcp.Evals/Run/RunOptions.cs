@@ -8,11 +8,11 @@ namespace EplanMcp.Evals.Run;
 /// null when not given; the holdout set is meant for acceptance runs only (evals/README.md). <see cref="Template"/> is the
 /// .elk file tasks on a copy copy, by default EPLAN's sample project (<see cref="ProjectCopies.FindTemplate"/>).
 /// </summary>
-internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int Repeat, string Model, string? Claude, string? Eplanmcp, string? Template = null)
+internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int Repeat, string Model, string? Claude, string? Eplanmcp, string? Template = null, bool Codex = false)
 {
     public const int MaxRepeat = 10;
 
-    public const string Usage = "run [--tasks <dir>] [--set dev|holdout|all] [--task <id>] [--repeat <n>] [--model <model>] [--claude <path>] [--eplanmcp <path>] [--template <.elk>]";
+    public const string Usage = "run [--tasks <dir>] [--set dev|holdout|all] [--task <id>] [--repeat <n>] [--model <model>] [--claude <path>] [--agent claude|codex] [--codex <path>] [--eplanmcp <path>] [--template <.elk>]";
 
     public static RunOptions Default { get; } = new(null, null, null, 1, ClaudeCommand.DefaultModel, null, null);
 
@@ -57,6 +57,15 @@ internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int 
                     break;
                 case "--claude":
                     options = options with { Claude = value };
+                    break;
+                case "--agent" when value is "claude" or "codex":
+                    options = options with { Codex = value == "codex" };
+                    break;
+                case "--agent":
+                    error = $"--agent is claude or codex, not {value}";
+                    return null;
+                case "--codex":
+                    options = options with { Codex = true, Claude = value };
                     break;
                 case "--eplanmcp":
                     options = options with { Eplanmcp = value };

@@ -20,6 +20,27 @@ internal static class ToolLocator
     }
 
     /// <summary>
+    /// <c>codex.exe</c> on <paramref name="searchPath"/>, otherwise the newest copy the OpenAI Codex desktop app keeps
+    /// under <c>OpenAI\Codex\bin\&lt;hash&gt;\</c> in <paramref name="localAppData"/>.
+    /// </summary>
+    public static string? Codex(string? searchPath, string localAppData)
+    {
+        foreach (string directory in (searchPath ?? string.Empty).Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            string candidate = Path.Combine(directory, "codex.exe");
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        var bin = new DirectoryInfo(Path.Combine(localAppData, "OpenAI", "Codex", "bin"));
+        return bin.Exists
+            ? bin.EnumerateFiles("codex.exe", SearchOption.AllDirectories).OrderByDescending(f => f.LastWriteTimeUtc).Select(f => f.FullName).FirstOrDefault()
+            : null;
+    }
+
+    /// <summary>
     /// <c>claude.exe</c> on <paramref name="searchPath"/> (the PATH), otherwise the newest copy the Claude desktop app
     /// keeps under <c>Claude\claude-code\&lt;version&gt;\&lt;build&gt;\</c> in its roaming data. The app is an MSIX package:
     /// its own processes see that folder in <paramref name="appData"/>, every other process only in the package's

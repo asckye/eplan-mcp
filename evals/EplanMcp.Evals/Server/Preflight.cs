@@ -26,8 +26,9 @@ internal static class Preflight
 
     internal static async Task<string?> ClaudeLoginProblemAsync(string claude, TimeSpan timeout, CancellationToken cancellationToken)
     {
+        bool codex = string.Equals(Path.GetFileNameWithoutExtension(claude), "codex", StringComparison.OrdinalIgnoreCase);
         var start = new ProcessStartInfo(claude) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
-        start.ArgumentList.Add("auth");
+        start.ArgumentList.Add(codex ? "login" : "auth");
         start.ArgumentList.Add("status");
         Process process;
         try
@@ -57,7 +58,9 @@ internal static class Preflight
                 return $"claude auth status did not answer within {timeout.TotalSeconds.ToString(CultureInfo.InvariantCulture)} s";
             }
 
-            return process.ExitCode == 0 ? null : "claude is not logged in: run `claude auth login` (or `claude setup-token`) once, then start the run again";
+            return process.ExitCode == 0 ? null
+                : codex ? "codex is not logged in: run `codex login` once, then start the run again"
+                : "claude is not logged in: run `claude auth login` (or `claude setup-token`) once, then start the run again";
         }
     }
 
