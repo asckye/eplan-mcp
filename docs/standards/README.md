@@ -1,27 +1,44 @@
 # 本项目采用的开发规范
 
-本仓库遵循[《工程开发手册》v1.1](engineering-handbook.html)，全部采用；本仓库不另设规则。
+本仓库遵循[《工程开发规范》3.0](https://github.com/asckye/engineering-standards/tree/v3.0)（asckye，CC BY 4.0），不另设规则。链接都固定在 `v3.0` 标签上。Claude Code 装插件 `engineering-standards@asckye-standards` 后，做相关工作时会加载对应规则。
+
+2026-11-10 起取代旧的《工程开发手册》v1.1。旧手册 [engineering-handbook.html](engineering-handbook.html) 暂时保留，其他文档里指向它的链接逐步换成新规范；旧编号 `MCP-xx`、`VND-xx` 用[对照表](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/handbook-mapping.md)换算。
 
 ## 项目声明
 
 | 项目 | 声明 |
 |---|---|
-| 采用范围 | 领域 A（MCP 服务）、C（EPLAN .NET API）、D（Workbench）；档位 M，审批、写入安全和防止项目数据损坏按 L。 |
+| 规范版本 | 通用规范 3.0；[MCP 服务规范](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/overview.md) 草稿 0.2；[桌面应用规范](https://github.com/asckye/engineering-standards/blob/v3.0/skills/desktop-app-standard/references/rules.md) 3.0 |
+| 等级 | M；审批、写入安全和防止项目数据损坏按 L |
+| 项目类型 | `mcp`、`desktop`（Workbench 和 EPLAN 内的审批窗口） |
+| 本机软件规则 | 桌面应用规范的本机软件、Windows、打包、诊断和桌面界面 |
+| 语言附录 | L1（C#/.NET） |
 | 提交格式（GIT-05） | Conventional Commits；scope 取自 `host bridge contracts tools policy audit workbench installer evals docs ci spikes`。 |
-| 语言政策（DOC-03） | 采用手册默认：开发与用户文档中文；代码、注释、提交、发布记录、面向模型的文本英文；与项目负责人交流用中文。 |
+| 语言政策（DOC-03） | 开发与用户文档中文；代码、注释、提交、发布记录、面向模型的文本英文；与项目负责人交流用中文。 |
 | 合并门（BLD-03） | [`eng/scripts/local-gate.ps1`](../../eng/scripts/local-gate.ps1) 是权威合并门，CI 不阻塞；通过本地关卡后直接推送 `main`、不开 PR，见 [ADR-0048](../adr/0048-local-gate-is-the-merge-gate.md)。 |
-| 证据台账（P-01、P-03） | EPLAN 行为的出处在 [`docs/eplan/api-notes.md`](../eplan/api-notes.md)；未实机验证项在 [`docs/process/large-pending.md`](../process/large-pending.md)。 |
+| MCP 修订（PRO-01） | MCP 2026-07-28，同时兼容 2025-11-25 的客户端；官方 C# SDK 的版本见 [`Directory.Packages.props`](../../Directory.Packages.props)。 |
+| 证据台账（P-01、P-03、ENG-15、VER-09） | EPLAN 行为的出处在 [`docs/eplan/api-notes.md`](../eplan/api-notes.md)；未实机验证项在 [`docs/process/large-pending.md`](../process/large-pending.md)，台账里的“待运行”“待实机验证”就是 VER-09 的 `NOT RUN`。 |
 | 支持的 EPLAN 版本 | 见 [ADR-0009](../adr/0009-supported-eplan-versions.md)。 |
 
-## 原规则 → 手册条款
+## 原规则 → 规范条款
 
-| 原规则 | 手册条款 |
+| 原规则 | 规范条款 |
 |---|---|
-| 只在 scratch 项目上做写操作 | [AI-10](engineering-handbook.html#ai-machine) |
-| 不带 AI 署名 | [GIT-04](engineering-handbook.html#review-git) |
-| L3 决策只能提议为 Proposed ADR，由负责人采纳 | [G-05](engineering-handbook.html#purpose) + [18.3](engineering-handbook.html#review-rfc) |
-| 不提交敏感内容 | [GIT-07](engineering-handbook.html#review-git) |
-| stdio 的 stdout 只输出协议 | [ARC-12](engineering-handbook.html#arch) |
+| 只在 scratch 项目上做写操作 | [AI-10](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/19-ai.md#ai-machine) |
+| 不带 AI 署名 | [GIT-04](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/18-process-review-git.md#review-git) |
+| L3 决策只能提议为 Proposed ADR，由负责人采纳 | [G-05](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/00-purpose.md#purpose-exceptions) + [18.3](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/18-process-review-git.md#review-rfc) |
+| 不提交敏感内容 | [GIT-07](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/18-process-review-git.md#review-git) |
+| stdio 的 stdout 只输出协议 | [ARC-12](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/02-architecture.md#arch-logging)、[PRO-20](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/01-protocol.md#pro-transport) |
+
+## 长期偏差
+
+2026-11-10 按 MCP 服务规范最小清单逐条对照（47 条：符合 23、部分符合 21、不符合 3）。已发布的工具名和字段是对外契约，不为规范改名。对 MUST 的例外集中写在 [ADR-0053](../adr/0053-mcp-standard-exceptions.md)（提议中，负责人确认前按偏差处理）；偏离 SHOULD 的理由写在下表。
+
+| 规则 | 级别 | 本项目做法 | 依据 |
+|---|---|---|---|
+| TL-41 | SHOULD | 参数用 snake_case，结果字段大多用 camelCase（`HostJson` 用 Web 默认），少数工具的结果用 snake_case | 已发布契约；新工具的结果沿用 camelCase，参数沿用 snake_case |
+| TL-42 | SHOULD | `eplan_session_status`、`eplan_tool_usage`、`eplan_property_schema` 等名称末段不是动作词 | 已发布名称 |
+| TL-30、TL-08、TL-14、TL-05、TL-17、WS-01、WS-03、WS-12、WS-17、PRO-09、ENG-01、ENG-08、ENG-11 | MUST / SHOULD | 逐条见 ADR | [ADR-0053](../adr/0053-mcp-standard-exceptions.md) |
 
 ## 本地关卡的实现入口
 
@@ -61,4 +78,4 @@ CI 在 `main` 上运行全部自动测试；Large 与 Agent 评测由开发机�
 - [release.md](../process/release.md)：发布列车、现行脚本调用与 ZIP/插件交付步骤。
 - [handoff.md](../status/handoff.md)：已核对但尚未完成的项目待办。
 - [docs/adr/](../adr/)：已作出的架构决定、历史上下文及追加修订。
-- [工具规格模板](../templates/tool-spec.md)：手册附录 T.3 之上的 EPLAN 项目字段。
+- [工具规格模板](../templates/tool-spec.md)：MCP 服务规范工具规格模板之上的 EPLAN 项目字段。

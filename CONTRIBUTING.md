@@ -2,7 +2,7 @@
 
 EplanMcp 是一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地读取和修改 EPLAN Electric P8 / Pro Panel 项目。架构见 [docs/architecture/architecture.md](docs/architecture/architecture.md)。
 
-遵循[《工程开发手册》](docs/standards/engineering-handbook.html)（先读★部分与改动涉及的章节）和 [docs/standards/README.md](docs/standards/README.md)；采用范围、提交格式、语言政策、合并门及证据台账均见后者。
+遵循[《工程开发规范》3.0](https://github.com/asckye/engineering-standards/tree/v3.0)：通用规范、MCP 服务规范（草稿 0.2）和桌面应用规范，装了插件 `engineering-standards@asckye-standards` 时按任务加载对应 skill。采用范围、等级、提交格式、语言政策、合并门、证据台账和长期偏差见 [docs/standards/README.md](docs/standards/README.md)。
 
 ## 第一次克隆后
 
@@ -45,11 +45,11 @@ node eng/scripts/apply-archify-font.mjs
 
 | 想了解 | 读这里 |
 |---|---|
-| 工具怎么设计 | [手册 MCP 条款](docs/standards/engineering-handbook.html#pa) |
-| 代码怎么写 | [手册第 3 章](docs/standards/engineering-handbook.html#code) |
-| 怎么测试 | [手册第 12 章](docs/standards/engineering-handbook.html#testing) |
-| Workbench 界面怎么做 | [手册界面条款](docs/standards/engineering-handbook.html#ui) · [Workbench 实现记录](docs/design/2026-10-20-m5-operability.md#workbench-implementation) |
-| 怎么协作、怎么发布 | [手册开发流程条款](docs/standards/engineering-handbook.html#review) · [CONTRIBUTING.md](CONTRIBUTING.md) · [预览版发布流程](docs/process/release.md) |
+| 工具怎么设计 | [MCP 服务规范的工具设计层](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/02-tool-design.md) |
+| 代码怎么写 | [通用规范第 3 节](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/03-code.md) |
+| 怎么测试 | [通用规范第 12 节](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/12-testing.md) |
+| Workbench 界面怎么做 | [桌面界面规则](https://github.com/asckye/engineering-standards/blob/v3.0/skills/desktop-app-standard/references/ui.md) · [Workbench 实现记录](docs/design/2026-10-20-m5-operability.md#workbench-implementation) |
+| 怎么协作、怎么发布 | [通用规范第 18 节](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/18-process-review-git.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [预览版发布流程](docs/process/release.md) |
 | 借鉴了哪些业界实践 | [参考资料与落地对照](docs/references.md) |
 | 模板 | [设计文档](docs/templates/design-doc.md) · [工具规格](docs/templates/tool-spec.md) · [ADR](docs/adr/template.md) |
 
@@ -77,7 +77,7 @@ Bridge 对 Newtonsoft.Json 的编译引用为 `ExcludeAssets="runtime"`、`Priva
 
 ## 测试入口
 
-当前测试类使用 `[Trait("Size", "Small")]`、`Medium`、`Large`。对应[手册 12.1](docs/standards/engineering-handbook.html#testing-layers) 的层次分别是纯逻辑/单元、本机进程与 IO 集成、厂商实机。Host 的 Small + Medium 运行命令为：
+当前测试类使用 `[Trait("Size", "Small")]`、`Medium`、`Large`。对应[通用规范 12.1](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/12-testing.md#testing-layers) 的层次分别是纯逻辑/单元、本机进程与 IO 集成、厂商实机。Host 的 Small + Medium 运行命令为：
 
 ```powershell
 dotnet test --project tests\EplanMcp.Host.Tests -- --filter-not-trait "Size=Large"

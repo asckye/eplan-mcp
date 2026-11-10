@@ -59,3 +59,4 @@
 | [0050](0050-bridge-frames-reject-unknown-members.md) | Bridge 管道消息拒绝未知字段和重复字段（SEC-14） | Accepted | 单向门 |
 | [0051](0051-build-release-packages-locally.md) | 发布包在开发机上打包，不经发布工作流 | Accepted | 双向门 |
 | [0052](0052-write-title-block-project-properties.md) | 用 `eplan_project_update` 写标题栏用到的项目属性 | Accepted | 双向门 |
+| [0053](0053-mcp-standard-exceptions.md) | 采用 MCP 服务规范 0.2，登记 MUST 例外和待改项 | Proposed | 双向门 |

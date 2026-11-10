@@ -8,7 +8,7 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 
 ## 开发规范
 
-遵循[《工程开发手册》](docs/standards/engineering-handbook.html)（先读★部分与改动涉及的章节）和 [docs/standards/README.md](docs/standards/README.md)；采用范围、提交格式、语言政策、合并门及证据台账均见后者。
+遵循[《工程开发规范》3.0](https://github.com/asckye/engineering-standards/tree/v3.0)：通用规范、MCP 服务规范（草稿 0.2）和桌面应用规范，装了插件 `engineering-standards@asckye-standards` 时按任务加载对应 skill。采用范围、等级、提交格式、语言政策、合并门、证据台账和长期偏差见 [docs/standards/README.md](docs/standards/README.md)。
 
 **用工具在 EPLAN 里画图之前，先通读 [docs/eplan/drawing-rules.md](docs/eplan/drawing-rules.md)**（通用规则：作图顺序、行列版式、命名、数据关联、画完检查清单），再读项目所属公司的作图配置（见该文档第 10 节）；画完按其中的检查清单核对，发现规则不对就改对应的文档。
 
@@ -16,13 +16,13 @@ EplanMcp：一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 
 ## 硬性规则（违反任何一条都不能合并）
 
-原五条硬性规则采用以下手册条款，含义见[逐项对照表](docs/standards/README.md#原规则--手册条款)：
+原五条硬性规则对应以下规范条款，含义见[逐项对照表](docs/standards/README.md#原规则--规范条款)：
 
-1. [AI-10](docs/standards/engineering-handbook.html#ai-machine)
-2. [GIT-04](docs/standards/engineering-handbook.html#review-git)
-3. [G-05 与 18.3](docs/standards/engineering-handbook.html#review-rfc)
-4. [GIT-07](docs/standards/engineering-handbook.html#review-git)
-5. [ARC-12](docs/standards/engineering-handbook.html#arch)
+1. [AI-10](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/19-ai.md#ai-machine)
+2. [GIT-04](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/18-process-review-git.md#review-git)
+3. [G-05](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/00-purpose.md#purpose-exceptions) 与 [18.3](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/18-process-review-git.md#review-rfc)
+4. [GIT-07](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/18-process-review-git.md#review-git)
+5. [ARC-12](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/02-architecture.md#arch-logging)、[PRO-20](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/01-protocol.md#pro-transport)
 
 ## 本机环境注意事项
 - 开发机装有 EPLAN 2026.0.3（`C:\Program Files\EPLAN\Platform\2026.0.3\Bin`），通常以 `/Variant:"Pro Panel"` 启动。
