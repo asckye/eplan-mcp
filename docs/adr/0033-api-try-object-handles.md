@@ -6,7 +6,7 @@
 | 日期 | 2026-11-01（提出）· 2026-11-01（接受） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门：句柄只在 C 级试执行中使用，默认关闭、只限 scratch；不满意时可以整体撤回，不影响其他工具 |
-| 影响 | 修改 [ADR-0032](0032-generic-api-layer.md) 中 C 级参数"只允许简单值与对象定位器"的约束；涉及 [ADR-0005](0005-safety-model.md) 的审批内容和 [security.md](../standards/security.md) 的 TB1 |
+| 影响 | 修改 [ADR-0032](0032-generic-api-layer.md) 中 C 级参数"只允许简单值与对象定位器"的约束；涉及 [ADR-0005](0005-safety-model.md) 的审批内容和 [security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) 的 TB1 |
 | 相关依据 | [API 覆盖报告](../eplan/coverage-report.md) 第 8 节"未覆盖原因"（2026-11-01 缺口分析） |
 
 ## 背景与问题

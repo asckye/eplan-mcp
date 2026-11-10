@@ -8,7 +8,7 @@
 
 | 项目字段 | 记录 |
 |---|---|
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.0) |
 | 工具名 / 注册 / 契约 | `eplan_annotation_create`；[AnnotationCreateTools](../../src/EplanMcp.Host/Tools/AnnotationCreateTools.cs)、[McpServerSetup](../../src/EplanMcp.Host/McpServerSetup.cs)；[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
 | 分组 / Profile / 状态 | placement / full / Implemented (Unreleased) |
 | 安全分类 / MCP 注解 | Write；readOnly/destructive/idempotent/openWorld 均 false |

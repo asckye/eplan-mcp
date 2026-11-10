@@ -6,7 +6,7 @@
 | 所属分组 / Profile | 工具集 `pack` / `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.0) |
 
 ## 1. 这个工具解决什么任务
 代理查看内置、本地和登记的共享插件库，选择可用插件并了解已安装版本及更新候选。不需要 EPLAN；索引文字仅是数据。

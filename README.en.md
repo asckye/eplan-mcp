@@ -52,8 +52,8 @@ Installation needs no administrator rights. See the [getting started guide](docs
 | Area | What it does |
 |---|---|
 | Read | Projects, pages, devices, connections, cables, terminals, PLC, parts, symbols, revisions, messages, check results, macros, placeholders, properties, and page objects |
-| Draw and edit | Create projects and pages, place devices from parts or symbols, insert macros, place interruption and potential definition points, add text and graphics, generate connections, edit properties, replace page text |
-| Check and report | Run EPLAN checks, check against engineering pack rules, review pages, create and update reports |
+| Draw and edit | Create, open, close and rename projects, fill in the title block, manage structure identifiers; create pages, place devices from parts or symbols, insert macros, place interruption and potential definition points, add text and graphics, generate connections, change the potential, colour and cross-section of potential definition points, delete placements, add shields, generate and readdress PLC pages, edit properties, replace page text |
+| Check and report | Run EPLAN checks, check against engineering pack rules, review pages against rule plugins (IEC 60204-1, IEC 81346 and others), create and update reports |
 | Numbering and translation | Number pages, devices, terminals, cables, and connections; generate cables; translate projects |
 | Import and export | Export PDF, DXF, images, PXF, part lists, labels, and untranslated text; import DXF/DWG, PXF, device and part lists, PLC data, and PDF comments |
 | Parts and translation databases | Query, import, sync, and export the system parts database; import and export the translation database |

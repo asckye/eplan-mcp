@@ -9,7 +9,7 @@
 | 影响 | 修订 [ADR-0005](0005-safety-model.md) 第 3、4 节：补充"结果未知"的处理和写入暂停，其余规则不变 |
 
 ## 背景与问题
-ADR-0005 规定写操作在 Bridge 的事务包装中执行，失败回滚，成功提交。但结果只用文字说明（`EPLAN_OPERATION_FAILED` 写"已回滚"，见 [mcp-tool-design 6.3](../standards/mcp-tool-design.md#63-错误码表)），而且 Host 有时并不知道结果：`BridgeClient` 每次 `invoke` 最多等 30 秒，超时后断开连接，返回可重试的 `TIMEOUT`，[M1 设计](../design/2026-10-13-m1-skeleton.md) 4.5 写明这只在只读时没有问题。WPF `Dispatcher.Invoke` 的超时只限制等待开始的时间，委托开始后会执行完（WPF 文档；进入超时的情况见 [api-notes](../eplan/api-notes/transactions-and-undo.md#a9-从后台线程调度到-eplan-主线程spike-s12026-10-13) A9）。所以 Host 报告超时后，写操作仍可能提交；模型一重试，同一个页面就建了两次。
+ADR-0005 规定写操作在 Bridge 的事务包装中执行，失败回滚，成功提交。但结果只用文字说明（`EPLAN_OPERATION_FAILED` 写"已回滚"，见 [mcp-tool-design 6.3](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/mcp-tool-design.md#63-错误码表)），而且 Host 有时并不知道结果：`BridgeClient` 每次 `invoke` 最多等 30 秒，超时后断开连接，返回可重试的 `TIMEOUT`，[M1 设计](../design/2026-10-13-m1-skeleton.md) 4.5 写明这只在只读时没有问题。WPF `Dispatcher.Invoke` 的超时只限制等待开始的时间，委托开始后会执行完（WPF 文档；进入超时的情况见 [api-notes](../eplan/api-notes/transactions-and-undo.md#a9-从后台线程调度到-eplan-主线程spike-s12026-10-13) A9）。所以 Host 报告超时后，写操作仍可能提交；模型一重试，同一个页面就建了两次。
 
 写操作被中断有四种情况：① Host 等待超时；② 管道断开（客户端重启、Host 被结束）；③ EPLAN 在途中崩溃或被强制结束；④ 回滚本身失败。① 和 ② 中 Bridge 知道结果，③ 和 ④ 才是真正的"结果未知"。
 
@@ -95,9 +95,9 @@ Write、Destructive（以及启用后的 Code）级工具的结果和错误都�
 ## 后果
 - **好的**：模型读一个字段就知道项目有没有被改；超时不再导致重复写入；大多数中断能得出确定结果；真正无法确定时，AI 的写入停下来，直到工程师核实，而且跨会话、跨重启有效；审计中每个写操作都有结果。
 - **代价**：Bridge 多了状态（结果记录、去重），Host 多了恢复流程，都需要故障注入测试；数据目录多一个 `state\`（[ADR-0008](0008-data-locations-and-instance-discovery.md) 的目录列表要补充）；极少数情况下工程师要多确认一次。
-- **必须在 M3 第一批写工具发布之前定下**：`execution`、两个新错误码、写操作超时后先取回结果、`outcome.get`。按[开发流程第 8 节](../process/development-workflow.md#8-版本与发布)，事后新增字段只算次版本；但写操作超时原来是"可重试"，之后改为"可能结果未知、不可重试"，改变了已有字段的含义，属于破坏性变更，按旧行为写好的提示词和评测也要返工。
+- **必须在 M3 第一批写工具发布之前定下**：`execution`、两个新错误码、写操作超时后先取回结果、`outcome.get`。按[开发流程第 8 节](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/process/development-workflow.md#8-版本与发布)，事后新增字段只算次版本；但写操作超时原来是"可重试"，之后改为"可能结果未知、不可重试"，改变了已有字段的含义，属于破坏性变更，按旧行为写好的提示词和评测也要返工。
 - **后续行动**（接受之后）：
-  - 文档：ADR-0005 加一段修订说明指向本 ADR；[mcp-tool-design](../standards/mcp-tool-design.md) 6.2、6.3（两个错误码、`execution` 一列、改写 `TIMEOUT`）、7.1、第 8 节和[工具规格模板](../templates/tool-spec.md)；[架构文档](../architecture/architecture.md) 6.3 时序图、第 7 节数据目录、8.2–8.4、8.8（"开始执行"记录、暂停记录），第 9 节增加 Q11（写入途中管道断开，报告真实结果，不重放）和 Q12（写入途中 EPLAN 被结束，返回 `OUTCOME_UNKNOWN`，下一次写入要求确认）；[安全标准](../standards/security.md)增加"结果未知后重复写入"的威胁和措施。
+  - 文档：ADR-0005 加一段修订说明指向本 ADR；[mcp-tool-design](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/mcp-tool-design.md) 6.2、6.3（两个错误码、`execution` 一列、改写 `TIMEOUT`）、7.1、第 8 节和[工具规格模板](../templates/tool-spec.md)；[架构文档](../architecture/architecture.md) 6.3 时序图、第 7 节数据目录、8.2–8.4、8.8（"开始执行"记录、暂停记录），第 9 节增加 Q11（写入途中管道断开，报告真实结果，不重放）和 Q12（写入途中 EPLAN 被结束，返回 `OUTCOME_UNKNOWN`，下一次写入要求确认）；[安全标准](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md)增加"结果未知后重复写入"的威胁和措施。
   - 代码与测试：Contracts 中的执行状态、两个错误码、`outcome.get` 及往返测试；Small 测试覆盖不变式和错误码对应关系，Medium 测试用假 Bridge 覆盖途中断开、延迟提交、重复请求 ID、Host 重启。
   - M3 设计文档确定记录条数、各工具的执行时限、状态文件格式、确认表单的中英文文字；spike S8。
 

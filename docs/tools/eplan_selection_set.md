@@ -1,7 +1,7 @@
 # 工具规格：`eplan_selection_set`
 | 模板项 | 规格 |
 |---|---|
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 | 工具 / 分组 / Profile / 状态 | eplan_selection_set / selection / full / Implemented；Large 首轮失败已离线修复，待复验（B11） |
 | 安全与注解 | Read；readOnly=true，destructive=false，idempotent=true，openWorld=false。选择及开页沿用 page_open 的 Read 边界（A54），不需审批或 dry_run；首次开新页曾改变 Page 文件（B11），不承诺整个开页路径逐字节不变。后续写 action 仍独立审批。 |
 | 1. 任务 | 精确准备选择上下文；replace/add/clear 幂等，显式报告选择、焦点和当前项目的 UI 副作用。 |

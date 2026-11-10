@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `pages` / `core` 与 `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true `destructiveHint` = false `idempotentHint` = true `openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 
 首片已实现；图片留待后续，合并后的 Large 验证登记为待运行，Implemented 不代表实机验收通过。
 

@@ -74,7 +74,7 @@
   - 多一套契约（输入、输出、`plugin.json`）要维护版本。
 - **后续行动**：
   - 第 5 阶段实现，之前不开工；
-  - [security.md](../standards/security.md) 增加"插件代码"威胁及措施（编号按当时的最大值顺延）；
+  - [security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) 增加"插件代码"威胁及措施（编号按当时的最大值顺延）；
   - 工具设计规范第 8 节的级别表下注明本 ADR 的例外：**已完成**（2026-10-21，与接受本 ADR 同一个 PR）；
   - `doctor` 显示 `plugins.mode` 和允许列表的核对结果；
   - 测试：Small（允许列表与哈希、输出校验）；Medium（超时被结束、内存超限、崩溃、输出越出柜的范围被拒绝、工作进程拿不到管道名和数据目录的环境变量）；

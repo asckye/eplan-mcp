@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 项目名就是项目文件名（`.elk` 和同名 `.edb` 文件夹），图框和报表里显示的"项目名称"取自它。负责人 2026-11-09 要求把 scratch 项目改成正式名称（"加工具，这个项目是叫通过式烘芯炉"）。EPLAN API 没有改名方法：`ProjectManager` 只有 `CopyProject` 和 `RemoveProject`，`HEServices.ProjectManagement` 也没有；官方 action 目录里也没有改项目名的 action。所以改名做成"按新名复制 → 关闭旧项目 → 打开新项目 → 删除旧项目"。

@@ -6,7 +6,7 @@
 | 日期 | 2026-10-30（提出）· 2026-10-30（接受） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 单向门：通用读写和分级执行的契约发布后，工作流和技能会依赖它；收紧要按工具契约变更处理 |
-| 影响 | 扩展 [ADR-0030](0030-action-catalog-tiers.md) 的三级模型到操作层（方法、对象属性）；涉及 [ADR-0005](0005-safety-model.md) 的审批模型和 [security.md](../standards/security.md) 的 TB1 |
+| 影响 | 扩展 [ADR-0030](0030-action-catalog-tiers.md) 的三级模型到操作层（方法、对象属性）；涉及 [ADR-0005](0005-safety-model.md) 的审批模型和 [security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) 的 TB1 |
 | 相关依据 | [API 覆盖报告](../eplan/coverage-report.md)、[覆盖设计](../design/2026-10-21-api-capability-coverage.md)、[M10 设计](../design/2026-10-30-m10-capability-expansion.md) |
 
 ## 背景与问题

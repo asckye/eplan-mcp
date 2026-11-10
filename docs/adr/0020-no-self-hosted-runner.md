@@ -31,7 +31,7 @@
 
 ## 决策
 选择方案 1：
-- **实机测试与评测**：Large 测试在开发机上手动运行（[testing.md](../standards/testing.md) 第 4 节，现状不变），时机是：合并写入类工具或 Bridge 的改动之前，以及每次发布之前；Agent 评测在发布前和工具描述改动后手动运行。结果附在 PR 或发布说明中。
+- **实机测试与评测**：Large 测试在开发机上手动运行（[testing.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/testing.md) 第 4 节，现状不变），时机是：合并写入类工具或 Bridge 的改动之前，以及每次发布之前；Agent 评测在发布前和工具描述改动后手动运行。结果附在 PR 或发布说明中。
 - **插件的构建**：新脚本 `eng/scripts/release-addin.ps1 -Tag vX.Y.Z`：
   1. 在新建的 worktree 中检出该标签，确认工作区干净、标签已推送；
   2. `dotnet build src\EplanMcp.Bridge.Eplan -c Release`（`EplanSign=false`，ADR-0007），在离线宿主上运行 Large 测试；

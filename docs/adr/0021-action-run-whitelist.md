@@ -27,7 +27,7 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
 - **任务工具优先**：任务工具在审批前列出每一项变化，执行后逐项读回；运行器做不到，不能让它成为绕开任务工具的途径。
 - **长尾要有出口**：M4c 之后工具将有约 55 个，再给每个 action 写一个工具，模型难以选择（ADR-0006）。
 - **不凭文档假设 action 的行为**：文档有 10 处没说清楚的副作用（api-actions 7.2）；实测中部件清单 CSV 导出后 EPLAN 关闭了全部项目（[api-notes](../eplan/api-notes/actions.md#a25-m4c-的导出spike-s252026-10-21eplan-20260325421electric-p8在调度器中) A25），部件库导入内部走的是另一个界面 action，在事务中留下未关闭的撤销日志（A30）。
-- **安全默认值不可悄悄放宽**（[开发流程](../process/development-workflow.md)第 1 节原则 5）；模型给的参数一律不可信（[security.md](../standards/security.md) TB1）。
+- **安全默认值不可悄悄放宽**（[开发流程](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/process/development-workflow.md)第 1 节原则 5）；模型给的参数一律不可信（[security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) TB1）。
 - **结果要如实**：做不到逐项核对时，要明说。
 
 ## 备选方案
@@ -45,7 +45,7 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
 - `eplan_action_run(action, type?, parameters, project?, dry_run?)`：
   - `action`：schema 中的枚举，只列白名单中的 action 名；`type`：白名单中出现过的 TYPE 值。`action` 与 `type` 的组合必须是一个条目；
   - `parameters`：对象，参数名按 EPLAN 文档原样拼写（如 `EXPORTFILE`）；值为字符串、整数或布尔（由 Host 转为 `0`/`1`）。带编号的参数（`PAGENAMEn`、`LAYER[n]`）以数组给出，由 Host 展开；
-  - `project`：条目作用于项目时必填（Write 及以上的条目一律必填，[工具设计规范](../standards/mcp-tool-design.md)第 5 节）；作用于部件库等系统数据的条目不给；
+  - `project`：条目作用于项目时必填（Write 及以上的条目一律必填，[工具设计规范](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/mcp-tool-design.md)第 5 节）；作用于部件库等系统数据的条目不给；
   - `dry_run`：为 true 时只返回变更清单（处理后的调用、级别、已知副作用），不请求审批，也不执行。
 - 不在白名单中的组合一律 `POLICY_DENIED`。`message` 只说明"不在 action 白名单中"，不提示怎样绕过。
 - 每个条目的参数、级别、副作用和示例由 `eplan_tool_usage(tool: "eplan_action_run", topic: "<action>/<TYPE>")` 返回，工具描述保持在约 250 个 token 之内。
@@ -123,7 +123,7 @@ ADR-0006 为这类长尾预留了受控的 `eplan_action_run`："只允许执行
 - **ADR-0010、0011、0012、0013、0019**：原样沿用。
 
 ### 7. 威胁与安全要求
-[security.md](../standards/security.md) 加入两条威胁和两条要求（与本 ADR 同一个 PR 加入）。T28、T29 和 SEC-31、SEC-32 已由 M4c 设计和 ADR-0019 预留，尚未写入，所以编号从 T30、SEC-33 开始：
+[security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) 加入两条威胁和两条要求（与本 ADR 同一个 PR 加入）。T28、T29 和 SEC-31、SEC-32 已由 M4c 设计和 ADR-0019 预留，尚未写入，所以编号从 T30、SEC-33 开始：
 - **T30**：经运行器越过白名单：白名单之外的 action、TYPE 或参数；参数值中夹带额外的参数；借 `ProjectAction` 转一道；不带项目参数的 action 作用在当前项目而不是指定的项目；路径逃出允许的根目录或指向 UNC；改白名单给自己加条目；项目中的注入文本诱导模型用它绕开任务工具。措施 SEC-33。
 - **T31**：白名单中的 action 有没记录的副作用：改了文档没写的数据，不建撤销步骤而清空工程师的撤销历史（api-notes B7），弹对话框或占住主线程，让 EPLAN 崩溃（A25），或在别的版本中行为不同；读回只比较指纹，看不到逐项的变化。措施 SEC-34。
 

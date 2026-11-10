@@ -80,7 +80,7 @@
   - 恶意的原生文件仍可能触发 EPLAN 自身的缺陷，这里只能控制来源和打开的位置；
   - 签名的密钥和证书管理由公司自己负责。
 - **后续行动**：
-  - [security.md](../standards/security.md) 增加"恶意或损坏的工程包"和"就地引用的企业资源被替换"两条威胁及措施（编号按当时的最大值顺延，现为 T31、SEC-34）；
+  - [security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) 增加"恶意或损坏的工程包"和"就地引用的企业资源被替换"两条威胁及措施（编号按当时的最大值顺延，现为 T31、SEC-34）；
   - M3b 设计 Q3 和工具规格中的宏路径规则加上 `packs\`；
   - `doctor` 显示 `packTrust`、`packSources` 和包占用的空间；
   - 测试（Small）：路径穿越、保留名、大小写重名、符号链接条目、超限、压缩比、多余或缺少的文件、哈希不符、签名不符、可执行类型、含脚本的 SVG；Medium：安装确认被拒绝时不留下任何文件。

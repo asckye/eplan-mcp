@@ -4,7 +4,7 @@
 |---|---|
 | 分组 / Profile | action_catalog / full |
 | 级别 | Read |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 | MCP 注解 | readOnly=true、destructive=false、idempotent=true、openWorld=false |
 
 用于发现官方 action 用法、本机界面定义与注册表条目；目录不授予执行权限，不调用 EPLAN 或 Bridge。

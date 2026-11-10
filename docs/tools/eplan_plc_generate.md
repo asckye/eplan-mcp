@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plc` / `full` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 从项目里已有的 PLC 设备生成原理图页，对应 EPLAN 的"生成 PLC 原理图"。EPLAN 自己建页、放宏，功能并入已有设备，不用再改名合并。

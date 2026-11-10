@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 用系统主数据更新项目里存的表格、图框和符号，对应 EPLAN 的"更新项目主数据"。从模板新建的项目存的是模板当时的版本，报表用词可能和系统表格不同；`eplan_report_create` 不会替换项目里已有的表格。

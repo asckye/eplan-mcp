@@ -75,7 +75,7 @@ TIA 的 Workbench（2026-10-20 只读查阅其仓库）：
   - ADR-0015 标为"Superseded by ADR-0017"（已完成）；
   - ADR-0004 的运行时表和架构 5.1 的 Workbench 一行改为 WPF 和 TIA 的主题（已完成）；
   - M5 设计 4.5 的观感规则改为引用 `docs/standards/workbench-ui.md`（已完成）；
-  - 写 [`docs/standards/workbench-ui.md`](../standards/workbench-ui.md)（已完成）；
+  - 写 [`docs/standards/workbench-ui.md`](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/workbench-ui.md)（已完成）；
   - 第三方声明增加 TIA 的主题。
 
 ## 2026-11-03 文档引用修订

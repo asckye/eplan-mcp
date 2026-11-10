@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `cable` / `full` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 在已有连接上画屏蔽，对应 EPLAN"插入"菜单的"屏蔽"。

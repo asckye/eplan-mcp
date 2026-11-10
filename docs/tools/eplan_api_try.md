@@ -8,7 +8,7 @@
 |---|---|
 | 分组 / Profile | api / full；`config.json` 的 `apiTry: "on"` 显式启用，默认 off 时不注册 |
 | 级别 / 注解 | C 级未验证试执行；false / true / false / false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 | 实机验证 | main 的 ApiTryTests 已通过；生命周期分支曾独立通过，合并数组页范围机制后的完整类待实机复验，本次不运行 EPLAN，见 [待验证清单](../process/large-pending.md) |
 
 ## 1. 任务与输入

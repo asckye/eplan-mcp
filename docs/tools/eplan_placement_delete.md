@@ -6,7 +6,7 @@
 |---|---|
 | 工具名 / 注册入口 / 契约快照 | `eplan_placement_delete` / `PlacementDeleteTools` / `server-contract.verified.json` |
 | 分组 / Profile | placement / full |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.0) |
 | 安全分类与 MCP 注解 | Destructive；readOnlyHint=false、destructiveHint=true、idempotentHint=false、openWorldHint=false |
 | 模型说明与示例来源 | `PlacementDeleteTools.cs`、`Usage/eplan_placement_delete.md` |
 | EPLAN 调用路线 | `placement.delete.plan/execute` → `EplanPlacementRemover` → `Placement.Remove()` |

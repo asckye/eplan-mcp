@@ -1,7 +1,7 @@
 # 工具规格：`eplan_rule_check`
 | 项 | 内容 |
 |---|---|
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 | 分组 / Profile | workflow / full |
 | 级别 / 注解 | Read；true / false / true / false |
 检查显式项目中所选柜的本机已提升正式规则；候选接受不授予规则资格。复用规则解释器与计划编译器，不新增 Bridge 操作。

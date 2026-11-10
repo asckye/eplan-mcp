@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `structure` / `full` |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 一次读出项目的全部结构标识符（`=`、`==`、`++`、`+`、`&`、`#`）：描述、是否被使用。结构总览报表和页名都依赖这些数据，不需要打开 EPLAN 的"结构标识符管理"对话框。

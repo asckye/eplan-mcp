@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 
 属性入口按精确运行时类型生成分发，沿继承链选择最派生的已声明 Properties；该成员被排除时不回退到基类。TerminalStrip、PlugStrip、Cable 等必须使用各自属性列表，遵守 A60。目录没有独立字典的派生类型，按属性列表继承链映射到最近的已登记字典，正式名、数字 ID 和拒读分类仍来自该字典；未知 ID 不读取。支持列表及暂不支持原因见 [find 规格](eplan_object_find.md)。输入结构及 locator 字段沿用 B2。
 

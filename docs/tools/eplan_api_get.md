@@ -5,7 +5,7 @@
 | 所属分组 / Profile | api / full |
 | 安全级别 | Read（ADR-0032 B 级） |
 | MCP 注解 | readOnlyHint=true，destructiveHint=false，idempotentHint=true，openWorldHint=false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 
 overlay 标为 `refused` 的侧在 `try_template` 中显示 `dispatchable:false`、`refused_unsafe` 和 A77 崩溃拒绝说明，不提供调用参数或示例；其余侧保留原模板。
 

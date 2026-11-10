@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `structure` / `full` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 一次调用写好一批结构标识符：已有的改描述，没有的新建。代理不操作对话框，也不用截图确认，结果在返回值里。

@@ -6,7 +6,7 @@
 | 日期 | 2026-11-01（提出）· 2026-11-01（接受：项目负责人答复"接受 ADR-0035"） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门：只改 Workbench 回答破坏性问题的交互，Host 的审批协议、审计记录和超时拒绝都不变 |
-| 影响 | 修改 [ADR-0011](0011-approval-out-of-band.md) 第 4 节、[ADR-0014](0014-workbench-approval-channel.md) 第 6 条、[security.md](../standards/security.md) SEC-24 与 [workbench-ui.md](../standards/workbench-ui.md) APR-02、CMD-02、CMD-06 中"批准与拒绝完全对等、没有快捷键"的规则，**只对破坏性问题**；写入问题的规则不变 |
+| 影响 | 修改 [ADR-0011](0011-approval-out-of-band.md) 第 4 节、[ADR-0014](0014-workbench-approval-channel.md) 第 6 条、[security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) SEC-24 与 [workbench-ui.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/workbench-ui.md) APR-02、CMD-02、CMD-06 中"批准与拒绝完全对等、没有快捷键"的规则，**只对破坏性问题**；写入问题的规则不变 |
 | 设计依据 | 项目负责人的"EplanMcp Workbench v2"设计中的"审批 · 删除确认面板"画板（见 [ADR-0034](0034-workbench-visual-apple-principles.md)） |
 
 ## 背景与问题

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `structure` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 给结构标识符改名，比如把 `+S1` 改成 `+CAB1`。用到它的页和设备会一起变。

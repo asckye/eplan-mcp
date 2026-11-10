@@ -6,7 +6,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 
 已注册；标题 `Create connection symbols and explicit wire paths`；connections / full / Write；四注解均为 false。普通 T3b 路径按 O2/O3 分两次提交、两步撤销；D5 含中断点的调用在同一步内生成与核验，注明 **1 undo step**。
 

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `report` / `full` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 决定部件列表怎么列。比如 71 页图纸的部件列表每个端子一行，而 EPLAN 默认把同标识、同部件号的设备合并成一行，页数和内容都对不上。

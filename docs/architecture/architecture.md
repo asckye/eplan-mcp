@@ -8,7 +8,7 @@
 | 关键决策 | [ADR 索引](../adr/README.md) |
 | 事实依据 | [EPLAN API 笔记](../eplan/api-notes.md)（实机验证与官方文档）；MCP 规范 2026-07-28 |
 
-> 标注 **〔待验证〕** 的内容依赖尚未在实机上验证的行为，都列在第 10 节的风险表中，由里程碑 M1 的技术验证（spike）给出结论。
+> 标注 **〔待验证〕** 的内容依赖尚未在实机上验证的行为，都列在第 10 节的风险表中；已验证的结论记在 [api-notes](../eplan/api-notes.md)。
 
 ---
 
@@ -92,7 +92,7 @@ flowchart LR
 | 用什么语言和运行时 | 全部用 C#：Host 用 .NET 10；Bridge 用 net481，一份构建支持 EPLAN 2024–2027；共享契约用 netstandard2.0 | [0004](../adr/0004-runtimes-and-target-frameworks.md)、[0009](../adr/0009-supported-eplan-versions.md) |
 | 如何保证安全 | **分级（Read / Write / Destructive / Code）+ 策略引擎 + 人工审批 + scratch 沙箱 + 事务回滚 + 撤销步骤 + 防篡改审计** | [0005](../adr/0005-safety-model.md) |
 | 工具怎么设计 | **面向任务的少量工具**：`eplan_<资源>_<动作>` 命名，显式声明全部 MCP 注解，结构化输出，分页，按 Profile 暴露 | [0006](../adr/0006-tool-surface-design.md) |
-| 授权与分发 | **待决策**：开发者授权（未签名，可能有 5 页限制）还是 EADN 签名 + 运行时授权。M1 spike S0 的结果出来后再定 | 0007（待写） |
+| 授权与分发 | 0.x 阶段发布未签名插件，构建预留 EADN 签名开关 | [0007](../adr/0007-licensing-and-distribution.md) |
 
 为什么不用其他访问方式作为主方案：
 
@@ -163,7 +163,7 @@ flowchart TB
 | 组件 | 职责 |
 |---|---|
 | `McpServer` | 基于官方 C# SDK：`server/discover`、`tools/list`（**顺序固定**，便于客户端缓存提示词）、`tools/call`、进度与取消；兼容 2025-11-25 及以前的客户端 |
-| `ToolCatalog` | 用 `[McpServerTool]` 等特性声明工具，并显式设置 `ReadOnly`、`Destructive`、`Idempotent`、`OpenWorld`；按 Profile 过滤；导出契约快照供 CI 比对 |
+| `ToolCatalog` | 用 `[McpServerTool]` 等特性声明工具，并显式设置 `ReadOnly`、`Destructive`、`Idempotent`、`OpenWorld`；按 Profile 过滤；导出契约快照，由本地关卡比对（[ADR-0048](../adr/0048-local-gate-is-the-merge-gate.md)） |
 | `ToolHandlers` | 每个工具一个处理器：校验参数 → 询问策略 → 调用 Bridge → 整形结果 |
 | `PolicyEngine` | 纯函数：输入（工具级别、目标项目、是否在 scratch 中、配置），输出（允许 / 需要审批 / 拒绝 + 原因）。见 [ADR-0005](../adr/0005-safety-model.md) |
 | `ApprovalService` | 只经工程师独立操作的窗口，按优先级选择：**Workbench 审批队列**（M5，Workbench 正在运行时；`WorkbenchChannel` 每次审批连接一次它的管道，连接超时 250 毫秒，问题送达后只在 Workbench 中回答，[ADR-0014](../adr/0014-workbench-approval-channel.md)）→ **EPLAN 内的审批对话框**（由 Bridge 显示）→ 拒绝。不用 MCP elicitation。在 Host 中等待决定，期限默认 120 秒（60–300 秒可配置），客户端提供了进度令牌时每 15 秒发一次进度通知（[ADR-0011](../adr/0011-approval-out-of-band.md)） |
@@ -369,7 +369,7 @@ sequenceDiagram
 | Workbench | `workbench\EplanMcp.Workbench.exe`，自包含目录，附字体及许可证 | 解压后直接打开，完成插件注册与客户端配置 |
 | Bridge | `bridge\net481\EplanMcp.Bridge.Eplan.dll`；需要针对特定版本构建时，按版本分目录 | 一个安装包可以支持多个 EPLAN 版本 |
 | 插件注册 | 只经 `eplanmcp install-addin`：它用命令行方式调用 EPLAN 官方的 `EplApiModuleAction /register:"<dll>"`，每个勾选的变体一次（有 EPLAN 在运行时拒绝），等命令启动的 EPLAN 加载插件、在握手中核对加载的是这个 DLL 后关闭它，结果记在 `<数据根目录>\state\addins.json`；注册不落在 MSIX 重定向的目录中，所以在 MSIX 环境中照常执行（S14）；`uninstall-addin` 按记录完全撤销（[ADR-0016](../adr/0016-per-user-installer.md)、[M5 设计](../design/2026-10-20-m5-operability.md) 4.2）。**更新插件后必须重启 EPLAN**：已加载的程序集在 EPLAN 退出前无法卸载（api-notes A8），握手时比对版本号以发现这种情况 | 使用官方机制，不手工修改 EPLAN 设置 |
-| 签名 | 0.x 的安装包和程序不签名，附 SHA-256 和构建来源证明，入门指南说明 SmartScreen 的"仍要运行"和校验方法；以后是否购买代码签名证书由项目负责人决定（M5 设计 Q6）。插件的 EADN 签名视 ADR-0007 的结论而定：如果走运行时授权路线，发布流水线中增加 EADN 签名步骤 | 暂时没有证书；授权要求 |
+| 签名 | 0.x 的安装包和程序不签名，附 SHA-256 和逐文件清单（v0.5.0 起在开发机上打包，没有 GitHub 构建来源证明，见 [ADR-0051](../adr/0051-build-release-packages-locally.md)），入门指南说明 SmartScreen 的"仍要运行"和校验方法；以后是否购买代码签名证书由项目负责人决定（M5 设计 Q6）。插件的 EADN 签名视 ADR-0007 的结论而定：如果走运行时授权路线，本地打包脚本中增加 EADN 签名步骤 | 暂时没有证书；授权要求 |
 | Claude Code 插件 | 程序目录的 `claude-plugin\` 只是模板；`client-config claude-code --plugin` 将它复制到 `<数据根目录>\claude-plugin\`，在 `.mcp.json` 写入当前 Host 的实际绝对路径，再按 Workbench 提示安装；程序移动后重新生成（M5 设计 4.7、Q10） | 一键安装，不依赖网络 |
 | 客户端配置 | `eplanmcp client-config <客户端>…` 为 M5 设计 4.11 中的 11 种客户端写入或移除名为 `eplan` 的本地 stdio 服务器。命令是运行 client-config 的那个 `eplanmcp.exe` 的完整路径：ZIP 中为 `<程序目录>\eplanmcp.exe`，开发时为构建输出中的那一个，没有环境变量或配置能改变它；参数 `serve`。`--dry-run` 只显示这一项改动前后的写法；写入前把原文件复制为同目录的 `<文件>.bak_<UTC 时间>`，其他服务器和设置保留；每次写入和移除都记在 `<数据根目录>\state\clients.json`，卸载时 `client-config --remove`（不带客户端）按记录移除 | 用户可以掌控被改动的内容；卸载能撤销写入过的配置 |
 | 环境变量 | **不修改 PATH 或任何全局环境变量**；客户端配置中直接写可执行文件的完整路径 | 开发机实际出过事故 |
@@ -602,7 +602,7 @@ flowchart LR
 | T20 | 篡改（T） | 审批界面中的项目文本误导工程师：变更清单中的文字冒充界面说明（如"已预先批准"），双向文字控制符改变显示顺序，换行伪造出多行，超长文本把关键的行挤出视野 | TB6 | [项目文本](../adr/0014-workbench-approval-channel.md) |
 | T21 | 篡改（T） | 回答落到别的问题上：回答完一个问题后下一个顶上来，或多个 Host 同时提问时误点；同一问题同时出现在 Workbench 和 EPLAN 对话框中，两处都能回答 | TB6 | [审批队列](../adr/0014-workbench-approval-channel.md)、[审批绑定](../adr/0011-approval-out-of-band.md) |
 | T22 | 篡改（T） | 安装与升级：下载的安装包被替换；安装程序要管理员权限、修改 PATH 或 EPLAN 目录；在 MSIX 客户端内注册插件，注册落到重定向的目录中；升级或卸载删除审计、备份等数据 | TB5 | [安装发布](../process/release.md)、[发布](../adr/0020-no-self-hosted-runner.md) |
-| T23 | 篡改（T） | 维护者开发机上构建的插件被替换或带入本地修改：插件不由 CI 构建，来源证明只能证明发布工作流收到的就是上传的文件（ADR-0020） | TB5 | [本机插件发布](../adr/0020-no-self-hosted-runner.md) |
+| T23 | 篡改（T） | 维护者开发机上构建的插件被替换或带入本地修改：插件和整个发布包都在开发机上构建，没有构建来源证明（ADR-0020、ADR-0051），只能靠 `SHA256SUMS.txt` 和逐文件清单校验 | TB5 | [本机插件发布](../adr/0020-no-self-hosted-runner.md) |
 | T24 | 冒充（S）、信息泄露（I） | 网络上的其他机器不带或猜测密钥调用工具；截获明文传输中的密钥和项目数据，再冒充客户端 | TB7 | [HTTP](../adr/0018-vm-http-transport.md)、[HTTP明文边界](../adr/0018-vm-http-transport.md) |
 | T25 | 拒绝服务（D） | 大量请求或暴力猜测密钥，拖住 Host 和 EPLAN | TB7 | [HTTP](../adr/0018-vm-http-transport.md) |
 | T26 | 冒充（S） | 宿主机上的网页借 DNS 重绑定或跨站请求访问虚拟机中的服务 | TB7 | [HTTP来源](../adr/0018-vm-http-transport.md) |
@@ -630,7 +630,7 @@ flowchart LR
 | SEC-08、10–12、17 | `ResultShaper` 清洗返回的数据字段；Host 默认日志不包含项目内容，错误映射去除堆栈、本机路径及内部类型，授权诊断只报告模块及可用性；工具描述与 schema 进入契约快照。 | SEC-08：T11、T30、T32；SEC-10：T7；SEC-11：T7；SEC-12：T8；SEC-17：T14 |
 | SEC-09 | 审计采用哈希链；审计写入失败会阻止写执行，`audit verify` 检查链完整性。覆盖入口包括审计篡改、不可写和写入失败测试。 | SEC-09：T4、T6 |
 | SEC-13、14 | 每个 EPLAN 实例的请求经过有长度上限的串行队列、超时与取消；主线程经调度器调用并捕获异常。Bridge 与原生 API 的实现及依赖边界见第 5 节；原生崩溃或模态窗口仍是风险，不能由异常捕获保证消除。 | SEC-13：T9；SEC-14：T10 |
-| SEC-15、16、26 | 包版本与锁文件由构建配置记录；发布产物的 SHA-256、SBOM 和来源证明及维护者按标签构建插件的安排见 [ADR-0020](../adr/0020-no-self-hosted-runner.md)、[发布操作](../process/release.md)。验证声明不代表本次已执行发布或 Large。 | SEC-15：T13；SEC-16：T13、T22；SEC-26：T23 |
+| SEC-15、16、26 | 包版本与锁文件由构建配置记录；发布产物的 SHA-256、逐文件清单及在开发机上按标签打包的安排见 [ADR-0020](../adr/0020-no-self-hosted-runner.md)、[ADR-0051](../adr/0051-build-release-packages-locally.md)、[发布操作](../process/release.md)。验证声明不代表本次已执行发布或 Large。 | SEC-15：T13；SEC-16：T13、T22；SEC-26：T23 |
 | SEC-18 | `WritePipeline` 在超时或断线后取回原请求结果，Bridge 按请求 ID 去重；`unknown` 以项目和实例暂停写入，由工程师经审批渠道核对后解除。四值结果及恢复链见 [ADR-0010](../adr/0010-write-outcomes.md)。 | SEC-18：T15 |
 | SEC-19 | 宏相对路径由 Bridge 解析到 `$(MD_MACROS)`；拒绝绝对路径、UNC、驱动器号、`..` 和根目录下的重解析点，根目录本身可为链接或网络路径；宏扩展名为 `.ema`，错误不回传根目录本机路径。见 [宏插入](../tools/eplan_macro_insert.md)和 M3b 设计。 | SEC-19：T16 |
 | SEC-20 | 导出目标由 Host 创建为 `exports/<项目名>/<UTC 时间>-<随机后缀>/`；工具不接受目录，PDF 可给受限文件名。Bridge 接收已有空目录；Host 检查导出文件是否越界或为链接，失败/取消清理本次目录。行为见 [ADR-0012](../adr/0012-export-tier.md)与各导出工具。 | SEC-20：T17 |

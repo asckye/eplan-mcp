@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project` / `full` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 `eplan_project_create` 建好的项目是关闭的，以前要靠工具之外的 `ProjectOpen` 才能打开。这个工具让一个项目从创建到导出都不离开 MCP。ADR-0021 没有把 `ProjectOpen` action 放进白名单，理由是路径可以指向任意文件，并写明需要时做任务工具；这里按写入策略限制路径。

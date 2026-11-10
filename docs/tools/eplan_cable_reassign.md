@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `cable` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 把电缆的连接分配到部件的芯线上，对应 EPLAN 的"全部重新分配"。不分配时，电缆图表把芯线和连接分成两段列出，"空闲芯线"也不对。

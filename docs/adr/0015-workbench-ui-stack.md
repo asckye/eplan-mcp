@@ -16,7 +16,7 @@ M5 要做 Workbench：审批队列、审计浏览、客户端配置向导、状�
 ## 决策驱动因素
 - 审批界面必须可靠：它是 ADR-0011 的两个渠道之一，出错时工程师可能误批。
 - 离线机器：不能依赖安装时或运行时下载任何组件。
-- 依赖越少越好（[编码规范第 7 节](../standards/coding-standards.md#7-依赖)、SEC-15）；运行时越少越好。
+- 依赖越少越好（[编码规范第 7 节](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/coding-standards.md#7-依赖)、SEC-15）；运行时越少越好。
 - Fluent 2 的还原度：项目负责人的决定，并且明确要用它的组件库。
 
 ## 备选方案

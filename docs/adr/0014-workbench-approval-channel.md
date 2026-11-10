@@ -9,7 +9,7 @@
 | 影响 | 落实 [ADR-0011](0011-approval-out-of-band.md) 中的"Workbench 审批队列"；在 [ADR-0002](0002-host-bridge-process-model.md) 的 Host、Bridge 之外增加第三种进程 |
 
 ## 背景与问题
-ADR-0011 规定审批只经工程师独立操作的窗口：Workbench 正在运行时用它的审批队列，否则用 EPLAN 内的对话框，都不可用时拒绝。它没有规定 Workbench 是什么进程、Host 怎样发现它、怎样把问题交给它、怎样判断"正在运行"。这些是进程拓扑、IPC 和审批模型的决定，属于 L3（[开发流程第 3 节](../process/development-workflow.md#3-变更分级与设计产物)）。详细设计见 [M5 设计](../design/2026-10-20-m5-operability.md) 4.4、4.6。
+ADR-0011 规定审批只经工程师独立操作的窗口：Workbench 正在运行时用它的审批队列，否则用 EPLAN 内的对话框，都不可用时拒绝。它没有规定 Workbench 是什么进程、Host 怎样发现它、怎样把问题交给它、怎样判断"正在运行"。这些是进程拓扑、IPC 和审批模型的决定，属于 L3（[开发流程第 3 节](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/process/development-workflow.md#3-变更分级与设计产物)）。详细设计见 [M5 设计](../design/2026-10-20-m5-operability.md) 4.4、4.6。
 
 现状：Host 的 `ApprovalService` 按注册顺序询问渠道，渠道返回 null 表示"现在不能问"，换下一个；决定的绑定（请求 ID、计划指纹、参数摘要）、期限和"只能使用一次"都在 Host 中判断（SEC-06）。一台机器上可以同时有多个 Host（每个客户端会话一个），它们都写同一个数据根目录（ADR-0008）。
 
@@ -35,7 +35,7 @@ ADR-0011 规定审批只经工程师独立操作的窗口：Workbench 正在运�
 2. **管道**：
    - 名称 `EplanMcp.Workbench.1.<摘要>`，摘要是"用户 SID + 换行 + 规范化的数据根目录完整路径（大写）"的 SHA-256 前 32 位十六进制。不同用户、不同数据根目录（例如 Large 测试的临时数据根目录）互不相见。
    - Workbench 用第一个实例标志创建（`FILE_FLAG_FIRST_PIPE_INSTANCE`），名字已被占用时 Workbench 报错并不接收审批；ACL 只允许当前用户，拒绝网络登录，所有者为当前用户（与 Bridge 的 `SecurePipeFactory` 相同）。
-   - Host 以 `PipeOptions.CurrentUserOnly` 连接，连接超时 250 毫秒；连上后取服务器进程号，核对它的映像路径是 Host 所在目录下的 `workbench\EplanMcp.Workbench.exe`。Workbench 同样核对连接方是同一安装中的 `eplanmcp.exe`。这只防错配（开发构建连上安装的版本、别的程序占了名字），**不是认证**：同一用户的程序不在防护范围内（[security.md](../standards/security.md) 第 2 节）。
+   - Host 以 `PipeOptions.CurrentUserOnly` 连接，连接超时 250 毫秒；连上后取服务器进程号，核对它的映像路径是 Host 所在目录下的 `workbench\EplanMcp.Workbench.exe`。Workbench 同样核对连接方是同一安装中的 `eplanmcp.exe`。这只防错配（开发构建连上安装的版本、别的程序占了名字），**不是认证**：同一用户的程序不在防护范围内（[security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) 第 2 节）。
 3. **协议**：帧格式和 JSON-RPC 2.0 与 Host–Bridge 相同（ADR-0003），单帧上限 1 MiB，未知字段和重复字段一律拒绝。协议版本是整数，从 1 开始，Host 支持 N 和 N-1。消息：
    - `handshake`：双方的协议版本和程序版本、Host 的进程号；Workbench 回答是否接收新问题（等待中的问题达到 50 个时不接收）；
    - `approval.ask`：请求 ID、问题种类（审批或解除暂停）、工具、级别、项目、EPLAN 实例、客户端自报的名称、变更清单、备份目录（Destructive）、暂停记录（解除暂停）、计划指纹、参数摘要、期限；回答为请求 ID、指纹、参数摘要和决定（批准、拒绝、关闭、过期）；

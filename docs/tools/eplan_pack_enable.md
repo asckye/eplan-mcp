@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `pack` / `full` |
 | 安全级别 | 本地数据写入，逐次审批 |
 | MCP 注解 | readOnly=false，destructive=false，idempotent=true，openWorld=false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.0) |
 
 ## 1. 这个工具解决什么任务
 全局启用一个已安装的精确插件版本，或停用它；不改变项目绑定，不卸载文件。

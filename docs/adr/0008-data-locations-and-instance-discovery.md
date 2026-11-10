@@ -30,7 +30,7 @@ spike S0 发现（[api-notes](../eplan/api-notes/clients-and-host.md#a6-由-msix
   - 不放在"文档"目录下：很多机器把"文档"重定向到 OneDrive，而 EPLAN 项目（`.edb` 中有大量小文件）不适合放在同步目录里。
   - 无论 Host 从哪里启动，路径都相同，EPLAN 和工程师都能看到。
 - **实例发现**：Bridge 创建名为 `EplanMcp.Bridge.<pid>.<随机值>` 的管道，Host 通过列举 `\\.\pipe\` 下的管道来发现实例。**不再使用实例发现文件**。
-- **握手**：去掉"发现文件中的一次性密钥"，安全性依靠管道 ACL（只允许当前用户）和 Host 端的 `PipeOptions.CurrentUserOnly`。这个密钥原本只用来防范同一用户下的其他进程，而这类威胁本来就不在防护范围内（[安全标准](../standards/security.md)第 2 节），所以去掉它不降低实际的安全性。
+- **握手**：去掉"发现文件中的一次性密钥"，安全性依靠管道 ACL（只允许当前用户）和 Host 端的 `PipeOptions.CurrentUserOnly`。这个密钥原本只用来防范同一用户下的其他进程，而这类威胁本来就不在防护范围内（[安全标准](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md)第 2 节），所以去掉它不降低实际的安全性。
 - `doctor` 报告当前进程是否带有 MSIX 包身份，以及实际使用的数据目录。
 
 ## 修订（2026-10-20，ADR-0010）

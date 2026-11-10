@@ -4,7 +4,7 @@
 |---|---|
 | 分组 / Profile | action_catalog / full |
 | 级别 | Read |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 | MCP 注解 | readOnly=true、destructive=false、idempotent=true、openWorld=false |
 
 按精确且区分大小写的 `name`（1–500 字符）读取同名 action 的全部官方 TYPE 行、本机 UI 定义或注册表条目；`limit` 默认 20、范围 1–100，`cursor` 分页。同名不等于所有 TYPE 都已验证。

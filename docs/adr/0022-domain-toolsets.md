@@ -5,8 +5,8 @@
 | 状态 | Accepted |
 | 日期 | 2026-10-21（提出）· 2026-10-21（接受：项目负责人"接受"） |
 | 决策人 | 项目负责人 |
-| 门的类型 | 双向门（1.0 发布前）：工具集的名称写进配置和客户端配置后，按工具契约管理（[开发流程](../process/development-workflow.md)第 8 节） |
-| 影响 | 扩展 [ADR-0006](0006-tool-surface-design.md) 第 6 节的 Profile 和[工具设计规范](../standards/mcp-tool-design.md)第 10 节；不改变工具的名称、schema、注解和任何审批规则 |
+| 门的类型 | 双向门（1.0 发布前）：工具集的名称写进配置和客户端配置后，按工具契约管理（[开发流程](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/process/development-workflow.md)第 8 节） |
+| 影响 | 扩展 [ADR-0006](0006-tool-surface-design.md) 第 6 节的 Profile 和[工具设计规范](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/mcp-tool-design.md)第 10 节；不改变工具的名称、schema、注解和任何审批规则 |
 
 ## 背景与问题
 [API 能力覆盖设计](../design/2026-10-21-api-capability-coverage.md)要求官方 API 的每项能力都能追溯到实现、访问路径、证据或不做的理由。能力仍按任务设计成工具（ADR-0006），但第 2 到第 7 阶段会覆盖图形、3D、拓扑、主数据、PLC、翻译、修订等领域，任务工具会从现在的 47 个继续增加。
@@ -19,7 +19,7 @@
 ## 决策驱动因素
 - **不支持动态发现的客户端必须照常可用**，不能依赖工具列表变更通知。
 - **工具契约就是 API**：分组不能改变工具的名称、schema 和注解；`tools/list` 的顺序固定（有利于客户端缓存提示词）。
-- **加载不是授权**：让一个工具出现在列表中，不放宽任何审批；Destructive 工具每次审批，`eplan_action_run` 仍要 `actionRun: on`（[ADR-0021](0021-action-run-whitelist.md)），模型给的参数一律不可信（[security.md](../standards/security.md) TB1）。
+- **加载不是授权**：让一个工具出现在列表中，不放宽任何审批；Destructive 工具每次审批，`eplan_action_run` 仍要 `actionRun: on`（[ADR-0021](0021-action-run-whitelist.md)），模型给的参数一律不可信（[security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) TB1）。
 - **省 token、选得准**：大多数会话只用一两个领域。
 - **简单**：不要求客户端和服务器保存额外的会话状态（MCP 2026-07-28 是无状态协议）。
 

@@ -8,7 +8,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 |---|---|
 | 分组 / Profile / 安全级别 | `placement` / `full` / Write |
 | 标题 / 四注解 | `Create text and graphics on an EPLAN page`；readOnly/destructive/idempotent/openWorld 均 false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 ## 1. 这个工具解决什么任务
 在指定电路图、总览或图形页添加说明文字、直线、矩形、折线、圆弧、整圆、椭圆、路径功能文本和图片；图形线不承担导线功能。路径功能文本用于该路径上器件的功能说明与报表。契约见 `PlacementCreateContract`，英文用法见 [PlacementCreate.usage.md](../../src/EplanMcp.Host/Tools/PlacementCreate.usage.md)。
 ## 2. 输入参数

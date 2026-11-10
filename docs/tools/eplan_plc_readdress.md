@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plc` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 按起始地址批量给 PLC 连接点编址，对应 EPLAN 的"编址"。图纸已经定好地址时不用它，用 `eplan_property_set` 写 20400。

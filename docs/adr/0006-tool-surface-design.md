@@ -27,10 +27,10 @@ Anthropic 的工程实践指出：整合工作流的少量工具优于一对一�
    - Code 级工具不属于任何默认 Profile。
    
    `tools/list` 的返回顺序固定（有利于客户端缓存提示词）。
-7. **工具契约就是 API**：名称、描述、schema、注解都纳入快照测试；版本和废弃规则见 [开发流程第 8 节](../process/development-workflow.md#8-版本与发布)。
+7. **工具契约就是 API**：名称、描述、schema、注解都纳入快照测试；版本和废弃规则见 [开发流程第 8 节](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/process/development-workflow.md#8-版本与发布)。
 8. **评测驱动**：每个工具至少对应一个 Agent 评测任务；修改工具描述后要重跑评测。
 
-详细规则见 [mcp-tool-design.md](../standards/mcp-tool-design.md)。
+详细规则见 [mcp-tool-design.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/mcp-tool-design.md)。
 
 ## 后果
 - **好的**：模型选工具更准，token 更省，单个任务需要的调用次数更少；契约稳定，容易测试。

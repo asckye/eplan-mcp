@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `pack` / `full` |
 | 安全级别 | Write（本地数据） |
 | MCP 注解 | readOnlyHint=false，destructiveHint=false，idempotentHint=true，openWorldHint=false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.0) |
 
 ## 1. 这个工具解决什么任务
 从已列出的插件库安装精确插件版本，不要求代理提供路径。安装不启用插件、不改变项目绑定。

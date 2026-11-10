@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 | 分组 / Profile / 注解 | pack / full / 本地数据；四注解 false/false/true/false |
 ## 1. 任务
 整份替换柜、项目值和包根，保持每项目同包单版本；不修改 EPLAN 工程。

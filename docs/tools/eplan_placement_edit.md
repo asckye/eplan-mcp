@@ -4,7 +4,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 
 | 模板项 | 规格 |
 |---|---|
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 
 placement / full / Implemented（Large 15/15 通过，2026-11-01）。delete 为 Destructive（SEC-21，逐次审批和备份），其余 Write；MCP：readOnly=false、destructive=true、idempotent=false、openWorld=false。
 ## 1. 这个工具解决什么任务

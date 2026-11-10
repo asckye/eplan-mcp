@@ -119,7 +119,7 @@
 - `{"tag":...,"update_from_parts":true}` 单独调用，放在最后一个部件之后：用 `DeviceService.UpdateDevice` 把已引用部件的功能定义、连接点数据和技术参数写到功能上，和 EPLAN 的设备更新相同（A93）。必须单独调用，不能和 `part`、`new_tag` 同时给；功能没有部件引用时拒绝。一步撤销还原这些数据。
 - `device.part`、`device.variant` 返回本次赋值的部件和变体；只改名时为 null。只赋值部件时，`tag` 与 `previousTag` 都返回主功能的实际完整名称（可能带 `:1` 等连接点后缀），主功能可直接交给 `eplan_device_get`；端子用 `eplan_terminal_strip_get` 定位；`functions=1`，`pages` 只含目标功能所在页。
 - 主线程目标为 2 秒，端到端默认时限 60 秒；部件库较大时可能超过目标，支持既有进度与取消。
-- Small 覆盖参数、默认变体、唯一主功能、重复引用、指纹和提交后读回；Medium 覆盖假 Bridge 的 part-only、同时改名、dry-run 与失败。Large 在 `FunctionPlaceTests` 放置 `IEC_symbol/SSD/0`、赋值 `SIE.3SB3400-0B/1` 并读回；仅编写，交由维护者运行。
+- Small 覆盖参数、默认变体、唯一主功能、重复引用、指纹和提交后读回；Medium 覆盖假 Bridge 的 part-only、同时改名、dry-run 与失败。写过的 Large 用例 `FunctionPlaceTests` 只在未合入的分支 `feat/function-place` 上，main 没有；部件赋值目前只有 Small 和 Medium 覆盖。
 
 ### 非主端子的部件
 - 仅 `part` 赋值且不改名时，`tag` 可为恰好一个已有 `FunctionCategory.Terminal` 的完整名称（如 `+A1-XD5:1`）；不按端子排名、前缀或短标识猜选。其他非主功能、重名端子与同时改名均拒绝。

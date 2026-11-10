@@ -2,7 +2,7 @@
 
 | 项目字段 | 记录 |
 |---|---|
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 | 工具名 / 注册入口 / 契约快照 | `eplan_graphic_edit`；[GraphicEditTools](../../src/EplanMcp.Host/Tools/GraphicEditTools.cs)、[McpServerSetup](../../src/EplanMcp.Host/McpServerSetup.cs)、[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
 | 分组 / Profile | placement / full |
 | 安全分类与 MCP 注解 | Write；readOnly=false、destructive=false、idempotent=false、openWorld=false |

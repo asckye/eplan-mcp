@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `project` / `full` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 
 ## 1. 这个工具解决什么任务
 做完一个项目后把它关掉，再打开下一个。提交过的修改已经存盘，不需要先保存。

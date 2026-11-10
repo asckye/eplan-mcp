@@ -7,7 +7,7 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | 项 | 内容 |
 |---|---|
 | 分组 / Profile / 级别 | `placement` / `full` / Write；四注解 false/false/true/false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 ## 输入与范围
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |

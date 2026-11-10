@@ -90,8 +90,8 @@
   - 每个计划多一次备份的时间和磁盘空间；
   - 计划工具的结果多一个取值，客户端和评测要认识它。
 - **后续行动**：
-  - 实现计划工具时，ADR-0005、ADR-0010 各加一段修订说明指向本 ADR；[工具设计规范](../standards/mcp-tool-design.md) 6.2、6.3、第 8 节写明计划级结果；架构 6.3 增加计划的时序；
-  - [security.md](../standards/security.md) 增加"计划文件在审批与执行之间被改""执行超出批准的范围"两条威胁及措施（编号按当时的最大值顺延）；
+  - 实现计划工具时，ADR-0005、ADR-0010 各加一段修订说明指向本 ADR；[工具设计规范](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/mcp-tool-design.md) 6.2、6.3、第 8 节写明计划级结果；架构 6.3 增加计划的时序；
+  - [security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) 增加"计划文件在审批与执行之间被改""执行超出批准的范围"两条威胁及措施（编号按当时的最大值顺延）；
   - 测试：Small（结果表与不变式、绑定）；Medium（假 Bridge：一次审批、备份、第 k 步失败、步骤之间断开、Host 重启、重新规划不一致时停下）；Large（示例项目的 scratch 副本上执行多步计划、逐步 Ctrl+Z、中途失败后的备份可以打开）。
 
 ## 项目负责人的决定

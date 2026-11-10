@@ -4,7 +4,7 @@
 |---|---|
 | 分组 / Profile | `pack` / `full` |
 | 级别 / 注解 | 本地数据，始终经工程师独立窗口确认；false / false / true / false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 
 ## 1. 任务
 接受或拒绝候选、关闭缺口，或将候选提升为同包的新 v2 Rule；接受不等于正式。候选和事实正文保留，审核状态由本机审计表示。

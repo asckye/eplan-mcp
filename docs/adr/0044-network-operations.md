@@ -50,7 +50,7 @@ Small/Medium 覆盖端点绑定、重定向、解析变化、数据摘要及重�
 
 本次仅离线文档盘点，以上机制均为待验证提议，未运行 EPLAN，也不宣称备份、恢复或看门狗已实现。实现前把精确 API 行为的官方/获准 scratch 证据写入 [api-notes](../eplan/api-notes.md)，新增 Large 待验记入[台账](../process/large-pending.md)。缺失或不可读数据只给警告和证据缺口，不据此判违规；独立成立的写保护、审批、权限及恢复前提仍有效。
 
-依据：[ADR-0005](0005-safety-model.md)、[0010](0010-write-outcomes.md)、[0011](0011-approval-out-of-band.md)、[0019](0019-master-data-writes.md)、[0032](0032-generic-api-layer.md)、[0033](0033-api-try-object-handles.md)、[security.md](../standards/security.md)；精确签名与排除来自已提交的 `catalog/eplan-2026.0.3`、`BannedSymbols.txt` 及六树输入快照（哈希见缺口清单）。
+依据：[ADR-0005](0005-safety-model.md)、[0010](0010-write-outcomes.md)、[0011](0011-approval-out-of-band.md)、[0019](0019-master-data-writes.md)、[0032](0032-generic-api-layer.md)、[0033](0033-api-try-object-handles.md)、[security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md)；精确签名与排除来自已提交的 `catalog/eplan-2026.0.3`、`BannedSymbols.txt` 及六树输入快照（哈希见缺口清单）。
 
 ## 2026-11-03 文档引用修订
 

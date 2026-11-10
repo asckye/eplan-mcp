@@ -6,7 +6,7 @@
 |---|---|
 | 分组 / Profile | action / full，`config.json` 中 `actionTry:on` 才注册，默认 off |
 | 安全级别 / 注解 | Write，逐次审批；readOnly=false，destructive=true，idempotent=false，openWorld=false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.4.1) |
 
 ## 1. 任务
 在 scratch 副本上试执行目录中的一个未验证 action。已验证组合使用 `eplan_action_run`；被排除及禁止类别不能执行。

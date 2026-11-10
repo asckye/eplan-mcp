@@ -72,7 +72,7 @@ TTL 和写前重新核对（设计 4.7、4.8）始终保留。事件只减少过
   - 没有参数的事件只能让大范围失效，效果有限。
 - **后续行动**：
   - 先做 S33：可用的事件名、参数、触发线程、批量操作时的频率、`SafetyPoint` 回滚时是否触发、处理函数的开销，结论写进 api-notes；
-  - [security.md](../standards/security.md) 增加"订阅连接上的洪泛或伪造通知"威胁及措施（编号按当时的最大值顺延）；架构 5.3、6.1 补充订阅连接；
+  - [security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md) 增加"订阅连接上的洪泛或伪造通知"威胁及措施（编号按当时的最大值顺延）；架构 5.3、6.1 补充订阅连接；
   - 测试：Bridge.Core 的 Small/Medium（序号、合并、缺口、订阅者上限、慢订阅者、处理函数中的异常被吞掉）；Host 的 Medium（假 Bridge 推送后缓存状态变化、缺口时全部待核对、重连续传）；Large（在 EPLAN 中手工改一页，Host 的缓存项变为待核对）。
 
 ## 项目负责人的决定

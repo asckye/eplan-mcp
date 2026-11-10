@@ -15,7 +15,7 @@ git config core.hooksPath eng/hooks
 ## 开发环境
 
 - Windows 10/11 x64
-- .NET SDK 10（版本由 `global.json` 固定）和 .NET Framework 4.8 目标包
+- .NET SDK 10（版本由 `global.json` 固定）和 .NET Framework 4.8.1 目标包
 - Visual Studio 2026 或 JetBrains Rider（可选）
 - 运行 Large 测试需要：EPLAN Electric P8 / Pro Panel 2026，以及包含 **API 扩展**的授权
 
@@ -36,7 +36,7 @@ git config core.hooksPath eng/hooks
 ```powershell
 $env:DISABLE_TELEMETRY = "1"; $env:DO_NOT_TRACK = "1"; npx -y skills add tt-a1i/archify --skill archify --agent claude-code --copy --yes
 ```
-安装后如果 `skills-lock.json` 发生了变化，说明 archify 发布了新版本：按开发流程作为依赖变更评审后再提交。
+安装后如果 `skills-lock.json` 发生了变化，说明 archify 发布了新版本：按依赖变更评审（[docs/standards/README.md](docs/standards/README.md)）后再提交。
 ```powershell
 node eng/scripts/apply-archify-font.mjs
 ```

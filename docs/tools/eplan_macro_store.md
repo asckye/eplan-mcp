@@ -6,7 +6,7 @@
 |---|---|
 | 工具名 / 注册入口 / 契约快照 | `eplan_macro_store`；[MacroStoreTools.cs](../../src/EplanMcp.Host/Tools/MacroStoreTools.cs)；[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
 | 分组 / Profile / 状态 | macro / full / Implemented（Unreleased），实机待验 |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.1) |
 | 当前安全分类与 MCP 注解 | Read 导出；readOnly、destructive、idempotent、openWorld 均 false |
 | 模型说明与参数示例来源 | 注册 schema 与 [usage](../../src/EplanMcp.Host/Tools/Usage/eplan_macro_store.md) |
 | EPLAN 调用路线 | `macro.store`；`WindowMacro.Create/Open/GetVariants`、`PageMacro.Create` |
