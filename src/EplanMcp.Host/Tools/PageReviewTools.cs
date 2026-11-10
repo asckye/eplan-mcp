@@ -22,7 +22,8 @@ internal sealed class PageReviewTools
     [McpServerTool(Name = Tool, Title = "Review a drawn EPLAN page", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
     [Description("Reviews wiring, geometry, targets and plugin rules. rule_packs selects installed plugins; omitted uses enabled rules. Read only. Coordinates: mm, bottom-left origin. See usage for standards and fixes. Example: {\"project\":\"Line1\",\"page\":\"=F+A1/1\"}.")]
     public static async Task<CallToolResult> ReviewAsync(IBridgeClient bridge, TimeProvider clock, string project, string page,
-        string[]? checks = null, JsonElement? expected = null, [Range(0, 100)] double tolerance_mm = 0.5, bool include_image = false,
+        string[]? checks = null, JsonElement? expected = null, [Range(0, 100)] double tolerance_mm = 0.5,
+        [Description("Not available yet: true is refused. For a picture of the page call eplan_export_image.")] bool include_image = false,
         [Range(1, 200)] int limit = 50, string? cursor = null, [AllowedValues("concise", "detailed")] string response_format = "concise",
         IProgress<ProgressNotificationValue>? progress = null, string[]? rule_packs = null, PackLibrary? packs = null, CancellationToken cancellationToken = default)
     {

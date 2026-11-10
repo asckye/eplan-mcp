@@ -293,6 +293,8 @@ internal sealed class DevicePlaceRequest
         "TLRO" or "TLRU" or "TOUL" or "TOUR" => "t_node",
         "PCP" => "potential_point",
         "ACBP" => "autoconnect_break",
+        // Interruption points: BP, BPIN, BPOUT, BPF and the like (Codex eval 2026-11-10 asked for SPECIAL/BPIN with tag 24V).
+        { } name when name.StartsWith("BP", StringComparison.Ordinal) => "interruption_point",
         _ => null,
     };
 

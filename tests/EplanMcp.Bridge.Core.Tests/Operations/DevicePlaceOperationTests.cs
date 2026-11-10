@@ -178,6 +178,7 @@ public sealed partial class DevicePlaceOperationTests
     [InlineData("tour", "t_node")]
     [InlineData("PCP", "potential_point")]
     [InlineData("ACBP", "autoconnect_break")]
+    [InlineData("BPIN", "interruption_point")]
     public void Plan_AConnectionSymbol_PointsToConnectionCreate(string symbol, string kind)
     {
         BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Plan(new DevicePlaceArgs { Project = "P", Page = NewPage, Library = "SPECIAL", Symbol = symbol, SymbolVariant = 0, X = 100, Y = 100 }));

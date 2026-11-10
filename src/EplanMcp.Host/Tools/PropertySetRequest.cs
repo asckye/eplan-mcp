@@ -80,7 +80,7 @@ internal static class PropertySetRequest
             }
             catch (Exception ex) when (ex is JsonException or ArgumentException or InvalidOperationException)
             {
-                violations.Add(at + ": use the published target/selector shape and a literal string value; unknown fields are refused.");
+                violations.Add(at + ": use target {device_tag}, property {property_id} or {property_name} and a literal string value, as in the tool's example; unknown fields are refused.");
             }
         }
         if (args.Changes.Select(c => JsonSerializer.Serialize(c.Target, _json)).Distinct(StringComparer.Ordinal).Count() > 50)

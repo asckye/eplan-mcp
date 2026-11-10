@@ -16,7 +16,7 @@ EES1 drive: page 1 variant, page 2 option strips. First create pages with eplan_
 
 `dry_run` omitted/true previews without approval or writes (`execution=not_started`); false executes. Execution limit is 60 seconds for one insertion, 300 seconds for a batch.
 
-1. Choose exactly one of `macro` (path from eplan_macro_list) or `part` (ARTICLE_GROUPSYMBOLMACRO). `part_variant` defaults to "1" or the sole variant. A part without a group symbol macro can use eplan_device_place.
+1. Choose exactly one of `macro` (path from eplan_macro_list; eplan_macro_store exports are not there) or `part` (ARTICLE_GROUPSYMBOLMACRO). `part_variant` defaults to "1" or the sole variant. A part without a group symbol macro can use eplan_device_place.
 2. `representation` is `"MultiLine"` (default) on Circuit, `"Overview"` on Overview, or `"SingleLine"` on CircuitSingleLine pages. The macro must contain that representation and integer `variant` (default 0).
 3. `x` and `y` place the macro's `reference_point` from eplan_macro_get in millimetres from the page's bottom left, y up. Objects may extend left or above it. Known outlines must fit; unavailable geometry warns.
 4. `numbering: "number"` (default) assigns unused tags in the page's structure. `keep` retains macro tags and refuses merging with existing devices. For specific tags, insert with `number`, then rename with eplan_device_update and `dry_run: false`.
@@ -52,4 +52,4 @@ Every error carries `execution`; `not_started` and `rolled_back` mean the projec
 - PLAN_STALE: page objects, macro file or tags in use changed while waiting; call again.
 - Policy, approval, audit, lock, connection and EPLAN errors: as for eplan_page_create.
 
-Layout preflight checks each page and all its batch outlines together. R1-R5/R8 refuse, R6/R7/R9 warn unless layout.strict is enabled. Boundary fallback uses Page.Size minus layout.marginMm; incomplete prediction warns. Symbols and property texts are measured before commit. Refusals include geometry in metadata.layoutViolations/layoutChecks. Post-commit connection geometry uses undo compensation. `layout_guard:"warn"` allows layout conflicts when reproducing drawings; off-page still refuses.
+Layout preflight checks each page and all its batch outlines together. R1-R5/R8 refuse, R6/R7/R9 warn unless layout.strict is enabled. Boundary fallback uses Page.Size minus layout.marginMm; incomplete prediction warns. Refusals put geometry in metadata.layoutViolations/layoutChecks. Post-commit connection geometry uses undo compensation. `layout_guard:"warn"` allows layout conflicts when reproducing drawings; off-page still refuses.

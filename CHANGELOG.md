@@ -7,7 +7,8 @@
 
 ### 修复
 
-- `eplan_device_place` 收到 `SPECIAL` 的连接符号（拐角 `CO`、T 节点 `TLRO`/`TLRU`/`TOUL`/`TOUR`、`PCP`、`ACBP`）时，直接指向 `eplan_connection_create` 和对应的 item kind，不再报“缺少标识”。
+- 按 Codex 绘图评测里反复出现的错误补了工具说明：`eplan_page_review` 的 `include_image` 写明暂不支持、改用 `eplan_export_image`；`eplan_property_set` 参数形状不对时说明要 `device_tag`、`property_id`/`property_name`；用法说明写明 T 节点的 `source` 和 `variant` 二选一、只有位置框和黑盒用 `corner_x`/`corner_y`、`eplan_macro_store` 导出的宏不能直接插入。
+- `eplan_device_place` 收到 `SPECIAL` 的连接符号（拐角 `CO`、T 节点 `TLRO`/`TLRU`/`TOUL`/`TOUR`、`PCP`、`ACBP`、以 `BP` 开头的中断点）时，直接指向 `eplan_connection_create` 和对应的 item kind，不再报“缺少标识”。
 - `eplan_project_open`、`eplan_project_create` 在审批之前不再访问 scratch 以外的路径（包括检查是否存在）；`eplan_project_open` 规划时拒绝设备名（如 `CON.elk`），文件不存在改在批准后执行时报告。
 - 虚拟机 HTTP 模式校验 `Host` 头，只接受绑定的地址和端口；别的名字（包括 `localhost`）返回 403，防止网页借 DNS 重绑定访问服务。
 - 项目文本返回给模型、写进审批窗口之前，去掉 Unicode 标签字符（U+E0000–U+E007F）。这些字符在任何字体里都看不见，可以把指令藏进项目文字。

@@ -30,18 +30,19 @@ SPECIAL/PDEF: no connection_designations. Plug pins: IEC_symbol/XBS.
 - execution=committed/not_started; dryRun=preview; undo="AI: eplan_device_place"; recovered=confirmed lost reply; hint=checks.
 - Symbols: symbol=variant/pins, changes=approval; part/variant=empty unless assigned; preview functions/unplaced=1/0.
 - assignedFunction=true if assigned; pins=its readback. Mismatch: committed+warning; check eplan_device_get before repeating.
-- Symbol-route display_properties: <=8 strict {property_id,offset_x_mm,offset_y_mm}. IDs: 20214/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406. Finite relative offsets, negatives allowed; 20214=prefixed tag. Part templates allow only symbol selection.
+- Symbol-route display_properties: <=8 {property_id,offset_x_mm,offset_y_mm}; IDs 20214 (prefixed tag)/20213/20211/20215/20058/20011/20027/20400/20403/20301/20300/20406; relative offsets, may be negative.
 - connection_designations: one nonblank pin/search order, <=64 chars, no controls; indexed 20022 verifies names.
 - Creation mismatch/cancel: rollback. One Ctrl+Z. visibleTag=null without tag display.
 - location_box: + and 1-64 letters/digits/_/dots; no tag/part/symbol. SPECIAL/SC/0, dashed; location_box_polyline: SC2. location_box_outline (needs polyline): 4-64 corners, bounds = area. x/y lower-left, corner_x/y upper-right; positive area.
 - locationBox: structure/bounds[minX,minY,maxX,maxY]/outline=dashed/affectedDevices=[]; preview predicted. functions/unplaced=0; device.tag/category=structure/LocationBox. No duplicate structure.
 
-- Terminal: terminal_strip + terminal_number; default IEC_symbol/X/0 without part. With part keep template or give library/symbol/symbol_variant. No boxes/tag/display/pins. Number=1-64 letters/digits/_/dots; conflicts ignore case. terminal_strip_text=new strips only, 1-256 plain ??_?? chars, no controls.
+- Terminal: terminal_strip + terminal_number; default IEC_symbol/X/0 without part; with part keep its template or give library/symbol/symbol_variant. No boxes/tag/display/pins. Number 1-64 letters/digits/_/dots, case-insensitive. terminal_strip_text: new strips only, 1-256 chars.
 - terminal_strip_position:[x,y]: finite 0..10000 mm; needs new strip text, omit for unplaced. Returns stripPosition/stripText.
 - Placed strip: plugin defaults.strip_definition.symbol/.variant (SPECIAL) or TDEF/0; metadata.plugins=id@version used. Changes stale plans.
 - terminal: strip/number/owner/position/sortCode(20809)/stripCreated; owner/sortCode=null in preview/recovery; empty sortCode=null. functions includes new strip. Segments: eplan_connection_generate dry_run:false.
 
-- PLC: existing SPECIAL/PLCC tag + plc_connection_point; one-pin DI. Point=1-64 chars, no leading colon; optional address/symbolic/text=1-256 nonblank chars, no controls. Same-name PLCTerminal/BusTerminal allows more representations; retain known address. Other-channel address conflicts reject; omissions unchanged.
+- corner_x/y only for location boxes and SPECIAL/DC; SPECIAL/PLCC takes x/y only. Corners, T-nodes, interruption points: eplan_connection_create.
+- PLC: existing SPECIAL/PLCC tag + plc_connection_point; one-pin DI. Point 1-64 chars, no leading colon; address/symbolic/text 1-256 chars. Same-name PLCTerminal/BusTerminal adds representations, keeps known address; other-channel address conflicts refuse.
 - NO/NC: select NoContact/NcContact; connection_designations=["13","14"] / ["11","12"].
 - plc_connection_point=20022; must match connection_designations. 20400/20402/20011=address/manual symbolic address/??_?? text; calculated 20403/20301 read-only.
 - plc_plug_designation: manual 20406, 1-64 nonblank chars, no controls; requires PLC point. Name=card:point.

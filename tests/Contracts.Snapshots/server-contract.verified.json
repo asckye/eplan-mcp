@@ -14707,6 +14707,7 @@
             "maximum": 100
           },
           "include_image": {
+            "description": "Not available yet: true is refused. For a picture of the page call eplan_export_image.",
             "type": "boolean",
             "default": false
           },
