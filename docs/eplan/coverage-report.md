@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 119（25.2%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 120（25.0%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -289,6 +289,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_plc_generate | write | plc.generate.execute<br>plc.generate.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
 | eplan_plc_get | read | plc.get | 83 | 40 | 1 | 31 | 0 | 2/1/3 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
 | eplan_plc_readdress | destructive | plc.readdress.execute<br>plc.readdress.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
+| eplan_potential_update | write | potential.update.execute<br>potential.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
 | eplan_project_close | write | project.close.execute<br>project.close.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | A34 | — |
 | eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 37 | 15 | 1 | 18 | 1 | 4/3/1 | A31 A32 A34 A35 | — |
 | eplan_project_get | read | project.get | 58 | 31 | 0 | 27 | 0 | 5/3/9 | A11 | 2026-10-19 pass（api-notes A12） |

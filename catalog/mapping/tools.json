@@ -18542,6 +18542,26 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_potential_update",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/PotentialUpdateTools.cs",
+      "operations": [
+        "potential.update.execute",
+        "potential.update.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_potential_update.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_project_close",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/ProjectSessionTools.cs",

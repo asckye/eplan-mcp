@@ -189,6 +189,8 @@ internal static class BridgeHost
             new GraphicEditExecuteOperation(new EplanGraphicEditor(), transactions),
             new PlacementDeleteOperation(catalog, new EplanDrawingReader(), new EplanPlacementRemover(), transactions, false, (project, target) => ProjectBackups.Make(backup, pages, project, target)),
             new PlacementDeleteExecuteOperation(catalog, new EplanDrawingReader(), new EplanPlacementRemover(), transactions, (project, target) => ProjectBackups.Make(backup, pages, project, target)),
+            new PotentialUpdateOperation(catalog, new EplanDrawingReader(), new EplanPotentialEditor(), transactions, false),
+            new PotentialUpdateExecuteOperation(catalog, new EplanDrawingReader(), new EplanPotentialEditor(), transactions),
             new ConnectionCreateExecuteOperation(connectionCreator, generator, transactions, new EplanPlacementMover()),
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
             new MacroInsertPlanOperation(catalog, pages, devices, macros, inserter),

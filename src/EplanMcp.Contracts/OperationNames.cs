@@ -9,6 +9,10 @@ public static class OperationNames
     public const string MacroStore = "macro.store";
     public const string PlacementDeletePlan = "placement.delete.plan";
     public const string PlacementDeleteExecute = "placement.delete.execute";
+    /// <summary>What eplan_potential_update would change on potential definitions. Reads only.</summary>
+    public const string PotentialUpdatePlan = "potential.update.plan";
+    /// <summary>Writes potential definition properties in one checked transaction (docs/tools/eplan_potential_update.md).</summary>
+    public const string PotentialUpdateExecute = "potential.update.execute";
     /// <summary>Read current UI context and a bounded selection block.</summary>
     public const string SelectionGet = "selection.get";
     /// <summary>Set UI selection without a project transaction.</summary>

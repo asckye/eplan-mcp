@@ -96,6 +96,7 @@
 | `eplan_plan_get` | full | 只读 | [eplan_plan_get.md](eplan_plan_get.md) |
 | `eplan_placement_edit` | full | 写入 | [eplan_placement_edit.md](eplan_placement_edit.md) |
 | `eplan_placement_delete` | full | 写入 | [eplan_placement_delete.md](eplan_placement_delete.md) |
+| `eplan_potential_update` | full | 写入 | [eplan_potential_update.md](eplan_potential_update.md) |
 | `eplan_plc_get` | full | 只读 | [eplan_plc_get.md](eplan_plc_get.md) |
 | `eplan_project_create` | full | 写入 | [eplan_project_create.md](eplan_project_create.md) |
 | `eplan_project_get` | core、full | 只读 | [eplan_project_get.md](eplan_project_get.md) |

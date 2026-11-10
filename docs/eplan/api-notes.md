@@ -486,6 +486,11 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A130. 修改已放置的电位定义（2026-11-10，EPLAN 2026.0.3.25421，Electric P8，scratch 副本 通过式烘芯炉）
+- **按 `eplan_connection_create` 新建时的写法改属性可行：** `PotentialName`、`SignalName` 走对象属性，31004 颜色、31002 截面、33003 电位值写字符串，31006 电位类型写整数。`eplan_potential_update` 把 N、NC 两个电位定义的颜色从 `WH` 改成 `BU`，读回一致；对全部原理图页 `eplan_connection_generate rebuild:true` 后，IEC 60204-1 复审的 N 线问题从 10 处降到 0。
+- 🔴 **第一次实机运行 EPLAN 在预览中崩溃（0xc0000374）：** 读取函数对每个属性各取一次 `point.Properties` 再释放，正是 A86 之后记下的“同一个包装对象不能取两次 `Properties`”。改成每个对象只取一次、在同一个 `using` 里读写所有属性后不再出现。写原生读写前先查 api-notes。
+- 刚用 `eplan_project_open` 打开项目后，紧接的调用可能返回 `EPLAN_BUSY`（`Reentrant`），可重试；脚本按 `retryable` 等待重试即可。
+
 ### A129. 电位连接点也是 `PotentialDefinition`（2026-11-10，EPLAN 2026.0.3.25421，Electric P8，绘图评测副本）
 - **`SPECIAL/PCP` 电位连接点读回的 .NET 类型是 `PotentialDefinition`，和电位定义点相同。** Codex 绘图评测 `draw-review-fix` 用 `potential_point` 在页左侧放 L1、L2、L3、PE，`eplan_placement_delete` 删除它们时报“Cannot delete PotentialDefinition”；审图读引脚时按 A71/A86 排除了 `PotentialDefinition`，四根电源线的起点都报 `dangling_end`。按符号名区分：`SymbolVariant.SymbolName == "PCP"` 的保留连接点，其他（定义点）照旧排除。改后同一道题重跑，`dangling_end` 消失，审图 clean。
 

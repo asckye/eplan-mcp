@@ -19491,6 +19491,154 @@
       }
     },
     {
+      "name": "eplan_potential_update",
+      "title": "Update potential definitions",
+      "description": "Changes name, signal, colour (31004), cross-section (31002), value or type of 1-50 placed potential definitions or points by locator. dry_run defaults true. One undo. Then eplan_connection_generate rebuild:true. See eplan_tool_usage.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "items"
+        ],
+        "properties": {
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "page": {
+            "type": "string",
+            "minLength": 1
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "locator"
+              ],
+              "properties": {
+                "locator": {
+                  "type": "object",
+                  "required": [
+                    "project",
+                    "page",
+                    "type",
+                    "oid",
+                    "digest"
+                  ]
+                },
+                "potential_name": {
+                  "type": "string"
+                },
+                "signal_name": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "cross_section": {
+                  "type": "string"
+                },
+                "potential_value": {
+                  "type": "string"
+                },
+                "potential_type": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "page",
+          "items",
+          "fingerprint",
+          "execution",
+          "dryRun",
+          "recovered"
+        ],
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "locator",
+                "before",
+                "after"
+              ],
+              "properties": {
+                "locator": {
+                  "type": "object"
+                },
+                "before": {
+                  "type": "object"
+                },
+                "after": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "execution": {
+            "enum": [
+              "not_started",
+              "committed"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "recovered": {
+            "type": "boolean"
+          },
+          "warning": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "annotations": {
+        "title": "Update potential definitions",
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_project_close",
       "title": "Close an EPLAN project",
       "description": "Closes an open project in EPLAN; committed changes are already stored. Previews by default. Approval outside scratch.",
@@ -25221,6 +25369,7 @@
               "eplan_plc_generate",
               "eplan_plc_get",
               "eplan_plc_readdress",
+              "eplan_potential_update",
               "eplan_project_close",
               "eplan_project_create",
               "eplan_project_get",

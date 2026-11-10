@@ -12,6 +12,7 @@
 
 ### 新增
 
+- 新增 `eplan_potential_update`：修改已放置的电位定义点和电位连接点的电位名、信号名、颜色、截面、电位值和电位类型，默认预览，一步撤销；之后用 `eplan_connection_generate` 的 `rebuild: true` 让导线采用新值。
 - 审图规则可以用 `connection.ends`（连接两端的“设备:引脚”）判断线接到哪种端子。
 
 ### 修复
