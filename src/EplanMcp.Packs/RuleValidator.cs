@@ -35,6 +35,7 @@ public static class RuleValidator
             ["connection.label"] = (new("text"), "review.label"),
             ["connection.pins"] = (new("text"), "review.pins"),
             ["connection.ends"] = (new("text"), "review.ends"),
+            ["connection.cable"] = (new("text"), "review.cable"),
             ["function.letters"] = (new("text"), "review.letters"),
         }.ToFrozenDictionary(StringComparer.Ordinal);
 

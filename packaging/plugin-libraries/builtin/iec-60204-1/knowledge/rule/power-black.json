@@ -14,73 +14,88 @@
     "scope": {
       "kind": "connection",
       "where": {
-        "any": [
+        "all": [
           {
-            "all": [
-              {
-                "exists": [
-                  {
-                    "property": "connection.potential_name"
-                  }
-                ]
-              },
-              {
-                "matches": [
-                  {
-                    "property": "connection.potential_name"
-                  },
-                  {
-                    "literal": "^L[123]$"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "all": [
+            "any": [
               {
                 "all": [
                   {
                     "exists": [
                       {
-                        "property": "connection.pins"
+                        "property": "connection.potential_name"
                       }
                     ]
                   },
                   {
                     "matches": [
                       {
-                        "property": "connection.pins"
+                        "property": "connection.potential_name"
                       },
                       {
-                        "literal": "(^|\\|)(L[123]|T[123]|U1?|V1?|W1?)(\\||$)"
+                        "literal": "^L[123]$"
                       }
                     ]
                   }
                 ]
               },
               {
-                "not": [
+                "all": [
                   {
                     "all": [
                       {
                         "exists": [
                           {
-                            "property": "connection.ends"
+                            "property": "connection.pins"
                           }
                         ]
                       },
                       {
                         "matches": [
                           {
-                            "property": "connection.ends"
+                            "property": "connection.pins"
                           },
                           {
-                            "literal": "-K[A-Z]*[0-9]*:T[0-9]"
+                            "literal": "(^|\\|)(L[123]|T[123]|U1?|V1?|W1?)(\\||$)"
                           }
                         ]
                       }
                     ]
+                  },
+                  {
+                    "not": [
+                      {
+                        "all": [
+                          {
+                            "exists": [
+                              {
+                                "property": "connection.ends"
+                              }
+                            ]
+                          },
+                          {
+                            "matches": [
+                              {
+                                "property": "connection.ends"
+                              },
+                              {
+                                "literal": "-K[A-Z]*[0-9]*:T[0-9]"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "not": [
+              {
+                "exists": [
+                  {
+                    "property": "connection.cable"
                   }
                 ]
               }

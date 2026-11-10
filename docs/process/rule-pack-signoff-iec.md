@@ -1,8 +1,18 @@
 # IEC 规则插件签核表（IEC 60204-1、IEC 81346）
 
-状态：待签核 · 签核人：项目负责人（2026-11-10 决定）· 插件版本：`iec-60204-1` 0.2.0、`iec-81346` 0.2.0
+状态：**已签核**（2026-11-10，项目负责人）· 插件版本：`iec-60204-1` 1.0.0、`iec-81346` 1.0.0
 
-两个插件是 EplanMcp 自带的审图规则（`packaging/plugin-libraries/builtin/`）。规则只有参数和条款号，不含标准原文。签核前它们是草稿，只能审 scratch 项目（[M12 设计第 6 节](../design/2026-10-31-m12-review-and-generation.md)）。
+两个插件是 EplanMcp 自带的审图规则（`packaging/plugin-libraries/builtin/`）。规则只有参数和条款号，不含标准原文。0.2.0 及以前是草稿，只能审 scratch 项目；1.0.0 签核后可以审其他项目（[M12 设计第 6 节](../design/2026-10-31-m12-review-and-generation.md)）。审图只检查收录的规则，结果干净不等于图纸符合标准。
+
+## 签核结果
+
+项目负责人 2026-11-10：“IEC规则里面除了N用蓝色，其他的按照你的建议来吧”。据此 1.0.0 相对 0.2.0 的改动：
+
+- `neutral-light-blue`：N 线只认 `BU`，不再放行橙色 `OG`；官方项目照明回路的棕色 `BN` 也算违规。
+- 多芯电缆的芯线（审图读到它属于某根电缆，新事实 `connection.cable`）不受 `power-black`、`neutral-light-blue`、`ac-control-red`、`dc-control-blue` 检查，颜色按电缆本身；两条绿黄规则对电缆芯线照样检查（保护芯也必须绿黄）。
+- 其余规则、条款号、严重级别按下表，不变。条款号来自二手资料，按负责人决定保留；以后对照正式标准发现不符时再改，并重新签核。
+
+插件 `pack.json` 已写入 `signoff`：`status: signed`、`signedBy: 项目负责人 asckye`、`signedAt: 2026-11-10`。
 
 ## 怎么签
 
@@ -28,12 +38,12 @@
 
 | 规则 | 级别 | 条款 | 适用于 | 要求 | 第 1 轮后的修改 | 签核 |
 |---|---|---|---|---|---|---|
-| `pe-green-yellow` | 强制 | 13.2.2 | 电位名 PE/PEN/PG/GND，或接 PE 连接点的线 | `GNYE` | 颜色写成数字（电缆芯号）时不检查 | |
-| `green-yellow-only-protective` | 推荐 | 13.2.2 | 颜色是 `GNYE` 的线 | 必须是保护导体：PE/PEN 电位、PE 连接点，或接 PE 端子（`-XD1:PE`）、接地端子排（`-XE`、`-XPE`）、PE 母排（`-WE`） | 增加按两端端子识别保护导体（官方 3 个项目误报 9 处） | |
-| `neutral-light-blue` | 推荐 | 13.2.3 | 电位名 N，或接 N 连接点的线 | `BU`，或 `OG` | 增加 `OG`：主开关断开后仍带电的回路（13.2.4）；电缆芯号不检查 | |
-| `power-black` | 推荐 | 13.2.4 | 电位 L1–L3，或接 L/T/U/V/W 连接点的线 | `BK`，或 `OG` | 增加 `OG`；电缆芯号不检查；继电器的 `T1`/`T3`（安全继电器测试输出）不算动力连接点 | |
-| `ac-control-red` | 推荐 | 13.2.4 | 电位名为交流控制电压（如 `230V AC`、`~230V`） | `RD`，或 `OG` | **新增**（欧标、国标、德标版都有，IEC 版漏了） | |
-| `dc-control-blue` | 推荐 | 13.2.4 | 电位名为直流控制电压（如 `24V`、`0V`） | `BU`、`DBU`、`BUWH`，或 `OG` | 增加深蓝 `DBU`、蓝白 `BUWH`（官方 S7-1500 的 0V 线用蓝白）；电缆芯号不检查 | |
+| `pe-green-yellow` | 强制 | 13.2.2 | 电位名 PE/PEN/PG/GND，或接 PE 连接点的线 | `GNYE` | 颜色写成数字（电缆芯号）时不检查 | 同意 |
+| `green-yellow-only-protective` | 推荐 | 13.2.2 | 颜色是 `GNYE` 的线 | 必须是保护导体：PE/PEN 电位、PE 连接点，或接 PE 端子（`-XD1:PE`）、接地端子排（`-XE`、`-XPE`）、PE 母排（`-WE`） | 增加按两端端子识别保护导体（官方 3 个项目误报 9 处） | 同意 |
+| `neutral-light-blue` | 推荐 | 13.2.3 | 电位名 N，或接 N 连接点的线 | `BU` | 电缆芯号不检查；签核时去掉 `OG`，N 只认蓝色 | 改：只认 `BU` |
+| `power-black` | 推荐 | 13.2.4 | 电位 L1–L3，或接 L/T/U/V/W 连接点的线 | `BK`，或 `OG` | 增加 `OG`；电缆芯号不检查；继电器的 `T1`/`T3`（安全继电器测试输出）不算动力连接点 | 同意 |
+| `ac-control-red` | 推荐 | 13.2.4 | 电位名为交流控制电压（如 `230V AC`、`~230V`） | `RD`，或 `OG` | **新增**（欧标、国标、德标版都有，IEC 版漏了） | 同意 |
+| `dc-control-blue` | 推荐 | 13.2.4 | 电位名为直流控制电压（如 `24V`、`0V`） | `BU`、`DBU`、`BUWH`，或 `OG` | 增加深蓝 `DBU`、蓝白 `BUWH`（官方 S7-1500 的 0V 线用蓝白）；电缆芯号不检查 | 同意 |
 
 第 2 轮仍报错、需要你判断的：
 
@@ -50,20 +60,20 @@
 
 | 规则 | EPLAN 类别 | 允许的开头 | 第 1 轮后的修改 | 签核 |
 |---|---|---|---|---|
-| `motor-letter` | Motor | `M` | — | |
-| `coil-letter` | Coil | `Q`（接触器）、`K`（继电器）、`B`（检测继电器） | 增加 `B`（官方 HVAC `BAA01`） | |
-| `protection-letter` | Overload、MotorOverloadSwitch、CircuitBreaker、CurrentCircuitBreaker | `F`、`Q` | — | |
-| `switch-letter` | Switch | `S`（手动）、`Q`（主开关、隔离开关）、`B`（位置开关等检测） | 增加 `Q`、`B`（官方 `QBA1`、`BGA1`） | |
-| `lamp-letter` | SignalLamp | `P` | — | |
-| `sensor-letter` | AnalogSensor、LightBarrier | `B` | — | |
-| `converter-letter` | Converter、Source | `T`（转换器、电源）、`B`（测量变送器） | 增加 `B`（官方 `BGF1`、`BCB01`） | |
-| `plc-letter` | PLCBox | `K`、`A`、`PH`（HMI）、`TA`（变频器等驱动） | 增加 `PH`、`TA`（官方 `PHA1`；烘芯炉的 HMI `16PH1`、变频器 `11TA1`） | |
-| `connector-letter` | TerminalDefText、ConnectorDefText、Socket | `X` | — | |
-| `cable-letter` | Cable、BusBarDefText | `W` | — | |
+| `motor-letter` | Motor | `M` | — | 同意 |
+| `coil-letter` | Coil | `Q`（接触器）、`K`（继电器）、`B`（检测继电器） | 增加 `B`（官方 HVAC `BAA01`） | 同意 |
+| `protection-letter` | Overload、MotorOverloadSwitch、CircuitBreaker、CurrentCircuitBreaker | `F`、`Q` | — | 同意 |
+| `switch-letter` | Switch | `S`（手动）、`Q`（主开关、隔离开关）、`B`（位置开关等检测） | 增加 `Q`、`B`（官方 `QBA1`、`BGA1`） | 同意 |
+| `lamp-letter` | SignalLamp | `P` | — | 同意 |
+| `sensor-letter` | AnalogSensor、LightBarrier | `B` | — | 同意 |
+| `converter-letter` | Converter、Source | `T`（转换器、电源）、`B`（测量变送器） | 增加 `B`（官方 `BGF1`、`BCB01`） | 同意 |
+| `plc-letter` | PLCBox | `K`、`A`、`PH`（HMI）、`TA`（变频器等驱动） | 增加 `PH`、`TA`（官方 `PHA1`；烘芯炉的 HMI `16PH1`、变频器 `11TA1`） | 同意 |
+| `connector-letter` | TerminalDefText、ConnectorDefText、Socket | `X` | — | 同意 |
+| `cable-letter` | Cable、BusBarDefText | `W` | — | 同意 |
 
-## 待定问题
+## 待定问题（已决定）
 
-1. **多芯电缆的芯线颜色**：传感器电缆、电机电缆的芯线颜色由电缆厂家决定（如棕 +24V、蓝 0V、黑信号）。颜色规则是否只管单根导线，跳过电缆芯线？我的建议：跳过，但这需要审图能读出“这根连接属于哪根电缆”，要再加一个事实。
-2. **棕色 N 线**：官方项目照明回路的 N 线用棕色，是否放行？
-3. **条款号**：颜色规则的条款号来自二手资料；字母代码规则只写了“IEC 81346-2:2019 字母代码表”，没有具体条款号。签核时请对照标准确认或补上。
-4. **严重级别**：颜色规则里只有 `pe-green-yellow` 是强制，其余推荐；字母代码全部推荐。是否同意？
+1. **多芯电缆的芯线颜色**：跳过功能颜色规则（已实现，见“签核结果”）。
+2. **棕色 N 线**：不放行，N 只用蓝色。
+3. **条款号**：保留现有条款号。
+4. **严重级别**：同意现状。

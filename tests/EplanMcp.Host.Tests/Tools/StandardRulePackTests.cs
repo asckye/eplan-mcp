@@ -39,7 +39,9 @@ public sealed class StandardRulePackTests
         { "dc-control-blue", "0V", "GY", RuleStatus.Fail },
         { "dc-control-blue", "N", "GY", RuleStatus.NotApplicable },
         { "dc-control-blue", "0V", "BUWH", RuleStatus.Pass },
-        { "neutral-light-blue", "N", "OG", RuleStatus.Pass },
+        // Owner sign-off 2026-11-10: N is blue only, orange excepted circuits included.
+        { "neutral-light-blue", "N", "OG", RuleStatus.Fail },
+        { "neutral-light-blue", "N", "BN", RuleStatus.Fail },
         { "power-black", "L1", "2", RuleStatus.Pass },
         { "ac-control-red", "230V AC", "RD", RuleStatus.Pass },
         { "ac-control-red", "~230V", "BK", RuleStatus.Fail },
@@ -72,6 +74,21 @@ public sealed class StandardRulePackTests
         wire["potentialName"] = "";
         wire["colour"] = colour;
         Assert.Equal(expected, await EvaluateAsync("iec-60204-1", rule, new JsonObject { ["connections"] = new JsonArray(wire) }));
+    }
+
+    // Owner sign-off 2026-11-10: the functional colour rules skip cores of multicore cables; protective cores are still checked.
+    [Theory]
+    [InlineData("dc-control-blue", "24V", "BK", RuleStatus.NotApplicable)]
+    [InlineData("neutral-light-blue", "N", "WH", RuleStatus.NotApplicable)]
+    [InlineData("power-black", "L1", "BN", RuleStatus.NotApplicable)]
+    [InlineData("pe-green-yellow", "PE", "BK", RuleStatus.Fail)]
+    public async Task CableCores_SkipTheFunctionalColourRules(string rule, string potential, string colour, RuleStatus expected)
+    {
+        JsonObject wire = Row();
+        wire["potentialName"] = potential;
+        wire["colour"] = colour;
+        var cable = new JsonObject { ["designation"] = "=BG+M-WG1", ["cores"] = new JsonArray(new JsonObject { ["locator"] = wire["locator"]!.DeepClone() }) };
+        Assert.Equal(expected, await EvaluateAsync("iec-60204-1", rule, new JsonObject { ["connections"] = new JsonArray(wire), ["cables"] = new JsonArray(cable) }));
     }
 
     // The official EES IEC projects (2026-11-10): PE terminals, earthing strips and PE busbars; safety relay test outputs.

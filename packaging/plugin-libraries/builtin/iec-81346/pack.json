@@ -1,8 +1,8 @@
 {
   "schemaVersion": 3,
   "id": "iec-81346",
-  "name": "IEC 81346 设备标识字母（草稿）",
-  "version": "0.2.0",
+  "name": "IEC 81346 设备标识字母",
+  "version": "1.0.0",
   "kind": "standard",
   "provides": [
     "rules"
@@ -10,11 +10,13 @@
   "standards": [
     "IEC 81346-2:2019"
   ],
-  "description": "按功能类别检查标识首字母的审图规则，只有参数；未经工程师签核，只用于 scratch 项目。",
+  "description": "按功能类别检查标识首字母的审图规则，只有参数；2026-11-10 由项目负责人签核。",
   "compatibility": {},
   "resources": [],
   "signoff": {
-    "status": "draft"
+    "status": "signed",
+    "signedBy": "项目负责人 asckye",
+    "signedAt": "2026-11-10"
   },
   "provenance": {
     "createdBy": "EplanMcp builtin library builder",

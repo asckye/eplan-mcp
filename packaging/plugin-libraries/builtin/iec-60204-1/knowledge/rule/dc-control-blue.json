@@ -16,19 +16,34 @@
       "where": {
         "all": [
           {
-            "exists": [
+            "all": [
               {
-                "property": "connection.potential_name"
+                "exists": [
+                  {
+                    "property": "connection.potential_name"
+                  }
+                ]
+              },
+              {
+                "matches": [
+                  {
+                    "property": "connection.potential_name"
+                  },
+                  {
+                    "literal": "^(\\+?24 ?[Vv][+-]?|0 ?[Vv]|L\\+|L-)$"
+                  }
+                ]
               }
             ]
           },
           {
-            "matches": [
+            "not": [
               {
-                "property": "connection.potential_name"
-              },
-              {
-                "literal": "^(\\+?24 ?[Vv][+-]?|0 ?[Vv]|L\\+|L-)$"
+                "exists": [
+                  {
+                    "property": "connection.cable"
+                  }
+                ]
               }
             ]
           }

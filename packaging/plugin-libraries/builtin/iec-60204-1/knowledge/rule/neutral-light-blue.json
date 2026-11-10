@@ -14,44 +14,59 @@
     "scope": {
       "kind": "connection",
       "where": {
-        "any": [
+        "all": [
           {
-            "all": [
+            "any": [
               {
-                "exists": [
+                "all": [
                   {
-                    "property": "connection.potential_name"
+                    "exists": [
+                      {
+                        "property": "connection.potential_name"
+                      }
+                    ]
+                  },
+                  {
+                    "matches": [
+                      {
+                        "property": "connection.potential_name"
+                      },
+                      {
+                        "literal": "^N$"
+                      }
+                    ]
                   }
                 ]
               },
               {
-                "matches": [
+                "all": [
                   {
-                    "property": "connection.potential_name"
+                    "exists": [
+                      {
+                        "property": "connection.pins"
+                      }
+                    ]
                   },
                   {
-                    "literal": "^N$"
+                    "matches": [
+                      {
+                        "property": "connection.pins"
+                      },
+                      {
+                        "literal": "(^|\\|)(N)(\\||$)"
+                      }
+                    ]
                   }
                 ]
               }
             ]
           },
           {
-            "all": [
+            "not": [
               {
                 "exists": [
                   {
-                    "property": "connection.pins"
-                  }
-                ]
-              },
-              {
-                "matches": [
-                  {
-                    "property": "connection.pins"
-                  },
-                  {
-                    "literal": "(^|\\|)(N)(\\||$)"
+                    "property": "connection.cable"
                   }
                 ]
               }
@@ -69,8 +84,7 @@
             },
             {
               "literal": [
-                "BU",
-                "OG"
+                "BU"
               ]
             }
           ]

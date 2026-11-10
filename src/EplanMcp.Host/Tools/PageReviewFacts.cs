@@ -10,6 +10,9 @@ internal sealed class PageReviewFacts : IRuleFactSnapshot
     private static readonly JsonElement _absent = JsonSerializer.SerializeToElement<string?>(null);
     private readonly Dictionary<string, (string Kind, JsonObject Row)> _objects = new(StringComparer.Ordinal);
 
+    // Connection locator -> designation of the cable whose core it is, from the cables read on the page.
+    private readonly Dictionary<string, string> _cables = new(StringComparer.Ordinal);
+
     internal PageReviewFacts(JsonObject actual, JsonObject page)
     {
         Add("page", page);
@@ -17,6 +20,14 @@ internal sealed class PageReviewFacts : IRuleFactSnapshot
         {
             foreach (JsonObject row in (actual[field] as JsonArray ?? []).OfType<JsonObject>())
             { Add(kind, row); }
+        }
+        foreach (JsonObject cable in (actual["cables"] as JsonArray ?? []).OfType<JsonObject>())
+        {
+            foreach (JsonObject core in (cable["cores"] as JsonArray ?? []).OfType<JsonObject>())
+            {
+                if (core["locator"] is JsonObject locator && Text(cable["designation"]) is { Length: > 0 } designation)
+                { _cables.TryAdd(locator.ToJsonString(), designation); }
+            }
         }
     }
 
@@ -52,6 +63,8 @@ internal sealed class PageReviewFacts : IRuleFactSnapshot
             "connection.label" => row["label"],
             "connection.pins" => JsonValue.Create(string.Join("|", new[] { row["from"], row["to"] }.Select(end => Text(end?["pin"])).Where(pin => !string.IsNullOrEmpty(pin)))),
             // device:pin of both ends, so rules see PE terminals (-XD1:PE), earthing strips (-XE) and the device behind a pin.
+            // Owner sign-off 2026-11-10: the functional colour rules skip cores of multicore cables (colours are the cable's).
+            "connection.cable" => _cables.TryGetValue(locator, out string? cable) ? JsonValue.Create(cable) : null,
             "connection.ends" => JsonValue.Create(string.Join("|", new[] { row["from"], row["to"] }.Select(end => Text(end?["device"]) + ":" + Text(end?["pin"])).Where(end => end != ":"))),
             _ => null,
         };
