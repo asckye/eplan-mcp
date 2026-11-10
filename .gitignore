@@ -54,3 +54,6 @@ backup/
 .archify/
 # archify delivery receipts next to each diagram (provenance of one local run, not reviewed content).
 docs/diagrams/**/*.delivery.json
+
+# Left behind only if the local gate is killed; it deletes the file itself.
+/.gate-tests.slnf

@@ -67,9 +67,18 @@ function Get-GateSolution {
 Assert-CleanTree
 
 if ($Push) {
-    Step 'Rebase onto origin/main' { git fetch --quiet origin main; git rebase --quiet origin/main }
+    Step 'Rebase onto origin/main' {
+        git fetch --quiet origin main
+        if ($LASTEXITCODE -ne 0) { throw 'Could not fetch origin/main; nothing was rebased.' }
+        git rebase --quiet origin/main
+        if ($LASTEXITCODE -ne 0) {
+            git rebase --abort
+            throw 'Rebasing onto origin/main conflicts; the rebase was aborted. Rebase by hand, then run the gate again.'
+        }
+    }
 }
 $base = git rev-parse origin/main
+if ($LASTEXITCODE -ne 0 -or -not $base) { throw 'origin/main is unknown; fetch it first.' }
 
 # Git Bash, found from git itself: a bare 'bash' on Windows can be the WSL launcher in System32.
 $gitRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (git --exec-path)))
@@ -91,6 +100,9 @@ Step 'Commit messages' {
 $suites = @((Get-Content tests/test-suites.json -Raw | ConvertFrom-Json).suites.assembly)
 $affected = if ($Full) { $suites } else { @(pwsh -NoProfile -File eng/scripts/affected-tests.ps1 -Base $base) }
 if (-not $Full -and $LASTEXITCODE -ne 0) { throw 'Affected test selection failed.' }
+# Only known suites: any other line the selection script prints would otherwise become a project path.
+$unknown = @($affected | Where-Object { $_ -notin $suites })
+if ($unknown.Count -gt 0) { throw ('Affected test selection printed unknown suites: ' + ($unknown -join ', ')) }
 Write-Output ("== Tests to run: " + $(if ($affected.Count -eq $suites.Count) { 'all' } else { $affected -join ', ' }))
 $filter = Join-Path $root '.gate-tests.slnf'
 $results = Join-Path ([IO.Path]::GetTempPath()) ("eplanmcp-gate-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
