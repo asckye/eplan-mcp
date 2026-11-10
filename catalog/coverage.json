@@ -1982,7 +1982,7 @@
       "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
-      "small": 11,
+      "small": 12,
       "medium": 17,
       "large": 19,
       "apiNotes": [
@@ -2059,7 +2059,7 @@
       "dependencies": 22,
       "actions": 0,
       "spec": "docs/tools/eplan_page_list.md",
-      "small": 15,
+      "small": 16,
       "medium": 5,
       "large": 14,
       "apiNotes": [

@@ -13285,6 +13285,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/CancellationTests.cs"
           },
           {
+            "name": "CodexTraceTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Evals.Tests/Agent/CodexTraceTests.cs"
+          },
+          {
             "name": "EplanDialogChannelTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Safety/EplanDialogChannelTests.cs"
@@ -14318,6 +14323,11 @@
             "name": "AgentTraceTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Agent/AgentTraceTests.cs"
+          },
+          {
+            "name": "CodexTraceTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Evals.Tests/Agent/CodexTraceTests.cs"
           },
           {
             "name": "ConnectionListOperationTests",
