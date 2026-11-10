@@ -31,3 +31,12 @@ eng/hooks/*    text eol=lf
 *.zw1  binary
 *.dll  binary
 *.exe  binary
+
+# Generated catalogs (`dotnet run --project eng/coverage -- generate` / `scan`). The local gate checks that they match
+# their inputs, so reviews read the inputs instead: no text diff here, and GitHub collapses them.
+catalog/coverage.json                linguist-generated=true -diff
+catalog/mapping/bridge-usage.json    linguist-generated=true -diff
+catalog/mapping/tools.json           linguist-generated=true -diff
+catalog/**/*.g.tsv                   linguist-generated=true -diff
+src/**/*.g.base64                    linguist-generated=true -diff
+src/**/*.g.cs                        linguist-generated=true
