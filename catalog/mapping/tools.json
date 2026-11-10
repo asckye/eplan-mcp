@@ -10,7 +10,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_action_catalog_get.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -48,7 +48,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_action_catalog_search.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -550,7 +550,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_action_try.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A9",
           "A40"
@@ -946,7 +946,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_annotation_create.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.0)",
         "apiNotes": [
           "A93",
           "A97"
@@ -1034,7 +1034,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_get.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A77"
         ],
@@ -1099,7 +1099,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_search.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -4978,7 +4978,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_api_try.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A39",
           "A56",
@@ -5132,7 +5132,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_asset_review.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -5279,7 +5279,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_cabinet_bind.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -5394,7 +5394,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_cabinet_list.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -5777,7 +5777,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_cable_reassign.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -6643,7 +6643,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_connection_create.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A52",
           "A55",
@@ -9865,7 +9865,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_graphic_edit.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [
           "A99"
         ],
@@ -10424,7 +10424,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_import_pdf_comments.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A39"
         ],
@@ -11489,7 +11489,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_macro_store.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -11520,7 +11520,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_masterdata_update.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -12078,7 +12078,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_object_find.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A57",
           "A60"
@@ -12822,7 +12822,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_object_get.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -12998,7 +12998,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_pack_enable.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -13079,7 +13079,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_pack_install.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -13112,7 +13112,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_pack_library_list.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -14571,7 +14571,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_open.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A54"
         ],
@@ -15018,7 +15018,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_page_review.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A41",
           "A64",
@@ -16700,7 +16700,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placement_create.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A54",
           "A88"
@@ -17061,7 +17061,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placement_delete.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.0)",
         "apiNotes": [
           "A87"
         ],
@@ -17569,7 +17569,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_placement_edit.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -18023,7 +18023,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_placement_update.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A57",
           "A72",
@@ -18345,7 +18345,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_plc_generate.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -18527,7 +18527,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_plc_readdress.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -18573,7 +18573,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_project_close.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [
           "A34"
         ],
@@ -19152,7 +19152,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_project_open.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [
           "A41"
         ],
@@ -19180,7 +19180,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_project_rename.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [
           "A18"
         ],
@@ -19326,7 +19326,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_project_update.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -20400,7 +20400,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_report_configure.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [
           "A28"
         ],
@@ -20509,7 +20509,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_report_create.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.0)",
         "apiNotes": [
           "A84"
         ],
@@ -21068,7 +21068,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_rule_check.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -21407,7 +21407,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_selection_get.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -21630,7 +21630,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_selection_set.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A54",
           "B11"
@@ -21845,7 +21845,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_shield_create.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -21871,7 +21871,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_structure_delete.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -21896,7 +21896,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_structure_list.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -21927,7 +21927,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_structure_rename.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -21953,7 +21953,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_structure_update.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
           {
@@ -22051,7 +22051,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_symbol_search.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.4.1)",
         "apiNotes": [
           "A52",
           "A53",
