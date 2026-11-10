@@ -46,13 +46,13 @@
           "property": "function.letters"
         },
         {
-          "literal": "^[QK]"
+          "literal": "^[QKB]"
         }
       ]
     },
     "message": {
-      "zh": "接触器和继电器线圈的标识字母以 Q、K 开头。",
-      "en": "Contactor and relay coil designations start with Q or K."
+      "zh": "线圈的标识字母以 Q（接触器）、K（继电器）或 B（检测继电器）开头。",
+      "en": "Coil designations start with Q (contactors), K (relays) or B (measuring relays)."
     }
   }
 }

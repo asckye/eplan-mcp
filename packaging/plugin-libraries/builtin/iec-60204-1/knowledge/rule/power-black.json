@@ -39,19 +39,48 @@
           {
             "all": [
               {
-                "exists": [
+                "all": [
                   {
-                    "property": "connection.pins"
+                    "exists": [
+                      {
+                        "property": "connection.pins"
+                      }
+                    ]
+                  },
+                  {
+                    "matches": [
+                      {
+                        "property": "connection.pins"
+                      },
+                      {
+                        "literal": "(^|\\|)(L[123]|T[123]|U1?|V1?|W1?)(\\||$)"
+                      }
+                    ]
                   }
                 ]
               },
               {
-                "matches": [
+                "not": [
                   {
-                    "property": "connection.pins"
-                  },
-                  {
-                    "literal": "(^|\\|)(L[123]|T[123]|U1?|V1?|W1?)(\\||$)"
+                    "all": [
+                      {
+                        "exists": [
+                          {
+                            "property": "connection.ends"
+                          }
+                        ]
+                      },
+                      {
+                        "matches": [
+                          {
+                            "property": "connection.ends"
+                          },
+                          {
+                            "literal": "-K[A-Z]*[0-9]*:T[0-9]"
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -61,13 +90,28 @@
       }
     },
     "check": {
-      "in": [
+      "any": [
         {
-          "property": "connection.colour"
+          "in": [
+            {
+              "property": "connection.colour"
+            },
+            {
+              "literal": [
+                "BK",
+                "OG"
+              ]
+            }
+          ]
         },
         {
-          "literal": [
-            "BK"
+          "matches": [
+            {
+              "property": "connection.colour"
+            },
+            {
+              "literal": "^[0-9]+$"
+            }
           ]
         }
       ]

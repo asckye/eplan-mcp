@@ -47,13 +47,13 @@
           "property": "function.letters"
         },
         {
-          "literal": "^[T]"
+          "literal": "^[TB]"
         }
       ]
     },
     "message": {
-      "zh": "变换器和电源的标识字母以 T 开头。",
-      "en": "Converter and power supply designations start with T."
+      "zh": "转换器和电源的标识字母以 T 开头，测量变送器以 B 开头。",
+      "en": "Converters and power supplies start with T; measuring transducers start with B."
     }
   }
 }

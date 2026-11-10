@@ -51,6 +51,8 @@ internal sealed class PageReviewFacts : IRuleFactSnapshot
             "connection.potential_type" => row["potentialType"],
             "connection.label" => row["label"],
             "connection.pins" => JsonValue.Create(string.Join("|", new[] { row["from"], row["to"] }.Select(end => Text(end?["pin"])).Where(pin => !string.IsNullOrEmpty(pin)))),
+            // device:pin of both ends, so rules see PE terminals (-XD1:PE), earthing strips (-XE) and the device behind a pin.
+            "connection.ends" => JsonValue.Create(string.Join("|", new[] { row["from"], row["to"] }.Select(end => Text(end?["device"]) + ":" + Text(end?["pin"])).Where(end => end != ":"))),
             _ => null,
         };
         if (node is null || property.Type.Kind == "text" && string.IsNullOrEmpty(Text(node)))

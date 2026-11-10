@@ -36,6 +36,7 @@ public sealed class PageReviewFactsTests
         Assert.Equal(System.Text.Json.JsonValueKind.Null, facts.GetProperty(empty, "function.category")!.Value.ValueKind);
         Assert.Equal(System.Text.Json.JsonValueKind.Null, facts.GetProperty(empty, "function.letters")!.Value.ValueKind);
         Assert.Equal(System.Text.Json.JsonValueKind.Null, facts.GetProperty(connection, "connection.label")!.Value.ValueKind);
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, facts.GetProperty(connection, "connection.ends")!.Value.ValueKind);
         Assert.Null(facts.GetProperty(connection, "function.name"));
         Assert.Null(facts.GetProperty("missing", "function.name"));
         foreach ((string property, string expected) in new[] { ("colour", "RD"), ("cross_section", "2.5"), ("potential_name", "L1"), ("potential_type", "raw:42") })

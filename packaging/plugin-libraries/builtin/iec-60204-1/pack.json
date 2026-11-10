@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "id": "iec-60204-1",
   "name": "IEC 60204-1 导线颜色（草稿）",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "kind": "standard",
   "provides": [
     "rules"

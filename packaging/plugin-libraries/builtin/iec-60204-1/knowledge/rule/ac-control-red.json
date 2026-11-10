@@ -1,0 +1,70 @@
+{
+  "apiVersion": "eplanmcp.pack/v2",
+  "kind": "rule",
+  "metadata": {
+    "name": "ac-control-red"
+  },
+  "spec": {
+    "severity": "recommended",
+    "source": {
+      "standard": "IEC 60204-1:2016",
+      "clause": "13.2.4",
+      "verification": "Values from secondary sources; confirm against the published standard at sign-off."
+    },
+    "scope": {
+      "kind": "connection",
+      "where": {
+        "all": [
+          {
+            "exists": [
+              {
+                "property": "connection.potential_name"
+              }
+            ]
+          },
+          {
+            "matches": [
+              {
+                "property": "connection.potential_name"
+              },
+              {
+                "literal": "^((~|AC) ?(24|48|110|115|120|220|230) ?[Vv]|(24|48|110|115|120|220|230) ?[Vv] ?(AC|~))$"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "check": {
+      "any": [
+        {
+          "in": [
+            {
+              "property": "connection.colour"
+            },
+            {
+              "literal": [
+                "RD",
+                "OG"
+              ]
+            }
+          ]
+        },
+        {
+          "matches": [
+            {
+              "property": "connection.colour"
+            },
+            {
+              "literal": "^[0-9]+$"
+            }
+          ]
+        }
+      ]
+    },
+    "message": {
+      "zh": "交流控制回路用红色，颜色代码 RD。",
+      "en": "AC control circuits use red, colour code RD."
+    }
+  }
+}

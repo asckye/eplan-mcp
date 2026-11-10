@@ -46,13 +46,13 @@
           "property": "function.letters"
         },
         {
-          "literal": "^[S]"
+          "literal": "^[SQB]"
         }
       ]
     },
     "message": {
-      "zh": "手动开关和按钮的标识字母以 S 开头。",
-      "en": "Manual switch and push button designations start with S."
+      "zh": "开关的标识字母以 S（手动操作）、Q（主开关、隔离开关）或 B（位置开关等检测）开头。",
+      "en": "Switch designations start with S (manual operation), Q (main or isolating switches) or B (position and other sensing switches)."
     }
   }
 }

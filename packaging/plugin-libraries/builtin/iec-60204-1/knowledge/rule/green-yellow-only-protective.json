@@ -78,12 +78,33 @@
               ]
             }
           ]
+        },
+        {
+          "all": [
+            {
+              "exists": [
+                {
+                  "property": "connection.ends"
+                }
+              ]
+            },
+            {
+              "matches": [
+                {
+                  "property": "connection.ends"
+                },
+                {
+                  "literal": "(-(XE|XPE|WE)[A-Z]*[0-9]*(:|$)|:PE(:|\\||$))"
+                }
+              ]
+            }
+          ]
         }
       ]
     },
     "message": {
-      "zh": "绿黄只能用于保护导体；这根线没有 PE 电位，也没有接 PE 连接点。如果它就是保护导体，请给它定义 PE 电位。",
-      "en": "Green-and-yellow is only for protective conductors; this wire has no PE potential or PE pin. If it is one, define its PE potential."
+      "zh": "绿黄只能用于保护导体；这根线没有 PE 电位，没有接 PE 连接点，也没有接 PE 端子或接地端子排。如果它就是保护导体，请给它定义 PE 电位。",
+      "en": "Green-and-yellow is for protective conductors only; this wire has no PE potential and no PE pin, PE terminal or earthing strip at either end. If it is a protective conductor, give it the PE potential."
     }
   }
 }

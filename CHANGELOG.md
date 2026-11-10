@@ -5,6 +5,14 @@
 
 ## [Unreleased]
 
+### 变更
+
+- 内置规则插件 `iec-60204-1`、`iec-81346` 升到 0.2.0（仍是草稿，只审 scratch 项目）：用 4 个官方 EES IEC 项目验证后修正误报。颜色规则不把电缆芯号当颜色，放行主开关断开后仍带电回路的橙色 `OG`，直流控制线也接受深蓝 `DBU`、蓝白 `BUWH`；绿黄线接 PE 端子、接地端子排或 PE 母排即算保护导体；继电器的 `T1`/`T3` 不算动力连接点；新增“交流控制回路用红色”。字母代码放宽为开关 `S`/`Q`/`B`、转换器 `T`/`B`、PLC 盒 `K`/`A`/`PH`/`TA`、线圈 `Q`/`K`/`B`。官方项目上的报错从 73 处降到 9 处。
+
+### 新增
+
+- 审图规则可以用 `connection.ends`（连接两端的“设备:引脚”）判断线接到哪种端子。
+
 ### 修复
 
 - 按 Codex 绘图评测里反复出现的错误补了工具说明：`eplan_page_review` 的 `include_image` 写明暂不支持、改用 `eplan_export_image`；`eplan_property_set` 参数形状不对时说明要 `device_tag`、`property_id`/`property_name`；用法说明写明 T 节点的 `source` 和 `variant` 二选一、只有位置框和黑盒用 `corner_x`/`corner_y`、`eplan_macro_store` 导出的宏不能直接插入。

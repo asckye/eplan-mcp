@@ -12,7 +12,7 @@ public sealed class StandardRulePackTests
     private static readonly string[] _packs = ["iec-60204-1", "iec-81346"];
     private static readonly string[] _coveredRules =
     [
-        "pe-green-yellow", "green-yellow-only-protective", "neutral-light-blue", "power-black", "dc-control-blue",
+        "pe-green-yellow", "green-yellow-only-protective", "neutral-light-blue", "power-black", "dc-control-blue", "ac-control-red",
         "motor-letter", "coil-letter", "protection-letter", "switch-letter", "lamp-letter", "sensor-letter", "converter-letter", "plc-letter", "connector-letter", "cable-letter",
     ];
 
@@ -38,6 +38,12 @@ public sealed class StandardRulePackTests
         { "dc-control-blue", "24V", "GY", RuleStatus.Fail },
         { "dc-control-blue", "0V", "GY", RuleStatus.Fail },
         { "dc-control-blue", "N", "GY", RuleStatus.NotApplicable },
+        { "dc-control-blue", "0V", "BUWH", RuleStatus.Pass },
+        { "neutral-light-blue", "N", "OG", RuleStatus.Pass },
+        { "power-black", "L1", "2", RuleStatus.Pass },
+        { "ac-control-red", "230V AC", "RD", RuleStatus.Pass },
+        { "ac-control-red", "~230V", "BK", RuleStatus.Fail },
+        { "ac-control-red", "24V", "RD", RuleStatus.NotApplicable },
     };
 
     [Theory]
@@ -68,6 +74,24 @@ public sealed class StandardRulePackTests
         Assert.Equal(expected, await EvaluateAsync("iec-60204-1", rule, new JsonObject { ["connections"] = new JsonArray(wire) }));
     }
 
+    // The official EES IEC projects (2026-11-10): PE terminals, earthing strips and PE busbars; safety relay test outputs.
+    [Theory]
+    [InlineData("green-yellow-only-protective", "=MA1+UC1-XD1:PE", "2", "=MA1+M-11MA1", "", "GNYE", RuleStatus.Pass)]
+    [InlineData("green-yellow-only-protective", "+S1-WE2", "1", "=GAA+S1-XD1:5", "1", "GNYE", RuleStatus.Pass)]
+    [InlineData("green-yellow-only-protective", "=GAA+B1-QB1:1", "2", "=GAA+B1-XEA1:1", "1", "GNYE", RuleStatus.Pass)]
+    [InlineData("green-yellow-only-protective", "-K1", "A1", "-X1:3", "1", "GNYE", RuleStatus.Fail)]
+    [InlineData("power-black", "=KF+S1-K1", "T1", "=KF+S1-XD1:1", "1", "YE", RuleStatus.NotApplicable)]
+    [InlineData("power-black", "-QA1", "T1", "-XD1:1", "1", "RD", RuleStatus.Fail)]
+    public async Task WireColourRules_SeeTheDevicesAtTheEnds(string rule, string fromDevice, string fromPin, string toDevice, string toPin, string colour, RuleStatus expected)
+    {
+        JsonObject wire = Row();
+        wire["from"] = new JsonObject { ["device"] = fromDevice, ["pin"] = fromPin };
+        wire["to"] = new JsonObject { ["device"] = toDevice, ["pin"] = toPin };
+        wire["potentialName"] = "";
+        wire["colour"] = colour;
+        Assert.Equal(expected, await EvaluateAsync("iec-60204-1", rule, new JsonObject { ["connections"] = new JsonArray(wire) }));
+    }
+
     [Theory]
     [InlineData("motor-letter", "Motor", "=GAA+A1-MA1", "=GAA+A1-K1")]
     [InlineData("coil-letter", "Coil", "=GAA+A1-QA1", "=GAA+A1-M1")]
@@ -75,10 +99,12 @@ public sealed class StandardRulePackTests
     [InlineData("protection-letter", "Overload", "=GAA+A1-FC1", "=GAA+A1-K1")]
     [InlineData("protection-letter", "CircuitBreaker", "=GAA+A1-Q1", "=GAA+A1-K1")]
     [InlineData("switch-letter", "Switch", "=GAA+A1-SG1", "=GAA+A1-K1")]
+    [InlineData("switch-letter", "Switch", "=GAA+S1-QBA1", "=GAA+A1-K1")]
     [InlineData("lamp-letter", "SignalLamp", "=GAA+A1-PF1", "=GAA+A1-H1")]
     [InlineData("sensor-letter", "AnalogSensor", "=GAA+A1-BL1", "=GAA+A1-S1")]
     [InlineData("converter-letter", "Converter", "=GAA+A1-TA1", "=GAA+A1-U1")]
     [InlineData("plc-letter", "PLCBox", "=GAA+A1-KE1", "=GAA+A1-U1")]
+    [InlineData("plc-letter", "PLCBox", "=PHA+S1-PHA1", "=GAA+A1-PF1")]
     [InlineData("connector-letter", "TerminalDefText", "=GAA+A1-XD1", "=GAA+A1-T1")]
     [InlineData("cable-letter", "Cable", "=GAA+A1-WD1", "=GAA+A1-C1")]
     public async Task LetterRules_PassTheClass_FailAnother_AndSkipOtherCategories(string rule, string category, string right, string wrong)
@@ -101,7 +127,7 @@ public sealed class StandardRulePackTests
     public void EveryRule_IsCoveredAboveOrNamedHere()
     {
         string[] names = [.. _packs.SelectMany(pack => Directory.GetFiles(Path.Combine(Builtin(), pack, "knowledge", "rule"), "*.json")).Select(Path.GetFileNameWithoutExtension)!];
-        Assert.Equal(15, names.Length);
+        Assert.Equal(16, names.Length);
         Assert.All(names, name => Assert.Contains(name, _coveredRules));
     }
 

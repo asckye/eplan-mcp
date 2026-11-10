@@ -46,13 +46,13 @@
           "property": "function.letters"
         },
         {
-          "literal": "^[KA]"
+          "literal": "^(K|A|PH|TA)"
         }
       ]
     },
     "message": {
-      "zh": "PLC的标识字母以 K、A 开头。",
-      "en": "PLC designations start with K or A."
+      "zh": "PLC 盒的标识字母以 K 或 A 开头；HMI 用 PH，变频器等驱动用 TA。",
+      "en": "PLC box designations start with K or A; HMIs use PH and drives such as converters TA."
     }
   }
 }
