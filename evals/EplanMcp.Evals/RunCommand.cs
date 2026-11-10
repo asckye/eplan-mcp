@@ -149,7 +149,7 @@ internal static class RunCommand
                 }
             }
 
-            var report = new RunReport(started, options.Model, claude, eplanmcp, invalidFiles, records);
+            var report = new RunReport(started, options.Codex && options.Model == ClaudeCommand.DefaultModel ? "codex default" : options.Model, claude, eplanmcp, invalidFiles, records);
             await ReportWriter.WriteAsync(report, run, CancellationToken.None).ConfigureAwait(false);
             foreach (SetSummary set in ReportWriter.Summarize(report))
             {

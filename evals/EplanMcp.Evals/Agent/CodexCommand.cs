@@ -22,6 +22,10 @@ internal static class CodexCommand
             "-c", $"mcp_servers.{AgentTrace.ServerName}.command={Toml(setup.Eplanmcp ?? string.Empty)}",
             "-c", $"mcp_servers.{AgentTrace.ServerName}.args=[\"serve\"]",
             "-c", $"mcp_servers.{AgentTrace.ServerName}.env.{ClaudeCommand.HomeVariable}={Toml(setup.Home ?? string.Empty)}",
+
+            // Codex asks before an MCP tool with destructiveHint and, with no one to ask, refuses it ("approval policy is
+            // never", 2026-11-10). eplanmcp's own policy and approval still apply, as with claude's dontAsk.
+            "-c", $"mcp_servers.{AgentTrace.ServerName}.default_tools_approval_mode=\"approve\"",
         ];
         if (setup.Model != ClaudeCommand.DefaultModel)
         {

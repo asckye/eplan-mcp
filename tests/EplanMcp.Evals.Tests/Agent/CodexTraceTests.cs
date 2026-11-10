@@ -97,6 +97,7 @@ public sealed class CodexTraceTests
 
         Assert.Contains("mcp_servers.eplan.command=\"C:\\\\a b\\\\eplanmcp.exe\"", arguments);
         Assert.Contains("mcp_servers.eplan.env.EPLANMCP_HOME=\"C:\\\\home\"", arguments);
+        Assert.Contains("mcp_servers.eplan.default_tools_approval_mode=\"approve\"", arguments);
         Assert.Equal(["--ignore-user-config", "--ignore-rules", "read-only"], arguments.Where(a => a is "--ignore-user-config" or "--ignore-rules" or "read-only"));
         Assert.DoesNotContain("-m", arguments);
         Assert.Equal("-", arguments[^1]);

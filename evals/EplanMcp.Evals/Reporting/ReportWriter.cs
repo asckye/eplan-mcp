@@ -70,7 +70,7 @@ internal static class ReportWriter
         Line(text);
         Line(text, $"- 开始时间：{report.Started:yyyy-MM-dd HH:mm:ss zzz}");
         Line(text, $"- 模型：`{report.Model}`");
-        Line(text, $"- claude：`{report.Claude}`");
+        Line(text, $"- 代理程序：`{report.Claude}`");
         Line(text, $"- eplanmcp：`{report.Eplanmcp}`");
         Line(text);
         Line(text, "## 汇总");
