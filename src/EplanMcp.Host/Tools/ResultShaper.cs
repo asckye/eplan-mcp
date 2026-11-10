@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Host.Tools;
 
@@ -184,6 +185,7 @@ internal static class ResultShaper
 
     internal static string CleanFullText(string text)
     {
+        text = TagCharacters.Remove(text);
         if (!text.AsSpan().ContainsAny(_controls))
         {
             return text;

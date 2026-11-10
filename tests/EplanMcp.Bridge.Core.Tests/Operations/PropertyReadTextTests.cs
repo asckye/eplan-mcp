@@ -221,4 +221,12 @@ public sealed class PropertyReadTextTests
         Assert.Null(row.Unit);
         Assert.Null(row.Format);
     }
+
+    [Fact]
+    public void CleanText_RemovesInvisibleTagCharacters()
+    {
+        string? clean = PropertyReadText.CleanText("-K1󠁤󠁥", out int length);
+
+        Assert.Equal(("-K1", 3), (clean, length));
+    }
 }

@@ -88,4 +88,10 @@ public sealed class ProjectTextTests
         Assert.Equal(["a ⏎ b"], one.Lines);
         Assert.Equal(0, one.MoreLines);
     }
+
+    [Fact]
+    public void InvisibleTagCharacters_AreRemoved()
+    {
+        Assert.Equal("-K1😀", ProjectText.Line("-K1󠁤󠁥😀"));
+    }
 }

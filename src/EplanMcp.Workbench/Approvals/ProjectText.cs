@@ -46,6 +46,10 @@ internal static class ProjectText
             {
                 line.Append(' ');
             }
+            else if (c == '\uDB40' && i + 1 < text.Length && text[i + 1] is >= '\uDC00' and <= '\uDC7F')
+            {
+                i++; // A tag character (U+E0000-U+E007F) is invisible and can hide instructions (WS-28).
+            }
             else if (char.IsHighSurrogate(c) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
             {
                 line.Append(c).Append(text[++i]);

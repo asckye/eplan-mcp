@@ -212,4 +212,11 @@ public sealed class ResultShaperTests
 
         List<string> IPagedResult<string>.Items => Entries;
     }
+
+    [Fact]
+    public void CleanText_RemovesInvisibleTagCharacters()
+    {
+        // Tag characters (U+E0000-U+E007F) can hide an instruction in project text (WS-28).
+        Assert.Equal("-K1", ResultShaper.CleanText("-K1󠁤󠁥󠁬"));
+    }
 }

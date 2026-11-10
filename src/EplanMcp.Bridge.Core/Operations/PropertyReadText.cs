@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
 
@@ -14,7 +15,7 @@ internal static class PropertyReadText
     // Same CleanText controls and marker as Host ResultShaper; inspect the full view before truncation (SEC-08).
     internal static string? CleanText(string? text, out int length)
     {
-        string? clean = text is null ? null : new string([.. text.Where(c =>
+        string? clean = text is null ? null : new string([.. TagCharacters.Remove(text).Where(c =>
             (!char.IsControl(c) || c is '\n' or '\t') && c is not (>= '\u202a' and <= '\u202e') and not (>= '\u2066' and <= '\u2069'))]);
         length = clean?.Length ?? 0;
         try
