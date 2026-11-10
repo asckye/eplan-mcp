@@ -28,14 +28,16 @@ internal sealed class EplanPartReader : IPartReader
             [
                 .. project.Articles.Select(article =>
                 {
-                    (string? description, string? descriptionLanguage) = EplanText.ReadWithLanguage(article.Properties.ARTICLE_DESCR1, textLanguage);
+                    // One property list per wrapper (api-notes: repeated Properties per wrapper is a known crash pattern); not disposed, as before.
+                    var properties = article.Properties;
+                    (string? description, string? descriptionLanguage) = EplanText.ReadWithLanguage(properties.ARTICLE_DESCR1, textLanguage);
                     return new ArticleRecord
                     {
                         PartNumber = article.PartNr ?? string.Empty,
                         Variant = article.VariantNr ?? string.Empty,
                         Description = description,
                         DescriptionLanguage = descriptionLanguage,
-                        Manufacturer = EplanText.Read(article.Properties.ARTICLE_MANUFACTURER, textLanguage),
+                        Manufacturer = EplanText.Read(properties.ARTICLE_MANUFACTURER, textLanguage),
                     };
                 }),
             ],

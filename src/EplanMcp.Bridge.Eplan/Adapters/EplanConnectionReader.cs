@@ -107,11 +107,13 @@ internal sealed class EplanConnectionReader : IConnectionReader
     /// </summary>
     internal static ConnectionRecord Record(Connection connection, TextLanguage language)
     {
+        // One property list per wrapper (api-notes: repeated Properties per wrapper is a known crash pattern); not disposed, as before.
+        var properties = connection.Properties;
         var record = new ConnectionRecord
         {
             Is3D = connection is Connection3D,
-            CrossSection = EplanText.Read(connection.Properties.CONNECTION_WIRECROSSSECTION, language),
-            Colour = EplanText.Read(connection.Properties.CONNECTION_WIRENUMBER, language),
+            CrossSection = EplanText.Read(properties.CONNECTION_WIRECROSSSECTION, language),
+            Colour = EplanText.Read(properties.CONNECTION_WIRENUMBER, language),
         };
         if (record.Is3D)
         {

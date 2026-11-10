@@ -123,9 +123,11 @@ internal sealed class EplanDeviceReader : IDeviceReader
                 string variant = reference.VariantNr ?? string.Empty;
                 Article? article = articles[partNumber].FirstOrDefault(a => string.Equals(a.VariantNr, variant, StringComparison.Ordinal))
                     ?? articles[partNumber].FirstOrDefault();
-                (string? description, string? descriptionLanguage) = article is null
+                // One property list per wrapper (api-notes: repeated Properties per wrapper is a known crash pattern); not disposed, as before.
+                var properties = article?.Properties;
+                (string? description, string? descriptionLanguage) = properties is null
                     ? (null, null)
-                    : EplanText.ReadWithLanguage(article.Properties.ARTICLE_DESCR1, language);
+                    : EplanText.ReadWithLanguage(properties.ARTICLE_DESCR1, language);
                 return new DevicePart
                 {
                     PartNumber = partNumber,
@@ -133,7 +135,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
                     Count = reference.Count,
                     Description = description,
                     DescriptionLanguage = descriptionLanguage,
-                    Manufacturer = article is null ? null : EplanText.Read(article.Properties.ARTICLE_MANUFACTURER, language),
+                    Manufacturer = properties is null ? null : EplanText.Read(properties.ARTICLE_MANUFACTURER, language),
                 };
             }),
         ];

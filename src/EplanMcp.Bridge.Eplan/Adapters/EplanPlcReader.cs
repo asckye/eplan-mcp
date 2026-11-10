@@ -32,15 +32,17 @@ internal sealed class EplanPlcReader : IPlcReader
         }
 
         var plc = (PLC)main;
+        // One property list per wrapper (api-notes: repeated Properties per wrapper is a known crash pattern); not disposed, as before.
+        var properties = plc.Properties;
         record.Plc = new PlcInfo
         {
             Tag = main.Name ?? string.Empty,
             VisibleTag = main.VisibleName,
             Page = main.Page?.Name,
             Parts = [.. main.ArticleReferences.Select(reference => reference.PartNr ?? string.Empty)],
-            Station = EplanText.Read(plc.Properties.FUNC_PLCSTATIONNAME, textLanguage),
-            Rack = EplanText.Read(plc.Properties.FUNC_PLCRACK, textLanguage),
-            Slot = EplanText.Read(plc.Properties.FUNC_PLCSOCKET, textLanguage),
+            Station = EplanText.Read(properties.FUNC_PLCSTATIONNAME, textLanguage),
+            Rack = EplanText.Read(properties.FUNC_PLCRACK, textLanguage),
+            Slot = EplanText.Read(properties.FUNC_PLCSOCKET, textLanguage),
             Cpu = plc.IsCPU,
         };
         Terminal[] members = plc.PLCTerminals ?? [];

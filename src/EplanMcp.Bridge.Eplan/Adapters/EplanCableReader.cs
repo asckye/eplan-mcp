@@ -37,15 +37,17 @@ internal sealed class EplanCableReader : ICableReader
         var sources = new List<StorableObject>();
         var targets = new List<StorableObject>();
         cable.GetSourcesAndTargets(sources, targets);
+        // One property list per wrapper (api-notes: repeated Properties per wrapper is a known crash pattern); not disposed, as before.
+        var properties = cable.Properties;
         record.Cable = new CableInfo
         {
             Tag = main.Name ?? string.Empty,
             VisibleTag = main.VisibleName,
             Page = main.Page?.Name,
-            Type = EplanText.Read(cable.Properties.FUNC_CABLETYPE, textLanguage),
-            WireCount = EplanText.Read(cable.Properties.FUNC_CABLEWIRECOUNT, textLanguage),
-            CrossSection = EplanText.Read(cable.Properties.FUNC_CABLEWIRECROSSSECTION, textLanguage),
-            Length = EplanText.Read(cable.Properties.FUNC_CABLELENGTH_FULL, textLanguage),
+            Type = EplanText.Read(properties.FUNC_CABLETYPE, textLanguage),
+            WireCount = EplanText.Read(properties.FUNC_CABLEWIRECOUNT, textLanguage),
+            CrossSection = EplanText.Read(properties.FUNC_CABLEWIRECROSSSECTION, textLanguage),
+            Length = EplanText.Read(properties.FUNC_CABLELENGTH_FULL, textLanguage),
             Sources = Names(sources),
             Targets = Names(targets),
             Parts = [.. main.ArticleReferences.Select(reference => reference.PartNr ?? string.Empty)],

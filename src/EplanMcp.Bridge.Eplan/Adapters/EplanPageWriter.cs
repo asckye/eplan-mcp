@@ -67,18 +67,20 @@ internal sealed class EplanPageWriter : IPageWriter, IPageGrid
             throw exists;
         }
 
+        // One property list per wrapper (api-notes: repeated Properties per wrapper is a known crash pattern); not disposed, as before.
+        var properties = page.Properties;
         if (description is not null)
         {
             using var text = new MultiLangString();
             text.AddString(textLanguage.Number, description);
-            page.Properties.PAGE_NOMINATIOMN = text;
+            properties.PAGE_NOMINATIOMN = text;
         }
 
         return new PageSummary
         {
             Name = page.Name,
             Type = page.PageType.ToString(),
-            Description = EplanText.Read(page.Properties.PAGE_NOMINATIOMN, textLanguage),
+            Description = EplanText.Read(properties.PAGE_NOMINATIOMN, textLanguage),
         };
     }
 }

@@ -30,7 +30,7 @@ internal sealed class EplanPartsDatabase : IPartsDatabase
             using MDPartsDatabase database = new MDPartsManagement().OpenDatabase() ?? throw new InvalidOperationException("EPLAN opened no parts database.");
             try
             {
-                return new PartsDatabaseContent { Database = selected, Parts = [.. database.Parts.Where(p => buildNumbers is null || buildNumbers.Contains(p.PartNr, StringComparer.Ordinal)).Select(part => { PartSearchItem item = Read(part, textLanguage); if (buildNumbers is not null) { item.BuildValues = BuildValues(part); } return item; })] };
+                return new PartsDatabaseContent { Database = selected, Parts = [.. database.Parts.Where(p => buildNumbers is null || buildNumbers.Contains(p.PartNr, StringComparer.Ordinal)).Select(part => { var properties = part.Properties; PartSearchItem item = Read(part, properties, textLanguage); if (buildNumbers is not null) { item.BuildValues = BuildValues(part, properties); } return item; })] };
             }
             finally
             {
@@ -53,29 +53,30 @@ internal sealed class EplanPartsDatabase : IPartsDatabase
     /// The fields S24 read. The single-language ones are read with ToString as S24 did; the description, which is
     /// multi-language, as project text is (<see cref="EplanText"/>), never by parsing the raw string.
     /// </summary>
-    private static PartSearchItem Read(MDPart part, TextLanguage language)
+    // The caller takes the part's property list once and passes it to both readers (api-notes: repeated Properties per
+    // wrapper is a known crash pattern); not disposed, as before.
+    private static PartSearchItem Read(MDPart part, MDPartsDatabaseItemPropertyList properties, TextLanguage language)
     {
-        (string? description, string? descriptionLanguage) = EplanText.ReadWithLanguage(part.Properties.ARTICLE_DESCR1, language);
+        (string? description, string? descriptionLanguage) = EplanText.ReadWithLanguage(properties.ARTICLE_DESCR1, language);
         return new PartSearchItem
         {
             PartNumber = part.PartNr ?? string.Empty,
             Variant = string.IsNullOrEmpty(part.Variant) ? null : part.Variant,
-            Manufacturer = Plain(part.Properties.ARTICLE_MANUFACTURER),
-            TypeNumber = Plain(part.Properties.ARTICLE_TYPENR),
-            OrderNumber = Plain(part.Properties.ARTICLE_ORDERNR),
+            Manufacturer = Plain(properties.ARTICLE_MANUFACTURER),
+            TypeNumber = Plain(properties.ARTICLE_TYPENR),
+            OrderNumber = Plain(properties.ARTICLE_ORDERNR),
             ProductGroup = part.ProductGroup.ToString(),
             Description = description,
             DescriptionLanguage = descriptionLanguage,
-            HasMacro = Plain(part.Properties.ARTICLE_MACRO) is not null,
+            HasMacro = Plain(properties.ARTICLE_MACRO) is not null,
         };
     }
 
     private static string? Plain(MDPropertyValue value) => value.IsEmpty ? null : value.ToString() is { Length: > 0 } text ? text : null;
 
     // S24 exported schema (A30); typed numeric conversions follow the installed MDPropertyValue XML documentation.
-    private static Dictionary<string, string> BuildValues(MDPart part)
+    private static Dictionary<string, string> BuildValues(MDPart part, MDPartsDatabaseItemPropertyList p)
     {
-        var p = part.Properties;
         var values = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             ["manufacturer"] = Plain(p.ARTICLE_MANUFACTURER) ?? "",
