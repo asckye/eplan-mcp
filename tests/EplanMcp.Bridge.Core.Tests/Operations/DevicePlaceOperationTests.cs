@@ -172,6 +172,20 @@ public sealed partial class DevicePlaceOperationTests
         Assert.Equal("3", plan.Details!["variant"]);
     }
 
+    [Theory]
+    [InlineData("CO", "corner")]
+    [InlineData("TLRU", "t_node")]
+    [InlineData("tour", "t_node")]
+    [InlineData("PCP", "potential_point")]
+    [InlineData("ACBP", "autoconnect_break")]
+    public void Plan_AConnectionSymbol_PointsToConnectionCreate(string symbol, string kind)
+    {
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Plan(new DevicePlaceArgs { Project = "P", Page = NewPage, Library = "SPECIAL", Symbol = symbol, SymbolVariant = 0, X = 100, Y = 100 }));
+
+        Assert.Equal(ErrorReason.InvalidArgument, error.Error.Reason);
+        Assert.Contains($"place it with eplan_connection_create, item kind {kind}.", error.Error.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Plan_ReportsEveryArgumentProblemAtOnce()
     {

@@ -73,6 +73,9 @@ internal sealed class DevicePlaceRequest
         DevicePlcPlan.Check(args);
         DeviceTerminalPlan.Check(args);
         DeviceSymbolPlan.CheckBox(args);
+        // Codex drawing eval 2026-11-10: corners and T-nodes asked for here got "'tag' is required" eight times in one redraw.
+        if (string.Equals(args.Library, "SPECIAL", StringComparison.OrdinalIgnoreCase) && ConnectionSymbolKind(args.Symbol) is { } kind)
+        { throw WriteArguments.Invalid([$"/symbol: SPECIAL/{args.Symbol} is a connection symbol, not a device; place it with eplan_connection_create, item kind {kind}."]); }
         if (!box && !terminal && args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null && !DevicePlacementRoute.UsesPart(args) || args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
         { throw WriteArguments.Invalid(["/library: symbol, display properties and pin designations or descriptions require a complete symbol source."]); }
         var violations = new List<string>();
@@ -282,6 +285,16 @@ internal sealed class DevicePlaceRequest
             yield return string.Format(CultureInfo.InvariantCulture, "'x' and 'y' must lie on the page, {0:0.##} x {1:0.##} mm: x from 0 to {0:0.##} and y from 0 to {1:0.##}.", width, height);
         }
     }
+
+    /// <summary>The eplan_connection_create item kind of a SPECIAL connection symbol, or null for any other symbol.</summary>
+    private static string? ConnectionSymbolKind(string? symbol) => symbol?.ToUpperInvariant() switch
+    {
+        "CO" => "corner",
+        "TLRO" or "TLRU" or "TOUL" or "TOUR" => "t_node",
+        "PCP" => "potential_point",
+        "ACBP" => "autoconnect_break",
+        _ => null,
+    };
 
     private static string? TagProblem(string tag) =>
         tag.Length == 0 ? "is required: from '-' (-KF20) for the page's structure, or in full (=GAA+A1-KF20)."
