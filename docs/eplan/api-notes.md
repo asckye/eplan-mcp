@@ -486,6 +486,9 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A129. 电位连接点也是 `PotentialDefinition`（2026-11-10，EPLAN 2026.0.3.25421，Electric P8，绘图评测副本）
+- **`SPECIAL/PCP` 电位连接点读回的 .NET 类型是 `PotentialDefinition`，和电位定义点相同。** Codex 绘图评测 `draw-review-fix` 用 `potential_point` 在页左侧放 L1、L2、L3、PE，`eplan_placement_delete` 删除它们时报“Cannot delete PotentialDefinition”；审图读引脚时按 A71/A86 排除了 `PotentialDefinition`，四根电源线的起点都报 `dangling_end`。按符号名区分：`SymbolVariant.SymbolName == "PCP"` 的保留连接点，其他（定义点）照旧排除。改后同一道题重跑，`dangling_end` 消失，审图 clean。
+
 ### A128. 以普通方式打开项目（2026-11-09，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 通过式烘芯炉）
 - **`OpenMode.Exclusive` 在项目名旁显示“专有”：** 别的 EPLAN 实例或用户在项目打开期间不能再打开它。负责人一人使用、不做多人编辑，要求去掉这个标记，打开工具改用 `OpenMode.Standard`（枚举值 Standard 0、ReadOnly 1、Exclusive 3）。
 - **普通方式下写入正常：** EPLAN 启动时按普通方式重新打开的 MX_Dryer27 上，结构、页面、宏插入、编址、连接和电缆定义都正常写入（mxd5_rtd.py）；改用 `Standard` 后用 `eplan_project_open` 关闭再打开 通过式烘芯炉，页导航器和标题栏都没有“专有”（窗口截图核对）。

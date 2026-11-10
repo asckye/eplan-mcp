@@ -22,6 +22,7 @@ after:
   # The review the engineer would run: both drafts apply to this scratch copy; clean means no rule errors, warnings or unknowns.
   rules_clean: { tool: eplan_page_review, args: { page: "=GAA+A1&EFS1/9917", checks: [rules], rule_packs: [iec-60204-1, iec-81346] }, pick: $.summary.clean }
   # Wires the colour rules actually checked and passed: an uncoloured page with no potentials would be clean but untested.
+  # At least one per defined potential (L1, L2, L3, PE); wires after the breaker count only where pins are named L/T/U/V/W.
   colour_passed: { tool: eplan_page_review, args: { page: "=GAA+A1&EFS1/9917", checks: [rules], rule_packs: [iec-60204-1] }, pick: "$.rulePacks[0].passed" }
 checks:
   - { answer: $.done, equals: true }
@@ -30,5 +31,5 @@ checks:
   - { after: motors, at_least: 1 }
   - { after: wires, at_least: 6 }
   - { after: rules_clean, equals: true }
-  - { after: colour_passed, at_least: 6 }
+  - { after: colour_passed, at_least: 4 }
 budget: { max_tool_calls: 120, max_minutes: 30, max_usd: 5 }

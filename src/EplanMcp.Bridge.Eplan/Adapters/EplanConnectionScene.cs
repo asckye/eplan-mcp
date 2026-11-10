@@ -10,8 +10,10 @@ internal static class EplanConnectionScene
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (SymbolReference reference in EplanNativePreconditions.Valid(placements).OfType<SymbolReference>())
         {
-            // A71/A86: wires and their definition points are not devices/nodes that terminate an edge.
-            if (reference is DynamicConnectionLine or ConnectionDefinitionPoint or PotentialDefinition || !seen.Add(reference.ToStringIdentifier()))
+            // A71/A86: wires and their definition points are not devices/nodes that terminate an edge. A potential point (SPECIAL/PCP)
+            // is also a PotentialDefinition but starts wires (Codex review eval 2026-11-10: its wire ends were reported dangling).
+            if (reference is DynamicConnectionLine or ConnectionDefinitionPoint || reference is PotentialDefinition && reference.SymbolVariant?.SymbolName != "PCP"
+                || !seen.Add(reference.ToStringIdentifier()))
             { continue; }
             foreach (PinBase pin in reference.GraphicalConnectionPoints)
             {
