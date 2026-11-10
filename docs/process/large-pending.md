@@ -61,7 +61,7 @@
 | 绘图几何 T0a（历史 brief/提交待补定位） | `DrawingGeometryTests` | 已通过：2026-11-05，A 槽 Electric P8，EPLAN 2026.0.3.25421，main `9faf3790`：`DrawingGeometryTests` 1/1（`EPLANMCP_DRAWING_VARIANT_BIN` 指向 Electric P8 Bin）。 |
 | PLC 无冲突导入（历史 brief/提交待补定位） | `ImportPlcTests`（现类主要覆盖冲突）；正向用例待补 | 受阻：准备无冲突夹具，新增同名对象、提交后一次撤销及恢复未验证。 |
 | 自动电缆正向生成（历史 brief/提交待补定位） | `CableGenerateTests`；正向夹具/用例待补 | 受阻：`CableGenerateTests` 1/1（2026-11-04）只证明已有电缆不会重复生成；正向验收要工程师准备可新增电缆的夹具。 |
-| M9 `eplan_part_build`（负责人 2026-11-01 决定） | `PartBuildTests` | 待运行：2026-11-10 合入 main（默认改为预览）。只在部件库副本上运行（`MasterDataOnCopyTests` 的做法，A103）：预览列出新建和字段差异，执行后读回字段、正在用的库哈希不变；有错误行时整批不执行。EDZ 导入另待负责人样本。 |
+| M9 `eplan_part_build`（负责人 2026-11-01 决定） | `PartBuildTests` | 2026-11-10 通过（B 槽 Pro Panel，经 `MasterDataOnCopyTests` 在部件库副本上运行，排在导入、同步、翻译之前）：预览 3 行新建、无审批；执行后新增 3 个、备份存在，导出读回型号、描述、宽度、技术参数、功能模板和连接点代号都对；正在用的两个库 29 个文件哈希不变。有错误行时整批不执行仅由小测试覆盖。EDZ 导入另待负责人样本。 |
 | 官方 action 离线导入（`feat/official-actions`，2026-11-01 负责人 brief） | `BatchVerification`、`ActionTryTests`、`ActionCatalogTests` | 部分通过：2026-11-04 `ActionCatalogTests` 通过；2026-11-03 `ActionTryTests` 1/1、B 槽 `BatchVerification` 1/1。未完成：137 个官方行里批量只通过 1 行，127 行缺上下文，在 action 主线继续。 |
 
 每项通过后保留本行，补日期、源码/插件版本、命令、结果与证据链接。部分通过继续列出未完成用例。发布范围内待验项须完成后才能发布。

@@ -134,10 +134,10 @@ dotnet test --project tests\EplanMcp.Large.Tests -- --filter-class "EplanMcp.Lar
 
 ### 系统主数据：在副本上运行（优先用这个）
 
-`MasterDataOnCopyTests` 把当前变体的部件库和翻译库设置指向 scratch 下的副本，再运行 `PartImportTests`、`PartSyncTests`、`TranslationImportTests`。每个测试开始前都核对 EPLAN 解析到的路径，不是副本就不写。2026-11-05 实测：跑前跑后正在用的两个库共 29 个文件（`.lck` 除外，含 `User.eod`、`User.eox`）的 SHA-256 完全相同（api-notes A103）。
+`MasterDataOnCopyTests` 把当前变体的部件库和翻译库设置指向 scratch 下的副本，依次运行 `PartBuildTests`、`PartImportTests`、`PartSyncTests`、`TranslationImportTests`。`PartBuildTests` 排第一，因为它要求部件库副本和源库逐字节相同，后面的同步测试会改动副本。每个测试开始前都核对 EPLAN 解析到的路径，不是副本就不写。2026-11-05 实测：跑前跑后正在用的两个库共 29 个文件（`.lck` 除外，含 `User.eod`、`User.eox`）的 SHA-256 完全相同（api-notes A103）。
 
-1. 关闭这个变体的 EPLAN，算两个库的 SHA-256；把部件库文件夹复制到 `<数据根目录>\scratch\masterdata-copy\parts\`（去掉 `.lck`），翻译库文件夹复制到 `...\translate\`，把 `C:\Users\Public\EPLAN\Settings\<变体>` 复制一份备用。
-2. 设置 `EPLANMCP_MASTERDATA_COPY` 为 `masterdata-copy` 文件夹，只运行这个类。`PartSyncTests` 会永久改动写副本，要用新复制的 `LargeWrite`。
+1. 关闭这个变体的 EPLAN，算两个库的 SHA-256；把部件库文件夹复制到 `<数据根目录>\scratch\masterdata-copy\parts\`（去掉 `.lck`；测试辅助插件只接受这个固定文件夹，旧副本先改名留档），翻译库文件夹复制到 `...\translate\`，把 `C:\Users\Public\EPLAN\Settings\<变体>` 复制一份备用。
+2. 设置 `EPLANMCP_MASTERDATA_COPY` 为 `masterdata-copy` 文件夹，`EPLANMCP_LARGE_PARTS_SOURCE` 为正在用的部件库 `.alk`（副本的来源），只运行这个类。`PartSyncTests` 会永久改动写副本，要用新复制的 `LargeWrite`。
 3. 关闭 EPLAN，用第 1 步的备份还原设置，核对哈希；再算两个库的 SHA-256，必须和第 1 步相同。证据在 `masterdata-copy\evidence.json`。
 
 ### 系统主数据（部件库）

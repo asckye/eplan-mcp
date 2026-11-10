@@ -7,7 +7,10 @@ namespace EplanMcp.Large.Tests;
 [Trait("Size", "Large")]
 public sealed class MasterDataOnCopyTests
 {
-    private static readonly string[] _tests = ["PartImportTests", "PartSyncTests", "TranslationImportTests"];
+    private static readonly string[] _tests = ["PartBuildTests", "PartImportTests", "PartSyncTests", "TranslationImportTests"];
+
+    /// <summary>The parts database the copy was made from; <c>PartBuildTests</c> compares the fresh copy with it and checks it stays unchanged.</summary>
+    public const string PartsSource = "EPLANMCP_LARGE_PARTS_SOURCE";
 
     public static bool Enabled => Environment.GetEnvironmentVariable("EPLANMCP_MASTERDATA_COPY") is { Length: > 0 };
 
@@ -53,6 +56,12 @@ public sealed class MasterDataOnCopyTests
         {
             evidence["set"] = (await Native(new { op = "set", parts, translate })).DeepClone();
             Save();
+            // First, while the parts copy is still byte-identical to its source.
+            Assert.False(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(PartsSource)), "Set " + PartsSource + " to the .alk the copy was made from.");
+            Environment.SetEnvironmentVariable("EPLANMCP_LARGE_PARTS_COPY", parts);
+            try
+            { await Run("PartBuildTests", () => new PartBuildTests().ThreeFictionalParts_AreBuiltOnlyOnACopy_ThenExportedAndCompared()); }
+            finally { Environment.SetEnvironmentVariable("EPLANMCP_LARGE_PARTS_COPY", null); }
             await Run("PartImportTests", () => new PartImportTests().ATestPart_IsAddedOnceAfterABackup_ThenLeftAsItIs());
             await Run("PartSyncTests", () => new PartSyncTests().TheCopysParts_AreSynchronizedAfterTwoBackups_ThenThereIsNothingToDo());
             await Run("TranslationImportTests", () => new TranslationImportTests().TestEntry_IsAddedOnceAndReimportAddsNothing_WithApprovalAndBackupEveryTime());

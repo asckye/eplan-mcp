@@ -57,7 +57,7 @@ public sealed class PartBuildTests
                 { changes.Add(new() { Action = "create", Kind = "part", Name = row.GetProperty("partNumber").GetString()!, Property = field.Name, OldValue = field.Value[0].GetString(), NewValue = field.Value[1].GetString() }); }
             }
             host.Approvals.Approve("eplan_part_build", string.Empty, WritePipeline.ChangeLines(new WritePlan { Changes = changes }));
-            JsonElement built = await host.CallAsync("eplan_part_build", new() { ["file"] = "fictional-parts.csv" });
+            JsonElement built = await host.CallAsync("eplan_part_build", new() { ["file"] = "fictional-parts.csv", ["dry_run"] = false });
             Assert.Equal("committed", built.GetProperty("execution").GetString());
             Assert.Equal(3, built.GetProperty("import").GetProperty("addedCount").GetInt32());
             Assert.Empty(built.GetProperty("import").GetProperty("missing").EnumerateArray());
