@@ -10,7 +10,7 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
-/// The rules of engineering-handbook.html#pa that can be checked mechanically, on the tools exactly as <c>serve</c> registers
+/// The rules of the MCP server standard that can be checked mechanically, on the tools exactly as <c>serve</c> registers
 /// them. The full contract is snapshotted in <see cref="ToolContractSnapshotTests"/>.
 /// </summary>
 [Trait("Size", "Small")]
@@ -392,7 +392,7 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void EveryArgumentName_IsSnakeCase()
     {
-        // engineering-handbook.html#pa: response_format, name_prefix; the C# parameter names become the schema names as they are.
+        // the MCP server standard: response_format, name_prefix; the C# parameter names become the schema names as they are.
         Assert.All(Tools, t => Assert.All(
             t.InputSchema.GetProperty("properties").EnumerateObject(),
             p => Assert.Matches("^[a-z]+(_[a-z]+)*$", p.Name)));
@@ -508,7 +508,7 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void Descriptions_StayWithinTheBudget()
     {
-        // ~250 tokens for description plus parameters (engineering-handbook.html#pa); 4 characters per token is a fair English estimate.
+        // ~250 tokens for description plus parameters (the MCP server standard); 4 characters per token is a fair English estimate.
         // eplan_tool_usage's list of names grows with the registered set (docs/tools/eplan_tool_usage.md), so it is not counted.
         // P24's specified nested scope includes the complete ObjectLocator contract; keep its larger schema bounded too.
         // P11 publishes seven existing argument schemas as one closed union; bound that required catalog separately.
@@ -582,7 +582,7 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void EveryTool_HasUsageWithAllFourTopics()
     {
-        // A tool without usage text, or a usage file without a tool, fails here (engineering-handbook.html#pa).
+        // A tool without usage text, or a usage file without a tool, fails here (the MCP server standard).
         Assert.Equal(Tools.Select(t => t.Name).Order(StringComparer.Ordinal), ToolUsageCatalog.Usage.Keys.Order(StringComparer.Ordinal));
         Assert.All(ToolUsageCatalog.Usage.Values, sections => Assert.Equal(ToolUsageCatalog.Topics.Order(StringComparer.Ordinal), sections.Keys.Order(StringComparer.Ordinal)));
     }

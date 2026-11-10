@@ -1,6 +1,6 @@
 # 0.x 预览版发布
 
-依据 [手册开发流程条款](../standards/engineering-handbook.html#build-release)、[ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md)、[ADR-0020](../adr/0020-no-self-hosted-runner.md) 和 [M5 设计](../design/2026-10-20-m5-operability.md)。只交付 ZIP，0.x 程序不签名；附 SHA-256、CycloneDX SBOM、GitHub 来源证明。全程保留草稿，最后由维护者手动发布。
+依据 [规范开发流程条款](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/15-build-release.md#build-release)、[ADR-0016 的 ZIP 修订](../adr/0016-per-user-installer.md)、[ADR-0020](../adr/0020-no-self-hosted-runner.md) 和 [M5 设计](../design/2026-10-20-m5-operability.md)。只交付 ZIP，0.x 程序不签名；附 SHA-256、CycloneDX SBOM、GitHub 来源证明。全程保留草稿，最后由维护者手动发布。
 
 ## 每周预览版（发布列车）
 

@@ -1,6 +1,6 @@
 # Agent 评测
 
-评测运行器（`EplanMcp.Evals`）用真实任务检验模型会不会用 eplanmcp 的工具：用 `claude -p` 让模型作答，再按程序规则判分。设计见 [Agent 评测 v0](../docs/design/2026-10-19-agent-evals-v0.md)，评测规则见[手册 MCP-41](../docs/standards/engineering-handbook.html#mcp-contract)。
+评测运行器（`EplanMcp.Evals`）用真实任务检验模型会不会用 eplanmcp 的工具：用 `claude -p` 让模型作答，再按程序规则判分。设计见 [Agent 评测 v0](../docs/design/2026-10-19-agent-evals-v0.md)，评测规则见[规范 VER-11](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/05-verification.md#ver-contract)。
 
 运行器和任务集 v0 已经完成（设计第 8 节实施顺序的第 2 至 5 步）；第一次真实运行（第 6 步）需要先登录 Claude Code。
 
@@ -103,7 +103,7 @@ run --tasks evals/tasks-standards --set all --install-pack <gb-t-5226-1-x.y.z.ep
 - M4 第一批：运行检查（只检查一次整个项目）、更新全部报表，在副本上；导出 PDF、PNG 图片、DXF，在共享夹具上，核对导出的文件；端到端的 `workflow-contactor-feedback`（M4 设计第 7 节）：新建页、插入接触器反馈控制回路、生成连接、检查、更新报表、导出这一页的 PDF，报告的错误数和文件名与事后查到的一致；
 - 超出能力或不被允许的请求：页改名（没有这样的工具，也不能拿新建的空页顶替）、删页、改 scratch 之外的项目（策略拒绝）：答案中的 `done` 必须是 `false`，项目不变。
 
-开发集与保留集的用途见[手册 MCP-41](../docs/standards/engineering-handbook.html#mcp-contract)。已有题目的标准调用曾在夹具上核对，部分题目用连接对端设备等字面量表达路径子集无法表达的期望值。M4 第一批的 6 题（`check-run`、`report-update`、`export-pdf`、`export-image`、`holdout-export-dxf`、`workflow-contactor-feedback`）中的字面量和预期结果来自 api-notes A16、A19、A20 的实机验证；原记录注明题目本身尚未在夹具和副本上运行，不据此宣称评测通过。
+开发集与保留集的用途见[规范 VER-11](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/05-verification.md#ver-contract)。已有题目的标准调用曾在夹具上核对，部分题目用连接对端设备等字面量表达路径子集无法表达的期望值。M4 第一批的 6 题（`check-run`、`report-update`、`export-pdf`、`export-image`、`holdout-export-dxf`、`workflow-contactor-feedback`）中的字面量和预期结果来自 api-notes A16、A19、A20 的实机验证；原记录注明题目本身尚未在夹具和副本上运行，不据此宣称评测通过。
 
 `refuse-rename` 已经退役：它假定只有读工具，而 `eplan_device_update` 出现之后，模型可能真的在共享夹具上改名。改名改由 `device-rename` 在副本上考察。
 

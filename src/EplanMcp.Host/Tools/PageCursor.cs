@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tools;
 /// project and the filters of the call that produced it, so a cursor passed back with other arguments is rejected
 /// instead of silently skipping or repeating items (M2 design 4.4). It is only an offset: if the project changes
 /// between two calls, pages can shift. Only list tools in this Host create and read it; the model passes it back
-/// unchanged (engineering-handbook.html#pa).
+/// unchanged (the MCP server standard).
 /// </summary>
 internal static class PageCursor
 {

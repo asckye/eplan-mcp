@@ -1,6 +1,6 @@
 name: commit-rules
 
-# Enforces docs/standards/engineering-handbook.html#review:
+# Enforces standard section 18:
 # Conventional Commits PR titles and no AI attribution in titles, descriptions or commits.
 on:
   pull_request:

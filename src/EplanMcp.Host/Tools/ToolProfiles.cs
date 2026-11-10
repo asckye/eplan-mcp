@@ -2,7 +2,7 @@ using ModelContextProtocol.Server;
 
 namespace EplanMcp.Host.Tools;
 
-/// <summary>Which tools <c>serve</c> offers (engineering-handbook.html#pa, M4c design 4.2).</summary>
+/// <summary>Which tools <c>serve</c> offers (the MCP server standard, M4c design 4.2).</summary>
 internal enum ToolProfile
 {
     /// <summary>Every tool; the default.</summary>

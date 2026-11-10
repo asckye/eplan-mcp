@@ -32,7 +32,7 @@
 - `devices`：带标识的主功能数量（`IsMainFunction` 且 `Name` 非空），与 `eplan_device_list` 默认列出的范围一致。
 - `pagesByType`：按数量降序（数量相同时按类型名），最多 15 种。`type` 用 EPLAN 页类型的枚举名（英文，稳定），与 `eplan_page_list` 的 `page_type` 参数一致。
 - `properties`（仅 `detailed`）：`[{ "id": 10000, "index": null, "name": "…", "value": "…" }]`，只含非空属性，不含 EPLAN 标为内部（`IsInternal`）的属性；带索引的属性（如附加字段）每个已用索引一条，`index` 是 EPLAN 的索引号，不带索引的属性 `index` 为 `null`；用户自定义属性没有编号，`id` 为 `null`，`name` 是它的标识名。单个属性按列出的方式读不出来时（抛出 `IndexedPropertyException` 等）只跳过这一个。文本经过 ResultShaper 的不可信文本处理，整体受 20k token 上限约束。
-- `truncated` / `hint`：`detailed` 的结果超过 20k token 时，从末尾去掉属性，`truncated` 为 true，`hint` 说明去掉了什么（[手册 MCP 条款](../standards/engineering-handbook.html#pa)）。
+- `truncated` / `hint`：`detailed` 的结果超过 20k token 时，从末尾去掉属性，`truncated` 为 true，`hint` 说明去掉了什么（[规范 MCP 条款](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/overview.md)）。
 - 一行摘要只给数字，不回显项目名和属性等项目数据（架构 8.5）：`Project has 321 pages, 420 devices, 2060 connections.`
 
 ## 4. 错误

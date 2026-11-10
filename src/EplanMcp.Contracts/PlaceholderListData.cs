@@ -3,7 +3,7 @@ namespace EplanMcp.Contracts;
 /// <summary>Result data of <see cref="OperationNames.PlaceholderList"/>: a page of a project's placeholder objects.</summary>
 public sealed class PlaceholderListData
 {
-    /// <summary>The name of the project actually used, so the tool can echo it (engineering-handbook.html#pa).</summary>
+    /// <summary>The name of the project actually used, so the tool can echo it (the MCP server standard).</summary>
     public string Project { get; set; } = string.Empty;
 
     /// <summary>The page the list is limited to, as EPLAN names it; null for the whole project.</summary>

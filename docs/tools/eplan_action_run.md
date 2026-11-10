@@ -154,7 +154,7 @@ Example: {"entry":"graphicallayertable/EXPORT","project":"Line1","arguments":{"E
 - 项目指纹另含 `projectType`；同步保留 Bridge 内完整的功能文本证据，结果公开 `functionTextHash` 和非空文本数 `function_texts`、项目部件数 `project_parts`（另含 `part_references`）。A50 的计数可不变而文本改变；摘要用于观察效果，不作为逐项正确性保证。类型切换的 hint 追加 `Project type: Schematic -> Macro.`。
 - `readback="fingerprint"` 时固定提示：`Changes have not been checked item by item; use read tools to verify objects you care about.` 已知副作用与未验证项也写入 `hint`。Write 提交时 `execution=committed`，dry-run 为 `not_started`、`after=null`、`readback=not_executed`。`undo=null`，提示“提交后一步 Ctrl+Z 未验证”，验证通过前不承诺撤销记录（[ADR §1、§4、§8][adr8]）。
 - 导出结果的 `directory` 是本次目录完整路径，`files` 递归列出文件相对路径、字节数和 **SHA-256**；`fileCount`、`totalBytes` 是完整合计。Write 无文件，`directory=null`、`files=[]`、合计为 0；dry-run 同样不产文件（[ADR §2–4][adr3]，导出清单增加哈希的产品行为**未验证**）。
-- 不分页，不提供 `response_format`。文件最多 50 项，指纹文件明细各最多 20 项，预算约 5k token、硬上限 20k；计算与比较使用完整集合，显示截断不影响判断。超限设置 `truncated=true` 和提示，计数及文件总数仍保留；项目自由文本只在数据字段，按 ResultShaper 清洗（[手册 MCP 条款](../standards/engineering-handbook.html#mcp-large)，[ADR §4][adr4]；此产品整形**未验证**）。
+- 不分页，不提供 `response_format`。文件最多 50 项，指纹文件明细各最多 20 项，预算约 5k token、硬上限 20k；计算与比较使用完整集合，显示截断不影响判断。超限设置 `truncated=true` 和提示，计数及文件总数仍保留；项目自由文本只在数据字段，按 ResultShaper 清洗（[规范 MCP 条款](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/02-tool-design.md#tl-size)，[ADR §4][adr4]；此产品整形**未验证**）。
 - 摘要：`Ran graphicallayertable/EXPORT; produced 1 file in a new folder; see 'directory'.` / `Ran changelayer; committed; fingerprint readback only.` 显式执行的 Read 不带 `execution`；Read 预览返回 `execution=not_started`。Read 出现未记录的项目指纹变化时，结果与审计如实报告并置 `entryDisabled=true`，本次 Host 进程停用该条目，doctor / 日志提示重新验证；不把 AML 尚未解释的变化直接登记为无害例外（[ADR §4][adr4]）。
 
 ## 4. 错误
@@ -231,7 +231,7 @@ Write 走现有 WritePipeline：只读规划/指纹 → 策略与审批 → 再�
 
 ## 7. 测试
 
-以下为实现验收要求，**均未执行、未验证产品实现**；本次文档工作不连接 EPLAN。规模遵守 [手册第 12 章](../standards/engineering-handbook.html#testing)：Small 不用磁盘，Medium 使用临时目录/Fake Bridge，Large 只用 scratch 副本（[ADR 后续行动][adr]）。
+以下为实现验收要求，**均未执行、未验证产品实现**；本次文档工作不连接 EPLAN。规模遵守 [规范第 12 章](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/12-testing.md)：Small 不用磁盘，Medium 使用临时目录/Fake Bridge，Large 只用 scratch 副本（[ADR 后续行动][adr]）。
 
 ### 7.1 Small
 

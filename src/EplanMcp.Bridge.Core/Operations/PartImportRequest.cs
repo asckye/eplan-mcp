@@ -66,7 +66,7 @@ internal sealed class PartImportRequest
     public int AddedVariants { get; }
 
     /// <summary>
-    /// Every argument problem at once (engineering-handbook.html#pa), then the file, the database (POLICY_DENIED on SQL Server,
+    /// Every argument problem at once (the MCP server standard), then the file, the database (POLICY_DENIED on SQL Server,
     /// ADR-0019) and its parts.
     /// </summary>
     public static PartImportRequest Check(PartImportArgs args, IPartsDatabaseWriter writer)

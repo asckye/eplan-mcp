@@ -1,6 +1,6 @@
 # Host 测试
 
-本程序集使用 xUnit v3，测试层含义见[手册 12.1](../../docs/standards/engineering-handbook.html#testing-layers)。从仓库根目录运行 Small + Medium：
+本程序集使用 xUnit v3，测试层含义见[规范 12.1](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/12-testing.md#testing-layers)。从仓库根目录运行 Small + Medium：
 
 ```powershell
 dotnet test --project tests/EplanMcp.Host.Tests -- --filter-not-trait "Size=Large"
@@ -31,7 +31,7 @@ Move-Item -LiteralPath tests/Contracts.Snapshots/server-contract.received.json -
 dotnet test --project tests/EplanMcp.Host.Tests -- --filter-class "EplanMcp.Host.Tests.Tools.ToolContractSnapshotTests"
 ```
 
-Verify 在结果变化时写 `*.received.json`，比较方法也适用于 CLI 快照；输出采用带 BOM 的 UTF-8 和 LF。快照评审要求见[手册 TST-08 / MCP-37](../../docs/standards/engineering-handbook.html#testing-rules)。
+Verify 在结果变化时写 `*.received.json`，比较方法也适用于 CLI 快照；输出采用带 BOM 的 UTF-8 和 LF。快照评审要求见[规范 TST-08 / VER-02](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/12-testing.md#testing-rules)。
 
 ## 模型文本和文档检查
 

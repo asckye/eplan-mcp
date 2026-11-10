@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// The device tools (docs/tools/eplan_device_*.md). Parameter names are snake_case because the SDK publishes them
-/// as written (engineering-handbook.html#pa); the class is internal, so CA1707 does not apply.
+/// as written (the MCP server standard); the class is internal, so CA1707 does not apply.
 /// </summary>
 [McpServerToolType]
 internal sealed class DeviceTools
@@ -38,7 +38,7 @@ internal sealed class DeviceTools
     public static async Task<CallToolResult> DeviceListAsync(
         IBridgeClient bridge,
         // Strings default to "" rather than null: a nullable type costs 12 schema characters each, and 8 parameters
-        // must fit the description budget (engineering-handbook.html#pa). Blank means "not given" everywhere. No apostrophes
+        // must fit the description budget (the MCP server standard). Blank means "not given" everywhere. No apostrophes
         // in parameter descriptions: the schema escapes each to six characters.
         [Description("Name or path; default: current.")] string project = "",
         [Description("Text in full or shown tag, any case.")] string tag_contains = "",

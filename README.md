@@ -97,7 +97,7 @@
 | CLI JSON 输出与安装验收 | [CLI 参考](docs/reference/cli.md) · [发布流程](docs/process/release.md#安装验收清单m5-发布前逐项通过) |
 | EPLAN API 的已验证事实和覆盖情况 | [api-notes 主题索引](docs/eplan/api-notes.md) · [API 覆盖矩阵](docs/eplan/api-coverage.md) |
 | 安全 | [项目威胁模型](docs/architecture/architecture.md#13-威胁模型) · [SECURITY.md](SECURITY.md) |
-| 怎么参与开发 | [CONTRIBUTING.md](CONTRIBUTING.md) · [工程开发手册](docs/standards/engineering-handbook.html) |
+| 怎么参与开发 | [CONTRIBUTING.md](CONTRIBUTING.md) · [工程开发规范](https://github.com/asckye/engineering-standards/tree/v3.0) |
 
 <details>
 <summary><strong>从源码构建（开发者）</strong></summary>

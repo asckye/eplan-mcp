@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// The part tools (docs/tools/eplan_part_list.md, eplan_part_search.md). Parameter names are snake_case because the SDK publishes them as
-/// written (engineering-handbook.html#pa); the class is internal, so CA1707 does not apply.
+/// written (the MCP server standard); the class is internal, so CA1707 does not apply.
 /// </summary>
 [McpServerToolType]
 internal sealed class PartTools

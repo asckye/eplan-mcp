@@ -36,7 +36,7 @@ internal sealed class TerminalRenumberRequest
 
     public int Step { get; }
 
-    /// <summary>Every argument problem at once as INVALID_ARGUMENT (engineering-handbook.html#pa), then the project, then the scheme.</summary>
+    /// <summary>Every argument problem at once as INVALID_ARGUMENT (the MCP server standard), then the project, then the scheme.</summary>
     public static TerminalRenumberRequest Check(TerminalRenumberArgs args, IProjectCatalog catalog, ITerminalRenumberer renumberer)
     {
         var violations = new List<string>();

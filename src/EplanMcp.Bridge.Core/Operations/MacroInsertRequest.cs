@@ -61,7 +61,7 @@ internal sealed class MacroInsertRequest
     public bool MacroBox { get; }
     public IReadOnlyDictionary<string, string>? Values { get; }
 
-    /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the macro.</summary>
+    /// <summary>Every argument problem at once (the MCP server standard), then the project, the page and the macro.</summary>
     public static MacroInsertRequest Check(MacroInsertArgs args, IProjectCatalog catalog, IPageReader pages, IMacroReader macros, IMacroInserter inserter, bool enforceLayout = true)
     {
         var violations = new List<string>();

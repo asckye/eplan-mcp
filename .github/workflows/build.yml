@@ -1,6 +1,6 @@
 name: build
 
-# CI gates of docs/standards/engineering-handbook.html#review that need no EPLAN: build with warnings as errors,
+# CI gates of standard section 18 that need no EPLAN: build with warnings as errors,
 # format check, and Small + Medium tests. eng/scripts/local-gate.ps1 runs the same steps before a push to main; on
 # main this workflow is a non-blocking check. The add-in (EplanMcp.Bridge.Eplan) compiles against the EPLAN API and
 # is built only on machines with EPLAN, so CI uses the EplanMcp.Ci.slnf filter.
@@ -90,7 +90,7 @@ jobs:
           }
           if ($failed -eq 0) { Write-Output '::error::No failed test in the TRX files; a test host may have crashed or not started.' }
 
-      # Fails on high or critical advisories, direct or transitive (engineering-handbook.html#review).
+      # Fails on high or critical advisories, direct or transitive (standard section 18).
       - name: Vulnerable packages
         shell: pwsh
         run: |

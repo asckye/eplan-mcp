@@ -3,7 +3,7 @@ namespace EplanMcp.Contracts;
 /// <summary>Result data of <see cref="OperationNames.RevisionList"/>: a project's revision state and a page of its revision log.</summary>
 public sealed class RevisionListData
 {
-    /// <summary>The name of the project actually used, so the tool can echo it (engineering-handbook.html#pa).</summary>
+    /// <summary>The name of the project actually used, so the tool can echo it (the MCP server standard).</summary>
     public string Project { get; set; } = string.Empty;
 
     /// <summary>The project's link file with its extension (<c>Project.ProjectLinkFilePath</c>).</summary>

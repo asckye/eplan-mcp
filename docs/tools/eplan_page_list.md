@@ -22,7 +22,7 @@
 | `limit` | integer，1–200 | 否 | 50 | 每页最多条数 |
 | `cursor` | string | 否 | — | 上一次结果中的 `nextCursor` |
 
-- `page_type` 有 75 个取值，写进 schema 的 `enum` 会超出描述预算（engineering-handbook.html#pa），所以由服务端校验，取值不合法时返回 `INVALID_ARGUMENT` 并列出常用取值。
+- `page_type` 有 75 个取值，写进 schema 的 `enum` 会超出描述预算（https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/overview.md），所以由服务端校验，取值不合法时返回 `INVALID_ARGUMENT` 并列出常用取值。
 - 多个过滤条件之间是"与"。
 
 ## 3. 输出

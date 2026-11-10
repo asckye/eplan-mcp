@@ -14,7 +14,7 @@ using ModelContextProtocol.Server;
 namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>
-/// Examples and tool names in model-facing text match the registered tools (engineering-handbook.html#pa): every example in a
+/// Examples and tool names in model-facing text match the registered tools (the MCP server standard): every example in a
 /// tool's description and in the Examples section of its usage file is a valid argument object for that tool, and no
 /// text names an <c>eplan_*</c> tool that is not registered. That every tool has a usage file is checked in
 /// <see cref="ToolContractTests"/>.

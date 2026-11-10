@@ -1,6 +1,6 @@
 # 共享结果契约
 
-本文记录 [ErrorReason](../../src/EplanMcp.Contracts/ErrorReason.cs)、[ExecutionState](../../src/EplanMcp.Contracts/ExecutionState.cs) 与工具快照中现有的返回值；具体工具的触发条件见其参考页。通用设计规则由[手册 MCP 与错误处理条款](../standards/engineering-handbook.html#mcp-errors)承担。
+本文记录 [ErrorReason](../../src/EplanMcp.Contracts/ErrorReason.cs)、[ExecutionState](../../src/EplanMcp.Contracts/ExecutionState.cs) 与工具快照中现有的返回值；具体工具的触发条件见其参考页。通用设计规则由[规范 MCP 与错误处理条款](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/02-tool-design.md#tl-errors)承担。
 
 ## 项目错误结构
 

@@ -26,7 +26,7 @@ internal sealed class ConnectionNumberRequest
     /// <summary>One of <see cref="ConnectionNumberArgs.OverwriteModes"/>.</summary>
     public string Overwrite { get; }
 
-    /// <summary>Every argument problem at once as INVALID_ARGUMENT (engineering-handbook.html#pa), then the project, then the scheme.</summary>
+    /// <summary>Every argument problem at once as INVALID_ARGUMENT (the MCP server standard), then the project, then the scheme.</summary>
     public static ConnectionNumberRequest Check(ConnectionNumberArgs args, IProjectCatalog catalog, IConnectionNumberer numberer)
     {
         var violations = new List<string>();

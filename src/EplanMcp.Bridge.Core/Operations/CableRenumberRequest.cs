@@ -35,7 +35,7 @@ internal sealed class CableRenumberRequest
 
     public int Step { get; }
 
-    /// <summary>Every argument problem at once as INVALID_ARGUMENT (engineering-handbook.html#pa), then the project, then the scheme.</summary>
+    /// <summary>Every argument problem at once as INVALID_ARGUMENT (the MCP server standard), then the project, then the scheme.</summary>
     public static CableRenumberRequest Check(CableRenumberArgs args, IProjectCatalog catalog, ICableRenumberer renumberer)
     {
         var violations = new List<string>();

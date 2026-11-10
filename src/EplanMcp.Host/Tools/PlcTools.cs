@@ -10,7 +10,7 @@ namespace EplanMcp.Host.Tools;
 
 /// <summary>
 /// The PLC tools (docs/tools/eplan_plc_get.md). eplan_device_list with category PLCBox lists the PLC boxes, so there is
-/// no list tool (tool spec 1). Parameter names are snake_case as the SDK publishes them (engineering-handbook.html#pa).
+/// no list tool (tool spec 1). Parameter names are snake_case as the SDK publishes them (the MCP server standard).
 /// </summary>
 [McpServerToolType]
 internal sealed class PlcTools

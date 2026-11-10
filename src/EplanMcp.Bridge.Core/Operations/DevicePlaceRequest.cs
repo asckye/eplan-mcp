@@ -59,7 +59,7 @@ internal sealed class DevicePlaceRequest
 
     internal string[] Existing { get; }
 
-    /// <summary>Every argument problem at once (engineering-handbook.html#pa), then the project, the page and the part.</summary>
+    /// <summary>Every argument problem at once (the MCP server standard), then the project, the page and the part.</summary>
     public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, IPlcReader? plc = null)
     {
         if (args.PropertyArrangement is { } arrangement && (string.IsNullOrWhiteSpace(arrangement) || arrangement.Any(char.IsControl)))

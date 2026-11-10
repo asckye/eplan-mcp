@@ -23,4 +23,4 @@
 
 ## 边界
 
-本次范围、依赖、未验证事项、风险与回退；变更规模采用[手册快速交付条款](../standards/engineering-handbook.html#fast)。
+本次范围、依赖、未验证事项、风险与回退；变更规模采用[规范快速交付条款](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/00d-fast-delivery.md#fast)。

@@ -2,7 +2,7 @@
 
 本仓库遵循[《工程开发规范》3.0](https://github.com/asckye/engineering-standards/tree/v3.0)（asckye，CC BY 4.0），不另设规则。链接都固定在 `v3.0` 标签上。Claude Code 装插件 `engineering-standards@asckye-standards` 后，做相关工作时会加载对应规则。
 
-2026-11-10 起取代旧的《工程开发手册》v1.1。旧手册 [engineering-handbook.html](engineering-handbook.html) 暂时保留，其他文档里指向它的链接逐步换成新规范；旧编号 `MCP-xx`、`VND-xx` 用[对照表](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/handbook-mapping.md)换算。
+2026-11-10 起取代旧的《工程开发手册》v1.1。仍在使用的文档、模板和代码注释都已改为引用新规范；旧手册 [engineering-handbook.html](engineering-handbook.html) 作为归档保留，ADR、设计文档和 spike 是按 v1.1 作出的历史记录，原样引用它；旧编号 `MCP-xx`、`VND-xx` 用[对照表](https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/handbook-mapping.md)换算。
 
 ## 项目声明
 

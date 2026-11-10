@@ -169,7 +169,7 @@ internal sealed class PackLibrary(HostDataLocations locations, HostConfig config
         },
     };
 
-    /// <summary>Problems as error metadata: one per line, at most 20, pack text cleaned (engineering-handbook.html#pa).</summary>
+    /// <summary>Problems as error metadata: one per line, at most 20, pack text cleaned (the MCP server standard).</summary>
     public static Dictionary<string, string> Problems(IEnumerable<PackProblem> problems) => new(StringComparer.Ordinal)
     {
         ["problems"] = string.Join("\n", problems.Take(20).Select(p => ResultShaper.CleanText(p.ToString()))),

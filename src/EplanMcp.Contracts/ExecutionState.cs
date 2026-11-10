@@ -1,7 +1,7 @@
 namespace EplanMcp.Contracts;
 
 /// <summary>
-/// Whether a write changed the project (ADR-0010, engineering-handbook.html#pa). Results and errors of Write, Destructive and
+/// Whether a write changed the project (ADR-0010, the MCP server standard). Results and errors of Write, Destructive and
 /// Code tools carry one of these; read tools carry none. Two invariants hold: a retryable error is
 /// <see cref="NotStarted"/> or <see cref="RolledBack"/>, and the state is <see cref="Unknown"/> exactly when the
 /// reason is <see cref="ErrorReason.OutcomeUnknown"/>.

@@ -7,7 +7,7 @@ namespace EplanMcp.Host.Tools;
 /// <summary>
 /// The texts behind <c>eplan_tool_usage</c>: one embedded Markdown file per tool, <c>Tools/Usage/&lt;tool&gt;.md</c>,
 /// made of exactly the four <see cref="Topics"/> as <c>## </c> sections in that order. The texts are written by this
-/// project and reviewed with the tool contract (engineering-handbook.html#pa); they never contain project data.
+/// project and reviewed with the tool contract (the MCP server standard); they never contain project data.
 /// Immutable after the first load, so safe to share between calls.
 /// </summary>
 internal static partial class ToolUsageCatalog

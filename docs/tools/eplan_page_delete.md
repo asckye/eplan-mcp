@@ -59,7 +59,7 @@
 | `POLICY_DENIED` / `APPROVAL_DENIED` / `APPROVAL_EXPIRED` | 策略或审批；scratch 中也要审批 | `not_started` | 同错误码表 |
 | 流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_create` | 同 `eplan_page_create` | 同 `eplan_page_create` |
 
-`BACKUP_FAILED` 由 ADR-0013 新增，第 10 步加入 Contracts 和错误码表（engineering-handbook.html#pa）。
+`BACKUP_FAILED` 由 ADR-0013 新增，第 10 步加入 Contracts 和错误码表（https://github.com/asckye/engineering-standards/blob/v3.0/skills/mcp-server-standard/references/overview.md）。
 
 ## 5. 实现要点
 - **Host**：走 `WritePipeline`，级别 Destructive，规划操作是 `page.delete.plan`，执行操作是 `page.delete.execute`。执行时限为 `min(300, 60 + 2 × 页数)` 秒，包括备份。

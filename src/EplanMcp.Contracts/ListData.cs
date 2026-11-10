@@ -3,7 +3,7 @@ namespace EplanMcp.Contracts;
 /// <summary>Common result data of the M2 list operations (M2 design 4.3).</summary>
 public sealed class ListData<TItem>
 {
-    /// <summary>The name of the project actually used, so the tool can echo it (engineering-handbook.html#pa).</summary>
+    /// <summary>The name of the project actually used, so the tool can echo it (the MCP server standard).</summary>
     public string Project { get; set; } = string.Empty;
 
     /// <summary>The requested slice, in a stable order.</summary>

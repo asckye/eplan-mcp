@@ -11,7 +11,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// </summary>
 public static class ProjectResolver
 {
-    /// <summary>The most candidates an <see cref="ErrorReason.AmbiguousName"/> error lists (engineering-handbook.html#pa).</summary>
+    /// <summary>The most candidates an <see cref="ErrorReason.AmbiguousName"/> error lists (the MCP server standard).</summary>
     public const int MaxCandidates = 20;
 
     public static OpenProject Resolve(IReadOnlyList<OpenProject> open, string? requested)
@@ -51,7 +51,7 @@ public static class ProjectResolver
 
     /// <summary>
     /// The <see cref="ErrorReason.AmbiguousName"/> error of every lookup by name. Candidates go into metadata, one
-    /// per line, because they are project data; the message only says what to do next (engineering-handbook.html#pa).
+    /// per line, because they are project data; the message only says what to do next (the MCP server standard).
     /// </summary>
     public static BridgeErrorException Ambiguous(string kind, string name, IEnumerable<string> candidates, string message)
     {

@@ -1,6 +1,6 @@
 # Large 测试：工具的实机测试
 
-运行环境为 Windows、受支持的 EPLAN 及 API 扩展授权；EPLAN 启动和原生项目读写是本程序集与本机 Small / Medium 测试的区别。scratch 默认位置为 `%USERPROFILE%\EplanMcp\scratch\`。测试层含义见[手册 12.1](../../docs/standards/engineering-handbook.html#testing-layers)，当前无自托管 runner 的决定见 [ADR-0020](../../docs/adr/0020-no-self-hosted-runner.md)。
+运行环境为 Windows、受支持的 EPLAN 及 API 扩展授权；EPLAN 启动和原生项目读写是本程序集与本机 Small / Medium 测试的区别。scratch 默认位置为 `%USERPROFILE%\EplanMcp\scratch\`。测试层含义见[规范 12.1](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/12-testing.md#testing-layers)，当前无自托管 runner 的决定见 [ADR-0020](../../docs/adr/0020-no-self-hosted-runner.md)。
 
 `AcceptanceRedrawTests` 按[整页重绘清单 v1](fixtures/acceptance/README.md)在 `LargeWrite` 新页分批绘制，先打开编辑器供观看，保留页面、PNG 和逐项验收报告，不自动撤销；支持仓库外本地 `EPLANMCP_ACCEPTANCE_LIST`。默认夹具为独立虚构 PLC DI 页。生产工具缺口逐项记 skipped，不能当整页通过；本次仅编写，不运行 EPLAN。
 

@@ -1,7 +1,7 @@
 # 设计文档：<标题>
 
 > 结构参考 Google 的设计文档实践。篇幅以能说清楚为准，通常 2 到 6 页。
-> 用于 L2/L3 变更（见 [手册开发流程条款](../standards/engineering-handbook.html#review-rfc)）。
+> 用于 L2/L3 变更（见 [规范开发流程条款](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/18-process-review-git.md#review-rfc)）。
 > 复制本文件到 `docs/design/<yyyy-mm-dd>-<slug>.md` 后填写，删掉所有引导语。
 
 | 项 | 内容 |

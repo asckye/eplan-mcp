@@ -3,7 +3,7 @@ namespace EplanMcp.Contracts;
 /// <summary>Result data of <see cref="OperationNames.DeviceGet"/>.</summary>
 public sealed class DeviceGetData
 {
-    /// <summary>The name of the project actually used, so the tool can echo it (engineering-handbook.html#pa).</summary>
+    /// <summary>The name of the project actually used, so the tool can echo it (the MCP server standard).</summary>
     public string Project { get; set; } = string.Empty;
 
     /// <summary>The device's main function.</summary>

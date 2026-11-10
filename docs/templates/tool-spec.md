@@ -1,6 +1,6 @@
 # 工具设计：`<tool_name>`
 
-设计说明采用[手册附录 T.3](../standards/engineering-handbook.html#tpl-rfc)；本页是 `docs/tools/<tool_name>.md` 使用的项目字段补充。问题、选项、决定、影响、测试计划和待决定事项使用手册模板。
+设计说明采用[规范附录 T.3](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/appendix/t-templates.md#tpl-rfc)；本页是 `docs/tools/<tool_name>.md` 使用的项目字段补充。问题、选项、决定、影响、测试计划和待决定事项使用手册模板。
 
 | 项目字段 | 记录 |
 |---|---|
