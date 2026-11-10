@@ -23,12 +23,24 @@ internal sealed class EplanDevicePlacer : IDevicePlacer, IDeviceStripTransaction
         if (result is not null)
         {
             result.PredictDevice = args => EplanLayout.Device(projectPath, args, result.Layout!);
-            foreach (LocationBox box in EplanNativePreconditions.Valid(Find(EplanProjects.ByPath(projectPath), pageName)!.AllPlacements).OfType<LocationBox>())
+            Project project = EplanProjects.ByPath(projectPath);
+            LocationBox[] boxes = [.. EplanNativePreconditions.Valid(Find(project, pageName)!.AllPlacements).OfType<LocationBox>()];
+            if (boxes.Length > 0)
             {
-                using FunctionBasePropertyList parts = box.NameParts;
-                using PropertyValue location = parts.DESIGNATION_LOCATION;
-                RectangleD area = box.GetLogicalArea();
-                result.LocationBoxStructures.Add(MacroTargetPage.BoxKey(location.IsEmpty ? string.Empty : "+" + location.ToString(), area.LowerLeft.X, area.LowerLeft.Y, area.UpperRight.X, area.UpperRight.Y));
+                // api-notes (polyline location boxes): GetLogicalArea needs a locked transaction even to read; nothing is
+                // written here, so the transaction is aborted. Only pre-existing boxes are read, never kept past the scope.
+                using var read = new FunctionTransactionScope(project, "Read location boxes");
+                try
+                {
+                    foreach (LocationBox box in boxes)
+                    {
+                        using FunctionBasePropertyList parts = box.NameParts;
+                        using PropertyValue location = parts.DESIGNATION_LOCATION;
+                        RectangleD area = box.GetLogicalArea();
+                        result.LocationBoxStructures.Add(MacroTargetPage.BoxKey(location.IsEmpty ? string.Empty : "+" + location.ToString(), area.LowerLeft.X, area.LowerLeft.Y, area.UpperRight.X, area.UpperRight.Y));
+                    }
+                }
+                finally { read.Rollback(); }
             }
         }
         return result;
