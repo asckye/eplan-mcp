@@ -11,6 +11,31 @@ namespace EplanMcp.Evals.Run;
 /// </summary>
 internal static class EvalsHome
 {
+    /// <summary>
+    /// Installs a plugin file with <c>eplanmcp pack install</c>, as the engineer would on the command line, into
+    /// <paramref name="home"/> or, when null, the data root the runner's own eplanmcp uses; null when it is installed (or
+    /// already was), otherwise what eplanmcp said.
+    /// </summary>
+    public static async Task<string?> InstallPackAsync(string eplanmcp, string? home, string pack, CancellationToken cancellationToken)
+    {
+        var start = new System.Diagnostics.ProcessStartInfo(eplanmcp) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+        foreach (string argument in new[] { "pack", "install", Path.GetFullPath(pack) })
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        if (home is not null)
+        {
+            start.Environment[Agent.ClaudeCommand.HomeVariable] = home;
+        }
+        using System.Diagnostics.Process process = System.Diagnostics.Process.Start(start) ?? throw new InvalidOperationException($"Could not start {eplanmcp}.");
+        Task<string> output = process.StandardOutput.ReadToEndAsync(cancellationToken);
+        Task<string> errors = process.StandardError.ReadToEndAsync(cancellationToken);
+        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        string text = (await output.ConfigureAwait(false) + " " + await errors.ConfigureAwait(false)).Trim();
+        return process.ExitCode == 0 ? null : text.Length > 0 ? text : $"exit code {process.ExitCode}";
+    }
+
     /// <summary>Where the model's eplanmcp writes its exports: <c>exports\</c> in its data root (M4 design 4.4).</summary>
     public static string Exports(string home) => Path.Combine(home, "exports");
 

@@ -1,0 +1,32 @@
+id: draw-gb-t-5226-1
+set: dev
+fixture: copy
+prompt: |
+  在项目 {project} 的 =GAA+A1 下新建 EFS1 第 9918 页多线原理图，按 GB/T 5226.1 画一台三相电机的直接启动主回路：
+  - 页面左侧用电位定义点定义 L1、L2、L3、PE；
+  - 从上到下依次是电机保护断路器、接触器主触点、三相电机（电机要接 PE）；
+  - 器件标识按 IEC 81346-2 选字母代码，导线颜色按 GB/T 5226.1。
+  规则插件 gb-t-5226-1 已经安装。画完后调用 eplan_page_review 并传 rule_packs: ["gb-t-5226-1"] 审图，按审图结果修改图纸，
+  再审一次，直到没有问题，最多修改三轮。最后报告审图还剩几个问题。
+answer:
+  type: object
+  required: [done, remaining_issues]
+  properties:
+    done: { type: boolean, description: "true when the page is drawn, connected and reviewed" }
+    remaining_issues: { type: integer, description: errors plus warnings in the last rule review of the page }
+after:
+  devices: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9918" }, pick: $.total }
+  motors: { tool: eplan_device_list, args: { page: "=GAA+A1&EFS1/9918", category: Motor }, pick: $.total }
+  wires: { tool: eplan_connection_list, args: { page: "=GAA+A1&EFS1/9918" }, pick: $.total }
+  rules_clean: { tool: eplan_page_review, args: { page: "=GAA+A1&EFS1/9918", checks: [rules], rule_packs: [gb-t-5226-1] }, pick: $.summary.clean }
+  # At least one checked wire per defined potential (L1, L2, L3, PE): a page without potentials or colours is clean but untested.
+  colour_passed: { tool: eplan_page_review, args: { page: "=GAA+A1&EFS1/9918", checks: [rules], rule_packs: [gb-t-5226-1] }, pick: "$.rulePacks[0].passed" }
+checks:
+  - { answer: $.done, equals: true }
+  - { answer: $.remaining_issues, equals: 0 }
+  - { after: devices, at_least: 3 }
+  - { after: motors, at_least: 1 }
+  - { after: wires, at_least: 6 }
+  - { after: rules_clean, equals: true }
+  - { after: colour_passed, at_least: 4 }
+budget: { max_tool_calls: 120, max_minutes: 30, max_usd: 5 }

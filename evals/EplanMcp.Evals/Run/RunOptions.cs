@@ -12,7 +12,13 @@ internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int 
 {
     public const int MaxRepeat = 10;
 
-    public const string Usage = "run [--tasks <dir>] [--set dev|holdout|all] [--task <id>] [--repeat <n>] [--model <model>] [--claude <path>] [--agent claude|codex] [--codex <path>] [--eplanmcp <path>] [--template <.elk>]";
+    /// <summary>
+    /// Plugin files (.eplanpack) installed into the run's own eplanmcp data root before any attempt, with
+    /// <c>eplanmcp pack install</c>: an unattended run has no one to approve a non-builtin install in EPLAN (stage 3, 2026-11-10).
+    /// </summary>
+    public IReadOnlyList<string> InstallPacks { get; init; } = [];
+
+    public const string Usage = "run [--tasks <dir>] [--set dev|holdout|all] [--task <id>] [--repeat <n>] [--model <model>] [--claude <path>] [--agent claude|codex] [--codex <path>] [--eplanmcp <path>] [--template <.elk>] [--install-pack <.eplanpack>]...";
 
     public static RunOptions Default { get; } = new(null, null, null, 1, ClaudeCommand.DefaultModel, null, null);
 
@@ -66,6 +72,9 @@ internal sealed record RunOptions(string? Tasks, string? Set, string? Task, int 
                     return null;
                 case "--codex":
                     options = options with { Codex = true, Claude = value };
+                    break;
+                case "--install-pack":
+                    options = options with { InstallPacks = [.. options.InstallPacks, value] };
                     break;
                 case "--eplanmcp":
                     options = options with { Eplanmcp = value };

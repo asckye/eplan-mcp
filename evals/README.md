@@ -64,6 +64,14 @@ Destructive 工具（删页、页面重编号、设备编号，以及 M4c 的端
 
 `draw-review-fix` 考“画图、审图、修正”的循环（第 2 阶段，2026-11-10）：模型自己安装内置规则插件 `iec-60204-1`、`iec-81346`，用 `eplan_page_review` 的 `rule_packs` 审图并修改，最多三轮。判分时运行器再用两个插件审一次，要求没有错误、警告和未知值，并且颜色规则确实检查到了至少 4 根线（定义的 L1、L2、L3、PE 各一根）（没定义电位、没设颜色的页虽然也“干净”，但等于没检查）。
 
+### 按国家标准画图：`evals/tasks-standards/`
+
+同一段描述（三相电机直接启动主回路），按不同国家标准各画一页，用对应的规则插件审图、修改，判分要求与 `draw-review-fix` 相同（第 3 阶段，2026-11-10）。规则插件不是内置的（在私有插件库里），无人值守时没人能在 EPLAN 里批准安装，所以运行时用 `--install-pack` 把插件文件装进本次运行的数据目录，也装进运行器自己的 eplanmcp 用的默认数据目录（标准调用和事后调用由它执行）；等同工程师在命令行执行 `eplanmcp pack install`，只安装，不启用：
+
+```
+run --tasks evals/tasks-standards --set all --install-pack <gb-t-5226-1-x.y.z.eplanpack> --install-pack <nfpa-79-x.y.z.eplanpack>
+```
+
 ### 导出题：作答中导出的文件
 模型那一侧的 eplanmcp 把导出的文件写在它的数据根目录下，`.local/evals/<运行>/eplanmcp/exports/<项目名>/<UTC 时间>-<后缀>/`（M4 设计 4.4），成功的导出不会被删除。运行器在每次作答前后各列一次这个目录，新出现的文件就是这次作答导出的。事后调用 `exported_files` 读的就是它们：它不是 eplanmcp 的工具，运行器自己回答，不调用工具，也不能用作标准调用。
 - 结果是 `{ "files": [{ "path", "name", "bytes" }], "count" }`：`path` 相对于 `exports\`（以项目名开头），`name` 是文件名，按 `path` 排序；

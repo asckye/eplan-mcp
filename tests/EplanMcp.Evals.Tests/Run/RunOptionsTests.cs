@@ -62,4 +62,14 @@ public sealed class RunOptionsTests
         Assert.Null(RunOptions.Parse(["--agent", "gpt"], out string? error));
         Assert.Equal("--agent is claude or codex, not gpt", error);
     }
+
+    [Fact]
+    public void Parse_InstallPack_Repeats()
+    {
+        RunOptions options = RunOptions.Parse(["--install-pack", "a.eplanpack", "--agent", "codex", "--install-pack", "b.eplanpack"], out string? error)!;
+
+        Assert.Null(error);
+        Assert.Equal(["a.eplanpack", "b.eplanpack"], options.InstallPacks);
+        Assert.Empty(RunOptions.Default.InstallPacks);
+    }
 }

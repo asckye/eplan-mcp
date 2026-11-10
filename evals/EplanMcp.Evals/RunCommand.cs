@@ -98,6 +98,17 @@ internal static class RunCommand
             string home = Path.Combine(run, "eplanmcp");
             string copiesRoot = Path.Combine(Preflight.ScratchRoot(), "evals", name);
             EvalsHome.Write(home, ProjectCopies.Writable(copiesRoot), tasks.Any(t => t.ToolSequence.Contains("eplan_api_try", StringComparer.Ordinal)));
+            // Into the run's data root for the model, and into the runner's own (the default one) for oracle and after calls.
+            foreach (string pack in options.InstallPacks)
+            {
+                foreach (string? target in new[] { home, null })
+                {
+                    if (await EvalsHome.InstallPackAsync(eplanmcp, target, pack, cancellationToken).ConfigureAwait(false) is { } problem)
+                    {
+                        return Stop(output, $"Could not install {pack}: {problem}");
+                    }
+                }
+            }
             string mcpConfig = Path.Combine(run, "mcp.json");
             await File.WriteAllTextAsync(mcpConfig, ClaudeCommand.McpConfig(eplanmcp, home), cancellationToken).ConfigureAwait(false);
             string workRoot = Path.Combine(Path.GetTempPath(), "eplanmcp-evals", name);
