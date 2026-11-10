@@ -51,6 +51,21 @@ public sealed class HttpSecurityTests
     }
 
     [Fact]
+    public void HostAllowed_OnlyTheBoundAddressAndPort()
+    {
+        IPAddress bound = IPAddress.Parse("192.168.56.1");
+        Assert.True(HttpGate.HostAllowed("192.168.56.1:8765", bound, 8765));
+        Assert.True(HttpGate.HostAllowed("192.168.56.1", bound, 80));
+        foreach (string host in new[] { "attacker.example:8765", "localhost:8765", "192.168.56.1", "192.168.56.1:8766", "192.168.56.2:8765", "" })
+        {
+            Assert.False(HttpGate.HostAllowed(host, bound, 8765));
+        }
+
+        Assert.False(HttpGate.HostAllowed(StringValues.Empty, bound, 8765));
+        Assert.False(HttpGate.HostAllowed(new StringValues(["192.168.56.1:8765", "192.168.56.1:8765"]), bound, 8765));
+    }
+
+    [Fact]
     public void Check_TenthFailureBlocksAllRequestsForAMinute_Only401Counts()
     {
         var clock = new Clock();

@@ -67,7 +67,8 @@ internal static class VmHttp
             {
                 // Fail closed after deletion or unreadable replacement.
             }
-            int status = gate.Check(context.Connection.RemoteIpAddress ?? IPAddress.None, context.Request.Headers.Origin, context.Request.Headers.Authorization, key);
+            int status = !HttpGate.HostAllowed(context.Request.Headers.Host, options.Address, context.Connection.LocalPort) ? 403
+                : gate.Check(context.Connection.RemoteIpAddress ?? IPAddress.None, context.Request.Headers.Origin, context.Request.Headers.Authorization, key);
             try
             {
                 await app.Services.GetRequiredService<AuditLog>().AppendAsync(new JsonObject { ["kind"] = "http_request", ["status"] = status == 0 ? "accepted" : status.ToString(System.Globalization.CultureInfo.InvariantCulture) }, context.RequestAborted).ConfigureAwait(false);

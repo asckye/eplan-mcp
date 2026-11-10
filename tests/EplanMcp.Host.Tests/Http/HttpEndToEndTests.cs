@@ -178,6 +178,21 @@ public sealed class HttpEndToEndTests : IAsyncLifetime
         Assert.False(response.Headers.Contains("Access-Control-Allow-Origin"));
     }
 
+    [Theory]
+    [InlineData("attacker.example")]
+    [InlineData("localhost")]
+    public async Task ForeignHostHeader_IsRefusedEvenWithTheKey(string host)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/mcp") { Content = new StringContent("{}", Encoding.UTF8, "application/json") };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _key);
+        request.Headers.Host = $"{host}:{_http.BaseAddress!.Port}";
+
+        using HttpResponseMessage response = await _http.SendAsync(request, Token);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(string.Empty, await response.Content.ReadAsStringAsync(Token));
+    }
+
     [Fact]
     public async Task AllowedOrigin_StillRequiresTheKey()
     {
