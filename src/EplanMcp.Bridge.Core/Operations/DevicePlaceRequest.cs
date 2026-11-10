@@ -21,6 +21,7 @@ internal sealed class DevicePlaceRequest
     private string? _plcWarning;
     private readonly string? _arrangement;
     private readonly int? _symbolVariant;
+    private string? _freeTag;
     private DevicePlaceRequest(OpenProject project, MacroTargetPage page, PartSearchItem part, DevicePlaceArgs args, string tag, string[] taken, string[] existing)
     {
         _arrangement = args.PropertyArrangement;
@@ -145,11 +146,12 @@ internal sealed class DevicePlaceRequest
             existing = [.. existing, Protocol.BridgeJson.FromObject(state).ToString(Newtonsoft.Json.Formatting.None)];
         }
         // MX_Dryer 2026-11-08: official pages put each field device in its own +M box, so only an exact repeat conflicts.
+        IReadOnlyList<string> functions = terminal || args.PlcConnectionPoint is not null || box ? existing : names.FunctionNames(project.Path);
         string[] taken = box ? [.. page.LocationBoxStructures.Where(n => string.Equals(n, MacroTargetPage.BoxKey(full, args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value), StringComparison.OrdinalIgnoreCase))] :
         [
-            .. (terminal || args.PlcConnectionPoint is not null ? existing : names.FunctionNames(project.Path))
+            .. functions
                 .Where(n => full.Length > 0 && ((terminal || args.PlcConnectionPoint is not null
-                    ? SameName(full, n, ignoreCase: true) : string.Equals(BareOf(full, n), WithoutEmptyFunction(n), StringComparison.OrdinalIgnoreCase)) || WithoutEmptyFunction(n).StartsWith(BareOf(full, n) + ":", StringComparison.OrdinalIgnoreCase)))
+                    ? SameName(full, n, ignoreCase: true) : Carries(full, n)) || WithoutEmptyFunction(n).StartsWith(BareOf(full, n) + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
         if (args.JoinDevice == true && taken.FirstOrDefault(n => SameName(full, n, ignoreCase: true)) is { } joinedTag)
@@ -166,7 +168,8 @@ internal sealed class DevicePlaceRequest
         {
             _joinsDevice = reusesPoint || args.JoinDevice == true || DeviceSymbolPlan.BusBarDefinition(args) || DeviceSymbolPlan.BusBarPoint(args),
             _plcWarning = plcWarning,
-            _requiresExistingDevice = args.JoinDevice == true
+            _requiresExistingDevice = args.JoinDevice == true,
+            _freeTag = !box && !terminal && args.PlcConnectionPoint is null && taken.Length > 0 ? FreeTag(full, functions) : null,
         };
         if (args.Fingerprint is null)
         { request.CheckFree(); }
@@ -205,6 +208,30 @@ internal sealed class DevicePlaceRequest
     public string StateFingerprint() =>
         Fingerprint.Of(Page.Objects.Select(id => "object\t" + id).Concat(Existing.Select(n => "name\t" + n)).Concat(Page.LocationBoxStructures.Select(n => "box\t" + n)).Append("taken\t" + Taken.Count.ToString(CultureInfo.InvariantCulture)).Append(Protocol.BridgeJson.FromObject(new { Page.Layout, LayoutWarnings }).ToString()).Concat(_arrangement is null ? [] : new[] { "arrangement\t" + _arrangement }).Concat(_symbolVariant is null ? [] : new[] { "symbol_variant\t" + _symbolVariant.Value.ToString(CultureInfo.InvariantCulture) }));
 
+    /// <summary>Whether function <paramref name="name"/> carries the device tag <paramref name="full"/> (any case).</summary>
+    private static bool Carries(string full, string name) => string.Equals(BareOf(full, name), WithoutEmptyFunction(name), StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The next free tag with the same letters and a higher counter (-FC1 taken: -FC2, ...), or null for a tag without a counter.
+    /// Codex review eval 2026-11-10: the model retried a taken -FC1 because the refusal named no free one.
+    /// </summary>
+    internal static string? FreeTag(string full, IReadOnlyList<string> functions)
+    {
+        int digits = full.Length;
+        while (digits > 0 && char.IsDigit(full[digits - 1]))
+        { digits--; }
+        if (digits == full.Length || digits == 0 || !char.IsLetter(full[digits - 1]) || full.Length - digits > 6)
+        { return null; }
+        int counter = int.Parse(full.Substring(digits), CultureInfo.InvariantCulture);
+        for (int next = counter + 1; next <= counter + 500; next++)
+        {
+            string candidate = full.Substring(0, digits) + next.ToString(CultureInfo.InvariantCulture);
+            if (!functions.Any(n => Carries(candidate, n) || WithoutEmptyFunction(n).StartsWith(BareOf(candidate, n) + ":", StringComparison.OrdinalIgnoreCase)))
+            { return candidate; }
+        }
+        return null;
+    }
+
     /// <summary>ALREADY_EXISTS when a device carries the tag: EPLAN would merge the two (A13: it does not check).</summary>
     public void CheckFree()
     {
@@ -214,9 +241,18 @@ internal sealed class DevicePlaceRequest
         {
             throw new BridgeErrorException(
                 ErrorReason.AlreadyExists,
-                Tag.StartsWith("+", StringComparison.Ordinal) && Tag.IndexOf('-') < 0 ? "A location box with this identifier already covers this area on the page; choose another area or identifier." : $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. Choose a free tag; eplan_device_list with tag_contains shows the tags in use.",
+                Tag.StartsWith("+", StringComparison.Ordinal) && Tag.IndexOf('-') < 0 ? "A location box with this identifier already covers this area on the page; choose another area or identifier." : $"'{Tag}' is already used by another device; a new device with this tag would merge with it in EPLAN, which this tool does not do. "
+                    + (_freeTag is null ? "Choose a free tag; eplan_device_list with tag_contains shows the tags in use." : $"'{_freeTag}' is free; or choose another free tag."),
                 retryable: false,
-                new Dictionary<string, string> { ["project"] = Project.Name, ["existing"] = string.Join("\n", Taken.Take(ProjectResolver.MaxCandidates)) });
+                Metadata());
+        }
+
+        Dictionary<string, string> Metadata()
+        {
+            var metadata = new Dictionary<string, string> { ["project"] = Project.Name, ["existing"] = string.Join("\n", Taken.Take(ProjectResolver.MaxCandidates)) };
+            if (_freeTag is not null)
+            { metadata["free"] = _freeTag; }
+            return metadata;
         }
     }
 

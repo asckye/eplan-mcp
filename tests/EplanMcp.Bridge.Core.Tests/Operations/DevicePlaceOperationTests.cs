@@ -321,6 +321,23 @@ public sealed partial class DevicePlaceOperationTests
     }
 
     [Fact]
+    public void Plan_ATagInUse_NamesTheNextFreeTag()
+    {
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Plan(Args(NewPage, "-KF1")));
+
+        Assert.Equal("=GAA+A1-KF2", error.Error.Metadata!["free"]);
+        Assert.Contains("'=GAA+A1-KF2' is free", error.Error.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("=GAA+A1-FC1", "=GAA+A1-FC3")]
+    [InlineData("=GAA+A1-QA9", "=GAA+A1-QA10")]
+    [InlineData("=GAA+A1-PH", null)]
+    [InlineData("=GAA+A1-12", null)]
+    public void FreeTag_TakesTheNextUnusedCounter(string tag, string? expected) =>
+        Assert.Equal(expected, DevicePlaceRequest.FreeTag(tag, ["=GAA+A1-FC1", "=GAA+A1-FC2:1", "=GAA+A1-QA9", "=GAA+A1-PH"]));
+
+    [Fact]
     public void Execute_PlacesTheDeviceAndRenamesEveryFunction_ThenCommits()
     {
         DevicePlaceArgs args = Args(NewPage, "-KF20");

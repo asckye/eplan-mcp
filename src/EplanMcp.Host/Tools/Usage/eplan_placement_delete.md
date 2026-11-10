@@ -6,7 +6,7 @@ To delete a device symbol and an interruption point, read `eplan_page_get` with 
 
 ## Workflow
 
-Use 1–100 distinct locators for Function, Terminal, InterruptionPoint, BoxedDevice, PLC or SymbolReference (SPECIAL corners and T-nodes), or for Line, Arc, PolyLine, Spline, Rectangle, Text, PathText, Image, MacroBox, HyperLink, QRCode, DimensionItem, DimensionCircle or PlaceHolder. Device connection points (DCP) read as Function. Grouped objects are supported. Connections, property text, blocks and objects with a block parent are refused. Deleting a function also removes its property text. Deleting a device's last placed function deletes the device and its part references. Removing a macro box keeps its referenced objects. One Ctrl+Z restores the deletion.
+Use 1–100 distinct locators for Function, Terminal, InterruptionPoint, BoxedDevice, PLC or SymbolReference (SPECIAL corners and T-nodes), PotentialDefinition (potential points and potential definition points), ConnectionDefinitionPoint, or for Line, Arc, PolyLine, Spline, Rectangle, Text, PathText, Image, MacroBox, HyperLink, QRCode, DimensionItem, DimensionCircle or PlaceHolder. Device connection points (DCP) read as Function. Grouped objects are supported. Connections, property text, blocks and objects with a block parent are refused. Deleting a function also removes its property text. Deleting a device's last placed function deletes the device and its part references. Removing a macro box keeps its referenced objects. One Ctrl+Z restores the deletion.
 
 ## Fields
 

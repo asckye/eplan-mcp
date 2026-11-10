@@ -16,6 +16,8 @@
 
 ### 修复
 
+- `eplan_placement_delete` 可以删除电位连接点、电位定义点（`PotentialDefinition`）和连接定义点（`ConnectionDefinitionPoint`），删除后提示重新生成连接。
+- `eplan_device_place`：标识已被占用时，报错里直接给出同字母的下一个可用标识（`metadata.free`，如 `-FC1` 被占用时给 `-FC3`），不用再猜。
 - `eplan_page_review`：从电位连接点（`SPECIAL/PCP`）引出的线不再报 `dangling_end`。EPLAN 把电位连接点和电位定义点归为同一个类，审图原来把两者都排除了。
 - 按 Codex 绘图评测里反复出现的错误补了工具说明：`eplan_page_review` 的 `include_image` 写明暂不支持、改用 `eplan_export_image`；`eplan_property_set` 参数形状不对时说明要 `device_tag`、`property_id`/`property_name`；用法说明写明 T 节点的 `source` 和 `variant` 二选一、只有位置框和黑盒用 `corner_x`/`corner_y`、`eplan_macro_store` 导出的宏不能直接插入。
 - `eplan_device_place` 收到 `SPECIAL` 的连接符号（拐角 `CO`、T 节点 `TLRO`/`TLRU`/`TOUL`/`TOUR`、`PCP`、`ACBP`、以 `BP` 开头的中断点）时，直接指向 `eplan_connection_create` 和对应的 item kind，不再报“缺少标识”。

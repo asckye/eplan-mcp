@@ -56,6 +56,8 @@ public sealed class PlacementDeleteTests
     [InlineData("BoxedDevice")]
     [InlineData("PLC")]
     [InlineData("SymbolReference")]
+    [InlineData("PotentialDefinition")]
+    [InlineData("ConnectionDefinitionPoint")]
     public void FunctionKindsAreAcceptedAndPreviewTheirNameAndKind(string kind)
     {
         var world = new World(kind);
