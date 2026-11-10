@@ -5,7 +5,10 @@
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-09
+
 ### 新增
+
 - 新增 `eplan_project_rename`：给打开着的项目改名（项目文件名）。EPLAN API 没有改名方法，按新名复制、关闭旧项目、打开副本、删除旧项目；属破坏性操作，总要工程师审批并先备份。
 - `eplan_page_review` 新增检查 `box_crossings`：文字（含电缆文字）压在位置框边线上时报 `text_crosses_box` 警告。
 - `eplan_device_place`：放 PLC 连接点时没给 `plc_address`，就沿用这块卡上同一通道已编好的地址（计划里列出），总览编址后再调用的点直接显示地址。
@@ -38,11 +41,16 @@
 - 新增 `eplan_macro_store`，默认预览，将同页对象存为窗口宏或将指定页存为页宏；导出文件名禁止覆盖，写后校验文件与项目业务快照。
 - 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
 - `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
+- `eplan_page_review` 支持通过 `rule_packs` 或已启用插件按规则审图，返回条款引用、缺值提示和本页统计；草稿规则仅用于 scratch，工程师签核后可用于其他项目。
+
 ### 变更
+
 - `eplan_project_open` 和 `eplan_project_rename` 改为按普通方式打开项目（`OpenMode.Standard`），项目名旁不再显示“专有”。
 - `eplan_connection_create`：T 节点默认画成带方向的样式（同官方 EES 样例），新增 `source` 指定电从哪边来；以前不给 `variant` 时是圆点。项目里没有带方向的变体时仍画圆点。
+- 发布包改为在维护者开发机上打包。从 v0.5.0 起不再附 GitHub 构建证明（attestation）；用 `SHA256SUMS.txt` 和逐文件清单校验。
 
 ### 修复
+
 - 审批窗口被销毁却没有走关闭流程时，EPLAN 不再一直被挡住：窗口不存在了或到期仍未关闭，就结束模态循环，按取消处理。
 - `eplan_project_open` 接受 `eplan_project_list` 返回的不带 `.elk` 的项目路径，关闭后可以直接用列表里的路径重新打开。
 - `eplan_connection_create` 的 `cable_definition`：EPLAN 读回芯线的顺序和请求的顺序不同时，不再误报读回不一致并撤销整次调用；每条芯线按它的连接对应后再核对。
@@ -65,19 +73,12 @@
 - `eplan_connection_create` 省略 `symbol_variant` 时，中断点箭头按电流方向（从左到右、从上到下）：左端和顶端画成进线（BP 变体 E、H），右端和底端画成出线。
 - `eplan_connection_create` 不再拒绝直角交叉的线：EPLAN 在交叉处不连接，三相母线和往下的分支本来就这样画。
 - 从部件放端子时，新建端子排不再报 `LOCK_FAILED`，端子排名称也只在第一个端子上显示。
-- 设备改名保留前缀（`-5Q1` 不再变成 `-Q1`）；没有高层代号的页上，`=+S1-5Q1` 和 `+S1-5Q1` 按同一标识校验。
-- 不含结构的标识格式下，中断点名称不再多出一个 `-`。
-- 原理图上的 PLC 点使用总览同名点的功能定义，总览不再出现空行。
 - `eplan_device_place` 放置失败时改用撤销回滚：之前报告已回滚，器件却可能留在页面上；读回不符时说明是哪一项不符。
 - `eplan_page_get` 的绘图项先列符号和图形，属性文字放在后面，不再占满预算；`eplan_context_get` 的 `scope` 可省略。
 - `eplan_plc_get` 的 `symbolicAddress` 优先返回手工填写的符号地址；`eplan_page_review` 不再把浮点误差造成的边缘相接报成重叠。
 - `eplan_symbol_search` 没有匹配时提示描述按项目显示语言比较；工具用法说明写明对齐的连接点由 EPLAN 自动连线，之后调用 `eplan_connection_generate`。
 - `eplan_connection_create` 的中断点接受短名称：`24V`、`-24V` 取本页高层代号，`=F-24V` 按原样写入。之前短名称读回不一致，且失败后中断点留在页上，工具报 `OUTCOME_UNKNOWN` 并暂停之后的写入。
 - `eplan_connection_create` 放置中断点失败时改用撤销回滚，`Transaction.Abort` 留下的对象不再残留；`OUTCOME_UNKNOWN` 的消息同时说明写入失败和回滚核对失败的原因。
-- `eplan_page_review` 支持通过 `rule_packs` 或已启用插件按规则审图，返回条款引用、缺值提示和本页统计；草稿规则仅用于 scratch，工程师签核后可用于其他项目。
-- 新增 `eplan_graphic_edit`：同页缩放、绘制顺序、组合与分解、文字固定、矩形圆角、格式复制、修剪、线长、拉伸、栅格对齐及两线倒角/圆角；默认仅预览，执行沿用审批、读回和一步撤销。
-- `eplan_page_get` 的绘图项提供 `drawingOrder`，用于核对置顶、置底和指定层次。
-### 修复
 - `eplan_context_get` 只请求插件汇总时不再附带全部页面证据，页数多的项目可使用默认预算；插件汇总显示实际规则数与签核状态。
 - `eplan_placement_create` 创建块时在规划阶段拒绝 Function 成员，避免 EPLAN 静默丢弃符号。
 - `eplan_device_place` 和 `eplan_device_update` 改名时保留标识前缀：`-5Q1` 之前会变成 `-Q1`。没有高层代号的页上，按部件放置和端子放置不再把 `=+S1-5Q1` 误报成名称不符。
@@ -85,10 +86,6 @@
 - `eplan_device_update` 能把宏带来的、还没有主功能的 PLC 盒和连接点并入总览的 PLC 盒。
 - `eplan_connection_create` 支持中断点不带结构的项目（如 EES 基本项目），之前 `=-L1` 被存成 `-=-L1`。
 - `eplan_macro_insert` 的说明改正：`x`、`y` 放的是宏的 `reference_point`，不一定是外框左上角。
-
-### Changed
-
-- 发布包改为在维护者开发机上打包。从 v0.5.0 起不再附 GitHub 构建证明（attestation）；用 `SHA256SUMS.txt` 和逐文件清单校验。
 
 ## [0.5.0] - 2026-11-05
 
