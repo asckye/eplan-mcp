@@ -488,8 +488,8 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 
 ### A134. 双端设备连接点的内侧引脚（2026-11-11，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 喂丝机9 第 8 页）
 - 施耐德 GV2P16 按部件放置后是黑盒（`SPECIAL/DC`），每个极是一个双端设备连接点 `SPECIAL/D2DCPNG`（例如 `-8FC1:1`，位置 120/248）。`eplan_api_try` 读它的 `GraphicalConnections` 得到两条：一条从连接点 (0,0) 到上方进线，一条从 **(0,−12)**（页面 120/236，盒子内部）到变频器 `-8TA1:L1` 的连接点 (0,3)。
-- 审图在 120/236 报“导线端点没有引脚”，同一个极也没有报任何未连接的引脚。所以审图用的 `GraphicalConnectionPoints` 很可能没有给出这个内侧引脚的 (0,−12) 位置。直接读 `GraphicalConnectionPoints` 的那次 `eplan_api_try` 返回结果未知，这一点没有直接证实。
-- 做法：连接场景除了 `GraphicalConnectionPoints`，也收图形连接两端的引脚（同一符号、同一引脚序号已收的不重复）。
+- **同一个引脚，EPLAN 报两个位置。** 这个内侧引脚（序号 1）在 `GraphicalConnectionPoints` 里没有；从图形连接收进来以后，审图报它在 120/228 未连接，而另一条连接的端点在 120/236（0,−12），两处对不上。所以导线端点不能按坐标找引脚。
+- 做法：连接场景也收图形连接两端的引脚（零长度的连接不收，它不画线，A72）；导线端点按“符号 + 引脚序号”取引脚表里的位置。实测 喂丝机9 第 8 页审图错误从 3 个降到 0 个。G120C 的 3 个网口引脚（总线端子）原来不在引脚表里，现在会报“未连接”警告，它们在这页上确实没有画线。
 — `eplan_api_try` 读 `SymbolReference.GraphicalConnections` 及其起止 `SymbolRef`、`ConnectionPoint.Location`，结果在会话 scratch `direct/gc2.log`。
 
 ### A133. S7-1200 G2、G120C 和喂丝机项目的实测（2026-11-11，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 喂丝机4–9）
