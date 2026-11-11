@@ -53,7 +53,15 @@ public sealed class ReadmeDemoTests(LiveEplan eplan)
     {
         var args = new Dictionary<string, object?>
         {
-            ["page"] = Page, ["library"] = "IEC_symbol", ["symbol"] = symbol, ["symbol_variant"] = 0, ["tag"] = tag, ["x"] = x, ["y"] = y, ["layout_guard"] = "warn", ["dry_run"] = false,
+            ["page"] = Page,
+            ["library"] = "IEC_symbol",
+            ["symbol"] = symbol,
+            ["symbol_variant"] = 0,
+            ["tag"] = tag,
+            ["x"] = x,
+            ["y"] = y,
+            ["layout_guard"] = "warn",
+            ["dry_run"] = false,
         };
         if (join)
         { args["join_device"] = true; }
