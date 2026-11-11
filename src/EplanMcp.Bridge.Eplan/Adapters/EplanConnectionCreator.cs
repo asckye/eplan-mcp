@@ -37,13 +37,14 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         Page native = Page(target.Path, page);
         PageDrawingGeometry geometry = new EplanDrawingReader().Read(target.Path, page, created)!;
         geometry.Project = target.Path;
-        var scene = new ConnectionCreatePlanner.Scene { Project = target, Page = geometry, PageType = native.PageType.ToString(), Complete = true, Graphical = Graphical(target.Path, page) };
+        var scene = new ConnectionCreatePlanner.Scene { Project = target, Page = geometry, PageType = native.PageType.ToString(), Complete = true };
         foreach (Placement placement in EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)).GroupBy(p => p.ToStringIdentifier(), StringComparer.Ordinal).Select(g => g.First()))
         {
             if (!geometry.Placements.Any(p => p.Locator.Type == SnapshotCanonical.TypeOf(placement.ToStringIdentifier()) && p.Locator.Oid == placement.ObjectIdentifier))
             { scene.Complete = false; }
         }
         EplanConnectionScene.ReadPins(scene, EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)));
+        scene.Graphical = Graphical(target.Path, page, scene.Pins);
         foreach (SymbolVariant variant in readSymbolBounds ? Variants(target.Path) : [])
         { scene.SymbolBounds.Add(FormattableString.Invariant($"{variant.SymbolName}/{variant.VariantNr}"), Outline(variant)); }
         scene.Logical = Endpoints(target.Path, page).Select(p => new ConnectionRecord { StartDevice = p[0], EndDevice = p[1] }).ToList();
@@ -285,9 +286,19 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
             return [];
         }
     }
-    private static List<double[][]> Graphical(string project, string page) => EplanNativePreconditions.Valid(Page(project, page).AllPlacements).OfType<SymbolReference>().SelectMany(r => r.GraphicalConnections)
-        .Select(g => new[] { new[] { g.StartSymbolRef.Location.X + g.StartConnectionPoint.Location.X, g.StartSymbolRef.Location.Y + g.StartConnectionPoint.Location.Y },
-            new[] { g.EndSymbolRef.Location.X + g.EndConnectionPoint.Location.X, g.EndSymbolRef.Location.Y + g.EndConnectionPoint.Location.Y } }).ToList();
+    /// <summary>
+    /// Wire segments between graphical connection points. An end on a pin of the scene takes that pin's location: EPLAN reports
+    /// one pin at different offsets (A134, the inner pin of a GV2P pole at (0,-12) in one connection and (0,-20) in another), and
+    /// a segment must end where its pin is.
+    /// </summary>
+    private static List<double[][]> Graphical(string project, string page, Dictionary<string, SymbolConnectionPoint> pins)
+    {
+        double[] End(SymbolReference reference, PinBase pin) =>
+            pins.TryGetValue(FormattableString.Invariant($"{SnapshotCanonical.TypeOf(reference.ToStringIdentifier())}/{reference.ObjectIdentifier}/{pin.Index}"), out SymbolConnectionPoint? known)
+                ? [.. known.Location] : [reference.Location.X + pin.Location.X, reference.Location.Y + pin.Location.Y];
+        return [.. EplanNativePreconditions.Valid(Page(project, page).AllPlacements).OfType<SymbolReference>().SelectMany(r => r.GraphicalConnections)
+            .Select(g => new[] { End(g.StartSymbolRef, g.StartConnectionPoint), End(g.EndSymbolRef, g.EndConnectionPoint) })];
+    }
     public List<string?[]> Endpoints(string project, string page)
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
