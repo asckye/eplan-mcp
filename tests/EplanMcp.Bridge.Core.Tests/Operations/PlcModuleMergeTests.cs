@@ -47,6 +47,30 @@ public sealed class PlcModuleMergeTests
     }
 
     [Fact]
+    public void DriveControlMacro_WithItsBoxAndShieldPoint_PlansToJoinTheDrive()
+    {
+        // G120C MultiLine variant 1 (2026-11-10): a PLC box, PLC points and the shield SH(3) as a device connection point,
+        // none of them main; the drive's power macro already holds the main PLC box under the target tag.
+        _store.Functions.InsertRange(0, [
+            new() { Name = Source, Id = "control box", Category = "PLCBox", Page = "circuit" },
+            new() { Name = Source + ":SH(3)", Id = "shield", Category = "DeviceEndTerminal", Page = "circuit" },
+        ]);
+        DeviceUpdateArgs args = Args();
+
+        WritePlan plan = Plan(args);
+
+        Assert.Equal("4", plan.Details!["functions"]);
+        Assert.Equal("circuit", plan.Details["pages"]);
+    }
+
+    [Fact]
+    public void ModuleWithAnOrdinaryFunction_IsNotJoined()
+    {
+        _store.Functions.Insert(0, new() { Name = Source + ":13", Id = "contact", Category = "NoContact", Page = "circuit" });
+        Assert.Equal(ErrorReason.AlreadyExists, Assert.Throws<BridgeErrorException>(() => Plan(Args())).Error.Reason);
+    }
+
+    [Fact]
     public void TerminalOnlyModule_TakesATagNoCardHasYet()
     {
         // The sample's =F+A2-KE1: its Overview page is outside the redrawn pages, so the module's points come first.

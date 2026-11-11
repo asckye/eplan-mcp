@@ -19,6 +19,13 @@ public sealed class DeviceNames
     /// <summary>The main function's auxiliary functions' names, including suffixes.</summary>
     public List<string> SubFunctions { get; set; } = [];
 
+    /// <summary>
+    /// Categories of a device without a main function that a rename may join to an existing PLC box: PLC points and
+    /// boxes (A89), and device connection points such as the shield of a drive's control-terminal macro (G120C
+    /// MultiLine variant 1, 2026-11-10: PLC box, PLC points and SH(3) as DeviceEndTerminal).
+    /// </summary>
+    public static bool PointCategory(string? category) => category is "PLCTerminal" or "PLCBox" or "DeviceEndTerminal";
+
     /// <summary>One function: its session identifier (<c>ToStringIdentifier</c>, valid in this EPLAN session only, A3) and page.</summary>
     public sealed class NamedFunction
     {

@@ -31,7 +31,7 @@ internal sealed class DeviceUpdateRequest
     public DeviceNames? MergeTarget { get; private set; }
 
     /// <summary>A PLC module's points without a main function: EPLAN reports a point's name for the whole device (A89).</summary>
-    public bool PointsOnly => Device.Functions.Count > 0 && Device.Functions.All(f => !f.IsMain && f.Category is "PLCTerminal" or "PLCBox");
+    public bool PointsOnly => Device.Functions.Count > 0 && Device.Functions.All(f => !f.IsMain && DeviceNames.PointCategory(f.Category));
     public DevicePartTarget? Main { get; private set; }
     public PartSearchItem? Part { get; private set; }
     public int Count { get; private set; } = 1;
@@ -111,7 +111,7 @@ internal sealed class DeviceUpdateRequest
             if (main!.Parts.Any(p => p.PartNumber == selected.PartNumber && p.Variant == selected.Variant))
             { throw Invalid("There is nothing to change: the function already references this part and variant."); }
         }
-        DeviceNames? destination = taken.Length > 0 && device.Functions.Count > 0 && device.Functions.All(f => !f.IsMain && f.Category is "PLCTerminal" or "PLCBox")
+        DeviceNames? destination = taken.Length > 0 && device.Functions.Count > 0 && device.Functions.All(f => !f.IsMain && DeviceNames.PointCategory(f.Category))
             ? renamer.ReadDevice(project.Path, target) : null;
         return new DeviceUpdateRequest(project, device, target, taken)
         {

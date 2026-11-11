@@ -68,8 +68,8 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         return [.. EplanNativePreconditions.Valid(finder.GetFunctions(null)).Where(f => f.Name == tag || (f.Name ?? string.Empty).StartsWith(tag + ":", StringComparison.Ordinal))];
     }
 
-    /// <summary>The main function (A12), or the first point of a terminal-only PLC module (A89).</summary>
+    /// <summary>The main function (A12), or the first point of a device made only of points (A89, <see cref="DeviceNames.PointCategory"/>).</summary>
     private static Function? Representative(Function[] named) =>
         named.FirstOrDefault(f => f.IsMainFunction && DeviceTags.Shown(f.VisibleName) is not null) ?? named.FirstOrDefault(f => f.IsMainFunction)
-        ?? (named.Length > 0 && named.All(f => !f.IsMainFunction && Category(f) is "PLCTerminal" or "PLCBox") ? named.FirstOrDefault(f => Category(f) == "PLCTerminal") ?? named[0] : null);
+        ?? (named.Length > 0 && named.All(f => !f.IsMainFunction && DeviceNames.PointCategory(Category(f))) ? named.FirstOrDefault(f => Category(f) == "PLCTerminal") ?? named[0] : null);
 }
