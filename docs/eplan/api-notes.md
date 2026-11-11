@@ -486,6 +486,12 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A134. 双端设备连接点的内侧引脚（2026-11-11，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 喂丝机9 第 8 页）
+- 施耐德 GV2P16 按部件放置后是黑盒（`SPECIAL/DC`），每个极是一个双端设备连接点 `SPECIAL/D2DCPNG`（例如 `-8FC1:1`，位置 120/248）。`eplan_api_try` 读它的 `GraphicalConnections` 得到两条：一条从连接点 (0,0) 到上方进线，一条从 **(0,−12)**（页面 120/236，盒子内部）到变频器 `-8TA1:L1` 的连接点 (0,3)。
+- 审图在 120/236 报“导线端点没有引脚”，同一个极也没有报任何未连接的引脚。所以审图用的 `GraphicalConnectionPoints` 很可能没有给出这个内侧引脚的 (0,−12) 位置。直接读 `GraphicalConnectionPoints` 的那次 `eplan_api_try` 返回结果未知，这一点没有直接证实。
+- 做法：连接场景除了 `GraphicalConnectionPoints`，也收图形连接两端的引脚（同一符号、同一引脚序号已收的不重复）。
+— `eplan_api_try` 读 `SymbolReference.GraphicalConnections` 及其起止 `SymbolRef`、`ConnectionPoint.Location`，结果在会话 scratch `direct/gc2.log`。
+
 ### A133. S7-1200 G2、G120C 和喂丝机项目的实测（2026-11-11，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 喂丝机4–9）
 - **S7-1200 G2 编址：** CPU 1214C G2（`6ES7214-1AH50-0XB0`）、SM 1221 DI16（`6ES7221-1BH50-0XB0`）、SM 1222 DQ16（`6ES7222-5BH50-0XB0`）的 X10/X11 端子交错：奇数端子 a.0–a.3、偶数端子 a.4–a.7（CPU 的 X10 是 a.0–a.7 在奇数、b.0–b.5 在偶数）。`eplan_plc_readdress` 默认（按接线点）给 X10:3 分到 I0.2、X10:5 分到 I0.4；`sorting:"channel"` 后 X10:1 I0.0、:3 I0.1、:5 I0.2，和硬件一致。总览上 X10 和 X11 的点同名（`-KE2:3` 两个），`eplan_plc_get` 列出时会按名合并，看起来少一半。
 - **宏的表达：** 三张卡的 Overview 变体 0 是整卡总览，没有占位符值集；多线变体 8（CPU，88×148）和 3（SM，40×152）是机架图片，其余变体是单个端子块。G120C PN（`6SL3210-1KE1x-xUF1_2D_.ema`）多线变体 0 是功率部分，变体 1 是控制端子（PLC 盒加 25 个端子，屏蔽 SH(3) 是 `DeviceEndTerminal`），单线变体 1 带两个总线端口（`SPECIAL/NWBCP/2`，连接点在符号下方 4 mm）。CPU 单线变体 0 也是两个端口。

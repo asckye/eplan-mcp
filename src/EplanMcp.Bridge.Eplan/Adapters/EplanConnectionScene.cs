@@ -21,5 +21,22 @@ internal static class EplanConnectionScene
                 scene.Pins.Add(key, new() { Location = [reference.Location.X + pin.Location.X, reference.Location.Y + pin.Location.Y], Direction = pin.Direction.ToString() });
             }
         }
+        // Wire feeder 2026-11-11 (api-notes A134): the inner end of a GV2P pole, a two-sided device connection point (SPECIAL/D2DCPNG),
+        // at (0,-12) ends the wire to the drive, yet the page review found no pin there and reported the wire end dangling. A pin
+        // that a graphical connection ends on is a pin; add the ones the symbol's own list left out.
+        foreach (SymbolReference reference in EplanNativePreconditions.Valid(placements).OfType<SymbolReference>().Where(r => r is not (DynamicConnectionLine or ConnectionDefinitionPoint)))
+        {
+            foreach (SymbolReference.GraphicalConnection connection in reference.GraphicalConnections)
+            {
+                foreach ((SymbolReference end, PinBase pin) in new[] { (connection.StartSymbolRef, connection.StartConnectionPoint), (connection.EndSymbolRef, connection.EndConnectionPoint) })
+                {
+                    if (end is null || pin is null || end is DynamicConnectionLine or ConnectionDefinitionPoint || end is PotentialDefinition && end.SymbolVariant?.SymbolName != "PCP")
+                    { continue; }
+                    string key = FormattableString.Invariant($"{SnapshotCanonical.TypeOf(end.ToStringIdentifier())}/{end.ObjectIdentifier}/{pin.Index}");
+                    if (!scene.Pins.ContainsKey(key))
+                    { scene.Pins.Add(key, new() { Location = [end.Location.X + pin.Location.X, end.Location.Y + pin.Location.Y], Direction = pin.Direction.ToString() }); }
+                }
+            }
+        }
     }
 }
