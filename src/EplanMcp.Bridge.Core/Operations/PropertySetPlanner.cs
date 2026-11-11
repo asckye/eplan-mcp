@@ -168,7 +168,7 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                 || metadata.IsIndexed != false || metadata.IsInternal != false
                 || metadata.IsReadOnly != false || metadata.IsNamePart != false || metadata.IsComputed == true)
             {
-                Add("/changes", "The runtime definition or related-object scope differs from B1.", ErrorReason.PolicyDenied);
+                Add("/changes", FormattableString.Invariant($"The runtime definition or related-object scope differs from B1 (property {propertyId}: type {metadata.ValueType}, indexed {metadata.IsIndexed}, internal {metadata.IsInternal}, read-only {metadata.IsReadOnly}, name part {metadata.IsNamePart}, computed {metadata.IsComputed})."), ErrorReason.PolicyDenied);
                 Refuse(violations);
             }
 

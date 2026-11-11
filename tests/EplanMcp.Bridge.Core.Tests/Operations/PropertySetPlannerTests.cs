@@ -274,7 +274,13 @@ public sealed class PropertySetPlannerTests
                 break;
         }
 
-        Assert.Equal(ErrorReason.PolicyDenied, Assert.Throws<BridgeErrorException>(() => Plan(adapter)).Error.Reason);
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(adapter)).Error;
+        Assert.Equal(ErrorReason.PolicyDenied, error.Reason);
+        if (drift == "indexed")
+        {
+            // The refusal names the runtime flags, so a new candidate's mismatch is visible without a probe (20105 on 2026-11-10).
+            Assert.Contains("indexed True", error.Metadata!["violations"], StringComparison.Ordinal);
+        }
         Assert.Empty(adapter.ValueRequests);
         adapter.AssertDisposed();
     }
