@@ -6215,6 +6215,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SmallProjectRedrawTests.cs"
           }
         ],
         "operationTests": [
@@ -6668,6 +6673,21 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewCableFixTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundFourTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundFourTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundThreeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -6806,6 +6826,11 @@
             "name": "PotentialEngineeringTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PotentialEngineeringTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
           },
           {
             "name": "SpecialObjectsSpikeTests",
@@ -6998,6 +7023,26 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementSymbolEditTests.cs"
           },
           {
+            "name": "SmallProjectRedrawCallTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawCallTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundFourTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundFourTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundThreeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
+          },
+          {
             "name": "ConnectionGenerateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionGenerateToolTests.cs"
@@ -7061,6 +7106,11 @@
             "name": "ProjectToolsTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
           }
         ],
         "operationTests": [
@@ -8529,6 +8579,31 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/PlcCommittedReadbackTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundFourTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundFourTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundThreeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
+          },
+          {
             "name": "SymbolFunctionAssignmentTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/SymbolFunctionAssignmentTests.cs"
@@ -8702,6 +8777,11 @@
             "name": "ProjectToolsTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
           },
           {
             "name": "SelectionSpikeTests",
@@ -9062,6 +9142,21 @@
             "file": "tests/EplanMcp.Workbench.Tests/Approvals/ApprovalQueueTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
+          },
+          {
             "name": "DeviceUpdateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/DeviceUpdateToolTests.cs"
@@ -9360,6 +9455,16 @@
             "name": "PlcOverviewSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SmallProjectRedrawTests.cs"
           }
         ],
         "operationTests": [
@@ -10972,6 +11077,21 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/MacroGetToolTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
+          },
+          {
             "name": "MacroPositionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroPositionTests.cs"
@@ -11325,6 +11445,21 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlaceholderListToolTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -11445,6 +11580,21 @@
             "name": "MacroListToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/MacroListToolTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
           },
           {
             "name": "MacroTests",
@@ -13300,6 +13450,16 @@
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanArgumentsTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundThreeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
+          },
+          {
             "name": "TransactionRunnerTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/TransactionRunnerTests.cs"
@@ -13488,6 +13648,11 @@
             "name": "ProjectToolsTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
           },
           {
             "name": "TerminalBusbarPropertyTests",
@@ -13982,6 +14147,26 @@
             "file": "tests/EplanMcp.Host.Tests/SmallProjectInventoryTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundThreeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -14185,6 +14370,11 @@
             "name": "ProjectTranslateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectTranslateTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
           },
           {
             "name": "ReportCreateTests",
@@ -14587,6 +14777,16 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PageOpenToolTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundThreeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -14625,6 +14825,11 @@
             "name": "PlcDisplaySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
           },
           {
             "name": "ReportBlockSpikeTests",
@@ -15041,6 +15246,11 @@
             "name": "PlacementMoveCablePointTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementMoveCablePointTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawCallTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawCallTests.cs"
           },
           {
             "name": "ToolContractTests",
@@ -16845,6 +17055,36 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementCreateTests.cs"
           },
           {
+            "name": "SmallProjectRedrawCallTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawCallTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawGraphicsTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawGraphicsTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundFourOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundFourOverviewTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -16948,6 +17188,11 @@
             "name": "PlacementTextCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
           },
           {
             "name": "SelectionSpikeTests",
@@ -17195,6 +17440,21 @@
         ],
         "tests": [
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundFourOverviewTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundFourOverviewTests.cs"
+          },
+          {
             "name": "PlacementDeleteProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlacementDeleteProtocolTests.cs"
@@ -17213,6 +17473,11 @@
             "name": "PlacementDeleteTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SmallProjectRedrawTests.cs"
           }
         ],
         "operationTests": [
@@ -18184,6 +18449,21 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/PlacementMoverTests.cs"
           },
           {
+            "name": "SmallProjectRedrawDriverTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundFourPropertyTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundFourPropertyTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawRoundThreeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -18817,6 +19097,16 @@
             "name": "ProjectCreateToolTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectCreateToolTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
+          },
+          {
+            "name": "SmallProjectRedrawTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SmallProjectRedrawTests.cs"
           }
         ],
         "operationTests": [
@@ -20445,6 +20735,11 @@
         ],
         "tests": [
           {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -20642,6 +20937,11 @@
           "A84"
         ],
         "tests": [
+          {
+            "name": "SmallProjectRedrawMacroTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawMacroTests.cs"
+          },
           {
             "name": "ToolContractTests",
             "size": "Small",
@@ -22255,6 +22555,11 @@
             "name": "PlcOverviewSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcOverviewSpikeTests.cs"
+          },
+          {
+            "name": "ReadmeDemoTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ReadmeDemoTests.cs"
           },
           {
             "name": "SpecialObjectsSpikeTests",
