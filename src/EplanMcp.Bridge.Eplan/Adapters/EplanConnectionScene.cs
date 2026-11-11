@@ -28,6 +28,10 @@ internal static class EplanConnectionScene
         {
             foreach (SymbolReference.GraphicalConnection connection in reference.GraphicalConnections)
             {
+                // A zero-length connection draws no wire (A72); its ends stay out, as before, so they are not reported unconnected.
+                if (connection.StartSymbolRef is { } a && connection.StartConnectionPoint is { } p && connection.EndSymbolRef is { } b && connection.EndConnectionPoint is { } q
+                    && a.Location.X + p.Location.X == b.Location.X + q.Location.X && a.Location.Y + p.Location.Y == b.Location.Y + q.Location.Y)
+                { continue; }
                 foreach ((SymbolReference end, PinBase pin) in new[] { (connection.StartSymbolRef, connection.StartConnectionPoint), (connection.EndSymbolRef, connection.EndConnectionPoint) })
                 {
                     if (end is null || pin is null || end is DynamicConnectionLine or ConnectionDefinitionPoint || end is PotentialDefinition && end.SymbolVariant?.SymbolName != "PCP")
