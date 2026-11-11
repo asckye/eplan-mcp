@@ -4,7 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| T.4 未放置功能分配第 2 项（2026-11-04，`02-update-assignment`） | `DevicePlaceTests.PartAssignment_MergesMatchingPlacedContacts_OneUndoRestores` | NOT RUN：本次禁止 EPLAN。仅在 LargeWrite 先放线圈及四个具名引脚触点，再追加 `SIE.3RT2015-1BB41-1AA0`，核对无未放置功能且触点引脚不变，单次撤销恢复；失败输出请求、结果和读回并比较快照。 |
+| T.4 未放置功能分配第 2 项（2026-11-04，`02-update-assignment`） | `DevicePlaceTests.PartAssignment_MergesMatchingPlacedContacts_OneUndoRestores` | 已通过：2026-11-10，B 槽 Pro Panel，main `285140c4` + 测试改为先追加部件再 `update_from_parts`：`DevicePlaceTests` 30/30。两步合并数都是 0，没有未放置功能，触点引脚不变，两次撤销恢复（api-notes A132）。 |
 | PLC 生成保留已有表达（2026-11-08，MX_Dryer 重画时发现机架页被清空） | `ProjectToolsTests` | 待实机验证：对已有多线放置的设备执行 `eplan_plc_generate`，核对原放置仍在原页、新增页面只含请求页，以及异常结果在事务内回滚。 |
 | 读取时每个包装对象只取一次属性列表（d0b63d65，2026-11-10；回顾第 7 条） | `CableTests`、`PlcTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`PageDescriptionMapTests`、`NoSideEffectTests` | 已通过：2026-11-10，B 槽 Pro Panel，EPLAN 2026.0.3.25421，main `3316ef24`（影子副本与构建一致）：7 个类 27/27，用时 9 分钟。 |
 | 电位定义点修改 `eplan_potential_update`（cd7cc5ad，2026-11-10；A130） | `PotentialEngineeringTests`（用例待补） | 工具路径已在会话中实机使用（2026-11-10：通过式烘芯炉 N/NC 线改蓝色、MX_NFPA 三根变频器线加定义点后重新生成，审图 0 问题）；Large 用例待补。 |

@@ -37,12 +37,24 @@ public sealed partial class DevicePlaceTests
                 ["dry_run"] = false
             });
             Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
-            Assert.Equal(4, result.GetProperty("assignedFunctions").GetInt32());
+            // A132 (live 2026-11-10): with the contacts placed first, neither the reference nor UpdateDevice creates template
+            // functions; both report 0 merged and nothing stays unplaced. The engineer's two steps are run and both counts logged.
+            JsonElement transferred = await PartsCallAsync("eplan_device_update", new()
+            {
+                ["project"] = project,
+                ["tag"] = tag,
+                ["update_from_parts"] = true,
+                ["dry_run"] = false
+            });
+            Assert.Equal(ExecutionState.Committed, transferred.GetProperty("execution").GetString());
+            TestContext.Current.TestOutputHelper!.WriteLine(FormattableString.Invariant(
+                $"assignedFunctions: part {result.GetProperty("assignedFunctions").GetInt32()}, update_from_parts {transferred.GetProperty("assignedFunctions").GetInt32()}"));
             JsonElement read = await AssignmentDeviceAsync(project, tag);
             AssertAssignmentContacts(read, placed: 4);
             Assert.Equal(original.GetProperty("functions").EnumerateArray().Select(function => function.GetRawText()).Order(StringComparer.Ordinal),
                 read.GetProperty("functions").EnumerateArray().Select(function => function.GetRawText()).Order(StringComparer.Ordinal));
             Assert.Equal(AssignmentPart, Assert.Single(read.GetProperty("parts").EnumerateArray()).GetProperty("partNumber").GetString());
+            await session.UndoAsync();
             await session.UndoAsync();
             Assert.Equal(before, (await session.SnapshotAsync()).Hash);
             Assert.Equal(original.GetRawText(), (await AssignmentDeviceAsync(project, tag)).GetRawText());

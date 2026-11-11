@@ -486,6 +486,11 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A132. 先放触点、后加部件不会生成模板功能（2026-11-10，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
+- **步骤：** 线圈 `-KPA5` 不带部件放置，再以同一标识放 4 个常开触点（引脚 `1/L1 2/T1`、`3/L2 4/T2`、`5/L3 6/T3`、`13 14`），然后 `eplan_device_update` 追加 `SIE.3RT2015-1BB41-1AA0`，再 `update_from_parts`。
+- **结果：** 两步之后设备仍只有这 4 个已放置触点，没有未放置功能，引脚不变；两步的 `assignedFunctions` 都是 0。`AddArticleReference` 不生成模板功能，`DeviceService.UpdateDevice` 在已有匹配触点时也不生成。两次撤销恢复到放置后的快照。
+- **对照：** 带部件放置设备（`CreateDevice`）会按模板生成 4 个未放置触点，`join_device` 放置时逐个分配（`DevicePlaceTests.JoinDevice_AssignsFourUnplacedContacts_OneUndoRestores`，同日通过）。
+
 ### A131. “不在部件清单中输出”是带索引的属性（2026-11-10，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
 - **20105 `FUNC_ARTICLE_SUPPRESSINPARTSLIST` 的运行时定义：** 布尔型、带索引（`IsIndexed` 为 true）、非内部、非只读、非名称组成，计算标记为空。PLC 盒 `=F+A2-KE1` 上没有值时读回 `empty`、没有类型。推测每个部件引用各有一个值，没挂部件的设备该写哪个索引、写后是否从部件清单消失，都还没实测。
 - **起因：** 71 页复刻第 15 页网络总览里的交换机 `+S1-K8` 是主功能、没挂部件，EPLAN 仍在部件清单里列出它，原图没有这一行，后面各行因此错开一行。`eplan_property_set` 只写不带索引的属性，规划时以“运行时定义与登记不一致”拒绝；拒绝消息现在列出运行时的类型和各标志。支持带索引写入的分支 `feat/suppress-in-parts-list` 暂停。

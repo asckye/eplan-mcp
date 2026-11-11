@@ -22,7 +22,7 @@
 - `eplan_property_set`：因运行时属性定义与登记不一致而拒绝时，消息里列出 EPLAN 报告的类型和索引、内部、只读、名称组成、计算各标志，不用再单独探测。
 - `eplan_device_place`：页面上已有位置框时，规划阶段读位置框范围报内部错误（EPLAN“未打开任何任务”）。现在先锁定、在事务里读完再回滚，不写入任何东西。2026-11-08 起的回归。
 - `eplan_device_place` 的提示、工具说明和用法改为以同一标识配合 `join_device` 放置其余未放置功能。
-- `eplan_device_update` 追加部件后自动合并类别及引脚名序列相同的已放置非主功能，返回 `assignedFunctions`；引脚不同的功能保持不变。
+- `eplan_device_update` 追加部件后，自动合并类别及引脚名序列相同的已放置非主功能，返回 `assignedFunctions`；引脚不同的功能保持不变。只有设备上已有部件模板生成的未放置功能时才会合并；先放触点、后追加部件时，EPLAN 不生成模板功能，合并数为 0（实测，api-notes A132）。
 - `eplan_placement_delete` 可以删除电位连接点、电位定义点（`PotentialDefinition`）和连接定义点（`ConnectionDefinitionPoint`），删除后提示重新生成连接。
 - `eplan_device_place`：标识已被占用时，报错里直接给出同字母的下一个可用标识（`metadata.free`，如 `-FC1` 被占用时给 `-FC3`），不用再猜。
 - `eplan_page_review`：从电位连接点（`SPECIAL/PCP`）引出的线不再报 `dangling_end`。EPLAN 把电位连接点和电位定义点归为同一个类，审图原来把两者都排除了。
