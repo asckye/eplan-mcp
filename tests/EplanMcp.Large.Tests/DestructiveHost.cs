@@ -131,15 +131,6 @@ public sealed class DestructiveHost : IAsyncLifetime
         return JsonDocument.Parse(WriteHost.Text(result)).RootElement.GetProperty("error");
     }
 
-    /// <summary>The structured result, or the <c>error</c> object, of a call that may succeed or fail.</summary>
-    public async Task<(bool Succeeded, JsonElement Result)> CallOrErrorAsync(string tool, Dictionary<string, object?> args)
-    {
-        CallToolResult result = await _client!.CallToolAsync(tool, args, cancellationToken: TestContext.Current.CancellationToken);
-        return result.IsError == true
-            ? (false, JsonDocument.Parse(WriteHost.Text(result)).RootElement.GetProperty("error"))
-            : (true, result.StructuredContent!.Value);
-    }
-
     /// <summary>Every record of this Host's audit log, oldest first.</summary>
     public List<JsonObject> AuditRecords() => WriteHost.AuditRecordsIn(Home);
 
