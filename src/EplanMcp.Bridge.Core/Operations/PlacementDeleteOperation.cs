@@ -145,7 +145,7 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
     // MX_NFPA 2026-11-07: SPECIAL corners and T-nodes read as SymbolReference; removing one changes the connections like a function.
     // Codex review eval 2026-11-10: potential points and potential or connection definition points change the connections' potential,
     // colour and cross-section, so they are removed and regenerated the same way (A129).
-    private static bool IsFunction(string kind) => kind is "Function" or "Terminal" or "InterruptionPoint" or "BoxedDevice" or "PLC" or "SymbolReference"
+    private static bool IsFunction(string kind) => kind is "Function" or "Terminal" or "InterruptionPoint" or "BoxedDevice" or "PLC" or "SymbolReference" or "LocationBox"
         or "PotentialDefinition" or "ConnectionDefinitionPoint";
     private PageDrawingGeometry Read(string project, string page) => drawings.Read(project, page) ?? throw new BridgeErrorException(execute ? ErrorReason.PlanStale : ErrorReason.PageNotFound, "Read the target page with eplan_page_get.");
     private static BridgeErrorException Stale() => new(ErrorReason.PlanStale, "A drawing locator or page changed; call eplan_page_get with include_drawings again.");
