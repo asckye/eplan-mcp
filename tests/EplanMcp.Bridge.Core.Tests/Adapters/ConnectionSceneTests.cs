@@ -43,6 +43,27 @@ public sealed class ConnectionSceneTests
     }
 
     [Fact]
+    public void PinOnlyAGraphicalConnectionNames_IsAddedOnce_ZeroLengthEndsAreNot()
+    {
+        // A134: a GV2P pole (SPECIAL/D2DCPNG) lists only its outer pin; its inner pin (0,-12) appears in the connection to the drive.
+        var pole = new Function(161) { Location = new(120, 248), GraphicalConnectionPoints = [new() { Index = 0, Direction = "Up" }] };
+        var drive = new Function(169) { Location = new(120, 212), GraphicalConnectionPoints = [new() { Index = 0, Location = new(0, 3), Direction = "Up" }] };
+        var port = new Function(178) { Location = new(84, 212) };
+        var line = new GraphicalConnection { StartSymbolRef = pole, StartConnectionPoint = new() { Index = 1, Location = new(0, -12), Direction = "Down" }, EndSymbolRef = drive, EndConnectionPoint = new() { Index = 0, Location = new(0, 3) } };
+        var touch = new GraphicalConnection { StartSymbolRef = port, StartConnectionPoint = new() { Index = 0 }, EndSymbolRef = port, EndConnectionPoint = new() { Index = 1 } };
+        pole.GraphicalConnections = [line];
+        drive.GraphicalConnections = [line];
+        port.GraphicalConnections = [touch];
+        var scene = new ConnectionCreatePlanner.Scene();
+
+        EplanConnectionScene.ReadPins(scene, [pole, drive, port]);
+
+        Assert.Equal(["17/161/0", "17/161/1", "17/169/0"], scene.Pins.Keys.Order(StringComparer.Ordinal));
+        Assert.Equal([120d, 236d], scene.Pins["17/161/1"].Location);
+        Assert.Equal("Down", scene.Pins["17/161/1"].Direction);
+    }
+
+    [Fact]
     public void DanglingFixture_DynamicWireWithRepeatedPinIndex_IsAnEdgeWithoutTerminatingPins()
     {
         var wire = new DynamicConnectionLine(1)

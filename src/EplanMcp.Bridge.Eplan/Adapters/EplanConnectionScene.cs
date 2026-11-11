@@ -26,7 +26,7 @@ internal static class EplanConnectionScene
         // that a graphical connection ends on is a pin; add the ones the symbol's own list left out.
         foreach (SymbolReference reference in EplanNativePreconditions.Valid(placements).OfType<SymbolReference>().Where(r => r is not (DynamicConnectionLine or ConnectionDefinitionPoint)))
         {
-            foreach (SymbolReference.GraphicalConnection connection in reference.GraphicalConnections)
+            foreach (var connection in reference.GraphicalConnections)
             {
                 // A zero-length connection draws no wire (A72); its ends stay out, as before, so they are not reported unconnected.
                 if (connection.StartSymbolRef is { } a && connection.StartConnectionPoint is { } p && connection.EndSymbolRef is { } b && connection.EndConnectionPoint is { } q
