@@ -41,6 +41,32 @@ public sealed class ModelViewCreateTests
         Assert.Equal(["Begin AI: eplan_modelview_create", "Commit", "CloseUndo", "Dispose"], _transactions.Calls);
     }
 
+    [Theory]
+    [InlineData("1:5", 2, "1:5")]
+    [InlineData("1:250", 2, "1:250")]
+    [InlineData("fit", 1, "")]
+    [InlineData(null, 0, "")]
+    public void Scale_IsAutoFitOrManual(string? scale, int setting, string manual)
+    {
+        ModelViewCreateArgs args = Args("panel");
+        args.Scale = scale;
+        args.Fingerprint = Plan(args).Fingerprint;
+        Execute(args);
+        Assert.Equal((setting, manual), (_writer.Steps.Single().ScaleSetting, _writer.Steps.Single().Scale));
+    }
+
+    [Theory]
+    [InlineData("1:0")]
+    [InlineData("1:05")]
+    [InlineData("2:1")]
+    [InlineData("1:1000")]
+    public void BadScale_IsRefused(string scale)
+    {
+        ModelViewCreateArgs args = Args("panel");
+        args.Scale = scale;
+        Assert.Contains("'scale' must be one of auto, fit or 1:N", Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
     [Fact]
     public void BadValues_AreAllRefusedTogether()
     {

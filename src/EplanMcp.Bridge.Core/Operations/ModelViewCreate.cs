@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using EplanMcp.Contracts;
 
 namespace EplanMcp.Bridge.Core.Operations;
@@ -16,6 +17,9 @@ public sealed class ModelViewStep
     public int Viewpoint { get; set; }
     public int Style { get; set; }
     public int ScaleSetting { get; set; }
+
+    /// <summary>The manual scale, e.g. <c>1:5</c>, when <see cref="ScaleSetting"/> is 2 (manually defined); empty otherwise.</summary>
+    public string Scale { get; set; } = string.Empty;
     public double X { get; set; }
     public double Y { get; set; }
     public double Width { get; set; }
@@ -27,6 +31,9 @@ public sealed class ModelViewCreated
 {
     public string ObjectId { get; set; } = string.Empty;
     public int Added { get; set; }
+
+    /// <summary>The scale EPLAN shows for the view, e.g. <c>1:5</c>.</summary>
+    public string Scale { get; set; } = string.Empty;
 }
 
 /// <summary>Inserts a model view, implemented by the EPLAN adapter; main thread, inside the operation's transaction.</summary>
@@ -54,6 +61,7 @@ internal sealed class ModelViewCreateRequest
 
     private static readonly Dictionary<string, int> _styles = new(StringComparer.OrdinalIgnoreCase) { ["wireframe"] = 0, ["hidden_lines"] = 1, ["shaded"] = 2 };
     private static readonly Dictionary<string, int> _scales = new(StringComparer.OrdinalIgnoreCase) { ["auto"] = 0, ["fit"] = 1 };
+    private static readonly Regex _manualScale = new("^1:([1-9][0-9]{0,2})$", RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1));
 
     public OpenProject Project { get; private set; } = new();
     public ModelViewStep Step { get; private set; } = new();
@@ -74,7 +82,17 @@ internal sealed class ModelViewCreateRequest
         { violations.Add("'view' must be panel, door or cabinet."); }
         int viewpoint = Pick(_viewpoints, args.Viewpoint, "front", "viewpoint", violations);
         int style = Pick(_styles, args.Style, "hidden_lines", "style", violations);
-        int scale = Pick(_scales, args.Scale, "auto", "scale", violations);
+        string manual = string.Empty;
+        int scale;
+        if (args.Scale?.Trim() is { } requested && _manualScale.Match(requested) is { Success: true } match)
+        {
+            scale = 2;
+            manual = "1:" + int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture);
+        }
+        else
+        {
+            scale = Pick(_scales, args.Scale, "auto", "scale", violations);
+        }
         Range(args.X, 0, 2000, "x", violations);
         Range(args.Y, 0, 2000, "y", violations);
         Range(args.Width, 20, 2000, "width", violations);
@@ -115,6 +133,7 @@ internal sealed class ModelViewCreateRequest
             Viewpoint = viewpoint,
             Style = style,
             ScaleSetting = scale,
+            Scale = manual,
             X = args.X!.Value,
             Y = args.Y!.Value,
             Width = args.Width!.Value,
@@ -125,13 +144,13 @@ internal sealed class ModelViewCreateRequest
     }
 
     public string StateFingerprint() => Fingerprint.Of([Project.Path, Step.Space, Step.Page, Step.Name, View, Step.RootId?.ToString(CultureInfo.InvariantCulture) ?? "",
-        string.Join(",", new[] { Step.Viewpoint, Step.Style, Step.ScaleSetting }), string.Join(",", new[] { Step.X, Step.Y, Step.Width, Step.Height }.Select(v => v.ToString("R", CultureInfo.InvariantCulture))), State]);
+        string.Join(",", new[] { Step.Viewpoint, Step.Style, Step.ScaleSetting }) + Step.Scale, string.Join(",", new[] { Step.X, Step.Y, Step.Width, Step.Height }.Select(v => v.ToString("R", CultureInfo.InvariantCulture))), State]);
 
     private static int Pick(Dictionary<string, int> values, string? requested, string fallback, string field, List<string> violations)
     {
         if (values.TryGetValue(string.IsNullOrWhiteSpace(requested) ? fallback : requested!.Trim(), out int value))
         { return value; }
-        violations.Add($"'{field}' must be one of {string.Join(", ", values.Keys)}.");
+        violations.Add($"'{field}' must be one of {string.Join(", ", values.Keys)}{(field == "scale" ? " or 1:N, N 1 to 999" : "")}.");
         return 0;
     }
 
@@ -209,6 +228,7 @@ public sealed class ModelViewCreateExecuteOperation(IProjectCatalog catalog, ILa
             Name = request.Step.Name,
             ObjectId = committed.Result.ObjectId,
             Added = committed.Result.Added,
+            Scale = committed.Result.Scale,
             Warning = committed.Warning,
         };
     }

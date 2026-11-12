@@ -2,6 +2,7 @@ using System.Globalization;
 using Eplan.EplApi.ApplicationFramework;
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.E3D;
+using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
@@ -20,7 +21,7 @@ internal sealed class EplanModelViewWriter : IModelViewWriter
         MainThread.Assert();
         Project project = EplanProjects.ByPath(projectPath);
         Page page = EplanPageDescriptions.Find(projectPath, view.Page);
-        int before = EplanNativePreconditions.Valid(page.AllPlacements).Count();
+        Placement[] existing = [.. EplanNativePreconditions.Valid(page.AllPlacements)];
 
         using var context = new ActionCallingContext();
         context.AddParameter("PROJECTNAME", project.ProjectLinkFilePath);
@@ -33,7 +34,8 @@ internal sealed class EplanModelViewWriter : IModelViewWriter
         context.AddParameter("DY", Number(view.Height));
         context.AddParameter("VIEWPOINT", Number(view.Viewpoint));
         context.AddParameter("STYLE", Number(view.Style));
-        context.AddParameter("SCALESETTING", Number(view.ScaleSetting));
+        // SCALESETTING and SCALE are ignored when the action runs from the add-in (every view read back 1:10, A136);
+        // the scale is set on the ViewPlacement below.
         context.AddParameter("VIEWTYPE", "1");
         if (view.RootId is { } root)
         {
@@ -54,9 +56,57 @@ internal sealed class EplanModelViewWriter : IModelViewWriter
 
         string id = string.Empty;
         context.GetParameter("OBJECTID", ref id);
-        int after = EplanNativePreconditions.Valid(EplanPageDescriptions.Find(projectPath, view.Page).AllPlacements).Count();
-        return new ModelViewCreated { ObjectId = id ?? string.Empty, Added = after - before };
+        Placement[] now = [.. EplanNativePreconditions.Valid(EplanPageDescriptions.Find(projectPath, view.Page).AllPlacements)];
+        // The view is not among Page.AllPlacements; OBJECTID is "<db>/190/<oid>/0", and the finder lists it (live 2026-11-12).
+        string[] parts = (id ?? string.Empty).Split('/');
+        ViewPlacement? placed = null;
+        if (parts.Length > 2 && long.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out long oid))
+        {
+            using var finder = new DMObjectsFinder(project);
+            placed = EplanNativePreconditions.Valid(finder.GetPlacements(null)).OfType<ViewPlacement>().FirstOrDefault(p => p.ObjectIdentifier == oid);
+        }
+
+        string scale = placed is null
+            ? throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The inserted model view could not be found by its OBJECTID; nothing was kept.", retryable: false,
+                new Dictionary<string, string> { ["objectId"] = id ?? string.Empty })
+            : SetScale(placed, view);
+        return new ModelViewCreated { ObjectId = id ?? string.Empty, Added = now.Length - existing.Length, Scale = scale };
     }
+
+    /// <summary>
+    /// Sets fit or a manual 1:N scale through the API and returns the scale EPLAN shows (36510, e.g. "1:10"). Whether
+    /// <see cref="ViewPlacement.Scale"/> takes 1/N or N is not documented; 1/N is tried first and checked against 36510.
+    /// </summary>
+    private static string SetScale(ViewPlacement placed, ModelViewStep view)
+    {
+        if (view.ScaleSetting == 1)
+        {
+            placed.ViewScale = ViewScaleType.ScaleFit;
+            placed.Update();
+        }
+        else if (view.ScaleSetting == 2)
+        {
+            double n = double.Parse(view.Scale.Substring(2), CultureInfo.InvariantCulture);
+            placed.ViewScale = ViewScaleType.ScaleManual;
+            placed.Scale = 1 / n;
+            placed.Update();
+            if (Shown(placed) != view.Scale)
+            {
+                placed.Scale = n;
+                placed.Update();
+            }
+
+            if (Shown(placed) != view.Scale)
+            {
+                throw new BridgeErrorException(ErrorReason.EplanOperationFailed,
+                    $"EPLAN shows the view at {Shown(placed)}, not {view.Scale}; nothing was kept.", retryable: false);
+            }
+        }
+
+        return Shown(placed);
+    }
+
+    private static string Shown(ViewPlacement placed) => placed.Properties[36510].ToString() ?? string.Empty;
 
     private static string RelativeId(Project project, long objectId)
     {

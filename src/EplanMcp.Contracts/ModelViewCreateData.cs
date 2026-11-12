@@ -18,6 +18,9 @@ public sealed class ModelViewCreateData
     /// <summary>Placements on the page after the insertion minus before.</summary>
     public int Added { get; set; }
 
+    /// <summary>The scale EPLAN shows for the view, e.g. <c>1:5</c>.</summary>
+    public string Scale { get; set; } = string.Empty;
+
     /// <summary>A note from the transaction, e.g. that undo could not be grouped; null when none.</summary>
     public string? Warning { get; set; }
 }

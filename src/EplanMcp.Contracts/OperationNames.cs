@@ -140,6 +140,12 @@ public static class OperationNames
     /// <summary>Inserts the planned model view with InsertModelViewAction in one transaction and reads it back (A136). Arguments: <see cref="ModelViewCreateArgs"/>; data: <see cref="ModelViewCreateData"/>.</summary>
     public const string ModelViewCreateExecute = "modelview.create.execute";
 
+    /// <summary>Plans removing rails, ducts and device placements from the 3D layout (docs/tools/eplan_layout_remove.md). Arguments: <see cref="LayoutRemoveArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string LayoutRemovePlan = "layout.remove.plan";
+
+    /// <summary>Removes the planned layout objects in one transaction and reads back that they are gone. Arguments: <see cref="LayoutRemoveArgs"/>; data: <see cref="LayoutRemoveData"/>.</summary>
+    public const string LayoutRemoveExecute = "layout.remove.execute";
+
     /// <summary>One PLC box by tag: station, rack, slot, and its channels with addresses and connections, sliced in the Bridge. Arguments: <see cref="PlcGetArgs"/>; data: <see cref="PlcGetData"/>.</summary>
     public const string PlcGet = "plc.get";
 
