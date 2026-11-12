@@ -53713,6 +53713,10 @@
       "count": 1279,
       "live_verified": 457
     },
+    "declined": {
+      "count": 210,
+      "live_verified": 0
+    },
     "dedicated": {
       "count": 610,
       "live_verified": 406
@@ -53722,7 +53726,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 1995,
+      "count": 1785,
       "live_verified": 0
     },
     "other": {
@@ -53734,6 +53738,12 @@
       "live_verified": 0
     }
   },
+  "declinedByReason": {
+    "catalog:banned_symbol": 32,
+    "external_path_parameter": 68,
+    "settings_write": 72,
+    "shared_interactive_state": 38
+  },
   "fullApi": {
     "total": {
       "denominator": 5983,
@@ -53741,6 +53751,10 @@
         "api_try_only": {
           "count": 1452,
           "live_verified": 461
+        },
+        "declined": {
+          "count": 275,
+          "live_verified": 0
         },
         "dedicated": {
           "count": 819,
@@ -53751,7 +53765,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 3410,
+          "count": 3135,
           "live_verified": 0
         },
         "other": {
@@ -53771,6 +53785,10 @@
           "count": 690,
           "live_verified": 77
         },
+        "declined": {
+          "count": 275,
+          "live_verified": 0
+        },
         "dedicated": {
           "count": 396,
           "live_verified": 175
@@ -53780,7 +53798,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1978,
+          "count": 1703,
           "live_verified": 0
         },
         "other": {
@@ -53799,6 +53817,10 @@
         "api_try_only": {
           "count": 762,
           "live_verified": 384
+        },
+        "declined": {
+          "count": 0,
+          "live_verified": 0
         },
         "dedicated": {
           "count": 423,
@@ -53826,6 +53848,10 @@
       "denominator": 238,
       "routes": {
         "api_try_only": {
+          "count": 0,
+          "live_verified": 0
+        },
+        "declined": {
           "count": 0,
           "live_verified": 0
         },

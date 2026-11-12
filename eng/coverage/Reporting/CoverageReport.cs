@@ -83,6 +83,9 @@ internal sealed class CoverageReport
 
     public SortedDictionary<string, RouteCount>? Routes { get; init; }
 
+    /// <summary>Groups on the declined route by their exclusion reason.</summary>
+    public SortedDictionary<string, int>? DeclinedByReason { get; init; }
+
     public FullApiCoverage? FullApi { get; init; }
 
     public ApiTotals? InstallationTotals { get; init; }
@@ -167,14 +170,20 @@ internal sealed class CoverageReport
         bool Counted(Unit u) => !status[u.Key].StartsWith("excluded", StringComparison.Ordinal);
         Unit[] all = [.. catalog.Units.Values];
         LayerCount Count(Func<Unit, bool> filter) => CountLayer([.. all.Where(filter)], status, used, Partial);
+        string apiTryReport = includeReachability && File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.Report(repositoryRoot) : "";
+        Dictionary<string, string> declined = CoverageRoutes.Declined(apiTryReport);
         CallableCoverage? reachability = includeReachability ? CallableCoverage.Build(all, status,
-            File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.Report(repositoryRoot) : "",
+            apiTryReport,
             File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) ? ApiTryGenerator.PropertyGroups(repositoryRoot) : [],
             CallableCoverage.ActionWhitelist(), overlay.Api,
             File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) && overlay.Api.Any(r => r.Status == "refused" && r.Sides!.Contains("read", StringComparer.Ordinal))
                 ? ApiTryGenerator.PropertyGroups(repositoryRoot, writableOnly: true) : []) : null;
-        string Route(Unit unit) => CoverageRoutes.Classify(used.TryGetValue(unit.Key, out var use) ? [.. use.Tools] : [],
-            status[unit.Key], reachability?.CallableGroups.Contains(unit.Key) == true);
+        string Route(Unit unit)
+        {
+            string route = CoverageRoutes.Classify(used.TryGetValue(unit.Key, out var use) ? [.. use.Tools] : [],
+                status[unit.Key], reachability?.CallableGroups.Contains(unit.Key) == true);
+            return route == "none" && declined.ContainsKey(unit.Key) ? "declined" : route;
+        }
         return new CoverageReport
         {
             EplanApi = usage.EplanApi,
@@ -207,6 +216,8 @@ internal sealed class CoverageReport
             Availability = overlay.Availability,
             Verification = verification,
             Reachability = reachability,
+            DeclinedByReason = includeReachability ? new SortedDictionary<string, int>(all.Where(u => u.Layer == ApiCatalog.Operation && Counted(u) && Route(u) == "declined")
+                .GroupBy(u => declined[u.Key], StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count()), StringComparer.Ordinal) : null,
             Routes = includeReachability ? CoverageRoutes.Count(all.Where(u => u.Layer == ApiCatalog.Operation && Counted(u))
                 .Select(u => (Route(u), status[u.Key] == "live_verified"))) : null,
             FullApi = includeReachability ? FullApiCoverage.Build(catalog.Groups.SelectMany(group =>

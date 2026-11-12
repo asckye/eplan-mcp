@@ -8,8 +8,40 @@ internal sealed record RouteCount(int Count, [property: JsonPropertyName("live_v
 /// <summary>Disjoint call routes; existing evidence states and callable membership remain unchanged.</summary>
 internal static class CoverageRoutes
 {
-    internal static readonly string[] Names = ["dedicated", "generic_read", "api_try_only", "state_only", "other", "none"];
-    internal static readonly string[] Labels = ["专用工具", "通用读取", "仅通用入口", "仅状态覆盖", "其他可调用", "到不了"];
+    internal static readonly string[] Names = ["dedicated", "generic_read", "api_try_only", "state_only", "other", "declined", "none"];
+    internal static readonly string[] Labels = ["专用工具", "通用读取", "仅通用入口", "仅状态覆盖", "其他可调用", "明确不做", "到不了"];
+
+    /// <summary>
+    /// Exclusion reasons that close a group on purpose (owner 2026-11-12): EPLAN marks the member internal, deprecated or not
+    /// applicable, the project bans it, or policy forbids it (global settings writes, arbitrary paths, shared UI state).
+    /// Technical obstacles (constructors, static members, master data copies) stay "none".
+    /// </summary>
+    internal static readonly string[] DeclinedReasons =
+        ["catalog:internal", "catalog:deprecated", "catalog:banned_symbol", "catalog:not_applicable", "settings_write", "external_path_parameter", "shared_interactive_state"];
+
+    /// <summary>Groups whose every api-try signature is excluded for a declined reason, with the most frequent reason.</summary>
+    internal static Dictionary<string, string> Declined(string apiTryReport)
+    {
+        var reasons = new Dictionary<string, List<string?>>(StringComparer.Ordinal);
+        foreach (string line in apiTryReport.Split('\n').Skip(1))
+        {
+            string[] cells = line.TrimEnd('\r').Split('\t');
+            if (cells.Length < 3)
+            {
+                continue;
+            }
+
+            if (!reasons.TryGetValue(cells[0], out List<string?>? list))
+            {
+                reasons[cells[0]] = list = [];
+            }
+
+            list.Add(cells[2] == "excluded" && cells.Length > 3 && DeclinedReasons.Contains(cells[3], StringComparer.Ordinal) ? cells[3] : null);
+        }
+
+        return reasons.Where(r => r.Value.All(v => v is not null))
+            .ToDictionary(r => r.Key, r => r.Value.GroupBy(v => v!, StringComparer.Ordinal).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal).First().Key, StringComparer.Ordinal);
+    }
     private static readonly HashSet<string> _generic = new(StringComparer.Ordinal)
         { "eplan_api_try", "eplan_api_get", "eplan_api_search", "eplan_action_try", "eplan_action_run" };
     private static readonly HashSet<string> _readGeneric = new(StringComparer.Ordinal)

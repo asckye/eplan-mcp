@@ -62,6 +62,11 @@ internal static class CoverageMarkdown
             Line($"| {CoverageRoutes.Labels[i]}（{route}） | {count.Count} | {Pct(count.Count, operationReachability.Denominator)} | {count.LiveVerified} |");
         }
         Line();
+        if (report.DeclinedByReason is { Count: > 0 } declinedReasons)
+        {
+            Line("- 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除；仍计入分母。按原因：" + string.Join("，", declinedReasons.OrderByDescending(r => r.Value).Select(r => r.Key + " " + r.Value.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons。");
+        }
+
         Line("- refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。");
         Line();
         Line("| 操作层分母 | tools | api_try | callable | refused_unsafe |");

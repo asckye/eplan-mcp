@@ -62,7 +62,7 @@ public sealed class FullApiCoverageTests
         Assert.All(new[] { report.Total, report.Methods, report.Properties, report.Other }, row =>
         {
             Assert.Equal(0, row.Denominator);
-            Assert.Equal(6, row.Routes.Count);
+            Assert.Equal(7, row.Routes.Count);
             Assert.All(row.Routes.Values, count => Assert.Equal(new RouteCount(0, 0), count));
         });
     }

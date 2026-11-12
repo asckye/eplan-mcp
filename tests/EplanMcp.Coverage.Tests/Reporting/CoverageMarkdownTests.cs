@@ -36,7 +36,7 @@ public sealed class CoverageMarkdownTests
         Assert.Contains("| action（按行） | 3 | printing：1 | 2 | 1 / 2（50.0%） |", report, StringComparison.Ordinal);
         Assert.Contains("登记 5 组（其中 0 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4 组，再按 overlay 排除后 4 组", report, StringComparison.Ordinal);
         Assert.Contains("| `Eplan.EplApi.Test.Planning` | 1 | 0 / 1（0.0%） | 0 / 1（0.0%） | 0 | 0 |", report, StringComparison.Ordinal);
-        Assert.Contains("**操作层 4 组：专用工具 2，通用读取 0，仅通用入口 0，仅状态覆盖 1，其他可调用 0，到不了 1；实机验证 1**", report, StringComparison.Ordinal);
+        Assert.Contains("**操作层 4 组：专用工具 2，通用读取 0，仅通用入口 0，仅状态覆盖 1，其他可调用 0，明确不做 0，到不了 1；实机验证 1**", report, StringComparison.Ordinal);
         Assert.Contains("action 2 行：工具到达 1，action_try 可尝试 0", report, StringComparison.Ordinal);
         Assert.Contains("summary.json 缺失，汇总暂未计入 api_try；这是证据缺口", report, StringComparison.Ordinal);
         Assert.Contains("无文档的重载组（不在 IntelliSense 中，仍在分母里，Q2）：共 1 组", report, StringComparison.Ordinal);
