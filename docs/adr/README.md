@@ -60,3 +60,4 @@
 | [0051](0051-build-release-packages-locally.md) | 发布包在开发机上打包，不经发布工作流 | Accepted | 双向门 |
 | [0052](0052-write-title-block-project-properties.md) | 用 `eplan_project_update` 写标题栏用到的项目属性 | Accepted | 双向门 |
 | [0053](0053-mcp-standard-exceptions.md) | 采用 MCP 服务规范 0.2，登记 MUST 例外和待改项 | Accepted | 双向门 |
+| [0054](0054-api-try-master-data-handles.md) | 通用入口的主数据句柄：读不限库，写只在当前配置为 scratch 文件副本时开放 | Proposed | 单向门 |
