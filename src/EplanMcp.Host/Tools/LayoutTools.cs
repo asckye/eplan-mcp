@@ -87,6 +87,7 @@ internal sealed class LayoutTools
         Box = e.Box,
         Panel = Surface(e.Panel),
         Door = Surface(e.Door),
+        Top = Surface(e.Top),
     };
 
     private static LayoutGetResult.SpaceEntry Space(LayoutSpace space) => new()

@@ -76,8 +76,8 @@ internal sealed class LayoutPlaceRequest
                 { violations.Add($"{at}: 'length_mm' must be 10 to 3000."); }
                 if (item.Orientation is { } o && o.Trim().ToLowerInvariant() is not ("horizontal" or "vertical"))
                 { violations.Add($"{at}: 'orientation' must be horizontal or vertical."); }
-                if (on is not ("panel" or "door"))
-                { violations.Add($"{at}: a {kind} goes on the panel or the door."); }
+                if (on is not ("panel" or "door" or "top"))
+                { violations.Add($"{at}: a {kind} goes on the panel, the door or the top."); }
                 if (!string.IsNullOrWhiteSpace(item.Ref))
                 {
                     if (refs.ContainsKey(item.Ref!.Trim()))
@@ -111,15 +111,15 @@ internal sealed class LayoutPlaceRequest
                     if (step.Offset < 0)
                     { violations.Add($"{at}: 'offset_mm' (0 or more) is required on a rail."); }
                 }
-                else if (on is not ("panel" or "door"))
-                { violations.Add($"{at}: 'on' must be panel, door or rail."); }
+                else if (on is not ("panel" or "door" or "top"))
+                { violations.Add($"{at}: 'on' must be panel, door, top or rail."); }
             }
             else
             { violations.Add($"{at}: 'kind' must be rail, duct or device."); }
 
-            if (on is "panel" or "door")
+            if (on is "panel" or "door" or "top")
             {
-                LayoutSurface? surface = on == "panel" ? enclosure.Panel : enclosure.Door;
+                LayoutSurface? surface = on switch { "panel" => enclosure.Panel, "door" => enclosure.Door, _ => enclosure.Top };
                 step.X = item.X ?? -1;
                 step.Y = item.Y ?? -1;
                 if (surface is null)

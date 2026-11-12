@@ -23,8 +23,8 @@ internal sealed class EplanLayoutPlacer : ILayoutPlacer
         using var finder = new DMObjectsFinder(project);
         Function3D[] all = [.. EplanNativePreconditions.Valid(finder.GetFunctions3D(null))];
         Cabinet cabinet = all.OfType<Cabinet>().First(c => c.ObjectIdentifier == enclosureId);
-        (Plane? panel, Plane? door) = EplanLayoutReader.Surfaces(cabinet);
-        Plane? plane = item.Surface == "door" ? door : item.Surface == "panel" ? panel : null;
+        (Plane? panel, Plane? door, Plane? top) = EplanLayoutReader.Surfaces(cabinet);
+        Plane? plane = item.Surface switch { "door" => door, "panel" => panel, "top" => top, _ => null };
         MountingRail? rail = item.Surface == "rail" ? all.OfType<MountingRail>().First(r => r.ObjectIdentifier == railId) : null;
 
         Placement3D created;
@@ -66,9 +66,19 @@ internal sealed class EplanLayoutPlacer : ILayoutPlacer
         Rect3D surface = plane.GetBoundingBox(false);
         source.SnapTo(plane.BaseMate, rotation, x, y);
         Rect3D snapped = item.GetBoundingBox(false);
-        Correct(item, surface.X + x - snapped.X, 0, surface.Z + y - snapped.Z);
+        // A horizontal surface (the top) measures y from its front edge (smallest Y) backwards.
+        bool horizontal = EplanLayoutReader.Horizontal(surface);
+        if (horizontal)
+        {
+            Correct(item, surface.X + x - snapped.X, surface.Y + y - snapped.Y, 0);
+        }
+        else
+        {
+            Correct(item, surface.X + x - snapped.X, 0, surface.Z + y - snapped.Z);
+        }
+
         Rect3D placed = item.GetBoundingBox(false);
-        return [Round(placed.X - surface.X), Round(placed.Z - surface.Z)];
+        return [Round(placed.X - surface.X), Round(horizontal ? placed.Y - surface.Y : placed.Z - surface.Z)];
     }
 
     /// <summary>Puts the box's left (or, on a vertical rail, lower) edge <paramref name="offset"/> from the rail's start.</summary>

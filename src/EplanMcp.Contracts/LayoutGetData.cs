@@ -52,6 +52,9 @@ public sealed class LayoutEnclosure
 
     /// <summary>The door's inner mounting surface, or null when the enclosure has none.</summary>
     public LayoutSurface? Door { get; set; }
+
+    /// <summary>The enclosure's top (roof) surface, horizontal: width across, height from front to back; null when none was found.</summary>
+    public LayoutSurface? Top { get; set; }
 }
 
 /// <summary>A surface devices are mounted on: width and height in its own plane, and its box in the space.</summary>

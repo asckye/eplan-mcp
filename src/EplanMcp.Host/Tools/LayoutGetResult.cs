@@ -62,6 +62,9 @@ internal sealed class LayoutGetResult : IPagedResult<LayoutGetResult.ObjectEntry
 
         [Description("Door surface; null when none.")]
         public SurfaceEntry? Door { get; set; }
+
+        [Description("Top (roof) surface, horizontal: height runs from the front edge back; null when none.")]
+        public SurfaceEntry? Top { get; set; }
     }
 
     internal sealed class SurfaceEntry

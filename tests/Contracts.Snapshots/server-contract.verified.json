@@ -8421,6 +8421,32 @@
                     "items": {}
                   }
                 }
+              },
+              "top": {
+                "description": "Top (roof) surface, horizontal: height runs from the front edge back; null when none.",
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "id": {
+                    "description": "Object ID of the panel or door that carries the surface, in this session.",
+                    "type": "integer"
+                  },
+                  "width": {
+                    "description": "Usable width in millimetres.",
+                    "type": "number"
+                  },
+                  "height": {
+                    "description": "Usable height in millimetres.",
+                    "type": "number"
+                  },
+                  "box": {
+                    "description": "Box in millimetres: min x, y, z, then size x, y, z.",
+                    "$ref": "#/properties/enclosure/properties/panel/properties/box",
+                    "items": {}
+                  }
+                }
               }
             }
           },
@@ -10887,6 +10913,32 @@
                       },
                       "door": {
                         "description": "Door surface; null when none.",
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "properties": {
+                          "id": {
+                            "description": "Object ID of the panel or door that carries the surface, in this session.",
+                            "type": "integer"
+                          },
+                          "width": {
+                            "description": "Usable width in millimetres.",
+                            "type": "number"
+                          },
+                          "height": {
+                            "description": "Usable height in millimetres.",
+                            "type": "number"
+                          },
+                          "box": {
+                            "description": "Box in millimetres: min x, y, z, then size x, y, z.",
+                            "$ref": "#/properties/spaces/items/properties/enclosures/items/properties/panel/properties/box",
+                            "items": {}
+                          }
+                        }
+                      },
+                      "top": {
+                        "description": "Top (roof) surface, horizontal: height runs from the front edge back; null when none.",
                         "type": [
                           "object",
                           "null"

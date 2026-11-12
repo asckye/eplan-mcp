@@ -13,6 +13,7 @@
 
 ### 新增
 
+- `eplan_layout_place` 新增安装面 `on: "top"`（柜顶，放塔灯、风扇），`eplan_layout_get` 的柜体返回 `top`；板上和门上对象的 `parentId` 改报安装板或门本身，与 `panel.id`/`door.id` 一致（A136）。
 - 新增 `eplan_layout_remove`（full，写入）：按对象 ID 删除 3D 布置里的导轨、线槽和设备，设备留在原理图里可以重新放；导轨上的设备必须一起列出，先删设备后删导轨；一个事务，一个撤销步骤（A136）。
 - `eplan_modelview_create` 的 `scale` 现在生效：`fit` 铺满框，新增手动比例 `1:N`，结果返回 EPLAN 显示的比例；插入后经 `ViewPlacement.ViewScale` 设置（action 的比例参数从插件调用时不起作用，A136）。
 - 新增 `eplan_modelview_create`（full，写入）：在 ModelView 页上插入安装空间的安装板、门或整柜的 2D 模型视图（布置图），可选视角、样式和比例；插件内经 `CommandLineInterpreter` 执行 `InsertModelViewAction`（`ActionManager` 对它返回 false，A136）；一个事务，一个撤销步骤。

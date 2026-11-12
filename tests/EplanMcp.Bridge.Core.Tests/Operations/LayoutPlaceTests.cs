@@ -87,6 +87,20 @@ public sealed class LayoutPlaceTests
     }
 
     [Fact]
+    public void DeviceOnTheTop_IsPlacedWhenTheEnclosureHasATop_AndRefusedOtherwise()
+    {
+        var args = new LayoutPlaceArgs { Project = "Line1", Space = "UC1", Items = [new LayoutPlaceItem { Kind = "device", Tag = "=GAA+UC1-1QA1", On = "top", X = 80, Y = 120 }] };
+        Assert.Contains("the enclosure has no top surface", Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Metadata!["violations"], StringComparison.Ordinal);
+
+        _layout.Record.Spaces[0].Enclosures[0].Top = new LayoutSurface { Id = 3, Width = 800, Height = 280 };
+        args.Fingerprint = Plan(args).Fingerprint;
+        Execute(args);
+        Assert.Equal(("top", 80.0, 120.0), (_layout.Placed.Single().Step.Surface, _layout.Placed.Single().Step.X, _layout.Placed.Single().Step.Y));
+        args.Items[0].Y = 300;
+        Assert.Contains("must lie on the top (0-800 x 0-280 mm)", Assert.Throws<BridgeErrorException>(() => Plan(args)).Error.Metadata!["violations"], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void SpaceWithoutEnclosure_IsRefused()
     {
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Plan(new LayoutPlaceArgs { Project = "Line1", Space = "UC9", Items = [new LayoutPlaceItem { Kind = "rail" }] })).Error;

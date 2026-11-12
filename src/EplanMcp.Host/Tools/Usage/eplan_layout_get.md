@@ -18,8 +18,8 @@ One installation space, 50 objects at a time:
 ## Fields
 
 - `project`: the project read.
-- `spaces`: `designation`, `name` (as EPLAN shows it) and `enclosures`: `id`, `parts`, `box` (min x, y, z, then size x, y, z in millimetres; X across, Y depth with the door at the smallest Y, Z up), `panel` and `door` (`id` of the panel or door, `width`, `height`, `box`, or null).
-- `objects`: placed objects of these spaces on this page, enclosures first: `space`, `id`, `kind` (Cabinet, MountingPanel, MountingRail, Duct, Component and so on), `tag` (device tag of a component, else null), `parts`, `parent` and `parentId`, `box`.
+- `spaces`: `designation`, `name` (as EPLAN shows it) and `enclosures`: `id`, `parts`, `box` (min x, y, z, then size x, y, z in millimetres; X across, Y depth with the door at the smallest Y, Z up), `panel`, `door` and `top` (`id` of the panel, door or roof, `width`, `height`, `box`, or null; the top is horizontal, its `height` runs from the front edge back).
+- `objects`: placed objects of these spaces on this page, enclosures first: `space`, `id`, `kind` (Cabinet, MountingPanel, MountingRail, Duct, Component and so on), `tag` (device tag of a component, else null), `parts`, `parent` and `parentId` (for items on a surface, the panel or door that owns it, matching its `id`), `box`.
 - `total`: the number of placed objects; `nextCursor`, `truncated`, `hint`: as for eplan_connection_list.
 - `unplaced`: devices with a part and no 3D representation (`tag`, first `part`), at most 200; `unplacedTotal` counts them all.
 

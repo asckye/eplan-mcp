@@ -19,7 +19,7 @@
 | `items` | object[] | 是 | — | 1–100 项，按顺序放；字段见下 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；false 执行 |
 
-`items` 每项：`kind`（`rail`/`duct`/`device`）；导轨和线槽要 `part`、`length_mm`（10–3000）、`x`、`y`，可选 `orientation`、`variant`、`on`、`ref`；设备要 `tag`（原理图中带部件的设备），可选 `part`，再给 `on` + `x`/`y`，或 `rail`（前面某项的 `ref` 或已放导轨的 `id`）+ `offset_mm`。坐标是从面的左下角到对象包围盒左下角的毫米数。未知字段报错。
+`items` 每项：`kind`（`rail`/`duct`/`device`）；导轨和线槽要 `part`、`length_mm`（10–3000）、`x`、`y`，可选 `orientation`、`variant`、`on`、`ref`；设备要 `tag`（原理图中带部件的设备），可选 `part`，再给 `on`（`panel`、`door` 或 `top`：柜顶，放塔灯、风扇）+ `x`/`y`，或 `rail`（前面某项的 `ref` 或已放导轨的 `id`）+ `offset_mm`。坐标是从面的左下角到对象包围盒左下角的毫米数；柜顶是水平面，`y` 从前沿往后量。未知字段报错。
 
 ## 3. 输出
 预览返回每项一条 `changes`；执行后按请求顺序返回 `items`（`id`、`tag`、`part`、读回的 `box` 和实测位置 `at`）、`overlaps`（与其他对象重叠的项，保留不回滚）和撤销步骤 `undo`。

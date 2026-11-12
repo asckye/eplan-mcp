@@ -44,8 +44,9 @@ internal sealed class EplanLayoutReader : ILayoutReader
                 Kind = function.GetType().Name,
                 Tag = function is Component && name.Contains('-') ? name : null,
                 Parts = [.. function.ArticleReferences.Select(a => a.PartNr ?? string.Empty)],
-                Parent = function.Parent?.GetType().Name,
-                ParentId = function.Parent is InstallationSpace ? null : function.Parent?.ObjectIdentifier,
+                // Items on a mounting surface hang below its Plane; report the panel or door that owns it, as the enclosure's surfaces do.
+                Parent = (function.Parent is Plane plane ? plane.Parent : function.Parent)?.GetType().Name,
+                ParentId = function.Parent is InstallationSpace ? null : (function.Parent is Plane surface ? surface.Parent : function.Parent)?.ObjectIdentifier,
                 Box = Box(function),
             });
             if (function is Cabinet cabinet && cabinet.Parent is InstallationSpace)
@@ -82,7 +83,7 @@ internal sealed class EplanLayoutReader : ILayoutReader
 
     private static LayoutEnclosure Enclosure(Cabinet cabinet)
     {
-        (Plane? panel, Plane? door) = Surfaces(cabinet);
+        (Plane? panel, Plane? door, Plane? top) = Surfaces(cabinet);
         return new LayoutEnclosure
         {
             Id = cabinet.ObjectIdentifier,
@@ -90,22 +91,33 @@ internal sealed class EplanLayoutReader : ILayoutReader
             Box = Box(cabinet),
             Panel = panel is null ? null : Surface(panel),
             Door = door is null ? null : Surface(door),
+            Top = top is null ? null : Surface(top),
         };
     }
 
-    /// <summary>The mounting panel's and the door's master surfaces of <paramref name="cabinet"/>, as layout tools place on them.</summary>
-    internal static (Plane? Panel, Plane? Door) Surfaces(Cabinet cabinet)
+    /// <summary>The mounting panel's, the door's and the top's surfaces of <paramref name="cabinet"/>, as layout tools place on them.</summary>
+    internal static (Plane? Panel, Plane? Door, Plane? Top) Surfaces(Cabinet cabinet)
     {
-        Plane[] planes = [.. Descendants(cabinet).OfType<Plane>().Where(p => p.PlaneMode == Placement3D.Enums.PlaneModeType.Master)];
+        Plane[] all = [.. Descendants(cabinet).OfType<Plane>()];
+        Plane[] planes = [.. all.Where(p => p.PlaneMode == Placement3D.Enums.PlaneModeType.Master)];
         // The door: of the surfaces not on the mounting panel or the body, the one furthest to the front (A136: 795x16x595 at the front).
-        return (planes.FirstOrDefault(p => p.Parent is MountingPanel), planes.Where(p => p.Parent is Component).OrderBy(p => p.GetBoundingBox(false).Y).FirstOrDefault());
+        Plane? door = planes.Where(p => p.Parent is Component).OrderBy(p => p.GetBoundingBox(false).Y).FirstOrDefault();
+        // The top: the highest horizontal surface, master surfaces first (towers and fans mount on the roof).
+        Plane? top = all.Where(p => p.Parent is not MountingPanel && Horizontal(p.GetBoundingBox(false)))
+            .OrderByDescending(p => p.PlaneMode == Placement3D.Enums.PlaneModeType.Master)
+            .ThenByDescending(p => p.GetBoundingBox(false).Z)
+            .FirstOrDefault();
+        return (planes.FirstOrDefault(p => p.Parent is MountingPanel), door, top);
     }
+
+    /// <summary>A surface lying in X/Y (a roof), not in X/Z like the panel and the door.</summary>
+    internal static bool Horizontal(Rect3D box) => box.SizeZ < 1 && box.SizeX > 1 && box.SizeY > 1;
 
     private static LayoutSurface Surface(Plane plane)
     {
         Rect3D box = plane.GetBoundingBox(false);
-        // A surface lies in X/Z (panel, door): width across, height up (A136).
-        return new LayoutSurface { Id = plane.Parent?.ObjectIdentifier ?? 0, Width = Round(box.SizeX), Height = Round(box.SizeZ), Box = Box(plane) };
+        // The panel and the door lie in X/Z: width across, height up (A136); the top lies in X/Y: height from front to back.
+        return new LayoutSurface { Id = plane.Parent?.ObjectIdentifier ?? 0, Width = Round(box.SizeX), Height = Round(Horizontal(box) ? box.SizeY : box.SizeZ), Box = Box(plane) };
     }
 
     private static IEnumerable<Placement3D> Descendants(Placement3D root)

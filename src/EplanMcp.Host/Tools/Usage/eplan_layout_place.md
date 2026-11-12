@@ -19,7 +19,7 @@ Place them: the same arguments with `"dry_run": false`.
 5. Item fields:
    - `kind`: `rail`, `duct` or `device`.
    - Rails and ducts: `part`, `length_mm` (10-3000), `x`, `y`, optional `orientation` (`horizontal`, default, or `vertical`), `variant`, `on` (`panel`, default, or `door`), and `ref` so later devices can name the rail.
-   - Devices: `tag` (a schematic device with a part, see eplan_layout_get `unplaced`), optional `part` to override it, and either `on` (`panel` or `door`) with `x`, `y`, or `rail` (an earlier item's `ref` or a placed rail's `id`) with `offset_mm`.
+   - Devices: `tag` (a schematic device with a part, see eplan_layout_get `unplaced`), optional `part` to override it, and either `on` (`panel`, `door` or `top`, the enclosure roof for towers and fans) with `x`, `y`, or `rail` (an earlier item's `ref` or a placed rail's `id`) with `offset_mm`.
 
 ## Fields
 
