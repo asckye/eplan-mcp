@@ -1,11 +1,9 @@
 # EPLAN API 覆盖报告
 
-> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-11-05 按 Bridge 源码 814555bb 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
-
-**操作层 4014 组：专用工具 535，通用读取 125，仅通用入口 1322，仅状态覆盖 8，其他可调用 5，到不了 2019；实机验证 856**
+**操作层 4014 组：专用工具 610，通用读取 117，仅通用入口 1279，仅状态覆盖 8，其他可调用 5，到不了 1995；实机验证 864**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-05 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 814555bb）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-12 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 cac76efb）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -14,18 +12,18 @@
 
 | 路线 | 组数 | 占 4014 的比例 | 实机验证组数 |
 |---|---:|---:|---:|
-| 专用工具（dedicated） | 535 | 535 / 4014（13.3%） | 378 |
-| 通用读取（generic_read） | 125 | 125 / 4014（3.1%） | 3 |
-| 仅通用入口（api_try_only） | 1322 | 1322 / 4014（32.9%） | 475 |
+| 专用工具（dedicated） | 610 | 610 / 4014（15.2%） | 406 |
+| 通用读取（generic_read） | 117 | 117 / 4014（2.9%） | 1 |
+| 仅通用入口（api_try_only） | 1279 | 1279 / 4014（31.9%） | 457 |
 | 仅状态覆盖（state_only） | 8 | 8 / 4014（0.2%） | 0 |
 | 其他可调用（other） | 5 | 5 / 4014（0.1%） | 0 |
-| 到不了（none） | 2019 | 2019 / 4014（50.3%） | 0 |
+| 到不了（none） | 1995 | 1995 / 4014（49.7%） | 0 |
 
 - refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。
 
 | 操作层分母 | tools | api_try | callable | refused_unsafe |
 |---:|---:|---:|---:|---:|
-| 4014 | 1990 | 1700 | 1995 | 5 |
+| 4014 | 2014 | 1700 | 2019 | 5 |
 
 - api_try 在操作层分母外还可到达 0 组，不加入可调用数或分母；原因：无。
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
@@ -37,44 +35,44 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 4155 个 ID（方法 1053，属性 1217，类型 481，字段和枚举值 1389，action 15），其中 4132 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
+Bridge 共用到 4224 个 ID（方法 1080，属性 1242，类型 490，字段和枚举值 1395，action 17），其中 4201 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
-| `Eplan.EplApi.ApplicationFramework` | 29 |
-| `Eplan.EplApi.Base` | 956 |
-| `Eplan.EplApi.DataModel` | 1364 |
-| `Eplan.EplApi.DataModel.E3D` | 358 |
-| `Eplan.EplApi.DataModel.EObjects` | 104 |
-| `Eplan.EplApi.DataModel.Graphics` | 590 |
-| `Eplan.EplApi.DataModel.MasterData` | 73 |
+| `Eplan.EplApi.ApplicationFramework` | 32 |
+| `Eplan.EplApi.Base` | 957 |
+| `Eplan.EplApi.DataModel` | 1376 |
+| `Eplan.EplApi.DataModel.E3D` | 371 |
+| `Eplan.EplApi.DataModel.EObjects` | 106 |
+| `Eplan.EplApi.DataModel.Graphics` | 591 |
+| `Eplan.EplApi.DataModel.MasterData` | 78 |
 | `Eplan.EplApi.DataModel.Planning` | 128 |
 | `Eplan.EplApi.DataModel.Revisions` | 21 |
 | `Eplan.EplApi.DataModel.Topology` | 18 |
 | `Eplan.EplApi.EServices` | 38 |
 | `Eplan.EplApi.EServices.Ged` | 6 |
-| `Eplan.EplApi.HEServices` | 406 |
+| `Eplan.EplApi.HEServices` | 418 |
 | `Eplan.EplApi.HEServices.Exceptions` | 1 |
-| `Eplan.EplApi.MasterData` | 48 |
-| `（action）` | 15 |
+| `Eplan.EplApi.MasterData` | 66 |
+| `（action）` | 17 |
 
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 1990 / 4014（49.6%） | 1982 | 178 | 1982 / 4014（49.4%） | 856 / 4014（21.3%） | 21 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 762 / 1799（42.4%） | 755 | 91 | 755 / 1799（42.0%） | 170 / 1799（9.4%） | 18 | 66 |
-| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 1228 / 2215（55.4%） | 1227 | 87 | 1227 / 2215（55.4%） | 686 / 2215（31.0%） | 3 | 68 |
-| 数据字典（对象类型） | 69 | deprecated：1 | 68 | 64 / 68（94.1%） | 64 | 0 | 64 / 68（94.1%） | 17 / 68（25.0%） | 0 | 0 |
-| action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 8 / 137（5.8%） | 7 | 0 | 8 / 137（5.8%） | 2 / 137（1.5%） | 0 | 0 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 2014 / 4014（50.2%） | 2006 | 188 | 2006 / 4014（50.0%） | 864 / 4014（21.5%） | 21 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 781 / 1799（43.4%） | 774 | 100 | 774 / 1799（43.0%） | 173 / 1799（9.6%） | 18 | 66 |
+| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 1233 / 2215（55.7%） | 1232 | 88 | 1232 / 2215（55.6%） | 691 / 2215（31.2%） | 3 | 68 |
+| 数据字典（对象类型） | 69 | deprecated：1 | 68 | 65 / 68（95.6%） | 65 | 0 | 65 / 68（95.6%） | 18 / 68（26.5%） | 0 | 0 |
+| action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 10 / 137（7.3%） | 9 | 0 | 10 / 137（7.3%） | 2 / 137（1.5%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 7 / 97（7.2%） | 7 | 0 | 7 / 97（7.2%） | 1 / 97（1.0%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
-- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 1990 / 4342（45.8%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 762 / 1799（42.4%），live_verified 170 / 1799（9.4%）。
-- 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 62 个，未过时的共 8585 个。
-- 依赖层：Bridge 用到 1943 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
-- action 137 行：工具到达 8，action_try 可尝试 35（离线规则，不代表实机验证）。
-- action 名称：Bridge 用到 7 个，没有整个排除的 action 共 64 个。
+- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 2014 / 4342（46.4%）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 781 / 1799（43.4%），live_verified 173 / 1799（9.6%）。
+- 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 78 个，未过时的共 8585 个。
+- 依赖层：Bridge 用到 1963 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
+- action 137 行：工具到达 10，action_try 可尝试 35（离线规则，不代表实机验证）。
+- action 名称：Bridge 用到 9 个，没有整个排除的 action 共 64 个。
 
 ### 全量 API
 
@@ -87,36 +85,36 @@ action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 4
 
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 方法 | 3109 | 314 / 168 | 37 / 2 | 730 / 79 | 7 / 0 | 5 / 0 | 2016 / 0 | 249 |
-| 普通属性 | 2636 | 381 / 289 | 273 / 2 | 781 / 401 | 1 / 0 | 0 / 0 | 1200 / 0 | 692 |
+| 方法 | 3109 | 396 / 175 | 33 / 0 | 690 / 77 | 7 / 0 | 5 / 0 | 1978 / 0 | 252 |
+| 普通属性 | 2636 | 423 / 312 | 256 / 1 | 762 / 384 | 1 / 0 | 0 / 0 | 1194 / 0 | 697 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5983 | 695 / 457 | 310 / 4 | 1511 / 480 | 8 / 0 | 5 / 0 | 3454 / 0 | 941 |
+| 合计 | 5983 | 819 / 487 | 289 / 1 | 1452 / 461 | 8 / 0 | 5 / 0 | 3410 / 0 | 949 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
 ## 3. 按命名空间（操作层）与按对象类型（数据字典）
 | 命名空间（overlay 排除后） | 分母 | implemented | callable | refused_unsafe | live_verified |
 |---|---:|---:|---:|---:|---:|
-| `Eplan.EplApi.ApplicationFramework` | 88 | 9 / 88（10.2%） | 9 / 88（10.2%） | 0 | 2 |
-| `Eplan.EplApi.Base` | 268 | 103 / 268（38.4%） | 103 / 268（38.4%） | 0 | 20 |
-| `Eplan.EplApi.DataModel` | 1247 | 797 / 1247（63.9%） | 802 / 1247（64.3%） | 4 | 371 |
-| `Eplan.EplApi.DataModel.E3D` | 368 | 272 / 368（73.9%） | 272 / 368（73.9%） | 1 | 119 |
-| `Eplan.EplApi.DataModel.EObjects` | 83 | 72 / 83（86.7%） | 72 / 83（86.7%） | 0 | 49 |
+| `Eplan.EplApi.ApplicationFramework` | 88 | 10 / 88（11.4%） | 10 / 88（11.4%） | 0 | 2 |
+| `Eplan.EplApi.Base` | 268 | 104 / 268（38.8%） | 104 / 268（38.8%） | 0 | 20 |
+| `Eplan.EplApi.DataModel` | 1247 | 800 / 1247（64.2%） | 805 / 1247（64.6%） | 4 | 373 |
+| `Eplan.EplApi.DataModel.E3D` | 368 | 277 / 368（75.3%） | 277 / 368（75.3%） | 1 | 119 |
+| `Eplan.EplApi.DataModel.EObjects` | 83 | 73 / 83（88.0%） | 73 / 83（88.0%） | 0 | 49 |
 | `Eplan.EplApi.DataModel.Graphics` | 414 | 320 / 414（77.3%） | 320 / 414（77.3%） | 0 | 156 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
-| `Eplan.EplApi.DataModel.MasterData` | 121 | 42 / 121（34.7%） | 42 / 121（34.7%） | 0 | 19 |
+| `Eplan.EplApi.DataModel.MasterData` | 121 | 44 / 121（36.4%） | 44 / 121（36.4%） | 0 | 20 |
 | `Eplan.EplApi.DataModel.Planning` | 122 | 101 / 122（82.8%） | 101 / 122（82.8%） | 0 | 48 |
 | `Eplan.EplApi.DataModel.Revisions` | 20 | 18 / 20（90.0%） | 18 / 20（90.0%） | 0 | 0 |
 | `Eplan.EplApi.DataModel.Topology` | 17 | 14 / 17（82.4%） | 14 / 17（82.4%） | 0 | 10 |
 | `Eplan.EplApi.EServices` | 127 | 28 / 127（22.0%） | 28 / 127（22.0%） | 0 | 7 |
 | `Eplan.EplApi.EServices.Ged` | 90 | 4 / 90（4.4%） | 4 / 90（4.4%） | 0 | 3 |
-| `Eplan.EplApi.HEServices` | 417 | 186 / 417（44.6%） | 186 / 417（44.6%） | 0 | 38 |
+| `Eplan.EplApi.HEServices` | 417 | 192 / 417（46.0%） | 192 / 417（46.0%） | 0 | 38 |
 | `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
-| `Eplan.EplApi.MasterData` | 592 | 24 / 592（4.1%） | 24 / 592（4.1%） | 0 | 14 |
+| `Eplan.EplApi.MasterData` | 592 | 29 / 592（4.9%） | 29 / 592（4.9%） | 0 | 19 |
 | `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 / 14（0.0%） | 0 | 0 |
 | `Eplan.EplApi.System` | 22 | 0 / 22（0.0%） | 0 / 22（0.0%） | 0 | 0 |
 
-数据字典中已实现的对象类型（64 个）：Arc（live_verified）、Article（live_verified）、ArticleReference（automated_test）、Block（automated_test）、BusBar（live_verified）、Cable（live_verified）、Comment（automated_test）、Connection（live_verified）、ConnectionDefinitionPoint（automated_test）、ConnectionPointsInfo（automated_test）、CopperBundle（automated_test）、DeletedObjectInfo（automated_test）、DeviceListEntry（automated_test）、DimensionCircle（automated_test）、DimensionItem（automated_test）、Function（live_verified）、Function3D（automated_test）、FunctionBase（live_verified）、FunctionDefinitionLibrary（automated_test）、GraphicalPlacement（automated_test）、HyperLink（automated_test）、Image（automated_test）、InstallationSpace（automated_test）、InterruptionPoint（live_verified）、Line（automated_test）、Location（automated_test）、LocationBox（live_verified）、MDPartsDatabaseItem（live_verified）、MacroBox（live_verified）、MacroEntry（automated_test）、MergedArticleReference（automated_test）、Option（automated_test）、OptionFragment（automated_test）、OptionGroup（automated_test）、Page（live_verified）、PathText（automated_test）、PipingDefinition（automated_test）、PlaceHolder（live_verified）、Placement（automated_test）、Placement3D（automated_test）、PlanningSegment（automated_test）、PlcIO（automated_test）、PlotFrame（automated_test）、PlugStrip（automated_test）、PotentialDefinition（live_verified）、Project（live_verified）、ProtectedGroup（automated_test）、QRCode（live_verified）、Rectangle（automated_test）、RoutedConnection（automated_test）、Segment（automated_test）、SegmentDefinition（automated_test）、SegmentPlacement（automated_test）、SegmentTemplate（automated_test）、StorableObject（automated_test）、StrandConnector（automated_test）、Symbol（automated_test）、SymbolLibrary（automated_test）、SymbolReference（automated_test）、SymbolVariant（automated_test）、TerminalStrip（live_verified）、Text（automated_test）、TextBase（automated_test）、ViewPlacement（automated_test）。
+数据字典中已实现的对象类型（65 个）：Arc（live_verified）、Article（live_verified）、ArticleReference（automated_test）、Block（automated_test）、BusBar（live_verified）、Cable（live_verified）、Comment（automated_test）、Connection（live_verified）、ConnectionDefinitionPoint（automated_test）、ConnectionPointsInfo（automated_test）、CopperBundle（automated_test）、DeletedObjectInfo（automated_test）、DeviceListEntry（automated_test）、DimensionCircle（automated_test）、DimensionItem（automated_test）、Function（live_verified）、Function3D（automated_test）、FunctionBase（live_verified）、FunctionDefinitionLibrary（automated_test）、GraphicalPlacement（automated_test）、HyperLink（automated_test）、Image（automated_test）、InstallationSpace（automated_test）、InterruptionPoint（live_verified）、Line（automated_test）、Location（automated_test）、LocationBox（live_verified）、MDFunctionTemplatePosition（live_verified）、MDPartsDatabaseItem（live_verified）、MacroBox（live_verified）、MacroEntry（automated_test）、MergedArticleReference（automated_test）、Option（automated_test）、OptionFragment（automated_test）、OptionGroup（automated_test）、Page（live_verified）、PathText（automated_test）、PipingDefinition（automated_test）、PlaceHolder（live_verified）、Placement（automated_test）、Placement3D（automated_test）、PlanningSegment（automated_test）、PlcIO（automated_test）、PlotFrame（automated_test）、PlugStrip（automated_test）、PotentialDefinition（live_verified）、Project（live_verified）、ProtectedGroup（automated_test）、QRCode（live_verified）、Rectangle（automated_test）、RoutedConnection（automated_test）、Segment（automated_test）、SegmentDefinition（automated_test）、SegmentPlacement（automated_test）、SegmentTemplate（automated_test）、StorableObject（automated_test）、StrandConnector（automated_test）、Symbol（automated_test）、SymbolLibrary（automated_test）、SymbolReference（automated_test）、SymbolVariant（automated_test）、TerminalStrip（live_verified）、Text（automated_test）、TextBase（automated_test）、ViewPlacement（automated_test）。
 
 无文档的重载组（不在 IntelliSense 中，仍在分母里，Q2）：共 134 组，按命名空间：
 
@@ -133,7 +131,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | `Eplan.EplApi.EServices.Ged` | 4 | 2 |
 | `Eplan.EplApi.HEServices` | 3 | 0 |
 | `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 |
-| `Eplan.EplApi.MasterData` | 39 | 0 |
+| `Eplan.EplApi.MasterData` | 39 | 1 |
 
 ## 4. 实机验证
 
@@ -208,10 +206,10 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_action_catalog_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/1 | — | — |
 | eplan_action_run | destructive | action.execute<br>action.plan<br>action.run | 135 | 71 | 2 | 57 | 0 | 1/2/0 | A11 A25 A30 A39 A40 | — |
 | eplan_action_try | destructive | action.try.execute<br>action.try.plan | 270 | 89 | 2 | 174 | 0 | 3/3/2 | A9 A40 | — |
-| eplan_annotation_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 322 | 196 | 2 | 123 | 0 | 1/0/1 | A93 A97 | — |
+| eplan_annotation_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 328 | 200 | 2 | 125 | 0 | 1/0/1 | A93 A97 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 5/4/0 | A77 | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/2/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 3836 | 1802 | 59 | 1808 | 0 | 7/3/3 | A39 A56 A67 A68 A76 A77 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 3837 | 1803 | 59 | 1808 | 0 | 7/3/3 | A39 A56 A67 A68 A76 A77 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |
@@ -219,22 +217,22 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_cabinet_bind | write | project.get | 58 | 31 | 0 | 27 | 0 | 2/1/0 | — | — |
 | eplan_cabinet_list | read | project.get | 58 | 31 | 0 | 27 | 0 | 1/1/1 | — | — |
 | eplan_cable_generate | destructive | cable.generate.execute<br>cable.generate.plan | 121 | 58 | 2 | 51 | 1 | 3/2/1 | A24 A30 A31 | — |
-| eplan_cable_get | read | cable.get | 68 | 34 | 2 | 27 | 0 | 2/2/3 | A24 | — |
-| eplan_cable_reassign | destructive | cable.reassign.execute<br>cable.reassign.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
-| eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 133 | 69 | 2 | 61 | 0 | 0/1/1 | A24 | 2026-10-21 pass（api-notes A24） |
+| eplan_cable_get | read | cable.get | 71 | 34 | 2 | 29 | 0 | 2/2/3 | A24 | — |
+| eplan_cable_reassign | destructive | cable.reassign.execute<br>cable.reassign.plan | 113 | 53 | 2 | 51 | 0 | 0/0/1 | — | — |
+| eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 134 | 69 | 2 | 61 | 0 | 0/1/1 | A24 | 2026-10-21 pass（api-notes A24） |
 | eplan_check_list | read | check.list | 31 | 16 | 0 | 15 | 0 | 2/3/3 | A12 | 2026-10-20 pass（api-notes A20） |
 | eplan_check_run | write | check.run.execute<br>check.run.plan | 75 | 35 | 0 | 40 | 0 | 0/1/3 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
-| eplan_connection_create | write | connection.create.execute<br>connection.create.plan<br>project.get | 379 | 224 | 7 | 138 | 0 | 7/11/18 | A52 A55 A86 A93 A94 | — |
-| eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 86 | 41 | 1 | 43 | 0 | 6/2/12 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
-| eplan_connection_list | read | connection.list | 78 | 45 | 1 | 30 | 0 | 2/4/8 | — | 2026-10-20 pass（api-notes A19） |
+| eplan_connection_create | write | connection.create.execute<br>connection.create.plan<br>project.get | 399 | 231 | 8 | 139 | 0 | 7/11/18 | A52 A55 A86 A93 A94 | — |
+| eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 88 | 41 | 1 | 44 | 0 | 6/2/12 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_connection_list | read | connection.list | 79 | 45 | 1 | 31 | 0 | 2/4/8 | — | 2026-10-20 pass（api-notes A19） |
 | eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 94 | 41 | 1 | 52 | 0 | 0/1/1 | A24 | — |
 | eplan_context_get | read | project.snapshot | 99 | 41 | 4 | 32 | 0 | 3/5/3 | A20 A33 A34 A35 A36 A39 | — |
-| eplan_device_get | read | device.get | 78 | 45 | 2 | 30 | 0 | 10/4/10 | — | 2026-10-19 pass（api-notes A12） |
+| eplan_device_get | read | device.get | 79 | 45 | 2 | 30 | 0 | 10/4/10 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 35 | 20 | 0 | 15 | 0 | 7/2/12 | A11 A12 | 2026-10-21 pass（api-notes A24） |
-| eplan_device_place | write | device.place.execute<br>device.place.plan<br>project.get | 391 | 227 | 6 | 130 | 0 | 17/7/28 | A13 A14 A26 A53 A55 A82 A85 | — |
+| eplan_device_place | write | device.place.execute<br>device.place.plan<br>project.get | 420 | 235 | 7 | 136 | 0 | 17/7/28 | A13 A14 A26 A53 A55 A82 A85 | — |
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 78 | 34 | 0 | 44 | 0 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
-| eplan_device_update | write | device.update.execute<br>device.update.plan | 117 | 57 | 3 | 47 | 0 | 5/2/5 | A3 A13 A79 A82 A85 A93 | 2026-10-20 pass（api-notes A17） |
-| eplan_enclosure_place | write | layout.enclosure.place.execute<br>layout.enclosure.place.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
+| eplan_device_update | write | device.update.execute<br>device.update.plan | 145 | 68 | 4 | 50 | 0 | 5/2/5 | A3 A13 A79 A82 A85 A93 | 2026-10-20 pass（api-notes A17） |
+| eplan_enclosure_place | write | layout.enclosure.place.execute<br>layout.enclosure.place.plan | 132 | 62 | 2 | 53 | 0 | 0/0/0 | — | — |
 | eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 42 | 20 | 0 | 22 | 0 | 1/1/0 | A16 | — |
 | eplan_export_image | write | export.image.plan<br>export.image.run | 45 | 18 | 0 | 27 | 0 | 2/2/12 | A14 A16 | 2026-10-20 pass（api-notes A21） |
 | eplan_export_labels | write | export.labels.plan<br>export.labels.run | 36 | 16 | 0 | 20 | 0 | 1/2/1 | A24 A25 B9 | — |
@@ -242,26 +240,26 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_export_pdf | write | export.pdf.plan<br>export.pdf.run | 46 | 20 | 0 | 26 | 0 | 1/1/1 | A16 | — |
 | eplan_export_pxf | write | export.pxf.plan<br>export.pxf.run | 22 | 8 | 0 | 14 | 0 | 1/2/2 | A25 | — |
 | eplan_export_untranslated | write | export.untranslated.plan<br>export.untranslated.run | 25 | 9 | 0 | 16 | 0 | 1/2/1 | A25 B9 | — |
-| eplan_graphic_edit | write | graphic.edit.execute<br>graphic.edit.plan | 0 | 0 | 0 | 0 | 0 | 1/1/1 | A99 | — |
-| eplan_import_dxf | write | import.dxf.execute<br>import.dxf.plan | 229 | 133 | 2 | 93 | 0 | 1/2/1 | A29 | — |
+| eplan_graphic_edit | write | graphic.edit.execute<br>graphic.edit.plan | 331 | 207 | 2 | 121 | 0 | 1/1/1 | A99 | — |
+| eplan_import_dxf | write | import.dxf.execute<br>import.dxf.plan | 232 | 135 | 2 | 94 | 0 | 1/2/1 | A29 | — |
 | eplan_import_list | destructive | import.list.execute<br>import.list.plan | 91 | 46 | 0 | 41 | 2 | 4/1/1 | A30 A31 | — |
 | eplan_import_pdf_comments | write | import.pdf_comments.execute<br>import.pdf_comments.plan | 82 | 39 | 2 | 39 | 1 | 2/1/1 | A39 | — |
 | eplan_import_plc | destructive | import.plc.execute<br>import.plc.plan | 79 | 38 | 0 | 39 | 1 | 2/1/1 | A30 | — |
 | eplan_import_pxf | write | import.pxf.execute<br>import.pxf.plan | 7 | 2 | 0 | 5 | 0 | 0/1/1 | A28 A29 | — |
-| eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 75 | 35 | 2 | 38 | 0 | 1/1/1 | A28 | — |
-| eplan_language_set | write | language.set.execute<br>language.set.plan | 50 | 22 | 0 | 28 | 0 | 2/1/4 | A28 | — |
-| eplan_layout_get | read | layout.get | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
-| eplan_layout_place | write | layout.place.execute<br>layout.place.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
-| eplan_layout_remove | destructive | layout.remove.execute<br>layout.remove.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
-| eplan_macro_get | read | macro.get | 43 | 23 | 0 | 18 | 0 | 4/0/4 | A14 A89 | — |
-| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 264 | 158 | 3 | 99 | 0 | 10/2/10 | A12 A13 A14 A79 A82 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 77 | 37 | 2 | 38 | 0 | 1/1/1 | A28 | — |
+| eplan_language_set | write | language.set.execute<br>language.set.plan | 52 | 24 | 0 | 28 | 0 | 2/1/4 | A28 | — |
+| eplan_layout_get | read | layout.get | 46 | 27 | 0 | 19 | 0 | 0/0/0 | — | — |
+| eplan_layout_place | write | layout.place.execute<br>layout.place.plan | 147 | 68 | 2 | 61 | 0 | 0/0/0 | — | — |
+| eplan_layout_remove | destructive | layout.remove.execute<br>layout.remove.plan | 74 | 39 | 0 | 35 | 0 | 0/0/0 | — | — |
+| eplan_macro_get | read | macro.get | 49 | 28 | 0 | 19 | 0 | 4/0/4 | A14 A89 | — |
+| eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 272 | 165 | 3 | 100 | 0 | 10/2/10 | A12 A13 A14 A79 A82 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 4/0/4 | A4 | — |
-| eplan_macro_store | write | macro.store | 0 | 0 | 0 | 0 | 0 | 1/0/1 | — | — |
-| eplan_masterdata_update | destructive | masterdata.update.execute<br>masterdata.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
+| eplan_macro_store | write | macro.store | 125 | 52 | 4 | 47 | 0 | 1/0/1 | — | — |
+| eplan_masterdata_update | destructive | masterdata.update.execute<br>masterdata.update.plan | 34 | 15 | 0 | 19 | 0 | 0/0/1 | — | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
-| eplan_modelview_create | write | modelview.create.execute<br>modelview.create.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
-| eplan_object_find | read | object.find<br>object.get<br>project.get | 447 | 277 | 63 | 166 | 0 | 3/1/16 | A57 A60 | — |
-| eplan_object_get | read | object.find<br>object.get<br>project.get | 528 | 358 | 63 | 166 | 0 | 2/1/4 | — | — |
+| eplan_modelview_create | write | modelview.create.execute<br>modelview.create.plan | 128 | 66 | 1 | 60 | 1 | 0/0/0 | — | — |
+| eplan_object_find | read | object.find<br>object.get<br>project.get | 450 | 280 | 63 | 166 | 0 | 3/1/16 | A57 A60 | — |
+| eplan_object_get | read | object.find<br>object.get<br>project.get | 531 | 361 | 63 | 166 | 0 | 2/1/4 | — | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 0/3/0 | — | — |
 | eplan_pack_enable | write | — | 0 | 0 | 0 | 0 | 0 | 1/1/0 | — | — |
 | eplan_pack_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
@@ -271,57 +269,57 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_page_create | write | page.create.execute<br>page.create.plan | 85 | 36 | 1 | 41 | 0 | 14/17/20 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 70 | 35 | 0 | 35 | 0 | 3/10/1 | A15 A18 A24 | — |
-| eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 189 | 121 | 2 | 65 | 0 | 11/6/41 | A11 A12 A57 A80 | — |
+| eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 193 | 124 | 2 | 66 | 0 | 11/6/41 | A11 A12 A57 A80 | — |
 | eplan_page_list | read | page.list | 43 | 20 | 1 | 22 | 0 | 16/5/14 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_open | read | page.open | 27 | 14 | 0 | 13 | 0 | 6/2/7 | A54 | — |
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 71 | 29 | 0 | 42 | 0 | 2/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
-| eplan_page_review | read | page.review | 205 | 133 | 2 | 69 | 0 | 5/2/2 | A41 A64 A65 A72 A73 | — |
+| eplan_page_review | read | page.review | 211 | 135 | 2 | 70 | 0 | 5/2/2 | A41 A64 A65 A72 A73 | — |
 | eplan_page_text_replace | write | page.text.replace.execute<br>page.text.replace.plan | 79 | 38 | 0 | 41 | 0 | 1/2/1 | A41 | — |
 | eplan_page_update | write | page.update.execute<br>page.update.plan | 81 | 41 | 1 | 38 | 0 | 3/5/6 | A7 A13 A36 A49 | 2026-10-20 pass（api-notes A17） |
-| eplan_part_build | destructive | part.import.execute<br>part.import.plan<br>part.search | 52 | 18 | 1 | 29 | 0 | 1/1/1 | A30 | — |
+| eplan_part_build | destructive | part.import.execute<br>part.import.plan<br>part.search | 70 | 23 | 2 | 30 | 0 | 1/1/1 | A30 | — |
 | eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 1/2/2 | A30 | 2026-10-27 pass（Large 测试 README） |
-| eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 45 | 13 | 0 | 30 | 1 | 1/5/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
-| eplan_part_list | read | part.list | 45 | 24 | 1 | 19 | 0 | 1/2/3 | — | 2026-10-19 pass_with_findings（api-notes A12） |
-| eplan_part_search | read | part.search | 36 | 16 | 1 | 15 | 0 | 2/2/5 | — | 2026-10-21 pass（api-notes A30） |
-| eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 120 | 54 | 1 | 62 | 1 | 1/1/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
-| eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 73 | 39 | 0 | 34 | 0 | 1/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
-| eplan_placeholder_list | read | placeholder.list | 45 | 27 | 0 | 18 | 0 | 1/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
-| eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 322 | 196 | 2 | 123 | 0 | 10/3/18 | A54 A88 | — |
-| eplan_placement_delete | destructive | placement.delete.execute<br>placement.delete.plan | 160 | 94 | 1 | 64 | 0 | 3/1/4 | A87 | — |
-| eplan_placement_edit | destructive | placement.edit.execute<br>placement.edit.plan | 458 | 280 | 3 | 173 | 0 | 3/3/2 | — | — |
-| eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 360 | 212 | 7 | 131 | 0 | 9/3/4 | A57 A72 A76 | — |
+| eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 86 | 28 | 2 | 39 | 1 | 1/5/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
+| eplan_part_list | read | part.list | 46 | 24 | 1 | 19 | 0 | 1/2/3 | — | 2026-10-19 pass_with_findings（api-notes A12） |
+| eplan_part_search | read | part.search | 54 | 21 | 2 | 16 | 0 | 2/2/5 | — | 2026-10-21 pass（api-notes A30） |
+| eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 121 | 54 | 1 | 62 | 1 | 1/1/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
+| eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 74 | 39 | 0 | 35 | 0 | 1/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
+| eplan_placeholder_list | read | placeholder.list | 46 | 27 | 0 | 19 | 0 | 1/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
+| eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 328 | 200 | 2 | 125 | 0 | 10/3/18 | A54 A88 | — |
+| eplan_placement_delete | destructive | placement.delete.execute<br>placement.delete.plan | 164 | 97 | 1 | 65 | 0 | 3/1/4 | A87 | — |
+| eplan_placement_edit | destructive | placement.edit.execute<br>placement.edit.plan | 461 | 282 | 3 | 174 | 0 | 3/3/2 | — | — |
+| eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 380 | 219 | 8 | 132 | 0 | 9/3/4 | A57 A72 A76 | — |
 | eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 2/8/5 | A14 A17 A39 | — |
 | eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/6/3 | — | — |
-| eplan_plc_generate | write | plc.generate.execute<br>plc.generate.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
+| eplan_plc_generate | write | plc.generate.execute<br>plc.generate.plan | 61 | 31 | 0 | 30 | 0 | 0/0/1 | — | — |
 | eplan_plc_get | read | plc.get | 83 | 40 | 1 | 31 | 0 | 2/1/3 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
-| eplan_plc_readdress | destructive | plc.readdress.execute<br>plc.readdress.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
-| eplan_potential_update | write | potential.update.execute<br>potential.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
-| eplan_project_close | write | project.close.execute<br>project.close.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | A34 | — |
-| eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 37 | 15 | 1 | 18 | 1 | 4/3/3 | A31 A32 A34 A35 | — |
+| eplan_plc_readdress | destructive | plc.readdress.execute<br>plc.readdress.plan | 75 | 32 | 1 | 41 | 0 | 0/0/1 | — | — |
+| eplan_potential_update | write | potential.update.execute<br>potential.update.plan | 173 | 103 | 1 | 67 | 0 | 0/0/0 | — | — |
+| eplan_project_close | write | project.close.execute<br>project.close.plan | 17 | 7 | 0 | 10 | 0 | 0/0/1 | A34 | — |
+| eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 38 | 15 | 1 | 18 | 2 | 4/3/3 | A31 A32 A34 A35 | — |
 | eplan_project_get | read | project.get | 58 | 31 | 0 | 27 | 0 | 5/3/9 | A11 | 2026-10-19 pass（api-notes A12） |
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/9 | — | 2026-10-18 pass（api-notes A10） |
-| eplan_project_open | write | project.open.execute<br>project.open.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | A41 | — |
-| eplan_project_rename | destructive | project.rename.execute<br>project.rename.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | A18 | — |
-| eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 81 | 37 | 2 | 42 | 0 | 0/1/1 | A11 A14 A25 A28 | — |
-| eplan_project_update | write | project.update.execute<br>project.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
+| eplan_project_open | write | project.open.execute<br>project.open.plan | 19 | 7 | 0 | 12 | 0 | 0/0/1 | A41 | — |
+| eplan_project_rename | destructive | project.rename.execute<br>project.rename.plan | 32 | 14 | 0 | 18 | 0 | 0/0/0 | A18 | — |
+| eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 82 | 38 | 2 | 42 | 0 | 0/1/1 | A11 A14 A25 A28 | — |
+| eplan_project_update | write | project.update.execute<br>project.update.plan | 64 | 31 | 1 | 31 | 0 | 0/0/1 | — | — |
 | eplan_property_get | read | project.get<br>property.read | 382 | 220 | 1 | 160 | 0 | 3/2/4 | A36 A44 | — |
 | eplan_property_schema | read | — | 0 | 0 | 0 | 0 | 0 | 3/1/0 | — | — |
-| eplan_property_set | write | project.get<br>property.set.execute<br>property.set.plan | 422 | 237 | 1 | 181 | 0 | 3/1/3 | A36 A44 A48 A95 B13 | — |
-| eplan_report_configure | write | report.settings.execute<br>report.settings.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | A28 | — |
-| eplan_report_create | write | report.create.execute<br>report.create.plan | 80 | 40 | 0 | 40 | 0 | 3/1/1 | A84 | — |
+| eplan_property_set | write | project.get<br>property.set.execute<br>property.set.plan | 423 | 238 | 1 | 181 | 0 | 3/1/3 | A36 A44 A48 A95 B13 | — |
+| eplan_report_configure | write | report.settings.execute<br>report.settings.plan | 16 | 8 | 0 | 8 | 0 | 0/0/1 | A28 | — |
+| eplan_report_create | write | report.create.execute<br>report.create.plan | 86 | 43 | 0 | 43 | 0 | 3/1/1 | A84 | — |
 | eplan_report_update | write | report.update.execute<br>report.update.plan | 59 | 27 | 0 | 32 | 0 | 0/1/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
 | eplan_revision_list | read | revision.list | 48 | 22 | 2 | 18 | 0 | 1/0/1 | A28 | — |
-| eplan_rule_check | read | device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>plan.names<br>project.snapshot | 297 | 166 | 7 | 92 | 0 | 2/1/0 | — | — |
+| eplan_rule_check | read | device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>plan.names<br>project.snapshot | 322 | 177 | 8 | 94 | 0 | 2/1/0 | — | — |
 | eplan_selection_get | read | selection.get | 181 | 42 | 0 | 139 | 0 | 1/1/1 | — | — |
 | eplan_selection_set | read | selection.set | 181 | 42 | 0 | 139 | 0 | 2/1/1 | A54 B11 | — |
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/9 | — | 2026-10-18 pass（api-notes A10） |
-| eplan_shield_create | write | shield.create.execute<br>shield.create.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
-| eplan_structure_delete | destructive | structure.delete.execute<br>structure.delete.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
-| eplan_structure_list | read | structure.list | 0 | 0 | 0 | 0 | 0 | 0/0/2 | — | — |
-| eplan_structure_rename | destructive | structure.rename.execute<br>structure.rename.plan | 0 | 0 | 0 | 0 | 0 | 0/0/1 | — | — |
-| eplan_structure_update | write | structure.update.execute<br>structure.update.plan | 0 | 0 | 0 | 0 | 0 | 0/0/2 | — | — |
-| eplan_symbol_search | read | symbol.search | 67 | 38 | 1 | 27 | 0 | 4/3/11 | A52 A53 A55 | — |
+| eplan_shield_create | write | shield.create.execute<br>shield.create.plan | 124 | 63 | 1 | 58 | 0 | 0/0/1 | — | — |
+| eplan_structure_delete | destructive | structure.delete.execute<br>structure.delete.plan | 73 | 32 | 1 | 39 | 0 | 0/0/1 | — | — |
+| eplan_structure_list | read | structure.list | 30 | 13 | 1 | 15 | 0 | 0/0/2 | — | — |
+| eplan_structure_rename | destructive | structure.rename.execute<br>structure.rename.plan | 73 | 32 | 1 | 39 | 0 | 0/0/1 | — | — |
+| eplan_structure_update | write | structure.update.execute<br>structure.update.plan | 72 | 30 | 1 | 40 | 0 | 0/0/2 | — | — |
+| eplan_symbol_search | read | symbol.search | 68 | 39 | 1 | 27 | 0 | 4/3/11 | A52 A53 A55 | — |
 | eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/3 | — | — |
 | eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 87 | 37 | 0 | 50 | 0 | 0/1/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
 | eplan_terminal_strip_get | read | terminal.strip.get | 41 | 24 | 0 | 17 | 0 | 2/1/3 | — | — |
@@ -329,7 +327,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 10/3/0 | — | — |
 | eplan_translation_export | write | translation.export.plan<br>translation.export.run | 40 | 14 | 0 | 23 | 1 | 1/2/2 | A30 | — |
 | eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 30 | 10 | 0 | 18 | 1 | 3/2/1 | A47 | 2026-10-27 pass（Large 测试 README） |
-| eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 298 | 167 | 7 | 92 | 0 | 3/4/7 | A14 A17 A32 A33 A36 A37 A39 | — |
+| eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 323 | 178 | 8 | 94 | 0 | 3/4/7 | A14 A17 A32 A33 A36 A37 A39 | — |
 
 ## 6. 按版本、模块、授权的可用性
 | 范围 | 状态 | 说明 | 来源 |
