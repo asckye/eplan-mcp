@@ -119,6 +119,9 @@ public static class OperationNames
     /// <summary>One terminal strip by name: its terminals in strip order, sliced in the Bridge, with their connections and bridges. Arguments: <see cref="TerminalStripGetArgs"/>; data: <see cref="TerminalStripGetData"/>.</summary>
     public const string TerminalStripGet = "terminal.strip.get";
 
+    /// <summary>The 3D mounting layout (docs/tools/eplan_layout_get.md): installation spaces, enclosures with their mounting panel and door, placed objects, and devices with a part but no 3D placement yet. Arguments: <see cref="LayoutGetArgs"/>; data: <see cref="LayoutGetData"/>.</summary>
+    public const string LayoutGet = "layout.get";
+
     /// <summary>One PLC box by tag: station, rack, slot, and its channels with addresses and connections, sliced in the Bridge. Arguments: <see cref="PlcGetArgs"/>; data: <see cref="PlcGetData"/>.</summary>
     public const string PlcGet = "plc.get";
 

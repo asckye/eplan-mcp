@@ -155,6 +155,7 @@ internal static class BridgeHost
             new CableGetOperation(catalog, devices, new EplanCableReader()),
             new TerminalStripListOperation(catalog, terminals),
             new TerminalStripGetOperation(catalog, terminals),
+            new LayoutGetOperation(catalog, new EplanLayoutReader()),
             new PlcGetOperation(catalog, devices, new EplanPlcReader()),
             new PartListOperation(catalog, new EplanPartReader()),
             new PartSearchOperation(new EplanPartsDatabase()),
