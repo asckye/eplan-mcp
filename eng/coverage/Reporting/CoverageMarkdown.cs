@@ -64,7 +64,7 @@ internal static class CoverageMarkdown
         Line();
         if (report.DeclinedByReason is { Count: > 0 } declinedReasons)
         {
-            Line("- 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除；仍计入分母。按原因：" + string.Join("，", declinedReasons.OrderByDescending(r => r.Value).Select(r => r.Key + " " + r.Value.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons。");
+            Line("- 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除，或整个类型按下列原因结案；仍计入分母。按原因：" + string.Join("，", declinedReasons.OrderByDescending(r => r.Value).Select(r => r.Key + " " + r.Value.ToString(System.Globalization.CultureInfo.InvariantCulture))) + "。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons 和 DeclinedTypes。");
         }
 
         Line("- refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。");

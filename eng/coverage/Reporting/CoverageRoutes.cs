@@ -19,6 +19,20 @@ internal static class CoverageRoutes
     internal static readonly string[] DeclinedReasons =
         ["catalog:internal", "catalog:deprecated", "catalog:banned_symbol", "catalog:not_applicable", "settings_write", "external_path_parameter", "shared_interactive_state"];
 
+    /// <summary>
+    /// Whole types closed on purpose (owner 2026-11-12), for groups no tool or api-try root reaches: property-ID tables and
+    /// conversions (eplan_property_schema and eplan_property_get/set work by ID and name), progress windows (shared UI
+    /// state), and the offline host application (Init, Exit, licence, dialogs) that an add-in inside EPLAN never drives.
+    /// </summary>
+    internal static readonly IReadOnlyDictionary<string, string> DeclinedTypes = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["T:Eplan.EplApi.DataModel.Properties"] = "property_id_tables",
+        ["T:Eplan.EplApi.DataModel.AnyPropertyId"] = "property_id_tables",
+        ["T:Eplan.EplApi.Base.Progress"] = "shared_interactive_state",
+        ["T:Eplan.EplApi.Base.IEplProgress"] = "shared_interactive_state",
+        ["T:Eplan.EplApi.System.EplApplication"] = "offline_host_application",
+    };
+
     /// <summary>Groups whose every api-try signature is excluded for a declined reason, with the most frequent reason.</summary>
     internal static Dictionary<string, string> Declined(string apiTryReport)
     {

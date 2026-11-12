@@ -110,6 +110,17 @@ public sealed class CoverageRoutesTests
     }
 
     [Fact]
+    public void DeclinedTypes_AreWholeTypesWithAReason()
+    {
+        Assert.All(CoverageRoutes.DeclinedTypes, entry =>
+        {
+            Assert.StartsWith("T:Eplan.EplApi.", entry.Key, StringComparison.Ordinal);
+            Assert.Matches("^[a-z_]+$", entry.Value);
+        });
+        Assert.Equal("property_id_tables", CoverageRoutes.DeclinedTypes["T:Eplan.EplApi.DataModel.Properties"]);
+    }
+
+    [Fact]
     public void Headline_ShowsEachRouteAndTheExistingLiveEvidence()
     {
         SortedDictionary<string, RouteCount> counts = CoverageRoutes.Count(

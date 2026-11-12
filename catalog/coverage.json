@@ -53714,7 +53714,7 @@
       "live_verified": 457
     },
     "declined": {
-      "count": 210,
+      "count": 428,
       "live_verified": 0
     },
     "dedicated": {
@@ -53726,7 +53726,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 1785,
+      "count": 1567,
       "live_verified": 0
     },
     "other": {
@@ -53741,8 +53741,10 @@
   "declinedByReason": {
     "catalog:banned_symbol": 32,
     "external_path_parameter": 68,
+    "offline_host_application": 22,
+    "property_id_tables": 169,
     "settings_write": 72,
-    "shared_interactive_state": 38
+    "shared_interactive_state": 65
   },
   "fullApi": {
     "total": {
@@ -53753,7 +53755,7 @@
           "live_verified": 461
         },
         "declined": {
-          "count": 275,
+          "count": 498,
           "live_verified": 0
         },
         "dedicated": {
@@ -53765,7 +53767,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 3135,
+          "count": 2912,
           "live_verified": 0
         },
         "other": {
@@ -53786,7 +53788,7 @@
           "live_verified": 77
         },
         "declined": {
-          "count": 275,
+          "count": 317,
           "live_verified": 0
         },
         "dedicated": {
@@ -53798,7 +53800,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1703,
+          "count": 1661,
           "live_verified": 0
         },
         "other": {
@@ -53819,7 +53821,7 @@
           "live_verified": 384
         },
         "declined": {
-          "count": 0,
+          "count": 181,
           "live_verified": 0
         },
         "dedicated": {
@@ -53831,7 +53833,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 1194,
+          "count": 1013,
           "live_verified": 0
         },
         "other": {

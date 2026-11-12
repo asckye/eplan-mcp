@@ -178,11 +178,13 @@ internal sealed class CoverageReport
             CallableCoverage.ActionWhitelist(), overlay.Api,
             File.Exists(Path.Combine(repositoryRoot, directory, "summary.json")) && overlay.Api.Any(r => r.Status == "refused" && r.Sides!.Contains("read", StringComparer.Ordinal))
                 ? ApiTryGenerator.PropertyGroups(repositoryRoot, writableOnly: true) : []) : null;
+        string? DeclinedReason(Unit unit) => declined.TryGetValue(unit.Key, out string? reason) ? reason
+            : unit.Type is { } type && CoverageRoutes.DeclinedTypes.TryGetValue(type, out string? byType) ? byType : null;
         string Route(Unit unit)
         {
             string route = CoverageRoutes.Classify(used.TryGetValue(unit.Key, out var use) ? [.. use.Tools] : [],
                 status[unit.Key], reachability?.CallableGroups.Contains(unit.Key) == true);
-            return route == "none" && declined.ContainsKey(unit.Key) ? "declined" : route;
+            return route == "none" && DeclinedReason(unit) is not null ? "declined" : route;
         }
         return new CoverageReport
         {
@@ -217,7 +219,7 @@ internal sealed class CoverageReport
             Verification = verification,
             Reachability = reachability,
             DeclinedByReason = includeReachability ? new SortedDictionary<string, int>(all.Where(u => u.Layer == ApiCatalog.Operation && Counted(u) && Route(u) == "declined")
-                .GroupBy(u => declined[u.Key], StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count()), StringComparer.Ordinal) : null,
+                .GroupBy(u => DeclinedReason(u)!, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count()), StringComparer.Ordinal) : null,
             Routes = includeReachability ? CoverageRoutes.Count(all.Where(u => u.Layer == ApiCatalog.Operation && Counted(u))
                 .Select(u => (Route(u), status[u.Key] == "live_verified"))) : null,
             FullApi = includeReachability ? FullApiCoverage.Build(catalog.Groups.SelectMany(group =>
