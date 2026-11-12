@@ -7864,6 +7864,11 @@
             "file": "tests/EplanMcp.Large.Tests/FullPropertyReadTests.cs"
           },
           {
+            "name": "Layout3DSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/Layout3DSpikeTests.cs"
+          },
+          {
             "name": "MacroOverviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
@@ -8058,6 +8063,11 @@
             "name": "ImportListTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ImportListTests.cs"
+          },
+          {
+            "name": "Layout3DSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/Layout3DSpikeTests.cs"
           },
           {
             "name": "NoSideEffectTests",
@@ -14262,6 +14272,11 @@
             "file": "tests/EplanMcp.Large.Tests/InterruptionVariantSpikeTests.cs"
           },
           {
+            "name": "Layout3DSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/Layout3DSpikeTests.cs"
+          },
+          {
             "name": "MacroGroupedPlacementTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/MacroGroupedPlacementTests.cs"
@@ -16225,6 +16240,11 @@
             "name": "PartToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
+          },
+          {
+            "name": "Layout3DSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/Layout3DSpikeTests.cs"
           },
           {
             "name": "NoSideEffectTests",
