@@ -82,11 +82,7 @@ internal sealed class EplanLayoutReader : ILayoutReader
 
     private static LayoutEnclosure Enclosure(Cabinet cabinet)
     {
-        Placement3D[] all = [.. Descendants(cabinet)];
-        Plane[] planes = [.. all.OfType<Plane>().Where(p => p.PlaneMode == Placement3D.Enums.PlaneModeType.Master)];
-        Plane? panel = planes.FirstOrDefault(p => p.Parent is MountingPanel);
-        // The door: of the surfaces not on the mounting panel or the body, the one furthest to the front (A136: 795x16x595 at the front).
-        Plane? door = planes.Where(p => p.Parent is Component).OrderBy(p => p.GetBoundingBox(false).Y).FirstOrDefault();
+        (Plane? panel, Plane? door) = Surfaces(cabinet);
         return new LayoutEnclosure
         {
             Id = cabinet.ObjectIdentifier,
@@ -95,6 +91,14 @@ internal sealed class EplanLayoutReader : ILayoutReader
             Panel = panel is null ? null : Surface(panel),
             Door = door is null ? null : Surface(door),
         };
+    }
+
+    /// <summary>The mounting panel's and the door's master surfaces of <paramref name="cabinet"/>, as layout tools place on them.</summary>
+    internal static (Plane? Panel, Plane? Door) Surfaces(Cabinet cabinet)
+    {
+        Plane[] planes = [.. Descendants(cabinet).OfType<Plane>().Where(p => p.PlaneMode == Placement3D.Enums.PlaneModeType.Master)];
+        // The door: of the surfaces not on the mounting panel or the body, the one furthest to the front (A136: 795x16x595 at the front).
+        return (planes.FirstOrDefault(p => p.Parent is MountingPanel), planes.Where(p => p.Parent is Component).OrderBy(p => p.GetBoundingBox(false).Y).FirstOrDefault());
     }
 
     private static LayoutSurface Surface(Plane plane)
