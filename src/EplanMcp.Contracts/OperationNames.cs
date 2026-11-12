@@ -122,6 +122,12 @@ public static class OperationNames
     /// <summary>The 3D mounting layout (docs/tools/eplan_layout_get.md): installation spaces, enclosures with their mounting panel and door, placed objects, and devices with a part but no 3D placement yet. Arguments: <see cref="LayoutGetArgs"/>; data: <see cref="LayoutGetData"/>.</summary>
     public const string LayoutGet = "layout.get";
 
+    /// <summary>Plans placing an enclosure by part in an installation space (docs/tools/eplan_enclosure_place.md). Arguments: <see cref="LayoutEnclosurePlaceArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string LayoutEnclosurePlacePlan = "layout.enclosure.place.plan";
+
+    /// <summary>Places the planned enclosure in one transaction and reads it back (A136: Cabinet.Create, then SetParent to the space). Arguments: <see cref="LayoutEnclosurePlaceArgs"/>; data: <see cref="LayoutEnclosurePlaceData"/>.</summary>
+    public const string LayoutEnclosurePlaceExecute = "layout.enclosure.place.execute";
+
     /// <summary>One PLC box by tag: station, rack, slot, and its channels with addresses and connections, sliced in the Bridge. Arguments: <see cref="PlcGetArgs"/>; data: <see cref="PlcGetData"/>.</summary>
     public const string PlcGet = "plc.get";
 
