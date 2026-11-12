@@ -486,6 +486,18 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `CableService.DoReassignWires(项目或电缆功能, 是否覆盖, 不改的属性)` 对应"全部重新分配"。示例项目的电缆已经分配过，再调用读回没有变化，也不产生撤销步骤，这时撤销会弹"'撤销'冲突"（A41），所以没有变化时工具不返回 `undo`。
 - **没有分配时的现象（71 页图纸）：** 电缆图表把芯线和连接分成两段，"空闲芯线"等于全部芯线数。
 
+### A136. Pro Panel 3D：柜体、导轨、线槽、器件和布置图（2026-11-11，EPLAN 2026.0.3.25421，**Electric P8**，scratch LargeWrite，Layout3DSpikeTests）
+- **Electric P8 里可以用 E3D API**（本机授权含 Pro Panel 模块），用的是 P8 当前配置的部件库，不需要切换到 Pro Panel 变体。
+- **安装空间：** `new InstallationSpace().Create(project, "A9")`，传入的字符串存进 36452 `INSTALLATIONSPACE_DESIGNATION`；不要带 `+`（带了会存成 `+A9`）。示例项目的空间 `Name` 为 `+A1`、36452 为 `A1`；新建的空间 `Name` 仍是 `+`，写 1200 位置属性抛 S063113，名称来源未查清。
+- **柜体：** `new Cabinet().Create(space, part, "1")` 之后 `Parent` 为空、`IsPlaced` 为假；再 `cabinet.SetParent(space, false)`，父对象变成 InstallationSpace、`IsPlaced` 为真，和示例项目的柜体一致。柜体宏自带：柜体本体（5 面各一对 Master/Opposite Plane）、**柜门**（Component，最靠前的那面 Plane）、**安装板** `MountingPanel`（Plane Master/Opposite，基准约束 `MP`）、铰链和门锁。坐标：X 宽、Y 深（前门 Y 小，后部 Y 大）、Z 高，单位 mm。
+- **实测柜体外形（宽×高×深）：** RIT.1034500 300×400×210、RIT.1380500 380×380×210、RIT.1055500 800×600×300（安装板 749×570）、RIT.1058500 600×800×250、RIT.8615000 600×1200×500、RIT.5830680 600×1800×400、RIT.5834600 800×2000×600。型号尺寸以这里的实测为准，不凭记忆。
+- **导轨、线槽：** `new MountingRail().Create(project, part, "1", 长度)`、`new Duct().Create(...)`；源约束点（`V1..V4`、`M1..M4`）中第一个 `CanSnapTo(plane.BaseMate)` 的用 `SnapTo(plane.BaseMate, 0, x, y)` 吸到安装板 Master 面上，父对象变成 Plane。导轨的 `BaseMate` 是 `LineMate R1`，线槽有 `LineMate L1/L3`。
+- **原理图设备进 3D（2026 没有 `Function3D.Place`）：** `Component.Create(project, rail, part, "1", -2, list)`（静态方法）建在导轨上，`M4` 约束吸到导轨 `LineMate`（`SnapTo(line, x)`），再把 `Function3D.Name` 设成设备标识，名称即生效。示例项目里已有的设备 3D 表示都已放置（3807 个，未放置 0 个），没有现成的“未放置”对象可吸。电缆（`EPL.2x6CABLE`）建不出 Component（S063177）。
+- **门上器件：** 施耐德 `SE.XB4BS844415`、`SE.XB4BW31B5` 用 `Component.Create(project, 门 Component, part, "1", -2, list)`，源约束 `G1` 吸到门的 Master Plane，按 x/y 定位。
+- **回滚：** 以上全部写在一个 `TransactionScope` 里回滚后，3D 对象数和安装空间列表与之前一致，包括中途调用了 action 的情况。
+- **布置图（模型视图）：** `InsertModelViewAction /PROJECTNAME:<elk> /PAGENAME:<页> /LAYOUTSPACE:A1 /VIEWNAME:<名> /X /Y /DX /DY /STYLE:1 /VIEWPOINT:5 /SCALESETTING:0 /VIEWTYPE:1` 从外部（eplremote）调用成功，页上生成 1186 个图形对象；`LAYOUTSPACE` 写 36452 的值（`A1`），写 `+A1` 失败。目标页类型 ModelView 和 PanelLayout 都可以。**在插件的 action 里用 `ActionManager` 调同样的参数一律返回 false**（5 种写法、两种页类型）。
+— 证据：`tests/EplanMcp.Large.ConnectionHelper/Layout3DSpikeAction.cs` 的读回 JSON，trx `Layout3DSpikeTests` 2026-11-12。
+
 ### A135. 删除和替换位置框（2026-11-11，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 喂丝机9-框测试、喂丝机9 第 13、15 页）
 - `LocationBox.Remove()`（`eplan_placement_delete`，按功能删除）删掉 `+M` 位置框后，框内设备的完整标识都不变（页上 21 个名称前后一致），页面上其余对象也没有变化，写后核对通过。随后在新范围放一个更宽的 `+M` 框，标识仍不变。
 - 位置框不改变框内设备已有的位置代号；换框只是改图形范围。`eplan_placement_edit` 的删除对位置框报“Property child inventory is incomplete”。

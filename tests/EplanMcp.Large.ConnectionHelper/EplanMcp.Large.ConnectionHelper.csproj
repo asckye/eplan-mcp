@@ -7,6 +7,7 @@
     <ProjectReference Include="..\..\src\EplanMcp.Bridge.Core\EplanMcp.Bridge.Core.csproj" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\TransactionScope.cs" Link="TransactionScope.cs" />
     <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
     <PackageReference Include="Newtonsoft.Json" ExcludeAssets="runtime" PrivateAssets="all" />
     <Compile Include="..\Shared\ConnectionCreateLayout.cs" Link="ConnectionCreateLayout.cs" />
     <Reference Include="Eplan.EplApi.AFu"><HintPath>$(EplanBinPath)\Eplan.EplApi.AFu.dll</HintPath><Private>false</Private></Reference>
