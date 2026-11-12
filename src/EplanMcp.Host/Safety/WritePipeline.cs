@@ -86,8 +86,8 @@ internal sealed partial class WritePipeline(
             throw NotStarted(ex.Error);
         }
 
-        if (request.Unverified && !ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots))
-        { throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = "API trials are allowed only in scratch projects." }); }
+        if (request.Unverified && UnverifiedDenial(plan) is { } denial)
+        { throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = denial }); }
         // Only a valid, non-empty plan is ever put to the engineer.
         if (request.DryRun || plan.Changes.Count == 0)
         {
@@ -244,8 +244,8 @@ internal sealed partial class WritePipeline(
         using BridgeProgress? waiting = BridgeProgress.Start(call, request.Activity, clock, cancellationToken);
         try
         {
-            if (request.Unverified && !ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots))
-            { throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = "API trials are allowed only in scratch projects." }); }
+            if (request.Unverified && UnverifiedDenial(plan) is { } trialDenial)
+            { throw NotStarted(new BridgeError { Reason = ErrorReason.PolicyDenied, Message = trialDenial }); }
             if (request.BeforeExecute is { } beforeExecute)
             {
                 try
@@ -312,6 +312,19 @@ internal sealed partial class WritePipeline(
             throw new BridgeCallException(BackupFolders.Failure());
         }
     }
+
+    /// <summary>
+    /// Why an unverified API trial may not run: outside a scratch project, or (ADR-0054) a master data write while
+    /// EPLAN's parts database is not a file copy under a scratch root.
+    /// </summary>
+    internal string? UnverifiedDenial(WritePlan plan) =>
+        !ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots) ? "API trials are allowed only in scratch projects."
+        : plan.MasterData is { } database && !(database.Path.Length > 0 && ScratchPaths.IsInside(database.Path, config.ScratchRoots)) ? MasterDataCopyDenied
+        : null;
+
+    /// <summary>POLICY_DENIED of an unverified master data write outside a scratch copy (ADR-0054).</summary>
+    internal const string MasterDataCopyDenied =
+        "Master data writes through eplan_api_try need EPLAN's parts database to be a file copy under a scratch root (ADR-0054). Ask the engineer to configure a scratch copy of the parts database in EPLAN's parts management, then plan again. Nothing was changed.";
 
     /// <summary>A new folder for the master-data backup (<see cref="BackupFolders.CreateMasterData"/>); BACKUP_FAILED when it cannot be made.</summary>
     private string NewMasterDataFolder()

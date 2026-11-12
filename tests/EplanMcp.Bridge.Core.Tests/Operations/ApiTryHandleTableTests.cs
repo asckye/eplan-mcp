@@ -111,4 +111,37 @@ public sealed class ApiTryHandleTableTests
         Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Resolve(table, handle)).Error.Reason);
         Assert.Throws<BridgeErrorException>(() => Resolve(table, handle));
     }
+
+    [Fact]
+    public void ReleaseRunsOnceWhenNoHandleReferencesTheNativeObjectAnyMore()
+    {
+        var released = new List<object>();
+        var table = new ApiTryHandleTable(() => _now, released.Add);
+        object database = new(), other = new();
+        ApiObjectHandle first = table.Add("host", database, Type, "O:a", () => Project);
+        table.Add("host", database, Type, "O:b", () => Project);
+        _now = _now.AddMinutes(5);
+        table.Add("host", other, Type, "O:c", () => Project);
+        Resolve(table, first);
+        _now = _now.AddMinutes(6);
+        table.Sweep(_ => true);
+        Assert.Empty(released);
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Resolve(table, first, session: "other")).Error.Reason);
+        table.Clear();
+        Assert.Equal(2, released.Count);
+        Assert.Same(database, Assert.Single(released, r => ReferenceEquals(r, database)));
+    }
+
+    [Fact]
+    public void ReleaseRunsWhenTheOwnerReportsTheObjectClosed()
+    {
+        var released = new List<object>();
+        var table = new ApiTryHandleTable(() => _now, released.Add);
+        object database = new();
+        bool open = true;
+        ApiObjectHandle handle = table.Add("host", database, Type, "O:open", () => open ? Project : null);
+        open = false;
+        Assert.Equal(ErrorReason.PlanStale, Assert.Throws<BridgeErrorException>(() => Resolve(table, handle)).Error.Reason);
+        Assert.Same(database, Assert.Single(released));
+    }
 }

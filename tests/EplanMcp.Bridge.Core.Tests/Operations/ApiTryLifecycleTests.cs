@@ -144,6 +144,7 @@ public sealed class ApiTryLifecycleTests
             OnRefresh?.Invoke();
             return new() { Project = locator.Project, Page = locator.Page, Type = locator.Type, Oid = locator.Oid, Digest = new string('b', 64) };
         }
+        public ConfiguredDatabase PartsDatabase() => new();
         public object? Invoke(ApiTryArgs args)
         {
             Invocations++;

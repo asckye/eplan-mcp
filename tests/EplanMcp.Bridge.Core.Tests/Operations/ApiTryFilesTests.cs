@@ -146,6 +146,7 @@ public sealed class ApiTryFilesTests : IDisposable
         public void CheckTarget(ApiTryArgs args) { }
         public Dictionary<string, string> Inspect(ApiTryArgs args) => new() { ["snapshot:1"] = "unchanged" };
         public string? Read(ApiTryArgs args) => null;
+        public ConfiguredDatabase PartsDatabase() => new();
         public object? Invoke(ApiTryArgs args)
         {
             Invocations++;

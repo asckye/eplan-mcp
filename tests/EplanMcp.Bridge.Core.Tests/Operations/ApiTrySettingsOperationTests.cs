@@ -131,6 +131,7 @@ public sealed class ApiTrySettingsOperationTests
         public bool ChangeOnInvoke { get; set; }
         public void CheckTarget(ApiTryArgs args) => Checks++;
         public string? Read(ApiTryArgs args) => throw new InvalidOperationException();
+        public ConfiguredDatabase PartsDatabase() => new();
         public object? Invoke(ApiTryArgs args)
         {
             Calls++;

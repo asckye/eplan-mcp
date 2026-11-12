@@ -41,8 +41,10 @@ public sealed partial class ApiTryPlanOperation(int major, IProjectCatalog catal
         if (!ApiTrySettingsValidation.Valid(args.Group, n => parameters[n]?.ToString()))
         { throw InvalidArgument("Use enumerated settings paths, nonnegative indexes, offset <= 1000000 and limit 1..200."); }
         dispatch.CheckTarget(args);
+        if (write && ApiTryMasterData.Changes(shape[0]))
+        { plan.MasterData = ApiTryMasterData.Target(dispatch.PartsDatabase()); }
         Dictionary<string, string> before = ApiTryFiles.Observe(args, dispatch.Inspect(args), planning: true);
-        plan.Fingerprint = Fingerprint.Of([args.Group, args.Project, args.Parameters, .. before.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => JsonConvert.SerializeObject(p))]);
+        plan.Fingerprint = Fingerprint.Of([args.Group, args.Project, args.Parameters, .. before.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => JsonConvert.SerializeObject(p)), .. plan.MasterData is { } database ? ["masterdata\t" + database.Database] : Array.Empty<string>()]);
         plan.Details["before"] = JsonConvert.SerializeObject(before);
         plan.Details["rawParameters"] = args.Parameters;
         plan.Details["handles"] = args.HandleSources;

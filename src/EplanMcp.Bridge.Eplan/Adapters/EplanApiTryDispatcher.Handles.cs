@@ -8,7 +8,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanApiTryDispatcher : IDisposable
 {
-    private readonly ApiTryHandleTable _handles = new(() => DateTime.UtcNow);
+    private readonly ApiTryHandleTable _handles = new(() => DateTime.UtcNow, ReleaseNative);
     private readonly global::Eplan.EplApi.ApplicationFramework.EventHandler _handleClose = new("Eplan.EplApi.OnPreCloseProject");
     private readonly global::Eplan.EplApi.ApplicationFramework.EventHandler _handleUserClose = new("Eplan.EplApi.OnUserPreCloseProject");
     private IEnumerable<global::Eplan.EplApi.ApplicationFramework.EventHandler> HandleEvents => [_handleClose, _handleUserClose];
@@ -72,9 +72,14 @@ internal sealed partial class EplanApiTryDispatcher : IDisposable
         if (!ApiTryHandleDispatch.Compatible(borrowed, nativeType))
         { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "The returned object does not match its compiled type."); }
         Func<string?> check = ReferenceEquals(ApiTryHandleDispatch.Owner(result), result) && result is not StorableObject ? target.Owner : () => NativeOwner(result);
+        if (result is global::Eplan.EplApi.MasterData.MDPartsDatabase database)
+        { check = MasterDataOwner(database, check); }
         string? project = check();
         if (project is null || !ProjectResolver.SamePath(args.Project, project) || !Scratch(args, project))
-        { throw new BridgeErrorException(ErrorReason.PolicyDenied, "The returned object must belong to the approved scratch project."); }
+        {
+            ReleaseNative(result);
+            throw new BridgeErrorException(ErrorReason.PolicyDenied, "The returned object must belong to the approved scratch project.");
+        }
         return _handles.Add(args.HostSession, borrowed, nativeType, args.Group, check, target.ReadOnly || ChainReadOnly(nativeType));
     }
 }

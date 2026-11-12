@@ -17,7 +17,7 @@ internal static class CoverageRoutes
     /// Technical obstacles (constructors, static members, master data copies) stay "none".
     /// </summary>
     internal static readonly string[] DeclinedReasons =
-        ["catalog:internal", "catalog:deprecated", "catalog:banned_symbol", "catalog:not_applicable", "settings_write", "external_path_parameter", "shared_interactive_state"];
+        ["catalog:internal", "catalog:deprecated", "catalog:banned_symbol", "catalog:not_applicable", "settings_write", "external_path_parameter", "shared_interactive_state", "masterdata_management"];
 
     /// <summary>
     /// Whole types closed on purpose (owner 2026-11-12), for groups no tool or api-try root reaches: property-ID tables and

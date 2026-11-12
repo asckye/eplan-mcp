@@ -11,4 +11,6 @@ public interface IApiTryDispatcher
     public string? Read(ApiTryArgs args);
     /// <summary>Invokes one generated member, returning text, a detached locator, session handle, shaped JSON or null.</summary>
     public object? Invoke(ApiTryArgs args);
+    /// <summary>The parts database EPLAN is configured with; nothing is opened (ADR-0054).</summary>
+    public ConfiguredDatabase PartsDatabase();
 }

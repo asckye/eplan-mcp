@@ -126,6 +126,7 @@ internal static partial class ApiTryGenerator
         // Named parameterized CLR properties are emitted as get_Name; C# indexers use brackets.
         string call = e.Row.Kind == "method" ? receiver + "(" + args + ")" : d.Parameters is { Length: > 0 }
             ? e.Name == "Item" || e.Type == "T:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable" && e.Name == "Layer" || e.Type == "T:Eplan.EplApi.DataModel.UniversalPropertyList" && e.Name == "Property"
+                || e.Name == "Property" && e.Type.StartsWith("T:Eplan.EplApi.MasterData.", StringComparison.Ordinal) && e.Type.EndsWith("PropertyList", StringComparison.Ordinal)
                 ? receiver[..^(e.Name.Length + 1)] + "[" + args + "]" : receiver[..^e.Name.Length] + "get_" + e.Name + "(" + args + ")" : receiver;
         return call;
     }

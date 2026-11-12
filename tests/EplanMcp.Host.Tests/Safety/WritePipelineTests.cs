@@ -188,6 +188,28 @@ public sealed class WritePipelineTests : IDisposable
         Assert.Equal((ErrorReason.ProjectNotOpen, ExecutionState.NotStarted), (error.Reason, error.Execution));
     }
 
+    [Fact]
+    public void UnverifiedMasterDataWrite_NeedsAFileCopyUnderAScratchRoot()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "eplanmcp-scratch-" + Guid.NewGuid().ToString("N"));
+        HostConfig config = HostConfig.Defaults(_locations) with { ScratchRoots = [root] };
+        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
+        var pipeline = new WritePipeline(_bridge, config, SuspensionStore.For(_locations), audit,
+            new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
+            new ApprovalService([], config, TimeProvider.System, NullLogger<ApprovalService>.Instance), new BackupFolders(_locations, TimeProvider.System), TimeProvider.System, NullLogger<WritePipeline>.Instance);
+        WritePlan Plan(string? database)
+        {
+            WritePlan plan = PlanFor(Path.Combine(root, "Copy.elk"));
+            plan.MasterData = database is null ? null : new() { Kind = MasterDataKinds.Parts, Database = database, Path = database };
+            return plan;
+        }
+
+        Assert.Null(pipeline.UnverifiedDenial(Plan(null)));
+        Assert.Null(pipeline.UnverifiedDenial(Plan(Path.Combine(root, "parts", "Copy.mdb"))));
+        Assert.Equal(WritePipeline.MasterDataCopyDenied, pipeline.UnverifiedDenial(Plan(Path.Combine(Path.GetTempPath(), "Parts.mdb"))));
+        Assert.Equal(WritePipeline.MasterDataCopyDenied, pipeline.UnverifiedDenial(Plan("")));
+        Assert.Equal("API trials are allowed only in scratch projects.", pipeline.UnverifiedDenial(PlanFor(Path.Combine(Path.GetTempPath(), "Real.elk"))));
+    }
     private static WritePlan PlanFor(string projectPath) => new()
     {
         Project = "Line1",

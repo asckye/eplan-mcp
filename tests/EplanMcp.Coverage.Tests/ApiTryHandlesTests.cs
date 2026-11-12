@@ -70,9 +70,13 @@ public sealed class ApiTryHandlesTests
         Assert.Equal([], ApiTryGenerator.CallShape(output, output.Details[0]).Skip(2));
     }
     [Theory]
+    [InlineData("Eplan.EplApi.HEServices.Masterdata")]
+    [InlineData("Eplan.EplApi.HEServices.PartsService")]
+    public void ProjectMasterDataServicesRemainPending(string type) => Assert.Equal("masterdata_copy_pending", ApiTryGenerator.HandleRestriction(type));
+    [Theory]
     [InlineData("Eplan.EplApi.MasterData.MDPart")]
     [InlineData("Eplan.EplApi.DataModel.MasterData.Symbol")]
-    public void PartsDatabaseHandlesRemainPending(string type) => Assert.Equal("masterdata_copy_pending", ApiTryGenerator.HandleRestriction(type));
+    public void PartsDatabaseHandlesAreReachableUnderAdr0054(string type) => Assert.Null(ApiTryGenerator.HandleRestriction(type));
     [Fact]
     public void GeneratedShapesIncludeObjectReturnHandleTargetsAndHandleParameters()
     {
@@ -84,7 +88,10 @@ public sealed class ApiTryHandlesTests
         Assert.False(ApiTryCatalog.ValidValue([Prefix + "Pin"], "locator", ""));
         Assert.NotNull(ApiTryCatalog.Shape("O:" + Prefix + "Project.DeviceTagSettings.AllowedLetters"));
         Assert.Null(ApiTryCatalog.ValueShape("O:" + Prefix + "Project.DeviceTagSettings.AllowedLetters"));
-        Assert.False(ApiTryCatalog.HandleType("Eplan.EplApi.MasterData.MDPart"));
+        Assert.True(ApiTryCatalog.HandleType("Eplan.EplApi.MasterData.MDPart"));
+        Assert.True(ApiTryCatalog.Service("O:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase"));
+        Assert.Null(ApiTryCatalog.Shape("O:Eplan.EplApi.MasterData.MDPartsManagement.CreateDatabase"));
+        Assert.False(ApiTryCatalog.Service("O:Eplan.EplApi.MasterData.MDPartsManagement.CreateDatabase"));
     }
     [Fact]
     public void ReturnedHelperDoesNotRequireAServiceConstructor()

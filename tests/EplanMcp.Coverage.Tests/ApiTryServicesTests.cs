@@ -106,4 +106,33 @@ public sealed class ApiTryServicesTests
         Assert.Equal("Eplan.EplApi.DataModel.Placement", ApiTryCatalog.ParameterShape(shape[1], "oPlacementToMove")![0]);
         Assert.Null(ApiTryCatalog.MethodAccess("O:Eplan.EplApi.HEServices.Masterdata.Update"));
     }
+
+    [Theory]
+    [InlineData("OpenDatabase", true)]
+    [InlineData("PartsDatabaseState", true)]
+    [InlineData("CreateDatabase", false)]
+    [InlineData("RemoveDatabase", false)]
+    [InlineData("UnlockClosedDBFiles", false)]
+    [InlineData("RefreshPartsManagementDialog", false)]
+    public void PartsManagementOpensOnlyTheConfiguredDatabase(string name, bool allowed)
+    {
+        ApiEntry entry = new(new("M:" + ApiTryServices.PartsManagement + "." + name, "O:" + ApiTryServices.PartsManagement + "." + name, "method", name, "registered", null, [], false),
+            "Eplan.EplApi.MasterData", "T:" + ApiTryServices.PartsManagement, name, null, [], [new("overload", "M:" + ApiTryServices.PartsManagement + "." + name, name, Parameters: [], ReturnType: "System.Void")]);
+        Assert.Equal(allowed ? null : "masterdata_management", ApiTryServices.Exclusion(entry, entry.Details[0]));
+    }
+
+    [Fact]
+    public void PartsDatabaseMembersAreNotExcludedAsMasterDataButKeepPathRules()
+    {
+        ApiEntry Member(string type, string name, ApiParameter[] parameters) => new(new("M:" + type + "." + name, "O:" + type + "." + name, "method", name, "registered", null, [], false),
+            "Eplan.EplApi.MasterData", "T:" + type, name, null, [], [new("overload", "M:" + type + "." + name, name, Parameters: parameters, ReturnType: "System.Void")]);
+        ApiEntry part = Member("Eplan.EplApi.MasterData.MDPartsDatabase", "GetPart", [new("strPartNr", "System.String")]);
+        ApiEntry handle = Member("Eplan.EplApi.MasterData.MDPartsDatabase", "Translate", [new("part", "Eplan.EplApi.MasterData.MDPart")]);
+        ApiEntry path = Member("Eplan.EplApi.MasterData.MDPartsDatabase", "ExportPart", [new("strFilePath", "System.String")]);
+        ApiEntry service = Member("Eplan.EplApi.HEServices.PartsService", "Info", []);
+        Assert.Null(ApiTryServices.Exclusion(part, part.Details[0]));
+        Assert.Null(ApiTryServices.Exclusion(handle, handle.Details[0]));
+        Assert.Equal("external_path_parameter", ApiTryServices.Exclusion(path, path.Details[0]));
+        Assert.Equal("masterdata_or_parts_management", ApiTryServices.Exclusion(service, service.Details[0]));
+    }
 }

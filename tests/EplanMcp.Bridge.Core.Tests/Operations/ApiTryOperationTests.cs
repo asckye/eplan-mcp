@@ -482,6 +482,8 @@ public sealed partial class ApiTryOperationTests
             return new() { ["snapshot:1"] = _changed ? "after" : "before", ["file:Page.eod"] = _changed ? "new-file" : "old-file" };
         }
         public string Read(ApiTryArgs args) { OnRead?.Invoke(); return Value; }
+        public ConfiguredDatabase Configured { get; set; } = new();
+        public ConfiguredDatabase PartsDatabase() => Configured;
         public object? Invoke(ApiTryArgs args)
         {
             Invocations++;

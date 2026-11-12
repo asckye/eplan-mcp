@@ -27,11 +27,14 @@ internal static partial class ApiTryGenerator
     private static Dictionary<string, string[]> Enums(string root) => (File.Exists(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")) ? File.ReadLines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")) : [])
         .Select(l => JsonSerializer.Deserialize<JsonElement>(l)).Where(t => t.GetProperty("kind").GetString() == "enum" && t.TryGetProperty("values", out _) && !t.TryGetProperty("excluded", out _))
         .ToDictionary(t => t.GetProperty("id").GetString()![2..], t => t.GetProperty("values").EnumerateObject().Select(p => p.Name).ToArray(), StringComparer.Ordinal);
-    internal static bool Writable(ApiDetail member) => member.Id != "P:Eplan.EplApi.DataModel.ViewPart.UseLocalPropertyPlacements" && member.SetterAccess is null && member.Access is null && member.Accessors?.Split(';').Contains("set", StringComparer.Ordinal) == true;
+    internal static bool Writable(ApiDetail member) => member.Id is not ("P:Eplan.EplApi.DataModel.ViewPart.UseLocalPropertyPlacements" or "P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionCategory") && member.SetterAccess is null && member.Access is null && member.Accessors?.Split(';').Contains("set", StringComparer.Ordinal) == true;
     private static bool ObjectType(string? type, IReadOnlyDictionary<string, string[]>? kinds = null) => kinds is null ? ApiTryCatalog.Kinds(type).Length > 0 : kinds.ContainsKey((type ?? "").Replace("Eplan.EplApi.DataModel.", "", StringComparison.Ordinal));
     private static bool Scalar(string? type, IReadOnlyDictionary<string, string[]>? enums) => type is "System.String" or "System.Boolean" or "System.Double" or "System.Int32" or "System.Int64" || type is not null && enums?.ContainsKey(type) == true;
-    internal static bool ReadMethod(ApiEntry entry) => _readPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal))
+    internal static bool ReadMethod(ApiEntry entry) => MasterDataSession(entry) || _readPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal))
         && !entry.Details.Where(d => d.Kind == "overload").SelectMany(d => d.Parameters!).Any(ApiTryServices.SideEffectParameter) && !FileOutput(entry);
+    // ADR-0054: opening the configured parts database and closing it change no data.
+    private static bool MasterDataSession(ApiEntry entry) => entry.Type == "T:" + ApiTryServices.PartsManagement
+        || entry.Type == "T:Eplan.EplApi.MasterData.MDPartsDatabase" && entry.Name == "Close";
     private static string ParameterName(ApiParameter p) => p.Name == "target" ? "argument_target" : p.Name;
     internal static string[] CallShape(ApiEntry entry, ApiDetail member) => [entry.Type[2..], member.Signature!, .. Inputs(member).Select(ParameterName)];
     internal static string Names(ApiDetail member) => string.Join("|", Inputs(member).Select(ParameterName).Order(StringComparer.Ordinal));

@@ -11,9 +11,18 @@ internal static class ApiTryServices
     private static readonly string[] _namespaces = ["Eplan.EplApi.HEServices", "Eplan.EplApi.EServices", "Eplan.EplApi.EServices.Ged", "Eplan.EplApi.DataModel.Planning", "Eplan.EplApi.DataModel.Topology"];
     private static string Text(JsonElement value, string name) => value.TryGetProperty(name, out JsonElement field) ? field.GetString() ?? "" : "";
     private static IEnumerable<JsonElement> Lines(string path) => File.Exists(path) ? File.ReadLines(path).Select(l => JsonSerializer.Deserialize<JsonElement>(l)) : [];
-    internal static Dictionary<string, Service> Load(string root) => Build(
-        [.. Lines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl"))],
-        [.. _namespaces.SelectMany(ns => Lines(Path.Combine(root, "catalog/eplan-2026.0.3/members/" + ns + ".jsonl")))]);
+    /// <summary>ADR-0054: the one parts master data root; a fresh instance per call opens only the database EPLAN is configured with.</summary>
+    internal const string PartsManagement = "Eplan.EplApi.MasterData.MDPartsManagement";
+    private static readonly string[] _partsManagementReads = ["OpenDatabase", "PartsDatabaseState"];
+    internal static bool MasterDataHandle(string type) => type.StartsWith("Eplan.EplApi.MasterData.", StringComparison.Ordinal);
+    internal static Dictionary<string, Service> Load(string root)
+    {
+        Dictionary<string, Service> services = Build(
+            [.. Lines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl"))],
+            [.. _namespaces.SelectMany(ns => Lines(Path.Combine(root, "catalog/eplan-2026.0.3/members/" + ns + ".jsonl")))]);
+        services[PartsManagement] = new(false, null);
+        return services;
+    }
     internal static Dictionary<string, Service> Build(JsonElement[] types, JsonElement[] members)
     {
         var byType = types.ToDictionary(t => Text(t, "id")[2..], StringComparer.Ordinal);
@@ -35,7 +44,11 @@ internal static class ApiTryServices
         string type = entry.Type[2..], operation = type + "." + entry.Name;
         if (Match(operation, "licen[cs]|\\.(Exit|Quit|Shutdown)(Application)?$"))
         { return "licensing_or_application_exit"; }
-        if (Match(type, "\\.(Masterdata|PartsService)(\\.|$)") || Match(entry.Name, "MasterData|PartsDatabase|PartToSystem"))
+        // ADR-0054: never create, select, delete, unlock or import databases, or drive the parts management dialog.
+        if (type == PartsManagement && !(_partsManagementReads.Contains(entry.Name, StringComparer.Ordinal) && member.Parameters!.Length == 0))
+        { return "masterdata_management"; }
+        bool masterData = MasterDataHandle(type);
+        if (!masterData && (Match(type, "\\.(Masterdata|PartsService)(\\.|$)") || Match(entry.Name, "MasterData|PartsDatabase|PartToSystem")))
         { return "masterdata_or_parts_management"; }
         if (Match(type, "\\.(Settings|.*SchemeSetting)(\\.|$)") || Match(entry.Name, "Settings|Scheme|Schema"))
         { return "settings_or_scheme_parameter"; }
@@ -43,7 +56,8 @@ internal static class ApiTryServices
         { return "owns_transaction"; }
         foreach (ApiParameter p in member.Parameters!)
         {
-            string descriptor = p.Name + " " + p.Type;
+            // Master data handle parameters are session handles of the same configured database, not database selectors.
+            string descriptor = p.Name + " " + (masterData && MasterDataHandle(p.Type) ? "" : p.Type);
             if (Match(descriptor, "stream"))
             { return "stream_parameter"; }
             if (Match(descriptor, "database|\\bstrServer\\b|\\.Sql"))

@@ -14,7 +14,8 @@ internal static partial class ApiTryGenerator
     };
     internal sealed record HandleModel(Dictionary<string, JsonElement> Types, HashSet<string> Reachable, (ApiEntry Entry, ApiDetail Member)[] Members);
     private static bool MatchHandle(string text, string pattern) => Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    internal static string? HandleRestriction(string type) => MatchHandle(type, "\\.(MasterData|PartsManagement|PartsService)(\\.|$)") ? "masterdata_copy_pending"
+    // ADR-0054: parts master data handles start at the configured database; the HEServices master data services sync projects and stay pending.
+    internal static string? HandleRestriction(string type) => MatchHandle(type, "^Eplan\\.EplApi\\.HEServices\\.(Masterdata|PartsService)(\\.|$)") ? "masterdata_copy_pending"
         : MatchHandle(type, "\\.(ApplicationFramework|Gui|System|.*Macro|.*File|.*Stream|.*Transaction|.*Lock|.*SafetyPoint)(\\.|$)") ? "handle_type_excluded" : null;
     internal static HandleModel BuildDirectHandles(ApiIndexData data, JsonElement[] metadata, Dictionary<string, string[]> kinds, Dictionary<string, string[]> enums, Dictionary<string, ApiTryServices.Service> services)
     {
