@@ -31,7 +31,7 @@
 `modelview.create.plan` / `.execute`（`ModelViewCreate*Operation`）→ `EplanModelViewWriter.Insert`：
 1. 按页全名找页，记下页上对象数；
 2. 组 `ActionCallingContext`：`PROJECTNAME`、`PAGENAME`、`LAYOUTSPACE`（36452 的值，不带 `+`）、`VIEWNAME`、`X/Y/DX/DY`、`VIEWPOINT`、`STYLE`、`SCALESETTING`、`VIEWTYPE=1`（机柜视图）；`panel`/`door` 再加 `ROOTELEMENTS` = 该面对象的 `FUNCTION3D_ID_RELATIVE`（36035）；
-3. `new CommandLineInterpreter().Execute("InsertModelViewAction", ctx)`。`ActionManager` 的 `Execute` 对这个 action 返回 false（A136 实测），所以只有这里用 `CommandLineInterpreter`（BannedSymbols 中注明）；
+3. 先 `ActionManager.FindAction("InsertModelViewAction").Execute(ctx)`：它返回 false，但之后 `new CommandLineInterpreter().Execute("InsertModelViewAction", ctx)` 才能成功；EPLAN 刚启动时直接调 `CommandLineInterpreter` 也返回 false（A136 实测）。只有这里用 `CommandLineInterpreter`（BannedSymbols 中注明）；
 4. 读 `OBJECTID`，再数页上对象。
 
 一个事务，一个撤销步骤。返回 false、没有 `OBJECTID` 或页上没有新增对象时整个事务回滚。执行前按指纹核对布置和参数没有变化。

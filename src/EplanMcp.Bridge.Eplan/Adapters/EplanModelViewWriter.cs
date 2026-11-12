@@ -41,8 +41,11 @@ internal sealed class EplanModelViewWriter : IModelViewWriter
         }
 
 #pragma warning disable RS0030 // InsertModelViewAction only, with checked parameters, inside the operation's TransactionScope (tool spec 4).
-        // ActionManager.FindAction(...).Execute returns false for this action; the command line interpreter runs it (A136, live 2026-11-12).
-        if (!new CommandLineInterpreter().Execute("InsertModelViewAction", context))
+        // ActionManager's Execute returns false for this action and the command line interpreter runs it, but only after
+        // ActionManager has executed it once in this EPLAN session (A136, live 2026-11-12); so both, in this order.
+        global::Eplan.EplApi.ApplicationFramework.Action action = new ActionManager().FindAction("InsertModelViewAction")
+            ?? throw new InvalidOperationException("EPLAN has no 'InsertModelViewAction' action.");
+        if (!action.Execute(context) && !new CommandLineInterpreter().Execute("InsertModelViewAction", context))
 #pragma warning restore RS0030
         {
             throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN refused to insert the model view; nothing was kept. Check the installation space and the page.",
