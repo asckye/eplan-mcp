@@ -150,6 +150,7 @@ internal static class McpServerSetup
             .WithTools<TerminalTools>(HostJson.Options)
             .WithTools<LayoutTools>(HostJson.Options)
             .WithTools<LayoutWriteTools>(HostJson.Options)
+            .WithTools<ModelViewTools>(HostJson.Options)
             .WithTools<TerminalDestructiveTools>(HostJson.Options)
             .WithTools<PlcTools>(HostJson.Options)
             .WithTools<PartTools>(HostJson.Options)

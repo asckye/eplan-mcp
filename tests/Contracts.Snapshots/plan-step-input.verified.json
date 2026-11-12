@@ -38,7 +38,8 @@
                             "Circuit",
                             "CircuitSingleLine",
                             "Overview",
-                            "Graphics"
+                            "Graphics",
+                            "ModelView"
                           ]
                         },
                         "description": {

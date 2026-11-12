@@ -25,7 +25,7 @@ internal sealed class PageWriteTools
     public const int MaxPages = 50;
 
     /// <summary>The page types the tool offers, the default first; the Bridge checks them again.</summary>
-    private static readonly string[] _pageTypes = ["Circuit", "CircuitSingleLine", "Overview", "Graphics"];
+    private static readonly string[] _pageTypes = ["Circuit", "CircuitSingleLine", "Overview", "Graphics", "ModelView"];
 
     [McpServerTool(
         Name = CreateTool,
@@ -279,7 +279,7 @@ internal sealed class PageWriteTools
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
-        [AllowedValues("Circuit", "CircuitSingleLine", "Overview", "Graphics")]
+        [AllowedValues("Circuit", "CircuitSingleLine", "Overview", "Graphics", "ModelView")]
         [JsonPropertyName("page_type")]
         public string? PageType { get; set; }
 

@@ -11837,6 +11837,26 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_modelview_create",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/ModelViewTools.cs",
+      "operations": [
+        "modelview.create.execute",
+        "modelview.create.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_modelview_create.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_object_find",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/ObjectReadTools.cs",

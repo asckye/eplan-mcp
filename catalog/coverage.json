@@ -1875,6 +1875,24 @@
       ]
     },
     {
+      "name": "eplan_modelview_create",
+      "safety": "write",
+      "operations": [
+        "modelview.create.execute",
+        "modelview.create.plan"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_modelview_create.md",
+      "small": 0,
+      "medium": 0,
+      "large": 0,
+      "apiNotes": []
+    },
+    {
       "name": "eplan_object_find",
       "safety": "read",
       "operations": [

@@ -17,7 +17,7 @@
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `pages` | array，1–50 项 | 是 | — | 要新建的页，按给出的顺序创建 |
 | `pages[].name` | string | 是 | — | 完整页名，如 `=GAA+A1&EFS1/5`。结构部分参照 `eplan_page_list` 中的已有页 |
-| `pages[].page_type` | enum `Circuit` / `CircuitSingleLine` / `Overview` / `Graphics` | 否 | `Circuit` | 页类型 |
+| `pages[].page_type` | enum `Circuit` / `CircuitSingleLine` / `Overview` / `Graphics` / `ModelView` | 否 | `Circuit` | 页类型；`ModelView` 是放 `eplan_modelview_create` 布置图的页 |
 | `pages[].description` | string 或语言到文本的 object，每语言最长 500 字符 | 否 | — | 页描述 |
 | `pages[].grid_size_mm` | number > 0 | 否 | 不修改默认网格 | 页面网格（mm），有限正数；通过 `Page.GridSize` 写入并读回 |
 | `language` | string | 否 | EPLAN 界面语言 | 页描述的语言，如 `zh_CN`、`en_US` |

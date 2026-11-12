@@ -13,6 +13,8 @@
 
 ### 新增
 
+- 新增 `eplan_modelview_create`（full，写入）：在 ModelView 页上插入安装空间的安装板、门或整柜的 2D 模型视图（布置图），可选视角、样式和比例；插件内经 `CommandLineInterpreter` 执行 `InsertModelViewAction`（`ActionManager` 对它返回 false，A136）；一个事务，一个撤销步骤。
+- `eplan_page_create` 新增页类型 `ModelView`，用来放布置图。
 - 新增 `eplan_layout_place`（full，写入）：在柜体的安装板、门或导轨上按顺序放导轨、线槽和原理图设备（按 tag），位置用毫米；吸附后按实测包围盒校正到给定位置，读回后报告重叠；一个事务，一个撤销步骤（A136）。
 - 新增 `eplan_enclosure_place`（full，写入）：在 3D 布置的安装空间里按部件放柜体（没有该空间就新建），挂到空间下使其成为已放置对象，读回柜体、安装板和门；一个事务，一个撤销步骤，读回无安装板时回滚（A136）。
 - 新增 `eplan_layout_get`（full，只读）：读取 3D 安装布置：安装空间、柜体及其安装板和门的可用尺寸、已放置的导轨、线槽和设备（mm 包围盒），以及原理图里有部件但还没有 3D 表示的设备。M4b 第一批的第一个工具，实机验证随放柜体的工具一起做。

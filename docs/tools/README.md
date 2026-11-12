@@ -53,6 +53,7 @@
 | `eplan_enclosure_place` | full | 写入 | [eplan_enclosure_place.md](eplan_enclosure_place.md) |
 | `eplan_layout_get` | full | 只读 | [eplan_layout_get.md](eplan_layout_get.md) |
 | `eplan_layout_place` | full | 写入 | [eplan_layout_place.md](eplan_layout_place.md) |
+| `eplan_modelview_create` | full | 写入 | [eplan_modelview_create.md](eplan_modelview_create.md) |
 | `eplan_project_update` | full | 写入 | [eplan_project_update.md](eplan_project_update.md) |
 | `eplan_project_open` | full | 写入 | [eplan_project_open.md](eplan_project_open.md) |
 | `eplan_project_close` | full | 写入 | [eplan_project_close.md](eplan_project_close.md) |
