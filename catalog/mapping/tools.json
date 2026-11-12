@@ -11060,6 +11060,26 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_layout_place",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/LayoutWriteTools.cs",
+      "operations": [
+        "layout.place.execute",
+        "layout.place.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_layout_place.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_macro_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/MacroTools.cs",
