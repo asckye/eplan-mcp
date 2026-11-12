@@ -31,6 +31,10 @@ internal static class CoverageRoutes
         ["T:Eplan.EplApi.Base.Progress"] = "shared_interactive_state",
         ["T:Eplan.EplApi.Base.IEplProgress"] = "shared_interactive_state",
         ["T:Eplan.EplApi.System.EplApplication"] = "offline_host_application",
+        // What these types add over the ISettings read slice (ADR-0036) is writing and restructuring settings and schemes.
+        ["T:Eplan.EplApi.Base.Settings"] = "settings_write",
+        ["T:Eplan.EplApi.Base.SettingNode"] = "settings_write",
+        ["T:Eplan.EplApi.Base.SchemeSetting"] = "settings_write",
     };
 
     /// <summary>Groups whose every api-try signature is excluded for a declined reason, with the most frequent reason.</summary>

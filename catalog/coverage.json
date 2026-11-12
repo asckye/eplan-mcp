@@ -53714,7 +53714,7 @@
       "live_verified": 457
     },
     "declined": {
-      "count": 428,
+      "count": 434,
       "live_verified": 0
     },
     "dedicated": {
@@ -53726,7 +53726,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 1567,
+      "count": 1561,
       "live_verified": 0
     },
     "other": {
@@ -53743,7 +53743,7 @@
     "external_path_parameter": 68,
     "offline_host_application": 22,
     "property_id_tables": 169,
-    "settings_write": 72,
+    "settings_write": 78,
     "shared_interactive_state": 65
   },
   "fullApi": {
@@ -53755,7 +53755,7 @@
           "live_verified": 461
         },
         "declined": {
-          "count": 498,
+          "count": 504,
           "live_verified": 0
         },
         "dedicated": {
@@ -53767,7 +53767,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 2912,
+          "count": 2906,
           "live_verified": 0
         },
         "other": {
@@ -53788,7 +53788,7 @@
           "live_verified": 77
         },
         "declined": {
-          "count": 317,
+          "count": 323,
           "live_verified": 0
         },
         "dedicated": {
@@ -53800,7 +53800,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1661,
+          "count": 1655,
           "live_verified": 0
         },
         "other": {
