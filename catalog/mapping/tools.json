@@ -11021,6 +11021,25 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_layout_get",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/LayoutTools.cs",
+      "operations": [
+        "layout.get"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_layout_get.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_macro_get",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/MacroTools.cs",
