@@ -128,6 +128,12 @@ public static class OperationNames
     /// <summary>Places the planned enclosure in one transaction and reads it back (A136: Cabinet.Create, then SetParent to the space). Arguments: <see cref="LayoutEnclosurePlaceArgs"/>; data: <see cref="LayoutEnclosurePlaceData"/>.</summary>
     public const string LayoutEnclosurePlaceExecute = "layout.enclosure.place.execute";
 
+    /// <summary>Plans placing rails, ducts and devices on an enclosure's mounting panel or door (docs/tools/eplan_layout_place.md). Arguments: <see cref="LayoutPlaceArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string LayoutPlacePlan = "layout.place.plan";
+
+    /// <summary>Places the planned items in one transaction, in order, and reads them back (A136). Arguments: <see cref="LayoutPlaceArgs"/>; data: <see cref="LayoutPlaceData"/>.</summary>
+    public const string LayoutPlaceExecute = "layout.place.execute";
+
     /// <summary>One PLC box by tag: station, rack, slot, and its channels with addresses and connections, sliced in the Bridge. Arguments: <see cref="PlcGetArgs"/>; data: <see cref="PlcGetData"/>.</summary>
     public const string PlcGet = "plc.get";
 
