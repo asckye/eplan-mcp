@@ -35,7 +35,7 @@ internal sealed class ModelViewTools
         [Description("panel (default), door, cabinet")] string? view = null,
         [Description("front (default)")] string? viewpoint = null,
         [Description("hidden_lines (default), wireframe, shaded")] string? style = null,
-        [Description("auto (default), fit")] string? scale = null,
+        [Description("auto (default), fit, 1:N")] string? scale = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {
@@ -118,6 +118,7 @@ internal sealed class ModelViewTools
             Name = ResultShaper.CleanText(data?.Name) ?? string.Empty,
             ObjectId = ResultShaper.CleanText(data?.ObjectId) ?? string.Empty,
             Added = data?.Added ?? 0,
+            Scale = ResultShaper.CleanText(data?.Scale) ?? string.Empty,
             Undo = outcome.Execution == ExecutionState.Committed ? "AI: " + CreateTool : null,
             Recovered = outcome.Recovered,
             Hint = hints.Count == 0 ? null : string.Join(" ", hints),

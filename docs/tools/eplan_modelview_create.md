@@ -21,18 +21,18 @@
 | `view` | string | 否 | `panel` | `panel`（安装板）、`door`（门）或 `cabinet`（整个安装空间） |
 | `viewpoint` | string | 否 | `front` | `front`、`rear`、`left`、`right`、`top`、`bottom`、`iso_se`、`iso_sw`、`iso_ne`、`iso_nw`（VIEWPOINT 5、6、3、4、2、1、7–10） |
 | `style` | string | 否 | `hidden_lines` | `hidden_lines`、`wireframe`、`shaded`（STYLE 1、0、2） |
-| `scale` | string | 否 | `auto` | `auto` 或 `fit`（SCALESETTING 0、1） |
+| `scale` | string | 否 | `auto` | `auto`（EPLAN 默认 1:10）、`fit`（铺满框）或手动比例 `1:N`，N 为 1–999；插入后用 `ViewPlacement.ViewScale`/`Scale` 设置 |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；false 执行 |
 
 ## 3. 输出
-视图名取 `<space> <view>`，如 `UC1 panel`。预览返回一条 `changes`；执行后返回 `page`、`name`、EPLAN 的视图 `objectId`、页上新增的对象数 `added` 和撤销步骤 `undo`。
+视图名取 `<space> <view>`，如 `UC1 panel`。预览返回一条 `changes`；执行后返回 `page`、`name`、EPLAN 的视图 `objectId`、页上新增的对象数 `added`、EPLAN 显示的比例 `scale` 和撤销步骤 `undo`。
 
 ## 4. EPLAN 调用路线
 `modelview.create.plan` / `.execute`（`ModelViewCreate*Operation`）→ `EplanModelViewWriter.Insert`：
 1. 按页全名找页，记下页上对象数；
 2. 组 `ActionCallingContext`：`PROJECTNAME`、`PAGENAME`、`LAYOUTSPACE`（36452 的值，不带 `+`）、`VIEWNAME`、`X/Y/DX/DY`、`VIEWPOINT`、`STYLE`、`SCALESETTING`、`VIEWTYPE=1`（机柜视图）；`panel`/`door` 再加 `ROOTELEMENTS` = 该面对象的 `FUNCTION3D_ID_RELATIVE`（36035）；
 3. 先 `ActionManager.FindAction("InsertModelViewAction").Execute(ctx)`：它返回 false，但之后 `new CommandLineInterpreter().Execute("InsertModelViewAction", ctx)` 才能成功；EPLAN 刚启动时直接调 `CommandLineInterpreter` 也返回 false（A136 实测）。只有这里用 `CommandLineInterpreter`（BannedSymbols 中注明）；
-4. 读 `OBJECTID`，再数页上对象。
+4. 读 `OBJECTID`，按其中的对象号在 `DMObjectsFinder.GetPlacements` 里找到 `ViewPlacement`（它不在 `Page.AllPlacements` 里），按 `scale` 设 `ViewScale`（和 `Scale`）后 `Update()`，读回 36510；手动比例读回不一致就回滚。从插件调用时 action 的 `SCALESETTING`/`SCALE` 不起作用（A136）。
 
 一个事务，一个撤销步骤。返回 false、没有 `OBJECTID` 或页上没有新增对象时整个事务回滚。执行前按指纹核对布置和参数没有变化。
 
@@ -42,4 +42,4 @@
 ## 6. 测试
 - Small：`ModelViewCreateTests`（三种 view 的根元素、参数映射和事务；参数错误一次报全；页不存在、页类型不对；没有新增对象时回滚；布置变化后计划过期）。`PageCreateOperationTests` 覆盖新页类型 `ModelView`。
 - 实机：2026-11-12 在 `自动喂丝机` 的 3D 副本上新建两张 ModelView 页，插入安装板视图（线槽、导轨、1QA1、8FC1、8TA1）和门视图（12SJ1、13SF5），导出图片核对内容正确。Large 待做。
-- 待查：`X/Y/DX/DY` 的单位和落位（A136）。
+- 实机：`fit` 读回 1:4、1:5，`1:5` 读回 1:5；等轴测隐藏线 + 着色两视图与官方 EES_rittal_3d 一致（A136）。

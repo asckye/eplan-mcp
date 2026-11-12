@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 125（24.0%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 126（23.8%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -252,6 +252,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_language_set | write | language.set.execute<br>language.set.plan | 50 | 22 | 0 | 28 | 0 | 2/1/4 | A28 | — |
 | eplan_layout_get | read | layout.get | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
 | eplan_layout_place | write | layout.place.execute<br>layout.place.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
+| eplan_layout_remove | destructive | layout.remove.execute<br>layout.remove.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
 | eplan_macro_get | read | macro.get | 43 | 23 | 0 | 18 | 0 | 4/0/4 | A14 A89 | — |
 | eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 264 | 158 | 3 | 99 | 0 | 10/2/10 | A12 A13 A14 A79 A82 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 4/0/4 | A4 | — |

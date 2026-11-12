@@ -13,13 +13,14 @@ The door view on the next page, executed:
 1. Place the enclosure and its items first (eplan_enclosure_place, eplan_layout_place).
 2. Create the page with eplan_page_create, `page_type` `ModelView`, and take its full name from the result or eplan_page_list.
 3. Preview, then execute with `dry_run: false`. Outside scratch the engineer approves in EPLAN. Ctrl+Z in EPLAN takes the view back.
-4. `view` `panel` or `door` shows that surface and what is on it; `cabinet` shows the whole installation space. `frame` is the view's lower left x, y, width and height on the page. With `scale` `auto` EPLAN picks the scale; `fit` fills the frame.
+4. `view` `panel` or `door` shows that surface and what is on it; `cabinet` shows the whole installation space. `frame` is the view's lower left x, y, width and height on the page. The view is centred in the frame. `scale` `fit` fills the frame, `1:N` (e.g. `1:5`) fixes the scale, `auto` keeps EPLAN's default (1:10). The result's `scale` is what EPLAN shows.
+6. Like the official EES samples: per enclosure one page with two `cabinet` views at `iso_se`, `hidden_lines` left and `shaded` right, each filling half the page with `fit`, and one page with the `panel` and `door` views.
 5. `viewpoint`: front (default), rear, left, right, top, bottom, iso_se, iso_sw, iso_ne, iso_nw. `style`: hidden_lines (default), wireframe, shaded. The view is named after the space and view, e.g. `UC1 panel`.
 
 ## Fields
 
 - `project`, `execution` (`committed` or `not_started`), `dryRun`, `fingerprint`, `changes` (the view to insert).
-- `page`, `name`: where the view went and its name; `objectId`: EPLAN's ID of the view; `added`: placements the page gained.
+- `page`, `name`: where the view went and its name; `objectId`: EPLAN's ID of the view; `added`: placements the page gained; `scale`: the scale EPLAN shows, e.g. `1:5`.
 - `undo`, `recovered`, `hint`.
 
 ## Errors

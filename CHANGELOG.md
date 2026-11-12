@@ -13,6 +13,8 @@
 
 ### 新增
 
+- 新增 `eplan_layout_remove`（full，写入）：按对象 ID 删除 3D 布置里的导轨、线槽和设备，设备留在原理图里可以重新放；导轨上的设备必须一起列出，先删设备后删导轨；一个事务，一个撤销步骤（A136）。
+- `eplan_modelview_create` 的 `scale` 现在生效：`fit` 铺满框，新增手动比例 `1:N`，结果返回 EPLAN 显示的比例；插入后经 `ViewPlacement.ViewScale` 设置（action 的比例参数从插件调用时不起作用，A136）。
 - 新增 `eplan_modelview_create`（full，写入）：在 ModelView 页上插入安装空间的安装板、门或整柜的 2D 模型视图（布置图），可选视角、样式和比例；插件内经 `CommandLineInterpreter` 执行 `InsertModelViewAction`（`ActionManager` 对它返回 false，A136）；一个事务，一个撤销步骤。
 - `eplan_page_create` 新增页类型 `ModelView`，用来放布置图。
 - 新增 `eplan_layout_place`（full，写入）：在柜体的安装板、门或导轨上按顺序放导轨、线槽和原理图设备（按 tag），位置用毫米；吸附后按实测包围盒校正到给定位置，读回后报告重叠；一个事务，一个撤销步骤（A136）。

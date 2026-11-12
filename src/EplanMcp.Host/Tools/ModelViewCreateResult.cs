@@ -33,6 +33,9 @@ internal sealed class ModelViewCreateResult
     [Description("Placements the page gained.")]
     public int Added { get; set; }
 
+    [Description("The scale EPLAN shows for the view, e.g. 1:5; empty for a dry run.")]
+    public string Scale { get; set; } = string.Empty;
+
     [Description("The undo step EPLAN lists after a commit; null otherwise.")]
     public string? Undo { get; set; }
 
