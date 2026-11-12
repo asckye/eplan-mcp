@@ -13,7 +13,7 @@ internal sealed class PageCreateRequest
     public const int MaxDescription = 500;
 
     /// <summary>The page types engineers edit interactively; the default comes first.</summary>
-    public static readonly string[] PageTypes = ["Circuit", "CircuitSingleLine", "Overview", "Graphics"];
+    public static readonly string[] PageTypes = ["Circuit", "CircuitSingleLine", "Overview", "Graphics", "ModelView"];
 
     private PageCreateRequest(OpenProject project, List<Page> pages, string? language)
     {

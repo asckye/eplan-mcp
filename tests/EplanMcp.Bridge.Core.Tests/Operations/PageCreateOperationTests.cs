@@ -61,7 +61,7 @@ public sealed class PageCreateOperationTests
         Assert.Equal(6, violations.Length);
         Assert.StartsWith("'project' is required", violations[0], StringComparison.Ordinal);
         Assert.StartsWith("pages[0].name uses '=='", violations[1], StringComparison.Ordinal);
-        Assert.StartsWith("pages[1].page_type must be one of Circuit, CircuitSingleLine, Overview, Graphics", violations[2], StringComparison.Ordinal);
+        Assert.StartsWith("pages[1].page_type must be one of Circuit, CircuitSingleLine, Overview, Graphics, ModelView", violations[2], StringComparison.Ordinal);
         Assert.StartsWith("pages[2].name repeats pages[1].name", violations[3], StringComparison.Ordinal);
         Assert.StartsWith("pages[3].description must have at most 500", violations[4], StringComparison.Ordinal);
         Assert.StartsWith("'language' is not a language EPLAN knows", violations[5], StringComparison.Ordinal);

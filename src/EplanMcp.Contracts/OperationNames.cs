@@ -134,6 +134,12 @@ public static class OperationNames
     /// <summary>Places the planned items in one transaction, in order, and reads them back (A136). Arguments: <see cref="LayoutPlaceArgs"/>; data: <see cref="LayoutPlaceData"/>.</summary>
     public const string LayoutPlaceExecute = "layout.place.execute";
 
+    /// <summary>Plans inserting a model view of an installation space, its mounting panel or its door on a page (docs/tools/eplan_modelview_create.md). Arguments: <see cref="ModelViewCreateArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string ModelViewCreatePlan = "modelview.create.plan";
+
+    /// <summary>Inserts the planned model view with InsertModelViewAction in one transaction and reads it back (A136). Arguments: <see cref="ModelViewCreateArgs"/>; data: <see cref="ModelViewCreateData"/>.</summary>
+    public const string ModelViewCreateExecute = "modelview.create.execute";
+
     /// <summary>One PLC box by tag: station, rack, slot, and its channels with addresses and connections, sliced in the Bridge. Arguments: <see cref="PlcGetArgs"/>; data: <see cref="PlcGetData"/>.</summary>
     public const string PlcGet = "plc.get";
 

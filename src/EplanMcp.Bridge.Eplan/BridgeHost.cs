@@ -160,6 +160,8 @@ internal static class BridgeHost
             new LayoutEnclosurePlaceExecuteOperation(catalog, new EplanLayoutReader(), partsDatabase, new EplanLayoutWriter(), transactions),
             new LayoutPlacePlanOperation(catalog, new EplanLayoutReader(), partsDatabase),
             new LayoutPlaceExecuteOperation(catalog, new EplanLayoutReader(), partsDatabase, new EplanLayoutPlacer(), transactions),
+            new ModelViewCreatePlanOperation(catalog, new EplanLayoutReader(), pages),
+            new ModelViewCreateExecuteOperation(catalog, new EplanLayoutReader(), pages, new EplanModelViewWriter(), transactions),
             new PlcGetOperation(catalog, devices, new EplanPlcReader()),
             new PartListOperation(catalog, new EplanPartReader()),
             new PartSearchOperation(new EplanPartsDatabase()),

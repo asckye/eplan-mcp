@@ -496,6 +496,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - **门上器件：** 施耐德 `SE.XB4BS844415`、`SE.XB4BW31B5` 用 `Component.Create(project, 门 Component, part, "1", -2, list)`，源约束 `G1` 吸到门的 Master Plane，按 x/y 定位。
 - **回滚：** 以上全部写在一个 `TransactionScope` 里回滚后，3D 对象数和安装空间列表与之前一致，包括中途调用了 action 的情况。
 - **布置图（模型视图）：** `InsertModelViewAction /PROJECTNAME:<elk> /PAGENAME:<页> /LAYOUTSPACE:A1 /VIEWNAME:<名> /X /Y /DX /DY /STYLE:1 /VIEWPOINT:5 /SCALESETTING:0 /VIEWTYPE:1` 从外部（eplremote）调用成功，页上生成 1186 个图形对象；`LAYOUTSPACE` 写 36452 的值（`A1`），写 `+A1` 失败。目标页类型 ModelView 和 PanelLayout 都可以。**在插件的 action 里用 `ActionManager` 调同样的参数一律返回 false**（5 种写法、两种页类型）。
+- **插件内的可行路线（2026-11-12 实机，自动喂丝机-3D试验 副本）：** 在 Bridge 调度器里（不在 action 回调里），`new ActionManager().FindAction("InsertModelViewAction").Execute(ctx)` 仍然返回 false，带不带 `ROOTELEMENTS` 都一样；同一个 `ActionCallingContext` 交给 `new CommandLineInterpreter().Execute("InsertModelViewAction", ctx)` 就返回 true，`OBJECTID` 形如 `42/190/35411/0`，可以放在 `TransactionScope` 里。`ROOTELEMENTS` 写安装板或门的 `FUNCTION3D_ID_RELATIVE`（36035，如 `15100.3.1;0;0`），视图只显示该面及其上的对象：安装板视图在页上加了 7 个对象，门视图加了 4 个。页类型 ModelView 用 `Page.Create` 新建即可（`eplan_page_create`）。**待查：** `X/Y/DX/DY` 给的 (40, 30, 330, 250) 在 A3 页上没有按毫米落位，视图约 76 mm 宽、位于页面中部。
 — 证据：`tests/EplanMcp.Large.ConnectionHelper/Layout3DSpikeAction.cs` 的读回 JSON，trx `Layout3DSpikeTests` 2026-11-12。
 
 ### A135. 删除和替换位置框（2026-11-11，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 喂丝机9-框测试、喂丝机9 第 13、15 页）
