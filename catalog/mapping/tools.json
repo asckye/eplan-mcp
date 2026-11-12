@@ -9235,6 +9235,26 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_enclosure_place",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/LayoutWriteTools.cs",
+      "operations": [
+        "layout.enclosure.place.execute",
+        "layout.enclosure.place.plan"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_enclosure_place.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_export_dxf",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/ExportTools.cs",

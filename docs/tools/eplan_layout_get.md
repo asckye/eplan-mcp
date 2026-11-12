@@ -54,4 +54,4 @@
 
 ## 6. 测试
 - Small：`LayoutGetOperationTests`（按空间过滤、柜体排前、未放置设备的判断、分页）。
-- Large：随 `eplan_layout_enclosure_place` 一起实测（M4b 第一批第 2 步），读回自己放的柜体、安装板和门。
+- Large：随 `eplan_enclosure_place` 一起实测（M4b 第一批第 2 步），读回自己放的柜体、安装板和门。

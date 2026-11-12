@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 122（24.6%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 123（24.4%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -234,6 +234,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_device_place | write | device.place.execute<br>device.place.plan<br>project.get | 391 | 227 | 6 | 130 | 0 | 17/7/28 | A13 A14 A26 A53 A55 A82 A85 | — |
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 78 | 34 | 0 | 44 | 0 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_device_update | write | device.update.execute<br>device.update.plan | 117 | 57 | 3 | 47 | 0 | 5/2/5 | A3 A13 A79 A82 A85 A93 | 2026-10-20 pass（api-notes A17） |
+| eplan_enclosure_place | write | layout.enclosure.place.execute<br>layout.enclosure.place.plan | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
 | eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 42 | 20 | 0 | 22 | 0 | 1/1/0 | A16 | — |
 | eplan_export_image | write | export.image.plan<br>export.image.run | 45 | 18 | 0 | 27 | 0 | 2/2/12 | A14 A16 | 2026-10-20 pass（api-notes A21） |
 | eplan_export_labels | write | export.labels.plan<br>export.labels.run | 36 | 16 | 0 | 20 | 0 | 1/2/1 | A24 A25 B9 | — |

@@ -80,18 +80,20 @@ internal sealed class LayoutTools
             result);
     }
 
+    internal static LayoutGetResult.EnclosureEntry Enclosure(LayoutEnclosure e) => new()
+    {
+        Id = e.Id,
+        Parts = ResultShaper.CleanTexts(e.Parts),
+        Box = e.Box,
+        Panel = Surface(e.Panel),
+        Door = Surface(e.Door),
+    };
+
     private static LayoutGetResult.SpaceEntry Space(LayoutSpace space) => new()
     {
         Designation = ResultShaper.CleanText(space.Designation),
         Name = ResultShaper.CleanText(space.Name),
-        Enclosures = [.. space.Enclosures.Select(e => new LayoutGetResult.EnclosureEntry
-        {
-            Id = e.Id,
-            Parts = ResultShaper.CleanTexts(e.Parts),
-            Box = e.Box,
-            Panel = Surface(e.Panel),
-            Door = Surface(e.Door),
-        })],
+        Enclosures = [.. space.Enclosures.Select(Enclosure)],
     };
 
     private static LayoutGetResult.ObjectEntry Object(LayoutObject item) => new()
