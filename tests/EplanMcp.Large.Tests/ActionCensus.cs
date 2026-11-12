@@ -18,7 +18,7 @@ public sealed class ActionCensus(LiveEplan eplan)
     public static bool Enabled => Environment.GetEnvironmentVariable("EPLANMCP_ACTION_CENSUS") is { Length: > 0 };
     private const int WmClose = 0x0010, WmKeyDown = 0x0100, WmKeyUp = 0x0101, VkEscape = 0x1B;
     private static readonly TimeSpan _closeAfter = TimeSpan.FromSeconds(1.5), _escapeAfter = TimeSpan.FromSeconds(8), _killAfter = TimeSpan.FromSeconds(45);
-    private string _project = "", _results = "", _evidence = "", _source = "", _page = "", _settings = "";
+    private string _project = "", _results = "", _evidence = "", _source = "", _page = "", _settings = "", _masterData = "", _stop = "";
     private int _copy;
     private bool _quiet = true;
     private string? _prepare;
@@ -39,6 +39,13 @@ public sealed class ActionCensus(LiveEplan eplan)
         DateTime deadline = DateTime.UtcNow.AddMinutes((double?)config["minutes"] ?? 600);
         _results = Path.Combine(_evidence, "results.jsonl");
         _settings = (string)config["settings"]!;
+        // 2026-11-11: an action wrote eight forms into the system master data, outside the scratch root (CLAUDE.md rule 1).
+        // Every action is now checked against the master data folder: new files are moved into the evidence, and a changed
+        // or removed file stops the census until someone has restored it and deleted the stop file.
+        _masterData = (string)config["masterData"]!;
+        Assert.True(Directory.Exists(_masterData), "Name the system master data folder as masterData in the census configuration.");
+        _stop = Path.Combine(_evidence, "STOP-master-data-written.txt");
+        Assert.False(File.Exists(_stop), "A previous action changed the system master data; restore it, then delete " + _stop);
         // Quiet runs show what works unattended; a run without quiet mode shows which dialog a command opens.
         _quiet = (bool?)config["quiet"] ?? true;
         // Many commands act on the selection, so a later round selects the page's objects first.
@@ -60,7 +67,7 @@ public sealed class ActionCensus(LiveEplan eplan)
             Append(new JsonObject { ["action"] = name, ["state"] = "started" });
             JsonObject row = await RunOneAsync(name);
             Append(row);
-            if ((string?)row["state"] == "eplan_gone")
+            if ((string?)row["state"] == "eplan_gone" || File.Exists(_stop))
             { return; }
         }
     }
@@ -73,6 +80,7 @@ public sealed class ActionCensus(LiveEplan eplan)
         { await RawAsync(_prepare, TimeSpan.FromSeconds(15)); }
         string before = await HashAsync();
         string settingsBefore = SettingsStamp();
+        Dictionary<string, (long, DateTime)> masterBefore = MasterDataStamp();
         string result = Path.Combine(_evidence, "last-result.json");
         File.Delete(result);
         var seen = new Dictionary<nint, string>();
@@ -86,6 +94,8 @@ public sealed class ActionCensus(LiveEplan eplan)
         }
         else
         { row["remote"] = output.Length > 400 ? output[..400] : output; }
+        if (MasterDataWritten(row, masterBefore, name))
+        { return row; }
         if (killed || !Alive())
         {
 
@@ -122,6 +132,38 @@ public sealed class ActionCensus(LiveEplan eplan)
         }
         await RawAsync("XGedEscapeAction", TimeSpan.FromSeconds(10));
         return row;
+    }
+
+    /// <summary>The master data files that matter: lock files, the libraries' session tables and the project list change with any use.</summary>
+    private Dictionary<string, (long, DateTime)> MasterDataStamp() =>
+        Directory.EnumerateFiles(_masterData, "*", SearchOption.AllDirectories)
+            .Where(f => !f.EndsWith(".lck", StringComparison.OrdinalIgnoreCase) && Path.GetFileName(f) is not ("User.eod" or "User.eox" or "Projects.db"))
+            .ToDictionary(f => f, f => { var info = new FileInfo(f); return (info.Length, info.LastWriteTimeUtc); }, StringComparer.OrdinalIgnoreCase);
+
+    private bool MasterDataWritten(JsonObject row, Dictionary<string, (long, DateTime)> before, string name)
+    {
+        Dictionary<string, (long, DateTime)> after = MasterDataStamp();
+        string[] added = [.. after.Keys.Where(f => !before.ContainsKey(f)).Order(StringComparer.OrdinalIgnoreCase)];
+        string[] changed = [.. after.Keys.Where(f => before.TryGetValue(f, out var was) && was != after[f]).Order(StringComparer.OrdinalIgnoreCase)];
+        string[] removed = [.. before.Keys.Where(f => !after.ContainsKey(f)).Order(StringComparer.OrdinalIgnoreCase)];
+        if (added.Length + changed.Length + removed.Length == 0)
+        { return false; }
+        string quarantine = Path.Combine(_evidence, "master-data-written", name);
+        var notMoved = new JsonArray();
+        foreach (string file in added)
+        {
+            string target = Path.Combine(quarantine, Path.GetRelativePath(_masterData, file));
+            try
+            { Directory.CreateDirectory(Path.GetDirectoryName(target)!); File.Move(file, target); }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+            { notMoved.Add(Path.GetRelativePath(_masterData, file) + ": " + error.Message); }
+        }
+        JsonArray Relative(string[] files) => [.. files.Select(f => (JsonNode)Path.GetRelativePath(_masterData, f))];
+        row["masterDataWritten"] = new JsonObject { ["added"] = Relative(added), ["changed"] = Relative(changed), ["removed"] = Relative(removed), ["addedMovedTo"] = quarantine, ["notMoved"] = notMoved };
+        row["state"] = "master_data_written";
+        if (changed.Length + removed.Length + notMoved.Count > 0)
+        { File.WriteAllText(_stop, name + " changed the system master data: " + row["masterDataWritten"]!.ToJsonString()); }
+        return true;
     }
 
     private async Task<(string Output, bool Killed, bool Escaped)> WatchAsync(string action, Dictionary<nint, string> seen)
