@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 2556,
-      "byTools": 2549,
-      "partial": 198,
-      "automatedTest": 2549,
+      "implemented": 2572,
+      "byTools": 2565,
+      "partial": 204,
+      "automatedTest": 2565,
       "liveVerified": 864,
       "envBlocked": 21,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 852,
-      "byTools": 845,
-      "partial": 105,
-      "automatedTest": 845,
+      "implemented": 868,
+      "byTools": 861,
+      "partial": 111,
+      "automatedTest": 861,
       "liveVerified": 173,
       "envBlocked": 18,
       "undocumented": 66
@@ -112,7 +112,7 @@
     }
   },
   "dependencies": {
-    "used": 2822,
+    "used": 2833,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -205,7 +205,7 @@
     {
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
-      "implemented": 238,
+      "implemented": 254,
       "liveVerified": 38
     },
     {
@@ -858,10 +858,10 @@
         "api.try.plan",
         "project.get"
       ],
-      "apiIds": 5283,
-      "operationGroups": 2366,
+      "apiIds": 5315,
+      "operationGroups": 2383,
       "dataDictionary": 69,
-      "dependencies": 2671,
+      "dependencies": 2684,
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
       "small": 7,
@@ -29152,6 +29152,16 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.HEServices.ConnectionService.ExportProductionWiring",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.HEServices.ConnectionService.SwapSourceAndTarget",
       "layer": "operation",
       "status": "automated_test",
@@ -29851,6 +29861,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_export_pxf"
       ],
       "route": "dedicated"
@@ -29864,6 +29875,156 @@
         "eplan_export_pdf"
       ],
       "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.CopperForDXF",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.CopperForNC",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.DrillingTemplatesToDXF",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.DrillingTemplatesToPDF",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToIFC",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToJT",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToVrml",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.NCForRittalAutomation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.NCForRittalPerforexLC",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.NCForSteinhauer",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.PipeBending",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.Placements3DToStep",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.ProjectToIFC",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.ProjectToJT",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.HEServices.Export3D.ProjectToVrml",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.HEServices.Generate.Connections",
@@ -59098,9 +59259,9 @@
   "reachability": {
     "operation": {
       "denominator": 4014,
-      "tools": 2556,
-      "apiTry": 2288,
-      "callable": 2561,
+      "tools": 2572,
+      "apiTry": 2305,
+      "callable": 2577,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -59177,7 +59338,7 @@
       },
       {
         "scope": "Eplan.EplApi.HEServices",
-        "callable": 238,
+        "callable": 254,
         "refused_unsafe": 0
       },
       {
@@ -59204,11 +59365,11 @@
   },
   "routes": {
     "api_try_only": {
-      "count": 1822,
+      "count": 1838,
       "live_verified": 457
     },
     "declined": {
-      "count": 444,
+      "count": 428,
       "live_verified": 0
     },
     "dedicated": {
@@ -59234,7 +59395,7 @@
   },
   "declinedByReason": {
     "catalog:banned_symbol": 29,
-    "external_path_parameter": 68,
+    "external_path_parameter": 52,
     "masterdata_management": 14,
     "offline_host_application": 22,
     "property_id_tables": 168,
@@ -59246,11 +59407,11 @@
       "denominator": 5983,
       "routes": {
         "api_try_only": {
-          "count": 2031,
+          "count": 2057,
           "live_verified": 461
         },
         "declined": {
-          "count": 514,
+          "count": 488,
           "live_verified": 0
         },
         "dedicated": {
@@ -59279,11 +59440,11 @@
       "denominator": 3109,
       "routes": {
         "api_try_only": {
-          "count": 778,
+          "count": 804,
           "live_verified": 77
         },
         "declined": {
-          "count": 334,
+          "count": 308,
           "live_verified": 0
         },
         "dedicated": {

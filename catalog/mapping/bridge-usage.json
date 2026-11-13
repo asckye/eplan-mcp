@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-13",
-  "scannedSources": "c1350654 + uncommitted changes",
-  "sourceHash": "sha256:ed0ec92bbd6b433672fb533187654cb4544760e891235bd4b4bee1a999f71627",
+  "scannedSources": "db236748 + uncommitted changes",
+  "sourceHash": "sha256:f3b7278f06a110f8e3f54959066f97a0df1f0151351a5f33e10130f6f8eeead7",
   "operations": [
     {
       "name": "action.execute",
@@ -9396,6 +9396,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L___": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -9652,6 +9663,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_af_ZA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -9674,6 +9696,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_am_AM": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -9700,6 +9733,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_AE": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -9722,6 +9766,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_BH": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -9748,6 +9803,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_DZ": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -9770,6 +9836,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_EG": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -9796,6 +9873,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_IQ": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -9818,6 +9906,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_JO": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -9844,6 +9943,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_KW": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -9866,6 +9976,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_LB": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -9892,6 +10013,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_LY": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -9914,6 +10046,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_MA": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -9940,6 +10083,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_OM": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -9962,6 +10116,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_QA": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -9988,6 +10153,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_SA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10010,6 +10186,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_SY": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10036,6 +10223,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_TN": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10058,6 +10256,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ar_YE": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10084,6 +10293,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_az_AZ": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10106,6 +10326,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_bg_BG": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10132,6 +10363,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_bs_BA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10154,6 +10396,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ca_ES": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10180,6 +10433,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_cs_CZ": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10202,6 +10466,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_da_DK": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10228,6 +10503,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_de_DE": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10250,6 +10536,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_dz_BT": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10276,6 +10573,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_el_GR": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10298,6 +10606,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_en_AU": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10324,6 +10643,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_en_CA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10346,6 +10676,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_en_EN": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10372,6 +10713,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_en_IE": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10396,6 +10748,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_en_NZ": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10418,6 +10781,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_en_US": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10460,6 +10834,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_en_ZA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10482,6 +10867,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_AR": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10508,6 +10904,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_BO": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10530,6 +10937,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_CL": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10556,6 +10974,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_CO": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10578,6 +11007,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_CR": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10604,6 +11044,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_DO": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10626,6 +11077,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_EC": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10652,6 +11114,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_ES": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10674,6 +11147,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_GT": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10700,6 +11184,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_HN": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10722,6 +11217,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_MX": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10748,6 +11254,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_NI": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10770,6 +11287,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_PA": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10796,6 +11324,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_PE": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10818,6 +11357,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_PR": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10844,6 +11394,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_PY": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10866,6 +11427,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_SV": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10892,6 +11464,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_UY": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10914,6 +11497,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_es_VE": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10940,6 +11534,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_et_EE": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -10962,6 +11567,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_eu_ES": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -10988,6 +11604,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_fa_IR": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11010,6 +11637,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_fi_FI": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11036,6 +11674,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_fo_FO": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11058,6 +11707,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_fr_BE": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11084,6 +11744,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_fr_CA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11106,6 +11777,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_fr_FR": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11132,6 +11814,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_he_IL": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11154,6 +11847,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_hi_IN": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11180,6 +11884,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_hr_BA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11202,6 +11917,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_hr_HR": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11228,6 +11954,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_hu_HU": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11250,6 +11987,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_id_ID": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11276,6 +12024,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_is_IS": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11298,6 +12057,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_it_IT": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11324,6 +12094,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ja_JP": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11346,6 +12127,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ka_GE": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11372,6 +12164,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_kk_KZ": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11394,6 +12197,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_kl_GL": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11420,6 +12234,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_km_KH": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11442,6 +12267,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ko_KR": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11468,6 +12304,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ky_CY": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11490,6 +12337,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_lt_LT": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11516,6 +12374,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_lv_LV": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11538,6 +12407,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_mk_MK": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11564,6 +12444,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_mn_MN": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11586,6 +12477,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ms_BN": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11612,6 +12514,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ms_MY": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11634,6 +12547,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_mt_MT": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11660,6 +12584,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_my_BU": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11682,6 +12617,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ne_NP": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11708,6 +12654,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_nl_BE": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11730,6 +12687,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_nl_NL": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11756,6 +12724,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_no_NO": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11778,6 +12757,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_pl_PL": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11804,6 +12794,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_pt_BR": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11826,6 +12827,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_pt_PT": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11852,6 +12864,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ro_RO": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11874,6 +12897,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ru_RU": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11900,6 +12934,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sk_SK": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11922,6 +12967,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sl_SI": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11948,6 +13004,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_so_SO": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -11970,6 +13037,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sq_AL": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -11996,6 +13074,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sr_BA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12018,6 +13107,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sr_CY": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12044,6 +13144,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sr_LT": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12066,6 +13177,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ss_SZ": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12092,6 +13214,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_su_SD": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12114,6 +13247,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sv_FI": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12140,6 +13284,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sv_SE": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12162,6 +13317,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_sy_SY": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12188,6 +13354,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_th_TH": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12210,6 +13387,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_tr_TR": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12236,6 +13424,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_uk_UA": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12258,6 +13457,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ur_IN": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12284,6 +13494,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_ur_PK": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12306,6 +13527,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_uz_CY": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12332,6 +13564,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_uz_LT": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12354,6 +13597,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_vi_VN": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12380,6 +13634,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_yy_XX": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12402,6 +13667,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_zh_CN": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12428,6 +13704,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_zh_HK": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12450,6 +13737,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_zh_MO": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -12476,6 +13774,17 @@
     "F:Eplan.EplApi.Base.ISOCode.Language.L_zh_SG": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -12498,6 +13807,17 @@
       }
     ],
     "F:Eplan.EplApi.Base.ISOCode.Language.L_zh_TW": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -29310,6 +30630,110 @@
         ],
         "operations": [
           "connection.number.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.PWMachineType.Averex": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.PWMachineType.Cadcabel": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.PWMachineType.Komax": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.PWMachineType.ListOfWires": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.PWMachineType.Metzner": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.PWMachineType.Pwa": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.PWMachineType.Schleuniger": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.PWMachineType.WireTerminal": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -64049,6 +65473,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.ConnectionService.ExportProductionWiring(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.Connection[],Eplan.EplApi.HEServices.ConnectionService.PWMachineType,System.String,System.String,System.String,Eplan.EplApi.Base.ISOCode.Language,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.ConnectionService.ExportProductionWiring(Eplan.EplApi.DataModel.Project,Eplan.EplApi.HEServices.ConnectionService.PWMachineType,System.String,System.String,System.String,Eplan.EplApi.Base.ISOCode.Language,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.ConnectionService.SwapSourceAndTarget(Eplan.EplApi.DataModel.Connection)": [
       {
         "adapter": "ApiTryDispatch",
@@ -65270,6 +66720,17 @@
     ],
     "M:Eplan.EplApi.HEServices.Export.#ctor": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "Run",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -65320,6 +66781,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Export.PXFProject(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Export.PXFProject(Eplan.EplApi.DataModel.Project,System.String,System.Boolean,System.Boolean)": [
       {
         "adapter": "EplanProjectExporter",
@@ -65343,6 +66817,227 @@
         ],
         "operations": [
           "export.pdf.run"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.CopperForDXF(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.CopperForNC(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.DrillingTemplatesToDXF(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.DrillingTemplatesToPDF(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToIFC(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToJT(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToVrml(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.NCForRittalAutomation(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.NCForRittalPerforexLC(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.NCForSteinhauer(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.PipeBending(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.Placements3DToStep(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D},System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.Placements3DToStep(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D},System.String,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.ProjectToIFC(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.ProjectToJT(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.ProjectToVrml(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -125646,6 +127341,17 @@
     "T:Eplan.EplApi.Base.ISOCode": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Write",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -126148,6 +127854,17 @@
       }
     ],
     "T:Eplan.EplApi.Base.ISOCode.Language": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
@@ -164339,6 +166056,19 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.HEServices.ConnectionService.PWMachineType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.HEServices.ConnectionService3D": [
       {
         "adapter": "ApiTryDispatch",
@@ -164699,6 +166429,17 @@
     ],
     "T:Eplan.EplApi.HEServices.Export": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "ExportImage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -164781,6 +166522,19 @@
         ],
         "operations": [
           "export.image.run"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.HEServices.Export3D": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],

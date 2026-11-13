@@ -29,7 +29,9 @@ public sealed class ApiTryFilesTests
     [InlineData("Convert", "strFileName", null)]
     [InlineData("ImportExport", "strFileName", null)]
     [InlineData("Convert", "inputOutputFile", null)]
-    [InlineData("ExportData", "strDestinationPath", null)]
+    [InlineData("ExportData", "strDestinationPath", "output_directory")]
+    [InlineData("ExportData", "strTargetDirectory", "output_directory")]
+    [InlineData("ImportData", "strTargetDirectory", null)]
     [InlineData("ImportData", "strFullLinkFileName", null)]
     [InlineData("ImportData", "strProjectPath", null)]
     [InlineData("ImportData", "templateFile", null)]
@@ -59,9 +61,13 @@ public sealed class ApiTryFilesTests
     [InlineData("PartsService", "ImportData")]
     [InlineData("Backup", "SaveFile")]
     [InlineData("Restore", "LoadFile")]
-    [InlineData("Export", "ExportData")]
     [InlineData("Import", "ImportData")]
     public void OtherExternalSideEffectsKeepTheirExclusions(string type, string method) => Assert.NotNull(Exclusion(Entry(method, type: type)));
+
+    [Theory]
+    [InlineData("Export", "ExportData", "strFileName")]
+    [InlineData("Export3D", "ProjectToIFC", "strTargetDirectory")]
+    public void ExportServicesWithAnExplicitOutputAreAllowed(string type, string method, string parameter) => Assert.Null(Exclusion(Entry(method, parameter, type)));
 
     [Fact]
     public void LaterSettingsAndPrinterParametersCannotBeHiddenBehindAnAllowedFile()

@@ -31,6 +31,24 @@ public sealed class ApiTryFilesTests : IDisposable
     private void Approve(ApiTryArgs args) => args.Fingerprint = ((WritePlan)Planner().Execute(args)!).Fingerprint;
 
     [Fact]
+    public void AnExportTargetFolderIsAnOutputCreatedAsAFolder()
+    {
+        var locator = new JObject { ["project"] = @"D:\scratch\Scratch", ["page"] = "", ["type"] = 1, ["oid"] = 1, ["digest"] = new string('a', 64) };
+        var args = new ApiTryArgs
+        {
+            Group = "O:Eplan.EplApi.HEServices.Export3D.ProjectToIFC",
+            Project = "Scratch",
+            DataRoot = _root,
+            OutputId = Guid.NewGuid().ToString("N"),
+            Parameters = new JObject { ["target"] = locator, ["oProject"] = locator, ["strTargetDirectory"] = "ifc" }.ToString(),
+        };
+
+        var path = Assert.Single(ApiTryFiles.Paths(args));
+
+        Assert.Equal(("strTargetDirectory", "ifc", true, true), path);
+    }
+
+    [Fact]
     public void ChangedInputContentOrDestinationAfterApprovalNeverInvokes()
     {
         foreach (string change in new[] { "input", "root", "id" })

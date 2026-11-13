@@ -5,12 +5,13 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>File evidence is captured inside the existing trial transaction, before commit.</summary>
 internal static class ApiTryFiles
 {
-    internal static IEnumerable<(string Name, string File, bool Output)> Paths(ApiTryArgs args)
+    /// <summary>Path parameters; an output folder (<c>output_directory</c>) is an output that is created as a folder.</summary>
+    internal static IEnumerable<(string Name, string File, bool Output, bool Folder)> Paths(ApiTryArgs args)
     {
         JObject parameters = ApiTryPlanOperation.Parameters(args.Parameters);
         string[]? shape = ApiTryCatalog.Shape(args.Group, parameters.Properties().Select(p => p.Name));
         return shape is null ? [] : parameters.Properties().Select(p => (Parameter: p, Direction: ApiTryCatalog.PathDirection(shape[1], p.Name)))
-            .Where(p => p.Direction is not null).Select(p => (p.Parameter.Name, (string)p.Parameter.Value!, p.Direction == "output"));
+            .Where(p => p.Direction is not null).Select(p => (p.Parameter.Name, (string)p.Parameter.Value!, p.Direction != "input", p.Direction == "output_directory"));
     }
     internal static Dictionary<string, string> Observe(ApiTryArgs args, Dictionary<string, string> state, bool planning = false)
     {

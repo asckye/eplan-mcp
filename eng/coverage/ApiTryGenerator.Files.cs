@@ -14,6 +14,9 @@ internal static partial class ApiTryGenerator
     internal static string? FileDirection(ApiEntry entry, ApiDetail member, ApiParameter parameter)
     {
         string name = parameter.Name;
+        // An export's explicit target folder: the Host gives it a new folder inside this call's exports destination.
+        if (parameter.Type == "System.String" && FileMatch(name, "^(str|s)(Target|Image)?(Directory|Dir)$|^strDestinationPath$") && FileMatch(entry.Type + "." + entry.Name, "Export"))
+        { return "output_directory"; }
         if (parameter.Type != "System.String" || FileMatch(name, "project|linkfile|directory|folder|dir$|template")
             || !FileMatch(name, "file|archive|macro|xml") && !(entry.Name == "ImportData" && entry.Type == "T:Eplan.EplApi.HEServices.PlcService" && name == "strFullName"))
         { return null; }
@@ -37,10 +40,13 @@ internal static partial class ApiTryGenerator
         { return original; }
         ApiParameter[] remaining = [.. member.Parameters!.Where(p => FileDirection(entry, member, p) is null
             && !(p.Name == "fileFormat" && p.Type == "Eplan.EplApi.HEServices.DeviceService.Format"))];
-        return member.Parameters!.Any(p => FileDirection(entry, member, p) is not null) && ApiTryServices.Exclusion(entry, member with { Parameters = remaining }) is null ? null : original;
+        // Export and Export3D are refused for implicit destinations; an explicit output file or folder is the only destination here.
+        string? rest = ApiTryServices.Exclusion(entry, member with { Parameters = remaining });
+        bool explicitOutput = member.Parameters!.Any(p => FileDirection(entry, member, p) is "output" or "output_directory");
+        return member.Parameters!.Any(p => FileDirection(entry, member, p) is not null) && (rest is null || rest == "external_destination" && explicitOutput) ? null : original;
     }
     private static bool FileOutput(ApiEntry entry) => entry.Details.Where(d => d.Kind == "overload")
-        .Any(d => d.Parameters!.Any(p => FileDirection(entry, d, p) == "output"));
+        .Any(d => d.Parameters!.Any(p => FileDirection(entry, d, p) is "output" or "output_directory"));
     private static string FileCatalog((ApiEntry Entry, ApiDetail Member)[] methods, Dictionary<string, ApiTryServices.Service> services) =>
         "    public static string? PathDirection(string signature, string name) => (signature, name) switch\n    {\n"
         + string.Join("\n", methods.Where(m => services.ContainsKey(m.Entry.Type[2..])).SelectMany(m => m.Member.Parameters!
