@@ -22,7 +22,7 @@ internal static class EplanFunctionAssignment
         return [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).OrderBy(f => f.ObjectIdentifier)];
     }
 
-    internal static string[] Pins(Function function) => [.. function.Pins.Select(p => p.Name ?? string.Empty)];
+    internal static string[] Pins(Function function) => [.. function.Pins.Select(p => EplanPins.Name(p) ?? string.Empty)];
 
     internal static Result Assign(string projectPath, long sourceId, long targetId, string tag)
     {

@@ -93,7 +93,7 @@ internal sealed class EplanCableGenerator : ICableGenerator
             Raw(properties.CONNECTION_DESIGNATION), Raw(properties.CONNECTION_WIRECROSSSECTION), Raw(properties.CONNECTION_WIRENUMBER));
     }
 
-    private static string? End(Pin? pin) => pin is null ? null : Hash(pin.ParentFunction?.ToStringIdentifier(), pin.ParentFunction?.Name, pin.Name);
+    private static string? End(Pin? pin) => pin is null ? null : Hash(pin.ParentFunction?.ToStringIdentifier(), pin.ParentFunction?.Name, EplanPins.Name(pin));
 
     private static string? Raw(PropertyValue value)
     {

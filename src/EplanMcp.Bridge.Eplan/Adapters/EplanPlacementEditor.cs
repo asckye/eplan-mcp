@@ -21,7 +21,7 @@ internal sealed partial class EplanPlacementEditor : IPlacementEditor
         var scene = Read(project, page);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(scene.Project.Path));
         Placement[] placements = EplanDeviceReader.FindPage(finder, page)!.AllPlacements;
-        JToken? End(Pin? pin) => pin?.ParentFunction is not { } owner ? null : new JObject { ["type"] = SnapshotCanonical.TypeOf(owner.ToStringIdentifier()), ["oid"] = owner.ObjectIdentifier, ["pin"] = pin.Name, ["function"] = owner.Name };
+        JToken? End(Pin? pin) => pin?.ParentFunction is not { } owner ? null : new JObject { ["type"] = SnapshotCanonical.TypeOf(owner.ToStringIdentifier()), ["oid"] = owner.ObjectIdentifier, ["pin"] = EplanPins.Name(pin), ["function"] = owner.Name };
         JObject State(EplanMcp.Contracts.DrawingPlacement row, Placement native, bool child)
         {
             JObject state = (JObject)Bridge.Core.Protocol.BridgeJson.FromObject(row);

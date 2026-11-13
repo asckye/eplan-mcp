@@ -139,7 +139,7 @@ internal sealed class EplanPropertyReadAdapter : IPropertyReadAdapter
     {
         Type = SnapshotCanonical.TypeOf(function.ToStringIdentifier()),
         Oid = function.ObjectIdentifier,
-        Pin = pin.Name is { } name ? SnapshotValues.Text(name) : null,
+        Pin = EplanPins.Name(pin) is { } name ? SnapshotValues.Text(name) : null,
     };
 
     internal sealed class Scope(UniversalPropertyList list, string objectType, string language, Action check,

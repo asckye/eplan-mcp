@@ -23,7 +23,8 @@ public static class WriteExceptionDiagnostics
             && !_seen.Any(reference => reference.TryGetTarget(out Exception? previous) && ReferenceEquals(previous, failure)))
         {
             _seen.Add(new WeakReference<Exception>(failure));
-            OperationContext.Current.Warn("native exception inside a write; EPLAN state may be unstable");
+            // The type alone: an EPLAN message is untrusted text, while the type names which native call failed.
+            OperationContext.Current.Warn("native exception inside a write (" + failure.GetType().Name + "); EPLAN state may be unstable");
         }
     }
 

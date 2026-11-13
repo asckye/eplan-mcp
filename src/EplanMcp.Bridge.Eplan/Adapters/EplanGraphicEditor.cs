@@ -43,7 +43,7 @@ internal sealed partial class EplanGraphicEditor : IGraphicEditor
         { Visit(native); }
         var objects = new JArray(placements.Values.OrderBy(p => p.ToStringIdentifier(), StringComparer.Ordinal).Select(p => Optional(() => State(p, scene, false))).Where(p => p is not null));
         scene.Complete &= objects.Count == placements.Count;
-        JToken? End(Pin? pin) => pin?.ParentFunction is not { } owner ? null : new JObject { ["type"] = SnapshotCanonical.TypeOf(owner.ToStringIdentifier()), ["oid"] = owner.ObjectIdentifier, ["pin"] = pin.Name, ["function"] = owner.Name };
+        JToken? End(Pin? pin) => pin?.ParentFunction is not { } owner ? null : new JObject { ["type"] = SnapshotCanonical.TypeOf(owner.ToStringIdentifier()), ["oid"] = owner.ObjectIdentifier, ["pin"] = EplanPins.Name(pin), ["function"] = owner.Name };
         return new JObject
         {
             ["scene"] = BridgeJson.FromObject(scene),

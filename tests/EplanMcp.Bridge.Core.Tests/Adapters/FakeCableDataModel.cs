@@ -97,6 +97,10 @@ internal class Connection(FakeCableStore? store = null, ConnectionState? state =
     }
 }
 
+// EPLAN raises these when a pin carries no connection designation (S063111) or an indexed one (S063172).
+internal sealed class EmptyPropertyException(string message) : System.Exception(message);
+internal sealed class IndexedPropertyException(string message) : System.Exception(message);
+
 internal sealed class Pin
 {
     public Pin() { }
@@ -104,7 +108,9 @@ internal sealed class Pin
     public Pin(long oid, int index) { ParentFunction = new(oid); Index = index; }
 #pragma warning restore CA2000
     public Function? ParentFunction { get; set; }
-    public string? Name { get; set; }
+    /// <summary>The native failure EPLAN raises for this pin's connection designation, if any.</summary>
+    public System.Exception? NameFailure { get; set; }
+    public string? Name { get => NameFailure is null ? field : throw NameFailure; set; }
     public int Index { get; set; }
 }
 

@@ -103,7 +103,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
             Page = function.Page?.Name,
             Text = text,
             TextLanguage = textLanguage,
-            Pins = [.. function.Pins.Select(pin => pin.Name ?? string.Empty)],
+            Pins = [.. function.Pins.Select(pin => EplanPins.Name(pin) ?? string.Empty)],
         };
     }
 

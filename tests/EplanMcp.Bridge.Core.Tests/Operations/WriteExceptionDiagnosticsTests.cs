@@ -25,7 +25,7 @@ public sealed class WriteExceptionDiagnosticsTests
         });
         var warning = Assert.Single(log.Entries);
         Assert.Equal(BridgeLogLevel.Warning, warning.Level);
-        Assert.Equal("[db10bb36] native exception inside a write; EPLAN state may be unstable", warning.Message);
+        Assert.Equal("[db10bb36] native exception inside a write (BaseException); EPLAN state may be unstable", warning.Message);
         Assert.Null(warning.Exception);
         Assert.DoesNotContain("Commit", transactions.Calls);
     }

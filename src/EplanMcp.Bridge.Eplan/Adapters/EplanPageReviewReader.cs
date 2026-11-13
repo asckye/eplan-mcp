@@ -26,7 +26,7 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
             OperationContext.Current.ThrowIfCancellationRequested();
             JObject Row() => new() { ["position"] = new JArray(p.Location), ["locator"] = BridgeJson.FromObject(p.Locator) };
             if (EplanNativePreconditions.Valid(native.AllPlacements).OfType<Function>().FirstOrDefault(f => f.ObjectIdentifier == p.Locator.Oid) is { } f && f is not Cable)
-            { JObject row = Row(); row["tag"] = f.Name; row["category"] = f.FunctionCategory.ToString(); row["main"] = f.IsMainFunction; row["library"] = f.SymbolVariant?.SymbolLibraryName; row["symbol"] = f.SymbolVariant?.SymbolName; row["symbol_variant"] = f.SymbolVariant?.VariantNr; row["pins"] = JObject.FromObject(f.Pins.ToDictionary(p => p.Index.ToString(System.Globalization.CultureInfo.InvariantCulture), p => p.Name ?? "")); row["placement"] = BridgeJson.FromObject(p); ((JArray)actual["devices"]!).Add(row); }
+            { JObject row = Row(); row["tag"] = f.Name; row["category"] = f.FunctionCategory.ToString(); row["main"] = f.IsMainFunction; row["library"] = f.SymbolVariant?.SymbolLibraryName; row["symbol"] = f.SymbolVariant?.SymbolName; row["symbol_variant"] = f.SymbolVariant?.VariantNr; row["pins"] = JObject.FromObject(f.Pins.ToDictionary(p => p.Index.ToString(System.Globalization.CultureInfo.InvariantCulture), p => EplanPins.Name(p) ?? "")); row["placement"] = BridgeJson.FromObject(p); ((JArray)actual["devices"]!).Add(row); }
             if (p.Kind == "Text")
             { JObject row = Row(); row["text"] = p.Properties["text"]; row["angle"] = p.Properties.TryGetValue("angle", out string? angle) && double.TryParse(angle, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double degrees) ? degrees : null; ((JArray)actual["texts"]!).Add(row); }
         }
@@ -34,7 +34,7 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
         foreach (Connection c in EplanNativePreconditions.Valid(finder.GetConnections(null)).Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
         {
             OperationContext.Current.ThrowIfCancellationRequested();
-            static JToken? End(Pin? pin) => pin?.ParentFunction is { } f ? new JObject { ["device"] = f.Name, ["pin"] = pin.Name ?? "" } : null;
+            static JToken? End(Pin? pin) => pin?.ParentFunction is { } f ? new JObject { ["device"] = f.Name, ["pin"] = EplanPins.Name(pin) ?? "" } : null;
             // Read before ReadCableWire, which disposes this wrapper's cached list: reading a disposed list corrupts EPLAN's heap (api-notes A36, A110).
             ConnectionPropertyList properties = c.Properties;
             static string Raw(PropertyValue value)

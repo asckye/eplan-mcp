@@ -332,7 +332,9 @@ internal sealed class PlanStepLiveSession(BridgeClient bridge, string project, L
         Task<string> output = process.StandardOutput.ReadToEndAsync(TestContext.Current.CancellationToken);
         Task<string> error = process.StandardError.ReadToEndAsync(TestContext.Current.CancellationToken);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(30));
+        // Exporting the 16 redraw pages natively takes longer than a single action: 30 s lost a whole run's comparison
+        // on 2026-11-13. A dead EPLAN still ends the wait, only later.
+        timeout.CancelAfter(TimeSpan.FromMinutes(5));
         await process.WaitForExitAsync(timeout.Token);
         Assert.Equal(0, process.ExitCode);
         TestContext.Current.TestOutputHelper!.WriteLine($"eplremote {action}: {await output} {await error}");
