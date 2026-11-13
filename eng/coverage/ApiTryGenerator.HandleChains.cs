@@ -59,7 +59,9 @@ internal static partial class ApiTryGenerator
             { return false; }
             if (Depth(e.Type[2..]) > 4 || HandleRestriction(e.Type[2..]) is not null || HandleRestriction(ElementType(d.ReturnType, types) ?? d.ReturnType ?? "") is not null)
             { return false; }
-            if (e.Row.Kind != "method" && !ObjectType(e.Type[2..], kinds) && !paths.ContainsKey(e.Type[2..]))
+            if (e.Row.Kind != "method" && !ObjectType(e.Type[2..], kinds) && !paths.ContainsKey(e.Type[2..])
+                // A service is constructed and disposed per call: only scalar properties, never a handle into a disposed service.
+                && !(services.TryGetValue(e.Type[2..], out ApiTryServices.Service? root) && root.Reason is null && Scalar(d.ReturnType, enums)))
             { return false; }
             string? restriction = ApiTryServices.Exclusion(e, d);
             bool settings = ChainSettingType(e.Type);

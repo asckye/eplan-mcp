@@ -13,6 +13,7 @@ internal static class ApiTryServices
     private static IEnumerable<JsonElement> Lines(string path) => File.Exists(path) ? File.ReadLines(path).Select(l => JsonSerializer.Deserialize<JsonElement>(l)) : [];
     /// <summary>ADR-0054: the one parts master data root; a fresh instance per call opens only the database EPLAN is configured with.</summary>
     internal const string PartsManagement = "Eplan.EplApi.MasterData.MDPartsManagement";
+    internal const string PathInfo = "Eplan.EplApi.DataModel.PathInfo";
     private static readonly string[] _partsManagementReads = ["OpenDatabase", "PartsDatabaseState"];
     internal static bool MasterDataHandle(string type) => type.StartsWith("Eplan.EplApi.MasterData.", StringComparison.Ordinal);
     internal static Dictionary<string, Service> Load(string root)
@@ -21,6 +22,8 @@ internal static class ApiTryServices
             [.. Lines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl"))],
             [.. _namespaces.SelectMany(ns => Lines(Path.Combine(root, "catalog/eplan-2026.0.3/members/" + ns + ".jsonl")))]);
         services[PartsManagement] = new(false, null);
+        // Read-only path settings (Articles, Macros, Symbols ...); ProjectManager.Paths would expose project open and remove.
+        services[PathInfo] = new(true, null);
         return services;
     }
     internal static Dictionary<string, Service> Build(JsonElement[] types, JsonElement[] members)

@@ -6,7 +6,6 @@ T:Eplan.EplApi.System.EplApplication	22	-	handle_type_excluded	none in public op
 T:Eplan.EplApi.Base.Settings	21	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.DMObjectsFinder	19	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.MasterData.TransientLayer	19	-	none: no approved root/return chain	P:Eplan.EplApi.DataModel.MasterData.TransientLayerTable.Layer(System.Int16) [property] [blocked: receiver/signature/lifecycle restriction]; P:Eplan.EplApi.DataModel.MasterData.TransientLayerTable.Layer(System.String) [property] [blocked: receiver/signature/lifecycle restriction]; P:Eplan.EplApi.DataModel.MasterData.TransientLayerTable.Layers [collection element] [blocked: receiver/signature/lifecycle restriction]
-T:Eplan.EplApi.DataModel.PathInfo	17	-	none: no approved root/return chain	P:Eplan.EplApi.DataModel.ProjectManager.Paths [property] [blocked: receiver/signature/lifecycle restriction]
 T:Eplan.EplApi.DataModel.ProjectSettings	15	1	P:Eplan.EplApi.DataModel.Project.Settings	P:Eplan.EplApi.DataModel.Project.Settings [property] [approved]
 T:Eplan.EplApi.Base.IEplProgress	14	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.SchemeSetting	14	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)

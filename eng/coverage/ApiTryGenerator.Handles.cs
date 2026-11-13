@@ -77,6 +77,9 @@ internal static partial class ApiTryGenerator
         var entries = EntrySelected(EntryData(root));
         return model with { Members = [.. model.Members.Where(s => !entries.Any(e => e.Entry.Row.Group == s.Entry.Row.Group && Names(e.Member) == Names(s.Member)))] };
     }
+    // A service property is read on a fresh instance per call; a value set on it is lost, or reaches shared state behind it.
+    private static bool ServiceRoot(ApiEntry e, HandleModel model, Dictionary<string, ApiTryServices.Service> services) =>
+        services.TryGetValue(e.Type[2..], out ApiTryServices.Service? service) && service.Reason is null && !model.Reachable.Contains(e.Type[2..]);
     private static bool HandleSetter(ApiEntry e, ApiDetail d) => !HandleCallable(e, d) && Writable(d) && !SettingType(e.Type) && d.ReturnType != "System.Int64";
     private static string HandleCatalog(string root)
     {
@@ -91,7 +94,7 @@ internal static partial class ApiTryGenerator
             + Switch("string[]? HandleMethodShape(string group, System.Collections.Generic.IEnumerable<string> names) => (group, string.Join(\"|\", System.Linq.Enumerable.OrderBy(System.Linq.Enumerable.Where(names, n => n != \"target\"), n => n, System.StringComparer.Ordinal)))", model.Members.Where(s => HandleCallable(s.Entry, s.Member)).Select(s => "(" + Literal(s.Entry.Row.Group) + ", " + Literal(Names(s.Member)) + ") => " + Fields(s.Entry, s.Member) + ","))
             + Switch("string? HandleMethodAccess(string group) => Shape(group) is not null ? null : group", model.Members.Where(s => HandleCallable(s.Entry, s.Member)).DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => " + Literal(HandleRead(s.Entry) ? "read" : "write") + ","))
             + Switch("string[]? HandleParameterShape(string signature, string name) => (signature, name)", model.Members.Where(s => HandleCallable(s.Entry, s.Member)).SelectMany(s => Inputs(s.Member).Select(p => "(" + Literal(s.Member.Signature!) + ", " + Literal(ParameterName(p)) + ") => " + Shape(p.Type) + ",")))
-            + Switch("string[]? HandleValueShape(string group) => group", model.Members.Where(s => s.Entry.Row.Kind == "property" && ChainSetter(s.Entry, s.Member) && Scalar(s.Member.ReturnType, enums)).Select(s => Literal(s.Entry.Row.Group) + " => " + Shape(s.Member.ReturnType!) + ","))
+            + Switch("string[]? HandleValueShape(string group) => group", model.Members.Where(s => s.Entry.Row.Kind == "property" && ChainSetter(s.Entry, s.Member) && !ServiceRoot(s.Entry, model, serviceTypes) && Scalar(s.Member.ReturnType, enums)).Select(s => Literal(s.Entry.Row.Group) + " => " + Shape(s.Member.ReturnType!) + ","))
             + Switch("bool HandleService(string group) => group", model.Members.Where(s => serviceTypes.TryGetValue(s.Entry.Type[2..], out ApiTryServices.Service? service) && service.Reason is null && !model.Reachable.Contains(s.Entry.Type[2..])).DistinctBy(s => s.Entry.Row.Group).Select(s => Literal(s.Entry.Row.Group) + " => true,"), "false");
     }
     private static string HandleDispatch(string root)
@@ -123,7 +126,7 @@ internal static partial class ApiTryGenerator
                 if (services.TryGetValue(s.Entry.Type[2..], out ApiTryServices.Service? service) && service.Reason is null && !model.Reachable.Contains(s.Entry.Type[2..]))
                 { construct = (service.Disposable ? "using " : "") + "var service = new global::" + s.Entry.Type[2..] + "(); "; receiver = "service." + s.Entry.Name; }
                 string call = ChainCall(s.Entry, s.Member, receiver, Inputs(s.Member).Select(p => Argument(ParameterName(p), p.Type)));
-                string setter = s.Entry.Row.Kind == "property" && ChainSetter(s.Entry, s.Member) && Scalar(s.Member.ReturnType, enums) ? "if (parameters.ContainsKey(\"value\")) { " + receiver + " = " + Argument("value", s.Member.ReturnType!) + "; } " : "";
+                string setter = s.Entry.Row.Kind == "property" && ChainSetter(s.Entry, s.Member) && !ServiceRoot(s.Entry, model, services) && Scalar(s.Member.ReturnType, enums) ? "if (parameters.ContainsKey(\"value\")) { " + receiver + " = " + Argument("value", s.Member.ReturnType!) + "; } " : "";
                 return "            case " + Literal(s.Member.Signature!) + ": { " + construct + setter + (s.Member.ReturnType == "System.Void" ? call + "; return null;" : "return " + call + ";") + " }";
             })) + "\n            default: throw new System.InvalidOperationException(\"No compiled handle dispatch.\");\n        }\n    }\n}\n";
     }
@@ -146,6 +149,6 @@ internal static partial class ApiTryGenerator
         var unreported = model.Members.Concat(Selected(data, enums, ObjectKindGenerator.Kinds(root))).DistinctBy(s => s.Member.Id).Where(s => !reported.Contains(s.Member.Id)).ToArray();
         reported.UnionWith(unreported.Select(s => s.Member.Id));
         return string.Join("\n", lines) + string.Join("", unreported.Select(s => s.Entry.Row.Group + "\t" + s.Member.Id + "\t" + (HandleCallable(s.Entry, s.Member) ? HandleClassification(s.Entry) : "read\tgetter") + "\n"
-            + (s.Entry.Row.Kind == "property" && ChainReportSetter(s.Entry, s.Member, model) && Scalar(s.Member.ReturnType, enums) ? s.Entry.Row.Group + "\t" + s.Member.Id + ":set\twrite\tsetter\n" : ""))) + string.Join("", data.Entries.SelectMany(e => e.Details.Where(d => d.Kind == "overload" && !reported.Contains(d.Id) && (HandleRestriction(e.Type[2..]) ?? HandleRestriction(d.ReturnType ?? "")) == "masterdata_copy_pending").Select(d => e.Row.Group + "\t" + d.Id + "\texcluded\t" + ((e.Row.ExcludedReason ?? d.ExcludedReason) is { } reason ? "catalog:" + reason : "masterdata_copy_pending") + "\n")));
+            + (s.Entry.Row.Kind == "property" && ChainReportSetter(s.Entry, s.Member, model) && !ServiceRoot(s.Entry, model, ApiTryServices.Load(root)) && Scalar(s.Member.ReturnType, enums) ? s.Entry.Row.Group + "\t" + s.Member.Id + ":set\twrite\tsetter\n" : ""))) + string.Join("", data.Entries.SelectMany(e => e.Details.Where(d => d.Kind == "overload" && !reported.Contains(d.Id) && (HandleRestriction(e.Type[2..]) ?? HandleRestriction(d.ReturnType ?? "")) == "masterdata_copy_pending").Select(d => e.Row.Group + "\t" + d.Id + "\texcluded\t" + ((e.Row.ExcludedReason ?? d.ExcludedReason) is { } reason ? "catalog:" + reason : "masterdata_copy_pending") + "\n")));
     }
 }
