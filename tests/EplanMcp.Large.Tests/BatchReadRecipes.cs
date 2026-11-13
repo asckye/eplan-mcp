@@ -43,7 +43,9 @@ internal sealed class BatchReadRecipes
             .ThenBy(m => m.Length).ThenBy(m => m[1], StringComparer.Ordinal).First();
     }
 
-    internal bool CanBuild(BatchEntry entry) => entry.Kind == "api-read" && entry.ObjectKinds is not { Length: 0 }
+    // An empty receiver is buildable when a producer of that type supplies a session handle (BatchHandles).
+    internal bool CanBuild(BatchEntry entry) => entry.Kind == "api-read"
+        && (entry.ObjectKinds is not { Length: 0 } || BatchValues.HandleReceiver(entry.Group) is not null)
         && (entry.Parameters?.All(p => Source(p.Value) is not null) ?? true) && ValidPreconditions(entry, _ => true);
 
     private string? Source(string[] shape)
