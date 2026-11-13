@@ -490,7 +490,9 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `new MDPartsManagement().OpenDatabase()` 在插件里打开 EPLAN 当前配置的部件库（本机为 `EESS2026_Parts`），返回的 `MDPartsDatabase` 可以作为会话句柄跨调用使用：`Name` 读出库名，`GetPart("SE.XVGKB3SW")` 返回 `MDPart`，`MDPart.Variant` 读出 `"1"`。四次调用都只读，执行状态 committed。
 - `OpenDatabase` 和 `MDPartsDatabase.Close` 不以 Get/Is 开头，生成器原本归为写入，被当成主数据写入拒绝；现在专门归为读取。
 - 当前配置的是在用库而不是 scratch 副本时，`MDPart.Variant` 的写入预演按设计返回 POLICY_DENIED，没有打开审批。副本上的写入（备份、写入、读回、原库哈希不变）要等工程师在 EPLAN 部件管理中把库配置成 scratch 副本后再验证。
-— `scratchpad/direct/md-live.py`（未合入）。
+- **子类句柄（同日）：** `GetPart("PXC.3209510")` 的 `FunctionTemplatePositions` 返回 1 项，运行时类型是 `MDTerminalTemplatePosition`，句柄按子类给出，`TerminalCategory` 读出 `"Common"`；`MDPartsDatabase.Close` 正常关闭。生成器因此把返回类的公开子类也算作可达。
+- 一次审批窗口关闭后，EPLAN 主窗口保持禁用、桌面上看不到对话框，后续调用都是 EPLAN_BUSY（ModalDialog）；重启 EPLAN 后恢复。原因未查明，插件日志只记操作开始，看不出审批是否结束。
+— `scratchpad/direct/md-live.py`、`md-sub.py`（未合入）。
 ### A136. Pro Panel 3D：柜体、导轨、线槽、器件和布置图（2026-11-11，EPLAN 2026.0.3.25421，**Electric P8**，scratch LargeWrite，Layout3DSpikeTests）
 - **Electric P8 里可以用 E3D API**（本机授权含 Pro Panel 模块），用的是 P8 当前配置的部件库，不需要切换到 Pro Panel 变体。
 - **安装空间：** `new InstallationSpace().Create(project, "A9")`，传入的字符串存进 36452 `INSTALLATIONSPACE_DESIGNATION`；不要带 `+`（带了会存成 `+A9`）。示例项目的空间 `Name` 为 `+A1`、36452 为 `A1`；新建的空间 `Name` 仍是 `+`，写 1200 位置属性抛 S063113，名称来源未查清。

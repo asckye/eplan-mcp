@@ -1,6 +1,6 @@
 # 路线图
 
-截至 2026-11-10，里程碑状态只在本页维护；设计与 ADR 保留方案和决策历史。状态：已完成（done）、进行中（in progress）、计划中（planned）、等待负责人（waiting on owner）、暂停（paused）。全路线图目标为 **2027 年 1 月底**；以下日期为估计。
+截至 2026-11-12，里程碑状态只在本页维护；设计与 ADR 保留方案和决策历史。状态：已完成（done）、进行中（in progress）、计划中（planned）、等待负责人（waiting on owner）、暂停（paused）。全路线图目标为 **2027 年 1 月底**；以下日期为估计。
 
 v0.5.0 于 **2026-11-05** 发布（预览版，带 ADR-0049 的破坏性变化），v0.5.1 于 **2026-11-09** 发布；之后每周按发布列车出预览版。下一个次版本是 **v0.6.0**，验收目标是小项目 16 页精确重绘。发布范围和未实机验证项见 CHANGELOG 和[待验台账](process/large-pending.md)。
 
@@ -20,7 +20,7 @@ v0.5.0 于 **2026-11-05** 发布（预览版，带 ADR-0049 的破坏性变化�
 | 全部 action：每个名称都要落到三种结果之一：可直接调用（实测后进白名单）、由工具覆盖、明确不做并说明原因。EPLAN 2026.0.3 注册 2498 个名称，Electric P8 按名称能找到 2266 个；普查已跑 310 个，分批继续 | 进行中 | 随预览版持续交付；时间等普查分批结果后重估 | [M10](design/2026-10-30-m10-capability-expansion.md)、[API Actions](eplan/api-actions.md) | [0021](adr/0021-action-run-whitelist.md)、[0030](adr/0030-action-catalog-tiers.md) |
 | 按任务做专用工具：普查结果按任务族汇总成工具，API 优先，没有 API 用 action，都不行就写明阻塞。6 批顺序：① 页面编辑、宏、连接 ② 端子排、电缆、PLC ③ 修订、编号、翻译、报表 ④ 部件库、项目管理 ⑤ 预规划、符号与图框表格编辑器 ⑥ 3D。功能区 339 个入口是实用清单（按用途判断，未逐个实测）：有工具 70、部分有 28、只影响显示 36、要做 55、第 5 批 16、3D 91、做不了或不自动做 8、标题或云入口 34、待判断 1；逐项明细只留本机（ADR-0030） | 进行中（第 1 批已盘点） | 分批进预览版 | 本页 | [0006](adr/0006-tool-surface-design.md)、[0030](adr/0030-action-catalog-tiers.md) |
 | 属性数据关联：每批实测谁是源头、谁是计算值、谁单独存，结论写入[数据关系](eplan/data-relationships.md) | 进行中 | 随每批工具 | [数据关系](eplan/data-relationships.md) | — |
-| 操作层 API：4014 组里可调用 1994 组（49.7%），实机验证 854 组（21.3%），2026-11-04 重算；全量 5983 个成员里能调用 2523 个（42.2%），实机验证 939 个（15.7%）。按需要补，不再要求先全部补齐 | 进行中 | 持续 | [实施计划](design/2026-10-31-api-completion.md)、[缺口 TSV](../catalog/operation-gaps.tsv) | [0032](adr/0032-generic-api-layer.md)、[0033](adr/0033-api-try-object-handles.md)、[0036–0045](adr/README.md) |
+| 操作层 API：4014 组里可调用 2438 组（60.7%），明确不做 445 组，到不了 1131 组，实机验证 864 组（21.5%），2026-11-12 重算（ADR-0054 部件库主数据、返回类的子类可达）；全量 5983 个成员里能调用 2523 个（42.2%），实机验证 939 个（15.7%）。按需要补，不再要求先全部补齐 | 进行中 | 持续 | [实施计划](design/2026-10-31-api-completion.md)、[缺口 TSV](../catalog/operation-gaps.tsv) | [0032](adr/0032-generic-api-layer.md)、[0033](adr/0033-api-try-object-handles.md)、[0036–0045](adr/README.md) |
 | M8 绘图与精确重绘：小项目 16 页完全一致（第 16 轮 65.77%），之后客户页精确重绘和客户彩排 | 暂停（action 主线优先） | **v0.6.0**；时间等 action 主线重估 | [M8](design/2026-10-27-m8-drawing.md)、[验收要求](design/2026-10-31-api-completion.md#45-客户页差异必须在重画前解决) | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |
 | 布局护栏 R1–R9、调用模板 `try_template`、页面审查 `eplan_page_review` 第 1 片 | 已实现，随 v0.5.0 预览版发布；未实机验证项见台账 | v0.5.0 预览版 | [绘图设计](design/2026-10-27-m8-drawing.md)、[审图设计](design/2026-10-31-m12-review-and-generation.md) | [0032](adr/0032-generic-api-layer.md) |
 
