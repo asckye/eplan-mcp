@@ -17,11 +17,11 @@
         "settings_write_disabled": 6
       },
       "denominator": 137,
-      "implemented": 10,
-      "byTools": 9,
+      "implemented": 49,
+      "byTools": 48,
       "partial": 0,
-      "automatedTest": 10,
-      "liveVerified": 2,
+      "automatedTest": 49,
+      "liveVerified": 19,
       "envBlocked": 0,
       "undocumented": 0
     },
@@ -33,11 +33,11 @@
         "settings_write_disabled": 1
       },
       "denominator": 97,
-      "implemented": 7,
-      "byTools": 7,
+      "implemented": 45,
+      "byTools": 45,
       "partial": 0,
-      "automatedTest": 7,
-      "liveVerified": 1,
+      "automatedTest": 45,
+      "liveVerified": 18,
       "envBlocked": 0,
       "undocumented": 0
     },
@@ -120,7 +120,7 @@
     "registered": 8585
   },
   "actionNames": {
-    "used": 9,
+    "used": 19,
     "registered": 64
   },
   "operationsByNamespace": [
@@ -1038,11 +1038,11 @@
         "cable.renumber.execute",
         "cable.renumber.plan"
       ],
-      "apiIds": 134,
+      "apiIds": 135,
       "operationGroups": 69,
       "dataDictionary": 2,
       "dependencies": 61,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_cable_renumber.md",
       "small": 0,
       "medium": 1,
@@ -1097,11 +1097,11 @@
         "check.run.execute",
         "check.run.plan"
       ],
-      "apiIds": 75,
+      "apiIds": 77,
       "operationGroups": 35,
       "dataDictionary": 0,
       "dependencies": 40,
-      "actions": 0,
+      "actions": 2,
       "spec": "docs/tools/eplan_check_run.md",
       "small": 0,
       "medium": 1,
@@ -1154,11 +1154,11 @@
         "connection.generate.execute",
         "connection.generate.plan"
       ],
-      "apiIds": 88,
+      "apiIds": 89,
       "operationGroups": 41,
       "dataDictionary": 1,
       "dependencies": 44,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_connection_generate.md",
       "small": 6,
       "medium": 2,
@@ -1215,11 +1215,11 @@
         "connection.number.execute",
         "connection.number.plan"
       ],
-      "apiIds": 94,
+      "apiIds": 95,
       "operationGroups": 41,
       "dataDictionary": 1,
       "dependencies": 52,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_connection_number.md",
       "small": 0,
       "medium": 1,
@@ -1343,11 +1343,11 @@
         "device.renumber.execute",
         "device.renumber.plan"
       ],
-      "apiIds": 78,
+      "apiIds": 79,
       "operationGroups": 34,
       "dataDictionary": 0,
       "dependencies": 44,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_device_renumber.md",
       "small": 2,
       "medium": 1,
@@ -1428,11 +1428,11 @@
         "export.dxf.plan",
         "export.dxf.run"
       ],
-      "apiIds": 42,
+      "apiIds": 48,
       "operationGroups": 20,
       "dataDictionary": 0,
       "dependencies": 22,
-      "actions": 0,
+      "actions": 6,
       "spec": "docs/tools/eplan_export_dxf.md",
       "small": 1,
       "medium": 1,
@@ -1448,11 +1448,11 @@
         "export.image.plan",
         "export.image.run"
       ],
-      "apiIds": 45,
+      "apiIds": 49,
       "operationGroups": 18,
       "dataDictionary": 0,
       "dependencies": 27,
-      "actions": 0,
+      "actions": 4,
       "spec": "docs/tools/eplan_export_image.md",
       "small": 2,
       "medium": 2,
@@ -1477,11 +1477,11 @@
         "export.labels.plan",
         "export.labels.run"
       ],
-      "apiIds": 36,
+      "apiIds": 37,
       "operationGroups": 16,
       "dataDictionary": 0,
       "dependencies": 20,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_export_labels.md",
       "small": 1,
       "medium": 2,
@@ -1499,11 +1499,11 @@
         "export.parts.plan",
         "export.parts.run"
       ],
-      "apiIds": 24,
+      "apiIds": 25,
       "operationGroups": 8,
       "dataDictionary": 0,
       "dependencies": 16,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_export_parts.md",
       "small": 1,
       "medium": 2,
@@ -1519,11 +1519,11 @@
         "export.pdf.plan",
         "export.pdf.run"
       ],
-      "apiIds": 46,
+      "apiIds": 48,
       "operationGroups": 20,
       "dataDictionary": 0,
       "dependencies": 26,
-      "actions": 0,
+      "actions": 2,
       "spec": "docs/tools/eplan_export_pdf.md",
       "small": 1,
       "medium": 1,
@@ -1539,11 +1539,11 @@
         "export.pxf.plan",
         "export.pxf.run"
       ],
-      "apiIds": 22,
+      "apiIds": 23,
       "operationGroups": 8,
       "dataDictionary": 0,
       "dependencies": 14,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_export_pxf.md",
       "small": 1,
       "medium": 2,
@@ -1559,11 +1559,11 @@
         "export.untranslated.plan",
         "export.untranslated.run"
       ],
-      "apiIds": 25,
+      "apiIds": 26,
       "operationGroups": 9,
       "dataDictionary": 0,
       "dependencies": 16,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_export_untranslated.md",
       "small": 1,
       "medium": 2,
@@ -1600,11 +1600,11 @@
         "import.dxf.execute",
         "import.dxf.plan"
       ],
-      "apiIds": 232,
+      "apiIds": 234,
       "operationGroups": 135,
       "dataDictionary": 2,
       "dependencies": 94,
-      "actions": 0,
+      "actions": 2,
       "spec": "docs/tools/eplan_import_dxf.md",
       "small": 1,
       "medium": 2,
@@ -1681,11 +1681,11 @@
         "import.pxf.execute",
         "import.pxf.plan"
       ],
-      "apiIds": 7,
+      "apiIds": 8,
       "operationGroups": 2,
       "dataDictionary": 0,
       "dependencies": 5,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_import_pxf.md",
       "small": 0,
       "medium": 1,
@@ -1702,11 +1702,11 @@
         "language.remove.execute",
         "language.remove.plan"
       ],
-      "apiIds": 77,
+      "apiIds": 78,
       "operationGroups": 37,
       "dataDictionary": 2,
       "dependencies": 38,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_language_remove.md",
       "small": 1,
       "medium": 1,
@@ -1885,11 +1885,11 @@
         "masterdata.update.execute",
         "masterdata.update.plan"
       ],
-      "apiIds": 34,
+      "apiIds": 35,
       "operationGroups": 15,
       "dataDictionary": 0,
       "dependencies": 19,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_masterdata_update.md",
       "small": 0,
       "medium": 0,
@@ -2215,11 +2215,11 @@
         "page.renumber.execute",
         "page.renumber.plan"
       ],
-      "apiIds": 71,
+      "apiIds": 72,
       "operationGroups": 29,
       "dataDictionary": 0,
       "dependencies": 42,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_page_renumber.md",
       "small": 2,
       "medium": 2,
@@ -2343,11 +2343,11 @@
         "part.export.plan",
         "part.export.run"
       ],
-      "apiIds": 33,
+      "apiIds": 34,
       "operationGroups": 11,
       "dataDictionary": 0,
       "dependencies": 19,
-      "actions": 1,
+      "actions": 2,
       "spec": "docs/tools/eplan_part_export.md",
       "small": 1,
       "medium": 2,
@@ -2374,11 +2374,11 @@
         "part.import.execute",
         "part.import.plan"
       ],
-      "apiIds": 86,
+      "apiIds": 87,
       "operationGroups": 28,
       "dataDictionary": 2,
       "dependencies": 39,
-      "actions": 1,
+      "actions": 2,
       "spec": "docs/tools/eplan_part_import.md",
       "small": 1,
       "medium": 5,
@@ -2459,11 +2459,11 @@
         "part.sync.execute",
         "part.sync.plan"
       ],
-      "apiIds": 121,
+      "apiIds": 122,
       "operationGroups": 54,
       "dataDictionary": 1,
       "dependencies": 62,
-      "actions": 1,
+      "actions": 2,
       "spec": "docs/tools/eplan_part_sync.md",
       "small": 1,
       "medium": 1,
@@ -2669,11 +2669,11 @@
         "plc.generate.execute",
         "plc.generate.plan"
       ],
-      "apiIds": 61,
+      "apiIds": 62,
       "operationGroups": 31,
       "dataDictionary": 0,
       "dependencies": 30,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_plc_generate.md",
       "small": 0,
       "medium": 0,
@@ -2891,11 +2891,11 @@
         "project.translate.execute",
         "project.translate.plan"
       ],
-      "apiIds": 82,
+      "apiIds": 84,
       "operationGroups": 38,
       "dataDictionary": 2,
       "dependencies": 42,
-      "actions": 0,
+      "actions": 2,
       "spec": "docs/tools/eplan_project_translate.md",
       "small": 0,
       "medium": 1,
@@ -3033,11 +3033,11 @@
         "report.update.execute",
         "report.update.plan"
       ],
-      "apiIds": 59,
+      "apiIds": 61,
       "operationGroups": 27,
       "dataDictionary": 0,
       "dependencies": 32,
-      "actions": 0,
+      "actions": 2,
       "spec": "docs/tools/eplan_report_update.md",
       "small": 0,
       "medium": 1,
@@ -3322,11 +3322,11 @@
         "terminal.renumber.execute",
         "terminal.renumber.plan"
       ],
-      "apiIds": 87,
+      "apiIds": 88,
       "operationGroups": 37,
       "dataDictionary": 0,
       "dependencies": 50,
-      "actions": 0,
+      "actions": 1,
       "spec": "docs/tools/eplan_terminal_renumber.md",
       "small": 0,
       "medium": 1,
@@ -3402,11 +3402,11 @@
         "translation.export.plan",
         "translation.export.run"
       ],
-      "apiIds": 40,
+      "apiIds": 41,
       "operationGroups": 14,
       "dataDictionary": 0,
       "dependencies": 23,
-      "actions": 1,
+      "actions": 2,
       "spec": "docs/tools/eplan_translation_export.md",
       "small": 1,
       "medium": 2,
@@ -3423,11 +3423,11 @@
         "translation.import.execute",
         "translation.import.plan"
       ],
-      "apiIds": 30,
+      "apiIds": 31,
       "operationGroups": 10,
       "dataDictionary": 0,
       "dependencies": 18,
-      "actions": 1,
+      "actions": 2,
       "spec": "docs/tools/eplan_translation_import.md",
       "small": 3,
       "medium": 2,
@@ -3522,12 +3522,147 @@
       ]
     },
     {
+      "unit": "A:check/PAGES",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_run"
+      ]
+    },
+    {
+      "unit": "A:check/PROJECT",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_check_run"
+      ]
+    },
+    {
       "unit": "A:devicelist/IMPORT",
       "layer": "action",
       "status": "automated_test",
       "partial": false,
       "tools": [
         "eplan_import_list"
+      ]
+    },
+    {
+      "unit": "A:export/DWGPAGE",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf"
+      ]
+    },
+    {
+      "unit": "A:export/DWGPROJECT",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf"
+      ]
+    },
+    {
+      "unit": "A:export/DXFDWGPPAGESSCHEME",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf"
+      ]
+    },
+    {
+      "unit": "A:export/DXFDWGPROJECTSCHEME",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf"
+      ]
+    },
+    {
+      "unit": "A:export/DXFPAGE",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf"
+      ]
+    },
+    {
+      "unit": "A:export/DXFPROJECT",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_dxf"
+      ]
+    },
+    {
+      "unit": "A:export/GRAPHICPAGE",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_export_image"
+      ]
+    },
+    {
+      "unit": "A:export/GRAPHICPROJECT",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_export_image"
+      ]
+    },
+    {
+      "unit": "A:export/PDFPAGESSCHEME",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_pdf"
+      ]
+    },
+    {
+      "unit": "A:export/PDFPROJECTSCHEME",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_pdf"
+      ]
+    },
+    {
+      "unit": "A:export/PXFPROJECT",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_pxf"
+      ]
+    },
+    {
+      "unit": "A:exportToGraphics/GRAPHICPAGE",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_export_image"
+      ]
+    },
+    {
+      "unit": "A:exportToGraphics/GRAPHICPROJECT",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_export_image"
       ]
     },
     {
@@ -3540,12 +3675,75 @@
       ]
     },
     {
+      "unit": "A:generate/CONNECTIONS",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_connection_generate"
+      ]
+    },
+    {
+      "unit": "A:import/DWGPAGE",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_dxf"
+      ]
+    },
+    {
+      "unit": "A:import/DXFPAGE",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_dxf"
+      ]
+    },
+    {
       "unit": "A:import/PDFCOMMENTS",
       "layer": "action",
       "status": "automated_test",
       "partial": false,
       "tools": [
         "eplan_import_pdf_comments"
+      ]
+    },
+    {
+      "unit": "A:import/PXFPROJECT",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_import_pxf"
+      ]
+    },
+    {
+      "unit": "A:label",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_labels"
+      ]
+    },
+    {
+      "unit": "A:masterdata/UPDATEPROJECT",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_masterdata_update"
+      ]
+    },
+    {
+      "unit": "A:partslist/EXPORT",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_parts"
       ]
     },
     {
@@ -3558,6 +3756,24 @@
       ]
     },
     {
+      "unit": "A:partsmanagementapi/EXPORTPARTS",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_export"
+      ]
+    },
+    {
+      "unit": "A:partsmanagementapi/IMPORT",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_import"
+      ]
+    },
+    {
       "unit": "A:plcservice/BUSDATAIMPORT",
       "layer": "action",
       "status": "automated_test",
@@ -3567,12 +3783,147 @@
       ]
     },
     {
+      "unit": "A:plcservice/GENERATEPLCSCHEMATIC",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_plc_generate"
+      ]
+    },
+    {
+      "unit": "A:renumber/CABLES",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_cable_renumber"
+      ]
+    },
+    {
+      "unit": "A:renumber/CONNECTIONS",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_connection_number"
+      ]
+    },
+    {
+      "unit": "A:renumber/DEVICES",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_device_renumber"
+      ]
+    },
+    {
+      "unit": "A:renumber/PAGES",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_page_renumber"
+      ]
+    },
+    {
+      "unit": "A:renumber/TERMINALS",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_terminal_renumber"
+      ]
+    },
+    {
+      "unit": "A:reports/PAGES",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_report_update"
+      ]
+    },
+    {
+      "unit": "A:reports/PROJECT",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_report_update"
+      ]
+    },
+    {
       "unit": "A:restore/PROJECT",
       "layer": "action",
       "status": "automated_test",
       "partial": false,
       "tools": [
         "eplan_project_create"
+      ]
+    },
+    {
+      "unit": "A:synchronize/PARTSTOSYSTEM",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_part_sync"
+      ]
+    },
+    {
+      "unit": "A:translate/EXPORTFROMTRANSDB",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_translation_export"
+      ]
+    },
+    {
+      "unit": "A:translate/EXPORTMISSINGTRANSLATIONS",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_export_untranslated"
+      ]
+    },
+    {
+      "unit": "A:translate/IMPORTTOTRANSDB",
+      "layer": "action",
+      "status": "live_verified",
+      "partial": false,
+      "tools": [
+        "eplan_translation_import"
+      ]
+    },
+    {
+      "unit": "A:translate/REMOVELANGUAGE",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_language_remove"
+      ]
+    },
+    {
+      "unit": "A:translate/TRANSLATEPAGES",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_project_translate"
+      ]
+    },
+    {
+      "unit": "A:translate/TRANSLATEPROJECT",
+      "layer": "action",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_project_translate"
       ]
     },
     {
@@ -37428,6 +37779,474 @@
       "via": "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property",
       "source": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160",
       "receiver": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:372"
+    },
+    {
+      "match": "A:export/PDFPAGESSCHEME",
+      "members": [
+        "A:export/PDFPAGESSCHEME"
+      ],
+      "tools": [
+        "eplan_export_pdf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.PdfPages",
+      "source": "docs/tools/eplan_export_pdf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/PDFPROJECTSCHEME",
+      "members": [
+        "A:export/PDFPROJECTSCHEME"
+      ],
+      "tools": [
+        "eplan_export_pdf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.PdfPages",
+      "source": "docs/tools/eplan_export_pdf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/DXFPAGE",
+      "members": [
+        "A:export/DXFPAGE"
+      ],
+      "tools": [
+        "eplan_export_dxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk",
+      "source": "docs/tools/eplan_export_dxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/DXFPROJECT",
+      "members": [
+        "A:export/DXFPROJECT"
+      ],
+      "tools": [
+        "eplan_export_dxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk",
+      "source": "docs/tools/eplan_export_dxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/DWGPAGE",
+      "members": [
+        "A:export/DWGPAGE"
+      ],
+      "tools": [
+        "eplan_export_dxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk",
+      "source": "docs/tools/eplan_export_dxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/DWGPROJECT",
+      "members": [
+        "A:export/DWGPROJECT"
+      ],
+      "tools": [
+        "eplan_export_dxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk",
+      "source": "docs/tools/eplan_export_dxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/DXFDWGPPAGESSCHEME",
+      "members": [
+        "A:export/DXFDWGPPAGESSCHEME"
+      ],
+      "tools": [
+        "eplan_export_dxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk",
+      "source": "docs/tools/eplan_export_dxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/DXFDWGPROJECTSCHEME",
+      "members": [
+        "A:export/DXFDWGPROJECTSCHEME"
+      ],
+      "tools": [
+        "eplan_export_dxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk",
+      "source": "docs/tools/eplan_export_dxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/GRAPHICPAGE",
+      "members": [
+        "A:export/GRAPHICPAGE"
+      ],
+      "tools": [
+        "eplan_export_image"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.GraphicPage",
+      "source": "docs/tools/eplan_export_image.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/GRAPHICPROJECT",
+      "members": [
+        "A:export/GRAPHICPROJECT"
+      ],
+      "tools": [
+        "eplan_export_image"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.GraphicPage",
+      "source": "docs/tools/eplan_export_image.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:exportToGraphics/GRAPHICPAGE",
+      "members": [
+        "A:exportToGraphics/GRAPHICPAGE"
+      ],
+      "tools": [
+        "eplan_export_image"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.GraphicPage",
+      "source": "docs/tools/eplan_export_image.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:exportToGraphics/GRAPHICPROJECT",
+      "members": [
+        "A:exportToGraphics/GRAPHICPROJECT"
+      ],
+      "tools": [
+        "eplan_export_image"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.GraphicPage",
+      "source": "docs/tools/eplan_export_image.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:export/PXFPROJECT",
+      "members": [
+        "A:export/PXFPROJECT"
+      ],
+      "tools": [
+        "eplan_export_pxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Export.PXFProject",
+      "source": "docs/tools/eplan_export_pxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:import/DXFPAGE",
+      "members": [
+        "A:import/DXFPAGE"
+      ],
+      "tools": [
+        "eplan_import_dxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Import.DXFPage",
+      "source": "docs/tools/eplan_import_dxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:import/DWGPAGE",
+      "members": [
+        "A:import/DWGPAGE"
+      ],
+      "tools": [
+        "eplan_import_dxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Import.DXFPage",
+      "source": "docs/tools/eplan_import_dxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:import/PXFPROJECT",
+      "members": [
+        "A:import/PXFPROJECT"
+      ],
+      "tools": [
+        "eplan_import_pxf"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Import.PXFProject",
+      "source": "docs/tools/eplan_import_pxf.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:check/PAGES",
+      "members": [
+        "A:check/PAGES"
+      ],
+      "tools": [
+        "eplan_check_run"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Check.VerifyPages",
+      "source": "docs/tools/eplan_check_run.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:check/PROJECT",
+      "members": [
+        "A:check/PROJECT"
+      ],
+      "tools": [
+        "eplan_check_run"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Check.VerifyProject",
+      "source": "docs/tools/eplan_check_run.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:generate/CONNECTIONS",
+      "members": [
+        "A:generate/CONNECTIONS"
+      ],
+      "tools": [
+        "eplan_connection_generate"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Generate.Connections",
+      "source": "docs/tools/eplan_connection_generate.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:renumber/CABLES",
+      "members": [
+        "A:renumber/CABLES"
+      ],
+      "tools": [
+        "eplan_cable_renumber"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.CableService.RenumberCables",
+      "source": "docs/tools/eplan_cable_renumber.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:renumber/CONNECTIONS",
+      "members": [
+        "A:renumber/CONNECTIONS"
+      ],
+      "tools": [
+        "eplan_connection_number"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.ConnectionService.DesignateConnections",
+      "source": "docs/tools/eplan_connection_number.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:renumber/DEVICES",
+      "members": [
+        "A:renumber/DEVICES"
+      ],
+      "tools": [
+        "eplan_device_renumber"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Renumber.DeviceTags",
+      "source": "docs/tools/eplan_device_renumber.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:renumber/PAGES",
+      "members": [
+        "A:renumber/PAGES"
+      ],
+      "tools": [
+        "eplan_page_renumber"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Renumber.Pages",
+      "source": "docs/tools/eplan_page_renumber.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:renumber/TERMINALS",
+      "members": [
+        "A:renumber/TERMINALS"
+      ],
+      "tools": [
+        "eplan_terminal_renumber"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Renumber.Terminals",
+      "source": "docs/tools/eplan_terminal_renumber.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:reports/PROJECT",
+      "members": [
+        "A:reports/PROJECT"
+      ],
+      "tools": [
+        "eplan_report_update"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Reports.GenerateProject",
+      "source": "docs/tools/eplan_report_update.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:reports/PAGES",
+      "members": [
+        "A:reports/PAGES"
+      ],
+      "tools": [
+        "eplan_report_update"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Reports.Update",
+      "source": "docs/tools/eplan_report_update.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:translate/TRANSLATEPROJECT",
+      "members": [
+        "A:translate/TRANSLATEPROJECT"
+      ],
+      "tools": [
+        "eplan_project_translate"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Translate.TranslateObjects",
+      "source": "docs/tools/eplan_project_translate.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:translate/TRANSLATEPAGES",
+      "members": [
+        "A:translate/TRANSLATEPAGES"
+      ],
+      "tools": [
+        "eplan_project_translate"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Translate.TranslateObjects",
+      "source": "docs/tools/eplan_project_translate.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:translate/EXPORTMISSINGTRANSLATIONS",
+      "members": [
+        "A:translate/EXPORTMISSINGTRANSLATIONS"
+      ],
+      "tools": [
+        "eplan_export_untranslated"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Translate.ExportMissingTranslation",
+      "source": "docs/tools/eplan_export_untranslated.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:translate/REMOVELANGUAGE",
+      "members": [
+        "A:translate/REMOVELANGUAGE"
+      ],
+      "tools": [
+        "eplan_language_remove"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Translate.RemoveProjectLanguage",
+      "source": "docs/tools/eplan_language_remove.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:translate/IMPORTTOTRANSDB",
+      "members": [
+        "A:translate/IMPORTTOTRANSDB"
+      ],
+      "tools": [
+        "eplan_translation_import"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts",
+      "source": "docs/tools/eplan_translation_import.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:translate/EXPORTFROMTRANSDB",
+      "members": [
+        "A:translate/EXPORTFROMTRANSDB"
+      ],
+      "tools": [
+        "eplan_translation_export"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Translate.ExportDatabaseTexts",
+      "source": "docs/tools/eplan_translation_export.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:partslist/EXPORT",
+      "members": [
+        "A:partslist/EXPORT"
+      ],
+      "tools": [
+        "eplan_export_parts"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.PartsService.ExportPartsList",
+      "source": "docs/tools/eplan_export_parts.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:synchronize/PARTSTOSYSTEM",
+      "members": [
+        "A:synchronize/PARTSTOSYSTEM"
+      ],
+      "tools": [
+        "eplan_part_sync"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Synchronize.Parts",
+      "source": "docs/tools/eplan_part_sync.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:masterdata/UPDATEPROJECT",
+      "members": [
+        "A:masterdata/UPDATEPROJECT"
+      ],
+      "tools": [
+        "eplan_masterdata_update"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Masterdata.UpdateProject",
+      "source": "docs/tools/eplan_masterdata_update.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:label",
+      "members": [
+        "A:label"
+      ],
+      "tools": [
+        "eplan_export_labels"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.Label.DoLabel",
+      "source": "docs/tools/eplan_export_labels.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:plcservice/GENERATEPLCSCHEMATIC",
+      "members": [
+        "A:plcservice/GENERATEPLCSCHEMATIC"
+      ],
+      "tools": [
+        "eplan_plc_generate"
+      ],
+      "via": "O:Eplan.EplApi.HEServices.PlcService.GenerateSchematic",
+      "source": "docs/tools/eplan_plc_generate.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:partsmanagementapi/EXPORTPARTS",
+      "members": [
+        "A:partsmanagementapi/EXPORTPARTS"
+      ],
+      "tools": [
+        "eplan_part_export"
+      ],
+      "via": "O:Eplan.EplApi.MasterData.MDPartsDatabase.ExportParts",
+      "source": "docs/tools/eplan_part_export.md",
+      "receiver": ""
+    },
+    {
+      "match": "A:partsmanagementapi/IMPORT",
+      "members": [
+        "A:partsmanagementapi/IMPORT"
+      ],
+      "tools": [
+        "eplan_part_import"
+      ],
+      "via": "O:Eplan.EplApi.MasterData.MDPartsDatabase.ImportParts",
+      "source": "docs/tools/eplan_part_import.md",
+      "receiver": ""
     }
   ],
   "availability": [
@@ -59267,7 +60086,7 @@
     },
     "action": {
       "denominator": 137,
-      "tools": 10,
+      "tools": 49,
       "actionTry": 35
     },
     "operationsByNamespace": [

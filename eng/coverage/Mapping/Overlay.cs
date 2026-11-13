@@ -115,13 +115,19 @@ internal sealed class Overlay
         foreach ((string id, VerificationRecord record) in overlay.Verification)
         { record.Id = id; }
 
+        // An action row a tool does through the API instead (an export, a check): the row itself is the only member.
+        foreach (ToolReach reach in overlay.ReachedByTool.Where(r => r.Match.StartsWith("A:", StringComparison.Ordinal) && r.Members.Count == 0))
+        { reach.Members = [reach.Match]; }
+
         string[] problems =
         [
             .. overlay.Live.Keys.Concat(overlay.Tools.Keys).Concat(overlay.ReachedByTool.SelectMany(r => r.Tools))
                 .Where(t => !tools.Contains(t)).Select(t => $"{t} is not a tool of the contract snapshot"),
-            .. overlay.ReachedByTool.Where(r => !r.Match.StartsWith("O:", StringComparison.Ordinal) || r.Members.Count == 0 || r.Tools.Count == 0
-                || !r.Via.StartsWith("O:", StringComparison.Ordinal) || r.Source.Length == 0 || r.Receiver.Length == 0)
-                .Select(r => $"reached-by-tool {r.Match}: needs an overload group, members, tools, via group, source and receiver code references"),
+            .. overlay.ReachedByTool.Where(r => r.Match.StartsWith("A:", StringComparison.Ordinal)
+                    ? r.Members.Count != 1 || r.Members[0] != r.Match || r.Tools.Count == 0 || !r.Via.StartsWith("O:", StringComparison.Ordinal) || r.Source.Length == 0
+                    : !r.Match.StartsWith("O:", StringComparison.Ordinal) || r.Members.Count == 0 || r.Tools.Count == 0
+                        || !r.Via.StartsWith("O:", StringComparison.Ordinal) || r.Source.Length == 0 || r.Receiver.Length == 0)
+                .Select(r => $"reached-by-tool {r.Match}: needs an overload group, members, tools, via group, source and receiver code references, or an action row, tools, the via group the tools call and a source"),
             .. overlay.Live.SelectMany(l => l.Value.Where(r => !DateOnly.TryParseExact(r.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
                 || r.Result is not ("pass" or "pass_with_findings" or "partial" or "fail") || r.Basis is not ("stated" or "inferred") || r.Source.Length == 0)
                 .Select(r => $"{l.Key}: a live record needs a yyyy-MM-dd date, a result, a basis and a source")),

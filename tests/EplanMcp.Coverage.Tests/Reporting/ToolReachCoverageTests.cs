@@ -41,6 +41,40 @@ public sealed class ToolReachCoverageTests
         Assert.Throws<InvalidDataException>(() => ToolMapping.Build(repository.Root));
     }
 
+    [Fact]
+    public void Build_ActionRowDoneThroughTheApi_CountsForTheToolThatCallsTheViaGroup()
+    {
+        using TempRepository repository = Create();
+        CoverageReport before = CoverageReport.Build(repository.Root);
+        WriteActionReach(repository, "A:export/DXF", "eplan_page_list");
+
+        CoverageReport after = CoverageReport.Build(repository.Root);
+
+        Assert.Equal(before.Layers["action"].Implemented + 1, after.Layers["action"].Implemented);
+        Assert.Equal(before.Layers["action"].Denominator, after.Layers["action"].Denominator);
+        Assert.Contains("eplan_page_list", Assert.Single(after.Units, u => u.Unit == "A:export/DXF").Tools);
+        Assert.Equivalent(before.Layers["operation"], after.Layers["operation"]);
+    }
+
+    [Theory]
+    [InlineData("A:export/GONE", "eplan_page_list")]
+    [InlineData("A:print", "eplan_page_list")]
+    [InlineData("A:export/DXF", "eplan_page_create")]
+    public void Build_UnknownOrExcludedActionRowOrUnreachedVia_Fails(string row, string tool)
+    {
+        using TempRepository repository = Create();
+        WriteActionReach(repository, row, tool);
+
+        Assert.ThrowsAny<InvalidDataException>(() => ToolMapping.Build(repository.Root));
+    }
+
+    private static void WriteActionReach(TempRepository repository, string row, string tool) =>
+        repository.Write(Overlay.RelativePath, repository.Read(Overlay.RelativePath) + "\n" + $$"""
+            reached-by-tool:
+              - { match: "{{row}}", tools: [{{tool}}], via: "O:Eplan.EplApi.Test.Page.Name", source: docs/tools/{{tool}}.md }
+
+            """);
+
     private static TempRepository Create()
     {
         TempRepository repository = ReportFixture.Create();

@@ -65,16 +65,16 @@ Bridge 共用到 5673 个 ID（方法 1190，属性 1714，类型 583，字段�
 | 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 868 / 1799（48.2%） | 861 | 111 | 861 / 1799（47.9%） | 173 / 1799（9.6%） | 18 | 66 |
 | 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 1704 / 2215（76.9%） | 1704 | 93 | 1704 / 2215（76.9%） | 691 / 2215（31.2%） | 3 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 68 / 68（100.0%） | 68 | 0 | 68 / 68（100.0%） | 18 / 68（26.5%） | 0 | 0 |
-| action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 10 / 137（7.3%） | 9 | 0 | 10 / 137（7.3%） | 2 / 137（1.5%） | 0 | 0 |
-| 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 7 / 97（7.2%） | 7 | 0 | 7 / 97（7.2%） | 1 / 97（1.0%） | 0 | 0 |
+| action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 49 / 137（35.8%） | 48 | 0 | 49 / 137（35.8%） | 19 / 137（13.9%） | 0 | 0 |
+| 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 45 / 97（46.4%） | 45 | 0 | 45 / 97（46.4%） | 18 / 97（18.6%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
 - 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 2572 / 4342（59.2%）。
 - 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 868 / 1799（48.2%），live_verified 173 / 1799（9.6%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 79 个，未过时的共 8585 个。
 - 依赖层：Bridge 用到 2833 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
-- action 137 行：工具到达 10，action_try 可尝试 35（离线规则，不代表实机验证）。
-- action 名称：Bridge 用到 9 个，没有整个排除的 action 共 64 个。
+- action 137 行：工具到达 49，action_try 可尝试 35（离线规则，不代表实机验证）。
+- action 名称：Bridge 用到 19 个，没有整个排除的 action 共 64 个。
 
 ### 全量 API
 
@@ -221,34 +221,34 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_cable_generate | destructive | cable.generate.execute<br>cable.generate.plan | 121 | 58 | 2 | 51 | 1 | 3/2/1 | A24 A30 A31 | — |
 | eplan_cable_get | read | cable.get | 71 | 34 | 2 | 29 | 0 | 2/2/3 | A24 | — |
 | eplan_cable_reassign | destructive | cable.reassign.execute<br>cable.reassign.plan | 113 | 53 | 2 | 51 | 0 | 0/0/1 | — | — |
-| eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 134 | 69 | 2 | 61 | 0 | 0/1/1 | A24 | 2026-10-21 pass（api-notes A24） |
+| eplan_cable_renumber | destructive | cable.renumber.execute<br>cable.renumber.plan | 135 | 69 | 2 | 61 | 1 | 0/1/1 | A24 | 2026-10-21 pass（api-notes A24） |
 | eplan_check_list | read | check.list | 31 | 16 | 0 | 15 | 0 | 2/3/3 | A12 | 2026-10-20 pass（api-notes A20） |
-| eplan_check_run | write | check.run.execute<br>check.run.plan | 75 | 35 | 0 | 40 | 0 | 0/1/3 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
+| eplan_check_run | write | check.run.execute<br>check.run.plan | 77 | 35 | 0 | 40 | 2 | 0/1/3 | A11 A16 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_connection_create | write | connection.create.execute<br>connection.create.plan<br>project.get | 399 | 231 | 8 | 139 | 0 | 7/11/18 | A52 A55 A86 A93 A94 | — |
-| eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 88 | 41 | 1 | 44 | 0 | 6/2/12 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
+| eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 89 | 41 | 1 | 44 | 1 | 6/2/12 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_connection_list | read | connection.list | 79 | 45 | 1 | 31 | 0 | 2/4/8 | — | 2026-10-20 pass（api-notes A19） |
-| eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 94 | 41 | 1 | 52 | 0 | 0/1/1 | A24 | — |
+| eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 95 | 41 | 1 | 52 | 1 | 0/1/1 | A24 | — |
 | eplan_context_get | read | project.snapshot | 99 | 41 | 4 | 32 | 0 | 3/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 79 | 45 | 2 | 30 | 0 | 10/4/10 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 35 | 20 | 0 | 15 | 0 | 7/2/12 | A11 A12 | 2026-10-21 pass（api-notes A24） |
 | eplan_device_place | write | device.place.execute<br>device.place.plan<br>project.get | 420 | 235 | 7 | 136 | 0 | 17/7/28 | A13 A14 A26 A53 A55 A82 A85 | — |
-| eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 78 | 34 | 0 | 44 | 0 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
+| eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 79 | 34 | 0 | 44 | 1 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_device_update | write | device.update.execute<br>device.update.plan | 145 | 68 | 4 | 50 | 0 | 5/2/5 | A3 A13 A79 A82 A85 A93 | 2026-10-20 pass（api-notes A17） |
 | eplan_enclosure_place | write | layout.enclosure.place.execute<br>layout.enclosure.place.plan | 132 | 62 | 2 | 53 | 0 | 0/0/0 | — | — |
-| eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 42 | 20 | 0 | 22 | 0 | 1/1/0 | A16 | — |
-| eplan_export_image | write | export.image.plan<br>export.image.run | 45 | 18 | 0 | 27 | 0 | 2/2/12 | A14 A16 | 2026-10-20 pass（api-notes A21） |
-| eplan_export_labels | write | export.labels.plan<br>export.labels.run | 36 | 16 | 0 | 20 | 0 | 1/2/1 | A24 A25 B9 | — |
-| eplan_export_parts | write | export.parts.plan<br>export.parts.run | 24 | 8 | 0 | 16 | 0 | 1/2/2 | A25 | — |
-| eplan_export_pdf | write | export.pdf.plan<br>export.pdf.run | 46 | 20 | 0 | 26 | 0 | 1/1/1 | A16 | — |
-| eplan_export_pxf | write | export.pxf.plan<br>export.pxf.run | 22 | 8 | 0 | 14 | 0 | 1/2/2 | A25 | — |
-| eplan_export_untranslated | write | export.untranslated.plan<br>export.untranslated.run | 25 | 9 | 0 | 16 | 0 | 1/2/1 | A25 B9 | — |
+| eplan_export_dxf | write | export.dxf.plan<br>export.dxf.run | 48 | 20 | 0 | 22 | 6 | 1/1/0 | A16 | — |
+| eplan_export_image | write | export.image.plan<br>export.image.run | 49 | 18 | 0 | 27 | 4 | 2/2/12 | A14 A16 | 2026-10-20 pass（api-notes A21） |
+| eplan_export_labels | write | export.labels.plan<br>export.labels.run | 37 | 16 | 0 | 20 | 1 | 1/2/1 | A24 A25 B9 | — |
+| eplan_export_parts | write | export.parts.plan<br>export.parts.run | 25 | 8 | 0 | 16 | 1 | 1/2/2 | A25 | — |
+| eplan_export_pdf | write | export.pdf.plan<br>export.pdf.run | 48 | 20 | 0 | 26 | 2 | 1/1/1 | A16 | — |
+| eplan_export_pxf | write | export.pxf.plan<br>export.pxf.run | 23 | 8 | 0 | 14 | 1 | 1/2/2 | A25 | — |
+| eplan_export_untranslated | write | export.untranslated.plan<br>export.untranslated.run | 26 | 9 | 0 | 16 | 1 | 1/2/1 | A25 B9 | — |
 | eplan_graphic_edit | write | graphic.edit.execute<br>graphic.edit.plan | 331 | 207 | 2 | 121 | 0 | 1/1/1 | A99 | — |
-| eplan_import_dxf | write | import.dxf.execute<br>import.dxf.plan | 232 | 135 | 2 | 94 | 0 | 1/2/1 | A29 | — |
+| eplan_import_dxf | write | import.dxf.execute<br>import.dxf.plan | 234 | 135 | 2 | 94 | 2 | 1/2/1 | A29 | — |
 | eplan_import_list | destructive | import.list.execute<br>import.list.plan | 91 | 46 | 0 | 41 | 2 | 4/1/1 | A30 A31 | — |
 | eplan_import_pdf_comments | write | import.pdf_comments.execute<br>import.pdf_comments.plan | 82 | 39 | 2 | 39 | 1 | 2/1/1 | A39 | — |
 | eplan_import_plc | destructive | import.plc.execute<br>import.plc.plan | 79 | 38 | 0 | 39 | 1 | 2/1/1 | A30 | — |
-| eplan_import_pxf | write | import.pxf.execute<br>import.pxf.plan | 7 | 2 | 0 | 5 | 0 | 0/1/1 | A28 A29 | — |
-| eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 77 | 37 | 2 | 38 | 0 | 1/1/1 | A28 | — |
+| eplan_import_pxf | write | import.pxf.execute<br>import.pxf.plan | 8 | 2 | 0 | 5 | 1 | 0/1/1 | A28 A29 | — |
+| eplan_language_remove | destructive | language.remove.execute<br>language.remove.plan | 78 | 37 | 2 | 38 | 1 | 1/1/1 | A28 | — |
 | eplan_language_set | write | language.set.execute<br>language.set.plan | 52 | 24 | 0 | 28 | 0 | 2/1/4 | A28 | — |
 | eplan_layout_get | read | layout.get | 46 | 27 | 0 | 19 | 0 | 0/0/0 | — | — |
 | eplan_layout_place | write | layout.place.execute<br>layout.place.plan | 147 | 68 | 2 | 61 | 0 | 0/0/0 | — | — |
@@ -257,7 +257,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_macro_insert | write | macro.insert.execute<br>macro.insert.plan | 272 | 165 | 3 | 100 | 0 | 10/2/10 | A12 A13 A14 A79 A82 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_macro_list | read | macro.list | 2 | 1 | 0 | 1 | 0 | 4/0/4 | A4 | — |
 | eplan_macro_store | write | macro.store | 125 | 52 | 4 | 47 | 0 | 1/0/1 | — | — |
-| eplan_masterdata_update | destructive | masterdata.update.execute<br>masterdata.update.plan | 34 | 15 | 0 | 19 | 0 | 0/0/1 | — | — |
+| eplan_masterdata_update | destructive | masterdata.update.execute<br>masterdata.update.plan | 35 | 15 | 0 | 19 | 1 | 0/0/1 | — | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
 | eplan_modelview_create | write | modelview.create.execute<br>modelview.create.plan | 128 | 66 | 1 | 60 | 1 | 0/0/0 | — | — |
 | eplan_object_find | read | object.find<br>object.get<br>project.get | 450 | 280 | 63 | 166 | 0 | 3/1/16 | A57 A60 | — |
@@ -274,16 +274,16 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 193 | 124 | 2 | 66 | 0 | 11/6/41 | A11 A12 A57 A80 | — |
 | eplan_page_list | read | page.list | 43 | 20 | 1 | 22 | 0 | 16/5/14 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_open | read | page.open | 27 | 14 | 0 | 13 | 0 | 6/2/7 | A54 | — |
-| eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 71 | 29 | 0 | 42 | 0 | 2/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
+| eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 72 | 29 | 0 | 42 | 1 | 2/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
 | eplan_page_review | read | page.review | 211 | 135 | 2 | 70 | 0 | 5/2/2 | A41 A64 A65 A72 A73 | — |
 | eplan_page_text_replace | write | page.text.replace.execute<br>page.text.replace.plan | 79 | 38 | 0 | 41 | 0 | 1/2/1 | A41 | — |
 | eplan_page_update | write | page.update.execute<br>page.update.plan | 81 | 41 | 1 | 38 | 0 | 3/5/6 | A7 A13 A36 A49 | 2026-10-20 pass（api-notes A17） |
 | eplan_part_build | destructive | part.import.execute<br>part.import.plan<br>part.search | 70 | 23 | 2 | 30 | 0 | 1/1/1 | A30 | — |
-| eplan_part_export | write | part.export.plan<br>part.export.run | 33 | 11 | 0 | 19 | 1 | 1/2/2 | A30 | 2026-10-27 pass（Large 测试 README） |
-| eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 86 | 28 | 2 | 39 | 1 | 1/5/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
+| eplan_part_export | write | part.export.plan<br>part.export.run | 34 | 11 | 0 | 19 | 2 | 1/2/2 | A30 | 2026-10-27 pass（Large 测试 README） |
+| eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 87 | 28 | 2 | 39 | 2 | 1/5/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
 | eplan_part_list | read | part.list | 46 | 24 | 1 | 19 | 0 | 1/2/3 | — | 2026-10-19 pass_with_findings（api-notes A12） |
 | eplan_part_search | read | part.search | 54 | 21 | 2 | 16 | 0 | 2/2/5 | — | 2026-10-21 pass（api-notes A30） |
-| eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 121 | 54 | 1 | 62 | 1 | 1/1/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
+| eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 122 | 54 | 1 | 62 | 2 | 1/1/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 74 | 39 | 0 | 35 | 0 | 1/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
 | eplan_placeholder_list | read | placeholder.list | 46 | 27 | 0 | 19 | 0 | 1/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
 | eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 328 | 200 | 2 | 125 | 0 | 10/3/18 | A54 A88 | — |
@@ -292,7 +292,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 380 | 219 | 8 | 132 | 0 | 9/3/4 | A57 A72 A76 | — |
 | eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 2/8/5 | A14 A17 A39 | — |
 | eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/6/3 | — | — |
-| eplan_plc_generate | write | plc.generate.execute<br>plc.generate.plan | 61 | 31 | 0 | 30 | 0 | 0/0/1 | — | — |
+| eplan_plc_generate | write | plc.generate.execute<br>plc.generate.plan | 62 | 31 | 0 | 30 | 1 | 0/0/1 | — | — |
 | eplan_plc_get | read | plc.get | 83 | 40 | 1 | 31 | 0 | 2/1/3 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
 | eplan_plc_readdress | destructive | plc.readdress.execute<br>plc.readdress.plan | 75 | 32 | 1 | 41 | 0 | 0/0/1 | — | — |
 | eplan_potential_update | write | potential.update.execute<br>potential.update.plan | 173 | 103 | 1 | 67 | 0 | 0/0/0 | — | — |
@@ -302,14 +302,14 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/9 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_project_open | write | project.open.execute<br>project.open.plan | 19 | 7 | 0 | 12 | 0 | 0/0/1 | A41 | — |
 | eplan_project_rename | destructive | project.rename.execute<br>project.rename.plan | 32 | 14 | 0 | 18 | 0 | 0/0/0 | A18 | — |
-| eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 82 | 38 | 2 | 42 | 0 | 0/1/1 | A11 A14 A25 A28 | — |
+| eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 84 | 38 | 2 | 42 | 2 | 0/1/1 | A11 A14 A25 A28 | — |
 | eplan_project_update | write | project.update.execute<br>project.update.plan | 64 | 31 | 1 | 31 | 0 | 0/0/1 | — | — |
 | eplan_property_get | read | project.get<br>property.read | 382 | 220 | 1 | 160 | 0 | 3/2/4 | A36 A44 | — |
 | eplan_property_schema | read | — | 0 | 0 | 0 | 0 | 0 | 3/1/0 | — | — |
 | eplan_property_set | write | project.get<br>property.set.execute<br>property.set.plan | 423 | 238 | 1 | 181 | 0 | 3/1/3 | A36 A44 A48 A95 B13 | — |
 | eplan_report_configure | write | report.settings.execute<br>report.settings.plan | 16 | 8 | 0 | 8 | 0 | 0/0/1 | A28 | — |
 | eplan_report_create | write | report.create.execute<br>report.create.plan | 86 | 43 | 0 | 43 | 0 | 3/1/1 | A84 | — |
-| eplan_report_update | write | report.update.execute<br>report.update.plan | 59 | 27 | 0 | 32 | 0 | 0/1/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
+| eplan_report_update | write | report.update.execute<br>report.update.plan | 61 | 27 | 0 | 32 | 2 | 0/1/2 | A16 A18 | 2026-10-20 pass（api-notes A20） |
 | eplan_revision_list | read | revision.list | 48 | 22 | 2 | 18 | 0 | 1/0/1 | A28 | — |
 | eplan_rule_check | read | device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>plan.names<br>project.snapshot | 322 | 177 | 8 | 94 | 0 | 2/1/0 | — | — |
 | eplan_selection_get | read | selection.get | 181 | 42 | 0 | 139 | 0 | 1/1/1 | — | — |
@@ -323,12 +323,12 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_structure_update | write | structure.update.execute<br>structure.update.plan | 72 | 30 | 1 | 40 | 0 | 0/0/2 | — | — |
 | eplan_symbol_search | read | symbol.search | 68 | 39 | 1 | 27 | 0 | 4/3/11 | A52 A53 A55 | — |
 | eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/3 | — | — |
-| eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 87 | 37 | 0 | 50 | 0 | 0/1/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
+| eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 88 | 37 | 0 | 50 | 1 | 0/1/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
 | eplan_terminal_strip_get | read | terminal.strip.get | 41 | 24 | 0 | 17 | 0 | 2/1/3 | — | — |
 | eplan_terminal_strip_list | read | terminal.strip.list | 20 | 11 | 0 | 9 | 0 | 2/1/3 | — | — |
 | eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 10/3/0 | — | — |
-| eplan_translation_export | write | translation.export.plan<br>translation.export.run | 40 | 14 | 0 | 23 | 1 | 1/2/2 | A30 | — |
-| eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 30 | 10 | 0 | 18 | 1 | 3/2/1 | A47 | 2026-10-27 pass（Large 测试 README） |
+| eplan_translation_export | write | translation.export.plan<br>translation.export.run | 41 | 14 | 0 | 23 | 2 | 1/2/2 | A30 | — |
+| eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 31 | 10 | 0 | 18 | 2 | 3/2/1 | A47 | 2026-10-27 pass（Large 测试 README） |
 | eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 323 | 178 | 8 | 94 | 0 | 3/4/7 | A14 A17 A32 A33 A36 A37 A39 | — |
 
 ## 6. 按版本、模块、授权的可用性
@@ -357,7 +357,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | `N:Eplan.EplApi.DataModel.Planning` | env_blocked | 开发机授权中 Preplanning 不可用 | api-notes A24 |
 
 ### 扫描漏记、已有工具执行的等价重载
-共 81 组、81 个读取重载；完整成员 ID 在 overlay 的 members 中。下表的 via 是扫描已识别的组；source 是调用，receiver 是具体列表的取得位置。此表不增加实机验证证据。
+共 120 组、120 个读取重载；完整成员 ID 在 overlay 的 members 中。下表的 via 是扫描已识别的组；source 是调用，receiver 是具体列表的取得位置。此表不增加实机验证证据。
 
 | 组 | 工具 | via | source | receiver |
 |---|---|---|---|---|
@@ -442,3 +442,42 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | `O:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:346 |
 | `O:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:351 |
 | `O:Eplan.EplApi.DataModel.ViewPartPropertyList.Property` | eplan_object_get | `O:Eplan.EplApi.DataModel.UniversalPropertyList.Property` | src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160 | src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:372 |
+| `A:export/PDFPAGESSCHEME` | eplan_export_pdf | `O:Eplan.EplApi.HEServices.Export.PdfPages` | docs/tools/eplan_export_pdf.md |  |
+| `A:export/PDFPROJECTSCHEME` | eplan_export_pdf | `O:Eplan.EplApi.HEServices.Export.PdfPages` | docs/tools/eplan_export_pdf.md |  |
+| `A:export/DXFPAGE` | eplan_export_dxf | `O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk` | docs/tools/eplan_export_dxf.md |  |
+| `A:export/DXFPROJECT` | eplan_export_dxf | `O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk` | docs/tools/eplan_export_dxf.md |  |
+| `A:export/DWGPAGE` | eplan_export_dxf | `O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk` | docs/tools/eplan_export_dxf.md |  |
+| `A:export/DWGPROJECT` | eplan_export_dxf | `O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk` | docs/tools/eplan_export_dxf.md |  |
+| `A:export/DXFDWGPPAGESSCHEME` | eplan_export_dxf | `O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk` | docs/tools/eplan_export_dxf.md |  |
+| `A:export/DXFDWGPROJECTSCHEME` | eplan_export_dxf | `O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk` | docs/tools/eplan_export_dxf.md |  |
+| `A:export/GRAPHICPAGE` | eplan_export_image | `O:Eplan.EplApi.HEServices.Export.GraphicPage` | docs/tools/eplan_export_image.md |  |
+| `A:export/GRAPHICPROJECT` | eplan_export_image | `O:Eplan.EplApi.HEServices.Export.GraphicPage` | docs/tools/eplan_export_image.md |  |
+| `A:exportToGraphics/GRAPHICPAGE` | eplan_export_image | `O:Eplan.EplApi.HEServices.Export.GraphicPage` | docs/tools/eplan_export_image.md |  |
+| `A:exportToGraphics/GRAPHICPROJECT` | eplan_export_image | `O:Eplan.EplApi.HEServices.Export.GraphicPage` | docs/tools/eplan_export_image.md |  |
+| `A:export/PXFPROJECT` | eplan_export_pxf | `O:Eplan.EplApi.HEServices.Export.PXFProject` | docs/tools/eplan_export_pxf.md |  |
+| `A:import/DXFPAGE` | eplan_import_dxf | `O:Eplan.EplApi.HEServices.Import.DXFPage` | docs/tools/eplan_import_dxf.md |  |
+| `A:import/DWGPAGE` | eplan_import_dxf | `O:Eplan.EplApi.HEServices.Import.DXFPage` | docs/tools/eplan_import_dxf.md |  |
+| `A:import/PXFPROJECT` | eplan_import_pxf | `O:Eplan.EplApi.HEServices.Import.PXFProject` | docs/tools/eplan_import_pxf.md |  |
+| `A:check/PAGES` | eplan_check_run | `O:Eplan.EplApi.HEServices.Check.VerifyPages` | docs/tools/eplan_check_run.md |  |
+| `A:check/PROJECT` | eplan_check_run | `O:Eplan.EplApi.HEServices.Check.VerifyProject` | docs/tools/eplan_check_run.md |  |
+| `A:generate/CONNECTIONS` | eplan_connection_generate | `O:Eplan.EplApi.HEServices.Generate.Connections` | docs/tools/eplan_connection_generate.md |  |
+| `A:renumber/CABLES` | eplan_cable_renumber | `O:Eplan.EplApi.HEServices.CableService.RenumberCables` | docs/tools/eplan_cable_renumber.md |  |
+| `A:renumber/CONNECTIONS` | eplan_connection_number | `O:Eplan.EplApi.HEServices.ConnectionService.DesignateConnections` | docs/tools/eplan_connection_number.md |  |
+| `A:renumber/DEVICES` | eplan_device_renumber | `O:Eplan.EplApi.HEServices.Renumber.DeviceTags` | docs/tools/eplan_device_renumber.md |  |
+| `A:renumber/PAGES` | eplan_page_renumber | `O:Eplan.EplApi.HEServices.Renumber.Pages` | docs/tools/eplan_page_renumber.md |  |
+| `A:renumber/TERMINALS` | eplan_terminal_renumber | `O:Eplan.EplApi.HEServices.Renumber.Terminals` | docs/tools/eplan_terminal_renumber.md |  |
+| `A:reports/PROJECT` | eplan_report_update | `O:Eplan.EplApi.HEServices.Reports.GenerateProject` | docs/tools/eplan_report_update.md |  |
+| `A:reports/PAGES` | eplan_report_update | `O:Eplan.EplApi.HEServices.Reports.Update` | docs/tools/eplan_report_update.md |  |
+| `A:translate/TRANSLATEPROJECT` | eplan_project_translate | `O:Eplan.EplApi.HEServices.Translate.TranslateObjects` | docs/tools/eplan_project_translate.md |  |
+| `A:translate/TRANSLATEPAGES` | eplan_project_translate | `O:Eplan.EplApi.HEServices.Translate.TranslateObjects` | docs/tools/eplan_project_translate.md |  |
+| `A:translate/EXPORTMISSINGTRANSLATIONS` | eplan_export_untranslated | `O:Eplan.EplApi.HEServices.Translate.ExportMissingTranslation` | docs/tools/eplan_export_untranslated.md |  |
+| `A:translate/REMOVELANGUAGE` | eplan_language_remove | `O:Eplan.EplApi.HEServices.Translate.RemoveProjectLanguage` | docs/tools/eplan_language_remove.md |  |
+| `A:translate/IMPORTTOTRANSDB` | eplan_translation_import | `O:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts` | docs/tools/eplan_translation_import.md |  |
+| `A:translate/EXPORTFROMTRANSDB` | eplan_translation_export | `O:Eplan.EplApi.HEServices.Translate.ExportDatabaseTexts` | docs/tools/eplan_translation_export.md |  |
+| `A:partslist/EXPORT` | eplan_export_parts | `O:Eplan.EplApi.HEServices.PartsService.ExportPartsList` | docs/tools/eplan_export_parts.md |  |
+| `A:synchronize/PARTSTOSYSTEM` | eplan_part_sync | `O:Eplan.EplApi.HEServices.Synchronize.Parts` | docs/tools/eplan_part_sync.md |  |
+| `A:masterdata/UPDATEPROJECT` | eplan_masterdata_update | `O:Eplan.EplApi.HEServices.Masterdata.UpdateProject` | docs/tools/eplan_masterdata_update.md |  |
+| `A:label` | eplan_export_labels | `O:Eplan.EplApi.HEServices.Label.DoLabel` | docs/tools/eplan_export_labels.md |  |
+| `A:plcservice/GENERATEPLCSCHEMATIC` | eplan_plc_generate | `O:Eplan.EplApi.HEServices.PlcService.GenerateSchematic` | docs/tools/eplan_plc_generate.md |  |
+| `A:partsmanagementapi/EXPORTPARTS` | eplan_part_export | `O:Eplan.EplApi.MasterData.MDPartsDatabase.ExportParts` | docs/tools/eplan_part_export.md |  |
+| `A:partsmanagementapi/IMPORT` | eplan_part_import | `O:Eplan.EplApi.MasterData.MDPartsDatabase.ImportParts` | docs/tools/eplan_part_import.md |  |

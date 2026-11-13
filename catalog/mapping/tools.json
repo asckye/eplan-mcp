@@ -7543,7 +7543,9 @@
         "T:Eplan.EplApi.HEServices.Exceptions.InvalidScheme",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:renumber/CABLES"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_cable_renumber.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -7800,7 +7802,10 @@
         "T:Eplan.EplApi.HEServices.Exceptions.InvalidScheme",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:check/PAGES",
+        "A:check/PROJECT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_check_run.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -8631,7 +8636,9 @@
         "T:Eplan.EplApi.HEServices.Generate",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:generate/CONNECTIONS"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_connection_generate.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -9082,7 +9089,9 @@
         "T:Eplan.EplApi.HEServices.Exceptions.InvalidScheme",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:renumber/CONNECTIONS"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_connection_number.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -10610,7 +10619,9 @@
         "T:Eplan.EplApi.HEServices.Renumber.Enums.DeviceTags",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:renumber/DEVICES"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_device_renumber.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -11135,7 +11146,14 @@
         "T:Eplan.EplApi.HEServices.Export",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:export/DWGPAGE",
+        "A:export/DWGPROJECT",
+        "A:export/DXFDWGPPAGESSCHEME",
+        "A:export/DXFDWGPROJECTSCHEME",
+        "A:export/DXFPAGE",
+        "A:export/DXFPROJECT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_export_dxf.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -11236,7 +11254,12 @@
         "T:Eplan.EplApi.HEServices.Export.Format",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:export/GRAPHICPAGE",
+        "A:export/GRAPHICPROJECT",
+        "A:exportToGraphics/GRAPHICPAGE",
+        "A:exportToGraphics/GRAPHICPROJECT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_export_image.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -11407,7 +11430,9 @@
         "T:Eplan.EplApi.HEServices.Label",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:label"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_export_labels.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -11497,7 +11522,9 @@
         "T:Eplan.EplApi.HEServices.PartsService.Format",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:partslist/EXPORT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_export_parts.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -11603,7 +11630,10 @@
         "T:Eplan.EplApi.HEServices.Export.DegreeOfColor",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:export/PDFPAGESSCHEME",
+        "A:export/PDFPROJECTSCHEME"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_export_pdf.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -11686,7 +11716,9 @@
         "T:Eplan.EplApi.HEServices.Export",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:export/PXFPROJECT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_export_pxf.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -11771,7 +11803,9 @@
         "T:Eplan.EplApi.HEServices.SelectionSet",
         "T:Eplan.EplApi.HEServices.Translate"
       ],
-      "actions": [],
+      "actions": [
+        "A:translate/EXPORTMISSINGTRANSLATIONS"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_export_untranslated.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -12435,7 +12469,10 @@
         "T:Eplan.EplApi.HEServices.Transformation.PositionMode",
         "T:Eplan.EplApi.HEServices.Transformation.ScalingMode"
       ],
-      "actions": [],
+      "actions": [
+        "A:import/DWGPAGE",
+        "A:import/DXFPAGE"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_import_dxf.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -12929,7 +12966,9 @@
         "T:Eplan.EplApi.DataModel.ProjectLockingException",
         "T:Eplan.EplApi.HEServices.Import"
       ],
-      "actions": [],
+      "actions": [
+        "A:import/PXFPROJECT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_import_pxf.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -13052,7 +13091,9 @@
         "T:Eplan.EplApi.HEServices.SelectionSet",
         "T:Eplan.EplApi.HEServices.Translate"
       ],
-      "actions": [],
+      "actions": [
+        "A:translate/REMOVELANGUAGE"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_language_remove.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -14404,7 +14445,9 @@
         "T:Eplan.EplApi.HEServices.Masterdata",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:masterdata/UPDATEPROJECT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_masterdata_update.md",
         "specStatus": "Implemented (v0.5.1)",
@@ -17858,7 +17901,9 @@
         "T:Eplan.EplApi.HEServices.Renumber.Enums.SubPages",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:renumber/PAGES"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_page_renumber.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -18741,7 +18786,8 @@
       ],
       "actions": [
         "A:backup",
-        "A:backup/MASTERDATA"
+        "A:backup/MASTERDATA",
+        "A:partsmanagementapi/EXPORTPARTS"
       ],
       "evidence": {
         "spec": "docs/tools/eplan_part_export.md",
@@ -18918,7 +18964,8 @@
       ],
       "actions": [
         "A:backup",
-        "A:backup/MASTERDATA"
+        "A:backup/MASTERDATA",
+        "A:partsmanagementapi/IMPORT"
       ],
       "evidence": {
         "spec": "docs/tools/eplan_part_import.md",
@@ -19409,7 +19456,8 @@
       ],
       "actions": [
         "A:backup",
-        "A:backup/MASTERDATA"
+        "A:backup/MASTERDATA",
+        "A:synchronize/PARTSTOSYSTEM"
       ],
       "evidence": {
         "spec": "docs/tools/eplan_part_sync.md",
@@ -21851,7 +21899,9 @@
         "T:Eplan.EplApi.HEServices.PlcService",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:plcservice/GENERATEPLCSCHEMATIC"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_plc_generate.md",
         "specStatus": "Implemented (v0.5.1)",
@@ -23159,7 +23209,10 @@
         "T:Eplan.EplApi.HEServices.SelectionSet",
         "T:Eplan.EplApi.HEServices.Translate"
       ],
-      "actions": [],
+      "actions": [
+        "A:translate/TRANSLATEPAGES",
+        "A:translate/TRANSLATEPROJECT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_project_translate.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -24604,7 +24657,10 @@
         "T:Eplan.EplApi.HEServices.Reports",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:reports/PAGES",
+        "A:reports/PROJECT"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_report_update.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -26737,7 +26793,9 @@
         "T:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
-      "actions": [],
+      "actions": [
+        "A:renumber/TERMINALS"
+      ],
       "evidence": {
         "spec": "docs/tools/eplan_terminal_renumber.md",
         "specStatus": "Implemented (v0.1.0)",
@@ -27098,7 +27156,8 @@
       ],
       "actions": [
         "A:backup",
-        "A:backup/MASTERDATA"
+        "A:backup/MASTERDATA",
+        "A:translate/EXPORTFROMTRANSDB"
       ],
       "evidence": {
         "spec": "docs/tools/eplan_translation_export.md",
@@ -27190,7 +27249,8 @@
       ],
       "actions": [
         "A:backup",
-        "A:backup/MASTERDATA"
+        "A:backup/MASTERDATA",
+        "A:translate/IMPORTTOTRANSDB"
       ],
       "evidence": {
         "spec": "docs/tools/eplan_translation_import.md",

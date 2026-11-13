@@ -226,6 +226,47 @@ reached-by-tool:
   - { match: "O:Eplan.EplApi.DataModel.ViewPartPropertyList.Property", members: ["P:Eplan.EplApi.DataModel.ViewPartPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)"], tools: [eplan_object_get], via: "O:Eplan.EplApi.DataModel.UniversalPropertyList.Property", source: src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs:160, receiver: src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs:372 }
 
 # availability: where the coverage was established, per version, module and licence.
+  # Action rows a tool does through the API instead of running the action (2026-11-13): the via group is what the tool calls.
+  - { match: "A:export/PDFPAGESSCHEME", tools: [eplan_export_pdf], via: "O:Eplan.EplApi.HEServices.Export.PdfPages", source: docs/tools/eplan_export_pdf.md }
+  - { match: "A:export/PDFPROJECTSCHEME", tools: [eplan_export_pdf], via: "O:Eplan.EplApi.HEServices.Export.PdfPages", source: docs/tools/eplan_export_pdf.md }
+  - { match: "A:export/DXFPAGE", tools: [eplan_export_dxf], via: "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk", source: docs/tools/eplan_export_dxf.md }
+  - { match: "A:export/DXFPROJECT", tools: [eplan_export_dxf], via: "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk", source: docs/tools/eplan_export_dxf.md }
+  - { match: "A:export/DWGPAGE", tools: [eplan_export_dxf], via: "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk", source: docs/tools/eplan_export_dxf.md }
+  - { match: "A:export/DWGPROJECT", tools: [eplan_export_dxf], via: "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk", source: docs/tools/eplan_export_dxf.md }
+  - { match: "A:export/DXFDWGPPAGESSCHEME", tools: [eplan_export_dxf], via: "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk", source: docs/tools/eplan_export_dxf.md }
+  - { match: "A:export/DXFDWGPROJECTSCHEME", tools: [eplan_export_dxf], via: "O:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk", source: docs/tools/eplan_export_dxf.md }
+  - { match: "A:export/GRAPHICPAGE", tools: [eplan_export_image], via: "O:Eplan.EplApi.HEServices.Export.GraphicPage", source: docs/tools/eplan_export_image.md }
+  - { match: "A:export/GRAPHICPROJECT", tools: [eplan_export_image], via: "O:Eplan.EplApi.HEServices.Export.GraphicPage", source: docs/tools/eplan_export_image.md }
+  - { match: "A:exportToGraphics/GRAPHICPAGE", tools: [eplan_export_image], via: "O:Eplan.EplApi.HEServices.Export.GraphicPage", source: docs/tools/eplan_export_image.md }
+  - { match: "A:exportToGraphics/GRAPHICPROJECT", tools: [eplan_export_image], via: "O:Eplan.EplApi.HEServices.Export.GraphicPage", source: docs/tools/eplan_export_image.md }
+  - { match: "A:export/PXFPROJECT", tools: [eplan_export_pxf], via: "O:Eplan.EplApi.HEServices.Export.PXFProject", source: docs/tools/eplan_export_pxf.md }
+  - { match: "A:import/DXFPAGE", tools: [eplan_import_dxf], via: "O:Eplan.EplApi.HEServices.Import.DXFPage", source: docs/tools/eplan_import_dxf.md }
+  - { match: "A:import/DWGPAGE", tools: [eplan_import_dxf], via: "O:Eplan.EplApi.HEServices.Import.DXFPage", source: docs/tools/eplan_import_dxf.md }
+  - { match: "A:import/PXFPROJECT", tools: [eplan_import_pxf], via: "O:Eplan.EplApi.HEServices.Import.PXFProject", source: docs/tools/eplan_import_pxf.md }
+  - { match: "A:check/PAGES", tools: [eplan_check_run], via: "O:Eplan.EplApi.HEServices.Check.VerifyPages", source: docs/tools/eplan_check_run.md }
+  - { match: "A:check/PROJECT", tools: [eplan_check_run], via: "O:Eplan.EplApi.HEServices.Check.VerifyProject", source: docs/tools/eplan_check_run.md }
+  - { match: "A:generate/CONNECTIONS", tools: [eplan_connection_generate], via: "O:Eplan.EplApi.HEServices.Generate.Connections", source: docs/tools/eplan_connection_generate.md }
+  - { match: "A:renumber/CABLES", tools: [eplan_cable_renumber], via: "O:Eplan.EplApi.HEServices.CableService.RenumberCables", source: docs/tools/eplan_cable_renumber.md }
+  - { match: "A:renumber/CONNECTIONS", tools: [eplan_connection_number], via: "O:Eplan.EplApi.HEServices.ConnectionService.DesignateConnections", source: docs/tools/eplan_connection_number.md }
+  - { match: "A:renumber/DEVICES", tools: [eplan_device_renumber], via: "O:Eplan.EplApi.HEServices.Renumber.DeviceTags", source: docs/tools/eplan_device_renumber.md }
+  - { match: "A:renumber/PAGES", tools: [eplan_page_renumber], via: "O:Eplan.EplApi.HEServices.Renumber.Pages", source: docs/tools/eplan_page_renumber.md }
+  - { match: "A:renumber/TERMINALS", tools: [eplan_terminal_renumber], via: "O:Eplan.EplApi.HEServices.Renumber.Terminals", source: docs/tools/eplan_terminal_renumber.md }
+  - { match: "A:reports/PROJECT", tools: [eplan_report_update], via: "O:Eplan.EplApi.HEServices.Reports.GenerateProject", source: docs/tools/eplan_report_update.md }
+  - { match: "A:reports/PAGES", tools: [eplan_report_update], via: "O:Eplan.EplApi.HEServices.Reports.Update", source: docs/tools/eplan_report_update.md }
+  - { match: "A:translate/TRANSLATEPROJECT", tools: [eplan_project_translate], via: "O:Eplan.EplApi.HEServices.Translate.TranslateObjects", source: docs/tools/eplan_project_translate.md }
+  - { match: "A:translate/TRANSLATEPAGES", tools: [eplan_project_translate], via: "O:Eplan.EplApi.HEServices.Translate.TranslateObjects", source: docs/tools/eplan_project_translate.md }
+  - { match: "A:translate/EXPORTMISSINGTRANSLATIONS", tools: [eplan_export_untranslated], via: "O:Eplan.EplApi.HEServices.Translate.ExportMissingTranslation", source: docs/tools/eplan_export_untranslated.md }
+  - { match: "A:translate/REMOVELANGUAGE", tools: [eplan_language_remove], via: "O:Eplan.EplApi.HEServices.Translate.RemoveProjectLanguage", source: docs/tools/eplan_language_remove.md }
+  - { match: "A:translate/IMPORTTOTRANSDB", tools: [eplan_translation_import], via: "O:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts", source: docs/tools/eplan_translation_import.md }
+  - { match: "A:translate/EXPORTFROMTRANSDB", tools: [eplan_translation_export], via: "O:Eplan.EplApi.HEServices.Translate.ExportDatabaseTexts", source: docs/tools/eplan_translation_export.md }
+  - { match: "A:partslist/EXPORT", tools: [eplan_export_parts], via: "O:Eplan.EplApi.HEServices.PartsService.ExportPartsList", source: docs/tools/eplan_export_parts.md }
+  - { match: "A:synchronize/PARTSTOSYSTEM", tools: [eplan_part_sync], via: "O:Eplan.EplApi.HEServices.Synchronize.Parts", source: docs/tools/eplan_part_sync.md }
+  - { match: "A:masterdata/UPDATEPROJECT", tools: [eplan_masterdata_update], via: "O:Eplan.EplApi.HEServices.Masterdata.UpdateProject", source: docs/tools/eplan_masterdata_update.md }
+  - { match: "A:label", tools: [eplan_export_labels], via: "O:Eplan.EplApi.HEServices.Label.DoLabel", source: docs/tools/eplan_export_labels.md }
+  - { match: "A:plcservice/GENERATEPLCSCHEMATIC", tools: [eplan_plc_generate], via: "O:Eplan.EplApi.HEServices.PlcService.GenerateSchematic", source: docs/tools/eplan_plc_generate.md }
+  - { match: "A:partsmanagementapi/EXPORTPARTS", tools: [eplan_part_export], via: "O:Eplan.EplApi.MasterData.MDPartsDatabase.ExportParts", source: docs/tools/eplan_part_export.md }
+  - { match: "A:partsmanagementapi/IMPORT", tools: [eplan_part_import], via: "O:Eplan.EplApi.MasterData.MDPartsDatabase.ImportParts", source: docs/tools/eplan_part_import.md }
+
 availability:
   - { scope: EPLAN 2026.0.3.25421, status: verified, note: 写明版本的实机记录都在这个版本上；没有其他版本的记录, source: api-notes A10–A30 }
   - { scope: Electric P8, status: verified, note: 大部分实机记录所用的变体, source: api-notes A12–A30 }

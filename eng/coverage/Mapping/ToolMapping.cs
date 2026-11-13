@@ -60,6 +60,13 @@ internal sealed partial class ToolMapping
             $"catalog/eplan-{string.Join('.', usage.EplanApi.Split('.').Take(3))}"));
         foreach (ToolReach reach in overlay.ReachedByTool)
         {
+            if (reach.Match.StartsWith("A:", StringComparison.Ordinal))
+            {
+                if (!catalog!.Units.TryGetValue(reach.Match, out Unit? row) || row.Exclusion is not null)
+                { throw new InvalidDataException($"{Overlay.RelativePath}: reached-by-tool {reach.Match} must name a non-excluded action row."); }
+                continue;
+            }
+
             if (!catalog!.Groups.TryGetValue(reach.Match, out var members)
                 || reach.Members.Any(id => !members.Contains((id, false))))
             {

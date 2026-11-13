@@ -20,7 +20,9 @@ public sealed class ToolReachReferenceTests
             Overlay overlay = Overlay.Parse(Resource("mapping-overlay.yaml"), tools);
             Assert.NotEmpty(overlay.ReachedByTool);
             var data = new TheoryData<string, string, string>();
-            foreach (ToolReach reach in overlay.ReachedByTool)
+            // Operation aliases name the call and the receiver in the adapter; action rows name the tool spec instead,
+            // and the scan itself proves the tool reaches the via group (ToolMapping.BuildCore).
+            foreach (ToolReach reach in overlay.ReachedByTool.Where(r => r.Match.StartsWith("O:", StringComparison.Ordinal)))
             {
                 data.Add(reach.Match, reach.Source, reach.Receiver);
             }
@@ -51,6 +53,18 @@ public sealed class ToolReachReferenceTests
             Assert.Contains(tree.GetRoot(TestContext.Current.CancellationToken).DescendantNodes().OfType<ExpressionSyntax>(), e => e.Span.IntersectsWith(lines[line - 1].Span));
             Assert.Contains(reference == call ? "list[id" : ").Properties", lines[line - 1].ToString(), StringComparison.Ordinal);
         }
+    }
+
+    [Fact]
+    public void Overlay_EveryActionRowDoneThroughTheApi_NamesTheSpecOfItsOwnTool()
+    {
+        using JsonDocument contract = JsonDocument.Parse(Resource("tool-contract.json"));
+        string[] tools = [.. contract.RootElement.GetProperty("tools").EnumerateArray().Select(t => t.GetProperty("name").GetString()!)];
+        ToolReach[] rows = [.. Overlay.Parse(Resource("mapping-overlay.yaml"), tools).ReachedByTool
+            .Where(r => r.Match.StartsWith("A:", StringComparison.Ordinal))];
+
+        Assert.NotEmpty(rows);
+        Assert.All(rows, row => Assert.Equal("docs/tools/" + Assert.Single(row.Tools) + ".md", row.Source));
     }
 
     private static string Resource(string name)
