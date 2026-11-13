@@ -20,7 +20,16 @@ internal static class PageExportComparerMacroShift
     /// <summary>Below this, a shared translation is coincidence rather than one macro's geometry.</summary>
     internal const int MinimumObjects = 10;
 
+    /// <summary>A page can hold several substituted macros, so each qualifying translation is taken in turn.</summary>
     internal static void Separate(PageExportComparison result)
+    {
+        while (SeparateOne(result))
+        {
+            // Every round pairs at least MinimumObjects leftovers, so the leftovers run out.
+        }
+    }
+
+    private static bool SeparateOne(PageExportComparison result)
     {
         var candidates = new List<(string Type, JObject Source, JObject Target, (double X, double Y) Delta)>();
         foreach (string type in _types)
@@ -36,9 +45,9 @@ internal static class PageExportComparerMacroShift
                 }
             }
         }
-        if (candidates.GroupBy(candidate => candidate.Delta).OrderByDescending(group => group.Count())
-            .FirstOrDefault() is not { } shift || shift.Count() < MinimumObjects || shift.Key is (0, 0))
-        { return; }
+        if (candidates.Where(candidate => candidate.Delta is not (0, 0)).GroupBy(candidate => candidate.Delta)
+            .OrderByDescending(group => group.Count()).FirstOrDefault() is not { } shift || shift.Count() < MinimumObjects)
+        { return false; }
 
         var usedSources = new HashSet<JObject>();
         var usedTargets = new HashSet<JObject>();
@@ -53,6 +62,7 @@ internal static class PageExportComparerMacroShift
             group.Extra.Remove(target);
             result.MacroShiftDifferences.Add(new(type, source, target, shift.Key.X, shift.Key.Y));
         }
+        return usedSources.Count >= MinimumObjects;
     }
 
     /// <summary>The translation from <paramref name="source"/> to <paramref name="target"/>, rounded to the micron.</summary>
@@ -63,16 +73,39 @@ internal static class PageExportComparerMacroShift
         return (Math.Round(to.X - from.X, 6), Math.Round(to.Y - from.Y, 6));
     }
 
-    /// <summary>The same drawing, wherever it sits: the bounding box's extent, and a circle's angles and radius.</summary>
-    private static bool SameShape(JObject left, JObject right) => Extent(left) is { } size && Extent(right) is { } other
-        && Math.Abs(size.Width - other.Width) <= PageExportComparer.PositionTolerance
-        && Math.Abs(size.Height - other.Height) <= PageExportComparer.PositionTolerance
-        && JToken.DeepEquals(left["startAngle"], right["startAngle"]) && JToken.DeepEquals(left["endAngle"], right["endAngle"])
-        && JToken.DeepEquals(left["radius"], right["radius"]);
+    /// <summary>
+    /// The same drawing, wherever it sits: every geometry field measured from the object's own location, so a shared
+    /// translation cancels out. The bounding box is left out because it grows with the pen width, and the pen, layer
+    /// and properties are left out because the substitute macro owns them; each entry records that offset and keeps
+    /// those fields in its copy of both objects.
+    /// </summary>
+    private static bool SameShape(JObject left, JObject right) => JToken.DeepEquals(Shape(left), Shape(right));
 
-    private static (double Width, double Height)? Extent(JObject value) =>
-        value["boundingBox"] is JArray { Count: 2 } box && Point(box[0]) is { } first && Point(box[1]) is { } second
-            ? (Math.Abs(second.X - first.X), Math.Abs(second.Y - first.Y)) : null;
+    private static readonly string[] _ownedByTheMacro = ["oid", "errors", "properties", "boundingBox", "location", "layer", "pen"];
+
+    private static JToken Shape(JObject value)
+    {
+        if (Point(value["location"]) is not { } origin)
+        { return JValue.CreateNull(); }
+        var shape = (JObject)value.DeepClone();
+        foreach (string field in _ownedByTheMacro)
+        { shape.Remove(field); }
+        Relative(shape, origin);
+        return shape;
+    }
+
+    /// <summary>Rewrites every {x, y} in place as an offset from <paramref name="origin"/>, rounded to the micron.</summary>
+    private static void Relative(JToken token, (double X, double Y) origin)
+    {
+        if (token is JObject point && Point(point) is { } absolute)
+        {
+            point["x"] = Math.Round(absolute.X - origin.X, 6);
+            point["y"] = Math.Round(absolute.Y - origin.Y, 6);
+            return;
+        }
+        foreach (JToken child in token is JObject nested ? nested.PropertyValues() : token.Children())
+        { Relative(child, origin); }
+    }
 
     private static (double X, double Y)? Point(JToken? value) => value is JObject point
         && Coordinate(point["x"]) is { } x && Coordinate(point["y"]) is { } y ? (x, y) : null;
