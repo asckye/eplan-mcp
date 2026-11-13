@@ -2,6 +2,7 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\src\EplanMcp.Bridge.Eplan\Resources\potential-definition.ema" LogicalName="potential-definition.ema" />
     <Compile Include="..\Shared\PageExportComparer.cs" Link="PageExportComparer.cs" />
+    <Compile Include="..\Shared\PageExportComparerMacroShift.cs" Link="PageExportComparerMacroShift.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Hosting\DataLocations.cs" Link="Hosting\DataLocations.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Hosting\FileBridgeLog.cs" Link="Hosting\FileBridgeLog.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Hosting\StartupFailureLog.cs" Link="Hosting\StartupFailureLog.cs" />

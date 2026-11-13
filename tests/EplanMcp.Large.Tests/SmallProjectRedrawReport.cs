@@ -42,6 +42,9 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
         _macroVersionDifferences.Add(item);
     }
 
+    private static string Offset(PageExportMacroShift shift) => string.Create(System.Globalization.CultureInfo.InvariantCulture,
+        $"{shift.X:0.######} mm right and {shift.Y:0.######} mm up");
+
     internal void RecordPageElapsed(string page, TimeSpan elapsed) => _pageElapsed[page] = elapsed.TotalMilliseconds;
 
     internal void RecordCall(string page, string tool, IEnumerable<string> objectTypes, IEnumerable<string> objectOids,
@@ -118,6 +121,13 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
                 ["fields"] = new JArray(item.Fields.Select(Field)),
             }));
             types[type] = counts;
+        }
+        // The owner's rule of 2026-11-04: a substitute macro's constant offset is a macro version difference, listed
+        // with its measured value and outside the rate, not an object to hand-draw.
+        foreach (PageExportMacroShift shift in comparison.MacroShiftDifferences)
+        {
+            RecordMacroVersionDifference(name, shift.Source, "source macro", "library macro",
+                "The library macro draws this graphic " + Offset(shift) + " from the sample's; no repair was drawn.");
         }
         bool reportPage = IsReportPage(source) || IsReportPage(target);
         _pages.Add(new JObject

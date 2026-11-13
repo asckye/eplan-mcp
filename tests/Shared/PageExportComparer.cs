@@ -144,6 +144,7 @@ internal static class PageExportComparer
                 group.Different.Add(new(pair.Source, pair.Target, differences));
             }
         }
+        PageExportComparerMacroShift.Separate(result);
         return result;
     }
 
@@ -745,6 +746,7 @@ internal sealed class PageExportComparison
     public List<PageExportSubsetDifference> SubsetDifferences { get; } = [];
     public int SubsetDifferenceCount => SubsetDifferences.Count;
     public List<PageExportFieldDifference> DefaultDifferences { get; } = [];
+    public List<PageExportMacroShift> MacroShiftDifferences { get; } = [];
     public PageExportReportRows? ReportRows { get; set; }
     public List<PageExportReadWarning> Warnings { get; } = [];
     public bool HasDifferences => PageDifferences.Count > 0 || Types.Values.Any(type => type.Missing.Count > 0 || type.Extra.Count > 0 || type.Different.Count > 0);
