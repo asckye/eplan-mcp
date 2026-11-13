@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-13",
-  "scannedSources": "db236748 + uncommitted changes",
-  "sourceHash": "sha256:f3b7278f06a110f8e3f54959066f97a0df1f0151351a5f33e10130f6f8eeead7",
+  "scannedSources": "cda0b49c",
+  "sourceHash": "sha256:4d11a34a381d84015cc9b9d02a82cfccf63e465327e4874565a552b8d4ab7a4f",
   "operations": [
     {
       "name": "action.execute",
@@ -104060,49 +104060,6 @@
         ]
       },
       {
-        "adapter": "EplanCableGenerator",
-        "member": "End",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanCableGenerator.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "cable.generate.execute",
-          "cable.generate.plan"
-        ]
-      },
-      {
-        "adapter": "EplanConnectionReader",
-        "member": "PinName",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionReader.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "cable.get",
-          "cable.reassign.execute",
-          "cable.reassign.plan",
-          "connection.generate.execute",
-          "connection.generate.plan",
-          "connection.list",
-          "shield.create.execute",
-          "shield.create.plan"
-        ]
-      },
-      {
-        "adapter": "EplanDeviceReader",
-        "member": "Detail",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceReader.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "cable.renumber.execute",
-          "cable.renumber.plan",
-          "device.get"
-        ]
-      },
-      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -104114,48 +104071,44 @@
         ]
       },
       {
-        "adapter": "EplanFunctionAssignment",
-        "member": "Pins",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanFunctionAssignment.cs",
+        "adapter": "EplanPins",
+        "member": "Name",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPins.cs",
         "access": [
           "get"
         ],
         "operations": [
+          "action.try.execute",
+          "action.try.plan",
+          "api.try.execute",
+          "api.try.plan",
+          "cable.generate.execute",
+          "cable.generate.plan",
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.generate.execute",
+          "connection.generate.plan",
+          "connection.list",
+          "device.get",
           "device.place.execute",
-          "device.update.execute"
-        ]
-      },
-      {
-        "adapter": "EplanGraphicEditor",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanGraphicEditor.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "graphic.edit.plan"
-        ]
-      },
-      {
-        "adapter": "EplanPageReviewReader",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReviewReader.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "page.review"
-        ]
-      },
-      {
-        "adapter": "EplanPlacementEditor",
-        "member": "Inspect",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPlacementEditor.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "placement.edit.plan"
+          "device.update.execute",
+          "graphic.edit.plan",
+          "macro.store",
+          "object.find",
+          "object.get",
+          "page.review",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan",
+          "selection.get",
+          "selection.set",
+          "shield.create.execute",
+          "shield.create.plan"
         ]
       },
       {
@@ -104169,31 +104122,6 @@
           "device.place.execute",
           "device.place.plan",
           "plc.get"
-        ]
-      },
-      {
-        "adapter": "EplanPropertyReadAdapter",
-        "member": "End",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs",
-        "access": [
-          "get"
-        ],
-        "operations": [
-          "action.try.execute",
-          "action.try.plan",
-          "api.try.execute",
-          "api.try.plan",
-          "graphic.edit.plan",
-          "macro.store",
-          "object.find",
-          "object.get",
-          "placement.edit.plan",
-          "placement.text.create.execute",
-          "property.read",
-          "property.set.execute",
-          "property.set.plan",
-          "selection.get",
-          "selection.set"
         ]
       },
       {
@@ -141712,19 +141640,42 @@
     ],
     "T:Eplan.EplApi.DataModel.EmptyPropertyException": [
       {
-        "adapter": "EplanConnectionReader",
-        "member": "PinName",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionReader.cs",
+        "adapter": "EplanPins",
+        "member": "Name",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPins.cs",
         "access": [
           "type"
         ],
         "operations": [
+          "action.try.execute",
+          "action.try.plan",
+          "api.try.execute",
+          "api.try.plan",
+          "cable.generate.execute",
+          "cable.generate.plan",
           "cable.get",
           "cable.reassign.execute",
           "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
           "connection.generate.execute",
           "connection.generate.plan",
           "connection.list",
+          "device.get",
+          "device.place.execute",
+          "device.update.execute",
+          "graphic.edit.plan",
+          "macro.store",
+          "object.find",
+          "object.get",
+          "page.review",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan",
+          "selection.get",
+          "selection.set",
           "shield.create.execute",
           "shield.create.plan"
         ]
@@ -149430,6 +149381,47 @@
     ],
     "T:Eplan.EplApi.DataModel.IndexedPropertyException": [
       {
+        "adapter": "EplanPins",
+        "member": "Name",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPins.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.try.execute",
+          "action.try.plan",
+          "api.try.execute",
+          "api.try.plan",
+          "cable.generate.execute",
+          "cable.generate.plan",
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.generate.execute",
+          "connection.generate.plan",
+          "connection.list",
+          "device.get",
+          "device.place.execute",
+          "device.update.execute",
+          "graphic.edit.plan",
+          "macro.store",
+          "object.find",
+          "object.get",
+          "page.review",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan",
+          "selection.get",
+          "selection.set",
+          "shield.create.execute",
+          "shield.create.plan"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -155021,6 +155013,47 @@
         ],
         "operations": [
           "page.review"
+        ]
+      },
+      {
+        "adapter": "EplanPins",
+        "member": "Name",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPins.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "action.try.execute",
+          "action.try.plan",
+          "api.try.execute",
+          "api.try.plan",
+          "cable.generate.execute",
+          "cable.generate.plan",
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.generate.execute",
+          "connection.generate.plan",
+          "connection.list",
+          "device.get",
+          "device.place.execute",
+          "device.update.execute",
+          "graphic.edit.plan",
+          "macro.store",
+          "object.find",
+          "object.get",
+          "page.review",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "property.read",
+          "property.set.execute",
+          "property.set.plan",
+          "selection.get",
+          "selection.set",
+          "shield.create.execute",
+          "shield.create.plan"
         ]
       },
       {
