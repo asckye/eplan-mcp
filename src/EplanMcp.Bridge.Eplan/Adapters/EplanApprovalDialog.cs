@@ -66,6 +66,7 @@ internal sealed class EplanApprovalDialog(IBridgeLog? log = null) : IApprovalDia
         layout.Children.Add(changes);
 
         IntPtr owner = VisibleMainWindow();
+        string ownerClass = owner == IntPtr.Zero ? "none" : ClassName(owner);
         var window = new Window
         {
             Title = question.Title,
@@ -148,8 +149,8 @@ internal sealed class EplanApprovalDialog(IBridgeLog? log = null) : IApprovalDia
             }
 
             log?.Write(ended == ApprovalModalEnd.Closed && disabled.Count == 0 ? BridgeLogLevel.Information : BridgeLogLevel.Warning, string.Format(
-                System.Globalization.CultureInfo.InvariantCulture, "Approval dialog {0} ended: {1}, {2}, {3:0.0} s open, {4} window(s) re-enabled",
-                question.RequestId, decision ?? ApprovalDecisions.Cancelled, ended, open.Elapsed.TotalSeconds, disabled.Count));
+                System.Globalization.CultureInfo.InvariantCulture, "Approval dialog {0} ended: {1}, {2}, {3:0.0} s open, {4} window(s) re-enabled, owner {5}",
+                question.RequestId, decision ?? ApprovalDecisions.Cancelled, ended, open.Elapsed.TotalSeconds, disabled.Count, ownerClass));
         }
 
         return decision ?? ApprovalDecisions.Cancelled;
@@ -199,11 +200,31 @@ internal sealed class EplanApprovalDialog(IBridgeLog? log = null) : IApprovalDia
         return [.. windows];
     }
 
-    /// <summary>EPLAN's main window, unless it is minimized: it would hide the windows it owns, the dialog included.</summary>
+    /// <summary>
+    /// EPLAN's main frame (window class <c>AfxMDIFrame*</c>), unless it is minimized: it would hide the windows it owns,
+    /// the dialog included. Not <c>Process.MainWindowHandle</c>: that may be a transient window, and destroying an owner
+    /// destroys the dialog with it (2026-11-12: destroyed after 0.8 s with nobody clicking). No frame: no owner.
+    /// </summary>
     private static IntPtr VisibleMainWindow()
     {
-        using var process = Process.GetCurrentProcess();
-        IntPtr main = process.MainWindowHandle;
-        return main != IntPtr.Zero && !NativeMethods.IsIconic(main) ? main : IntPtr.Zero;
+        IntPtr frame = IntPtr.Zero;
+        NativeMethods.EnumThreadWindows(NativeMethods.GetCurrentThreadId(), (window, _) =>
+        {
+            if (NativeMethods.IsWindowVisible(window) && ClassName(window).StartsWith("AfxMDIFrame", StringComparison.Ordinal))
+            {
+                frame = window;
+                return false;
+            }
+
+            return true;
+        }, IntPtr.Zero);
+        return frame != IntPtr.Zero && !NativeMethods.IsIconic(frame) ? frame : IntPtr.Zero;
+    }
+
+    private static string ClassName(IntPtr window)
+    {
+        char[] name = new char[256];
+        int length = NativeMethods.GetClassName(window, name, name.Length);
+        return length > 0 ? new string(name, 0, length) : string.Empty;
     }
 }
