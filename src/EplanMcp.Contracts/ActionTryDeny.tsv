@@ -10,3 +10,4 @@ action	(print|plot)	Sends physical print or plot jobs.
 action	(script|execute|exec|shell|command|process|program|application|start|launch|run|call|dispatch|invoke|batch|automatic)	Executes external programs, code or nested actions.
 action	(master|partsmanagement|translate|backup|restore|export|import|file|saveas|saveall|database|sql|odbc)	Touches shared master data, files or databases beyond the target scratch project.
 parameter	(project|prj|path|file|directory|folder|destination|source|target|action|command|script|program|exec|function|method|operation|arguments?|parameters?|verb|url|host|server|database|password|token|credential|secret|setting|scheme|config|user|allprojects|allproject)	Overrides targets, paths, credentials, settings or invokes nested/batch execution.
+action	^(xpagenewdialogshow|plccommonformatdlgshow|xpb_lockinginfoaction|xfgfilterschemadlgaction)$	Closed EPLAN during the 2026-11 action census (slot A, quiet mode).

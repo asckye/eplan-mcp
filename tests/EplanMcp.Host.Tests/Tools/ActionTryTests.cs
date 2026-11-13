@@ -86,6 +86,10 @@ public sealed class ActionTryContractTests
     [InlineData("RunProgram")]
     [InlineData("ExecuteScript")]
     [InlineData("EplApiModuleAction")]
+    [InlineData("XPageNewDialogShow")]
+    [InlineData("PLCCommonFormatDlgShow")]
+    [InlineData("XPB_LockingInfoAction")]
+    [InlineData("XFgFilterSchemaDlgAction")]
     public void DenyData_CoversForbiddenCategoriesAndCaseVariants(string name)
     {
         Assert.True(ActionTryPolicy.Denied("action", name));
