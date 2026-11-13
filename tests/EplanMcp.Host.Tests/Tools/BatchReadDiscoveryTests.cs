@@ -12,7 +12,9 @@ public sealed class BatchReadDiscoveryTests
     private const string Project = "X:/fixture/Line1";
     private const string Page = "=A/1";
     private const string NameService = "O:Eplan.EplApi.HEServices.NameService.CanDeviceTagBeNested";
-    private static readonly BatchEntry[][] _readBatches = [.. BatchValues.ApiEntries().Where(BatchReadRecipes.Default.CanBuild).Chunk(8)];
+    // A handle receiver is supplied by a producer trial, which the offline fixture cannot run; it has its own test below.
+    private static readonly BatchEntry[][] _readBatches = [.. BatchValues.ApiEntries()
+        .Where(e => BatchReadRecipes.Default.CanBuild(e) && BatchValues.HandleReceiver(e.Group) is null).Chunk(8)];
 
     private static BatchEntry Entry(string group) => Assert.Single(BatchValues.ApiEntries(), e => e.Group == group && e.Kind == "api-read");
 
@@ -55,6 +57,39 @@ public sealed class BatchReadDiscoveryTests
             Assert.All(bridge.Calls, call => Assert.Contains(call.Operation,
                 new[] { OperationNames.ProjectGet, OperationNames.ObjectFind, OperationNames.PageList }));
         }
+    }
+
+    private static BatchEntry HandleEntry() => BatchValues.ApiEntries().First(e => e.Kind == "api-read"
+        && BatchReadRecipes.Default.CanBuild(e) && BatchValues.HandleReceiver(e.Group) is not null);
+
+    [Fact]
+    public async Task HandleReceiver_ComesFromOneProducerReadOnADiscoveredObject()
+    {
+        FakeBridgeClient bridge = Bridge();
+        BatchEntry entry = HandleEntry();
+        string type = Assert.IsType<string>(BatchValues.HandleReceiver(entry.Group));
+        var trials = new List<string>();
+        Task<JsonElement?> Trial(string group, Dictionary<string, object?> values, CancellationToken token)
+        {
+            trials.Add(group);
+            Assert.Contains("target", values.Keys);
+            return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(new { value = new { handle = "h:1", type } }));
+        }
+        BatchArguments result = await new BatchReadDiscovery(bridge, Project, Trial).ArgumentsAsync(entry, TestContext.Current.CancellationToken);
+
+        Assert.Null(result.Outcome);
+        Assert.NotNull(result.Values);
+        Assert.Equal("h:1", Assert.IsType<JsonElement>(result.Values["target"]).GetProperty("handle").GetString());
+        Assert.Equal(BatchHandles.Producers(type)[0], Assert.Single(trials));
+    }
+
+    [Fact]
+    public async Task HandleReceiverWithoutATrial_IsNoObject()
+    {
+        BatchArguments result = await new BatchReadDiscovery(Bridge(), Project).ArgumentsAsync(HandleEntry(), TestContext.Current.CancellationToken);
+
+        Assert.Null(result.Values);
+        Assert.Equal("skipped:no_object", result.Outcome);
     }
 
     [Fact]
