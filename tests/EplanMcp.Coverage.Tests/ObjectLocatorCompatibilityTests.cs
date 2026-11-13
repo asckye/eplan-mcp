@@ -49,6 +49,7 @@ public sealed class ObjectLocatorCompatibilityTests
             using EplanMcp.Contracts;
             using Newtonsoft.Json;
             """ + Doubles
+            + "static class EplanPins {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/EplanPins.cs", "Name") + "}\n"
             + "class EplanPropertyReadAdapter {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs", "Describe", "End") + "}\n"
             + "class EplanObjectReader {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs", "Describe", "Legacy") + "}\n"
             + "class BeforeSlice {" + BeforeSlice + "}\n"
@@ -107,6 +108,8 @@ public sealed class ObjectLocatorCompatibilityTests
             public class FunctionBase : Placement { public string Name => "=A+一-X1"; }
             public class Function : FunctionBase { public bool IsMainFunction => true; public FunctionCategory FunctionCategory { get; set; } }
             public class Connection : StorableObject { public Pin StartPin => new(); public Pin EndPin => new(); public Page Page => new(); }
+            public class EmptyPropertyException : Exception { }
+            public class IndexedPropertyException : Exception { }
             public class Pin { public Function ParentFunction => new(); public string Name => "1"; }
             public class BoxedDevice : Function { }
             public class InterruptionPoint : FunctionBase { }

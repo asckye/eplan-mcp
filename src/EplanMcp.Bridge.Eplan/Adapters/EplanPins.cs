@@ -17,7 +17,7 @@ internal static class EplanPins
         { return pin?.Name; }
         catch (Exception failure) when (failure is EmptyPropertyException or IndexedPropertyException)
         {
-            Core.Operations.WriteExceptionDiagnostics.Report(failure);
+            EplanMcp.Bridge.Core.Operations.WriteExceptionDiagnostics.Report(failure);
             return string.Empty;
         }
     }
