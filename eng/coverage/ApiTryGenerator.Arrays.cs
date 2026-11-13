@@ -32,6 +32,9 @@ internal static partial class ApiTryGenerator
         // A70: the catalog omits modreq(IsByValue); Roslyn cannot bind this native C++ collection overload.
         if (member.Id == "M:Eplan.EplApi.DataModel.E3D.Placement3D.CopyTo(Eplan.EplApi.DataModel.E3D.Placement3D,System.Collections.Generic.List{Eplan.EplApi.DataModel.E3D.Placement3D})")
         { return "unsupported_required_modifier"; }
+        // The C++/CLI master data assembly does not mark out parameters; an unmarked by-reference parameter may be one.
+        if (member.Id.StartsWith("M:Eplan.EplApi.MasterData.", StringComparison.Ordinal) && member.Parameters!.Any(p => p.Direction is null && p.Type.EndsWith('@')))
+        { return "ref_out"; }
         bool Value(string? t) => Supported(t, enums, kinds) || t is not null && Element(t) is { } e && Supported(e, enums, kinds);
         foreach (ApiParameter p in member.Parameters!)
         {

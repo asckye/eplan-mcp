@@ -43,6 +43,10 @@ internal static partial class ApiTryGenerator
             { foreach (JsonElement i in interfaces.EnumerateArray()) { yield return i.GetString()!; } }
         }
         IEnumerable<string> Ancestors(string type) => new[] { type }.Concat(Parents(type).Where(Candidate).SelectMany(Ancestors));
+        // A member declared to return a class may return any public subclass at run time; handles carry the run-time type.
+        var subclasses = types.Values.Where(t => Text(t, "kind") == "class" && Text(t, "base").Length > 0).GroupBy(t => Text(t, "base"), StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Select(t => Text(t, "id")[2..]).ToArray(), StringComparer.Ordinal);
+        IEnumerable<string> Subclasses(string type) => (subclasses.TryGetValue(type, out string[]? children) ? children : []).Where(Candidate).SelectMany(c => new[] { c }.Concat(Subclasses(c)));
         var paths = new Dictionary<string, (int Depth, string Source)>(StringComparer.Ordinal);
         foreach (string root in kinds.Keys.Select(k => "Eplan.EplApi.DataModel." + k))
         { foreach (string type in Ancestors(root).Where(t => Text(types[t], "kind") == "interface")) { paths.TryAdd(type, (0, "locator:" + root)); } }
@@ -83,7 +87,7 @@ internal static partial class ApiTryGenerator
                     foreach (string? returned in new[] { d.ReturnType }.Concat(d.Parameters!.Where(Out).Select(ValueType)).SelectMany(t => new[] { t, ElementType(t, types) }))
                     {
                         if (Candidate(returned))
-                        { additions.AddRange(Ancestors(returned!).Select(type => (type, Depth(e.Type[2..]) + 1, d.Id + (returned != d.ReturnType ? " [element]" : "")))); }
+                        { additions.AddRange(Ancestors(returned!).Concat(Subclasses(returned!).SelectMany(Ancestors)).Select(type => (type, Depth(e.Type[2..]) + 1, d.Id + (returned != d.ReturnType ? " [element]" : "") + (type != returned && !Ancestors(returned!).Contains(type) ? " [subclass]" : "")))); }
                     }
                 }
             }
@@ -127,6 +131,7 @@ internal static partial class ApiTryGenerator
         string call = e.Row.Kind == "method" ? receiver + "(" + args + ")" : d.Parameters is { Length: > 0 }
             ? e.Name == "Item" || e.Type == "T:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable" && e.Name == "Layer" || e.Type == "T:Eplan.EplApi.DataModel.UniversalPropertyList" && e.Name == "Property"
                 || e.Name == "Property" && e.Type.StartsWith("T:Eplan.EplApi.MasterData.", StringComparison.Ordinal) && e.Type.EndsWith("PropertyList", StringComparison.Ordinal)
+                || (e.Type, e.Name) is ("T:Eplan.EplApi.MasterData.MDSymbol", "Variant") or ("T:Eplan.EplApi.MasterData.MDSymbolLibrary", "Symbol")
                 ? receiver[..^(e.Name.Length + 1)] + "[" + args + "]" : receiver[..^e.Name.Length] + "get_" + e.Name + "(" + args + ")" : receiver;
         return call;
     }

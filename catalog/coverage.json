@@ -47,10 +47,10 @@
         "deprecated": 1
       },
       "denominator": 68,
-      "implemented": 65,
-      "byTools": 65,
+      "implemented": 68,
+      "byTools": 68,
       "partial": 0,
-      "automatedTest": 65,
+      "automatedTest": 68,
       "liveVerified": 18,
       "envBlocked": 0,
       "undocumented": 0
@@ -66,10 +66,10 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 2308,
-      "byTools": 2300,
-      "partial": 194,
-      "automatedTest": 2300,
+      "implemented": 2433,
+      "byTools": 2425,
+      "partial": 198,
+      "automatedTest": 2425,
       "liveVerified": 864,
       "envBlocked": 21,
       "undocumented": 134
@@ -84,10 +84,10 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 832,
-      "byTools": 825,
-      "partial": 104,
-      "automatedTest": 825,
+      "implemented": 841,
+      "byTools": 834,
+      "partial": 105,
+      "automatedTest": 834,
       "liveVerified": 173,
       "envBlocked": 18,
       "undocumented": 66
@@ -102,17 +102,17 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 1476,
-      "byTools": 1475,
-      "partial": 90,
-      "automatedTest": 1475,
+      "implemented": 1592,
+      "byTools": 1591,
+      "partial": 93,
+      "automatedTest": 1591,
       "liveVerified": 691,
       "envBlocked": 3,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 2579,
+    "used": 2811,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -139,13 +139,13 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 801,
+      "implemented": 806,
       "liveVerified": 373
     },
     {
       "scope": "Eplan.EplApi.DataModel.E3D",
       "denominator": 368,
-      "implemented": 277,
+      "implemented": 293,
       "liveVerified": 119
     },
     {
@@ -169,7 +169,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
-      "implemented": 45,
+      "implemented": 46,
       "liveVerified": 20
     },
     {
@@ -217,7 +217,7 @@
     {
       "scope": "Eplan.EplApi.MasterData",
       "denominator": 592,
-      "implemented": 320,
+      "implemented": 423,
       "liveVerified": 19
     },
     {
@@ -249,7 +249,7 @@
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 24,
-      "implemented": 9,
+      "implemented": 10,
       "liveVerified": 5
     },
     {
@@ -481,6 +481,24 @@
       "denominator": 1,
       "implemented": 1,
       "liveVerified": 1
+    },
+    {
+      "scope": "MDSymbol",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
+    },
+    {
+      "scope": "MDSymbolLibrary",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
+    },
+    {
+      "scope": "MDSymbolVariant",
+      "denominator": 1,
+      "implemented": 1,
+      "liveVerified": 0
     },
     {
       "scope": "MacroBox",
@@ -840,10 +858,10 @@
         "api.try.plan",
         "project.get"
       ],
-      "apiIds": 4774,
-      "operationGroups": 2110,
-      "dataDictionary": 61,
-      "dependencies": 2427,
+      "apiIds": 5140,
+      "operationGroups": 2235,
+      "dataDictionary": 69,
+      "dependencies": 2659,
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
       "small": 7,
@@ -3810,6 +3828,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get"
       ]
@@ -3947,6 +3966,33 @@
         "eplan_placement_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
+      ]
+    },
+    {
+      "unit": "D:MDSymbol",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "D:MDSymbolLibrary",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ]
+    },
+    {
+      "unit": "D:MDSymbolVariant",
+      "layer": "data_dictionary",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
       ]
     },
     {
@@ -4123,6 +4169,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get"
       ]
@@ -4300,6 +4347,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
         "eplan_object_find",
@@ -4315,6 +4363,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get"
       ]
@@ -4336,6 +4385,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_object_find",
         "eplan_object_get"
       ]
@@ -7811,6 +7861,56 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ContextPropertyPlacement.BasePoint",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ContextPropertyPlacement.CreateFromPageProperties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ContextPropertyPlacement.CreateFromProjectProperties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ContextPropertyPlacement.GetBoundingBox",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ContextPropertyPlacement.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DMObjectsFinder.GetAll",
       "layer": "operation",
       "status": "automated_test",
@@ -9171,6 +9271,16 @@
       "route": "generic_read"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.BasePointMate.NameEnumerated",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.BusBar.BarCount",
       "layer": "operation",
       "status": "live_verified",
@@ -9666,6 +9776,26 @@
       "route": "generic_read"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Create",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.CopperBundle.Properties",
       "layer": "operation",
       "status": "live_verified",
@@ -10098,6 +10228,106 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridLineMate.GridMate",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridLineMate.SnapIncrement",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridMate.IncrementX",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridMate.IncrementY",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridMate.LengthX",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridMate.LengthY",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridMate.SizeX",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridMate.SizeY",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridMate.StartPositionX",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.GridMate.StartPositionY",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Group3D.AddMate",
       "layer": "operation",
       "status": "automated_test",
@@ -10518,7 +10748,37 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.MateEntry.Mate",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.MateEntry.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Mesh.FacePoints",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.MountingLineMate.Create",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -19489,6 +19749,16 @@
         "eplan_workflow_plan"
       ],
       "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.MasterData.Symbol.Parent",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.Symbol.Project",
@@ -30642,6 +30912,226 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.Combination",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.Description",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.Diameter",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.FunctionDefintion",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.IsIntrinsicallySafe",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.NestedDeviceTag",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.PairIndex",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.PipeClass",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.PotentialType",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.ShieldedBy",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDCableTemplatePosition.WireNumOrColor",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.Characteristic",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.ConnectionDimension",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.ConnectionPointCrossSection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.ConnectionPointDescription",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.ConnectionPointDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.ContactIndex",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.IsIntrinsicallySafe",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.IsRelevantToSafety",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.PlugDeviceTag",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.Symbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDComponentTemplatePosition.SymbolMacro",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDConnectionCategory.AsLong",
       "layer": "operation",
       "status": "automated_test",
@@ -31276,6 +31766,116 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.Characteristic",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.ConnectionDimension",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.ConnectionPointCrossSection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.ConnectionPointDescription",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.ConnectionPointDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.ContactIndex",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.IsIntrinsicallySafe",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.IsRelevantToSafety",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.PlugDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.Symbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.SymbolMacro",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.AdditionalDescription",
       "layer": "operation",
       "status": "automated_test",
@@ -31379,6 +31979,36 @@
     },
     {
       "unit": "O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.TemplateGroup",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDMechanicsFunctionDefinition.AdditionalDescription",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDMechanicsFunctionDefinition.ItemType",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDMechanicsFunctionDefinition.ValidItemTypes",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -32916,6 +33546,266 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.BusSystemKind",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.ChannelDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.ConnectionDimension",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.ConnectionPointCrossSection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.ConnectionPointDescription",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.ConnectionPointDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.IsIntrinsicallySafe",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.IsRelevantToSafety",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.PlcBusInterfaceName",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.PlcSubdeviceIndex",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.PlugDeviceTag",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.SignalRange",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.Symbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlcTemplatePosition.SymbolMacro",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.ConnectionDimension",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.ConnectionPointCrossSection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.ConnectionPointDescription",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.ConnectionPointDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.ContactCoilInxdex",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.IsIntrinsicallySafe",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.IsRelevantToSafety",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.PinDescription",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.PinDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.PlugDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.Symbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDPlugTemplatePosition.SymbolMacro",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDPropertyDefinition.Id",
       "layer": "operation",
       "status": "automated_test",
@@ -33202,6 +34092,156 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionCategory",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbol.GetConnectionPoints",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbol.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbol.PlacementType",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbol.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbol.Type",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbol.Variant",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbol.Variants",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibrary.AddSymbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibrary.Close",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibrary.GetSymbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibrary.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibrary.Symbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibrary.Symbols",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibraryPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDSymbolPosition.RefPos",
       "layer": "operation",
       "status": "automated_test",
@@ -33233,6 +34273,206 @@
     },
     {
       "unit": "O:Eplan.EplApi.MasterData.MDSymbolPosition.SymbolVariantNr",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolVariant.AsGroup",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolVariant.Properties",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolVariant.PropertyPlacements",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolVariantPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.ConnectionDimension",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.ConnectionPointCrossSection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.ConnectionPointDescription",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.ConnectionPointDesignation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.HasLed",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.HasPlugInAdapter",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.IsIntrinsicallySafe",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.IsRelevantToSafety",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.LabelingType",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.Level",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.Symbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.SymbolMacro",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.TerminalCategory",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.TerminalDescription",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.TerminalDesignation",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -33593,6 +34833,66 @@
     },
     {
       "unit": "O:Eplan.EplApi.MasterData.MDUserDefinedPropertyPosition.Value",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDWireTemplatePosition.Color",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDWireTemplatePosition.Diameter",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDWireTemplatePosition.IsIntrinsicallySafe",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDWireTemplatePosition.PairIndex",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDWireTemplatePosition.PotentialType",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDWireTemplatePosition.ShieldedBy",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -56559,9 +57859,9 @@
   "reachability": {
     "operation": {
       "denominator": 4014,
-      "tools": 2308,
-      "apiTry": 2022,
-      "callable": 2313,
+      "tools": 2433,
+      "apiTry": 2146,
+      "callable": 2438,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -56583,12 +57883,12 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel",
-        "callable": 806,
+        "callable": 811,
         "refused_unsafe": 4
       },
       {
         "scope": "Eplan.EplApi.DataModel.E3D",
-        "callable": 277,
+        "callable": 293,
         "refused_unsafe": 1
       },
       {
@@ -56608,7 +57908,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.MasterData",
-        "callable": 45,
+        "callable": 46,
         "refused_unsafe": 0
       },
       {
@@ -56648,7 +57948,7 @@
       },
       {
         "scope": "Eplan.EplApi.MasterData",
-        "callable": 320,
+        "callable": 423,
         "refused_unsafe": 0
       },
       {
@@ -56665,7 +57965,7 @@
   },
   "routes": {
     "api_try_only": {
-      "count": 1573,
+      "count": 1698,
       "live_verified": 457
     },
     "declined": {
@@ -56681,7 +57981,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 1256,
+      "count": 1131,
       "live_verified": 0
     },
     "other": {
@@ -56707,7 +58007,7 @@
       "denominator": 5983,
       "routes": {
         "api_try_only": {
-          "count": 1768,
+          "count": 1907,
           "live_verified": 461
         },
         "declined": {
@@ -56723,7 +58023,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 2579,
+          "count": 2440,
           "live_verified": 0
         },
         "other": {
@@ -56740,7 +58040,7 @@
       "denominator": 3109,
       "routes": {
         "api_try_only": {
-          "count": 756,
+          "count": 767,
           "live_verified": 77
         },
         "declined": {
@@ -56756,7 +58056,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1578,
+          "count": 1567,
           "live_verified": 0
         },
         "other": {
@@ -56773,7 +58073,7 @@
       "denominator": 2636,
       "routes": {
         "api_try_only": {
-          "count": 1012,
+          "count": 1140,
           "live_verified": 384
         },
         "declined": {
@@ -56789,7 +58089,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 763,
+          "count": 635,
           "live_verified": 0
         },
         "other": {
