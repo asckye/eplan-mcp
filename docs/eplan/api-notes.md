@@ -491,7 +491,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - `OpenDatabase` 和 `MDPartsDatabase.Close` 不以 Get/Is 开头，生成器原本归为写入，被当成主数据写入拒绝；现在专门归为读取。
 - 当前配置的是在用库而不是 scratch 副本时，`MDPart.Variant` 的写入预演按设计返回 POLICY_DENIED，没有打开审批。副本上的写入（备份、写入、读回、原库哈希不变）要等工程师在 EPLAN 部件管理中把库配置成 scratch 副本后再验证。
 - **子类句柄（同日）：** `GetPart("PXC.3209510")` 的 `FunctionTemplatePositions` 返回 1 项，运行时类型是 `MDTerminalTemplatePosition`，句柄按子类给出，`TerminalCategory` 读出 `"Common"`；`MDPartsDatabase.Close` 正常关闭。生成器因此把返回类的公开子类也算作可达。
-- 一次审批窗口关闭后，EPLAN 主窗口保持禁用、桌面上看不到对话框，后续调用都是 EPLAN_BUSY（ModalDialog）；重启 EPLAN 后恢复。原因未查明，插件日志只记操作开始，看不出审批是否结束。
+- 一次审批窗口关闭后，EPLAN 主窗口保持禁用、桌面上看不到对话框，后续调用都是 EPLAN_BUSY（ModalDialog）；重启 EPLAN 后恢复。当时插件日志只记操作开始，看不出审批怎样结束。可能的原因：审批窗口的兜底逻辑（窗口被销毁时 `Dispatcher.ExitAllFrames()`）从外部结束模态循环，跳过了 WPF 恢复被 `ShowDialog` 禁用窗口的步骤。现在审批窗口打开前记下本线程可见且可用的顶层窗口，结束后把仍被禁用的重新启用；关闭 1 秒后模态循环仍未结束的也会被结束；每次审批记录结束日志（决定、结束方式、打开时长、重新启用的窗口数）。
 — `scratchpad/direct/md-live.py`、`md-sub.py`（未合入）。
 ### A136. Pro Panel 3D：柜体、导轨、线槽、器件和布置图（2026-11-11，EPLAN 2026.0.3.25421，**Electric P8**，scratch LargeWrite，Layout3DSpikeTests）
 - **Electric P8 里可以用 E3D API**（本机授权含 Pro Panel 模块），用的是 P8 当前配置的部件库，不需要切换到 Pro Panel 变体。

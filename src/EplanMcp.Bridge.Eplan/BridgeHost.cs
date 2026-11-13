@@ -176,7 +176,7 @@ internal static class BridgeHost
             new MacroGetOperation(catalog, macros),
             new MacroStoreOperation(catalog, new EplanMacroStorer(), new EplanSnapshotReader()),
             new PlanMacroInspectOperation(catalog, macros),
-            .. eplan.Offline ? [] : new IOperation[] { new ApprovalAskOperation(new EplanApprovalDialog()) },
+            .. eplan.Offline ? [] : new IOperation[] { new ApprovalAskOperation(new EplanApprovalDialog(log)) },
             new PageCreatePlanOperation(catalog, pages, pageWriter),
             new PageCreateExecuteOperation(catalog, pages, pageWriter, transactions, descriptions),
             new PageUpdatePlanOperation(catalog, pages, descriptions, () => new EplanPagePlotFrames()),
