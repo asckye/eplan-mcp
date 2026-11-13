@@ -13,6 +13,7 @@
     <EmbeddedResource Include="../../catalog/api-try.g.tsv" LogicalName="api-try.g.tsv" />
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" Aliases="host" />
     <Compile Include="..\EplanMcp.Large.Tests\BatchVerificationData.cs" Link="BatchVerificationData.cs" />
+    <Compile Include="..\EplanMcp.Large.Tests\BatchHandles.cs" Link="BatchHandles.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\BatchReadRecipes.cs" Link="BatchReadRecipes.cs" />
     <EmbeddedResource Include="..\EplanMcp.Large.Tests\fixtures\batch-read-recipes.json" LogicalName="BatchReadRecipes.json" />
     <EmbeddedResource Include="fixtures/actions/*.html" />

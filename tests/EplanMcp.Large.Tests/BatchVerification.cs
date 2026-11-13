@@ -57,7 +57,8 @@ public sealed class BatchVerification(LiveEplan eplan)
         foreach (var count in _expected)
         { TestContext.Current.TestOutputHelper.WriteLine($"Expected {count.Key}: {count.Value}"); }
         Save();
-        entries = BatchValues.Resume(entries, Environment.GetEnvironmentVariable("EPLANMCP_BATCH_FROM"), Environment.GetEnvironmentVariable("EPLANMCP_BATCH_AFTER"));
+        entries = BatchValues.Resume(BatchValues.Select(entries, Environment.GetEnvironmentVariable("EPLANMCP_BATCH_ONLY")),
+            Environment.GetEnvironmentVariable("EPLANMCP_BATCH_FROM"), Environment.GetEnvironmentVariable("EPLANMCP_BATCH_AFTER"));
         using var budget = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         budget.CancelAfter(TimeSpan.FromMinutes(minutes));
         var watch = Stopwatch.StartNew();
@@ -141,8 +142,16 @@ public sealed class BatchVerification(LiveEplan eplan)
             // Same operation as eplan_page_open, with the entry's cancellation token (A61).
             await bridge.InvokeAsync<PageOpenArgs, PageOpenData>(OperationNames.PageOpen, new() { Project = project, Page = page }, cancellationToken);
         }
+        var api = ActivatorUtilities.CreateInstance<ApiTryTools>(provider);
+        // A producer read for a handle receiver goes through the same tool, approvals and policy as the trial itself.
+        async Task<JsonElement?> ProducerAsync(string producer, Dictionary<string, object?> values, CancellationToken token)
+        {
+            CallToolResult producerCall = await api.TryAsync(_progress, producer, project, JsonSerializer.SerializeToElement(values), dry_run: false, cancellationToken: token);
+            return producerCall.IsError == true ? null : Data(producerCall).TryGetProperty("value", out JsonElement value) ? value.Clone() : null;
+        }
+
         BatchArguments arguments = entry.Kind == "api-read"
-            ? await new BatchReadDiscovery(bridge, project).ArgumentsAsync(entry, cancellationToken)
+            ? await new BatchReadDiscovery(bridge, project, ProducerAsync).ArgumentsAsync(entry, cancellationToken)
             : new(await BatchValues.ArgumentsAsync(entry, kinds => LocatorAsync(bridge, project, kinds, cancellationToken)));
         Dictionary<string, object?>? parameters = arguments.Values;
         if (parameters is null)
@@ -156,7 +165,6 @@ public sealed class BatchVerification(LiveEplan eplan)
             { parameters["target"] = target; }
         }
         string group = entry.Group;
-        var api = ActivatorUtilities.CreateInstance<ApiTryTools>(provider);
         string? originalValue = null;
         bool propertyWrite = entry.Kind == "api-write" && !entry.Method;
         if (propertyWrite)

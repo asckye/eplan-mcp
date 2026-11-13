@@ -197,8 +197,11 @@ public sealed class BatchVerificationTests
         BatchEntry removal = entries.Single(e => e.Group == "O:Eplan.EplApi.DataModel.Placement.Remove");
         Assert.Equal("api-write", removal.Kind);
         Assert.True(removal.Destructive);
+        // A read reaches a Pin through a producer; the write-path arguments below still must not invent one.
         BatchEntry handle = entries.Single(e => e.Group == "O:Eplan.EplApi.DataModel.Pin.Name" && e.Kind == "api-read");
-        Assert.True(handle.NeedsContext);
+        Assert.False(handle.NeedsContext);
+        Assert.Equal("Eplan.EplApi.DataModel.Pin", BatchValues.HandleReceiver(handle.Group));
+        Assert.All(entries.Where(e => e.Kind != "api-read" && BatchValues.HandleReceiver(e.Group) is not null), e => Assert.True(e.NeedsContext));
         Assert.Contains(entries, e => ApiTryCatalog.Settings(e.Group));
         BatchEntry file = entries.First(e => e.Parameters?.Any(p => ApiTryCatalog.PathDirection(e.Signature!, p.Key) is not null) == true);
         BatchEntry fileProperty = entries.Single(e => e.Group == "O:Eplan.EplApi.DataModel.Graphics.Image.FileName" && e.Kind == "api-write");
@@ -304,5 +307,58 @@ public sealed class BatchActionCatalogTests
         foreach ((string kind, int count) in BatchValues.ExpectedCounts(entries))
         { TestContext.Current.TestOutputHelper!.WriteLine($"Expected {kind}: {count}"); }
         TestContext.Current.TestOutputHelper!.WriteLine($"Unique API groups: {entries.Where(e => e.Kind != "action").Select(e => e.Group).Distinct(StringComparer.Ordinal).Count()}");
+    }
+
+    [Fact]
+    public void HandleReceivers_AreTrialledThroughAReadProducerInsteadOfNeedingContext()
+    {
+        BatchEntry[] handled = [.. BatchValues.ApiEntries().Where(e => e.Kind == "api-read" && e.ObjectKinds is { Length: 0 } && BatchValues.HandleReceiver(e.Group) is not null)];
+
+        Assert.NotEmpty(handled);
+        Assert.All(handled, entry =>
+        {
+            Assert.False(entry.NeedsContext);
+            string type = Assert.IsType<string>(BatchValues.HandleReceiver(entry.Group));
+            // Only a read whose own receiver is a discovery locator, so one producer call cannot change the project.
+            Assert.All(BatchHandles.Producers(type), producer =>
+            {
+                Assert.NotEqual("write", ApiTryCatalog.MethodAccess(producer));
+                Assert.NotEmpty(BatchValues.ObjectKinds(producer)!);
+            });
+        });
+    }
+
+    [Fact]
+    public void HandleOfATrialResult_PrefersTheWantedTypeAndIgnoresOtherValues()
+    {
+        JsonElement value = JsonSerializer.Deserialize<JsonElement>("""
+            {"returnValue":{"handle":"h:1","type":"Other"},"outputs":{"items":[{"name":"x"},{"handle":"h:2","type":"Wanted"}]}}
+            """);
+
+        JsonElement handle = Assert.IsType<JsonElement>(BatchHandles.Handle(value, "Wanted"), exactMatch: false);
+
+        Assert.Equal("h:2", handle.GetProperty("handle").GetString());
+        Assert.Equal("h:1", BatchHandles.Handle(value, "Missing")!.Value.GetProperty("handle").GetString());
+        Assert.Null(BatchHandles.Handle(JsonSerializer.Deserialize<JsonElement>("""{"value":"text"}"""), "Wanted"));
+    }
+
+    [Fact]
+    public void Select_RerunsOnlyTheListedEntries_AndRefusesAListThatMatchesNone()
+    {
+        BatchEntry[] entries = BatchValues.ApiEntries();
+        string file = Path.Combine(Path.GetTempPath(), "batch-only-" + Guid.NewGuid().ToString("N") + ".txt");
+        try
+        {
+            File.WriteAllLines(file, ["", "  " + entries[1].Id + "  ", entries[0].Id]);
+
+            BatchEntry[] selected = BatchValues.Select(entries, file);
+
+            Assert.Equal([entries[0].Id, entries[1].Id], selected.Select(e => e.Id).Order(StringComparer.Ordinal));
+            Assert.Same(entries, BatchValues.Select(entries, null));
+            File.WriteAllLines(file, ["O:Eplan.EplApi.Gone"]);
+            Assert.Throws<ArgumentException>(() => BatchValues.Select(entries, file));
+        }
+        finally
+        { File.Delete(file); }
     }
 }

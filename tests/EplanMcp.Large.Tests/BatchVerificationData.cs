@@ -25,7 +25,9 @@ internal sealed record BatchEntry(string Id, string Kind, string[]? ObjectKinds 
         || ActionCallTemplates.Example(action).Any(p => p.Value?.GetValue<string>().StartsWith("<scratch ", StringComparison.Ordinal) == true)
         || action.Parameters.Any(p => p.TryGetProperty("required", out var required) && required.ValueKind == JsonValueKind.True
             && !ActionCallTemplates.Example(action).ContainsKey(p.GetProperty("name").GetString()!)))
-        || ObjectKinds is { Length: 0 } || Kind == "api-write" && Group.EndsWith(".FileName", StringComparison.Ordinal)
+        // A read reaches a handle receiver through a producer (BatchReadDiscovery); a write never obtains one.
+        || ObjectKinds is { Length: 0 } && (Kind != "api-read" || BatchValues.HandleReceiver(Group) is null)
+        || Kind == "api-write" && Group.EndsWith(".FileName", StringComparison.Ordinal)
         || Parameters?.Any(p => Signature is not null && ApiTryCatalog.PathDirection(Signature, p.Key) is not null
         || p.Value[0] is "handle" or "via" or "Eplan.EplApi.DataModel.Page") == true;
 }
@@ -83,12 +85,17 @@ internal static class BatchValues
     internal static string[]? ObjectKinds(string group) => ApiTryCatalog.Shape(group) is { } shape ? ReceiverKinds(shape[1]) : [];
     internal static string[]? ReceiverKinds(string signature) => ApiTryCatalog.ReceiverShape(signature) is { } shape
         ? shape[0] is "handle" or "via" ? [] : DiscoveryKinds(ApiTryCatalog.Kinds(shape[0])) : null;
+
+    /// <summary>The receiver type of a group whose receiver is no discovery locator, so a session handle supplies it.</summary>
+    internal static string? HandleReceiver(string group) => ApiTryCatalog.Shape(group) is [var type, var signature, ..]
+        && ReceiverKinds(signature) is { Length: 0 } && BatchHandles.Producers(type).Length > 0 ? type : null;
     private static string[] DiscoveryKinds(string[] kinds) => [.. ObjectReadTypes.Types.Where(ObjectReadTypes.Supported)
         .Where(name => kinds.Contains(name, StringComparer.OrdinalIgnoreCase))];
 
     internal static async Task<Dictionary<string, object?>?> ArgumentsAsync(BatchEntry entry, Func<string[], Task<JsonElement?>> find)
     {
-        if (entry.NeedsContext)
+        // Only the discovery path reads a producer for a handle receiver; here one would have to be invented.
+        if (entry.NeedsContext || HandleReceiver(entry.Group) is not null)
         { return null; }
         if (entry.Action is { } action)
         { return ActionCallTemplates.Example(action).ToDictionary(p => p.Key, p => (object?)p.Value?.GetValue<string>(), StringComparer.Ordinal); }
@@ -155,6 +162,20 @@ internal static class BatchValues
             && result.Detail?.Contains("EPLAN could not complete", StringComparison.Ordinal) == true)
         { result.Outcome = "failed:needs_context"; }
     }
+    /// <summary>
+    /// The entries of one run: all of them, or only those whose ID is listed in the file <paramref name="only"/>, one
+    /// per line. A rerun after the harness gained a context (EPLANMCP_BATCH_ONLY) repeats just the affected entries.
+    /// </summary>
+    internal static BatchEntry[] Select(BatchEntry[] entries, string? only)
+    {
+        if (string.IsNullOrWhiteSpace(only))
+        { return entries; }
+        HashSet<string> wanted = [.. File.ReadAllLines(only).Select(line => line.Trim()).Where(line => line.Length > 0)];
+        BatchEntry[] selected = [.. entries.Where(entry => wanted.Contains(entry.Id))];
+        return selected.Length > 0 ? selected
+            : throw new ArgumentException("EPLANMCP_BATCH_ONLY lists no entry of this catalog: " + only);
+    }
+
     internal static BatchEntry[] Resume(BatchEntry[] entries, string? from, string? after = null)
     {
         if (from is not null && after is not null)

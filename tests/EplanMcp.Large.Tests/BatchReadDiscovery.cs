@@ -7,9 +7,26 @@ using EplanMcp.Host.Tools;
 namespace EplanMcp.Large.Tests;
 
 /// <summary>Resolves recipes through existing read operations on the explicitly selected batch project.</summary>
-internal sealed class BatchReadDiscovery(IBridgeClient bridge, string project)
+internal sealed class BatchReadDiscovery(IBridgeClient bridge, string project, Func<string, Dictionary<string, object?>, CancellationToken, Task<JsonElement?>>? trial = null)
 {
     private readonly PropertySchemaPaging _paging = new(TimeProvider.System);
+
+    /// <summary>One read on a producer of <paramref name="type"/>, whose own receiver is a discovery locator.</summary>
+    private async Task<JsonElement?> HandleAsync(string type, CancellationToken cancellationToken)
+    {
+        if (trial is null)
+        { return null; }
+        foreach (string producer in BatchHandles.Producers(type))
+        {
+            JsonElement? receiver = await FindAsync(BatchValues.ObjectKinds(producer)!, null, cancellationToken);
+            if (receiver is null)
+            { continue; }
+            JsonElement? value = await trial(producer, new Dictionary<string, object?> { ["target"] = receiver }, cancellationToken);
+            if (value is { } result && BatchHandles.Handle(result, type) is { } handle)
+            { return handle; }
+        }
+        return null;
+    }
 
     internal async Task<BatchArguments> ArgumentsAsync(BatchEntry entry, CancellationToken cancellationToken)
     {
@@ -30,9 +47,12 @@ internal sealed class BatchReadDiscovery(IBridgeClient bridge, string project)
         BatchArguments arguments = await BatchReadRecipes.Default.ArgumentsAsync(entry, ResolveAsync);
         if (arguments.Values is null || entry.ObjectKinds is null)
         { return arguments; }
-        JsonElement? target = entry.ObjectKinds is ["Page"]
-            ? await ResolveAsync("circuit-page", ["Page"])
-            : await FindAsync(entry.ObjectKinds, null, cancellationToken);
+        // An intermediate object has no discovery locator; one read on a producer of its type supplies a handle.
+        JsonElement? target = entry.ObjectKinds is { Length: 0 } && BatchValues.HandleReceiver(entry.Group) is { } type
+            ? await HandleAsync(type, cancellationToken)
+            : entry.ObjectKinds is ["Page"]
+                ? await ResolveAsync("circuit-page", ["Page"])
+                : await FindAsync(entry.ObjectKinds, null, cancellationToken);
         if (target is null)
         { return new(null, "skipped:no_object", "No receiver was found in the batch project."); }
         arguments.Values["target"] = target;
