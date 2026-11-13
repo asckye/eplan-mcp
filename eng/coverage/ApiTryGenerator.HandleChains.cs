@@ -73,7 +73,7 @@ internal static partial class ApiTryGenerator
             return e.Row.Kind is "property" or "method" && (e.Row.Kind == "method" || d.Accessors?.Split(';').Contains("get", StringComparer.Ordinal) == true && d.Parameters!.All(p => Scalar(p.Type, enums) || p.Type is "System.Int16" or "System.UInt32"))
                 && Exclusion(e, d with { ReturnType = "System.Void", Parameters = [.. d.Parameters!.Select(p => Out(p) ? p with { Type = "System.Int32@" } : e.Row.Kind == "property" && p.Type is "System.Int16" or "System.UInt32" ? p with { Type = "System.Int64" } : p)] }, enums, expanded, paths.ContainsKey(e.Type[2..]) ? null : services) is null;
         }
-        bool Return(string? type, bool discover) => type == "System.Void" || Scalar(type, enums) || type == "Eplan.EplApi.Base.PointD" || ObjectType(type, kinds)
+        bool Return(string? type, bool discover) => type == "System.Void" || Scalar(type, enums) || ResultScalar(type) || type == "Eplan.EplApi.Base.PointD" || ObjectType(type, kinds)
             || (discover ? Candidate(type) : paths.ContainsKey(type ?? "")) || ElementType(type, types) is { } element && (Scalar(element, enums) || ObjectType(element, kinds) || (discover ? Candidate(element) : paths.ContainsKey(element)));
         bool Returns(ApiDetail d, bool discover) => Return(d.ReturnType, discover) && d.Parameters!.Where(Out).All(p => Return(ValueType(p), discover));
         bool changed;

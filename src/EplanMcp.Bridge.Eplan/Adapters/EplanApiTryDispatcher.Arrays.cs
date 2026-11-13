@@ -47,7 +47,12 @@ internal sealed partial class EplanApiTryDispatcher
             }
             return items;
         }
-        if (result is not null && result is not (string or bool or int or long or double or Enum) && native is not null)
+        if (result is DateTime time)
+        { return time.ToString("o", System.Globalization.CultureInfo.InvariantCulture); }
+        if (result is float single && (float.IsNaN(single) || float.IsInfinity(single)))
+        { throw new InvalidOperationException("Returned coordinates and numbers must be finite."); }
+        // Result-only scalars of the generator (ApiTryGenerator.ResultScalar) are plain values, never native handles.
+        if (result is not null && result is not (string or bool or int or long or double or Enum or short or ushort or uint or byte or sbyte or float) && native is not null)
         { return native(result); }
         return result is null ? null : nested && result is not Enum ? result : Convert.ToString(result, System.Globalization.CultureInfo.InvariantCulture);
     }

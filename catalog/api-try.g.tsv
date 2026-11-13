@@ -184,6 +184,7 @@ O:Eplan.EplApi.Base.Settings.SetStringSetting	M:Eplan.EplApi.Base.Settings.SetSt
 O:Eplan.EplApi.Base.Settings.ThrowForTopLevelSetting	M:Eplan.EplApi.Base.Settings.ThrowForTopLevelSetting(System.String)	excluded	static_or_nonpublic
 O:Eplan.EplApi.Base.Settings.WriteSetting	M:Eplan.EplApi.Base.Settings.WriteSetting(System.String,System.String)	excluded	settings_write
 O:Eplan.EplApi.DataModel.AnyPropertyId.Definition	P:Eplan.EplApi.DataModel.AnyPropertyId.Definition	read	getter
+O:Eplan.EplApi.DataModel.AnyPropertyId.Index	P:Eplan.EplApi.DataModel.AnyPropertyId.Index	read	getter
 O:Eplan.EplApi.DataModel.AnyPropertyId.SetPropertyId	M:Eplan.EplApi.DataModel.AnyPropertyId.SetPropertyId(System.Int32)	write	-
 O:Eplan.EplApi.DataModel.Article.Accessory.AccessoryPlacement	P:Eplan.EplApi.DataModel.Article.Accessory.AccessoryPlacement	read	getter
 O:Eplan.EplApi.DataModel.Article.Accessory.IsAccessoryList	P:Eplan.EplApi.DataModel.Article.Accessory.IsAccessoryList	read	getter
@@ -266,9 +267,11 @@ O:Eplan.EplApi.DataModel.Connection.CanHaveArticleData	P:Eplan.EplApi.DataModel.
 O:Eplan.EplApi.DataModel.Connection.Connection3D	P:Eplan.EplApi.DataModel.Connection.Connection3D	read	getter
 O:Eplan.EplApi.DataModel.Connection.ConnectionDefPointProperties	P:Eplan.EplApi.DataModel.Connection.ConnectionDefPointProperties	read	getter
 O:Eplan.EplApi.DataModel.Connection.ConnectionDefPoints	P:Eplan.EplApi.DataModel.Connection.ConnectionDefPoints	read	getter
+O:Eplan.EplApi.DataModel.Connection.EndIndex	P:Eplan.EplApi.DataModel.Connection.EndIndex	read	getter
 O:Eplan.EplApi.DataModel.Connection.EndPin	P:Eplan.EplApi.DataModel.Connection.EndPin	read	getter
 O:Eplan.EplApi.DataModel.Connection.EndSymbolConnPoint	P:Eplan.EplApi.DataModel.Connection.EndSymbolConnPoint	read	getter
 O:Eplan.EplApi.DataModel.Connection.EndSymbolReference	P:Eplan.EplApi.DataModel.Connection.EndSymbolReference	read	getter
+O:Eplan.EplApi.DataModel.Connection.EndTargetNumber	P:Eplan.EplApi.DataModel.Connection.EndTargetNumber	read	getter
 O:Eplan.EplApi.DataModel.Connection.FunctionDefinition	P:Eplan.EplApi.DataModel.Connection.FunctionDefinition	read	getter
 O:Eplan.EplApi.DataModel.Connection.GetTemplateObject_Internal	M:Eplan.EplApi.DataModel.Connection.GetTemplateObject_Internal	excluded	catalog:internal
 O:Eplan.EplApi.DataModel.Connection.GetWriteProtectionFlagSet	M:Eplan.EplApi.DataModel.Connection.GetWriteProtectionFlagSet(Eplan.EplApi.DataModel.IWriteProtection.WriteProtectionKind)	read	-
@@ -289,9 +292,11 @@ O:Eplan.EplApi.DataModel.Connection.RemoveArticleReference	M:Eplan.EplApi.DataMo
 O:Eplan.EplApi.DataModel.Connection.RepresentationType	P:Eplan.EplApi.DataModel.Connection.RepresentationType	read	getter
 O:Eplan.EplApi.DataModel.Connection.RepresentationType	P:Eplan.EplApi.DataModel.Connection.RepresentationType:set	write	setter
 O:Eplan.EplApi.DataModel.Connection.Shieldings	P:Eplan.EplApi.DataModel.Connection.Shieldings	read	getter
+O:Eplan.EplApi.DataModel.Connection.StartIndex	P:Eplan.EplApi.DataModel.Connection.StartIndex	read	getter
 O:Eplan.EplApi.DataModel.Connection.StartPin	P:Eplan.EplApi.DataModel.Connection.StartPin	read	getter
 O:Eplan.EplApi.DataModel.Connection.StartSymbolConnPoint	P:Eplan.EplApi.DataModel.Connection.StartSymbolConnPoint	read	getter
 O:Eplan.EplApi.DataModel.Connection.StartSymbolReference	P:Eplan.EplApi.DataModel.Connection.StartSymbolReference	read	getter
+O:Eplan.EplApi.DataModel.Connection.StartTargetNumber	P:Eplan.EplApi.DataModel.Connection.StartTargetNumber	read	getter
 O:Eplan.EplApi.DataModel.Connection.SubConnections	P:Eplan.EplApi.DataModel.Connection.SubConnections	read	getter
 O:Eplan.EplApi.DataModel.Connection.SymbolReferences	P:Eplan.EplApi.DataModel.Connection.SymbolReferences	read	getter
 O:Eplan.EplApi.DataModel.Connection.WriteProtected	P:Eplan.EplApi.DataModel.Connection.WriteProtected	read	getter
@@ -313,6 +318,7 @@ O:Eplan.EplApi.DataModel.ConnectionPointPosition.ConnectionCategory	P:Eplan.EplA
 O:Eplan.EplApi.DataModel.ConnectionPointPosition.ConnectionSize	P:Eplan.EplApi.DataModel.ConnectionPointPosition.ConnectionSize	read	getter
 O:Eplan.EplApi.DataModel.ConnectionPointPosition.ConnectionSize	P:Eplan.EplApi.DataModel.ConnectionPointPosition.ConnectionSize:set	write	setter
 O:Eplan.EplApi.DataModel.ConnectionPointPosition.DirectionOfConnectionPoint	P:Eplan.EplApi.DataModel.ConnectionPointPosition.DirectionOfConnectionPoint	read	getter
+O:Eplan.EplApi.DataModel.ConnectionPointPosition.Index	P:Eplan.EplApi.DataModel.ConnectionPointPosition.Index	read	getter
 O:Eplan.EplApi.DataModel.ConnectionPointPosition.Parent	P:Eplan.EplApi.DataModel.ConnectionPointPosition.Parent	read	getter
 O:Eplan.EplApi.DataModel.ConnectionPointPosition.Position	P:Eplan.EplApi.DataModel.ConnectionPointPosition.Position	read	getter
 O:Eplan.EplApi.DataModel.ConnectionPointPosition.SocketSize	P:Eplan.EplApi.DataModel.ConnectionPointPosition.SocketSize	read	getter
@@ -611,6 +617,7 @@ O:Eplan.EplApi.DataModel.E3D.Mate.Source	P:Eplan.EplApi.DataModel.E3D.Mate.Sourc
 O:Eplan.EplApi.DataModel.E3D.Mate.StoreToObject	M:Eplan.EplApi.DataModel.E3D.Mate.StoreToObject	write	-
 O:Eplan.EplApi.DataModel.E3D.MateEntry.Mate	P:Eplan.EplApi.DataModel.E3D.MateEntry.Mate	read	getter
 O:Eplan.EplApi.DataModel.E3D.MateEntry.Properties	P:Eplan.EplApi.DataModel.E3D.MateEntry.Properties	read	getter
+O:Eplan.EplApi.DataModel.E3D.Mesh.FaceCount	P:Eplan.EplApi.DataModel.E3D.Mesh.FaceCount	read	getter
 O:Eplan.EplApi.DataModel.E3D.Mesh.FacePoints	P:Eplan.EplApi.DataModel.E3D.Mesh.FacePoints(System.UInt32)	read	settings_key_read
 O:Eplan.EplApi.DataModel.E3D.MountingLineMate.Create	M:Eplan.EplApi.DataModel.E3D.MountingLineMate.Create(System.String,Eplan.EplApi.Base.MultiLangString,Eplan.EplApi.Base.PointD3D,Eplan.EplApi.Base.PointD3D)	write	-
 O:Eplan.EplApi.DataModel.E3D.MountingPanel.Create	M:Eplan.EplApi.DataModel.E3D.MountingPanel.Create(Eplan.EplApi.DataModel.Project,System.Double,System.Double,System.Double)	write	-
@@ -650,10 +657,10 @@ O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetAllCurrentValues	M:Eplan.EplApi.Da
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetCurrentValue	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetCurrentValue(Eplan.EplApi.DataModel.StorableObject,Eplan.EplApi.DataModel.AnyPropertyId,System.Int32)	read	-
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetProjectPropertyEntry	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetProjectPropertyEntry(Eplan.EplApi.DataModel.AnyPropertyId)	read	-
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetPropertyEntry	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetPropertyEntry(Eplan.EplApi.DataModel.E3D.Placement3D,Eplan.EplApi.DataModel.AnyPropertyId)	read	-
-O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetRecordNames	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetRecordNames	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetRecordNames	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetRecordNames	read	-
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetValue	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetValue(System.String,System.String)	read	-
-O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetValues	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetValues(System.String)	excluded	unsupported_return
-O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetVariableNames	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetVariableNames	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetValues	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetValues(System.String)	read	-
+O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetVariableNames	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetVariableNames	read	-
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.InstallationSpace	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.InstallationSpace	read	getter
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.IsDocumentReferenceActive	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.IsDocumentReferenceActive	read	getter
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.IsDocumentReferenceActive	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.IsDocumentReferenceActive:set	write	setter
@@ -663,6 +670,7 @@ O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.Name	P:Eplan.EplApi.DataModel.E3D.Pla
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NameOfRecord	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NameOfRecord(System.Int32)	read	settings_key_read
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NumberOfRecords	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NumberOfRecords	read	getter
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NumberOfReferences	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NumberOfReferences	read	getter
+O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NumberOfVariables	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NumberOfVariables	read	getter
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.Properties	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.Properties	read	getter
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.RemoveInvalidObjectReferences	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.RemoveInvalidObjectReferences	write	-
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.RemoveObjectReferences	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.RemoveObjectReferences(Eplan.EplApi.DataModel.StorableObject[])	write	-
@@ -670,6 +678,7 @@ O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.SetProjectPropertyEntry	M:Eplan.EplAp
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.SetPropertyEntry	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.SetPropertyEntry(Eplan.EplApi.DataModel.E3D.Placement3D,Eplan.EplApi.DataModel.AnyPropertyId,Eplan.EplApi.Base.MultiLangString)	write	-
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.SetValue	M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.SetValue(System.String,System.String,Eplan.EplApi.Base.MultiLangString)	write	-
 O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.Value	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.Value(System.String,System.String)	read	settings_key_read
+O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.VariableNames	P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.VariableNames	read	getter
 O:Eplan.EplApi.DataModel.E3D.Placement3D.AddConnectionPointPosition	M:Eplan.EplApi.DataModel.E3D.Placement3D.AddConnectionPointPosition	write	-
 O:Eplan.EplApi.DataModel.E3D.Placement3D.AddMatePersistent	M:Eplan.EplApi.DataModel.E3D.Placement3D.AddMatePersistent(Eplan.EplApi.DataModel.E3D.Mate)	write	-
 O:Eplan.EplApi.DataModel.E3D.Placement3D.AreConnectionPointPositionsLocal	P:Eplan.EplApi.DataModel.E3D.Placement3D.AreConnectionPointPositionsLocal	read	getter
@@ -884,6 +893,7 @@ O:Eplan.EplApi.DataModel.EObjects.Terminal.PlcIOEntry	P:Eplan.EplApi.DataModel.E
 O:Eplan.EplApi.DataModel.EObjects.Terminal.SubTerminals	P:Eplan.EplApi.DataModel.EObjects.Terminal.SubTerminals	read	getter
 O:Eplan.EplApi.DataModel.EObjects.Terminal.TerminalStrip	P:Eplan.EplApi.DataModel.EObjects.Terminal.TerminalStrip	read	getter
 O:Eplan.EplApi.DataModel.EObjects.TerminalAccessory.PartNumber	P:Eplan.EplApi.DataModel.EObjects.TerminalAccessory.PartNumber	read	getter
+O:Eplan.EplApi.DataModel.EObjects.TerminalAccessory.ReferencePos	P:Eplan.EplApi.DataModel.EObjects.TerminalAccessory.ReferencePos	read	getter
 O:Eplan.EplApi.DataModel.EObjects.TerminalAccessory.Variant	P:Eplan.EplApi.DataModel.EObjects.TerminalAccessory.Variant	read	getter
 O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.AddLocalFunctionTemplates	M:Eplan.EplApi.DataModel.EObjects.TerminalStrip.AddLocalFunctionTemplates(Eplan.EplApi.DataModel.Function[])	write	-
 O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Bridges	P:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Bridges	read	getter
@@ -996,7 +1006,9 @@ O:Eplan.EplApi.DataModel.FunctionDefinition.Description	P:Eplan.EplApi.DataModel
 O:Eplan.EplApi.DataModel.FunctionDefinition.FunctionCategory	P:Eplan.EplApi.DataModel.FunctionDefinition.FunctionCategory	read	getter
 O:Eplan.EplApi.DataModel.FunctionDefinition.FunctionDefinitionLibrary	P:Eplan.EplApi.DataModel.FunctionDefinition.FunctionDefinitionLibrary	read	getter
 O:Eplan.EplApi.DataModel.FunctionDefinition.GetBaseSymbolFromSpecifiedSymbolLibrary	M:Eplan.EplApi.DataModel.FunctionDefinition.GetBaseSymbolFromSpecifiedSymbolLibrary(Eplan.EplApi.DataModel.MasterData.SymbolLibrary)	read	-
+O:Eplan.EplApi.DataModel.FunctionDefinition.Group	P:Eplan.EplApi.DataModel.FunctionDefinition.Group	read	getter
 O:Eplan.EplApi.DataModel.FunctionDefinition.GroupName	P:Eplan.EplApi.DataModel.FunctionDefinition.GroupName	read	getter
+O:Eplan.EplApi.DataModel.FunctionDefinition.Id	P:Eplan.EplApi.DataModel.FunctionDefinition.Id	read	getter
 O:Eplan.EplApi.DataModel.FunctionDefinition.Identifier	P:Eplan.EplApi.DataModel.FunctionDefinition.Identifier	read	getter
 O:Eplan.EplApi.DataModel.FunctionDefinition.Identifier	P:Eplan.EplApi.DataModel.FunctionDefinition.Identifier(System.String)	read	settings_key_read
 O:Eplan.EplApi.DataModel.FunctionDefinition.Identifiers	P:Eplan.EplApi.DataModel.FunctionDefinition.Identifiers	read	getter
@@ -1027,10 +1039,17 @@ O:Eplan.EplApi.DataModel.Graphics.Arc.SetArc	M:Eplan.EplApi.DataModel.Graphics.A
 O:Eplan.EplApi.DataModel.Graphics.Arc.SetCircle	M:Eplan.EplApi.DataModel.Graphics.Arc.SetCircle(Eplan.EplApi.Base.PointD,System.Double)	write	-
 O:Eplan.EplApi.DataModel.Graphics.Arc.SetEllipse	M:Eplan.EplApi.DataModel.Graphics.Arc.SetEllipse(Eplan.EplApi.Base.PointD,System.Double,System.Double,System.Double)	write	-
 O:Eplan.EplApi.DataModel.Graphics.Arc.StartAngle	P:Eplan.EplApi.DataModel.Graphics.Arc.StartAngle	read	getter
+O:Eplan.EplApi.DataModel.Graphics.Color.B	P:Eplan.EplApi.DataModel.Graphics.Color.B	read	getter
+O:Eplan.EplApi.DataModel.Graphics.Color.ColorId	P:Eplan.EplApi.DataModel.Graphics.Color.ColorId	read	getter
+O:Eplan.EplApi.DataModel.Graphics.Color.G	P:Eplan.EplApi.DataModel.Graphics.Color.G	read	getter
+O:Eplan.EplApi.DataModel.Graphics.Color.R	P:Eplan.EplApi.DataModel.Graphics.Color.R	read	getter
+O:Eplan.EplApi.DataModel.Graphics.Color.Transparency	P:Eplan.EplApi.DataModel.Graphics.Color.Transparency	read	getter
 O:Eplan.EplApi.DataModel.Graphics.Color.TransparencyDefinedByLayer	P:Eplan.EplApi.DataModel.Graphics.Color.TransparencyDefinedByLayer	read	getter
 O:Eplan.EplApi.DataModel.Graphics.Color.TransparencyDefinedByLayer	P:Eplan.EplApi.DataModel.Graphics.Color.TransparencyDefinedByLayer:set	write	setter
 O:Eplan.EplApi.DataModel.Graphics.Comment.Answer	P:Eplan.EplApi.DataModel.Graphics.Comment.Answer	read	getter
 O:Eplan.EplApi.DataModel.Graphics.Comment.Author	P:Eplan.EplApi.DataModel.Graphics.Comment.Author	read	getter
+O:Eplan.EplApi.DataModel.Graphics.Comment.CreationDate	P:Eplan.EplApi.DataModel.Graphics.Comment.CreationDate	read	getter
+O:Eplan.EplApi.DataModel.Graphics.Comment.ModificationDate	P:Eplan.EplApi.DataModel.Graphics.Comment.ModificationDate	read	getter
 O:Eplan.EplApi.DataModel.Graphics.Comment.Properties	P:Eplan.EplApi.DataModel.Graphics.Comment.Properties	read	getter
 O:Eplan.EplApi.DataModel.Graphics.Comment.ReviewState	P:Eplan.EplApi.DataModel.Graphics.Comment.ReviewState	read	getter
 O:Eplan.EplApi.DataModel.Graphics.Comment.ReviewState	P:Eplan.EplApi.DataModel.Graphics.Comment.ReviewState:set	write	setter
@@ -1071,6 +1090,7 @@ O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.DimensionUnit	P:Eplan.EplApi.D
 O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.DimensionUnit	P:Eplan.EplApi.DataModel.Graphics.DimensionCircle.DimensionUnit:set	write	setter
 O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.Location	P:Eplan.EplApi.DataModel.Graphics.DimensionCircle.Location	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.Properties	P:Eplan.EplApi.DataModel.Graphics.DimensionCircle.Properties	read	getter
+O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextColor	P:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextColor	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextFontInfo	P:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextFontInfo	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextHeight	P:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextHeight	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextHeight	P:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextHeight:set	write	setter
@@ -1119,6 +1139,7 @@ O:Eplan.EplApi.DataModel.Graphics.DimensionItem.Properties	P:Eplan.EplApi.DataMo
 O:Eplan.EplApi.DataModel.Graphics.DimensionItem.SecondPoint	P:Eplan.EplApi.DataModel.Graphics.DimensionItem.SecondPoint	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionItem.SuppressDimensionLine	P:Eplan.EplApi.DataModel.Graphics.DimensionItem.SuppressDimensionLine	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionItem.SuppressDimensionLine	P:Eplan.EplApi.DataModel.Graphics.DimensionItem.SuppressDimensionLine:set	write	setter
+O:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextColor	P:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextColor	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextFontInfo	P:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextFontInfo	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextHeight	P:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextHeight	read	getter
 O:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextHeight	P:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextHeight:set	write	setter
@@ -1126,8 +1147,10 @@ O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Create	M:Eplan.EplApi.DataModel
 O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Description	P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Description	read	getter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Equals	M:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Equals(System.Object)	excluded	catalog:not_applicable
 O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.GetHashCode	M:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.GetHashCode	excluded	catalog:not_applicable
+O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Id	P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Id	read	getter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Pen	P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Pen	read	getter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Store	M:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Store	write	property_entry
+O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Transparency	P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Transparency	read	getter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.AddLayer	M:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.AddLayer(Eplan.EplApi.DataModel.Graphics.GraphicalLayer)	write	-
 O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.AddLayer	M:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.AddLayer(System.String,Eplan.EplApi.Base.MultiLangString)	write	-
 O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.Export	M:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.Export(System.String)	excluded	external_path_parameter
@@ -1147,6 +1170,7 @@ O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.ReplaceLayer	M:Eplan.EplAp
 O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.IsVisible	P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.IsVisible	read	getter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.IsVisible	P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.IsVisible:set	write	setter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Layer	P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Layer	read	getter
+O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.LayerId	P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.LayerId	read	getter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Pen	P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Pen	read	getter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Properties	P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.Properties	read	getter
 O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.SetVisibilityDependingOnLayer	M:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.SetVisibilityDependingOnLayer	write	-
@@ -1203,7 +1227,10 @@ O:Eplan.EplApi.DataModel.Graphics.PathText.CreateTransient	M:Eplan.EplApi.DataMo
 O:Eplan.EplApi.DataModel.Graphics.PathText.Properties	P:Eplan.EplApi.DataModel.Graphics.PathText.Properties	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PathText.ToPathText	M:Eplan.EplApi.DataModel.Graphics.PathText.ToPathText	write	-
 O:Eplan.EplApi.DataModel.Graphics.PathText.ToText	M:Eplan.EplApi.DataModel.Graphics.PathText.ToText	write	-
+O:Eplan.EplApi.DataModel.Graphics.Pen.ColorId	P:Eplan.EplApi.DataModel.Graphics.Pen.ColorId	read	getter
 O:Eplan.EplApi.DataModel.Graphics.Pen.GetHashCode	M:Eplan.EplApi.DataModel.Graphics.Pen.GetHashCode	excluded	catalog:not_applicable
+O:Eplan.EplApi.DataModel.Graphics.Pen.LineEndType	P:Eplan.EplApi.DataModel.Graphics.Pen.LineEndType	read	getter
+O:Eplan.EplApi.DataModel.Graphics.Pen.StyleId	P:Eplan.EplApi.DataModel.Graphics.Pen.StyleId	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddRecord	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddRecord(System.String)	write	-
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddReference	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddReference(Eplan.EplApi.DataModel.StorableObject)	write	-
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddVariable	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddVariable(System.String)	write	-
@@ -1225,18 +1252,20 @@ O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetAllCurrentValues	M:Eplan.EplApi
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetCurrentValue	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetCurrentValue(Eplan.EplApi.DataModel.StorableObject,Eplan.EplApi.DataModel.AnyPropertyId,System.Int32)	read	-
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetProjectPropertyEntry	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetProjectPropertyEntry(Eplan.EplApi.DataModel.AnyPropertyId)	read	-
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetPropertyEntry	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetPropertyEntry(Eplan.EplApi.DataModel.StorableObject,Eplan.EplApi.DataModel.AnyPropertyId)	read	-
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames	read	-
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue(System.String,System.String)	read	-
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues(System.String)	excluded	unsupported_return
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues(System.String)	read	-
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames	read	-
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.IsVariableValid	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.IsVariableValid(System.String)	read	-
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Layer	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Layer	read	getter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.LayerId	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.LayerId	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Location	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Location	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Name:set	write	setter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NameOfRecord	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NameOfRecord(System.Int32)	read	settings_key_read
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfRecords	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfRecords	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfReferences	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfReferences	read	getter
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfVariables	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfVariables	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Properties	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Properties	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.PropertyPlacements	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.PropertyPlacements	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.RemoveInvalidObjectReferences	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.RemoveInvalidObjectReferences	write	-
@@ -1247,6 +1276,7 @@ O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetValue	M:Eplan.EplApi.DataModel.
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetVisibilityDependingOnLayer	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetVisibilityDependingOnLayer	excluded	catalog:deprecated
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SymbolVariant	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SymbolVariant	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Value	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Value(System.String,System.String)	read	settings_key_read
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PolyLine.Closed	P:Eplan.EplApi.DataModel.Graphics.PolyLine.Closed	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PolyLine.Closed	P:Eplan.EplApi.DataModel.Graphics.PolyLine.Closed:set	write	setter
 O:Eplan.EplApi.DataModel.Graphics.PolyLine.Create	M:Eplan.EplApi.DataModel.Graphics.PolyLine.Create(Eplan.EplApi.DataModel.Group)	excluded	lifecycle_or_creation
@@ -1279,6 +1309,7 @@ O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Project	P:Eplan.EplApi.DataM
 O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Properties	P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Properties	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Relation	P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Relation	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Relation	P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Relation:set	write	setter
+O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.RelationIndex	P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.RelationIndex	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Remove	M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Remove	write	-
 O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Source	P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Source	read	getter
 O:Eplan.EplApi.DataModel.Graphics.QRCode.BlockFormat	P:Eplan.EplApi.DataModel.Graphics.QRCode.BlockFormat	read	getter
@@ -1379,6 +1410,7 @@ O:Eplan.EplApi.DataModel.Graphics.TextBase.Rotation	P:Eplan.EplApi.DataModel.Gra
 O:Eplan.EplApi.DataModel.Graphics.TextBase.Rotation	P:Eplan.EplApi.DataModel.Graphics.TextBase.Rotation:set	write	setter
 O:Eplan.EplApi.DataModel.Graphics.TextBase.RowSpacing	P:Eplan.EplApi.DataModel.Graphics.TextBase.RowSpacing	read	getter
 O:Eplan.EplApi.DataModel.Graphics.TextBase.RowSpacing	P:Eplan.EplApi.DataModel.Graphics.TextBase.RowSpacing:set	write	setter
+O:Eplan.EplApi.DataModel.Graphics.TextBase.TextColorId	P:Eplan.EplApi.DataModel.Graphics.TextBase.TextColorId	read	getter
 O:Eplan.EplApi.DataModel.Graphics.TextBase.UndockText	M:Eplan.EplApi.DataModel.Graphics.TextBase.UndockText	write	-
 O:Eplan.EplApi.DataModel.Graphics.TopologyLine.IsDirectLine	P:Eplan.EplApi.DataModel.Graphics.TopologyLine.IsDirectLine	read	getter
 O:Eplan.EplApi.DataModel.Graphics.TopologyLine.Properties	P:Eplan.EplApi.DataModel.Graphics.TopologyLine.Properties	read	getter
@@ -1456,7 +1488,10 @@ O:Eplan.EplApi.DataModel.IPlaceHolder.FindVariable	M:Eplan.EplApi.DataModel.IPla
 O:Eplan.EplApi.DataModel.IPlaceHolder.GetAllCurrentValues	M:Eplan.EplApi.DataModel.IPlaceHolder.GetAllCurrentValues	read	-
 O:Eplan.EplApi.DataModel.IPlaceHolder.GetCurrentValue	M:Eplan.EplApi.DataModel.IPlaceHolder.GetCurrentValue(Eplan.EplApi.DataModel.StorableObject,Eplan.EplApi.DataModel.AnyPropertyId,System.Int32)	read	-
 O:Eplan.EplApi.DataModel.IPlaceHolder.GetProjectPropertyEntry	M:Eplan.EplApi.DataModel.IPlaceHolder.GetProjectPropertyEntry(Eplan.EplApi.DataModel.AnyPropertyId)	read	-
+O:Eplan.EplApi.DataModel.IPlaceHolder.GetRecordNames	M:Eplan.EplApi.DataModel.IPlaceHolder.GetRecordNames	read	-
 O:Eplan.EplApi.DataModel.IPlaceHolder.GetValue	M:Eplan.EplApi.DataModel.IPlaceHolder.GetValue(System.String,System.String)	read	-
+O:Eplan.EplApi.DataModel.IPlaceHolder.GetValues	M:Eplan.EplApi.DataModel.IPlaceHolder.GetValues(System.String)	read	-
+O:Eplan.EplApi.DataModel.IPlaceHolder.GetVariableNames	M:Eplan.EplApi.DataModel.IPlaceHolder.GetVariableNames	read	-
 O:Eplan.EplApi.DataModel.IPlaceHolder.IsDocumentReferenceActive	P:Eplan.EplApi.DataModel.IPlaceHolder.IsDocumentReferenceActive	read	getter
 O:Eplan.EplApi.DataModel.IPlaceHolder.IsDocumentReferenceActive	P:Eplan.EplApi.DataModel.IPlaceHolder.IsDocumentReferenceActive:set	write	setter
 O:Eplan.EplApi.DataModel.IPlaceHolder.IsVariableValid	M:Eplan.EplApi.DataModel.IPlaceHolder.IsVariableValid(System.String)	read	-
@@ -1465,11 +1500,13 @@ O:Eplan.EplApi.DataModel.IPlaceHolder.Name	P:Eplan.EplApi.DataModel.IPlaceHolder
 O:Eplan.EplApi.DataModel.IPlaceHolder.NameOfRecord	P:Eplan.EplApi.DataModel.IPlaceHolder.NameOfRecord(System.Int32)	read	settings_key_read
 O:Eplan.EplApi.DataModel.IPlaceHolder.NumberOfRecords	P:Eplan.EplApi.DataModel.IPlaceHolder.NumberOfRecords	read	getter
 O:Eplan.EplApi.DataModel.IPlaceHolder.NumberOfReferences	P:Eplan.EplApi.DataModel.IPlaceHolder.NumberOfReferences	read	getter
+O:Eplan.EplApi.DataModel.IPlaceHolder.NumberOfVariables	P:Eplan.EplApi.DataModel.IPlaceHolder.NumberOfVariables	read	getter
 O:Eplan.EplApi.DataModel.IPlaceHolder.RemoveInvalidObjectReferences	M:Eplan.EplApi.DataModel.IPlaceHolder.RemoveInvalidObjectReferences	write	-
 O:Eplan.EplApi.DataModel.IPlaceHolder.RemoveObjectReferences	M:Eplan.EplApi.DataModel.IPlaceHolder.RemoveObjectReferences(Eplan.EplApi.DataModel.StorableObject[])	write	-
 O:Eplan.EplApi.DataModel.IPlaceHolder.SetProjectPropertyEntry	M:Eplan.EplApi.DataModel.IPlaceHolder.SetProjectPropertyEntry(Eplan.EplApi.DataModel.AnyPropertyId,Eplan.EplApi.Base.MultiLangString)	write	-
 O:Eplan.EplApi.DataModel.IPlaceHolder.SetValue	M:Eplan.EplApi.DataModel.IPlaceHolder.SetValue(System.String,System.String,Eplan.EplApi.Base.MultiLangString)	write	-
 O:Eplan.EplApi.DataModel.IPlaceHolder.Value	P:Eplan.EplApi.DataModel.IPlaceHolder.Value(System.String,System.String)	read	settings_key_read
+O:Eplan.EplApi.DataModel.IPlaceHolder.VariableNames	P:Eplan.EplApi.DataModel.IPlaceHolder.VariableNames	read	getter
 O:Eplan.EplApi.DataModel.IPlacementsContainer.SubPlacements	P:Eplan.EplApi.DataModel.IPlacementsContainer.SubPlacements	read	getter
 O:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements	P:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements	read	getter
 O:Eplan.EplApi.DataModel.IWriteProtection.GetWriteProtectionFlagSet	M:Eplan.EplApi.DataModel.IWriteProtection.GetWriteProtectionFlagSet(Eplan.EplApi.DataModel.IWriteProtection.WriteProtectionKind)	read	-
@@ -1850,6 +1887,8 @@ O:Eplan.EplApi.DataModel.Pin.Connections	P:Eplan.EplApi.DataModel.Pin.Connection
 O:Eplan.EplApi.DataModel.Pin.Equals	M:Eplan.EplApi.DataModel.Pin.Equals(System.Object)	excluded	catalog:not_applicable
 O:Eplan.EplApi.DataModel.Pin.FunctionDefinition	P:Eplan.EplApi.DataModel.Pin.FunctionDefinition	read	getter
 O:Eplan.EplApi.DataModel.Pin.GetHashCode	M:Eplan.EplApi.DataModel.Pin.GetHashCode	excluded	catalog:not_applicable
+O:Eplan.EplApi.DataModel.Pin.JumperBarCount	P:Eplan.EplApi.DataModel.Pin.JumperBarCount	read	getter
+O:Eplan.EplApi.DataModel.Pin.MaxConnectionCount	P:Eplan.EplApi.DataModel.Pin.MaxConnectionCount	read	getter
 O:Eplan.EplApi.DataModel.Pin.OppositePin	P:Eplan.EplApi.DataModel.Pin.OppositePin	read	getter
 O:Eplan.EplApi.DataModel.Pin.ParentFunction	P:Eplan.EplApi.DataModel.Pin.ParentFunction	read	getter
 O:Eplan.EplApi.DataModel.Pin.SymbolConnPoint	P:Eplan.EplApi.DataModel.Pin.SymbolConnPoint	read	getter
@@ -1890,6 +1929,7 @@ O:Eplan.EplApi.DataModel.PlaceHolderText.SourceObject	P:Eplan.EplApi.DataModel.P
 O:Eplan.EplApi.DataModel.Placement.CopyTo	M:Eplan.EplApi.DataModel.Placement.CopyTo(Eplan.EplApi.DataModel.Group)	write	-
 O:Eplan.EplApi.DataModel.Placement.CopyTo	M:Eplan.EplApi.DataModel.Placement.CopyTo(Eplan.EplApi.DataModel.Group,System.Boolean)	write	-
 O:Eplan.EplApi.DataModel.Placement.CopyTo	M:Eplan.EplApi.DataModel.Placement.CopyTo(Eplan.EplApi.DataModel.Group,System.Boolean,System.Boolean)	write	-
+O:Eplan.EplApi.DataModel.Placement.DrawingOrder	P:Eplan.EplApi.DataModel.Placement.DrawingOrder	read	getter
 O:Eplan.EplApi.DataModel.Placement.GetBoundingBox	M:Eplan.EplApi.DataModel.Placement.GetBoundingBox	read	-
 O:Eplan.EplApi.DataModel.Placement.Group	P:Eplan.EplApi.DataModel.Placement.Group	read	getter
 O:Eplan.EplApi.DataModel.Placement.IsPlaced	P:Eplan.EplApi.DataModel.Placement.IsPlaced	read	getter
@@ -2123,6 +2163,7 @@ O:Eplan.EplApi.DataModel.Project.ProjectLinkFilePath	P:Eplan.EplApi.DataModel.Pr
 O:Eplan.EplApi.DataModel.Project.ProjectName	P:Eplan.EplApi.DataModel.Project.ProjectName	read	getter
 O:Eplan.EplApi.DataModel.Project.ProjectName	P:Eplan.EplApi.DataModel.Project.ProjectName:set	write	setter
 O:Eplan.EplApi.DataModel.Project.Properties	P:Eplan.EplApi.DataModel.Project.Properties	read	getter
+O:Eplan.EplApi.DataModel.Project.PropertyPlacementsSchemaId	P:Eplan.EplApi.DataModel.Project.PropertyPlacementsSchemaId	read	getter
 O:Eplan.EplApi.DataModel.Project.Remove	M:Eplan.EplApi.DataModel.Project.Remove	excluded	external_destination
 O:Eplan.EplApi.DataModel.Project.RemoveAllPages	M:Eplan.EplApi.DataModel.Project.RemoveAllPages	write	-
 O:Eplan.EplApi.DataModel.Project.RemoveArticleReference	M:Eplan.EplApi.DataModel.Project.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)	excluded	masterdata_or_parts_management
@@ -2209,8 +2250,11 @@ O:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString	M:Eplan.EplApi.DataMode
 O:Eplan.EplApi.DataModel.PropertyValue.ToPointD	M:Eplan.EplApi.DataModel.PropertyValue.ToPointD	write	-
 O:Eplan.EplApi.DataModel.PropertyValue.ToString	M:Eplan.EplApi.DataModel.PropertyValue.ToString(Eplan.EplApi.Base.ISOCode.Language)	write	-
 O:Eplan.EplApi.DataModel.PropertyValue.ToString	M:Eplan.EplApi.DataModel.PropertyValue.ToString(Eplan.EplApi.Base.ISOCode.Language,System.String)	write	-
+O:Eplan.EplApi.DataModel.PropertyValue.ToTime	M:Eplan.EplApi.DataModel.PropertyValue.ToTime	write	-
 O:Eplan.EplApi.DataModel.ProtectedGroup.Create	M:Eplan.EplApi.DataModel.ProtectedGroup.Create(Eplan.EplApi.DataModel.Placement[])	excluded	factory_constructor_unavailable
 O:Eplan.EplApi.DataModel.ProtectedGroup.Properties	P:Eplan.EplApi.DataModel.ProtectedGroup.Properties	read	getter
+O:Eplan.EplApi.DataModel.Relation.Index	P:Eplan.EplApi.DataModel.Relation.Index	read	getter
+O:Eplan.EplApi.DataModel.Relation.ToInt	M:Eplan.EplApi.DataModel.Relation.ToInt	write	-
 O:Eplan.EplApi.DataModel.ReportBlock.Action	P:Eplan.EplApi.DataModel.ReportBlock.Action	read	getter
 O:Eplan.EplApi.DataModel.ReportBlock.Action	P:Eplan.EplApi.DataModel.ReportBlock.Action:set	write	setter
 O:Eplan.EplApi.DataModel.ReportBlock.Create	M:Eplan.EplApi.DataModel.ReportBlock.Create(Eplan.EplApi.DataModel.Project)	write	-
@@ -2246,6 +2290,7 @@ O:Eplan.EplApi.DataModel.Revisions.Comparison.ComparisonEntries	P:Eplan.EplApi.D
 O:Eplan.EplApi.DataModel.Revisions.Comparison.ComparisonProjectName	P:Eplan.EplApi.DataModel.Revisions.Comparison.ComparisonProjectName	read	getter
 O:Eplan.EplApi.DataModel.Revisions.Comparison.CreateDeletedObjectInfo	P:Eplan.EplApi.DataModel.Revisions.Comparison.CreateDeletedObjectInfo	read	getter
 O:Eplan.EplApi.DataModel.Revisions.Comparison.CreateDeletedObjectInfo	P:Eplan.EplApi.DataModel.Revisions.Comparison.CreateDeletedObjectInfo:set	write	setter
+O:Eplan.EplApi.DataModel.Revisions.Comparison.DateOfComparison	P:Eplan.EplApi.DataModel.Revisions.Comparison.DateOfComparison	read	getter
 O:Eplan.EplApi.DataModel.Revisions.Comparison.LastUser	P:Eplan.EplApi.DataModel.Revisions.Comparison.LastUser	read	getter
 O:Eplan.EplApi.DataModel.Revisions.Comparison.Properties	P:Eplan.EplApi.DataModel.Revisions.Comparison.Properties	read	getter
 O:Eplan.EplApi.DataModel.Revisions.Comparison.RevisionMarker	P:Eplan.EplApi.DataModel.Revisions.Comparison.RevisionMarker	read	getter
@@ -2258,6 +2303,7 @@ O:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.Object	P:Eplan.EplApi.DataMod
 O:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.ObjectIdOfComparedObject	P:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.ObjectIdOfComparedObject	read	getter
 O:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.PageName	P:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.PageName	read	getter
 O:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.Properties	P:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.Properties	read	getter
+O:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.TypeIdOfComparedObject	P:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.TypeIdOfComparedObject	read	getter
 O:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.OldPropertyValue	P:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.OldPropertyValue	read	getter
 O:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.Properties	P:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.Properties	read	getter
 O:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.PropertyId	P:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.PropertyId	read	getter
@@ -2265,6 +2311,7 @@ O:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.PropertyValue	P:Eplan.E
 O:Eplan.EplApi.DataModel.SafetyPoint.Create	M:Eplan.EplApi.DataModel.SafetyPoint.Create	excluded	application_or_session_state
 O:Eplan.EplApi.DataModel.SafetyPoint.GetAutoLockingState	M:Eplan.EplApi.DataModel.SafetyPoint.GetAutoLockingState	excluded	application_or_session_state
 O:Eplan.EplApi.DataModel.StorableObject.CrossReferencedObjectsAll	P:Eplan.EplApi.DataModel.StorableObject.CrossReferencedObjectsAll	read	getter
+O:Eplan.EplApi.DataModel.StorableObject.DatabaseIdentifier	P:Eplan.EplApi.DataModel.StorableObject.DatabaseIdentifier	read	getter
 O:Eplan.EplApi.DataModel.StorableObject.Equals	M:Eplan.EplApi.DataModel.StorableObject.Equals(System.Object)	excluded	catalog:not_applicable
 O:Eplan.EplApi.DataModel.StorableObject.FromStringIdentifier	M:Eplan.EplApi.DataModel.StorableObject.FromStringIdentifier(System.String)	excluded	unscoped_object_identifier
 O:Eplan.EplApi.DataModel.StorableObject.FromStringIdentifier	M:Eplan.EplApi.DataModel.StorableObject.FromStringIdentifier(System.String,System.UInt16)	excluded	unscoped_object_identifier
@@ -2282,6 +2329,7 @@ O:Eplan.EplApi.DataModel.StorableObject.SmartLock	M:Eplan.EplApi.DataModel.Stora
 O:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier	M:Eplan.EplApi.DataModel.StorableObject.ToStringIdentifier	write	-
 O:Eplan.EplApi.DataModel.StorableObject.TryParseIdentifier	M:Eplan.EplApi.DataModel.StorableObject.TryParseIdentifier(System.String,Eplan.EplApi.DataModel.StorableObject@)	excluded	unscoped_object_identifier
 O:Eplan.EplApi.DataModel.StorableObject.TryParseIdentifier	M:Eplan.EplApi.DataModel.StorableObject.TryParseIdentifier(System.String,System.UInt16,Eplan.EplApi.DataModel.StorableObject@)	excluded	unscoped_object_identifier
+O:Eplan.EplApi.DataModel.StorableObject.TypeIdentifier	P:Eplan.EplApi.DataModel.StorableObject.TypeIdentifier	read	getter
 O:Eplan.EplApi.DataModel.StrandConnector.Properties	P:Eplan.EplApi.DataModel.StrandConnector.Properties	read	getter
 O:Eplan.EplApi.DataModel.StrandInterConnector.Properties	P:Eplan.EplApi.DataModel.StrandInterConnector.Properties	read	getter
 O:Eplan.EplApi.DataModel.SymbolReference.AreTargetsSpecifed	P:Eplan.EplApi.DataModel.SymbolReference.AreTargetsSpecifed	read	getter
@@ -2508,7 +2556,7 @@ O:Eplan.EplApi.EServices.ProjectMessage.GetObject2	M:Eplan.EplApi.EServices.Proj
 O:Eplan.EplApi.EServices.ProjectMessage.GetPartNumber	M:Eplan.EplApi.EServices.ProjectMessage.GetPartNumber	read	-
 O:Eplan.EplApi.EServices.ProjectMessage.GetPartVariant	M:Eplan.EplApi.EServices.ProjectMessage.GetPartVariant	read	-
 O:Eplan.EplApi.EServices.ProjectMessage.GetText	M:Eplan.EplApi.EServices.ProjectMessage.GetText	read	-
-O:Eplan.EplApi.EServices.ProjectMessage.GetTime	M:Eplan.EplApi.EServices.ProjectMessage.GetTime	excluded	no_public_default_constructor
+O:Eplan.EplApi.EServices.ProjectMessage.GetTime	M:Eplan.EplApi.EServices.ProjectMessage.GetTime	read	-
 O:Eplan.EplApi.EServices.ProjectMessage.GetUser	M:Eplan.EplApi.EServices.ProjectMessage.GetUser	read	-
 O:Eplan.EplApi.EServices.ProjectMessage.SetDone	M:Eplan.EplApi.EServices.ProjectMessage.SetDone(System.Boolean)	excluded	catalog:banned_symbol
 O:Eplan.EplApi.EServices.SubProjectsCollection.FileOff	M:Eplan.EplApi.EServices.SubProjectsCollection.FileOff(Eplan.EplApi.EServices.SubProject)	excluded	no_public_default_constructor
@@ -2995,7 +3043,7 @@ O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.ChangeDigital	P:Eplan.Epl
 O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.ConfigurationProject	P:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.ConfigurationProject	read	getter
 O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.CpuName	P:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.CpuName	read	getter
 O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.DigitalStartAddress	P:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.DigitalStartAddress	read	getter
-O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.GetSortModesCount	M:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.GetSortModesCount	excluded	unsupported_return
+O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.GetSortModesCount	M:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.GetSortModesCount	read	public_static
 O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.OnlySelectedTerminals	P:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.OnlySelectedTerminals	read	getter
 O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.Station	P:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.Station	read	getter
 O:Eplan.EplApi.HEServices.PlcService.WriteBackConnPointDesignations	M:Eplan.EplApi.HEServices.PlcService.WriteBackConnPointDesignations(Eplan.EplApi.DataModel.EObjects.Terminal[],System.Boolean)	write	service_method_write
@@ -3314,6 +3362,7 @@ O:Eplan.EplApi.MasterData.MDAddress.Type	P:Eplan.EplApi.MasterData.MDAddress.Typ
 O:Eplan.EplApi.MasterData.MDAnyPropertyId.Definition	P:Eplan.EplApi.MasterData.MDAnyPropertyId.Definition	read	getter
 O:Eplan.EplApi.MasterData.MDAnyPropertyId.Id	P:Eplan.EplApi.MasterData.MDAnyPropertyId.Id	read	getter
 O:Eplan.EplApi.MasterData.MDAnyPropertyId.Id	P:Eplan.EplApi.MasterData.MDAnyPropertyId.Id:set	write	setter
+O:Eplan.EplApi.MasterData.MDAnyPropertyId.Index	P:Eplan.EplApi.MasterData.MDAnyPropertyId.Index	read	getter
 O:Eplan.EplApi.MasterData.MDArticleTerminalInfo.BoundingBox	P:Eplan.EplApi.MasterData.MDArticleTerminalInfo.BoundingBox	read	getter
 O:Eplan.EplApi.MasterData.MDArticleTerminalInfo.MainHandleValid	P:Eplan.EplApi.MasterData.MDArticleTerminalInfo.MainHandleValid	read	getter
 O:Eplan.EplApi.MasterData.MDArticleTerminalInfo.MainHandleValid	P:Eplan.EplApi.MasterData.MDArticleTerminalInfo.MainHandleValid:set	write	setter
@@ -3506,6 +3555,9 @@ O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.Symbol	P:Eplan.EplAp
 O:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.SymbolMacro	P:Eplan.EplApi.MasterData.MDElectricalRelayTemplatePosition.SymbolMacro	read	getter
 O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.AdditionalDescription	P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.AdditionalDescription	read	getter
 O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionCategory	P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionCategory	read	getter
+O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionGroup	P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionGroup	read	getter
+O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionId	P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionId	read	getter
+O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.HarnessLink	P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.HarnessLink	read	getter
 O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.AllIds	P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.AllIds	read	getter
 O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.GetProperty	M:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.GetProperty(Eplan.EplApi.MasterData.MDAnyPropertyId)	read	-
 O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.NonEmptyIds	P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.NonEmptyIds	read	getter
@@ -3565,6 +3617,7 @@ O:Eplan.EplApi.MasterData.MDPartAssemblyPosition.ItemNumber	P:Eplan.EplApi.Maste
 O:Eplan.EplApi.MasterData.MDPartAssemblyPosition.ItemNumber	P:Eplan.EplApi.MasterData.MDPartAssemblyPosition.ItemNumber:set	write	setter
 O:Eplan.EplApi.MasterData.MDPartAssemblyPosition.SupplementaryText	P:Eplan.EplApi.MasterData.MDPartAssemblyPosition.SupplementaryText	read	getter
 O:Eplan.EplApi.MasterData.MDPartAssemblyPosition.SupplementaryText	P:Eplan.EplApi.MasterData.MDPartAssemblyPosition.SupplementaryText:set	write	setter
+O:Eplan.EplApi.MasterData.MDPartHierarchyPosition.Count	P:Eplan.EplApi.MasterData.MDPartHierarchyPosition.Count	read	getter
 O:Eplan.EplApi.MasterData.MDPartHierarchyPosition.Devicetag	P:Eplan.EplApi.MasterData.MDPartHierarchyPosition.Devicetag	read	getter
 O:Eplan.EplApi.MasterData.MDPartHierarchyPosition.Devicetag	P:Eplan.EplApi.MasterData.MDPartHierarchyPosition.Devicetag:set	write	setter
 O:Eplan.EplApi.MasterData.MDPartHierarchyPosition.DevicetagId	P:Eplan.EplApi.MasterData.MDPartHierarchyPosition.DevicetagId	read	getter
@@ -3701,6 +3754,7 @@ O:Eplan.EplApi.MasterData.MDPartsDatabase.UserDefinedPropertyDefinitions	P:Eplan
 O:Eplan.EplApi.MasterData.MDPartsDatabase.Version	P:Eplan.EplApi.MasterData.MDPartsDatabase.Version	read	getter
 O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.AdoId	P:Eplan.EplApi.MasterData.MDPartsDatabaseItem.AdoId	read	getter
 O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.Database	P:Eplan.EplApi.MasterData.MDPartsDatabaseItem.Database	read	getter
+O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.GetTimeStampOfLastChange	M:Eplan.EplApi.MasterData.MDPartsDatabaseItem.GetTimeStampOfLastChange	read	-
 O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.Properties	P:Eplan.EplApi.MasterData.MDPartsDatabaseItem.Properties	read	getter
 O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.ToDataModelIdentifier	M:Eplan.EplApi.MasterData.MDPartsDatabaseItem.ToDataModelIdentifier	write	-
 O:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.ARTICLE_SUITABLE_FOR_PCF_HCS_FIBRE_230_uM	P:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.ARTICLE_SUITABLE_FOR_PCF_HCS_FIBRE_230_uM	read	getter
@@ -3807,9 +3861,13 @@ O:Eplan.EplApi.MasterData.MDPropertyValue.ToMultiLangString	M:Eplan.EplApi.Maste
 O:Eplan.EplApi.MasterData.MDPropertyValue.ToPointD	M:Eplan.EplApi.MasterData.MDPropertyValue.ToPointD	write	-
 O:Eplan.EplApi.MasterData.MDPropertyValue.ToString	M:Eplan.EplApi.MasterData.MDPropertyValue.ToString(Eplan.EplApi.Base.ISOCode.Language)	write	-
 O:Eplan.EplApi.MasterData.MDPropertyValue.ToString	M:Eplan.EplApi.MasterData.MDPropertyValue.ToString(Eplan.EplApi.Base.ISOCode.Language,System.String)	write	-
+O:Eplan.EplApi.MasterData.MDPropertyValue.ToTime	M:Eplan.EplApi.MasterData.MDPropertyValue.ToTime	write	-
 O:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionCategory	P:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionCategory	read	getter
 O:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionCategory	P:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionCategory:set	write	setter
+O:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionGroup	P:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionGroup	read	getter
+O:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionId	P:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionId	read	getter
 O:Eplan.EplApi.MasterData.MDSymbol.GetConnectionPoints	M:Eplan.EplApi.MasterData.MDSymbol.GetConnectionPoints(Eplan.EplApi.DataModel.Project)	read	-
+O:Eplan.EplApi.MasterData.MDSymbol.Id	P:Eplan.EplApi.MasterData.MDSymbol.Id	read	getter
 O:Eplan.EplApi.MasterData.MDSymbol.Name	P:Eplan.EplApi.MasterData.MDSymbol.Name	read	getter
 O:Eplan.EplApi.MasterData.MDSymbol.Name	P:Eplan.EplApi.MasterData.MDSymbol.Name:set	write	setter
 O:Eplan.EplApi.MasterData.MDSymbol.PlacementType	P:Eplan.EplApi.MasterData.MDSymbol.PlacementType	read	getter

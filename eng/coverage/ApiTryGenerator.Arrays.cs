@@ -22,9 +22,13 @@ internal static partial class ApiTryGenerator
     private static IEnumerable<ApiParameter> Inputs(ApiDetail member) => member.Parameters!.Where(p => !Out(p));
     private static IEnumerable<string> ProducedTypes(ApiDetail member) => new[] { member.ReturnType }.Concat(member.Parameters!.Where(Out).Select(ValueType))
         .Where(t => t is not null).Select(t => Element(t!) ?? t!).Distinct(StringComparer.Ordinal);
+    // Values a member may return but never take or have set: the Bridge returns them as text (DateTime as ISO 8601).
+    private static readonly HashSet<string> _resultScalars = new(StringComparer.Ordinal)
+        { "System.Int16", "System.UInt16", "System.UInt32", "System.Byte", "System.SByte", "System.Single", "System.DateTime", "System.Collections.Specialized.StringCollection" };
+    internal static bool ResultScalar(string? type) => type is not null && _resultScalars.Contains(type);
     private static bool Supported(string? type, IReadOnlyDictionary<string, string[]>? enums, IReadOnlyDictionary<string, string[]>? kinds) => type is not null
         && (Scalar(type, enums) || type == "Eplan.EplApi.Base.PointD" || ObjectType(type, kinds));
-    internal static bool PropertyReturn(string? type, IReadOnlyDictionary<string, string[]>? enums, IReadOnlyDictionary<string, string[]>? kinds) => Scalar(type, enums)
+    internal static bool PropertyReturn(string? type, IReadOnlyDictionary<string, string[]>? enums, IReadOnlyDictionary<string, string[]>? kinds) => Scalar(type, enums) || ResultScalar(type)
         || type == "Eplan.EplApi.Base.PointD" || type is not null && Element(type) is { } element && Supported(element, enums, kinds);
     private static bool PropertyWritable(ApiDetail member, IReadOnlyDictionary<string, string[]>? enums) => Writable(member) && Scalar(member.ReturnType, enums) && member.ReturnType != "System.Int64";
     internal static string? ShapeExclusion(ApiDetail member, IReadOnlyDictionary<string, string[]>? enums, IReadOnlyDictionary<string, string[]>? kinds)
@@ -48,7 +52,7 @@ internal static partial class ApiTryGenerator
             { return "delegate_parameter"; }
             return p.Type.Contains('{', StringComparison.Ordinal) || p.Type.Contains('`', StringComparison.Ordinal) || p.Type.StartsWith("System.Collections.", StringComparison.Ordinal) ? "generic_or_collection_parameter" : "unsupported_parameter";
         }
-        return member.Id.Contains('`', StringComparison.Ordinal) ? "generic_or_collection_parameter" : member.ReturnType != "System.Void" && !Value(member.ReturnType) ? "unsupported_return" : null;
+        return member.Id.Contains('`', StringComparison.Ordinal) ? "generic_or_collection_parameter" : member.ReturnType != "System.Void" && !Value(member.ReturnType) && !ResultScalar(member.ReturnType) ? "unsupported_return" : null;
     }
     private static string CollectionShape(string type, Dictionary<string, string[]> enums)
     {

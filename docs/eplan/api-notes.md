@@ -493,6 +493,7 @@ Workbench 的私有字体、回退字体与 DPI 原型记录见 [S18](../../spik
 - **子类句柄（同日）：** `GetPart("PXC.3209510")` 的 `FunctionTemplatePositions` 返回 1 项，运行时类型是 `MDTerminalTemplatePosition`，句柄按子类给出，`TerminalCategory` 读出 `"Common"`；`MDPartsDatabase.Close` 正常关闭。生成器因此把返回类的公开子类也算作可达。
 - 一次审批窗口关闭后，EPLAN 主窗口保持禁用、桌面上看不到对话框，后续调用都是 EPLAN_BUSY（ModalDialog）；重启 EPLAN 后恢复。当时插件日志只记操作开始，看不出审批怎样结束。可能的原因：审批窗口的兜底逻辑（窗口被销毁时 `Dispatcher.ExitAllFrames()`）从外部结束模态循环，跳过了 WPF 恢复被 `ShowDialog` 禁用窗口的步骤。现在审批窗口打开前记下本线程可见且可用的顶层窗口，结束后把仍被禁用的重新启用；关闭 1 秒后模态循环仍未结束的也会被结束；每次审批记录结束日志（决定、结束方式、打开时长、重新启用的窗口数）。
 - **审批窗口被销毁的来源（同日查明）：** 新日志记到一次 `cancelled, Destroyed, 0.8 s open, 1 window(s) re-enabled`，没有人点击，窗口打开 0.8 秒就被销毁，EPLAN 刚重启不久。当时所有者取的是 `Process.MainWindowHandle`，它可能是一个临时窗口，所有者被销毁时，它名下的窗口一起被销毁。现在所有者取本线程可见的 `AfxMDIFrame*` 主框架窗口，日志记录所有者的类名；重启后立刻审批，记录为 `granted, Closed, owner AfxMDIFrame140u`。
+- **只出现在返回值里的标量（同日）：** `StorableObject.TypeIdentifier` 对项目读出 `"14"`，`MDPartsDatabaseItem.GetTimeStampOfLastChange` 对 `PXC.3209510` 读出 `"2026-04-13T19:50:07.0000000"`（插件按 ISO 8601 输出 `DateTime`）。`Int16`、`UInt16`、`UInt32`、`Byte`、`SByte`、`Single`、`DateTime`、`StringCollection` 只作返回值开放，不作参数，也不开放写入。
 - **服务对象上的属性：** `new PathInfo().Macros` 读出宏目录（本机为 SynologyDrive 下的 `003.EPLAN\Data\宏\Company name`）。服务对象每次调用都新建、用完释放，所以通用入口对服务属性只开放读取、只限标量返回值，不交出指向已释放服务的句柄。
 — `scratchpad/direct/md-live.py`、`md-sub.py`（未合入）。
 ### A136. Pro Panel 3D：柜体、导轨、线槽、器件和布置图（2026-11-11，EPLAN 2026.0.3.25421，**Electric P8**，scratch LargeWrite，Layout3DSpikeTests）

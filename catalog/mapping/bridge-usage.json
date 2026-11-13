@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-13",
-  "scannedSources": "73ea6537 + uncommitted changes",
-  "sourceHash": "sha256:4b4f88297b919238c9206df582275246ce66b8655e19d338e87282738e78b193",
+  "scannedSources": "c1350654 + uncommitted changes",
+  "sourceHash": "sha256:ed0ec92bbd6b433672fb533187654cb4544760e891235bd4b4bee1a999f71627",
   "operations": [
     {
       "name": "action.execute",
@@ -50083,6 +50083,17 @@
     "M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetRecordNames": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "LifecycleReadback",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -50107,7 +50118,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetValues(System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.GetVariableNames": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "LifecycleReadback",
@@ -53057,6 +53092,17 @@
     "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "LifecycleReadback",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -53094,7 +53140,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues(System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "LifecycleReadback",
@@ -54622,7 +54692,46 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.IPlaceHolder.GetRecordNames": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.IPlaceHolder.GetValue(System.String,System.String)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.IPlaceHolder.GetValues(System.String)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.IPlaceHolder.GetVariableNames": [
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
@@ -59587,6 +59696,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.PropertyValue.ToTime": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.PropertyValue.op_Implicit(Eplan.EplApi.Base.MultiLangString)~Eplan.EplApi.DataModel.PropertyValue": [
       {
         "adapter": "EplanDeviceSymbolPlacement",
@@ -59890,6 +60012,19 @@
         ],
         "operations": [
           "property.set.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Relation.ToInt": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -63655,6 +63790,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.EServices.ProjectMessage.GetTime": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.EServices.ProjectMessage.GetUser": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -66511,6 +66659,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.GetSortModesCount": [
+      {
+        "adapter": "ApiTryEntryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.PlcService.WriteBackConnPointDesignations(Eplan.EplApi.DataModel.EObjects.Terminal[],System.Boolean)": [
       {
         "adapter": "ApiTryDispatch",
@@ -69186,6 +69347,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabaseItem.GetTimeStampOfLastChange": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.MasterData.MDPartsDatabaseItem.ToDataModelIdentifier": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -69727,6 +69901,19 @@
       }
     ],
     "M:Eplan.EplApi.MasterData.MDPropertyValue.ToString(Eplan.EplApi.Base.ISOCode.Language,System.String)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPropertyValue.ToTime": [
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
@@ -71891,6 +72078,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.AnyPropertyId.Index": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Article.Accessory.AccessoryPlacement": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -73557,6 +73757,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Connection.EndIndex": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Connection.EndPin": [
       {
         "adapter": "ApiTryEntryDispatch",
@@ -73888,6 +74101,19 @@
           "page.review",
           "placement.edit.plan",
           "plan.step.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Connection.EndTargetNumber": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -74331,6 +74557,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Connection.StartIndex": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Connection.StartPin": [
       {
         "adapter": "ApiTryEntryDispatch",
@@ -74662,6 +74901,19 @@
           "page.review",
           "placement.edit.plan",
           "plan.step.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Connection.StartTargetNumber": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -74997,6 +75249,19 @@
         "access": [
           "get",
           "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.ConnectionPointPosition.Index": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "api.try.execute"
@@ -77962,6 +78227,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.E3D.Mesh.FaceCount": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.E3D.Mesh.FacePoints(System.UInt32)": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -78202,6 +78480,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.NumberOfVariables": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.Properties": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -78237,6 +78528,19 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.VariableNames": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "api.try.execute"
@@ -80999,6 +81303,19 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.EObjects.TerminalAccessory.PartNumber": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.EObjects.TerminalAccessory.ReferencePos": [
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
@@ -85236,6 +85553,17 @@
     ],
     "P:Eplan.EplApi.DataModel.FunctionDefinition.Group": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
@@ -85293,6 +85621,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.FunctionDefinition.Id": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
@@ -87140,6 +87479,71 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.Color.B": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Color.ColorId": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Color.G": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Color.R": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.Color.Transparency": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.Color.TransparencyDefinedByLayer": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -87193,6 +87597,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.Comment.CreationDate": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanPdfCommentsImporter",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPdfCommentsImporter.cs",
@@ -87205,6 +87620,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.Comment.ModificationDate": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanPdfCommentsImporter",
         "member": "Read",
@@ -87741,6 +88167,19 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.DimensionCircle.TextColor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -88377,6 +88816,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextColor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.DimensionItem.TextFontInfo": [
       {
         "adapter": "ApiTryEntryDispatch",
@@ -88481,6 +88933,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Id": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanPlacementStyle",
         "member": "Apply",
@@ -88656,6 +89119,19 @@
         "access": [
           "get",
           "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Transparency": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "api.try.execute"
@@ -89016,6 +89492,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.LayerId": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDrawingReader",
         "member": "Read",
@@ -89984,6 +90471,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.Pen.ColorId": [
       {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
@@ -90052,6 +90550,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.Pen.LineEndType": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDrawingReader",
         "member": "Read",
@@ -90216,6 +90725,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.Pen.StyleId": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateLocationBox",
@@ -90454,6 +90974,19 @@
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.LayerId": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "get"
@@ -90754,6 +91287,17 @@
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.NumberOfVariables": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "PlaceHolderApi",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Generated/PlaceHolderApi.g.cs",
@@ -90853,6 +91397,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanPlacementTextWriter",
         "member": "Annotation",
@@ -91424,6 +91979,19 @@
         "access": [
           "get",
           "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.RelationIndex": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "api.try.execute"
@@ -93214,6 +93782,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Graphics.TextBase.TextColorId": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Graphics.TextPropertyList.TEXT_CONTENTS": [
       {
         "adapter": "EplanPdfCommentsImporter",
@@ -94091,6 +94672,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.IPlaceHolder.NumberOfVariables": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.IPlaceHolder.Value(System.String,System.String)": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -94098,6 +94692,19 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.IPlaceHolder.VariableNames": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "api.try.execute"
@@ -101719,6 +102326,32 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Pin.JumperBarCount": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.Pin.MaxConnectionCount": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Pin.Name": [
       {
         "adapter": "ApiTryEntryDispatch",
@@ -103017,6 +103650,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.Placement.DrawingOrder": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDrawingReader",
         "member": "Read",
@@ -107683,6 +108327,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Project.PropertyPlacementsSchemaId": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Project.Sections": [
       {
         "adapter": "ApiTryEntryDispatch",
@@ -109856,6 +110513,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Relation.Index": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.ReportBlock.Action": [
       {
         "adapter": "ApiTryDispatch",
@@ -110572,6 +111242,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Revisions.Comparison.DateOfComparison": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Revisions.Comparison.LastUser": [
       {
         "adapter": "ApiTryDispatch",
@@ -110767,6 +111450,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.DataModel.Revisions.ComparisonEntry.TypeIdOfComparedObject": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.DataModel.Revisions.ComparisonEntryDetail.OldPropertyValue": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -110871,6 +111567,17 @@
       }
     ],
     "P:Eplan.EplApi.DataModel.StorableObject.DatabaseIdentifier": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanReferenceProjects",
         "member": "Close",
@@ -112461,6 +113168,19 @@
           "property.read",
           "property.set.execute",
           "property.set.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.StorableObject.TypeIdentifier": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -116214,6 +116934,19 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.MasterData.MDAnyPropertyId.Index": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.MasterData.MDArticleTerminalInfo.BoundingBox": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -117757,6 +118490,45 @@
         ]
       }
     ],
+    "P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionGroup": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionId": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.HarnessLink": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.AllIds": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -118372,6 +119144,19 @@
         "access": [
           "get",
           "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDPartHierarchyPosition.Count": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "api.try.execute"
@@ -120799,6 +121584,45 @@
         "access": [
           "get",
           "set"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionGroup": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDSymbol.FunctionDefinitionId": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.MasterData.MDSymbol.Id": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "get"
         ],
         "operations": [
           "api.try.execute"
@@ -143542,6 +144366,17 @@
       },
       {
         "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
         "member": "Type",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -159607,6 +160442,17 @@
       },
       {
         "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
         "member": "Type",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -164297,6 +165143,17 @@
         ]
       },
       {
+        "adapter": "ApiTryEntryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "ApiTryHandleDispatch",
         "member": "Compatible",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
@@ -164432,6 +165289,17 @@
       }
     ],
     "T:Eplan.EplApi.HEServices.PlcService.ReadressingConfig": [
+      {
+        "adapter": "ApiTryEntryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
