@@ -60259,8 +60259,8 @@
     "operation": {
       "denominator": 4014,
       "tools": 2572,
-      "apiTry": 2337,
-      "callable": 2605,
+      "apiTry": 2519,
+      "callable": 2737,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -60282,22 +60282,22 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel",
-        "callable": 849,
+        "callable": 942,
         "refused_unsafe": 4
       },
       {
         "scope": "Eplan.EplApi.DataModel.E3D",
-        "callable": 297,
+        "callable": 303,
         "refused_unsafe": 1
       },
       {
         "scope": "Eplan.EplApi.DataModel.EObjects",
-        "callable": 74,
+        "callable": 80,
         "refused_unsafe": 0
       },
       {
         "scope": "Eplan.EplApi.DataModel.Graphics",
-        "callable": 347,
+        "callable": 361,
         "refused_unsafe": 0
       },
       {
@@ -60312,7 +60312,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.Planning",
-        "callable": 101,
+        "callable": 104,
         "refused_unsafe": 0
       },
       {
@@ -60322,7 +60322,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.Topology",
-        "callable": 14,
+        "callable": 16,
         "refused_unsafe": 0
       },
       {
@@ -60347,7 +60347,7 @@
       },
       {
         "scope": "Eplan.EplApi.MasterData",
-        "callable": 434,
+        "callable": 442,
         "refused_unsafe": 0
       },
       {
@@ -60368,7 +60368,7 @@
       "live_verified": 615
     },
     "declined": {
-      "count": 677,
+      "count": 613,
       "live_verified": 0
     },
     "dedicated": {
@@ -60380,11 +60380,11 @@
       "live_verified": 1
     },
     "none": {
-      "count": 732,
+      "count": 664,
       "live_verified": 0
     },
     "other": {
-      "count": 33,
+      "count": 165,
       "live_verified": 0
     },
     "state_only": {
@@ -60406,7 +60406,7 @@
     "masterdata_management": 14,
     "masterdata_message_objects": 36,
     "offline_host_application": 22,
-    "property_id_tables": 172,
+    "property_id_tables": 108,
     "settings_write": 80,
     "shared_interactive_state": 65
   },
@@ -60419,7 +60419,7 @@
           "live_verified": 620
         },
         "declined": {
-          "count": 745,
+          "count": 681,
           "live_verified": 0
         },
         "dedicated": {
@@ -60431,11 +60431,11 @@
           "live_verified": 1
         },
         "none": {
-          "count": 2028,
+          "count": 1945,
           "live_verified": 0
         },
         "other": {
-          "count": 38,
+          "count": 185,
           "live_verified": 0
         },
         "state_only": {
@@ -60464,11 +60464,11 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1373,
+          "count": 1314,
           "live_verified": 0
         },
         "other": {
-          "count": 26,
+          "count": 85,
           "live_verified": 0
         },
         "state_only": {
@@ -60485,7 +60485,7 @@
           "live_verified": 543
         },
         "declined": {
-          "count": 275,
+          "count": 211,
           "live_verified": 0
         },
         "dedicated": {
@@ -60497,11 +60497,11 @@
           "live_verified": 1
         },
         "none": {
-          "count": 417,
+          "count": 393,
           "live_verified": 0
         },
         "other": {
-          "count": 12,
+          "count": 100,
           "live_verified": 0
         },
         "state_only": {

@@ -24,9 +24,35 @@ internal static partial class ApiTryGenerator
     private static readonly string[] _readPrefixes = ["Get", "Is", "Has", "Can", "Find"];
     // Reviewed lifecycle calls use the closed lifecycle policy; session state remains excluded.
     private static readonly string[] _excludedPrefixes = ["Remove", "Delete", "Erase", "Create", "Destroy", "Init", "init", "Freeze", "Lock", "#"];
-    private static Dictionary<string, string[]> Enums(string root) => (File.Exists(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")) ? File.ReadLines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl")) : [])
-        .Select(l => JsonSerializer.Deserialize<JsonElement>(l)).Where(t => t.GetProperty("kind").GetString() == "enum" && t.TryGetProperty("values", out _) && !t.TryGetProperty("excluded", out _))
-        .ToDictionary(t => t.GetProperty("id").GetString()![2..], t => t.GetProperty("values").EnumerateObject().Select(p => p.Name).ToArray(), StringComparer.Ordinal);
+    /// <summary>
+    /// The enum value names a parameter of that type accepts. The extractor routes the property-ID enums nested in a
+    /// Properties class to data-dictionary.jsonl so the member files stay small (catalog/README.md), so their type
+    /// line carries no values and a parameter of that type could not be validated at all. Those names come back from
+    /// the dictionary, whose <c>object</c> is the enum's own short name (owner 2026-11-14: this alone blocked 67
+    /// groups of <c>*PropertyList.Exists</c> and <c>.Property</c>).
+    /// </summary>
+    private static Dictionary<string, string[]> Enums(string root)
+    {
+        string File2(string name) => Path.Combine(root, "catalog/eplan-2026.0.3/" + name);
+        IEnumerable<JsonElement> Read(string name) => File.Exists(File2(name))
+            ? File.ReadLines(File2(name)).Select(l => JsonSerializer.Deserialize<JsonElement>(l)) : [];
+        Dictionary<string, string[]> dictionary = Read("data-dictionary.jsonl")
+            .GroupBy(p => p.GetProperty("object").GetString()!, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Select(p => p.GetProperty("name").GetString()!).Distinct(StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);
+        var enums = new Dictionary<string, string[]>(StringComparer.Ordinal);
+        foreach (JsonElement type in Read("types.jsonl"))
+        {
+            if (type.GetProperty("kind").GetString() != "enum" || type.TryGetProperty("excluded", out _))
+            { continue; }
+            string id = type.GetProperty("id").GetString()![2..];
+            if (type.TryGetProperty("values", out JsonElement values))
+            { enums[id] = [.. values.EnumerateObject().Select(p => p.Name)]; }
+            else if (type.TryGetProperty("outer", out JsonElement outer) && outer.GetString()!.EndsWith(".Properties", StringComparison.Ordinal)
+                && dictionary.TryGetValue(id[(id.LastIndexOf('.') + 1)..], out string[]? names))
+            { enums[id] = names; }
+        }
+        return enums;
+    }
     internal static bool Writable(ApiDetail member) => member.Id is not ("P:Eplan.EplApi.DataModel.ViewPart.UseLocalPropertyPlacements" or "P:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.FunctionDefinitionCategory") && member.SetterAccess is null && member.Access is null && member.Accessors?.Split(';').Contains("set", StringComparer.Ordinal) == true;
     private static bool ObjectType(string? type, IReadOnlyDictionary<string, string[]>? kinds = null) => kinds is null ? ApiTryCatalog.Kinds(type).Length > 0 : kinds.ContainsKey((type ?? "").Replace("Eplan.EplApi.DataModel.", "", StringComparison.Ordinal));
     private static bool Scalar(string? type, IReadOnlyDictionary<string, string[]>? enums) => type is "System.String" or "System.Boolean" or "System.Double" or "System.Int32" or "System.Int64" || type is not null && enums?.ContainsKey(type) == true;
