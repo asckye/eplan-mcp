@@ -60368,7 +60368,7 @@
       "live_verified": 615
     },
     "declined": {
-      "count": 598,
+      "count": 602,
       "live_verified": 0
     },
     "dedicated": {
@@ -60380,7 +60380,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 829,
+      "count": 825,
       "live_verified": 0
     },
     "other": {
@@ -60404,7 +60404,7 @@
     "masterdata_management": 14,
     "masterdata_message_objects": 36,
     "offline_host_application": 22,
-    "property_id_tables": 168,
+    "property_id_tables": 172,
     "settings_write": 80,
     "shared_interactive_state": 65
   },
@@ -60417,7 +60417,7 @@
           "live_verified": 620
         },
         "declined": {
-          "count": 662,
+          "count": 666,
           "live_verified": 0
         },
         "dedicated": {
@@ -60429,7 +60429,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 2132,
+          "count": 2128,
           "live_verified": 0
         },
         "other": {
@@ -60483,7 +60483,7 @@
           "live_verified": 543
         },
         "declined": {
-          "count": 223,
+          "count": 227,
           "live_verified": 0
         },
         "dedicated": {
@@ -60495,7 +60495,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 477,
+          "count": 473,
           "live_verified": 0
         },
         "other": {

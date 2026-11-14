@@ -28,6 +28,8 @@ internal static class CoverageRoutes
     {
         ["T:Eplan.EplApi.DataModel.Properties"] = "property_id_tables",
         ["T:Eplan.EplApi.DataModel.AnyPropertyId"] = "property_id_tables",
+        // The master-data side of the same tables: AllMD*PropIDs list property IDs, which eplan_property_schema serves.
+        ["T:Eplan.EplApi.MasterData.Properties"] = "property_id_tables",
         ["T:Eplan.EplApi.Base.Progress"] = "shared_interactive_state",
         ["T:Eplan.EplApi.Base.IEplProgress"] = "shared_interactive_state",
         ["T:Eplan.EplApi.System.EplApplication"] = "offline_host_application",

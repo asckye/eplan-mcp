@@ -62,3 +62,4 @@
 | [0053](0053-mcp-standard-exceptions.md) | 采用 MCP 服务规范 0.2，登记 MUST 例外和待改项 | Accepted | 双向门 |
 | [0054](0054-api-try-master-data-handles.md) | 通用入口的主数据句柄：读不限库，写只在当前配置为 scratch 文件副本时开放 | Accepted | 单向门 |
 | [0055](0055-api-try-field-handle-roots.md) | 通用入口把公开实例字段也当作句柄来源，只读不写 | Accepted | 双向门 |
+| [0056](0056-api-try-keyed-chain-steps.md) | 通用入口的句柄链接受按键取值的一步，工具类按名单作为根 | Proposed | 双向门 |

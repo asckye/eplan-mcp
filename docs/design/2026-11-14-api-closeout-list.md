@@ -60,3 +60,15 @@
 ## 5. 不在本页范围
 
 长尾按签名排除的三类——`unsupported_return` 105、`unsupported_parameter` 95、`unsupported_property_or_ambiguous_shape` 78——要逐签名决定，放在后面单独一页。
+
+## 6. 第二轮结案（新提出，等负责人确认）
+
+第一轮落地后又看清一类：**枚举器类型**。它们是集合类型的机械产物，一次试执行取不到迭代语义——能用的是集合本身，不是它的枚举器。
+
+| 建议理由 | 类型 | 组数 |
+|---|---|---:|
+| `enumerator_type`：集合的枚举器，单次试执行无法迭代；集合本身另有路径 | `DataModel.MasterData.FunctionDefinitionEnumerator` 4、`Graphics.PlaceHolder.VariablesClass.VariablesEnumerator` 4、`Graphics.PlaceHolder.ValueSetsClass.ValueSetEnumerator` 4、`Base.SysMessagesEnumerator` 4 | 16 |
+
+（`MasterData.MDPartsMessagesEnumerator` 5 与 `MDPartsMessagesRegisteredEnumerator` 4 已随第一轮的主数据消息对象结案。）
+
+另外第 1 节提到的 `MasterData.Properties` 4 组已按 `property_id_tables` 结案（与 `DataModel.Properties` 同类），明确不做因此为 602 组（15.0%）。
