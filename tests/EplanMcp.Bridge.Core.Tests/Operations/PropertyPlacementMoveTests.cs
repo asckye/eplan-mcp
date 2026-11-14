@@ -8,6 +8,31 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class PropertyPlacementMoveTests
 {
+    /// <summary>
+    /// A sample device inserted from a macro stays grouped, and its property text is still the device's own child
+    /// placement: live 2026-11-14, every one of the 224 texts on =K1+A2&amp;EFA1/1 had a grouped owner.
+    /// </summary>
+    [Theory]
+    [InlineData("true", "false", true)]
+    [InlineData("false", "false", true)]
+    [InlineData("true", "true", false)]
+    [InlineData("false", "true", false)]
+    public void Grouping_RefusesAGroupedTextAndAcceptsAGroupedOwner(string owner, string child, bool accepted)
+    {
+        var fake = new Mover(0) { ReadbackDigest = new string('f', 64) };
+        fake.Scene.Page.Placements[0].Properties!["grouped"] = owner;
+        fake.Child.Properties!["grouped"] = child;
+
+        if (accepted)
+        {
+            Assert.Equal(ExecutionState.Committed, (string?)fake.Execute()["execution"]);
+            return;
+        }
+        BridgeErrorException refusal = Assert.Throws<BridgeErrorException>(() => fake.Execute());
+        Assert.Equal(ErrorReason.InvalidArgument, refusal.Error.Reason);
+        Assert.Contains("ungrouped text", refusal.Error.Message, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("Circuit", true)]
     [InlineData("Overview", true)]

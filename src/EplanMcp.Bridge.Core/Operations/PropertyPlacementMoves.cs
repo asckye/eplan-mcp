@@ -60,10 +60,16 @@ internal static class PropertyPlacementMoves
                 && Value(p, "property_id") == move["property_id"]!.ToString() && Value(p, "property_index") == move["property_index"]!.ToString());
             if (child is null)
             { throw new BridgeErrorException(ErrorReason.PlanStale, "Property selector changed; refresh the parent's property placements."); }
-            Require(Value(owner, "grouped") == "false" && Value(child, "grouped") == "false"
+            // The owner's own grouping is not checked: a property text is its owner's child placement, not a member of
+            // the owner's group, and moving it leaves the owner where it is (A53/A54/A57). Sample devices are usually
+            // inserted from a macro and stay grouped, so checking it refused texts that are otherwise movable (live
+            // 2026-11-14: on =K1+A2&EFA1/1 every one of the 224 texts had a grouped owner, and every one of the 223 on
+            // =K1+A2&EFS1/2 passed the child, bounds and rotation checks). If EPLAN does drag the group after all, the
+            // commit-time readback sees the owner move and rolls the whole move back.
+            Require(Value(child, "grouped") == "false"
                 && child.Location.Length == 2 && DrawingCoordinates.ValidBounds(child.Bounds)
                 && (Value(child, "angle_deg") == "from_layer" || double.TryParse(Value(child, "angle_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out double before) && before is 0 or 90 or 180 or 270),
-                "Require ungrouped text with known bounds and a right-angle rotation.");
+                "Require an ungrouped text with known bounds and a right-angle rotation.");
             Require(!rows.Any(r => DrawingLocators.Matches(child.Locator, r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!)), "Remove duplicate property targets.");
             JToken[] coordinates = [move["x_mm"]!, move["y_mm"]!];
             Require(coordinates.All(n => n.Type is JTokenType.Float or JTokenType.Integer && (double)n is >= 0 and <= 10000), "Supply finite page coordinates 0..10000 mm.");

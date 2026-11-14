@@ -35,6 +35,8 @@ Small 覆盖同号属性闭包、逐项读回、范围外变化、提交后连�
 
 `property_moves` 接受 Circuit 和 Overview 两种页类型：总览页上同样有设备属性文字，且没有需要绕行的导线（2026-11-13 实机：16 页重绘里 5 个总览页按"不是 Circuit 页"被拒）。`moves` 的几何闭包仍只限 Circuit 页。
 
+`property_moves` 不检查父对象是否成组：属性文字是父对象的子放置，不是父对象所在组的成员，移动它不动父对象（A53/A54/A57）。样本器件多由宏插入而保持成组，检查它会把本可移动的文字拒掉（2026-11-14 实机：`=K1+A2&EFA1/1` 上 224 个属性文字的父对象全部成组）。文字自身仍须未成组；若 EPLAN 实际会带动整组，提交前读回会发现父对象移位并整次回滚。
+
 `property_moves` 另可设 `alignment`（原生枚举名）、`height_mm`（0.5–100 或默认 -16002）、`visible`、整数 `layer`、`pen:{color,width_mm,style,pattern_length,line_end}`。x_mm/y_mm 仍为页面绝对坐标，内部属性位置加父位置转换，外框由显式 GetBoundingBox(false) 读为绝对坐标；修改样式可单独产生撤销步。除 visible:false 外均读回核对；隐藏写入后 EPLAN 显示不可见元素时可能仍读到 IsVisible=true，结果 warning 明示跳过该比较。字高和对齐改变后的外框使用 EPLAN 实测。
 
 属性字高读回同时保留 `height_raw_mm` 原始数值供写入校验；`height_mm` 沿用布局读取语义，默认字高为 `from_layer`。

@@ -141,4 +141,14 @@
 - 2026-11-03 03:39，负责人提供的正式工具 Large 失败：`ReportCreateTests` 在 LargeWrite 创建目录通过；端子图输入 `type=TerminalDiagram`、`form=F13_008`、`filter_scheme=Location designation_A3`，未传方案数据，返回 `S029131 配置无效。参数名称:'esFilterSchemeName'。参数值:'Location designation_A3'。请使用下列配置中的其中一个:'Anlage, Einbauort'。`。此前探测成功时同时设置了 `FilterSchemaData`；因此正式读写工具须携带数据。此次仅核对本机 XML，不运行 EPLAN；修复后的端到端生成与撤销仍待验。
 - `ReportBlock.Create(project)` 设置上述字段后 `Reports.CreateReport(block, 首页名)` 在一个事务内生成并提交：目录用 `F06_002` 生成 12 页（`&AAB1/102` 起）；
   端子图用 `F13_008` 与原筛选方案生成。按 `DeviceTagNameParts` 限定到 LargeWrite 的一个端子排（1200=A1、20013=FC、20014=2）**没有起作用**，生成了项目中全部端子排的端子图（26 页）。限定方式待查，产品首版按项目范围生成。
-— Large `ReportBlockSpikeTests`（证据 `%TEMP%\eplanmcp-spikeseport-blocks-*.json`）。
+— Large `ReportBlockSpikeTests`（证据 `%TEMP%\eplanmcp-spikes
+eport-blocks-*.json`）。
+
+### A138. 属性文字的父对象多数成组，文字自身从不成组（2026-11-14，EPLAN 2026.0.3.25421，Electric P8；scratch 项目 SmallRedraw_20261104171405264 只读）
+- `eplan_page_get include_drawings` 的 `properties` 子对象给出 `grouped`、`angle_deg`、`docked`、`visible`、`property_id`、`displayed_property_id`、`property_index`、`height_mm`、`height_raw_mm`、`layer`、`pen_*`、`alignment`；`angle_deg` 与 `angle` 并列，`bounds` 与 `location` 在同级而不在 `properties` 内。
+- 三页共 570 个属性文字，`grouped` **全部为 `false`**，角度全为 0 或 90，外框四值齐全，定位点二维。父对象的 `grouped` 则因页而异：`=K1+A2&EFA1/1` 的 224 个全部成组（Terminal 200、BusTerminal 16、PLC 8）；`=K1+A2&EFS1/2` 223 个中 68 个成组；`=K1+A2&EFS1/1` 123 个中 33 个成组。由宏插入的器件保持成组是常态，因此 `property_moves` 不再检查父对象的 `grouped`（见 [eplan_placement_update](../../tools/eplan_placement_update.md)）。
+- 属性文字的 `parent` 定位器与自身 `oid` 相同、只有 `digest` 不同（A57 的共享对象号）；按 `oid` 找父对象时必须同时要求对方不是属性放置。
+- `eplan_page_get` 在项目未打开时返回空的 `drawings` 而不报错，`eplan_page_create` 同样情况明确返回 `PROJECT_NOT_OPEN`；读取路径的这一不一致使"读到空"与"页上确实没有对象"无法区分。
+- 由 `eplan_page_get` 得到的定位器直接交给 `eplan_object_get` 返回 `PLAN_STALE`，须先经 `eplan_object_find` 取新定位器。
+- 定义点必须落在已有连接段上：空白页上调用 `eplan_connection_create` 放 `definition_point` 返回 `/items/0/position: Place the definition point on a segment of this connection. Nearest existing segment: none.`
+— 探查脚本与日志：`probe3-text-cable.py`、`probe7.log`（会话 scratchpad，未入库）。
