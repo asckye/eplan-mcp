@@ -119,7 +119,7 @@ internal static class ConnectionDefinitionPoints
 
     internal static JObject PlanPotential(JToken value, string at, double[] position, int index)
     {
-        ConnectionCreatePlanner.Members(value, at, "kind position", "potential_name signal_name potential_value potential_type color cross_section");
+        ConnectionCreatePlanner.Members(value, at, "kind position", "potential_name signal_name potential_value potential_type color cross_section line_color");
         var properties = new JObject();
         foreach (string field in new[] { "potential_name", "signal_name", "potential_value", "color", "cross_section" })
         {
@@ -129,11 +129,15 @@ internal static class ConnectionDefinitionPoints
                 && ((string)name!).Length <= 200 && !((string)name!).Any(char.IsControl), at + "/" + field, "Supply nonempty text within 200 characters.");
             properties[field] = name.DeepClone();
         }
-        if (value["potential_type"] is { } type)
+        // A potential's own line colour (31005) is what a connection on it draws with; the sample's potentials carry
+        // an explicit index where ours left the layer's (live 2026-11-14: 33 connections of the sixteen-page redraw).
+        foreach (string field in new[] { "potential_type", "line_color" })
         {
-            ConnectionCreatePlanner.Require(type.Type == JTokenType.Integer && int.TryParse(type.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _),
-                at + "/potential_type", "Supply an integer supported by the native PropertyValue Int32 accessor.");
-            properties["potential_type"] = type.DeepClone();
+            if (value[field] is not { } number)
+            { continue; }
+            ConnectionCreatePlanner.Require(number.Type == JTokenType.Integer && int.TryParse(number.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _),
+                at + "/" + field, "Supply an integer supported by the native PropertyValue Int32 accessor.");
+            properties[field] = number.DeepClone();
         }
         if (properties["cross_section"] is { } section)
         {

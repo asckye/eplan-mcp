@@ -44,6 +44,9 @@ public sealed class PotentialDefinitionTests
     [InlineData("potential_type", "\"2\"")]
     [InlineData("potential_type", "2.5")]
     [InlineData("potential_type", "2147483648")]
+    [InlineData("line_color", "\"5\"")]
+    [InlineData("line_color", "5.5")]
+    [InlineData("line_color", "2147483648")]
     public void EngineeringFields_RejectInvalidTypesBeforeWriting(string field, string json)
     {
         var f = Fixture();
@@ -64,12 +67,15 @@ public sealed class PotentialDefinitionTests
         row["potential_name"] = "PE";
         row["potential_value"] = "PE";
         row["potential_type"] = 4;
+        row["line_color"] = 5;
         row["color"] = "GNYE";
         row["cross_section"] = section;
         JToken properties = f.Plan()["definitionPoints"]![0]!["properties"]!;
         Assert.Equal("PE", (string?)properties["potential_value"]);
         Assert.Equal(JTokenType.Integer, properties["potential_type"]!.Type);
         Assert.Equal(4, (int)properties["potential_type"]!);
+        Assert.Equal(JTokenType.Integer, properties["line_color"]!.Type);
+        Assert.Equal(5, (int)properties["line_color"]!);
         Assert.Equal("GNYE", (string?)properties["color"]);
         Assert.Equal("1,5", (string?)properties["cross_section"]);
     }

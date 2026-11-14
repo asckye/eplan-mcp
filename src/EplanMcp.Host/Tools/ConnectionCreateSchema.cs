@@ -32,6 +32,7 @@ internal static class ConnectionCreateSchema
         potential["properties"]!["signal_name"] = Text();
         potential["properties"]!["potential_value"] = Text();
         potential["properties"]!["potential_type"] = new JsonObject { ["type"] = "integer" };
+        potential["properties"]!["line_color"] = new JsonObject { ["type"] = "integer" };
         potential["properties"]!["color"] = Text();
         potential["properties"]!["cross_section"] = Text();
         potential["anyOf"] = new JsonArray(new JsonObject { ["required"] = new JsonArray("potential_name") }, new JsonObject { ["required"] = new JsonArray("signal_name") });

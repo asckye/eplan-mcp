@@ -403,8 +403,12 @@ internal sealed partial class SmallProjectRedrawDriver(
                     if (Property(item, id) is string value && value.Length > 0)
                     { point[field] = value; }
                 }
-                if (Property(item, 31006) is string type && int.TryParse(type, NumberStyles.Integer, CultureInfo.InvariantCulture, out int potentialType))
-                { point["potential_type"] = potentialType; }
+                foreach ((int id, string field) in new[] { (31006, "potential_type"), (31005, "line_color") })
+                {
+                    if (Property(item, id) is string number
+                        && int.TryParse(number, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed))
+                    { point[field] = parsed; }
+                }
                 if (point["potential_name"] is null && point["signal_name"] is null)
                 { report.Warning(page, "Potential definition " + Id(item) + " has no readable nonempty potential or signal name."); }
                 else

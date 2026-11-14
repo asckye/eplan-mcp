@@ -10,7 +10,10 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanConnectionCreator
 {
-    private static readonly (string Name, int Id)[] _potentialProperties = [("potential_value", 33003), ("potential_type", 31006), ("color", 31004), ("cross_section", 31002)];
+    private static readonly (string Name, int Id)[] _potentialProperties = [("potential_value", 33003), ("potential_type", 31006), ("color", 31004), ("cross_section", 31002), ("line_color", 31005)];
+
+    /// <summary>Property IDs the native PropertyValue holds as an integer rather than text.</summary>
+    private static readonly int[] _potentialIntegers = [31006, 31005];
 
     private static PotentialDefinition InsertPotential(Page page, JToken row)
     {
@@ -37,7 +40,7 @@ internal sealed partial class EplanConnectionCreator
                 if (row["properties"]![property.Name] is not { } value)
                 { continue; }
                 using AnyPropertyId id = property.Id;
-                if (property.Id == 31006)
+                if (_potentialIntegers.Contains(property.Id))
                 { properties[id] = (int)value; }
                 else
                 { properties[id] = (string)value!; }
@@ -57,7 +60,7 @@ internal sealed partial class EplanConnectionCreator
             { continue; }
             using AnyPropertyId id = property.Id;
             using PropertyValue value = properties[id];
-            values[property.Name] = property.Id == 31006 ? new JValue(value.ToInt()) : new JValue(value.ToString());
+            values[property.Name] = _potentialIntegers.Contains(property.Id) ? new JValue(value.ToInt()) : new JValue(value.ToString());
         }
         return new JObject
         {

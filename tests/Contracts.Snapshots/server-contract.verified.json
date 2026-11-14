@@ -5225,6 +5225,9 @@
                     "potential_type": {
                       "type": "integer"
                     },
+                    "line_color": {
+                      "type": "integer"
+                    },
                     "color": {
                       "$ref": "#/$defs/t"
                     },
