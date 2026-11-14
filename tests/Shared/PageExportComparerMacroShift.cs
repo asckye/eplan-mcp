@@ -20,16 +20,28 @@ internal static class PageExportComparerMacroShift
     /// <summary>Below this, a shared translation is coincidence rather than one macro's geometry.</summary>
     internal const int MinimumObjects = 10;
 
+    /// <summary>
+    /// Fields the substitute macro redraws in its own convention: EPLAN stores an arc's extent in angles whose start
+    /// and end a macro insertion does not preserve (api-notes: the sample's circles keep start = end). The owner
+    /// decided on 2026-11-13 that these count as macro version differences too, so an object already pinned to a
+    /// macro's translation may differ in them; every entry names the ones that do.
+    /// </summary>
+    private static readonly string[] _redrawnByTheMacro = ["startAngle", "endAngle"];
+
     /// <summary>A page can hold several substituted macros, so each qualifying translation is taken in turn.</summary>
     internal static void Separate(PageExportComparison result)
     {
-        while (SeparateOne(result))
+        var translations = new List<(double X, double Y)>();
+        while (SeparateOne(result, translations))
         {
             // Every round pairs at least MinimumObjects leftovers, so the leftovers run out.
         }
+        // Only now, with each macro's translation measured, are leftovers at one of them taken in its own convention.
+        foreach ((double X, double Y) translation in translations)
+        { SeparateRedrawn(result, translation); }
     }
 
-    private static bool SeparateOne(PageExportComparison result)
+    private static bool SeparateOne(PageExportComparison result, List<(double X, double Y)> translations)
     {
         var candidates = new List<(string Type, JObject Source, JObject Target, (double X, double Y) Delta)>();
         foreach (string type in _types)
@@ -60,9 +72,44 @@ internal static class PageExportComparerMacroShift
             PageExportTypeComparison group = result.Types[type];
             group.Missing.Remove(source);
             group.Extra.Remove(target);
-            result.MacroShiftDifferences.Add(new(type, source, target, shift.Key.X, shift.Key.Y));
+            result.MacroShiftDifferences.Add(new(type, source, target, shift.Key.X, shift.Key.Y, []));
         }
-        return usedSources.Count >= MinimumObjects;
+        if (usedSources.Count < MinimumObjects)
+        { return false; }
+        translations.Add(shift.Key);
+        return true;
+    }
+
+    /// <summary>Leftovers exactly at <paramref name="translation"/> whose only remaining differences are the macro's own convention.</summary>
+    private static void SeparateRedrawn(PageExportComparison result, (double X, double Y) translation)
+    {
+        foreach (string type in _types)
+        {
+            if (!result.Types.TryGetValue(type, out PageExportTypeComparison? group))
+            { continue; }
+            foreach (JObject missing in group.Missing.ToArray())
+            {
+                JObject? paired = group.Extra.FirstOrDefault(extra => Delta(missing, extra) == translation
+                    && Redrawn(missing, extra) is { Length: > 0 });
+                if (paired is null)
+                { continue; }
+                group.Missing.Remove(missing);
+                group.Extra.Remove(paired);
+                result.MacroShiftDifferences.Add(new(type, missing, paired, translation.X, translation.Y,
+                    Redrawn(missing, paired)!));
+            }
+        }
+    }
+
+    /// <summary>The convention fields that differ, or null when something outside them does.</summary>
+    private static string[]? Redrawn(JObject left, JObject right)
+    {
+        if (Shape(left) is not JObject one || Shape(right) is not JObject other)
+        { return null; }
+        string[] differing = [.. _redrawnByTheMacro.Where(field => !JToken.DeepEquals(one[field], other[field]))];
+        foreach (string field in _redrawnByTheMacro)
+        { one.Remove(field); other.Remove(field); }
+        return JToken.DeepEquals(one, other) ? differing : null;
     }
 
     /// <summary>The translation from <paramref name="source"/> to <paramref name="target"/>, rounded to the micron.</summary>
@@ -114,5 +161,9 @@ internal static class PageExportComparerMacroShift
         : double.TryParse((string?)value, NumberStyles.Float, CultureInfo.InvariantCulture, out double parsed) ? parsed : null;
 }
 
-/// <summary>One object a substitute macro drew at a constant offset from the sample's.</summary>
-internal sealed record PageExportMacroShift(string Type, JObject Source, JObject Target, double X, double Y);
+/// <summary>
+/// One object a substitute macro drew at a constant offset from the sample's. <paramref name="Redrawn"/> names the
+/// fields the macro also states in its own convention; it is empty when only the position differs.
+/// </summary>
+internal sealed record PageExportMacroShift(string Type, JObject Source, JObject Target, double X, double Y,
+    IReadOnlyList<string> Redrawn);

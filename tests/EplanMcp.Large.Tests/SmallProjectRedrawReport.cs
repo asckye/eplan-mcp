@@ -43,7 +43,8 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
     }
 
     private static string Offset(PageExportMacroShift shift) => string.Create(System.Globalization.CultureInfo.InvariantCulture,
-        $"{shift.X:0.######} mm right and {shift.Y:0.######} mm up");
+        $"{shift.X:0.######} mm right and {shift.Y:0.######} mm up")
+        + (shift.Redrawn.Count == 0 ? "" : ", and states " + string.Join(", ", shift.Redrawn) + " in its own convention");
 
     internal void RecordPageElapsed(string page, TimeSpan elapsed) => _pageElapsed[page] = elapsed.TotalMilliseconds;
 
