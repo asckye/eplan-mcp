@@ -92,3 +92,17 @@
 同批实现的可达性扩展：服务只有带 `Project` 的公开构造函数时用调用已指定的 Project 构造（+7 组）；抽象服务若存在**恰好一个**可构造的具体子类则按该子类构造——这条规则今天一个也没命中（6 个抽象服务都没有具体子类），保留它是为了将来 EPLAN 增加实现时自动生效。
 
 三轮结案与 ADR-0055 / 0056 实现之后：**明确不做 673 组（16.8%），到不了 599 组（14.9%）**，起点 428 / 1009。
+
+## 8. 第四轮：具体类候选的评审结果（负责人 2026-11-14 「A 类放开，B 类跟着查找器结案」）
+
+把"公开目录里没有来源"的 76 个具体类按对画图的用处分了三类，结果是 **A 类基本是我判断错了**：
+
+| 类 | 决定 | 实际结果 |
+|---|---|---|
+| A：建议放开（22 组） | 按 ADR-0056 的名单放开 | **放开后 0 组变化**。`Base.PathMap`、`Base.Languages`、`DataModel.DocumentTypeManager` 的成员**全是静态的**——静态成员不需要接收者，本来就按"静态入口"可调（`DocumentTypeManager` 的 14 个 `Get*`/`Is*` 一直是 `read public_static`）；缺口文件把它们误报成 `declaring_type_unreachable`，是报告缺陷不是能力缺口。`MasterData.MDTranslationDatabase`（13 组）要先 `Open(路径)` 才能查词条，而按路径打开主数据文件被 `external_path_parameter` 排除，**不另做决定就用不了**。`DataModel.ProjectSchemeSetting`（1 组）只有 `Init`/`Set`，都已按既有规则排除。名单里只留 `UnitParser`、`ISOCode`，其余撤回，理由写在 `ApiTryServices.Utilities` 的注释里。 |
+| B：过滤器（21 组） | 跟着查找器结案 | 10 个过滤器类型按 `covered_by_object_find` 结案 |
+| C：框架与基础设施（54 组） | 结案 | `addin_infrastructure` 13 个类型、`diagnostic_infrastructure` 5 个、`exception_type` 6 个、`write_pipeline_owned` 3 个、`masterdata_message_objects` 1 个 |
+
+同时修了缺口文件的第二个报告缺陷：**所有重载都是静态的组不再按所属类型的可达性判断**，121 行从 `declaring_type_unreachable` 归到各自真正的原因（多为 `static_or_nonpublic`）。
+
+四轮之后：**明确不做 747 组（18.6%），到不了 525 组（13.1%）**，起点 428 / 1009。

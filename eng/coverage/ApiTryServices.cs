@@ -16,8 +16,18 @@ internal static class ApiTryServices
     /// <summary>ADR-0054: the one parts master data root; a fresh instance per call opens only the database EPLAN is configured with.</summary>
     internal const string PartsManagement = "Eplan.EplApi.MasterData.MDPartsManagement";
     internal const string PathInfo = "Eplan.EplApi.DataModel.PathInfo";
-    /// <summary>ADR-0056: the utility types allowed as trial roots; adding one means amending that ADR.</summary>
-    internal static readonly string[] Utilities = ["Eplan.EplApi.Base.UnitParser", "Eplan.EplApi.Base.ISOCode"];
+    /// <summary>
+    /// ADR-0056: the types allowed as trial roots by name, with whether they are IDisposable; adding one means
+    /// amending that ADR. They touch no project, file, setting, database, printer or licence: UnitParser and ISOCode
+    /// parse units and language codes. PathMap, Languages and DocumentTypeManager were considered on 2026-11-14 and
+    /// left out: every member of theirs is static, so they were already callable and the gap list was simply
+    /// reporting their declaring type's reachability, which a static member does not need.
+    /// </summary>
+    internal static readonly (string Type, bool Disposable)[] Utilities =
+    [
+        ("Eplan.EplApi.Base.UnitParser", true),
+        ("Eplan.EplApi.Base.ISOCode", true),
+    ];
     private static readonly string[] _partsManagementReads = ["OpenDatabase", "PartsDatabaseState"];
     internal static bool MasterDataHandle(string type) => type.StartsWith("Eplan.EplApi.MasterData.", StringComparison.Ordinal);
     internal static Dictionary<string, Service> Load(string root)
@@ -30,8 +40,8 @@ internal static class ApiTryServices
         services[PathInfo] = new(true, null);
         // ADR-0056: utility types by name, never by rule. These parse units and language codes and touch no project,
         // file, setting, database, printer or licence; both are IDisposable and are disposed per call like a service.
-        foreach (string utility in Utilities)
-        { services[utility] = new(true, null); }
+        foreach ((string utility, bool disposable) in Utilities)
+        { services[utility] = new(disposable, null); }
         return services;
     }
     /// <summary>

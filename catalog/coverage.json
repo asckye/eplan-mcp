@@ -60368,7 +60368,7 @@
       "live_verified": 615
     },
     "declined": {
-      "count": 673,
+      "count": 747,
       "live_verified": 0
     },
     "dedicated": {
@@ -60380,7 +60380,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 599,
+      "count": 525,
       "live_verified": 0
     },
     "other": {
@@ -60394,22 +60394,25 @@
   },
   "declinedByReason": {
     "abstract_no_public_implementation": 46,
-    "addin_infrastructure": 55,
+    "addin_infrastructure": 78,
     "catalog:banned_symbol": 29,
-    "covered_by_object_find": 29,
+    "covered_by_object_find": 54,
     "covered_by_tool": 5,
+    "diagnostic_infrastructure": 10,
     "dialog_decision_context": 26,
     "enumerator_type": 29,
+    "exception_type": 9,
     "external_path_parameter": 54,
     "file_masterdata_macro_tools": 57,
     "lifecycle_or_creation": 9,
     "locking_internals": 8,
     "masterdata_management": 14,
-    "masterdata_message_objects": 36,
+    "masterdata_message_objects": 39,
     "offline_host_application": 22,
     "property_id_tables": 109,
     "settings_write": 80,
-    "shared_interactive_state": 65
+    "shared_interactive_state": 65,
+    "write_pipeline_owned": 4
   },
   "fullApi": {
     "total": {
@@ -60420,7 +60423,7 @@
           "live_verified": 620
         },
         "declined": {
-          "count": 747,
+          "count": 827,
           "live_verified": 0
         },
         "dedicated": {
@@ -60432,7 +60435,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 1874,
+          "count": 1794,
           "live_verified": 0
         },
         "other": {
@@ -60453,7 +60456,7 @@
           "live_verified": 77
         },
         "declined": {
-          "count": 512,
+          "count": 572,
           "live_verified": 0
         },
         "dedicated": {
@@ -60465,7 +60468,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1270,
+          "count": 1210,
           "live_verified": 0
         },
         "other": {
@@ -60486,7 +60489,7 @@
           "live_verified": 543
         },
         "declined": {
-          "count": 235,
+          "count": 255,
           "live_verified": 0
         },
         "dedicated": {
@@ -60498,7 +60501,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 366,
+          "count": 346,
           "live_verified": 0
         },
         "other": {

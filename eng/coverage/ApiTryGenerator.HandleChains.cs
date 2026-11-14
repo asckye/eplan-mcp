@@ -162,7 +162,12 @@ internal static partial class ApiTryGenerator
         return [.. input.Data.Entries.Where(e => e.Row.Group.StartsWith("O:", StringComparison.Ordinal) && e.Row.Status is "registered" or "env_blocked" && !covered.Contains(e.Row.Group)).Select(e =>
         {
             string type = e.Type[2..];
-            bool receiver = ObjectType(type, input.Kinds) || model.Reachable.Contains(type) || input.Services.ContainsKey(type) || entryReachable.Contains(type);
+            // A static member needs no receiver, so the declaring type's reachability says nothing about it; the gap
+            // list used to report such groups as declaring_type_unreachable even while they were callable (owner
+            // 2026-11-14: PathMap, Languages and DocumentTypeManager read that way).
+            bool allStatic = e.Details.Where(d => d.Kind == "overload").All(d => d.Static);
+            bool receiver = allStatic || ObjectType(type, input.Kinds) || model.Reachable.Contains(type)
+                || input.Services.ContainsKey(type) || entryReachable.Contains(type);
             string? reason = HandleRestriction(type) == "masterdata_copy_pending" ? "masterdata_copy_pending" : !receiver ? "declaring_type_unreachable" : null;
             reason ??= e.Row.Kind is not ("property" or "method") ? "member_kind_not_dispatched" : e.Details.Where(d => d.Kind == "overload").Select(d => Exclusion(e, d, input.Enums, expanded, model.Reachable.Contains(type) ? null : input.Services)).FirstOrDefault(r => r is not null) ?? "unsupported_property_or_ambiguous_shape";
             return (e, reason, receiver ? "No unique supported compiled member shape" : "No approved return chain within depth 4; see handle reachability table");

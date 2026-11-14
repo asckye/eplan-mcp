@@ -77,6 +77,51 @@ internal static class CoverageRoutes
         ["T:Eplan.EplApi.DataModel.ProjectManager"] = "lifecycle_or_creation",
         // System messages, which the system-message tool already reads.
         ["T:Eplan.EplApi.Base.SysMessagesCollection"] = "covered_by_tool",
+        // Owner 2026-11-14, third round. The finder's filter objects: eplan_object_find / eplan_object_get provide
+        // the capability and the finder itself is closed out above, so nothing would receive a filter.
+        ["T:Eplan.EplApi.DataModel.ArticleReferencesFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.PlacementsFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.StorableObjectsFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.ConnectionsFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.PlanningSegmentsFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.SegmentPlacementsFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.SegmentDefinitionsFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.SegmentTemplatesFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.PlaceHolders3DFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.MasterData.MDObjectFilter"] = "covered_by_object_find",
+        // The add-in framework and the starter: same as the infrastructure closed out in the first round.
+        ["T:Eplan.EplApi.ApplicationFramework.ActionCallingContext"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.ActionManager"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.ActionParameterProperties"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.EventHandler"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.EventHandlerWrapper"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.EventManager"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.EventParameterString"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.CommandLineInterpreter"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.EnableCondition"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.Starter.EplanFinder"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.Starter.ComHelper"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.Starter.SelectEplanDialog"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.Starter.EplanSignedAssemblyAttribute"] = "addin_infrastructure",
+        // Tracing, assertions, progress and the decider: diagnostics, not project data.
+        ["T:Eplan.EplApi.Base.EplTrace"] = "diagnostic_infrastructure",
+        ["T:Eplan.EplApi.Base.EplAssert"] = "diagnostic_infrastructure",
+        ["T:Eplan.EplApi.Base.TraceListener"] = "diagnostic_infrastructure",
+        ["T:Eplan.EplApi.Base.ProgressFactory"] = "diagnostic_infrastructure",
+        ["T:Eplan.EplApi.Base.Decider"] = "diagnostic_infrastructure",
+        // Exception objects: constructing one carries no engineering meaning.
+        ["T:Eplan.EplApi.Base.LockingException"] = "exception_type",
+        ["T:Eplan.EplApi.DataModel.InvalidPageNameException"] = "exception_type",
+        ["T:Eplan.EplApi.DataModel.InvalidPageNameException_IncorrectParts"] = "exception_type",
+        ["T:Eplan.EplApi.DataModel.NameConflictException"] = "exception_type",
+        ["T:Eplan.EplApi.DataModel.LockingExceptionFailedLockAttempt"] = "exception_type",
+        ["T:Eplan.EplApi.HEServices.Exceptions.InvalidScheme"] = "exception_type",
+        // Transactions, locking and the connection-update switch belong to the write pipeline, which owns them for
+        // every tool; a second mechanism through the generic entry would break single-step undo.
+        ["T:Eplan.EplApi.DataModel.TransactionManager"] = "write_pipeline_owned",
+        ["T:Eplan.EplApi.DataModel.LockingStep"] = "write_pipeline_owned",
+        ["T:Eplan.EplApi.DataModel.DisableConnectionUpdateStep"] = "write_pipeline_owned",
+        ["T:Eplan.EplApi.MasterData.MDPartsMessagesRegisteredCollection"] = "masterdata_message_objects",
         // Owner 2026-11-14: the verification and message services are abstract and the public catalogue holds no
         // concrete subclass at all (Verification's three children are abstract too), so no caller can construct one;
         // instances reach a caller only through EPLAN's own callbacks, which are not trial roots.
