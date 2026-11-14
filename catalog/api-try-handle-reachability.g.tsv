@@ -8,13 +8,13 @@ T:Eplan.EplApi.DataModel.MasterData.TransientLayer	19	-	none: no approved root/r
 T:Eplan.EplApi.Base.IEplProgress	14	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.SchemeSetting	14	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.Progress	13	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
-T:Eplan.EplApi.MasterData.MDTranslationDatabase	13	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.MasterData.MDPartsDatabaseMessages	12	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.ApplicationFramework.IXMLProcessor	10	-	handle_type_excluded	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.ApplicationFramework.UserRights	10	-	handle_type_excluded	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.ProjectManager	9	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.HEServices.Masterdata	9	-	masterdata_copy_pending	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.MasterData.MDPartsMessage	9	-	none: no approved root/return chain	M:Eplan.EplApi.MasterData.MDPartsDatabaseMessages.AddMessage(System.Int32,System.String,System.String,System.String) [method] [blocked: receiver/signature/lifecycle restriction]; P:Eplan.EplApi.MasterData.MDPartsMessagesEnumerator.CurrentMDPartsMessage [property] [blocked: receiver/signature/lifecycle restriction]
+T:Eplan.EplApi.MasterData.MDTranslationDatabase	9	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.FileSelectDecisionContext	8	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.LockingVector	8	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.ProjectSettingNode	8	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
@@ -128,9 +128,6 @@ T:Eplan.EplApi.EServices.IPartVerification	1	-	none: no approved root/return cha
 T:Eplan.EplApi.EServices.IVerification	1	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.HEServices.Exceptions.InvalidScheme	1	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.MasterData.MDSymbolLibrary	1	4	P:Eplan.EplApi.MasterData.PropertiesAndHandleObjectPropertyList.Parent [subclass]	M:Eplan.EplApi.MasterData.MDSymbolLibrary.Create(System.String) [static factory] [blocked: receiver/signature/lifecycle restriction]; M:Eplan.EplApi.MasterData.MDSymbolLibrary.Open(System.String) [static factory] [blocked: receiver/signature/lifecycle restriction]; M:Eplan.EplApi.MasterData.MDSymbolLibrary.Open(System.String,Eplan.EplApi.MasterData.MDSymbolLibrary.Mode) [static factory] [blocked: receiver/signature/lifecycle restriction]
-T:Eplan.EplApi.MasterData.MDSymbolLibraryPropertyList	1	3	P:Eplan.EplApi.MasterData.PropertiesAndHandleObject.Properties [subclass]	P:Eplan.EplApi.MasterData.MDSymbolLibrary.Properties [property] [approved]
-T:Eplan.EplApi.MasterData.MDSymbolPropertyList	1	3	P:Eplan.EplApi.MasterData.PropertiesAndHandleObject.Properties [subclass]	P:Eplan.EplApi.MasterData.MDSymbol.Properties [property] [approved]
-T:Eplan.EplApi.MasterData.MDSymbolVariantPropertyList	1	3	P:Eplan.EplApi.MasterData.PropertiesAndHandleObject.Properties [subclass]	P:Eplan.EplApi.MasterData.MDSymbolVariant.Properties [property] [approved]
 T:Eplan.EplApi.Starter.ComHelper	1	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Starter.EplanSignedAssemblyAttribute	1	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Starter.SelectEplanDialog	1	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)

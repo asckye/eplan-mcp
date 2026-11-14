@@ -66,12 +66,12 @@
         "overlay:unsafe": 3
       },
       "denominator": 4014,
-      "implemented": 2572,
-      "byTools": 2565,
-      "partial": 204,
-      "automatedTest": 2565,
+      "implemented": 2748,
+      "byTools": 2741,
+      "partial": 209,
+      "automatedTest": 2741,
       "liveVerified": 1026,
-      "envBlocked": 21,
+      "envBlocked": 18,
       "undocumented": 134
     },
     "operation.method": {
@@ -84,12 +84,12 @@
         "overlay:not_applicable": 172
       },
       "denominator": 1799,
-      "implemented": 868,
-      "byTools": 861,
-      "partial": 111,
-      "automatedTest": 861,
+      "implemented": 948,
+      "byTools": 941,
+      "partial": 110,
+      "automatedTest": 941,
       "liveVerified": 173,
-      "envBlocked": 18,
+      "envBlocked": 15,
       "undocumented": 66
     },
     "operation.property": {
@@ -102,21 +102,21 @@
         "overlay:unsafe": 3
       },
       "denominator": 2215,
-      "implemented": 1704,
-      "byTools": 1704,
-      "partial": 93,
-      "automatedTest": 1704,
+      "implemented": 1800,
+      "byTools": 1800,
+      "partial": 99,
+      "automatedTest": 1800,
       "liveVerified": 853,
       "envBlocked": 3,
       "undocumented": 68
     }
   },
   "dependencies": {
-    "used": 2833,
+    "used": 2910,
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 79,
+    "used": 7990,
     "registered": 8585
   },
   "actionNames": {
@@ -133,31 +133,31 @@
     {
       "scope": "Eplan.EplApi.Base",
       "denominator": 268,
-      "implemented": 104,
+      "implemented": 114,
       "liveVerified": 27
     },
     {
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
-      "implemented": 840,
+      "implemented": 939,
       "liveVerified": 459
     },
     {
       "scope": "Eplan.EplApi.DataModel.E3D",
       "denominator": 368,
-      "implemented": 297,
+      "implemented": 303,
       "liveVerified": 138
     },
     {
       "scope": "Eplan.EplApi.DataModel.EObjects",
       "denominator": 83,
-      "implemented": 74,
+      "implemented": 80,
       "liveVerified": 49
     },
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
-      "implemented": 333,
+      "implemented": 364,
       "liveVerified": 193
     },
     {
@@ -175,7 +175,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Planning",
       "denominator": 122,
-      "implemented": 101,
+      "implemented": 104,
       "liveVerified": 61
     },
     {
@@ -187,13 +187,13 @@
     {
       "scope": "Eplan.EplApi.DataModel.Topology",
       "denominator": 17,
-      "implemented": 14,
+      "implemented": 16,
       "liveVerified": 10
     },
     {
       "scope": "Eplan.EplApi.EServices",
       "denominator": 127,
-      "implemented": 30,
+      "implemented": 37,
       "liveVerified": 7
     },
     {
@@ -217,7 +217,7 @@
     {
       "scope": "Eplan.EplApi.MasterData",
       "denominator": 592,
-      "implemented": 434,
+      "implemented": 446,
       "liveVerified": 19
     },
     {
@@ -261,7 +261,7 @@
     {
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 26,
-      "implemented": 1,
+      "implemented": 5,
       "liveVerified": 0
     },
     {
@@ -303,7 +303,7 @@
     {
       "scope": "Eplan.EplApi.MasterData",
       "denominator": 39,
-      "implemented": 28,
+      "implemented": 32,
       "liveVerified": 1
     }
   ],
@@ -858,10 +858,10 @@
         "api.try.plan",
         "project.get"
       ],
-      "apiIds": 5315,
-      "operationGroups": 2383,
+      "apiIds": 13677,
+      "operationGroups": 2608,
       "dataDictionary": 69,
-      "dependencies": 2684,
+      "dependencies": 2765,
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
       "small": 7,
@@ -3452,10 +3452,10 @@
       "operations": [
         "translation.keyword.search"
       ],
-      "apiIds": 0,
-      "operationGroups": 0,
+      "apiIds": 30,
+      "operationGroups": 13,
       "dataDictionary": 0,
-      "dependencies": 0,
+      "dependencies": 17,
       "actions": 0,
       "spec": "docs/tools/eplan_translation_keyword.md",
       "small": 1,
@@ -5016,10 +5016,20 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.Base.ISOCode.GetLongName",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.Base.ISOCode.GetNumber",
       "layer": "operation",
       "status": "live_verified",
-      "partial": true,
+      "partial": false,
       "tools": [
         "eplan_annotation_create",
         "eplan_api_try",
@@ -5068,6 +5078,7 @@
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_symbol_search",
+        "eplan_translation_keyword",
         "eplan_workflow_plan"
       ],
       "route": "dedicated"
@@ -5076,9 +5087,10 @@
       "unit": "O:Eplan.EplApi.Base.ISOCode.GetString",
       "layer": "operation",
       "status": "live_verified",
-      "partial": true,
+      "partial": false,
       "tools": [
         "eplan_annotation_create",
+        "eplan_api_try",
         "eplan_export_labels",
         "eplan_graphic_edit",
         "eplan_object_find",
@@ -5089,6 +5101,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
+        "eplan_translation_keyword",
         "eplan_workflow_plan"
       ],
       "route": "dedicated"
@@ -5150,6 +5163,26 @@
         "eplan_workflow_plan"
       ],
       "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.ISOCode.SetNumber",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.ISOCode.SetString",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.Base.ISettings.GetBoolSetting",
@@ -5234,7 +5267,8 @@
         "eplan_page_text_replace",
         "eplan_placement_create",
         "eplan_property_get",
-        "eplan_property_set"
+        "eplan_property_set",
+        "eplan_translation_keyword"
       ],
       "route": "dedicated"
     },
@@ -5350,6 +5384,7 @@
         "eplan_terminal_renumber",
         "eplan_translation_export",
         "eplan_translation_import",
+        "eplan_translation_keyword",
         "eplan_workflow_plan"
       ],
       "route": "dedicated"
@@ -5435,6 +5470,7 @@
         "eplan_structure_list",
         "eplan_structure_rename",
         "eplan_structure_update",
+        "eplan_translation_keyword",
         "eplan_workflow_plan"
       ],
       "route": "dedicated"
@@ -5452,7 +5488,8 @@
         "eplan_page_text_replace",
         "eplan_placement_create",
         "eplan_property_get",
-        "eplan_property_set"
+        "eplan_property_set",
+        "eplan_translation_keyword"
       ],
       "route": "dedicated"
     },
@@ -5475,6 +5512,7 @@
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
+        "eplan_translation_keyword",
         "eplan_workflow_plan"
       ],
       "route": "dedicated"
@@ -6467,6 +6505,306 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.Base.UnitParser.GetBaseUnit",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.UnitParser.GetBaseValue",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.UnitParser.GetUnit",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.UnitParser.GetValue",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.UnitParser.Set",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.UnitParser.ToDisplay",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.Base.UnitParser.ValueToUnit",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArc",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticle",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticleReference",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsBlock",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsBusBar",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsCable",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsComment",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionDefinitionPoint",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionPointsInfo",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsCopperBundle",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDeletedObjectInfo",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDeviceListEntry",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDimensionCircle",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDimensionItem",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunction",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunction3D",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunctionBase",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunctionDefinitionLibrary",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsGraphicalPlacement",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsHyperLink",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsImage",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInstallationSpace",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInt",
       "layer": "operation",
       "status": "live_verified",
@@ -6496,6 +6834,326 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInterruptionPoint",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLine",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLocation",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLocationBox",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMacroBox",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMacroEntry",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMergedArticleReference",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOption",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOptionFragment",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOptionGroup",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPage",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPathText",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPipingDefinition",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlaceHolder",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlacement",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlacement3D",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlanningSegment",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlcIO",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlotFrame",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlugStrip",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPotentialDefinition",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsProject",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsProtectedGroup",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsQRCode",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsRectangle",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsRoutedConnection",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegment",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentDefinition",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentPlacement",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentTemplate",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsStorableObject",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsStrandConnector",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsString",
       "layer": "operation",
       "status": "live_verified",
@@ -6518,6 +7176,86 @@
         "eplan_property_set"
       ],
       "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolLibrary",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolReference",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolVariant",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsTerminalStrip",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsText",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsTextBase",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsViewPlacement",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.Definition",
@@ -6829,11 +7567,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ArticlePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ArticlePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -7020,6 +7769,26 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Block.BreakUp",
       "layer": "operation",
       "status": "automated_test",
@@ -7150,11 +7919,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.BlockPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.BlockPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -7874,11 +8654,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -8249,14 +9040,35 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ConnectionPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionPropertyList.Property",
@@ -8264,6 +9076,7 @@
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_connection_create",
         "eplan_connection_list",
         "eplan_device_place",
@@ -9186,11 +9999,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -9267,11 +10091,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -9886,11 +10721,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -10251,11 +11097,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -10647,11 +11504,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_modelview_create",
         "eplan_object_get"
       ],
@@ -11023,11 +11891,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_enclosure_place",
         "eplan_layout_get",
         "eplan_layout_place",
@@ -12140,6 +13019,16 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.Placement3D.PropertyPlacementsSchemas",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Placement3D.Remove",
       "layer": "operation",
       "status": "automated_test",
@@ -12202,11 +13091,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -12887,6 +13787,26 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.CablePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.CablePropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.CableUnit.AllObjects",
       "layer": "operation",
       "status": "automated_test",
@@ -13184,6 +14104,26 @@
         "eplan_property_set"
       ],
       "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.PlugStripPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.PlugStripPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.Shield.Create",
@@ -13550,6 +14490,26 @@
         "eplan_terminal_strip_list"
       ],
       "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.TerminalStripPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.EObjects.TerminalStripPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Function.AddArticleReference",
@@ -14409,11 +15369,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -14674,11 +15645,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.FunctionPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.FunctionPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
         "eplan_placement_update",
@@ -15065,11 +16047,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -15204,11 +16197,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_import_pdf_comments"
       ],
       "route": "dedicated"
@@ -15478,11 +16482,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -15804,11 +16819,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -16278,11 +17304,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -16380,11 +17417,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -16525,11 +17573,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -16667,11 +17726,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -17382,6 +18452,86 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Add",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Clear",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Contains",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.CopyTo",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Count",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.IsReadOnly",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Variable.IsChangeable",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.Variable.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames",
       "layer": "operation",
       "status": "live_verified",
@@ -17401,11 +18551,72 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Add",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Clear",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Count",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.IsReadOnly",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Item",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -17927,11 +19138,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -18108,11 +19330,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -18739,14 +19972,35 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Property",
@@ -18754,6 +20008,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -18900,6 +20155,46 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.PropertyPlacementsSchema.IsCustom",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.PropertyPlacementsSchema.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.PropertyPlacementsSchemas",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.PropertyPlacementsSchemasList.Selected",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.Rectangle",
       "layer": "operation",
       "status": "live_verified",
@@ -19023,11 +20318,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_modelview_create",
         "eplan_object_get"
       ],
@@ -19733,11 +21039,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.InterruptionPointPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.InterruptionPointPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_connection_create",
         "eplan_placement_update"
       ],
@@ -19915,14 +21232,35 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.LocationBoxPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.LocationBoxPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.LocationPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.LocationPropertyList.Property",
@@ -19930,6 +21268,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -21002,11 +22341,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -21462,11 +22812,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.OptionFragmentPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.OptionFragmentPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -21527,14 +22888,35 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.OptionGroupPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.OptionGroupPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.OptionPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.OptionPropertyList.Property",
@@ -21542,6 +22924,7 @@
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -22061,11 +23444,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PagePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.PagePropertyList.Property",
       "layer": "operation",
       "status": "live_verified",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_page_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -22759,11 +24153,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PipingDefinitionPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.PipingDefinitionPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -23119,11 +24524,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PlacementPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.PlacementPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -23789,11 +25205,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -23964,11 +25391,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -24049,11 +25487,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -24259,11 +25708,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PlcIOPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.PlcIOPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -24313,11 +25773,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -25645,11 +27116,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ProjectPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ProjectPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get",
         "eplan_project_update",
         "eplan_property_get"
@@ -26464,11 +27946,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -27486,6 +28979,26 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.StorableObjectPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.StorableObjectPropertyList.Property",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": true,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.StrandConnector.Properties",
       "layer": "operation",
       "status": "live_verified",
@@ -27501,11 +29014,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -27850,11 +29374,32 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.ID",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.IsCustom",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.Name",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
         "eplan_placement_edit",
@@ -27868,6 +29413,7 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
         "eplan_placement_edit",
@@ -27889,11 +29435,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.DefaultScheme",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Selected",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
       "tools": [
+        "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
         "eplan_placement_edit",
@@ -28038,11 +29595,22 @@
       "route": "dedicated"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.SymbolReferencePropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.SymbolReferencePropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -28113,11 +29681,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -28190,11 +29769,22 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
       "partial": true,
       "tools": [
+        "eplan_api_try",
         "eplan_object_get"
       ],
       "route": "generic_read"
@@ -28951,6 +30541,46 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacementsSchema.IsCustom",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacementsSchema.Name",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacementsSchemas",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacementsSchemasList.Selected",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.DataModel.ViewPart.Source",
       "layer": "operation",
       "status": "live_verified",
@@ -29211,6 +30841,66 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.EServices.PrjMessagesCollection.Contains",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.PrjMessagesCollection.CopyTo",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.PrjMessagesCollection.Count",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.PrjMessagesCollection.GetPrjMsgEnumerator",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.PrjMessagesCollection.IsReadOnly",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.PrjMessagesEnumerator.CurrentProjectMessage",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.EServices.PrjMessagesEnumerator.MoveNext",
       "layer": "operation",
       "status": "automated_test",
@@ -29440,6 +31130,16 @@
     },
     {
       "unit": "O:Eplan.EplApi.EServices.ProjectMessage.GetUser",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.EServices.SubProjectsCollection.Count",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -32018,7 +33718,8 @@
         "eplan_part_import",
         "eplan_part_sync",
         "eplan_translation_export",
-        "eplan_translation_import"
+        "eplan_translation_import",
+        "eplan_translation_keyword"
       ],
       "route": "dedicated"
     },
@@ -32118,7 +33819,8 @@
         "eplan_part_import",
         "eplan_part_sync",
         "eplan_translation_export",
-        "eplan_translation_import"
+        "eplan_translation_import",
+        "eplan_translation_keyword"
       ],
       "route": "dedicated"
     },
@@ -32423,6 +34125,46 @@
     },
     {
       "unit": "O:Eplan.EplApi.MasterData.MDAddress.Type",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDPartsDatabaseItem",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbol",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbolLibrary",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbolVariant",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -35202,6 +36944,16 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
@@ -36002,6 +37754,16 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibraryPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDSymbolLibraryPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
@@ -36052,6 +37814,16 @@
       "route": "api_try_only"
     },
     {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolPropertyList.Exists",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
       "unit": "O:Eplan.EplApi.MasterData.MDSymbolPropertyList.Property",
       "layer": "operation",
       "status": "automated_test",
@@ -36083,6 +37855,16 @@
     },
     {
       "unit": "O:Eplan.EplApi.MasterData.MDSymbolVariant.PropertyPlacements",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_api_try"
+      ],
+      "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDSymbolVariantPropertyList.Exists",
       "layer": "operation",
       "status": "automated_test",
       "partial": false,
@@ -36370,6 +38152,46 @@
         "eplan_api_try"
       ],
       "route": "api_try_only"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTranslationDatabase.Close",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_translation_keyword"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTranslationDatabase.FindAllKeywords",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_translation_keyword"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTranslationDatabase.Languages",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_translation_keyword"
+      ],
+      "route": "dedicated"
+    },
+    {
+      "unit": "O:Eplan.EplApi.MasterData.MDTranslationDatabase.Open",
+      "layer": "operation",
+      "status": "automated_test",
+      "partial": false,
+      "tools": [
+        "eplan_translation_keyword"
+      ],
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.MasterData.MDUserDefinedPropertyDefinition.AvailableForPartReferences",
@@ -60277,9 +62099,9 @@
   "reachability": {
     "operation": {
       "denominator": 4014,
-      "tools": 2572,
+      "tools": 2748,
       "apiTry": 2523,
-      "callable": 2742,
+      "callable": 2753,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -60301,12 +62123,12 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel",
-        "callable": 941,
+        "callable": 944,
         "refused_unsafe": 4
       },
       {
         "scope": "Eplan.EplApi.DataModel.E3D",
-        "callable": 302,
+        "callable": 303,
         "refused_unsafe": 1
       },
       {
@@ -60316,7 +62138,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.Graphics",
-        "callable": 361,
+        "callable": 364,
         "refused_unsafe": 0
       },
       {
@@ -60366,7 +62188,7 @@
       },
       {
         "scope": "Eplan.EplApi.MasterData",
-        "callable": 442,
+        "callable": 446,
         "refused_unsafe": 0
       },
       {
@@ -60383,15 +62205,15 @@
   },
   "routes": {
     "api_try_only": {
-      "count": 1838,
+      "count": 2010,
       "live_verified": 615
     },
     "declined": {
-      "count": 760,
+      "count": 756,
       "live_verified": 0
     },
     "dedicated": {
-      "count": 610,
+      "count": 614,
       "live_verified": 410
     },
     "generic_read": {
@@ -60399,11 +62221,11 @@
       "live_verified": 1
     },
     "none": {
-      "count": 512,
+      "count": 505,
       "live_verified": 0
     },
     "other": {
-      "count": 170,
+      "count": 5,
       "live_verified": 0
     },
     "state_only": {
@@ -60417,7 +62239,7 @@
     "catalog:banned_symbol": 29,
     "covered_by_object_find": 54,
     "covered_by_tool": 5,
-    "covered_by_translation_tool": 13,
+    "covered_by_translation_tool": 9,
     "diagnostic_infrastructure": 10,
     "dialog_decision_context": 26,
     "enumerator_type": 29,
@@ -60439,15 +62261,15 @@
       "denominator": 5983,
       "routes": {
         "api_try_only": {
-          "count": 2057,
+          "count": 2250,
           "live_verified": 620
         },
         "declined": {
-          "count": 842,
+          "count": 838,
           "live_verified": 0
         },
         "dedicated": {
-          "count": 819,
+          "count": 823,
           "live_verified": 491
         },
         "generic_read": {
@@ -60455,11 +62277,11 @@
           "live_verified": 1
         },
         "none": {
-          "count": 1779,
+          "count": 1771,
           "live_verified": 0
         },
         "other": {
-          "count": 190,
+          "count": 5,
           "live_verified": 0
         },
         "state_only": {
@@ -60472,15 +62294,15 @@
       "denominator": 3109,
       "routes": {
         "api_try_only": {
-          "count": 804,
+          "count": 886,
           "live_verified": 77
         },
         "declined": {
-          "count": 583,
+          "count": 580,
           "live_verified": 0
         },
         "dedicated": {
-          "count": 396,
+          "count": 399,
           "live_verified": 175
         },
         "generic_read": {
@@ -60492,7 +62314,7 @@
           "live_verified": 0
         },
         "other": {
-          "count": 87,
+          "count": 5,
           "live_verified": 0
         },
         "state_only": {
@@ -60505,15 +62327,15 @@
       "denominator": 2636,
       "routes": {
         "api_try_only": {
-          "count": 1253,
+          "count": 1364,
           "live_verified": 543
         },
         "declined": {
-          "count": 259,
+          "count": 258,
           "live_verified": 0
         },
         "dedicated": {
-          "count": 423,
+          "count": 424,
           "live_verified": 316
         },
         "generic_read": {
@@ -60521,11 +62343,11 @@
           "live_verified": 1
         },
         "none": {
-          "count": 342,
+          "count": 334,
           "live_verified": 0
         },
         "other": {
-          "count": 103,
+          "count": 0,
           "live_verified": 0
         },
         "state_only": {
