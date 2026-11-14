@@ -60368,7 +60368,7 @@
       "live_verified": 615
     },
     "declined": {
-      "count": 428,
+      "count": 598,
       "live_verified": 0
     },
     "dedicated": {
@@ -60380,7 +60380,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 1009,
+      "count": 839,
       "live_verified": 0
     },
     "other": {
@@ -60393,12 +60393,19 @@
     }
   },
   "declinedByReason": {
+    "addin_infrastructure": 55,
     "catalog:banned_symbol": 29,
+    "covered_by_object_find": 29,
+    "covered_by_tool": 5,
+    "dialog_decision_context": 26,
     "external_path_parameter": 52,
+    "lifecycle_or_creation": 9,
+    "locking_internals": 8,
     "masterdata_management": 14,
+    "masterdata_message_objects": 36,
     "offline_host_application": 22,
     "property_id_tables": 168,
-    "settings_write": 78,
+    "settings_write": 80,
     "shared_interactive_state": 65
   },
   "fullApi": {
@@ -60410,7 +60417,7 @@
           "live_verified": 620
         },
         "declined": {
-          "count": 488,
+          "count": 662,
           "live_verified": 0
         },
         "dedicated": {
@@ -60422,7 +60429,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 2318,
+          "count": 2144,
           "live_verified": 0
         },
         "other": {
@@ -60443,7 +60450,7 @@
           "live_verified": 77
         },
         "declined": {
-          "count": 308,
+          "count": 439,
           "live_verified": 0
         },
         "dedicated": {
@@ -60455,7 +60462,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1556,
+          "count": 1425,
           "live_verified": 0
         },
         "other": {
@@ -60476,7 +60483,7 @@
           "live_verified": 543
         },
         "declined": {
-          "count": 180,
+          "count": 223,
           "live_verified": 0
         },
         "dedicated": {
@@ -60488,7 +60495,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 524,
+          "count": 481,
           "live_verified": 0
         },
         "other": {

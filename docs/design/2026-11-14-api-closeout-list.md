@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Proposed（等负责人确认清单） |
+| 状态 | Accepted（项目负责人 2026-11-14："都按你的建议结案"，含两条 ⚠️） |
 | 作者 | 维护者 |
 | 相关 | [API 补齐实施计划](2026-10-31-api-completion.md)、[ADR-0032](../adr/0032-generic-api-layer.md)、[ADR-0033](../adr/0033-api-try-object-handles.md)、[ADR-0054](../adr/0054-api-try-master-data-handles.md) |
 | 最后更新 | 2026-11-14 |
@@ -16,7 +16,7 @@
 - **本来就不是工程能力**：属性 ID 表、进度窗口、对话框决定上下文、插件基础设施、主数据消息对象。补一条理由结案即可，不增加也不减少能力。
 - **是真能力但句柄到不了**：参数化宏的变量与值集、宏的图层、主数据库、属性放置方案。要改句柄可达性才能做，属于安全面变更，另走 ADR。
 
-本页只请负责人确认第一种的清单。确认之前我不动 `eng/coverage/Reporting/CoverageRoutes.cs` 的 `DeclinedTypes`。
+负责人 2026-11-14 确认了第一种的全部清单（含两条 ⚠️），已写入 `eng/coverage/Reporting/CoverageRoutes.cs` 的 `DeclinedTypes`。重算后的实际变化：明确不做 428 → 598 组（14.9%），到不了 1009 → 839 组（20.9%），差 170 组而不是表中合计的 176——其中 6 组本来就已按签名理由计为明确不做，不重复计数。
 
 **口径提醒**：下表的组数是该类型在"到不了"里的组数（生成的 `catalog/api-try-handle-reachability.g.tsv` 的 `before_unreachable_groups` 列）。`Properties`、`Progress`、`IEplProgress`、`EplApplication`、`Settings`、`SettingNode`、`SchemeSetting` 已经在"明确不做"名单里，不在下表。
 
@@ -37,7 +37,7 @@
 | ⚠️ `covered_by_tool`：系统消息集合，能力已由系统消息工具提供（名称待核） | `Base.SysMessagesCollection` 5 | 5 |
 | **合计** | | **176** |
 
-结案后"到不了"从 1009 组降到约 833 组（20.8%），"明确不做"升到约 604 组（15.0%）。**能力没有变化**，只是每一组都有了说明。
+实测结案后"到不了"1009 → 839 组（20.9%），"明确不做"428 → 598 组（14.9%）。**能力没有变化**，只是每一组都有了说明。仍未结案也未排进批次的：`MasterData.Properties` 4 组（主数据侧的属性 ID 表，与已结案的 `DataModel.Properties` 同类，下批一并处理）。
 
 ## 3. 不建议结案，要做成可调用
 
@@ -52,10 +52,10 @@
 | `DataModel.SymbolReference.PropertyPlacementsSchemasList` 5 | 5 | 没有已批准的返回链 | 第 2 批 |
 | `Base.UnitParser` 7、`Base.ISOCode` 5 | 12 | 没有已批准的根；都是无副作用的解析工具 | 第 2 批 |
 
-## 4. 要你回答的
+## 4. 负责人的决定（2026-11-14）
 
-1. 第 2 节的 176 组按表中理由结案，可以吗？两条 ⚠️ 要不要单独保留？
-2. 第 1 批"字段作为句柄根"扩大了 api_try 能拿到的句柄范围，属于安全面变更（CLAUDE.md 硬性规则 3）。我写成 `Proposed` 的 ADR 等你确认，还是你先口头认可、ADR 随实现一起提？
+1. 第 2 节全部按表中理由结案，两条 ⚠️ 不单独保留。
+2. [ADR-0055](../adr/0055-api-try-field-handle-roots.md)（字段作为句柄根）直接接受，按它实现第 1 批。
 
 ## 5. 不在本页范围
 

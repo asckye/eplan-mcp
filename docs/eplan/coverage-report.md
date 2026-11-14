@@ -1,6 +1,6 @@
 # EPLAN API 覆盖报告
 
-**操作层 4014 组：专用工具 610，通用读取 117，仅通用入口 1838，仅状态覆盖 7，其他可调用 5，明确不做 428，到不了 1009；实机验证 1026**
+**操作层 4014 组：专用工具 610，通用读取 117，仅通用入口 1838，仅状态覆盖 7，其他可调用 5，明确不做 598，到不了 839；实机验证 1026**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-14 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 2cfb0ff9 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
@@ -17,10 +17,10 @@
 | 仅通用入口（api_try_only） | 1838 | 1838 / 4014（45.8%） | 615 |
 | 仅状态覆盖（state_only） | 7 | 7 / 4014（0.2%） | 0 |
 | 其他可调用（other） | 5 | 5 / 4014（0.1%） | 0 |
-| 明确不做（declined） | 428 | 428 / 4014（10.7%） | 0 |
-| 到不了（none） | 1009 | 1009 / 4014（25.1%） | 0 |
+| 明确不做（declined） | 598 | 598 / 4014（14.9%） | 0 |
+| 到不了（none） | 839 | 839 / 4014（20.9%） | 0 |
 
-- 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除，或整个类型按下列原因结案；仍计入分母。按原因：property_id_tables 168，settings_write 78，shared_interactive_state 65，external_path_parameter 52，catalog:banned_symbol 29，offline_host_application 22，masterdata_management 14。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons 和 DeclinedTypes。
+- 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除，或整个类型按下列原因结案；仍计入分母。按原因：property_id_tables 168，settings_write 80，shared_interactive_state 65，addin_infrastructure 55，external_path_parameter 52，masterdata_message_objects 36，catalog:banned_symbol 29，covered_by_object_find 29，dialog_decision_context 26，offline_host_application 22，masterdata_management 14，lifecycle_or_creation 9，locking_internals 8，covered_by_tool 5。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons 和 DeclinedTypes。
 - refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。
 
 | 操作层分母 | tools | api_try | callable | refused_unsafe |
@@ -87,10 +87,10 @@ action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 4
 
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 方法 | 3109 | 396 / 175 | 33 / 0 | 804 / 77 | 7 / 0 | 5 / 0 | 308 / 0 | 1556 / 0 | 252 |
-| 普通属性 | 2636 | 423 / 316 | 256 / 1 | 1253 / 543 | 0 / 0 | 0 / 0 | 180 / 0 | 524 / 0 | 860 |
+| 方法 | 3109 | 396 / 175 | 33 / 0 | 804 / 77 | 7 / 0 | 5 / 0 | 439 / 0 | 1425 / 0 | 252 |
+| 普通属性 | 2636 | 423 / 316 | 256 / 1 | 1253 / 543 | 0 / 0 | 0 / 0 | 223 / 0 | 481 / 0 | 860 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5983 | 819 / 491 | 289 / 1 | 2057 / 620 | 7 / 0 | 5 / 0 | 488 / 0 | 2318 / 0 | 1112 |
+| 合计 | 5983 | 819 / 491 | 289 / 1 | 2057 / 620 | 7 / 0 | 5 / 0 | 662 / 0 | 2144 / 0 | 1112 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 

@@ -35,6 +35,44 @@ internal static class CoverageRoutes
         ["T:Eplan.EplApi.Base.Settings"] = "settings_write",
         ["T:Eplan.EplApi.Base.SettingNode"] = "settings_write",
         ["T:Eplan.EplApi.Base.SchemeSetting"] = "settings_write",
+        // Owner 2026-11-14, from the closeout list in docs/design/2026-11-14-api-closeout-list.md: these types are
+        // not engineering capability, so each carries a reason instead of counting as unreached. Capability is
+        // unchanged; the list also names the types that stay open because they are real capability.
+        // Add-in infrastructure: loading, action registration, licence, user rights, project events. The add-in runs
+        // inside EPLAN and never drives these.
+        ["T:Eplan.EplApi.ApplicationFramework.UserRights"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.IXMLProcessor"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.LockingVectorProxy"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.Action"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.IExtendedProcessor"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.ApplicationFramework.License"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.Starter.AssemblyResolver"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.DataModel.ProjectEventsProvider"] = "addin_infrastructure",
+        ["T:Eplan.EplApi.DataModel.StorableObjectContext"] = "addin_infrastructure",
+        // Result messages of master-data operations and their enumerators: only reachable by calling the
+        // master-data writes that are themselves excluded.
+        ["T:Eplan.EplApi.MasterData.MDPartsDatabaseMessages"] = "masterdata_message_objects",
+        ["T:Eplan.EplApi.MasterData.MDPartsMessage"] = "masterdata_message_objects",
+        ["T:Eplan.EplApi.MasterData.TemplateMDMessage"] = "masterdata_message_objects",
+        ["T:Eplan.EplApi.MasterData.MDPartsMessagesEnumerator"] = "masterdata_message_objects",
+        ["T:Eplan.EplApi.MasterData.MDPartsMessagesRegisteredEnumerator"] = "masterdata_message_objects",
+        // Decision contexts of modal dialogs, which ADR-0030 does not drive.
+        ["T:Eplan.EplApi.Base.FileSelectDecisionContext"] = "dialog_decision_context",
+        ["T:Eplan.EplApi.Base.ListSelectDecisionContext"] = "dialog_decision_context",
+        ["T:Eplan.EplApi.Base.IContext"] = "dialog_decision_context",
+        ["T:Eplan.EplApi.Base.Context"] = "dialog_decision_context",
+        // The finder itself and the filter arguments it takes: eplan_object_find / eplan_object_get provide this.
+        ["T:Eplan.EplApi.DataModel.DMObjectsFinder"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.Placements3DFilter"] = "covered_by_object_find",
+        ["T:Eplan.EplApi.DataModel.InterruptionPointsFilter"] = "covered_by_object_find",
+        // Same as SettingNode above: beyond the read-only ISettings slice (ADR-0036) this is writing settings.
+        ["T:Eplan.EplApi.DataModel.ProjectSettingNode"] = "settings_write",
+        // Object locking vectors; the owner decided on 2026-10-27 against multi-user editing and writes lock all.
+        ["T:Eplan.EplApi.DataModel.LockingVector"] = "locking_internals",
+        // Creating, opening, closing and deleting projects, each already a dedicated tool with approval and backup.
+        ["T:Eplan.EplApi.DataModel.ProjectManager"] = "lifecycle_or_creation",
+        // System messages, which the system-message tool already reads.
+        ["T:Eplan.EplApi.Base.SysMessagesCollection"] = "covered_by_tool",
     };
 
     /// <summary>Groups whose every api-try signature is excluded for a declined reason, with the most frequent reason.</summary>
