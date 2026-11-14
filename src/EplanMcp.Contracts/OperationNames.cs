@@ -162,6 +162,12 @@ public static class OperationNames
     public const string PartSearch = "part.search";
 
     /// <summary>
+    /// Searches the keywords of the translation database EPLAN is configured with, opened read-only and closed again in
+    /// the call, never changed. Arguments: <see cref="TranslationKeywordArgs"/>; data: <see cref="TranslationKeywordData"/>.
+    /// </summary>
+    public const string TranslationKeywordSearch = "translation.keyword.search";
+
+    /// <summary>
     /// A project's revision state by its link file's extension, its revision log sliced in the Bridge, and the pages
     /// EPLAN lists as changed; never changes a revision. Arguments: <see cref="RevisionListArgs"/>; data:
     /// <see cref="RevisionListData"/>.

@@ -211,6 +211,29 @@ internal sealed class FakePartsDatabase : IPartsDatabase
     }
 }
 
+/// <summary>The translation database with test keywords; the adapter's own matching is modelled as "contains".</summary>
+internal sealed class FakeTranslationDatabase : ITranslationDatabase
+{
+    public TranslationDatabaseContent Content { get; } = new() { Database = @"$(MD_TRANSLATE)\Translate.db", Languages = ["de_DE", "en_US", "zh_CN"] };
+
+    public List<string> Queries { get; } = [];
+
+    public BridgeErrorException? Failure { get; set; }
+
+    public TranslationDatabaseContent Read(string query)
+    {
+        Queries.Add(query);
+        if (Failure is not null)
+        { throw Failure; }
+        return new TranslationDatabaseContent
+        {
+            Database = Content.Database,
+            Languages = Content.Languages,
+            Keywords = [.. Content.Keywords.Where(k => k.Source.Contains(query, StringComparison.OrdinalIgnoreCase))],
+        };
+    }
+}
+
 /// <summary>An operation whose behaviour is a delegate, for router and connection tests.</summary>
 internal sealed class DelegateOperation(string name, Func<object?> execute) : IOperation
 {

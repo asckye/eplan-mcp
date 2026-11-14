@@ -3447,6 +3447,25 @@
       }
     },
     {
+      "name": "eplan_translation_keyword",
+      "safety": "read",
+      "operations": [
+        "translation.keyword.search"
+      ],
+      "apiIds": 0,
+      "operationGroups": 0,
+      "dataDictionary": 0,
+      "dependencies": 0,
+      "actions": 0,
+      "spec": "docs/tools/eplan_translation_keyword.md",
+      "small": 1,
+      "medium": 0,
+      "large": 0,
+      "apiNotes": [
+        "A27"
+      ]
+    },
+    {
       "name": "eplan_workflow_plan",
       "safety": "read",
       "operations": [

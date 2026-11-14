@@ -167,6 +167,7 @@ internal static class BridgeHost
             new PlcGetOperation(catalog, devices, new EplanPlcReader()),
             new PartListOperation(catalog, new EplanPartReader()),
             new PartSearchOperation(new EplanPartsDatabase()),
+            new TranslationKeywordSearchOperation(new EplanTranslationDatabase()),
             new RevisionListOperation(catalog, new EplanRevisionReader()),
             new SymbolSearchOperation(catalog, new EplanSymbolReader()),
             new PlaceholderListOperation(catalog, pages, placeholders),

@@ -27354,6 +27354,32 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_translation_keyword",
+      "safety": "read",
+      "host": "src/EplanMcp.Host/Tools/TranslationKeywordTools.cs",
+      "operations": [
+        "translation.keyword.search"
+      ],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_translation_keyword.md",
+        "apiNotes": [
+          "A27"
+        ],
+        "tests": [
+          {
+            "name": "TranslationKeywordToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationKeywordToolTests.cs"
+          }
+        ],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_workflow_plan",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/WorkflowTools.cs",
