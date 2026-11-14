@@ -9,7 +9,7 @@ internal static class ApiTryServices
 {
     /// <summary><paramref name="ProjectConstructor"/>: the service is built from the approved Project target
     /// instead of a parameterless constructor (owner 2026-11-14, same batch as ADR-0056).</summary>
-    internal sealed record Service(bool Disposable, string? Reason, bool ProjectConstructor = false);
+    internal sealed record Service(bool Disposable, string? Reason, bool ProjectConstructor = false, string? Concrete = null);
     private static readonly string[] _namespaces = ["Eplan.EplApi.HEServices", "Eplan.EplApi.EServices", "Eplan.EplApi.EServices.Ged", "Eplan.EplApi.DataModel.Planning", "Eplan.EplApi.DataModel.Topology"];
     private static string Text(JsonElement value, string name) => value.TryGetProperty(name, out JsonElement field) ? field.GetString() ?? "" : "";
     private static IEnumerable<JsonElement> Lines(string path) => File.Exists(path) ? File.ReadLines(path).Select(l => JsonSerializer.Deserialize<JsonElement>(l)) : [];
@@ -52,14 +52,29 @@ internal static class ApiTryServices
             (Derives(Text(t, "base"), parent) || t.TryGetProperty("interfaces", out JsonElement interfaces) && interfaces.EnumerateArray().Any(i => Derives(i.GetString()!, parent)));
         bool Public(JsonElement t) => !t.TryGetProperty("access", out _) && !t.TryGetProperty("excluded", out _)
             && (!t.TryGetProperty("outer", out JsonElement outer) || byType.TryGetValue(outer.GetString()![2..], out JsonElement owner) && Public(owner));
+        bool Constructible(JsonElement t) => members.Any(m => Text(m, "kind") == "constructor" && Text(m, "type") == Text(t, "id")
+                && !m.TryGetProperty("access", out _) && (!m.TryGetProperty("params", out JsonElement q) || q.GetArrayLength() == 0))
+            || ProjectConstructor(members, Text(t, "id"));
+        // A member declared on an abstract service is called on an instance, and the catalogue counts it under the
+        // base type. Where exactly one public concrete subclass is constructible, that subclass is the instance to
+        // build; several would make the choice ambiguous, so those stay abstract_service (owner 2026-11-14).
+        string? Concrete(JsonElement t)
+        {
+            if (!Text(t, "modifiers").Contains("abstract", StringComparison.Ordinal))
+            { return null; }
+            string[] children = [.. types.Where(c => Text(c, "kind") == "class" && Text(c, "base") == Text(t, "id")[2..]
+                && Public(c) && !Text(c, "modifiers").Contains("abstract", StringComparison.Ordinal) && Constructible(c))
+                .Select(c => Text(c, "id")[2..])];
+            return children.Length == 1 ? children[0] : null;
+        }
         return types.Where(t => Text(t, "kind") == "class" && _namespaces.Contains(Text(t, "ns"), StringComparer.Ordinal)
                 && !Derives(Text(t, "id")[2..], "Eplan.EplApi.DataModel.StorableObject"))
             .ToDictionary(t => Text(t, "id")[2..], t => new Service(Derives(Text(t, "id")[2..], "System.IDisposable"),
-                !Public(t) ? "service_type_excluded" : Text(t, "modifiers").Contains("abstract", StringComparison.Ordinal) ? "abstract_service"
+                !Public(t) ? "service_type_excluded" : Text(t, "modifiers").Contains("abstract", StringComparison.Ordinal) && Concrete(t) is null ? "abstract_service"
                 : members.Any(m => Text(m, "type") == Text(t, "id") && Text(m, "kind") == "constructor" && Public(m)
                     && (!m.TryGetProperty("static", out JsonElement s) || !s.GetBoolean()) && (!m.TryGetProperty("params", out JsonElement p) || p.GetArrayLength() == 0)) ? null
-                : ProjectConstructor(members, Text(t, "id")) ? null : "no_public_default_constructor",
-                ProjectConstructor(members, Text(t, "id"))), StringComparer.Ordinal);
+                : ProjectConstructor(members, Text(t, "id")) || Concrete(t) is not null ? null : "no_public_default_constructor",
+                ProjectConstructor(members, Concrete(t) ?? Text(t, "id")), Concrete(t)), StringComparer.Ordinal);
     }
     private static bool Match(string value, string pattern) => Regex.IsMatch(value, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     internal static bool SideEffectParameter(ApiParameter p) => Match(p.Name, "dialog|dlg|show|select|lock|write|update|create|remove|delete|save|store|generate|rebuild|overwrite|change|set");

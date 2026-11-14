@@ -52,8 +52,18 @@ internal static partial class ApiTryGenerator
             { return "delegate_parameter"; }
             return p.Type.Contains('{', StringComparison.Ordinal) || p.Type.Contains('`', StringComparison.Ordinal) || p.Type.StartsWith("System.Collections.", StringComparison.Ordinal) ? "generic_or_collection_parameter" : "unsupported_parameter";
         }
-        return member.Id.Contains('`', StringComparison.Ordinal) ? "generic_or_collection_parameter" : member.ReturnType != "System.Void" && !Value(member.ReturnType) && !ResultScalar(member.ReturnType) ? "unsupported_return" : null;
+        // An enumerator return is the same mechanical by-product as an enumerator type (owner 2026-11-14): one
+        // trial call cannot iterate, and the collection the enumerator came from is what a caller reaches for.
+        return member.Id.Contains('`', StringComparison.Ordinal) ? "generic_or_collection_parameter"
+            : member.ReturnType != "System.Void" && !Value(member.ReturnType) && !ResultScalar(member.ReturnType)
+                ? Enumerator(member.ReturnType) ? "enumerator_type" : "unsupported_return"
+                : null;
     }
+    /// <summary>An IEnumerator return, in any of the catalogue's spellings.</summary>
+    internal static bool Enumerator(string? type) => type is not null
+        && (type.StartsWith("System.Collections.IEnumerator", StringComparison.Ordinal)
+            || type.StartsWith("System.Collections.Generic.IEnumerator", StringComparison.Ordinal)
+            || type.EndsWith("Enumerator", StringComparison.Ordinal));
     private static string CollectionShape(string type, Dictionary<string, string[]> enums)
     {
         type = type.TrimEnd('@');
@@ -80,7 +90,7 @@ internal static partial class ApiTryGenerator
         ApiParameter[] parameters = member.Parameters!;
         ApiParameter[] byref = parameters.Where(p => p.Type.EndsWith('@') || p.Direction is "out" or "ref").ToArray();
         bool service = services.TryGetValue(entry.Type[2..], out ApiTryServices.Service? receiver) && receiverExpression is null;
-        string construct = service ? (receiver!.Disposable ? "using " : "") + "var service = new global::" + entry.Type[2..]
+        string construct = service ? (receiver!.Disposable ? "using " : "") + "var service = new global::" + (receiver.Concrete ?? entry.Type[2..])
             + (receiver.ProjectConstructor ? "((global::Eplan.EplApi.DataModel.Project)target!); " : "(); ") : "";
         string Token(ApiParameter p) => "parameters[" + Literal(ParameterName(p)) + "]";
         string Local(ApiParameter p) => "arg" + Array.IndexOf(parameters, p);

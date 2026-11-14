@@ -17,7 +17,9 @@ internal static class CoverageRoutes
     /// Technical obstacles (constructors, static members, master data copies) stay "none".
     /// </summary>
     internal static readonly string[] DeclinedReasons =
-        ["catalog:internal", "catalog:deprecated", "catalog:banned_symbol", "catalog:not_applicable", "settings_write", "external_path_parameter", "shared_interactive_state", "masterdata_management"];
+        ["catalog:internal", "catalog:deprecated", "catalog:banned_symbol", "catalog:not_applicable", "settings_write", "external_path_parameter", "shared_interactive_state", "masterdata_management",
+         // Owner 2026-11-14: a member that only returns an enumerator closes out with the enumerator types.
+         "enumerator_type"];
 
     /// <summary>
     /// Whole types closed on purpose (owner 2026-11-12), for groups no tool or api-try root reaches: property-ID tables and
@@ -75,6 +77,15 @@ internal static class CoverageRoutes
         ["T:Eplan.EplApi.DataModel.ProjectManager"] = "lifecycle_or_creation",
         // System messages, which the system-message tool already reads.
         ["T:Eplan.EplApi.Base.SysMessagesCollection"] = "covered_by_tool",
+        // Owner 2026-11-14: the verification and message services are abstract and the public catalogue holds no
+        // concrete subclass at all (Verification's three children are abstract too), so no caller can construct one;
+        // instances reach a caller only through EPLAN's own callbacks, which are not trial roots.
+        ["T:Eplan.EplApi.EServices.Verification"] = "abstract_no_public_implementation",
+        ["T:Eplan.EplApi.EServices.FunctionVerification"] = "abstract_no_public_implementation",
+        ["T:Eplan.EplApi.EServices.InterruptionPointVerification"] = "abstract_no_public_implementation",
+        ["T:Eplan.EplApi.EServices.PotentialVerification"] = "abstract_no_public_implementation",
+        ["T:Eplan.EplApi.EServices.PartVerification"] = "abstract_no_public_implementation",
+        ["T:Eplan.EplApi.EServices.Message"] = "abstract_no_public_implementation",
         // Owner 2026-11-14, second round. A collection's enumerator is a mechanical by-product: one trial call
         // cannot iterate, and the collection itself is what a caller reaches for.
         ["T:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionEnumerator"] = "enumerator_type",

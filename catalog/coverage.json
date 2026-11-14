@@ -60368,7 +60368,7 @@
       "live_verified": 615
     },
     "declined": {
-      "count": 614,
+      "count": 673,
       "live_verified": 0
     },
     "dedicated": {
@@ -60380,7 +60380,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 658,
+      "count": 599,
       "live_verified": 0
     },
     "other": {
@@ -60393,12 +60393,13 @@
     }
   },
   "declinedByReason": {
+    "abstract_no_public_implementation": 46,
     "addin_infrastructure": 55,
     "catalog:banned_symbol": 29,
     "covered_by_object_find": 29,
     "covered_by_tool": 5,
     "dialog_decision_context": 26,
-    "enumerator_type": 16,
+    "enumerator_type": 29,
     "external_path_parameter": 54,
     "file_masterdata_macro_tools": 57,
     "lifecycle_or_creation": 9,
@@ -60419,7 +60420,7 @@
           "live_verified": 620
         },
         "declined": {
-          "count": 682,
+          "count": 747,
           "live_verified": 0
         },
         "dedicated": {
@@ -60431,7 +60432,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 1939,
+          "count": 1874,
           "live_verified": 0
         },
         "other": {
@@ -60452,7 +60453,7 @@
           "live_verified": 77
         },
         "declined": {
-          "count": 470,
+          "count": 512,
           "live_verified": 0
         },
         "dedicated": {
@@ -60464,7 +60465,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1312,
+          "count": 1270,
           "live_verified": 0
         },
         "other": {
@@ -60485,7 +60486,7 @@
           "live_verified": 543
         },
         "declined": {
-          "count": 212,
+          "count": 235,
           "live_verified": 0
         },
         "dedicated": {
@@ -60497,7 +60498,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 389,
+          "count": 366,
           "live_verified": 0
         },
         "other": {

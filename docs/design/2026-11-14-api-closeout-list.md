@@ -81,3 +81,14 @@
 | `enumerator_type` | 上表四个枚举器 | 16 |
 
 两轮结案加 ADR-0055 / ADR-0056 的实现之后：**明确不做 675 组（16.8%），到不了 740 组（18.4%）**，起点是 428 / 1009。
+
+## 7. 第三轮结案（负责人 2026-11-14 「都按前几批的方式做，枚举器一并结案」）
+
+| 理由 | 内容 | 组数 |
+|---|---|---:|
+| `enumerator_type` | 只返回 `IEnumerator` 的成员，与枚举器类型同理：一次试执行取不到迭代语义 | 13 |
+| `abstract_no_public_implementation` | `EServices.Verification`、`FunctionVerification`、`InterruptionPointVerification`、`PotentialVerification`、`PartVerification`、`Message`：抽象类，公开目录里**没有任何具体子类**（`Verification` 的三个子类自己也是抽象的），任何调用方都构造不出来；实例只经 EPLAN 自己的回调交到调用方手里，而回调不是试执行的根 | 46 |
+
+同批实现的可达性扩展：服务只有带 `Project` 的公开构造函数时用调用已指定的 Project 构造（+7 组）；抽象服务若存在**恰好一个**可构造的具体子类则按该子类构造——这条规则今天一个也没命中（6 个抽象服务都没有具体子类），保留它是为了将来 EPLAN 增加实现时自动生效。
+
+三轮结案与 ADR-0055 / 0056 实现之后：**明确不做 673 组（16.8%），到不了 599 组（14.9%）**，起点 428 / 1009。

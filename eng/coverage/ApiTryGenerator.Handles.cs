@@ -125,7 +125,7 @@ internal static partial class ApiTryGenerator
                 string construct = "";
                 if (services.TryGetValue(s.Entry.Type[2..], out ApiTryServices.Service? service) && service.Reason is null && !model.Reachable.Contains(s.Entry.Type[2..]))
                 {
-                    construct = (service.Disposable ? "using " : "") + "var service = new global::" + s.Entry.Type[2..]
+                    construct = (service.Disposable ? "using " : "") + "var service = new global::" + (service.Concrete ?? s.Entry.Type[2..])
                         + (service.ProjectConstructor ? "((global::Eplan.EplApi.DataModel.Project)target!); " : "(); ");
                     receiver = "service." + s.Entry.Name;
                 }

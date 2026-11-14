@@ -1383,8 +1383,8 @@ O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Add	M:Eplan.EplApi.
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Clear	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Clear	write	property_entry
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Contains	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Contains(System.String)	write	property_entry
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.CopyTo	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.CopyTo(System.String[],System.Int32)	write	property_entry
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.GetEnumerator	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.GetEnumerator	excluded	unsupported_return
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.GetEnumerator2	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.GetEnumerator2	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.GetEnumerator	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.GetEnumerator	excluded	enumerator_type
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.GetEnumerator2	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.GetEnumerator2	excluded	enumerator_type
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Remove	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Remove(System.String)	excluded	lifecycle_or_creation
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames	P:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariableNames	read	getter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Add	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Add(Eplan.EplApi.DataModel.Graphics.PlaceHolder.Variable)	excluded	unsupported_parameter
@@ -1393,8 +1393,8 @@ O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Add	M:Eplan.EplApi.
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Clear	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Clear	write	property_entry
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Contains	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Contains(Eplan.EplApi.DataModel.Graphics.PlaceHolder.Variable)	excluded	unsupported_parameter
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.CopyTo	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.CopyTo(Eplan.EplApi.DataModel.Graphics.PlaceHolder.Variable[],System.Int32)	excluded	array_or_params
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.GetEnumerator	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.GetEnumerator	excluded	unsupported_return
-O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.GetEnumerator2	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.GetEnumerator2	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.GetEnumerator	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.GetEnumerator	excluded	enumerator_type
+O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.GetEnumerator2	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.GetEnumerator2	excluded	enumerator_type
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Remove	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Remove(Eplan.EplApi.DataModel.Graphics.PlaceHolder.Variable)	excluded	lifecycle_or_creation
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Remove	M:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Remove(System.String)	excluded	lifecycle_or_creation
 O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Exists	M:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Exists(Eplan.EplApi.DataModel.Properties.PlaceHolder)	write	-
@@ -1882,8 +1882,8 @@ O:Eplan.EplApi.DataModel.MacroEntry.Properties	P:Eplan.EplApi.DataModel.MacroEnt
 O:Eplan.EplApi.DataModel.MacroEntry.RelatedObject	P:Eplan.EplApi.DataModel.MacroEntry.RelatedObject	read	getter
 O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Close	M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Close	write	-
 O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.FunctionDefinitions	P:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.FunctionDefinitions	read	getter
-O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.GetEnumerator	M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.GetEnumerator	excluded	unsupported_return
-O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.GetEnumerator2	M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.GetEnumerator2	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.GetEnumerator	M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.GetEnumerator	excluded	enumerator_type
+O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.GetEnumerator2	M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.GetEnumerator2	excluded	enumerator_type
 O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.IdentifierSets	P:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.IdentifierSets	read	getter
 O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Initialize	M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Initialize	excluded	lifecycle_or_creation
 O:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Initialize	M:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionLibrary.Initialize(Eplan.EplApi.DataModel.Project)	excluded	lifecycle_or_creation
@@ -2121,8 +2121,8 @@ O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSet.Variab
 O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSets	P:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSets	read	getter
 O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.Contains	M:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.Contains(Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSet)	excluded	external_path_parameter
 O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.CopyTo	M:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.CopyTo(Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSet[],System.Int32)	excluded	external_path_parameter
-O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.GetEnumerator	M:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.GetEnumerator	excluded	unsupported_return
-O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.GetEnumerator2	M:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.GetEnumerator2	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.GetEnumerator	M:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.GetEnumerator	excluded	enumerator_type
+O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.GetEnumerator2	M:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.GetEnumerator2	excluded	enumerator_type
 O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.Item	P:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.Item(System.Int32)	read	settings_key_read
 O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.Item	P:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.Item(System.String)	read	settings_key_read
 O:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.MacroPlaceHolderValueSetsEnumerator.MoveNext	M:Eplan.EplApi.DataModel.Planning.PlanningObject.MacroPlaceHolderValueSetsClass.MacroPlaceHolderValueSetsEnumerator.MoveNext	excluded	no_public_default_constructor
@@ -2728,8 +2728,8 @@ O:Eplan.EplApi.EServices.PrjMessagesCollection.Clear	M:Eplan.EplApi.EServices.Pr
 O:Eplan.EplApi.EServices.PrjMessagesCollection.Contains	M:Eplan.EplApi.EServices.PrjMessagesCollection.Contains(Eplan.EplApi.EServices.BaseProjectMessage)	write	-
 O:Eplan.EplApi.EServices.PrjMessagesCollection.CopyTo	M:Eplan.EplApi.EServices.PrjMessagesCollection.CopyTo(Eplan.EplApi.EServices.BaseProjectMessage[],System.Int32)	write	-
 O:Eplan.EplApi.EServices.PrjMessagesCollection.Count	P:Eplan.EplApi.EServices.PrjMessagesCollection.Count	read	getter
-O:Eplan.EplApi.EServices.PrjMessagesCollection.GetEnumerator	M:Eplan.EplApi.EServices.PrjMessagesCollection.GetEnumerator	excluded	unsupported_return
-O:Eplan.EplApi.EServices.PrjMessagesCollection.GetEnumerator2	M:Eplan.EplApi.EServices.PrjMessagesCollection.GetEnumerator2	excluded	unsupported_return
+O:Eplan.EplApi.EServices.PrjMessagesCollection.GetEnumerator	M:Eplan.EplApi.EServices.PrjMessagesCollection.GetEnumerator	excluded	enumerator_type
+O:Eplan.EplApi.EServices.PrjMessagesCollection.GetEnumerator2	M:Eplan.EplApi.EServices.PrjMessagesCollection.GetEnumerator2	excluded	enumerator_type
 O:Eplan.EplApi.EServices.PrjMessagesCollection.GetPrjMsgEnumerator	M:Eplan.EplApi.EServices.PrjMessagesCollection.GetPrjMsgEnumerator	read	-
 O:Eplan.EplApi.EServices.PrjMessagesCollection.IsReadOnly	P:Eplan.EplApi.EServices.PrjMessagesCollection.IsReadOnly	read	getter
 O:Eplan.EplApi.EServices.PrjMessagesCollection.Remove	M:Eplan.EplApi.EServices.PrjMessagesCollection.Remove(Eplan.EplApi.EServices.BaseProjectMessage)	excluded	catalog:banned_symbol
@@ -2738,7 +2738,7 @@ O:Eplan.EplApi.EServices.PrjMessagesEnumerator.MoveNext	M:Eplan.EplApi.EServices
 O:Eplan.EplApi.EServices.PrjMessagesEnumerator.Reset	M:Eplan.EplApi.EServices.PrjMessagesEnumerator.Reset	write	service_method_write
 O:Eplan.EplApi.EServices.PrjMessagesEnumerator.SetProject	M:Eplan.EplApi.EServices.PrjMessagesEnumerator.SetProject(Eplan.EplApi.DataModel.Project)	write	service_method_write
 O:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.Count	P:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.Count	read	getter
-O:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.GetEnumerator	M:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.GetEnumerator	excluded	unsupported_return
+O:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.GetEnumerator	M:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.GetEnumerator	excluded	enumerator_type
 O:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.GetRegisteredPrjMsgsEnumerator	M:Eplan.EplApi.EServices.PrjMessagesRegisteredCollection.GetRegisteredPrjMsgsEnumerator	read	-
 O:Eplan.EplApi.EServices.PrjMessagesRegisteredEnumerator.Init	M:Eplan.EplApi.EServices.PrjMessagesRegisteredEnumerator.Init	excluded	lifecycle_or_creation
 O:Eplan.EplApi.EServices.PrjMessagesRegisteredEnumerator.Init	M:Eplan.EplApi.EServices.PrjMessagesRegisteredEnumerator.Init(Eplan.EplApi.DataModel.Project)	excluded	lifecycle_or_creation
@@ -2764,8 +2764,8 @@ O:Eplan.EplApi.EServices.ProjectMessage.GetUser	M:Eplan.EplApi.EServices.Project
 O:Eplan.EplApi.EServices.ProjectMessage.SetDone	M:Eplan.EplApi.EServices.ProjectMessage.SetDone(System.Boolean)	excluded	catalog:banned_symbol
 O:Eplan.EplApi.EServices.SubProjectsCollection.Count	P:Eplan.EplApi.EServices.SubProjectsCollection.Count	read	getter
 O:Eplan.EplApi.EServices.SubProjectsCollection.FileOff	M:Eplan.EplApi.EServices.SubProjectsCollection.FileOff(Eplan.EplApi.EServices.SubProject)	excluded	unsupported_parameter
-O:Eplan.EplApi.EServices.SubProjectsCollection.GetEnumerator	M:Eplan.EplApi.EServices.SubProjectsCollection.GetEnumerator	excluded	unsupported_return
-O:Eplan.EplApi.EServices.SubProjectsCollection.GetEnumerator2	M:Eplan.EplApi.EServices.SubProjectsCollection.GetEnumerator2	excluded	unsupported_return
+O:Eplan.EplApi.EServices.SubProjectsCollection.GetEnumerator	M:Eplan.EplApi.EServices.SubProjectsCollection.GetEnumerator	excluded	enumerator_type
+O:Eplan.EplApi.EServices.SubProjectsCollection.GetEnumerator2	M:Eplan.EplApi.EServices.SubProjectsCollection.GetEnumerator2	excluded	enumerator_type
 O:Eplan.EplApi.EServices.SubProjectsCollection.Store	M:Eplan.EplApi.EServices.SubProjectsCollection.Store(Eplan.EplApi.EServices.SubProject)	excluded	unsupported_parameter
 O:Eplan.EplApi.EServices.SubProjectsCollection.Update	M:Eplan.EplApi.EServices.SubProjectsCollection.Update(Eplan.EplApi.EServices.SubProject)	excluded	unsupported_parameter
 O:Eplan.EplApi.EServices.Verification.DoErrorMessage	M:Eplan.EplApi.EServices.Verification.DoErrorMessage(Eplan.EplApi.DataModel.StorableObject)	excluded	abstract_service
