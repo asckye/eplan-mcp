@@ -39,13 +39,32 @@ internal static partial class ApiTryGenerator
         string typesFile = Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl");
         // Test repositories hold no catalogue, like Enums and ObjectKindGenerator.Load expect.
         var types = (File.Exists(typesFile) ? File.ReadLines(typesFile) : []).Select(l => JsonSerializer.Deserialize<JsonElement>(l)).ToDictionary(t => t.GetProperty("id").GetString()![2..], StringComparer.Ordinal);
-        return new(data, kinds, Enums(root), EntryPaths(data, kinds, types), types);
+        return new(data, kinds, Enums(root), EntryPaths(data, kinds, types, ChainFields(root)), types);
     }
-    internal static EntryPath[] EntryPaths(ApiIndexData data, IReadOnlyDictionary<string, string[]> kinds, IReadOnlyDictionary<string, JsonElement> types)
+    /// <summary>
+    /// ADR-0055: a public instance field reads like a parameterless getter, so it is a handle source on the same
+    /// terms. Only reading is generated; a field is never assigned. Fields named <c>m_*</c> are the API's own
+    /// implementation details and stay out.
+    /// </summary>
+    private static (string Declaring, string Name, string Returns)[] PathFields(IReadOnlyList<JsonElement>? fields,
+        Func<string, bool> safeType) =>
+        [.. (fields ?? []).Where(f => !f.TryGetProperty("access", out _) && !f.TryGetProperty("excluded", out _)
+                && !f.TryGetProperty("static", out _) && f.TryGetProperty("returns", out JsonElement returns)
+                && safeType(returns.GetString() ?? ""))
+            .Select(f => (Declaring: f.GetProperty("type").GetString()![2..], Id: f.GetProperty("id").GetString()![2..],
+                Returns: f.GetProperty("returns").GetString()!))
+            .Where(f => f.Id.StartsWith(f.Declaring + ".", StringComparison.Ordinal))
+            .Select(f => (f.Declaring, Name: f.Id[(f.Declaring.Length + 1)..], f.Returns))
+            .Where(f => !f.Name.Contains('.', StringComparison.Ordinal) && !f.Name.StartsWith("m_", StringComparison.Ordinal))
+            .OrderBy(f => f.Declaring, StringComparer.Ordinal).ThenBy(f => f.Name, StringComparer.Ordinal)];
+
+    internal static EntryPath[] EntryPaths(ApiIndexData data, IReadOnlyDictionary<string, string[]> kinds, IReadOnlyDictionary<string, JsonElement> types,
+        IReadOnlyList<JsonElement>? fields = null)
     {
         var result = new List<EntryPath>();
         bool SafeType(string type) => PublicEntryType(type, types) && types[type].GetProperty("kind").GetString() is "class" or "interface" && type.StartsWith("Eplan.EplApi.DataModel.", StringComparison.Ordinal)
             && !MatchEntry(type, "PropertyList|PropertyValue|Filter|ArticleReference|PropertyPlacement|MateEntry|MasterData\\.(?!PlotFrame$)");
+        var pathFields = PathFields(fields, SafeType);
         var properties = data.Entries.Where(e => e.Row.Kind == "property" && e.Row.ExcludedReason is null).SelectMany(e => e.Details.Where(d => d.Kind == "overload" && d.ExcludedReason is null && d.Access is null && !d.Static && d.Accessors?.Split(';').Contains("get", StringComparer.Ordinal) == true && SafeType(d.ReturnType ?? "")).Select(d => (e, d))).ToArray();
         void Follow(string parent, string origin, string path, string expression, int depth)
         {
@@ -61,6 +80,13 @@ internal static partial class ApiTryGenerator
                 result.Add(new(origin, d.ReturnType!, next, code, key));
                 if (!key)
                 { Follow(d.ReturnType!, origin, next, code, depth + 1); }
+            }
+            foreach ((string _, string name, string returns) in pathFields.Where(f => f.Declaring == parent))
+            {
+                string next = path.Length == 0 ? name : path + "." + name;
+                string code = "Hold(" + expression + "." + name + ", own)";
+                result.Add(new(origin, returns, next, code));
+                Follow(returns, origin, next, code, depth + 1);
             }
         }
         foreach (string type in kinds.Keys.Select(k => "Eplan.EplApi.DataModel." + k).Where(t => PublicEntryType(t, types)))

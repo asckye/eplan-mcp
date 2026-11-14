@@ -139,6 +139,9 @@ internal static partial class ApiTryGenerator
     }
     private static IEnumerable<JsonElement> ChainLines(string path) => File.Exists(path) ? File.ReadLines(path).Select(l => JsonSerializer.Deserialize<JsonElement>(l)) : [];
     private static JsonElement[] ChainTypes(string root) => [.. ChainLines(Path.Combine(root, "catalog/eplan-2026.0.3/types.jsonl"))];
+    /// <summary>The catalogue's field members, which ADR-0055 reads as handle sources.</summary>
+    internal static JsonElement[] ChainFields(string root) =>
+        [.. ChainMemberFiles(root).SelectMany(ChainLines).Where(m => m.TryGetProperty("kind", out JsonElement k) && k.GetString() == "field")];
     private static IEnumerable<string> ChainMemberFiles(string root) => Directory.Exists(Path.Combine(root, "catalog/eplan-2026.0.3/members")) ? Directory.EnumerateFiles(Path.Combine(root, "catalog/eplan-2026.0.3/members"), "*.jsonl").Order(StringComparer.Ordinal) : [];
     private static (ApiIndexData Data, JsonElement[] Types, Dictionary<string, string[]> Kinds, Dictionary<string, string[]> Enums, Dictionary<string, ApiTryServices.Service> Services) ChainInputs(string root) =>
         (Data(root), ChainTypes(root), ObjectKindGenerator.Kinds(root), Enums(root), ApiTryServices.Load(root));
@@ -162,7 +165,7 @@ internal static partial class ApiTryGenerator
     {
         var input = ChainInputs(root);
         ChainAnalysis analysis = AnalyzeChains(input.Data, input.Types, input.Kinds, input.Enums, input.Services);
-        JsonElement[] fields = [.. ChainMemberFiles(root).SelectMany(ChainLines).Where(m => m.TryGetProperty("kind", out JsonElement k) && k.GetString() == "field")];
+        JsonElement[] fields = ChainFields(root);
         var before = ChainGaps(root, true).Where(g => g.Reason is "declaring_type_unreachable" or "masterdata_copy_pending").GroupBy(g => g.Entry.Type, StringComparer.Ordinal);
         return "type\tbefore_unreachable_groups\tdepth\tapproved_source\tpossible_sources_and_blockers\n" + string.Join("", before.OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal).Select(g =>
         {

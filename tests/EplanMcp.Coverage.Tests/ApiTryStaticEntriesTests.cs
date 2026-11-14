@@ -86,4 +86,31 @@ public sealed class ApiTryStaticEntriesTests
         types[prefix + "Nested"] = Type("Nested", ",\"outer\":\"T:" + prefix + "Private\"");
         Assert.False(ApiTryGenerator.PublicEntryType(prefix + "Nested", types));
     }
+
+    [Fact]
+    public void PublicInstanceFieldsAreHandleSourcesButStaticAndInternalOnesAreNot()
+    {
+        const string prefix = "Eplan.EplApi.DataModel.";
+        JsonElement Type(string name, string extra = "") => JsonSerializer.Deserialize<JsonElement>("{\"id\":\"T:" + prefix + name + "\",\"kind\":\"class\"" + extra + "}");
+        JsonElement Field(string id, string returns, string extra = "") => JsonSerializer.Deserialize<JsonElement>(
+            "{\"id\":\"F:" + prefix + id + "\",\"kind\":\"field\",\"layer\":\"type\",\"type\":\"T:" + prefix + id[..id.LastIndexOf('.')] + "\",\"returns\":\"" + prefix + returns + "\"" + extra + "}");
+        var types = new[] { Type("Project"), Type("Child"), Type("Leaf") }.ToDictionary(t => t.GetProperty("id").GetString()![2..]);
+        ApiIndexData data = new([], []);
+        JsonElement[] fields =
+        [
+            Field("Project.Held", "Child"),
+            Field("Child.Deeper", "Leaf"),
+            Field("Project.Shared", "Child", ",\"static\":true"),
+            Field("Project.Hidden", "Child", ",\"access\":\"internal\""),
+            Field("Project.Dropped", "Child", ",\"excluded\":\"unsafe\""),
+            Field("Project.m_inner", "Child"),
+        ];
+
+        var paths = ApiTryGenerator.EntryPaths(data, new Dictionary<string, string[]> { ["Project"] = ["project"] }, types, fields);
+
+        Assert.Equal(["Held", "Held.Deeper"], paths.Select(p => p.Path));
+        Assert.Equal([prefix + "Child", prefix + "Leaf"], paths.Select(p => p.Type));
+        Assert.All(paths, p => Assert.DoesNotContain(" = ", p.Expression, StringComparison.Ordinal));
+        Assert.Empty(ApiTryGenerator.EntryPaths(data, new Dictionary<string, string[]> { ["Project"] = ["project"] }, types));
+    }
 }

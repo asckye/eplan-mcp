@@ -60259,8 +60259,8 @@
     "operation": {
       "denominator": 4014,
       "tools": 2572,
-      "apiTry": 2305,
-      "callable": 2577,
+      "apiTry": 2315,
+      "callable": 2587,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -60297,7 +60297,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.Graphics",
-        "callable": 333,
+        "callable": 343,
         "refused_unsafe": 0
       },
       {
@@ -60380,11 +60380,11 @@
       "live_verified": 1
     },
     "none": {
-      "count": 839,
+      "count": 829,
       "live_verified": 0
     },
     "other": {
-      "count": 5,
+      "count": 15,
       "live_verified": 0
     },
     "state_only": {
@@ -60429,11 +60429,11 @@
           "live_verified": 1
         },
         "none": {
-          "count": 2144,
+          "count": 2132,
           "live_verified": 0
         },
         "other": {
-          "count": 5,
+          "count": 17,
           "live_verified": 0
         },
         "state_only": {
@@ -60462,11 +60462,11 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1425,
+          "count": 1417,
           "live_verified": 0
         },
         "other": {
-          "count": 5,
+          "count": 13,
           "live_verified": 0
         },
         "state_only": {
@@ -60495,11 +60495,11 @@
           "live_verified": 1
         },
         "none": {
-          "count": 481,
+          "count": 477,
           "live_verified": 0
         },
         "other": {
-          "count": 0,
+          "count": 4,
           "live_verified": 0
         },
         "state_only": {
