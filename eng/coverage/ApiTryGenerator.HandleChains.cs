@@ -149,12 +149,18 @@ internal static partial class ApiTryGenerator
     {
         var input = ChainInputs(root);
         HandleModel model = before ? BuildDirectHandles(input.Data, input.Types, input.Kinds, input.Enums, input.Services) : BuildHandles(input.Data, input.Types, input.Kinds, input.Enums, input.Services);
-        var covered = model.Members.Concat(Selected(input.Data, input.Enums, input.Kinds)).Concat(Methods(input.Data, input.Enums, input.Kinds, input.Services)).Select(s => s.Entry.Row.Group).ToHashSet(StringComparer.Ordinal);
+        // The entry model reaches types by its own property, field and keyed paths (ADR-0055, ADR-0056), which the
+        // chain model above does not know about. Without it the gap list keeps reporting groups that are callable,
+        // as PlaceHolder's variable and value-set classes were on 2026-11-14.
+        EntryModel entries = EntryData(root);
+        var entryReachable = entries.Paths.Select(p => p.Type).ToHashSet(StringComparer.Ordinal);
+        var covered = model.Members.Concat(Selected(input.Data, input.Enums, input.Kinds)).Concat(Methods(input.Data, input.Enums, input.Kinds, input.Services))
+            .Concat(EntrySelected(entries)).Select(s => s.Entry.Row.Group).ToHashSet(StringComparer.Ordinal);
         var expanded = input.Kinds.Concat(model.Reachable.Where(t => !ObjectType(t, input.Kinds)).Select(t => new KeyValuePair<string, string[]>(t.Replace("Eplan.EplApi.DataModel.", "", StringComparison.Ordinal), []))).ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
         return [.. input.Data.Entries.Where(e => e.Row.Group.StartsWith("O:", StringComparison.Ordinal) && e.Row.Status is "registered" or "env_blocked" && !covered.Contains(e.Row.Group)).Select(e =>
         {
             string type = e.Type[2..];
-            bool receiver = ObjectType(type, input.Kinds) || model.Reachable.Contains(type) || input.Services.ContainsKey(type);
+            bool receiver = ObjectType(type, input.Kinds) || model.Reachable.Contains(type) || input.Services.ContainsKey(type) || entryReachable.Contains(type);
             string? reason = HandleRestriction(type) == "masterdata_copy_pending" ? "masterdata_copy_pending" : !receiver ? "declaring_type_unreachable" : null;
             reason ??= e.Row.Kind is not ("property" or "method") ? "member_kind_not_dispatched" : e.Details.Where(d => d.Kind == "overload").Select(d => Exclusion(e, d, input.Enums, expanded, model.Reachable.Contains(type) ? null : input.Services)).FirstOrDefault(r => r is not null) ?? "unsupported_property_or_ambiguous_shape";
             return (e, reason, receiver ? "No unique supported compiled member shape" : "No approved return chain within depth 4; see handle reachability table");

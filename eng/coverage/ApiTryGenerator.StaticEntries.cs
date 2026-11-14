@@ -63,7 +63,10 @@ internal static partial class ApiTryGenerator
     {
         var result = new List<EntryPath>();
         bool SafeType(string type) => PublicEntryType(type, types) && types[type].GetProperty("kind").GetString() is "class" or "interface" && type.StartsWith("Eplan.EplApi.DataModel.", StringComparison.Ordinal)
-            && !MatchEntry(type, "PropertyList|PropertyValue|Filter|ArticleReference|PropertyPlacement|MateEntry|MasterData\\.(?!PlotFrame$)");
+            // A property placement is excluded because it shares its parent's object number (A57/A138), so it cannot
+            // be addressed on its own. That reason does not apply to the placement *schemes*: a scheme is its own
+            // object, and it is what property 19307 selects, which the sixteen-page redraw needs (owner 2026-11-14).
+            && !MatchEntry(type, "PropertyList|PropertyValue|Filter|ArticleReference|PropertyPlacement(?!sSchema)|MateEntry|MasterData\\.(?!PlotFrame$)");
         var pathFields = PathFields(fields, SafeType);
         var properties = data.Entries.Where(e => e.Row.Kind == "property" && e.Row.ExcludedReason is null).SelectMany(e => e.Details.Where(d => d.Kind == "overload" && d.ExcludedReason is null && d.Access is null && !d.Static && d.Accessors?.Split(';').Contains("get", StringComparer.Ordinal) == true && SafeType(d.ReturnType ?? "")).Select(d => (e, d))).ToArray();
         void Follow(string parent, string origin, string path, string expression, int depth)

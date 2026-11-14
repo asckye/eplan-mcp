@@ -60259,8 +60259,8 @@
     "operation": {
       "denominator": 4014,
       "tools": 2572,
-      "apiTry": 2330,
-      "callable": 2599,
+      "apiTry": 2337,
+      "callable": 2605,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -60282,7 +60282,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel",
-        "callable": 845,
+        "callable": 849,
         "refused_unsafe": 4
       },
       {
@@ -60297,7 +60297,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.Graphics",
-        "callable": 345,
+        "callable": 347,
         "refused_unsafe": 0
       },
       {
@@ -60368,7 +60368,7 @@
       "live_verified": 615
     },
     "declined": {
-      "count": 675,
+      "count": 677,
       "live_verified": 0
     },
     "dedicated": {
@@ -60380,11 +60380,11 @@
       "live_verified": 1
     },
     "none": {
-      "count": 740,
+      "count": 732,
       "live_verified": 0
     },
     "other": {
-      "count": 27,
+      "count": 33,
       "live_verified": 0
     },
     "state_only": {
@@ -60399,7 +60399,7 @@
     "covered_by_tool": 5,
     "dialog_decision_context": 26,
     "enumerator_type": 16,
-    "external_path_parameter": 52,
+    "external_path_parameter": 54,
     "file_masterdata_macro_tools": 57,
     "lifecycle_or_creation": 9,
     "locking_internals": 8,
@@ -60419,7 +60419,7 @@
           "live_verified": 620
         },
         "declined": {
-          "count": 742,
+          "count": 745,
           "live_verified": 0
         },
         "dedicated": {
@@ -60431,11 +60431,11 @@
           "live_verified": 1
         },
         "none": {
-          "count": 2037,
+          "count": 2028,
           "live_verified": 0
         },
         "other": {
-          "count": 32,
+          "count": 38,
           "live_verified": 0
         },
         "state_only": {
@@ -60452,7 +60452,7 @@
           "live_verified": 77
         },
         "declined": {
-          "count": 467,
+          "count": 470,
           "live_verified": 0
         },
         "dedicated": {
@@ -60464,7 +60464,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1376,
+          "count": 1373,
           "live_verified": 0
         },
         "other": {
@@ -60497,11 +60497,11 @@
           "live_verified": 1
         },
         "none": {
-          "count": 423,
+          "count": 417,
           "live_verified": 0
         },
         "other": {
-          "count": 6,
+          "count": 12,
           "live_verified": 0
         },
         "state_only": {

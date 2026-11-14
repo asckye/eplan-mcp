@@ -2385,6 +2385,11 @@ O:Eplan.EplApi.DataModel.SymbolReference.LogicalAreaSegments	P:Eplan.EplApi.Data
 O:Eplan.EplApi.DataModel.SymbolReference.LogicalAreaSegmentsLocal	P:Eplan.EplApi.DataModel.SymbolReference.LogicalAreaSegmentsLocal	read	getter
 O:Eplan.EplApi.DataModel.SymbolReference.Properties	P:Eplan.EplApi.DataModel.SymbolReference.Properties	read	getter
 O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements	P:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacements	read	getter
+O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Add	M:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Add(System.String)	excluded	unsupported_return
+O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Export	M:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Export(System.String)	excluded	external_path_parameter
+O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Export	M:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Export(System.String[],System.String)	excluded	external_path_parameter
+O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Import	M:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Import(System.String,System.Boolean)	excluded	external_path_parameter
+O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Remove	M:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchemasList.Remove(Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema)	excluded	lifecycle_or_creation
 O:Eplan.EplApi.DataModel.SymbolReference.ReorderPropertyPlacements	M:Eplan.EplApi.DataModel.SymbolReference.ReorderPropertyPlacements(System.Collections.Generic.List{Eplan.EplApi.DataModel.Graphics.PropertyPlacement})	write	-
 O:Eplan.EplApi.DataModel.SymbolReference.Segment.Angle	P:Eplan.EplApi.DataModel.SymbolReference.Segment.Angle	read	getter
 O:Eplan.EplApi.DataModel.SymbolReference.Segment.EndPoint	P:Eplan.EplApi.DataModel.SymbolReference.Segment.EndPoint	read	getter
