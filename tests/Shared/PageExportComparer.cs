@@ -113,16 +113,13 @@ internal static class PageExportComparer
             AddIdentity(sourceIds, pair.Source["oid"], identity);
             AddIdentity(targetIds, pair.Target["oid"], identity);
         }
-        int propertyPairStart = pairs.Count;
         PairGroups(sourcePlacements.Where(IsPropertyPlacement),
             targetPlacements.Where(IsPropertyPlacement), result, pairs,
             (left, right) => SameParent(left, right, sourceIds, targetIds));
-        for (int index = propertyPairStart; index < pairs.Count; index++)
-        {
-            string identity = "paired:" + index.ToString(CultureInfo.InvariantCulture);
-            AddIdentity(sourceIds, pairs[index].Source["oid"], identity);
-            AddIdentity(targetIds, pairs[index].Target["oid"], identity);
-        }
+        // A property text's object number is its owner's (A138) and several texts of one owner share it, so
+        // registering the texts would overwrite the owner's entry with whichever text came last. The winner differed
+        // between the two projects and made a text's own parentOid read as another object (live 2026-11-14: 40 texts
+        // of the sixteen-page redraw differed in nothing else). The owner's entry, written above, is the right one.
 
         PairGroup("Connection", Objects(source["connections"]), Objects(target["connections"]), result, pairs,
             (left, right) => SameEndpoints(left, right));

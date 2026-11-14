@@ -179,4 +179,49 @@ public sealed class PageExportComparerScopeTests
         Assert.Empty(result.SubsetDifferences);
         Assert.NotEmpty(result.Types["InterruptionPoint"].Different);
     }
+
+    /// <summary>A page whose device owns two property texts that carry the device's own object number (A138).</summary>
+    private static JObject TextOwner(params string[] contents)
+    {
+        var texts = new JArray();
+        for (int index = 0; index < contents.Length; index++)
+        {
+            texts.Add(new JObject
+            {
+                ["type"] = "ContextPropertyPlacement",
+                ["oid"] = 396,
+                ["parentOid"] = 396,
+                ["location"] = new JObject { ["x"] = 10 + index, ["y"] = 30 },
+                ["content"] = new JObject { ["en_US"] = contents[index] },
+                ["properties"] = new JArray(),
+            });
+        }
+        var placements = new JArray(new JObject
+        {
+            ["type"] = "Function",
+            ["oid"] = 396,
+            ["name"] = "+A1-WE1",
+            ["location"] = new JObject { ["x"] = 10, ["y"] = 20 },
+            ["properties"] = new JArray(),
+        });
+        foreach (JToken text in texts)
+        { placements.Add(text); }
+        return new JObject
+        {
+            ["name"] = "=K1+A2&EFS1/1",
+            ["pageType"] = "Circuit",
+            ["placements"] = placements,
+            ["connections"] = new JArray(),
+        };
+    }
+
+    [Fact]
+    public void PropertyText_KeepsItsOwnersIdentity_WhenSeveralTextsShareItsObjectNumber()
+    {
+        PageExportComparison result = PageExportComparer.Compare(TextOwner("-WE1", "1,5"), TextOwner("-WE1", "1,5"));
+
+        Assert.Equal(2, result.Types["ContextPropertyPlacement"].Matched.Count);
+        Assert.Empty(result.Types["ContextPropertyPlacement"].Different);
+        Assert.Single(result.Types["Function"].Matched);
+    }
 }

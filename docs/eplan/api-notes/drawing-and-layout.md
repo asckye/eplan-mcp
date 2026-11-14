@@ -155,6 +155,7 @@ eport-blocks-*.json`）。
 - `eplan_page_get include_drawings` 的 `properties` 子对象给出 `grouped`、`angle_deg`、`docked`、`visible`、`property_id`、`displayed_property_id`、`property_index`、`height_mm`、`height_raw_mm`、`layer`、`pen_*`、`alignment`；`angle_deg` 与 `angle` 并列，`bounds` 与 `location` 在同级而不在 `properties` 内。
 - 三页共 570 个属性文字，`grouped` **全部为 `false`**，角度全为 0 或 90，外框四值齐全，定位点二维。父对象的 `grouped` 则因页而异：`=K1+A2&EFA1/1` 的 224 个全部成组（Terminal 200、BusTerminal 16、PLC 8）；`=K1+A2&EFS1/2` 223 个中 68 个成组；`=K1+A2&EFS1/1` 123 个中 33 个成组。由宏插入的器件保持成组是常态，因此 `property_moves` 不再检查父对象的 `grouped`（见 [eplan_placement_update](../../tools/eplan_placement_update.md)）。
 - 属性文字的 `parent` 定位器与自身 `oid` 相同、只有 `digest` 不同（A57 的共享对象号）；按 `oid` 找父对象时必须同时要求对方不是属性放置。
+- 同一父对象的多个属性文字**共用同一个对象号**：原生导出里 `=GAA+A1&EFS1/1` 的 562 段属性文字中，号 396 出现 144 次、9550 出现 88 次；其中 132 段的 `oid` 与 `parentOid` 相同，且这个号同时是某个父对象的号。所以按对象号建立"对象 → 配对身份"的映射时不能登记属性文字，否则父对象的条目会被最后一段文字覆盖，两个项目里的"最后一段"还不一样（2026-11-14 实机：16 页重画有 40 段文字因此只在 `parentOid`、`sourceOid` 上不同）。
 - `eplan_page_get` 在项目未打开时返回空的 `drawings` 而不报错，`eplan_page_create` 同样情况明确返回 `PROJECT_NOT_OPEN`；读取路径的这一不一致使"读到空"与"页上确实没有对象"无法区分。
 - 由 `eplan_page_get` 得到的定位器直接交给 `eplan_object_get` 返回 `PLAN_STALE`，须先经 `eplan_object_find` 取新定位器。
 - 定义点必须落在已有连接段上：空白页上调用 `eplan_connection_create` 放 `definition_point` 返回 `/items/0/position: Place the definition point on a segment of this connection. Nearest existing segment: none.`
