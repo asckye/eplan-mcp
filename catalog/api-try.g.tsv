@@ -204,7 +204,6 @@ O:Eplan.EplApi.Base.UnitParser.Set	M:Eplan.EplApi.Base.UnitParser.Set(System.Str
 O:Eplan.EplApi.Base.UnitParser.ToDisplay	M:Eplan.EplApi.Base.UnitParser.ToDisplay(Eplan.EplApi.Base.ParserParameter)	write	-
 O:Eplan.EplApi.Base.UnitParser.ValueToUnit	M:Eplan.EplApi.Base.UnitParser.ValueToUnit(Eplan.EplApi.Base.ParserParameter)	write	-
 O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnection	P:Eplan.EplApi.DataModel.AnyPropertyId.AsConnection	read	getter
-O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnection3D	P:Eplan.EplApi.DataModel.AnyPropertyId.AsConnection3D	read	getter
 O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionDefinitionPoint	P:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionDefinitionPoint	read	getter
 O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionPointsInfo	P:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionPointsInfo	read	getter
 O:Eplan.EplApi.DataModel.AnyPropertyId.AsRoutedConnection	P:Eplan.EplApi.DataModel.AnyPropertyId.AsRoutedConnection	read	getter
@@ -524,9 +523,6 @@ O:Eplan.EplApi.DataModel.E3D.Connection3D.RoutingType	P:Eplan.EplApi.DataModel.E
 O:Eplan.EplApi.DataModel.E3D.Connection3D.RoutingType	P:Eplan.EplApi.DataModel.E3D.Connection3D.RoutingType:set	write	setter
 O:Eplan.EplApi.DataModel.E3D.Connection3D.StartConnectionPointPosition	P:Eplan.EplApi.DataModel.E3D.Connection3D.StartConnectionPointPosition	read	getter
 O:Eplan.EplApi.DataModel.E3D.Connection3D.StartObject	P:Eplan.EplApi.DataModel.E3D.Connection3D.StartObject	read	getter
-O:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Exists	M:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Exists(Eplan.EplApi.DataModel.Properties.Connection3D)	write	-
-O:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property	P:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property(Eplan.EplApi.DataModel.Properties.Connection3D)	read	settings_key_read
-O:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property	P:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property(Eplan.EplApi.DataModel.Properties.Connection3D,System.Int32)	read	settings_key_read
 O:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Create	M:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Create(Eplan.EplApi.DataModel.E3D.Placement3D,Eplan.EplApi.DataModel.AnyPropertyId)	write	-
 O:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Create	M:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Create(Eplan.EplApi.DataModel.ViewPart,Eplan.EplApi.DataModel.AnyPropertyId)	write	-
 O:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Properties	P:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Properties	read	getter

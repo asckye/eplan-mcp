@@ -131,8 +131,10 @@ internal static partial class ApiTryGenerator
         string args = string.Join(", ", arguments);
         // Named parameterized CLR properties are emitted as get_Name; C# indexers use brackets.
         string call = e.Row.Kind == "method" ? receiver + "(" + args + ")" : d.Parameters is { Length: > 0 }
-            ? e.Name == "Item" || e.Type == "T:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable" && e.Name == "Layer" || e.Type == "T:Eplan.EplApi.DataModel.UniversalPropertyList" && e.Name == "Property"
-                || e.Name == "Property" && e.Type.StartsWith("T:Eplan.EplApi.MasterData.", StringComparison.Ordinal) && e.Type.EndsWith("PropertyList", StringComparison.Ordinal)
+            // Every *PropertyList declares its Property member with IndexerName, so all of them take brackets; the
+            // list used to name UniversalPropertyList and the master-data ones because only those were selectable.
+            ? e.Name == "Item" || e.Type == "T:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable" && e.Name == "Layer"
+                || e.Name == "Property" && e.Type.EndsWith("PropertyList", StringComparison.Ordinal)
                 || (e.Type, e.Name) is ("T:Eplan.EplApi.MasterData.MDSymbol", "Variant") or ("T:Eplan.EplApi.MasterData.MDSymbolLibrary", "Symbol")
                 ? receiver[..^(e.Name.Length + 1)] + "[" + args + "]" : receiver[..^e.Name.Length] + "get_" + e.Name + "(" + args + ")" : receiver;
         return call;

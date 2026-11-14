@@ -166,7 +166,12 @@ internal static partial class ApiTryGenerator
                 string receiver = s.Member.Static ? "global::" + s.Entry.Type[2..] : "((global::" + s.Entry.Type[2..] + ")target!)";
                 if (s.Entry.Row.Kind == "method")
                 { return MethodCase(s.Entry, s.Member, m.Enums, m.Kinds, new Dictionary<string, ApiTryServices.Service>(), receiver); }
-                string call = receiver + "." + s.Entry.Name;
+                // An indexed property is an indexer, whatever IndexerName calls it (PropertyList's is "Property"),
+                // so it is read and written through brackets; naming the accessor is CS0571.
+                string call = s.Member.Parameters is { Length: > 0 } indexes
+                    ? receiver + "[" + string.Join(", ", indexes.Select(p =>
+                        ArgumentValue(p.Type, "parameters[" + Literal(ParameterName(p)) + "]", m.Enums, m.Kinds))) + "]"
+                    : receiver + "." + s.Entry.Name;
                 return "            case " + Literal(s.Member.Signature!) + ": { " + (EntryWritable(s.Entry, s.Member) ? "if (parameters.ContainsKey(\"value\")) { " + call + " = " + ConvertValue(s.Member.ReturnType!, "parameters[\"value\"]!") + "; } " : "")
                     + (s.Member.ReturnType == "System.Void" ? "" : "return ") + call + ";" + (s.Member.ReturnType == "System.Void" ? " return null;" : "") + " }";
             })) + "\n            default: throw new System.InvalidOperationException(\"No entry dispatch.\");\n        }\n    }\n    private static T Hold<T>(T value, System.Action<System.IDisposable> own) { if (value is System.IDisposable disposable && value is not StorableObject) { own(disposable); } return value; }\n    internal static object? Via(string type, string path, StorableObject target, JObject parameters, System.Action<System.IDisposable> own) => (type, path) switch\n    {\n"

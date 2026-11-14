@@ -29,7 +29,8 @@ internal static partial class ApiTryGenerator
     /// Properties class to data-dictionary.jsonl so the member files stay small (catalog/README.md), so their type
     /// line carries no values and a parameter of that type could not be validated at all. Those names come back from
     /// the dictionary, whose <c>object</c> is the enum's own short name (owner 2026-11-14: this alone blocked 67
-    /// groups of <c>*PropertyList.Exists</c> and <c>.Property</c>).
+    /// groups of <c>*PropertyList.Exists</c> and <c>.Property</c>). Obsolete IDs are left out: the assembly marks
+    /// them for internal use only, and naming one in generated code fails the plugin build with CS0618.
     /// </summary>
     private static Dictionary<string, string[]> Enums(string root)
     {
@@ -38,7 +39,8 @@ internal static partial class ApiTryGenerator
             ? File.ReadLines(File2(name)).Select(l => JsonSerializer.Deserialize<JsonElement>(l)) : [];
         Dictionary<string, string[]> dictionary = Read("data-dictionary.jsonl")
             .GroupBy(p => p.GetProperty("object").GetString()!, StringComparer.Ordinal)
-            .ToDictionary(g => g.Key, g => g.Select(p => p.GetProperty("name").GetString()!).Distinct(StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);
+            .ToDictionary(g => g.Key, g => g.Where(p => !p.TryGetProperty("obsolete", out _))
+                .Select(p => p.GetProperty("name").GetString()!).Distinct(StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);
         var enums = new Dictionary<string, string[]>(StringComparer.Ordinal);
         foreach (JsonElement type in Read("types.jsonl"))
         {
@@ -47,8 +49,10 @@ internal static partial class ApiTryGenerator
             string id = type.GetProperty("id").GetString()![2..];
             if (type.TryGetProperty("values", out JsonElement values))
             { enums[id] = [.. values.EnumerateObject().Select(p => p.Name)]; }
+            // An empty name list would generate a switch with no arms, so such an enum stays unknown and its
+            // members stay excluded for an unsupported parameter.
             else if (type.TryGetProperty("outer", out JsonElement outer) && outer.GetString()!.EndsWith(".Properties", StringComparison.Ordinal)
-                && dictionary.TryGetValue(id[(id.LastIndexOf('.') + 1)..], out string[]? names))
+                && dictionary.TryGetValue(id[(id.LastIndexOf('.') + 1)..], out string[]? names) && names.Length > 0)
             { enums[id] = names; }
         }
         return enums;
