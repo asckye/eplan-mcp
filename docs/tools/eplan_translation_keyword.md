@@ -1,6 +1,14 @@
-# 工具设计：`eplan_translation_keyword`
+# 工具规格：`eplan_translation_keyword`
 
-设计说明采用[规范附录 T.3](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/appendix/t-templates.md#tpl-rfc)。本页是设计。**读取已实现（2026-11-14），写入待实现。**
+| 项 | 内容 |
+|---|---|
+| 工具名 | `eplan_translation_keyword` |
+| 所属分组 / Profile | `language` / `full`（新工具默认只在 `full` 中） |
+| 安全级别 | Read；写入（增删改词条、增删语言）尚未实现，实现后按系统主数据处理（[ADR-0019](../adr/0019-master-data-writes.md)） |
+| MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
+| 状态 | Implemented (Unreleased) |
+
+读取已实现（2026-11-14）；写入仍是设计。设计说明采用[规范附录 T.3](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/appendix/t-templates.md#tpl-rfc)。
 
 | 项目字段 | 记录 |
 |---|---|

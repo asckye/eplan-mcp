@@ -131,6 +131,7 @@
 | `eplan_tool_usage` | core、full | 只读 | [eplan_tool_usage.md](eplan_tool_usage.md) |
 | `eplan_translation_export` | full | 写入 | [eplan_translation_export.md](eplan_translation_export.md) |
 | `eplan_translation_import` | full | 写入 | [eplan_translation_import.md](eplan_translation_import.md) |
+| `eplan_translation_keyword` | full | 只读 | [eplan_translation_keyword.md](eplan_translation_keyword.md) |
 | `eplan_workflow_plan` | full | 只读 | [eplan_workflow_plan.md](eplan_workflow_plan.md) |
 
 
