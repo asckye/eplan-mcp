@@ -80,7 +80,8 @@ internal static partial class ApiTryGenerator
         ApiParameter[] parameters = member.Parameters!;
         ApiParameter[] byref = parameters.Where(p => p.Type.EndsWith('@') || p.Direction is "out" or "ref").ToArray();
         bool service = services.TryGetValue(entry.Type[2..], out ApiTryServices.Service? receiver) && receiverExpression is null;
-        string construct = service ? (receiver!.Disposable ? "using " : "") + "var service = new global::" + entry.Type[2..] + "(); " : "";
+        string construct = service ? (receiver!.Disposable ? "using " : "") + "var service = new global::" + entry.Type[2..]
+            + (receiver.ProjectConstructor ? "((global::Eplan.EplApi.DataModel.Project)target!); " : "(); ") : "";
         string Token(ApiParameter p) => "parameters[" + Literal(ParameterName(p)) + "]";
         string Local(ApiParameter p) => "arg" + Array.IndexOf(parameters, p);
         string locals = string.Concat(byref.Select(p => "global::" + Native(ValueType(p)) + " " + Local(p) + (Out(p) ? "; " : " = " + ArgumentValue(ValueType(p), Token(p), enums, kinds, structs) + "; ")));

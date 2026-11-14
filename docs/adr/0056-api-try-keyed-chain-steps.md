@@ -64,3 +64,4 @@ ADR-0055 打通了 `VariablesClass` 和 `ValueSetsClass` 本身，但它们的 `
 | 2026-11-14 | 提出并接受 | 项目负责人 2026-11-14 |
 | 2026-11-14 | 实现：只做 string 键；实测 12 组而非估计的 38 组，原因记在"后果"里 | 覆盖报告重算 |
 | 2026-11-14 | 负责人同批授权（「两个都按你的建议做」）：链路的 `PropertyPlacement` 排除收窄为 `PropertyPlacement(?!sSchema)`。排除的理由是属性放置与父对象共用对象号、无法单独定位（A57/A138），这条理由不适用于放置**方案**——方案是独立对象，正是属性 19307 选的东西。实测 +6 组（`PropertyPlacementsSchema` 的 `ID`、`Name`、`IsCustom`，以及 `PropertyPlacementsSchemasList` 的 `Selected`、`DefaultScheme` 可达） | 覆盖报告重算 |
+| 2026-11-14 | 负责人「继续推剩下的 665 组」：服务只有带 `Project` 的公开构造函数时，用调用已经指定的 Project 目标构造。每个服务的接收者形状本来就是同一个已批准的 Project 定位器，所以不增加项目之外的触达面。实测 +7 组（`EServices.SubProjectsCollection`、`PrjMessagesCollection` 中可开放的部分；其余成员各自因 `banned_symbol` 6、`unsupported_return` 5、`unsupported_parameter` 3 继续排除），到不了 665 → 658 | 覆盖报告重算 |

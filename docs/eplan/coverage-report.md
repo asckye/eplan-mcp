@@ -1,6 +1,6 @@
 # EPLAN API 覆盖报告
 
-**操作层 4014 组：专用工具 610，通用读取 117，仅通用入口 1838，仅状态覆盖 7，其他可调用 163，明确不做 614，到不了 665；实机验证 1026**
+**操作层 4014 组：专用工具 610，通用读取 117，仅通用入口 1838，仅状态覆盖 7，其他可调用 170，明确不做 614，到不了 658；实机验证 1026**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-14 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 2cfb0ff9 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
@@ -16,20 +16,20 @@
 | 通用读取（generic_read） | 117 | 117 / 4014（2.9%） | 1 |
 | 仅通用入口（api_try_only） | 1838 | 1838 / 4014（45.8%） | 615 |
 | 仅状态覆盖（state_only） | 7 | 7 / 4014（0.2%） | 0 |
-| 其他可调用（other） | 163 | 163 / 4014（4.1%） | 0 |
+| 其他可调用（other） | 170 | 170 / 4014（4.2%） | 0 |
 | 明确不做（declined） | 614 | 614 / 4014（15.3%） | 0 |
-| 到不了（none） | 665 | 665 / 4014（16.6%） | 0 |
+| 到不了（none） | 658 | 658 / 4014（16.4%） | 0 |
 
 - 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除，或整个类型按下列原因结案；仍计入分母。按原因：property_id_tables 109，settings_write 80，shared_interactive_state 65，file_masterdata_macro_tools 57，addin_infrastructure 55，external_path_parameter 54，masterdata_message_objects 36，catalog:banned_symbol 29，covered_by_object_find 29，dialog_decision_context 26，offline_host_application 22，enumerator_type 16，masterdata_management 14，lifecycle_or_creation 9，locking_internals 8，covered_by_tool 5。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons 和 DeclinedTypes。
 - refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。
 
 | 操作层分母 | tools | api_try | callable | refused_unsafe |
 |---:|---:|---:|---:|---:|
-| 4014 | 2572 | 2516 | 2735 | 5 |
+| 4014 | 2572 | 2523 | 2742 | 5 |
 
 - api_try 在操作层分母外还可到达 0 组，不加入可调用数或分母；原因：无。
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
-- C 级方法选择：read 1801 组，write 1055 组；排除（按签名）：catalog:internal 168，external_path_parameter 160，masterdata_or_parts_management 103，lifecycle_or_creation 97，settings_write 92，settings_or_scheme_parameter 72，catalog:banned_symbol 66，catalog:deprecated 39，shared_interactive_state 39，transient_creation 36，unsupported_parameter 33，printer_parameter 32，abstract_service 29，static_or_nonpublic 24，no_public_default_constructor 23，unsupported_return 17，masterdata_management 16，catalog:not_applicable 14，catalog:deprecated: obsolete_attribute 14，entry_type_excluded 10，generic_or_collection_parameter 8，masterdata_copy_pending 7，application_or_session_state 5，unsupported_settings_read 5，external_or_application_effect 5，external_destination 4，unscoped_object_identifier 4，static_not_project_scoped 4，database_parameter 4，ref_out 3，array_or_params 2，unsupported_required_modifier 1，factory_constructor_unavailable 1，catalog:internal: native_signature 1，owns_transaction 1。
+- C 级方法选择：read 1806 组，write 1057 组；排除（按签名）：catalog:internal 168，external_path_parameter 160，masterdata_or_parts_management 103，lifecycle_or_creation 97，settings_write 92，settings_or_scheme_parameter 72，catalog:banned_symbol 66，catalog:deprecated 39，shared_interactive_state 39，unsupported_parameter 36，transient_creation 36，printer_parameter 32，abstract_service 29，static_or_nonpublic 24，unsupported_return 21，masterdata_management 16，catalog:not_applicable 14，catalog:deprecated: obsolete_attribute 14，no_public_default_constructor 13，entry_type_excluded 10，generic_or_collection_parameter 8，masterdata_copy_pending 7，application_or_session_state 5，unsupported_settings_read 5，external_or_application_effect 5，external_destination 4，unscoped_object_identifier 4，static_not_project_scoped 4，database_parameter 4，ref_out 3，array_or_params 2，unsupported_required_modifier 1，factory_constructor_unavailable 1，catalog:internal: native_signature 1，owns_transaction 1。
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
 - 通用读取计数：数据字典类型的 kind 在 ObjectReadTypes 中 supported 时，也经 eplan_object_find / eplan_object_get 计为 implemented；通用路径有 Small/Medium 测试时计为 automated_test；该路径的 live_verified 仅限生成器中按 api-notes A60/A62 明确列出的已读 kind，不由支持范围推定，未支持类型保留原原因。
 - 扫描漏记的可执行别名仅按 overlay 的 `reached-by-tool` 逐组、逐重载补入；必须列出工具、实际调用和接收列表的代码位置，以及扫描已识别的等价组。本轮只补各列表打开父值必经的按 ID getter，不向每个列表推定带索引重载、命名属性 ID、枚举 getter、转换 getter 或 setter。核对说明见 [操作层映射复核](operation-mapping-review.md)。
@@ -87,10 +87,10 @@ action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 4
 
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 方法 | 3109 | 396 / 175 | 33 / 0 | 804 / 77 | 7 / 0 | 84 / 0 | 470 / 0 | 1315 / 0 | 252 |
-| 普通属性 | 2636 | 423 / 316 | 256 / 1 | 1253 / 543 | 0 / 0 | 99 / 0 | 212 / 0 | 393 / 0 | 860 |
+| 方法 | 3109 | 396 / 175 | 33 / 0 | 804 / 77 | 7 / 0 | 87 / 0 | 470 / 0 | 1312 / 0 | 252 |
+| 普通属性 | 2636 | 423 / 316 | 256 / 1 | 1253 / 543 | 0 / 0 | 103 / 0 | 212 / 0 | 389 / 0 | 860 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5983 | 819 / 491 | 289 / 1 | 2057 / 620 | 7 / 0 | 183 / 0 | 682 / 0 | 1946 / 0 | 1112 |
+| 合计 | 5983 | 819 / 491 | 289 / 1 | 2057 / 620 | 7 / 0 | 190 / 0 | 682 / 0 | 1939 / 0 | 1112 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
@@ -108,7 +108,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | `Eplan.EplApi.DataModel.Planning` | 122 | 101 / 122（82.8%） | 104 / 122（85.2%） | 0 | 61 |
 | `Eplan.EplApi.DataModel.Revisions` | 20 | 20 / 20（100.0%） | 20 / 20（100.0%） | 0 | 0 |
 | `Eplan.EplApi.DataModel.Topology` | 17 | 14 / 17（82.4%） | 16 / 17（94.1%） | 0 | 10 |
-| `Eplan.EplApi.EServices` | 127 | 30 / 127（23.6%） | 30 / 127（23.6%） | 0 | 7 |
+| `Eplan.EplApi.EServices` | 127 | 30 / 127（23.6%） | 37 / 127（29.1%） | 0 | 7 |
 | `Eplan.EplApi.EServices.Ged` | 90 | 15 / 90（16.7%） | 15 / 90（16.7%） | 0 | 3 |
 | `Eplan.EplApi.HEServices` | 417 | 254 / 417（60.9%） | 254 / 417（60.9%） | 0 | 38 |
 | `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |

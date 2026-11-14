@@ -124,7 +124,11 @@ internal static partial class ApiTryGenerator
                 string receiver = Cast(s.Entry.Type[2..], "target") + "." + s.Entry.Name;
                 string construct = "";
                 if (services.TryGetValue(s.Entry.Type[2..], out ApiTryServices.Service? service) && service.Reason is null && !model.Reachable.Contains(s.Entry.Type[2..]))
-                { construct = (service.Disposable ? "using " : "") + "var service = new global::" + s.Entry.Type[2..] + "(); "; receiver = "service." + s.Entry.Name; }
+                {
+                    construct = (service.Disposable ? "using " : "") + "var service = new global::" + s.Entry.Type[2..]
+                        + (service.ProjectConstructor ? "((global::Eplan.EplApi.DataModel.Project)target!); " : "(); ");
+                    receiver = "service." + s.Entry.Name;
+                }
                 string call = ChainCall(s.Entry, s.Member, receiver, Inputs(s.Member).Select(p => Argument(ParameterName(p), p.Type)));
                 string setter = s.Entry.Row.Kind == "property" && ChainSetter(s.Entry, s.Member) && !ServiceRoot(s.Entry, model, services) && Scalar(s.Member.ReturnType, enums) ? "if (parameters.ContainsKey(\"value\")) { " + receiver + " = " + Argument("value", s.Member.ReturnType!) + "; } " : "";
                 return "            case " + Literal(s.Member.Signature!) + ": { " + construct + setter + (s.Member.ReturnType == "System.Void" ? call + "; return null;" : "return " + call + ";") + " }";

@@ -7,7 +7,9 @@ namespace EplanMcp.Coverage;
 /// <summary>Offline service construction and side-effect restrictions, independent of runtime reflection.</summary>
 internal static class ApiTryServices
 {
-    internal sealed record Service(bool Disposable, string? Reason);
+    /// <summary><paramref name="ProjectConstructor"/>: the service is built from the approved Project target
+    /// instead of a parameterless constructor (owner 2026-11-14, same batch as ADR-0056).</summary>
+    internal sealed record Service(bool Disposable, string? Reason, bool ProjectConstructor = false);
     private static readonly string[] _namespaces = ["Eplan.EplApi.HEServices", "Eplan.EplApi.EServices", "Eplan.EplApi.EServices.Ged", "Eplan.EplApi.DataModel.Planning", "Eplan.EplApi.DataModel.Topology"];
     private static string Text(JsonElement value, string name) => value.TryGetProperty(name, out JsonElement field) ? field.GetString() ?? "" : "";
     private static IEnumerable<JsonElement> Lines(string path) => File.Exists(path) ? File.ReadLines(path).Select(l => JsonSerializer.Deserialize<JsonElement>(l)) : [];
@@ -32,6 +34,17 @@ internal static class ApiTryServices
         { services[utility] = new(true, null); }
         return services;
     }
+    /// <summary>
+    /// A service whose only public constructor takes the project is built from the Project the call already targets:
+    /// the receiver shape of every service is that same approved Project locator, so this adds no new reach beyond
+    /// the project in hand (owner 2026-11-14: project messages and sub-project collections were unreachable only
+    /// because the generator insisted on a parameterless constructor).
+    /// </summary>
+    private static bool ProjectConstructor(JsonElement[] members, string typeId) => members.Any(m =>
+        Text(m, "kind") == "constructor" && Text(m, "type") == typeId && !m.TryGetProperty("access", out _)
+        && m.TryGetProperty("params", out JsonElement p) && p.GetArrayLength() == 1
+        && p[0].GetProperty("type").GetString() == "Eplan.EplApi.DataModel.Project");
+
     internal static Dictionary<string, Service> Build(JsonElement[] types, JsonElement[] members)
     {
         var byType = types.ToDictionary(t => Text(t, "id")[2..], StringComparer.Ordinal);
@@ -44,7 +57,9 @@ internal static class ApiTryServices
             .ToDictionary(t => Text(t, "id")[2..], t => new Service(Derives(Text(t, "id")[2..], "System.IDisposable"),
                 !Public(t) ? "service_type_excluded" : Text(t, "modifiers").Contains("abstract", StringComparison.Ordinal) ? "abstract_service"
                 : members.Any(m => Text(m, "type") == Text(t, "id") && Text(m, "kind") == "constructor" && Public(m)
-                    && (!m.TryGetProperty("static", out JsonElement s) || !s.GetBoolean()) && (!m.TryGetProperty("params", out JsonElement p) || p.GetArrayLength() == 0)) ? null : "no_public_default_constructor"), StringComparer.Ordinal);
+                    && (!m.TryGetProperty("static", out JsonElement s) || !s.GetBoolean()) && (!m.TryGetProperty("params", out JsonElement p) || p.GetArrayLength() == 0)) ? null
+                : ProjectConstructor(members, Text(t, "id")) ? null : "no_public_default_constructor",
+                ProjectConstructor(members, Text(t, "id"))), StringComparer.Ordinal);
     }
     private static bool Match(string value, string pattern) => Regex.IsMatch(value, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     internal static bool SideEffectParameter(ApiParameter p) => Match(p.Name, "dialog|dlg|show|select|lock|write|update|create|remove|delete|save|store|generate|rebuild|overwrite|change|set");
