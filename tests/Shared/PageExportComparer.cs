@@ -17,6 +17,9 @@ internal static class PageExportComparer
     [
         new("oid", "Native object IDs change when a page is redrawn; references are resolved through paired objects."),
         new("2000", "Object identification is the internal object ID encoded as a string; redrawing allocates a new ID."),
+        new("31160", "A connection's source object identification is the same internal object ID as 2000, for the object at its start."),
+        new("31161", "A connection's target object identification is the same internal object ID as 2000, for the object at its end."),
+        new("31047", "Internal property origin records where another property's value came from; that property is compared on its own."),
         new("10185", "Last editor's dongle license number identifies the editing session, not drawing content."),
         new("11001", "Automatic modification time belongs to the new page's edit history."),
         new("11002", "Creation time belongs to the new page's edit history."),
@@ -133,6 +136,8 @@ internal static class PageExportComparer
             Differences(Normalize(pair.Source, "", sourceIds), Normalize(pair.Target, "", targetIds), "", differences);
             if (comparedPages is not null)
             { SeparatePairedDifferences(pair, differences, sourcePlacements, comparedPages, result); }
+            SeparateMacroNameDifferences(pair, differences, result);
+            SeparateOutsideScopeDifferences(pair, differences, comparedPages, result);
             SeparateDefaultDifferences(pair, differences, result);
             PageExportTypeComparison group = Group(result, pair.Type);
             if (differences.Count == 0)
@@ -236,6 +241,61 @@ internal static class PageExportComparer
             }
         }
     }
+
+    private static readonly Regex _propertyValueField = new(@"^properties\[id=(\d+),index=-?\d+\]\.value$", RegexOptions.Compiled);
+    private static readonly string[] _macroExtensions = [".ema", ".ems", ".emp"];
+    private const string OutsideScopeName = "Placement outside the redrawn pages";
+    private const string OutsideScopeReason =
+        "The device is also placed on a mounting panel or on a page that was not redrawn, and neither is drawn here.";
+
+    private static string? PropertyId(string field) =>
+        _propertyValueField.Match(field) is { Success: true } match ? match.Groups[1].Value : null;
+
+    /// <summary>
+    /// The macro file an object was inserted from (20468). The library holds a later version of some of the sample's
+    /// macros, so an object drawn from the substitute names that file instead while every other compared field still
+    /// has to match. The owner's rule of 2026-11-04 lists such a substitution as a macro version difference, so the
+    /// pair is recorded with both macro names rather than counted as something to redraw by hand.
+    /// </summary>
+    private static void SeparateMacroNameDifferences(ObjectPair pair, List<PageExportFieldDifference> differences,
+        PageExportComparison result)
+    {
+        foreach (PageExportFieldDifference difference in differences.ToArray())
+        {
+            if (PropertyId(difference.Field) != "20468" || Macro(difference.Source) is not { } source
+                || Macro(difference.Target) is not { } target)
+            { continue; }
+            differences.Remove(difference);
+            result.MacroNameDifferences.Add(new(pair.Type, pair.Source, source, target));
+        }
+    }
+
+    private static string? Macro(JToken? value) => value?.Type == JTokenType.String && (string?)value is { } name
+        && _macroExtensions.Any(extension => name.EndsWith(extension, StringComparison.OrdinalIgnoreCase)) ? name : null;
+
+    /// <summary>
+    /// A device's placement list (20477) holds one entry per placement. A sample device is usually mounted in the
+    /// cabinet layout as well, which this redraw does not draw, and those entries name a mounting panel instead of a
+    /// page; an entry naming a page outside the redrawn subset is outside it the same way. Entries that name a compared
+    /// page stay a difference.
+    /// </summary>
+    private static void SeparateOutsideScopeDifferences(ObjectPair pair, List<PageExportFieldDifference> differences,
+        IReadOnlySet<string>? comparedPages, PageExportComparison result)
+    {
+        foreach (PageExportFieldDifference difference in differences.ToArray())
+        {
+            if (PropertyId(difference.Field) != "20477"
+                || PlacementPage(difference.Source) is { } page && (comparedPages?.Contains(page) ?? true))
+            { continue; }
+            differences.Remove(difference);
+            result.SubsetDifferences.Add(new(pair.Type + " " + pair.Source["oid"] + ": " + difference.Field,
+                OutsideScopeName, OutsideScopeReason, difference.Source, difference.Target));
+        }
+    }
+
+    /// <summary>The page a placement entry names, or null for a mounting-panel placement such as "+A1 (A1.S1)".</summary>
+    private static string? PlacementPage(JToken? value) => value?.Type == JTokenType.String
+        && Regex.Match((string?)value ?? "", @"^(.*/\d+)(\.\d+)?$") is { Success: true } match ? match.Groups[1].Value : null;
 
     private static bool PartnerOutside(JObject function, IReadOnlySet<string> comparedPages)
     {
@@ -723,6 +783,12 @@ internal static class PageExportComparer
 
 internal sealed record PageExportIgnoreRule(string Member, string Reason);
 internal sealed record PageExportSubsetRule(string Member, string Name, string Reason);
+
+/// <summary>
+/// One object the library's substitute macro drew in place of the sample's. Both macro file names are kept so the
+/// report can name the substitution instead of listing the object as a difference to repair.
+/// </summary>
+internal sealed record PageExportMacroNameDifference(string Type, JObject Source, string SourceMacro, string TargetMacro);
 internal sealed record PageExportSubsetDifference(string Field, string Name, string Reason, JToken? Source, JToken? Target);
 internal sealed record PageExportFieldDifference(string Field, JToken? Source, JToken? Target);
 internal sealed record PageExportReadWarning(string Path, JToken Error);
@@ -747,6 +813,7 @@ internal sealed class PageExportComparison
     public int SubsetDifferenceCount => SubsetDifferences.Count;
     public List<PageExportFieldDifference> DefaultDifferences { get; } = [];
     public List<PageExportMacroShift> MacroShiftDifferences { get; } = [];
+    public List<PageExportMacroNameDifference> MacroNameDifferences { get; } = [];
     public PageExportReportRows? ReportRows { get; set; }
     public List<PageExportReadWarning> Warnings { get; } = [];
     public bool HasDifferences => PageDifferences.Count > 0 || Types.Values.Any(type => type.Missing.Count > 0 || type.Extra.Count > 0 || type.Different.Count > 0);

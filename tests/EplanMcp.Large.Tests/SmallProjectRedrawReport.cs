@@ -130,6 +130,13 @@ internal sealed class SmallProjectRedrawReport(string run, string project)
             RecordMacroVersionDifference(name, shift.Source, "source macro", "library macro",
                 "The library macro draws this graphic " + Offset(shift) + " from the sample's; no repair was drawn.");
         }
+        // Same rule for an object the library's substitute macro drew: every other compared field matches the sample's,
+        // so the macro file it came from is listed as a version difference with both names, not as a repair.
+        foreach (PageExportMacroNameDifference macro in comparison.MacroNameDifferences)
+        {
+            RecordMacroVersionDifference(name, macro.Source, macro.SourceMacro, macro.TargetMacro,
+                "The object was drawn from the library's macro; every other compared field matches the sample's.");
+        }
         bool reportPage = IsReportPage(source) || IsReportPage(target);
         _pages.Add(new JObject
         {
