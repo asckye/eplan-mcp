@@ -94,6 +94,23 @@ internal sealed partial class SmallProjectRedrawDriver(
         }
     }
 
+    /// <summary>Takes the potential definitions' colours onto the autoconnect lines once every page is drawn.</summary>
+    // A119: a plain generate leaves a new autoconnect line at the layer's colour even where it already reaches a
+    // coloured potential; only a rebuild takes the potential definition's. Potential tracking crosses pages through
+    // interruption points, and a page's own potentials are placed after its connections are generated, so this runs
+    // once over all the circuit pages at the end rather than per page (live 2026-11-14: 33 connections of the
+    // sixteen-page redraw read property 31005 from their definition point, origin 9, where the sample's read it from
+    // the potential, origin 5, and four of those pages carry no potential definition of their own).
+    internal async Task RebuildConnectionsAsync(IReadOnlyList<JObject> sources)
+    {
+        string[] pages = [.. sources.Where(source => !IsReportPage(source)).Select(source => (string)source["name"]!)];
+        foreach (string[] batch in pages.Chunk(50))
+        {
+            await InvokeAsync(batch[0], "eplan_connection_generate",
+                new JObject { ["pages"] = new JArray(batch), ["rebuild"] = true }, []);
+        }
+    }
+
     private static bool IsReportPage(JObject source) => (bool?)source["isReportPage"] == true
         || Objects(source["report"]).Length > 0 || Text(source["pageType"]) is not ("Circuit" or "Overview");
     private readonly HashSet<string> _generatedReports = new(StringComparer.Ordinal);

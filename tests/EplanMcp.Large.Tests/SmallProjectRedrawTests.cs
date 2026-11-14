@@ -102,6 +102,8 @@ public sealed class SmallProjectRedrawTests(LiveEplan eplan, DestructiveHost hos
                 }
             }
 
+            await driver.RebuildConnectionsAsync(ordered);
+
             // The engineer's last step: its messages name objects to trace in the gap list.
             JObject? check = await ObserveAsync(report, "", "eplan_check_run", "Project", new JObject { ["project"] = project, ["dry_run"] = false });
             report.Note("", "Project", "", "Project check counts: " + check?["counts"]?.ToString(Newtonsoft.Json.Formatting.None));
