@@ -122,6 +122,10 @@ internal static class CoverageRoutes
         ["T:Eplan.EplApi.DataModel.LockingStep"] = "write_pipeline_owned",
         ["T:Eplan.EplApi.DataModel.DisableConnectionUpdateStep"] = "write_pipeline_owned",
         ["T:Eplan.EplApi.MasterData.MDPartsMessagesRegisteredCollection"] = "masterdata_message_objects",
+        // Owner 2026-11-14: the translation database needs Open(path) before a keyword can be read, and opening a
+        // master-data file by path is not a route we take (external_path_parameter). A dedicated tool gets it instead,
+        // with the copy rules the parts database already has; see docs/tools/eplan_translation_keyword.md.
+        ["T:Eplan.EplApi.MasterData.MDTranslationDatabase"] = "covered_by_translation_tool",
         // Owner 2026-11-14: the verification and message services are abstract and the public catalogue holds no
         // concrete subclass at all (Verification's three children are abstract too), so no caller can construct one;
         // instances reach a caller only through EPLAN's own callbacks, which are not trial roots.

@@ -29,6 +29,7 @@ v0.5.0 于 **2026-11-05** 发布（预览版，带 ADR-0049 的破坏性变化�
 | v0.6.0 前后（按推进顺序） | 状态 | 发布 | 设计依据 | ADR |
 |---|---|---|---|---|
 | M9 主数据与报表余项；EDZ 导入等待负责人样本；`eplan_part_build` 已于 2026-11-10 合入 main，同日在部件库副本上实机通过 | 等待负责人（EDZ）；其余计划中 | v0.6.0 之后，版本待定 | [API 主数据补齐](design/2026-10-31-api-completion.md)、[能力扩展](design/2026-10-30-m10-capability-expansion.md)（独立设计待写） | [0019](adr/0019-master-data-writes.md)、[0032](adr/0032-generic-api-layer.md) |
+| 翻译库词条工具 `eplan_translation_keyword`：查词条的各语言译文、补译文、增删语言；读不限库，写只在 scratch 副本上。负责人 2026-11-14 决定不让通用入口按路径打开主数据文件，改为专用工具 | 已设计，待实现 | 待定 | [工具设计](tools/eplan_translation_keyword.md) | [0019](adr/0019-master-data-writes.md)、[0054](adr/0054-api-try-master-data-handles.md) |
 | M10 能力扩展：吸收 Canary 有益功能，action 部分已并入当前主线；其余 Canary 有益功能按 A/B/C 分级 | 计划中 | v0.6.0 之后，版本待定 | [M10](design/2026-10-30-m10-capability-expansion.md) | [0030](adr/0030-action-catalog-tiers.md)、[0031](adr/0031-private-extension-modules.md) |
 | M12 国家规则包：IEC 60204-1 + IEC 81346 → GB/T 5226.1 → NFPA 79 已提到当前主线；这里只剩公司默认包和从 IO 清单生成 PLC 页。每包经工程师签核，不复制标准正文 | 计划中 | v0.6.0 之后，版本待定 | [M12](design/2026-10-31-m12-review-and-generation.md) | [0005](adr/0005-safety-model.md)、[0024](adr/0024-pack-trust-and-container.md)、[0029](adr/0029-phase3-engineering-records.md) |
 | M11 PDF 图纸集转 EPLAN 项目：在 M9/M10 之后 | 计划中 | v0.6.0 之后，版本待定 | [M8 绘图基础](design/2026-10-27-m8-drawing.md)（独立设计待写） | [0005](adr/0005-safety-model.md)、[0032](adr/0032-generic-api-layer.md) |

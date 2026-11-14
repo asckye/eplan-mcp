@@ -106,3 +106,5 @@
 同时修了缺口文件的第二个报告缺陷：**所有重载都是静态的组不再按所属类型的可达性判断**，121 行从 `declaring_type_unreachable` 归到各自真正的原因（多为 `static_or_nonpublic`）。
 
 四轮之后：**明确不做 747 组（18.6%），到不了 525 组（13.1%）**，起点 428 / 1009。
+
+负责人 2026-11-14 对翻译库的决定：**不开"按路径打开主数据文件"这条路，翻译库写专用工具。** `MasterData.MDTranslationDatabase` 的 13 组按 `covered_by_translation_tool` 结案，设计见 [eplan_translation_keyword](../tools/eplan_translation_keyword.md)——已有的导出、导入、项目翻译三个工具都做不到"查一个词条的各语言译文"和"给一个词条补一种译文"，而写入沿用部件库那套副本规则（ADR-0054、ADR-0019）。至此**明确不做 760 组（18.9%），到不了 512 组（12.8%）**。

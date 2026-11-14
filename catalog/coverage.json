@@ -60368,7 +60368,7 @@
       "live_verified": 615
     },
     "declined": {
-      "count": 747,
+      "count": 760,
       "live_verified": 0
     },
     "dedicated": {
@@ -60380,7 +60380,7 @@
       "live_verified": 1
     },
     "none": {
-      "count": 525,
+      "count": 512,
       "live_verified": 0
     },
     "other": {
@@ -60398,6 +60398,7 @@
     "catalog:banned_symbol": 29,
     "covered_by_object_find": 54,
     "covered_by_tool": 5,
+    "covered_by_translation_tool": 13,
     "diagnostic_infrastructure": 10,
     "dialog_decision_context": 26,
     "enumerator_type": 29,
@@ -60423,7 +60424,7 @@
           "live_verified": 620
         },
         "declined": {
-          "count": 827,
+          "count": 842,
           "live_verified": 0
         },
         "dedicated": {
@@ -60435,7 +60436,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 1794,
+          "count": 1779,
           "live_verified": 0
         },
         "other": {
@@ -60456,7 +60457,7 @@
           "live_verified": 77
         },
         "declined": {
-          "count": 572,
+          "count": 583,
           "live_verified": 0
         },
         "dedicated": {
@@ -60468,7 +60469,7 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1210,
+          "count": 1199,
           "live_verified": 0
         },
         "other": {
@@ -60489,7 +60490,7 @@
           "live_verified": 543
         },
         "declined": {
-          "count": 255,
+          "count": 259,
           "live_verified": 0
         },
         "dedicated": {
@@ -60501,7 +60502,7 @@
           "live_verified": 1
         },
         "none": {
-          "count": 346,
+          "count": 342,
           "live_verified": 0
         },
         "other": {
