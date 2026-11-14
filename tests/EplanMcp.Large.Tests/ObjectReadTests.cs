@@ -59,4 +59,29 @@ public sealed class ObjectReadTests(LiveEplan eplan, WriteHost host) : IClassFix
         }
         Assert.True(foundObject, objectType + " must exist in the fixture or the LargeWrite scratch copy.");
     }
+
+    /// <summary>
+    /// A found object must be readable whatever its category. Discovery under Terminal also returns terminals of
+    /// the PLC category, which the reader describes as plcterminal; object_get used to build its property target
+    /// from the requested type and refused every one of them (live 2026-11-14: all 31 terminals of a sample
+    /// redraw copy are PLC terminals, so the one-object case above never saw it).
+    /// </summary>
+    [Theory]
+    [InlineData("Terminal")]
+    [InlineData("Function")]
+    public async Task EveryFoundObject_IsReadable_WhateverItsCategory(string objectType)
+    {
+        foreach (string project in new[] { eplan.ProjectPath, host.Writable })
+        {
+            JsonElement found = await eplan.CallAsync("eplan_object_find", new() { ["project"] = project, ["object_type"] = objectType, ["limit"] = 20 });
+            Assert.Equal("supported", found.GetProperty("status").GetString());
+            foreach (JsonElement obj in found.GetProperty("items").EnumerateArray())
+            {
+                JsonElement read = await eplan.CallAsync("eplan_object_get", new Dictionary<string, object?>
+                { ["project"] = project, ["object_type"] = objectType, ["locator"] = obj.GetProperty("locator"), ["limit"] = 200 });
+                Assert.Equal("supported", read.GetProperty("status").GetString());
+                Assert.NotEqual(0, read.GetProperty("items").GetArrayLength());
+            }
+        }
+    }
 }

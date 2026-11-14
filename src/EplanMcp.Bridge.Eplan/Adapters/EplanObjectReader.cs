@@ -54,6 +54,7 @@ internal sealed class EplanObjectReader : IObjectReadAdapter
             found[(identity.Type, identity.Oid)] = new ObjectSummary
             {
                 Name = SnapshotValues.Text(identity.Name ?? string.Empty),
+                Kind = identity.Kind ?? string.Empty,
                 Location = drawing?.Location,
                 Properties = drawing?.Properties ?? (annotation ? new() { ["read_warning"] = "Annotation geometry is unavailable; inspect this object in EPLAN." } : null),
                 Locator = new DrawingLocator

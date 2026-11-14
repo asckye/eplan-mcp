@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using EplanMcp.Contracts;
 using Newtonsoft.Json.Linq;
 namespace EplanMcp.Bridge.Core.Operations;
@@ -14,6 +15,32 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
         { throw InvalidArgument("Use the published read argument types without unknown fields or coercion."); }
         return base.ParseArgs(args);
     }
+    /// <summary>
+    /// Why the locator found nothing, so the caller does not have to guess: how many objects of this type the
+    /// project holds, how many carry its number, and which of the locator's fields the first of those disagrees
+    /// with. A fresh locator cannot help when the number is not there at all, and the message alone could not say
+    /// so (live 2026-11-14: eplan_object_get refused every locator eplan_object_find had just returned).
+    /// </summary>
+    private static Dictionary<string, string> Mismatch(DrawingLocator locator, IReadOnlyList<ObjectSummary> objects)
+    {
+        ObjectSummary[] numbered = [.. objects.Where(o => o.Locator.Type == locator.Type && o.Locator.Oid == locator.Oid).Take(2)];
+        var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["objectsOfThisType"] = objects.Count.ToString(CultureInfo.InvariantCulture),
+            ["withThisNumber"] = numbered.Length.ToString(CultureInfo.InvariantCulture),
+        };
+        if (numbered.FirstOrDefault() is { } other)
+        {
+            metadata["differs"] = string.Join(",", new[]
+            {
+                ProjectResolver.SamePath(locator.Project, other.Locator.Project) ? null : "project",
+                locator.Page == other.Locator.Page ? null : "page",
+                locator.Digest == other.Locator.Digest ? null : "digest",
+            }.Where(field => field is not null));
+        }
+        return metadata;
+    }
+
     protected override ObjectReadData Execute(ObjectReadArgs args)
     {
         if (!ObjectReadTypes.Types.Contains(args.ObjectType)
@@ -43,14 +70,23 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
                 && locator.Type == o.Locator.Type && locator.Oid == o.Locator.Oid).Take(2).ToArray();
             if (candidates.Length != 1)
             {
-                throw new BridgeErrorException(ErrorReason.PlanStale, "Object identity changed. Call eplan_object_find for a fresh locator.");
+                throw new BridgeErrorException(ErrorReason.PlanStale,
+                    "Object identity changed. Call eplan_object_find for a fresh locator.", metadata: Mismatch(locator, objects));
             }
             selected = candidates[0];
             result.Hint = "The locator's digest is not this object's identity digest (for example a drawing locator from eplan_page_get); the result's locator is the current object locator.";
         }
         result.Locator = selected.Locator;
+        // The object's own kind can be more specific than the requested type, and both the locator check and the
+        // property list follow the object, not the request: a Terminal of the PLC category is described as
+        // plcterminal (live 2026-11-14: all 31 terminals of the sample redraw are, and object_get refused every
+        // one of them with check=not_found while the same locators read under PLCTerminal).
+        string objectType = ObjectReadTypes.Types.FirstOrDefault(type =>
+            string.Equals(type, selected.Kind, StringComparison.OrdinalIgnoreCase)) ?? args.ObjectType;
+        if (!string.Equals(objectType, args.ObjectType, StringComparison.OrdinalIgnoreCase))
+        { result.Hint = "This object is a " + objectType + "; its properties are read under that type."; }
         var target = new PropertyTarget(locator: new ObjectLocator
-        { Project = args.Project, Kind = args.ObjectType.ToLowerInvariant(), Type = selected.Locator.Type, Oid = selected.Locator.Oid });
+        { Project = args.Project, Kind = objectType.ToLowerInvariant(), Type = selected.Locator.Type, Oid = selected.Locator.Oid });
         var read = new PropertyReadArgs
         {
             ProjectPath = args.Project,
@@ -60,7 +96,7 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
             SelectorOffset = args.Offset,
             IndexOffset = args.IndexOffset,
             // Object listing keeps the type's own property list (block sizes as before); classification still resolves base lists.
-            Properties = PropertyCatalog.Entries.Where(e => e.ObjectType == ObjectReadTypes.DictionaryType(args.ObjectType) && e.PropertyId.HasValue)
+            Properties = PropertyCatalog.Entries.Where(e => e.ObjectType == ObjectReadTypes.DictionaryType(objectType) && e.PropertyId.HasValue)
                 .OrderBy(e => e.PropertyId).Select(e => new PropertySelector(propertyId: e.PropertyId)).ToList(),
         };
         if (args.Offset >= read.Properties.Count)

@@ -1,5 +1,12 @@
 # [EPLAN API 笔记](../api-notes.md)：绘图、布局与连接
 
+### A140. 读对象必须给 project，端子按自身类别读（2026-11-14，EPLAN 2026.0.3.25421，Electric P8；scratch 项目 SmallRedraw_20261104171405264 只读）
+
+- **`eplan_object_get` 省略 `project` 时按"当前项目"解析。** `eplan_project_open` 之后 `eplan_project_list` 里仍可能 `current` 全为 false，宿主便解析到另一个已打开项目，在那里按定位器找不到对象，返回 `PLAN_STALE`。带 `project`（项目名或定位器里的路径都行）即读到 50 条属性。工具现在在这个错误里附带 `objectsOfThisType`、`withThisNumber` 和 `differs`（project/page/digest），省得再猜。
+- **`eplan_object_find` 用 `object_type: Terminal` 也会返回 PLC 类别的端子**，而读取适配器把这些描述成 `plcterminal`。`eplan_object_get` 原来用请求的类型拼属性目标，定位器校验因此 `check=not_found`，**31 个端子一个都读不出来**；同样的定位器用 `object_type: PLCTerminal` 每个读出 60 条属性。工具改为跟随对象自身的类别（`ObjectSummary.Kind`）决定属性目标和属性清单，并在 `hint` 里说明按哪个类型读的。
+- 同一页 `eplan_object_find` 带页过滤与不带页过滤返回的 `digest` 完全相同（连接定义点 11/52、端子 24/213 逐个一致），所以摘要的身份摘要与页过滤无关。
+- 我们自己建的连接定义点确实只有部件号（20100 `LAPP.4150400`），**没有** 20904 部件分配，也没有 20040 系列电缆数据；样本的同类点两者都有。`eplan_property_set` 的白名单不含 20904，也不收连接定义点作为目标，所以这一项不能用它验证。
+
 ### A139. 31047 说明连接的每个属性取自哪里（2026-11-14，EPLAN 2026.0.3.25421，Electric P8；16 页重画的样本与目标导出离线对比）
 
 - 连接的 31047 `内部属性来源` 按**属性号**索引：`31047[31005]` 就是 31005 的来源。实测取值：`5` 来自电位，`9` 来自连接定义点或部件，`2` 来自层，`3` 由连接两端推算。诊断"属性值为什么不对"时先读它，比猜继承顺序快。
@@ -157,6 +164,6 @@ eport-blocks-*.json`）。
 - 属性文字的 `parent` 定位器与自身 `oid` 相同、只有 `digest` 不同（A57 的共享对象号）；按 `oid` 找父对象时必须同时要求对方不是属性放置。
 - 同一父对象的多个属性文字**共用同一个对象号**：原生导出里 `=GAA+A1&EFS1/1` 的 562 段属性文字中，号 396 出现 144 次、9550 出现 88 次；其中 132 段的 `oid` 与 `parentOid` 相同，且这个号同时是某个父对象的号。所以按对象号建立"对象 → 配对身份"的映射时不能登记属性文字，否则父对象的条目会被最后一段文字覆盖，两个项目里的"最后一段"还不一样（2026-11-14 实机：16 页重画有 40 段文字因此只在 `parentOid`、`sourceOid` 上不同）。
 - `eplan_page_get` 在项目未打开时返回空的 `drawings` 而不报错，`eplan_page_create` 同样情况明确返回 `PROJECT_NOT_OPEN`；读取路径的这一不一致使"读到空"与"页上确实没有对象"无法区分。
-- 由 `eplan_page_get` 得到的定位器直接交给 `eplan_object_get` 返回 `PLAN_STALE`，须先经 `eplan_object_find` 取新定位器。
+- 由 `eplan_page_get` 得到的定位器直接交给 `eplan_object_get` 返回 `PLAN_STALE`，须先经 `eplan_object_find` 取新定位器。**更正（2026-11-14）**：本条原先还写了"`eplan_object_find` 自己的定位器也被拒"，那是探查脚本的错——当时省略了 `project`，而 EPLAN 里没有当前项目（`eplan_project_list` 里 `current` 全为 false），宿主于是解析到了别的项目。带上 `project` 后读取正常，见 A140。
 - 定义点必须落在已有连接段上：空白页上调用 `eplan_connection_create` 放 `definition_point` 返回 `/items/0/position: Place the definition point on a segment of this connection. Nearest existing segment: none.`
 — 探查脚本与日志：`probe3-text-cable.py`、`probe7.log`（会话 scratchpad，未入库）。

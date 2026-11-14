@@ -252,6 +252,66 @@ public sealed class ObjectReadOperationTests
         reader.Native.AssertDisposed();
     }
 
+    [Fact]
+    public void StaleLocator_NamesWhatTheProjectHolds_SoTheCallerNeedNotGuess()
+    {
+        var reader = new Reader();
+        reader.Objects.Add(new() { Locator = new DrawingLocator { Project = Project, Page = "=A/2", Type = 1, Oid = 7, Digest = new string('b', 64) } });
+        reader.Objects.Add(new() { Locator = Locator(9) });
+        var args = new ObjectReadArgs { Project = Project, ObjectType = "Function", Locator = Locator(7) };
+
+        BridgeErrorException stale = Assert.Throws<BridgeErrorException>(() => Execute(reader, args, get: true));
+
+        Assert.Equal(ErrorReason.PlanStale, stale.Error.Reason);
+        Assert.Equal("2", stale.Error.Metadata!["objectsOfThisType"]);
+        Assert.Equal("1", stale.Error.Metadata["withThisNumber"]);
+        Assert.Equal("page,digest", stale.Error.Metadata["differs"]);
+    }
+
+    [Fact]
+    public void StaleLocator_WhenTheNumberIsGone_SaysSoInsteadOfNamingFields()
+    {
+        var reader = new Reader();
+        var args = new ObjectReadArgs { Project = Project, ObjectType = "Function", Locator = Locator(7) };
+
+        BridgeErrorException stale = Assert.Throws<BridgeErrorException>(() => Execute(reader, args, get: true));
+
+        Assert.Equal("0", stale.Error.Metadata!["objectsOfThisType"]);
+        Assert.Equal("0", stale.Error.Metadata["withThisNumber"]);
+        Assert.False(stale.Error.Metadata.ContainsKey("differs"));
+    }
+
+    [Fact]
+    public void MoreSpecificKind_ReadsThePropertiesOfThatTypeAndSaysSo()
+    {
+        var reader = new Reader();
+        reader.Objects.Add(new() { Locator = Locator(7), Kind = "plcterminal" });
+        reader.Native.ObjectType = "PLCTerminal";
+        reader.Native.Properties.Add(20400, new());
+        var args = new ObjectReadArgs { Project = Project, ObjectType = "Terminal", Locator = Locator(7) };
+
+        ObjectReadData read = Execute(reader, args, get: true);
+
+        Assert.Equal("plcterminal", reader.Native.Target!.Locator!.Kind);
+        Assert.Contains("PLCTerminal", read.Hint, StringComparison.Ordinal);
+        Assert.NotEmpty(read.Properties!.Items);
+    }
+
+    [Fact]
+    public void KindTheAdapterDoesNotReport_KeepsTheRequestedType()
+    {
+        var reader = new Reader();
+        reader.Objects.Add(new() { Locator = Locator(7) });
+        reader.Native.ObjectType = "Function";
+        reader.Native.Properties.Add(20011, new());
+        var args = new ObjectReadArgs { Project = Project, ObjectType = "Function", Locator = Locator(7) };
+
+        ObjectReadData read = Execute(reader, args, get: true);
+
+        Assert.Equal("function", reader.Native.Target!.Locator!.Kind);
+        Assert.Null(read.Hint);
+    }
+
     private sealed class Reader : IObjectReadAdapter
     {
         public FakePropertyReadAdapter Native { get; } = new();
