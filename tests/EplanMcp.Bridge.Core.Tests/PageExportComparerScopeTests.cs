@@ -122,4 +122,61 @@ public sealed class PageExportComparerScopeTests
         Assert.Single(result.Types["Function"].Matched);
         Assert.Empty(result.SubsetDifferences);
     }
+
+    private const string PointPage = """
+        {"name":"=GAA+A1&EFS1/1","pageType":"Circuit","placements":[
+          {"type":"InterruptionPoint","oid":7,"name":"-1L1","location":{"x":376,"y":248},"properties":[]}
+        ],"connections":[]}
+        """;
+
+    private static JObject Point(string counterpartPage, bool paired)
+    {
+        JObject page = JObject.Parse(PointPage);
+        JObject point = (JObject)page["placements"]![0]!;
+        point["counterpartReference"] = paired ? "=EA+A1-FB1:1" : "";
+        var list = (JArray)point["properties"]!;
+        foreach ((int id, string? value) in new (int, string?)[]
+            { (24300, counterpartPage + ".0"), (24351, "=EA+A1-FB1:1"), (20930, paired ? "0" : "1") })
+        { list.Add(new JObject { ["id"] = id, ["index"] = 0, ["value"] = paired ? value : null }); }
+        list.Add(new JObject { ["id"] = 20201, ["index"] = 5, ["value"] = paired ? "-1L1-E1-/0" : "-1L1--/" });
+        return page;
+    }
+
+    [Fact]
+    public void InterruptionPoint_PairedWithAnOmittedPage_IsASubsetDifference()
+    {
+        PageExportComparison result = PageExportComparer.Compare(Point("=EA+A1&EFS1/1", true), Point("=EA+A1&EFS1/1", false),
+            new HashSet<string>(StringComparer.Ordinal) { "=GAA+A1&EFS1/1" });
+
+        Assert.Single(result.Types["InterruptionPoint"].Matched);
+        Assert.Empty(result.Types["InterruptionPoint"].Different);
+        Assert.Equal(5, result.SubsetDifferences.Count);
+    }
+
+    [Fact]
+    public void InterruptionPoint_PairedWithAComparedPage_StaysADifference()
+    {
+        PageExportComparison result = PageExportComparer.Compare(Point("=GAA+A1&EFS1/2", true), Point("=GAA+A1&EFS1/2", false),
+            new HashSet<string>(StringComparer.Ordinal) { "=GAA+A1&EFS1/1", "=GAA+A1&EFS1/2" });
+
+        // The paired flag (20930) reaches this fixture as a value against null, which the default channel takes;
+        // the live report has both sides filled, so the rule still has to cover it.
+        Assert.Empty(result.SubsetDifferences);
+        Assert.Equal(4, Assert.Single(result.Types["InterruptionPoint"].Different).Fields.Count);
+    }
+
+    [Fact]
+    public void InterruptionPoint_WithoutACrossReference_StaysADifference()
+    {
+        JObject source = Point("=EA+A1&EFS1/1", true);
+        ((JArray)source["placements"]![0]!["properties"]!).First(property => (int?)property["id"] == 24300).Remove();
+        JObject target = Point("=EA+A1&EFS1/1", false);
+        ((JArray)target["placements"]![0]!["properties"]!).First(property => (int?)property["id"] == 24300).Remove();
+
+        PageExportComparison result = PageExportComparer.Compare(source, target,
+            new HashSet<string>(StringComparer.Ordinal) { "=GAA+A1&EFS1/1" });
+
+        Assert.Empty(result.SubsetDifferences);
+        Assert.NotEmpty(result.Types["InterruptionPoint"].Different);
+    }
 }

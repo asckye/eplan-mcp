@@ -138,6 +138,7 @@ internal static class PageExportComparer
             { SeparatePairedDifferences(pair, differences, sourcePlacements, comparedPages, result); }
             SeparateMacroNameDifferences(pair, differences, result);
             SeparateOutsideScopeDifferences(pair, differences, comparedPages, result);
+            SeparateCounterpartDifferences(pair, differences, comparedPages, result);
             SeparateDefaultDifferences(pair, differences, result);
             PageExportTypeComparison group = Group(result, pair.Type);
             if (differences.Count == 0)
@@ -290,6 +291,45 @@ internal static class PageExportComparer
             differences.Remove(difference);
             result.SubsetDifferences.Add(new(pair.Type + " " + pair.Source["oid"] + ": " + difference.Field,
                 OutsideScopeName, OutsideScopeReason, difference.Source, difference.Target));
+        }
+    }
+
+    /// <summary>
+    /// The fields an interruption point's pairing determines: the counterpart it names, the cross-reference block
+    /// EPLAN fills in from it (24300-24302, 24351), the combined designation that carries the counterpart's page and
+    /// column (20201 index 5), the paired flag (20930) and the message EPLAN leaves on an unpaired point (20185).
+    /// </summary>
+    private static readonly string[] _counterpartFields =
+        ["counterpartReference", "properties[id=20201,index=5].value", "properties[id=20930,index=0].value",
+         "properties[id=20185,index=0].value"];
+    private static readonly string[] _counterpartPropertyIds = ["24300", "24301", "24302", "24351"];
+    private const string CounterpartName = "Interruption point paired outside the redrawn pages";
+    private const string CounterpartReason =
+        "The sample point's counterpart is on a page that was not redrawn, so the redrawn point cannot pair up and "
+        + "EPLAN leaves every field it would fill in from the counterpart empty.";
+
+    /// <summary>
+    /// An interruption point carries its own name and position, which are compared on their own; what it says about
+    /// its counterpart EPLAN determines from the point of the same name elsewhere in the project. Where the sample's
+    /// counterpart is on a page outside this subset, the redrawn point has nothing to pair with inside it, so those
+    /// determined fields can never match (live 2026-11-14: five points name =EA and =GAB1 pages). A counterpart on a
+    /// compared page stays a difference: that one is ours to get right.
+    /// </summary>
+    private static void SeparateCounterpartDifferences(ObjectPair pair, List<PageExportFieldDifference> differences,
+        IReadOnlySet<string>? comparedPages, PageExportComparison result)
+    {
+        if (pair.Type != "InterruptionPoint" || comparedPages is null
+            || differences.FirstOrDefault(difference => PropertyId(difference.Field) == "24300") is not { } reference
+            || PlacementPage(reference.Source) is not { } page || comparedPages.Contains(page))
+        { return; }
+        foreach (PageExportFieldDifference difference in differences.ToArray())
+        {
+            if (!_counterpartFields.Contains(difference.Field, StringComparer.Ordinal)
+                && !_counterpartPropertyIds.Contains(PropertyId(difference.Field), StringComparer.Ordinal))
+            { continue; }
+            differences.Remove(difference);
+            result.SubsetDifferences.Add(new(pair.Type + " " + pair.Source["oid"] + ": " + difference.Field,
+                CounterpartName, CounterpartReason, difference.Source, difference.Target));
         }
     }
 
