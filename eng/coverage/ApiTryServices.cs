@@ -14,6 +14,8 @@ internal static class ApiTryServices
     /// <summary>ADR-0054: the one parts master data root; a fresh instance per call opens only the database EPLAN is configured with.</summary>
     internal const string PartsManagement = "Eplan.EplApi.MasterData.MDPartsManagement";
     internal const string PathInfo = "Eplan.EplApi.DataModel.PathInfo";
+    /// <summary>ADR-0056: the utility types allowed as trial roots; adding one means amending that ADR.</summary>
+    internal static readonly string[] Utilities = ["Eplan.EplApi.Base.UnitParser", "Eplan.EplApi.Base.ISOCode"];
     private static readonly string[] _partsManagementReads = ["OpenDatabase", "PartsDatabaseState"];
     internal static bool MasterDataHandle(string type) => type.StartsWith("Eplan.EplApi.MasterData.", StringComparison.Ordinal);
     internal static Dictionary<string, Service> Load(string root)
@@ -24,6 +26,10 @@ internal static class ApiTryServices
         services[PartsManagement] = new(false, null);
         // Read-only path settings (Articles, Macros, Symbols ...); ProjectManager.Paths would expose project open and remove.
         services[PathInfo] = new(true, null);
+        // ADR-0056: utility types by name, never by rule. These parse units and language codes and touch no project,
+        // file, setting, database, printer or licence; both are IDisposable and are disposed per call like a service.
+        foreach (string utility in Utilities)
+        { services[utility] = new(true, null); }
         return services;
     }
     internal static Dictionary<string, Service> Build(JsonElement[] types, JsonElement[] members)

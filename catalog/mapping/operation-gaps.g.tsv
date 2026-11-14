@@ -123,11 +123,8 @@ O:Eplan.EplApi.Base.IEplProgress.SetAllowCancel	Eplan.EplApi.Base	T:Eplan.EplApi
 O:Eplan.EplApi.Base.IEplProgress.SetOverallActionText	Eplan.EplApi.Base	T:Eplan.EplApi.Base.IEplProgress	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.IEplProgress.SetProgressStep	Eplan.EplApi.Base	T:Eplan.EplApi.Base.IEplProgress	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.IEplProgress.SetTitle	Eplan.EplApi.Base	T:Eplan.EplApi.Base.IEplProgress	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISOCode.GetAllLanguages	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISOCode.GetAllLongNames	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISOCode.GetLongName	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISOCode.SetNumber	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISOCode.SetString	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
+O:Eplan.EplApi.Base.ISOCode.GetAllLanguages	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	ref_out	No unique supported compiled member shape
+O:Eplan.EplApi.Base.ISOCode.GetAllLongNames	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	ref_out	No unique supported compiled member shape
 O:Eplan.EplApi.Base.ISettings.ExistSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.Base.ISettings.SetBoolSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.Base.ISettings.SetDoubleSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
@@ -234,13 +231,6 @@ O:Eplan.EplApi.Base.SysMessagesEnumerator.MoveNext	Eplan.EplApi.Base	T:Eplan.Epl
 O:Eplan.EplApi.Base.SysMessagesEnumerator.Reset	Eplan.EplApi.Base	T:Eplan.EplApi.Base.SysMessagesEnumerator	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.TraceListener.Write	Eplan.EplApi.Base	T:Eplan.EplApi.Base.TraceListener	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.TraceListener.WriteLine	Eplan.EplApi.Base	T:Eplan.EplApi.Base.TraceListener	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.UnitParser.GetBaseUnit	Eplan.EplApi.Base	T:Eplan.EplApi.Base.UnitParser	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.UnitParser.GetBaseValue	Eplan.EplApi.Base	T:Eplan.EplApi.Base.UnitParser	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.UnitParser.GetUnit	Eplan.EplApi.Base	T:Eplan.EplApi.Base.UnitParser	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.UnitParser.GetValue	Eplan.EplApi.Base	T:Eplan.EplApi.Base.UnitParser	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.UnitParser.Set	Eplan.EplApi.Base	T:Eplan.EplApi.Base.UnitParser	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.UnitParser.ToDisplay	Eplan.EplApi.Base	T:Eplan.EplApi.Base.UnitParser	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.UnitParser.ValueToUnit	Eplan.EplApi.Base	T:Eplan.EplApi.Base.UnitParser	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.AbstractDMObjectFilter.ResetFilter	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.AbstractDMObjectFilter	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.AnyPropertyId.AsArc	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.AnyPropertyId	property	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticle	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.AnyPropertyId	property	unsupported_return	No unique supported compiled member shape

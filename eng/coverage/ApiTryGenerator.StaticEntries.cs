@@ -72,7 +72,9 @@ internal static partial class ApiTryGenerator
             { return; }
             foreach ((ApiEntry e, ApiDetail d) in properties.Where(p => p.e.Type[2..] == parent))
             {
-                bool key = e.Name == "Layer" && parent.EndsWith(".GraphicalLayerTable", StringComparison.Ordinal) && d.Parameters is [{ Type: "System.String" }];
+                // ADR-0056: a getter that takes one string key reads like a parameterless one; the key travels in
+                // via_key, as the layer table's did before this was general. Keyed assignment is never generated.
+                bool key = d.Parameters is [{ Type: "System.String" }];
                 if (d.Parameters is not { Length: 0 } && !key)
                 { continue; }
                 string next = path.Length == 0 ? e.Name : path + "." + e.Name;

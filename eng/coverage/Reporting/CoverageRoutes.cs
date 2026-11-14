@@ -75,6 +75,23 @@ internal static class CoverageRoutes
         ["T:Eplan.EplApi.DataModel.ProjectManager"] = "lifecycle_or_creation",
         // System messages, which the system-message tool already reads.
         ["T:Eplan.EplApi.Base.SysMessagesCollection"] = "covered_by_tool",
+        // Owner 2026-11-14, second round. A collection's enumerator is a mechanical by-product: one trial call
+        // cannot iterate, and the collection itself is what a caller reaches for.
+        ["T:Eplan.EplApi.DataModel.MasterData.FunctionDefinitionEnumerator"] = "enumerator_type",
+        ["T:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.VariablesEnumerator"] = "enumerator_type",
+        ["T:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.ValueSetEnumerator"] = "enumerator_type",
+        ["T:Eplan.EplApi.Base.SysMessagesEnumerator"] = "enumerator_type",
+        // Owner 2026-11-14: macros are file-backed master data and eplan_macro_* covers them. ADR-0054 lists
+        // WindowMacro among the handles it opens, but the only source is WindowMacro.Create, which writes a macro
+        // file; opening a file-writing path through the generic entry buys nothing the macro tools do not provide.
+        ["T:Eplan.EplApi.DataModel.MasterData.WindowMacro"] = "file_masterdata_macro_tools",
+        ["T:Eplan.EplApi.DataModel.MasterData.Macro"] = "file_masterdata_macro_tools",
+        ["T:Eplan.EplApi.DataModel.MasterData.PageMacro"] = "file_masterdata_macro_tools",
+        ["T:Eplan.EplApi.DataModel.MasterData.SymbolMacro"] = "file_masterdata_macro_tools",
+        ["T:Eplan.EplApi.DataModel.MasterData.PrePlanningMacro"] = "file_masterdata_macro_tools",
+        // The layer table hangs off Macro.CustomLayerTable, so it closes out with the macros that own it.
+        ["T:Eplan.EplApi.DataModel.MasterData.TransientLayer"] = "file_masterdata_macro_tools",
+        ["T:Eplan.EplApi.DataModel.MasterData.TransientLayerTable"] = "file_masterdata_macro_tools",
     };
 
     /// <summary>Groups whose every api-try signature is excluded for a declined reason, with the most frequent reason.</summary>
