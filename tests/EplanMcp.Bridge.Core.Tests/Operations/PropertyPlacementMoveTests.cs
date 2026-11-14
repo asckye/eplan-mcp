@@ -8,6 +8,26 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class PropertyPlacementMoveTests
 {
+    [Theory]
+    [InlineData("Circuit", true)]
+    [InlineData("Overview", true)]
+    [InlineData("Report", false)]
+    [InlineData("ModelView", false)]
+    public void PageType_AcceptsCircuitAndOverviewOnly(string pageType, bool accepted)
+    {
+        var fake = new Mover(0) { ReadbackDigest = new string('f', 64) };
+        fake.Scene.PageType = pageType;
+
+        if (accepted)
+        {
+            Assert.Equal(ExecutionState.Committed, (string?)fake.Execute()["execution"]);
+            return;
+        }
+        BridgeErrorException refusal = Assert.Throws<BridgeErrorException>(() => fake.Execute());
+        Assert.Equal(ErrorReason.InvalidArgument, refusal.Error.Reason);
+        Assert.Contains("Circuit or Overview", refusal.Error.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void PropertyMove_LiveW4BoundsAcross248Wire_CommitsWithADeviationWarning()
     {

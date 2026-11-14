@@ -20,8 +20,10 @@ internal static class PropertyPlacementMoves
         { Require(input[flag] is null || input[flag]!.Type == JTokenType.Boolean, "Supply boolean flags."); }
         Require(input["response_format"] is null || input["response_format"]!.Type == JTokenType.String && (string?)input["response_format"] is "concise" or "detailed", "Use concise or detailed.");
         Require(input["property_moves"] is JArray { Count: >= 1 and <= 50 }, "Supply 1..50 property moves.");
-        Require(scene.Complete && scene.PageType == "Circuit" && scene.Page.Project == scene.Project.Path && DrawingCoordinates.ValidBounds([0, 0, .. scene.Page.PageSize ?? []]) && scene.Page.PageSize!.All(n => n > 0)
-            && scene.Page.Placements.Count <= 10000, "Read a complete Circuit page with Page.Size.");
+        // An Overview page carries the same device property text and no wires to route around, and the sample moves it
+        // there too (live 2026-11-13: five of the sixteen redraw pages were refused as "not a Circuit page").
+        Require(scene.Complete && scene.PageType is "Circuit" or "Overview" && scene.Page.Project == scene.Project.Path && DrawingCoordinates.ValidBounds([0, 0, .. scene.Page.PageSize ?? []]) && scene.Page.PageSize!.All(n => n > 0)
+            && scene.Page.Placements.Count <= 10000, "Read a complete Circuit or Overview page with Page.Size.");
         string fingerprint = Fingerprint.Of([input.ToString(Formatting.None), BridgeJson.FromObject(scene).ToString(Formatting.None)]);
         if (expected is not null && fingerprint != expected)
         { throw new BridgeErrorException(ErrorReason.PlanStale, "Page or property text changed; read the drawings and re-plan."); }

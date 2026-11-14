@@ -33,6 +33,8 @@ A72：属性放置读回附带 `properties.displayed_property_id`，用于区分
 Small 覆盖同号属性闭包、逐项读回、范围外变化、提交后连线与撤回失败；Medium 覆盖假实现的中途失败、stale、no-op 及 Host 流水线。Large 在新 LargeWrite 页移动线圈/标识和自由文本，生成后核对连接并验证一步撤销及范围外不变；本次遵照要求不运行 EPLAN，实机组合行为和画面验收待维护者执行。
 共享布局守卫：R1–R5、R8 拒绝并给出规则与可用时的空位建议；R6/R7/R9 默认警告，layout.strict 时拒绝。图框可用区无法读取时继续使用页尺寸减 layout.marginMm 回退并在结果中说明。预测未知不拒绝：写前校验插入点、已知外框及路由；写后在原事务内测量符号与属性文字外框，再校验 R1–R9：按 [ADR-0046](../adr/0046-readback-deviation-warnings.md)，只有新对象超出页面（S2）才整次回滚；其余违规照常提交，warning 中逐条给出 `Readback deviation: …`（规则、对象、实测外框和修复工具；偏差不搜索空位，回滚时才给最近空位），外框无法测量记为未验证。warning/hint 报告写前与写后检查；拒绝的 metadata.layoutViolations/layoutChecks 提供几何和阶段。连接提交后才生效的几何沿用原撤销补偿。参数与限制见 [布局守卫设计](../design/2026-11-01-layout-guard.md)。
 
+`property_moves` 接受 Circuit 和 Overview 两种页类型：总览页上同样有设备属性文字，且没有需要绕行的导线（2026-11-13 实机：16 页重绘里 5 个总览页按"不是 Circuit 页"被拒）。`moves` 的几何闭包仍只限 Circuit 页。
+
 `property_moves` 另可设 `alignment`（原生枚举名）、`height_mm`（0.5–100 或默认 -16002）、`visible`、整数 `layer`、`pen:{color,width_mm,style,pattern_length,line_end}`。x_mm/y_mm 仍为页面绝对坐标，内部属性位置加父位置转换，外框由显式 GetBoundingBox(false) 读为绝对坐标；修改样式可单独产生撤销步。除 visible:false 外均读回核对；隐藏写入后 EPLAN 显示不可见元素时可能仍读到 IsVisible=true，结果 warning 明示跳过该比较。字高和对齐改变后的外框使用 EPLAN 实测。
 
 属性字高读回同时保留 `height_raw_mm` 原始数值供写入校验；`height_mm` 沿用布局读取语义，默认字高为 `from_layer`。
