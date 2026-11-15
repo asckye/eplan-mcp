@@ -63,18 +63,6 @@ public sealed class TranslationImportPlanOperation(ITranslationDatabaseWriter wr
                 "The translation file cannot be read. Close it in other programs and call again.", ex));
         }
 
-        ConfiguredDatabase database = writer.Configured();
-        if (MasterDatabases.IsServer(database.Database))
-        {
-            throw MasterDatabases.Denied("translation");
-        }
-
-        if (database.Database.Length == 0)
-        {
-            throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.EplanOperationFailed,
-                "EPLAN has no translation database configured. Ask the engineer to select one in EPLAN's settings."));
-        }
-
-        return (source, table, database);
+        return (source, table, TranslationWrite.Database(writer));
     }
 }
