@@ -35,3 +35,24 @@
 - 只改 `$(md_translate)\Translate.db`（修改时间随写入更新）；同目录的 `translate.etd`、`TranslateReports.etd`、`TranslateTemplate.db` 不变，不产生锁文件或其他文件。关闭 EPLAN 后用文件副本替换 `Translate.db`，四个文件与测试前逐字节相同。
 - 只含两列（`en_US`、`zh_CN`）表头的文件只在错误的第三个参数下试过，结果不能说明部分列文件是否可用。
 — 协调人经 S24 spike（`importtranslation`、`exporttranslation` 模式）实测：先文件副本加 SHA-256、再 `backup MASTERDATA` 备份，导入测试词条，导出比较，最后关闭 EPLAN 恢复并核对哈希。
+
+### A103. 主数据测试可以隔离：把配置指向副本（2026-11-05，EPLAN 2026.0.3，Pro Panel）
+- `Settings.SetStringSetting("USER.PartsManagementGui.Database", 路径, 0)` 和 `USER.TRANSLATEGUI.DATABASE_NAME` 改完立刻生效，不用重启：`MDPartsManagement.SelectedPartsDatabaseAsString`、`Translate.TranslateDatabase` 都读到新路径。原值是 `$(MD_PARTS)\EPLAN_parts.alk`、`$(md_translate)\Translate.db`。
+- 这样运行 `eplan_part_import`、`eplan_part_sync`、`eplan_translation_import`，正在用的两个库 29 个文件（`.lck` 除外）的 SHA-256 不变，包括 `User.eod`、`User.eox`；副本的 `Translate.db` 变了。A30 说的“副本隔离不了导入”只针对按路径打开另一个库。
+- 设置是每个变体各一份，用文件备份还原后哈希一致。
+— `MasterDataOnCopyTests`。
+
+### A137. 通用入口读部件库主数据（2026-11-12，EPLAN 2026.0.3.25421，Electric P8，scratch 项目 自动喂丝机，ADR-0054）
+- `new MDPartsManagement().OpenDatabase()` 在插件里打开 EPLAN 当前配置的部件库（本机为 `EESS2026_Parts`），返回的 `MDPartsDatabase` 可以作为会话句柄跨调用使用：`Name` 读出库名，`GetPart("SE.XVGKB3SW")` 返回 `MDPart`，`MDPart.Variant` 读出 `"1"`。四次调用都只读，执行状态 committed。
+- `OpenDatabase` 和 `MDPartsDatabase.Close` 不以 Get/Is 开头，生成器原本归为写入，被当成主数据写入拒绝；现在专门归为读取。
+- 当前配置的是在用库而不是 scratch 副本时，`MDPart.Variant` 的写入预演按设计返回 POLICY_DENIED，没有打开审批。副本上的写入（备份、写入、读回、原库哈希不变）要等工程师在 EPLAN 部件管理中把库配置成 scratch 副本后再验证。
+- **子类句柄（同日）：** `GetPart("PXC.3209510")` 的 `FunctionTemplatePositions` 返回 1 项，运行时类型是 `MDTerminalTemplatePosition`，句柄按子类给出，`TerminalCategory` 读出 `"Common"`；`MDPartsDatabase.Close` 正常关闭。生成器因此把返回类的公开子类也算作可达。
+- 一次审批窗口关闭后，EPLAN 主窗口保持禁用、桌面上看不到对话框，后续调用都是 EPLAN_BUSY（ModalDialog）；重启 EPLAN 后恢复。当时插件日志只记操作开始，看不出审批怎样结束。可能的原因：审批窗口的兜底逻辑（窗口被销毁时 `Dispatcher.ExitAllFrames()`）从外部结束模态循环，跳过了 WPF 恢复被 `ShowDialog` 禁用窗口的步骤。现在审批窗口打开前记下本线程可见且可用的顶层窗口，结束后把仍被禁用的重新启用；关闭 1 秒后模态循环仍未结束的也会被结束；每次审批记录结束日志（决定、结束方式、打开时长、重新启用的窗口数）。
+- **审批窗口被销毁的来源（同日查明）：** 新日志记到一次 `cancelled, Destroyed, 0.8 s open, 1 window(s) re-enabled`，没有人点击，窗口打开 0.8 秒就被销毁，EPLAN 刚重启不久。当时所有者取的是 `Process.MainWindowHandle`，它可能是一个临时窗口，所有者被销毁时，它名下的窗口一起被销毁。现在所有者取本线程可见的 `AfxMDIFrame*` 主框架窗口，日志记录所有者的类名；重启后立刻审批，记录为 `granted, Closed, owner AfxMDIFrame140u`。
+- **只出现在返回值里的标量（同日）：** `StorableObject.TypeIdentifier` 对项目读出 `"14"`，`MDPartsDatabaseItem.GetTimeStampOfLastChange` 对 `PXC.3209510` 读出 `"2026-04-13T19:50:07.0000000"`（插件按 ISO 8601 输出 `DateTime`）。`Int16`、`UInt16`、`UInt32`、`Byte`、`SByte`、`Single`、`DateTime`、`StringCollection` 只作返回值开放，不作参数，也不开放写入。
+- **导出到输出目录（同日）：** `Export3D.ProjectToIFC(oProject, strTargetDirectory)` 在自动喂丝机上执行，插件先在本次调用的 `exports/api-try-<ID>/` 下建好调用方命名的目录 `ifc`，EPLAN 在其中写出 `=+ (UC1).ifc`（35138 字节，以安装空间命名）；执行状态 committed，前后快照有 4 处变化（没有展开查看）。
+- **服务对象上的属性：** `new PathInfo().Macros` 读出宏目录（本机为 SynologyDrive 下的 `003.EPLAN\Data\宏\Company name`）。服务对象每次调用都新建、用完释放，所以通用入口对服务属性只开放读取、只限标量返回值，不交出指向已释放服务的句柄。
+— `scratchpad/direct/md-live.py`、`md-sub.py`（未合入）。
+
+### B14. Function.AddArticleReference 的文档范围（2026-11-04，安装版 2026.0.3 XML）
+- `M:Eplan.EplApi.DataModel.Function.AddArticleReference(System.String,System.String,System.UInt32)` 返回 `ArticleReference`，向功能增加部件引用；文档说明部件来自系统部件库/项目，明确列出的特殊限制为 ArticlePlacement 只能有一个引用，未列 Terminal 必须是主功能的限制。此事实不等于端子运行时验证；已有端子的追加、提交后读回及撤销由本轮 Large 待验。A87 的创建事务限制针对新建 ConnectionDefinitionPoint，不据此推断所有 Function。

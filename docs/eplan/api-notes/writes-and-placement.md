@@ -136,3 +136,106 @@
 - 写回：新建占位符和值集 → `WindowMacro.Create` 存为新 `.ema` → 重新打开 → 再插入 → `ApplyRecord`，布尔、多语言（值集给全语言时保留全部）、部件引用、技术参数逐项一致，一次提交、一次撤销、失败回滚无空步、重开持久，约 18 秒。— S36 第 2 部分。
 - 🔴 **宏文件写在项目事务之外**：回滚和撤销后 `.ema` 仍在磁盘上，工具须自行删除失败产生的文件或列为产物。— S36 第 2 部分。
 - 一次失败中 `SafetyPoint.Rollback()` 抛出“不能重新恢复原有状态,因为其不再由系统管理”；回滚前须先记录原始异常，回滚失败按结果未知处理。— S36 第 2 部分。
+
+### A82. 从部件创建与放置功能的探针依据（2026-11-02，EPLAN 2026.0.3，本机官方 XML 核对，未运行 EPLAN）
+- `Eplan.EplApi.HEServicesu.xml` 的 `DeviceService.CreateDevice(Project, string partNumber, string partVariant, FunctionPropertyList, ref List<IFunctionBase>)` 将创建的 2D、3D 功能写入传入列表；最后一参的 ref 依据见 A70，探针传新建空列表。层级属性列表缺少代号及计数器时按项目编号设置生成名称；无匹配变体时默认选择第一个可用变体。实际返回类型、模板及放置状态、名称和部件关系由本次 Large 探针观察，不把 XML 的简略说明当作实机结论。
+- `DataModelu.xml` 的 `Project.ParseNameAndProps(int functionCategory, string deviceName, UniversalPropertyList outputProps, UniversalPropertyList additionalProps)` 解析设备名称并填入两份属性列表；类别来自原生功能观察，不使用未记载的默认整数。`FUNC_FULLNAME`、`FUNC_IDENTDEVICETAG` 为只读计算属性，不能由它们存在 setter 就断言可用来给 `CreateDevice` 指定名称。
+- `Eplan.EplApi.DataModelu.xml` 的 `Function.PlaceAt(Page, PointD, DocumentTypeManager.DocumentType, SymbolVariant)` 说明：瞬态功能模板会先实例化，已实例化功能则在项目中新建功能；放置模板会更新该对象的 `IsCoveredTemplate`，但先前取得的其他模板包装器不会同步更新。`FunctionBase.Name` 的异常说明包含瞬态对象，故模板字段读取失败须逐项保留，不能据此丢弃该部件的其他观察。
+- 同一 XML 的 `Function.AddArticleReference(string partNr, string variant, uint count)` 返回新增的 `ArticleReference`，将系统部件库存入项目，只有部件已经存在于系统或项目库时才赋给功能；`ArticleReference.PartNr`、`VariantNr`、`Count` 可读。`Function.IsMainFunction` 文档说明只有主功能可有部件引用；实际赋值结果由探针记录，不自动更改主辅功能。
+- `Eplan.EplApi.MasterDatau.xml` 的 `MDPartsManagement.OpenDatabase()` 打开已配置部件库，不自动升级旧格式；`MDPartsDatabase.GetPartVariants(string partNumber)` 返回该编号全部变体并按变体名排序。`MDPart` 继承的 `MDPartsDatabaseItem.Properties` 暴露部件属性；`ExistingIds` 给出已有属性，`MDPropertyDefinition.Name` 给出属性名。`ARTICLE_MACRO` 为 22010，XML 描述为图形宏（说明为 3D 宏）；不得仅凭字段名把任意宏用途视为已验证。探针只读取并关闭库，不导入、修改或升级。
+- 功能观察使用 `Function.FunctionCategory`、`IsMainFunction`、`Pins`、`Placement.IsPlaced`、`SymbolReference.SymbolVariant`；后者允许 null。`PinBase.Index` 是逻辑或图形连接点索引，`Pin.Name` 是实际连接点代号（从 `FunctionDefinition` 取得时允许 null），`Pin.Designation` 是内部代号。指定属性为 20022/20023（功能连接点代号/描述，索引 1–1000）、20028/20029（连接点代号/描述，只读，索引 1–100）、20400（PLC 地址）、20402（手工符号地址）、20406（手工插头代号）、20011（功能文本）；只记录非空实际值，保留索引。
+- `SymbolVariant.Parent` 返回所属 `Symbol`，其 `Name` 为符号名，`Properties.SYMB_NR`（16002）为符号在库内的编号；`SymbolVariant.SymbolLibraryName`、`VariantNr` 分别为库名与变体编号。上述值仅作原始观察，不推定任一部件预先关联了符号。
+- `Graphics.PropertyPlacement.Parent` 与 `DisplayedProperty` 用于确认功能归属及属性 ID/索引。`GetDisplayString()` 的 XML 同时称返回 GUI 显示字符串、列出 `InvalidOperationException: Always thrown`，因此按请求调用并逐项记录返回值或异常，实际可用性待实机确认。读属性值期间继续遵守 A80 的所有者存活要求。
+- 仅登记、不调用的端子入口（`HEServicesu.xml`）：`CreateTerminalDevice(Project, string fullDeviceTag, string partNumber, string partVariant, string numberingPattern, bool numberByLevels)`；另一个重载在最后 bool 前增加 `int newTerminalDevicePosition, int newTerminalSortCode`。XML 说明按部件功能模板及编号模式创建端子，第一个端子为主端子并接收部件；本次不验证这一行为。
+- **实机结果**（2026-11-02 21:17–22:05，EPLAN 2026.0.3.25421，Electric P8，scratch 副本 LargeWrite 的新页，`PartsFirstSpikeTests` 三轮）：
+  1. `CreateDevice(Project, …, ref list)`：SIE.6ES7131-4BD01-0AA0 得到 6 个持久的未放置 PLC 端子（`:1` 为主功能），符号为 `PLC_CBOX_LEFT_PLUG`/`PLC_CBOX_CON`，20023 依次为 DI0、DI2、DC24V、DI1、DI3、DC24V，没有宏。对其中两个调用 `PlaceAt(Circuit, PLC_CBOX)`，另建了已放置的同名功能（非主功能），原来的未放置功能仍在，即重复。按钮 SIE.3SB3400-0B（有宏）同样如此。
+  2. `CreateDevice(part, variant, page, point)`：主功能 `:1` 放在插入点，使用模板符号 `PLC_CBOX_LEFT_PLUG`，带 20023，器件自动编号为 `-K1`、`-K2`；其余 5 个是持久的未放置功能，没有符号。主功能的 `FunctionTemplates` 返回 6 个模板，均已被覆盖，没有可以实例化的对象。
+  3. 对这些未放置功能调用 `Function.Place(page, point, true, true, true)`：另建了已放置的同名功能，没有符号（页上显示红叉），原功能仍在。
+  4. `CreateDeviceListItem` 加 `GetTemplatesFromDeviceList`：返回 6 个临时的未覆盖模板，器件标识为空（`=+`），没有符号，`IsMainFunction` 均为 false。
+  5. 先放符号 `SSD`、再 `AddArticleReference(SIE.3SB3400-0B)`：部件引用写到了主功能上；部件的模板（`SSMNO`，引脚 `.3`/`.4`）仍是临时的未覆盖模板，没有生成未放置功能。连接点代号相同，但符号和功能定义不同，模板不被覆盖。
+  - 结论：产品用 `CreateDevice(page)` 放主功能（与 EPLAN"插入设备"相同）；其余功能用 `PlaceAt` 加指定符号放置，然后在同一事务中删除原来的未放置功能。删除这一步待正式工具的 Large 测试验证。
+- **改名与命名创建**（2026-11-02 23:40–2026-11-03 00:40，同上环境，`PartsFirstSpikeTests` 第 4–5 轮）：
+  1. `CreateDevice(page)` 生成的未放置功能不能改名：事务内给 `Function.Name` 赋值能读到新名，提交后变回 `=+-K3:2` 等原名，并脱离已改名的主功能；对它们写 1100、1200、20013、20014 均被拒绝（S063113）。已放置的主功能写 1100 也被拒绝（高层代号来自所在页），但赋 `Name` 有效（A13）。
+  2. `ParseNameAndProps` 加 `CreateDevice(Project, …, 名称属性, ref list)` 一次建出全部功能，名称、模板符号、20023 描述、主功能上的部件引用都正确（`=GAA+A1-KC…:1…:7`）。
+  3. **在同一事务中对上述刚建出的 PLC 主功能调用 `PlaceAt`**：传入功能自带的 `SymbolVariant` 时，EPLAN 内部抛出 `NullReferenceException`（`Terminal.setHandle`）并回滚；改为传入事务前从符号库解析的变体（A52）时，**EPLAN 进程崩溃（0xc0000374，堆损坏）**。第 1 轮用其它符号（`PLC_CBOX`）放置同类功能时没有出现。产品不得使用这一路径。
+
+### A85. 用 `NameService.RenameDevice` 给按部件建出的器件改名（2026-11-03，EPLAN 2026.0.3.25421，Electric P8）
+依据：`Eplan.EplApi.HEServicesu.xml` 的 `NameService.RenameDevice(Function, FunctionBasePropertyList, bool bRenameCDPsAlso, bool bKeepDescribingProps)`
+（"Rename all functions of device"）。实机：scratch 副本 LargeWrite 的新页，`PartsFirstSpikeTests` 的 `rename-device` 步骤，一次运行。
+- 做法：同一事务中 `DeviceService.CreateDevice(part, variant, page, point)`，再用 `Project.ParseNameAndProps` 解析目标标识，把
+  1100 `DESIGNATION_PLANT`、1200 `DESIGNATION_LOCATION`、20013 `FUNC_CODE`、20014 `FUNC_COUNTER` 写进一个新的 `FunctionBasePropertyList`
+  （离线列表可写，A82 中拒绝写入的是功能对象本身），调用 `RenameDevice(主功能, 列表, false, true)`，返回 void，然后提交。— 实测
+- 结果（SIE.6ES7131-4BD01-0AA0，6 个功能，其中 5 个未放置）：提交后 6 个功能全部改为 `=GAA+A1-KR…:1…:7`，未放置功能仍属该器件，
+  旧标识下没有剩余功能；20022/20023（DI0、DI2、DC24V、DI1、DI3、DC24V）不变；主功能上的部件引用保留。单功能部件
+  （SIE.3SB3400-0B 按钮）同样改名成功，部件引用保留。这解决了 A82 中逐个给 `Function.Name` 赋值时未放置功能还原、脱离器件的问题。— 实测
+- 未放置功能在事务内的 ID 形如 `53/17/22197/1`，提交后变为新的持久 ID（`53/17/69886/0`）；提交后的读回按新标识查找，不能沿用事务内的 ID。— 实测
+- **崩溃**：同一事务中 `CreateDevice` → `RenameDevice` → 对一个未放置的 PLC 功能 `PlaceAt(page, point, Circuit, IEC_symbol/PLC_CBOX 变体 0)`
+  → 对原未放置功能 `Remove()`，EPLAN 进程崩溃（0xc0000374，堆损坏），没有写出结果，崩溃前系统日志无相关记录；未区分是 `PlaceAt` 还是 `Remove` 引起。
+  产品不使用这条路径；非 PLC 部件的同一路径未测。— 实测
+
+### A92. 第 6 轮工程数据写入的实测结果（2026-11-04，EPLAN 2026.0.3，Pro Panel，LargeWrite）
+- `eplan_property_set` 的 B8 条目写入和读回通过：盒子 20161、20408，总览点 20400，原理图点 20011，一步撤销恢复（`PlcPropertyB8Tests`）。B13 的类型由此确认。
+- 原生类型是 `PLC`、`Terminal`、`BusTerminal` 的对象同样用 `FunctionPropertyList` 读写，按 Function 的属性字典处理。
+- 写前快照如果覆盖全项目的 PLC 属性，在 323 页的项目上超过 30 秒。防误改检查的范围收窄到被写入的那张卡。
+- `interruption_point.symbol_variant` 能选 BP 变体 0（`InterruptionExplicitVariantTests`）；`AddArticleReference` 可以加到已有的非主端子上（`ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores`）；`Page.GridSize` 单位是毫米，新建 Overview 页写 4 后读回为 4（`PageGridWriteTests`）；电位定义点 33003、31006、31004、31002 可写（`PotentialEngineeringTests`）。以上都能一步撤销。
+
+### A93. 部件数据要靠 `DeviceService.UpdateDevice` 写入（2026-11-04，EPLAN 2026.0.3，LargeWrite 探针）
+- `AddArticleReference` 只写引用和零件自身的字段（20100、20101、20190、20200、20919 等），功能定义和技术数据不动。官方 XML：`UpdateDevice` 接受设备的主功能或连接，把部件数据写到主功能，函数模板写到设备的所有功能。
+- 探针结果，写入的值都和样本一致：端子 `PXC.3211813` 的 20188 由 `100/6/0` 变成 `100/6/1`，20057 变成 6；`PXC.3036563` 的 20230 变成 4；`SIE.3VA1032-2ED32-0AA0` 的 20027 变成 `In = 32A`，20022 变成连接点 1 到 6。
+- 连接定义点要更新两次，都返回 true：`UpdateDevice(connection)` 把 31048、31059 写到连接和点上；`UpdateDevice(point)` 把点的 20188 由 `4/1/1` 变成 `4/1/4`，20026、20117 随之改变。之后重新生成连接，这些值仍在。
+- 连接自身的 20188 由连线情况决定（同一端子排的相邻端子是 `4/1/7` 鞍形跳线），和点的 20188 互不影响。
+- 点的 20188、20121 可以按属性写入，读回和重新生成后不变；20121 写 0 后 19021 变成“未定义”，20470 变成 0。
+- `Function.Create(page, FunctionDefinition)` 建出的对象即使再 `SetSymbolVariant` 成 CDP，类型仍是 `Function`，不是 `ConnectionDefinitionPoint`，不能用来建定义点。
+- 撤销取决于作用域：`SafetyPoint` 提交之后再调用 `UpdateDevice`，`XEsUndoAction` 报 S328050（步骤不可用）并弹对话框，部件已在项目里时也一样；放在 `FunctionTransactionScope(undoCommitted: true)` 的撤销步骤里，一步撤销能还原（`ExistingTerminalConnection_DefinitionPointOnly_PreservesEndpoints_OneUndoRestores`，带部件）。
+- 第二个部件引用只有在 `SafetyPoint` 作用域里能加上。普通 `Transaction` 或 `FunctionTransactionScope` 里，第一个能加，第二个抛 S063074（未能添加部件），有没有先 `UpdateDevice` 都一样（端子 `PXC.3211813` 加 `PXC.3022218`）。所以 `eplan_device_update` 的 `part` 走 `SafetyPoint`，`update_from_parts` 单独一次调用，走 `FunctionTransactionScope`。
+- 🔴 连接和定义点上不要调用 `UpdateDevice`。探针和回归测试里它都正常，一步撤销也能还原；但 16 页重画中，更新完 30 个定义点后，同一页插入电位定义宏时 `Insert.WindowMacro` 抛 AccessViolationException，EPLAN 终止（0xe0434352，2026-11-04 14:47）。同样的流程不调用这两次更新（第 12 次）全程没有崩溃。只出现过一次，原因没有查清。工具改为明确写 20188、20121、31048。
+- 🔴 同一个包装对象不能取两次 `Properties` 再各释放一次。第二次取到的是已释放的列表，读出别的对象的值（定义点读回 `100/6/1`）或抛 S063109，之后 EPLAN 崩溃（0xc0000374、0xc0000005，位置不固定）。放进同一个 `using` 只读一次后不再出现。
+- 🔴 `UpdateDevice` 之后，它之前取到的包装对象已经失效：继续用会读到别的对象（2000 由 `53/59/69844/0` 变成 `53/4/26/0`），并可能让 EPLAN 崩溃（0xc0000374，探针第一次，2026-11-04 12:12）。每个事务都要重新取对象。
+
+### A95. 部件优先路线与名称/数量补充（2026-11-04，负责人 LargeWrite 探针，EPLAN 2026.0.3）
+- `DeviceService.CreateDevice` 为 PXC.3211813、3212140、3036563、3211822 建出非主 Terminal，模板 X2_2/0、20188 为 100/6/1 或 100/6/3；PXC.3211819 为 X/0、100/6/2。默认名称 `+-X1` 可在同一事务改为 `+A1-XQ10:1`，`NameService(page).AdjustVisibleName` 返回 true，显示名为 `-XQ10`。这些是负责人已实测的行为；工具集成及主功能替换 FAH1、Q_3LI/6、LSW2C 仍待本轮 Large。
+- `RIT.3581000` 的 CreateDevice 抛 S063114；RIT.3450500、RIT.3451500 未放出任何对象。BCP 在首次提交后新事务中可追加 RIT.3451500/1；同名 BBDEF 保持主功能，BCP 为非主 Busbar。
+- 中断点仅赋 Name 时 VisibleName、20002、20010 为空；AdjustVisibleName 返回 true 后 `-2Z3` 可读。示例 `=GAA-2L1` 的显示名为 `-2L1`。
+- 主功能在 SafetyPoint 内追加第二个部件 `AddArticleReference("RIT.9340030", "1", 2)` 读回数量 2；普通 Transaction 或 FunctionTransactionScope 会对第二个部件抛 S063074。本条补充 A93 的已知条件。
+- 非主 Terminal 的 20367、20809 为 String，20035 为 Long，均已写入读回；未附部件的端子写 20054、20044 抛 S063109，不列入白名单。BCP 的 20011 写 PE 读回 `??_??@PE;`。
+
+### A98. 部件的未放置功能用 `Function.Assign` 放到符号上（2026-11-04，EPLAN 2026.0.3，LargeWrite 探针和 Large）
+- 部件路线放置后，线圈已放置，其余功能未放置（`IsPlaced` false，读 `SymbolVariant` 抛 NullReferenceException），`Pins` 已有名称。
+- 三个入口实测：`Function.Place` 放出红叉，原功能保留；`Function.PlaceAt` 符号正常，但原功能保留、标识文字重叠；**`unplaced.Assign(target)`** 让已放置的符号得到模板的引脚名，未放置功能消失，标识只显示一次，触点映像干净。`Assign` 要在符号提交后的下一个事务里调用。
+- 先放符号、后分配部件时，`AddArticleReference` 不产生未放置功能对象，`eplan_device_get` 只列出已放置的功能。但线圈的触点映像会多出部件模板里没有匹配上的触点行：模板的主触点是主触点符号，普通常开 `S` 匹配不上，`13/14` 能匹配。所以这个顺序不推荐，应先放部件，再用 `join_device` 放其余符号。
+— Large `DevicePlaceTests.UnplacedAssignment`、探针 `FunctionPlaceSpikeTests`（未合入）。
+- `DimensionItem.CreateAngular` 之后同一事务读 `SecondPoint` 得到 (0,0)，EPLAN 计算的角度文字正常；角度标注不用这个读回做核对。
+
+### A99. 提交后读二维码内容或尺寸文字会让撤销失败（2026-11-04，EPLAN 2026.0.3，Electric P8，LargeWrite 探针和 Large）
+- 提交后读 `QRCode.GetQRCode()`、`DimensionItem.DimensionText` 或 `DimensionCircle.DimensionText`，之后 `XEsUndoAction` 弹“撤销冲突，步骤不存在”，对象留在页面上。
+- 同样在提交后读标识符、位置、属性 ID、画笔、边界、分组不受影响；二维码内容改读属性 `QRCODE_BLOCK_VALUE` 也不受影响。
+- 所以 `eplan_annotation_create` 只在创建事务内读尺寸文字，`eplan_page_get` 不返回 `dimension_text`。
+— Large `AnnotationCreateTests`、探针 `AnnotationUndoProbeTests`（未合入）。
+
+### A117. 占位符引用无效属性时读不出当前值（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，官方 EES 码垛系统示例副本）
+- `PlaceHolder.GetAllCurrentValues()` 对引用了无效属性的占位符抛 `PropertyNotFoundException`（`S063109属性无效`），不是 A33 里的 `LockingException`。`eplan_placeholder_list` 的 `detailed` 原来因此整体报 INTERNAL；工具改为把这样的占位符和未锁定的一样标记为取不到当前值，值集和变量照常返回（2026-11-07 实机复验：码垛示例 7 个占位符，3 个取不到当前值，列表正常返回）。`eplan_placeholder_apply` 现对这种占位符照常应用值集，省略当前值及其变化标记并给出提示（2026-11-07 实机复验：码垛示例 `=GAB+S1&EFS/1` 的 `#<EES_COM>` 套用 `DC O.K.` 已提交，结果带提示）。
+
+### A120. 宏里的占位符与插入时套用值集（2026-11-07，EPLAN 2026.0.3.25421，Electric P8，从公司基本项目建的 scratch 项目 EES1）
+- `eplan_macro_get` 不插入就读出占位符和值集：P8 数据目录的官方宏库 `EPLAN_Macro` 136 个窗口宏中 36 个带值集。例如 `203_Electrical_Engine/001_Option_1/Contactor_Feedback_Control.ema` 的 `#<Function_text>` 有 8 个值集（Forward control、Reverse control、Feed Forward……），变量 `DI_Drive_Control`（功能文字）和 `DT`（设备代号）。
+- `eplan_macro_insert` 带 `values: {"#<Function_text>": "Reverse control"}`：插入和 `ApplyRecord` 在同一事务中提交，读回的当前值正好是该值集的值（`驱动装置"给料,向后"`、`{{QA2}}`）；写错的值集在预览时就被拒绝，并列出可选的值集。`Insert.WindowMacro` 返回的放置对象里包含插入的 `PlaceHolder`。
+
+### A131. “不在部件清单中输出”是带索引的属性（2026-11-10，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
+- **20105 `FUNC_ARTICLE_SUPPRESSINPARTSLIST` 的运行时定义：** 布尔型、带索引（`IsIndexed` 为 true）、非内部、非只读、非名称组成，计算标记为空。PLC 盒 `=F+A2-KE1` 上没有值时读回 `empty`、没有类型。推测每个部件引用各有一个值，没挂部件的设备该写哪个索引、写后是否从部件清单消失，都还没实测。
+- **起因：** 71 页复刻第 15 页网络总览里的交换机 `+S1-K8` 是主功能、没挂部件，EPLAN 仍在部件清单里列出它，原图没有这一行，后面各行因此错开一行。`eplan_property_set` 只写不带索引的属性，规划时以“运行时定义与登记不一致”拒绝；拒绝消息现在列出运行时的类型和各标志。支持带索引写入的分支 `feat/suppress-in-parts-list` 暂停。
+
+### A132. 先放触点、后加部件不会生成模板功能（2026-11-10，EPLAN 2026.0.3.25421，Pro Panel，LargeWrite）
+- **步骤：** 线圈 `-KPA5` 不带部件放置，再以同一标识放 4 个常开触点（引脚 `1/L1 2/T1`、`3/L2 4/T2`、`5/L3 6/T3`、`13 14`），然后 `eplan_device_update` 追加 `SIE.3RT2015-1BB41-1AA0`，再 `update_from_parts`。
+- **结果：** 两步之后设备仍只有这 4 个已放置触点，没有未放置功能，引脚不变；两步的 `assignedFunctions` 都是 0。`AddArticleReference` 不生成模板功能，`DeviceService.UpdateDevice` 在已有匹配触点时也不生成。两次撤销恢复到放置后的快照。
+- **对照：** 带部件放置设备（`CreateDevice`）会按模板生成 4 个未放置触点，`join_device` 放置时逐个分配（`DevicePlaceTests.JoinDevice_AssignsFourUnplacedContacts_OneUndoRestores`，同日通过）。
+
+### B12. 放置编辑成员（2026-10-31 离线核对；2026-11-01 实机日志复验）
+`eplan_api_search/get` 核对 Placement.Remove、CopyTo(Group)、Function.RemoveFromPage、Page.AllPlacements、Edit.Rotate(Placement[],PointD,double)、Mirror(Placement[],PointD,PointD,bool)；Rotate、TextBase.Rotation、Rectangle.Angle 均用弧度，文本 -16002 表示继承图层角度（工具拒绝该文字的旋转/镜像）。`PlacementEditSpikeTests` 与测试原生 helper 检查删除功能/连接、复制标识、旋转支点、镜像文字和单步撤销；行为结论以下述实机日志为准，离线编译不算实机验证。
+
+- 前一轮探针的两项测试修复见提交 `66a2cf35`：`eplan_object_find` 的公开字段为 `items`；属性文字初始化须先设 `UseLocalPropertyPlacements=true`，再重新取得本地属性放置。随 2026.0.3 提供的 `Eplan.EplApi.DataModelu.xml` 的 `Graphics.PropertyPlacement` 类型说明指出，符号变体的属性放置来自只读符号库，直接修改会抛 `BaseException`。以下复验日志已替换前一轮同名文件，不能再用当前文件的行号引用旧失败。
+- 2026-11-01，EPLAN 2026.0.3，Electric P8，LargeWrite scratch，串行、单实例：复验日志（`../../.local/failures/q-edit-PlacementEditSpikeTests.log`，本工作区未提供该日志） 共 15 项、8 失败、7 成功。原生探针已越过 seed，以下为其 `before/during/afterCommit/after` 的实际读数，不能概括为整套测试通过。本次修复未启动 EPLAN，仍须实机复验撤销链。
+- **轴对齐矩形旋转/镜像后会重新排序角点，`Location` 为新外框左下角，`Angle` 仍为 0**。原生 `(220,200)..(230,210)` 绕自身旋转 90°，读回 `(210,200)..(220,210)`、位置 `(210,200)`；以 x=210 镜像为 `(190,200)..(200,210)`，以 y=150 镜像为 `(220,90)..(230,100)`。产品测试第 2、40 行的两项 rolled_back 来自把矩形位置当固定锚点、角度当作累加值；已修正 planner，并用产品原始三矩形布局 `(40,200)..(50,210)`、`(100,180)..(110,190)`、`(180,160)..(190,170)` 作 Small 读回回归，保留位置/外框/角度不符即回滚的检查。— 原生 rotate 报告第 60623 行起，mirror 第 181850 行起，horizontal 第 409141 行起。
+- **零角度自由文字镜像后 `Rotation` 仍为 0，外框按镜像改变**。`Mirror note` 在 `(100,200)`，原框 `(100,200)..(128.93,205.99025)`；以 x=210 镜像后位置 `(320,200)`、框 `(291.07,200)..(320,205.99025)`；以 y=150 镜像后位置 `(100,100)`、框 `(100,94.00975)..(128.93,100)`。绕自身旋转 90° 时自由文字角度为 π/2，符号的属性文字角度仍为 0，部分属性相对偏移随符号旋转；可见标识的外框保持横排，不能只旋转原文本外框。产品修正零角度自由文字镜像预测，Small 逐项复现上述读数；原生测试按种类精确检查矩形、自由文字及属性文字角度。— 同上及 mirror rollback 报告第 303077 行起。
+- **符号编辑后的引脚取实际变体几何，并非原引脚坐标的刚体变换**。本探针 SPECIAL/PCP 起始偏移 `(0,3)`、Up，旋转 90° 后为 `(-2,0)`、Left（页上 x=338，旧断言误算 337）；水平镜像后为 `(0,-4)`、Down（页上 y=96，旧断言误算 97）。IEC_symbol/K 水平镜像后两点偏移为 `(0,-4)`、Down 与 `(0,3.99)`、Up。探针针对这些固定种子逐点检查实际变体坐标与方向，仍使用原 6 位小数断言；不扩大容差，不把变体差异推广到其他符号。产品仍须拒绝与批准预测不符的实际引脚/子项读回。— rotate 第 60623、530368 行起，horizontal 第 409141 行起。
+- **属性放置的局部偏移也并非每项都作刚体变换**：两个 K 分别有 13 项（带新增标识）与 12 项；首项、两项 `(-0.6,±1.4)` 和新增标识 `(8,8)` 的偏移随旋转/镜像改变，其余项如 `(-6,-3)`、`(-6,-3.84)`、`(0.526,-1.513)`、`(0.5,0)` 保持原偏移。PCP 两项原为 `(0,-1)`，只首项变换，第二项保持原偏移。探针按这组已记录的槽位精确比较全部子项的位置、文本、零角度及数量，保留回滚前后全量相等断言；这不是其他符号或其他属性方案的通用规则。— 同上五份原生失败报告的 children。
+- 原生 rotate、mirror 的 rollback 报告中，`after` 与 `before` 的全部对象、功能、连接完全一致；提交报告的 `during` 与 `afterCommit` 一致。提交用例在几何断言处已失败，**尚不能从这些失败用例证明后续一次撤销或显式支点检查成功**。— rotate rollback 第 530368 行起；mirror rollback 第 303077 行起。
+- 产品 delete 的第 21 行是 `APPROVAL_DENIED/not_started`：测试没有给 `ScriptedApprovalChannel` 登记本次删除的批准；已用公开预览的 `predicted` 定位符、位置、角度生成精确批准行，并检查返回备份。拒绝行为不需修改产品策略。该份 q 日志没有关联 ID、`api_try` 或验收夹具失败；当天 `bridge-slotA.log` 含其他分支的历史异常，不能把它们当作本次编辑失败的堆栈。

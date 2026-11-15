@@ -103,3 +103,19 @@
   - 实测读出的格式（2026-10-21，第一次 Large 测试，按上面相对 `Data` 的路径）：`Device tag list`、`Summarized parts list` 为 `XmlLblTextExportConverterImpl`；`Cable diagram`、`PCT-Loops`、`Rittal Length cutting C8+`、`SmartWiring` 为 `XmlLblExcelExportConverterImpl`。`Terminal diagram` 没有在这次读出的方案中，S25 中它导出的是 xlsx。— 实机。
 - 项目的翻译语言在项目设置 `TRANSLATEGUI.TRANSLATE_LANGUAGES`（索引 0，分号分隔，如 `en_US;de_DE`）。— CommandLineActions XML 中 `projectsettings` 动作的示例；S25 用 `ProjectSettings.GetStringSetting` 读出示例项目的 20 种（A25）。`Translate.ExportMissingTranslation` 要求每种语言都已是项目的翻译语言。— XML。
 - `Label.DoLabel(project, 方案, 语言, 目标文件, 1, 1)`：目标文件的扩展名要与方案的配置一致，应为 `.txt`、`.xls`、`.xlsx` 或 `.xml`，否则换成 `.txt`；`.xls` 需要 Excel；目标为空时用方案中的目标；带 `bShowOutput` 的重载会打开输出文件。— XML。
+
+### A100. action 的真实数量来自注册表，功能区入口由 `MFTools.xml` 映射（2026-11-04，EPLAN 2026.0.3.25421，安装文件和 Electric P8 实测）
+- `Cfg/regPlatform.xml` 和 `regMinimal.xml` 的 `Settings/CAT/MOD/LEV1[@name='Services']/LEV2/LEV3`：`LEV2` 为 `Actions` 2213 个、`Interactions` 268 个、`AsmActions` 49 个，去重 2498 个；所属模块在 `LEV3/LEV4/Setting[@name='ModuleName']/Val`。
+- `ActionManager.FindAction(name, true)`：注册表、`MFTools.xml` 和官方表合计 2666 个候选，找到 2266 个；官方 99 个全部能找到。`Interactions` 基本不能按名称找到，`XGedIa…` 要经 `XGedStartInteractionAction2D /Name:…` 启动并等鼠标。只有 20 个声明了参数。
+- `MFTools.xml` 的 `Dialogs`、`Shortcuts` 区段基本不是 action。其他项目说的“约 1050 个”是 `MFTools.xml` 全部区段去掉官方后的数量，不是总数。
+- 功能区：12 个选项卡、339 个入口（313 个命令 ID），其中 330 个能通过 `MFTools.xml` 的 `UsedActions/neutral|mm` 映射到命令，9 个云入口没有映射，25 个是下拉标题 `MfDropdownMenuDummyAction`。
+- 名单本身不进仓库（ADR-0030）。
+— 读安装文件，探针 `ActionFindSpikeTests`、`RibbonSpikeTests`（未合入）。
+
+### A109. 报表的数据来源（2026-11-06，EPLAN 2026.0.3.25421，Electric P8，复刻 71 页图纸）
+- **部件列表逐个列出：** 项目设置 `PartsListGui.SummarizePartsOfSameDT`（`Cfg/PartsListGui.xml`，默认 true）决定同标识、同部件号是否合并成一行。设为 false 后报表更新，部件列表从 4 页 108 行变成 5 页 162 行，和原图相同。用 `ProjectSettings` 读写，读回一致。
+- **部件更新只改所选的页：** `eplan_report_update` 只更新传入的页。后续页变成子页 `/1.1`，要 `eplan_page_renumber` 的 `to_main` 改回。
+- **端子排定义可以带部件：** 类别 `TerminalDefText` 的设备（如 `=+S1-X0`）用 `eplan_device_update` 加部件，部件列表就有端支架和标记架这两行。
+- **功能文本的两个来源：** `FUNC_TEXT_AUTOMATIC`（20031）取手工的 20011，空时取路径功能文本（`Graphics.PathText`）。官方说明路径文本用于 PLC 交叉参考、端子图和部件列表。所以原图的报表有"加热器"，原理图上却不多显示；A105 提到的隐藏问题也是这个。新项目实测确认：电机列下放路径功能文本（`eplan_placement_create` 的 `kind:"path_text"`）后，电缆和端子报表的"功能文本"列和 PDF 一致，原理图不多出文字。
+- **报表选项在 `Cfg/FormGeneratorGui.xml`：** 比如 `FuncTextReplace`、`FuncTextReplaceString` 决定相同功能文本是否替换成"="。
+- **未解决：** 原图表格行显示中英文两行、行高 12 mm；本机相同表格只显示第一种语言、行高 8 mm。结构标识符描述存了两种语言，显示语言也是 `zh_CN;en_US`，原因没有查明。
