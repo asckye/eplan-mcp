@@ -71785,8 +71785,8 @@
     "operation": {
       "denominator": 4014,
       "tools": 2748,
-      "apiTry": 2523,
-      "callable": 2753,
+      "apiTry": 2551,
+      "callable": 2771,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -71808,17 +71808,17 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel",
-        "callable": 944,
+        "callable": 952,
         "refused_unsafe": 4
       },
       {
         "scope": "Eplan.EplApi.DataModel.E3D",
-        "callable": 303,
+        "callable": 306,
         "refused_unsafe": 1
       },
       {
         "scope": "Eplan.EplApi.DataModel.EObjects",
-        "callable": 80,
+        "callable": 81,
         "refused_unsafe": 0
       },
       {
@@ -71838,7 +71838,7 @@
       },
       {
         "scope": "Eplan.EplApi.DataModel.Planning",
-        "callable": 104,
+        "callable": 107,
         "refused_unsafe": 0
       },
       {
@@ -71863,7 +71863,7 @@
       },
       {
         "scope": "Eplan.EplApi.HEServices",
-        "callable": 254,
+        "callable": 257,
         "refused_unsafe": 0
       },
       {
@@ -71894,7 +71894,7 @@
       "live_verified": 908
     },
     "declined": {
-      "count": 756,
+      "count": 757,
       "live_verified": 0
     },
     "dedicated": {
@@ -71906,11 +71906,11 @@
       "live_verified": 0
     },
     "none": {
-      "count": 505,
+      "count": 486,
       "live_verified": 0
     },
     "other": {
-      "count": 5,
+      "count": 23,
       "live_verified": 0
     },
     "state_only": {
@@ -71929,7 +71929,7 @@
     "dialog_decision_context": 26,
     "enumerator_type": 29,
     "exception_type": 9,
-    "external_path_parameter": 54,
+    "external_path_parameter": 55,
     "file_masterdata_macro_tools": 57,
     "lifecycle_or_creation": 9,
     "locking_internals": 8,
@@ -71950,7 +71950,7 @@
           "live_verified": 915
         },
         "declined": {
-          "count": 838,
+          "count": 843,
           "live_verified": 0
         },
         "dedicated": {
@@ -71962,11 +71962,11 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1771,
+          "count": 1740,
           "live_verified": 0
         },
         "other": {
-          "count": 5,
+          "count": 31,
           "live_verified": 0
         },
         "state_only": {
@@ -71983,7 +71983,7 @@
           "live_verified": 85
         },
         "declined": {
-          "count": 580,
+          "count": 585,
           "live_verified": 0
         },
         "dedicated": {
@@ -71995,11 +71995,11 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1199,
+          "count": 1168,
           "live_verified": 0
         },
         "other": {
-          "count": 5,
+          "count": 31,
           "live_verified": 0
         },
         "state_only": {

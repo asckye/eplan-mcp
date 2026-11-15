@@ -106,7 +106,9 @@ internal static class ApiTryServices
         foreach (ApiParameter p in member.Parameters!)
         {
             // Master data handle parameters are session handles of the same configured database, not database selectors.
-            string descriptor = p.Name + " " + (masterData && MasterDataHandle(p.Type) ? "" : p.Type);
+            // ADR-0059 tier 1: a symbol, symbol variant or definition from the project's own libraries
+            // (DataModel.MasterData) is an argument of a project write, not a parts database or system master data.
+            string descriptor = p.Name + " " + (masterData && MasterDataHandle(p.Type) || p.Type.StartsWith("Eplan.EplApi.DataModel.MasterData.", StringComparison.Ordinal) ? "" : p.Type);
             if (Match(descriptor, "stream"))
             { return "stream_parameter"; }
             if (Match(descriptor, "database|\\bstrServer\\b|\\.Sql"))

@@ -277,7 +277,8 @@ public sealed partial class ApiTryOperationTests
     [Fact]
     public void RegisteredButUndispatchable_ProducesAnEmptyPlan()
     {
-        ApiTryArgs args = Args("O:Eplan.EplApi.DataModel.Function.Create");
+        // Every overload of this group is still excluded (lifecycle_or_creation).
+        ApiTryArgs args = Args("O:Eplan.EplApi.DataModel.ContextPropertyPlacement.Create");
         args.Parameters = "{}";
         WritePlan plan = Plan(args);
         Assert.Equal("not_dispatchable_yet", plan.Details!["status"]);

@@ -32,14 +32,21 @@ public sealed class ApiTryLifecycleGeneratorTests
     [Theory]
     [InlineData("strFileName", "System.String", "external_path_parameter")]
     [InlineData("strContureName", "System.String", "external_path_parameter")]
-    [InlineData("strArticleNr", "System.String", "masterdata_or_parts_management")]
-    [InlineData("variant", "Eplan.EplApi.DataModel.MasterData.SymbolVariant", "masterdata_or_parts_management")]
     [InlineData("settings", "System.String", "settings_or_scheme_parameter")]
     [InlineData("bTransient", "System.Boolean", "transient_creation")]
     public void CreationDoesNotOpenExternalResources(string name, string type, string reason)
     {
         ApiEntry entry = Entry("Create", [new(name, type)]);
         Assert.Equal(reason, ApiTryGenerator.Exclusion(entry, entry.Details[0], null));
+    }
+    [Theory]
+    [InlineData("strArticleNr", "System.String")]
+    [InlineData("variant", "Eplan.EplApi.DataModel.MasterData.SymbolVariant")]
+    public void AProjectObjectCarryingAPartOrASymbol_IsAnOrdinaryWrite(string name, string type)
+    {
+        // ADR-0059 tier 1: the object belongs to the project; the part number and the project's symbol variant are arguments.
+        ApiEntry entry = Entry("Create", [new(name, type)]);
+        Assert.Null(ApiTryGenerator.Exclusion(entry, entry.Details[0], null));
     }
     [Theory]
     [InlineData("Destroy")]

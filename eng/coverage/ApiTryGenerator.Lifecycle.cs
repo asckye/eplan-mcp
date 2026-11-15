@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using EplanMcp.Host.Tools;
 
 namespace EplanMcp.Coverage;
@@ -31,8 +30,9 @@ internal static partial class ApiTryGenerator
         { return "external_path_parameter"; }
         if (ApiTryServices.Exclusion(entry, member) is { } reason)
         { return reason; }
-        return member.Parameters!.Any(p => Regex.IsMatch(p.Name + " " + p.Type, "article|partNr|partNumber|symbol|functiondefinition|segmentdefinition", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
-            || entry.Type.Contains(".MasterData.", StringComparison.Ordinal) ? "masterdata_or_parts_management" : null;
+        // ADR-0059 tier 1: creating or removing a project object that carries a part, symbol or definition changes the
+        // project, not the parts database, and is an ordinary write; master data types themselves stay out (tiers 2, 3).
+        return entry.Type.Contains(".MasterData.", StringComparison.Ordinal) ? "masterdata_or_parts_management" : null;
     }
     internal static ApiEntry[] Factories(ApiIndexData data, JsonElement[] constructors, JsonElement[] types)
     {
