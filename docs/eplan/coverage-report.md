@@ -1,6 +1,6 @@
 # EPLAN API 覆盖报告
 
-**操作层 4014 组：专用工具 626，通用读取 116，仅通用入口 1999，仅状态覆盖 7，其他可调用 5，明确不做 756，到不了 505；实机验证 1118**
+**操作层 4014 组：专用工具 626，通用读取 116，仅通用入口 1999，仅状态覆盖 7，其他可调用 5，明确不做 756，到不了 505；实机验证 1192**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
 > 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 b008a697）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
@@ -12,9 +12,9 @@
 
 | 路线 | 组数 | 占 4014 的比例 | 实机验证组数 |
 |---|---:|---:|---:|
-| 专用工具（dedicated） | 626 | 626 / 4014（15.6%） | 420 |
+| 专用工具（dedicated） | 626 | 626 / 4014（15.6%） | 421 |
 | 通用读取（generic_read） | 116 | 116 / 4014（2.9%） | 0 |
-| 仅通用入口（api_try_only） | 1999 | 1999 / 4014（49.8%） | 698 |
+| 仅通用入口（api_try_only） | 1999 | 1999 / 4014（49.8%） | 771 |
 | 仅状态覆盖（state_only） | 7 | 7 / 4014（0.2%） | 0 |
 | 其他可调用（other） | 5 | 5 / 4014（0.1%） | 0 |
 | 明确不做（declined） | 756 | 756 / 4014（18.8%） | 0 |
@@ -61,16 +61,16 @@ Bridge 共用到 14029 个 ID（方法 1285，属性 1919，类型 648，字段�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 2748 / 4014（68.5%） | 2741 | 209 | 2741 / 4014（68.3%） | 1118 / 4014（27.9%） | 18 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 948 / 1799（52.7%） | 941 | 110 | 941 / 1799（52.3%） | 172 / 1799（9.6%） | 15 | 66 |
-| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 1800 / 2215（81.3%） | 1800 | 99 | 1800 / 2215（81.3%） | 946 / 2215（42.7%） | 3 | 68 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 2748 / 4014（68.5%） | 2741 | 209 | 2741 / 4014（68.3%） | 1192 / 4014（29.7%） | 18 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 948 / 1799（52.7%） | 941 | 110 | 941 / 1799（52.3%） | 178 / 1799（9.9%） | 15 | 66 |
+| 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 1800 / 2215（81.3%） | 1800 | 99 | 1800 / 2215（81.3%） | 1014 / 2215（45.8%） | 3 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 68 / 68（100.0%） | 68 | 0 | 68 / 68（100.0%） | 18 / 68（26.5%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 49 / 137（35.8%） | 48 | 0 | 49 / 137（35.8%） | 19 / 137（13.9%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 45 / 97（46.4%） | 45 | 0 | 45 / 97（46.4%） | 18 / 97（18.6%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
 - 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 2748 / 4342（63.3%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 948 / 1799（52.7%），live_verified 172 / 1799（9.6%）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 948 / 1799（52.7%），live_verified 178 / 1799（9.9%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 7990 个，未过时的共 8585 个。
 - 依赖层：Bridge 用到 2910 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 137 行：工具到达 49，action_try 可尝试 35（离线规则，不代表实机验证）。
@@ -87,10 +87,10 @@ action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 4
 
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 方法 | 3109 | 403 / 173 | 33 / 0 | 882 / 79 | 7 / 0 | 5 / 0 | 580 / 0 | 1199 / 0 | 252 |
-| 普通属性 | 2636 | 435 / 327 | 255 / 0 | 1354 / 626 | 0 / 0 | 0 / 0 | 258 / 0 | 334 / 0 | 953 |
+| 方法 | 3109 | 403 / 173 | 33 / 0 | 882 / 85 | 7 / 0 | 5 / 0 | 580 / 0 | 1199 / 0 | 258 |
+| 普通属性 | 2636 | 435 / 328 | 255 / 0 | 1354 / 693 | 0 / 0 | 0 / 0 | 258 / 0 | 334 / 0 | 1021 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5983 | 838 / 500 | 288 / 0 | 2236 / 705 | 7 / 0 | 5 / 0 | 838 / 0 | 1771 / 0 | 1205 |
+| 合计 | 5983 | 838 / 501 | 288 / 0 | 2236 / 778 | 7 / 0 | 5 / 0 | 838 / 0 | 1771 / 0 | 1279 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
@@ -99,18 +99,18 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 |---|---:|---:|---:|---:|---:|
 | `Eplan.EplApi.ApplicationFramework` | 88 | 10 / 88（11.4%） | 10 / 88（11.4%） | 0 | 2 |
 | `Eplan.EplApi.Base` | 268 | 114 / 268（42.5%） | 114 / 268（42.5%） | 0 | 29 |
-| `Eplan.EplApi.DataModel` | 1247 | 939 / 1247（75.3%） | 944 / 1247（75.7%） | 4 | 488 |
+| `Eplan.EplApi.DataModel` | 1247 | 939 / 1247（75.3%） | 944 / 1247（75.7%） | 4 | 555 |
 | `Eplan.EplApi.DataModel.E3D` | 368 | 303 / 368（82.3%） | 303 / 368（82.3%） | 1 | 136 |
 | `Eplan.EplApi.DataModel.EObjects` | 83 | 80 / 83（96.4%） | 80 / 83（96.4%） | 0 | 48 |
-| `Eplan.EplApi.DataModel.Graphics` | 414 | 364 / 414（87.9%） | 364 / 414（87.9%） | 0 | 198 |
+| `Eplan.EplApi.DataModel.Graphics` | 414 | 364 / 414（87.9%） | 364 / 414（87.9%） | 0 | 201 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
 | `Eplan.EplApi.DataModel.MasterData` | 121 | 46 / 121（38.0%） | 46 / 121（38.0%） | 0 | 20 |
 | `Eplan.EplApi.DataModel.Planning` | 122 | 104 / 122（85.2%） | 104 / 122（85.2%） | 0 | 62 |
 | `Eplan.EplApi.DataModel.Revisions` | 20 | 20 / 20（100.0%） | 20 / 20（100.0%） | 0 | 0 |
 | `Eplan.EplApi.DataModel.Topology` | 17 | 16 / 17（94.1%） | 16 / 17（94.1%） | 0 | 10 |
-| `Eplan.EplApi.EServices` | 127 | 37 / 127（29.1%） | 37 / 127（29.1%） | 0 | 8 |
+| `Eplan.EplApi.EServices` | 127 | 37 / 127（29.1%） | 37 / 127（29.1%） | 0 | 11 |
 | `Eplan.EplApi.EServices.Ged` | 90 | 15 / 90（16.7%） | 15 / 90（16.7%） | 0 | 14 |
-| `Eplan.EplApi.HEServices` | 417 | 254 / 417（60.9%） | 254 / 417（60.9%） | 0 | 83 |
+| `Eplan.EplApi.HEServices` | 417 | 254 / 417（60.9%） | 254 / 417（60.9%） | 0 | 84 |
 | `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
 | `Eplan.EplApi.MasterData` | 592 | 446 / 592（75.3%） | 446 / 592（75.3%） | 0 | 20 |
 | `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 / 14（0.0%） | 0 | 0 |
@@ -142,8 +142,8 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
 | kind | 通过且撤销恢复 | 只读通过 | 失败 | 未知 | 跳过 | 需要上下文 |
 |---|---:|---:|---:|---:|---:|---:|
-| api-read | 0 | 955 | 14 | 13 | 218 | 602 |
-| api-write | 163 | 0 | 91 | 73 | 58 | 595 |
+| api-read | 0 | 1029 | 15 | 10 | 218 | 683 |
+| api-write | 163 | 0 | 91 | 74 | 57 | 633 |
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录

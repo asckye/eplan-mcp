@@ -70,7 +70,7 @@
       "byTools": 2741,
       "partial": 209,
       "automatedTest": 2741,
-      "liveVerified": 1118,
+      "liveVerified": 1192,
       "envBlocked": 18,
       "undocumented": 134
     },
@@ -88,7 +88,7 @@
       "byTools": 941,
       "partial": 110,
       "automatedTest": 941,
-      "liveVerified": 172,
+      "liveVerified": 178,
       "envBlocked": 15,
       "undocumented": 66
     },
@@ -106,7 +106,7 @@
       "byTools": 1800,
       "partial": 99,
       "automatedTest": 1800,
-      "liveVerified": 946,
+      "liveVerified": 1014,
       "envBlocked": 3,
       "undocumented": 68
     }
@@ -140,7 +140,7 @@
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
       "implemented": 939,
-      "liveVerified": 488
+      "liveVerified": 555
     },
     {
       "scope": "Eplan.EplApi.DataModel.E3D",
@@ -158,7 +158,7 @@
       "scope": "Eplan.EplApi.DataModel.Graphics",
       "denominator": 414,
       "implemented": 364,
-      "liveVerified": 198
+      "liveVerified": 201
     },
     {
       "scope": "Eplan.EplApi.DataModel.Helpers",
@@ -194,7 +194,7 @@
       "scope": "Eplan.EplApi.EServices",
       "denominator": 127,
       "implemented": 37,
-      "liveVerified": 8
+      "liveVerified": 11
     },
     {
       "scope": "Eplan.EplApi.EServices.Ged",
@@ -206,7 +206,7 @@
       "scope": "Eplan.EplApi.HEServices",
       "denominator": 417,
       "implemented": 254,
-      "liveVerified": 83
+      "liveVerified": 84
     },
     {
       "scope": "Eplan.EplApi.HEServices.Exceptions",
@@ -6710,7 +6710,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArc",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6720,7 +6720,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticle",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6730,7 +6730,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticleReference",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6740,7 +6740,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsBlock",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6750,7 +6750,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsBusBar",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6760,7 +6760,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsCable",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6770,7 +6770,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsComment",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6780,7 +6780,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnection",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6790,7 +6790,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionDefinitionPoint",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6800,7 +6800,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionPointsInfo",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6810,7 +6810,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsCopperBundle",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6820,7 +6820,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDeletedObjectInfo",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6830,7 +6830,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDeviceListEntry",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6840,7 +6840,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDimensionCircle",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6850,7 +6850,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDimensionItem",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6860,7 +6860,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunction",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6870,7 +6870,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunction3D",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6880,7 +6880,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunctionBase",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6890,7 +6890,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunctionDefinitionLibrary",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6900,7 +6900,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsGraphicalPlacement",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6910,7 +6910,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsHyperLink",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6920,7 +6920,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsImage",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6930,7 +6930,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInstallationSpace",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6970,7 +6970,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInterruptionPoint",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6980,7 +6980,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLine",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -6990,7 +6990,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLocation",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7000,7 +7000,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLocationBox",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7010,7 +7010,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMacroBox",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7020,7 +7020,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMacroEntry",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7030,7 +7030,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMergedArticleReference",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7040,7 +7040,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOption",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7050,7 +7050,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOptionFragment",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7060,7 +7060,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOptionGroup",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7070,7 +7070,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPage",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7080,7 +7080,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPathText",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7090,7 +7090,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPipingDefinition",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7100,7 +7100,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlaceHolder",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7110,7 +7110,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlacement",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7120,7 +7120,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlacement3D",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7130,7 +7130,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlanningSegment",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7140,7 +7140,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlcIO",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7150,7 +7150,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlotFrame",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7160,7 +7160,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlugStrip",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7170,7 +7170,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPotentialDefinition",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7180,7 +7180,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsProject",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7190,7 +7190,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsProtectedGroup",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7200,7 +7200,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsQRCode",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7210,7 +7210,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsRectangle",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7220,7 +7220,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsRoutedConnection",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7230,7 +7230,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegment",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7240,7 +7240,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentDefinition",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7250,7 +7250,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentPlacement",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7260,7 +7260,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentTemplate",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7270,7 +7270,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsStorableObject",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7280,7 +7280,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsStrandConnector",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7314,7 +7314,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbol",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7324,7 +7324,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolLibrary",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7334,7 +7334,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolReference",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7344,7 +7344,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolVariant",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7354,7 +7354,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsTerminalStrip",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7364,7 +7364,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsText",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7374,7 +7374,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsTextBase",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -7384,7 +7384,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsViewPlacement",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -18119,7 +18119,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.Pen.StyleFactor",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -18371,7 +18371,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -18403,7 +18403,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -20964,7 +20964,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.IPlaceHolder.GetRecordNames",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -20994,7 +20994,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.IPlaceHolder.GetVariableNames",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -26191,7 +26191,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.Project.CurrentUsers",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -29003,7 +29003,7 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.StorableObject.IsReadOnly",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try",
@@ -31189,7 +31189,7 @@
     {
       "unit": "O:Eplan.EplApi.EServices.PrjMessagesCollection.Count",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -31199,7 +31199,7 @@
     {
       "unit": "O:Eplan.EplApi.EServices.PrjMessagesCollection.GetPrjMsgEnumerator",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -31209,7 +31209,7 @@
     {
       "unit": "O:Eplan.EplApi.EServices.PrjMessagesCollection.IsReadOnly",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -33045,7 +33045,7 @@
     {
       "unit": "O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.GetSortModesCount",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
         "eplan_api_try"
@@ -41884,9 +41884,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 90.0066514,
+      "seconds": 90.0057333,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.ISOCode.SetString#write": {
@@ -41894,9 +41894,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0577187,
+      "seconds": 0.0556982,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.ISettings.GetBoolSetting": {
@@ -41984,9 +41984,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0016673,
+      "seconds": 0.0025749,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.MultiLangString.ContainsData#write": {
@@ -41994,9 +41994,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0014979,
+      "seconds": 0.0019462,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.MultiLangString.DeleteString#write": {
@@ -42004,9 +42004,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0012996,
+      "seconds": 0.0019514,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.MultiLangString.GetAsString": {
@@ -42074,9 +42074,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0022156,
+      "seconds": 0.0015025,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.MultiLangString.Translatable#write": {
@@ -42084,9 +42084,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0014336,
+      "seconds": 0.0025571,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.ParserParameter.CanParse": {
@@ -42934,9 +42934,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 9.2907616,
+      "seconds": 10.8805559,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.UnitParser.GetBaseValue": {
@@ -42944,9 +42944,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 9.2119651,
+      "seconds": 14.4340661,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.UnitParser.GetUnit": {
@@ -42954,9 +42954,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 8.7792825,
+      "seconds": 15.1975308,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.UnitParser.GetValue": {
@@ -42964,9 +42964,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 8.6716214,
+      "seconds": 16.1644719,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.UnitParser.Set#write": {
@@ -42974,9 +42974,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0013364,
+      "seconds": 0.0032641,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.UnitParser.ToDisplay#write": {
@@ -42984,9 +42984,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0013782,
+      "seconds": 0.0028262,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.Base.UnitParser.ValueToUnit#write": {
@@ -42994,9 +42994,239 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0011442,
+      "seconds": 0.0015758,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArc": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArc",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.3116283,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticle": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticle",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.0166778,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticleReference": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsArticleReference",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 14.8744219,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsBlock": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsBlock",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.799953,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsBusBar": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsBusBar",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.7296979,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsCable": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsCable",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.6704716,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsComment": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsComment",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.1108706,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnection": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnection",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 16.4817084,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionDefinitionPoint": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionDefinitionPoint",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 27.9461932,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionPointsInfo": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsConnectionPointsInfo",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 29.0156226,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsCopperBundle": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsCopperBundle",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 29.5143828,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDeletedObjectInfo": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDeletedObjectInfo",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 27.7444686,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDeviceListEntry": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDeviceListEntry",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 26.2125798,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDimensionCircle": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDimensionCircle",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 22.0688195,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDimensionItem": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsDimensionItem",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 18.1877396,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunction": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunction",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.5516317,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunction3D": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunction3D",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 14.6799011,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunctionBase": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunctionBase",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.1572222,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunctionDefinitionLibrary": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsFunctionDefinitionLibrary",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 16.0554358,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsGraphicalPlacement": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsGraphicalPlacement",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.7054082,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsHyperLink": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsHyperLink",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 18.0569904,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsImage": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsImage",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.8232402,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInstallationSpace": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInstallationSpace",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.7673415,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInt": {
@@ -43019,6 +43249,326 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInterruptionPoint": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsInterruptionPoint",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 18.0058367,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLine": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLine",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 23.3688414,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLocation": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLocation",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.905753,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLocationBox": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsLocationBox",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 16.2904153,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMacroBox": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMacroBox",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.469901,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMacroEntry": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMacroEntry",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 18.4419631,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMergedArticleReference": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsMergedArticleReference",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.7865663,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOption": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOption",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.9524662,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOptionFragment": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOptionFragment",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.5593953,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOptionGroup": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsOptionGroup",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 20.7989296,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPage": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPage",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 20.1301973,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPathText": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPathText",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.1504303,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPipingDefinition": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPipingDefinition",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.4653519,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlaceHolder": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlaceHolder",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.2021539,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlacement": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlacement",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 16.6207141,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlacement3D": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlacement3D",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.0459643,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlanningSegment": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlanningSegment",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.2467492,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlcIO": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlcIO",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.0271823,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlotFrame": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlotFrame",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.8154461,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlugStrip": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPlugStrip",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 20.0644479,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPotentialDefinition": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsPotentialDefinition",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.6546049,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsProject": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsProject",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 21.234637,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsProtectedGroup": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsProtectedGroup",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 22.0425978,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsQRCode": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsQRCode",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 21.4875387,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsRectangle": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsRectangle",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 21.4097597,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsRoutedConnection": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsRoutedConnection",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 21.8690296,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegment": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegment",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.967893,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentDefinition": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentDefinition",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.4898593,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentPlacement": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentPlacement",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.8110127,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentTemplate": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSegmentTemplate",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.2550503,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsStorableObject": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsStorableObject",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.7728648,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsStrandConnector": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsStrandConnector",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 22.5438575,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.AnyPropertyId.AsString": {
       "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsString",
       "kind": "api-read",
@@ -43027,6 +43577,86 @@
       "seconds": 16.8981831,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbol": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbol",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 23.3371193,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolLibrary": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolLibrary",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 23.2696928,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolReference": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolReference",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.1438291,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolVariant": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsSymbolVariant",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 15.0927123,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsTerminalStrip": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsTerminalStrip",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 16.3226388,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsText": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsText",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 17.4567729,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsTextBase": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsTextBase",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 21.4729918,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.AnyPropertyId.AsViewPlacement": {
+      "id": "O:Eplan.EplApi.DataModel.AnyPropertyId.AsViewPlacement",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 19.0621575,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.AnyPropertyId.Definition": {
@@ -43054,9 +43684,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0018806,
+      "seconds": 0.0024532,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Article.Accessory.AccessoryPlacement": {
@@ -43114,9 +43744,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 8.4213191,
+      "seconds": 12.5958113,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Article.ArticleAccessories": {
@@ -43334,9 +43964,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 4.650065,
+      "seconds": 5.8193681,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Article.VariantNr": {
@@ -43357,6 +43987,26 @@
       "seconds": 15.7414376,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ArticlePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.ArticlePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0102485,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ArticlePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.ArticlePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.002028,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ArticleReference.Article": {
@@ -43494,9 +44144,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0018217,
+      "seconds": 0.0020184,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ArticleReference.VariantNr": {
@@ -43519,15 +44169,35 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0015882,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0019381,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Block.BreakUp#write": {
       "id": "O:Eplan.EplApi.DataModel.Block.BreakUp#write",
       "kind": "api-write",
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 15.6374459,
+      "seconds": 17.6316019,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Block.Count": {
@@ -43545,9 +44215,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0076597,
+      "seconds": 0.0085188,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Block.Name": {
@@ -43591,14 +44261,34 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.BlockPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.BlockPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013989,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.BlockPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.BlockPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013182,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.BoxedDevice.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.BoxedDevice.Create#write",
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0012478,
+      "seconds": 0.0011912,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.BoxedDevice.FunctionsInside": {
@@ -43669,9 +44359,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 14.6935182,
+      "seconds": 16.4500221,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Connection.AddArticleReference#write": {
@@ -43679,9 +44369,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0577422,
+      "seconds": 0.0550273,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Connection.ArticleReferences": {
@@ -43710,9 +44400,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 16.3659762,
+      "seconds": 15.2044588,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Connection.CableDefinitionLine": {
@@ -43910,9 +44600,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 90.0084576,
+      "seconds": 90.0076229,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Connection.Page": {
@@ -43930,9 +44620,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0665866,
+      "seconds": 0.0544081,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Connection.PlaceAsConnectionDefinitionPoint#write": {
@@ -43940,9 +44630,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0027905,
+      "seconds": 0.0021855,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Connection.PotentialDefinitions": {
@@ -43970,9 +44660,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 8.5314687,
+      "seconds": 7.2253339,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Connection.RepresentationType": {
@@ -44102,9 +44792,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0020019,
+      "seconds": 0.0018287,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ConnectionDefinitionPoint.ArticleReferences": {
@@ -44175,6 +44865,26 @@
       "seconds": 10.9901291,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0012845,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.ConnectionDefinitionPointPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013614,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ConnectionPointPosition.AdditionalLength": {
@@ -44582,9 +45292,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0016182,
+      "seconds": 0.0012397,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ConnectionPointPosition.StrippingLength": {
@@ -44802,9 +45512,39 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.7034521,
+      "seconds": 0.6854868,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0012979,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.ConnectionPointsInfoPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0012919,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ConnectionPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.ConnectionPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0012008,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ContextPropertyPlacement.BasePoint": {
@@ -44832,9 +45572,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0013139,
+      "seconds": 0.001219,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ContextPropertyPlacement.CreateFromProjectProperties#write": {
@@ -44842,9 +45582,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0012182,
+      "seconds": 0.0011649,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ContextPropertyPlacement.GetBoundingBox": {
@@ -44872,9 +45612,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0015059,
+      "seconds": 0.0012183,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.DaisyChain.ConnectionPoints": {
@@ -44922,9 +45662,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0013413,
+      "seconds": 0.0016356,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.DeletedObjectInfo.Properties": {
@@ -44937,14 +45677,34 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0012359,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.DeletedObjectInfoPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013261,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.DeviceGroup.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.DeviceGroup.Create#write",
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 18.2792536,
+      "seconds": 18.134553,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.DeviceGroup.Properties": {
@@ -44992,9 +45752,29 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.7368274,
+      "seconds": 0.7793342,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013377,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.DeviceListEntryPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0025327,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.DimensionGroup.Create#write": {
@@ -45002,9 +45782,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0019721,
+      "seconds": 0.0011672,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.DimensionGroup.DimensionType": {
@@ -45182,9 +45962,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.003003,
+      "seconds": 0.0014219,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.DynamicConnectionLine.GetFirstEmbeddedInstance": {
@@ -45232,9 +46012,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0029344,
+      "seconds": 0.0018738,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Area.Create#write": {
@@ -45242,9 +46022,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.7641016,
+      "seconds": 0.4519181,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Area.Properties": {
@@ -45433,9 +46213,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0017937,
+      "seconds": 0.0014306,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.BusBar.ChangeSegmentLength#write": {
@@ -45443,9 +46223,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0023761,
+      "seconds": 0.0011844,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.BusBar.CreateNewBendingPoint#write": {
@@ -45453,9 +46233,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0029397,
+      "seconds": 0.0012616,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.BusBar.DepthOfBars": {
@@ -45483,9 +46263,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 90.0215015,
+      "seconds": 90.013856,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.BusBar.Properties": {
@@ -45503,9 +46283,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0660955,
+      "seconds": 0.0568215,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.BusBar.SetCopperBundle#write": {
@@ -45513,9 +46293,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 90.004758,
+      "seconds": 90.0118379,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.BusBar.SetParent#write": {
@@ -45523,9 +46303,29 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 1.0451193,
+      "seconds": 1.1073371,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0028728,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.BusBarPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024273,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.BusBarSystem.BarCount": {
@@ -45624,9 +46424,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 16.8204125,
+      "seconds": 16.6699392,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Connection3D.Color": {
@@ -45644,9 +46444,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 12.2574274,
+      "seconds": 6.8376153,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Connection3D.EndConnectionPointPosition": {
@@ -45775,9 +46575,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 2.0455961,
+      "seconds": 1.0983567,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Properties": {
@@ -45805,9 +46605,29 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.7213023,
+      "seconds": 0.4218249,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0031908,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.CopperBundlePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0015306,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.ContourName": {
@@ -45825,9 +46645,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.4886938,
+      "seconds": 0.4254963,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.CreateHexagon#write": {
@@ -45835,9 +46655,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.6515299,
+      "seconds": 0.3722023,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.CreateOctagon#write": {
@@ -45845,9 +46665,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.6357881,
+      "seconds": 0.4034797,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.CreateRectangle#write": {
@@ -45855,9 +46675,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.5454346,
+      "seconds": 0.3742552,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.CreateRound#write": {
@@ -45865,9 +46685,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.6995957,
+      "seconds": 0.3740088,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.CreateRoundedRectangle#write": {
@@ -45875,9 +46695,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.5075397,
+      "seconds": 0.4119521,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.CreateSlot#write": {
@@ -45885,9 +46705,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 1.0338175,
+      "seconds": 0.4021202,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.CreateTapHole#write": {
@@ -45895,9 +46715,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.517836,
+      "seconds": 0.369817,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.CreatedAutomatically": {
@@ -45905,9 +46725,9 @@
       "kind": "api-read",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 6.4024567,
+      "seconds": 8.7482667,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Drilling.Parameter1": {
@@ -45989,9 +46809,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 17.1842073,
+      "seconds": 17.5060432,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Duct.Properties": {
@@ -46009,9 +46829,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0520661,
+      "seconds": 0.0597899,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Function3D.ArticleReferences": {
@@ -46182,9 +47002,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 15.3064987,
+      "seconds": 16.7251356,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Function3D.VisibleName": {
@@ -46216,6 +47036,26 @@
       "seconds": 10.2770508,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0077521,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.Function3DPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0833693,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.GridLineMate.GridMate": {
@@ -46323,9 +47163,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0586849,
+      "seconds": 0.0771676,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Group3D.Create#write": {
@@ -46333,9 +47173,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 5.2686814,
+      "seconds": 8.5884474,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Group3D.GetMates": {
@@ -46363,9 +47203,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.7414641,
+      "seconds": 1.4619714,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Group3D.InsertSubPlacement3Ds#write": {
@@ -46373,9 +47213,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.9479349,
+      "seconds": 0.7618695,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Group3D.IsPlaced": {
@@ -46393,9 +47233,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0024538,
+      "seconds": 0.0030298,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Group3D.Parent": {
@@ -46423,9 +47263,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.6143686,
+      "seconds": 0.3674375,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Group3D.RemoveSubPlacement3D#write": {
@@ -46433,9 +47273,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.7664021,
+      "seconds": 0.8062314,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Group3D.RemoveSubPlacement3Ds#write": {
@@ -46443,9 +47283,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 1.1357715,
+      "seconds": 0.7654183,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Group3D.SubPlacement3Ds": {
@@ -46463,9 +47303,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.3618586,
+      "seconds": 0.3426875,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.HandleMate.Create#write": {
@@ -46473,9 +47313,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0027916,
+      "seconds": 0.0030088,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.HandleMate.Group": {
@@ -46503,9 +47343,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 4.795698,
+      "seconds": 5.0381077,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.InstallationSpace.Name": {
@@ -46554,9 +47394,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 90.0150884,
+      "seconds": 90.0059634,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.InstallationSpace.VisibleName": {
@@ -46578,6 +47418,26 @@
       "seconds": 31.5213832,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0093975,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.InstallationSpacePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0035619,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.LineMate.EndPoint": {
@@ -46705,9 +47565,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0097074,
+      "seconds": 0.0021966,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Mate.Rotation": {
@@ -46755,9 +47615,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0023304,
+      "seconds": 0.0012919,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.MateEntry.Mate": {
@@ -46805,9 +47665,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0568982,
+      "seconds": 0.0519438,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.MountingPanel.Create#write": {
@@ -46815,9 +47675,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 1.0305754,
+      "seconds": 0.8179852,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.MountingPanel.Properties": {
@@ -46855,9 +47715,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0020286,
+      "seconds": 0.001812,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.AddReference#write": {
@@ -46865,9 +47725,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.9179498,
+      "seconds": 0.7282735,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.AddVariable#write": {
@@ -46875,9 +47735,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0026116,
+      "seconds": 0.0015822,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.ApplyRecord#write": {
@@ -46885,9 +47745,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0023411,
+      "seconds": 0.0012048,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.AssignedObjects": {
@@ -46905,9 +47765,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 5.7087909,
+      "seconds": 5.9059339,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.DeleteRecord#write": {
@@ -46915,9 +47775,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0525397,
+      "seconds": 0.0496018,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.DeleteUnusedVariables#write": {
@@ -46925,9 +47785,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.7890148,
+      "seconds": 0.792018,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.DeleteVariable#write": {
@@ -46935,9 +47795,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0017893,
+      "seconds": 0.0017755,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.FindRecord": {
@@ -47165,9 +48025,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.4103564,
+      "seconds": 0.3522837,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.RemoveObjectReferences#write": {
@@ -47175,9 +48035,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 11.9002326,
+      "seconds": 13.695429,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.SetProjectPropertyEntry#write": {
@@ -47185,9 +48045,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0026817,
+      "seconds": 0.0014812,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.SetPropertyEntry#write": {
@@ -47195,9 +48055,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.4478344,
+      "seconds": 0.8219146,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.SetValue#write": {
@@ -47205,9 +48065,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0026757,
+      "seconds": 0.002344,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlaceHolder3D.Value": {
@@ -47236,9 +48096,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 15.506231,
+      "seconds": 18.5171882,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.AddMatePersistent#write": {
@@ -47246,9 +48106,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0861757,
+      "seconds": 0.0515227,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.AreConnectionPointPositionsLocal": {
@@ -47318,9 +48178,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 19.811303,
+      "seconds": 15.9316097,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.Corners": {
@@ -47608,9 +48468,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.004329,
+      "seconds": 0.0531246,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.MoveRelative#write": {
@@ -47618,9 +48478,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0017875,
+      "seconds": 0.0022518,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.Parent": {
@@ -47678,9 +48538,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 5.0941887,
+      "seconds": 5.0503953,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.RemovePlacement#write": {
@@ -47688,9 +48548,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 5.5349649,
+      "seconds": 6.0670343,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.SetParent#write": {
@@ -47698,9 +48558,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 1.051281,
+      "seconds": 0.9319776,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.SwitchLocalPropertyPlacements#write": {
@@ -47708,9 +48568,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0030839,
+      "seconds": 0.0021206,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Placement3D.TopLevelParent": {
@@ -47744,6 +48604,26 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013373,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.Placement3DPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0033715,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.E3D.PlacementArea.Coordinates": {
       "id": "O:Eplan.EplApi.DataModel.E3D.PlacementArea.Coordinates",
       "kind": "api-read",
@@ -47769,9 +48649,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0024958,
+      "seconds": 0.0012069,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlacementArea.Rotate#write": {
@@ -47779,9 +48659,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.002294,
+      "seconds": 0.0012692,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.PlacementArea.TurnAround#write": {
@@ -47789,9 +48669,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0022681,
+      "seconds": 0.0013595,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Plane.BaseMate": {
@@ -47992,9 +48872,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.001125,
+      "seconds": 0.0021082,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.RoutingAccessory.Diameter": {
@@ -48062,9 +48942,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 4.731964,
+      "seconds": 4.7135976,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.RoutingSegment.EndVertex": {
@@ -48152,9 +49032,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.9513719,
+      "seconds": 0.8668149,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.RoutingSpline.GeometricalLength": {
@@ -48283,9 +49163,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 5.0121337,
+      "seconds": 4.3208892,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.BusTerminal.IsPlcMaster": {
@@ -48355,9 +49235,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 16.1064257,
+      "seconds": 16.1697898,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.Cable.CableConnections": {
@@ -48376,9 +49256,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 12.832078,
+      "seconds": 12.843118,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.Cable.FunctionCategory": {
@@ -48406,9 +49286,9 @@
       "kind": "api-read",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 30.0031778,
+      "seconds": 21.0520403,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.Cable.Location": {
@@ -48429,6 +49309,26 @@
       "seconds": 8.8083664,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.EObjects.CablePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.CablePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.007007,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.EObjects.CablePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.CablePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0029583,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.CableUnit.AllObjects": {
@@ -48658,9 +49558,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 5.3279456,
+      "seconds": 5.4633869,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.Plug.FunctionCategory": {
@@ -48719,9 +49619,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 17.1929046,
+      "seconds": 17.2485286,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.PlugStrip.Create#write": {
@@ -48729,9 +49629,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0073436,
+      "seconds": 0.0074348,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.PlugStrip.DeleteAllLocalFunctionTemplates#write": {
@@ -48739,9 +49639,9 @@
       "kind": "api-write",
       "outcome": "failed",
       "changed": false,
-      "seconds": 5.6452594,
+      "seconds": 5.6820513,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.PlugStrip.FunctionCategory": {
@@ -48782,6 +49682,26 @@
       "seconds": 14.5782047,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.EObjects.PlugStripPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.PlugStripPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013615,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.EObjects.PlugStripPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.PlugStripPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0030944,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.Shield.FunctionCategory": {
@@ -48939,9 +49859,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 8.855222,
+      "seconds": 9.0274769,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.Terminal.PLC": {
@@ -49030,9 +49950,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 14.099506,
+      "seconds": 19.4912864,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.Bridges": {
@@ -49070,9 +49990,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0081358,
+      "seconds": 0.0083638,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.DeleteAllLocalFunctionTemplates#write": {
@@ -49080,9 +50000,9 @@
       "kind": "api-write",
       "outcome": "failed",
       "changed": false,
-      "seconds": 4.8647281,
+      "seconds": 6.2791763,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.TerminalStrip.FunctionCategory": {
@@ -49135,6 +50055,26 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.EObjects.TerminalStripPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.TerminalStripPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013243,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.EObjects.TerminalStripPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.TerminalStripPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0032441,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Function.AddArticleReference#write": {
       "id": "O:Eplan.EplApi.DataModel.Function.AddArticleReference#write",
       "kind": "api-write",
@@ -49151,9 +50091,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 14.8488384,
+      "seconds": 16.5971092,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.AllSubFunctions": {
@@ -49518,9 +50458,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 90.0049839,
+      "seconds": 90.0120809,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.ManualPlacementType": {
@@ -49568,9 +50508,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0116774,
+      "seconds": 0.0732181,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.Pins": {
@@ -49588,9 +50528,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0023709,
+      "seconds": 0.0016353,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.PlaceAt#write": {
@@ -49598,9 +50538,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0021978,
+      "seconds": 0.0015619,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.PlaceFunctionalMacro#write": {
@@ -49608,9 +50548,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0019719,
+      "seconds": 0.0015448,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.PlanningSegment": {
@@ -49639,9 +50579,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 12.7321834,
+      "seconds": 18.1810304,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.ResetGraphicalTerminalsToConnectionPointsMapping#write": {
@@ -49650,9 +50590,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 13.0895502,
+      "seconds": 17.4478455,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.SetPlanningSegment#write": {
@@ -49660,9 +50600,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.7577122,
+      "seconds": 1.7518537,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.SetSymbolVariant#write": {
@@ -49670,9 +50610,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.5328809,
+      "seconds": 1.2246872,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.SubFunctions": {
@@ -49700,9 +50640,9 @@
       "kind": "api-write",
       "outcome": "skipped:refused_unsafe",
       "changed": false,
-      "seconds": 0.0006772,
+      "seconds": 0.000418,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.WriteProtected": {
@@ -49836,6 +50776,26 @@
       "seconds": 8.1717609,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0019996,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.FunctionBasePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0037722,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.FunctionDefinition.BaseSymbol": {
@@ -50058,14 +51018,34 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.FunctionPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.FunctionPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0015105,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.FunctionPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.FunctionPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0031951,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.Arc.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.Arc.Create#write",
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0010527,
+      "seconds": 0.0016543,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Arc.ElipseAngle": {
@@ -50185,9 +51165,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0010991,
+      "seconds": 0.0017325,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Arc.SetCircle#write": {
@@ -50195,9 +51175,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0009101,
+      "seconds": 0.0017893,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Arc.SetEllipse#write": {
@@ -50205,9 +51185,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0011026,
+      "seconds": 0.0014941,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Arc.StartAngle": {
@@ -50218,6 +51198,26 @@
       "seconds": 19.2824361,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022943,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.ArcPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0034647,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Color.B": {
@@ -50360,6 +51360,26 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0015567,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.CommentPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0028234,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.ContactImage.AreUserDefinedSettings": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.ContactImage.AreUserDefinedSettings",
       "kind": "api-read",
@@ -50405,9 +51425,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.1011227,
+      "seconds": 0.2384856,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.ContactImage.DisplayMask": {
@@ -50485,9 +51505,9 @@
       "kind": "api-write",
       "outcome": "skipped:no_object",
       "changed": false,
-      "seconds": 0.5159122,
+      "seconds": 1.2115318,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.Create#write": {
@@ -50495,9 +51515,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0013663,
+      "seconds": 0.0020803,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.DimensionCircle.DimensionCalculated": {
@@ -50760,14 +51780,34 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.001551,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.DimensionCirclePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0030655,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.Create#write",
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0011658,
+      "seconds": 0.0014616,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.CreateAngular#write": {
@@ -50775,9 +51815,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0010026,
+      "seconds": 0.0015472,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.DimensionCalculated": {
@@ -50995,9 +52035,9 @@
       "kind": "api-read",
       "outcome": "failed",
       "changed": true,
-      "seconds": 10.9327633,
+      "seconds": 28.4086093,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.DimensionText#write": {
@@ -51005,9 +52045,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 12.939538,
+      "seconds": 15.3434679,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.DimensionUnit": {
@@ -51118,9 +52158,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 10.1483705,
+      "seconds": 11.070987,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.DimensionItem.Location": {
@@ -51257,6 +52297,26 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0012906,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.DimensionItemPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0019902,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Alignment": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Alignment",
       "kind": "api-read",
@@ -51282,9 +52342,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0032074,
+      "seconds": 0.0012925,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.Description": {
@@ -51482,9 +52542,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0015988,
+      "seconds": 0.0012659,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayer.TextHeight": {
@@ -51622,9 +52682,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0016188,
+      "seconds": 0.0013501,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.FindElementsOnLayer": {
@@ -51672,9 +52732,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0022422,
+      "seconds": 0.0015324,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.ReassignLayer#write": {
@@ -51682,9 +52742,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0016518,
+      "seconds": 0.0561816,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.Reload#write": {
@@ -51692,9 +52752,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0010362,
+      "seconds": 0.0011792,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.RemoveLayer#write": {
@@ -51702,9 +52762,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0009062,
+      "seconds": 0.001252,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalLayerTable.ReplaceLayer#write": {
@@ -51712,9 +52772,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0010427,
+      "seconds": 0.0012361,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacement.IsVisible": {
@@ -51789,6 +52849,26 @@
       "date": "2026-11-04",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013402,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.GraphicalPlacementPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013395,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.HyperLink.Comment": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.HyperLink.Comment",
       "kind": "api-read",
@@ -51824,9 +52904,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0010701,
+      "seconds": 0.0011819,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.HyperLink.Link": {
@@ -51859,14 +52939,34 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0011875,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.HyperLinkPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013246,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.Image.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.Image.Create#write",
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0009035,
+      "seconds": 0.0011171,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Image.FileName": {
@@ -51944,9 +53044,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0017505,
+      "seconds": 0.0013181,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Image.SetAreaByHeigth#write": {
@@ -51954,9 +53054,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0015327,
+      "seconds": 0.0012502,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Image.SetAreaByWidth#write": {
@@ -51964,9 +53064,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0009698,
+      "seconds": 0.0012481,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Image.SetFile#write": {
@@ -51974,9 +53074,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.000894,
+      "seconds": 0.00115,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Image.WidthToHeighRatioFix": {
@@ -52000,14 +53100,34 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013267,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.ImagePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.00148,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.Line.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.Line.Create#write",
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0009273,
+      "seconds": 0.0011975,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Line.EndArrow": {
@@ -52134,24 +53254,44 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0014188,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.LinePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013203,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.LockedMountingArea.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.LockedMountingArea.Create#write",
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0008873,
+      "seconds": 0.0012858,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.LockedMountingArea.CreateEmbedded#write": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.LockedMountingArea.CreateEmbedded#write",
       "kind": "api-write",
-      "outcome": "skipped:no_object",
+      "outcome": "timeout",
       "changed": false,
-      "seconds": 1.5293008,
+      "seconds": 20.6770979,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.LockedMountingArea.Properties": {
@@ -52169,9 +53309,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.001267,
+      "seconds": 0.0099106,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PathText.Properties": {
@@ -52189,9 +53329,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 7.3707794,
+      "seconds": 9.157618,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PathText.ToText#write": {
@@ -52200,9 +53340,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 13.4010964,
+      "seconds": 14.7143334,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Pen.ColorId": {
@@ -52248,11 +53388,11 @@
     "O:Eplan.EplApi.DataModel.Graphics.Pen.StyleFactor": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.Pen.StyleFactor",
       "kind": "api-read",
-      "outcome": "timeout",
+      "outcome": "ok",
       "changed": false,
-      "seconds": 30.0129169,
+      "seconds": 26.6230666,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Pen.StyleFactor#write": {
@@ -52260,9 +53400,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0080996,
+      "seconds": 0.0026316,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Pen.StyleId": {
@@ -52300,9 +53440,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0109092,
+      "seconds": 0.0530703,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddReference#write": {
@@ -52311,9 +53451,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 14.4575617,
+      "seconds": 31.3276397,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.AddVariable#write": {
@@ -52321,9 +53461,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0130875,
+      "seconds": 0.0846953,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ApplyRecord#write": {
@@ -52372,9 +53512,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0019596,
+      "seconds": 0.0015069,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteRecord#write": {
@@ -52382,9 +53522,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0020468,
+      "seconds": 0.0020688,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteUnusedVariables#write": {
@@ -52392,9 +53532,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 38.2426876,
+      "seconds": 90.0131576,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.DeleteVariable#write": {
@@ -52402,9 +53542,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0079215,
+      "seconds": 0.0506493,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.FindRecord": {
@@ -52477,6 +53617,16 @@
       "date": "2026-11-04",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetRecordNames",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 11.7877097,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValue",
       "kind": "api-read",
@@ -52485,6 +53635,26 @@
       "seconds": 0.0016548,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetValues",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0020742,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.GetVariableNames",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 10.2041234,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.IsVariableValid": {
@@ -52635,9 +53805,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0018689,
+      "seconds": 0.0032102,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetPropertyEntry#write": {
@@ -52645,9 +53815,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.8378154,
+      "seconds": 13.3594638,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SetValue#write": {
@@ -52655,9 +53825,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.000989,
+      "seconds": 0.0014618,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.SymbolVariant": {
@@ -52678,6 +53848,46 @@
       "seconds": 0.0024986,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Add#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Add#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0011694,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Clear#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Clear#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0010931,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Contains#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Contains#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0014408,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.CopyTo#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.CopyTo#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0014153,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.ValueSetsClass.Count": {
@@ -52740,6 +53950,26 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Add#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Add#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0012402,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Clear#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Clear#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0014593,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Count": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolder.VariablesClass.Count",
       "kind": "api-read",
@@ -52758,6 +53988,26 @@
       "seconds": 0.0011555,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023224,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PlaceHolderPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013593,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PolyLine.Closed": {
@@ -52786,9 +54036,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0008441,
+      "seconds": 0.0020044,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PolyLine.FillPattern": {
@@ -52887,9 +54137,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0016647,
+      "seconds": 0.0020087,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PolyLine.SetPointAt#write": {
@@ -52897,9 +54147,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0009125,
+      "seconds": 0.0022413,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.ProjectParserParameter.SetParameter#write": {
@@ -52907,9 +54157,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0009475,
+      "seconds": 0.0020702,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Centered": {
@@ -53017,9 +54267,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 24.7799338,
+      "seconds": 22.6469332,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Relation#write": {
@@ -53027,9 +54277,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0030299,
+      "seconds": 0.0023532,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.RelationIndex": {
@@ -53037,9 +54287,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 25.8677203,
+      "seconds": 21.7194809,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Remove#write": {
@@ -53047,9 +54297,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0012906,
+      "seconds": 0.001643,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Source": {
@@ -53088,9 +54338,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0010869,
+      "seconds": 0.002078,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.QRCode.GetQRCode": {
@@ -53118,9 +54368,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0011084,
+      "seconds": 0.0020228,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.QRCode.SetArea#write": {
@@ -53128,9 +54378,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.000978,
+      "seconds": 0.0020296,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.QRCode.SetAreaBySize#write": {
@@ -53138,9 +54388,29 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0012926,
+      "seconds": 0.0022716,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0020201,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.QRCodePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0018905,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Rectangle.Angle": {
@@ -53190,9 +54460,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0011033,
+      "seconds": 0.0025458,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Rectangle.FillPattern": {
@@ -53291,9 +54561,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0011033,
+      "seconds": 0.0015665,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Rectangle.UpperRightCorner": {
@@ -53314,6 +54584,26 @@
       "seconds": 11.4203638,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0020244,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.RectanglePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0011947,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Shielding.Height": {
@@ -53341,9 +54631,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.001259,
+      "seconds": 0.002197,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Shielding.Width": {
@@ -53361,9 +54651,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0011018,
+      "seconds": 0.0019208,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Spline.Properties": {
@@ -53391,9 +54681,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0016341,
+      "seconds": 0.0022958,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.Text.GetBoundingBox": {
@@ -53421,9 +54711,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 7.905732,
+      "seconds": 10.0570184,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.TextBase.AlignmentBoxFixedHeight": {
@@ -53589,9 +54879,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 15.9700993,
+      "seconds": 17.3782175,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.TextBase.DockingDirection": {
@@ -54018,6 +55308,46 @@
       "date": "2026-11-04",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0078296,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.TextBasePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0028076,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0021514,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.TextPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0027652,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.TopologyLine.IsDirectLine": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.TopologyLine.IsDirectLine",
       "kind": "api-read",
@@ -54053,9 +55383,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 5.5729806,
+      "seconds": 5.5929523,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.ExcludedElements": {
@@ -54158,6 +55488,26 @@
       "seconds": 11.521858,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.PropertyPlacementsSchema.IsCustom": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.PropertyPlacementsSchema.IsCustom",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022674,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.PropertyPlacementsSchema.Name": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.PropertyPlacementsSchema.Name",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023994,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.Rectangle": {
@@ -54291,9 +55641,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 14.2426513,
+      "seconds": 18.6032967,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Graphics.ViewPlacement.ViewDirection": {
@@ -54380,14 +55730,34 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Exists#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Exists#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0068411,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.ViewPlacementPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024421,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Group.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Group.Create#write",
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 8.3170832,
+      "seconds": 20.5259033,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Group.DeepUnGroup#write": {
@@ -54395,9 +55765,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 11.2778817,
+      "seconds": 10.4119758,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Group.GetBoundingBox": {
@@ -54415,9 +55785,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 13.3279277,
+      "seconds": 22.6062968,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Group.InsertSubPlacements#write": {
@@ -54425,9 +55795,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 10.8697732,
+      "seconds": 24.1416518,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Group.IsEditable": {
@@ -54465,9 +55835,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0014029,
+      "seconds": 0.0028211,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Group.Properties": {
@@ -54486,9 +55856,9 @@
       "outcome": "failed",
       "changed": true,
       "undo_restores": false,
-      "seconds": 13.4748454,
+      "seconds": 13.5717119,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Group.RemoveSubPlacement#write": {
@@ -54496,9 +55866,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 13.7560394,
+      "seconds": 28.7697546,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Group.RemoveSubPlacements#write": {
@@ -54506,9 +55876,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 12.7724474,
+      "seconds": 25.5092752,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Group.SubPlacements": {
@@ -54526,9 +55896,9 @@
       "kind": "api-write",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 13.0044706,
+      "seconds": 26.7527843,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.IArticleUser.AddArticleReference#write": {
@@ -54536,9 +55906,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0016229,
+      "seconds": 0.001713,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.IArticleUser.ArticleReferences": {
@@ -54636,9 +56006,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0012888,
+      "seconds": 0.0010859,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.IPlaceHolder.AddVariable#write": {
@@ -54646,9 +56016,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0015136,
+      "seconds": 0.0010722,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.IPlaceHolder.ApplyRecord#write": {
@@ -54656,9 +56026,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0014224,
+      "seconds": 0.0017661,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.IPlaceHolder.AssignedObjects": {
@@ -54676,9 +56046,9 @@
       "kind": "api-write",
       "outcome": "failed:needs_context",
       "changed": false,
-      "seconds": 0.0014569,
+      "seconds": 0.0015232,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.IPlaceHolder.DeleteUnusedVariables#write": {
@@ -54686,9 +56056,9 @@
       "kind": "api-write",
       "outcome": "timeout",
       "changed": false,
-      "seconds": 39.049466,
+      "seconds": 90.012438,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.IPlaceHolder.DeleteVariable#write": {
@@ -54751,6 +56121,16 @@
       "date": "2026-11-04",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.IPlaceHolder.GetRecordNames": {
+      "id": "O:Eplan.EplApi.DataModel.IPlaceHolder.GetRecordNames",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 16.6347187,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.IPlaceHolder.GetValue": {
       "id": "O:Eplan.EplApi.DataModel.IPlaceHolder.GetValue",
       "kind": "api-read",
@@ -54759,6 +56139,26 @@
       "seconds": 0.001003,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.IPlaceHolder.GetValues": {
+      "id": "O:Eplan.EplApi.DataModel.IPlaceHolder.GetValues",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0020962,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.IPlaceHolder.GetVariableNames": {
+      "id": "O:Eplan.EplApi.DataModel.IPlaceHolder.GetVariableNames",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 10.8921034,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.IPlaceHolder.IsDocumentReferenceActive": {
@@ -55048,6 +56448,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.InterruptionPointPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.InterruptionPointPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024276,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Location.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Location.Create#write",
       "kind": "api-write",
@@ -55229,6 +56639,26 @@
       "seconds": 12.5217601,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.LocationBoxPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.LocationBoxPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024182,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.LocationPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.LocationPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023207,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.MacroBox.AddReference#write": {
@@ -55843,6 +57273,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.MergedArticleReferencePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0017827,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.MergedConnection.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.MergedConnection.Create#write",
       "kind": "api-write",
@@ -56283,6 +57723,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.OptionFragmentPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.OptionFragmentPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022853,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.OptionGroup.AddOption#write": {
       "id": "O:Eplan.EplApi.DataModel.OptionGroup.AddOption#write",
       "kind": "api-write",
@@ -56331,6 +57781,26 @@
       "seconds": 0.3289348,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.OptionGroupPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.OptionGroupPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.002376,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.OptionPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.OptionPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0026375,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Page.AllFirstLevelPlacements": {
@@ -57302,6 +58772,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.PipingDefinitionPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.PipingDefinitionPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024041,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.PlaceHolderText.ActionName": {
       "id": "O:Eplan.EplApi.DataModel.PlaceHolderText.ActionName",
       "kind": "api-read",
@@ -57524,6 +59004,16 @@
       "seconds": 24.6317094,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.PlacementPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.PlacementPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023725,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Planning.PCTLoop.Properties": {
@@ -58311,6 +59801,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Planning.PlanningSegmentPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0021642,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Planning.PropertyConfiguration.Id": {
       "id": "O:Eplan.EplApi.DataModel.Planning.PropertyConfiguration.Id",
       "kind": "api-read",
@@ -58504,6 +60004,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Planning.SegmentDefinitionPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.002368,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Planning.SegmentPlacement.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Planning.SegmentPlacement.Create#write",
       "kind": "api-write",
@@ -58572,6 +60082,16 @@
       "seconds": 13.9241937,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023969,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Planning.SegmentTemplate.CanHaveArticleData": {
@@ -58753,9 +60273,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 10.3286622,
+      "seconds": 11.310974,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.PlcIO.PlcCpu": {
@@ -58810,6 +60330,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.PlcIOPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.PlcIOPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.002464,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.PotentialDefinition.PotentialName": {
       "id": "O:Eplan.EplApi.DataModel.PotentialDefinition.PotentialName",
       "kind": "api-read",
@@ -58860,6 +60390,16 @@
       "seconds": 39.2943949,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.PotentialDefinitionPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024112,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Project.AddArticleReference#write": {
@@ -58965,11 +60505,11 @@
     "O:Eplan.EplApi.DataModel.Project.CurrentUsers": {
       "id": "O:Eplan.EplApi.DataModel.Project.CurrentUsers",
       "kind": "api-read",
-      "outcome": "outcome_unknown",
+      "outcome": "ok",
       "changed": false,
-      "seconds": 13.778014,
+      "seconds": 9.9953176,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Project.DeviceTagConfig": {
@@ -59443,14 +60983,24 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.ProjectPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.ProjectPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013299,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.ProjectSections.ActiveScheme": {
       "id": "O:Eplan.EplApi.DataModel.ProjectSections.ActiveScheme",
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 18.731885,
+      "seconds": 13.9529929,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.ProjectSections.AvailableSchemes": {
@@ -59911,6 +61461,16 @@
       "seconds": 0.5878147,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.ProtectedGroupPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013457,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Relation.Index": {
@@ -60498,11 +62058,11 @@
     "O:Eplan.EplApi.DataModel.StorableObject.IsReadOnly": {
       "id": "O:Eplan.EplApi.DataModel.StorableObject.IsReadOnly",
       "kind": "api-read",
-      "outcome": "timeout",
+      "outcome": "ok",
       "changed": false,
-      "seconds": 20.5512334,
+      "seconds": 20.5352848,
       "eplan_messages": 0,
-      "date": "2026-11-14",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.StorableObject.IsTransient": {
@@ -60585,6 +62145,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.StorableObjectPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.StorableObjectPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0021899,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.StrandConnector.Properties": {
       "id": "O:Eplan.EplApi.DataModel.StrandConnector.Properties",
       "kind": "api-read",
@@ -60593,6 +62163,16 @@
       "seconds": 9.514395,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.StrandConnectorPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0011865,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.StrandInterConnector.Properties": {
@@ -60662,9 +62242,9 @@
       "kind": "api-read",
       "outcome": "outcome_unknown",
       "changed": false,
-      "seconds": 5.1443334,
+      "seconds": 6.3671166,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.EndConnectionPoint": {
@@ -60785,6 +62365,36 @@
       "seconds": 16.9388157,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.ID": {
+      "id": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.ID",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0011798,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.IsCustom": {
+      "id": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.IsCustom",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0020195,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.Name": {
+      "id": "O:Eplan.EplApi.DataModel.SymbolReference.PropertyPlacementsSchema.Name",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0021089,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.SymbolReference.ReorderPropertyPlacements#write": {
@@ -60919,6 +62529,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.SymbolReferencePropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.SymbolReferencePropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022464,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Topology.RoutedConnection.ClearRoutingPath#write": {
       "id": "O:Eplan.EplApi.DataModel.Topology.RoutedConnection.ClearRoutingPath#write",
       "kind": "api-write",
@@ -60980,6 +62600,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Topology.RoutedConnectionPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022217,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Topology.Segment.Create#write": {
       "id": "O:Eplan.EplApi.DataModel.Topology.Segment.Create#write",
       "kind": "api-write",
@@ -61038,6 +62668,16 @@
       "seconds": 9.5381108,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Property": {
+      "id": "O:Eplan.EplApi.DataModel.Topology.SegmentPropertyList.Property",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013342,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.UniversalPropertyList.CopyTo#write": {
@@ -61380,6 +63020,26 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacementsSchema.IsCustom": {
+      "id": "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacementsSchema.IsCustom",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023716,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacementsSchema.Name": {
+      "id": "O:Eplan.EplApi.DataModel.ViewPart.PropertyPlacementsSchema.Name",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023459,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.ViewPart.Source": {
       "id": "O:Eplan.EplApi.DataModel.ViewPart.Source",
       "kind": "api-read",
@@ -61630,6 +63290,46 @@
       "date": "2026-11-04",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.EServices.PrjMessagesCollection.Count": {
+      "id": "O:Eplan.EplApi.EServices.PrjMessagesCollection.Count",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 9.8708643,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.EServices.PrjMessagesCollection.GetPrjMsgEnumerator": {
+      "id": "O:Eplan.EplApi.EServices.PrjMessagesCollection.GetPrjMsgEnumerator",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 12.5668009,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.EServices.PrjMessagesCollection.IsReadOnly": {
+      "id": "O:Eplan.EplApi.EServices.PrjMessagesCollection.IsReadOnly",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 8.8083464,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.EServices.PrjMessagesEnumerator.CurrentProjectMessage": {
+      "id": "O:Eplan.EplApi.EServices.PrjMessagesEnumerator.CurrentProjectMessage",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013297,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.EServices.PrjMessagesEnumerator.MoveNext#write": {
       "id": "O:Eplan.EplApi.EServices.PrjMessagesEnumerator.MoveNext#write",
       "kind": "api-write",
@@ -61830,6 +63530,16 @@
       "date": "2026-11-04",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.EServices.ProjectMessage.GetTime": {
+      "id": "O:Eplan.EplApi.EServices.ProjectMessage.GetTime",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0034682,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.EServices.ProjectMessage.GetUser": {
       "id": "O:Eplan.EplApi.EServices.ProjectMessage.GetUser",
       "kind": "api-read",
@@ -61838,6 +63548,16 @@
       "seconds": 0.0016711,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.EServices.SubProjectsCollection.Count": {
+      "id": "O:Eplan.EplApi.EServices.SubProjectsCollection.Count",
+      "kind": "api-read",
+      "outcome": "failed",
+      "changed": true,
+      "seconds": 9.5248797,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.HEServices.CableService.DeleteAutoCable#write": {
@@ -62768,9 +64488,9 @@
       "kind": "api-read",
       "outcome": "rolled_back",
       "changed": false,
-      "seconds": 16.1361423,
+      "seconds": 10.5047894,
       "eplan_messages": 0,
-      "date": "2026-11-04",
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.HEServices.NameService.RemovalOfUnnecessaryDeviceTagNamePartsIsEnabled": {
@@ -63022,6 +64742,16 @@
       "seconds": 9.1248006,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.GetSortModesCount": {
+      "id": "O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.GetSortModesCount",
+      "kind": "api-read",
+      "outcome": "ok",
+      "changed": false,
+      "seconds": 9.68607,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.OnlySelectedTerminals": {
@@ -64398,6 +66128,46 @@
       "seconds": 0.0024346,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDPartsDatabaseItem": {
+      "id": "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDPartsDatabaseItem",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0615096,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbol": {
+      "id": "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbol",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0033617,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbolLibrary": {
+      "id": "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbolLibrary",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.002876,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbolVariant": {
+      "id": "O:Eplan.EplApi.MasterData.MDAnyPropertyId.AsMDSymbolVariant",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024594,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.MasterData.MDAnyPropertyId.Definition": {
@@ -66380,6 +68150,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.GetProperty": {
+      "id": "O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.GetProperty",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024583,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.NonEmptyIds": {
       "id": "O:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.NonEmptyIds",
       "kind": "api-read",
@@ -67790,6 +69570,96 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetAccessoryList": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetAccessoryList",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.001582,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetAccessoryPlacement": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetAccessoryPlacement",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.001475,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetConnectionPointInfo": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetConnectionPointInfo",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023108,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetConstruction": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetConstruction",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0015532,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetCustomer": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetCustomer",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023344,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetManufacturer": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetManufacturer",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023122,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetPart": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetPart",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023658,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetPartVariantsByERPNumber": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetPartVariantsByERPNumber",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0021724,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetParts": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.GetParts",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.00147,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.MasterData.MDPartsDatabase.ID": {
       "id": "O:Eplan.EplApi.MasterData.MDPartsDatabase.ID",
       "kind": "api-read",
@@ -67898,6 +69768,16 @@
       "seconds": 0.0024837,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.GetTimeStampOfLastChange": {
+      "id": "O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.GetTimeStampOfLastChange",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022728,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.MasterData.MDPartsDatabaseItem.Properties": {
@@ -68530,6 +70410,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.MasterData.MDPropertyValue.GetDisplayString": {
+      "id": "O:Eplan.EplApi.MasterData.MDPropertyValue.GetDisplayString",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0024474,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.MasterData.MDPropertyValue.Id": {
       "id": "O:Eplan.EplApi.MasterData.MDPropertyValue.Id",
       "kind": "api-read",
@@ -68630,6 +70520,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.MasterData.MDSymbol.GetConnectionPoints": {
+      "id": "O:Eplan.EplApi.MasterData.MDSymbol.GetConnectionPoints",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023547,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.MasterData.MDSymbol.Id": {
       "id": "O:Eplan.EplApi.MasterData.MDSymbol.Id",
       "kind": "api-read",
@@ -68728,6 +70628,16 @@
       "seconds": 0.0025293,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.MasterData.MDSymbolLibrary.GetSymbol": {
+      "id": "O:Eplan.EplApi.MasterData.MDSymbolLibrary.GetSymbol",
+      "kind": "api-read",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022132,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.MasterData.MDSymbolLibrary.Properties": {
@@ -69981,7 +71891,7 @@
   "routes": {
     "api_try_only": {
       "count": 1999,
-      "live_verified": 698
+      "live_verified": 771
     },
     "declined": {
       "count": 756,
@@ -69989,7 +71899,7 @@
     },
     "dedicated": {
       "count": 626,
-      "live_verified": 420
+      "live_verified": 421
     },
     "generic_read": {
       "count": 116,
@@ -70037,7 +71947,7 @@
       "routes": {
         "api_try_only": {
           "count": 2236,
-          "live_verified": 705
+          "live_verified": 778
         },
         "declined": {
           "count": 838,
@@ -70045,7 +71955,7 @@
         },
         "dedicated": {
           "count": 838,
-          "live_verified": 500
+          "live_verified": 501
         },
         "generic_read": {
           "count": 288,
@@ -70070,7 +71980,7 @@
       "routes": {
         "api_try_only": {
           "count": 882,
-          "live_verified": 79
+          "live_verified": 85
         },
         "declined": {
           "count": 580,
@@ -70103,7 +72013,7 @@
       "routes": {
         "api_try_only": {
           "count": 1354,
-          "live_verified": 626
+          "live_verified": 693
         },
         "declined": {
           "count": 258,
@@ -70111,7 +72021,7 @@
         },
         "dedicated": {
           "count": 435,
-          "live_verified": 327
+          "live_verified": 328
         },
         "generic_read": {
           "count": 255,
