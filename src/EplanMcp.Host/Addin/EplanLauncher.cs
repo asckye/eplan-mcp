@@ -100,34 +100,5 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
         }
     }
 
-    /// <summary>
-    /// Asks EPLAN to close, refreshing the process first every time: .NET's <c>Process</c> keeps the main window handle
-    /// it first found, early in EPLAN's start the splash screen, and a request sent there does nothing (api-notes A23).
-    /// Asks again every <see cref="AddinTimings.Resend"/> in case a request did not take. False when EPLAN is still
-    /// running after <see cref="AddinTimings.Close"/>, for example behind a system messages window.
-    /// </summary>
-    private async Task<bool> CloseAsync(IStartedEplan started)
-    {
-        long start = time.GetTimestamp();
-        TimeSpan? asked = null;
-        while (!started.HasExited)
-        {
-            TimeSpan elapsed = time.GetElapsedTime(start);
-            if (elapsed >= timings.Close)
-            {
-                return false;
-            }
-
-            if (asked is null || elapsed - asked >= timings.Resend)
-            {
-                started.Refresh();
-                started.CloseMainWindow();
-                asked = elapsed;
-            }
-
-            await Task.Delay(timings.Poll, time).ConfigureAwait(false);
-        }
-
-        return true;
-    }
+    private Task<bool> CloseAsync(IStartedEplan started) => EplanCloser.CloseAsync(started, time, timings, CancellationToken.None);
 }

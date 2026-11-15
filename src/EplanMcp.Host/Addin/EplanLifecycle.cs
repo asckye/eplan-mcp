@@ -7,8 +7,8 @@ namespace EplanMcp.Host.Addin;
 /// <summary>What starting EPLAN gave: the process, the variant and version it runs, and its Bridge's handshake.</summary>
 internal sealed record EplanStart(int ProcessId, string Variant, string Version, HandshakeResult Handshake, double Seconds);
 
-/// <summary>Why starting EPLAN did not give a connected instance; maps onto an MCP error reason.</summary>
-internal sealed class EplanStartException(string reason, string message, IReadOnlyDictionary<string, string>? metadata = null) : Exception(message)
+/// <summary>Why starting or closing EPLAN did not happen as asked; maps onto an MCP error reason.</summary>
+internal sealed class EplanLifecycleException(string reason, string message, IReadOnlyDictionary<string, string>? metadata = null) : Exception(message)
 {
     public string Reason { get; } = reason;
 
@@ -43,21 +43,21 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
     {
         if (Pinned)
         {
-            throw new EplanStartException(ErrorReason.CapabilityMissing,
+            throw new EplanLifecycleException(ErrorReason.CapabilityMissing,
                 "This EplanMcp serves one EPLAN process over HTTP and cannot start another; start EPLAN in the virtual machine and restart the service there.");
         }
 
         EplanInstallation installation = Newest()
-            ?? throw new EplanStartException(ErrorReason.CapabilityMissing, "No supported EPLAN is installed on this computer (doctor lists what it finds).");
+            ?? throw new EplanLifecycleException(ErrorReason.CapabilityMissing, "No supported EPLAN is installed on this computer (doctor lists what it finds).");
         string chosen = string.IsNullOrWhiteSpace(variant)
             ? installation.Variants.FirstOrDefault(v => v.Equals("Electric P8", StringComparison.OrdinalIgnoreCase)) ?? installation.Variants[0]
             : installation.Variants.FirstOrDefault(v => v.Equals(variant.Trim(), StringComparison.OrdinalIgnoreCase))
-                ?? throw new EplanStartException(ErrorReason.InvalidArgument, $"'variant' must be one of: {string.Join(", ", installation.Variants)}.");
+                ?? throw new EplanLifecycleException(ErrorReason.InvalidArgument, $"'variant' must be one of: {string.Join(", ", installation.Variants)}.");
 
         IReadOnlyList<int> running = processes.Running();
         if (running.Count > 0)
         {
-            throw new EplanStartException(ErrorReason.AlreadyExists,
+            throw new EplanLifecycleException(ErrorReason.AlreadyExists,
                 "EPLAN is already running; a second instance would fight it over the station settings. Call eplan_session_status, or close EPLAN first.",
                 new Dictionary<string, string> { ["processes"] = string.Join(", ", running.Select(id => id.ToString(CultureInfo.InvariantCulture))) });
         }
@@ -71,14 +71,14 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
             cancellationToken.ThrowIfCancellationRequested();
             if (eplan.HasExited)
             {
-                throw new EplanStartException(ErrorReason.EplanNotConnected, "EPLAN exited while starting; ask the engineer to start it by hand and look at what it says.",
+                throw new EplanLifecycleException(ErrorReason.EplanNotConnected, "EPLAN exited while starting; ask the engineer to start it by hand and look at what it says.",
                     new Dictionary<string, string> { ["process"] = pid });
             }
 
             TimeSpan elapsed = time.GetElapsedTime(started);
             if (elapsed >= timings.Load)
             {
-                throw new EplanStartException(ErrorReason.Timeout,
+                throw new EplanLifecycleException(ErrorReason.Timeout,
                     "EPLAN started but its EplanMcp add-in did not answer in time; it may be waiting on a dialog, or the add-in is not registered for this variant. EPLAN was left running.",
                     new Dictionary<string, string> { ["process"] = pid, ["variant"] = chosen });
             }
@@ -101,12 +101,29 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
 
             if (i == EplanLauncher.HandshakeTries)
             {
-                throw new EplanStartException(ErrorReason.BridgeIncompatible, "EPLAN started and its add-in pipe is up, but the add-in did not answer the handshake. Call eplan_session_status.",
+                throw new EplanLifecycleException(ErrorReason.BridgeIncompatible, "EPLAN started and its add-in pipe is up, but the add-in did not answer the handshake. Call eplan_session_status.",
                     new Dictionary<string, string> { ["process"] = pid });
             }
 
             await Task.Delay(timings.Poll, time, cancellationToken).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// Asks the EPLAN with <paramref name="processId"/> to close as its close button would and waits up to a minute; true
+    /// when it exited. It never forces EPLAN: one that stays open (a dialog, a system messages window) is left running.
+    /// </summary>
+    public async Task<bool> CloseAsync(int processId, CancellationToken cancellationToken)
+    {
+        if (Pinned)
+        {
+            throw new EplanLifecycleException(ErrorReason.CapabilityMissing,
+                "This EplanMcp serves one EPLAN process over HTTP and cannot close it; ask the engineer to close EPLAN in the virtual machine.");
+        }
+
+        using IStartedEplan eplan = processes.Attach(processId) ?? throw new EplanLifecycleException(ErrorReason.SessionNotSelected,
+            $"No EPLAN with process {processId.ToString(CultureInfo.InvariantCulture)} runs in this Windows session; call eplan_session_status.");
+        return await EplanCloser.CloseAsync(eplan, time, timings, cancellationToken).ConfigureAwait(false);
     }
 
     private EplanInstallation? Newest() => EplanInstallation.Find(machine.ProgramFiles, machine.FileVersion)

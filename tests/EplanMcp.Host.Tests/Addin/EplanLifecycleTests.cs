@@ -46,9 +46,9 @@ public sealed class EplanLifecycleTests : IDisposable
     public async Task Start_RefusesWhileAnyEplanRuns_AndAnUnknownVariant()
     {
         _eplan.Others.Add(77);
-        EplanStartException running = await Assert.ThrowsAsync<EplanStartException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
+        EplanLifecycleException running = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
         _eplan.Others.Clear();
-        EplanStartException unknown = await Assert.ThrowsAsync<EplanStartException>(() => Lifecycle().StartAsync("Harness proD", null, TestContext.Current.CancellationToken));
+        EplanLifecycleException unknown = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle().StartAsync("Harness proD", null, TestContext.Current.CancellationToken));
 
         Assert.Equal((ErrorReason.AlreadyExists, "77"), (running.Reason, running.Metadata["processes"]));
         Assert.Equal(ErrorReason.InvalidArgument, unknown.Reason);
@@ -60,10 +60,10 @@ public sealed class EplanLifecycleTests : IDisposable
     public async Task Start_ReportsAnEplanThatExits_AndOneWhoseAddinNeverAnswers_LeavingItRunning()
     {
         _eplan.ExitsBeforePipe = true;
-        EplanStartException exited = await Assert.ThrowsAsync<EplanStartException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
+        EplanLifecycleException exited = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
         _eplan.ExitsBeforePipe = false;
         _eplan.PipeAfterLooks = null;
-        EplanStartException silent = await Assert.ThrowsAsync<EplanStartException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
+        EplanLifecycleException silent = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
 
         Assert.Equal(ErrorReason.EplanNotConnected, exited.Reason);
         Assert.Equal(ErrorReason.Timeout, silent.Reason);
@@ -74,9 +74,9 @@ public sealed class EplanLifecycleTests : IDisposable
     [Fact]
     public async Task Start_IsUnavailableToAPinnedHttpHost_AndWithoutASupportedEplan()
     {
-        EplanStartException pinned = await Assert.ThrowsAsync<EplanStartException>(() => Lifecycle(pinned: true).StartAsync(null, null, TestContext.Current.CancellationToken));
+        EplanLifecycleException pinned = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle(pinned: true).StartAsync(null, null, TestContext.Current.CancellationToken));
         Directory.Delete(Path.Combine(ProgramFiles, "EPLAN"), recursive: true);
-        EplanStartException missing = await Assert.ThrowsAsync<EplanStartException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
+        EplanLifecycleException missing = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
 
         Assert.Equal((ErrorReason.CapabilityMissing, ErrorReason.CapabilityMissing), (pinned.Reason, missing.Reason));
         Assert.Empty(_eplan.Log);

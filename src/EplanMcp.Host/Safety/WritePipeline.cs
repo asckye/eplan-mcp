@@ -64,6 +64,8 @@ internal sealed partial class WritePipeline(
     TimeProvider clock,
     ILogger<WritePipeline> logger)
 {
+    private int _inFlight;
+
     /// <summary>Runs <paramref name="request"/> without reporting progress.</summary>
     public Task<WriteOutcome<TData>> RunAsync<TArgs, TExecuteArgs, TData>(WriteRequest<TArgs, TExecuteArgs> request, CancellationToken cancellationToken) =>
         RunAsync<TArgs, TExecuteArgs, TData>(request, progress: null, cancellationToken);
@@ -74,6 +76,22 @@ internal sealed partial class WritePipeline(
     /// write (M4 design 4.3), the wait is reported there.
     /// </summary>
     public async Task<WriteOutcome<TData>> RunAsync<TArgs, TExecuteArgs, TData>(WriteRequest<TArgs, TExecuteArgs> request, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
+    {
+        Interlocked.Increment(ref _inFlight);
+        try
+        {
+            return await RunCoreAsync<TArgs, TExecuteArgs, TData>(request, progress, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _inFlight);
+        }
+    }
+
+    /// <summary>Write calls between planning and their result, approvals they wait on included; eplan_session_close waits for none.</summary>
+    public int InFlight => Volatile.Read(ref _inFlight);
+
+    private async Task<WriteOutcome<TData>> RunCoreAsync<TArgs, TExecuteArgs, TData>(WriteRequest<TArgs, TExecuteArgs> request, IProgress<ProgressNotificationValue>? progress, CancellationToken cancellationToken)
     {
         CallProgress? call = CallProgress.For(progress);
         WritePlan plan;

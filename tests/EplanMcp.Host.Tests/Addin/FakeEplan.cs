@@ -96,6 +96,8 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
         return instance;
     }
 
+    public IStartedEplan? Attach(int processId) => _instances.FirstOrDefault(i => i.Id == processId && !i.Exited);
+
     public bool IsUp(int processId) => Up(processId) is not null;
 
     public Task<HandshakeResult?> HandshakeAsync(int processId, CancellationToken cancellationToken) =>

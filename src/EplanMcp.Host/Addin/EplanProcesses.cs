@@ -34,6 +34,28 @@ internal sealed class EplanProcesses : IEplanProcesses
         return new Started(Process.Start(start) ?? throw new InvalidOperationException($"{exe} did not start."));
     }
 
+    public IStartedEplan? Attach(int processId)
+    {
+        using Process current = Process.GetCurrentProcess();
+        Process process;
+        try
+        {
+            process = Process.GetProcessById(processId);
+        }
+        catch (ArgumentException)
+        {
+            return null;
+        }
+
+        if (process.SessionId == current.SessionId && string.Equals(process.ProcessName, "EPLAN", StringComparison.OrdinalIgnoreCase))
+        {
+            return new Started(process);
+        }
+
+        process.Dispose();
+        return null;
+    }
+
     private sealed class Started(Process process) : IStartedEplan
     {
         public int Id => process.Id;

@@ -34,6 +34,18 @@ internal sealed class TaskRegistry : IDisposable
         _cleanup = clock.CreateTimer(_ => Cleanup(), null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
     }
 
+    /// <summary>Plan tasks of any session that are queued or running; eplan_session_close waits for none.</summary>
+    public int Unfinished
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _entries.Count(e => !e.Record.IsTerminal);
+            }
+        }
+    }
+
     // STDIO has no SDK SessionId. The DI server represents its connection; request facades do not.
     public PlanOwner OwnerFor(McpServer server) => SessionFor(server).Owner;
 

@@ -15,6 +15,9 @@ internal interface IEplanProcesses
 
     /// <summary>Starts <paramref name="exe"/> with the raw <paramref name="arguments"/>; throws when it cannot.</summary>
     public IStartedEplan Start(string exe, string arguments);
+
+    /// <summary>The EPLAN with <paramref name="processId"/> in this Windows session, to close it; null when there is none.</summary>
+    public IStartedEplan? Attach(int processId);
 }
 
 /// <summary>An EPLAN install-addin started. Disposing it lets go of the process, which keeps running.</summary>

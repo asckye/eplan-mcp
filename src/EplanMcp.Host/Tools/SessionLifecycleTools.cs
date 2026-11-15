@@ -36,7 +36,7 @@ internal sealed class SessionLifecycleTools
             started = await lifecycle.StartAsync(variant, message => progress.Report(new ProgressNotificationValue { Progress = ++step, Message = message }), cancellationToken)
                 .ConfigureAwait(false);
         }
-        catch (EplanStartException ex)
+        catch (EplanLifecycleException ex)
         {
             BridgeError error = ex.Reason == ErrorReason.InvalidArgument
                 ? ToolResults.InvalidArgumentError([ex.Message])
