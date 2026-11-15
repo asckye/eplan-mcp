@@ -486,6 +486,20 @@ public static class OperationNames
     public const string TranslationImportExecute = "translation.import.execute";
 
     /// <summary>
+    /// Previews adding keywords to, and filling missing translations of, the configured translation database, and
+    /// classifies every requested translation as add, fill or keep against the database as it is now. Arguments:
+    /// <see cref="TranslationKeywordSetArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string TranslationKeywordSetPlan = "translation.keyword.set.plan";
+
+    /// <summary>
+    /// Writes the planned keywords through the same merging import as
+    /// <see cref="TranslationImportExecute"/>, so an existing translation is never overwritten (api-notes A47).
+    /// Arguments: <see cref="TranslationKeywordSetArgs"/>; data: <see cref="TranslationKeywordSetData"/>.
+    /// </summary>
+    public const string TranslationKeywordSetExecute = "translation.keyword.set.execute";
+
+    /// <summary>
     /// The plan of eplan_page_delete: finds the pages by their exact names and the devices their removal leaves without a
     /// main function, never writes. Arguments: <see cref="PageDeleteArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>

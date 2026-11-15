@@ -22,6 +22,15 @@ public sealed class TranslationTable
 
     public string ReferenceLanguage { get; }
 
+    /// <summary>The most keywords one write may ask for; a bigger change belongs in a file import.</summary>
+    internal const int MaxKeywords = 200;
+
+    /// <summary>The longest source text or translation; EPLAN's dictionary holds phrases, not documents.</summary>
+    internal const int MaxText = 1000;
+
+    /// <summary>The kind every planned keyword change carries, so the approval form groups them.</summary>
+    internal const string Kind = "translation_keyword";
+
     /// <summary>Requires a UTF-16 BOM; exports additionally allow COMMENT and empty reference texts.</summary>
     public static TranslationTable Parse(byte[] bytes, string referenceLanguage = "en_US", bool export = false)
     {
@@ -85,6 +94,119 @@ public sealed class TranslationTable
 
         return new TranslationTable(columns, rows, referenceLanguage);
     }
+
+    /// <summary>
+    /// The table a keyword write asks for, checked as arguments rather than as a file: the reference language is the
+    /// first column and every language any entry mentions follows, so <see cref="Remap"/> maps it onto the export's
+    /// own header. An entry with no translations is still a row, which adds the source text to the dictionary.
+    /// </summary>
+    public static TranslationTable FromKeywords(IReadOnlyList<TranslationKeywordEntry> keywords, string referenceLanguage)
+    {
+        var violations = new List<string>();
+        if (!Code(referenceLanguage))
+        {
+            violations.Add("'reference_language' must be a language code such as en_US.");
+        }
+
+        if (keywords.Count is 0 or > MaxKeywords)
+        {
+            violations.Add($"'keywords' must have 1 to {MaxKeywords} entries.");
+        }
+
+        var sources = new HashSet<string>(StringComparer.Ordinal);
+        var languages = new List<string>();
+        for (int i = 0; i < keywords.Count; i++)
+        {
+            TranslationKeywordEntry entry = keywords[i];
+            string at = $"'keywords[{i.ToString(CultureInfo.InvariantCulture)}]";
+            if (!Text(entry.Source))
+            {
+                violations.Add($"{at}.source' must be 1 to {MaxText} characters without a tab, line break or other control character.");
+            }
+            else if (!sources.Add(entry.Source))
+            {
+                violations.Add($"{at}.source' repeats a source text named earlier; give each keyword once.");
+            }
+
+            foreach (KeyValuePair<string, string> pair in entry.Translations)
+            {
+                (string language, string text) = (pair.Key, pair.Value);
+                if (!Code(language) || language == referenceLanguage)
+                {
+                    violations.Add($"{at}.translations' must use language codes such as zh_CN, and not 'reference_language'.");
+                }
+                else if (!Text(text))
+                {
+                    violations.Add($"{at}.translations.{language}' must be 1 to {MaxText} characters without a tab, line break or other control character.");
+                }
+                else if (!languages.Contains(language, StringComparer.Ordinal))
+                {
+                    languages.Add(language);
+                }
+            }
+        }
+
+        if (violations.Count > 0)
+        {
+            throw WriteArguments.NotStarted(WriteArguments.Invalid(violations));
+        }
+
+        languages.Sort(StringComparer.Ordinal);
+        string[] columns = [referenceLanguage, .. languages];
+        List<string[]> rows = [.. keywords.Select(entry => columns
+            .Select(column => column == referenceLanguage ? entry.Source
+                : entry.Translations.TryGetValue(column, out string? text) ? text : string.Empty)
+            .ToArray())];
+        return new TranslationTable(columns, rows, referenceLanguage);
+    }
+
+    /// <summary>
+    /// What this table would change in the database as it is now: a row for a source text that is not there yet and a
+    /// row per translation that is still empty. A language that already reads something is not a change, because a
+    /// merging import leaves it alone (api-notes A47); those are returned separately so the caller can say so.
+    /// </summary>
+    public (List<PlannedChange> Changes, List<string> Kept) Classify(TranslationTable current)
+    {
+        int[] columns = Positions(current);
+        int reference = Array.IndexOf(Columns, ReferenceLanguage);
+        Dictionary<string, string[]> rows = current.Index(ReferenceLanguage);
+        var changes = new List<PlannedChange>();
+        var kept = new List<string>();
+        foreach (string[] row in Rows)
+        {
+            string source = row[reference];
+            bool exists = rows.TryGetValue(source, out string[] present);
+            if (!exists)
+            {
+                changes.Add(new PlannedChange { Action = "create", Kind = Kind, Name = source });
+            }
+
+            for (int i = 0; i < Columns.Length; i++)
+            {
+                if (i == reference || row[i].Length == 0)
+                {
+                    continue;
+                }
+
+                string old = exists ? present![columns[i]] : string.Empty;
+                if (old.Length == 0)
+                {
+                    changes.Add(new PlannedChange { Action = "update", Kind = Kind, Name = source, Property = Columns[i], NewValue = row[i] });
+                }
+                else if (old != row[i])
+                {
+                    kept.Add(source + " [" + Columns[i] + "] " + old);
+                }
+            }
+        }
+
+        return (changes, kept);
+    }
+
+    private static bool Code(string value) => Regex.IsMatch(value, "^[a-z]{2}_[A-Z]{2}$", RegexOptions.CultureInvariant);
+
+    /// <summary>A tab or line break would split the tab file, and the dictionary holds no other control character.</summary>
+    private static bool Text(string? value) => value is { Length: > 0 and <= MaxText } && !value.Any(char.IsControl);
 
     /// <summary>Preserves the export's exact header, including COMMENT; the caller writes this as UTF-16.</summary>
     public string Remap(TranslationTable export)

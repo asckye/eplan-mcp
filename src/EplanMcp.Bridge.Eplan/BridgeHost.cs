@@ -316,6 +316,8 @@ internal static class BridgeHost
             new PartImportExecuteOperation(parts, new EplanPartsDatabase()),
             new TranslationImportPlanOperation(translations),
             new TranslationImportExecuteOperation(translations),
+            new TranslationKeywordSetPlanOperation(translations),
+            new TranslationKeywordSetExecuteOperation(translations),
             new PartSyncPlanOperation(catalog, reader, parts),
             new PartSyncExecuteOperation(catalog, pages, reader, parts, backup, transactions),
         ];
