@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-15
+
 ### 新增
 
 - 新增 `eplan_session_start`（full，写入）：在本机启动 EPLAN（默认 Electric P8，可选 `variant`），等 EplanMcp 插件握手，最长 3 分钟，每 5 秒报一次进度；不打开项目，窗口正常显示（之后的审批框弹在上面）。已有 EPLAN 在运行时拒绝（`ALREADY_EXISTS`），因为第二个实例会和第一个争站点设置；超时则让 EPLAN 留着，不强制关闭。HTTP（虚拟机）模式下不可用（ADR-0058）。尚未实机验证。
