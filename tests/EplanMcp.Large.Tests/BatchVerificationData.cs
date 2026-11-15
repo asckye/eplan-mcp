@@ -21,7 +21,13 @@ internal sealed record BatchEntry(string Id, string Kind, string[]? ObjectKinds 
     internal bool Destructive => ApiTryLifecycle.Effect(Group) == "removes";
     internal bool Refused => ApiTryCatalog.Refused(Group, Kind == "api-write" ? "write" : "read") is not null
         || Method && ApiTryCatalog.Refused(Group, "call") is not null;
-    internal bool NeedsContext => Action is { } action && (action.Context?.Any(c => c is "file" or "page" or "selection") == true
+    /// <summary>The write recipe that supplies this entry's arguments (fixtures/batch-write-recipes.json); null for reads and actions.</summary>
+    internal Dictionary<string, JsonElement>? Recipe => Kind == "api-write" && Method ? BatchWriteRecipes.Default.For(Id, Parameters?.Keys) : null;
+
+    // With a recipe only a handle receiver still needs context: the recipe stands in for every discovered argument.
+    internal bool NeedsContext => Recipe is not null ? ObjectKinds is { Length: 0 } : DiscoveryNeedsContext;
+
+    private bool DiscoveryNeedsContext => Action is { } action && (action.Context?.Any(c => c is "file" or "page" or "selection") == true
         || ActionCallTemplates.Example(action).Any(p => p.Value?.GetValue<string>().StartsWith("<scratch ", StringComparison.Ordinal) == true)
         || action.Parameters.Any(p => p.TryGetProperty("required", out var required) && required.ValueKind == JsonValueKind.True
             && !ActionCallTemplates.Example(action).ContainsKey(p.GetProperty("name").GetString()!)))
@@ -97,6 +103,20 @@ internal static class BatchValues
         // Only the discovery path reads a producer for a handle receiver; here one would have to be invented.
         if (entry.NeedsContext || HandleReceiver(entry.Group) is not null)
         { return null; }
+        if (entry.Recipe is { } recipe)
+        {
+            var values = new Dictionary<string, object?>(StringComparer.Ordinal);
+            foreach (string parameter in entry.Parameters?.Keys ?? Enumerable.Empty<string>())
+            {
+                JsonElement given = recipe[parameter];
+                values[parameter] = given.ValueKind == JsonValueKind.String && given.GetString() == BatchWriteRecipes.Project
+                    ? await find(["Project"]) is { } project ? project : null
+                    : given;
+                if (values[parameter] is null)
+                { return null; }
+            }
+            return values;
+        }
         if (entry.Action is { } action)
         { return ActionCallTemplates.Example(action).ToDictionary(p => p.Key, p => (object?)p.Value?.GetValue<string>(), StringComparer.Ordinal); }
         if (entry.Signature is not null)

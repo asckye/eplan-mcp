@@ -85,3 +85,9 @@
 - 🔴 规则：通过 `PropertyValue` 读取期间，必须保持其所属对象包装器可达（它也持有缓存的列表）：全量读取接收所有者对象，在全部值释放后 `GC.KeepAlive(所有者)`。同一请求中在同一对象上先读的单个属性值（`FUNC_TEXT`、`PAGE_NOMINATIOMN`）当场 `using` 释放，不留给终结器在之后的全量读取中执行。
 - 修复后 A 槽复验（2026-11-02 15:44–16:01，LargeWrite scratch 副本与只读夹具；EPLAN 由本次运行启动，进程环境中 `COMPlus_GCgen0size=0x10000`，运行结束时 gen0 GC 计数约 150 万次）：`FullPropertyReadTests` 1/1、`DevicePlaceTests` 8/8、`AcceptanceRedrawTests` 1/1（含 `-X6` 1..8 端子的放置及其后的 detailed 读取），应用程序日志中无 EPLAN 崩溃事件。— TRX 计数、.NET CLR Memory 性能计数器、Windows 应用程序日志。
 - 未处理：上一请求留下的、同一对象的其他包装器在本次读取中被终结（例如写入后紧接的读取）。上面的复验在 GC 压力下没有出现这种问题，但不能据此排除。
+
+### A143. 项目级创建在大项目里观察不到；两种创建一次撤销不恢复（2026-11-15，EPLAN 2026.0.3.25421，Electric P8，A 槽 LargeWrite scratch 副本）
+- 批量验证用写入配方（`fixtures/batch-write-recipes.json`）试 `Article.Create`、`E3D.Component.Create`、`DeviceService.CreateDeviceListItem`，都是不带页的项目级创建。
+- `eplan_api_try` 观察项目级创建时遍历整个项目：示例项目约 95000 个对象（去重后 50000 以上），描述约 11 MB，遍历约 2 秒，超出对象数与大小预算（10000 个、256 KiB），结果为 `TIMEOUT`。只遍历所建对象的种类（`ObjectKindDispatch.Candidates(kind)`，项目级、不带页）对 article、devicelistentry、3D 部件返回 0 个对象，不能代替全量遍历；改动未合入，预算保持原值。
+- 把观察范围缩到 0 的那一次，调用真的执行了：`CreateDeviceListItem` 和 `E3D.Component.Create` 改动了项目，**一次 `XEsUndoAction` 没有恢复**（`undo_restores` 为 false）；`Article.Create` 失败并回滚。这三组保持未验证；项目级创建要先解决不带页对象的观察方法，再验证撤销。
+

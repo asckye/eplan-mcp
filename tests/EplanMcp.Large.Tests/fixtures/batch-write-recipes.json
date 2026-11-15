@@ -1,0 +1,6 @@
+{
+  "_why": "Write arguments the batch cannot discover: a known part of the development machine's parts database and the batch project. $project is the project locator; anything else is a literal. Each write is verified by one undo restoring the copy.",
+  "O:Eplan.EplApi.DataModel.Article.Create#write": { "proj": "$project", "strPartnr": "SIE.3RH2122-1HB40", "strVariant": "1" },
+  "O:Eplan.EplApi.DataModel.E3D.Component.Create#write": { "oProject": "$project", "strArticleNr": "SIE.3RH2122-1HB40", "strVariant": "1" },
+  "O:Eplan.EplApi.HEServices.DeviceService.CreateDeviceListItem#write": { "oProject": "$project", "strPartNumber": "SIE.3RH2122-1HB40", "strPartVariant": "1" }
+}

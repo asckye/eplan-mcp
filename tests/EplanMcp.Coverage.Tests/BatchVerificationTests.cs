@@ -330,6 +330,24 @@ public sealed class BatchActionCatalogTests
     }
 
     [Fact]
+    public void WriteRecipes_NameWriteEntries_AndTakeThemOutOfNeedingContext()
+    {
+        using var reader = new StreamReader(typeof(BatchWriteRecipes).Assembly.GetManifestResourceStream("BatchWriteRecipes.json")!);
+        string json = reader.ReadToEnd();
+        using JsonDocument document = JsonDocument.Parse(json);
+        string[] ids = [.. document.RootElement.EnumerateObject().Select(p => p.Name).Where(n => !n.StartsWith('_'))];
+        BatchEntry[] entries = BatchValues.ApiEntries();
+
+        Assert.NotEmpty(ids);
+        Assert.All(ids, id =>
+        {
+            BatchEntry entry = Assert.Single(entries, e => e.Id == id);
+            Assert.True(entry.Recipe is not null, id + " has parameters the recipe does not give: " + string.Join(", ", entry.Parameters?.Keys ?? Enumerable.Empty<string>()));
+            Assert.False(entry.NeedsContext, id + " still needs context with its recipe");
+        });
+    }
+
+    [Fact]
     public void PartsDatabasePositions_AreReachedThroughAChainFromTheProject()
     {
         string type = Assert.IsType<string>(BatchValues.HandleReceiver("O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.HasPlugInAdapter"));

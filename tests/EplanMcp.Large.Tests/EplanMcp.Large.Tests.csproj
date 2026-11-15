@@ -21,6 +21,7 @@
     <!-- Input files the import tests copy below the imports root (S34's device list exports of the sample project). -->
     <None Include="fixtures\**" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="fixtures\batch-read-recipes.json" LogicalName="BatchReadRecipes.json" />
+    <EmbeddedResource Include="fixtures\batch-write-recipes.json" LogicalName="BatchWriteRecipes.json" />
     <EmbeddedResource Include="..\..\catalog\eplan-2026.0.3\types.jsonl" LogicalName="CatalogTypes.jsonl" />
   </ItemGroup>
   <ItemGroup>

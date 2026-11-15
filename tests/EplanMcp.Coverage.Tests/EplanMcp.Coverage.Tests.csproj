@@ -15,7 +15,9 @@
     <Compile Include="..\EplanMcp.Large.Tests\BatchVerificationData.cs" Link="BatchVerificationData.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\BatchHandles.cs" Link="BatchHandles.cs" />
     <Compile Include="..\EplanMcp.Large.Tests\BatchReadRecipes.cs" Link="BatchReadRecipes.cs" />
+    <Compile Include="..\EplanMcp.Large.Tests\BatchWriteRecipes.cs" Link="BatchWriteRecipes.cs" />
     <EmbeddedResource Include="..\EplanMcp.Large.Tests\fixtures\batch-read-recipes.json" LogicalName="BatchReadRecipes.json" />
+    <EmbeddedResource Include="..\EplanMcp.Large.Tests\fixtures\batch-write-recipes.json" LogicalName="BatchWriteRecipes.json" />
     <EmbeddedResource Include="..\..\catalog\eplan-2026.0.3\types.jsonl" LogicalName="CatalogTypes.jsonl" />
     <EmbeddedResource Include="fixtures/actions/*.html" />
   </ItemGroup>
