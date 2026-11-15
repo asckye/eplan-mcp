@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `meta` / `discovery`（只在 discovery 中，见 [ADR-0057](../adr/0057-discovery-profile-dispatch.md)） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Designed（2026-11-14，ADR-0057 接受后） |
+| 状态 | Implemented (Unreleased) |
 
 ## 1. 这个工具解决什么任务
 discovery Profile 的会话开头只有四个工具。模型要先知道"画一页图、给设备换部件、导出 PDF"该用哪个工具，再用 [`eplan_tool_usage`](eplan_tool_usage.md) 查用法，最后经 `eplan_tool_read` 或 `eplan_tool_write` 调用。本工具按关键词在全部可转发工具里找候选。

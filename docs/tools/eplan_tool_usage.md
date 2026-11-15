@@ -41,7 +41,7 @@
 - 内容放在 `src/EplanMcp.Host/Tools/Usage/<工具名>.md`，作为嵌入资源编译进 `eplanmcp.exe`，运行时不读磁盘；第一次调用时加载并解析全部文件，之后只读。不调用 Bridge，耗时可以忽略。
 - 文件格式：恰好四个 `## ` 节，依次为 Examples、Workflow、Fields、Errors（与 `topic` 的值不区分大小写地对应），第一个标题之前没有文字，每节都有内容；节内可以用 `###`。
 - 四节分别存放完整参数示例、典型调用顺序、结果字段和错误处理；当前 reason 定义见 [共享结果契约](error-reference.md)。`ModelTextTests`、`ToolUsageExampleTests` 与契约快照的检查入口见 [Host 测试说明](../../tests/EplanMcp.Host.Tests/README.md)。
-- `serve --profile core|full` 默认 `full`；`core` 集合来自 [`ToolProfiles.Core`](../../src/EplanMcp.Host/Tools/ToolProfiles.cs)。工具枚举先按 Profile 与配置开关筛选，再由当前注册集合生成；`tools/list` 按分组和名称排序。
+- `serve --profile core|full|discovery` 默认 `full`；`core` 集合来自 [`ToolProfiles.Core`](../../src/EplanMcp.Host/Tools/ToolProfiles.cs)。`discovery` 下 `tool` 的枚举是分发工具能调用的全部工具加四个 discovery 工具（`ToolRegistry.Explained`），不只是本 Profile 提供的四个。工具枚举先按 Profile 与配置开关筛选，再由当前注册集合生成；`tools/list` 按分组和名称排序。
 
 ## 6. 写操作专项
 不适用。

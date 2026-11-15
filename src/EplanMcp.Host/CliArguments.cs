@@ -43,7 +43,7 @@ internal sealed record CliArguments(
     bool Offline = false)
 {
     public static string Usage { get; } =
-        "usage: eplanmcp [serve [--profile core|full]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--offline] [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
+        "usage: eplanmcp [serve [--profile core|full|discovery]] | serve --http --address <IPv4> [--port <n>] [--process <pid>] | vm-key create|show|delete | doctor [--offline] [--format json] | audit verify [--format json] | client-config <client>... [--dry-run|--remove] [--format json]"
         + " | client-config claude-code --plugin [--dry-run] [--format json] | addin-variants [--format json]"
         + " | client-config <client>... --vm --url http://<IPv4>:<port>/mcp --key-stdin [--dry-run] [--format json]"
         + " | client-config [<client>...] --vm --remove [--format json]"
@@ -62,6 +62,7 @@ internal sealed record CliArguments(
         [] or ["serve"] => new(CliCommand.Serve, Json: false),
         ["serve", "--profile", "full"] => new(CliCommand.Serve, Json: false),
         ["serve", "--profile", "core"] => new(CliCommand.Serve, Json: false, Profile: ToolProfile.Core),
+        ["serve", "--profile", "discovery"] => new(CliCommand.Serve, Json: false, Profile: ToolProfile.Discovery),
         ["serve", .. var options] when HttpArguments.Parse(options) is { } http => new(CliCommand.Serve, Json: false, Http: http),
         ["vm-key", var action] when action is "create" or "show" or "delete" => new(CliCommand.VmKey, Json: false, KeyAction: action),
         ["vm-firewall", var action, .. var options] when VmFirewallRequest.Parse(action, options) is { } firewall => new(CliCommand.VmFirewall, Json: firewall.Json, Firewall: firewall),

@@ -22,6 +22,6 @@
 
 ## 工具发现与日志
 
-`eplanmcp serve --profile core|full` 的默认值为 `full`；`core` 集合由 `ToolProfiles.Core` 定义，注册工具按组和名称排序。`eplan_tool_usage` 的 `tool` 枚举取自本次 Profile 与开关筛选后的注册集合，详见[用法工具](../tools/eplan_tool_usage.md)。
+`eplanmcp serve --profile core|full|discovery` 的默认值为 `full`；`core` 集合由 `ToolProfiles.Core` 定义，`discovery` 只提供 `eplan_tool_search`、`eplan_tool_usage`、`eplan_tool_read`、`eplan_tool_write` 四个工具，其余工具经两个分发工具调用（[ADR-0057](../adr/0057-discovery-profile-dispatch.md)），注册工具按组和名称排序。`eplan_tool_usage` 的 `tool` 枚举取自本次 Profile 与开关筛选后的注册集合，详见[用法工具](../tools/eplan_tool_usage.md)。
 
 Host 使用 `Microsoft.Extensions.Logging` 的 `AddSimpleConsole`，单行日志写到 stderr；Bridge 日志为数据目录中的 `logs/bridge-*.log`，离线宿主为 `logs/bridge-offline-*.log`，插件启动异常另写 `bridge-startup-error.log`。默认数据目录与环境变量见 [CLAUDE.md](../../CLAUDE.md#常用命令)和[数据位置决定](../adr/0008-data-locations-and-instance-discovery.md)。

@@ -846,7 +846,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_api_search.md",
       "small": 2,
-      "medium": 2,
+      "medium": 3,
       "large": 0,
       "apiNotes": []
     },
@@ -2096,7 +2096,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
       "small": 14,
-      "medium": 17,
+      "medium": 18,
       "large": 20,
       "apiNotes": [
         "A7",
@@ -2173,7 +2173,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
-      "medium": 5,
+      "medium": 6,
       "large": 14,
       "apiNotes": [
         "A11"
@@ -3391,7 +3391,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_tool_usage.md",
       "small": 10,
-      "medium": 3,
+      "medium": 4,
       "large": 0,
       "apiNotes": []
     },

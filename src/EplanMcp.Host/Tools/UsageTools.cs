@@ -17,10 +17,16 @@ internal sealed class UsageTools
 {
     public const string UsageTool = "eplan_tool_usage";
 
-    public static void Configure(McpServerOptions options)
+    public static void Configure(McpServerOptions options) =>
+        Configure(options, [.. (options.ToolCollection ?? []).Select(t => t.ProtocolTool.Name).Order(StringComparer.Ordinal)]);
+
+    /// <summary>
+    /// The <c>tool</c> enum is <paramref name="names"/>: the offered tools, and in the discovery profile every tool its
+    /// dispatchers reach (<see cref="ToolRegistry.Explained"/>).
+    /// </summary>
+    public static void Configure(McpServerOptions options, IReadOnlyList<string> names)
     {
         // HTTP sessions share tool definitions. Rebuild the enum from the filtered collection on every configuration.
-        string[] names = [.. (options.ToolCollection ?? []).Select(t => t.ProtocolTool.Name).Order(StringComparer.Ordinal)];
         foreach (McpServerTool usage in (options.ToolCollection ?? []).Where(t => t.ProtocolTool.Name == UsageTool))
         {
             var schema = JsonNode.Parse(usage.ProtocolTool.InputSchema.GetRawText())!;
@@ -47,9 +53,12 @@ internal sealed class UsageTools
         [Description("The tool to explain.")] string tool,
         [Description("Only this section; omit for all.")]
         [AllowedValues(ToolUsageCatalog.Examples, ToolUsageCatalog.Workflow, ToolUsageCatalog.Fields, ToolUsageCatalog.Errors)]
-        string? topic = null)
+        string? topic = null,
+        ToolRegistry? registry = null)
     {
-        string[] names = [.. (options.Value.ToolCollection ?? []).Select(t => t.ProtocolTool.Name).Order(StringComparer.Ordinal)];
+        string[] names = registry is { Explained.Count: > 0 }
+            ? [.. registry.Explained]
+            : [.. (options.Value.ToolCollection ?? []).Select(t => t.ProtocolTool.Name).Order(StringComparer.Ordinal)];
         bool registered = names.Contains(tool, StringComparer.Ordinal);
         if (tool == ActionRunTools.Tool)
         {

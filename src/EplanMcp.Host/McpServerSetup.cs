@@ -90,23 +90,25 @@ internal static class McpServerSetup
         services.PostConfigure<McpServerOptions>(options => WorkflowResults.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanTools.Configure(options.ToolCollection ?? []));
         services.PostConfigure<McpServerOptions>(options => PlanToolSchema.Configure(options.ToolCollection ?? []));
-        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionRunSchema.Configure(options, profile.Profile == ToolProfile.Full ? config : config with { ActionRun = ActionRunSwitch.Off }));
-        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionTrySchema.Configure(options, profile.Profile == ToolProfile.Full && config.ActionTry == ActionRunSwitch.On));
+        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionRunSchema.Configure(options, profile.Profile != ToolProfile.Core ? config : config with { ActionRun = ActionRunSwitch.Off }));
+        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ActionTrySchema.Configure(options, profile.Profile != ToolProfile.Core && config.ActionTry == ActionRunSwitch.On));
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
-        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ApiTrySchema.Configure(options, config.ApiTry == ActionRunSwitch.On && profile.Profile == ToolProfile.Full));
-        services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice>((options, choice) =>
+        services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ApiTrySchema.Configure(options, config.ApiTry == ActionRunSwitch.On && profile.Profile != ToolProfile.Core));
+        services.TryAddSingleton<ToolRegistry>();
+        services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice, ToolRegistry>((options, choice, registry) =>
         {
-            ToolProfiles.Apply(options.ToolCollection ?? [], choice.Profile);
+            registry.Apply(options.ToolCollection ?? [], choice.Profile);
             options.ServerInstructions = ServerInstructions.Text + (options.ToolCollection?.Any(t => t.ProtocolTool.Name == ContextTools.GetTool) == true ? ServerInstructions.Plugins : string.Empty);
 
-            // The pack resources belong to the pack toolset, which only the full profile offers (ADR-0022).
+            // The pack resources belong to the pack toolset, which only the full profile offers directly (ADR-0022).
             if (choice.Profile != ToolProfile.Full)
             {
                 options.ResourceCollection?.Clear();
             }
         });
 
-        services.PostConfigure<McpServerOptions>(UsageTools.Configure);
+        services.AddOptions<McpServerOptions>().PostConfigure<ToolRegistry>((options, registry) => UsageTools.Configure(options, registry.Explained));
+        services.AddOptions<McpServerOptions>().PostConfigure<ToolRegistry>(DiscoveryTools.Configure);
 
         // Tool order in tools/list stays fixed (group, then name) so clients can cache prompts (ADR-0006).
         return services
@@ -163,6 +165,7 @@ internal static class McpServerSetup
             .WithTools<TranslationImportTools>(HostJson.Options)
             .WithTools<TranslationKeywordTools>(HostJson.Options)
             .WithTools<TranslationAddTools>(HostJson.Options)
+            .WithTools<DiscoveryTools>(HostJson.Options)
             .WithTools<MessageTools>(HostJson.Options)
             .WithTools<CheckTools>(HostJson.Options)
             .WithTools<CheckWriteTools>(HostJson.Options)

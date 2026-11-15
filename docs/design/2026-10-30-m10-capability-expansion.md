@@ -55,6 +55,6 @@
 | 1 | 全部 action 三级开放与批量验证 | 基本完成：B 级目录、C 级试执行、A 级白名单、普查（2026-11-12 跑完） | 按 action 族查官方参数文档，复测进白名单（路线图原主线） |
 | 2 | EPLAN 生命周期 | 未做 | [ADR-0058](../adr/0058-eplan-lifecycle-tools.md)（2026-11-14 接受）；下一步写三个工具的规格 |
 | 3 | 按模板建 scratch 项目 | 已由 `eplan_project_create` 覆盖：基础项目 `.zw9` 或备份 `.zw1`，默认落在第一个 scratch 根目录 | 无 |
-| 4 | discovery Profile | 未做 | [ADR-0057](../adr/0057-discovery-profile-dispatch.md)（2026-11-14 接受）；下一步写三个工具的规格 |
+| 4 | discovery Profile | 未做 | [ADR-0057](../adr/0057-discovery-profile-dispatch.md)（2026-11-14 接受），2026-11-14 实现（`serve --profile discovery`）；审计的分发来源标记待做 |
 | 13 | 多语言 README 与面向 AI 的能力总览 | `README.en.md` 已有；能力总览按 llmstxt.org 的通行格式放在仓库根目录的 [`llms.txt`](../../llms.txt)，取代原计划的 `docs/llm.md` | 随工具变化更新 |
 | 5–12 | 第 2、3 批 | 未做 | 第 1 批之后；第 9 项并入 Workbench v2 实施（同日提前） |

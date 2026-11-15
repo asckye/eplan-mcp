@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `meta` / `discovery`（只在 discovery 中，见 [ADR-0057](../adr/0057-discovery-profile-dispatch.md)） |
 | 安全级别 | Read：只转发 `readOnlyHint` 为 true 的工具 |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Designed（2026-11-14，ADR-0057 接受后） |
+| 状态 | Implemented (Unreleased) |
 
 ## 1. 这个工具解决什么任务
 在 discovery Profile 里调用任意一个只读工具。客户端看到它是只读工具，可以按"只读放行"处理，而写入一律经 [`eplan_tool_write`](eplan_tool_write.md)。

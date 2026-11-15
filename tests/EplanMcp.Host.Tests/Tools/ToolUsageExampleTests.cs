@@ -80,7 +80,8 @@ public sealed partial class ToolUsageExampleTests : IDisposable
     [Fact]
     public void ModelFacingText_NamesOnlyRegisteredTools()
     {
-        HashSet<string> registered = [.. Tools.Select(t => t.Name)];
+        // The discovery profile's own tools are registered, only offered in that profile (ADR-0057).
+        HashSet<string> registered = [.. Tools.Select(t => t.Name), .. ToolProfiles.Discovery];
         (string Where, string Text)[] texts =
         [
             ("server instructions", _options.ServerInstructions!),

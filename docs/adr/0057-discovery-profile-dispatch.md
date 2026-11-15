@@ -57,3 +57,4 @@
 | 日期 | 修订内容与原因 | 确认依据 / 取代 ADR |
 |---|---|---|
 | 2026-11-14 | 提出并接受 | 项目负责人 2026-11-14 |
+| 2026-11-14 | 实现：`serve --profile discovery`；`ToolRegistry` 在 Profile 过滤前记下完整集合，分发时用新的请求上下文经 `UnknownArgumentFilter` 调用目标；两个分发工具的 `tool` 枚举各列出能调用的工具。审计里的 `dispatched_by` 标记未做，留作后续项 | `DiscoveryToolsTests` |

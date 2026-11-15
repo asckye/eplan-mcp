@@ -10,6 +10,12 @@ internal enum ToolProfile
 
     /// <summary>At most <see cref="ToolProfiles.CoreLimit"/> tools, for clients that cap how many tools they take.</summary>
     Core,
+
+    /// <summary>
+    /// Four tools: search, usage and two dispatchers that call every other tool, split by safety level so the client can
+    /// still ask before writes (ADR-0057).
+    /// </summary>
+    Discovery,
 }
 
 /// <summary>The profile <c>serve</c> was started with; tests and other hosts get <see cref="ToolProfile.Full"/>.</summary>
@@ -33,17 +39,21 @@ internal static class ToolProfiles
         PageReviewTools.Tool, ImageExportTools.ImageTool,
     };
 
+    /// <summary>The discovery profile (ADR-0057); its three own tools are offered in no other profile.</summary>
+    public static readonly IReadOnlySet<string> Discovery = new HashSet<string>(StringComparer.Ordinal)
+    {
+        DiscoveryTools.SearchTool, UsageTools.UsageTool, DiscoveryTools.ReadTool, DiscoveryTools.WriteTool,
+    };
+
     /// <summary>
-    /// Leaves only the profile's tools.
+    /// Leaves only the profile's tools. Full keeps everything but the discovery tools, which would only repeat it.
     /// </summary>
     public static void Apply(ICollection<McpServerTool> tools, ToolProfile profile)
     {
-        if (profile == ToolProfile.Full)
-        {
-            return;
-        }
-
-        foreach (McpServerTool tool in tools.Where(t => !Core.Contains(t.ProtocolTool.Name)).ToList())
+        IReadOnlySet<string>? keep = profile switch { ToolProfile.Core => Core, ToolProfile.Discovery => Discovery, _ => null };
+        foreach (McpServerTool tool in tools.Where(t => keep is null
+            ? t.ProtocolTool.Name is DiscoveryTools.SearchTool or DiscoveryTools.ReadTool or DiscoveryTools.WriteTool
+            : !keep.Contains(t.ProtocolTool.Name)).ToList())
         {
             tools.Remove(tool);
         }

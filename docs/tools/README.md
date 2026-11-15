@@ -128,7 +128,10 @@
 | `eplan_terminal_renumber` | full | 写入 | [eplan_terminal_renumber.md](eplan_terminal_renumber.md) |
 | `eplan_terminal_strip_get` | full | 只读 | [eplan_terminal_strip_get.md](eplan_terminal_strip_get.md) |
 | `eplan_terminal_strip_list` | full | 只读 | [eplan_terminal_strip_list.md](eplan_terminal_strip_list.md) |
-| `eplan_tool_usage` | core、full | 只读 | [eplan_tool_usage.md](eplan_tool_usage.md) |
+| `eplan_tool_read` | discovery | 只读 | [eplan_tool_read.md](eplan_tool_read.md) |
+| `eplan_tool_search` | discovery | 只读 | [eplan_tool_search.md](eplan_tool_search.md) |
+| `eplan_tool_usage` | core、full、discovery | 只读 | [eplan_tool_usage.md](eplan_tool_usage.md) |
+| `eplan_tool_write` | discovery | 写入 | [eplan_tool_write.md](eplan_tool_write.md) |
 | `eplan_translation_export` | full | 写入 | [eplan_translation_export.md](eplan_translation_export.md) |
 | `eplan_translation_import` | full | 写入 | [eplan_translation_import.md](eplan_translation_import.md) |
 | `eplan_translation_keyword` | full | 只读 | [eplan_translation_keyword.md](eplan_translation_keyword.md) |

@@ -582,8 +582,9 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void EveryTool_HasUsageWithAllFourTopics()
     {
-        // A tool without usage text, or a usage file without a tool, fails here (the MCP server standard).
-        Assert.Equal(Tools.Select(t => t.Name).Order(StringComparer.Ordinal), ToolUsageCatalog.Usage.Keys.Order(StringComparer.Ordinal));
+        // A tool without usage text, or a usage file without a tool, fails here (the MCP server standard). The discovery
+        // profile's own tools are registered too, only offered in that profile (ADR-0057).
+        Assert.Equal(Tools.Select(t => t.Name).Union(ToolProfiles.Discovery).Order(StringComparer.Ordinal), ToolUsageCatalog.Usage.Keys.Order(StringComparer.Ordinal));
         Assert.All(ToolUsageCatalog.Usage.Values, sections => Assert.Equal(ToolUsageCatalog.Topics.Order(StringComparer.Ordinal), sections.Keys.Order(StringComparer.Ordinal)));
     }
 

@@ -1126,6 +1126,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
           },
           {
+            "name": "DiscoveryToolsTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DiscoveryToolsTests.cs"
+          },
+          {
             "name": "SelectionCatalogTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/SelectionCatalogTests.cs"
@@ -24851,6 +24856,11 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/DanglingWritesTests.cs"
           },
           {
+            "name": "DiscoveryToolsTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DiscoveryToolsTests.cs"
+          },
+          {
             "name": "DoctorCheckIdTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Doctor/DoctorCheckIdTests.cs"
@@ -25923,6 +25933,11 @@
             "name": "UsageToolsTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/UsageToolsTests.cs"
+          },
+          {
+            "name": "DiscoveryToolsTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DiscoveryToolsTests.cs"
           },
           {
             "name": "PageCreateToolTests",
@@ -35485,6 +35500,11 @@
             "name": "ApiProtocolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ApiProtocolTests.cs"
+          },
+          {
+            "name": "DiscoveryToolsTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/DiscoveryToolsTests.cs"
           },
           {
             "name": "HttpEndToEndTests",
