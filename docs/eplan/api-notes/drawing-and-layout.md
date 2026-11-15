@@ -1,5 +1,15 @@
 # [EPLAN API 笔记](../api-notes.md)：绘图、布局与连接
 
+### A141. Pro Panel 3D 布线：清除后重新布线得到同样的长度（2026-11-14，EPLAN 2026.0.3.25421，Pro Panel；scratch 样例夹具 EPLAN_Sample_Project，全部在事务里做完后回滚）
+
+- **入口：** `project.InstallationSpaces` 按 36452（安装空间代号，如 `A1`）选空间；`InstallationSpace.Connection3Ds` 列出空间里的 3D 连接；`Connection3D.RoutePoints` 是布线折线（`PointD3D`，单位 mm），`IsRouted`、`RoutingType`（`RoutingWithNetwork` = 1、`RoutingWithoutNetwork` = 2）说明怎么布的。样例 A1、A2 的 508 根全是 `RoutingWithNetwork`。
+- **端点不一定是引脚：** 端点是"连接点位置"时，读 `StartPin`/`EndPin` 抛 `NotSupportedException` S063219，并提示改用 `Connection3D.StartConnectionPointPosition`；用它的 `DeviceTag` 和 `Index` 标识端点即可。`ConnectionPointPosition` 还有 `AdditionalLength`（附加长度），会影响最终长度，未实测。
+- **布线是确定的：** 对每根已布线的连接先 `ClearRouteAndNodes()`（之后长度全部变化，证明清除生效），再按原 `RoutingType` 分组调用 `ConnectionService3D.RouteConnections(List<Connection3D>, RoutingType)`，按折线算的长度与原来相差不超过 0.5 mm 的：A2 **332 / 332**，A1 **173 / 176**。
+- **布不回来的 3 根**（A1 的 `+A1-XD1:1/2/3` 到 `=GAA+A1-FC1`，原长约 2308 mm）清除后成为未布线。**[推断]** `ClearRouteAndNodes` 连设计人员手工设的布线节点一起清掉了，自动布线找不到原路线；样例第 1 页上的 `2.31 m`、`2.318 m`、`2.309 m` 正是这几根。复刻时要连布线节点一起放回。
+- **回滚可靠：** `TransactionScope.Rollback()` 之后 508 根的长度全部回到原值。
+- 3D 长度（mm）与原理图块值 `20201[10]`（m，3 位小数）怎样对应（是否加附加长度、如何取整）未核对，见 [数据关系 R5](../data-relationships.md)。
+— 证据：`tests/EplanMcp.Large.ConnectionHelper/RouteCheckAction.cs`，trx `SampleRouteCheckTests` 2026-11-14（B 槽）。
+
 ### A140. 读对象必须给 project，端子按自身类别读（2026-11-14，EPLAN 2026.0.3.25421，Electric P8；scratch 项目 SmallRedraw_20261104171405264 只读）
 
 - **`eplan_object_get` 省略 `project` 时按"当前项目"解析。** `eplan_project_open` 之后 `eplan_project_list` 里仍可能 `current` 全为 false，宿主便解析到另一个已打开项目，在那里按定位器找不到对象，返回 `PLAN_STALE`。带 `project`（项目名或定位器里的路径都行）即读到 50 条属性。工具现在在这个错误里附带 `objectsOfThisType`、`withThisNumber` 和 `differs`（project/page/digest），省得再猜。

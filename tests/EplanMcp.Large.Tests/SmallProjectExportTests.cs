@@ -37,7 +37,7 @@ public sealed class SmallProjectExportTests(LiveEplan eplan)
         await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
         try
         {
-            await ExportActionAsync(request);
+            await RunActionAsync("EplanMcpLargePageExport", request);
             string response = await File.ReadAllTextAsync(request + ".result.json", TestContext.Current.CancellationToken);
             using JsonDocument result = JsonDocument.Parse(response);
             Assert.True(result.RootElement.GetProperty("success").GetBoolean(), response);
@@ -105,9 +105,10 @@ public sealed class SmallProjectExportTests(LiveEplan eplan)
         }
     }
 
-    private static async Task ExportActionAsync(string request)
+    /// <summary>Runs a helper action with its request file through eplremote; the export covers all 16 pages in one call.</summary>
+    internal static async Task RunActionAsync(string action, string request)
     {
-        // The existing action helper has a 30-second deadline; this single read covers all 16 pages.
+        // The existing action helper has a 30-second deadline, too short for one read of all 16 pages.
         string remote = Environment.GetEnvironmentVariable("EPLANMCP_EPLREMOTE")
             ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..",
                 ".local", "tools", "eplremote", "bin", "Release", "net481", "eplremote.exe"));
@@ -121,7 +122,7 @@ public sealed class SmallProjectExportTests(LiveEplan eplan)
         start.ArgumentList.Add("--host");
         start.ArgumentList.Add(Environment.GetEnvironmentVariable("EPLREMOTE_HOST")
             ?? throw new InvalidOperationException("Set EPLREMOTE_HOST to this machine's IPv4 address (S35/A41)."));
-        start.ArgumentList.Add("EplanMcpLargePageExport /REQUEST:\"" + request + "\"");
+        start.ArgumentList.Add(action + " /REQUEST:\"" + request + "\"");
         start.Environment["EPLREMOTE_PORT"] = Environment.GetEnvironmentVariable("EPLREMOTE_PORT") ?? "49152";
         using Process process = Process.Start(start) ?? throw new InvalidOperationException("Could not start eplremote.");
         Task<string> stdout = process.StandardOutput.ReadToEndAsync(TestContext.Current.CancellationToken);
@@ -129,7 +130,7 @@ public sealed class SmallProjectExportTests(LiveEplan eplan)
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         timeout.CancelAfter(TimeSpan.FromMinutes(30));
         await process.WaitForExitAsync(timeout.Token);
-        Assert.True(process.ExitCode == 0, $"Page export action failed ({process.ExitCode}): {await stdout} {await stderr}");
+        Assert.True(process.ExitCode == 0, $"{action} failed ({process.ExitCode}): {await stdout} {await stderr}");
     }
 
     private static string? Text(JsonElement value, string name) => value.ValueKind == JsonValueKind.Object
