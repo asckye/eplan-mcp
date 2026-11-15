@@ -58,3 +58,12 @@
 | 4 | discovery Profile | 未做 | [ADR-0057](../adr/0057-discovery-profile-dispatch.md)（2026-11-14 接受），2026-11-14 实现（`serve --profile discovery`）；审计的分发来源标记待做 |
 | 13 | 多语言 README 与面向 AI 的能力总览 | `README.en.md` 已有；能力总览按 llmstxt.org 的通行格式放在仓库根目录的 [`llms.txt`](../../llms.txt)，取代原计划的 `docs/llm.md` | 随工具变化更新 |
 | 5–12 | 第 2、3 批 | 未做 | 第 1 批之后；第 9 项并入 Workbench v2 实施（同日提前） |
+
+## 7. 2026-11-14 许可证变化与复用规则（负责人决定）
+
+第 1 节写的"这些仓库没有声明许可证，因此不复制任何代码"已经过时：2026-11-14 重新调研时，Canary-ECAD 的 `eplan-mcp`、`bochica`、`eplan-scripting-skill`、`eplan-cloudflare-rags` 都已是 **MIT** 许可。负责人同日决定：
+
+- **MIT 代码可以复用**：被复用的文件在文件头写明来源仓库和提交，`THIRD-PARTY-NOTICES.md` 保留其 MIT 版权声明，做法与引入的 TIA 主题相同。
+- **仍然不做**：连接对方的在线服务（`covaga.xyz` 上的文档 RAG）；使用爬取的 EPLAN 帮助文档（文档版权属于 EPLAN，MIT 管不到）；复制没有许可证的仓库（如 `qiap/eplan-bridge`）的代码。
+- **首批可借鉴**：关闭 EPLAN 的做法（Remote Client `StopEplan()` 加调用超时、按进程句柄等待退出、强制结束只作可选兜底；2025 起要自己启动 `EPLAN.exe`）用于 [ADR-0058](../adr/0058-eplan-lifecycle-tools.md)；读取 EPLAN 系统消息的工具；工具 `_meta` 里的 `changesProject`、`runsCode`、`changesEplan`、`projectArgument`；他们实测 Claude Code 会自己延迟加载工具 schema，所以 discovery Profile 对 Claude Code 没有帮助；EPLAN 2027 是 .NET 8、API 程序集名为 `Eplan.EplApi.*Netu.dll`（M7）。符号图片数据集（33,502 个 EPLAN 符号）用于第 6 项前要单独查许可。
+
