@@ -125,9 +125,12 @@ public sealed class PlcRackExecuteOperation(
         {
             PlacedMacro placed = inserter.Insert(project, insert.Page.Name, insert.MacroPath, insert.Variant, insert.X, insert.Y, number: false,
                 insert.Representation, macroBox: false);
-            string[] mains = [.. placed.Functions.Where(f => f.Main).Select(f => f.Name.Split(':')[0]).Distinct(StringComparer.Ordinal).OrderBy(m => m.Length)];
+            // A rack picture's box is not a main function (A122, live 2026-11-15: the ET 200SP picture placed none), so
+            // without one the device is the shortest tag among all placed functions.
+            IEnumerable<MacroFunctionRecord> owners = placed.Functions.Any(f => f.Main) ? placed.Functions.Where(f => f.Main) : placed.Functions;
+            string[] mains = [.. owners.Select(f => f.Name.Split(':')[0]).Where(n => n.Length > 0).Distinct(StringComparer.Ordinal).OrderBy(m => m.Length)];
             string main = mains.FirstOrDefault()
-                ?? throw Failed($"Inserting {insert.Macro} on {insert.Page.Name} placed no main function; the rack was rolled back.");
+                ?? throw Failed($"Inserting {insert.Macro} on {insert.Page.Name} placed no function; the rack was rolled back.");
             return (main, [.. mains.Skip(1).Where(m => m.StartsWith(main + "-", StringComparison.Ordinal)).OrderByDescending(m => m.Length)]);
         }
 

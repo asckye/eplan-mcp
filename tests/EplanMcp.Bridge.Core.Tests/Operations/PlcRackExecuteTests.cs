@@ -68,6 +68,17 @@ public sealed class PlcRackExecuteTests : IDisposable
     }
 
     [Fact]
+    public void APictureWithoutAMainFunction_IsStillJoinedToItsCard()
+    {
+        _project.PicturesHaveNoMain = true;
+
+        PlcRackData data = Execute(Args());
+
+        Assert.Equal(["=K1+UC1-KE1", "=K1+UC1-KE2"], data.Cards.Select(c => c.Tag));
+        Assert.Equal(["=K1+UC1-KE1", "=K1+UC1-KE2", "=K1+UC1-KE2-K1", "=K1+UC1-KEC1"], _project.Devices.Keys.Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
     public void APartMissingAfterTheCommit_RollsTheWholeRackBack()
     {
         _project.DropPartsOnCommit = true;
@@ -124,6 +135,11 @@ public sealed class PlcRackExecuteTests : IDisposable
 
         public bool DropPartsOnCommit { get; set; }
 
+        /// <summary>The rack picture's box is no main function, as in the ET 200SP picture (live 2026-11-15).</summary>
+        public bool PicturesHaveNoMain { get; set; }
+
+        private int _inserts;
+
         public List<MacroFunctionRecord> Insert()
         {
             foreach (string tag in new[] { "=K1+UC1-K1", "=K1+UC1-K1-K1" })
@@ -134,7 +150,8 @@ public sealed class PlcRackExecuteTests : IDisposable
                 Parts[id] = [];
             }
 
-            return [new() { Name = "=K1+UC1-K1", Main = true, Category = "PLC" }, new() { Name = "=K1+UC1-K1-K1", Main = true, Category = "PLC" }];
+            bool main = !(PicturesHaveNoMain && ++_inserts % 2 == 0);
+            return [new() { Name = "=K1+UC1-K1", Main = main, Category = "PLC" }, new() { Name = "=K1+UC1-K1-K1", Main = main, Category = "PLC" }];
         }
 
         public DeviceNames? ReadDevice(string projectPath, string tag) => null;
