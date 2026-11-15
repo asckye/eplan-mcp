@@ -7,11 +7,13 @@
   <Thickness x:Key="Ui.Gap.DialogIcon">0,4,12,0</Thickness>
   <Thickness x:Key="Ui.Gap.Drawer">0,8,8,8</Thickness>
   <Thickness x:Key="Ui.Gap.Icon">0,4,8,0</Thickness>
+  <Thickness x:Key="Ui.Gap.Left.Brand">8,0,0,0</Thickness>
   <Thickness x:Key="Ui.Gap.Left.LG">24,0,0,0</Thickness>
   <Thickness x:Key="Ui.Gap.Left.Normal">16,0,0,0</Thickness>
   <Thickness x:Key="Ui.Gap.Left.XS">8,0,0,0</Thickness>
   <Thickness x:Key="Ui.Gap.Left.XXS">4,0,0,0</Thickness>
   <Thickness x:Key="Ui.Gap.Right.SM">0,0,12,0</Thickness>
+  <Thickness x:Key="Ui.Gap.SiderStatus">0,24,0,4</Thickness>
   <Thickness x:Key="Ui.Gap.Right.XS">0,0,8,0</Thickness>
   <Thickness x:Key="Ui.Gap.Right.XXS">0,0,4,0</Thickness>
   <Thickness x:Key="Ui.Gap.Top.LG">0,24,0,0</Thickness>
@@ -22,6 +24,12 @@
   <Thickness x:Key="Ui.Gap.Wrap.SM">0,0,12,12</Thickness>
   <Thickness x:Key="Ui.Gap.Wrap.XS">0,0,8,8</Thickness>
   <Thickness x:Key="Ui.Inset.Brand">16,0,12,0</Thickness>
+  <Thickness x:Key="Ui.Inset.SiderBrand">8,4,8,16</Thickness>
+  <Thickness x:Key="Ui.Inset.SiderStatus">8,8,8,8</Thickness>
+  <Thickness x:Key="Ui.Inset.Sider">8,16</Thickness>
+  <Thickness x:Key="Ui.Inset.SiderSection">8,4</Thickness>
+  <Thickness x:Key="Ui.Inset.NavItem">8,0</Thickness>
+  <Thickness x:Key="Ui.Inset.NavCount">8,0</Thickness>
   <Thickness x:Key="Ui.Inset.ClientCard">16,12</Thickness>
   <Thickness x:Key="Ui.Inset.Code">12,8</Thickness>
   <Thickness x:Key="Ui.Inset.CodeValue">4,4</Thickness>
@@ -29,7 +37,7 @@
   <Thickness x:Key="Ui.Inset.DrawerFooter">24,12,24,24</Thickness>
   <Thickness x:Key="Ui.Inset.DrawerHeader">24,12,16,12</Thickness>
   <Thickness x:Key="Ui.Inset.DrawerMessage">24,12,24,0</Thickness>
-  <Thickness x:Key="Ui.Inset.Header">24,0,8,0</Thickness>
+  <Thickness x:Key="Ui.Inset.Header">32,20,16,16</Thickness>
   <Thickness x:Key="Ui.Inset.Horizontal.Normal">16,0</Thickness>
   <Thickness x:Key="Ui.Inset.Horizontal.XS">8,0</Thickness>
   <Thickness x:Key="Ui.Inset.Horizontal.XXS">4,0</Thickness>

@@ -99,15 +99,15 @@ public sealed class ShellTests(WpfContext wpf)
             var toggle = (Button)window.FindName("SiderToggle");
 
             Resize(window, 1200);
-            Assert.Equal((216d, false), (sider.Width, Ux.GetCompact(sider)));
+            Assert.Equal((232d, false), (sider.Width, Ux.GetCompact(sider)));
             Resize(window, 980);
-            Assert.Equal((56d, true), (sider.Width, Ux.GetCompact(sider)));
+            Assert.Equal((64d, true), (sider.Width, Ux.GetCompact(sider)));
             Click(toggle);
             Resize(window, 970);
-            Assert.Equal(216d, sider.Width);
+            Assert.Equal(232d, sider.Width);
             Resize(window, 1100);
             Resize(window, 970);
-            Assert.Equal(56d, sider.Width);
+            Assert.Equal(64d, sider.Width);
         }));
     }
 

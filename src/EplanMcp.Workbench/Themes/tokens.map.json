@@ -59,7 +59,10 @@
     "Primer.textFaint": "label-secondary",
     "Primer.textMuted": "label-secondary",
     "Primer.warn": "warning-text",
-    "Primer.warnBg": "warning-tint"
+    "Primer.warnBg": "warning-tint",
+    "Workbench.navSelected": "fill-selected-inactive",
+    "Workbench.navSelectedText": "label",
+    "Workbench.sidebarBg": "bg-sidebar"
   },
   "dark": {
     "Ant.colorFillSecondary": "bg-grouped"

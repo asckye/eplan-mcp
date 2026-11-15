@@ -36,30 +36,36 @@
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <!-- Sider: brand, the page menu (one Tab stop, arrow keys inside, NAV-04), settings, the collapse button. -->
-    <Border x:Name="Sider" Width="216" Style="{StaticResource Primer.Sider}" AutomationProperties.Name="{l:Tr Shell.Menu}">
+    <!--
+      Sider (v2, ADR-0034): brand, the page menu (one Tab stop, arrow keys inside, NAV-04), the connection status
+      (STS-11), settings, the collapse button.
+    -->
+    <Border x:Name="Sider" Width="232" Style="{StaticResource Workbench.Sider}" AutomationProperties.Name="{l:Tr Shell.Menu}">
       <!-- Rows, not docking, so that the Tab order is the visual order (KEY-02). -->
       <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid MinHeight="56" Margin="{StaticResource Ui.Inset.Brand}">
+        <Grid Margin="{StaticResource Ui.Inset.SiderBrand}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <Border Style="{StaticResource Primer.BrandDot}" />
-          <TextBlock x:Name="Brand" Grid.Column="1" Text="{l:Tr App.Name}" Style="{StaticResource Ui.Text.BodyStrong}" TextTrimming="None" VerticalAlignment="Center" TextWrapping="Wrap" Margin="{StaticResource Ui.Inset.Horizontal.XS}" />
-          <Border x:Name="VersionChip" Grid.Column="2" Style="{StaticResource Primer.Chip}">
-            <TextBlock x:Name="VersionText" Style="{StaticResource Primer.Mono.text}" />
+          <Border Style="{StaticResource Workbench.BrandTile}">
+            <Path Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Stretch="Uniform" Stroke="{DynamicResource Text.OnAccent}" StrokeThickness="2" StrokeLineJoin="Round"
+                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M3.5,12 L7,12 L9.5,6 L14.5,18 L17,12 L20.5,12" />
           </Border>
+          <TextBlock x:Name="Brand" Grid.Column="1" Text="{l:Tr Shell.Brand}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="15" TextTrimming="None"
+                     VerticalAlignment="Center" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Left.Brand}" />
         </Grid>
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-          <StackPanel x:Name="Menu" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle" Margin="{StaticResource Ui.Gap.Top.XS}">
+        <TextBlock x:Name="SiderSection" Grid.Row="1" Text="{l:Tr Shell.Section}" Style="{StaticResource Workbench.SiderSection}" />
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+          <StackPanel x:Name="Menu" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
             <RadioButton x:Name="ApprovalsItem" Style="{StaticResource Workbench.NavItem}" ux:Ux.Icon="{DynamicResource Icon.Bell}" Content="{l:Tr Page.Approvals}"
                          AutomationProperties.Name="{l:Tr Page.Approvals}" AutomationProperties.AcceleratorKey="Ctrl+1"
                          AutomationProperties.PositionInSet="1" AutomationProperties.SizeOfSet="4" Click="OnMenuClick" />
@@ -74,9 +80,16 @@
                          AutomationProperties.PositionInSet="4" AutomationProperties.SizeOfSet="4" Click="OnMenuClick" />
           </StackPanel>
         </ScrollViewer>
-        <Button x:Name="SettingsButton" Grid.Row="2" Style="{StaticResource Primer.MenuButton}" ux:Ux.Icon="{DynamicResource Icon.Setting}" Content="{l:Tr Settings.Title}"
+        <!-- STS-11: whether approvals are taken, always, in words; when not, why and that the EPLAN dialog asks instead. -->
+        <Border x:Name="SiderStatus" Grid.Row="3" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,1,0,0" Padding="{StaticResource Ui.Inset.SiderStatus}" Margin="{StaticResource Ui.Gap.SiderStatus}">
+          <StackPanel Orientation="Horizontal">
+            <Path x:Name="PipeIcon" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Right.XS}" VerticalAlignment="Top" />
+            <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Text}" FontSize="13" MaxWidth="170" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
+          </StackPanel>
+        </Border>
+        <Button x:Name="SettingsButton" Grid.Row="4" Style="{StaticResource Primer.MenuButton}" ux:Ux.Icon="{DynamicResource Icon.Setting}" Content="{l:Tr Settings.Title}"
                 AutomationProperties.Name="{l:Tr Settings.Title}" Click="OnSettings" />
-        <Button x:Name="SiderToggle" Grid.Row="3" Style="{StaticResource Primer.MenuButton}" Margin="{StaticResource Ui.Inset.SiderToggle}" Click="OnSiderToggle" />
+        <Button x:Name="SiderToggle" Grid.Row="5" Style="{StaticResource Primer.MenuButton}" Margin="{StaticResource Ui.Inset.SiderToggle}" Click="OnSiderToggle" />
       </Grid>
     </Border>
 
@@ -86,7 +99,7 @@
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
 
-      <!-- Header: breadcrumb (secondary text, not a heading), the status area, the window buttons. -->
+      <!-- Header: the page's large title (v2, no breadcrumb), the waiting count, the window buttons. -->
       <Border x:Name="Header" Style="{StaticResource Primer.HeaderBar}" AutomationProperties.Name="{l:Tr Shell.Header}">
         <!-- Columns, not docking, so that the Tab order is the visual order (KEY-02). -->
         <Grid MinHeight="56" Margin="{StaticResource Ui.Inset.Header}">
@@ -95,19 +108,10 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Text="{l:Tr Shell.Breadcrumb}" Style="{StaticResource Primer.Breadcrumb}" />
-            <TextBlock Text="/" Margin="{StaticResource Ui.Inset.Horizontal.XS}" Style="{StaticResource Primer.Breadcrumb}" />
-            <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Text}" />
-          </StackPanel>
-          <!--
-            STS-11: whether approvals are taken, always, in words, and when not, why and that the EPLAN dialog asks instead;
-            STS-10: the waiting count, which opens the queue.
-          -->
+          <TextBlock x:Name="CurrentPageText" Style="{StaticResource Workbench.PageTitle}" VerticalAlignment="Center" />
+          <!-- STS-10: the waiting count, which opens the queue. -->
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="{StaticResource Ui.Inset.Horizontal.Normal}" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
             <Button x:Name="PendingBadge" Style="{StaticResource Primer.PendingBadge}" Visibility="Collapsed" Click="OnPendingBadge" />
-            <Path x:Name="PipeIcon" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Inset.Horizontal.XS}" VerticalAlignment="Center" />
-            <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Text}" MaxWidth="360" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
           <StackPanel x:Name="WindowButtons" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
             <Button x:Name="MinimizeButton" Style="{StaticResource Primer.WindowButton}" Click="OnMinimize">

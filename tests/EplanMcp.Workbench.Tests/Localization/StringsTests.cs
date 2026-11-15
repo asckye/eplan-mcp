@@ -15,7 +15,7 @@ namespace EplanMcp.Workbench.Tests.Localization;
 public sealed partial class StringsTests
 {
     /// <summary>Texts that are the same in both languages on purpose: product names, technical identifiers, formats.</summary>
-    private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.WindowTitle", "Shell.Breadcrumb", "Settings.Chinese", "Settings.English", "Question.SuspendedValue",
+    private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.Brand", "Shell.WindowTitle", "Shell.Section", "Settings.Chinese", "Settings.English", "Question.SuspendedValue",
         "Clients.Name.ClaudeCode", "Clients.Name.Codex", "Clients.Name.GeminiCli", "Clients.Name.QwenCode", "Clients.Name.KimiCode", "Clients.Name.Codebuddy",
         "Clients.Name.Opencode", "Clients.Name.QwenAgent", "Clients.Name.Cursor", "Clients.Name.VscodeCopilot",
     ];
@@ -106,7 +106,7 @@ public sealed partial class StringsTests
         string[] literals = [.. SourceScan.Own.Where(f => f.Path.EndsWith(".xaml", StringComparison.Ordinal))
             .SelectMany(f => LiteralText().Matches(f.Text).Select(m => $"{f.Path}: {m.Value.Trim()}"))];
 
-        Assert.Equal(["Shell/MainWindow.xaml: Text=\"/\""], literals);
+        Assert.Empty(literals);
     }
 
     private static int[] Indexes(string text) => [.. Placeholder().Matches(text).Select(m => int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture)).Distinct().Order()];

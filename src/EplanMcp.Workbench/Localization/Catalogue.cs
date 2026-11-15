@@ -10,6 +10,7 @@ internal static class Catalogue
     public static IReadOnlyList<(string Key, string En, string Zh)> Entries { get; } =
     [
         ("App.Name", "EplanMcp Workbench", "EplanMcp Workbench"),
+        ("Shell.Brand", "EplanMcp", "EplanMcp"),
         ("VmHost.Local", "This computer", "同一台电脑"),
         ("VmHost.Remote", "VM ↔ host", "虚拟机 ↔ 宿主机"),
         ("VmHost.Caption", "Choose the AI clients on this host computer. Preview and confirm before writing the eplan-vm connection to their files.", "选择宿主机上的 AI 客户端，预览并确认后将 eplan-vm 连接写入其配置文件。"),
@@ -93,7 +94,7 @@ internal static class Catalogue
 
         // Shell: Sider, Header, window (docs/design/2026-10-20-m5-operability.md#workbench-implementation).
         ("Shell.WindowTitle", "{0} – EplanMcp Workbench", "{0} – EplanMcp Workbench"),
-        ("Shell.Breadcrumb", "Workbench", "Workbench"),
+        ("Shell.Section", "Workbench", "Workbench"),
         ("Shell.Shortcut", "{0} ({1})", "{0}（{1}）"),
         ("Shell.Menu", "Pages", "页面"),
         ("Shell.Header", "Header", "顶栏"),

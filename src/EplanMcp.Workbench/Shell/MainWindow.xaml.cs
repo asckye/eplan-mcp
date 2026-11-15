@@ -58,7 +58,7 @@ public partial class MainWindow : Window
             (WorkbenchPage.Status, "Page.Status", "Ctrl+3", StatusItem, StatusPage),
             (WorkbenchPage.Clients, "Page.Clients", "Ctrl+4", ClientsItem, ClientsPage),
         ];
-        VersionText.Text = typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0];
+        Brand.ToolTip = "EplanMcp " + typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0];
         // The shortcuts reach no page while the settings drawer covers the window (DLG-10).
         CommandBindings.Add(new CommandBinding(NavigateCommand, (_, e) => Navigate((WorkbenchPage)e.Parameter, NavigationOrigin.Shortcut), CanNavigate));
         CommandBindings.Add(new CommandBinding(CycleCommand, (_, e) => Cycle(int.Parse((string)e.Parameter, CultureInfo.InvariantCulture)), CanNavigate));
@@ -342,6 +342,8 @@ public partial class MainWindow : Window
         PendingBadge.Content = _pending.ToString(CultureInfo.CurrentCulture);
         PendingBadge.ToolTip = pending;
         AutomationProperties.SetName(PendingBadge, pending);
+        ApprovalsItem.Tag = _pending > 0 ? _pending.ToString(CultureInfo.CurrentCulture) : null;
+        AutomationProperties.SetHelpText(ApprovalsItem, _pending > 0 ? pending : string.Empty);
     }
 
     private void OnSettingsClosed(object? sender, EventArgs e) => CloseSettings();
@@ -371,8 +373,8 @@ public partial class MainWindow : Window
 
         bool compact = _compactChosen ?? narrow;
         Ux.SetCompact(Sider, compact);
-        Sider.Width = compact ? 56 : 216;
-        Brand.Visibility = VersionChip.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
+        Sider.Width = compact ? 64 : 232;
+        Brand.Visibility = SiderSection.Visibility = SiderStatus.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
         Ux.SetIcon(SiderToggle, (Geometry)FindResource(compact ? "Icon.MenuUnfold" : "Icon.MenuFold"));
         ApplyTexts();
     }

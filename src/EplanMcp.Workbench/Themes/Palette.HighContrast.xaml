@@ -11,6 +11,10 @@
   <SolidColorBrush x:Key="Primer.accent" Color="{DynamicResource {x:Static SystemColors.HotTrackColorKey}}" />
   <SolidColorBrush x:Key="Primer.onAccent" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
   <SolidColorBrush x:Key="Primer.primaryBg" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+  <!-- The v2 sidebar (ADR-0034): the window's own colour, and the current item as the system selection. -->
+  <SolidColorBrush x:Key="Workbench.sidebarBg" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.navSelected" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.navSelectedText" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
   <SolidColorBrush x:Key="Primer.primaryText" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
   <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Layer" Color="{Binding Color, Source={StaticResource Primer.card}, Mode=OneWay}" />

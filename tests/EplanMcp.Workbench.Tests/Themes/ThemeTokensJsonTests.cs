@@ -43,7 +43,12 @@ public sealed partial class ThemeTokensJsonTests
         {
             foreach (JsonProperty entry in section.Value.EnumerateObject())
             {
-                Assert.Contains(entry.Name, vendored);
+                // A Workbench.* key is the Workbench's own (the v2 sidebar), defined in all three palettes; everything else
+                // overrides a vendored colour.
+                if (!entry.Name.StartsWith("Workbench.", StringComparison.Ordinal))
+                { Assert.Contains(entry.Name, vendored); }
+                else
+                { Assert.Contains($"x:Key=\"{entry.Name}\"", SourceScan.Single("Themes/Palette.HighContrast.xaml").Text, StringComparison.Ordinal); }
                 Assert.Contains(entry.Value.GetString()!, tokens);
             }
         }

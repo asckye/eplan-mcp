@@ -60,6 +60,9 @@
   <SolidColorBrush x:Key="Ant.colorTextLightSolid" Color="#FFFFFF" /><!-- label-on-accent -->
   <SolidColorBrush x:Key="Ant.colorWarningBorder" Color="#FF9F0A" /><!-- warning -->
   <SolidColorBrush x:Key="Ant.controlItemBgActiveHover" Color="#3A3A3C" /><!-- fill-selected-inactive -->
+  <SolidColorBrush x:Key="Workbench.navSelected" Color="#3A3A3C" /><!-- fill-selected-inactive -->
+  <SolidColorBrush x:Key="Workbench.navSelectedText" Color="#F5F5F7" /><!-- label -->
+  <SolidColorBrush x:Key="Workbench.sidebarBg" Color="#2A2A2C" /><!-- bg-sidebar -->
   <!-- END v2 tokens -->
   <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Layer" Color="{Binding Color, Source={StaticResource Primer.card}, Mode=OneWay}" />
