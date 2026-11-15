@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-15",
-  "scannedSources": "e8b7b53d",
-  "sourceHash": "sha256:adf97baff4769aea5b6dd5052f3d635ecbcd44e1528158e48eec9f6302319d63",
+  "scannedSources": "b008a697",
+  "sourceHash": "sha256:0885799cb563f5f2309deccfb14e6ca51b7d5bfb5f4d4c69d2a932eaa60fce1f",
   "operations": [
     {
       "name": "action.execute",
@@ -533,6 +533,14 @@
     {
       "name": "plc.get",
       "class": "PlcGetOperation"
+    },
+    {
+      "name": "plc.rack.execute",
+      "class": "PlcRackExecuteOperation"
+    },
+    {
+      "name": "plc.rack.plan",
+      "class": "PlcRackPlanOperation"
     },
     {
       "name": "plc.readdress.execute",
@@ -1390,6 +1398,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -1449,6 +1458,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -1509,6 +1519,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -1568,6 +1579,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -1627,6 +1639,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -9680,6 +9693,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -27521,7 +27536,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -27570,7 +27587,8 @@
           "read"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -27594,7 +27612,8 @@
           "read"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -128077,7 +128096,8 @@
           "read"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -151090,6 +151110,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -151149,6 +151170,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -151209,6 +151231,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -151268,6 +151291,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -151327,6 +151351,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -151389,6 +151414,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -151448,6 +151474,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -151886,6 +151913,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -151946,6 +151975,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -152141,6 +152172,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -152201,6 +152234,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -152507,6 +152542,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -152567,6 +152604,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -152836,6 +152875,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -153309,6 +153350,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -153610,6 +153653,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -153760,7 +153805,9 @@
           "plan.macro.inspect",
           "plan.step.execute",
           "plc.generate.execute",
-          "plc.generate.plan"
+          "plc.generate.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -153772,7 +153819,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -153845,6 +153894,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -154022,6 +154073,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -154044,7 +154097,8 @@
           "new"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -155400,7 +155454,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -156286,7 +156342,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -156308,7 +156366,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -156330,7 +156390,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -156352,7 +156414,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -156428,7 +156492,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -156520,7 +156585,9 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -156545,7 +156612,8 @@
           "new"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -156653,6 +156721,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -156678,7 +156748,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -156782,7 +156853,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -156793,7 +156866,8 @@
           "new"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -156942,6 +157016,8 @@
           "placeholder.list",
           "plc.generate.execute",
           "plc.generate.plan",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "project.backup",
           "project.rename.execute",
@@ -157892,7 +157968,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -157914,7 +157992,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -157936,7 +158016,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -158226,7 +158308,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -158238,7 +158322,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -158325,7 +158410,9 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -158339,7 +158426,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -158418,7 +158506,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -158497,7 +158586,8 @@
           "call"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -159253,6 +159343,8 @@
           "placement.delete.plan",
           "placement.edit.plan",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan",
           "project.translate.execute",
           "project.translate.plan",
@@ -159301,6 +159393,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -159344,7 +159438,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -159463,6 +159559,8 @@
           "placeholder.list",
           "plc.generate.execute",
           "plc.generate.plan",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "project.backup",
           "project.rename.execute",
@@ -163467,7 +163565,8 @@
           "call"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -163489,7 +163588,8 @@
           "call"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -163527,7 +163627,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -163841,7 +163942,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -163892,7 +163994,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -164049,7 +164152,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -164072,7 +164176,8 @@
           "new"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -165219,7 +165324,8 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "placeholder.apply.execute"
+          "placeholder.apply.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -165799,6 +165905,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -165990,6 +166098,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       }
@@ -166055,6 +166165,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       }
@@ -166795,7 +166907,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -167362,6 +167476,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -167421,6 +167536,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -167490,6 +167606,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -167904,7 +168021,8 @@
           "new"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -167919,7 +168037,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -167960,7 +168080,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -167984,7 +168106,8 @@
           "call"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -167999,7 +168122,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -168027,7 +168152,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -168044,7 +168171,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -168703,6 +168832,8 @@
           "placement.delete.plan",
           "placement.edit.plan",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan",
           "project.translate.execute",
           "project.translate.plan",
@@ -168751,6 +168882,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -168768,7 +168901,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -169026,6 +169161,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -169083,7 +169220,8 @@
           "call"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -170137,6 +170275,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -170173,7 +170312,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -170454,6 +170594,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -171825,6 +171967,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -171980,7 +172124,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -172004,7 +172149,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -172081,6 +172227,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -172423,6 +172571,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -172909,6 +173059,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -172968,6 +173119,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -173029,6 +173181,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -173090,6 +173243,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -173160,6 +173314,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -173329,7 +173484,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -173352,7 +173509,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -173385,7 +173544,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -173408,7 +173569,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -173467,7 +173630,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -173478,7 +173643,8 @@
           "call"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -173490,7 +173656,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -173501,7 +173668,8 @@
           "call"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -173568,6 +173736,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -173638,7 +173808,8 @@
           "call"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -173649,7 +173820,8 @@
           "call"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -173677,7 +173849,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -174394,6 +174568,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -174696,6 +174872,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -174742,7 +174919,8 @@
           "call"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -174765,7 +174943,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -174813,6 +174992,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -174873,6 +175053,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -174919,7 +175100,8 @@
           "new"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -174942,7 +175124,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -174991,6 +175174,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175037,7 +175221,8 @@
           "call"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -175060,7 +175245,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -175109,6 +175295,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175171,6 +175358,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175230,6 +175418,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175292,6 +175481,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175351,6 +175541,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175413,6 +175604,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175481,6 +175673,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175551,6 +175744,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175610,6 +175804,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175672,6 +175867,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175740,6 +175936,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175811,6 +176008,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175870,6 +176068,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175932,6 +176131,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -175991,6 +176191,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -177301,7 +177502,8 @@
           "new"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -177516,7 +177718,8 @@
           "call"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -178826,7 +179029,8 @@
           "new"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -178878,7 +179082,8 @@
           "call"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -179145,7 +179350,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -179443,7 +179649,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -180908,6 +181115,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -181122,6 +181331,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -182234,7 +182445,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -182533,7 +182746,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -182692,7 +182907,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -182795,7 +183012,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -183095,7 +183314,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -183573,6 +183794,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -183816,7 +184039,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -183851,7 +184076,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -183873,7 +184100,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -183895,7 +184124,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184014,6 +184245,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -184044,6 +184277,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -184095,7 +184330,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184110,7 +184347,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184125,7 +184364,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184402,7 +184643,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184437,7 +184680,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184459,7 +184704,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184481,7 +184728,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184600,6 +184849,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -184630,6 +184881,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -184681,7 +184934,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184696,7 +184951,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -184711,7 +184968,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -185120,6 +185379,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -185267,6 +185528,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -185706,6 +185969,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -186927,7 +187192,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -186974,7 +187240,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -186985,7 +187252,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -187137,7 +187405,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -187222,7 +187491,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -187233,7 +187503,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -187351,7 +187622,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -187398,7 +187670,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -187409,7 +187682,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -187491,6 +187765,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -187557,6 +187833,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -187655,6 +187933,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -188024,7 +188304,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -188047,7 +188329,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -188162,7 +188446,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -188184,7 +188470,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -188207,7 +188495,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -188229,7 +188519,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -188416,7 +188708,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -188623,6 +188917,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.snapshot",
           "property.read",
           "property.set.execute",
@@ -188759,7 +189055,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -188962,7 +189260,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -188984,7 +189284,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -189007,7 +189309,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -189029,7 +189333,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -189216,7 +189522,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -190282,7 +190590,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -195263,6 +195573,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -196415,7 +196727,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196502,7 +196815,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196513,7 +196827,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196765,7 +197080,8 @@
           "get"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196776,7 +197092,8 @@
           "get"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196788,7 +197105,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196846,7 +197164,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196860,7 +197179,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196934,6 +197254,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -196945,7 +197267,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -196960,7 +197283,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -197292,7 +197617,8 @@
           "set"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -197303,7 +197629,8 @@
           "get"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -197315,7 +197642,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -197415,7 +197743,8 @@
           "set"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -197430,7 +197759,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -197564,7 +197894,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -197575,7 +197906,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -197590,7 +197922,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -197893,6 +198227,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       }
@@ -197942,7 +198278,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -198055,7 +198392,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -198532,7 +198870,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -198594,7 +198934,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -198869,7 +199211,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -198914,7 +199258,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -198955,7 +199301,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199055,7 +199402,9 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -199069,7 +199418,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199094,7 +199444,8 @@
           "get"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199250,6 +199601,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -199262,7 +199615,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199329,7 +199683,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199340,7 +199695,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199355,7 +199711,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -199871,7 +200229,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199951,7 +200310,8 @@
           "get"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199965,7 +200325,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -199999,7 +200360,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -200014,7 +200376,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -200095,7 +200459,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -200122,7 +200487,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -200148,7 +200514,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -200163,7 +200530,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -200177,7 +200545,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -200192,7 +200561,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -200207,7 +200577,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -201554,7 +201925,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -201726,7 +202098,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -201798,7 +202171,8 @@
           "set"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -201852,6 +202226,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -201907,6 +202283,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -201962,6 +202340,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -202041,6 +202421,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -202150,6 +202532,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -202205,6 +202589,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -202271,6 +202657,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -202327,6 +202715,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -204393,6 +204783,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -204498,6 +204890,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -204598,6 +204992,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -204769,6 +205165,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       }
@@ -204823,6 +205221,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -204943,6 +205343,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -205137,6 +205539,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -205350,6 +205754,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -205580,6 +205986,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -205660,6 +206068,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -205741,6 +206151,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -205847,6 +206259,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -205928,6 +206342,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -206144,6 +206560,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -206155,7 +206573,8 @@
           "get"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -206222,7 +206641,9 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -206250,7 +206671,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -206340,7 +206763,9 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -206384,7 +206809,9 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -206560,7 +206987,9 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -206679,6 +207108,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -206807,6 +207238,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -206927,6 +207360,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -207005,6 +207440,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -207119,6 +207556,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -207264,6 +207703,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -207337,6 +207778,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       }
@@ -207391,6 +207834,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -207848,6 +208293,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -208427,6 +208874,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -208529,6 +208978,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -208653,6 +209104,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -208949,6 +209402,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -209787,6 +210242,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -210135,6 +210592,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -210898,6 +211357,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -211392,6 +211853,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       }
@@ -211447,6 +211910,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -211517,7 +211982,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -211729,7 +212196,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -211814,7 +212283,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -211965,7 +212436,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -212170,7 +212643,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -212540,6 +213015,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -212642,7 +213119,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -212675,7 +213154,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -212771,6 +213252,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -212801,6 +213284,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -212948,7 +213433,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -213077,6 +213564,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -213177,7 +213666,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -213194,7 +213685,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -213211,7 +213704,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -213228,7 +213723,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -213245,7 +213742,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -213262,7 +213761,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -213279,7 +213780,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -214235,7 +214738,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -214269,7 +214774,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -214306,7 +214813,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -214392,6 +214900,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -214431,7 +214941,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -214823,6 +215335,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -215111,7 +215625,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -215145,7 +215661,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -215167,7 +215685,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -215223,7 +215743,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -215288,6 +215809,8 @@
           "placement.delete.plan",
           "placement.edit.plan",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan",
           "project.translate.execute",
           "project.translate.plan",
@@ -215483,6 +216006,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -215537,7 +216062,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -215554,7 +216081,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -215723,6 +216252,8 @@
           "placeholder.list",
           "plc.generate.execute",
           "plc.generate.plan",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "project.backup",
           "project.rename.execute",
@@ -216295,7 +216826,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -216345,7 +216878,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -216544,6 +217079,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -216864,6 +217401,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -216881,7 +217420,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -217245,6 +217786,8 @@
           "placement.delete.plan",
           "placement.edit.plan",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan",
           "project.translate.execute",
           "project.translate.plan",
@@ -217293,6 +217836,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -217310,7 +217855,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -217429,6 +217976,8 @@
           "placement.delete.plan",
           "placement.edit.plan",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan",
           "project.translate.execute",
           "project.translate.plan",
@@ -217477,6 +218026,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -217494,7 +218045,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -217997,6 +218550,7 @@
           "page.review",
           "placement.edit.plan",
           "placement.text.create.execute",
+          "plc.rack.execute",
           "property.read",
           "property.set.execute",
           "property.set.plan",
@@ -218149,7 +218703,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218171,7 +218727,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218194,7 +218752,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218216,7 +218776,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218525,7 +219087,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218611,7 +219175,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218633,7 +219199,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218655,7 +219223,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218678,7 +219248,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218700,7 +219272,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218722,7 +219296,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218768,7 +219344,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218803,7 +219381,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -218836,7 +219416,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -219232,6 +219814,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -219325,6 +219909,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -219419,7 +220005,8 @@
           "set"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -219533,7 +220120,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -219638,6 +220226,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -219818,7 +220408,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -219852,7 +220444,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -219864,7 +220458,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -222814,6 +223409,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -222998,7 +223595,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -223326,6 +223924,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -223488,6 +224088,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -223880,6 +224482,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -224209,7 +224813,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -224579,6 +225185,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -224785,6 +225393,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -225686,7 +226296,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -225711,7 +226322,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -225723,7 +226335,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -225826,6 +226439,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -226156,6 +226771,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -227619,6 +228236,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -227904,7 +228523,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -227939,7 +228560,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -227972,7 +228595,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -228005,7 +228630,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -228016,7 +228643,8 @@
           "get"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -228028,7 +228656,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -228146,6 +228775,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -228158,7 +228789,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -228170,7 +228802,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -229159,7 +229792,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -229181,7 +229816,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -229239,7 +229876,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -229261,7 +229900,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -229308,7 +229949,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -229330,7 +229973,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -229388,7 +230033,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -229410,7 +230057,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -229470,7 +230119,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -229503,7 +230154,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -229561,7 +230214,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -229583,7 +230238,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -229631,7 +230288,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -229687,7 +230346,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -229808,6 +230469,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -230178,7 +230841,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -230219,6 +230884,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -230249,6 +230916,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -235073,7 +235742,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -235266,7 +235937,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -236329,7 +237002,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -236469,7 +237144,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -236604,7 +237281,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -239796,6 +240475,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -239855,6 +240535,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -239915,6 +240596,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -239974,6 +240656,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -240033,6 +240716,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -240416,6 +241100,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -240475,6 +241160,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -240535,6 +241221,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -240594,6 +241281,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -240653,6 +241341,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -240745,7 +241434,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -240814,6 +241505,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.snapshot",
           "property.read",
           "property.set.execute",
@@ -240846,7 +241539,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -240920,6 +241614,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -240950,6 +241646,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -240980,6 +241678,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -241038,7 +241738,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -241055,7 +241756,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -241070,7 +241773,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -241085,7 +241790,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -242358,6 +243065,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -242418,6 +243127,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -242478,6 +243189,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -242808,6 +243521,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -242868,6 +243583,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -243089,6 +243806,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -243285,6 +244004,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -243560,6 +244281,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -243687,6 +244410,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -243705,7 +244430,9 @@
           "plan.macro.inspect",
           "plan.step.execute",
           "plc.generate.execute",
-          "plc.generate.plan"
+          "plc.generate.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -243717,7 +244444,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -243917,7 +244646,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -244024,6 +244755,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -244054,6 +244787,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -244076,7 +244811,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -244093,7 +244829,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -244110,7 +244848,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -244125,7 +244865,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -244140,7 +244882,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -244468,6 +245212,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -244881,7 +245627,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -244933,6 +245681,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -245639,6 +246389,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -245888,6 +246640,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -246179,7 +246933,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -246201,7 +246957,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -246224,7 +246982,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -246246,7 +247006,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -246330,6 +247092,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.snapshot",
           "property.read",
           "property.set.execute",
@@ -246746,7 +247510,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -246768,7 +247534,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -247180,7 +247948,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -247588,7 +248358,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -247610,7 +248382,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -247632,7 +248406,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -247654,7 +248430,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -247770,7 +248548,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -247864,6 +248643,8 @@
           "placement.delete.plan",
           "placement.edit.plan",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan",
           "project.translate.execute",
           "project.translate.plan",
@@ -247929,7 +248710,9 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -247943,7 +248726,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -247968,7 +248752,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -248088,6 +248873,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -248113,7 +248900,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -248255,7 +249043,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -248266,7 +249056,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -248432,6 +249223,8 @@
           "placeholder.list",
           "plc.generate.execute",
           "plc.generate.plan",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "project.backup",
           "project.rename.execute",
@@ -250162,7 +250955,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -250192,6 +250987,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -251428,6 +252225,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.snapshot",
           "property.read",
           "property.set.execute",
@@ -255109,7 +255908,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -255504,6 +256305,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -255519,7 +256322,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -256171,6 +256976,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -256186,7 +256993,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -256777,6 +257586,7 @@
           "page.review",
           "placement.edit.plan",
           "placement.text.create.execute",
+          "plc.rack.execute",
           "property.read",
           "property.set.execute",
           "property.set.plan",
@@ -257041,7 +257851,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257052,7 +257863,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257064,7 +257876,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257076,7 +257889,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257087,7 +257901,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257189,7 +258004,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257203,7 +258019,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257217,7 +258034,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257242,7 +258060,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257256,7 +258075,8 @@
           "device.place.execute",
           "device.place.plan",
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257375,6 +258195,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -257387,7 +258209,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257399,7 +258222,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257411,7 +258235,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257493,7 +258318,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257504,7 +258330,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257515,7 +258342,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -257541,7 +258369,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -258033,6 +258863,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -258192,7 +259024,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -258510,7 +259343,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -258787,7 +259621,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -258810,7 +259645,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -258945,6 +259781,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -259528,6 +260366,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -259761,6 +260601,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -260155,6 +260997,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -260411,6 +261255,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -260594,6 +261440,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -260777,6 +261625,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -261113,6 +261963,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -261286,6 +262138,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -261456,6 +262310,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -261467,7 +262323,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -261482,7 +262339,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -261497,7 +262356,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -261594,7 +262455,8 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "placeholder.apply.execute"
+          "placeholder.apply.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -261612,7 +262474,9 @@
           "placeholder.apply.plan",
           "placeholder.list",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -261844,6 +262708,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -262053,6 +262919,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -262083,6 +262951,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -262111,6 +262981,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -262424,6 +263296,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -262454,6 +263328,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -262568,6 +263444,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       }
@@ -262667,6 +263545,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -263100,6 +263980,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -263351,6 +264233,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -264239,6 +265123,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -264600,6 +265486,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -264746,6 +265634,7 @@
           "page.review",
           "placement.edit.plan",
           "placement.text.create.execute",
+          "plc.rack.execute",
           "property.read",
           "property.set.execute",
           "property.set.plan",
@@ -264875,7 +265764,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -265344,6 +266235,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -265602,6 +266495,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -265613,7 +266508,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -265628,7 +266524,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -266228,7 +267126,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -266327,7 +267227,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -266684,7 +267586,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -266717,7 +267621,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -266739,7 +267645,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -266857,6 +267765,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -267025,7 +267935,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -267040,7 +267951,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -267097,7 +268010,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -267112,7 +268026,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -267158,7 +268074,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -267204,7 +268121,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -267219,7 +268137,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -268589,7 +269509,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -268622,7 +269544,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -268695,6 +269619,8 @@
           "plan.step.execute",
           "plan.step.guard",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.snapshot",
           "property.read",
           "property.set.execute",
@@ -268787,6 +269713,8 @@
           "placement.delete.plan",
           "placement.edit.plan",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan",
           "project.translate.execute",
           "project.translate.plan",
@@ -268956,6 +269884,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -269060,7 +269990,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -269071,7 +270003,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -269082,7 +270015,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -269110,7 +270044,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -269127,7 +270063,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -270038,6 +270976,8 @@
           "placement.delete.plan",
           "placement.edit.plan",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan",
           "project.translate.execute",
           "project.translate.plan",
@@ -270086,6 +271026,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -270103,7 +271045,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -270287,7 +271231,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -270309,7 +271255,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -270332,7 +271280,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -270354,7 +271304,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -270458,6 +271410,7 @@
           "page.review",
           "placement.edit.plan",
           "placement.text.create.execute",
+          "plc.rack.execute",
           "property.read",
           "property.set.execute",
           "property.set.plan",
@@ -270686,7 +271639,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -270720,7 +271675,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -271185,7 +272142,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -271218,7 +272177,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -271259,6 +272220,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -271320,7 +272283,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -271335,7 +272300,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -273336,7 +274303,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -273763,7 +274732,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -273878,7 +274848,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -273889,7 +274860,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -274000,7 +274972,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -274081,7 +275054,9 @@
           "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -274092,7 +275067,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -274103,7 +275079,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -274129,7 +275106,9 @@
           "macro.insert.execute",
           "macro.insert.plan",
           "plan.macro.inspect",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -274690,6 +275669,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -274851,6 +275832,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -275130,6 +276113,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -275720,6 +276704,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -277751,7 +278737,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -277774,7 +278762,8 @@
         ],
         "operations": [
           "device.update.execute",
-          "device.update.plan"
+          "device.update.plan",
+          "plc.rack.execute"
         ]
       },
       {
@@ -277811,7 +278800,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -277823,7 +278813,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -277922,6 +278913,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -278339,6 +279332,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "shield.create.execute",
           "shield.create.plan",
           "symbol.search"
@@ -278387,6 +279382,8 @@
           "placement.edit.plan",
           "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get",
           "revision.list",
           "shield.create.execute",
@@ -279129,6 +280126,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -279442,7 +280440,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -279562,6 +280561,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -280338,7 +281339,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -280360,7 +281363,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -280395,7 +281400,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -280450,7 +281457,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -280491,6 +281500,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -280521,6 +281532,8 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "potential.update.plan"
         ]
       },
@@ -280742,7 +281755,9 @@
           "macro.insert.plan",
           "page.review",
           "placement.edit.plan",
-          "plan.step.execute"
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       }
     ],
@@ -281241,7 +282256,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -281264,7 +282280,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -281313,6 +282330,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -281359,7 +282377,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -281382,7 +282401,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -281431,6 +282451,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -281493,6 +282514,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -281552,6 +282574,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -281614,6 +282637,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -281673,6 +282697,7 @@
           "placement.edit.plan",
           "placement.text.create.execute",
           "plc.generate.execute",
+          "plc.rack.execute",
           "plc.readdress.execute",
           "potential.update.plan",
           "project.translate.execute",
@@ -282733,7 +283758,8 @@
           "type"
         ],
         "operations": [
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -283240,7 +284266,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -283275,7 +284302,8 @@
           "type"
         ],
         "operations": [
-          "macro.insert.execute"
+          "macro.insert.execute",
+          "plc.rack.execute"
         ]
       }
     ],
@@ -283386,7 +284414,8 @@
         ],
         "operations": [
           "device.place.execute",
-          "device.update.execute"
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -284144,6 +285173,8 @@
           "plc.generate.execute",
           "plc.generate.plan",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "plc.readdress.execute",
           "plc.readdress.plan",
           "potential.update.plan",
@@ -285569,7 +286600,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -286031,7 +287064,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {
@@ -286420,7 +287455,9 @@
         ],
         "operations": [
           "macro.insert.execute",
-          "macro.insert.plan"
+          "macro.insert.plan",
+          "plc.rack.execute",
+          "plc.rack.plan"
         ]
       },
       {

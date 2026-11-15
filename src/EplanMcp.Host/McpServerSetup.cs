@@ -167,6 +167,7 @@ internal static class McpServerSetup
             .WithTools<TranslationImportTools>(HostJson.Options)
             .WithTools<TranslationKeywordTools>(HostJson.Options)
             .WithTools<TranslationAddTools>(HostJson.Options)
+            .WithTools<PlcRackTools>(HostJson.Options)
             .WithTools<DiscoveryTools>(HostJson.Options)
             .WithTools<SessionLifecycleTools>(HostJson.Options)
             .WithTools<ConnectionRouteTools>(HostJson.Options)

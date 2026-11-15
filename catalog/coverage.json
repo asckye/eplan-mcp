@@ -2728,6 +2728,27 @@
       }
     },
     {
+      "name": "eplan_plc_rack",
+      "safety": "write",
+      "operations": [
+        "plc.rack.execute",
+        "plc.rack.plan"
+      ],
+      "apiIds": 300,
+      "operationGroups": 176,
+      "dataDictionary": 5,
+      "dependencies": 108,
+      "actions": 0,
+      "spec": "docs/tools/eplan_plc_rack.md",
+      "small": 0,
+      "medium": 1,
+      "large": 0,
+      "apiNotes": [
+        "A85",
+        "A93"
+      ]
+    },
+    {
       "name": "eplan_plc_readdress",
       "safety": "destructive",
       "operations": [
@@ -4142,6 +4163,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_workflow_plan"
@@ -4248,6 +4270,7 @@
         "eplan_object_get",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_project_translate",
         "eplan_property_get",
@@ -4280,6 +4303,7 @@
         "eplan_object_find",
         "eplan_object_get",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ]
@@ -4426,6 +4450,7 @@
         "eplan_part_import",
         "eplan_part_search",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ]
@@ -4708,6 +4733,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -5163,6 +5189,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -5245,6 +5272,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -5410,6 +5438,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -5555,6 +5584,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_project_update",
         "eplan_report_create",
@@ -5653,6 +5683,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -5866,6 +5897,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_report_create",
         "eplan_rule_check",
@@ -5901,6 +5933,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -5939,6 +5972,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -6015,6 +6049,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_shield_create",
@@ -6063,6 +6098,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_shield_create",
@@ -6922,6 +6958,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_selection_get",
@@ -7721,6 +7758,7 @@
         "eplan_part_list",
         "eplan_part_sync",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -7807,6 +7845,7 @@
         "eplan_part_sync",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_property_set",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -7860,6 +7899,7 @@
         "eplan_part_list",
         "eplan_part_sync",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -7917,6 +7957,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -7957,6 +7998,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -8009,6 +8051,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -8217,6 +8260,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_workflow_plan"
@@ -8261,6 +8305,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -8297,6 +8342,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -8435,6 +8481,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -8500,6 +8547,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -8576,6 +8624,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -8612,6 +8661,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -9184,6 +9234,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -9380,6 +9431,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -9447,6 +9499,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_project_get",
         "eplan_project_translate",
@@ -9675,6 +9728,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_create",
@@ -14048,6 +14102,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -14628,7 +14683,8 @@
         "eplan_api_try",
         "eplan_device_place",
         "eplan_device_update",
-        "eplan_macro_insert"
+        "eplan_macro_insert",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -14689,6 +14745,7 @@
         "eplan_page_get",
         "eplan_placement_create",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_property_set",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -14713,7 +14770,8 @@
       "tools": [
         "eplan_api_try",
         "eplan_device_place",
-        "eplan_device_update"
+        "eplan_device_update",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -14833,6 +14891,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -14976,6 +15035,7 @@
         "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -15077,6 +15137,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -15105,7 +15166,8 @@
         "eplan_device_place",
         "eplan_device_update",
         "eplan_page_review",
-        "eplan_plc_get"
+        "eplan_plc_get",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -15172,6 +15234,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_project_translate",
         "eplan_property_get",
@@ -15330,6 +15393,7 @@
         "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -15392,6 +15456,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_get",
@@ -15461,6 +15526,7 @@
         "eplan_page_get",
         "eplan_placement_create",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -15789,7 +15855,8 @@
         "eplan_device_get",
         "eplan_device_place",
         "eplan_device_update",
-        "eplan_plc_get"
+        "eplan_plc_get",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -15826,7 +15893,8 @@
         "eplan_device_get",
         "eplan_device_place",
         "eplan_device_update",
-        "eplan_plc_get"
+        "eplan_plc_get",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -15843,6 +15911,7 @@
         "eplan_macro_insert",
         "eplan_page_get",
         "eplan_placement_create",
+        "eplan_plc_rack",
         "eplan_project_translate",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -15883,6 +15952,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -15910,6 +15980,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -15937,6 +16008,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -15974,6 +16046,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -16028,6 +16101,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -16055,6 +16129,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -16082,6 +16157,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -16148,6 +16224,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17310,6 +17387,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17353,6 +17431,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17380,6 +17459,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17463,6 +17543,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17503,6 +17584,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17579,6 +17661,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17745,6 +17828,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17817,6 +17901,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17968,6 +18053,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -17995,6 +18081,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -18022,6 +18109,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -18059,6 +18147,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -18086,6 +18175,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -18136,7 +18226,8 @@
       "tools": [
         "eplan_api_try",
         "eplan_macro_insert",
-        "eplan_placeholder_apply"
+        "eplan_placeholder_apply",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -18388,6 +18479,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -18412,6 +18504,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -18431,6 +18524,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -18457,6 +18551,7 @@
         "eplan_macro_insert",
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -18653,6 +18748,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -18750,6 +18846,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -18810,6 +18907,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -18857,6 +18955,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -18954,6 +19053,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -18991,6 +19091,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_selection_get",
@@ -19020,6 +19121,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -19047,6 +19149,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -19084,6 +19187,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -19207,6 +19311,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -19287,6 +19392,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -19573,6 +19679,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -19874,6 +19981,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -19911,6 +20019,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -19948,6 +20057,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -20039,6 +20149,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -20484,6 +20595,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -20622,6 +20734,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -21049,6 +21162,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -21485,6 +21599,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -21788,6 +21903,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -21816,6 +21932,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -21847,6 +21964,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_symbol_search",
@@ -21907,6 +22025,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_symbol_search",
@@ -21929,6 +22048,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_symbol_search",
@@ -21961,6 +22081,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_symbol_search",
@@ -22007,6 +22128,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_symbol_search",
@@ -22131,6 +22253,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -22158,6 +22281,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_shield_create",
@@ -22186,6 +22310,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_shield_create",
@@ -22223,6 +22348,7 @@
         "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_macro_store",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -22236,6 +22362,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -22249,6 +22376,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -22263,6 +22391,7 @@
         "eplan_macro_get",
         "eplan_macro_insert",
         "eplan_macro_store",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -22276,6 +22405,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -22289,6 +22419,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -22302,6 +22433,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -22315,6 +22447,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -22328,6 +22461,7 @@
       "tools": [
         "eplan_macro_get",
         "eplan_macro_insert",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -23088,6 +23222,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -23183,6 +23318,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -23277,6 +23413,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_rename",
@@ -23347,6 +23484,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -23411,6 +23549,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -23525,6 +23664,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -23621,6 +23761,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_project_translate",
         "eplan_property_get",
@@ -23671,6 +23812,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_project_translate",
         "eplan_property_get",
@@ -23972,6 +24114,7 @@
         "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -24021,6 +24164,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -24137,6 +24281,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_workflow_plan"
@@ -24159,6 +24304,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -24180,6 +24326,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_symbol_search",
         "eplan_workflow_plan"
@@ -24409,6 +24556,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -24437,6 +24585,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -24467,6 +24616,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -24486,7 +24636,8 @@
         "eplan_graphic_edit",
         "eplan_placement_edit",
         "eplan_placement_update",
-        "eplan_plc_generate"
+        "eplan_plc_generate",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -24523,6 +24674,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -24570,6 +24722,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_property_get",
         "eplan_property_set",
         "eplan_rule_check",
@@ -24607,7 +24760,8 @@
         "eplan_macro_insert",
         "eplan_placement_delete",
         "eplan_placement_edit",
-        "eplan_placement_update"
+        "eplan_placement_update",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -26350,6 +26504,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_close",
@@ -26446,6 +26601,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -26492,6 +26648,7 @@
         "eplan_device_update",
         "eplan_page_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_workflow_plan"
@@ -26506,7 +26663,8 @@
       "tools": [
         "eplan_api_try",
         "eplan_device_place",
-        "eplan_device_update"
+        "eplan_device_update",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -26603,6 +26761,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_close",
@@ -26743,6 +26902,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_close",
@@ -26884,6 +27044,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_shield_create",
         "eplan_symbol_search",
@@ -27060,6 +27221,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_close",
@@ -27197,6 +27359,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_close",
@@ -27782,6 +27945,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_create",
@@ -27949,6 +28113,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_project_get",
         "eplan_project_update",
         "eplan_property_get",
@@ -28027,6 +28192,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_create",
@@ -28654,6 +28820,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -28714,6 +28881,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -28774,6 +28942,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -28920,6 +29089,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_get",
@@ -28979,6 +29149,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_property_get",
         "eplan_property_set",
@@ -29082,6 +29253,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -29252,6 +29424,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_shield_create",
@@ -29294,6 +29467,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -29314,6 +29488,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -29334,6 +29509,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -29354,6 +29530,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -29375,6 +29552,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -29395,6 +29573,7 @@
         "eplan_page_review",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -29436,6 +29615,7 @@
         "eplan_placement_create",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -29497,6 +29677,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -29694,6 +29875,7 @@
         "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_potential_update",
         "eplan_rule_check",
         "eplan_workflow_plan"
@@ -29964,6 +30146,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -30024,6 +30207,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -30084,6 +30268,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -30144,6 +30329,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -30204,6 +30390,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -30264,6 +30451,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -30324,6 +30512,7 @@
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_translate",
@@ -31607,7 +31796,8 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
-        "eplan_device_update"
+        "eplan_device_update",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -32357,7 +32547,8 @@
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_macro_insert",
-        "eplan_placement_update"
+        "eplan_placement_update",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -32584,7 +32775,8 @@
       "tools": [
         "eplan_api_try",
         "eplan_device_place",
-        "eplan_device_update"
+        "eplan_device_update",
+        "eplan_plc_rack"
       ],
       "route": "dedicated"
     },
@@ -33370,6 +33562,7 @@
         "eplan_placement_update",
         "eplan_plc_generate",
         "eplan_plc_get",
+        "eplan_plc_rack",
         "eplan_plc_readdress",
         "eplan_potential_update",
         "eplan_project_close",
@@ -35886,6 +36079,7 @@
         "eplan_part_search",
         "eplan_part_sync",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -36010,6 +36204,7 @@
         "eplan_part_import",
         "eplan_part_search",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -36650,6 +36845,7 @@
         "eplan_part_search",
         "eplan_part_sync",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -36850,6 +37046,7 @@
         "eplan_api_try",
         "eplan_macro_insert",
         "eplan_part_export",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -36970,6 +37167,7 @@
         "eplan_part_search",
         "eplan_part_sync",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -37063,6 +37261,7 @@
         "eplan_part_import",
         "eplan_part_search",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],
@@ -37129,6 +37328,7 @@
         "eplan_part_search",
         "eplan_part_sync",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_translation_export",
         "eplan_workflow_plan"
@@ -37713,6 +37913,7 @@
         "eplan_part_import",
         "eplan_part_search",
         "eplan_placement_update",
+        "eplan_plc_rack",
         "eplan_rule_check",
         "eplan_workflow_plan"
       ],

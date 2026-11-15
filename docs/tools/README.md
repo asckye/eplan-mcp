@@ -64,6 +64,7 @@
 | `eplan_shield_create` | full | 写入 | [eplan_shield_create.md](eplan_shield_create.md) |
 | `eplan_plc_generate` | full | 写入 | [eplan_plc_generate.md](eplan_plc_generate.md) |
 | `eplan_plc_readdress` | full | 写入 | [eplan_plc_readdress.md](eplan_plc_readdress.md) |
+| `eplan_plc_rack` | full | 写入 | [eplan_plc_rack.md](eplan_plc_rack.md) |
 | `eplan_cable_reassign` | full | 写入 | [eplan_cable_reassign.md](eplan_cable_reassign.md) |
 | `eplan_report_configure` | full | 写入 | [eplan_report_configure.md](eplan_report_configure.md) |
 | `eplan_macro_get` | core、full | 只读 | [eplan_macro_get.md](eplan_macro_get.md) |

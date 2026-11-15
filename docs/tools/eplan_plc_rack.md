@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plc` / `full` |
 | 安全级别 | Write（只在新页或空页上画；scratch 内自动允许，其他按策略审批） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Accepted（项目负责人 2026-11-14 确认，v0.6.0 发布后实现） |
+| 状态 | Implemented (Unreleased) |
 
 ## 1. 问题
 画 PLC 部分时，AI 每次自己决定顺序和细节，结果不稳定：MX_Dryer 第一次先画了机架多线图片、后补总览，补总览时被合并规则拒绝；再用 `eplan_plc_generate` 补，机架页被清空。负责人要求"先画总览，再调用"，并希望把固定的作图顺序做成工具："只要给数据参数，就能直接生成，而不是 AI 一个个自己想"。
@@ -22,24 +22,21 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string | 是 | — | 已打开项目的名称或路径 |
-| `rack_page` | string | 是 | — | 机架页完整页名；不存在就新建（Circuit），存在必须是空页 |
+| `rack_page` | string | 是 | — | 机架页完整页名；必须是已有的空 Circuit 页（第一版不建页，先用 `eplan_page_create`） |
 | `cards` | array，1–20 项 | 是 | — | 从左到右的卡片，见下 |
 | `origin` | [x, y] | 否 | [24, 264] | 第一张卡图片的插入点（mm，左下原点） |
 | `overview_position` | [x, y] | 否 | [176, 264] | 每张总览页上卡片的插入点 |
-| `supply_y` | [y24, y0] | 否 | [100, 88] | 正、负电源中断点的 y |
-| `label_y` | number | 否 | 28 | 卡片下方列文字的 y |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览；执行须显式 false |
 
 `cards[]`：
 - `tag`：完整设备标识（如 `=K1+UC1-KE3`），必须是新标识。
 - `part`：部件号，必须在部件库里，并且部件带宏。
-- `overview_page`：这张卡的总览页完整页名；不存在就新建（Overview 类型，描述取 `label`），存在必须是空的 Overview 页。
+- `overview_page`：这张卡的总览页完整页名；必须是已有的空 Overview 页。
 - `picture_variant`：机架图片的多线变体，整数。已知取值见 A122（DI/DQ 浅色 5、深色 6，F-DI 6，CPU 1，CM PtP 3）。第一版必填，以后由规则包给默认值。
 - `overview_variant`：可选，默认 0。
 - `extra_parts`：可选，追加到卡主功能上的部件号数组（如 BaseUnit `SIE.6ES7193-6BP00-0BA0`）。
-- `sub_devices`：可选，宏里子设备的改名和部件，`[{macro_suffix:"-K1", tag:"=K1+UC1-KEC1", part:"SIE.6ES7193-6AR00-0AA0"}]`。宏里有子设备但没给映射时，子设备保留宏里的名字，并在 `warning` 里列出。
-- `supply`：可选，`{plus, minus}`，这张卡 L+/M（CPU 为 1L+/1M）接的中断点名，例如 `=GAB-XD1:4`、`=GAB-XD2:4`。只给电位组的第一张卡。
-- `label`：卡片下方的列文字，同时用作新建总览页的描述。
+- `sub_devices`：可选，宏里子设备的改名和部件，`[{macro_suffix:"-K1", tag:"=K1+UC1-KEC1", part:"SIE.6ES7193-6AR00-0AA0"}]`。宏里有子设备但没给映射时，子设备改名为卡的标识加它的后缀（如 `=K1+UC1-KE2-K1`），否则下一张卡的宏会并进它。
+- 第二版再加：`supply`（L+/M 电源中断点）、`label`（卡片下方的列文字）和缺页时自动建页。第一版画完后用 `eplan_connection_create`、`eplan_placement_create` 补。
 
 ## 4. 决定：执行顺序（固定，不由调用方选择）
 1. 校验全部输入，算出机架位置：每张卡的 x = 上一张的 x + 上一张图片的宽度（从宏读取），卡片紧挨着。
@@ -94,3 +91,10 @@
 | 预览、审批与审计 | 预览列出每张卡的页、x、部件、图片变体、子设备和中断点；审批摘要为页名与卡数 |
 | 事务、回滚与结果恢复 | 一个 `UndoStep` + 事务；失败 `rolled_back`；提交后丢失回复时 `recovered`，用 `eplan_page_get` 读回 |
 | 项目测试与夹具 | 见第 9 节；参考实现会话脚本 `mxd2.py` |
+
+## 11. 实现记录（2026-11-15）
+
+- 第一版实现第 4 节的第 1、3、4、7 步；建页（第 2 步）、电源中断点（第 5 步）、列文字（第 6 步）留到第二版。
+- 总览和图片都**按宏路径**插入，不用 `part=`：后者会把卡的部件挂到宏里每个主功能上（CPU 的总线适配器也会挂上，A122）；部件在改名后逐个追加。
+- 整个机架在 `PartTransactions` 的一个事务里，一个撤销步骤同时覆盖提交后的部件数据传递（A93）。提交后每张卡必须只有一个主功能并带全部部件，否则整体回滚。
+- 新插入设备的主功能在改名前按宏标识读取（A85：新名字提交前是临时的）。这一点和"同一事务里改名合并"都还没有实机验证，Large 用例见第 9 节。

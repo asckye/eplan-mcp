@@ -20828,6 +20828,194 @@
       }
     },
     {
+      "name": "eplan_plc_rack",
+      "title": "Draw a PLC rack overview first",
+      "description": "Draws an ET 200SP rack from data in one undo step: each card's Overview on its empty Overview page, renamed with its parts, then its picture beside the others on the empty rack page, joined to it. Omit/true previews; false draws. Cards and an example: eplan_tool_usage.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rack_page": {
+            "description": "Empty Circuit page",
+            "type": "string"
+          },
+          "cards": {
+            "description": "1-20 cards, left to right",
+            "type": "array",
+            "items": {}
+          },
+          "project": {
+            "description": "Project; default current",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "origin": {
+            "description": "First picture [x, y] mm",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "number"
+            },
+            "default": null
+          },
+          "overview_position": {
+            "description": "Card on overview [x, y] mm",
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "number"
+            },
+            "default": null
+          },
+          "dry_run": {
+            "description": "Omit/true previews; false executes.",
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "rack_page",
+          "cards"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "description": "The project.",
+            "type": "string"
+          },
+          "execution": {
+            "description": "not_started, committed or unknown (ADR-0010).",
+            "type": "string"
+          },
+          "dryRun": {
+            "description": "True when this call only previewed the rack.",
+            "type": "boolean"
+          },
+          "fingerprint": {
+            "description": "The preview's fingerprint.",
+            "type": "string"
+          },
+          "changes": {
+            "description": "Per card: tag, parts, overview page, picture variant, rack x and width.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "oldValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "newValue": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "cards": {
+            "description": "The drawn cards with the parts read back; empty on a dry run.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "type": "string"
+                },
+                "overviewPage": {
+                  "type": "string"
+                },
+                "rackX": {
+                  "type": "number"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "parts": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "subDevices": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "warning": {
+            "description": "Layout findings that did not stop the rack.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "undo": {
+            "description": "How to take the rack back.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "auditId": {
+            "description": "The audit record's request ID.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recovered": {
+            "description": "True when the result was recovered after a lost reply.",
+            "type": "boolean"
+          },
+          "hint": {
+            "description": "What to do next.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "annotations": {
+        "title": "Draw a PLC rack overview first",
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_plc_readdress",
       "title": "Address the PLC connection points of an EPLAN project",
       "description": "Lets EPLAN assign PLC addresses from start addresses; new addresses are known only afterwards. Previews by default. Execution always requires engineer approval, including scratch, and a project backup. One undo.",
@@ -27115,6 +27303,7 @@
               "eplan_plan_get",
               "eplan_plc_generate",
               "eplan_plc_get",
+              "eplan_plc_rack",
               "eplan_plc_readdress",
               "eplan_potential_update",
               "eplan_project_close",

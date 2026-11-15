@@ -3,7 +3,7 @@
 **操作层 4014 组：专用工具 626，通用读取 116，仅通用入口 1999，仅状态覆盖 7，其他可调用 5，明确不做 756，到不了 505；实机验证 1118**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 e8b7b53d）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 b008a697）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 132（22.7%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 133（22.6%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -295,6 +295,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_plan_get | read | —（P12 仅查询 Host 计划快照；同会话归属、分页、片段、预算和只读 Resource，不访问 Bridge；stateless HTTP 拒绝。） | 0 | 0 | 0 | 0 | 0 | 6/6/3 | — | — |
 | eplan_plc_generate | write | plc.generate.execute<br>plc.generate.plan | 62 | 31 | 0 | 30 | 1 | 0/0/1 | — | — |
 | eplan_plc_get | read | plc.get | 83 | 40 | 1 | 31 | 0 | 2/1/3 | A55 | 2026-10-21 pass_with_findings（docs/tools/eplan_plc_get.md） |
+| eplan_plc_rack | write | plc.rack.execute<br>plc.rack.plan | 300 | 176 | 5 | 108 | 0 | 0/1/0 | A85 A93 | — |
 | eplan_plc_readdress | destructive | plc.readdress.execute<br>plc.readdress.plan | 75 | 32 | 1 | 41 | 0 | 0/0/1 | — | — |
 | eplan_potential_update | write | potential.update.execute<br>potential.update.plan | 173 | 103 | 1 | 67 | 0 | 0/0/0 | — | — |
 | eplan_project_close | write | project.close.execute<br>project.close.plan | 17 | 7 | 0 | 10 | 0 | 0/0/1 | A34 | — |
