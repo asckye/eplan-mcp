@@ -5,7 +5,7 @@
 | 状态 | Accepted（项目负责人 2026-10-30 同意分级方案，并接受 ADR-0030、ADR-0031） |
 | 级别 | L2 为主；action 未验证执行与私有扩展模块为 L3，见 ADR-0030、ADR-0031 |
 | 相关依据 | [ADR-0021](../adr/0021-action-run-whitelist.md)、[ADR-0025](../adr/0025-code-plugin-worker.md)、[路线图](../roadmap.md) |
-| 最后更新 | 2026-11-15 |
+| 最后更新 | 2026-11-14 |
 
 ## 1. 背景
 
@@ -48,13 +48,13 @@
 - 批量验证工具对全部 action 出具报告，报告与结论进 api-notes；
 - C 级执行在 scratch 外一律拒绝，每次审批，审计带"未验证"标记。
 
-## 6. 2026-11-15 进度核对（负责人决定提前）
+## 6. 2026-11-14 进度核对（负责人决定提前）
 
 | # | 功能 | 现状 | 下一步 |
 |---|---|---|---|
 | 1 | 全部 action 三级开放与批量验证 | 基本完成：B 级目录、C 级试执行、A 级白名单、普查（2026-11-12 跑完） | 按 action 族查官方参数文档，复测进白名单（路线图原主线） |
-| 2 | EPLAN 生命周期 | 未做 | [ADR-0058](../adr/0058-eplan-lifecycle-tools.md)（Proposed：Host 启动 EPLAN 改变进程关系，关闭涉及数据安全），确认后写规格 |
+| 2 | EPLAN 生命周期 | 未做 | [ADR-0058](../adr/0058-eplan-lifecycle-tools.md)（2026-11-14 接受）；下一步写三个工具的规格 |
 | 3 | 按模板建 scratch 项目 | 已由 `eplan_project_create` 覆盖：基础项目 `.zw9` 或备份 `.zw1`，默认落在第一个 scratch 根目录 | 无 |
-| 4 | discovery Profile | 未做 | [ADR-0057](../adr/0057-discovery-profile-dispatch.md)（Proposed：分发工具改变客户端看到的审批面），确认后写规格 |
+| 4 | discovery Profile | 未做 | [ADR-0057](../adr/0057-discovery-profile-dispatch.md)（2026-11-14 接受）；下一步写三个工具的规格 |
 | 13 | 多语言 README 与面向 AI 的能力总览 | `README.en.md` 已有；能力总览按 llmstxt.org 的通行格式放在仓库根目录的 [`llms.txt`](../../llms.txt)，取代原计划的 `docs/llm.md` | 随工具变化更新 |
 | 5–12 | 第 2、3 批 | 未做 | 第 1 批之后；第 9 项并入 Workbench v2 实施（同日提前） |

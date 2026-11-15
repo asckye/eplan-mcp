@@ -63,5 +63,5 @@
 | [0054](0054-api-try-master-data-handles.md) | 通用入口的主数据句柄：读不限库，写只在当前配置为 scratch 文件副本时开放 | Accepted | 单向门 |
 | [0055](0055-api-try-field-handle-roots.md) | 通用入口把公开实例字段也当作句柄来源，只读不写 | Accepted | 双向门 |
 | [0056](0056-api-try-keyed-chain-steps.md) | 通用入口的句柄链接受按键取值的一步，工具类按名单作为根 | Accepted | 双向门 |
-| [0057](0057-discovery-profile-dispatch.md) | discovery Profile 用按安全级别分开的两个分发工具调用其余工具 | Proposed | 双向门 |
-| [0058](0058-eplan-lifecycle-tools.md) | Host 可以启动、关闭和重启本机的 EPLAN，关闭只在打开的项目都在 scratch 时自动进行 | Proposed | 双向门 |
+| [0057](0057-discovery-profile-dispatch.md) | discovery Profile 用按安全级别分开的两个分发工具调用其余工具 | Accepted | 双向门 |
+| [0058](0058-eplan-lifecycle-tools.md) | Host 可以启动、关闭和重启本机的 EPLAN，关闭只在打开的项目都在 scratch 时自动进行 | Accepted | 双向门 |
