@@ -43829,6 +43829,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Article.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.Article.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 1.0522984,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Article.IsAssembly": {
       "id": "O:Eplan.EplApi.DataModel.Article.IsAssembly",
       "kind": "api-read",
@@ -43965,6 +43975,16 @@
       "outcome": "timeout",
       "changed": false,
       "seconds": 5.8193681,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Article.RemoveModule#write": {
+      "id": "O:Eplan.EplApi.DataModel.Article.RemoveModule#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0017926,
       "eplan_messages": 0,
       "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
@@ -44661,6 +44681,16 @@
       "outcome": "rolled_back",
       "changed": false,
       "seconds": 7.2253339,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Connection.RemoveArticleReference#write": {
+      "id": "O:Eplan.EplApi.DataModel.Connection.RemoveArticleReference#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022141,
       "eplan_messages": 0,
       "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
@@ -46378,6 +46408,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.E3D.BusBarSystem.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.BusBarSystem.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.395441,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.E3D.BusBarSystem.Holder": {
       "id": "O:Eplan.EplApi.DataModel.E3D.BusBarSystem.Holder",
       "kind": "api-read",
@@ -46398,6 +46438,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.E3D.Cabinet.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.Cabinet.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.4297765,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.E3D.Cabinet.Properties": {
       "id": "O:Eplan.EplApi.DataModel.E3D.Cabinet.Properties",
       "kind": "api-read",
@@ -46406,6 +46456,16 @@
       "seconds": 9.2922069,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.Component.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.Component.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.4229659,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Component.Properties": {
@@ -46814,6 +46874,16 @@
       "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.E3D.Duct.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.Duct.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.3842221,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.E3D.Duct.Properties": {
       "id": "O:Eplan.EplApi.DataModel.E3D.Duct.Properties",
       "kind": "api-read",
@@ -46994,6 +47064,16 @@
       "seconds": 9.9871763,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.Function3D.RemoveArticleReference#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.Function3D.RemoveArticleReference#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0015709,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.Function3D.SetPlanningSegment#write": {
@@ -47698,6 +47778,16 @@
       "seconds": 19.8890341,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.E3D.MountingRail.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.MountingRail.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.3450354,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.E3D.MountingRail.Properties": {
@@ -48877,6 +48967,16 @@
       "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.E3D.RoutingAccessory.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.E3D.RoutingAccessory.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.3574578,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.E3D.RoutingAccessory.Diameter": {
       "id": "O:Eplan.EplApi.DataModel.E3D.RoutingAccessory.Diameter",
       "kind": "api-read",
@@ -49250,6 +49350,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.EObjects.Cable.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.Cable.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0023793,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.EObjects.Cable.DeleteAllLocalFunctionTemplates#write": {
       "id": "O:Eplan.EplApi.DataModel.EObjects.Cable.DeleteAllLocalFunctionTemplates#write",
       "kind": "api-write",
@@ -49450,6 +49560,16 @@
       "seconds": 28.8287184,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.EObjects.PLC.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.PLC.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022808,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.PLC.FunctionCategory": {
@@ -49704,6 +49824,16 @@
       "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.EObjects.Shield.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.Shield.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0014467,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.EObjects.Shield.FunctionCategory": {
       "id": "O:Eplan.EplApi.DataModel.EObjects.Shield.FunctionCategory",
       "kind": "api-read",
@@ -49782,6 +49912,16 @@
       "seconds": 9.2155915,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.EObjects.Terminal.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.EObjects.Terminal.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.543407,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.EObjects.Terminal.DistributedTerminals": {
@@ -50239,6 +50379,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Function.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.Function.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.002161,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Function.FunctionCategory": {
       "id": "O:Eplan.EplApi.DataModel.Function.FunctionCategory",
       "kind": "api-read",
@@ -50571,6 +50721,16 @@
       "seconds": 8.192908,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Function.RemoveArticleReference#write": {
+      "id": "O:Eplan.EplApi.DataModel.Function.RemoveArticleReference#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0022973,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Function.RemoveFromPage#write": {
@@ -54192,6 +54352,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.1251552,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.DisplayedProperty": {
       "id": "O:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.DisplayedProperty",
       "kind": "api-read",
@@ -55931,6 +56101,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.IArticleUser.RemoveArticleReference#write": {
+      "id": "O:Eplan.EplApi.DataModel.IArticleUser.RemoveArticleReference#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0012671,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.IFunctionBase.IsNameEmpty": {
       "id": "O:Eplan.EplApi.DataModel.IFunctionBase.IsNameEmpty",
       "kind": "api-read",
@@ -57183,6 +57363,16 @@
       "date": "2026-11-14",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.MergedArticleReference.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.MergedArticleReference.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0011421,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.MergedArticleReference.DisassembleRecursive#write": {
       "id": "O:Eplan.EplApi.DataModel.MergedArticleReference.DisassembleRecursive#write",
       "kind": "api-write",
@@ -57851,6 +58041,16 @@
       "seconds": 0.0004071,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Page.CopyTo#write": {
+      "id": "O:Eplan.EplApi.DataModel.Page.CopyTo#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.3313336,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Page.Create#write": {
@@ -59699,6 +59899,16 @@
       "date": "2026-11-04",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.DataModel.Planning.PlanningSegment.RemoveArticleReference#write": {
+      "id": "O:Eplan.EplApi.DataModel.Planning.PlanningSegment.RemoveArticleReference#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0013741,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.DataModel.Planning.PlanningSegment.RemovePLCAddress#write": {
       "id": "O:Eplan.EplApi.DataModel.Planning.PlanningSegment.RemovePLCAddress#write",
       "kind": "api-write",
@@ -59849,6 +60059,16 @@
       "seconds": 0.0036377,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Planning.SegmentDefinition.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.Planning.SegmentDefinition.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0015466,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Planning.SegmentDefinition.DisplayedName": {
@@ -60102,6 +60322,16 @@
       "seconds": 12.4370542,
       "eplan_messages": 0,
       "date": "2026-11-14",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Planning.SegmentTemplate.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.Planning.SegmentTemplate.Create#write",
+      "kind": "api-write",
+      "outcome": "timeout",
+      "changed": false,
+      "seconds": 4.8384675,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Planning.SegmentTemplate.GetWriteProtectionFlagSet": {
@@ -60870,6 +61100,16 @@
       "seconds": 4.8123326,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.Project.RemoveArticleReference#write": {
+      "id": "O:Eplan.EplApi.DataModel.Project.RemoveArticleReference#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0541188,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.Project.Sections": {
@@ -62215,6 +62455,16 @@
       "seconds": 15.4619546,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.DataModel.SymbolReference.Create#write": {
+      "id": "O:Eplan.EplApi.DataModel.SymbolReference.Create#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.0020692,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.DataModel.SymbolReference.GetLogicalArea": {
@@ -63713,6 +63963,26 @@
       "date": "2026-11-04",
       "eplan": "2026.0.3.25421"
     },
+    "O:Eplan.EplApi.HEServices.DeviceService.CreateDeviceListItem#write": {
+      "id": "O:Eplan.EplApi.HEServices.DeviceService.CreateDeviceListItem#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.9098372,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.HEServices.DeviceService.CreateTerminalDevice#write": {
+      "id": "O:Eplan.EplApi.HEServices.DeviceService.CreateTerminalDevice#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.3970087,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
+      "eplan": "2026.0.3.25421"
+    },
     "O:Eplan.EplApi.HEServices.DeviceService.DeleteDeviceList#write": {
       "id": "O:Eplan.EplApi.HEServices.DeviceService.DeleteDeviceList#write",
       "kind": "api-write",
@@ -64340,6 +64610,16 @@
       "seconds": 0.0011613,
       "eplan_messages": 0,
       "date": "2026-11-04",
+      "eplan": "2026.0.3.25421"
+    },
+    "O:Eplan.EplApi.HEServices.MountingPanelService.CreateArticlePlacement#write": {
+      "id": "O:Eplan.EplApi.HEServices.MountingPanelService.CreateArticlePlacement#write",
+      "kind": "api-write",
+      "outcome": "failed:needs_context",
+      "changed": false,
+      "seconds": 0.1540631,
+      "eplan_messages": 0,
+      "date": "2026-11-15",
       "eplan": "2026.0.3.25421"
     },
     "O:Eplan.EplApi.HEServices.MountingPanelService.ReorganizeLegendNumbers#write": {

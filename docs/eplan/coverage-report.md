@@ -1,5 +1,7 @@
 # EPLAN API 覆盖报告
 
+> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-11-15 按 Bridge 源码 b008a697 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
+
 **操作层 4014 组：专用工具 626，通用读取 116，仅通用入口 1999，仅状态覆盖 7，其他可调用 27，明确不做 753，到不了 486；实机验证 1329**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
@@ -143,7 +145,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | kind | 通过且撤销恢复 | 只读通过 | 失败 | 未知 | 跳过 | 需要上下文 |
 |---|---:|---:|---:|---:|---:|---:|
 | api-read | 0 | 1166 | 15 | 18 | 372 | 384 |
-| api-write | 163 | 0 | 91 | 74 | 57 | 633 |
+| api-write | 163 | 0 | 91 | 75 | 57 | 660 |
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
