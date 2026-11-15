@@ -8,7 +8,7 @@
 ### 新增
 
 - 新增 `eplan_session_start`（full，写入）：在本机启动 EPLAN（默认 Electric P8，可选 `variant`），等 EplanMcp 插件握手，最长 3 分钟，每 5 秒报一次进度；不打开项目，窗口正常显示（之后的审批框弹在上面）。已有 EPLAN 在运行时拒绝（`ALREADY_EXISTS`），因为第二个实例会和第一个争站点设置；超时则让 EPLAN 留着，不强制关闭。HTTP（虚拟机）模式下不可用（ADR-0058）。尚未实机验证。
-- 新增发现模式 `serve --profile discovery`（ADR-0057）：只发布 `eplan_tool_search`、`eplan_tool_read`、`eplan_tool_write` 三个工具，按关键词找工具、读说明，再经只读或写入入口调用，调用仍走原工具的参数校验、安全分级和审批。适合一次只能加载少量工具的客户端；Claude Code 自己延迟加载工具，不需要它。
+- 新增发现模式 `serve --profile discovery`（ADR-0057）：只发布 `eplan_tool_search`、`eplan_tool_usage`、`eplan_tool_read`、`eplan_tool_write` 四个工具，按关键词找工具、读说明，再经只读或写入入口调用，调用仍走原工具的参数校验、安全分级和审批。适合一次只能加载少量工具的客户端；Claude Code 自己延迟加载工具，不需要它。
 - 新增 `eplan_connection_route`（full，写入）：对安装空间里的 3D 连接执行 EPLAN 的布线，返回每根连接是否布通和长度（毫米）。同一模型重复布线结果一致（A141）。需要设备已放进 3D 布局且有部件；整条工具尚未实机验证。
 - 新增 `eplan_translation_keyword`（只读）和 `eplan_translation_add`（full，写入）：读翻译库关键词；按关键词添加或补全译文，已有译文保留不覆盖并单独列出，先预览后执行，经导出、合并、导入、回读核对。
 - `eplan_connection_create` 的电位定义项新增 `line_color`：写电位自己的连接线颜色（31005），连接按所属电位着色。

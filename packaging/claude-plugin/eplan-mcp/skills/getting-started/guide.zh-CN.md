@@ -82,11 +82,15 @@ Claude Code 不用插件时，把上述客户端名换成 `claude-code`；已装
 
 写入只修改名为 `eplan` 的服务器项，原文件先备份为同目录的 `<文件>.bak_<UTC 时间>`。JSONC 注释会在改写后丢失，可从备份查看。不要分享整个客户端配置文件，其中可能有其他服务的密钥。
 
+一次只能加载少量工具的客户端，可以在服务器参数里加 `serve --profile discovery`：只发布 `eplan_tool_search`、`eplan_tool_usage`、`eplan_tool_read`、`eplan_tool_write` 四个工具，模型先搜索再调用，安全分级和审批不变（[命令行参考](../reference/cli.md)）。Claude Code 自己按需加载工具，不需要这样做。
+
 ## 6. 第一次对话
 
 在 EPLAN 中打开一个项目，然后对客户端说：“先调用 `eplan_session_status` 确认连接，再告诉我这个项目有多少页。”
 
 正常顺序是 `eplan_session_status` → `eplan_project_list` → `eplan_project_get`。有多个 EPLAN 实例时，先由你确认目标实例，再用 `eplan_session_select` 选择；不要只凭当前前台窗口猜测。需要详细参数时，让模型调用 `eplan_tool_usage`。
+
+EPLAN 还没有启动时，可以让模型调用 `eplan_session_start` 启动（默认 Electric P8，也可指定 Pro Panel）。它等插件连上再返回，最长 3 分钟；不会打开项目，已有 EPLAN 在运行时拒绝。启动要占一个 EPLAN 授权。
 
 ## 7. 第一次修改与审批
 

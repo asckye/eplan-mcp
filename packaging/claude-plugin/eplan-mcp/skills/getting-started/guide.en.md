@@ -82,11 +82,15 @@ For Claude Code without the plugin, replace the client name above with `claude-c
 
 Writing only changes the server entry named `eplan`. The original file is first backed up in the same directory as `<file>.bak_<UTC time>`. JSONC comments are lost when the file is rewritten; you can view them in the backup. Do not share the entire client configuration file, which may contain keys for other services.
 
+For a client that can only load a few tools at a time, add `serve --profile discovery` to the server arguments: it publishes only `eplan_tool_search`, `eplan_tool_usage`, `eplan_tool_read` and `eplan_tool_write`; the model searches first and then calls, with the same safety tiers and approvals ([CLI reference](../reference/cli.md)). Claude Code loads tools on demand by itself and does not need this.
+
 ## 6. Your First Conversation
 
 Open a project in EPLAN, then tell the client: "First call `eplan_session_status` to confirm the connection, then tell me how many pages this project has."
 
 The normal sequence is `eplan_session_status` → `eplan_project_list` → `eplan_project_get`. If multiple EPLAN instances are running, confirm the target instance yourself first, then use `eplan_session_select` to select it; do not guess based only on the current foreground window. For detailed parameters, ask the model to call `eplan_tool_usage`.
+
+If EPLAN is not running yet, ask the model to call `eplan_session_start` (Electric P8 by default, or Pro Panel). It returns once the add-in connects, within 3 minutes; it opens no project and refuses while another EPLAN runs. Starting EPLAN takes an EPLAN licence.
 
 ## 7. Your First Change and Approval
 

@@ -245,6 +245,8 @@ S18 的 WinUI 3 原型按这些规则做，附浅色、深色截图，供项目�
 
 **字体**（Q2，项目负责人 2026-10-20 决定）：界面文字（中英文）和等宽的数据区都用 Maple Mono CN（SIL OFL 1.1，官方发布包 `MapleMono-CN`）。字体文件随程序放在 `app\workbench\` 中，只由 Workbench 自己加载，不安装到系统；只带用到的字重，不修改、不裁剪字体文件；许可证文本随安装包附带。加载失败时回退到系统字体 Segoe UI Variable 和 Microsoft YaHei UI。不用苹果的 SF 字体。等宽字体比 Segoe UI 宽，页面布局按实际宽度留余量。微软的排版指南建议简体中文最小 12px（Regular），回退字体也照此。官方发布包 `MapleMono-CN.zip`（v7.9）含全部字重和斜体，共约 141 MB；每个字重的实际体积、未打包时从程序目录加载字体、中文显示由 S18 核对。
 
+> 2026-11-14 起本段作废：界面改用 Windows 自带字体，安装包不再带 Maple Mono（[ADR-0034](../adr/0034-workbench-visual-apple-principles.md) 决定 3，现状见第 54 行附近的实现说明）。
+
 **spike S18（界面技术原型）**：按 Q1 的结论，只做审批卡片一页，在 Windows 10 和 11 的虚拟机上核对：讲述人、高对比度、200% 缩放、中文字体回退、Windows 10 上的外观（Mica 需要 Windows 11 22621）、冷启动时间和发布体积；另查托盘封装、单实例、Maple Mono CN 的加载与体积、.NET 10 下的构建和自包含发布能否在 CI（windows-2025 镜像）上用 `dotnet` 命令完成。S18 发现 A 无法满足时，改用 B，ADR-0015 随之修改。
 
 ### 4.6 审批队列

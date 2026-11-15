@@ -6,7 +6,7 @@
 
 当前 MCP SDK 固定版本、协议 revision 及客户端兼容注释以 [`Directory.Packages.props`](../../Directory.Packages.props) 为来源；运行时绑定见[架构协议说明](../architecture/architecture.md)。
 
-负责人于 2026-11-01 决定每周五从 main 发布预览版，11-02 决定有已验证内容就提前发布。2026-11-04 决定：main 带 ADR-0049 的破坏性变化，按 **v0.5.0 预览版**发布，原 v0.5.0 的验收目标（小项目 16 页完全一致、客户页精确重绘）顺延到 **v0.6.0**。此后按 0.5.x 递增 patch；patch 不带破坏性契约变化，此类变化进入下一个次版本。`release.yml` 的 `tags: ['v*']` 和 `^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$` 校验均接受 v0.5.0、v0.5.1 等标签；无需改 workflow，也不增加定时发布。
+负责人于 2026-11-01 决定每周五从 main 发布预览版，11-02 决定有已验证内容就提前发布。2026-11-04 决定：main 带 ADR-0049 的破坏性变化，按 **v0.5.0 预览版**发布，原 v0.5.0 的验收目标（小项目 16 页完全一致、客户页精确重绘）顺延到 **v0.6.0**。此后按 0.5.x 递增 patch；patch 不带破坏性契约变化，此类变化进入下一个次版本。2026-11-14 负责人决定 M8 不再以精确重绘为验收，从 main 直接发布 **v0.6.0**，之后按 0.6.x 递增。2026-11-05 起发布包在本机打（ADR-0051），`release.yml` 只能手动触发，推标签不会启动它。
 
 只有受影响 Large 类已通过的功能可默认开启。逐行审阅 [待验台账](large-pending.md)：未关闭项保持默认关闭，或在发布说明中逐项明确标为“未实机验证”，不能将其算作已验证发布范围；`apiTry`、`actionTry` 已默认关闭，继续保持。随包携带待验实现不代表发布验收通过，也不改变发布范围内的 Large、Agent 评测和支持矩阵要求。
 
@@ -26,7 +26,7 @@
 - 将 CHANGELOG 的 Unreleased 整理为目标版本，确认 main 的常规 CI 通过。
 - 打标签前核对 `packaging/zip/README.md`：它会复制到 ZIP 根目录 `README.md`，必须与发布说明携带同一份支持矩阵，逐项检查下面的清单。
 - 维护者审阅后通过本地关卡直接落到 main；从同一提交准备版本、验证并打标签。核对 Workbench 注册/撤销、任意程序目录 Host 定位与本地市场生成；`packaging/claude-plugin/` 提供模板和技能，`client-config` 在数据根目录生成含实际 Host 绝对路径的市场，中英文指南同步到技能副本。插件版本须与标签一致，缺少输入时打包失败。
-- 维护者准备 PowerShell 7.4+、global.json 指定的 SDK、git、已登录的 gh、本机 EPLAN 2026 引用程序集和授权；关闭示例夹具，供脚本复制。脚本默认使用 2026.0.3 的 Platform 与 Electric P8 Bin，可用参数覆盖这两个目录，但引用程序集仍须属于 2026。
+- 维护者准备 PowerShell 7.4+、global.json 指定的 SDK、git、已登录的 gh、本机 EPLAN 2026 引用程序集和授权；关闭示例夹具，供脚本复制。脚本默认使用 2026.0.3 的 Platform 与 Electric P8 Bin，可用参数覆盖这两个目录，但引用程序集仍须属于 2026。本机 Electric P8 自 2026-11-06 起用负责人的群晖主数据，离线 Large 要加 `-OfflineVariantBin 'C:\Program Files\EPLAN\Pro Panel\2026.0.3\Bin'`，否则部件搜索和宏检查的离线测试失败。`release-addin.ps1` 单独运行，不与实机测试并行（v0.4.1 时离线宿主并行崩溃过一次）。
 - 另行完成界面中的 Large 测试、Agent 评测、Workbench 冒烟检查（讲述人、高对比度、200% 缩放、中英文和键盘），并记录结果；离线宿主测试不能证明插件注册、审批窗口或 Ctrl+Z 正确。
 
 ## 标签、草稿与插件交接
@@ -38,7 +38,7 @@ git tag v0.5.0 HEAD
 git push origin v0.5.0
 gh release create v0.5.0 --repo asckye/eplan-mcp --verify-tag --draft --prerelease --title 'v0.5.0 preview' --notes-file .local/release/v0.5.0-notes.md
 eng/scripts/release-addin.ps1 -Tag v0.5.0 -WhatIf
-eng/scripts/release-addin.ps1 -Tag v0.5.0
+eng/scripts/release-addin.ps1 -Tag v0.5.0 -OfflineVariantBin 'C:\Program Files\EPLAN\Pro Panel\2026.0.3\Bin'
 ```
 
 `-WhatIf` 只显示计划，不联网、不建 worktree、不构建、不启动 EPLAN、不上传。实际执行会核对本地标签与远端标签（含附注标签的提交），在系统临时目录建立新的 detached worktree，确认干净，按标签版本构建 Release 插件（`EplanSign=false`、锁定还原）。工作区中的未提交修改不会进入产物。
