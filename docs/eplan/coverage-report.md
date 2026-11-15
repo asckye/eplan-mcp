@@ -3,7 +3,7 @@
 **操作层 4014 组：专用工具 626，通用读取 116，仅通用入口 1999，仅状态覆盖 7，其他可调用 5，明确不做 756，到不了 505；实机验证 1118**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 d8ccd8d3 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 61ba9fdc）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 129（23.3%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 130（23.1%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -316,6 +316,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_selection_get | read | selection.get | 183 | 42 | 0 | 141 | 0 | 1/1/1 | — | — |
 | eplan_selection_set | read | selection.set | 183 | 42 | 0 | 141 | 0 | 2/1/1 | A54 B11 | — |
 | eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | 2026-10-19 pass（api-notes A12） |
+| eplan_session_start | write | — | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
 | eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/9 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_shield_create | write | shield.create.execute<br>shield.create.plan | 125 | 63 | 1 | 59 | 0 | 0/0/1 | — | — |
 | eplan_structure_delete | destructive | structure.delete.execute<br>structure.delete.plan | 73 | 32 | 1 | 39 | 0 | 0/0/1 | — | — |

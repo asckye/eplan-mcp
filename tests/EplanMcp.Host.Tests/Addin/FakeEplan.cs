@@ -73,7 +73,9 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
 
         Log.Add($"start {exe} {arguments}");
         Match action = Action().Match(arguments);
-        string variant = action.Groups["variant"].Value;
+        // A plain start (eplan_session_start) names only the variant; the registered add-in loads as at any start.
+        Match plain = PlainStart().Match(arguments);
+        string variant = action.Success ? action.Groups["variant"].Value : plain.Groups["variant"].Value;
         string? loaded = Registered.GetValueOrDefault(variant);
         if (action.Groups["register"].Success)
         {
@@ -114,6 +116,9 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
 
     [GeneratedRegex("^/Variant:\"(?<variant>[^\"]*)\" EplApiModuleAction /(?:register:\"(?<register>[^\"]*)\"|unregister:\"[^\"]*\")$")]
     private static partial Regex Action();
+
+    [GeneratedRegex("^/Variant:\"(?<variant>[^\"]*)\"$")]
+    private static partial Regex PlainStart();
 
     internal sealed class Instance(FakeEplan eplan, int id, string? loadedFrom, int start) : IStartedEplan
     {

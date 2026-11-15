@@ -34309,6 +34309,23 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_session_start",
+      "safety": "write",
+      "host": "src/EplanMcp.Host/Tools/SessionLifecycleTools.cs",
+      "operations": [],
+      "api": [],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_session_start.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [],
+        "operationTests": []
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_session_status",
       "safety": "read",
       "host": "src/EplanMcp.Host/Tools/SessionTools.cs",

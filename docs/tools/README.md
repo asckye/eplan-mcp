@@ -119,6 +119,7 @@
 | `eplan_selection_get` | full | 只读 | [eplan_selection_get.md](eplan_selection_get.md) |
 | `eplan_selection_set` | full | 只读 | [eplan_selection_set.md](eplan_selection_set.md) |
 | `eplan_session_select` | core、full | 只读 | [eplan_session_select.md](eplan_session_select.md) |
+| `eplan_session_start` | full | 写入 | [eplan_session_start.md](eplan_session_start.md) |
 | `eplan_session_status` | core、full | 只读 | [eplan_session_status.md](eplan_session_status.md) |
 | `eplan_structure_delete` | full | 写入 | [eplan_structure_delete.md](eplan_structure_delete.md) |
 | `eplan_structure_list` | full | 只读 | [eplan_structure_list.md](eplan_structure_list.md) |

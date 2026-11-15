@@ -24997,6 +24997,64 @@
       }
     },
     {
+      "name": "eplan_session_start",
+      "title": "Start EPLAN with the EplanMcp add-in",
+      "description": "Starts EPLAN on this computer and waits up to 3 minutes for its EplanMcp add-in to connect; use it when eplan_session_status reports no EPLAN. Refuses while any EPLAN runs. Opens no project: then call eplan_project_open. Takes an EPLAN licence and shows EPLAN's window. Example: {\"variant\": \"Electric P8\"}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "variant": {
+            "description": "Product variant, e.g. Electric P8 or Pro Panel; default Electric P8",
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "processId": {
+            "description": "The Windows process ID of the EPLAN started, as eplan_session_select takes it.",
+            "type": "integer"
+          },
+          "variant": {
+            "description": "The product variant started.",
+            "type": "string"
+          },
+          "version": {
+            "description": "EPLAN's file version.",
+            "type": "string"
+          },
+          "bridgeVersion": {
+            "description": "The EplanMcp add-in version that answered.",
+            "type": "string"
+          },
+          "seconds": {
+            "description": "Seconds from the start to the add-in's handshake.",
+            "type": "number"
+          },
+          "hint": {
+            "description": "What to do next.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "annotations": {
+        "title": "Start EPLAN with the EplanMcp add-in",
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_session_status",
       "title": "EPLAN session status",
       "description": "Reports whether EPLAN is running with the EplanMcp add-in, and which EPLAN version and variant this server is connected to. Use it first, or when another tool returns EPLAN_NOT_CONNECTED or BRIDGE_INCOMPATIBLE: it succeeds even when EPLAN is not available and says in 'hint' what the engineer should do. Does not touch any project and does not wait for EPLAN's main thread. Related: eplan_project_list.",
@@ -26885,6 +26943,7 @@
               "eplan_selection_get",
               "eplan_selection_set",
               "eplan_session_select",
+              "eplan_session_start",
               "eplan_session_status",
               "eplan_shield_create",
               "eplan_structure_delete",

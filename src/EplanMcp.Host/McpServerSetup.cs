@@ -95,6 +95,8 @@ internal static class McpServerSetup
         services.TryAddSingleton(new ToolProfileChoice(ToolProfile.Full));
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ApiTrySchema.Configure(options, config.ApiTry == ActionRunSwitch.On && profile.Profile != ToolProfile.Core));
         services.TryAddSingleton<ToolRegistry>();
+        // HTTP mode registers HttpCaller first: that Host serves one EPLAN process and must not start another (ADR-0018).
+        services.TryAddSingleton(sp => Addin.EplanLifecycle.ForMachine(pinned: sp.GetService<EplanMcp.Host.Http.HttpCaller>() is not null));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice, ToolRegistry>((options, choice, registry) =>
         {
             registry.Apply(options.ToolCollection ?? [], choice.Profile);
@@ -166,6 +168,7 @@ internal static class McpServerSetup
             .WithTools<TranslationKeywordTools>(HostJson.Options)
             .WithTools<TranslationAddTools>(HostJson.Options)
             .WithTools<DiscoveryTools>(HostJson.Options)
+            .WithTools<SessionLifecycleTools>(HostJson.Options)
             .WithTools<ConnectionRouteTools>(HostJson.Options)
             .WithTools<MessageTools>(HostJson.Options)
             .WithTools<CheckTools>(HostJson.Options)
