@@ -6,7 +6,7 @@
 |---|---|---|
 | T.4 未放置功能分配第 2 项（2026-11-04，`02-update-assignment`） | `DevicePlaceTests.PartAssignment_MergesMatchingPlacedContacts_OneUndoRestores` | 已通过：2026-11-10，B 槽 Pro Panel，main `285140c4` + 测试改为先追加部件再 `update_from_parts`：`DevicePlaceTests` 30/30。两步合并数都是 0，没有未放置功能，触点引脚不变，两次撤销恢复（api-notes A132）。 |
 | PLC 生成保留已有表达（2026-11-08，MX_Dryer 重画时发现机架页被清空） | `ProjectToolsTests` | 待实机验证：对已有多线放置的设备执行 `eplan_plc_generate`，核对原放置仍在原页、新增页面只含请求页，以及异常结果在事务内回滚。 |
-| `eplan_plc_rack`（2026-11-15，`feat/m10-batch1`） | 新类 `PlcRackTests`（待写） | 待实机验证：在从 EES 模板新建的 scratch 项目上画 3 张卡（CPU 带总线适配器、F-DI、DI），核对：同一事务里新插入设备的改名、改名合并（图片并入总览设备）、部件追加和提交后的部件数据传递都生效；每张卡一个主功能并带全部部件；一次撤销恢复空页。 |
+| `eplan_plc_rack`（2026-11-15，`feat/m10-batch1`） | `PlcRackTests` | 已通过：2026-11-15，A 槽 Electric P8，`97f347ed`：两张 ET 200SP 卡一次画完，每张卡带自己的部件，图片并入总览设备，两次撤销恢复快照（api-notes A142）。中间两次失败分别修了"图片没有主功能"和"改名读回为连接点"。 |
 | `eplan_session_close` / `eplan_session_restart`（2026-11-15，`feat/m10-batch1`） | 新类 `SessionLifecycleTests`（待写） | 待实机验证：只开 scratch 项目时关闭成功；开着 scratch 外项目时拒绝；重启后插件版本读回。 |
 | 读取时每个包装对象只取一次属性列表（d0b63d65，2026-11-10；回顾第 7 条） | `CableTests`、`PlcTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`PageDescriptionMapTests`、`NoSideEffectTests` | 已通过：2026-11-10，B 槽 Pro Panel，EPLAN 2026.0.3.25421，main `3316ef24`（影子副本与构建一致）：7 个类 27/27，用时 9 分钟。 |
 | 电位定义点修改 `eplan_potential_update`（cd7cc5ad，2026-11-10；A130） | `PotentialEngineeringTests`（用例待补） | 工具路径已在会话中实机使用（2026-11-10：通过式烘芯炉 N/NC 线改蓝色、MX_NFPA 三根变频器线加定义点后重新生成，审图 0 问题）；Large 用例待补。 |

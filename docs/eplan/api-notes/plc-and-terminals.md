@@ -104,3 +104,11 @@ M4c 编号工具依赖的文档说明；实测结果见 A24（S21 只用了空�
 ### B13. PLC 写属性的正式名和值类型（2026-11-04，安装版 2026.0.3 XML 与字典）
 - 本机 `Eplan.EplApi.DataModelu.xml` 的 Function 属性文档与 `catalog/eplan-2026.0.3/data-dictionary.jsonl` 对照：20161 `FUNC_PLCCONFIGURATIONPROJECT`、20408 `FUNC_PLCSTATIONNAME`、20409 `FUNC_PLCSTATIONTYPE`、20410 `FUNC_PLCRACK`、20411 `FUNC_PLCSOCKET`、20427 `FUNC_PLCTHISRACK`、20400 `FUNC_PLCADDRESS`、20402 `FUNC_PLCSYMBOLICADDRESS_MANUAL`、20407 `FUNC_PLCCHANNEL_DESIGNATION_MANUAL` 返回 `System.String`。
 - 20308 `FUNC_PLC_BUSSYSTEM` 文档类型为 `System.Int64`，XML 列出 0..51（51 为 KNX）；`PropertyValue` 原生整数写入/读回入口是 Int32 隐式转换和 `ToInt()`，该范围可无损表示。以上是静态文档事实；B8 工具写入、传播和撤销尚待 Large 实测。
+
+### A142. 一个事务画 PLC 机架：图片没有主功能，改名读回为连接点（2026-11-15，EPLAN 2026.0.3.25421，Electric P8，A 槽 LargeWrite scratch 副本）
+- `eplan_plc_rack`（`PlcRackTests`）在一个 `PartTransactions` 事务里画两张 ET 200SP 数字量卡（`SIE.6ES7131-6BH01-0BA0`、`SIE.6ES7132-6BH01-0BA0`，图片变体 5）：按宏路径插入 Overview、改名、追加部件，再插入多线图片并改成同一标识，提交后传递部件数据。结果已提交，每张卡带自己的部件，`eplan_device_get` 读到的功能同时在机架页和总览页上；两次撤销（机架、建页）后快照与开始时一致。
+- 同一事务里，对刚插入的设备改名、改名并入已有设备（图片并入总览设备）、给它追加部件，都有效；主功能在改名前按宏标识读取。
+- ET 200SP 的多线图片插入后**没有主功能**（第一次运行在第一张卡的图片处回滚）：设备取放置的功能里最短的标识。
+- 这样的设备改名后，`RenameReadBack.MainName` 读回的是它的一个连接点，例如 `=GAA+A1-KR3A:L+`（第二次运行在此回滚）；"新标识 + `:` 连接点"算改名成功。
+- 证据：`PlcRackTests` 1/1 通过（684 s），提交 `97f347ed` 之上；前两次失败的日志在会话 scratchpad `after-adr59-1.log`、`plcrack-run.log`。
+
