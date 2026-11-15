@@ -166,7 +166,9 @@ public sealed class PlcRackExecuteTests : IDisposable
             { Parts[existing].AddRange(Parts[id]); } // joined
             else
             { Devices[newTag] = id; }
-            return new RenameReadBack { MainName = newTag, VisibleName = newTag, Renamed = 1 };
+            // EPLAN reads a device without a main function back as a connection point (live 2026-11-15).
+            string read = PicturesHaveNoMain && _inserts % 2 == 0 && !tag.EndsWith("-K1-K1", StringComparison.Ordinal) ? newTag + ":L+" : newTag;
+            return new RenameReadBack { MainName = read, VisibleName = newTag, Renamed = 1 };
         }
 
         public IReadOnlyList<DevicePartTarget> ReadMainFunctions(string projectPath, string tag, bool includeTerminals = false)

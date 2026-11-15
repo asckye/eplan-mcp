@@ -139,7 +139,8 @@ public sealed class PlcRackExecuteOperation(
             if (string.Equals(from, to, StringComparison.Ordinal))
             { return; }
             RenameReadBack back = renamer.Rename(project, from, to);
-            if (back.MainName != to && back.MainName != from)
+            // A picture without a main function reads back as one of its connection points, the tag plus ":L+" (live 2026-11-15).
+            if (back.MainName != to && back.MainName != from && !back.MainName.StartsWith(to + ":", StringComparison.Ordinal))
             { throw Failed($"Renaming {from} for card {card.Tag} gave {back.MainName}, not {to}; the rack was rolled back."); }
         }
 
