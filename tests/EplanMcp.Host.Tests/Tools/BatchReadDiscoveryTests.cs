@@ -84,6 +84,30 @@ public sealed class BatchReadDiscoveryTests
     }
 
     [Fact]
+    public async Task AHandleTwoStepsAway_IsReadThroughItsProducerChain_Once()
+    {
+        FakeBridgeClient bridge = Bridge();
+        BatchEntry entry = BatchValues.ApiEntries().First(e => e.Kind == "api-read" && BatchReadRecipes.Default.CanBuild(e)
+            && BatchValues.HandleReceiver(e.Group) is { } t && BatchHandles.Producers(t, depth: 1).Length == 0);
+        var trials = new List<string>();
+        Task<JsonElement?> Trial(string group, Dictionary<string, object?> values, CancellationToken token)
+        {
+            trials.Add(group);
+            return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(new { value = new { handle = "h:" + trials.Count, type = "Any" } }));
+        }
+        var discovery = new BatchReadDiscovery(bridge, Project, Trial);
+
+        BatchArguments first = await discovery.ArgumentsAsync(entry, TestContext.Current.CancellationToken);
+        int chain = trials.Count;
+        BatchArguments again = await discovery.ArgumentsAsync(entry, TestContext.Current.CancellationToken);
+
+        Assert.True(chain >= 2, $"one read per step of the chain, got {chain}");
+        Assert.Equal(chain, trials.Count);
+        Assert.Equal("h:" + chain, Assert.IsType<JsonElement>(first.Values!["target"]).GetProperty("handle").GetString());
+        Assert.Equal("h:" + chain, Assert.IsType<JsonElement>(again.Values!["target"]).GetProperty("handle").GetString());
+    }
+
+    [Fact]
     public async Task HandleReceiverWithoutATrial_IsNoObject()
     {
         BatchArguments result = await new BatchReadDiscovery(Bridge(), Project).ArgumentsAsync(HandleEntry(), TestContext.Current.CancellationToken);

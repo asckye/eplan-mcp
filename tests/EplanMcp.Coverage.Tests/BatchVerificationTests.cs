@@ -319,13 +319,24 @@ public sealed class BatchActionCatalogTests
         {
             Assert.False(entry.NeedsContext);
             string type = Assert.IsType<string>(BatchValues.HandleReceiver(entry.Group));
-            // Only a read whose own receiver is a discovery locator, so one producer call cannot change the project.
+            // Only reads, whose receiver is a discovery locator or another handle (ObjectKinds empty), so no producer call
+            // in the chain can change the project.
             Assert.All(BatchHandles.Producers(type), producer =>
             {
                 Assert.NotEqual("write", ApiTryCatalog.MethodAccess(producer));
-                Assert.NotEmpty(BatchValues.ObjectKinds(producer)!);
+                Assert.NotNull(BatchHandles.ReceiverKinds(producer));
             });
         });
+    }
+
+    [Fact]
+    public void PartsDatabasePositions_AreReachedThroughAChainFromTheProject()
+    {
+        string type = Assert.IsType<string>(BatchValues.HandleReceiver("O:Eplan.EplApi.MasterData.MDTerminalTemplatePosition.HasPlugInAdapter"));
+
+        Assert.Equal("Eplan.EplApi.MasterData.MDTerminalTemplatePosition", type);
+        Assert.Contains("O:Eplan.EplApi.MasterData.MDPartsManagement.OpenDatabase", BatchHandles.Producers("Eplan.EplApi.MasterData.MDPartsDatabase"));
+        Assert.Empty(BatchHandles.Producers(type, depth: 1));
     }
 
     [Fact]

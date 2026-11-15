@@ -11,19 +11,34 @@ internal sealed class BatchReadDiscovery(IBridgeClient bridge, string project, F
 {
     private readonly PropertySchemaPaging _paging = new(TimeProvider.System);
 
-    /// <summary>One read on a producer of <paramref name="type"/>, whose own receiver is a discovery locator.</summary>
-    private async Task<JsonElement?> HandleAsync(string type, CancellationToken cancellationToken)
+    private readonly Dictionary<string, JsonElement?> _handles = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// A session handle of <paramref name="type"/> from one read on a producer, whose receiver is a discovery locator or
+    /// a handle found the same way (up to <see cref="BatchHandles.Depth"/> steps). Kept for the run, misses included, so a
+    /// chain is read once and not once per member of the type.
+    /// </summary>
+    private async Task<JsonElement?> HandleAsync(string type, CancellationToken cancellationToken, int depth = BatchHandles.Depth)
     {
-        if (trial is null)
+        if (trial is null || depth <= 0)
         { return null; }
-        foreach (string producer in BatchHandles.Producers(type))
+        if (_handles.TryGetValue(type, out JsonElement? known))
+        { return known; }
+        _handles[type] = null; // a cycle through this type ends here
+        foreach (string producer in BatchHandles.Producers(type, depth))
         {
-            JsonElement? receiver = await FindAsync(BatchValues.ObjectKinds(producer)!, null, cancellationToken);
+            JsonElement? receiver = BatchHandles.ReceiverKinds(producer) is { Length: > 0 } kinds
+                ? await FindAsync(kinds, null, cancellationToken)
+                : BatchHandles.Owner(producer) is { } owner ? await HandleAsync(owner, cancellationToken, depth - 1) : null;
             if (receiver is null)
             { continue; }
             JsonElement? value = await trial(producer, new Dictionary<string, object?> { ["target"] = receiver }, cancellationToken);
-            if (value is { } result && BatchHandles.Handle(result, type) is { } handle)
-            { return handle; }
+            bool viaBase = !ApiTryCatalog.Producers(type).Contains(producer, StringComparer.Ordinal);
+            if (value is { } result && BatchHandles.Handle(result, type, exact: viaBase) is { } handle)
+            {
+                _handles[type] = handle;
+                return handle;
+            }
         }
         return null;
     }
