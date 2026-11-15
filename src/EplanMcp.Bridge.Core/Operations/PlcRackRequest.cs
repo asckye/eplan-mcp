@@ -150,8 +150,9 @@ internal sealed class PlcRackRequest
     private static MacroInsertItem Item(string page, PlcRackCardPlan card, string representation, int variant, double x, double y) => new()
     {
         Page = page,
-        Part = card.Part,
-        PartVariant = card.PartVariant,
+        // By macro path, not part: part= would hang the card's part on every main function of the macro, the CPU's bus
+        // adapter included (A122); the parts are added explicitly after the rename.
+        Macro = card.Macro,
         Representation = representation,
         Variant = variant,
         X = x,

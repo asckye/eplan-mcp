@@ -311,6 +311,18 @@ public static class OperationNames
     public const string MacroInsertExecute = "macro.insert.execute";
 
     /// <summary>
+    /// The plan of eplan_plc_rack: checks the cards, lays the pictures side by side and checks every insertion. Arguments:
+    /// <see cref="PlcRackArgs"/>; data: <see cref="WritePlan"/>.
+    /// </summary>
+    public const string PlcRackPlan = "plc.rack.plan";
+
+    /// <summary>
+    /// Draws a PLC rack in one transaction: overviews, renames, parts, then the pictures joined to the cards. Arguments:
+    /// <see cref="PlcRackArgs"/> with the fingerprint; data: <see cref="PlcRackData"/>.
+    /// </summary>
+    public const string PlcRackExecute = "plc.rack.execute";
+
+    /// <summary>
     /// The plan of eplan_import_dxf: finds the page and reads the file the Host resolved below its import root again,
     /// never writes. Arguments: <see cref="ImportDxfArgs"/>; data: <see cref="WritePlan"/> with details.
     /// </summary>

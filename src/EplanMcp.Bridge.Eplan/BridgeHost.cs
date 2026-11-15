@@ -207,6 +207,8 @@ internal static class BridgeHost
             new ConnectionGenerateExecuteOperation(catalog, pages, generator, transactions),
             new MacroInsertPlanOperation(catalog, pages, devices, macros, inserter),
             new MacroInsertExecuteOperation(catalog, pages, devices, macros, inserter, transactions),
+            new PlcRackPlanOperation(catalog, pages, macros, inserter, renamer),
+            new PlcRackExecuteOperation(catalog, pages, macros, inserter, renamer, new EplanDevicePartAssigner()),
             new PlaceholderApplyPlanOperation(catalog, pages, placeholders),
             new PlaceholderApplyExecuteOperation(catalog, pages, placeholders, new EplanPlaceholderWriter(), transactions),
             new ImportDxfPlanOperation(catalog, pages, drawings),
