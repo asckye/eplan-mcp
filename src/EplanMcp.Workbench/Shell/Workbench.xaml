@@ -129,6 +129,7 @@
     <Setter Property="FontWeight" Value="Bold" />
     <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
     <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="AutomationProperties.HeadingLevel" Value="Level1" />
   </Style>
 
   <!--

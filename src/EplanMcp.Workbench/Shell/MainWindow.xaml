@@ -15,7 +15,7 @@
     WindowStyle="None" ResizeMode="CanResize" Style="{StaticResource Workbench.Window}">
   <!-- 3.1: TIA's frame, the Header is the caption area and holds the window buttons. -->
   <chrome:WindowChrome.WindowChrome>
-    <chrome:WindowChrome CaptionHeight="56" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+    <chrome:WindowChrome CaptionHeight="48" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
   </chrome:WindowChrome.WindowChrome>
   <Window.InputBindings>
     <KeyBinding Key="D1" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Approvals}" />
@@ -102,13 +102,14 @@
       <!-- Header: the page's large title (v2, no breadcrumb), the waiting count, the window buttons. -->
       <Border x:Name="Header" Style="{StaticResource Primer.HeaderBar}" AutomationProperties.Name="{l:Tr Shell.Header}">
         <!-- Columns, not docking, so that the Tab order is the visual order (KEY-02). -->
-        <Grid MinHeight="56" Margin="{StaticResource Ui.Inset.Header}">
+        <Grid MinHeight="40" Margin="{StaticResource Ui.Inset.Header}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <TextBlock x:Name="CurrentPageText" Style="{StaticResource Workbench.PageTitle}" VerticalAlignment="Center" />
+          <!-- The page's name for the window title and automation; each page draws its own large title (v2). -->
+          <TextBlock x:Name="CurrentPageText" Visibility="Collapsed" />
           <!-- STS-10: the waiting count, which opens the queue. -->
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="{StaticResource Ui.Inset.Horizontal.Normal}" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
             <Button x:Name="PendingBadge" Style="{StaticResource Primer.PendingBadge}" Visibility="Collapsed" Click="OnPendingBadge" />

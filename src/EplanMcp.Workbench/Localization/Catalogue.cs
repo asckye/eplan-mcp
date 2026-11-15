@@ -149,7 +149,6 @@ internal static class Catalogue
         ("Page.Audit", "Audit", "审计"),
         ("Page.Status", "Status", "状态"),
         ("Page.Clients", "MCP and clients", "MCP 与客户端"),
-        ("Page.Approvals.Caption", "Questions from the AI that wait for your answer", "等待你回答的 AI 问题"),
         // A question (APR-07 to APR-12); the titles, buttons, countdowns and notes are the EPLAN dialog's (TXT-09).
         ("Question.Title", "Approve AI changes to the EPLAN project?", "批准 AI 修改 EPLAN 项目？"),
         ("Question.ReleaseTitle", "The outcome of the last AI change is unknown", "上次 AI 修改的结果未知"),

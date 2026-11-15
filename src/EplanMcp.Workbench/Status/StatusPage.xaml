@@ -15,7 +15,7 @@
         <Button x:Name="RefreshButton" DockPanel.Dock="Right" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.Left.Normal}" Style="{StaticResource Primer.Secondary}"
                 Content="{l:Tr Status.Refresh}" AutomationProperties.AcceleratorKey="F5" Click="OnRefresh" />
         <StackPanel>
-          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Status}" Style="{StaticResource Primer.PageTitle}" TextWrapping="Wrap" TextTrimming="None"
+          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Status}" Style="{StaticResource Workbench.PageTitle}" TextWrapping="Wrap" TextTrimming="None"
                      Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
           <TextBlock x:Name="Caption" Style="{StaticResource Primer.PageSubtitle}" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
