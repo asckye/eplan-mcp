@@ -43,7 +43,7 @@ public sealed partial class VendoredThemeTests
     {
         string[] changed = [.. SourceScan.Vendored.Where(f => !f.Text.Contains("Unchanged below this header.", StringComparison.Ordinal)).Select(f => f.Path).Order(StringComparer.Ordinal)];
 
-        Assert.Equal(["Tia/Controls/ContrastSelection.cs", "Tia/Themes/ThemeManager.cs"], changed);
+        Assert.Equal(["Tia/Controls/ContrastSelection.cs", "Tia/Themes/Primer.xaml", "Tia/Themes/ThemeManager.cs"], changed);
         Assert.All(changed, path => Assert.Contains("Changed below: ", SourceScan.Single(path).Text, StringComparison.Ordinal));
     }
 

@@ -27,7 +27,7 @@ public sealed partial class ThemeContrastTests(WpfContext wpf)
         ("Primer.text", "Primer.cardSel"), ("Primer.text", "Primer.cardSoft"), ("Primer.text", "Primer.pill"), ("Primer.text", "Primer.menuBg"),
         ("Primer.textFaint", "Primer.card"), ("Primer.textFaint", "Primer.input"),
         ("Primer.codeText", "Primer.codeBg"),
-        ("Primer.accent", "Primer.bg"), ("Primer.accent", "Primer.cardSel"), ("Primer.onAccent", "Primer.accent"),
+        ("Primer.accent", "Primer.bg"), ("Primer.accent", "Primer.cardSel"), ("Primer.onAccent", "Primer.primaryBg"),
         ("Primer.warn", "Primer.bg"), ("Primer.warn", "Primer.card"), ("Primer.warn", "Primer.warnBg"), ("Primer.warn", "Primer.countWarningBg"),
         ("Primer.ok", "Primer.bg"), ("Primer.ok", "Primer.card"),
         ("Primer.diffRed", "Primer.bg"), ("Primer.diffRed", "Primer.card"), ("Primer.diffRed", "Primer.cardSel"),
