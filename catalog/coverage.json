@@ -1229,6 +1229,26 @@
       ]
     },
     {
+      "name": "eplan_connection_route",
+      "safety": "write",
+      "operations": [
+        "connection.route.execute",
+        "connection.route.plan"
+      ],
+      "apiIds": 69,
+      "operationGroups": 38,
+      "dataDictionary": 0,
+      "dependencies": 31,
+      "actions": 0,
+      "spec": "docs/tools/eplan_connection_route.md",
+      "small": 0,
+      "medium": 1,
+      "large": 0,
+      "apiNotes": [
+        "A1"
+      ]
+    },
+    {
       "name": "eplan_context_get",
       "safety": "read",
       "operations": [
@@ -5886,9 +5906,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.Base.PointD3D.Y",
@@ -5896,9 +5917,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.Base.PointD3D.Z",
@@ -5906,9 +5928,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.Base.RectangleD.Height",
@@ -8763,9 +8786,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ConnectionPointPosition.Level",
@@ -10955,9 +10979,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Connection3D.EndObject",
@@ -10965,9 +10990,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Connection3D.IsRouted",
@@ -10975,9 +11001,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Connection3D.IsVisible",
@@ -11030,9 +11057,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Connection3D.RoutingType",
@@ -11050,9 +11078,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Connection3D.StartObject",
@@ -11060,9 +11089,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.Connection3DPropertyList.Property",
@@ -11442,6 +11472,7 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_route",
         "eplan_enclosure_place",
         "eplan_layout_get",
         "eplan_layout_place",
@@ -11830,12 +11861,13 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_route",
         "eplan_object_find",
         "eplan_object_get",
         "eplan_property_get",
         "eplan_property_set"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.E3D.InstallationSpace.Create",
@@ -11880,6 +11912,7 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_route",
         "eplan_enclosure_place",
         "eplan_layout_get",
         "eplan_layout_place",
@@ -11930,6 +11963,7 @@
       "partial": true,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_route",
         "eplan_enclosure_place",
         "eplan_layout_get",
         "eplan_layout_place",
@@ -23874,6 +23908,7 @@
         "eplan_cable_renumber",
         "eplan_connection_generate",
         "eplan_connection_list",
+        "eplan_connection_route",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_place",
@@ -26148,6 +26183,7 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_connection_route",
         "eplan_enclosure_place",
         "eplan_layout_get",
         "eplan_layout_place",
@@ -26212,6 +26248,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
@@ -26328,6 +26365,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -26461,6 +26499,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
@@ -26598,6 +26637,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
@@ -26912,6 +26952,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
@@ -27046,6 +27087,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
@@ -27892,6 +27934,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_place",
@@ -28522,6 +28565,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -28581,6 +28625,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -28640,6 +28685,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -29829,6 +29875,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -29888,6 +29935,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -29947,6 +29995,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -30006,6 +30055,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -30065,6 +30115,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -30124,6 +30175,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -30183,6 +30235,7 @@
         "eplan_connection_create",
         "eplan_connection_generate",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_device_place",
         "eplan_device_renumber",
         "eplan_device_update",
@@ -31330,9 +31383,10 @@
       "status": "automated_test",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_connection_route"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.HEServices.ConnectionService3D.SwapSourceAndTarget",
@@ -33204,6 +33258,7 @@
         "eplan_connection_generate",
         "eplan_connection_list",
         "eplan_connection_number",
+        "eplan_connection_route",
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_list",
@@ -69661,20 +69716,20 @@
   },
   "routes": {
     "api_try_only": {
-      "count": 2010,
-      "live_verified": 708
+      "count": 1999,
+      "live_verified": 698
     },
     "declined": {
       "count": 756,
       "live_verified": 0
     },
     "dedicated": {
-      "count": 614,
-      "live_verified": 409
+      "count": 626,
+      "live_verified": 420
     },
     "generic_read": {
-      "count": 117,
-      "live_verified": 1
+      "count": 116,
+      "live_verified": 0
     },
     "none": {
       "count": 505,
@@ -69717,20 +69772,20 @@
       "denominator": 5983,
       "routes": {
         "api_try_only": {
-          "count": 2250,
-          "live_verified": 715
+          "count": 2236,
+          "live_verified": 705
         },
         "declined": {
           "count": 838,
           "live_verified": 0
         },
         "dedicated": {
-          "count": 823,
-          "live_verified": 489
+          "count": 838,
+          "live_verified": 500
         },
         "generic_read": {
-          "count": 289,
-          "live_verified": 1
+          "count": 288,
+          "live_verified": 0
         },
         "none": {
           "count": 1771,
@@ -69750,7 +69805,7 @@
       "denominator": 3109,
       "routes": {
         "api_try_only": {
-          "count": 886,
+          "count": 882,
           "live_verified": 79
         },
         "declined": {
@@ -69758,7 +69813,7 @@
           "live_verified": 0
         },
         "dedicated": {
-          "count": 399,
+          "count": 403,
           "live_verified": 173
         },
         "generic_read": {
@@ -69783,20 +69838,20 @@
       "denominator": 2636,
       "routes": {
         "api_try_only": {
-          "count": 1364,
-          "live_verified": 636
+          "count": 1354,
+          "live_verified": 626
         },
         "declined": {
           "count": 258,
           "live_verified": 0
         },
         "dedicated": {
-          "count": 424,
-          "live_verified": 316
+          "count": 435,
+          "live_verified": 327
         },
         "generic_read": {
-          "count": 256,
-          "live_verified": 1
+          "count": 255,
+          "live_verified": 0
         },
         "none": {
           "count": 334,

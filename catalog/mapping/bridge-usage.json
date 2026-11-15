@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-15",
-  "scannedSources": "0dab03eb + uncommitted changes",
-  "sourceHash": "sha256:52a27933252b8b40333cf756d7b9b2c06638f4b9c657a77af9abb22186a5d633",
+  "scannedSources": "d8ccd8d3 + uncommitted changes",
+  "sourceHash": "sha256:adf97baff4769aea5b6dd5052f3d635ecbcd44e1528158e48eec9f6302319d63",
   "operations": [
     {
       "name": "action.execute",
@@ -103,6 +103,14 @@
     {
       "name": "connection.number.plan",
       "class": "ConnectionNumberPlanOperation"
+    },
+    {
+      "name": "connection.route.execute",
+      "class": "ConnectionRouteExecuteOperation"
+    },
+    {
+      "name": "connection.route.plan",
+      "class": "ConnectionRoutePlanOperation"
     },
     {
       "name": "device.get",
@@ -1354,6 +1362,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -1413,6 +1422,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -1471,6 +1481,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -1530,6 +1541,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -1588,6 +1600,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -24565,6 +24578,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "connection.route.execute"
+        ]
       }
     ],
     "F:Eplan.EplApi.DataModel.E3D.Connection3D.Enums.RoutingType.RoutingWithoutNetwork": [
@@ -24588,6 +24612,17 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "connection.route.execute"
         ]
       }
     ],
@@ -151027,6 +151062,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -151086,6 +151122,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -151144,6 +151181,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -151203,6 +151241,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -151261,6 +151300,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -151321,6 +151361,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -151380,6 +151421,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -155380,6 +155422,8 @@
           "call"
         ],
         "operations": [
+          "connection.route.execute",
+          "connection.route.plan",
           "layout.enclosure.place.execute",
           "layout.enclosure.place.plan",
           "layout.get",
@@ -167290,6 +167334,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -167349,6 +167394,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -167416,6 +167462,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -170062,6 +170109,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -170317,6 +170365,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -172056,6 +172106,8 @@
           "call"
         ],
         "operations": [
+          "connection.route.execute",
+          "connection.route.plan",
           "layout.enclosure.place.execute",
           "layout.enclosure.place.plan",
           "layout.get",
@@ -172830,6 +172882,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -172888,6 +172941,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -172948,6 +173002,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -173008,6 +173063,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -173077,6 +173133,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -174611,6 +174668,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -174728,6 +174786,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -174786,6 +174845,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -174903,6 +174963,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -175020,6 +175081,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -175081,6 +175143,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -175140,6 +175203,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -175200,6 +175264,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -175259,6 +175324,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -175319,6 +175385,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -175387,6 +175454,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -175456,6 +175524,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -175514,6 +175583,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -175574,6 +175644,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -175642,6 +175713,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -175711,6 +175783,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -175770,6 +175843,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -175830,6 +175904,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -175889,6 +175964,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -177014,6 +177090,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "connection.route.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.HEServices.ConnectionService3D.CreateRoutingSegments(Eplan.EplApi.DataModel.E3D.InstallationSpace)": [
@@ -177091,6 +177178,17 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.route.execute"
         ]
       }
     ],
@@ -180721,6 +180819,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -180933,6 +181033,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -184844,6 +184946,18 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.Base.PointD3D.Y": [
@@ -184858,6 +184972,18 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.Base.PointD3D.Z": [
@@ -184871,6 +184997,18 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
         ]
       }
     ],
@@ -189470,6 +189608,18 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Pin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ConnectionPointPosition.Level": [
@@ -191140,6 +191290,18 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Pin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.E3D.Connection3D.EndObject": [
@@ -191164,6 +191326,32 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Device",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.E3D.Connection3D.EndPin": [
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Pin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.E3D.Connection3D.IsRouted": [
@@ -191176,6 +191364,18 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
         ]
       }
     ],
@@ -191268,6 +191468,18 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.E3D.Connection3D.RoutingType": [
@@ -191316,6 +191528,18 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Pin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.E3D.Connection3D.StartObject": [
@@ -191339,6 +191563,32 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Device",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      }
+    ],
+    "P:Eplan.EplApi.DataModel.E3D.Connection3D.StartPin": [
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Pin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
         ]
       }
     ],
@@ -191746,6 +191996,18 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Device",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
         ]
       },
       {
@@ -192248,6 +192510,29 @@
         ]
       },
       {
+        "adapter": "EplanConnectionRouter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute"
+        ]
+      },
+      {
         "adapter": "ObjectKindDispatch",
         "member": "AllCandidates",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs",
@@ -192353,6 +192638,8 @@
           "get"
         ],
         "operations": [
+          "connection.route.execute",
+          "connection.route.plan",
           "layout.enclosure.place.execute",
           "layout.enclosure.place.plan",
           "layout.get",
@@ -192413,6 +192700,8 @@
           "get"
         ],
         "operations": [
+          "connection.route.execute",
+          "connection.route.plan",
           "layout.enclosure.place.execute",
           "layout.enclosure.place.plan",
           "layout.get",
@@ -217654,6 +217943,18 @@
         ]
       },
       {
+        "adapter": "EplanConnectionRouter",
+        "member": "Pin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -222255,6 +222556,18 @@
         ]
       },
       {
+        "adapter": "EplanConnectionRouter",
+        "member": "Space",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      },
+      {
         "adapter": "EplanLayoutReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLayoutReader.cs",
@@ -222412,6 +222725,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -222922,6 +223237,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -223085,6 +223402,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -223472,6 +223791,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -224169,6 +224490,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -224373,6 +224696,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -239443,6 +239768,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -239502,6 +239828,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -239560,6 +239887,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -239619,6 +239947,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -239677,6 +240006,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -240058,6 +240388,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -240117,6 +240448,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -240175,6 +240507,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -240234,6 +240567,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -240292,6 +240626,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -243990,6 +244325,18 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
       }
     ],
     "T:Eplan.EplApi.Base.RectangleD": [
@@ -246553,6 +246900,18 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Pin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
         ]
       }
     ],
@@ -251098,6 +251457,53 @@
         ]
       },
       {
+        "adapter": "EplanConnectionRouter",
+        "member": "Describe",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Device",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Pin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute"
+        ]
+      },
+      {
         "adapter": "EplanGraphicEditor",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanGraphicEditor.cs",
@@ -251227,6 +251633,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.E3D.Connection3D.Enums.RoutingType": [
@@ -251250,6 +251667,17 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute"
         ]
       }
     ],
@@ -252231,6 +252659,41 @@
         ]
       },
       {
+        "adapter": "EplanConnectionRouter",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Space",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute",
+          "connection.route.plan"
+        ]
+      },
+      {
         "adapter": "EplanLayoutReader",
         "member": "Designation",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLayoutReader.cs",
@@ -252238,6 +252701,8 @@
           "type"
         ],
         "operations": [
+          "connection.route.execute",
+          "connection.route.plan",
           "layout.enclosure.place.execute",
           "layout.enclosure.place.plan",
           "layout.get",
@@ -274139,6 +274604,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -274295,6 +274762,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -274633,6 +275102,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -275161,6 +275631,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",
@@ -278630,6 +279102,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -280812,6 +281285,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -280929,6 +281403,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -280990,6 +281465,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -281049,6 +281525,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -281109,6 +281586,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.place.plan",
           "device.renumber.execute",
@@ -281168,6 +281646,7 @@
           "connection.create.execute",
           "connection.generate.execute",
           "connection.number.execute",
+          "connection.route.execute",
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
@@ -282160,6 +282639,17 @@
         ],
         "operations": [
           "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionRouter",
+        "member": "Route",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionRouter.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.route.execute"
         ]
       }
     ],
@@ -283565,6 +284055,8 @@
           "connection.list",
           "connection.number.execute",
           "connection.number.plan",
+          "connection.route.execute",
+          "connection.route.plan",
           "device.get",
           "device.list",
           "device.place.execute",

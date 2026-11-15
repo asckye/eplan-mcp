@@ -1,9 +1,9 @@
 # EPLAN API 覆盖报告
 
-**操作层 4014 组：专用工具 614，通用读取 117，仅通用入口 2010，仅状态覆盖 7，其他可调用 5，明确不做 756，到不了 505；实机验证 1118**
+**操作层 4014 组：专用工具 626，通用读取 116，仅通用入口 1999，仅状态覆盖 7，其他可调用 5，明确不做 756，到不了 505；实机验证 1118**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 0dab03eb + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 d8ccd8d3 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -12,9 +12,9 @@
 
 | 路线 | 组数 | 占 4014 的比例 | 实机验证组数 |
 |---|---:|---:|---:|
-| 专用工具（dedicated） | 614 | 614 / 4014（15.3%） | 409 |
-| 通用读取（generic_read） | 117 | 117 / 4014（2.9%） | 1 |
-| 仅通用入口（api_try_only） | 2010 | 2010 / 4014（50.1%） | 708 |
+| 专用工具（dedicated） | 626 | 626 / 4014（15.6%） | 420 |
+| 通用读取（generic_read） | 116 | 116 / 4014（2.9%） | 0 |
+| 仅通用入口（api_try_only） | 1999 | 1999 / 4014（49.8%） | 698 |
 | 仅状态覆盖（state_only） | 7 | 7 / 4014（0.2%） | 0 |
 | 其他可调用（other） | 5 | 5 / 4014（0.1%） | 0 |
 | 明确不做（declined） | 756 | 756 / 4014（18.8%） | 0 |
@@ -37,14 +37,14 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 14027 个 ID（方法 1285，属性 1917，类型 648，字段和枚举值 10160，action 17），其中 14004 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
+Bridge 共用到 14029 个 ID（方法 1285，属性 1919，类型 648，字段和枚举值 10160，action 17），其中 14006 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
 | `Eplan.EplApi.ApplicationFramework` | 32 |
 | `Eplan.EplApi.Base` | 975 |
 | `Eplan.EplApi.DataModel` | 8607 |
-| `Eplan.EplApi.DataModel.E3D` | 547 |
+| `Eplan.EplApi.DataModel.E3D` | 549 |
 | `Eplan.EplApi.DataModel.EObjects` | 116 |
 | `Eplan.EplApi.DataModel.Graphics` | 671 |
 | `Eplan.EplApi.DataModel.MasterData` | 84 |
@@ -87,10 +87,10 @@ action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 4
 
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 方法 | 3109 | 399 / 173 | 33 / 0 | 886 / 79 | 7 / 0 | 5 / 0 | 580 / 0 | 1199 / 0 | 252 |
-| 普通属性 | 2636 | 424 / 316 | 256 / 1 | 1364 / 636 | 0 / 0 | 0 / 0 | 258 / 0 | 334 / 0 | 953 |
+| 方法 | 3109 | 403 / 173 | 33 / 0 | 882 / 79 | 7 / 0 | 5 / 0 | 580 / 0 | 1199 / 0 | 252 |
+| 普通属性 | 2636 | 435 / 327 | 255 / 0 | 1354 / 626 | 0 / 0 | 0 / 0 | 258 / 0 | 334 / 0 | 953 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5983 | 823 / 489 | 289 / 1 | 2250 / 715 | 7 / 0 | 5 / 0 | 838 / 0 | 1771 / 0 | 1205 |
+| 合计 | 5983 | 838 / 500 | 288 / 0 | 2236 / 705 | 7 / 0 | 5 / 0 | 838 / 0 | 1771 / 0 | 1205 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 128（23.4%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 129（23.3%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -228,6 +228,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 90 | 41 | 1 | 45 | 1 | 6/2/12 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_connection_list | read | connection.list | 80 | 45 | 1 | 32 | 0 | 2/4/8 | — | 2026-10-20 pass（api-notes A19） |
 | eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 95 | 41 | 1 | 52 | 1 | 0/1/1 | A24 | — |
+| eplan_connection_route | write | connection.route.execute<br>connection.route.plan | 69 | 38 | 0 | 31 | 0 | 0/1/0 | A1 | — |
 | eplan_context_get | read | project.snapshot | 99 | 41 | 4 | 32 | 0 | 3/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 80 | 45 | 2 | 31 | 0 | 10/4/10 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 35 | 20 | 0 | 15 | 0 | 7/2/12 | A11 A12 | 2026-10-21 pass（api-notes A24） |

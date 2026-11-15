@@ -26,6 +26,7 @@
 | `eplan_check_list` | core、full | 只读 | [eplan_check_list.md](eplan_check_list.md) |
 | `eplan_check_run` | core、full | 写入 | [eplan_check_run.md](eplan_check_run.md) |
 | `eplan_connection_create` | full | 写入 | [eplan_connection_create.md](eplan_connection_create.md) |
+| `eplan_connection_route` | full | 写入 | [eplan_connection_route.md](eplan_connection_route.md) |
 | `eplan_connection_generate` | core、full | 写入 | [eplan_connection_generate.md](eplan_connection_generate.md) |
 | `eplan_connection_list` | core、full | 只读 | [eplan_connection_list.md](eplan_connection_list.md) |
 | `eplan_connection_number` | full | 写入 | [eplan_connection_number.md](eplan_connection_number.md) |
