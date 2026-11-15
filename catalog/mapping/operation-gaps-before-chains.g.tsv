@@ -965,10 +965,6 @@ O:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToStep	Eplan.EplApi.HEServi
 O:Eplan.EplApi.HEServices.Export3D.ProjectToStep	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Generate.Cables	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Generate	method	settings_or_scheme_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Import.DXFDWGFiles	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Import	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Import.PDFComments	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Import	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Import3D.DesignSpace	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Import3D	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Import3D.JT	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Import3D	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Import3D.STEP	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Import3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Insert.PlanningSegment	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Insert	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Insert3D.SymbolMacro	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Insert3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Insert3D.WindowMacro	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Insert3D	method	external_path_parameter	No unique supported compiled member shape

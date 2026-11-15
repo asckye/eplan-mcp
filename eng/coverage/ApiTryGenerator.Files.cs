@@ -28,10 +28,12 @@ internal static partial class ApiTryGenerator
         // Explicit parameter direction wins; documentation then method/service verbs supply a missing direction.
         if (FileMatch(name, "input|import|source|output|export|target|destination"))
         { return Direction(name, "input|import|source", "output|export|target|destination"); }
-        if (!string.IsNullOrEmpty(member.Summary))
-        { return Direction(member.Summary!, "\\b(import|read|load)s?\\b", "\\b(export|write|save)s?\\b"); }
+        // A summary that names both directions (an import that also saves the project) leaves it to the method name.
+        if (!string.IsNullOrEmpty(member.Summary) && Direction(member.Summary!, "\\b(import|read|load)s?\\b", "\\b(export|write|save)s?\\b") is { } fromSummary)
+        { return fromSummary; }
         return FileMatch(entry.Name, "Import.*Export|Export.*Import|Read.*Write|Write.*Read") ? null
-            : Direction(entry.Name + (entry.Type.EndsWith(".Insert", StringComparison.Ordinal) ? "Import" : ""), "^(Import|Read|Load)|Import$", "^(Export|Write|Save)");
+            : Direction(entry.Name + (entry.Type.EndsWith(".Insert", StringComparison.Ordinal) || FileMatch(entry.Type, @"\.Import3?D?$") ? "Import" : ""),
+                "^(Import|Read|Load)|Import$", "^(Export|Write|Save)");
     }
     private static string? FileExclusion(ApiEntry entry, ApiDetail member)
     {
@@ -43,7 +45,12 @@ internal static partial class ApiTryGenerator
         // Export and Export3D are refused for implicit destinations; an explicit output file or folder is the only destination here.
         string? rest = ApiTryServices.Exclusion(entry, member with { Parameters = remaining });
         bool explicitOutput = member.Parameters!.Any(p => FileDirection(entry, member, p) is "output" or "output_directory");
-        return member.Parameters!.Any(p => FileDirection(entry, member, p) is not null) && (rest is null || rest == "external_destination" && explicitOutput) ? null : original;
+        // ADR-0059 step 2 (ADR-0042, controlled copies): an import whose only file is an explicit input from the imports
+        // root writes into the project itself, which is its destination, not a configured location outside it.
+        bool projectImport = FileMatch(entry.Type, @"\.Import3?D?$") && member.Parameters!.Any(p => FileDirection(entry, member, p) is "input")
+            && !explicitOutput;
+        return member.Parameters!.Any(p => FileDirection(entry, member, p) is not null)
+            && (rest is null || rest == "external_destination" && (explicitOutput || projectImport)) ? null : original;
     }
     private static bool FileOutput(ApiEntry entry) => entry.Details.Where(d => d.Kind == "overload")
         .Any(d => d.Parameters!.Any(p => FileDirection(entry, d, p) is "output" or "output_directory"));

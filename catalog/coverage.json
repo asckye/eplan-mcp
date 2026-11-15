@@ -71785,8 +71785,8 @@
     "operation": {
       "denominator": 4014,
       "tools": 2748,
-      "apiTry": 2551,
-      "callable": 2771,
+      "apiTry": 2555,
+      "callable": 2775,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -71863,7 +71863,7 @@
       },
       {
         "scope": "Eplan.EplApi.HEServices",
-        "callable": 257,
+        "callable": 261,
         "refused_unsafe": 0
       },
       {
@@ -71894,7 +71894,7 @@
       "live_verified": 908
     },
     "declined": {
-      "count": 757,
+      "count": 753,
       "live_verified": 0
     },
     "dedicated": {
@@ -71910,7 +71910,7 @@
       "live_verified": 0
     },
     "other": {
-      "count": 23,
+      "count": 27,
       "live_verified": 0
     },
     "state_only": {
@@ -71929,7 +71929,7 @@
     "dialog_decision_context": 26,
     "enumerator_type": 29,
     "exception_type": 9,
-    "external_path_parameter": 55,
+    "external_path_parameter": 51,
     "file_masterdata_macro_tools": 57,
     "lifecycle_or_creation": 9,
     "locking_internals": 8,
@@ -71950,7 +71950,7 @@
           "live_verified": 915
         },
         "declined": {
-          "count": 843,
+          "count": 837,
           "live_verified": 0
         },
         "dedicated": {
@@ -71966,7 +71966,7 @@
           "live_verified": 0
         },
         "other": {
-          "count": 31,
+          "count": 37,
           "live_verified": 0
         },
         "state_only": {
@@ -71983,7 +71983,7 @@
           "live_verified": 85
         },
         "declined": {
-          "count": 585,
+          "count": 579,
           "live_verified": 0
         },
         "dedicated": {
@@ -71999,7 +71999,7 @@
           "live_verified": 0
         },
         "other": {
-          "count": 31,
+          "count": 37,
           "live_verified": 0
         },
         "state_only": {

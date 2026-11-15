@@ -61,12 +61,14 @@ public sealed class ApiTryFilesTests
     [InlineData("PartsService", "ImportData")]
     [InlineData("Backup", "SaveFile")]
     [InlineData("Restore", "LoadFile")]
-    [InlineData("Import", "ImportData")]
     public void OtherExternalSideEffectsKeepTheirExclusions(string type, string method) => Assert.NotNull(Exclusion(Entry(method, type: type)));
 
     [Theory]
     [InlineData("Export", "ExportData", "strFileName")]
     [InlineData("Export3D", "ProjectToIFC", "strTargetDirectory")]
+    // ADR-0059 step 2: an import's explicit input file comes from the imports root, and the project is its destination.
+    [InlineData("Import", "ImportData", "strFileName")]
+    [InlineData("Import3D", "STEP", "strFileName")]
     public void ExportServicesWithAnExplicitOutputAreAllowed(string type, string method, string parameter) => Assert.Null(Exclusion(Entry(method, parameter, type)));
 
     [Fact]
