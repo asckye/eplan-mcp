@@ -10,7 +10,7 @@
 
 ## 背景、范围与风险
 
-负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口清单](../eplan/operation-gap-inventory.md)与 [TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **0 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
+负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口 TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **0 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
 
 本类在 4014 缺口内首阻为 0；`DrawingService.DrawDisplayList(HWND__*, Rectangle)` 是分母内混合组中的 1 条 internal 签名。另有 147 个整组 internal 已在分母外，包括 `Project.getProjectHandle(ProjectHandle*)`、`Context.CreateContextfromInternal(EContext*)`。这些不能静默加回 4014。
 

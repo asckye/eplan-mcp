@@ -76,6 +76,5 @@ CI 在 `main` 上运行全部自动测试；Large 与 Agent 评测由开发机�
 - [live-verification.md](../process/live-verification.md)：现有实机批次组织和证据记录入口。
 - [large-pending.md](../process/large-pending.md)：未验证范围、阻塞条件及已通过记录。
 - [release.md](../process/release.md)：发布列车、现行脚本调用与 ZIP/插件交付步骤。
-- [handoff.md](../status/handoff.md)：已核对但尚未完成的项目待办。
 - [docs/adr/](../adr/)：已作出的架构决定、历史上下文及追加修订。
 - [工具规格模板](../templates/tool-spec.md)：MCP 服务规范工具规格模板之上的 EPLAN 项目字段。

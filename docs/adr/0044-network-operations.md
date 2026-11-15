@@ -10,7 +10,7 @@
 
 ## 背景、范围与风险
 
-负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口清单](../eplan/operation-gap-inventory.md)与 [TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **2 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
+负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口 TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **2 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
 
 正式缺口的首阻为 `EplApplication.StartEplanRemoteServer` 和 `ProjectManagement.PublishProjectForSmartProduction` 两组；前者涉及服务监听，后者须先查明发布究竟只落文件还是实际发送。其他组的 URL、UNC、数据库服务器参数作为交叉约束，不能因本类只有两组而忽略。
 

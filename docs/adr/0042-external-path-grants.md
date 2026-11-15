@@ -10,7 +10,7 @@
 
 ## 背景、范围与风险
 
-负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口清单](../eplan/operation-gap-inventory.md)与 [TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **35 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
+负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口 TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **35 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
 
 包括 `PathInfo` 路径属性、`PathMap.ReSubstitutePath`、`AssemblyResolver.SetBinPaths`、`ProjectManagement.LoadDirectory`、隐式来源的 `Translate.ImportProjectTexts` 及数据库/隐式目的地参数。B3 的 `Export3D.ProjectToStep` 等仅需 imports/exports 适配者不重复计数。
 

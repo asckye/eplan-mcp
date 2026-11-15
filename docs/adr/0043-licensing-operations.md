@@ -10,7 +10,7 @@
 
 ## 背景、范围与风险
 
-负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口清单](../eplan/operation-gap-inventory.md)与 [TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **9 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
+负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口 TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **9 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
 
 包括 `License.GetLicenseModules/LockOption/Type/DongleNumber` 和 `EplApplication.License/LicenseFile/Password/User`。这 9 组按首阻列入授权/凭据类别，不表示每组都会占用许可。目录中 `Password`、`User` 仅有 setter，`LicenseFile` 有 getter/setter；不能虚构读取密码的 getter。A2 已验证 `HasOption` 只检查，`LockOption` 会占用直到 EPLAN 退出。
 

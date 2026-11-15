@@ -10,7 +10,7 @@
 
 ## 背景、范围与风险
 
-负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口清单](../eplan/operation-gap-inventory.md)与 [TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **0 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
+负责人目标是 4014 组全部可调用（scratch、逐次审批）。[缺口 TSV](../../catalog/operation-gaps.tsv)中本类首阻为 **0 组**；计数不等于该类全部重载，也不重复计其他块的交叉约束。
 
 本类首阻为 0；正式缺口中 7 个混合组含 22 条 deprecated 签名，例如 `Backup.Project`、`ProjectManagement.CompressProject`、`NetDefinitionPoint.AddDaisyChain`。另有 54 个整组 deprecated 在分母外。可调用至少一个非弃用重载已满足组口径，不能因此宣称旧重载也已开放。
 
