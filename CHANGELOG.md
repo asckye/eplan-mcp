@@ -5,7 +5,24 @@
 
 ## [Unreleased]
 
+### 新增
+
+- 新增 `eplan_session_start`（full，写入）：在本机启动 EPLAN（默认 Electric P8，可选 `variant`），等 EplanMcp 插件握手，最长 3 分钟，每 5 秒报一次进度；不打开项目，窗口正常显示（之后的审批框弹在上面）。已有 EPLAN 在运行时拒绝（`ALREADY_EXISTS`），因为第二个实例会和第一个争站点设置；超时则让 EPLAN 留着，不强制关闭。HTTP（虚拟机）模式下不可用（ADR-0058）。尚未实机验证。
+- 新增发现模式 `serve --profile discovery`（ADR-0057）：只发布 `eplan_tool_search`、`eplan_tool_read`、`eplan_tool_write` 三个工具，按关键词找工具、读说明，再经只读或写入入口调用，调用仍走原工具的参数校验、安全分级和审批。适合一次只能加载少量工具的客户端；Claude Code 自己延迟加载工具，不需要它。
+- 新增 `eplan_connection_route`（full，写入）：对安装空间里的 3D 连接执行 EPLAN 的布线，返回每根连接是否布通和长度（毫米）。同一模型重复布线结果一致（A141）。需要设备已放进 3D 布局且有部件；整条工具尚未实机验证。
+- 新增 `eplan_translation_keyword`（只读）和 `eplan_translation_add`（full，写入）：读翻译库关键词；按关键词添加或补全译文，已有译文保留不覆盖并单独列出，先预览后执行，经导出、合并、导入、回读核对。
+- `eplan_connection_create` 的电位定义项新增 `line_color`：写电位自己的连接线颜色（31005），连接按所属电位着色。
+- 移动属性文字：概览页上的属性文字也能移动；设备来自宏、仍在组里时，它的属性文字可以单独移动，设备不动（A138）。
+
+### 修正
+
+- `eplan_object_get` 按对象实际类型读取：`eplan_object_find` 在 Terminal 下返回的 PLC 端子不再被定位检查拒绝（A140）。
+- 读不到端子号的连接点改读连接点位置上的设备标识和序号，不再报错。
+
 ### 变更
+
+- Workbench 换成 v2 设计的颜色（浅色、深色、高对比度三套主题由设计变量生成），界面字体改用 Windows 自带字体，安装包不再带 Maple Mono。
+- `eplan_api_try` 可调用的操作层 API 组增至 2748 组（68.5%），到不了的从 25.1% 降到 12.6%：句柄可以从公开字段取（ADR-0055）、带键的链式步骤（ADR-0056）、属性 ID 枚举参数按数据字典校验、按调用目标项目构造服务。
 
 - 覆盖报告：工具通过 EPLAN API 完成的官方 action 计为“由工具覆盖”，共 39 行，包括导出 PDF、DXF/DWG、图片、PXF，导入 DXF、PXF，检查，生成连接，设备、页、连接、电缆和端子编号，报表更新，翻译，部件导出、导入和同步，主数据更新，标签，PLC 原理图生成。声明写在 overlay 的 `reached-by-tool`，生成器核对工具确实调用了对应的 API 方法。有文档的 action 137 行中，已由工具或白名单覆盖 49 行，占 35.8%。
 
