@@ -31772,6 +31772,11 @@
             "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
           },
           {
+            "name": "SessionLifecycleTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SessionLifecycleTests.cs"
+          },
+          {
             "name": "SnapshotCopyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/SnapshotCopyTests.cs"
@@ -31920,6 +31925,11 @@
             "name": "ProjectToolsTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
+          },
+          {
+            "name": "SessionLifecycleTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SessionLifecycleTests.cs"
           }
         ],
         "operationTests": [
@@ -34651,6 +34661,11 @@
             "name": "SessionCloseToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/SessionCloseToolTests.cs"
+          },
+          {
+            "name": "SessionLifecycleTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SessionLifecycleTests.cs"
           }
         ],
         "operationTests": [
@@ -34774,6 +34789,11 @@
             "name": "SessionCloseToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/SessionCloseToolTests.cs"
+          },
+          {
+            "name": "SessionLifecycleTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SessionLifecycleTests.cs"
           }
         ],
         "operationTests": [
@@ -34903,6 +34923,11 @@
             "name": "PartAndMessageTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PartAndMessageTests.cs"
+          },
+          {
+            "name": "SessionLifecycleTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SessionLifecycleTests.cs"
           }
         ],
         "operationTests": []
@@ -35015,6 +35040,11 @@
             "name": "RevisionListTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/RevisionListTests.cs"
+          },
+          {
+            "name": "SessionLifecycleTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/SessionLifecycleTests.cs"
           },
           {
             "name": "SnapshotCopyTests",

@@ -7,7 +7,7 @@
 | T.4 未放置功能分配第 2 项（2026-11-04，`02-update-assignment`） | `DevicePlaceTests.PartAssignment_MergesMatchingPlacedContacts_OneUndoRestores` | 已通过：2026-11-10，B 槽 Pro Panel，main `285140c4` + 测试改为先追加部件再 `update_from_parts`：`DevicePlaceTests` 30/30。两步合并数都是 0，没有未放置功能，触点引脚不变，两次撤销恢复（api-notes A132）。 |
 | PLC 生成保留已有表达（2026-11-08，MX_Dryer 重画时发现机架页被清空） | `ProjectToolsTests` | 待实机验证：对已有多线放置的设备执行 `eplan_plc_generate`，核对原放置仍在原页、新增页面只含请求页，以及异常结果在事务内回滚。 |
 | `eplan_plc_rack`（2026-11-15，`feat/m10-batch1`） | `PlcRackTests` | 已通过：2026-11-15，A 槽 Electric P8，`97f347ed`：两张 ET 200SP 卡一次画完，每张卡带自己的部件，图片并入总览设备，两次撤销恢复快照（api-notes A142）。中间两次失败分别修了"图片没有主功能"和"改名读回为连接点"。 |
-| `eplan_session_close` / `eplan_session_restart`（2026-11-15，`feat/m10-batch1`） | 新类 `SessionLifecycleTests`（待写） | 待实机验证：只开 scratch 项目时关闭成功；开着 scratch 外项目时拒绝；重启后插件版本读回。 |
+| `eplan_session_close` / `eplan_session_restart`（2026-11-15） | `SessionLifecycleTests`（单独、最后运行） | 部分通过：2026-11-15，A 槽 Electric P8：开着 scratch 之外的副本 LargeOutside 时关闭被拒绝（`POLICY_DENIED`，只写项目名不带路径），EPLAN 仍在运行。第一次运行发现一条 10-20 留下、项目早已关闭的挂起也挡住了关闭，已改为只算打开的项目上的挂起。待运行：只开 scratch 项目的槽位上，重启关闭开着项目的 EPLAN 并重新启动同一变体。 |
 | 读取时每个包装对象只取一次属性列表（d0b63d65，2026-11-10；回顾第 7 条） | `CableTests`、`PlcTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`PageDescriptionMapTests`、`NoSideEffectTests` | 已通过：2026-11-10，B 槽 Pro Panel，EPLAN 2026.0.3.25421，main `3316ef24`（影子副本与构建一致）：7 个类 27/27，用时 9 分钟。 |
 | 电位定义点修改 `eplan_potential_update`（cd7cc5ad，2026-11-10；A130） | `PotentialEngineeringTests`（用例待补） | 工具路径已在会话中实机使用（2026-11-10：通过式烘芯炉 N/NC 线改蓝色、MX_NFPA 三根变频器线加定义点后重新生成，审图 0 问题）；Large 用例待补。 |
 | 删除电位连接点、电位定义点和连接定义点（a9bf6580，2026-11-09） | `PlacementDeleteTests` | 待实机验证：删除三类点后核对点消失、提示重新生成连接、一次撤销恢复。 |

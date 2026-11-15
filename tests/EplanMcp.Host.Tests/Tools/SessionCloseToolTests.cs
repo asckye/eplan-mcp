@@ -89,6 +89,17 @@ public sealed class SessionCloseToolTests : IDisposable
     }
 
     [Fact]
+    public async Task ASuspensionOfAProjectNotOpen_DoesNotBlockClosing()
+    {
+        SuspensionStore.For(_harness.Locations).Suspend(Path.Combine(_harness.Locations.DefaultScratch, "Closed"), _pid, DateTimeOffset.UnixEpoch,
+            "eplan_page_update", "r1", DateTimeOffset.UnixEpoch, SuspensionReason.OutcomeUnknown, ["page"]);
+
+        var data = WriteToolHarness.Structured(await CloseAsync(_pid));
+
+        Assert.Equal(0, data.GetProperty("suspendedWrites").GetInt32());
+    }
+
+    [Fact]
     public async Task AnotherProcess_ThanTheConnectedOne_IsRefused()
     {
         var error = WriteToolHarness.Error(await CloseAsync(77, dryRun: false));

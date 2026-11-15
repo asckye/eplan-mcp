@@ -211,7 +211,10 @@ internal sealed class SessionLifecycleTools
             ProcessId = processId,
             WritesInFlight = writes.InFlight,
             PlanTasks = tasks.Unfinished,
-            SuspendedWrites = suspensions.All().Count(s => s.ProcessId is null || s.ProcessId == processId),
+            // Only a suspension of a project open in this EPLAN concerns closing it (live 2026-11-15: a suspension of
+            // a project closed weeks ago blocked the close).
+            SuspendedWrites = suspensions.All().Count(s => s.Project is { } suspended
+                && open.Projects.Any(p => string.Equals(p.Path, suspended, StringComparison.OrdinalIgnoreCase))),
             Projects = [.. open.Projects.Select(p => new SessionCloseResult.ProjectEntry { Name = p.Name, InScratch = ScratchPaths.IsInside(p.Path, config.ScratchRoots) })],
             Execution = ExecutionState.NotStarted,
         };

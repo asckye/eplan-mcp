@@ -303,8 +303,8 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_project_close | write | project.close.execute<br>project.close.plan | 17 | 7 | 0 | 10 | 0 | 0/0/1 | A34 | — |
 | eplan_project_create | write | project.create.execute<br>project.create.plan<br>project.restore.execute<br>project.restore.plan | 38 | 15 | 1 | 18 | 2 | 4/3/3 | A31 A32 A34 A35 | — |
 | eplan_project_get | read | project.get | 58 | 31 | 0 | 27 | 0 | 5/3/9 | A11 | 2026-10-19 pass（api-notes A12） |
-| eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/9 | — | 2026-10-18 pass（api-notes A10） |
-| eplan_project_open | write | project.open.execute<br>project.open.plan | 19 | 7 | 0 | 12 | 0 | 0/0/1 | A41 | — |
+| eplan_project_list | read | project.list | 11 | 6 | 0 | 5 | 0 | 6/4/10 | — | 2026-10-18 pass（api-notes A10） |
+| eplan_project_open | write | project.open.execute<br>project.open.plan | 19 | 7 | 0 | 12 | 0 | 0/0/2 | A41 | — |
 | eplan_project_rename | destructive | project.rename.execute<br>project.rename.plan | 32 | 14 | 0 | 18 | 0 | 0/0/0 | A18 | — |
 | eplan_project_translate | destructive | project.translate.execute<br>project.translate.plan | 84 | 38 | 2 | 42 | 2 | 0/1/1 | A11 A14 A25 A28 | — |
 | eplan_project_update | write | project.update.execute<br>project.update.plan | 64 | 31 | 1 | 31 | 0 | 0/0/1 | — | — |
@@ -318,11 +318,11 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_rule_check | read | device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>plan.names<br>project.snapshot | 322 | 177 | 8 | 94 | 0 | 2/1/0 | — | — |
 | eplan_selection_get | read | selection.get | 183 | 42 | 0 | 141 | 0 | 1/1/1 | — | — |
 | eplan_selection_set | read | selection.set | 183 | 42 | 0 | 141 | 0 | 2/1/1 | A54 B11 | — |
-| eplan_session_close | destructive | project.list | 11 | 6 | 0 | 5 | 0 | 1/0/0 | A23 | — |
-| eplan_session_restart | destructive | project.list | 11 | 6 | 0 | 5 | 0 | 1/0/0 | — | — |
-| eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/1 | — | 2026-10-19 pass（api-notes A12） |
+| eplan_session_close | destructive | project.list | 11 | 6 | 0 | 5 | 0 | 1/0/1 | A23 | — |
+| eplan_session_restart | destructive | project.list | 11 | 6 | 0 | 5 | 0 | 1/0/1 | — | — |
+| eplan_session_select | read | —（只在 Host 中运行：在已发现的 EPLAN 实例中选一个，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 2/2/2 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_session_start | write | — | 0 | 0 | 0 | 0 | 0 | 0/0/0 | — | — |
-| eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/9 | — | 2026-10-18 pass（api-notes A10） |
+| eplan_session_status | read | —（只在 Host 中运行：读 Bridge 的握手，不调用 Bridge 操作） | 0 | 0 | 0 | 0 | 0 | 4/3/10 | — | 2026-10-18 pass（api-notes A10） |
 | eplan_shield_create | write | shield.create.execute<br>shield.create.plan | 125 | 63 | 1 | 59 | 0 | 0/0/1 | — | — |
 | eplan_structure_delete | destructive | structure.delete.execute<br>structure.delete.plan | 73 | 32 | 1 | 39 | 0 | 0/0/1 | — | — |
 | eplan_structure_list | read | structure.list | 30 | 13 | 1 | 15 | 0 | 0/0/2 | — | — |
