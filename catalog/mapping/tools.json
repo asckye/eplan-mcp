@@ -27004,6 +27004,11 @@
             "file": "tests/EplanMcp.Host.Tests/Plans/PlanArgumentsTests.cs"
           },
           {
+            "name": "SessionCloseToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SessionCloseToolTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -34247,6 +34252,254 @@
             "name": "SelectionOperationTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/SelectionOperationTests.cs"
+          }
+        ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_session_close",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/SessionLifecycleTools.cs",
+      "operations": [
+        "project.list"
+      ],
+      "api": [
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_session_close.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A23"
+        ],
+        "tests": [
+          {
+            "name": "SessionCloseToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SessionCloseToolTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "BridgeConnectionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Server/BridgeConnectionTests.cs"
+          },
+          {
+            "name": "OperationRouterTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/OperationRouterTests.cs"
+          },
+          {
+            "name": "RequestFrameTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Server/RequestFrameTests.cs"
+          },
+          {
+            "name": "WriteInvokeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/WriteInvokeTests.cs"
+          },
+          {
+            "name": "ApprovalDialogInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ApprovalDialogInteropTests.cs"
+          },
+          {
+            "name": "BridgeServerTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Server/BridgeServerTests.cs"
+          },
+          {
+            "name": "CableToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/CableToolsInteropTests.cs"
+          },
+          {
+            "name": "ConnectionToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ConnectionToolsInteropTests.cs"
+          },
+          {
+            "name": "DeviceToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/DeviceToolsInteropTests.cs"
+          },
+          {
+            "name": "HostBridgeInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/HostBridgeInteropTests.cs"
+          },
+          {
+            "name": "HttpEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
+          },
+          {
+            "name": "PartToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
+          },
+          {
+            "name": "PlcToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/PlcToolsInteropTests.cs"
+          },
+          {
+            "name": "ProjectPageInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
+          },
+          {
+            "name": "SessionSelectInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/SessionSelectInteropTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "TerminalToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/TerminalToolsInteropTests.cs"
+          }
+        ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
+      "name": "eplan_session_restart",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/SessionLifecycleTools.cs",
+      "operations": [
+        "project.list"
+      ],
+      "api": [
+        "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
+        "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
+        "P:Eplan.EplApi.DataModel.Project.IsReadOnly",
+        "P:Eplan.EplApi.DataModel.Project.ProjectFullName",
+        "P:Eplan.EplApi.DataModel.Project.ProjectName",
+        "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
+        "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
+        "T:Eplan.EplApi.DataModel.Project",
+        "T:Eplan.EplApi.DataModel.ProjectManager",
+        "T:Eplan.EplApi.HEServices.SelectionSet"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_session_restart.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [],
+        "tests": [
+          {
+            "name": "SessionCloseToolTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/SessionCloseToolTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "BridgeConnectionTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Server/BridgeConnectionTests.cs"
+          },
+          {
+            "name": "OperationRouterTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/OperationRouterTests.cs"
+          },
+          {
+            "name": "RequestFrameTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Server/RequestFrameTests.cs"
+          },
+          {
+            "name": "WriteInvokeTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/WriteInvokeTests.cs"
+          },
+          {
+            "name": "ApprovalDialogInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ApprovalDialogInteropTests.cs"
+          },
+          {
+            "name": "BridgeServerTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Server/BridgeServerTests.cs"
+          },
+          {
+            "name": "CableToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/CableToolsInteropTests.cs"
+          },
+          {
+            "name": "ConnectionToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ConnectionToolsInteropTests.cs"
+          },
+          {
+            "name": "DeviceToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/DeviceToolsInteropTests.cs"
+          },
+          {
+            "name": "HostBridgeInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/HostBridgeInteropTests.cs"
+          },
+          {
+            "name": "HttpEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
+          },
+          {
+            "name": "PartToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
+          },
+          {
+            "name": "PlcToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/PlcToolsInteropTests.cs"
+          },
+          {
+            "name": "ProjectPageInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
+          },
+          {
+            "name": "SessionSelectInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/SessionSelectInteropTests.cs"
+          },
+          {
+            "name": "StdioEndToEndTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "TerminalToolsInteropTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Bridge/TerminalToolsInteropTests.cs"
           }
         ]
       },

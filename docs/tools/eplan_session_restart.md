@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `session` / `full`（见 [ADR-0058](../adr/0058-eplan-lifecycle-tools.md)） |
 | 安全级别 | Destructive（本机进程）：关闭部分与 [`eplan_session_close`](eplan_session_close.md) 完全相同 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Designed（2026-11-14，ADR-0058 接受后） |
+| 状态 | Implemented (Unreleased) |
 
 ## 1. 这个工具解决什么任务
 替换插件后让 EPLAN 重新加载它，或 EPLAN 状态异常时重新开始。等于先 `eplan_session_close`、再以同一个变体 `eplan_session_start`，中间任何一步失败都停下并说明停在哪一步。
@@ -18,7 +18,7 @@
 | `dry_run` | boolean | 否，默认 true | 省略或 true 只列出关闭的前置检查；false 才执行 |
 
 ## 3. 输出
-关闭部分同 `eplan_session_close`，启动部分同 `eplan_session_start`；另有 `stage`：`closed`、`started` 或停下的那一步。
+`close`：同 `eplan_session_close` 的结果；`bridgeVersionBefore`：关闭前插件报告的版本；`start`：同 `eplan_session_start` 的结果，演练时为 null。
 
 ## 4. 错误
 关闭部分的错误同 `eplan_session_close`（此时 EPLAN 未被关闭）；启动部分的错误同 `eplan_session_start`（此时旧 EPLAN 已关闭，摘要明确说"EPLAN is closed and was not started again"）。

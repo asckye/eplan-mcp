@@ -2315,7 +2315,7 @@
       "dependencies": 38,
       "actions": 0,
       "spec": "docs/tools/eplan_page_update.md",
-      "small": 3,
+      "small": 4,
       "medium": 5,
       "large": 6,
       "apiNotes": [
@@ -3159,6 +3159,42 @@
         "A54",
         "B11"
       ]
+    },
+    {
+      "name": "eplan_session_close",
+      "safety": "destructive",
+      "operations": [
+        "project.list"
+      ],
+      "apiIds": 11,
+      "operationGroups": 6,
+      "dataDictionary": 0,
+      "dependencies": 5,
+      "actions": 0,
+      "spec": "docs/tools/eplan_session_close.md",
+      "small": 1,
+      "medium": 0,
+      "large": 0,
+      "apiNotes": [
+        "A23"
+      ]
+    },
+    {
+      "name": "eplan_session_restart",
+      "safety": "destructive",
+      "operations": [
+        "project.list"
+      ],
+      "apiIds": 11,
+      "operationGroups": 6,
+      "dataDictionary": 0,
+      "dependencies": 5,
+      "actions": 0,
+      "spec": "docs/tools/eplan_session_restart.md",
+      "small": 1,
+      "medium": 0,
+      "large": 0,
+      "apiNotes": []
     },
     {
       "name": "eplan_session_select",
@@ -26332,6 +26368,8 @@
         "eplan_rule_check",
         "eplan_selection_get",
         "eplan_selection_set",
+        "eplan_session_close",
+        "eplan_session_restart",
         "eplan_shield_create",
         "eplan_structure_delete",
         "eplan_structure_list",
@@ -26583,6 +26621,8 @@
         "eplan_rule_check",
         "eplan_selection_get",
         "eplan_selection_set",
+        "eplan_session_close",
+        "eplan_session_restart",
         "eplan_shield_create",
         "eplan_structure_delete",
         "eplan_structure_list",
@@ -26721,6 +26761,8 @@
         "eplan_rule_check",
         "eplan_selection_get",
         "eplan_selection_set",
+        "eplan_session_close",
+        "eplan_session_restart",
         "eplan_shield_create",
         "eplan_structure_delete",
         "eplan_structure_list",
@@ -27036,6 +27078,8 @@
         "eplan_rule_check",
         "eplan_selection_get",
         "eplan_selection_set",
+        "eplan_session_close",
+        "eplan_session_restart",
         "eplan_shield_create",
         "eplan_structure_delete",
         "eplan_structure_list",
@@ -27172,6 +27216,8 @@
         "eplan_rule_check",
         "eplan_selection_get",
         "eplan_selection_set",
+        "eplan_session_close",
+        "eplan_session_restart",
         "eplan_shield_create",
         "eplan_structure_delete",
         "eplan_structure_list",
@@ -33342,6 +33388,8 @@
         "eplan_rule_check",
         "eplan_selection_get",
         "eplan_selection_set",
+        "eplan_session_close",
+        "eplan_session_restart",
         "eplan_shield_create",
         "eplan_structure_delete",
         "eplan_structure_list",

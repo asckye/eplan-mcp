@@ -24947,6 +24947,199 @@
       }
     },
     {
+      "name": "eplan_session_close",
+      "title": "Close EPLAN when only scratch projects are open",
+      "description": "Closes the connected EPLAN as its close button would, waiting up to 1 minute; never forces it. Refuses while a project outside the scratch roots is open, a write or plan task runs, or a write is suspended. dry_run (default true) only reports these checks. Example: {\"process_id\": 4711, \"dry_run\": false}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "process_id": {
+            "description": "EPLAN's process ID from eplan_session_status; it must be the connected instance",
+            "type": "integer"
+          },
+          "dry_run": {
+            "description": "True (default) only reports the checks; false closes EPLAN",
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "process_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "processId": {
+            "description": "The EPLAN process checked or closed.",
+            "type": "integer"
+          },
+          "writesInFlight": {
+            "description": "Write calls running now, approvals they wait on included; closing waits for 0.",
+            "type": "integer"
+          },
+          "planTasks": {
+            "description": "Plan tasks queued or running; closing waits for 0.",
+            "type": "integer"
+          },
+          "suspendedWrites": {
+            "description": "Writes suspended with an unknown outcome; the engineer confirms them first.",
+            "type": "integer"
+          },
+          "projects": {
+            "description": "The open projects, by name, and whether each is under a scratch root.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "Project name as EPLAN shows it.",
+                  "type": "string"
+                },
+                "inScratch": {
+                  "description": "True when the project is under a scratch root.",
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "execution": {
+            "description": "not_started (dry run or refused) or committed (EPLAN exited).",
+            "type": "string"
+          }
+        }
+      },
+      "annotations": {
+        "title": "Close EPLAN when only scratch projects are open",
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "eplan_session_restart",
+      "title": "Restart EPLAN when only scratch projects are open",
+      "description": "Closes the connected EPLAN like eplan_session_close (same checks, never forced), then starts the same variant again like eplan_session_start and waits for the add-in, up to 4 minutes in all. Opens no project. Use it after the add-in was replaced. dry_run (default true) only reports the close checks. Example: {\"process_id\": 4711, \"dry_run\": false}.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "process_id": {
+            "description": "EPLAN's process ID from eplan_session_status; it must be the connected instance",
+            "type": "integer"
+          },
+          "dry_run": {
+            "description": "True (default) only reports the close checks; false restarts EPLAN",
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "process_id"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "close": {
+            "description": "The close checks, and whether EPLAN was closed.",
+            "type": "object",
+            "properties": {
+              "processId": {
+                "description": "The EPLAN process checked or closed.",
+                "type": "integer"
+              },
+              "writesInFlight": {
+                "description": "Write calls running now, approvals they wait on included; closing waits for 0.",
+                "type": "integer"
+              },
+              "planTasks": {
+                "description": "Plan tasks queued or running; closing waits for 0.",
+                "type": "integer"
+              },
+              "suspendedWrites": {
+                "description": "Writes suspended with an unknown outcome; the engineer confirms them first.",
+                "type": "integer"
+              },
+              "projects": {
+                "description": "The open projects, by name, and whether each is under a scratch root.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "description": "Project name as EPLAN shows it.",
+                      "type": "string"
+                    },
+                    "inScratch": {
+                      "description": "True when the project is under a scratch root.",
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "execution": {
+                "description": "not_started (dry run or refused) or committed (EPLAN exited).",
+                "type": "string"
+              }
+            }
+          },
+          "bridgeVersionBefore": {
+            "description": "The EplanMcp add-in version before the restart, to compare with start.bridgeVersion after replacing the add-in.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "start": {
+            "description": "The started EPLAN; null on a dry run.",
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "processId": {
+                "description": "The Windows process ID of the EPLAN started, as eplan_session_select takes it.",
+                "type": "integer"
+              },
+              "variant": {
+                "description": "The product variant started.",
+                "type": "string"
+              },
+              "version": {
+                "description": "EPLAN's file version.",
+                "type": "string"
+              },
+              "bridgeVersion": {
+                "description": "The EplanMcp add-in version that answered.",
+                "type": "string"
+              },
+              "seconds": {
+                "description": "Seconds from the start to the add-in's handshake.",
+                "type": "number"
+              },
+              "hint": {
+                "description": "What to do next.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "annotations": {
+        "title": "Restart EPLAN when only scratch projects are open",
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "eplan_session_select",
       "title": "Choose the EPLAN to work with",
       "description": "Chooses which running EPLAN this server works with when several have the add-in loaded and other tools return SESSION_NOT_SELECTED. Take process_id from the instances of eplan_session_status; the result names that EPLAN's version and variant, so select another if it is not the one meant. Lasts until that EPLAN exits; changes nothing in EPLAN. Example: {\"process_id\": 24688}.",
@@ -26942,6 +27135,8 @@
               "eplan_rule_check",
               "eplan_selection_get",
               "eplan_selection_set",
+              "eplan_session_close",
+              "eplan_session_restart",
               "eplan_session_select",
               "eplan_session_start",
               "eplan_session_status",
