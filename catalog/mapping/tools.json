@@ -18017,6 +18017,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcPropertyB8Tests.cs"
           },
           {
+            "name": "PlcRackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcRackTests.cs"
+          },
+          {
             "name": "WriteSafetyTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/WriteSafetyTests.cs"
@@ -25080,6 +25085,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlcPropertyB8Tests.cs"
           },
           {
+            "name": "PlcRackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcRackTests.cs"
+          },
+          {
             "name": "PlcRepresentationTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcRepresentationTests.cs"
@@ -26112,6 +26122,11 @@
             "name": "PlcDisplaySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
+          },
+          {
+            "name": "PlcRackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcRackTests.cs"
           },
           {
             "name": "ProjectAndPageTests",
@@ -27804,6 +27819,11 @@
             "name": "PartsFirstSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PartsFirstSpikeTests.cs"
+          },
+          {
+            "name": "PlcRackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcRackTests.cs"
           }
         ],
         "operationTests": [
@@ -30919,6 +30939,11 @@
             "name": "PlcRackToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PlcRackToolTests.cs"
+          },
+          {
+            "name": "PlcRackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlcRackTests.cs"
           }
         ],
         "operationTests": [
