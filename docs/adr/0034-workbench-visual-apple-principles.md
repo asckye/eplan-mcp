@@ -53,3 +53,11 @@
 原正文保留为决策时的历史记录。采用手册后，原规范及本地规则编号不再作为现行规则入口；现行条款和项目事实分别见以下归宿：
 
 - 原引用 `../standards/workbench-ui.md` → [Workbench 实现记录](../design/2026-10-20-m5-operability.md#workbench-implementation)。
+
+## 2026-11-14 实施记录
+
+负责人 2026-11-14 决定提前实施，不再等 v0.6.0。
+
+- **颜色**（决定 2、6）：设计规范导出的 [`tokens.json`](../../src/EplanMcp.Workbench/Themes/tokens.json) 放进仓库，[`tokens.map.json`](../../src/EplanMcp.Workbench/Themes/tokens.map.json) 写明每个引入的 Primer/Ant 颜色键取哪个 token，[`eng/scripts/workbench-tokens.ps1`](../../eng/scripts/workbench-tokens.ps1) 生成浅色、深色调色板里的颜色块；生成结果不是最新时 `ThemeTokensJsonTests` 失败。设计改动只改 `tokens.json`（键换了 token 时再改映射表）。高对比跟随系统颜色，不生成。
+- **为保证 WCAG AA 而偏离设计稿的三处**（理由也写在映射表的 `_why` 里）：选中行暂用 `fill-track`（强调色和红色文字压在 `fill-selected-inactive` 上不到 4.5:1，审批列表改成 v2 的选中样式后再换回）；文本选中色改用 `accent` 实底（引入的 `Primer.xaml` 里唯一一处改动，文件头已声明）；深色下进度条轨道用 `bg-grouped`（设计稿 `accent` 对 `fill-track` 只有 2.97:1）。后一处是设计规范本身的缺口，回头在规范里修正。
+- **字体**（决定 3）：下一步去掉随软件分发的 Maple Mono CN。
