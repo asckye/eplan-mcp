@@ -31,7 +31,14 @@ public sealed class AuditViewTests(WpfContext wpf) : IDisposable
         File.WriteAllText(Path.Combine(_directory, "2026-10-20.jsonl"), "{\"tool\":\"\\ud800\"}\n{\"\\udc00\":1}\n{\"kind\":\"approval\"}\n");
         AuditView view = View();
         int told = 0;
-        view.PropertyChanged += (_, e) => told += e.PropertyName == string.Empty ? 1 : 0;
+        view.PropertyChanged += (_, e) =>
+        {
+            // Progress reports arrive on pool threads while reading runs, so a plain += could lose an increment.
+            if (e.PropertyName == string.Empty)
+            {
+                Interlocked.Increment(ref told);
+            }
+        };
 
         await view.LoadAsync(Token);
 
