@@ -17,7 +17,7 @@ Next page: repeat the same arguments and add the `nextCursor` of the previous re
 1. The translation database is the one configured in EPLAN for every project (`database`), not a project: no `project` argument. To translate a project's texts, call eplan_project_translate; to write the whole database to a file, eplan_translation_export.
 2. `query` is 1 to 200 characters, matched ignoring case anywhere in a keyword's source text. `exact` keeps only keywords whose whole source text equals it, which is how to answer "is this text in the database".
 3. `languages` lists the languages the database holds. A keyword's `translations` holds only the languages it actually has a text in, so a language in `languages` but missing from `translations` means that keyword is not translated into it.
-4. This tool reads only. Adding or changing a keyword is not available yet; until then, change the database in EPLAN's translation dictionary, or export it, edit the file and import it with eplan_translation_import.
+4. This tool reads only. eplan_translation_add adds a keyword and fills a language it has no text in; changing an existing translation, deleting a keyword or adding a language is EPLAN's translation dictionary, or an export, an edit and eplan_translation_import.
 5. The database is opened read-only and closed again in each call and never changed. A large database takes longer; narrow `query` rather than paging through everything.
 
 ## Fields

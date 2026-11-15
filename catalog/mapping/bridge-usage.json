@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
-  "scannedOn": "2026-11-14",
-  "scannedSources": "0dab03eb",
-  "sourceHash": "sha256:a1926b9ea5d0187f142189ee4e60ab826e1d15444d7015b7ac6dd23425d5dbf5",
+  "scannedOn": "2026-11-15",
+  "scannedSources": "0dab03eb + uncommitted changes",
+  "sourceHash": "sha256:52a27933252b8b40333cf756d7b9b2c06638f4b9c657a77af9abb22186a5d633",
   "operations": [
     {
       "name": "action.execute",
@@ -753,6 +753,14 @@
     {
       "name": "translation.keyword.search",
       "class": "TranslationKeywordSearchOperation"
+    },
+    {
+      "name": "translation.keyword.set.execute",
+      "class": "TranslationKeywordSetExecuteOperation"
+    },
+    {
+      "name": "translation.keyword.set.plan",
+      "class": "TranslationKeywordSetPlanOperation"
     }
   ],
   "usages": {
@@ -1102,7 +1110,9 @@
         ],
         "operations": [
           "translation.export.run",
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -1322,7 +1332,8 @@
           "read"
         ],
         "operations": [
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute"
         ]
       },
       {
@@ -128534,7 +128545,9 @@
         "operations": [
           "masterdata.backup",
           "translation.import.execute",
-          "translation.import.plan"
+          "translation.import.plan",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -150770,7 +150783,9 @@
         ],
         "operations": [
           "translation.export.run",
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -150990,7 +151005,8 @@
           "new"
         ],
         "operations": [
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute"
         ]
       },
       {
@@ -152860,7 +152876,9 @@
           "translation.export.plan",
           "translation.export.run",
           "translation.import.execute",
-          "translation.keyword.search"
+          "translation.keyword.search",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       }
     ],
@@ -153751,7 +153769,9 @@
         ],
         "operations": [
           "translation.import.execute",
-          "translation.import.plan"
+          "translation.import.plan",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       }
     ],
@@ -181373,7 +181393,9 @@
         "operations": [
           "masterdata.backup",
           "translation.import.execute",
-          "translation.import.plan"
+          "translation.import.plan",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -181385,7 +181407,9 @@
         ],
         "operations": [
           "translation.export.run",
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -181484,7 +181508,8 @@
           "new"
         ],
         "operations": [
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute"
         ]
       }
     ],
@@ -181535,7 +181560,9 @@
         ],
         "operations": [
           "translation.export.run",
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       }
     ],
@@ -181587,7 +181614,8 @@
           "call"
         ],
         "operations": [
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute"
         ]
       }
     ],
@@ -232171,7 +232199,9 @@
         "operations": [
           "masterdata.backup",
           "translation.import.execute",
-          "translation.import.plan"
+          "translation.import.plan",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -232227,7 +232257,9 @@
         "operations": [
           "masterdata.backup",
           "translation.import.execute",
-          "translation.import.plan"
+          "translation.import.plan",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -239167,7 +239199,9 @@
         ],
         "operations": [
           "translation.export.run",
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -239387,7 +239421,8 @@
           "type"
         ],
         "operations": [
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute"
         ]
       },
       {
@@ -239779,7 +239814,9 @@
         ],
         "operations": [
           "translation.export.run",
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -239999,7 +240036,8 @@
           "type"
         ],
         "operations": [
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute"
         ]
       },
       {
@@ -240734,7 +240772,9 @@
           "part.export.run",
           "translation.export.plan",
           "translation.export.run",
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -242796,7 +242836,9 @@
           "translation.export.plan",
           "translation.export.run",
           "translation.import.execute",
-          "translation.keyword.search"
+          "translation.keyword.search",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -243391,7 +243433,9 @@
         ],
         "operations": [
           "translation.import.execute",
-          "translation.import.plan"
+          "translation.import.plan",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       }
     ],
@@ -274960,7 +275004,9 @@
           "translation.export.plan",
           "translation.export.run",
           "translation.import.execute",
-          "translation.keyword.search"
+          "translation.keyword.search",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       }
     ],
@@ -283870,7 +283916,9 @@
         "operations": [
           "masterdata.backup",
           "translation.import.execute",
-          "translation.import.plan"
+          "translation.import.plan",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -283882,7 +283930,9 @@
         ],
         "operations": [
           "translation.export.run",
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {
@@ -283981,7 +284031,8 @@
           "type"
         ],
         "operations": [
-          "translation.import.execute"
+          "translation.import.execute",
+          "translation.keyword.set.execute"
         ]
       }
     ],
@@ -283996,7 +284047,9 @@
         "operations": [
           "masterdata.backup",
           "translation.import.execute",
-          "translation.import.plan"
+          "translation.import.plan",
+          "translation.keyword.set.execute",
+          "translation.keyword.set.plan"
         ]
       },
       {

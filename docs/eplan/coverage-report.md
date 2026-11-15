@@ -3,7 +3,7 @@
 **操作层 4014 组：专用工具 614，通用读取 117，仅通用入口 2010，仅状态覆盖 7，其他可调用 5，明确不做 756，到不了 505；实机验证 1118**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-14 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 0dab03eb）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 0dab03eb + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -147,7 +147,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | action | 0 | 1 | 7 | 2 | 0 | 127 |
 
 ### 既有工具记录
-有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 127（23.6%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
+有实机记录（来源写明工具名、结果为 pass 或 pass_with_findings）的工具：30 / 128（23.4%），共 38 条记录。版本和变体按来源原样填写，来源没写的标"未注明"。
 
 | 工具 | 日期 | EPLAN | 变体 | 结果 | 来源 | 说明 |
 |---|---|---|---|---|---|---|
@@ -327,9 +327,10 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_terminal_strip_get | read | terminal.strip.get | 41 | 24 | 0 | 17 | 0 | 2/1/3 | — | — |
 | eplan_terminal_strip_list | read | terminal.strip.list | 20 | 11 | 0 | 9 | 0 | 2/1/3 | — | — |
 | eplan_tool_usage | read | —（只在 Host 中运行：返回工具用法文本，不接触 EPLAN） | 0 | 0 | 0 | 0 | 0 | 10/3/0 | — | — |
+| eplan_translation_add | destructive | translation.keyword.set.execute<br>translation.keyword.set.plan | 18 | 6 | 0 | 12 | 0 | 0/1/0 | A47 | — |
 | eplan_translation_export | write | translation.export.plan<br>translation.export.run | 41 | 14 | 0 | 23 | 2 | 1/2/2 | A30 | — |
 | eplan_translation_import | destructive | masterdata.backup<br>translation.import.execute<br>translation.import.plan | 31 | 10 | 0 | 18 | 2 | 3/2/1 | A47 | 2026-10-27 pass（Large 测试 README） |
-| eplan_translation_keyword | read | translation.keyword.search | 30 | 13 | 0 | 17 | 0 | 1/0/0 | A27 | — |
+| eplan_translation_keyword | read | translation.keyword.search | 30 | 13 | 0 | 17 | 0 | 1/0/0 | A27 A47 | — |
 | eplan_workflow_plan | read | device.list<br>device.renumber.plan<br>device.update.plan<br>macro.insert.plan<br>page.create.plan<br>page.delete.plan<br>page.renumber.plan<br>page.update.plan<br>plan.functions<br>plan.macro.inspect<br>project.snapshot | 323 | 178 | 8 | 94 | 0 | 3/4/7 | A14 A17 A32 A33 A36 A37 A39 | — |
 
 ## 6. 按版本、模块、授权的可用性

@@ -27412,6 +27412,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartSyncOperationTests.cs"
           },
           {
+            "name": "TranslationAddToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationAddToolTests.cs"
+          },
+          {
             "name": "TranslationImportSupportTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Safety/TranslationImportSupportTests.cs"
@@ -27872,6 +27877,11 @@
             "name": "PartSyncOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PartSyncOperationTests.cs"
+          },
+          {
+            "name": "TranslationAddToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationAddToolTests.cs"
           },
           {
             "name": "TranslationImportSupportTests",
@@ -35494,6 +35504,64 @@
       "dataDictionary": []
     },
     {
+      "name": "eplan_translation_add",
+      "safety": "destructive",
+      "host": "src/EplanMcp.Host/Tools/TranslationAddTools.cs",
+      "operations": [
+        "translation.keyword.set.execute",
+        "translation.keyword.set.plan"
+      ],
+      "api": [
+        "F:Eplan.EplApi.ApplicationFramework.QuietModes.ShowNoDialogs",
+        "F:Eplan.EplApi.HEServices.Translate.DatabaseType.SQL",
+        "M:Eplan.EplApi.ApplicationFramework.QuietModeStep.#ctor(Eplan.EplApi.ApplicationFramework.QuietModes)",
+        "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
+        "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String)",
+        "M:Eplan.EplApi.HEServices.Translate.#ctor",
+        "M:Eplan.EplApi.HEServices.Translate.ExportDatabaseTexts(System.String,System.String)",
+        "M:Eplan.EplApi.HEServices.Translate.ImportDatabaseTexts(System.String,System.String,System.String)",
+        "P:Eplan.EplApi.HEServices.Translate.ActiveTranslateDatabase",
+        "P:Eplan.EplApi.HEServices.Translate.TranslateDatabase",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
+        "T:Eplan.EplApi.ApplicationFramework.QuietModes",
+        "T:Eplan.EplApi.Base.BaseException",
+        "T:Eplan.EplApi.Base.LockingException",
+        "T:Eplan.EplApi.Base.PathMap",
+        "T:Eplan.EplApi.DataModel.ProjectLockingException",
+        "T:Eplan.EplApi.HEServices.Translate",
+        "T:Eplan.EplApi.HEServices.Translate.DatabaseType"
+      ],
+      "actions": [],
+      "evidence": {
+        "spec": "docs/tools/eplan_translation_add.md",
+        "specStatus": "Implemented (Unreleased)",
+        "apiNotes": [
+          "A47"
+        ],
+        "tests": [
+          {
+            "name": "TranslationAddToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationAddToolTests.cs"
+          }
+        ],
+        "operationTests": [
+          {
+            "name": "TranslationAddToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationAddToolTests.cs"
+          },
+          {
+            "name": "TranslationKeywordSetOperationTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/TranslationKeywordSetOperationTests.cs"
+          }
+        ]
+      },
+      "live": [],
+      "dataDictionary": []
+    },
+    {
       "name": "eplan_translation_export",
       "safety": "write",
       "host": "src/EplanMcp.Host/Tools/MasterDataExportTools.cs",
@@ -35684,6 +35752,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/MasterDataBackupOperationTests.cs"
           },
           {
+            "name": "TranslationAddToolTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/TranslationAddToolTests.cs"
+          },
+          {
             "name": "TranslationImportOperationTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/TranslationImportOperationTests.cs"
@@ -35759,7 +35832,8 @@
         "spec": "docs/tools/eplan_translation_keyword.md",
         "specStatus": "Implemented (Unreleased)",
         "apiNotes": [
-          "A27"
+          "A27",
+          "A47"
         ],
         "tests": [
           {

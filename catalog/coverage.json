@@ -3396,6 +3396,26 @@
       "apiNotes": []
     },
     {
+      "name": "eplan_translation_add",
+      "safety": "destructive",
+      "operations": [
+        "translation.keyword.set.execute",
+        "translation.keyword.set.plan"
+      ],
+      "apiIds": 18,
+      "operationGroups": 6,
+      "dataDictionary": 0,
+      "dependencies": 12,
+      "actions": 0,
+      "spec": "docs/tools/eplan_translation_add.md",
+      "small": 0,
+      "medium": 1,
+      "large": 0,
+      "apiNotes": [
+        "A47"
+      ]
+    },
+    {
       "name": "eplan_translation_export",
       "safety": "write",
       "operations": [
@@ -3462,7 +3482,8 @@
       "medium": 0,
       "large": 0,
       "apiNotes": [
-        "A27"
+        "A27",
+        "A47"
       ]
     },
     {
@@ -5382,6 +5403,7 @@
         "eplan_shield_create",
         "eplan_symbol_search",
         "eplan_terminal_renumber",
+        "eplan_translation_add",
         "eplan_translation_export",
         "eplan_translation_import",
         "eplan_translation_keyword",
@@ -5776,6 +5798,7 @@
         "eplan_potential_update",
         "eplan_report_create",
         "eplan_rule_check",
+        "eplan_translation_add",
         "eplan_translation_import",
         "eplan_workflow_plan"
       ],
@@ -33717,6 +33740,7 @@
         "eplan_api_try",
         "eplan_part_import",
         "eplan_part_sync",
+        "eplan_translation_add",
         "eplan_translation_export",
         "eplan_translation_import",
         "eplan_translation_keyword"
@@ -33750,6 +33774,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_translation_add",
         "eplan_translation_export",
         "eplan_translation_import"
       ],
@@ -33781,6 +33806,7 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_translation_add",
         "eplan_translation_import"
       ],
       "route": "dedicated"
@@ -33818,6 +33844,7 @@
         "eplan_api_try",
         "eplan_part_import",
         "eplan_part_sync",
+        "eplan_translation_add",
         "eplan_translation_export",
         "eplan_translation_import",
         "eplan_translation_keyword"
