@@ -65,3 +65,4 @@
 | [0056](0056-api-try-keyed-chain-steps.md) | 通用入口的句柄链接受按键取值的一步，工具类按名单作为根 | Accepted | 双向门 |
 | [0057](0057-discovery-profile-dispatch.md) | discovery Profile 用按安全级别分开的两个分发工具调用其余工具 | Accepted | 双向门 |
 | [0058](0058-eplan-lifecycle-tools.md) | Host 可以启动、关闭和重启本机的 EPLAN，关闭只在打开的项目都在 scratch 时自动进行 | Accepted | 双向门 |
+| [0059](0059-operation-layer-remaining-categories.md) | 操作层余下三类按档开放：带部件的项目对象、部件库副本和系统主数据、锁定与冻结 | Accepted | 双向门 |
