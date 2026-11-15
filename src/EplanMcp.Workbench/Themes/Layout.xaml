@@ -37,6 +37,8 @@
   <Thickness x:Key="Ui.Inset.DrawerFooter">24,12,24,24</Thickness>
   <Thickness x:Key="Ui.Inset.DrawerHeader">24,12,16,12</Thickness>
   <Thickness x:Key="Ui.Inset.DrawerMessage">24,12,24,0</Thickness>
+  <Thickness x:Key="Ui.Inset.GroupCard">16,8</Thickness>
+  <Thickness x:Key="Ui.Inset.Detail">24,16,24,16</Thickness>
   <Thickness x:Key="Ui.Inset.Header">16,4,8,4</Thickness>
   <Thickness x:Key="Ui.Inset.Horizontal.Normal">16,0</Thickness>
   <Thickness x:Key="Ui.Inset.Horizontal.XS">8,0</Thickness>

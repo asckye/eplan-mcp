@@ -122,6 +122,15 @@
     </Setter>
   </Style>
 
+  <!-- v2 grouped list (ADR-0034 decision 2): rows on a rounded card over the grouped background. -->
+  <Style x:Key="Workbench.GroupCard" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.GroupCard}" />
+  </Style>
+
   <!-- The page's large title in the header (ADR-0034 decision 2: 28 px bold, no breadcrumb). -->
   <Style x:Key="Workbench.PageTitle" TargetType="TextBlock" BasedOn="{StaticResource Primer.Text}">
     <Setter Property="FontSize" Value="28" />

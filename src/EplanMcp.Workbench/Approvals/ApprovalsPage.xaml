@@ -71,9 +71,9 @@
       <shell:EmptyState x:Name="Empty" Grid.Row="1" Grid.ColumnSpan="2" Title="{l:Tr Approvals.Empty}" Text="{l:Tr Approvals.EmptyText}" />
 
       <!-- The shown question (APR-07). Focus goes to its title, never to a button (APR-03). -->
-      <ScrollViewer x:Name="DetailArea" Grid.Row="1" Grid.Column="1" Margin="{StaticResource Ui.Gap.Left.LG}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+      <ScrollViewer x:Name="DetailArea" Grid.Row="1" Grid.Column="1" Margin="{StaticResource Ui.Gap.Left.LG}" Background="{DynamicResource Surface.Subtle}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                     Focusable="False" AutomationProperties.Name="{l:Tr Approvals.Detail}" DataContext="{Binding Shown}">
-        <StackPanel x:Name="Detail" Margin="{StaticResource Ui.Gap.Right.XS}">
+        <StackPanel x:Name="Detail" Margin="{StaticResource Ui.Inset.Detail}">
           <TextBlock x:Name="QuestionTitle" Text="{Binding Title}" Style="{StaticResource Primer.ContainerTitle}" TextWrapping="Wrap" TextTrimming="None"
                      Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
 
@@ -89,7 +89,8 @@
             </DockPanel>
           </Border>
 
-          <Grid Margin="{StaticResource Ui.Gap.Top.SM}">
+          <Border Margin="{StaticResource Ui.Gap.Top.SM}" Style="{StaticResource Workbench.GroupCard}">
+          <Grid>
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
@@ -120,6 +121,7 @@
             <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Suspension}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None"
                        Visibility="{Binding IsRelease, Converter={StaticResource BoolToVisibility}}" />
           </Grid>
+          </Border>
 
           <!-- APR-08: the change list is project data, said so, plain, read only and selectable. -->
           <DockPanel Margin="{StaticResource Ui.Gap.ChangesLabel}">
