@@ -87,6 +87,10 @@ internal static class ApiTryServices
                 ProjectConstructor(members, Concrete(t) ?? Text(t, "id")), Concrete(t)), StringComparer.Ordinal);
     }
     private static bool Match(string value, string pattern) => Regex.IsMatch(value, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    /// <summary>A string argument naming the scheme a call uses, on a call that does not itself change settings or schemes.</summary>
+    internal static bool SchemeUse(ApiEntry entry, ApiParameter p) => p.Type == "System.String" && Match(p.Name, "^(str|s)?Schem[ae](Name)?$")
+        && !Match(entry.Name, "^(Set|Remove|Delete|Rename)|Schem[ae]s?$|Setting") && !Match(entry.Type, @"\.(Settings|.*SchemeSetting|ProjectSettings)$");
+
     internal static bool SideEffectParameter(ApiParameter p) => Match(p.Name, "dialog|dlg|show|select|lock|write|update|create|remove|delete|save|store|generate|rebuild|overwrite|change|set");
     internal static string? Exclusion(ApiEntry entry, ApiDetail member)
     {
@@ -115,7 +119,9 @@ internal static class ApiTryServices
             { return "database_parameter"; }
             if (Match(descriptor, "masterdata|partsmanagement"))
             { return "masterdata_or_parts_management"; }
-            if (Match(descriptor, "settings?|schem[ae]"))
+            // ADR-0059 step 3a: the name of an existing scheme is read, not written; only calls that set, remove or import
+            // settings and schemes change the configuration (ADR-0036 keeps those until they back up and restore).
+            if (Match(descriptor, "settings?|schem[ae]") && !SchemeUse(entry, p))
             { return "settings_or_scheme_parameter"; }
             if (Match(descriptor, "printer"))
             { return "printer_parameter"; }

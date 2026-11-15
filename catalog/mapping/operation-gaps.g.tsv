@@ -925,18 +925,10 @@ O:Eplan.EplApi.HEServices.ChangeOfStandard.SetSchema	Eplan.EplApi.HEServices	T:E
 O:Eplan.EplApi.HEServices.ChangeOfStandard.TransformObjects	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ChangeOfStandard	method	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Check.VerifyInstallationSpace	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Check	method	catalog:banned_symbol	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Check.VerifyMDPartsDatabaseItems	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Check	method	catalog:banned_symbol	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.ConnectionService.AlignAndFormatConnectionDefinitionPoints	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService	method	settings_or_scheme_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ConnectionService.GenerateListOfUnusedConnections	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ConnectionService.InterconnectDevices	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService	method	generic_or_collection_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.ConnectionService.PlaceConnectionDefinitionPoints	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService	method	settings_or_scheme_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ConnectionService3D.BundleConnections	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService3D	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.ConnectionService3D.Import	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService3D	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.ConnectionService3D.ImportExcel	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService3D	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.ConnectionService3D.ImportText	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ConnectionService3D.ShowFillingDegree	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ConnectionService3D	method	shared_interactive_state	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.DeviceService.ImportDevices	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DeviceService	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.DeviceService.ImportDevicesExcel	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DeviceService	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.DeviceService.ImportDevicesText	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DeviceService	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.DrawingService.DrawDisplayList	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DrawingService	method	catalog:internal: native_signature	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.DrawingService.GetViewport	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.DrawingService	method	unsupported_return	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Edit.OpenPageWithDeviceName	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Edit	method	external_path_parameter	No unique supported compiled member shape
@@ -947,21 +939,15 @@ O:Eplan.EplApi.HEServices.Edit3D.OpenInstallationSpace	Eplan.EplApi.HEServices	T
 O:Eplan.EplApi.HEServices.Edit3D.OpenInstallationSpaceWithDeviceName	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Edit3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Exceptions.InvalidScheme.SchemesNames	Eplan.EplApi.HEServices.Exceptions	T:Eplan.EplApi.HEServices.Exceptions.InvalidScheme	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.HEServices.Exceptions.InvalidScheme.convertTable	Eplan.EplApi.HEServices.Exceptions	T:Eplan.EplApi.HEServices.Exceptions.InvalidScheme	method	static_or_nonpublic	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export.DxfDwgPage	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export.DxfDwgPageToDisk	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export.DxfDwgPages	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export.DxfDwgProject	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export.DxfDwgProjectToDisk	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export.GraphicPageEx	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_path_parameter	No unique supported compiled member shape
+O:Eplan.EplApi.HEServices.Export.DxfDwgPage	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_path_parameter	No unique supported compiled member shape
+O:Eplan.EplApi.HEServices.Export.DxfDwgPageToDisk	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_path_parameter	No unique supported compiled member shape
+O:Eplan.EplApi.HEServices.Export.DxfDwgPages	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_destination	No unique supported compiled member shape
+O:Eplan.EplApi.HEServices.Export.DxfDwgProject	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_destination	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Export.GraphicPageEx2	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Export.GraphicProject	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Export.GraphicProjectEx	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Export.MacroToDxfDwg	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export.PdfProject	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export3D.DesignSpaces	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export3D	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export3D.InstallationSpaceToIFC	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToStep	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export3D	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Export3D.ProjectToStep	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Export3D	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Generate.Cables	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Generate	method	settings_or_scheme_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Import.DXFDWGFiles	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Import	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Insert.PlanningSegment	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Insert	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
@@ -1006,11 +992,9 @@ O:Eplan.EplApi.HEServices.PlcService.ExportData	Eplan.EplApi.HEServices	T:Eplan.
 O:Eplan.EplApi.HEServices.PlcService.ImportAssignmentList	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.PlcService	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.PlcService.ReadressingConfig.SortModeIndex	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.PlcService.ReadressingConfig	property	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.PrePlanningService.ExportSegmentTemplates	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.PrePlanningService	method	external_path_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.PrePlanningService.ImportData	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.PrePlanningService	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Print.Pages	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Print	method	printer_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Print.Project	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Print	method	printer_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ProjectManagement.CompressProject	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ProjectManagement	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.ProjectManagement.CorrectProjectItems	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ProjectManagement	method	settings_or_scheme_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ProjectManagement.CreateDatabase	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ProjectManagement	method	database_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ProjectManagement.DoProjectInspection	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ProjectManagement	method	settings_or_scheme_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ProjectManagement.ExportPropertyPlacementsSchemas	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ProjectManagement	method	settings_or_scheme_parameter	No unique supported compiled member shape
@@ -1021,8 +1005,6 @@ O:Eplan.EplApi.HEServices.ProjectManagement.LoadDirectory	Eplan.EplApi.HEService
 O:Eplan.EplApi.HEServices.ProjectManagement.PublishProjectForSmartProduction	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ProjectManagement	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ProjectManagement.SetSQLServerConnectionParameters	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ProjectManagement	method	database_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.ProjectManagement.UpdateProjectStructureFromSettings	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.ProjectManagement	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Renumber.DeviceTagsWithPlcData	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Renumber	method	settings_or_scheme_parameter	No unique supported compiled member shape
-O:Eplan.EplApi.HEServices.Renumber.Plugs	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Renumber	method	settings_or_scheme_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Reports.CreateCopperUnfolds	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Reports	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Reports.CreateDrillingViews	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Reports	method	external_path_parameter	No unique supported compiled member shape
 O:Eplan.EplApi.HEServices.Reports.CreateViewPlacements	Eplan.EplApi.HEServices	T:Eplan.EplApi.HEServices.Reports	method	external_path_parameter	No unique supported compiled member shape

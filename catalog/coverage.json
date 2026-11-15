@@ -72065,8 +72065,8 @@
     "operation": {
       "denominator": 4014,
       "tools": 2748,
-      "apiTry": 2555,
-      "callable": 2775,
+      "apiTry": 2577,
+      "callable": 2793,
       "outsideDenominator": {},
       "refused_unsafe": 5
     },
@@ -72143,7 +72143,7 @@
       },
       {
         "scope": "Eplan.EplApi.HEServices",
-        "callable": 261,
+        "callable": 279,
         "refused_unsafe": 0
       },
       {
@@ -72174,7 +72174,7 @@
       "live_verified": 908
     },
     "declined": {
-      "count": 753,
+      "count": 744,
       "live_verified": 0
     },
     "dedicated": {
@@ -72186,11 +72186,11 @@
       "live_verified": 0
     },
     "none": {
-      "count": 486,
+      "count": 477,
       "live_verified": 0
     },
     "other": {
-      "count": 27,
+      "count": 45,
       "live_verified": 0
     },
     "state_only": {
@@ -72209,7 +72209,7 @@
     "dialog_decision_context": 26,
     "enumerator_type": 29,
     "exception_type": 9,
-    "external_path_parameter": 51,
+    "external_path_parameter": 42,
     "file_masterdata_macro_tools": 57,
     "lifecycle_or_creation": 9,
     "locking_internals": 8,
@@ -72230,7 +72230,7 @@
           "live_verified": 915
         },
         "declined": {
-          "count": 837,
+          "count": 824,
           "live_verified": 0
         },
         "dedicated": {
@@ -72242,11 +72242,11 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1740,
+          "count": 1720,
           "live_verified": 0
         },
         "other": {
-          "count": 37,
+          "count": 70,
           "live_verified": 0
         },
         "state_only": {
@@ -72263,7 +72263,7 @@
           "live_verified": 85
         },
         "declined": {
-          "count": 579,
+          "count": 566,
           "live_verified": 0
         },
         "dedicated": {
@@ -72275,11 +72275,11 @@
           "live_verified": 0
         },
         "none": {
-          "count": 1168,
+          "count": 1148,
           "live_verified": 0
         },
         "other": {
-          "count": 37,
+          "count": 70,
           "live_verified": 0
         },
         "state_only": {

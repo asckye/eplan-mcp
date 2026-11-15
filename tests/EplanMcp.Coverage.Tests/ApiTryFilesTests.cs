@@ -75,7 +75,8 @@ public sealed class ApiTryFilesTests
     public void LaterSettingsAndPrinterParametersCannotBeHiddenBehindAnAllowedFile()
     {
         ApiEntry e = Entry("ImportData");
-        foreach (string parameter in new[] { "strScheme", "printer", "url", "database", "masterdata" })
+        // A scheme name only selects an existing scheme (ADR-0059 step 3a); a settings path still changes settings.
+        foreach (string parameter in new[] { "strSettingPath", "printer", "url", "database", "masterdata" })
         { Assert.NotNull(Exclusion(e with { Details = [e.Details[0] with { Parameters = [new("inputFile", "System.String"), new(parameter, "System.String")] }] })); }
         Assert.Null(Exclusion(Entry("ImportData", "strFullName", "PlcService")));
         ApiEntry insert = Entry("PageMacro", "strEMPFileName", "Insert");

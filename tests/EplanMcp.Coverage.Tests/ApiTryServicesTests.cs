@@ -52,12 +52,22 @@ public sealed class ApiTryServicesTests
     [InlineData("input", "System.IO.Stream", "stream_parameter")]
     [InlineData("database", "System.String", "database_parameter")]
     [InlineData("input", "Eplan.EplApi.MasterData.MDPart", "masterdata_or_parts_management")]
-    [InlineData("strSchemaName", "System.String", "settings_or_scheme_parameter")]
+    [InlineData("strSettingPath", "System.String", "settings_or_scheme_parameter")]
     [InlineData("input", "Eplan.EplApi.Base.Settings", "settings_or_scheme_parameter")]
     [InlineData("printer", "System.String", "printer_parameter")]
     [InlineData("destination", "System.Uri", "url_parameter")]
     public void ExternalResourcesAreExcludedBeforeParameterShapeSelection(string name, string type, string reason) =>
         Assert.Equal(reason, Exclusion(Entry("GetValue", parameters: [new(name, type)])));
+
+    [Theory]
+    // ADR-0059 step 3a: a call that only uses an existing scheme by name reads it; one that sets, removes or names
+    // the scheme itself changes the configuration and stays with ADR-0036.
+    [InlineData("GetValue", "strSchemaName", null)]
+    [InlineData("AutoCableSelection", "strScheme", null)]
+    [InlineData("SetSchema", "strSchemeName", "settings_or_scheme_parameter")]
+    [InlineData("RemoveScheme", "strScheme", "settings_or_scheme_parameter")]
+    public void ASchemeName_IsReadUnlessTheCallChangesSchemes(string method, string name, string? reason) =>
+        Assert.Equal(reason, Exclusion(Entry(method, parameters: [new(name, "System.String")])));
 
     [Theory]
     [InlineData("Print", "Project", "external_destination")]
