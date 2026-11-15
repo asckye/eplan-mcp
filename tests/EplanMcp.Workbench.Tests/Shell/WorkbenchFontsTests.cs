@@ -7,41 +7,23 @@ using EplanMcp.Workbench.Shell;
 namespace EplanMcp.Workbench.Tests.Shell;
 
 /// <summary>
-/// The font tokens (docs/design/2026-10-20-m5-operability.md#workbench-implementation) and the ligatures (TYP-11). Maple Mono CN itself is not in the repository or
-/// on CI; with it the tokens name it first (checked by hand, see the PR), without it they name the fallbacks.
+/// The font tokens: Windows' own fonts, none shipped (ADR-0034 decision 3), and the ligatures (TYP-11).
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Medium")]
-public sealed class WorkbenchFontsTests(WpfContext wpf) : IDisposable
+public sealed class WorkbenchFontsTests(WpfContext wpf)
 {
-    private readonly DirectoryInfo _app = Directory.CreateTempSubdirectory("eplanmcp-workbench-fonts-");
-
-    public void Dispose() => _app.Delete(recursive: true);
-
     [Fact]
-    public void WithoutAFontsFolder_TheTokensNameTheSystemFallbacks_WithMicrosoftYaHeiUi()
+    public void TheTokensNameTheSystemFonts_WithMicrosoftYaHeiUi()
     {
         wpf.Run(() =>
         {
             var resources = new ResourceDictionary();
 
-            Assert.False(WorkbenchFonts.Apply(resources, _app.FullName));
+            WorkbenchFonts.Apply(resources);
+
             Assert.Equal("Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI", ((FontFamily)resources["Ui.Font"]).Source);
             Assert.Equal("Cascadia Mono, Consolas, Microsoft YaHei UI", ((FontFamily)resources["Ui.FontMono"]).Source);
-        });
-    }
-
-    [Fact]
-    public void AFontsFolderWithoutMapleMono_IsNotTakenForIt()
-    {
-        Directory.CreateDirectory(Path.Combine(_app.FullName, "Fonts"));
-        File.WriteAllText(Path.Combine(_app.FullName, "Fonts", "MapleMono-CN-Regular.ttf"), "not a font");
-
-        wpf.Run(() =>
-        {
-            var resources = new ResourceDictionary();
-
-            Assert.False(WorkbenchFonts.Apply(resources, _app.FullName));
             Assert.Null(((FontFamily)resources["Ui.Font"]).BaseUri);
         });
     }
@@ -51,10 +33,10 @@ public sealed class WorkbenchFontsTests(WpfContext wpf) : IDisposable
     {
         wpf.Run(() =>
         {
-            WorkbenchFonts.Apply(Application.Current.Resources, _app.FullName);
+            WorkbenchFonts.Apply(Application.Current.Resources);
 
-            Assert.Equal(WorkbenchFonts.UiFallback, ((FontFamily)Application.Current.FindResource("Ui.Font")).Source);
-            Assert.Equal(WorkbenchFonts.MonoFallback, ((FontFamily)Application.Current.FindResource("Ui.FontMono")).Source);
+            Assert.Equal(WorkbenchFonts.Ui, ((FontFamily)Application.Current.FindResource("Ui.Font")).Source);
+            Assert.Equal(WorkbenchFonts.Mono, ((FontFamily)Application.Current.FindResource("Ui.FontMono")).Source);
         });
     }
 

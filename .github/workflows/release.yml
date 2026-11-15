@@ -61,7 +61,6 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           $version = $env:TAG.Substring(1)
-          eng/scripts/get-fonts.ps1
           dotnet publish src/EplanMcp.Host -c Release -r win-x64 --self-contained true -p:NuGetLockFilePath=packages.win-x64.lock.json "-p:PublishProfileFullPath=$((Resolve-Path eng/installer/Release.pubxml).Path)" -p:DebugType=None -p:Version=$version -o .local/host
           dotnet publish src/EplanMcp.Workbench -c Release -r win-x64 --self-contained true -p:NuGetLockFilePath=packages.win-x64.lock.json -p:DebugType=None -p:Version=$version -o stage/app/workbench
           New-Item -ItemType Directory stage/boms -Force | Out-Null
@@ -194,9 +193,9 @@ jobs:
             }
           }
           # Add the shipped runtime and vendored assets, which a NuGet-only BOM does not describe.
-          foreach ($item in @(@('Microsoft.NETCore.App','System.Private.CoreLib.dll','MIT'), @('Microsoft.WindowsDesktop.App','PresentationFramework.dll','MIT'), @('Maple Mono CN','Fonts/MapleMono-CN-Regular.ttf','OFL-1.1'))) {
+          foreach ($item in @(@('Microsoft.NETCore.App','System.Private.CoreLib.dll','MIT'), @('Microsoft.WindowsDesktop.App','PresentationFramework.dll','MIT'))) {
             $file = Get-Item "stage/app/workbench/$($item[1])"
-            $version = if ($item[0] -eq 'Maple Mono CN') { '7.9' } else { $file.VersionInfo.ProductVersion.Split('+')[0] }
+            $version = $file.VersionInfo.ProductVersion.Split('+')[0]
             $ref = "$($item[0])@$version"
             $components[$ref] = @{ type = 'library'; 'bom-ref' = $ref; name = $item[0]; version = $version; licenses = @(@{ license = @{ id = $item[2] } }) }
           }

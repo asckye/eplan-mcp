@@ -6,8 +6,8 @@
   -->
 
   <!--
-    TYP-11: Maple Mono's ligatures off for the whole window (the Typography properties are inherited), so that project
-    data such as "->" or "!=" shows the characters it holds (SEC-23).
+    TYP-11: ligatures off for the whole window (the Typography properties are inherited), so that project data such as
+    "->" or "!=" shows the characters it holds (SEC-23), whichever font the system substitutes.
   -->
   <Style x:Key="Workbench.Window" TargetType="Window" BasedOn="{StaticResource Ui.Window}">
     <Setter Property="Background" Value="{DynamicResource Surface.Window}" />

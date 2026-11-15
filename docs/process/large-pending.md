@@ -73,7 +73,7 @@
 
 | 范围 | 状态与现有证据 |
 |---|---|
-| 字体与文字缩放 | 待核对：S18 未验证 Windows“文本大小”缩放以及 Maple Mono CN 在真实 WPF 中的 `->`、`!=`、`==` 字形/连字效果；见 [S18](../../spikes/S18-workbench-ui/README.md)。 |
+| 字体与文字缩放 | 待核对：S18 未验证 Windows“文本大小”缩放；连字已对整个窗口关闭（TYP-11），换成系统字体后 `->`、`!=`、`==` 的实际显示仍需在真实 WPF 中看一遍；见 [S18](../../spikes/S18-workbench-ui/README.md)。 |
 | 通知与无障碍 | 待运行：AI4W FastPass、讲述人对新问题/倒计时/结束/状态的播报，以及托盘通知；原 S16 仅提供检查方向，本工作区未找到同名 spike 目录，见 [M5 验证入口](../design/2026-10-20-m5-operability.md#workbench-evidence)。 |
 | DPI 与对比主题 | 待运行：100–200% 与混合 DPI、1366×768@100%、1920×1080@150%、文本大小 150%，以及 Aquatic/Desert/Dusk/Night sky 四套系统对比主题。 |
 | 高对比资源差异 | 2026-11-01 原表与 `Tia/Themes/Palette.HighContrast.xaml` 对 `Primer.cardSel`、`Primer.textFaint` 的映射不同；项目包装 `Themes/Palette.HighContrast.xaml` 已覆盖 `cardSel`、`selectedText`、`textFaint`。保留原始差异及包装事实，整体符合性仍待人工验证。 |

@@ -52,7 +52,7 @@ public sealed partial class App : Application, IDisposable
         }
 
         _settings = WorkbenchSettings.Load(_locations.Settings);
-        WorkbenchFonts.Apply(Resources, AppContext.BaseDirectory);
+        WorkbenchFonts.Apply(Resources);
         Loc.Current.Language = _settings.Language ?? Loc.FromSystem();
         ThemeManager.Current.Initialize(_settings.Theme);
 

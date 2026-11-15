@@ -45,13 +45,13 @@ Host 子命令由参数列表启动，结果以带 `schemaVersion` 的 JSON 解�
 | `Themes/Layout.xaml` | `Ui.Gap.*`、`Ui.Inset.*` 为 `Thickness`，`Ui.IconSize.*` 为 `Double`；原有 `Ui.Space.*` 是 `Double`，`Ui.Padding.*` 为 `Thickness` |
 | `Tia/Themes/Primer.xaml` | `Ui.Space.XXS/XS/SM/默认/MD/LG/XL` 当前为 4/8/12/16/20/24/32；`Ui.ControlHeight` 为 32，Small/Large 为 24/40；`Ui.Radius` 为 6，Small/XS/Large 为 4/2/8 |
 | 字体层级 | Caption/Body/Section/Title 当前字号 12/14/16/20；`Ui.LineHeight.Small/默认/Large` 为 20/22/24；`Ui.Text.BodyStrong` 是 14、SemiBold |
-| `Tia/Themes/Icons.xaml` | `Icon.*` 命名几何；随包的 MapleMono-CN 不是 Nerd Font 图标版本 |
+| `Tia/Themes/Icons.xaml` | `Icon.*` 命名几何；图标自绘，不依赖字体图标 |
 
 颜色和值以这些资源文件为事实源。包装层中例如 `Surface.Window → Primer.bg`、`Surface.Selected → Primer.cardSel`、`Text.Secondary → Primer.textMuted`、`Text.Faint → Primer.textFaint`、`Accent.Graphic → Ant.colorPrimary`；高对比包装覆盖 `Primer.cardSel`、`Primer.selectedText`、`Primer.textFaint` 为 Highlight、HighlightText、WindowText。阴影资源为 `Ant.boxShadowKey/Umbra/Ambient`，模板以分层边框实现；不复制一份手写调色板标准。
 
 ### 字体、文本和审批显示
 
-`Shell/WorkbenchFonts.cs` 从程序旁 `Fonts/` 私有加载 Maple Mono CN（Regular、SemiBold，SIL OFL 1.1，不安装到系统）；`Ui.Font` / `Ui.FontMono` 都先用它，回退分别是 Segoe UI Variable Text、Segoe UI、Microsoft YaHei UI，以及 Cascadia Mono、Consolas、Microsoft YaHei UI。字体来源、随包约定见 [ADR-0017](../adr/0017-workbench-wpf-tia-theme.md) 与 [第三方说明](../../THIRD-PARTY-NOTICES.md)。
+`Shell/WorkbenchFonts.cs` 只用 Windows 自带字体（2026-11-14 起，[ADR-0034](../adr/0034-workbench-visual-apple-principles.md) 决定 3）：`Ui.Font` 为 Segoe UI Variable Text、Segoe UI、Microsoft YaHei UI，`Ui.FontMono` 为 Cascadia Mono、Consolas、Microsoft YaHei UI。此前随程序附带的 Maple Mono CN 已不再分发。
 
 S18 记录了以 `Fonts/` 为基准 URI 加载同族字重的方式，`pack://siteoforigin` 和仅写家族名未达到相同效果；没有显式 Microsoft YaHei UI 且界面为 en-US 时出现 Yu Gothic UI 的日文字形。旧布局按等宽字体调整过标题、路径和变更清单换行；连字的真实 WPF 显示效果和 Windows“文本大小”缩放仍是待验项。
 

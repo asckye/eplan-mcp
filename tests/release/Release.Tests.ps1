@@ -135,7 +135,7 @@ try {
     if ($builtinCopy.Count -ne 1) { throw 'Publish must stage generated plugin libraries exactly once.' }
     Push-Location (New-Item -ItemType Directory (Join-Path $testRoot 'merge'))
     try {
-        foreach ($directory in 'packaging/zip', 'packaging/claude-plugin/.claude-plugin', 'packaging/claude-plugin/eplan-mcp/.claude-plugin', 'docs/getting-started', 'addin/payload/bridge/net481', 'stage/boms', 'stage/app/workbench/Fonts', 'stage/app/docs/getting-started') {
+        foreach ($directory in 'packaging/zip', 'packaging/claude-plugin/.claude-plugin', 'packaging/claude-plugin/eplan-mcp/.claude-plugin', 'docs/getting-started', 'addin/payload/bridge/net481', 'stage/boms', 'stage/app/workbench', 'stage/app/docs/getting-started') {
             New-Item -ItemType Directory $directory -Force | Out-Null
         }
         Copy-Item "$repositoryRoot/packaging/zip/README.md" packaging/zip/README.md
@@ -155,7 +155,6 @@ try {
         'Fixture contracts' | Set-Content addin/payload/bridge/net481/EplanMcp.Contracts.dll
         '{}' | Set-Content addin/payload/release-addin.json
         'Fixture archive' | Set-Content "addin/$zipName"
-        'Fixture font' | Set-Content stage/app/workbench/Fonts/MapleMono-CN-Regular.ttf
         # Only the version resource matters here; these binaries are never executed.
         Copy-Item ([Environment]::ProcessPath) stage/app/workbench/System.Private.CoreLib.dll
         Copy-Item ([Environment]::ProcessPath) stage/app/workbench/PresentationFramework.dll

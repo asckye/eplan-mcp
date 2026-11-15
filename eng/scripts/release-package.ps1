@@ -15,16 +15,12 @@ param(
     [ValidatePattern('^v0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$')]
     [string] $Tag,
     [Parameter(Mandatory)]
-    [string] $Worktree,
-    # A MapleMono-CN.zip v7.9 already on disk; get-fonts.ps1 checks it like a download.
-    [string] $FontZip
+    [string] $Worktree
 )
 
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 $repository = 'asckye/eplan-mcp'
-$fontArguments = @{}
-if ($FontZip) { $fontArguments.Zip = (Resolve-Path -LiteralPath $FontZip).Path }
 
 Set-Location -LiteralPath $Worktree
 $commit = git rev-parse "$Tag^{commit}"
@@ -72,7 +68,6 @@ if ($manifest.schemaVersion -ne 1 -or $manifest.tag -cne $env:TAG -or $manifest.
 
 # Publish the self-contained programs and collect licences and SBOM inputs.
 $version = $env:TAG.Substring(1)
-eng/scripts/get-fonts.ps1 @fontArguments
 dotnet publish src/EplanMcp.Host -c Release -r win-x64 --self-contained true -p:NuGetLockFilePath=packages.win-x64.lock.json "-p:PublishProfileFullPath=$((Resolve-Path eng/installer/Release.pubxml).Path)" -p:DebugType=None -p:Version=$version -o .local/host
 dotnet publish src/EplanMcp.Workbench -c Release -r win-x64 --self-contained true -p:NuGetLockFilePath=packages.win-x64.lock.json -p:DebugType=None -p:Version=$version -o stage/app/workbench
 New-Item -ItemType Directory stage/boms -Force | Out-Null
@@ -130,9 +125,9 @@ foreach ($file in Get-ChildItem stage/boms -Filter *.json) {
   }
 }
 # Add the shipped runtime and vendored assets, which a NuGet-only BOM does not describe.
-foreach ($item in @(@('Microsoft.NETCore.App','System.Private.CoreLib.dll','MIT'), @('Microsoft.WindowsDesktop.App','PresentationFramework.dll','MIT'), @('Maple Mono CN','Fonts/MapleMono-CN-Regular.ttf','OFL-1.1'))) {
+foreach ($item in @(@('Microsoft.NETCore.App','System.Private.CoreLib.dll','MIT'), @('Microsoft.WindowsDesktop.App','PresentationFramework.dll','MIT'))) {
   $file = Get-Item "stage/app/workbench/$($item[1])"
-  $version = if ($item[0] -eq 'Maple Mono CN') { '7.9' } else { $file.VersionInfo.ProductVersion.Split('+')[0] }
+  $version = $file.VersionInfo.ProductVersion.Split('+')[0]
   $ref = "$($item[0])@$version"
   $components[$ref] = @{ type = 'library'; 'bom-ref' = $ref; name = $item[0]; version = $version; licenses = @(@{ license = @{ id = $item[2] } }) }
 }
