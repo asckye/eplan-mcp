@@ -128,6 +128,12 @@ public static class OperationNames
     /// <summary>Places the planned enclosure in one transaction and reads it back (A136: Cabinet.Create, then SetParent to the space). Arguments: <see cref="LayoutEnclosurePlaceArgs"/>; data: <see cref="LayoutEnclosurePlaceData"/>.</summary>
     public const string LayoutEnclosurePlaceExecute = "layout.enclosure.place.execute";
 
+    /// <summary>Plans routing the 3D connections of one installation space (docs/tools/eplan_connection_route.md); reads only. Arguments: <see cref="ConnectionRouteArgs"/>; data: <see cref="WritePlan"/>.</summary>
+    public const string ConnectionRoutePlan = "connection.route.plan";
+
+    /// <summary>Routes the planned 3D connections in one transaction and reads their routes back (api-notes A141). Arguments: <see cref="ConnectionRouteArgs"/>; data: <see cref="ConnectionRouteData"/>.</summary>
+    public const string ConnectionRouteExecute = "connection.route.execute";
+
     /// <summary>Plans placing rails, ducts and devices on an enclosure's mounting panel or door (docs/tools/eplan_layout_place.md). Arguments: <see cref="LayoutPlaceArgs"/>; data: <see cref="WritePlan"/>.</summary>
     public const string LayoutPlacePlan = "layout.place.plan";
 
