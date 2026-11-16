@@ -126,11 +126,7 @@ O:Eplan.EplApi.Base.IEplProgress.SetTitle	Eplan.EplApi.Base	T:Eplan.EplApi.Base.
 O:Eplan.EplApi.Base.ISOCode.GetAllLanguages	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	ref_out	No unique supported compiled member shape
 O:Eplan.EplApi.Base.ISOCode.GetAllLongNames	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	ref_out	No unique supported compiled member shape
 O:Eplan.EplApi.Base.ISettings.ExistSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISettings.SetBoolSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISettings.SetDoubleSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.ISettings.SetMultiLangStringSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISettings.SetNumericSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.Base.ISettings.SetStringSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.Languages.AlternativeLanguage	Eplan.EplApi.Base	T:Eplan.EplApi.Base.Languages	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.ListSelectDecisionContext.AllowMultiSelect	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ListSelectDecisionContext	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.ListSelectDecisionContext.Entries	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ListSelectDecisionContext	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
@@ -411,7 +407,6 @@ O:Eplan.EplApi.DataModel.Helpers.SettingPropertiesManager.CurrentStep	Eplan.EplA
 O:Eplan.EplApi.DataModel.IArticleInfo.nCount	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.IArticleInfo	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.IArticleInfo.partNumber	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.IArticleInfo	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.IArticleInfo.partVariant	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.IArticleInfo	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
-O:Eplan.EplApi.DataModel.IArticleUser.RemoveArticleReference	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.IArticleUser	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.ICustomFilter.IsMatching	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ICustomFilter	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.ITransaction.Commit	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.ITransaction	method	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.DataModel.InterruptionPointsFilter.ExactNameMatching	Eplan.EplApi.DataModel	T:Eplan.EplApi.DataModel.InterruptionPointsFilter	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table

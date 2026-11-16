@@ -22,7 +22,6 @@ T:Eplan.EplApi.HEServices.PartsService	8	-	masterdata_copy_pending	none in publi
 T:Eplan.EplApi.ApplicationFramework.LockingVectorProxy	6	-	handle_type_excluded	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.Context	6	-	none: no approved root/return chain	M:Eplan.EplApi.Base.Context.CreateContextfromInternal(EContext*) [static factory] [blocked: internal]
 T:Eplan.EplApi.Base.IContext	6	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
-T:Eplan.EplApi.Base.ISettings	6	1	P:Eplan.EplApi.DataModel.Project.Settings	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.ListSelectDecisionContext	6	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.MasterData.TemplateMDMessage	6	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Starter.AssemblyResolver	6	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
@@ -76,6 +75,7 @@ T:Eplan.EplApi.ApplicationFramework.IEplanEvents	2	-	handle_type_excluded	none i
 T:Eplan.EplApi.ApplicationFramework.IEplanEventsWrapper	2	-	handle_type_excluded	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.BaseException	2	-	none: no approved root/return chain	M:Eplan.EplApi.ApplicationFramework.ActionCallingContext.GetException [method] [blocked: receiver/signature/lifecycle restriction]; M:Eplan.EplApi.Base.Internal.ExceptionServices.getAPIExceptionFromUnmanaged(EBaseException) [static factory] [blocked: internal]
 T:Eplan.EplApi.Base.EplAssert	2	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
+T:Eplan.EplApi.Base.ISettings	2	1	P:Eplan.EplApi.DataModel.Project.Settings	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.LockingException	2	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.Base.TraceListener	2	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.ConnectionsFilter	2	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
@@ -109,7 +109,6 @@ T:Eplan.EplApi.DataModel.E3D.BasePointMate	1	1	M:Eplan.EplApi.DataModel.E3D.Grou
 T:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3DPropertyList	1	1	P:Eplan.EplApi.DataModel.DaisyChain.Properties [subclass]	P:Eplan.EplApi.DataModel.E3D.ContextPropertyPlacement3D.Properties [property] [approved]
 T:Eplan.EplApi.DataModel.E3D.MateEntryPropertyList	1	1	P:Eplan.EplApi.DataModel.DaisyChain.Properties [subclass]	P:Eplan.EplApi.DataModel.E3D.MateEntry.Properties [property] [approved]
 T:Eplan.EplApi.DataModel.E3D.MountingPointMate	1	1	M:Eplan.EplApi.DataModel.E3D.Group3D.GetMates [element] [subclass]	M:Eplan.EplApi.DataModel.E3D.MountingPointMate.Create(System.String,Eplan.EplApi.Base.MultiLangString,System.Windows.Media.Media3D.Matrix3D) [method] [blocked: receiver/signature/lifecycle restriction]
-T:Eplan.EplApi.DataModel.IArticleUser	1	0	locator:Eplan.EplApi.DataModel.BoxedDevice	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.ICustomFilter	1	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.ITransaction	1	-	handle_type_excluded	none in public operation catalog (constructor/callback is not a trial root)
 T:Eplan.EplApi.DataModel.InvalidPageNameException	1	-	none: no approved root/return chain	none in public operation catalog (constructor/callback is not a trial root)

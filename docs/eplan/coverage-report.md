@@ -1,11 +1,9 @@
 # EPLAN API 覆盖报告
 
-> **Bridge 扫描已过期**：`catalog/mapping/bridge-usage.json` 是 2026-11-15 按 Bridge 源码 b008a697 扫描的，之后 `src/EplanMcp.Bridge.Eplan`、`src/EplanMcp.Bridge.Core` 或 `OperationNames` 有了改动。下面与 Bridge 有关的数字可能已经不准；在装有 EPLAN 的机器上（EPLAN 不必运行）运行 `dotnet run --project eng/coverage -- scan`，再提交更新后的文件。
-
-**操作层 4014 组：专用工具 626，通用读取 116，仅通用入口 1999，仅状态覆盖 7，其他可调用 45，明确不做 744，到不了 477；实机验证 1329**
+**操作层 4014 组：专用工具 626，通用读取 116，仅通用入口 2043，仅状态覆盖 7，其他可调用 11，明确不做 738，到不了 473；实机验证 1329**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-15 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 b008a697）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-16 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 463ffec0 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -16,22 +14,22 @@
 |---|---:|---:|---:|
 | 专用工具（dedicated） | 626 | 626 / 4014（15.6%） | 421 |
 | 通用读取（generic_read） | 116 | 116 / 4014（2.9%） | 0 |
-| 仅通用入口（api_try_only） | 1999 | 1999 / 4014（49.8%） | 908 |
+| 仅通用入口（api_try_only） | 2043 | 2043 / 4014（50.9%） | 908 |
 | 仅状态覆盖（state_only） | 7 | 7 / 4014（0.2%） | 0 |
-| 其他可调用（other） | 45 | 45 / 4014（1.1%） | 0 |
-| 明确不做（declined） | 744 | 744 / 4014（18.5%） | 0 |
-| 到不了（none） | 477 | 477 / 4014（11.9%） | 0 |
+| 其他可调用（other） | 11 | 11 / 4014（0.3%） | 0 |
+| 明确不做（declined） | 738 | 738 / 4014（18.4%） | 0 |
+| 到不了（none） | 473 | 473 / 4014（11.8%） | 0 |
 
-- 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除，或整个类型按下列原因结案；仍计入分母。按原因：property_id_tables 109，settings_write 80，addin_infrastructure 78，shared_interactive_state 65，file_masterdata_macro_tools 57，covered_by_object_find 54，abstract_no_public_implementation 46，external_path_parameter 42，masterdata_message_objects 39，catalog:banned_symbol 29，enumerator_type 29，dialog_decision_context 26，offline_host_application 22，masterdata_management 14，diagnostic_infrastructure 10，covered_by_translation_tool 9，exception_type 9，lifecycle_or_creation 9，locking_internals 8，covered_by_tool 5，write_pipeline_owned 4。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons 和 DeclinedTypes。
+- 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除，或整个类型按下列原因结案；仍计入分母。按原因：property_id_tables 109，addin_infrastructure 78，settings_write 74，shared_interactive_state 65，file_masterdata_macro_tools 57，covered_by_object_find 54，abstract_no_public_implementation 46，external_path_parameter 42，masterdata_message_objects 39，catalog:banned_symbol 29，enumerator_type 29，dialog_decision_context 26，offline_host_application 22，masterdata_management 14，diagnostic_infrastructure 10，covered_by_translation_tool 9，exception_type 9，lifecycle_or_creation 9，locking_internals 8，covered_by_tool 5，write_pipeline_owned 4。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons 和 DeclinedTypes。
 - refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。
 
 | 操作层分母 | tools | api_try | callable | refused_unsafe |
 |---:|---:|---:|---:|---:|
-| 4014 | 2748 | 2577 | 2793 | 5 |
+| 4014 | 2792 | 2585 | 2803 | 5 |
 
 - api_try 在操作层分母外还可到达 0 组，不加入可调用数或分母；原因：无。
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
-- C 级方法选择：read 1806 组，write 1111 组；排除（按签名）：catalog:internal 168，external_path_parameter 145，lifecycle_or_creation 97，settings_write 92，catalog:banned_symbol 66，catalog:deprecated 39，shared_interactive_state 39，unsupported_parameter 38，masterdata_or_parts_management 36，transient_creation 36，settings_or_scheme_parameter 35，printer_parameter 32，abstract_service 29，static_or_nonpublic 24，masterdata_management 16，catalog:not_applicable 14，generic_or_collection_parameter 14，catalog:deprecated: obsolete_attribute 14，enumerator_type 13，no_public_default_constructor 13，entry_type_excluded 10，unsupported_return 9，external_destination 8，masterdata_copy_pending 7，application_or_session_state 5，unsupported_settings_read 5，external_or_application_effect 5，ref_out 4，unscoped_object_identifier 4，static_not_project_scoped 4，database_parameter 4，array_or_params 2，unsupported_required_modifier 1，factory_constructor_unavailable 1，catalog:internal: native_signature 1，owns_transaction 1。
+- C 级方法选择：read 1806 组，write 1119 组；排除（按签名）：catalog:internal 168，external_path_parameter 145，lifecycle_or_creation 97，settings_write 84，catalog:banned_symbol 66，catalog:deprecated 39，shared_interactive_state 39，unsupported_parameter 38，masterdata_or_parts_management 36，transient_creation 36，settings_or_scheme_parameter 35，printer_parameter 32，abstract_service 29，static_or_nonpublic 24，masterdata_management 16，catalog:not_applicable 14，generic_or_collection_parameter 14，catalog:deprecated: obsolete_attribute 14，enumerator_type 13，no_public_default_constructor 13，entry_type_excluded 10，unsupported_return 9，external_destination 8，masterdata_copy_pending 7，application_or_session_state 5，unsupported_settings_read 5，external_or_application_effect 5，ref_out 4，unscoped_object_identifier 4，static_not_project_scoped 4，database_parameter 4，array_or_params 2，unsupported_required_modifier 1，factory_constructor_unavailable 1，catalog:internal: native_signature 1，owns_transaction 1。
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
 - 通用读取计数：数据字典类型的 kind 在 ObjectReadTypes 中 supported 时，也经 eplan_object_find / eplan_object_get 计为 implemented；通用路径有 Small/Medium 测试时计为 automated_test；该路径的 live_verified 仅限生成器中按 api-notes A60/A62 明确列出的已读 kind，不由支持范围推定，未支持类型保留原原因。
 - 扫描漏记的可执行别名仅按 overlay 的 `reached-by-tool` 逐组、逐重载补入；必须列出工具、实际调用和接收列表的代码位置，以及扫描已识别的等价组。本轮只补各列表打开父值必经的按 ID getter，不向每个列表推定带索引重载、命名属性 ID、枚举 getter、转换 getter 或 setter。
@@ -39,23 +37,23 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 14029 个 ID（方法 1285，属性 1919，类型 648，字段和枚举值 10160，action 17），其中 14006 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
+Bridge 共用到 14185 个 ID（方法 1392，属性 1919，类型 658，字段和枚举值 10199，action 17），其中 14162 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
 | `Eplan.EplApi.ApplicationFramework` | 32 |
-| `Eplan.EplApi.Base` | 975 |
-| `Eplan.EplApi.DataModel` | 8607 |
-| `Eplan.EplApi.DataModel.E3D` | 549 |
-| `Eplan.EplApi.DataModel.EObjects` | 116 |
-| `Eplan.EplApi.DataModel.Graphics` | 671 |
-| `Eplan.EplApi.DataModel.MasterData` | 84 |
-| `Eplan.EplApi.DataModel.Planning` | 140 |
+| `Eplan.EplApi.Base` | 979 |
+| `Eplan.EplApi.DataModel` | 8622 |
+| `Eplan.EplApi.DataModel.E3D` | 562 |
+| `Eplan.EplApi.DataModel.EObjects` | 124 |
+| `Eplan.EplApi.DataModel.Graphics` | 672 |
+| `Eplan.EplApi.DataModel.MasterData` | 91 |
+| `Eplan.EplApi.DataModel.Planning` | 146 |
 | `Eplan.EplApi.DataModel.Revisions` | 23 |
-| `Eplan.EplApi.DataModel.Topology` | 26 |
+| `Eplan.EplApi.DataModel.Topology` | 28 |
 | `Eplan.EplApi.EServices` | 49 |
 | `Eplan.EplApi.EServices.Ged` | 19 |
-| `Eplan.EplApi.HEServices` | 501 |
+| `Eplan.EplApi.HEServices` | 601 |
 | `Eplan.EplApi.HEServices.Exceptions` | 1 |
 | `Eplan.EplApi.MasterData` | 2219 |
 | `（action）` | 17 |
@@ -63,18 +61,18 @@ Bridge 共用到 14029 个 ID（方法 1285，属性 1919，类型 648，字段�
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 2748 / 4014（68.5%） | 2741 | 209 | 2741 / 4014（68.3%） | 1329 / 4014（33.1%） | 18 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 948 / 1799（52.7%） | 941 | 110 | 941 / 1799（52.3%） | 178 / 1799（9.9%） | 15 | 66 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 2792 / 4014（69.6%） | 2785 | 202 | 2785 / 4014（69.4%） | 1329 / 4014（33.1%） | 15 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 992 / 1799（55.1%） | 985 | 103 | 985 / 1799（54.8%） | 178 / 1799（9.9%） | 12 | 66 |
 | 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 1800 / 2215（81.3%） | 1800 | 99 | 1800 / 2215（81.3%） | 1151 / 2215（52.0%） | 3 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 68 / 68（100.0%） | 68 | 0 | 68 / 68（100.0%） | 18 / 68（26.5%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 49 / 137（35.8%） | 48 | 0 | 49 / 137（35.8%） | 19 / 137（13.9%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 45 / 97（46.4%） | 45 | 0 | 45 / 97（46.4%） | 18 / 97（18.6%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
-- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 2748 / 4342（63.3%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 948 / 1799（52.7%），live_verified 178 / 1799（9.9%）。
+- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 2792 / 4342（64.3%）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 992 / 1799（55.1%），live_verified 178 / 1799（9.9%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 7990 个，未过时的共 8585 个。
-- 依赖层：Bridge 用到 2910 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
+- 依赖层：Bridge 用到 2968 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 137 行：工具到达 49，action_try 可尝试 35（离线规则，不代表实机验证）。
 - action 名称：Bridge 用到 19 个，没有整个排除的 action 共 64 个。
 
@@ -89,10 +87,10 @@ action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 4
 
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 方法 | 3109 | 403 / 173 | 33 / 0 | 882 / 85 | 7 / 0 | 70 / 0 | 566 / 0 | 1148 / 0 | 258 |
+| 方法 | 3109 | 403 / 173 | 33 / 0 | 951 / 85 | 7 / 0 | 15 / 0 | 556 / 0 | 1144 / 0 | 258 |
 | 普通属性 | 2636 | 435 / 328 | 255 / 0 | 1354 / 830 | 0 / 0 | 0 / 0 | 258 / 0 | 334 / 0 | 1158 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5983 | 838 / 501 | 288 / 0 | 2236 / 915 | 7 / 0 | 70 / 0 | 824 / 0 | 1720 / 0 | 1416 |
+| 合计 | 5983 | 838 / 501 | 288 / 0 | 2305 / 915 | 7 / 0 | 15 / 0 | 814 / 0 | 1716 / 0 | 1416 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
@@ -100,19 +98,19 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | 命名空间（overlay 排除后） | 分母 | implemented | callable | refused_unsafe | live_verified |
 |---|---:|---:|---:|---:|---:|
 | `Eplan.EplApi.ApplicationFramework` | 88 | 10 / 88（11.4%） | 10 / 88（11.4%） | 0 | 2 |
-| `Eplan.EplApi.Base` | 268 | 114 / 268（42.5%） | 114 / 268（42.5%） | 0 | 29 |
-| `Eplan.EplApi.DataModel` | 1247 | 939 / 1247（75.3%） | 952 / 1247（76.3%） | 4 | 555 |
-| `Eplan.EplApi.DataModel.E3D` | 368 | 303 / 368（82.3%） | 306 / 368（83.2%） | 1 | 136 |
-| `Eplan.EplApi.DataModel.EObjects` | 83 | 80 / 83（96.4%） | 81 / 83（97.6%） | 0 | 48 |
+| `Eplan.EplApi.Base` | 268 | 118 / 268（44.0%） | 122 / 268（45.5%） | 0 | 29 |
+| `Eplan.EplApi.DataModel` | 1247 | 947 / 1247（75.9%） | 954 / 1247（76.5%） | 4 | 555 |
+| `Eplan.EplApi.DataModel.E3D` | 368 | 306 / 368（83.2%） | 306 / 368（83.2%） | 1 | 136 |
+| `Eplan.EplApi.DataModel.EObjects` | 83 | 81 / 83（97.6%） | 81 / 83（97.6%） | 0 | 48 |
 | `Eplan.EplApi.DataModel.Graphics` | 414 | 364 / 414（87.9%） | 364 / 414（87.9%） | 0 | 201 |
 | `Eplan.EplApi.DataModel.Helpers` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
 | `Eplan.EplApi.DataModel.MasterData` | 121 | 46 / 121（38.0%） | 46 / 121（38.0%） | 0 | 20 |
-| `Eplan.EplApi.DataModel.Planning` | 122 | 104 / 122（85.2%） | 107 / 122（87.7%） | 0 | 62 |
+| `Eplan.EplApi.DataModel.Planning` | 122 | 107 / 122（87.7%） | 107 / 122（87.7%） | 0 | 62 |
 | `Eplan.EplApi.DataModel.Revisions` | 20 | 20 / 20（100.0%） | 20 / 20（100.0%） | 0 | 0 |
 | `Eplan.EplApi.DataModel.Topology` | 17 | 16 / 17（94.1%） | 16 / 17（94.1%） | 0 | 10 |
 | `Eplan.EplApi.EServices` | 127 | 37 / 127（29.1%） | 37 / 127（29.1%） | 0 | 11 |
 | `Eplan.EplApi.EServices.Ged` | 90 | 15 / 90（16.7%） | 15 / 90（16.7%） | 0 | 14 |
-| `Eplan.EplApi.HEServices` | 417 | 254 / 417（60.9%） | 279 / 417（66.9%） | 0 | 84 |
+| `Eplan.EplApi.HEServices` | 417 | 279 / 417（66.9%） | 279 / 417（66.9%） | 0 | 84 |
 | `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
 | `Eplan.EplApi.MasterData` | 592 | 446 / 592（75.3%） | 446 / 592（75.3%） | 0 | 157 |
 | `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 / 14（0.0%） | 0 | 0 |
@@ -213,7 +211,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_annotation_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 328 | 200 | 2 | 125 | 0 | 1/0/1 | A93 A97 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 5/4/0 | A77 | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/3/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 13677 | 2608 | 69 | 2765 | 0 | 7/3/3 | A39 A56 A67 A68 A76 A77 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 13877 | 2666 | 69 | 2853 | 0 | 7/3/3 | A39 A56 A67 A68 A76 A77 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 0/2/0 | A33 | — |

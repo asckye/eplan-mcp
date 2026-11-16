@@ -126,11 +126,7 @@ O:Eplan.EplApi.Base.IEplProgress.SetTitle	Eplan.EplApi.Base	T:Eplan.EplApi.Base.
 O:Eplan.EplApi.Base.ISOCode.GetAllLanguages	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	ref_out	No unique supported compiled member shape
 O:Eplan.EplApi.Base.ISOCode.GetAllLongNames	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISOCode	method	ref_out	No unique supported compiled member shape
 O:Eplan.EplApi.Base.ISettings.ExistSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
-O:Eplan.EplApi.Base.ISettings.SetBoolSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
-O:Eplan.EplApi.Base.ISettings.SetDoubleSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.Base.ISettings.SetMultiLangStringSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
-O:Eplan.EplApi.Base.ISettings.SetNumericSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
-O:Eplan.EplApi.Base.ISettings.SetStringSetting	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ISettings	method	unsupported_property_or_ambiguous_shape	No unique supported compiled member shape
 O:Eplan.EplApi.Base.Languages.AlternativeLanguage	Eplan.EplApi.Base	T:Eplan.EplApi.Base.Languages	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.ListSelectDecisionContext.AllowMultiSelect	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ListSelectDecisionContext	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table
 O:Eplan.EplApi.Base.ListSelectDecisionContext.Entries	Eplan.EplApi.Base	T:Eplan.EplApi.Base.ListSelectDecisionContext	property	declaring_type_unreachable	No approved return chain within depth 4; see handle reachability table

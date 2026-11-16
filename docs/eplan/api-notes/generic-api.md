@@ -86,6 +86,13 @@
 - 修复后 A 槽复验（2026-11-02 15:44–16:01，LargeWrite scratch 副本与只读夹具；EPLAN 由本次运行启动，进程环境中 `COMPlus_GCgen0size=0x10000`，运行结束时 gen0 GC 计数约 150 万次）：`FullPropertyReadTests` 1/1、`DevicePlaceTests` 8/8、`AcceptanceRedrawTests` 1/1（含 `-X6` 1..8 端子的放置及其后的 detailed 读取），应用程序日志中无 EPLAN 崩溃事件。— TRX 计数、.NET CLR Memory 性能计数器、Windows 应用程序日志。
 - 未处理：上一请求留下的、同一对象的其他包装器在本次读取中被终结（例如写入后紧接的读取）。上面的复验在 GC 压力下没有出现这种问题，但不能据此排除。
 
+### A144. 设置写入：USER 设置读回后恢复；PROJECT 设置写入不能撤销（2026-11-16，EPLAN 2026.0.3.25421，Electric P8，A 槽 LargeWrite scratch 副本）
+- ADR-0059 第 3b 步放开 `Settings` 和 `ProjectSettings` 带索引的 `Set{Bool,Double,Numeric,String}Setting`。
+- `Settings.SetStringSetting("USER.TRANSLATEGUI.DATABASE_NAME", …, 0)`：写入后立即读回新值；Bridge 随即写回原值（`$(md_translate)\Translate.db`），再读一次与原值一致。
+- `ProjectSettings.SetStringSetting("TRANSLATEGUI.SOURCE_LANGUAGE", "de_DE", 0)`：读回 `de_DE`，项目的 `Settings.xdb/Setting.eod` 和 `.eox` 改动时间更新。
+- 🔴 PROJECT 设置写入之后执行一次 `XEsUndoAction`，EPLAN 记录 `TrObjMgmt` 消息"无法执行撤销操作"并弹出模态提示，远程调用 120 秒超时，后续的撤销也一直被挡住。所以设置写入不进入撤销；`eplan_api_try` 返回原值（`before`），要退回就把原值写回去。
+- 影响：设置写入的批量验证不能用"一步撤销恢复"的口径，改用"写回原值后读回一致"。
+
 ### A143. 项目级创建在大项目里观察不到；两种创建一次撤销不恢复（2026-11-15，EPLAN 2026.0.3.25421，Electric P8，A 槽 LargeWrite scratch 副本）
 - 批量验证用写入配方（`fixtures/batch-write-recipes.json`）试 `Article.Create`、`E3D.Component.Create`、`DeviceService.CreateDeviceListItem`，都是不带页的项目级创建。
 - `eplan_api_try` 观察项目级创建时遍历整个项目：示例项目约 95000 个对象（去重后 50000 以上），描述约 11 MB，遍历约 2 秒，超出对象数与大小预算（10000 个、256 KiB），结果为 `TIMEOUT`。只遍历所建对象的种类（`ObjectKindDispatch.Candidates(kind)`，项目级、不带页）对 article、devicelistentry、3D 部件返回 0 个对象，不能代替全量遍历；改动未合入，预算保持原值。

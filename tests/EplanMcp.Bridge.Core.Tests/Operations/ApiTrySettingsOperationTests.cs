@@ -40,7 +40,6 @@ public sealed class ApiTrySettingsOperationTests
     }
 
     [Theory]
-    [InlineData("Base.Settings.SetStringSetting")]
     [InlineData("Base.SchemeSetting.SetScheme")]
     [InlineData("Base.SettingNode.ResetNode")]
     [InlineData("DataModel.ProjectSettings.ReadSettings")]
@@ -50,6 +49,22 @@ public sealed class ApiTrySettingsOperationTests
     {
         Assert.Equal(ErrorReason.PolicyDenied, Assert.Throws<BridgeErrorException>(() => Plan(Args(member))).Error.Reason);
         Assert.Equal(0, _dispatch.Checks);
+    }
+
+    [Theory]
+    [InlineData("Base.Settings.SetStringSetting", "USER.A", true)]
+    [InlineData("Base.Settings.SetStringSetting", "STATION.A", true)]
+    [InlineData("DataModel.ProjectSettings.SetStringSetting", "PROJECT.A", false)]
+    public void ASettingWrite_SaysWhenItIsSharedByAllProjects(string member, string node, bool shared)
+    {
+        ApiTryArgs args = Args(member);
+        args.Parameters = new JObject { ["target"] = JObject.Parse(args.Parameters)["target"], ["node"] = node, ["strSettingPath"] = "Leaf", ["strValue"] = "x", ["nIdx"] = 0 }.ToString();
+
+        WritePlan plan = Plan(args);
+
+        PlannedChange change = Assert.Single(plan.Changes);
+        Assert.Equal("write", change.Action);
+        Assert.Equal(shared, change.Kind.Contains("shared by all projects", StringComparison.Ordinal));
     }
 
     [Theory]

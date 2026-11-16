@@ -23,9 +23,14 @@ internal static partial class ApiTryGenerator
     private static bool SettingsList(ApiEntry e) => e.Name is "GetListOfNodes" or "GetListOfSettings" or "GetListOfAllSettings";
     private static bool SettingsProperty(ApiEntry e) => e.Row.Kind == "property";
     private static bool SettingsRootProperty(ApiEntry e) => SettingsProperty(e) && e.Type != "T:Eplan.EplApi.Base.SchemeSetting";
+    /// <summary>ADR-0059 step 3b: the scalar setters with an index; WriteSetting reads back and restores USER/STATION values.</summary>
+    internal static string? SettingsSetter(ApiEntry e, ApiDetail d) => e.Type is "T:Eplan.EplApi.Base.Settings" or "T:Eplan.EplApi.DataModel.ProjectSettings"
+        && Regex.Match(e.Name, "^Set(Bool|Double|Numeric|String)Setting$", RegexOptions.CultureInvariant) is { Success: true } m
+        && d.Parameters is [{ Name: "strSettingPath", Type: "System.String" }, { Type: "System.Boolean" or "System.Double" or "System.Int32" or "System.String" }, { Name: "nIdx", Type: "System.Int32" }]
+        ? m.Groups[1].Value : null;
     internal static string? SettingsExclusion(ApiEntry e, ApiDetail d)
     {
-        if (SettingsWrite(e))
+        if (SettingsWrite(e) && SettingsSetter(e, d) is null)
         { return "settings_write"; }
         if (e.Row.ExcludedReason is not null || d.ExcludedReason is not null)
         { return "catalog:" + (e.Row.ExcludedReason ?? d.ExcludedReason); }
@@ -36,6 +41,8 @@ internal static partial class ApiTryGenerator
         bool read = SettingsProperty(e) && d.Accessors?.Split(';').Contains("get", StringComparer.Ordinal) == true
             || SettingsList(e) && d.Parameters is [{ Type: "System.Collections.Specialized.StringCollection@" }, { Type: "System.Boolean" }]
             || Regex.IsMatch(e.Name, "^(ExistSetting|Get(Bool|Double|Numeric|String|ExpandedString|MultiLangString)(Setting|Default)|GetCountOf(DefaultValues|Values|Nodes|Settings)|GetDescription|GetTypeOfSetting|IsMainNodeReadOnly|GetNodePath(Dot)?|GetCount|GetLastUsed|GetName|GetLocalizedNameSettingPath|CheckIfSchemeExists|CountSetting)$", RegexOptions.CultureInvariant);
+        if (SettingsSetter(e, d) is not null)
+        { return null; }
         return read && (SettingsList(e) || Scalar(d.ReturnType, null) || d.ReturnType is "System.UInt32" or "Eplan.EplApi.Base.ISettings.SettingType" or "Eplan.EplApi.Base.MultiLangString" or "Eplan.EplApi.DataModel.ProjectSettings")
             && (SettingsList(e) || d.Parameters!.All(p => p.Type is "System.String" or "System.Int32")) ? null : "unsupported_settings_read";
     }
@@ -47,7 +54,7 @@ internal static partial class ApiTryGenerator
     private static string SettingsReport(ApiIndexData data, string original)
     {
         string additions = string.Concat(data.Entries.Where(SettingsType).SelectMany(e => e.Details.Where(d => d.Kind == "overload").Select(d =>
-        e.Row.Group + "\t" + d.Id + "\t" + (SettingsExclusion(e, d) is { } reason ? "excluded\t" + reason : "read\tsettings_read_only") + "\n"
+        e.Row.Group + "\t" + d.Id + "\t" + (SettingsExclusion(e, d) is { } reason ? "excluded\t" + reason : SettingsSetter(e, d) is not null ? "write\tsettings_write_restored" : "read\tsettings_read_only") + "\n"
         + (d.Accessors?.Split(';').Contains("set", StringComparer.Ordinal) == true ? e.Row.Group + "\t" + d.Id + ":set\texcluded\tsettings_write\n" : ""))));
         if (additions.Length == 0)
         { return original; }
@@ -58,7 +65,8 @@ internal static partial class ApiTryGenerator
     private static string SettingsCatalog(ApiIndexData data)
     {
         var members = SettingsMembers(data).ToArray();
-        return "    public static bool Settings(string group) => group switch { " + string.Join(" ", members.Select(s => Literal(s.Entry.Row.Group) + " => true,")) + " _ => false };\n"
+        return "    public static bool SettingsWrite(string group) => group switch { " + string.Join(" ", members.Where(s => SettingsSetter(s.Entry, s.Member) is not null).Select(s => Literal(s.Entry.Row.Group) + " => true,").Distinct(StringComparer.Ordinal)) + " _ => false };\n"
+            + "    public static bool Settings(string group) => group switch { " + string.Join(" ", members.Select(s => Literal(s.Entry.Row.Group) + " => true,")) + " _ => false };\n"
             + "    public static string[][] SettingsMethods(string group) => group switch\n    {\n"
             + string.Join("\n", members.GroupBy(s => s.Entry.Row.Group).Select(g => "        " + Literal(g.Key) + " => [" + string.Join(", ", g.Select(s => "[" + string.Join(", ", new[] { s.Entry.Type[2..], s.Member.Signature! }.Concat(SettingsParameters(s.Entry, s.Member).Select(p => p.Name)).Select(Literal)) + "]")) + "],"))
             + "\n        _ => [],\n    };\n    private static string[]? SettingsReceiverShape(string signature) => signature switch { " + string.Join(" ", members.Select(s => Literal(s.Member.Signature!) + " => [\"Eplan.EplApi.DataModel.Project\"],")) + " _ => null };\n"
@@ -82,7 +90,13 @@ internal static partial class ApiTryGenerator
                     : type.EndsWith(".SchemeSetting", StringComparison.Ordinal) ? "EplanApiTryDispatcher.OpenSettingsScheme(project, nodePath)"
                     : "EplanApiTryDispatcher.OpenSettingsNode(project, nodePath)";
                 string body;
-                if (SettingsRootProperty(s.Entry))
+                if (SettingsSetter(s.Entry, s.Member) is { } kind)
+                {
+                    string settings = type.EndsWith(".Settings", StringComparison.Ordinal) ? "new global::Eplan.EplApi.Base.Settings()" : "project.Settings";
+                    body = "string nodePath = parameters[\"node\"]!.Value<string>()!; using var receiver = " + settings + "; return EplanApiTryDispatcher.WriteSetting(receiver, nodePath, EplanApiTryDispatcher.SettingsFullPath(nodePath, parameters[\"strSettingPath\"]!.Value<string>()!), parameters[\"nIdx\"]!.Value<int>(), "
+                        + Literal(kind) + ", parameters[" + Literal(s.Member.Parameters![1].Name) + "]!);";
+                }
+                else if (SettingsRootProperty(s.Entry))
                 { body = "return " + (name == "Settings" ? "\"PROJECT\"" : type.EndsWith(".DeviceTagSettings", StringComparison.Ordinal) ? "new global::" + type + "(project)." + name : "throw new System.InvalidOperationException(\"Unsupported settings property.\")") + ";"; }
                 else
                 {

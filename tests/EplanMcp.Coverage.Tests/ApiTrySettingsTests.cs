@@ -30,6 +30,25 @@ public sealed class ApiTrySettingsTests
         Assert.Equal("settings_write", ApiTryGenerator.SettingsExclusion(e, e.Details[0]));
     }
 
+    [Theory]
+    [InlineData("SetStringSetting", "System.String", "String")]
+    [InlineData("SetBoolSetting", "System.Boolean", "Bool")]
+    [InlineData("SetNumericSetting", "System.Int32", "Numeric")]
+    [InlineData("SetDoubleSetting", "System.Double", "Double")]
+    public void ScalarSettersWithAnIndex_AreOpenedAsRestoredWrites(string name, string type, string kind)
+    {
+        ApiEntry e = Entry(name, parameters: [new("strSettingPath", "System.String"), new("value", type), new("nIdx", "System.Int32")]);
+        Assert.Equal(kind, ApiTryGenerator.SettingsSetter(e, e.Details[0]));
+        Assert.Null(ApiTryGenerator.SettingsExclusion(e, e.Details[0]));
+    }
+
+    [Fact]
+    public void ASetterWithoutAnIndex_StaysExcluded()
+    {
+        ApiEntry e = Entry("SetStringSetting", parameters: [new("strSettingPath", "System.String"), new("strValue", "System.String")]);
+        Assert.Equal("settings_write", ApiTryGenerator.SettingsExclusion(e, e.Details[0]));
+    }
+
     [Fact]
     public void ProjectSettingsGetterIsNotASetMethod()
     {
@@ -135,7 +154,7 @@ public sealed class ApiTrySettingsTests
         Assert.Equal("catalog:unsafe", ApiTryGenerator.SettingsExclusion(e, e.Details[0] with { ExcludedReason = "unsafe" }));
         Assert.Equal("static_or_nonpublic", ApiTryGenerator.SettingsExclusion(e, e.Details[0] with { Static = true }));
         Assert.Equal("unsupported_settings_read", ApiTryGenerator.SettingsExclusion(Entry("GetUnreviewed", "System.String"), e.Details[0]));
-        foreach (string method in new[] { "SetStringSetting", "ReadSettings", "WriteSetting", "RemoveAllIndexedSetting" })
+        foreach (string method in new[] { "ReadSettings", "WriteSetting", "RemoveAllIndexedSetting" })
         { Assert.False(ApiTryCatalog.Allowed("O:Eplan.EplApi.Base.Settings." + method)); }
     }
 }
@@ -153,7 +172,11 @@ public sealed class ApiTrySettingsGenerationTests
         Assert.Contains("using var text = receiver.GetMultiLangStringSetting", dispatch, StringComparison.Ordinal);
         string[] rows = ApiTryGenerator.Report(root).Split('\n');
         Assert.All(rows.Where(r => r.Length > 0).GroupBy(r => r.Split('\t')[1]), g => Assert.Single(g));
-        Assert.All(rows.Where(r => r.Contains("\tsettings_write", StringComparison.Ordinal)), row =>
+        // ADR-0059 step 3b: only the indexed scalar setters are generated, through WriteSetting (read back, USER/STATION restored).
+        string[] restored = [.. rows.Where(r => r.EndsWith("\twrite\tsettings_write_restored", StringComparison.Ordinal)).Select(r => r.Split('\t')[0]).Distinct(StringComparer.Ordinal)];
+        Assert.Equal(8, restored.Length);
+        Assert.Contains("EplanApiTryDispatcher.WriteSetting(receiver", dispatch, StringComparison.Ordinal);
+        Assert.All(rows.Where(r => r.EndsWith("\tsettings_write", StringComparison.Ordinal)), row =>
         {
             string signature = row.Split('\t')[1];
             Assert.DoesNotContain(JsonSerializer.Serialize(signature), dispatch, StringComparison.Ordinal);
@@ -161,7 +184,7 @@ public sealed class ApiTrySettingsGenerationTests
             {
                 string name = signature.Split('(')[0].Split('.')[^1];
                 Assert.DoesNotContain("receiver." + name + "(", dispatch, StringComparison.Ordinal);
-                Assert.False(ApiTryCatalog.Allowed(row.Split('\t')[0]));
+                Assert.Equal(restored.Contains(row.Split('\t')[0], StringComparer.Ordinal), ApiTryCatalog.Allowed(row.Split('\t')[0]));
             }
         });
         Assert.DoesNotContain("System.Reflection", dispatch, StringComparison.Ordinal);

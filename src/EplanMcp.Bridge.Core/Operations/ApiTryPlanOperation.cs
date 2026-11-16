@@ -51,7 +51,12 @@ public sealed partial class ApiTryPlanOperation(int major, IProjectCatalog catal
         plan.Details["status"] = "dispatchable";
         if (ApiTryLifecycle.Effect(args.Group) is { } effect)
         { plan.Details["lifecycle"] = effect; }
-        plan.Changes = [new() { Action = write ? "write" : "read", Kind = "unverified API", Name = args.Group, Property = shape[1], NewValue = setter ? value!.ToString(Formatting.None) : null }];
+        // ADR-0036: a USER or STATION setting is shared by every project; WriteSetting restores it after the read-back.
+        string kind = ApiTryCatalog.SettingsWrite(args.Group) && !(parameters["node"]?.ToString() ?? "").StartsWith("PROJECT", StringComparison.Ordinal)
+            ? "unverified API: changes a user or station setting shared by all projects; the previous value is restored after the read-back"
+            : ApiTryCatalog.SettingsWrite(args.Group) ? "unverified API: changes a project setting that EPLAN cannot undo; the result carries the previous value to write back"
+            : "unverified API";
+        plan.Changes = [new() { Action = write ? "write" : "read", Kind = kind, Name = args.Group, Property = shape[1], NewValue = setter ? value!.ToString(Formatting.None) : null }];
         return plan;
     }
     internal static bool ValidValue(string[]? shape, JToken value) => shape?[0] == "array"

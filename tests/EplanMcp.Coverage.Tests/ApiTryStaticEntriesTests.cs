@@ -53,7 +53,7 @@ public sealed class ApiTryStaticEntriesTests
     {
         Assert.Null(Reason(Entry("Eplan.EplApi.DataModel.ProjectSettings", "GetBoolSetting", false, parameters: [new("strSettingPath", "System.String"), new("nIdx", "System.Int32")])));
         Assert.Null(ApiTryCatalog.ValueShape("O:Eplan.EplApi.DataModel.Project.DeviceTagSettings.EnableSyntaxCheck"));
-        Assert.Null(ApiTryCatalog.MethodAccess("O:Eplan.EplApi.DataModel.ProjectSettings.SetBoolSetting"));
+        Assert.Equal("write", ApiTryCatalog.MethodAccess("O:Eplan.EplApi.DataModel.ProjectSettings.SetBoolSetting"));
         Assert.Contains("project", ApiTryCatalog.ViaKinds("Eplan.EplApi.DataModel.ProjectSettings", "Settings"));
         Assert.True(ApiTryCatalog.ViaKey("Eplan.EplApi.DataModel.Graphics.GraphicalLayer", "LayerTable.Layer"));
         Assert.Empty(ApiTryCatalog.ViaKinds("Eplan.EplApi.DataModel.ProjectSettings", "Project.Project.Settings"));

@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
-  "scannedOn": "2026-11-15",
-  "scannedSources": "b008a697",
-  "sourceHash": "sha256:0885799cb563f5f2309deccfb14e6ca51b7d5bfb5f4d4c69d2a932eaa60fce1f",
+  "scannedOn": "2026-11-16",
+  "scannedSources": "463ffec0 + uncommitted changes",
+  "sourceHash": "sha256:f07d85b95e3b50e88c0e1d3576dd2d6230946e80d0d5cc8c3d6377e576e8c6c0",
   "operations": [
     {
       "name": "action.execute",
@@ -27494,6 +27494,126 @@
       {
         "adapter": "ApiTryDispatch",
         "member": "Write",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode.Ignore": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode.None": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode.Number": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode.NumberPreferPrefix": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode.NumberWithQuestionMark": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "read"
@@ -127532,6 +127652,97 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.Align.All": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.Align.CanHaveDesignation": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.Align.OnlyForWirnum": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.AvoidIdenticalDesignations.InEachResetRange": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.AvoidIdenticalDesignations.InSelection": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.AvoidIdenticalDesignations.InWholeProject": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.AvoidIdenticalDesignations.None": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.HEServices.ConnectionService.Deletion.ConnectionDefinitionPoints": [
       {
         "adapter": "ApiTryDispatch",
@@ -127573,6 +127784,17 @@
     ],
     "F:Eplan.EplApi.HEServices.ConnectionService.DesignateOverwrition.All": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionNumberer",
         "member": "Designate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionNumberer.cs",
@@ -127586,6 +127808,17 @@
     ],
     "F:Eplan.EplApi.HEServices.ConnectionService.DesignateOverwrition.ExceptManuals": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionNumberer",
         "member": "Designate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionNumberer.cs",
@@ -127598,6 +127831,17 @@
       }
     ],
     "F:Eplan.EplApi.HEServices.ConnectionService.DesignateOverwrition.None": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionNumberer",
         "member": "Designate",
@@ -127714,6 +127958,84 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.Visibility.All": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.Visibility.DoNotChange": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService.Visibility.OncePerPageAndExtent": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService3D.ImportMode.Change": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService3D.ImportMode.Create": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.ConnectionService3D.ImportMode.Delete": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.HEServices.CoordinateService.CoordinateSystems.COORDSYSTEM_ELECTRO": [
       {
         "adapter": "ApiTryDispatch",
@@ -127806,6 +128128,45 @@
       }
     ],
     "F:Eplan.EplApi.HEServices.DeviceService.Format.XML": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.DeviceService.ImportMode.Change": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.DeviceService.ImportMode.Create": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.DeviceService.ImportMode.Delete": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -127924,6 +128285,17 @@
     ],
     "F:Eplan.EplApi.HEServices.Export.DegreeOfColor.BlackAndWhite": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "ExportPdf",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -127937,6 +128309,17 @@
     ],
     "F:Eplan.EplApi.HEServices.Export.DegreeOfColor.Color": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "ExportPdf",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -127948,7 +128331,31 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.HEServices.Export.DegreeOfColor.FromScheme": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.HEServices.Export.DegreeOfColor.GreyLevel": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanExporter",
         "member": "ExportPdf",
@@ -127958,6 +128365,19 @@
         ],
         "operations": [
           "export.pdf.run"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Export.DegreeOfColor.WhiteInverted": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -128335,7 +128755,57 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.DeviceTagsWithPLCOverwrition.All": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.DeviceTagsWithPLCOverwrition.MarkedAsNumeratedByPLC": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.DeviceTagsWithPLCOverwrition.PostNumeration": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.HEServices.Renumber.Enums.Extent.AllSelectedTerminalStrips": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
@@ -128348,7 +128818,44 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.Extent.Selected": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.MultipleTerminals.DontModify": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.HEServices.Renumber.Enums.MultipleTerminals.NumberIndividually": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
@@ -128358,6 +128865,19 @@
         ],
         "operations": [
           "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.MultipleTerminals.NumberSame": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -128375,6 +128895,45 @@
       }
     ],
     "F:Eplan.EplApi.HEServices.Renumber.Enums.NumberingDirection3D.Succession": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.PlugsSequence.Cable": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.PlugsSequence.Collector": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.PlugsSequence.Page": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -128459,7 +129018,31 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential.IgnoreNumbering": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential.Numbering": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
@@ -128469,11 +129052,61 @@
         ],
         "operations": [
           "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential.PositionKeep": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence.Cable": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence.Collector": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
     "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence.Level": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalRenumberer.cs",
@@ -128485,7 +129118,31 @@
         ]
       }
     ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence.Page": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters.DontModify": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
@@ -128495,6 +129152,32 @@
         ],
         "operations": [
           "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters.KeepAlphabeticalElements": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "F:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters.Number": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -152651,6 +153334,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "ReadSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.Base.ISettings.GetDoubleSetting(System.String,System.Int32)": [
@@ -152658,6 +153352,17 @@
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "ReadSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
         "access": [
           "call"
         ],
@@ -152703,6 +153408,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "ReadSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.Base.ISettings.GetStringSetting(System.String,System.Int32)": [
@@ -152716,6 +153432,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "ReadSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.Base.ISettings.GetTypeOfSetting(System.String)": [
@@ -152723,6 +153450,58 @@
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.Base.ISettings.SetBoolSetting(System.String,System.Boolean,System.Int32)": [
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "SetSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.Base.ISettings.SetDoubleSetting(System.String,System.Double,System.Int32)": [
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "SetSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.Base.ISettings.SetNumericSetting(System.String,System.Int32,System.Int32)": [
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "SetSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.Base.ISettings.SetStringSetting(System.String,System.String,System.Int32)": [
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "SetSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
         "access": [
           "call"
         ],
@@ -155621,6 +156400,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Article.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Article.AddModule": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -155647,9 +156439,35 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Article.Create(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Article.Remove": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Article.RemoveModule(Eplan.EplApi.DataModel.Article.Module)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -155956,6 +156774,19 @@
     "M:Eplan.EplApi.DataModel.Connection.Remove": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Connection.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -161154,6 +161985,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.E3D.Area.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.FunctionDefinition)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.E3D.Area.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.FunctionDefinition,Eplan.EplApi.Base.PointD)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.E3D.Area.Create(Eplan.EplApi.DataModel.Project,System.Double,System.Double)": [
       {
         "adapter": "ApiTryDispatch",
@@ -161297,7 +162154,44 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.E3D.BusBarSystem.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.E3D.BusBarSystem.Create(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Int32,System.Double)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.E3D.Cabinet.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanLayoutWriter",
         "member": "PlaceEnclosure",
@@ -161312,6 +162206,17 @@
     ],
     "M:Eplan.EplApi.DataModel.E3D.Cabinet.Create(Eplan.EplApi.DataModel.E3D.InstallationSpace,System.String,System.String)": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanLayoutWriter",
         "member": "PlaceEnclosure",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLayoutWriter.cs",
@@ -161320,6 +162225,32 @@
         ],
         "operations": [
           "layout.enclosure.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.E3D.Cabinet.Create(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.E3D.Component.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -161333,6 +162264,19 @@
         ],
         "operations": [
           "layout.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.E3D.Component.Create(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -161559,6 +162503,17 @@
     ],
     "M:Eplan.EplApi.DataModel.E3D.Duct.#ctor": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanLayoutPlacer",
         "member": "Place",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanLayoutPlacer.cs",
@@ -161570,7 +162525,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.E3D.Duct.Create(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.E3D.Duct.Create(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Double)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanLayoutPlacer",
         "member": "Place",
@@ -161599,6 +162578,19 @@
     "M:Eplan.EplApi.DataModel.E3D.Function3D.GetValidItemTypes": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.E3D.Function3D.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -162073,7 +163065,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.E3D.MountingPanel.Create(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.E3D.MountingRail.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanLayoutPlacer",
         "member": "Place",
@@ -162086,7 +163102,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.E3D.MountingRail.Create(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.E3D.MountingRail.Create(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Double)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanLayoutPlacer",
         "member": "Place",
@@ -163033,6 +164073,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.E3D.RoutingAccessory.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.E3D.RoutingAccessory.Create(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Double)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.E3D.RoutingSegment.#ctor": [
       {
         "adapter": "ApiTryDispatch",
@@ -163113,6 +164179,17 @@
     ],
     "M:Eplan.EplApi.DataModel.EObjects.Cable.#ctor": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionCreator",
         "member": "PrepareCables",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionCreator.Cables.cs",
@@ -163148,7 +164225,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.EObjects.Cable.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.EObjects.Cable.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "PrepareCables",
@@ -163228,6 +164329,17 @@
     ],
     "M:Eplan.EplApi.DataModel.EObjects.PLC.#ctor": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Plc.cs",
@@ -163236,6 +164348,32 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.PLC.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.PLC.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -163266,6 +164404,19 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.EObjects.Plug.Create(Eplan.EplApi.DataModel.EObjects.PlugStrip)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.Plug.Create(Eplan.EplApi.DataModel.EObjects.PlugStrip,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -163358,6 +164509,17 @@
     ],
     "M:Eplan.EplApi.DataModel.EObjects.Shield.#ctor": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanShieldCreator",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanShieldCreator.cs",
@@ -163371,6 +164533,17 @@
     ],
     "M:Eplan.EplApi.DataModel.EObjects.Shield.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.Symbol,Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanShieldCreator",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanShieldCreator.cs",
@@ -163382,7 +164555,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.EObjects.Shield.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.EObjects.Terminal.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
@@ -163406,7 +164603,57 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.PLC,Eplan.EplApi.DataModel.FunctionDefinition)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.PLC,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.TerminalStrip,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.EObjects.Terminal.Create(Eplan.EplApi.DataModel.EObjects.TerminalStrip,Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateTerminal",
@@ -163509,6 +164756,17 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.Function.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "PrepareDefinitionPoints",
@@ -163632,7 +164890,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.FunctionDefinition)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "PrepareDefinitionPoints",
@@ -163680,6 +164962,17 @@
     ],
     "M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant,Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD)": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateBlackBox",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.LocationBox.cs",
@@ -163693,6 +164986,17 @@
     ],
     "M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.FunctionDefinition)": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "PrepareStrip",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.Terminal.cs",
@@ -163701,6 +165005,19 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Function.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -163811,6 +165128,19 @@
     "M:Eplan.EplApi.DataModel.Function.PlaceFunctionalMacro(Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,System.String,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32)": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Function.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -166022,6 +167352,17 @@
     ],
     "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.#ctor": [
       {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -166035,6 +167376,17 @@
     ],
     "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Create(Eplan.EplApi.DataModel.SymbolReference,Eplan.EplApi.DataModel.AnyPropertyId)": [
       {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceSymbolPlacement.cs",
@@ -166043,6 +167395,19 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.Create(Eplan.EplApi.DataModel.SymbolReference,Eplan.EplApi.DataModel.AnyPropertyId,Eplan.EplApi.DataModel.Graphics.PropertyPlacement.RelationType,System.Int32)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -167143,6 +168508,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.IArticleUser.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.IPlaceHolder.AddRecord(System.String)": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -168177,6 +169555,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.MergedArticleReference.#ctor": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.MergedArticleReference.Create(Eplan.EplApi.DataModel.ArticleReference[])": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.MergedArticleReference.DisassembleRecursive(System.Int32,System.Int32)": [
       {
         "adapter": "ApiTryDispatch",
@@ -168633,6 +170037,32 @@
     "M:Eplan.EplApi.DataModel.Page.ConvertToGraphics": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Page.CopyTo(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.PagePropertyList,Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode,System.Boolean)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Page.CopyTo(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.PagePropertyList,Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -169492,6 +170922,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Planning.PlanningSegment.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Planning.PlanningSegment.RemovePLCAddress(Eplan.EplApi.DataModel.Planning.PlanningSegment.PLCAddress)": [
       {
         "adapter": "ApiTryHandleDispatch",
@@ -169557,9 +171000,35 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Planning.SegmentDefinition.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Planning.SegmentDefinition.AddPropertyConfiguration(Eplan.EplApi.DataModel.UserDefinedPropertyDefinition)": [
       {
         "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Planning.SegmentDefinition.Create(System.String,Eplan.EplApi.DataModel.Planning.SegmentDefinition)": [
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -169648,6 +171117,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.Planning.SegmentPlacement.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.Planning.SegmentPlacement.Create(Eplan.EplApi.DataModel.Planning.PlanningSegment,Eplan.EplApi.DataModel.Page)": [
       {
         "adapter": "ApiTryDispatch",
@@ -169701,6 +171183,32 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.Planning.SegmentPlacementPropertyList.Exists(Eplan.EplApi.DataModel.Properties.SegmentPlacement)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Planning.SegmentTemplate.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Planning.SegmentTemplate.Create(Eplan.EplApi.DataModel.Planning.SegmentDefinition)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -170320,6 +171828,19 @@
     "M:Eplan.EplApi.DataModel.Project.RemoveAllPages": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Project.RemoveArticleReference(Eplan.EplApi.DataModel.ArticleReference)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -174436,6 +175957,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.DataModel.SymbolReference.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.DataModel.SymbolReference.ConvertToGraphics": [
       {
         "adapter": "ApiTryDispatch",
@@ -174470,6 +176004,19 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.SymbolReference.Create(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -174787,6 +176334,32 @@
       }
     ],
     "M:Eplan.EplApi.DataModel.Topology.Segment.Create(Eplan.EplApi.DataModel.Project)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Topology.Segment.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.SymbolReference,Eplan.EplApi.DataModel.SymbolReference)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.DataModel.Topology.Segment.Create(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.SymbolReference,Eplan.EplApi.DataModel.SymbolReference,System.Boolean)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -177176,6 +178749,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.ConnectionService.AlignAndFormatConnectionDefinitionPoints(Eplan.EplApi.DataModel.Project,System.String,Eplan.EplApi.HEServices.ConnectionService.Align,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.ConnectionService.DeleteConnectionDefinitionPoints(Eplan.EplApi.DataModel.Project,Eplan.EplApi.HEServices.ConnectionService.Deletion,System.Boolean,System.Boolean)": [
       {
         "adapter": "ApiTryDispatch",
@@ -177191,6 +178777,17 @@
     ],
     "M:Eplan.EplApi.HEServices.ConnectionService.DesignateConnections(Eplan.EplApi.DataModel.Project,System.String,Eplan.EplApi.HEServices.ConnectionService.DesignateOverwrition,System.Boolean,System.Boolean)": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionNumberer",
         "member": "Designate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionNumberer.cs",
@@ -177199,6 +178796,19 @@
         ],
         "operations": [
           "connection.number.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.ConnectionService.DesignateConnections(Eplan.EplApi.DataModel.Project,System.String,Eplan.EplApi.HEServices.ConnectionService.DesignateOverwrition,System.Boolean,System.Boolean,Eplan.EplApi.HEServices.ConnectionService.AvoidIdenticalDesignations,Eplan.EplApi.HEServices.ConnectionService.Visibility,System.Int32[],System.Int32[],System.Boolean[])": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -177216,6 +178826,19 @@
       }
     ],
     "M:Eplan.EplApi.HEServices.ConnectionService.ExportProductionWiring(Eplan.EplApi.DataModel.Project,Eplan.EplApi.HEServices.ConnectionService.PWMachineType,System.String,System.String,System.String,Eplan.EplApi.Base.ISOCode.Language,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.ConnectionService.PlaceConnectionDefinitionPoints(Eplan.EplApi.DataModel.Project,System.String,System.Boolean)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -177305,6 +178928,45 @@
       }
     ],
     "M:Eplan.EplApi.HEServices.ConnectionService3D.CreateRoutingSegments(Eplan.EplApi.DataModel.E3D.InstallationSpace)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.ConnectionService3D.Import(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.ConnectionService3D.ImportExcel(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Int32,System.Int32,Eplan.EplApi.DataModel.FunctionDefinition,System.String,System.String,Eplan.EplApi.HEServices.ConnectionService3D.ImportMode)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.ConnectionService3D.ImportText(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Int32,System.Int32,Eplan.EplApi.DataModel.FunctionDefinition,System.String,System.String,Eplan.EplApi.HEServices.ConnectionService3D.ImportMode)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -177568,6 +179230,58 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.DeviceService.CreateDeviceListItem(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.DeviceService.CreateDeviceListItem(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.DeviceService.CreateTerminalDevice(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.String,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.DeviceService.CreateTerminalDevice(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.String,System.Int32,System.Int32,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.DeviceService.DeleteDeviceList(Eplan.EplApi.DataModel.Project)": [
       {
         "adapter": "ApiTryDispatch",
@@ -177672,6 +179386,58 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.DeviceService.ImportDevices(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.DeviceService.ImportDevicesExcel(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Int32,System.Int32,Eplan.EplApi.DataModel.FunctionDefinition,Eplan.EplApi.DataModel.FunctionDefinition,Eplan.EplApi.HEServices.DeviceService.ImportMode)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.DeviceService.ImportDevicesText(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Int32,System.Int32,Eplan.EplApi.DataModel.FunctionDefinition,Eplan.EplApi.DataModel.FunctionDefinition,Eplan.EplApi.HEServices.DeviceService.ImportMode)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.DeviceService.ImportDevicesText(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Int32,System.Int32,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.DeviceService.InsertAccessory3D(Eplan.EplApi.DataModel.E3D.Placement3D,System.String,System.String,System.String,System.String,System.Boolean,System.Collections.Generic.ICollection{Eplan.EplApi.DataModel.E3D.Placement3D})": [
       {
         "adapter": "ApiTryDispatch",
@@ -177754,6 +179520,19 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.DrawingService.CreateDisplayList(Eplan.EplApi.DataModel.MasterData.SymbolVariant)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
         ],
         "operations": [
           "api.try.execute"
@@ -178510,6 +180289,17 @@
     ],
     "M:Eplan.EplApi.HEServices.Export.DxfDwgPagesToDisk(Eplan.EplApi.DataModel.Page[],System.String,System.String,System.String)": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "ExportDxf",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -178518,6 +180308,32 @@
         ],
         "operations": [
           "export.dxf.run"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export.DxfDwgProjectToDisk(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export.DxfDwgProjectToDisk(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -178531,6 +180347,19 @@
         ],
         "operations": [
           "export.image.run"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export.GraphicPageEx(Eplan.EplApi.DataModel.Page,System.String,System.String,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -178573,6 +180402,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Export.PdfProject(Eplan.EplApi.DataModel.Project,System.String,System.String,Eplan.EplApi.HEServices.Export.DegreeOfColor,System.Boolean,System.String,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Export3D.#ctor": [
       {
         "adapter": "ApiTryDispatch",
@@ -178612,6 +180454,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Export3D.DesignSpaces(Eplan.EplApi.DataModel.Project,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Export3D.DrillingTemplatesToDXF(Eplan.EplApi.DataModel.Project,System.String,System.String,System.Boolean,System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D})": [
       {
         "adapter": "ApiTryDispatch",
@@ -178638,7 +180493,33 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Export3D.InstallationSpaceToIFC(Eplan.EplApi.DataModel.E3D.InstallationSpace,System.String,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToIFC(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToIFC(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String,System.String)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -178664,7 +180545,46 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToJT(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToJT(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToVrml(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.InstallationSpacesToVrml(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.InstallationSpace},System.String,System.String)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -178755,6 +180675,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Export3D.Placements3DToStep(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D},System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.Placements3DToStep(System.Collections.Generic.IEnumerable{Eplan.EplApi.DataModel.E3D.Placement3D},System.String,System.String,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Export3D.ProjectToIFC(Eplan.EplApi.DataModel.Project,System.String)": [
       {
         "adapter": "ApiTryDispatch",
@@ -178768,7 +180714,46 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Export3D.ProjectToIFC(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Export3D.ProjectToJT(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.ProjectToJT(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Export3D.ProjectToStep(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -178939,6 +180924,17 @@
     ],
     "M:Eplan.EplApi.HEServices.Import.#ctor": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingImporter",
         "member": "ImportDxf",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingImporter.cs",
@@ -178974,6 +180970,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Import.PDFComments(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Import.PXFProject(System.String,System.String)": [
       {
         "adapter": "EplanProjectImporter",
@@ -178984,6 +180993,71 @@
         ],
         "operations": [
           "import.pxf.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Import3D.#ctor": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Import3D.DesignSpace(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Import3D.DesignSpace(Eplan.EplApi.DataModel.Project,System.String,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Import3D.JT(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Import3D.STEP(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -179047,6 +181121,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Insert.PageMacro(System.String,Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.Project,System.Boolean,Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Insert.PrePlanningMacro(System.String,Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.Planning.PlanningSegment)": [
       {
         "adapter": "ApiTryDispatch",
@@ -179060,7 +181147,33 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Insert.SymbolMacro(System.String,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32,Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.HEServices.Insert.MoveKind,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.NumerationMode)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Insert.SymbolMacro(System.String,System.Int32,Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.HEServices.Insert.MoveKind)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Insert.SymbolMacro(System.String,System.Int32,Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.HEServices.Insert.MoveKind,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.NumerationMode)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -179087,7 +181200,31 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Insert.WindowMacro(System.String,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32,Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.HEServices.Insert.MoveKind)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Insert.WindowMacro(System.String,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32,Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.HEServices.Insert.MoveKind,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.NumerationMode)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanConnectionCreator",
         "member": "InsertPotential",
@@ -179097,6 +181234,19 @@
         ],
         "operations": [
           "connection.create.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Insert.WindowMacro(System.String,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.RepresentationType,System.Int32,Eplan.EplApi.DataModel.Page,Eplan.EplApi.Base.PointD,Eplan.EplApi.HEServices.Insert.MoveKind,Eplan.EplApi.DataModel.MasterData.WindowMacro.Enums.NumerationMode,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -179208,6 +181358,19 @@
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
           "new"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.MountingPanelService.CreateArticlePlacement(Eplan.EplApi.DataModel.Function,System.String,Eplan.EplApi.Base.PointD)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
         ],
         "operations": [
           "api.try.execute"
@@ -180176,6 +182339,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.PrePlanningService.ImportData(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Boolean,Eplan.EplApi.DataModel.Planning.PlanningSegment,System.Boolean,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.PrePlanningService.ImportData(Eplan.EplApi.DataModel.Project,System.String,System.String,System.String,System.Boolean,Eplan.EplApi.DataModel.Planning.PlanningSegment,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.PrePlanningService.ImportDescriptions(Eplan.EplApi.DataModel.Project)": [
       {
         "adapter": "ApiTryDispatch",
@@ -180369,6 +182558,32 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.ProjectManagement.CorrectProjectItems(Eplan.EplApi.DataModel.Function[],System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.ProjectManagement.CorrectProjectItems(Eplan.EplApi.DataModel.Project,System.String)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.ProjectManagement.ReadProjectInfo(Eplan.EplApi.DataModel.Project,System.String)": [
       {
         "adapter": "ApiTryDispatch",
@@ -180454,6 +182669,19 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Renumber.DeviceTags(Eplan.EplApi.DataModel.Function[],System.Int32,System.String,System.Int32,System.Int32)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Renumber.DeviceTags(Eplan.EplApi.DataModel.IFunctionBase[],System.String,Eplan.EplApi.HEServices.Renumber.Enums.DeviceTags,System.String,System.Int32,System.Int32)": [
       {
         "adapter": "EplanDeviceRenumberer",
@@ -180464,6 +182692,32 @@
         ],
         "operations": [
           "device.renumber.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Renumber.DeviceTagsWithPlcData(Eplan.EplApi.DataModel.Function[],System.String,System.Boolean,Eplan.EplApi.HEServices.Renumber.Enums.DeviceTagsWithPLCOverwrition)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Renumber.DeviceTagsWithPlcData(Eplan.EplApi.DataModel.Project,System.String,System.Boolean,Eplan.EplApi.HEServices.Renumber.Enums.DeviceTagsWithPLCOverwrition)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -180530,7 +182784,83 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.HEServices.Renumber.Plugs(Eplan.EplApi.DataModel.Function[],Eplan.EplApi.HEServices.Renumber.Enums.PlugsSequence,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,System.Boolean,System.String,System.Int32,System.Int32)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Renumber.Plugs(Eplan.EplApi.DataModel.Function[],Eplan.EplApi.HEServices.Renumber.Enums.PlugsSequence,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,System.Boolean,System.String,System.Int32,System.Int32,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Renumber.Plugs(Eplan.EplApi.DataModel.Project,Eplan.EplApi.HEServices.Renumber.Enums.PlugsSequence,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,System.Boolean,System.String,System.Int32,System.Int32)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Renumber.Plugs(Eplan.EplApi.DataModel.Project,Eplan.EplApi.HEServices.Renumber.Enums.PlugsSequence,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,System.Boolean,System.String,System.Int32,System.Int32,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Renumber.Terminals(Eplan.EplApi.DataModel.Function[],Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence,Eplan.EplApi.HEServices.Renumber.Enums.Extent,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.MultipleTerminals,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters,System.String,System.Int32,System.Int32,System.String,System.String,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.HEServices.Renumber.Terminals(Eplan.EplApi.DataModel.Function[],Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence,Eplan.EplApi.HEServices.Renumber.Enums.Extent,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.MultipleTerminals,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters,System.String,System.Int32,System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
@@ -180540,6 +182870,32 @@
         ],
         "operations": [
           "terminal.renumber.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Renumber.Terminals(Eplan.EplApi.DataModel.Project,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.MultipleTerminals,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters,System.String,System.Int32,System.Int32,System.String,System.String,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Renumber.Terminals(Eplan.EplApi.DataModel.Project,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential,Eplan.EplApi.HEServices.Renumber.Enums.MultipleTerminals,Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters,System.String,System.Int32,System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -180790,6 +183146,32 @@
       }
     ],
     "M:Eplan.EplApi.HEServices.Revision.CompareProjects(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.Project,System.Boolean,System.String,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Revision.CompareProjects(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.Project,System.String,System.Boolean,System.String,System.Boolean)": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.HEServices.Revision.CompareProjects(Eplan.EplApi.DataModel.Project,Eplan.EplApi.DataModel.Project,System.String,System.Boolean,System.String,System.Boolean,System.Boolean,System.Boolean)": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -243649,6 +246031,39 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "ReadSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "SetSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "EplanApiTryDispatcher",
+        "member": "WriteSetting",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanApiTryDispatcher.Settings.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
       }
     ],
     "T:Eplan.EplApi.Base.LanguageList": [
@@ -251643,6 +254058,17 @@
     "T:Eplan.EplApi.DataModel.E3D.BusBarSystem": [
       {
         "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryDispatch",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
         "access": [
@@ -251947,6 +254373,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.E3D.Component": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Compatible",
@@ -252816,6 +255253,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.E3D.Duct": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Compatible",
@@ -254077,6 +256525,17 @@
     ],
     "T:Eplan.EplApi.DataModel.E3D.MountingRail": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "ApiTryEntryDispatch",
         "member": "Via",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
@@ -255148,6 +257607,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.E3D.RoutingAccessory": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Read",
@@ -256703,6 +259173,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.EObjects.Shield": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Read",
@@ -266907,6 +269388,28 @@
     ],
     "T:Eplan.EplApi.DataModel.MasterData.PageMacro": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanMacroStorer",
         "member": "Prepare",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanMacroStorer.cs",
@@ -266915,6 +269418,54 @@
         ],
         "operations": [
           "macro.store"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MasterData.PageMacro.Enums": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.DataModel.MasterData.PageMacro.Enums.NumerationMode": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -267039,6 +269590,17 @@
       }
     ],
     "T:Eplan.EplApi.DataModel.MasterData.Symbol": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "ApiTryDispatch",
         "member": "Read",
@@ -283615,6 +286177,32 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.HEServices.ConnectionService.Align": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.HEServices.ConnectionService.AvoidIdenticalDesignations": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.HEServices.ConnectionService.Deletion": [
       {
         "adapter": "ApiTryDispatch",
@@ -283630,6 +286218,17 @@
     ],
     "T:Eplan.EplApi.HEServices.ConnectionService.DesignateOverwrition": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanConnectionNumberer",
         "member": "Designate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanConnectionNumberer.cs",
@@ -283642,6 +286241,19 @@
       }
     ],
     "T:Eplan.EplApi.HEServices.ConnectionService.PWMachineType": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.HEServices.ConnectionService.Visibility": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -283675,6 +286287,19 @@
         ],
         "operations": [
           "connection.route.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.HEServices.ConnectionService3D.ImportMode": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -283775,6 +286400,19 @@
       }
     ],
     "T:Eplan.EplApi.HEServices.DeviceService.Format": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.HEServices.DeviceService.ImportMode": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -284098,6 +286736,17 @@
     ],
     "T:Eplan.EplApi.HEServices.Export.DegreeOfColor": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanExporter",
         "member": "ExportPdf",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanExporter.cs",
@@ -284202,6 +286851,17 @@
     ],
     "T:Eplan.EplApi.HEServices.Import": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanDrawingImporter",
         "member": "ImportDxf",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingImporter.cs",
@@ -284221,6 +286881,19 @@
         ],
         "operations": [
           "import.pxf.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.HEServices.Import3D": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       }
     ],
@@ -284834,7 +287507,31 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.HEServices.Renumber.Enums.DeviceTagsWithPLCOverwrition": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.HEServices.Renumber.Enums.Extent": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
@@ -284849,6 +287546,17 @@
     ],
     "T:Eplan.EplApi.HEServices.Renumber.Enums.MultipleTerminals": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalRenumberer.cs",
@@ -284861,6 +287569,19 @@
       }
     ],
     "T:Eplan.EplApi.HEServices.Renumber.Enums.NumberingDirection3D": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "T:Eplan.EplApi.HEServices.Renumber.Enums.PlugsSequence": [
       {
         "adapter": "ApiTryDispatch",
         "member": "Invoke",
@@ -284899,6 +287620,17 @@
     ],
     "T:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsPotential": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalRenumberer.cs",
@@ -284912,6 +287644,17 @@
     ],
     "T:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsSequence": [
       {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
+      {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanTerminalRenumberer.cs",
@@ -284924,6 +287667,17 @@
       }
     ],
     "T:Eplan.EplApi.HEServices.Renumber.Enums.TerminalsWithAlphabeticalCharacters": [
+      {
+        "adapter": "ApiTryDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      },
       {
         "adapter": "EplanTerminalRenumberer",
         "member": "Renumber",
