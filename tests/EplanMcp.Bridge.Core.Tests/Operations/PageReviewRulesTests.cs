@@ -56,6 +56,39 @@ public sealed class PageReviewRulesTests
         Assert.Empty(Review("box_crossings"));
     }
 
+    /// <summary>A145: the sample's A3 frame grid is [4, 16, 420, 292]; the title block lies below y 16.</summary>
+    [Theory]
+    [InlineData(100, 100, false, 0, 0)]  // inside
+    [InlineData(100, 14, true, 100, 20)] // into the title block: moved up onto the grid
+    [InlineData(419, 100, true, 416, 100)] // past the right edge: moved left
+    public void OutlineLeavingTheFrameArea_IsAnErrorWithAMoveInside(double x, double y, bool reported, double fixX, double fixY)
+    {
+        _scene.Page.PageSize = [420, 297];
+        _scene.Page.DrawingArea = [4, 16, 420, 292];
+        DrawingPlacement p = Placement(1, x, "Function", "-K1");
+        p.Location = [x, y];
+        p.Bounds = [x - 2, y - 2, x + 2, y + 2];
+        JArray issues = Review("off_area");
+        Assert.Equal(reported ? 1 : 0, issues.Count);
+        if (reported)
+        {
+            Assert.Equal(("off_area", "error"), ((string?)issues[0]!["code"], (string?)issues[0]!["severity"]));
+            JToken move = issues[0]!["fix"]!["args"]!["moves"]![0]!;
+            Assert.Equal((fixX, fixY), ((double)move["x_mm"]!, (double)move["y_mm"]!));
+        }
+    }
+
+    [Fact]
+    public void WithoutAFrameArea_OnlyThePageEdgeCounts()
+    {
+        _scene.Page.PageSize = [420, 297];
+        _scene.Graphical.Add([[8, 8], [8, 300]]);
+        DrawingPlacement p = Placement(1, 8, "Function", "-K1");
+        p.Bounds = [6, 6, 10, 10];
+        JArray issues = Review("off_area");
+        Assert.Equal("Wire point leaves the page; reroute it inside [0, 0, 420, 297].", (string?)Assert.Single(issues)["message"]);
+    }
+
     private const string Page = "=F+A1/1";
     private readonly ConnectionCreatePlanner.Scene _scene = new() { Project = new() { Name = "Line1" }, Page = new() { Page = Page, GridSize = 4 } };
     private readonly JObject _actual = JObject.Parse("""{"devices":[],"connections":[],"cables":[],"interruptions":[],"texts":[],"messages":[]}""");

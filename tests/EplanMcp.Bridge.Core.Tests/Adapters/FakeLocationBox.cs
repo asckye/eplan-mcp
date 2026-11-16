@@ -45,6 +45,11 @@ internal sealed class PropertyValue(string text, Action? checkAlive = null) : ID
     public bool IsEmpty => Text.Length == 0;
     public override string ToString() => Text;
     public int ToInt() => int.Parse(Text, System.Globalization.CultureInfo.InvariantCulture);
+    public double ToDouble() => double.Parse(Text, System.Globalization.CultureInfo.InvariantCulture);
+    /// <summary>Indexed values (plot frame row heights and column widths); empty for a scalar property.</summary>
+    public IReadOnlyDictionary<int, string> Items { get; init; } = new Dictionary<int, string>();
+    public int[] Indexes => [.. Items.Keys];
+    public PropertyValue this[int index] => new(Items[index], checkAlive);
     public static implicit operator PropertyValue(int value) => new(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
     public static implicit operator PropertyValue(string text) => new(text);
     public Eplan.EplApi.Base.MultiLangString ToMultiLangString() => new(Text.Contains('@', StringComparison.Ordinal) ? Text : "??_??@" + Text + ";");

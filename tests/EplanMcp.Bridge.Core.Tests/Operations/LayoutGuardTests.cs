@@ -155,6 +155,17 @@ public sealed class LayoutGuardTests
         model.Page.PageSize = null;
         Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeErrorException>(() => LayoutGuard.Check(model, [p])).Error.Reason);
     }
+    /// <summary>A145: the frame grid read with the page bounds R1 when the caller gives no area.</summary>
+    [Fact]
+    public void R1_UsesThePageFrameArea()
+    {
+        var model = Model();
+        model.Page.DrawingArea = [0, 16, 90, 90];
+        DrawingPlacement low = Row("Function", 1, 40, 12);
+        Assert.Contains(LayoutGuard.Check(model, [low], false), v => v.Rule == "R1" && !v.Message.Contains("fallback", StringComparison.Ordinal));
+        Assert.Empty(LayoutGuard.Check(model, [Row("Function", 2, 4, 40)], false));
+        Assert.StartsWith("Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. Boundary: plot-frame drawing area.", LayoutGuard.Report(model, false), StringComparison.Ordinal);
+    }
     [Fact]
     public void R1_MacroOutlinePastTheDrawingArea_IsAWarning_ASymbolStillRefuses()
     {

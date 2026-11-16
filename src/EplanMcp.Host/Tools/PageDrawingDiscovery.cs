@@ -44,6 +44,7 @@ internal static class PageDrawingDiscovery
                 GridSize = geometry.GridSize,
                 PageSize = geometry.PageSize,
                 PlotFrameSize = geometry.PlotFrameSize,
+                DrawingArea = geometry.DrawingArea,
                 BoundarySource = geometry.PageSize is null ? "unknown" : "Page.Size",
                 Total = geometry.Placements.Count,
                 // Agent eval 2026-11-06: property texts came first and filled the size budget, so wiring could not find its symbols.

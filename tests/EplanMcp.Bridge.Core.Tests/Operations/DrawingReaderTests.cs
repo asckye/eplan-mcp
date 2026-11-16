@@ -44,6 +44,34 @@ public sealed class DrawingReaderTests
         Assert.Equal(1, bridge.DispatchCalls);
     }
 
+    /// <summary>A145: the sample's A3 frame stores start (4, 16), one row of 276 mm and no column widths.</summary>
+    [Theory]
+    [InlineData(null, new double[] { 4, 16, 420, 292 })]
+    [InlineData("41.6", new double[] { 4, 16, 420, 292 })]  // ten columns of 41.6 mm
+    [InlineData("50", null)]                                // wider than the page: not an area
+    public void FakeBridge_FrameGrid_IsTheDrawingArea(string? columnWidth, double[]? expected)
+    {
+        var frame = new PlotFrame();
+        foreach ((string key, string value) in new[] { ("x", "4"), ("y", "16"), ("width", "420"), ("height", "297") })
+        { frame.Grid[key] = value; }
+        frame.RowHeights[1] = "276";
+        for (int i = 1; columnWidth is not null && i <= 10; i++)
+        { frame.ColumnWidths[i] = columnWidth; }
+
+        PageDrawingGeometry result = new FakeDrawingBridge(new Page { PlotFrame = frame }).Read("+A1/1")!;
+
+        if (expected is null)
+        { Assert.Null(result.DrawingArea); }
+        else
+        { Assert.Equal(expected, result.DrawingArea!.Select(v => Math.Round(v, 6)).ToArray()); }
+    }
+
+    [Fact]
+    public void FakeBridge_FrameWithoutGrid_HasNoDrawingArea()
+    {
+        Assert.Null(new FakeDrawingBridge(new Page { PlotFrame = new() }).Read("+A1/1")!.DrawingArea);
+    }
+
     [Fact]
     public void FakeBridge_EmptyPageSizeUnavailable_DoesNotUseFrameAsBoundary()
     {

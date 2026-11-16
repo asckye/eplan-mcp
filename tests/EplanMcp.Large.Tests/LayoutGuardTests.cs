@@ -61,7 +61,7 @@ public sealed class LayoutGuardTests(LiveEplan eplan, WriteHost host, ITestOutpu
         Assert.Contains("Suggested position", error.GetProperty("message").GetString(), StringComparison.Ordinal);
     }
     [Fact]
-    public async Task DrawingInTitleBlockFallbackBand_RefusedBeforeWriting()
+    public async Task DrawingInTitleBlock_RefusedBeforeWriting()
     {
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
         PageDrawingGeometry page = await Page(session);
@@ -78,7 +78,8 @@ public sealed class LayoutGuardTests(LiveEplan eplan, WriteHost host, ITestOutpu
         });
         Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
         Assert.Contains("R1", error.GetProperty("message").GetString(), StringComparison.Ordinal);
-        Assert.Contains("fallback", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+        // A145: the bound is the plot frame's evaluation grid now, not Page.Size minus the margin.
+        Assert.DoesNotContain("fallback", error.GetProperty("message").GetString(), StringComparison.Ordinal);
     }
     [Fact]
     public async Task MovingTextOntoSymbol_RefusedWithSuggestion()

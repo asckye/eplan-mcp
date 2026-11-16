@@ -56,12 +56,14 @@ public static class LayoutGuard
         if (new[] { c.SymbolClearanceMm, c.ParallelSpacingMm ?? (model.AllowUnknownGeometry && (!Finite(model.Page.GridSize) || model.Page.GridSize <= 0) ? 0 : model.Page.GridSize), c.MinimumTextHeightMm, c.MarginMm }.Any(n => !Finite(n) || n < 0)
             || !model.AllowUnknownGeometry && (!Finite(model.Page.GridSize) || model.Page.GridSize <= 0) || c.MinimumTextHeightMm <= 0)
         { throw WriteArguments.Invalid(["layout: use finite nonnegative distances, positive text height and page grid."]); }
-        double[]? area = model.DrawingArea ?? (model.Page.PageSize is { Length: 2 } s && s.All(n => Finite(n) && n > 0) ? [c.MarginMm, c.MarginMm, s[0] - c.MarginMm, s[1] - c.MarginMm] : null);
+        double[]? area = FrameArea(model) ?? (model.Page.PageSize is { Length: 2 } s && s.All(n => Finite(n) && n > 0) ? [c.MarginMm, c.MarginMm, s[0] - c.MarginMm, s[1] - c.MarginMm] : null);
         if (model.AllowUnknownGeometry && area is null)
         { return [double.MinValue, double.MinValue, double.MaxValue, double.MaxValue]; }
         return DrawingCoordinates.ValidBounds(area) && area![0] < area[2] && area[1] < area[3] ? area
             : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: reliable drawing area unavailable; read page geometry before drawing.");
     }
+    /// <summary>The caller's area, else the plot frame's evaluation grid read with the page (A145).</summary>
+    public static double[]? FrameArea(Model model) => model.DrawingArea ?? model.Page.DrawingArea;
     public static List<Violation> Check(Model model, IReadOnlyList<DrawingPlacement> changed, bool suggest = true, bool measured = false, bool searchViolations = true, TimeSpan? searchBudget = null)
     {
         searchBudget ??= FreePositionSearchBudget;
@@ -83,7 +85,7 @@ public static class LayoutGuard
                 Objects = other is null ? [p.Locator] : [p.Locator, other],
                 Geometry = p.Bounds ?? p.Location,
                 Warning = warning,
-                Message = rule + ": " + (warning ? "Warning: " : "") + message + " " + (model.DrawingArea is null ? "Boundary fallback: Page.Size minus layout.marginMm; plot-frame usable area is unverified. " : "") + (warningOnly ? "Review the symbol's text layout." : "Choose another grid position or reroute.")
+                Message = rule + ": " + (warning ? "Warning: " : "") + message + " " + (FrameArea(model) is null ? "Boundary fallback: Page.Size minus layout.marginMm; the plot frame reports no drawing area. " : "") + (warningOnly ? "Review the symbol's text layout." : "Choose another grid position or reroute.")
             });
         }
         void TextConflict(DrawingPlacement p, DrawingPlacement q, string message)
@@ -277,7 +279,7 @@ public static class LayoutGuard
     public static string Report(Model model, bool measured) => (measured
         ? "Layout after write: R1-R9 on measured bounds, text metadata and routes. "
         : "Layout before write: R1/R7 insertion points; R1-R9 on known bounds, text metadata and routes; unknown bounds deferred. ")
-        + (model.AllowUnknownGeometry && model.Page.PageSize is null ? "Boundary unverified: page size is unreadable. " : model.DrawingArea is null ? "Boundary fallback: Page.Size minus layout.marginMm." : "Boundary: plot-frame drawing area.")
+        + (model.AllowUnknownGeometry && model.Page.PageSize is null ? "Boundary unverified: page size is unreadable. " : FrameArea(model) is null ? "Boundary fallback: Page.Size minus layout.marginMm." : "Boundary: plot-frame drawing area.")
         + (model.AllowUnknownGeometry && (!Finite(model.Page.GridSize) || model.Page.GridSize <= 0) ? " Grid unverified: snapping and R7 were skipped." : "");
     internal const int SummaryLines = 20;
     internal static readonly TimeSpan FreePositionSearchBudget = TimeSpan.FromSeconds(2);

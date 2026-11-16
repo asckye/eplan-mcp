@@ -178,6 +178,23 @@ internal sealed class PlotFrame(params Placement[] children)
 {
     public Placement[] SubPlacements { get; } = children;
     public PointD Size { get; set; } = new(420, 297);
+    /// <summary>The evaluation grid properties (A145); empty values by default, as a frame without a grid.</summary>
+    public Dictionary<string, string> Grid { get; } = new(StringComparer.Ordinal);
+    public Dictionary<int, string> RowHeights { get; } = [];
+    public Dictionary<int, string> ColumnWidths { get; } = [];
+    public PlotFramePropertyList Properties => new(this);
+}
+
+internal sealed class PlotFramePropertyList(PlotFrame frame) : IDisposable
+{
+    private PropertyValue Value(string name) => new(frame.Grid.TryGetValue(name, out string? text) ? text : string.Empty);
+    public PropertyValue FRAME_EVALUATION_AREA_START_POINT_X => Value("x");
+    public PropertyValue FRAME_EVALUATION_AREA_START_POINT_Y => Value("y");
+    public PropertyValue FRAME_AREA_X => Value("width");
+    public PropertyValue FRAME_AREA_Y => Value("height");
+    public PropertyValue FRAME_POSITIONSIZE => new(string.Empty) { Items = frame.RowHeights };
+    public PropertyValue FRAME_PATHSIZE => new(string.Empty) { Items = frame.ColumnWidths };
+    public void Dispose() { }
 }
 
 internal sealed class Page : StorableObject, IWriteProtection, IDisposable

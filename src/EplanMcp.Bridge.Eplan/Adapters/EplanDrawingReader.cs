@@ -38,6 +38,10 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         { result.PageSize = null; OperationContext.Current.Warn("Page size is unavailable; boundary checks remain unverified."); }
         if (result.PlotFrameSize is not { Length: 2 } || result.PlotFrameSize.Any(n => double.IsNaN(n) || double.IsInfinity(n) || n <= 0))
         { result.PlotFrameSize = null; }
+        result.DrawingArea = Optional(() => page.PlotFrame is not null ? FrameArea(page) : null);
+        if (result.DrawingArea is not { Length: 4 } a || result.PageSize is not { Length: 2 } s || a.Any(n => double.IsNaN(n) || double.IsInfinity(n))
+            || a[0] < 0 || a[1] < 0 || a[2] > s[0] + 1e-6 || a[3] > s[1] + 1e-6 || a[0] >= a[2] || a[1] >= a[3])
+        { result.DrawingArea = null; }
         Placement[] native = [.. page.AllPlacements, .. created];
         var cardOwners = new Dictionary<string, string>(StringComparer.Ordinal);
         // A55: Terminal.PLC may be null even when PLCTerminals reports the card membership.
@@ -312,6 +316,38 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
     {
         using AnyPropertyId id = placement.DisplayedProperty;
         return id.AsInt;
+    }
+
+    /// <summary>
+    /// A145: the evaluation grid starts at 12003/12004; its height is the sum of the row heights 12002 and its width the sum
+    /// of the column widths 12102. A frame that stores no widths spans the frame width 12033 from its start.
+    /// </summary>
+    private static double[]? FrameArea(Page page)
+    {
+        using var properties = page.PlotFrame!.Properties;
+        static double Value(PropertyValue value)
+        { using (value) { return value.IsEmpty ? double.NaN : value.ToDouble(); } }
+        static double Sum(PropertyValue value)
+        {
+            using (value)
+            {
+                double total = 0;
+                foreach (int index in value.Indexes)
+                {
+                    using PropertyValue item = value[index];
+                    if (!item.IsEmpty)
+                    { total += item.ToDouble(); }
+                }
+                return total;
+            }
+        }
+        double x = Value(properties.FRAME_EVALUATION_AREA_START_POINT_X), y = Value(properties.FRAME_EVALUATION_AREA_START_POINT_Y);
+        double width = Sum(properties.FRAME_PATHSIZE), height = Sum(properties.FRAME_POSITIONSIZE);
+        if (width <= 0)
+        { width = Value(properties.FRAME_AREA_X) - x; }
+        if (height <= 0)
+        { height = Value(properties.FRAME_AREA_Y) - y; }
+        return [x, y, x + width, y + height];
     }
 
     private static double[] XY(PointD point) => [DrawingCoordinates.ApiToMillimetres(point.X), DrawingCoordinates.ApiToMillimetres(point.Y)];

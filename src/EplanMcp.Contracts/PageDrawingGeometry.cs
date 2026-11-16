@@ -13,6 +13,11 @@ public sealed class PageDrawingGeometry
     public double[]? PageSize { get; set; }
     /// <summary>PlotFrame.Size width/height as read, never a fallback drawing boundary: S42 did not verify its origin/scale.</summary>
     public double[]? PlotFrameSize { get; set; }
+    /// <summary>
+    /// The plot frame's evaluation grid [x1, y1, x2, y2] in page millimetres (A145): the area inside the border, above the
+    /// title block and below the column header. Null when the frame or its grid is unreadable or lies outside the page.
+    /// </summary>
+    public double[]? DrawingArea { get; set; }
     /// <summary>Supported placements and property children; excludes plot-frame descendants and part references.</summary>
     public List<DrawingPlacement> Placements { get; set; } = [];
 

@@ -51,7 +51,7 @@
       "byTools": 68,
       "partial": 0,
       "automatedTest": 68,
-      "liveVerified": 18,
+      "liveVerified": 19,
       "envBlocked": 0,
       "undocumented": 0
     },
@@ -70,7 +70,7 @@
       "byTools": 2785,
       "partial": 202,
       "automatedTest": 2785,
-      "liveVerified": 1329,
+      "liveVerified": 1331,
       "envBlocked": 15,
       "undocumented": 134
     },
@@ -88,7 +88,7 @@
       "byTools": 985,
       "partial": 103,
       "automatedTest": 985,
-      "liveVerified": 178,
+      "liveVerified": 179,
       "envBlocked": 12,
       "undocumented": 66
     },
@@ -106,7 +106,7 @@
       "byTools": 1800,
       "partial": 99,
       "automatedTest": 1800,
-      "liveVerified": 1151,
+      "liveVerified": 1152,
       "envBlocked": 3,
       "undocumented": 68
     }
@@ -116,7 +116,7 @@
     "registered": 9823
   },
   "dictionaryProperties": {
-    "used": 7990,
+    "used": 7996,
     "registered": 8585
   },
   "actionNames": {
@@ -140,7 +140,7 @@
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
       "implemented": 947,
-      "liveVerified": 555
+      "liveVerified": 556
     },
     {
       "scope": "Eplan.EplApi.DataModel.E3D",
@@ -170,7 +170,7 @@
       "scope": "Eplan.EplApi.DataModel.MasterData",
       "denominator": 121,
       "implemented": 46,
-      "liveVerified": 20
+      "liveVerified": 21
     },
     {
       "scope": "Eplan.EplApi.DataModel.Planning",
@@ -588,7 +588,7 @@
       "scope": "PlotFrame",
       "denominator": 1,
       "implemented": 1,
-      "liveVerified": 0
+      "liveVerified": 1
     },
     {
       "scope": "PlugStrip",
@@ -804,9 +804,9 @@
         "placement.text.create.plan",
         "project.get"
       ],
-      "apiIds": 328,
-      "operationGroups": 200,
-      "dataDictionary": 2,
+      "apiIds": 337,
+      "operationGroups": 202,
+      "dataDictionary": 3,
       "dependencies": 125,
       "actions": 0,
       "spec": "docs/tools/eplan_annotation_create.md",
@@ -858,8 +858,8 @@
         "api.try.plan",
         "project.get"
       ],
-      "apiIds": 13877,
-      "operationGroups": 2666,
+      "apiIds": 13884,
+      "operationGroups": 2667,
       "dataDictionary": 69,
       "dependencies": 2853,
       "actions": 0,
@@ -1130,9 +1130,9 @@
         "connection.create.plan",
         "project.get"
       ],
-      "apiIds": 399,
-      "operationGroups": 231,
-      "dataDictionary": 8,
+      "apiIds": 408,
+      "operationGroups": 233,
+      "dataDictionary": 9,
       "dependencies": 139,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
@@ -1337,9 +1337,9 @@
         "device.place.plan",
         "project.get"
       ],
-      "apiIds": 420,
-      "operationGroups": 235,
-      "dataDictionary": 7,
+      "apiIds": 429,
+      "operationGroups": 237,
+      "dataDictionary": 8,
       "dependencies": 136,
       "actions": 0,
       "spec": "docs/tools/eplan_device_place.md",
@@ -1600,9 +1600,9 @@
         "graphic.edit.execute",
         "graphic.edit.plan"
       ],
-      "apiIds": 333,
-      "operationGroups": 207,
-      "dataDictionary": 2,
+      "apiIds": 344,
+      "operationGroups": 211,
+      "dataDictionary": 3,
       "dependencies": 123,
       "actions": 0,
       "spec": "docs/tools/eplan_graphic_edit.md",
@@ -1620,9 +1620,9 @@
         "import.dxf.execute",
         "import.dxf.plan"
       ],
-      "apiIds": 234,
-      "operationGroups": 135,
-      "dataDictionary": 2,
+      "apiIds": 245,
+      "operationGroups": 139,
+      "dataDictionary": 3,
       "dependencies": 94,
       "actions": 2,
       "spec": "docs/tools/eplan_import_dxf.md",
@@ -1835,9 +1835,9 @@
         "macro.insert.execute",
         "macro.insert.plan"
       ],
-      "apiIds": 272,
-      "operationGroups": 165,
-      "dataDictionary": 3,
+      "apiIds": 283,
+      "operationGroups": 169,
+      "dataDictionary": 4,
       "dependencies": 100,
       "actions": 0,
       "spec": "docs/tools/eplan_macro_insert.md",
@@ -1962,7 +1962,7 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 450,
+      "apiIds": 457,
       "operationGroups": 280,
       "dataDictionary": 63,
       "dependencies": 166,
@@ -1984,7 +1984,7 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 531,
+      "apiIds": 538,
       "operationGroups": 361,
       "dataDictionary": 63,
       "dependencies": 166,
@@ -2164,15 +2164,15 @@
         "page.get",
         "project.get"
       ],
-      "apiIds": 193,
-      "operationGroups": 124,
-      "dataDictionary": 2,
+      "apiIds": 202,
+      "operationGroups": 126,
+      "dataDictionary": 3,
       "dependencies": 66,
       "actions": 0,
       "spec": "docs/tools/eplan_page_get.md",
       "small": 11,
       "medium": 6,
-      "large": 41,
+      "large": 42,
       "apiNotes": [
         "A11",
         "A12",
@@ -2194,7 +2194,7 @@
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
       "medium": 6,
-      "large": 15,
+      "large": 16,
       "apiNotes": [
         "A11"
       ],
@@ -2265,15 +2265,15 @@
       "operations": [
         "page.review"
       ],
-      "apiIds": 213,
-      "operationGroups": 135,
-      "dataDictionary": 2,
+      "apiIds": 224,
+      "operationGroups": 139,
+      "dataDictionary": 3,
       "dependencies": 72,
       "actions": 0,
       "spec": "docs/tools/eplan_page_review.md",
       "small": 5,
       "medium": 2,
-      "large": 2,
+      "large": 3,
       "apiNotes": [
         "A41",
         "A64",
@@ -2574,9 +2574,9 @@
         "placement.text.create.plan",
         "project.get"
       ],
-      "apiIds": 328,
-      "operationGroups": 200,
-      "dataDictionary": 2,
+      "apiIds": 337,
+      "operationGroups": 202,
+      "dataDictionary": 3,
       "dependencies": 125,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_create.md",
@@ -2595,9 +2595,9 @@
         "placement.delete.execute",
         "placement.delete.plan"
       ],
-      "apiIds": 164,
-      "operationGroups": 97,
-      "dataDictionary": 1,
+      "apiIds": 175,
+      "operationGroups": 101,
+      "dataDictionary": 2,
       "dependencies": 65,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_delete.md",
@@ -2615,9 +2615,9 @@
         "placement.edit.execute",
         "placement.edit.plan"
       ],
-      "apiIds": 463,
-      "operationGroups": 282,
-      "dataDictionary": 3,
+      "apiIds": 473,
+      "operationGroups": 285,
+      "dataDictionary": 4,
       "dependencies": 176,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_edit.md",
@@ -2633,9 +2633,9 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 380,
-      "operationGroups": 219,
-      "dataDictionary": 8,
+      "apiIds": 391,
+      "operationGroups": 223,
+      "dataDictionary": 9,
       "dependencies": 132,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
@@ -2734,9 +2734,9 @@
         "plc.rack.execute",
         "plc.rack.plan"
       ],
-      "apiIds": 300,
-      "operationGroups": 176,
-      "dataDictionary": 5,
+      "apiIds": 311,
+      "operationGroups": 180,
+      "dataDictionary": 6,
       "dependencies": 108,
       "actions": 0,
       "spec": "docs/tools/eplan_plc_rack.md",
@@ -2773,9 +2773,9 @@
         "potential.update.execute",
         "potential.update.plan"
       ],
-      "apiIds": 173,
-      "operationGroups": 103,
-      "dataDictionary": 1,
+      "apiIds": 184,
+      "operationGroups": 107,
+      "dataDictionary": 2,
       "dependencies": 67,
       "actions": 0,
       "spec": "docs/tools/eplan_potential_update.md",
@@ -3133,9 +3133,9 @@
         "plan.names",
         "project.snapshot"
       ],
-      "apiIds": 322,
-      "operationGroups": 177,
-      "dataDictionary": 8,
+      "apiIds": 331,
+      "operationGroups": 179,
+      "dataDictionary": 9,
       "dependencies": 94,
       "actions": 0,
       "spec": "docs/tools/eplan_rule_check.md",
@@ -3594,9 +3594,9 @@
         "plan.macro.inspect",
         "project.snapshot"
       ],
-      "apiIds": 323,
-      "operationGroups": 178,
-      "dataDictionary": 8,
+      "apiIds": 332,
+      "operationGroups": 180,
+      "dataDictionary": 9,
       "dependencies": 94,
       "actions": 0,
       "spec": "docs/tools/eplan_workflow_plan.md",
@@ -4653,12 +4653,28 @@
     {
       "unit": "D:PlotFrame",
       "layer": "data_dictionary",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_graphic_edit",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
         "eplan_object_find",
-        "eplan_object_get"
+        "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_plc_rack",
+        "eplan_potential_update",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ]
     },
     {
@@ -22010,14 +22026,30 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.MasterData.PlotFrame.Properties",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
+        "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_graphic_edit",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_plc_rack",
+        "eplan_potential_update",
         "eplan_property_get",
-        "eplan_property_set"
+        "eplan_property_set",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
       "route": "dedicated"
     },
@@ -28084,11 +28116,20 @@
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_place",
+        "eplan_graphic_edit",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
         "eplan_macro_store",
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_get",
+        "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_plc_rack",
+        "eplan_potential_update",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -28180,11 +28221,20 @@
         "eplan_context_get",
         "eplan_device_get",
         "eplan_device_place",
+        "eplan_graphic_edit",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
         "eplan_macro_store",
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_get",
+        "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_plc_rack",
+        "eplan_potential_update",
         "eplan_project_get",
         "eplan_property_get",
         "eplan_property_set",
@@ -28244,16 +28294,32 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToDouble",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
+        "eplan_annotation_create",
         "eplan_api_try",
+        "eplan_connection_create",
+        "eplan_device_place",
+        "eplan_graphic_edit",
+        "eplan_import_dxf",
+        "eplan_macro_insert",
         "eplan_object_find",
         "eplan_object_get",
+        "eplan_page_get",
+        "eplan_page_review",
+        "eplan_placement_create",
+        "eplan_placement_delete",
+        "eplan_placement_edit",
+        "eplan_placement_update",
+        "eplan_plc_rack",
+        "eplan_potential_update",
         "eplan_property_get",
-        "eplan_property_set"
+        "eplan_property_set",
+        "eplan_rule_check",
+        "eplan_workflow_plan"
       ],
-      "route": "generic_read"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.PropertyValue.ToInt",
@@ -72632,11 +72698,11 @@
       "live_verified": 0
     },
     "dedicated": {
-      "count": 626,
-      "live_verified": 421
+      "count": 627,
+      "live_verified": 423
     },
     "generic_read": {
-      "count": 116,
+      "count": 115,
       "live_verified": 0
     },
     "none": {
@@ -72688,11 +72754,11 @@
           "live_verified": 0
         },
         "dedicated": {
-          "count": 838,
-          "live_verified": 501
+          "count": 839,
+          "live_verified": 503
         },
         "generic_read": {
-          "count": 288,
+          "count": 287,
           "live_verified": 0
         },
         "none": {
@@ -72721,11 +72787,11 @@
           "live_verified": 0
         },
         "dedicated": {
-          "count": 403,
-          "live_verified": 173
+          "count": 404,
+          "live_verified": 174
         },
         "generic_read": {
-          "count": 33,
+          "count": 32,
           "live_verified": 0
         },
         "none": {
@@ -72755,7 +72821,7 @@
         },
         "dedicated": {
           "count": 435,
-          "live_verified": 328
+          "live_verified": 329
         },
         "generic_read": {
           "count": 255,

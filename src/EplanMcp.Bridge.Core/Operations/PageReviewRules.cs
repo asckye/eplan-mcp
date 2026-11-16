@@ -76,6 +76,31 @@ public static class PageReviewRules
                 { Add("overlap", "warning", p.Location, [p.Locator, q.Locator], "Symbol or text bounds overlap.", "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(q.Locator) }); }
             }
         }
+        // A145: the plot frame's evaluation grid keeps the title block, border and column header clear; without it the page edge.
+        double[]? area = scene.Page.DrawingArea ?? (scene.Page.PageSize is { Length: 2 } size ? [0, 0, size[0], size[1]] : null);
+        if (Enabled("off_area") && area is not null)
+        {
+            string where = scene.Page.DrawingArea is null ? "the page" : "the plot frame's drawing area";
+            double Shift(double low, double high, double min, double max) => low < min - 1e-6 ? min - low : high > max + 1e-6 ? max - high : 0;
+            double Snap(double v, double toward) => toward != 0 && scene.Page.GridSize > 0 ? (toward > 0 ? Math.Ceiling(v / scene.Page.GridSize - 1e-9) : Math.Floor(v / scene.Page.GridSize + 1e-9)) * scene.Page.GridSize : v;
+            foreach (DrawingPlacement p in placements.Where(p => p.Bounds is { Length: 4 } b && b.All(v => !double.IsNaN(v) && !double.IsInfinity(v)) && !b.All(v => v == 0)))
+            {
+                double[] b = p.Bounds!;
+                double dx = Shift(b[0], b[2], area[0], area[2]), dy = Shift(b[1], b[3], area[1], area[3]);
+                if (dx == 0 && dy == 0)
+                { continue; }
+                // A text that belongs to a symbol moves with it; the fix moves the owner.
+                DrawingLocator target = p.Parent is { } owner && p.Kind != "Text" ? owner : p.Locator;
+                double[] location = scene.Page.Placements.FirstOrDefault(o => o.Locator.Oid == target.Oid && o.Locator.Type == target.Type && o.Parent is null)?.Location ?? p.Location;
+                Add("off_area", "error", p.Location, [p.Locator], FormattableString.Invariant($"Outline [{b[0]}, {b[1]}, {b[2]}, {b[3]}] leaves {where} [{area[0]}, {area[1]}, {area[2]}, {area[3]}]; keep it clear of the border and title block."),
+                    "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(target), ["x"] = Snap(location[0] + dx, dx), ["y"] = Snap(location[1] + dy, dy) });
+            }
+            foreach (double[] point in graphical.SelectMany(s => s).Where(Known).Where(p => p[0] != 0 || p[1] != 0).GroupBy(p => string.Join("/", p)).Select(g => g.First()))
+            {
+                if (point[0] < area[0] - 1e-6 || point[1] < area[1] - 1e-6 || point[0] > area[2] + 1e-6 || point[1] > area[3] + 1e-6)
+                { Add("off_area", "error", point, [], FormattableString.Invariant($"Wire point leaves {where}; reroute it inside [{area[0]}, {area[1]}, {area[2]}, {area[3]}]."), "eplan_connection_create", new() { ["page"] = scene.Page.Page }); }
+            }
+        }
         // MX_Dryer16 2026-11-08: cable texts ran across the +M location box border; the official pages keep them inside the box.
         // The box's own texts (its +M label sits on the corner) do not count.
         if (Enabled("box_crossings"))
