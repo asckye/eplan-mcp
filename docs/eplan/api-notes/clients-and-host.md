@@ -20,6 +20,7 @@
 - **远程调用只在 EPLAN 空闲且没有 action 正在运行时才执行**，可以用 `DisableSynchronizingCalls(true)` 关闭这项同步。— XML。
 - 传输层是旧版 C-core gRPC（`Grpc.Core`），使用 `ChannelCredentials.Insecure`（没有 TLS），附带一个双工回调流。客户端进程还需要 `System.Memory` 和 `System.Runtime.CompilerServices.Unsafe`，这两个 Bin 里都没有。— 反射 + IL。
 - 服务器端：需要开启"允许通过 Remote Client 进行远程访问"（`STATION.Remoting.AllowLocalAccess`）；EPLAN 不能以 `/NoRemoting` 启动；默认端口 49152，可以用 `/EplanServerPort` 指定（49152–65535）。— `2026/EPLANRemoting.html`。
+- 🔴 端口落在 Windows 保留段里时远程服务不启动，也不报错：2026-11-16 本机 TCP 49152–49251 被保留给 Hyper-V/WSL（`netsh int ipv4 show excludedportrange protocol=tcp`），两个变体的 EPLAN 都不监听任何端口，`HKCU\Software\EPLAN\RemoteServer` 下没有登记，EPLAN 系统消息里也没有记录。以 `/EplanServerPort:49252` 启动后恢复正常。`eng/scripts/eval-fixture.ps1` 现在启动前从 49152 起找第一个既不保留也未监听的端口。— 实机验证。
 - 远程调用 `ExecuteScript` 时，即使脚本编译失败也会返回成功（见 A1）。
 - 客户端（net481 x64）引用 EPLAN Bin 中的 `RemoteClientu`、`Remotingu`、`Grpc.Core.Api`、`Newtonsoft.Json`，另加 NuGet 包 `System.Memory` 4.5.5（带来 `Unsafe` 等）即可运行。**gRPC 会使用 `HTTP_PROXY` 等代理环境变量**，设置了代理时要在客户端进程内清除，否则连不上本机的 EPLAN。— spike S9 驱动。
 - 通过 `ExecuteAction` 传给 action 的参数中，**含中文的路径没有完整传到**（action 报文件不存在）；ASCII 路径正常。— spike S9。

@@ -76,9 +76,16 @@ if ($WriteCopies) {
 if ($Open) {
     $eplan = Join-Path $EplanBin 'EPLAN.exe'
     if (-not (Test-Path $eplan)) { throw "EPLAN.exe not found in $EplanBin" }
+    # The Remote Client server binds one port and does not start when it is taken. Windows reserves dynamic ranges for
+    # Hyper-V/WSL that can cover the default 49152 (2026-11-16: 49152-49251 after a reboot), so pick the first port from
+    # 49152 that is neither reserved nor listening.
+    $reserved = @(netsh int ipv4 show excludedportrange protocol=tcp | ForEach-Object { if ($_ -match '^\s*(\d+)\s+(\d+)') { , @([int]$Matches[1], [int]$Matches[2]) } })
+    $listening = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | ForEach-Object LocalPort)
+    $port = 49152
+    while ($port -lt 65535 -and (($reserved | Where-Object { $port -ge $_[0] -and $port -le $_[1] }) -or $listening -contains $port)) { $port++ }
     # Minimized: live runs happen while the engineer works, and a window coming to the front takes their clicks.
-    Start-Process -WindowStyle Minimized -FilePath $eplan -ArgumentList @("/Variant:`"$Variant`"", 'ProjectOpen', "/Project:`"$target.elk`"") | Out-Null
-    Write-Output "Started EPLAN ($Variant) with $target.elk."
+    Start-Process -WindowStyle Minimized -FilePath $eplan -ArgumentList @("/Variant:`"$Variant`"", "/EplanServerPort:$port", 'ProjectOpen', "/Project:`"$target.elk`"") | Out-Null
+    Write-Output "Started EPLAN ($Variant) with $target.elk, Remote Client port $port."
 }
 
 # robocopy's 1 means files were copied; the script itself succeeded.
