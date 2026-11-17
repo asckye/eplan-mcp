@@ -66,6 +66,22 @@ public sealed class DrawingReaderTests
         { Assert.Equal(expected, result.DrawingArea!.Select(v => Math.Round(v, 6)).ToArray()); }
     }
 
+    /// <summary>A145, live 2026-11-16: =EC1+A3&amp;EFS1/1 is 630 x 445.5 with the 420 x 297 frame; the grid scales with the page.</summary>
+    [Fact]
+    public void FakeBridge_ScaledPage_ScalesTheFrameGrid()
+    {
+        var frame = new PlotFrame();
+        foreach ((string key, string value) in new[] { ("x", "4"), ("y", "16"), ("width", "420"), ("height", "297") })
+        { frame.Grid[key] = value; }
+        frame.RowHeights[1] = "276";
+        frame.ColumnWidths[1] = "412";
+        var page = new Page { PlotFrame = frame, StoredSize = new(630, 445.5) };
+
+        PageDrawingGeometry result = new FakeDrawingBridge(page).Read("+A1/1")!;
+
+        Assert.Equal([6, 24, 624, 438], result.DrawingArea!.Select(v => Math.Round(v, 6)).ToArray());
+    }
+
     [Fact]
     public void FakeBridge_FrameWithoutGrid_HasNoDrawingArea()
     {

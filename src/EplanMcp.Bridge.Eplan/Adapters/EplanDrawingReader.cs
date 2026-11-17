@@ -39,6 +39,9 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         if (result.PlotFrameSize is not { Length: 2 } || result.PlotFrameSize.Any(n => double.IsNaN(n) || double.IsInfinity(n) || n <= 0))
         { result.PlotFrameSize = null; }
         result.DrawingArea = Optional(() => page.PlotFrame is not null ? FrameArea(page) : null);
+        // A145: a scaled page (official =EC1+A3&EFS1/1: 630 x 445.5 with a 420 x 297 frame) draws the frame grid at page scale.
+        if (result.DrawingArea is { Length: 4 } grid && result.PageSize is { Length: 2 } page2 && result.PlotFrameSize is { Length: 2 } frame2)
+        { result.DrawingArea = [grid[0] * page2[0] / frame2[0], grid[1] * page2[1] / frame2[1], grid[2] * page2[0] / frame2[0], grid[3] * page2[1] / frame2[1]]; }
         if (result.DrawingArea is not { Length: 4 } a || result.PageSize is not { Length: 2 } s || a.Any(n => double.IsNaN(n) || double.IsInfinity(n))
             || a[0] < 0 || a[1] < 0 || a[2] > s[0] + 1e-6 || a[3] > s[1] + 1e-6 || a[0] >= a[2] || a[1] >= a[3])
         { result.DrawingArea = null; }
