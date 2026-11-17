@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_macro_get` |
-| 所属分组 / Profile | `macro` / `core` |
+| 所属分组 / Profile | `macro` / `full`（2026-11-17 起不在 `core`） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
 | 状态 | Implemented (v0.1.0) |

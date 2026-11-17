@@ -22,8 +22,11 @@ internal enum ToolProfile
 internal sealed record ToolProfileChoice(ToolProfile Profile);
 
 /// <summary>
-/// The tool profiles. Core is an explicit list: every Read and Write tool and the exports as of M4, so a new tool joins
-/// full only until it is added here. Destructive tools are full only.
+/// The tool profiles. Core is an explicit list, so a new tool joins full only until it is added here; Destructive tools
+/// are full only. Since 2026-11-17 core is chosen for the main task, drawing a schematic page from a description,
+/// reviewing it and fixing it: read the project, find symbols and parts, create a page, place devices, macros, wires,
+/// texts and graphics, move and retext them, generate connections, review, and look at the result. The M4 list
+/// (reads, macros, checks, reports and the PDF export) could not place a symbol or draw a wire.
 /// </summary>
 internal static class ToolProfiles
 {
@@ -31,11 +34,18 @@ internal static class ToolProfiles
 
     public static readonly IReadOnlySet<string> Core = new HashSet<string>(StringComparer.Ordinal)
     {
+        // Session and reading.
         SessionTools.StatusTool, SessionTools.SelectTool, ProjectTools.ListTool, ProjectTools.GetTool, PageTools.ListTool,
-        PageTools.GetTool, DeviceTools.ListTool, DeviceTools.GetTool, ConnectionTools.ListTool, PartTools.ListTool,
-        MessageTools.ListTool, CheckTools.ListTool, MacroTools.ListTool, MacroTools.GetTool, UsageTools.UsageTool,
-        PageWriteTools.CreateTool, PageWriteTools.UpdateTool, DeviceWriteTools.UpdateTool, MacroWriteTools.InsertTool,
-        ConnectionWriteTools.GenerateTool, CheckWriteTools.RunTool, ReportWriteTools.UpdateTool, ExportTools.PdfTool,
+        PageTools.GetTool, DeviceTools.ListTool, DeviceTools.GetTool, ConnectionTools.ListTool, UsageTools.UsageTool,
+        // Finding what to place.
+        SymbolTools.Tool, PartTools.SearchTool, MacroTools.ListTool,
+        // Drawing.
+        PageWriteTools.CreateTool, PageWriteTools.UpdateTool, DeviceWriteTools.PlaceTool, MacroWriteTools.InsertTool,
+        ConnectionCreateTools.Tool, PlacementCreateTools.Tool, ConnectionWriteTools.GenerateTool,
+        // Fixing.
+        // Fixing: move and retext. Deleting is Destructive (approval and backup even in scratch) and stays in full.
+        PlacementUpdateTools.Tool, PropertySetTools.Tool, DeviceWriteTools.UpdateTool,
+        // Reviewing and looking.
         PageReviewTools.Tool, ImageExportTools.ImageTool,
     };
 

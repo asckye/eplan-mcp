@@ -38,6 +38,22 @@ public sealed class ToolProfileTests
         Assert.DoesNotContain(ReportCreateTools.Tool, ToolProfiles.Core);
     }
 
+    /// <summary>
+    /// Owner 2026-11-17: core serves the main task. A client on core can read the project, find symbols and parts, draw a
+    /// page, move and retext what it drew, review the page and look at it. The M4 list could not place a symbol.
+    /// </summary>
+    [Fact]
+    public void Core_CanDrawReviewAndFixAPage()
+    {
+        string[] needed =
+        [
+            PageTools.GetTool, SymbolTools.Tool, PartTools.SearchTool, PageWriteTools.CreateTool, DeviceWriteTools.PlaceTool, MacroWriteTools.InsertTool,
+            ConnectionCreateTools.Tool, PlacementCreateTools.Tool, ConnectionWriteTools.GenerateTool, PlacementUpdateTools.Tool, PropertySetTools.Tool,
+            PageReviewTools.Tool, ImageExportTools.ImageTool,
+        ];
+        Assert.All(needed, name => Assert.Contains(name, ToolProfiles.Core));
+    }
+
     [Fact]
     public void Core_HasNoDestructiveTool()
     {
@@ -57,15 +73,15 @@ public sealed class ToolProfileTests
     {
         Assert.Equal(ReviewedToolContract.Names, Tools(ToolProfile.Full).Select(t => t.Name).Order(StringComparer.Ordinal));
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PlacementCreateTools.Tool);
-        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PlacementCreateTools.Tool);
+        Assert.Contains(Tools(ToolProfile.Core), t => t.Name == PlacementCreateTools.Tool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == AssetTools.ReviewTool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == AssetTools.ReviewTool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == SymbolTools.Tool);
-        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == SymbolTools.Tool);
+        Assert.Contains(Tools(ToolProfile.Core), t => t.Name == SymbolTools.Tool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PdfCommentsImportTools.Tool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PdfCommentsImportTools.Tool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PropertySetTools.Tool);
-        Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == PropertySetTools.Tool);
+        Assert.Contains(Tools(ToolProfile.Core), t => t.Name == PropertySetTools.Tool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == TranslationImportTools.Tool);
         Assert.DoesNotContain(Tools(ToolProfile.Core), t => t.Name == TranslationImportTools.Tool);
         Assert.Contains(Tools(ToolProfile.Full), t => t.Name == PageTextReplaceTools.Tool);

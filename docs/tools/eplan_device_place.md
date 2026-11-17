@@ -11,7 +11,7 @@ T7d 回归修复：`plc_text`、`terminal_strip_text` 均接收普通文本，�
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_device_place` |
-| 所属分组 / Profile | `device` / `full`（M4c 的新工具默认只在 `full` 中） |
+| 所属分组 / Profile | `device` / `core`、`full`（2026-11-17 起进入 `core`） |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
 | 状态 | Implemented (v0.1.0) |

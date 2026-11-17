@@ -62,7 +62,7 @@
 | 计划执行 | 把多步操作编成计划，审阅后整体批准执行 |
 | 通用 API 层 | 搜索 EPLAN API 与 action，查看调用模板，在安全规则允许的范围内调用 |
 
-完整清单、Profile 与读写注解见[工具索引](docs/tools/README.md)。默认提供全部工具（默认关闭的工具需另行启用），`serve --profile core` 只提供固定的 25 个常用工具。
+完整清单、Profile 与读写注解见[工具索引](docs/tools/README.md)。默认提供全部工具（默认关闭的工具需另行启用），`serve --profile core` 只提供固定的 25 个工具，够完成“读项目、找符号和部件、画一页、移动和改文字、审图、看图”；删除等 Destructive 工具只在默认的 `full` 里。
 
 ## 工作方式
 

@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_check_list` |
-| 所属分组 / Profile | `check` / `core` |
+| 所属分组 / Profile | `check` / `full`（2026-11-17 起不在 `core`） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
 | 状态 | Implemented (v0.1.0) |

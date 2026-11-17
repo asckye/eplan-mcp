@@ -130,10 +130,10 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
-    public void ConnectionCreate_IsAFullProfileNonIdempotentWrite_WithClosedCableExecutionBranch()
+    public void ConnectionCreate_IsACoreNonIdempotentWrite_WithClosedCableExecutionBranch()
     {
         Tool tool = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
-        Assert.DoesNotContain(ConnectionCreateTools.Tool, ToolProfiles.Core);
+        Assert.Contains(ConnectionCreateTools.Tool, ToolProfiles.Core);
         Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.InRange(tool.Description!.Length, 1, 600);
         Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5650);

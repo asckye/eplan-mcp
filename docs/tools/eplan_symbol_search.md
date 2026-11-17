@@ -5,7 +5,7 @@ T7d 兼容输出增加 `functionCategory`（原生功能类别）与 `plcInputDe
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_symbol_search` |
-| 所属分组 / Profile | `symbol` / `full` |
+| 所属分组 / Profile | `symbol` / `core`、`full`（2026-11-17 起进入 `core`） |
 | 安全级别 | Read |
 | MCP 注解 | `readOnlyHint=true`、`destructiveHint=false`、`idempotentHint=true`、`openWorldHint=false` |
 | 状态 | Implemented (v0.4.1) |

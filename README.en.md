@@ -62,7 +62,7 @@ Installation needs no administrator rights. See the [getting started guide](docs
 | Plans | Compile several steps into a plan, review it, and approve it as a whole |
 | Generic API layer | Search EPLAN APIs and actions, read call templates, and call them within the safety rules |
 
-See the [tool index](docs/tools/README.md) for the full list, profiles, and read/write annotations. All tools are offered by default (tools that are off by default must be enabled); `serve --profile core` offers a fixed set of 25 common tools.
+See the [tool index](docs/tools/README.md) for the full list, profiles, and read/write annotations. All tools are offered by default (tools that are off by default must be enabled); `serve --profile core` offers a fixed set of 25 tools, enough to read a project, find symbols and parts, draw a page, move and retext what was drawn, review the page and look at it; deleting and the other Destructive tools are in the default `full` profile only.
 
 ## How it works
 

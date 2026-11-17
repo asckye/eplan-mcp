@@ -1,6 +1,6 @@
 # 已注册工具索引
 
-以 [server-contract.verified.json](../../tests/Contracts.Snapshots/server-contract.verified.json) 的 121 个工具及 `readOnlyHint` 为准；Profile 按 [ToolProfiles.Core](../../src/EplanMcp.Host/Tools/ToolProfiles.cs) 补齐（快照不含 Profile 字段）。`full` 包含全部登记工具，默认关闭的工具仍须配置启用。
+以 [server-contract.verified.json](../../tests/Contracts.Snapshots/server-contract.verified.json) 的 133 个工具及 `readOnlyHint` 为准；Profile 按 [ToolProfiles.Core](../../src/EplanMcp.Host/Tools/ToolProfiles.cs) 补齐（快照不含 Profile 字段）。`full` 包含全部登记工具，默认关闭的工具仍须配置启用。
 
 “写入”表示 `readOnlyHint: false`，包含项目写入、本地数据和导出文件；具体安全级别、审批及验证边界见规格。规格状态括号记录首次发布版本，标签中尚无该工具时记 `Unreleased`；Implemented 不代表已经通过实机验收。未注册规格不列入此表，里程碑状态见[路线图](../roadmap.md)。
 
@@ -23,9 +23,9 @@
 | `eplan_cable_generate` | full | 写入 | [eplan_cable_generate.md](eplan_cable_generate.md) |
 | `eplan_cable_get` | full | 只读 | [eplan_cable_get.md](eplan_cable_get.md) |
 | `eplan_cable_renumber` | full | 写入 | [eplan_cable_renumber.md](eplan_cable_renumber.md) |
-| `eplan_check_list` | core、full | 只读 | [eplan_check_list.md](eplan_check_list.md) |
-| `eplan_check_run` | core、full | 写入 | [eplan_check_run.md](eplan_check_run.md) |
-| `eplan_connection_create` | full | 写入 | [eplan_connection_create.md](eplan_connection_create.md) |
+| `eplan_check_list` | full | 只读 | [eplan_check_list.md](eplan_check_list.md) |
+| `eplan_check_run` | full | 写入 | [eplan_check_run.md](eplan_check_run.md) |
+| `eplan_connection_create` | core、full | 写入 | [eplan_connection_create.md](eplan_connection_create.md) |
 | `eplan_connection_route` | full | 写入 | [eplan_connection_route.md](eplan_connection_route.md) |
 | `eplan_connection_generate` | core、full | 写入 | [eplan_connection_generate.md](eplan_connection_generate.md) |
 | `eplan_connection_list` | core、full | 只读 | [eplan_connection_list.md](eplan_connection_list.md) |
@@ -33,14 +33,14 @@
 | `eplan_context_get` | full | 只读 | [eplan_context_get.md](eplan_context_get.md) |
 | `eplan_device_get` | core、full | 只读 | [eplan_device_get.md](eplan_device_get.md) |
 | `eplan_device_list` | core、full | 只读 | [eplan_device_list.md](eplan_device_list.md) |
-| `eplan_device_place` | full | 写入 | [eplan_device_place.md](eplan_device_place.md) |
+| `eplan_device_place` | core、full | 写入 | [eplan_device_place.md](eplan_device_place.md) |
 | `eplan_device_renumber` | full | 写入 | [eplan_device_renumber.md](eplan_device_renumber.md) |
 | `eplan_device_update` | core、full | 写入 | [eplan_device_update.md](eplan_device_update.md) |
 | `eplan_export_dxf` | full | 写入 | [eplan_export_dxf.md](eplan_export_dxf.md) |
 | `eplan_export_image` | core、full | 写入 | [eplan_export_image.md](eplan_export_image.md) |
 | `eplan_export_labels` | full | 写入 | [eplan_export_labels.md](eplan_export_labels.md) |
 | `eplan_export_parts` | full | 写入 | [eplan_export_parts.md](eplan_export_parts.md) |
-| `eplan_export_pdf` | core、full | 写入 | [eplan_export_pdf.md](eplan_export_pdf.md) |
+| `eplan_export_pdf` | full | 写入 | [eplan_export_pdf.md](eplan_export_pdf.md) |
 | `eplan_export_pxf` | full | 写入 | [eplan_export_pxf.md](eplan_export_pxf.md) |
 | `eplan_export_untranslated` | full | 写入 | [eplan_export_untranslated.md](eplan_export_untranslated.md) |
 | `eplan_graphic_edit` | full | 写入 | [eplan_graphic_edit.md](eplan_graphic_edit.md) |
@@ -67,11 +67,11 @@
 | `eplan_plc_rack` | full | 写入 | [eplan_plc_rack.md](eplan_plc_rack.md) |
 | `eplan_cable_reassign` | full | 写入 | [eplan_cable_reassign.md](eplan_cable_reassign.md) |
 | `eplan_report_configure` | full | 写入 | [eplan_report_configure.md](eplan_report_configure.md) |
-| `eplan_macro_get` | core、full | 只读 | [eplan_macro_get.md](eplan_macro_get.md) |
+| `eplan_macro_get` | full | 只读 | [eplan_macro_get.md](eplan_macro_get.md) |
 | `eplan_macro_insert` | core、full | 写入 | [eplan_macro_insert.md](eplan_macro_insert.md) |
 | `eplan_macro_list` | core、full | 只读 | [eplan_macro_list.md](eplan_macro_list.md) |
 | `eplan_macro_store` | full | 写入 | [eplan_macro_store.md](eplan_macro_store.md) |
-| `eplan_message_list` | core、full | 只读 | [eplan_message_list.md](eplan_message_list.md) |
+| `eplan_message_list` | full | 只读 | [eplan_message_list.md](eplan_message_list.md) |
 | `eplan_object_find` | full | 只读 | [eplan_object_find.md](eplan_object_find.md) |
 | `eplan_object_get` | full | 只读 | [eplan_object_get.md](eplan_object_get.md) |
 | `eplan_pack_build` | full | 写入 | [eplan_pack_build.md](eplan_pack_build.md) |
@@ -93,13 +93,13 @@
 | `eplan_part_build` | full | 写入 | [eplan_part_build.md](eplan_part_build.md) |
 | `eplan_part_export` | full | 写入 | [eplan_part_export.md](eplan_part_export.md) |
 | `eplan_part_import` | full | 写入 | [eplan_part_import.md](eplan_part_import.md) |
-| `eplan_part_list` | core、full | 只读 | [eplan_part_list.md](eplan_part_list.md) |
-| `eplan_part_search` | full | 只读 | [eplan_part_search.md](eplan_part_search.md) |
+| `eplan_part_list` | full | 只读 | [eplan_part_list.md](eplan_part_list.md) |
+| `eplan_part_search` | core、full | 只读 | [eplan_part_search.md](eplan_part_search.md) |
 | `eplan_part_sync` | full | 写入 | [eplan_part_sync.md](eplan_part_sync.md) |
 | `eplan_placeholder_apply` | full | 写入 | [eplan_placeholder_apply.md](eplan_placeholder_apply.md) |
 | `eplan_placeholder_list` | full | 只读 | [eplan_placeholder_list.md](eplan_placeholder_list.md) |
-| `eplan_placement_create` | full | 写入 | [eplan_placement_create.md](eplan_placement_create.md) |
-| `eplan_placement_update` | full | 写入 | [eplan_placement_update.md](eplan_placement_update.md) |
+| `eplan_placement_create` | core、full | 写入 | [eplan_placement_create.md](eplan_placement_create.md) |
+| `eplan_placement_update` | core、full | 写入 | [eplan_placement_update.md](eplan_placement_update.md) |
 | `eplan_plan_apply` | full | 写入 | [eplan_plan_apply.md](eplan_plan_apply.md) |
 | `eplan_plan_get` | full | 只读 | [eplan_plan_get.md](eplan_plan_get.md) |
 | `eplan_placement_edit` | full | 写入 | [eplan_placement_edit.md](eplan_placement_edit.md) |
@@ -112,9 +112,9 @@
 | `eplan_project_translate` | full | 写入 | [eplan_project_translate.md](eplan_project_translate.md) |
 | `eplan_property_get` | full | 只读 | [eplan_property_get.md](eplan_property_get.md) |
 | `eplan_property_schema` | full | 只读 | [eplan_property_schema.md](eplan_property_schema.md) |
-| `eplan_property_set` | full | 写入 | [eplan_property_set.md](eplan_property_set.md) |
+| `eplan_property_set` | core、full | 写入 | [eplan_property_set.md](eplan_property_set.md) |
 | `eplan_report_create` | full | 写入 | [eplan_report_create.md](eplan_report_create.md) |
-| `eplan_report_update` | core、full | 写入 | [eplan_report_update.md](eplan_report_update.md) |
+| `eplan_report_update` | full | 写入 | [eplan_report_update.md](eplan_report_update.md) |
 | `eplan_revision_list` | full | 只读 | [eplan_revision_list.md](eplan_revision_list.md) |
 | `eplan_rule_check` | full | 只读 | [eplan_rule_check.md](eplan_rule_check.md) |
 | `eplan_selection_get` | full | 只读 | [eplan_selection_get.md](eplan_selection_get.md) |
@@ -128,7 +128,7 @@
 | `eplan_structure_list` | full | 只读 | [eplan_structure_list.md](eplan_structure_list.md) |
 | `eplan_structure_rename` | full | 写入 | [eplan_structure_rename.md](eplan_structure_rename.md) |
 | `eplan_structure_update` | full | 写入 | [eplan_structure_update.md](eplan_structure_update.md) |
-| `eplan_symbol_search` | full | 只读 | [eplan_symbol_search.md](eplan_symbol_search.md) |
+| `eplan_symbol_search` | core、full | 只读 | [eplan_symbol_search.md](eplan_symbol_search.md) |
 | `eplan_task_get` | full | 只读 | [eplan_task_get.md](eplan_task_get.md) |
 | `eplan_terminal_renumber` | full | 写入 | [eplan_terminal_renumber.md](eplan_terminal_renumber.md) |
 | `eplan_terminal_strip_get` | full | 只读 | [eplan_terminal_strip_get.md](eplan_terminal_strip_get.md) |
@@ -180,7 +180,7 @@
 | `message` | EPLAN 系统消息 | 系统消息树 |
 | `action` | EPLAN 的 action，受控的 `eplan_action_run` 只执行白名单条目（[ADR-0021](../adr/0021-action-run-whitelist.md)） | `ActionManager`、`ActionCallingContext` |
 | `action_catalog` | 官方与本机 UI action 的只读目录（[ADR-0030](../adr/0030-action-catalog-tiers.md)），查询不授予执行权限 | 官方 actions 及本机功能区/菜单定义 |
-| `tool` | 本服务器的工具，只用于元工具 `eplan_tool_usage` | 本项目的概念 |
+| `tool` | 本服务器的工具，用于元工具 `eplan_tool_usage` 和发现模式的 `eplan_tool_search`、`eplan_tool_read`、`eplan_tool_write` | 本项目的概念 |
 | `api` | ADR-0032 B 级离线能力目录，搜索重载组及查询签名、状态与证据 | 已提交的 API 目录与覆盖映射 |
 | `pack` | 工程包：开发目录 `packs-dev\`、已安装的版本 `packs\`（M6 设计 4.1） | 本项目的概念；包中的原生文件是 EPLAN 的宏、项目等 |
 | `pack_library` | 内置、本地和共享的插件库及其只读索引 | 本项目的概念；安装前的发现来源 |

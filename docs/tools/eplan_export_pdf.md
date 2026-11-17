@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_export_pdf` |
-| 所属分组 / Profile | `export` / `core` |
+| 所属分组 / Profile | `export` / `full`（2026-11-17 起不在 `core`） |
 | 安全级别 | Read（写文件，ADR-0012） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
 | 状态 | Implemented (v0.1.0) |

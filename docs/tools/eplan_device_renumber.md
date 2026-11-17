@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 工具名 | `eplan_device_renumber` |
-| 所属分组 / Profile | `device` / `core` |
+| 所属分组 / Profile | `device` / `full` |
 | 安全级别 | Destructive |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
 | 状态 | Implemented (v0.1.0) |

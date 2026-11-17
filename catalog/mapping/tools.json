@@ -16931,6 +16931,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
             "name": "AcceptanceListFileTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceListFileTests.cs"
@@ -17284,6 +17289,11 @@
             "name": "SmallProjectRedrawRoundThreeTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
             "name": "ConnectionGenerateToolTests",
@@ -19035,6 +19045,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
             "name": "AcceptanceListFileTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceListFileTests.cs"
@@ -20015,6 +20030,11 @@
             "name": "ExportToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ExportToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
             "name": "ImageExportToolTests",
@@ -22844,6 +22864,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
             "name": "MacroInsertToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/MacroInsertToolTests.cs"
@@ -25196,6 +25221,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawRoundThreeTests.cs"
           },
           {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
             "name": "TransactionRunnerTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/TransactionRunnerTests.cs"
@@ -25929,6 +25959,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
             "name": "AcceptanceListFileTests",
@@ -27105,6 +27140,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
+          },
+          {
             "name": "PageReviewContractTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewContractTests.cs"
@@ -28187,6 +28227,11 @@
             "name": "PartSearchToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PartSearchToolTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
             "name": "MasterDataExportOperationTests",
@@ -30544,6 +30589,11 @@
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
+            "name": "ToolProfileTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
           },
           {
             "name": "PageDisplayToolTests",

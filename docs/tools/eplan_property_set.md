@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 工具名 / title | `eplan_property_set` / Set EPLAN properties |
-| 所属分组 / Profile | `property` / `full`；不加入 `core` |
+| 所属分组 / Profile | `property` / `core`、`full`（2026-11-17 起进入 `core`） |
 | 安全级别 | Write |
 | MCP 注解 | readOnly=false，destructive=false，idempotent=true，openWorld=false |
 | 状态 | Implemented (v0.4.0) |

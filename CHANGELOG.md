@@ -5,6 +5,17 @@
 
 ## [Unreleased]
 
+### 变更
+
+- `serve --profile core` 的 25 个工具改为围绕“按描述画一页、审图、修正”选取：加入 `eplan_device_place`、`eplan_connection_create`、`eplan_placement_create`、`eplan_placement_update`、`eplan_property_set`、`eplan_symbol_search`、`eplan_part_search`；`eplan_part_list`、`eplan_message_list`、`eplan_check_list`、`eplan_check_run`、`eplan_macro_get`、`eplan_report_update`、`eplan_export_pdf` 只在默认的 `full` 里。原来的 core 是早期的“读取加宏”组合，放不了符号、画不了线。删除类工具属于 Destructive，仍只在 `full`。服务器说明不再让 core 客户端调用它看不到的 `eplan_page_open`。
+
+### 修复
+
+- scratch 判断把项目的链接文件 `<名称>.elk` 和数据目录 `<名称>.edb` 也算进去：其中任一个是指向 scratch 之外的联接点或链接时，项目按“不在 scratch”处理，写入要审批。以前只解析不带扩展名的项目路径，这种项目会被当成 scratch 项目。
+- `eplan_api_try` 的删除类调用在执行前真正备份项目；以前审批文字说会备份，实际没有备份。
+- EPLAN 审批对话框里的项目文字去掉行分隔符（U+2028、U+2029）和方向标记，项目文字不能在审批内容里另起一行。
+- 写入执行固定到计划时的项目路径：审批之后同名的另一个项目被打开时，写入不会落到它上面，而是报告项目未打开。原始 JSON 参数的 6 个绘图工具和计划步骤执行还没有覆盖。
+
 ## [0.7.0] - 2026-11-17
 
 ### 新增
