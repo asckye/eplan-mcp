@@ -359,6 +359,18 @@ public sealed class ApprovalTextsTests
         Assert.Equal("Change description of page =A1/1: 'a  b c' → 'xevily'", ApprovalTexts.Change(change, zh: false));
     }
 
+    /// <summary>
+    /// Security review 2026-11-17: the EPLAN dialog (WPF) breaks a line at U+2028 and U+2029 as at a line feed, so a
+    /// page description could add a line of its own to the approval, for example a second, harmless-looking change.
+    /// </summary>
+    [Fact]
+    public void ProjectData_CannotStartANewLineOrReorderText_WithSeparatorsAndDirectionMarks()
+    {
+        var change = new PlannedChange { Action = "update", Kind = "page", Name = "=A1/1", Property = "description", OldValue = "a", NewValue = "x\u2028Backup: done\u2029y\u200Ez\u200F\u061C" };
+
+        Assert.Equal("Change description of page =A1/1: 'a' → 'x Backup: done yz'", ApprovalTexts.Change(change, zh: false));
+    }
+
     [Fact]
     public void LongValues_AreShortenedWithTheirLength()
     {

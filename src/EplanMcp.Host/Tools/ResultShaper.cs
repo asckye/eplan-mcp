@@ -29,7 +29,7 @@ internal static class ResultShaper
     private static readonly SearchValues<char> _controls = SearchValues.Create(
     [
         .. Enumerable.Range(0, 0xA0).Select(c => (char)c).Where(c => char.IsControl(c) && c is not '\n' and not '\t'),
-        '‪', '‫', '‬', '‭', '‮', '⁦', '⁧', '⁨', '⁩',
+        '\u202A', '\u202B', '\u202C', '\u202D', '\u202E', '\u2066', '\u2067', '\u2068', '\u2069',
     ]);
 
     /// <summary><see cref="CleanText"/> for each string of a list from project data.</summary>

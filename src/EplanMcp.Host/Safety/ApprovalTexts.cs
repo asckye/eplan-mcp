@@ -576,7 +576,10 @@ internal static class ApprovalTexts
     /// </summary>
     internal static string Value(string text, bool zh)
     {
-        string clean = new([.. text.Where(c => c is not ((>= '‪' and <= '‮') or (>= '⁦' and <= '⁩'))).Select(c => char.IsControl(c) ? ' ' : c)]);
+        // Line and paragraph separators break lines in the EPLAN dialog (WPF) like a line feed, so project text could
+        // forge a line of its own there; the direction marks reorder what is read. Same set as the Workbench's ProjectText.
+        string clean = new([.. text.Where(c => c is not ((>= '\u202A' and <= '\u202E') or (>= '\u2066' and <= '\u2069') or '\u200E' or '\u200F' or '\u061C'))
+            .Select(c => char.IsControl(c) || c is '\u2028' or '\u2029' ? ' ' : c)]);
         if (clean.Length <= MaxValueLength)
         {
             return clean;
