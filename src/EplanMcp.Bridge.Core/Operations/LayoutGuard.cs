@@ -130,9 +130,12 @@ public static class LayoutGuard
                     || badAngle && model.SetsTextAttribute?.Invoke(p, "angle") == true;
                 Add("R8", p, null, "Use the configured minimum text height and rotation 0, 90, 180 or 270 degrees.", !requested);
             }
-            foreach (DrawingPlacement q in all.Where(q => !ReferenceEquals(p, q) && !Same(p, q)))
+            foreach (DrawingPlacement q in all)
             {
-                if (!Positioned(q) || !DrawingCoordinates.ValidBounds(q.Bounds))
+                // Live 2026-11-16: 3870 objects took 11.8 s in page review; the outline test comes before the identity and
+                // ownership comparisons, which build strings. Every rule below needs the outlines to meet.
+                if (ReferenceEquals(p, q) || !Positioned(q) || !DrawingCoordinates.ValidBounds(q.Bounds)
+                    || !Overlaps(b, q.Bounds!, model.Config.SymbolClearanceMm) && !(p.Bounds is null && p.Location.SequenceEqual(q.Location)) || Same(p, q))
                 { continue; }
                 bool overlap = Overlaps(b, q.Bounds!);
                 if (Related(p, q, owners))
@@ -181,7 +184,7 @@ public static class LayoutGuard
                         }
                     }
                 }
-                if (Text(p) && !Related(p, row, owners) && Hits(line.Points, p.Bounds!))
+                if (Text(p) && Hits(line.Points, p.Bounds!) && !Related(p, row, owners))
                 { TextConflict(p, row, "Text bounds conflict with a line."); }
             }
             if (!line.Changed)
@@ -385,7 +388,7 @@ public static class LayoutGuard
     public static bool Overlaps(double[] a, double[] b, double clearance = 0) => a[0] < b[2] + clearance && a[2] + clearance > b[0] && a[1] < b[3] + clearance && a[3] + clearance > b[1];
     private static bool Text(DrawingPlacement p) => p.Kind is "Text" or "PathText" or "PropertyPlacement" or "HyperLink" or "DimensionItem" or "DimensionCircle";
     private static bool Graphic(DrawingPlacement p) => p.Kind is "PolyLine" or "Arc" or "Image" or "Spline" or "QRCode" or "PlaceHolder" or "MacroBox";
-    private static bool Container(DrawingPlacement p) => p.Properties.TryGetValue("layout_container", out string? value) && value == "true" || p.Kind is "LocationBox" or "PLC" or "PLCBox" or "Box";
+    internal static bool Container(DrawingPlacement p) => p.Properties.TryGetValue("layout_container", out string? value) && value == "true" || p.Kind is "LocationBox" or "PLC" or "PLCBox" or "Box";
     private static bool Symbol(DrawingPlacement p) => p.Kind != "DynamicConnectionLine" && !Container(p) && (p.Kind is "Function" or "SymbolReference" or "PotentialDefinition" or "ConnectionDefinitionPoint" or "Macro" || p.Properties.ContainsKey("layout_symbol"));
     // The project path comparison allocates; compare it last.
     private static bool OwnerId(DrawingLocator a, DrawingLocator b) => a.Oid == b.Oid && a.Type == b.Type && a.Page == b.Page && ProjectResolver.SamePath(a.Project, b.Project);
@@ -516,6 +519,9 @@ public static class LayoutGuard
         Dictionary<string, List<double[][]>>? pointRoutes, out bool unverified, ISet<string>? endpointPins = null)
     {
         unverified = false;
+        // Live 2026-11-16: on a 3870-object page the pin scan below ran for every wire and box; most wires miss the outline.
+        if (!Hits(s, p.Bounds!))
+        { return false; }
         // A black-box connection point may belong to a child function, rather than to the box itself.
         bool endsAtBoxPin = (Container(p) || p.Kind == "BoxedDevice") && pins.Any(pin =>
             (endpointPins is null || endpointPins.Contains(pin.Key)) && Hits([pin.Value.Location, pin.Value.Location], p.Bounds!)
