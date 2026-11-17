@@ -181,7 +181,7 @@ CLI 的 JSON 输出契约、版本与退出码见 [CLI 参考](../reference/cli.
 | `AddIn` | 实现 `IEplAddIn`（每个程序集只能有一个），以 `bLoadOnStart = true` 注册。在 `OnInitGui` 中：在主线程上取得调度器、检查授权、启动管道服务器（管道名带固定前缀，供 Host 枚举发现，见 ADR-0008）；在 `OnExit` 中清理 |
 | `PipeServer`（Bridge.Core） | 管道监听、帧读写、JSON-RPC 分发、握手校验。不引用 EPLAN |
 | `EplanDispatcher`（实现 `IMainThreadDispatcher`） | 在 `OnInitGui` 捕获 `Dispatcher.CurrentDispatcher`，通过带超时的 `Dispatcher.Invoke` 调度；委托内捕获异常、先检查主窗口禁用状态和重入标志，再创建 `LockingStep`。等待超时或模态/重入返回 `EPLAN_BUSY`；API 证据见 A9（S1）及 ADR-0009 |
-| `Operations` | 按资源划分的操作处理器（Project、Page、Device、Connection、Part、Report、Export、Check……），只依赖适配层的接口 |
+| `Operations` | 按资源划分的操作处理器，只依赖适配层的接口。文件按领域放在 11 个子目录里（2026-11-17 起；命名空间仍是 `EplanMcp.Bridge.Core.Operations`）：`Pages`、`Projects`、`Devices`、`Connections`、`Placement`、`Properties`、`MasterData`、`Exchange`（导入、导出、报表、检查）、`Api`（通用 API 与 action）、`Plans`（计划与审批）、`Runtime`（操作基类、事务、结果记录） |
 | `TransactionScope` | 调度器的 `LockingStep` 内依次创建 `SafetyPoint`、`UndoStep`、`QuietModeStep(ShowNoDialogs)`；结束静默作用域后 Commit，再 CloseUndo。`Function.Create` 使用 `FunctionTransactionScope`；精确顺序与生命周期证据见 [实现证据索引](../eplan/api-notes.md#实现证据索引) |
 | `Adapters` | EPLAN 对象与 DTO 的转换、多语言文本及单位在此处理。插件、Offline 启动入口和 Large 的 RevisionHelper 也直接接触厂商入口；借用句柄表的生命周期见 ADR-0033 |
 | `MessageCapture` | 记录操作前后 EPLAN 系统消息的差异，一并返回。这是实机测试得到的教训：EPLAN 的很多失败只出现在系统消息里 |
