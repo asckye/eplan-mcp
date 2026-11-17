@@ -11,6 +11,7 @@
 | 读取时每个包装对象只取一次属性列表（d0b63d65，2026-11-10；回顾第 7 条） | `CableTests`、`PlcTests`、`DeviceAndConnectionTests`、`PartAndMessageTests`、`PartSearchTests`、`PageDescriptionMapTests`、`NoSideEffectTests` | 已通过：2026-11-10，B 槽 Pro Panel，EPLAN 2026.0.3.25421，main `3316ef24`（影子副本与构建一致）：7 个类 27/27，用时 9 分钟。 |
 | 电位定义点修改 `eplan_potential_update`（cd7cc5ad，2026-11-10；A130） | `PotentialEngineeringTests`（用例待补） | 工具路径已在会话中实机使用（2026-11-10：通过式烘芯炉 N/NC 线改蓝色、MX_NFPA 三根变频器线加定义点后重新生成，审图 0 问题）；Large 用例待补。 |
 | 删除电位连接点、电位定义点和连接定义点（a9bf6580，2026-11-09） | `PlacementDeleteTests` | 待实机验证：删除三类点后核对点消失、提示重新生成连接、一次撤销恢复。 |
+| 页面体检用官方 EES 项目回归（“read macro box texts and SPECIAL/DC boxes stably”与“stop page review errors on the official EES projects”两个提交，2026-11-17；A147） | `OfficialCorpusReviewTests`（需 `EPLANMCP_LARGE_OFFICIAL_CORPUS` 指向官方 `.zw1` 目录） | 已通过：2026-11-17，A 槽 Electric P8，EPLAN 2026.0.3.25421：8 个项目 256 页 0 个 error，冷读游标检查通过，EPLAN 内存稳定（1.8–1.9 GiB）。同日另两次完整运行中 EPLAN 在审宏项目时崩溃（`ucrtbase.dll` 0xc0000409），单页与两项目子集新旧插件均未复现，原因待查。 |
 | 审图把电位连接点算作导线端点（47ac65b7，2026-11-09；A129） | `PageReviewTests` | 已在会话中实机复验（2026-11-09，从 `SPECIAL/PCP` 引出的线不再报 `dangling_end`）；Large 测试未跑。 |
 | 项目改名 `eplan_project_rename`（7a6df47e，2026-11-09；A127） | `ProjectToolsTests` | 待实机验证：scratch 项目改名后核对旧文件消失、新名可打开、未打开项目与打开项目两种路径。 |
 | 项目以标准模式打开（091d6688，2026-11-09） | `ProjectToolsTests` | 待实机验证：`eplan_project_open` 后 EPLAN 内仍可手动编辑同一项目，不再独占。 |
