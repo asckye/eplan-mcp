@@ -21,6 +21,9 @@ public static class PageReviewRules
     /// The layout guard over every placement and wire of the page, as measured: nets come from shared wire ends, polylines
     /// are split into segments, and no free position is searched.
     /// </summary>
+    /// <summary>Pages whose lines are wires: not model views (3D projections) and not P&amp;ID pages (pipes).</summary>
+    private static bool Schematic(ConnectionCreatePlanner.Scene scene) => scene.PageType is not ("ModelView" or "ProcessAndInstrumentationDiagram");
+
     private static double Deep(ConnectionCreatePlanner.Scene scene) => Math.Max(1, scene.Page.GridSize / 2);
     private static string Device(DrawingPlacement p) => p.Properties.TryGetValue("name", out string? name) ? name.Split(':')[0] : "";
     /// <summary>One device, or a device and its sub-device (live 2026-11-16: the pins of -KK1-X11 sit on the -KK1 box edge).</summary>
@@ -117,7 +120,7 @@ public static class PageReviewRules
         {
             OperationContext.Current.ThrowIfCancellationRequested();
             if (Enabled("dangling_ends") && !scene.Pins.Values.Any(p => Equal(p.Location, end)))
-            { Add("dangling_end", "error", end, [], "Wire end has no symbol pin or node.", "eplan_connection_create", new() { ["page"] = scene.Page.Page }); }
+            { Add("dangling_end", Schematic(scene) ? "error" : "warning", end, [], "Wire end has no symbol pin or node.", "eplan_connection_create", new() { ["page"] = scene.Page.Page }); }
         }
         bool Connected(double[] location) => graphical.Any(s => s.Any(p => Equal(p, location)));
         // A83: an interruption point is one wire end even with two connection points (BP); one connected pin covers it, an open one is
@@ -153,7 +156,9 @@ public static class PageReviewRules
                 {
                     // Owner decision 2026-11-16: one symbol on another is a drawing error; overlapping texts stay a warning.
                     // Live 2026-11-16 (official =GAB1+A2&EFS1/1): a device symbol encloses its own connection points (-TB1, -TB1:13).
-                    bool symbols = scene.PageType != "ModelView" && p.Kind != "Text" && q.Kind != "Text" && !LayoutGuard.Related(p, q, scene.Page.Placements) && !SameDevice(p, q)
+                    // Corpus 2026-11-17 (official PLC and Stacking samples): a graphic block (kind Block, the card picture) drawn inside a PLC
+                    // box carries a block name, not a device; it is graphics on graphics.
+                    bool symbols = Schematic(scene) && p.Kind is not ("Text" or "Block") && q.Kind is not ("Text" or "Block") && !LayoutGuard.Related(p, q, scene.Page.Placements) && !SameDevice(p, q)
                         // Live 2026-11-16: official pages touch by 0.25-1 mm (mated plugs, plug pins on a box edge, a breaker and its
                         // potential point); outlines that overlap by half a grid both ways sit on each other.
                         && Math.Min(a[2], b[2]) - Math.Max(a[0], b[0]) >= Deep(scene) && Math.Min(a[3], b[3]) - Math.Max(a[1], b[1]) >= Deep(scene);
@@ -183,7 +188,10 @@ public static class PageReviewRules
                 // A text that belongs to a symbol moves with it; the fix moves the owner.
                 DrawingLocator target = p.Parent is { } owner && p.Kind != "Text" ? owner : p.Locator;
                 double[] location = scene.Page.Placements.FirstOrDefault(o => o.Locator.Oid == target.Oid && o.Locator.Type == target.Type && o.Parent is null)?.Location ?? p.Location;
-                Add("off_area", "error", p.Location, [p.Locator], FormattableString.Invariant($"Outline [{b[0]}, {b[1]}, {b[2]}, {b[3]}] leaves {where} [{area[0]}, {area[1]}, {area[2]}, {area[3]}]; keep it clear of the border and title block."),
+                // Corpus 2026-11-17 (A147): EPLAN reports property texts longer than their ink along the text direction (official HVAC
+                // pages: ink inside the area, outline up to 45 mm past it), and macro box frames and loose graphics are not symbols.
+                bool symbol = p.Kind is not ("PropertyPlacement" or "Text" or "MacroBox") && (p.Properties.ContainsKey("name") || LayoutGuard.Container(p));
+                Add("off_area", symbol ? "error" : "warning", p.Location, [p.Locator], FormattableString.Invariant($"Outline [{b[0]}, {b[1]}, {b[2]}, {b[3]}] leaves {where} [{area[0]}, {area[1]}, {area[2]}, {area[3]}]; keep it clear of the border and title block."),
                     "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(target), ["x"] = Snap(location[0] + dx, dx), ["y"] = Snap(location[1] + dy, dy) });
             }
             foreach (double[] point in graphical.SelectMany(s => s).Where(Known).Where(p => p[0] != 0 || p[1] != 0).GroupBy(p => string.Join("/", p)).Select(g => g.First()))
@@ -202,7 +210,8 @@ public static class PageReviewRules
         // Owner 2026-11-16: the write-time layout rules over the whole page, so old, hand-drawn and api_try objects are checked too.
         // Live 2026-11-16: model view pages are projections of the 3D layout, not schematics; their outlines cross by design
         // (hundreds of findings on the official &ETC1/1-3 and +A4&ETC1/1), so the schematic layout rules do not apply there.
-        string[] guarded = scene.PageType == "ModelView" ? [] : [.. _guardChecks.Keys.Where(Enabled)];
+        // Corpus 2026-11-17: P&ID pages (official HVAC ==ASP01=RLT01++GEB01&PFB/1) draw pipes and plant pictures, not wires.
+        string[] guarded = !Schematic(scene) ? [] : [.. _guardChecks.Keys.Where(Enabled)];
         if (guarded.Length > 0)
         {
             var reported = new HashSet<string>(StringComparer.Ordinal);

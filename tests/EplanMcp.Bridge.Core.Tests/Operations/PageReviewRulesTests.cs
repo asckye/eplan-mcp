@@ -78,6 +78,30 @@ public sealed class PageReviewRulesTests
         }
     }
 
+    /// <summary>Corpus 2026-11-17 (A147): property texts read longer than their ink; macro box frames and loose lines are no symbols.</summary>
+    [Theory]
+    [InlineData("PropertyPlacement", "-K1")]
+    [InlineData("MacroBox", null)]
+    [InlineData("Line", null)]
+    public void OutlinesOtherThanSymbols_LeavingTheArea_OnlyWarn(string kind, string? name)
+    {
+        _scene.Page.PageSize = [420, 297];
+        _scene.Page.DrawingArea = [12, 16, 412, 292];
+        DrawingPlacement p = Placement(1, 60, kind, name);
+        p.Location = [60, 236];
+        p.Bounds = [-5.55, 254.76, 39, 260.92];
+        Assert.Equal("warning", (string?)Assert.Single(Review("off_area"))["severity"]);
+    }
+
+    /// <summary>Corpus 2026-11-17 (official PLC sample =K3+B2&amp;EFS/1): the card picture is a graphic block inside the PLC box.</summary>
+    [Fact]
+    public void AGraphicBlockInsideABox_OnlyWarns()
+    {
+        Placement(1, 52, "PLC", "-KE1").Bounds = [52, 188, 72, 260];
+        Placement(2, 52, "Block", "144_1428091").Bounds = [52.0007, 191.2, 72.14, 256.3];
+        Assert.Equal("warning", (string?)Assert.Single(Review("overlaps"))["severity"]);
+    }
+
     [Fact]
     public void WithoutAFrameArea_OnlyThePageEdgeCounts()
     {
@@ -217,11 +241,13 @@ public sealed class PageReviewRulesTests
         Assert.Equal(("text_format", "warning", "eplan_placement_update"), ((string?)issue["code"], (string?)issue["severity"], (string?)issue["fix"]!["tool"]));
     }
 
-    /// <summary>Live 2026-11-16: model view pages project the 3D layout; their outlines cross by design.</summary>
-    [Fact]
-    public void ModelViewPages_SkipTheSchematicLayoutRules()
+    /// <summary>Live 2026-11-16: model view pages project the 3D layout; corpus 2026-11-17: P&amp;ID pages draw pipes.</summary>
+    [Theory]
+    [InlineData("ModelView")]
+    [InlineData("ProcessAndInstrumentationDiagram")]
+    public void NonSchematicPages_SkipTheSchematicLayoutRules(string type)
     {
-        _scene.PageType = "ModelView";
+        _scene.PageType = type;
         Placement(1, 8, "Function", "-K1").Bounds = [4, 4, 12, 12];
         Placement(2, 9, "Function", "-K2").Bounds = [8, 8, 16, 16];
         _scene.Graphical.Add([[0, 10], [20, 10]]);

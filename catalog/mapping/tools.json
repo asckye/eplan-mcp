@@ -26051,6 +26051,11 @@
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
           },
           {
+            "name": "OfficialCorpusReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/OfficialCorpusReviewTests.cs"
+          },
+          {
             "name": "PageDescriptionMapTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageDescriptionMapTests.cs"
@@ -26427,6 +26432,11 @@
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"
+          },
+          {
+            "name": "OfficialCorpusReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/OfficialCorpusReviewTests.cs"
           },
           {
             "name": "PageOpenTests",
@@ -27103,6 +27113,11 @@
             "name": "PageReviewRulePackTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
+          },
+          {
+            "name": "OfficialCorpusReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/OfficialCorpusReviewTests.cs"
           },
           {
             "name": "PageReviewLayoutFaultTests",
@@ -31762,6 +31777,11 @@
         ],
         "tests": [
           {
+            "name": "OfficialCorpusReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/OfficialCorpusReviewTests.cs"
+          },
+          {
             "name": "ProjectToolsTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
@@ -31874,6 +31894,11 @@
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
+          },
+          {
+            "name": "OfficialCorpusReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/OfficialCorpusReviewTests.cs"
           },
           {
             "name": "ProjectCreateToolTests",
@@ -32382,6 +32407,11 @@
           "A41"
         ],
         "tests": [
+          {
+            "name": "OfficialCorpusReviewTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/OfficialCorpusReviewTests.cs"
+          },
           {
             "name": "ProjectToolsTests",
             "size": "Large",

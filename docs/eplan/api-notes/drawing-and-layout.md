@@ -1,5 +1,14 @@
 # [EPLAN API 笔记](../api-notes.md)：绘图、布局与连接
 
+### A147. 官方项目回归样本里的读数：属性文字外框偏长、`SPECIAL/DC` 黑盒、P&ID 页、PLC 盒内的图形组（2026-11-17，EPLAN 2026.0.3.25421，Electric P8，A 槽，8 个官方 EES 项目的 scratch 还原副本，只读）
+- **属性文字外框比墨迹长：** `PropertyPlacement.GetBoundingBox(false)` 沿文字方向读得偏长。HVAC 示例 `==ASP01=SSA01++GEB01+F1&EFS/101` 上 `-KE11` 左侧右对齐的交叉引用文字，墨迹约在 x 25–39 mm，外框读成 [-5.55, 254.76, 39, 260.92]；`&EFS/22` 卡件上方的竖排文字墨迹止于约 290 mm（列号栏 292 mm 以下），外框到 301.8 mm。所以文字越出绘图区只能作提示，不能当错误。
+- **黑盒：** 维修开关 `-QB1`（`&EFS/30`）是符号 `SPECIAL/DC/0` 的 `Function`，读出的类别不是 `BlackBox`，导线竖穿进盒子接盒内的触点。读取器现在把 `SPECIAL/DC` 符号也当容器。
+- **P&ID 页：** 页型 `ProcessAndInstrumentationDiagram`（HVAC `==ASP01=RLT01++GEB01&PFB/1`）上的线是管道和设备图，宏边框、占位对象（type 106）、管道定义（type 234）互相交叠，管道端点不接引脚，电气布局规则不适用。
+- **PLC 盒里的图形组：** 官方 PLC 与 Stacking 示例的 `=K3+B2&EFS/1`、`=K2+S1&EFS/1` 在 PLC 盒（`SPECIAL/PLCC`）里有一个 `Block`（type 144，`name` 为图形组名如 `144_1428091`，54 段线、弧、文字），是卡件的外观图形，完全在盒内。
+- **宏边框属性文字的可见性冷热不同：** PLC 示例 `=K3+B2&EFS/1` 重新打开项目后第一次读页，宏边框（type 37）的属性文字（宏名 23001、描述 23004、变体、生成时间 23002 等）`PropertyPlacement.IsVisible` 读为 `false`，之后每次读为 `true`，其他字段完全相同；这些文字外框都是 [0,0,0,0]。对象摘要因此变化，第一次给出的绘图游标在第二段被判为过期。读取器把宏边框属性文字的可见性读成空值。
+- **还原：** `eplan_project_create` 的 `backup` 模式能还原这 8 个 2022/2023 版官方 `.zw1`（5–22 秒）。项目名 54 个字符时 HVAC 示例还原失败，EplLog 记“移动数据库时出错”：项目内部文件路径超长，名字改短后成功。
+— 证据：`tests/EplanMcp.Large.Tests/OfficialCorpusReviewTests.cs`，以及探查时导出的页面图片和逐对象读数（2026-11-17）。
+
 ### A146. 模型视图页的绘图读取：对象多到超过回复上限，ViewPart 外框冷读和热读不同（2026-11-16，EPLAN 2026.0.3.25421，Electric P8，A 槽，示例项目 scratch 副本，只读）
 - **对象数：** 官方模型视图页 `=K2+B2.Y1&MTC1/1` 有 38507 个绘图对象，`=K2+B2.Y1&MTC1/4` 25965 个，`=GQA+B2.Y1&MTC1/1` 24817 个；整页的绘图证据有 17–26 MiB，超过插件与 Host 之间单条消息 16 MiB 的上限。插件以前照发，Host 判定通信出错就断开连接，AI 看到的是 `EPLAN_NOT_CONNECTED`。现在超限的回复改为 `RESOURCE_EXHAUSTED`，`eplan_page_get` 则只向插件要当前这一段（`drawingOffset`/`drawingLimit`），插件附上整页总数和全部对象的指纹，游标绑定在指纹上。
 - **ViewPart 外框：** 同一页连读两次，第一段里的 `ViewPart`（type 191）第一次读外框为空，第二次读回一个宽高为 0、正好在插入点上的“外框”；之后各段两次读取完全相同。两种读数都不提供插入点以外的信息，所以读取器把这种点状外框按空处理，否则对象摘要会变，第一次给出的游标在第二次读取时被判为过期。

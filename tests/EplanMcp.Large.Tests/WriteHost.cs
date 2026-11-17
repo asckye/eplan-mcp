@@ -90,6 +90,10 @@ public sealed class WriteHost : IAsyncLifetime
         return result.StructuredContent!.Value;
     }
 
+    /// <summary>The raw result, for a call that may fail without failing the test.</summary>
+    public async Task<CallToolResult> RawAsync(string tool, Dictionary<string, object?> args) =>
+        await _client!.CallToolAsync(tool, args, cancellationToken: TestContext.Current.CancellationToken);
+
     /// <summary>The <c>error</c> object of a call that must fail.</summary>
     public async Task<JsonElement> ErrorAsync(string tool, Dictionary<string, object?> args)
     {

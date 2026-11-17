@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；直接写进对应的主题文件（末尾追加），同时在下面的索引表加一行。
-- 当前下一个可用编号：**A147、B17**。并行分支先协调编号。主题文件：`actions`、`clients-and-host`、`drawing-and-layout`（含 3D 布置）、`environment-and-licensing`、`generic-api`（`eplan_api_try` 与批量验证）、`master-data-and-parts`、`plc-and-terminals`、`reads-and-snapshots`（含项目打开、新建、改名）、`transactions-and-undo`、`writes-and-placement`。2026-11-14 已把原“新条目”一节的 73 条全部归档。
+- 当前下一个可用编号：**A148、B17**。并行分支先协调编号。主题文件：`actions`、`clients-and-host`、`drawing-and-layout`（含 3D 布置）、`environment-and-licensing`、`generic-api`（`eplan_api_try` 与批量验证）、`master-data-and-parts`、`plc-and-terminals`、`reads-and-snapshots`（含项目打开、新建、改名）、`transactions-and-undo`、`writes-and-placement`。2026-11-14 已把原“新条目”一节的 73 条全部归档。
 - **A58、A59 不存在**，是既有编号空缺，不是遗漏文件，也不作为下一个编号复用。C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -164,6 +164,7 @@
 | A142 | 一个事务画 PLC 机架：图片没有主功能，改名读回为连接点 | 2026-11-15 | [plc-and-terminals](api-notes/plc-and-terminals.md#a142-一个事务画-plc-机架图片没有主功能改名读回为连接点2026-11-15eplan-20260325421electric-p8a-槽-largewrite-scratch-副本) |
 | A144 | 设置写入：USER 设置读回后恢复；PROJECT 设置写入不能撤销 | 2026-11-16 | [generic-api](api-notes/generic-api.md#a144-设置写入user-设置读回后恢复project-设置写入不能撤销2026-11-16eplan-20260325421electric-p8a-槽-largewrite-scratch-副本) |
 | A143 | 项目级创建在大项目里观察不到；两种创建一次撤销不恢复 | 2026-11-15 | [generic-api](api-notes/generic-api.md#a143-项目级创建在大项目里观察不到两种创建一次撤销不恢复2026-11-15eplan-20260325421electric-p8a-槽-largewrite-scratch-副本) |
+| A147 | 官方项目回归样本里的读数：属性文字外框偏长、`SPECIAL/DC` 黑盒、P&ID 页、PLC 盒内的图形组 | 2026-11-17 | [drawing-and-layout](api-notes/drawing-and-layout.md#a147-官方项目回归样本里的读数属性文字外框偏长specialdc-黑盒pid-页plc-盒内的图形组2026-11-17eplan-20260325421electric-p8a-槽8-个官方-ees-项目的-scratch-还原副本只读) |
 | A146 | 模型视图页的绘图读取：对象多到超过回复上限，ViewPart 外框冷读和热读不同 | 2026-11-16 | [drawing-and-layout](api-notes/drawing-and-layout.md#a146-模型视图页的绘图读取对象多到超过回复上限viewpart-外框冷读和热读不同2026-11-16eplan-20260325421electric-p8a-槽示例项目-scratch-副本只读) |
 | A145 | 图框评估区就是绘图区：起点 12003/12004，高为行高 12002 之和 | 2026-11-16 | [drawing-and-layout](api-notes/drawing-and-layout.md#a145-图框评估区就是绘图区起点-1200312004高为行高-12002-之和2026-11-16eplan-20260325421electric-p8a-槽示例项目-scratch-副本只读) |
 | B1 | 程序集与目标框架 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b1-程序集与目标框架) |

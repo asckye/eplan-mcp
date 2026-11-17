@@ -2172,7 +2172,7 @@
       "spec": "docs/tools/eplan_page_get.md",
       "small": 11,
       "medium": 6,
-      "large": 44,
+      "large": 45,
       "apiNotes": [
         "A11",
         "A12",
@@ -2194,7 +2194,7 @@
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
       "medium": 6,
-      "large": 20,
+      "large": 21,
       "apiNotes": [
         "A11"
       ],
@@ -2273,7 +2273,7 @@
       "spec": "docs/tools/eplan_page_review.md",
       "small": 5,
       "medium": 2,
-      "large": 8,
+      "large": 9,
       "apiNotes": [
         "A41",
         "A64",
@@ -2799,7 +2799,7 @@
       "spec": "docs/tools/eplan_project_close.md",
       "small": 0,
       "medium": 0,
-      "large": 1,
+      "large": 2,
       "apiNotes": [
         "A34"
       ]
@@ -2821,7 +2821,7 @@
       "spec": "docs/tools/eplan_project_create.md",
       "small": 4,
       "medium": 3,
-      "large": 3,
+      "large": 4,
       "apiNotes": [
         "A31",
         "A32",
@@ -2900,7 +2900,7 @@
       "spec": "docs/tools/eplan_project_open.md",
       "small": 0,
       "medium": 0,
-      "large": 2,
+      "large": 3,
       "apiNotes": [
         "A41"
       ]
