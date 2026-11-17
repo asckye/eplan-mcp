@@ -173,7 +173,10 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             int? drawingOrder = ReadOptional(() => (int?)placement.DrawingOrder);
             double? rotation = ReadOptional(() => (placement as PropertyPlacement)?.Rotation);
             bool? docked = ReadOptional(() => (placement as PropertyPlacement)?.IsDocked);
-            bool? visible = ReadOptional(() => (placement as PropertyPlacement)?.IsVisible);
+            // Corpus 2026-11-17 (official PLC sample =K3+B2&EFS/1, A147): the property texts of a macro box read IsVisible false on
+            // the first read of the page and true on later reads; they carry no ink either way, and the digest must not change.
+            bool? visible = ReadOptional(() => placement is PropertyPlacement { Parent: Placement owner } && owner.GetType().Name == "MacroBox" ? null
+                : (placement as PropertyPlacement)?.IsVisible);
             string? displayedId = ReadOptional(() => placement is PropertyPlacement property ? DisplayedId(property).ToString(System.Globalization.CultureInfo.InvariantCulture) : null);
             string? rawHeight = ReadOptional(() => placement is PropertyPlacement raw ? Number(raw.Height) : null);
             double[]? start = ReadOptional(() => placement is Line line ? XY(line.StartPoint) : null);
@@ -231,7 +234,9 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             // A75 catalog: DynamicConnectionLine derives from SymbolReference (DMClassId.InternalTypeId = 33),
             // but its wire outline is neither a layout symbol nor a container.
             // Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
-            bool isContainer = ReadOptional(() => placement is not DynamicConnectionLine && (placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant?.SymbolName == "PLCC"
+            // Corpus 2026-11-17: SPECIAL/DC is the black box symbol; the official repair switch -QB1 (HVAC EFS/30) uses it on a
+            // function whose category is not BlackBox, and its wires run into the box to the contacts inside.
+            bool isContainer = ReadOptional(() => placement is not DynamicConnectionLine && (placement is LocationBox || placement is SymbolReference container && (container.SymbolVariant?.SymbolName is "PLCC" or "DC"
                 || placement.GetType().Name == "PLC" || placement is Function boxFunction && boxFunction.FunctionCategory.ToString() is "PLCBox" or "BlackBox" or "Blackbox")));
             string? containerOwner = isContainer ? placement.ToStringIdentifier() : null;
             try
