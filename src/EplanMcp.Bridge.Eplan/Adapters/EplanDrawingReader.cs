@@ -150,6 +150,13 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
             {
                 bounds = null;
             }
+            // Live 2026-11-16 (official =K2+B2.Y1&MTC1/1): a model view part reports no outline on the first read of the page
+            // and a point at its insertion point on the next. Both carry no outline, and the digest must not change between
+            // reads, or a drawing cursor goes stale.
+            if (bounds is { Length: 4 } point && placement.GetType().Name == "ViewPart" && point[0] == point[2] && point[1] == point[3])
+            {
+                bounds = null;
+            }
             string? display = ReadOptional(() => (placement as PropertyPlacement)?.GetDisplayString());
             if (bounds is null && display == "")
             { bounds = [0, 0, 0, 0]; } // A53/A54: empty property text has no visible ink.
