@@ -12,6 +12,30 @@ internal static class ScratchPaths
 {
     public static bool IsInside(string path, IEnumerable<string> roots)
     {
+        string[] all = [.. roots];
+        // A project argument is the project's path without an extension (Project.ProjectFullName), which names nothing on
+        // disk: the project is the link file <path>.elk and the data folder <path>.edb. Either may be a link that points
+        // out of scratch (a junction needs no privilege), and EPLAN would then write the real project. Both must lie in
+        // scratch too, wherever they really are. For a path that is not a project (a parts database file) neither exists.
+        return Lies(path, all) && _projectParts.All(part => !Exists(path + part) || Lies(path + part, all));
+    }
+
+    private static readonly string[] _projectParts = [".elk", ".edb"];
+
+    private static bool Exists(string path)
+    {
+        try
+        {
+            return File.Exists(path) || Directory.Exists(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            return true; // unreadable: let the canonical check decide, which counts what it cannot resolve as outside
+        }
+    }
+
+    private static bool Lies(string path, string[] roots)
+    {
         string candidate;
         try
         {

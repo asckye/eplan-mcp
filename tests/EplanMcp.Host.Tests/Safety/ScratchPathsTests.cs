@@ -74,6 +74,42 @@ public sealed class ScratchPathsTests : IDisposable
         Assert.True(Inside(Path.Combine(link, "Line1")));
     }
 
+    /// <summary>
+    /// Review 2026-11-17: the project path has no extension and names nothing on disk; the data folder next to it may be
+    /// a junction to a real project's data folder.
+    /// </summary>
+    [Theory]
+    [InlineData(".edb")]
+    [InlineData(".elk")]
+    public void IsInside_AProjectWhoseDataFolderOrLinkFileIsALinkPointingOutside_IsOutside(string part)
+    {
+        string project = Path.Combine(_scratch, "Line1");
+        Directory.CreateDirectory(Path.Combine(_real, "Line1" + part));
+        Junction(project + part, Path.Combine(_real, "Line1" + part));
+
+        Assert.False(Inside(project));
+    }
+
+    [Fact]
+    public void IsInside_AProjectWithItsOwnFilesInScratch_OrWithNoneYet_IsInside()
+    {
+        string project = Path.Combine(_scratch, "Line1");
+        Assert.True(Inside(project));
+        Directory.CreateDirectory(project + ".edb");
+        File.WriteAllText(project + ".elk", string.Empty);
+        Assert.True(Inside(project));
+    }
+
+    [Fact]
+    public void IsInside_AProjectWhoseDataFolderIsALinkToAnotherScratchFolder_IsInside()
+    {
+        string project = Path.Combine(_scratch, "Line1");
+        string elsewhere = Directory.CreateDirectory(Path.Combine(_scratch, "Data", "Line1.edb")).FullName;
+        Junction(project + ".edb", elsewhere);
+
+        Assert.True(Inside(project));
+    }
+
     [Fact]
     public void IsInside_AShortNameOfTheRoot_IsTheRoot()
     {
