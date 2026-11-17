@@ -100,6 +100,21 @@ public sealed class BridgeConnectionTests
         Assert.DoesNotContain(_log.Entries, e => e.Level == Diagnostics.BridgeLogLevel.Error);
     }
 
+    /// <summary>Live 2026-11-16: a model view page's drawings passed the frame limit and the Host dropped the connection.</summary>
+    [Fact]
+    public void OversizedResponse_BecomesResourceExhaustedForThatRequest()
+    {
+        var response = new JObject { ["jsonrpc"] = "2.0", ["id"] = 7, ["result"] = new JObject { ["data"] = new string('x', 4000) } };
+
+        JObject sent = JObject.Parse(Encoding.UTF8.GetString(BridgeConnection.Body(response, 1000, _log)));
+
+        Assert.Equal(7, (int)sent["id"]!);
+        Assert.Equal(ErrorReason.ResourceExhausted, (string?)sent["error"]!["data"]!["reason"]);
+        Assert.Contains("Read less at once", (string?)sent["error"]!["message"], StringComparison.Ordinal);
+        Assert.Contains(_log.Entries, e => e.Level == Diagnostics.BridgeLogLevel.Warning);
+        Assert.Equal(EplanMcp.Bridge.Core.Protocol.BridgeJson.ToUtf8(response), BridgeConnection.Body(response, 1 << 20, _log));
+    }
+
     [Fact]
     public void Invoke_BeforeHandshake_IsRejectedWithoutRunningAnything()
     {

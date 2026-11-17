@@ -66,7 +66,7 @@ internal sealed class BridgeConnection
             {
                 try
                 {
-                    await Framing.WriteFrameAsync(stream, BridgeJson.ToUtf8(response), cancellationToken).ConfigureAwait(false);
+                    await Framing.WriteFrameAsync(stream, Body(response, BridgeProtocol.MaxFrameBytes, _log), cancellationToken).ConfigureAwait(false);
                 }
                 catch (IOException)
                 {
@@ -229,6 +229,22 @@ internal sealed class BridgeConnection
         };
         JToken data = _router.Invoke((string)envelope["operation"]!, envelope["args"], correlationId, progress);
         return new JObject { ["data"] = data };
+    }
+
+    /// <summary>
+    /// The response as one frame body. Live 2026-11-16: page drawings of the official model view page =GQA+B2.Y1&amp;MTC1/1
+    /// passed the 16 MiB frame limit and the Host dropped the connection as EPLAN_NOT_CONNECTED; an oversized response
+    /// becomes RESOURCE_EXHAUSTED for that request and the connection stays.
+    /// </summary>
+    internal static byte[] Body(JObject response, int limit, IBridgeLog log)
+    {
+        byte[] body = BridgeJson.ToUtf8(response);
+        if (body.Length <= limit)
+        { return body; }
+        log.Write(BridgeLogLevel.Warning, FormattableString.Invariant($"A response of {body.Length} bytes passes the {limit} byte frame limit; sent RESOURCE_EXHAUSTED instead."));
+        var error = new BridgeErrorException(ErrorReason.ResourceExhausted, FormattableString.Invariant(
+            $"The result is {body.Length / (1024 * 1024)} MiB, more than the {limit / (1024 * 1024)} MiB a reply can carry. The operation itself finished. Read less at once: one page, fewer objects or a smaller limit.")).Error;
+        return BridgeJson.ToUtf8(Error(response["id"], BridgeProtocol.BusinessErrorCode, error.Message, BridgeJson.FromObject(error)));
     }
 
     private static JObject Error(JToken? id, int code, string message, JToken? data)
