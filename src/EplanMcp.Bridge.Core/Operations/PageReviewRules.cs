@@ -153,7 +153,7 @@ public static class PageReviewRules
                 {
                     // Owner decision 2026-11-16: one symbol on another is a drawing error; overlapping texts stay a warning.
                     // Live 2026-11-16 (official =GAB1+A2&EFS1/1): a device symbol encloses its own connection points (-TB1, -TB1:13).
-                    bool symbols = p.Kind != "Text" && q.Kind != "Text" && !LayoutGuard.Related(p, q, scene.Page.Placements) && !SameDevice(p, q)
+                    bool symbols = scene.PageType != "ModelView" && p.Kind != "Text" && q.Kind != "Text" && !LayoutGuard.Related(p, q, scene.Page.Placements) && !SameDevice(p, q)
                         // Live 2026-11-16: official pages touch by 0.25-1 mm (mated plugs, plug pins on a box edge, a breaker and its
                         // potential point); outlines that overlap by half a grid both ways sit on each other.
                         && Math.Min(a[2], b[2]) - Math.Max(a[0], b[0]) >= Deep(scene) && Math.Min(a[3], b[3]) - Math.Max(a[1], b[1]) >= Deep(scene);
@@ -200,7 +200,9 @@ public static class PageReviewRules
             }
         }
         // Owner 2026-11-16: the write-time layout rules over the whole page, so old, hand-drawn and api_try objects are checked too.
-        string[] guarded = [.. _guardChecks.Keys.Where(Enabled)];
+        // Live 2026-11-16: model view pages are projections of the 3D layout, not schematics; their outlines cross by design
+        // (hundreds of findings on the official &ETC1/1-3 and +A4&ETC1/1), so the schematic layout rules do not apply there.
+        string[] guarded = scene.PageType == "ModelView" ? [] : [.. _guardChecks.Keys.Where(Enabled)];
         if (guarded.Length > 0)
         {
             var reported = new HashSet<string>(StringComparer.Ordinal);
@@ -217,6 +219,38 @@ public static class PageReviewRules
                 Add(_guardChecks[check], v.Rule == "R5" || v.Rule == "R4" ? "error" : "warning", at, objects, v.Message,
                     text ? "eplan_placement_update" : "eplan_connection_create", text && objects.Length > 0 ? new() { ["locator"] = BridgeJson.FromObject(objects[0]) } : new() { ["page"] = scene.Page.Page });
             }
+        }
+        // Batch 2 (owner 2026-11-16): EPLAN numbers a device's column from its insertion point; pins in another column make
+        // the cross-reference point at a column the reader does not find them in.
+        if (Enabled("path_straddle") && scene.Page.ColumnEdges is { Length: > 2 } edges)
+        {
+            int Column(double x) => Array.FindLastIndex(edges, e => e <= x + 1e-6);
+            foreach (DrawingPlacement p in scene.Page.Placements.Where(p => p.Parent is null && p.Properties.ContainsKey("name") && !LayoutGuard.Container(p) && p.Location.Length == 2))
+            {
+                string owner = FormattableString.Invariant($"{p.Locator.Type}/{p.Locator.Oid}/");
+                int home = Column(p.Location[0]);
+                int[] columns = [.. scene.Pins.Where(pin => pin.Key.StartsWith(owner, StringComparison.Ordinal) && pin.Value.Location.Length == 2).Select(pin => Column(pin.Value.Location[0])).Distinct()];
+                if (home < 0 || home >= edges.Length - 1 || columns.All(c => c == home))
+                { continue; }
+                Add("path_straddle", "warning", p.Location, [p.Locator], FormattableString.Invariant($"Pins lie in columns {string.Join(", ", columns.Select(c => c + 1))}, the symbol is numbered in column {home + 1}; keep the symbol and its pins in one column."),
+                    "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(p.Locator) });
+            }
+        }
+        // Batch 2: a page whose frame or grid differs from most pages of its type was usually made from the wrong template.
+        if (Enabled("page_setup") && actual["pageSetup"] is JObject setup && setup["peers"] is JArray { Count: >= 3 } peers)
+        {
+            void Odd(string field, string argument, string label)
+            {
+                var groups = peers.GroupBy(p => p[field]?.ToString(Newtonsoft.Json.Formatting.None) ?? "null", StringComparer.Ordinal).OrderByDescending(g => g.Count()).ToArray();
+                string mine = setup[field]?.ToString(Newtonsoft.Json.Formatting.None) ?? "null";
+                if (groups[0].Key == mine || groups[0].Key == "null" || groups.Length > 1 && groups[1].Count() == groups[0].Count() || groups.FirstOrDefault(g => g.Key == mine)?.Count() * 2 >= peers.Count)
+                { return; }
+                JToken wanted = groups[0].First()[field]!;
+                Add("page_setup", "warning", [], [], FormattableString.Invariant($"The {label} is {setup[field]}; {groups[0].Count()} of {peers.Count} {setup["type"]} pages use {wanted}."),
+                    "eplan_page_update", new() { ["project"] = scene.Project.Name, ["pages"] = new JArray(new JObject { ["name"] = scene.Page.Page, [argument] = wanted.DeepClone() }) });
+            }
+            Odd("frame", "plot_frame", "plot frame");
+            Odd("grid", "grid_size_mm", "grid");
         }
         // MX_Dryer16 2026-11-08: cable texts ran across the +M location box border; the official pages keep them inside the box.
         // The box's own texts (its +M label sits on the corner) do not count.

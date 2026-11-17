@@ -83,6 +83,22 @@ public sealed class DrawingReaderTests
     }
 
     [Fact]
+    public void FakeBridge_ColumnWidths_GiveTheColumnEdges_AtPageScale()
+    {
+        var frame = new PlotFrame();
+        foreach ((string key, string value) in new[] { ("x", "4"), ("y", "16"), ("width", "420"), ("height", "297") })
+        { frame.Grid[key] = value; }
+        frame.RowHeights[1] = "276";
+        for (int i = 1; i <= 10; i++)
+        { frame.ColumnWidths[i] = "41.2"; }
+
+        double[] edges = new FakeDrawingBridge(new Page { PlotFrame = frame, StoredSize = new(630, 445.5) }).Read("+A1/1")!.ColumnEdges!;
+
+        Assert.Equal(11, edges.Length);
+        Assert.Equal([6, 67.8, 624], new[] { edges[0], edges[1], edges[10] }.Select(v => Math.Round(v, 6)));
+    }
+
+    [Fact]
     public void FakeBridge_FrameWithoutGrid_HasNoDrawingArea()
     {
         Assert.Null(new FakeDrawingBridge(new Page { PlotFrame = new() }).Read("+A1/1")!.DrawingArea);

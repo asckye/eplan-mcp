@@ -2172,7 +2172,7 @@
       "spec": "docs/tools/eplan_page_get.md",
       "small": 11,
       "medium": 6,
-      "large": 42,
+      "large": 43,
       "apiNotes": [
         "A11",
         "A12",
@@ -2194,7 +2194,7 @@
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
       "medium": 6,
-      "large": 17,
+      "large": 19,
       "apiNotes": [
         "A11"
       ],
@@ -2265,15 +2265,15 @@
       "operations": [
         "page.review"
       ],
-      "apiIds": 224,
-      "operationGroups": 139,
+      "apiIds": 225,
+      "operationGroups": 140,
       "dataDictionary": 3,
       "dependencies": 72,
       "actions": 0,
       "spec": "docs/tools/eplan_page_review.md",
       "small": 5,
       "medium": 2,
-      "large": 5,
+      "large": 7,
       "apiNotes": [
         "A41",
         "A64",
@@ -22007,6 +22007,7 @@
       "partial": false,
       "tools": [
         "eplan_api_try",
+        "eplan_page_review",
         "eplan_page_update",
         "eplan_rule_check",
         "eplan_workflow_plan"

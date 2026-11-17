@@ -20,7 +20,7 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 已打开项目的名称或路径 |
 | `page` | string | 是 | — | 完整页名，按序数精确匹配 |
-| `checks` | string[]（enum） | 否 | 全部 | 只做这些检查：`dangling_ends`、`unconnected_pins`、`overlaps`、`off_grid`、`unintended_junctions`、`interruption_pairing`、`cable_cores`、`box_crossings`、`off_area`、`wire_through_symbol`、`net_overlap`、`text_format`、`cross_reference_clash`、`eplan_messages`、`expected`、`rules` |
+| `checks` | string[]（enum） | 否 | 全部 | 只做这些检查：`dangling_ends`、`unconnected_pins`、`overlaps`、`off_grid`、`unintended_junctions`、`interruption_pairing`、`cable_cores`、`box_crossings`、`off_area`、`wire_through_symbol`、`net_overlap`、`text_format`、`cross_reference_clash`、`path_straddle`、`page_setup`、`eplan_messages`、`expected`、`rules` |
 | `rule_packs` | string[] | 否 | 当前作用域启用的规则插件 | 1–10 个不重复的已安装插件 ID；显式 `checks` 不含 `rules` 时不评估 |
 | `expected` | object | 否 | — | 目标清单，格式与绘图工具的输入一致：`devices`（名称、符号、位置）、`connections`（两端设备与连接点）、`cables`（名称、芯线与它们应属于的连接、颜色）、`interruptions`（名称、位置）、`texts`（内容、位置、角度）。给出时做 `expected` 检查 |
 | `tolerance_mm` | number | 否 | 0.5 | 位置比较的容差 |
@@ -50,10 +50,12 @@
 | `cable_core_segment` | error | 芯线归属与目标不符：电缆画在主干段时，经过该段的全部逻辑连接共用一个连接定义点（A64） |
 | `text_crosses_box` | warning | 文字（含电缆的属性文字）压在位置框的边线上，一部分在框内一部分在框外；位置框自己的标签不算 |
 | `off_area` | error | 符号、文字的外框或导线点超出绘图区：图框评估区（边线以内、标题栏以上，A145），读不到时为页面边缘；`fix` 把所属对象按栅格移回区域内 |
-| `wire_through_symbol` | error | 布局守卫 R4 用于整页：导线从符号外框中间穿过。导线端点在外框内的引脚上，或经过符号自己的连接点时，不算穿过（官方 PLC 插头、连接点符号） |
+| `wire_through_symbol` | error | 布局守卫 R4 用于整页（模型视图页是 3D 布置的投影，不查 R4/R5/R6/R8/R9，重叠最多 warning）：导线从符号外框中间穿过。导线端点在外框内的引脚上，或经过符号自己的连接点时，不算穿过（官方 PLC 插头、连接点符号） |
 | `net_overlap` | error / warning | R5/R6：不同网络的导线共线重合为 error，平行间距小于一格为 warning；共用端点的导线算同一网络 |
 | `text_format` | warning | R8：文字打印高度小于 0.5 mm（按页比例换算，A145），或角度不是 0/90/180/270 |
 | `cross_reference_clash` | warning | R9：对象压在交叉引用文字上 |
+| `path_straddle` | warning | 设备的引脚落在与插入点不同的列：EPLAN 按插入点编列号，交叉引用会指错列。列边界来自图框列宽 12102（按页比例换算，A145）；容器不查；图框没存列宽时不查 |
+| `page_setup` | warning | 本页的图框或栅格与同类型页的多数不同（同类页至少 3 页、多数明确）；`fix` 用 `eplan_page_update` 改成多数页的 `plot_frame` 或 `grid_size_mm` |
 | `eplan_message` | 按消息级别 | 该页上已有的 EPLAN 检查消息（只读取，不运行检查） |
 | `expected_*` | error | 与目标清单的缺失、多余、不一致 |
 | `rule:<插件ID>/<规则名>` | mandatory 为 error，recommended 为 warning | 现有语法树解释器评估失败；附规则 `spec.source` 原样作为 `reference` |

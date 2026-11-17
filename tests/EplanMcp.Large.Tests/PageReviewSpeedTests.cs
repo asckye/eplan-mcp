@@ -21,7 +21,8 @@ public sealed class PageReviewSpeedTests(LiveEplan eplan, ITestOutputHelper outp
         do
         {
             var args = new Dictionary<string, object?> { ["project"] = eplan.ProjectPath, ["limit"] = 200 };
-            if (cursor is not null) { args["cursor"] = cursor; }
+            if (cursor is not null)
+            { args["cursor"] = cursor; }
             JsonElement list = await eplan.CallAsync("eplan_page_list", args);
             foreach (string page in list.GetProperty("pages").EnumerateArray().Select(p => p.GetProperty("name").GetString()!))
             {
@@ -44,7 +45,8 @@ public sealed class PageReviewSpeedTests(LiveEplan eplan, ITestOutputHelper outp
             JsonElement review = await eplan.CallAsync("eplan_page_review", new() { ["project"] = eplan.ProjectPath, ["page"] = page, ["checks"] = _layout, ["limit"] = 1 });
             watch.Stop();
             output.WriteLine(FormattableString.Invariant($"{page}: {total} objects, {watch.ElapsedMilliseconds} ms, summary {review.GetProperty("summary").GetRawText()}"));
-            if (watch.Elapsed > TimeSpan.FromSeconds(15)) { slow.Add(page); }
+            if (watch.Elapsed > TimeSpan.FromSeconds(15))
+            { slow.Add(page); }
         }
         Assert.Empty(slow);
     }

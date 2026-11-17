@@ -1704,6 +1704,7 @@
             ],
             "plotFrameSize": null,
             "drawingArea": null,
+            "columnEdges": null,
             "placements": [
               {
                 "locator": {
@@ -1786,6 +1787,7 @@
             ],
             "plotFrameSize": null,
             "drawingArea": null,
+            "columnEdges": null,
             "placements": [
               {
                 "locator": {
@@ -1844,7 +1846,7 @@
       ],
       "preservedEndpoints": []
     },
-    "fingerprint": "5f33e37c5f18932b2b3683f068ea864e5d308cebb7cd5307d078ab6f8d66131f"
+    "fingerprint": "a786694c832461ffab19c1724364f82569a72572380877a7130cc91b8a7f1e23"
   },
   "interruptionReadback": [
     {

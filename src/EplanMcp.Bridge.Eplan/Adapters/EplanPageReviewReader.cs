@@ -66,6 +66,24 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
             foreach (InterruptionPoint p in EplanNativePreconditions.Valid(finder.GetInterruptionPoints(null)))
             { OperationContext.Current.ThrowIfCancellationRequested(); ((JArray)actual["interruptions"]!).Add(new JObject { ["name"] = p.Name, ["page"] = p.Page.Name, ["pageOrder"] = Array.FindIndex(pages, page => page.Name == p.Page.Name), ["position"] = new JArray(p.Location.X, p.Location.Y), ["locator"] = p.Page.Name == page ? BridgeJson.FromObject(scene.Page.Placements.First(d => d.Locator.Oid == p.ObjectIdentifier).Locator) : null }); }
         }
+        if (Enabled("page_setup"))
+        {
+            // Batch 2 (owner 2026-11-16): frame and grid of every page of this page type, so an odd page stands out.
+            static string? Frame(Page p)
+            {
+                try
+                { return p.PlotFrame?.Name; }
+                catch (Exception ex) when (ex is global::Eplan.EplApi.Base.BaseException or InvalidOperationException)
+                { WriteExceptionDiagnostics.Report(ex); return null; }
+            }
+            var peers = new JArray();
+            foreach (Page p in pages.Where(p => p.PageType == native.PageType))
+            {
+                OperationContext.Current.ThrowIfCancellationRequested();
+                peers.Add(new JObject { ["page"] = p.Name, ["frame"] = Frame(p), ["grid"] = DrawingCoordinates.ApiToMillimetres(p.GridSize) });
+            }
+            actual["pageSetup"] = new JObject { ["type"] = native.PageType.ToString(), ["frame"] = Frame(native), ["grid"] = DrawingCoordinates.ApiToMillimetres(native.GridSize), ["peers"] = peers };
+        }
         if (Enabled("eplan_messages"))
         {
             foreach (ProjectMessageRecord m in new EplanProjectMessageReader().ReadMessages(target.Path).Where(m => !m.Done && m.Page == page))

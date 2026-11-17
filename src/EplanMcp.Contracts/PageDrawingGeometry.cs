@@ -18,6 +18,8 @@ public sealed class PageDrawingGeometry
     /// title block and below the column header. Null when the frame or its grid is unreadable or lies outside the page.
     /// </summary>
     public double[]? DrawingArea { get; set; }
+    /// <summary>The x of every column edge of the frame grid in page millimetres, left to right; null when the frame stores no widths.</summary>
+    public double[]? ColumnEdges { get; set; }
     /// <summary>Supported placements and property children; excludes plot-frame descendants and part references.</summary>
     public List<DrawingPlacement> Placements { get; set; } = [];
 

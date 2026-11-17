@@ -15694,6 +15694,8 @@
                 "net_overlap",
                 "text_format",
                 "cross_reference_clash",
+                "path_straddle",
+                "page_setup",
                 "eplan_messages",
                 "expected",
                 "rules"

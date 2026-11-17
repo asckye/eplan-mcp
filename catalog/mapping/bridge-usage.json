@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-17",
-  "scannedSources": "02e86016",
-  "sourceHash": "sha256:97e04ad8bc242895f6bca5539a85adc77b9e3c88315adcea4bdc9e1a2366afbc",
+  "scannedSources": "77c009c0",
+  "sourceHash": "sha256:80ff89756248c24bb154e98197e71f812207ceb18f8a8c12328ca7ec5bad6e33",
   "operations": [
     {
       "name": "action.execute",
@@ -173285,6 +173285,38 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
         "adapter": "EplanPropertyReadDefinition",
         "member": "Bound",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadDefinition.cs",
@@ -214196,6 +214228,17 @@
           "page.update.execute",
           "page.update.plan"
         ]
+      },
+      {
+        "adapter": "EplanPageReviewReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReviewReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.review"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Page": [
@@ -214215,6 +214258,38 @@
       {
         "adapter": "EplanDrawingReader",
         "member": "FrameArea",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
         "access": [
           "get"
@@ -214486,6 +214561,38 @@
           "plc.rack.plan",
           "potential.update.plan"
         ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.MasterData.PlotFramePropertyList.FRAME_EVALUATION_AREA_START_POINT_Y": [
@@ -214526,6 +214633,38 @@
       {
         "adapter": "EplanDrawingReader",
         "member": "FrameArea",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
         "access": [
           "get"
@@ -218016,6 +218155,17 @@
         ]
       },
       {
+        "adapter": "EplanPageReviewReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReviewReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.review"
+        ]
+      },
+      {
         "adapter": "EplanPageWriter",
         "member": "ReadGrid",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
@@ -219570,6 +219720,17 @@
         ]
       },
       {
+        "adapter": "EplanPageReviewReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReviewReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.review"
+        ]
+      },
+      {
         "adapter": "EplanPageWriter",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageWriter.cs",
@@ -219737,6 +219898,39 @@
       },
       {
         "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
         "access": [
@@ -219790,6 +219984,17 @@
           "page.plotframe.inspect",
           "page.update.execute",
           "page.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageReviewReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReviewReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.review"
         ]
       },
       {
@@ -228830,6 +229035,38 @@
         ]
       },
       {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
         "adapter": "EplanProperties",
         "member": "Add",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs",
@@ -229130,6 +229367,39 @@
       {
         "adapter": "EplanDrawingReader",
         "member": "FrameArea",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
         "access": [
           "get",
@@ -229544,6 +229814,38 @@
       {
         "adapter": "EplanDrawingReader",
         "member": "FrameArea",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
         "access": [
           "get"
@@ -270017,6 +270319,38 @@
           "plc.rack.plan",
           "potential.update.plan"
         ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
       }
     ],
     "T:Eplan.EplApi.DataModel.MasterData.Symbol": [
@@ -272852,6 +273186,38 @@
       {
         "adapter": "EplanDrawingReader",
         "member": "FrameArea",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
         "access": [
           "type"
@@ -281913,6 +282279,38 @@
       {
         "adapter": "EplanDrawingReader",
         "member": "FrameArea",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDrawingReader",
+        "member": "FrameColumns",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanDrawingReader.cs",
         "access": [
           "type"

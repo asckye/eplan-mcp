@@ -45,6 +45,12 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
         if (result.DrawingArea is not { Length: 4 } a || result.PageSize is not { Length: 2 } s || a.Any(n => double.IsNaN(n) || double.IsInfinity(n))
             || a[0] < 0 || a[1] < 0 || a[2] > s[0] + 1e-6 || a[3] > s[1] + 1e-6 || a[0] >= a[2] || a[1] >= a[3])
         { result.DrawingArea = null; }
+        // Batch 2 (owner 2026-11-16): the column edges of the frame grid, at page scale, for the column checks.
+        result.ColumnEdges = result.DrawingArea is null ? null : Optional(() => FrameColumns(page));
+        if (result.ColumnEdges is { Length: > 1 } edges && result.PageSize is { Length: 2 } pageSize && result.PlotFrameSize is { Length: 2 } frameSize)
+        { result.ColumnEdges = [.. edges.Select(e => e * pageSize[0] / frameSize[0])]; }
+        if (result.ColumnEdges is not { Length: > 2 } columns || columns.Zip(columns.Skip(1), (a, b) => b - a).Any(w => !(w > 0)))
+        { result.ColumnEdges = null; }
         Placement[] native = [.. page.AllPlacements, .. created];
         var cardOwners = new Dictionary<string, string>(StringComparer.Ordinal);
         // A55: Terminal.PLC may be null even when PLCTerminals reports the card membership.
@@ -325,6 +331,24 @@ internal sealed class EplanDrawingReader : IPageDrawingReader
     /// A145: the evaluation grid starts at 12003/12004; its height is the sum of the row heights 12002 and its width the sum
     /// of the column widths 12102. A frame that stores no widths spans the frame width 12033 from its start.
     /// </summary>
+    /// <summary>Batch 2: x of every column edge, from 12003 across the column widths 12102 in index order; null without widths.</summary>
+    private static double[]? FrameColumns(Page page)
+    {
+        using var properties = page.PlotFrame!.Properties;
+        using PropertyValue start = properties.FRAME_EVALUATION_AREA_START_POINT_X;
+        using PropertyValue widths = properties.FRAME_PATHSIZE;
+        if (start.IsEmpty)
+        { return null; }
+        var edges = new List<double> { start.ToDouble() };
+        foreach (int index in widths.Indexes.OrderBy(i => i))
+        {
+            using PropertyValue item = widths[index];
+            if (!item.IsEmpty)
+            { edges.Add(edges[edges.Count - 1] + item.ToDouble()); }
+        }
+        return edges.Count > 1 ? [.. edges] : null;
+    }
+
     private static double[]? FrameArea(Page page)
     {
         using var properties = page.PlotFrame!.Properties;

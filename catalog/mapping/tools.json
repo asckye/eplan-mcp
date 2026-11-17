@@ -26056,6 +26056,11 @@
             "file": "tests/EplanMcp.Large.Tests/PageGridWriteTests.cs"
           },
           {
+            "name": "PageReviewSpeedTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewSpeedTests.cs"
+          },
+          {
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
@@ -26422,6 +26427,16 @@
             "name": "PageReviewLayoutRuleTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewLayoutRuleTests.cs"
+          },
+          {
+            "name": "PageReviewSetupTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewSetupTests.cs"
+          },
+          {
+            "name": "PageReviewSpeedTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewSpeedTests.cs"
           },
           {
             "name": "PlacementTextCreateTests",
@@ -26905,6 +26920,7 @@
         "P:Eplan.EplApi.DataModel.Group.SubPlacements",
         "P:Eplan.EplApi.DataModel.IPropertyPlacementsContainer.PropertyPlacements",
         "P:Eplan.EplApi.DataModel.MacroBox.MacroName",
+        "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Name",
         "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Properties",
         "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.Size",
         "P:Eplan.EplApi.DataModel.MasterData.PlotFrame.SubPlacements",
@@ -27086,6 +27102,16 @@
             "name": "PageReviewRulePackTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewRulePackTests.cs"
+          },
+          {
+            "name": "PageReviewSetupTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewSetupTests.cs"
+          },
+          {
+            "name": "PageReviewSpeedTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewSpeedTests.cs"
           },
           {
             "name": "PageReviewTests",

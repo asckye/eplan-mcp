@@ -217,6 +217,53 @@ public sealed class PageReviewRulesTests
         Assert.Equal(("text_format", "warning", "eplan_placement_update"), ((string?)issue["code"], (string?)issue["severity"], (string?)issue["fix"]!["tool"]));
     }
 
+    /// <summary>Live 2026-11-16: model view pages project the 3D layout; their outlines cross by design.</summary>
+    [Fact]
+    public void ModelViewPages_SkipTheSchematicLayoutRules()
+    {
+        _scene.PageType = "ModelView";
+        Placement(1, 8, "Function", "-K1").Bounds = [4, 4, 12, 12];
+        Placement(2, 9, "Function", "-K2").Bounds = [8, 8, 16, 16];
+        _scene.Graphical.Add([[0, 10], [20, 10]]);
+        Assert.Equal("warning", (string?)Assert.Single(Review("overlaps"))["severity"]);
+        Assert.Empty(Review("wire_through_symbol"));
+    }
+
+    [Theory]
+    [InlineData(40, 40, false)]  // both pins in column 1
+    [InlineData(44, 48, true)]   // the second pin crosses the edge at 45.2
+    public void PinsInAnotherColumn_AreAWarning(double first, double second, bool reported)
+    {
+        _scene.Page.ColumnEdges = [4, 45.2, 86.4, 127.6];
+        DrawingPlacement k1 = Placement(1, first, "Function", "-K1");
+        k1.Location = [first, 100];
+        _scene.Pins["13/1/0"] = new() { Location = [first, 100] };
+        _scene.Pins["13/1/1"] = new() { Location = [second, 100] };
+        JArray issues = Review("path_straddle");
+        Assert.Equal(reported ? 1 : 0, issues.Count);
+        if (reported)
+        { Assert.Equal("Pins lie in columns 1, 2, the symbol is numbered in column 1; keep the symbol and its pins in one column.", (string?)issues[0]!["message"]); }
+    }
+
+    [Theory]
+    [InlineData("FN1_A", 4, null)]          // like most pages
+    [InlineData("FN1_B", 4, "plot_frame")]  // the odd frame
+    [InlineData("FN1_A", 2, "grid_size_mm")]
+    public void APageUnlikeMostOfItsType_IsAWarning(string frame, double grid, string? argument)
+    {
+        _actual["pageSetup"] = JObject.Parse(FormattableString.Invariant($$"""
+            {"type":"Circuit","frame":"{{frame}}","grid":{{grid}},"peers":[{"page":"=F+A1/1","frame":"{{frame}}","grid":{{grid}}},
+            {"page":"=F+A1/2","frame":"FN1_A","grid":4},{"page":"=F+A1/3","frame":"FN1_A","grid":4},{"page":"=F+A1/4","frame":"FN1_A","grid":4}]}
+            """));
+        JArray issues = Review("page_setup");
+        Assert.Equal(argument is null ? 0 : 1, issues.Count);
+        if (argument is not null)
+        {
+            JToken update = issues[0]!["fix"]!["args"]!["pages"]![0]!;
+            Assert.Equal((Page, argument == "plot_frame" ? (JToken)"FN1_A" : 4), ((string?)update["name"], update[argument]!));
+        }
+    }
+
     private const string Page = "=F+A1/1";
     private readonly ConnectionCreatePlanner.Scene _scene = new() { Project = new() { Name = "Line1" }, Page = new() { Page = Page, GridSize = 4 } };
     private readonly JObject _actual = JObject.Parse("""{"devices":[],"connections":[],"cables":[],"interruptions":[],"texts":[],"messages":[]}""");
