@@ -161,7 +161,7 @@ public sealed class LanguageSetToolTests : IDisposable
         Assert.Equal("Set the displayed languages to en_US, zh_CN.", WriteToolHarness.Text(result, 0));
         Assert.Empty(_dialog.Questions);
         var sent = (LanguageSetArgs)_harness.Bridge.LastArgs!;
-        Assert.Equal(("Line1", "f1", null), (sent.Project, sent.Fingerprint, sent.Add));
+        Assert.Equal((_harness.ProjectPath, "f1", null), (sent.Project, sent.Fingerprint, sent.Add));
         Assert.Equal(["en_US", "zh_CN"], sent.Display!);
         Assert.Equal(TimeSpan.FromSeconds(60), Assert.Single(_harness.Bridge.Writes).Limit);
     }

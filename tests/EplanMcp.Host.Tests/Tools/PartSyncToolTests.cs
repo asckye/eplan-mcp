@@ -101,7 +101,7 @@ public sealed class PartSyncToolTests : IDisposable
         Assert.Equal((_harness.ProjectPath, Path.Combine(_harness.Locations.Backups, "Line1"), Path.Combine(_harness.Locations.Backups, "masterdata")), (question.Plan.ProjectPath, question.BackupFolder, question.MasterDataBackupFolder));
         Assert.Equal(["add 1 part from Line1 to the parts database", "store 48 parts the project references in project Line1 (now 293)"], question.Changes);
         var executed = (PartSyncArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.PartSyncExecute).Args!;
-        Assert.Equal(("Line1", "append_new", "f1"), (executed.Project, executed.Mode, executed.Fingerprint));
+        Assert.Equal((_harness.ProjectPath, "append_new", "f1"), (executed.Project, executed.Mode, executed.Fingerprint));
     }
 
     [Fact]

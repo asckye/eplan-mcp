@@ -55,7 +55,7 @@ public sealed class ReportCreateToolTests : IDisposable
         JsonElement result = WriteToolHarness.Structured(await Create());
         var args = (ReportCreateArgs)_harness.Bridge.Calls.Last(c => c.Operation == OperationNames.ReportCreateExecute).Args!;
 
-        Assert.Equal(("Line1", "TableOfContents", "F06_002", "&AAB1/102", "Location designation_A3", "DT (full)", "Directory", "f1"),
+        Assert.Equal((_harness.ProjectPath, "TableOfContents", "F06_002", "&AAB1/102", "Location designation_A3", "DT (full)", "Directory", "f1"),
             (args.Project, args.Type, args.Form, args.FirstPage, args.FilterScheme, args.SortScheme, args.PageDescription, args.Fingerprint));
         Assert.Equal(["&AAB1/102", "&AAB1/103"], result.GetProperty("pages").EnumerateArray().Select(p => p.GetString()));
         Assert.Equal(["&AAB1/103"], result.GetProperty("new_pages").EnumerateArray().Select(p => p.GetString()));

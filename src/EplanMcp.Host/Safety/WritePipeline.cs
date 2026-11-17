@@ -271,7 +271,7 @@ internal sealed partial class WritePipeline(
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 { throw NotStarted(new BridgeError { Reason = ErrorReason.Cancelled, Message = "The call was cancelled before execution." }); }
             }
-            WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, request.ExecuteArgs(plan, backup), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
+            WriteResult<TData> result = await bridge.InvokeWriteAsync<TExecuteArgs, TData>(request.ExecuteOperation, PinnedProject.In(request.ExecuteArgs(plan, backup), plan), requestId, request.Limit, waiting, cancellationToken).ConfigureAwait(false);
             await RecordResultAsync(request.Tool, requestId, plan, eplan, result.Execution, null, result.Recovered, backup, masterDataBackup, result.Data).ConfigureAwait(false);
             await Show(shown, result.Execution, null).ConfigureAwait(false);
             return new WriteOutcome<TData>(plan, result.Execution, result.Data, result.Recovered, backup?.Path, masterDataBackup, requestId);

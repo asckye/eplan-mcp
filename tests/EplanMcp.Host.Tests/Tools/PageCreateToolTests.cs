@@ -93,7 +93,7 @@ public sealed class PageCreateToolTests : IDisposable
         Assert.Equal(["Circuit", "Graphics"], data.GetProperty("pages").EnumerateArray().Select(p => p.GetProperty("type").GetString()));
         Assert.Equal("Created 2 pages; Ctrl+Z in EPLAN undoes this step.", Text(result, 0));
         var executed = (PageCreateArgs)_bridge.Calls.Last(c => c.Operation == OperationNames.PageCreateExecute).Args!;
-        Assert.Equal(("Line1", "f1", "zh_CN"), (executed.Project, executed.Fingerprint, executed.Language));
+        Assert.Equal((_projectPath, "f1", "zh_CN"), (executed.Project, executed.Fingerprint, executed.Language));
         Assert.Equal(TimeSpan.FromSeconds(64), Assert.Single(_bridge.Writes).Limit);
     }
 
