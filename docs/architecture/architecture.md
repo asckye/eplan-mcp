@@ -391,7 +391,7 @@ sequenceDiagram
 
 ### 8.2 错误模型
 - 协议错误（未知工具、请求格式错误）走 JSON-RPC 错误。**参数校验错误和业务错误一律以 `isError: true` 的工具结果返回**，让模型可以自行纠正。
-- 错误结构借鉴 Google AIP-193：`reason`（大写下划线形式，如 `PAGE_NOT_FOUND`）、给模型看的 `message`（说明下一步怎么做）、`retryable`、`metadata`。先检查权限，再检查对象是否存在。当前错误码由 `EplanMcp.Contracts/ErrorReason.cs`、契约快照及各工具参考记录。
+- 错误结构借鉴 Google AIP-193：`reason`（大写下划线形式，如 `PAGE_NOT_FOUND`）、给模型看的 `message`（说明下一步怎么做）、`retryable`、`metadata`。先检查权限，再检查对象是否存在。当前错误码由 `EplanMcp.Contracts/Protocol/ErrorReason.cs`、契约快照及各工具参考记录。
 - 写工具的结果和错误都带执行状态 `execution`（`not_started`、`rolled_back`、`committed`、`unknown`），见 [ADR-0010](../adr/0010-write-outcomes.md)。
 
 

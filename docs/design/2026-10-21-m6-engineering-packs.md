@@ -51,7 +51,7 @@
 | # | 能力 | 状态 | 依据 | 对 M6 的意义 |
 |---|---|---|---|---|
 | 1 | 写入流水线 | 已实现 | `src/EplanMcp.Host/Safety/WritePipeline.cs`：规划 → 策略 → 写入暂停 → 审批 → 备份（Destructive）→ 审计 `execution_started` → 执行 → 审计 `execution_result` | 一次工具调用只有一对 `*.plan`/`*.execute` 操作、一个 Bridge 事务；计划的每一步复用这些段，计划级的部分要新建（ADR-0023） |
-| 2 | 变更清单与指纹 | 已实现（单步） | `src/EplanMcp.Contracts/WritePlan.cs`（`Project`、`ProjectPath`、`Changes`、`Fingerprint`、`Details`）、`PlannedChange.cs`；`src/EplanMcp.Bridge.Core/Operations/Runtime/Fingerprint.cs`（排序后的行做 SHA-256）；每个工具只覆盖它触及的对象，行中多用 `ToStringIdentifier()`；`PLAN_STALE` 由各 `*ExecuteOperation.cs` 返回 | 运行时字符串标识含按打开分配的数据库号（S28），**不能用于跨调用保存的计划**；`dry_run` 不返回计划令牌 |
+| 2 | 变更清单与指纹 | 已实现（单步） | `src/EplanMcp.Contracts/Runtime/WritePlan.cs`（`Project`、`ProjectPath`、`Changes`、`Fingerprint`、`Details`）、`PlannedChange.cs`；`src/EplanMcp.Bridge.Core/Operations/Runtime/Fingerprint.cs`（排序后的行做 SHA-256）；每个工具只覆盖它触及的对象，行中多用 `ToStringIdentifier()`；`PLAN_STALE` 由各 `*ExecuteOperation.cs` 返回 | 运行时字符串标识含按打开分配的数据库号（S28），**不能用于跨调用保存的计划**；`dry_run` 不返回计划令牌 |
 | 3 | Destructive 备份 | 已实现 | `Safety/BackupFolders.cs`、`Bridge.Core/Operations/Projects/ProjectBackups.cs`、`Bridge.Eplan/Adapters/EplanProjectBackup.cs`（`CopyProject(…, Snapshot)`，核对页数） | 计划开始前的备份直接复用 |
 | 4 | 结果恢复与写入暂停 | 已实现 | `Bridge.Core/Operations/Runtime/OutcomeRecords.cs`（内存，256 条）、`Host/Bridge/BridgeClient.Writes.cs`（`outcome.get` 轮询）、`Safety/DanglingWrites.cs`、`Safety/SuspensionStore.cs` | 逐步沿用；多步计划还需要计划级的结果（ADR-0023） |
 | 5 | 审计 | 已实现 | `src/EplanMcp.Host/Audit/AuditLog.cs`：`approval`、`suspension_release`、`execution_started`、`execution_result`、`writes_suspended`，哈希链；读和导出不审计 | 增加计划、工作区和包的记录种类 |

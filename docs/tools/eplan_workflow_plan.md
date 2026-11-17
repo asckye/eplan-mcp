@@ -64,9 +64,9 @@ P11 中省略语言时与页工具一致，使用 EPLAN 界面语言，实际语
 ```
 
 - 示例中的空集合只省略内容；真实计划不得省去前置条件。`outputSchema` 声明以上字段：ID、哈希为 string，哈希为 SHA-256 小写十六进制，时间为 UTC RFC 3339；`tier` 为 Write/Destructive 枚举；步骤按序号递增；配置/上下文无来源时为 null，不能伪造锁或修订号。
-- `readScope`/`modifyScope` 为 `{pages, structures, locators}`；页和结构为明确名称，定位符沿用 [ObjectLocator](../../src/EplanMcp.Contracts/ObjectLocator.cs)：`{project,kind,type,oid,name,page,category,pos}`，`pos` 为 `x,y` 毫米文本，不能改成设计早期示例的 `pos_mm` 数组。`kind` 仅 page/function/connection。
+- `readScope`/`modifyScope` 为 `{pages, structures, locators}`；页和结构为明确名称，定位符沿用 [ObjectLocator](../../src/EplanMcp.Contracts/Properties/ObjectLocator.cs)：`{project,kind,type,oid,name,page,category,pos}`，`pos` 为 `x,y` 毫米文本，不能改成设计早期示例的 `pos_mm` 数组。`kind` 仅 page/function/connection。
 - `preconditions[]` 记存在/不存在、属性值、对象/页/范围集合哈希及资源哈希；每项带范围或定位符和依据。新对象不能预造 oid，以“第 k 步产物 + 明确描述”引用，执行后取得真实定位符；`expected[]` 同样给目标、预期值或获批的编号模式、来源及校验项。
-- `plannedChanges` 沿用 [WritePlan / PlannedChange](../../src/EplanMcp.Contracts/WritePlan.cs) 的变更形状；预览按步、按页分组，预测步骤显式列出允许的名称模式、对象种类/数量及范围，不能用任意通配符代替审批边界。`tier` 由服务端目录取最高值，客户端不能降低。
+- `plannedChanges` 沿用 [WritePlan / PlannedChange](../../src/EplanMcp.Contracts/Runtime/WritePlan.cs) 的变更形状；预览按步、按页分组，预测步骤显式列出允许的名称模式、对象种类/数量及范围，不能用任意通配符代替审批边界。`tier` 由服务端目录取最高值，客户端不能降低。
 - 返回 structuredContent、同内容 JSON 文本和一行摘要 `Compiled a plan with 3 steps; no project data was changed.`，附 `resource_link`。整个结果默认约 5k、硬上限 20k token（双份 JSON 合计）；超限仅缩略返回的条目，保留计数、`truncated`、`hint` 和计划引用，完整不可变计划不截断，经 `eplan_plan_get` 分页读取。
 
 ## 4. 错误
@@ -86,7 +86,7 @@ Read 结果/错误不带 `execution`。`RESOURCE_NOT_FOUND`、`CAPABILITY_MISSIN
 - **重编号**：两种重编号仍全项目读写且为最后有效步，整个项目≤50 页、10,000 个 standard 对象；先从名称清单按页数提前拒绝，超限 missing=`plan.renumber:whole_project_guard`，提示使用对应单次重编号工具。单次工具保留自己的审批、备份和预算。
 - **容量与覆盖**：v0.3.0 面向数千页项目，按负责人决定列出的核验规模为 300/1,000/3,000 页；10,000 页尚不支持，不承诺任意规模。局部 standard 内容加全项目名称筛查不等于全项目内容验证；未观察页、属性和时间窗口在 apply 的 coverage 中列出。guard 10 s、初备份 60 s、总墙钟 15 min 和证据 13 MiB 预算不放宽。
 - **编译**：校验全部输入 → 解析并固定已有项目和默认柜 → 读取上下文、资源及快照 → 独立步骤调用真实 `*.plan` → 依赖步骤由 Host 预测 → 检查范围与预期 → 保存计划。默认值（含语言）编译时显式固定；已有多柜绑定报缺能力，不用默认柜合并。预测只针对明确依赖，例如前步新建的页；不能可靠预测时拒绝或报告缺能力。
-- **快照与解析**：按已合入 [ProjectSnapshotArgs/Data](../../src/EplanMcp.Contracts/ProjectSnapshotArgs.cs) 分块，以 `complete`/`nextAfterPage` 续读，检查 `missingPages`；仅整项目单块才有 Bridge `snapshotHash`，多块按 [Bridge 设计 4.4](../design/2026-10-21-m6-bridge-snapshot.md) 合成，记录覆盖范围，不能把部分页哈希冒充整项目。`object.resolve` 每批 1–200 项，只对已打开项目；`stale` 或哈希不符即冲突，不按描述换目标。
+- **快照与解析**：按已合入 [ProjectSnapshotArgs/Data](../../src/EplanMcp.Contracts/Projects/ProjectSnapshotArgs.cs) 分块，以 `complete`/`nextAfterPage` 续读，检查 `missingPages`；仅整项目单块才有 Bridge `snapshotHash`，多块按 [Bridge 设计 4.4](../design/2026-10-21-m6-bridge-snapshot.md) 合成，记录覆盖范围，不能把部分页哈希冒充整项目。`object.resolve` 每批 1–200 项，只对已打开项目；`stale` 或哈希不符即冲突，不按描述换目标。
 - **身份**：项目键按规范化路径区分副本；定位符 `project` 使用快照的无扩展名 `projectPath`。oid 只在项目内唯一，`PROJ_GUID` 仅提示同源（[api-notes A32、A34](../eplan/api-notes.md)）。跨调用不保存 `ToStringIdentifier`、`DatabaseIdentifier` 或依赖它们的会话指纹；apply 重新规划生成临时指纹。范围哈希包括对象集合，能发现新增、删除和名称占用，不只比已有对象。
 - **最小模块**（提议）：`args={module,page,x,y,variant?,numbering?,placeholder?,value_set?}`，位置、变体、编号及占位符/值集字段沿用宏/占位符工具；module 必须解析为带版本、清单 SHA-256 和参考来源定位符的已安装模块。仅 `.ema`，在一个事务中插入并应用预定义值集；不做 `.emp`、配置接口、部件映射、自动提取或自定义参数记录。包宏根目录须按 ADR-0024 增加受控适配，不把包的绝对路径塞入当前 `MacroInsertArgs.Macro`，也不扩大独立宏工具的根目录。
 - **占位符写范围**：module/placeholder 的引用可能不只在占位符所在页；完整引用范围的计划读取尚需合同细化（未验证部分见 apply Q3）。无法确定全部可能修改的对象/页/项目属性时报 `CAPABILITY_MISSING`，不能只用所在页批准后再以校验 unknown 代替范围约束。
