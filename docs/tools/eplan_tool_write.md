@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `meta` / `discovery`（只在 discovery 中，见 [ADR-0057](../adr/0057-discovery-profile-dispatch.md)） |
 | 安全级别 | 取目标工具的级别：写入或破坏性，审批与 scratch 规则由目标工具决定 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.6.0) |
 
 ## 1. 这个工具解决什么任务
 在 discovery Profile 里调用任意一个写入或破坏性工具。客户端看到它是破坏性工具，会按"写入询问"处理；服务端的预览默认值、scratch 判断、审批、备份和审计全部由目标工具照旧执行，分发工具不加也不减。

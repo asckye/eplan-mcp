@@ -154,7 +154,7 @@ flowchart TB
 | **Host**（`eplanmcp.exe`） | .NET 10 控制台程序，自包含单文件发布；官方 MCP C# SDK 2.x（支持 2026-07-28 规范，并兼容旧版客户端） | MCP 协议；工具注册和 Profile；参数校验；策略与审批；审计；结果整形；发现和管理 Bridge 连接；CLI 子命令 | 不引用任何 EPLAN 程序集 |
 | **Bridge**（EPLAN 插件） | net481 类库，由 EPLAN 加载；**除 EPLAN 自带的程序集外不带任何第三方依赖** | 在主线程上执行操作；事务和撤销；把 EPLAN 对象映射为契约 DTO；收集操作期间产生的 EPLAN 系统消息 | 不做策略判断，不访问 MCP，不写审计 |
 | **Contracts** | netstandard2.0 类库，纯 POCO | Host 与 Bridge 共享的请求/响应 DTO、操作名、错误码、协议版本 | 不包含逻辑，也不依赖任何序列化器 |
-| **Workbench**（M5） | 单独的桌面程序 `workbench\EplanMcp.Workbench.exe`，WPF（.NET 10，自包含，[ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)），视觉与 TIA 的 Workbench 一致（Ant Design v5，复用其主题），视觉按 v2 设计（[ADR-0034](../adr/0034-workbench-visual-apple-principles.md)）；中英双语；字体用 Windows 自带的 Segoe UI Variable、Microsoft YaHei UI 与 Cascadia Mono，不随程序附带字体 | 审批管道的服务器（每个 Windows 用户、每个数据根目录一个，[ADR-0014](../adr/0014-workbench-approval-channel.md)）和审批队列（一种审批渠道）；客户端配置向导（选择客户端、一键写入 MCP 配置）、审计浏览、连接与授权状态面板；需要 Host 知识的功能调用 `eplanmcp` 的子命令 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目；不由 Host 启动，不判断绑定、期限和一次性（这些在 Host 中） |
+| **Workbench**（M5） | 单独的桌面程序 `workbench\EplanMcp.Workbench.exe`，WPF（.NET 10，自包含，[ADR-0017](../adr/0017-workbench-wpf-tia-theme.md)），控件沿用 TIA 的 Ant Design v5 主题，视觉按 v2 设计（[ADR-0034](../adr/0034-workbench-visual-apple-principles.md)）；中英双语；字体用 Windows 自带的 Segoe UI Variable、Microsoft YaHei UI 与 Cascadia Mono，不随程序附带字体 | 审批管道的服务器（每个 Windows 用户、每个数据根目录一个，[ADR-0014](../adr/0014-workbench-approval-channel.md)）和审批队列（一种审批渠道）；客户端配置向导（选择客户端、一键写入 MCP 配置）、审计浏览、连接与授权状态面板；需要 Host 知识的功能调用 `eplanmcp` 的子命令 | 不重复 EPLAN 自身的编辑界面：工程师直接在 EPLAN 中查看和修改项目；不由 Host 启动，不判断绑定、期限和一次性（这些在 Host 中） |
 
 **职责划分原则：Host 决定"能不能做"，Bridge 只负责"怎么做"。** 安全逻辑全部在 Host 中，不依赖 EPLAN，可以用 Small 测试穷尽验证。
 
@@ -271,7 +271,7 @@ sequenceDiagram
 ```
 
 - Host 启动时不要求 EPLAN 已经在运行。没有可用实例时，工具返回 `EPLAN_NOT_CONNECTED`，并提示"请启动 EPLAN 并确认 EplanMcp 插件已加载"。
-- 有多个 EPLAN 实例时不自动选择，需要先用 `eplan_session_list` / `eplan_session_select` 指定。MCP 本身没有会话，所以选择结果保存在 Host 进程中；一个 Host 进程只服务一个客户端连接（stdio）。
+- 有多个 EPLAN 实例时不自动选择，需要先用 `eplan_session_status` 查看、`eplan_session_select` 指定。MCP 本身没有会话，所以选择结果保存在 Host 进程中；stdio 模式下一个 Host 进程只服务一个客户端连接，HTTP 模式（虚拟机部署，[ADR-0018](../adr/0018-vm-http-transport.md)）另见该 ADR。Host 也可以按工程师的要求启动、关闭和重启 EPLAN（`eplan_session_start` / `eplan_session_close` / `eplan_session_restart`，[ADR-0058](../adr/0058-eplan-lifecycle-tools.md)）。
 - 枚举时把前缀作为查询掩码交给管道文件系统（`FindFirstFileExW`），匹配的几个管道在一次查询内返回。不能用 `Directory.EnumerateFiles` 列出整个 `\\.\pipe\`：它分多次查询读取几百个管道，每次从上次的位置继续，其间每关闭一个更早的管道，后面的管道就前移到已读过的部分而被跳过。刚启动的 Bridge 排在最后，所以在繁忙的机器上最容易漏掉，表现为间歇性的 `EPLAN_NOT_CONNECTED`。
 
 ### 6.2 只读调用
@@ -366,7 +366,7 @@ sequenceDiagram
 | 安装范围 | 校验并解除 ZIP 锁定后，整体解压到短且固定的程序目录；数据仍在 `%USERPROFILE%\EplanMcp\`，与程序分开 | 无需管理员权限；程序可放在工程师选择的位置 |
 | 安装包 | 只提供 `EplanMcp-<version>.zip`，唯一顶层目录 `EplanMcp-<version>\`，内含 Host、`bridge\net481\`、`workbench\`、`claude-plugin\`、`docs\` 和 `README.md`，不套 `app\`；升级前关闭 EPLAN、Workbench 和客户端，再整体替换同一路径；卸载先撤销注册和客户端配置，再删除程序目录，保留数据（[ADR-0016](../adr/0016-per-user-installer.md)、[发布流程](../process/release.md)、[打包布局](../../packaging/README.md)） | 无需管理员或联网，不创建卸载项或开始菜单入口 |
 | Host | 程序目录根部的 `eplanmcp.exe`，自包含单文件发布 | 不依赖本机安装的 .NET 版本 |
-| Workbench | `workbench\EplanMcp.Workbench.exe`，自包含目录，附字体及许可证 | 解压后直接打开，完成插件注册与客户端配置 |
+| Workbench | `workbench\EplanMcp.Workbench.exe`，自包含目录，附许可证；不附字体（[ADR-0034](../adr/0034-workbench-visual-apple-principles.md)） | 解压后直接打开，完成插件注册与客户端配置 |
 | Bridge | `bridge\net481\EplanMcp.Bridge.Eplan.dll`；需要针对特定版本构建时，按版本分目录 | 一个安装包可以支持多个 EPLAN 版本 |
 | 插件注册 | 只经 `eplanmcp install-addin`：它用命令行方式调用 EPLAN 官方的 `EplApiModuleAction /register:"<dll>"`，每个勾选的变体一次（有 EPLAN 在运行时拒绝），等命令启动的 EPLAN 加载插件、在握手中核对加载的是这个 DLL 后关闭它，结果记在 `<数据根目录>\state\addins.json`；注册不落在 MSIX 重定向的目录中，所以在 MSIX 环境中照常执行（S14）；`uninstall-addin` 按记录完全撤销（[ADR-0016](../adr/0016-per-user-installer.md)、[M5 设计](../design/2026-10-20-m5-operability.md) 4.2）。**更新插件后必须重启 EPLAN**：已加载的程序集在 EPLAN 退出前无法卸载（api-notes A8），握手时比对版本号以发现这种情况 | 使用官方机制，不手工修改 EPLAN 设置 |
 | 签名 | 0.x 的安装包和程序不签名，附 SHA-256 和逐文件清单（v0.5.0 起在开发机上打包，没有 GitHub 构建来源证明，见 [ADR-0051](../adr/0051-build-release-packages-locally.md)），入门指南说明 SmartScreen 的"仍要运行"和校验方法；以后是否购买代码签名证书由项目负责人决定（M5 设计 Q6）。插件的 EADN 签名视 ADR-0007 的结论而定：如果走运行时授权路线，本地打包脚本中增加 EADN 签名步骤 | 暂时没有证书；授权要求 |
@@ -514,7 +514,7 @@ Host 与 Bridge 的 IPC 帧双向拒绝协议信封中的重复成员与未声�
 | Bridge | 运行在 EPLAN 进程中（或离线宿主中）的插件，负责执行 EPLAN API 调用 |
 | scratch 项目 | 位于 scratch 根目录下、用于测试和试验的项目副本；策略允许在其中自动写入 |
 | 级别（Tier） | 工具的安全级别：Read / Write / Destructive / Code |
-| Profile | 一组预先选定、对外暴露的工具集合，例如 `core`、`full` |
+| Profile | 一组预先选定、对外暴露的工具集合：`full`（默认，全部工具）、`core`（25 个，围绕画图、审图、修正）、`discovery`（4 个元工具，按需查找和调用其余工具，[ADR-0057](../adr/0057-discovery-profile-dispatch.md)） |
 | dry-run / 计划 | 只计算将要发生的变化、不修改项目的执行方式 |
 | MRTR | Multi Round-Trip Request，MCP 2026-07-28 中服务器向用户请求输入的方式 |
 | EADN | EPLAN Application Developer Network，EPLAN 的开发者计划，提供 API 程序签名服务 |

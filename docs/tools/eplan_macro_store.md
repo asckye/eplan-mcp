@@ -5,7 +5,7 @@
 | 项目字段 | 记录 |
 |---|---|
 | 工具名 / 注册入口 / 契约快照 | `eplan_macro_store`；[MacroStoreTools.cs](../../src/EplanMcp.Host/Tools/MacroStoreTools.cs)；[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
-| 分组 / Profile / 状态 | macro / full / Implemented（Unreleased），实机待验 |
+| 分组 / Profile / 状态 | macro / full / Implemented (v0.5.1)，实机待验 |
 | 状态 | Implemented (v0.5.1) |
 | 当前安全分类与 MCP 注解 | Read 导出；readOnly、destructive、idempotent、openWorld 均 false |
 | 模型说明与参数示例来源 | 注册 schema 与 [usage](../../src/EplanMcp.Host/Tools/Usage/eplan_macro_store.md) |
@@ -17,7 +17,7 @@
 | 已有测量 | 上述字节数为负责人原生调用证据；工具端到端耗时、取消和实机闭环待验 |
 | 项目测试与夹具 | Host 文件验证与并发拒绝；Core 参数与快照故障；Large `MacroStoreTests` 在 LargeWrite 新页存宏、插入、撤销与页宏文件校验，仅编写未运行 |
 
-窗口宏必填 project、page、locators（1–500）、name。representation 默认 multi_line，支持 MultiLine、Overview；variant 为 0–15，默认 0；reference_mm 默认对象外框左下角。页宏必填 project、pages（1–50 个精确页名）、name。description 接受字符串或语言文本字典，与 page_create 一致。
+必填 `project`、`operation`（`window` 存窗口宏，`page` 存页宏）、`name`；`dry_run` 默认 true，只返回变更清单和指纹，false 才写文件。窗口宏必填 project、page、locators（1–500）、name。representation 默认 multi_line，支持 MultiLine、Overview；variant 为 0–15，默认 0；reference_mm 默认对象外框左下角。页宏必填 project、pages（1–50 个精确页名）、name。description 接受字符串或语言文本字典，与 page_create 一致。
 
 name 仅接受 ASCII 字母、数字、`_`、`-`、`.` 组成的有效 Windows 文件名，自动补对应扩展名。文件限定在 Host 的 `exports/macros/` 下，已存在拒绝。执行返回 path、size、sha256，窗口宏另返回 variants；空文件、无法打开、缺请求变量或业务快照变化均报 EPLAN_OPERATION_FAILED。导出文件交由现有宏目录管理流程后，可供 macro_insert 使用。
 

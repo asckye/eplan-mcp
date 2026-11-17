@@ -16,7 +16,7 @@
 |---|---|---|---|---|
 | `project` | string | 否 | — | 只取 plugins 且省略时离线返回全局插件；其他读取回显实际名称和路径 |
 | `cabinet` | string | 多柜时是 | 单柜自动选择 | 只返回所选柜的对象、配置及精确依赖资源 |
-| `scope` | object | 是 | — | `{pages?,structures?,kinds?,locators?}`；空对象表示所选柜全部范围，各过滤条件取交集 |
+| `scope` | object | 否 | — | `{pages?,structures?,kinds?,locators?}`；省略或空对象表示所选柜全部范围，各过滤条件取交集 |
 | `include` | array of enum | 否 | `[objects,facts,modules,config,capabilities]` | 可选 plugins/objects/facts/modules/rules/config/capabilities；只取需要的数据，不执行规则 |
 | `max_tokens` | integer，1–20000 | 否 | 5000 | 整个工具结果预算，含 structuredContent、JSON 文本和摘要；实际为估算 token 数，过小放不下必要元数据则报参数错误 |
 

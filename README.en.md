@@ -88,6 +88,21 @@ Everything happens in the EPLAN session you are using. See the [architecture](do
 - AI makes mistakes: try on a scratch project first and check the preview before approving.
 - Project content returned by tools enters your AI client; whether it reaches a model service depends on the client and model you use, so confirm this meets your confidentiality requirements before working on customer projects. Installing EplanMcp and connecting locally need no internet access.
 
+## Documentation
+
+Most project documentation is in Chinese.
+
+| To learn | Read |
+|---|---|
+| How to start | [English guide](docs/getting-started/en.md) · [中文入门指南](docs/getting-started/zh-CN.md) |
+| Which tools exist and how each is used | [Tool index](docs/tools/README.md) (Chinese); every tool's usage text is English and is returned by `eplan_tool_usage` |
+| Milestones, release scope and schedule | [Roadmap](docs/roadmap.md) (Chinese) · [CHANGELOG](CHANGELOG.md) |
+| How the system is designed, and why | [Architecture](docs/architecture/architecture.md) · [ADRs](docs/adr/README.md) (Chinese) |
+| CLI JSON output and install acceptance | [CLI reference](docs/reference/cli.md) · [Release process](docs/process/release.md) |
+| Verified facts about the EPLAN API and its coverage | [api-notes index](docs/eplan/api-notes.md) · [API coverage](docs/eplan/api-coverage.md) |
+| Security | [Threat model](docs/architecture/architecture.md#13-威胁模型) · [SECURITY.md](SECURITY.md) |
+| How to contribute | [CONTRIBUTING.md](CONTRIBUTING.md) · [Engineering standard](https://github.com/asckye/engineering-standards/tree/v3.0) |
+
 ## Building from source
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) (in Chinese) and the source build steps in the [Chinese README](README.md).

@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `layout` / `full`（新工具默认只在 `full` 中） |
 | 安全级别 | Write（项目）：scratch 内直接执行，scratch 外每次审批 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.6.0) |
 
 ## 1. 这个工具解决什么任务
 

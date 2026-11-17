@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `layout` / `full`（当前注册在 `full` 中，见[工具索引](README.md)） |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.2) |
 
 ## 1. 这个工具解决什么任务
 "把第二排导轨连同上面的 PLC 删掉，重新排。"布置要反复调整：代理用这个工具按对象 ID 删除已放的导轨、线槽和设备，设备留在原理图里，回到 `eplan_layout_get` 的 `unplaced`，可以再用 `eplan_layout_place` 放。设计见 [M4b 第一批](../design/2026-11-12-m4b-layout3d.md)，实测事实见 [api-notes A136](../eplan/api-notes.md)。

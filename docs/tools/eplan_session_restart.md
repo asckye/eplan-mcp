@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `session` / `full`（见 [ADR-0058](../adr/0058-eplan-lifecycle-tools.md)） |
 | 安全级别 | Destructive（本机进程）：关闭部分与 [`eplan_session_close`](eplan_session_close.md) 完全相同 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.7.0) |
 
 ## 1. 这个工具解决什么任务
 替换插件后让 EPLAN 重新加载它，或 EPLAN 状态异常时重新开始。等于先 `eplan_session_close`、再以同一个变体 `eplan_session_start`，中间任何一步失败都停下并说明停在哪一步。

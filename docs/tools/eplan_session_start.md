@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `session` / `full`（见 [ADR-0058](../adr/0058-eplan-lifecycle-tools.md)） |
 | 安全级别 | Write（本机进程）：不改任何项目，不需要审批；占用一个 EPLAN 授权 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.6.0) |
 
 ## 1. 这个工具解决什么任务
 代理遇到 `EPLAN_NOT_CONNECTED` 时，不必请工程师去开 EPLAN：本工具在本机启动一个装好 EplanMcp 插件的 EPLAN，等它连上后返回与 [`eplan_session_status`](eplan_session_status.md) 相同的结果。

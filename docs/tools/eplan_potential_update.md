@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `connection` / `full` |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.2) |
 
 ## 1. 这个工具解决什么任务
 电位定义点（以及电位连接点，A129：同为 `PotentialDefinition`）决定一组导线的电位名、颜色、截面。负责人 2026-11-10 签核 IEC 规则后，通过式烘芯炉有 10 根 N 线是白色，原因是 N 电位定义点的颜色写成了 `WH`；MX_NFPA 有 3 根线是 `RED`。原来只有 `eplan_connection_create` 能在新建时写这些属性，已放好的电位定义只能删了重建（删除要审批）。负责人选了做工具（“按你的建议做③”）：直接改已有电位定义的属性，再按电位颜色重新生成连接。

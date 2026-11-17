@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `part` / `full` |
 | 安全级别 | 系统主数据（[ADR-0019](../adr/0019-master-data-writes.md)）：每次审批，执行前备份主数据 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.2) |
 
 负责人 2026-10-31 提前实施 M9 首批，2026-11-10 回顾后合入 main；Large 仅编写未运行。从供应商表格每行生成一个部件，免去手写 XML；无 project，目标为所有项目共享的当前配置部件库。省略 `dry_run` 或传 `true` 只预览，传 `false` 才执行（ADR-0049）。
 

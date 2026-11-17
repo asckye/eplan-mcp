@@ -17,11 +17,11 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
-| `page` | string | 是 | — | 完整页名；MultiLine 要求 `Circuit` 页，Overview 要求 `Overview` 页 |
+| `page` | string | 单次模式必填 | — | 完整页名；MultiLine 要求 `Circuit` 页，Overview 要求 `Overview` 页，SingleLine 要求 `CircuitSingleLine` 页。使用 `items` 时不给（schema 只要求 `project`） |
 | `macro` | string | 二选一 | — | `eplan_macro_list` 返回的 `path`；与 `part` 互斥 |
 | `part` / `part_variant` | string | 否 | — | 部件号及部件变体；只读部件库的 `ARTICLE_GROUPSYMBOLMACRO`。变体缺省选 `1` 或唯一变体，与 `eplan_device_place` 一致 |
-| `representation` | enum | 否 | `MultiLine` | `MultiLine` 或 `Overview`；宏必须具有该表达 |
-| `x`、`y` | number | 是 | — | 插入点，单位毫米，原点在页的左下角，y 向上。宏外框的左上角落在这里（A14） |
+| `representation` | enum | 否 | `MultiLine` | `MultiLine`、`Overview` 或 `SingleLine`；宏必须具有该表达 |
+| `x`、`y` | number | 单次模式必填 | — | 插入点，单位毫米，原点在页的左下角，y 向上。宏外框的左上角落在这里（A14） |
 | `variant` | integer | 否 | 0 | 宏的变体编号（`eplan_macro_get` 的 `variants`） |
 | `numbering` | enum `number` / `keep` | 否 | `number` | `number`：EPLAN 给宏中的设备分配不冲突的标识；`keep`：保留宏中的标识，结构跟随目标页，与已有设备同名时拒绝（M3b 设计 Q2） |
 | `macro_box` | boolean | 否 | true | true 按项目设置保留宏框；false 在插入的同一事务删除返回的宏框，引用对象保留 |

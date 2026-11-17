@@ -18,7 +18,7 @@ S24 r15 发现同步**也写项目**：被引用但没有存进项目的部件�
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
-| `project` | string | 否 | EPLAN 中选中的项目 | 项目名，或 `eplan_project_list` 返回的 `path` |
+| `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `mode` | enum `append_new` \| `overwrite_existing` \| `overwrite_and_append` | 否 | `append_new` | `append_new`：只加部件库中没有的部件；`overwrite_existing`：用项目中的数据覆盖部件库中已有的部件（连同全部变体）；`overwrite_and_append`：两者都做 |
 | `dry_run` | bool | 否 | true | 省略或 true 仅预览；执行须显式 false |
 

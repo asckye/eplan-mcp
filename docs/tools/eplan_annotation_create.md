@@ -1,6 +1,6 @@
 # 工具规格：`eplan_annotation_create`
 
-状态：Implemented (Unreleased)，实机待验 · 2026-11-04。
+状态：Implemented (v0.5.0)，实机待验 · 2026-11-04。
 
 ## 问题、选项与决定
 
@@ -10,7 +10,7 @@
 |---|---|
 | 状态 | Implemented (v0.5.0) |
 | 工具名 / 注册 / 契约 | `eplan_annotation_create`；[AnnotationCreateTools](../../src/EplanMcp.Host/Tools/AnnotationCreateTools.cs)、[McpServerSetup](../../src/EplanMcp.Host/McpServerSetup.cs)；[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
-| 分组 / Profile / 状态 | placement / full / Implemented (Unreleased) |
+| 分组 / Profile / 状态 | placement / full / Implemented (v0.5.0) |
 | 安全分类 / MCP 注解 | Write；readOnly/destructive/idempotent/openWorld 均 false |
 | 模型说明 / 示例来源 | [AnnotationCreateContract](../../src/EplanMcp.Host/Tools/AnnotationCreateContract.cs)、[英文用法](../../src/EplanMcp.Host/Tools/Usage/eplan_annotation_create.md) |
 | EPLAN 路线 | 复用 `placement.text.create.plan/execute`、`PlacementTextCreateExecuteOperation`、`EplanPlacementTextWriter` |

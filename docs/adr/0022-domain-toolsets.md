@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 状态 | Accepted |
+| 状态 | Superseded by [ADR-0057](0057-discovery-profile-dispatch.md)（项目负责人 2026-11-17）。未实现：`--toolsets`、`eplan_toolset_list`、`eplan_toolset_load` 和 `dynamic` 模式都没有做；“工具列表要小”的目标由 ADR-0057 的发现模式（`serve --profile discovery`，4 个元工具）达成 |
 | 日期 | 2026-10-21（提出）· 2026-10-21（接受：项目负责人"接受"） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门（1.0 发布前）：工具集的名称写进配置和客户端配置后，按工具契约管理（[开发流程](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/process/development-workflow.md)第 8 节） |

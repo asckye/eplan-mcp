@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `language` / `full`（新工具默认只在 `full` 中） |
 | 安全级别 | 系统主数据（[ADR-0019](../adr/0019-master-data-writes.md)）：每次审批，执行前备份主数据，scratch 内也一样 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.6.0) |
 
 读取见 [`eplan_translation_keyword`](eplan_translation_keyword.md)。
 

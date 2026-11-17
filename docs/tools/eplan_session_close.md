@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `session` / `full`（见 [ADR-0058](../adr/0058-eplan-lifecycle-tools.md)） |
 | 安全级别 | Destructive（本机进程）：只在打开的项目全部在 scratch 时执行，否则拒绝 |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = true　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.7.0) |
 
 ## 1. 这个工具解决什么任务
 代理用完 EPLAN、或要在替换插件前关掉它时调用。它不替人关真实项目：只要有一个打开的项目不在 scratch 根目录下，就拒绝并请工程师自己关。

@@ -18,6 +18,7 @@
 | `display` | array of string，1–10 项 | 否 | — | 图上显示的语言，按顺序，如 `["en_US", "zh_CN"]`；每种都必须是项目的翻译语言。只给 `["##_##"]` 时清除显示语言（恢复为未设置） |
 | `add` | array of string，1–10 项 | 否 | — | 加入翻译语言的语言，如 `["en_US"]`；已有的语言忽略 |
 | `source` | string | 否 | — | 项目的源语言，即文本原本所用的语言，如 `de_DE`；必须是项目的翻译语言。给 `##_##` 时清除。**不设源语言，`eplan_project_translate` 什么也不会翻译**（S23 r2） |
+| `show_missing_translation` | boolean | 否 | — | 缺少某种语言的译文时，图上是否显示占位符；省略则不改这项设置 |
 | `dry_run` | boolean | 否 | true | 为 true 时只返回前后的语言设置，不请求审批，也不修改项目 |
 
 - `display`、`add`、`source` 至少给一个；先加语言，再设源语言，最后设显示语言。
@@ -46,7 +47,7 @@
 ## 4. 错误
 | 错误码 | 什么时候发生 | `execution` | 返回给模型的提示 |
 |---|---|---|---|
-| `INVALID_ARGUMENT` | `display`、`add`、`source` 都没给；语言代码形式不对或重复；`display` 中有语言或 `source` 不是翻译语言（也不在 `add` 中） | `not_started` | `metadata.violations` 列出全部问题；`metadata.candidates` 列出项目的翻译语言 |
+| `INVALID_ARGUMENT` | `display`、`add`、`source`、`show_missing_translation` 都没给；语言代码形式不对或重复；`display` 中有语言或 `source` 不是翻译语言（也不在 `add` 中） | `not_started` | `metadata.violations` 列出全部问题；`metadata.candidates` 列出项目的翻译语言 |
 | `EPLAN_OPERATION_FAILED` | EPLAN 拒绝（`ArgumentException`），或执行后读回的设置与请求不同 | `rolled_back` | 附带 EPLAN 的消息；说明已经写回原来的设置；读回不同时 `metadata.problem` 说明 EPLAN 得到了什么 |
 | `OUTCOME_UNKNOWN` | 写回原值失败，或写回后读回与原值不同；提交或回滚本身失败 | `unknown` | 不要重复调用；`metadata.translation`、`metadata.display`、`metadata.source` 给出原值，请工程师在项目设置（翻译）中恢复；该项目的写入随之暂停 |
 | 策略、审批、流水线、锁定、项目解析、连接与授权类错误 | 同 `eplan_page_create` | 同 `eplan_page_create` | 同 `eplan_page_create` |

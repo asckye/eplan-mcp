@@ -6,14 +6,14 @@
 | 所属分组 / Profile | `language` / `full`（新工具默认只在 `full` 中） |
 | 安全级别 | Read。写入见 [`eplan_translation_add`](eplan_translation_add.md)（系统主数据，[ADR-0019](../adr/0019-master-data-writes.md)） |
 | MCP 注解 | `readOnlyHint` = true　`destructiveHint` = false　`idempotentHint` = true　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.6.0) |
 
 本页只讲读取（2026-11-14 实现）。写入 2026-11-14 同日作为独立工具 [`eplan_translation_add`](eplan_translation_add.md) 实现，范围、路线与边界以那一页为准。设计说明采用[规范附录 T.3](https://github.com/asckye/engineering-standards/blob/v3.0/skills/general-engineering-standard/references/appendix/t-templates.md#tpl-rfc)。
 
 | 项目字段 | 记录 |
 |---|---|
 | 工具名 / 注册入口 / 契约快照 | `eplan_translation_keyword`（`McpServerSetup` 显式 `.WithTools<TranslationKeywordTools>`；与已有 [`eplan_translation_export`](eplan_translation_export.md)、[`eplan_translation_import`](eplan_translation_import.md)、[`eplan_project_translate`](eplan_project_translate.md) 同组） |
-| 分组 / Profile / 状态 | `language` / `full` / **Implemented（2026-11-14，Unreleased）**；写入是独立工具 |
+| 分组 / Profile / 状态 | `language` / `full` / **Implemented（2026-11-14，v0.6.0）**；写入是独立工具 |
 | 当前安全分类与 MCP 注解 | Read，`readOnlyHint` = true、`idempotentHint` = true |
 | 模型说明与参数示例来源 | [`TranslationKeywordArgs`](../../src/EplanMcp.Contracts/TranslationKeywordArgs.cs)、[`TranslationKeywordData`](../../src/EplanMcp.Contracts/TranslationKeywordData.cs)、[Host 工具](../../src/EplanMcp.Host/Tools/TranslationKeywordTools.cs)、[输出](../../src/EplanMcp.Host/Tools/TranslationKeywordResult.cs) |
 | EPLAN 调用路线 | Bridge 操作 `translation.keyword.search` → [`EplanTranslationDatabase`](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabase.cs) → `Eplan.EplApi.MasterData.MDTranslationDatabase`（本工具用 `Open(bReadOnly: true)`、`FindAllKeywords`、`Close`；写入用的 `ExportDatabaseTexts`／`ImportDatabaseTexts` 见 [`eplan_translation_add`](eplan_translation_add.md)） |

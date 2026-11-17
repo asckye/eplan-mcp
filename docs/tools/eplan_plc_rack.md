@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `plc` / `full` |
 | 安全级别 | Write（只在新页或空页上画；scratch 内自动允许，其他按策略审批） |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.7.0) |
 
 ## 1. 问题
 画 PLC 部分时，AI 每次自己决定顺序和细节，结果不稳定：MX_Dryer 第一次先画了机架多线图片、后补总览，补总览时被合并规则拒绝；再用 `eplan_plc_generate` 补，机架页被清空。负责人要求"先画总览，再调用"，并希望把固定的作图顺序做成工具："只要给数据参数，就能直接生成，而不是 AI 一个个自己想"。

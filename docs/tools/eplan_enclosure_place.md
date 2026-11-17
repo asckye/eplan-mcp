@@ -6,7 +6,7 @@
 | 所属分组 / Profile | `layout` / `full`（当前注册在 `full` 中，见[工具索引](README.md)） |
 | 安全级别 | Write |
 | MCP 注解 | `readOnlyHint` = false　`destructiveHint` = false　`idempotentHint` = false　`openWorldHint` = false |
-| 状态 | Implemented (Unreleased) |
+| 状态 | Implemented (v0.5.2) |
 
 ## 1. 这个工具解决什么任务
 "在安装空间 UC1 里放一个 Rittal AE 1055.500 柜体。"代理画 3D 安装布置的第一步：按部件放柜体，拿到安装板和门的可用尺寸，接着在上面放导轨、线槽和设备。设计见 [M4b 第一批](../design/2026-11-12-m4b-layout3d.md)，实测事实见 [api-notes A136](../eplan/api-notes.md)。

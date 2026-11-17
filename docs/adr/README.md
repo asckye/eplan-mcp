@@ -28,12 +28,12 @@
 | [0019](0019-master-data-writes.md) | 部件库、翻译库的写入按 Destructive 处理：每次审批，先备份主数据，只支持文件型数据库 | Accepted | 单向门（写系统主数据的工具发布后） |
 | [0020](0020-no-self-hosted-runner.md) | 不使用自托管 runner：实机测试在开发机上手动运行，插件在开发机上按标签构建后交给发布工作流 | Accepted（打包方式见 [0051](0051-build-release-packages-locally.md)） | 双向门 |
 | [0021](0021-action-run-whitelist.md) | 用受控的 `eplan_action_run` 覆盖长尾的 EPLAN action：只执行随产品发布、经实机验证的白名单条目，按条目的级别走任务工具的流水线；默认关闭，只在 `full` 中 | Accepted | 单向门（白名单条目发布后） |
-| [0022](0022-domain-toolsets.md) | 按领域把工具分成工具集，Profile 由工具集组成；支持工具列表变更通知的客户端可以按需加载工具集，其他客户端用固定的工具集 | Accepted | 双向门（1.0 发布前） |
+| [0022](0022-domain-toolsets.md) | 按领域把工具分成工具集，Profile 由工具集组成；支持工具列表变更通知的客户端可以按需加载工具集，其他客户端用固定的工具集 | Superseded by [0057](0057-discovery-profile-dispatch.md)（未实现） | 双向门（1.0 发布前） |
 | [0023](0023-plan-approval-and-backup.md) | 组合计划一次审批（带差异预览）、开始前备份一次、每步一个事务，计划级结果增加 `partially_committed` | Accepted | 单向门（计划工具发布后） |
 | [0024](0024-pack-trust-and-container.md) | 工程包按不可信输入处理：只含数据，安装前校验容器，安装后不可变，放在数据根目录；企业资源只按配置文件中的根目录和哈希引用 | Accepted | 单向门（第一批 `.eplanpack` 交换出去后） |
 | [0025](0025-code-plugin-worker.md) | 算法插件在单独的工作进程中运行，纯数据进、计划草稿出，按 Code 级默认关闭，列入允许列表后每次运行不再单独审批；`AssemblyLoadContext` 只用于加载依赖 | Accepted | 单向门（插件契约发布后） |
 | [0026](0026-eplan-events-and-push.md) | Bridge 订阅经验证的 EPLAN 事件，在单独的订阅连接上把带序号的失效通知推给 Host；通知只用于缓存失效，从不作为写入的依据 | Accepted | 双向门（协议有能力声明） |
-| [0027](0027-workbench-plan-review.md) | Workbench 的计划审阅与计划结果通知扩展为版本化协议（M6 第 2 阶段不依赖） | Proposed（暂缓到 Workbench 改版） | 单向门（改变 Workbench IPC 合同） |
+| [0027](0027-workbench-plan-review.md) | Workbench 的计划审阅与计划结果通知扩展为版本化协议（M6 第 2 阶段不依赖） | Proposed（暂缓；v2 外壳已发布，代码整理后再定） | 单向门（改变 Workbench IPC 合同） |
 | [0028](0028-plan-record-format.md) | 计划以版本化的不可变定义加原子替换的状态记录落盘（`state\plans\`），规范 SHA-256，可执行 24 小时、保留 30 天 | Accepted | 单向门（新增落盘格式） |
 | [0029](0029-phase3-engineering-records.md) | 采用版本化的配置、模块、规则与工程计划证据格式 | Accepted | 单向门（新增落盘格式） |
 | [0030](0030-action-catalog-tiers.md) | EPLAN action 分三级：已验证条目照旧，全部 action 只读可查，未验证 action 只在 scratch 中逐次审批后执行，并批量自动验证 | Accepted | 单向门（未验证执行发布后） |
