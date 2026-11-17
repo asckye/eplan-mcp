@@ -9,10 +9,10 @@
 | 项目字段 | 记录 |
 |---|---|
 | 状态 | Implemented (v0.5.0) |
-| 工具名 / 注册 / 契约 | `eplan_annotation_create`；[AnnotationCreateTools](../../src/EplanMcp.Host/Tools/AnnotationCreateTools.cs)、[McpServerSetup](../../src/EplanMcp.Host/McpServerSetup.cs)；[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
+| 工具名 / 注册 / 契约 | `eplan_annotation_create`；[AnnotationCreateTools](../../src/EplanMcp.Host/Tools/Pages/AnnotationCreateTools.cs)、[McpServerSetup](../../src/EplanMcp.Host/McpServerSetup.cs)；[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
 | 分组 / Profile / 状态 | placement / full / Implemented (v0.5.0) |
 | 安全分类 / MCP 注解 | Write；readOnly/destructive/idempotent/openWorld 均 false |
-| 模型说明 / 示例来源 | [AnnotationCreateContract](../../src/EplanMcp.Host/Tools/AnnotationCreateContract.cs)、[英文用法](../../src/EplanMcp.Host/Tools/Usage/eplan_annotation_create.md) |
+| 模型说明 / 示例来源 | [AnnotationCreateContract](../../src/EplanMcp.Host/Tools/Pages/AnnotationCreateContract.cs)、[英文用法](../../src/EplanMcp.Host/Tools/Usage/eplan_annotation_create.md) |
 | EPLAN 路线 | 复用 `placement.text.create.plan/execute`、`PlacementTextCreateExecuteOperation`、`EplanPlacementTextWriter` |
 | API 证据 | [API 记录](../eplan/api-notes.md)（A97）；2026.0.3 各类型单独事务已创建提交；整批闭环见[待验台账](../process/large-pending.md) |
 | 原生作用域 / 生命周期 | 项目路径与页名；每次事务重新取原生对象；不跨事务保留；不重复取得及释放同一包装对象的 Properties（A93） |

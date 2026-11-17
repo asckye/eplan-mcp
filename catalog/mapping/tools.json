@@ -4,7 +4,7 @@
     {
       "name": "eplan_action_catalog_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ActionCatalogTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Api/ActionCatalogTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -42,7 +42,7 @@
     {
       "name": "eplan_action_catalog_search",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ActionCatalogTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Api/ActionCatalogTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -85,7 +85,7 @@
     {
       "name": "eplan_action_run",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/ActionRunTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Api/ActionRunTools.cs",
       "operations": [
         "action.execute",
         "action.plan",
@@ -270,7 +270,7 @@
     {
       "name": "eplan_action_try",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/ActionTryTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Api/ActionTryTools.cs",
       "operations": [
         "action.try.execute",
         "action.try.plan"
@@ -613,7 +613,7 @@
     {
       "name": "eplan_annotation_create",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/AnnotationCreateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/AnnotationCreateTools.cs",
       "operations": [
         "page.drawing.get",
         "page.get",
@@ -1045,7 +1045,7 @@
     {
       "name": "eplan_api_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ApiTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Api/ApiTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -1110,7 +1110,7 @@
     {
       "name": "eplan_api_search",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ApiTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Api/ApiTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -1153,7 +1153,7 @@
     {
       "name": "eplan_api_try",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/ApiTryTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Api/ApiTryTools.cs",
       "operations": [
         "api.try.execute",
         "api.try.plan",
@@ -15173,7 +15173,7 @@
     {
       "name": "eplan_asset_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/AssetTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -15196,7 +15196,7 @@
     {
       "name": "eplan_asset_review",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/AssetTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -15229,7 +15229,7 @@
     {
       "name": "eplan_asset_search",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/AssetTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -15259,7 +15259,7 @@
     {
       "name": "eplan_asset_update",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/AssetTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/AssetTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -15282,7 +15282,7 @@
     {
       "name": "eplan_cabinet_bind",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/CabinetTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/CabinetTools.cs",
       "operations": [
         "project.get"
       ],
@@ -15397,7 +15397,7 @@
     {
       "name": "eplan_cabinet_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/CabinetTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/CabinetTools.cs",
       "operations": [
         "project.get"
       ],
@@ -15512,7 +15512,7 @@
     {
       "name": "eplan_cable_generate",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/CableGenerateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/CableGenerateTools.cs",
       "operations": [
         "cable.generate.execute",
         "cable.generate.plan"
@@ -15703,7 +15703,7 @@
     {
       "name": "eplan_cable_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/CableTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/CableTools.cs",
       "operations": [
         "cable.get"
       ],
@@ -15844,7 +15844,7 @@
     {
       "name": "eplan_cable_reassign",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/CableReassignTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/CableReassignTools.cs",
       "operations": [
         "cable.reassign.execute",
         "cable.reassign.plan"
@@ -15991,7 +15991,7 @@
     {
       "name": "eplan_cable_renumber",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/CableDestructiveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/CableDestructiveTools.cs",
       "operations": [
         "cable.renumber.execute",
         "cable.renumber.plan"
@@ -16179,7 +16179,7 @@
     {
       "name": "eplan_check_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/CheckTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/CheckTools.cs",
       "operations": [
         "check.list"
       ],
@@ -16310,7 +16310,7 @@
     {
       "name": "eplan_check_run",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/CheckWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/CheckWriteTools.cs",
       "operations": [
         "check.run.execute",
         "check.run.plan"
@@ -16461,7 +16461,7 @@
     {
       "name": "eplan_connection_create",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ConnectionCreateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Connections/ConnectionCreateTools.cs",
       "operations": [
         "connection.create.execute",
         "connection.create.plan",
@@ -17150,7 +17150,7 @@
     {
       "name": "eplan_connection_generate",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ConnectionWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Connections/ConnectionWriteTools.cs",
       "operations": [
         "connection.generate.execute",
         "connection.generate.plan"
@@ -17391,7 +17391,7 @@
     {
       "name": "eplan_connection_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ConnectionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Connections/ConnectionTools.cs",
       "operations": [
         "connection.list"
       ],
@@ -17604,7 +17604,7 @@
     {
       "name": "eplan_connection_number",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/ConnectionDestructiveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Connections/ConnectionDestructiveTools.cs",
       "operations": [
         "connection.number.execute",
         "connection.number.plan"
@@ -17756,7 +17756,7 @@
     {
       "name": "eplan_connection_route",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ConnectionRouteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Connections/ConnectionRouteTools.cs",
       "operations": [
         "connection.route.execute",
         "connection.route.plan"
@@ -17860,7 +17860,7 @@
     {
       "name": "eplan_context_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ContextTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/ContextTools.cs",
       "operations": [
         "project.snapshot"
       ],
@@ -18054,7 +18054,7 @@
     {
       "name": "eplan_device_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/DeviceTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/DeviceTools.cs",
       "operations": [
         "device.get"
       ],
@@ -18307,7 +18307,7 @@
     {
       "name": "eplan_device_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/DeviceTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/DeviceTools.cs",
       "operations": [
         "device.list"
       ],
@@ -18508,7 +18508,7 @@
     {
       "name": "eplan_device_place",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/DeviceWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/DeviceWriteTools.cs",
       "operations": [
         "device.place.execute",
         "device.place.plan",
@@ -19284,7 +19284,7 @@
     {
       "name": "eplan_device_renumber",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/DeviceDestructiveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/DeviceDestructiveTools.cs",
       "operations": [
         "device.renumber.execute",
         "device.renumber.plan"
@@ -19427,7 +19427,7 @@
     {
       "name": "eplan_device_update",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/DeviceWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/DeviceWriteTools.cs",
       "operations": [
         "device.update.execute",
         "device.update.plan"
@@ -19691,7 +19691,7 @@
     {
       "name": "eplan_enclosure_place",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/LayoutWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/LayoutWriteTools.cs",
       "operations": [
         "layout.enclosure.place.execute",
         "layout.enclosure.place.plan"
@@ -19850,7 +19850,7 @@
     {
       "name": "eplan_export_dxf",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ExportTools.cs",
       "operations": [
         "export.dxf.plan",
         "export.dxf.run"
@@ -19955,7 +19955,7 @@
     {
       "name": "eplan_export_image",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ImageExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ImageExportTools.cs",
       "operations": [
         "export.image.plan",
         "export.image.run"
@@ -20145,7 +20145,7 @@
     {
       "name": "eplan_export_labels",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ProjectExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectExportTools.cs",
       "operations": [
         "export.labels.plan",
         "export.labels.run"
@@ -20249,7 +20249,7 @@
     {
       "name": "eplan_export_parts",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ProjectExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectExportTools.cs",
       "operations": [
         "export.parts.plan",
         "export.parts.run"
@@ -20335,7 +20335,7 @@
     {
       "name": "eplan_export_pdf",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ExportTools.cs",
       "operations": [
         "export.pdf.plan",
         "export.pdf.run"
@@ -20445,7 +20445,7 @@
     {
       "name": "eplan_export_pxf",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ProjectExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectExportTools.cs",
       "operations": [
         "export.pxf.plan",
         "export.pxf.run"
@@ -20529,7 +20529,7 @@
     {
       "name": "eplan_export_untranslated",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ProjectExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectExportTools.cs",
       "operations": [
         "export.untranslated.plan",
         "export.untranslated.run"
@@ -20612,7 +20612,7 @@
     {
       "name": "eplan_graphic_edit",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/GraphicEditTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/GraphicEditTools.cs",
       "operations": [
         "graphic.edit.execute",
         "graphic.edit.plan"
@@ -21001,7 +21001,7 @@
     {
       "name": "eplan_import_dxf",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ImportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ImportTools.cs",
       "operations": [
         "import.dxf.execute",
         "import.dxf.plan"
@@ -21297,7 +21297,7 @@
     {
       "name": "eplan_import_list",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/ListImportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ListImportTools.cs",
       "operations": [
         "import.list.execute",
         "import.list.plan"
@@ -21455,7 +21455,7 @@
     {
       "name": "eplan_import_pdf_comments",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PdfCommentsImportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/PdfCommentsImportTools.cs",
       "operations": [
         "import.pdf_comments.execute",
         "import.pdf_comments.plan"
@@ -21599,7 +21599,7 @@
     {
       "name": "eplan_import_plc",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PlcImportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/PlcImportTools.cs",
       "operations": [
         "import.plc.execute",
         "import.plc.plan"
@@ -21734,7 +21734,7 @@
     {
       "name": "eplan_import_pxf",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ImportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ImportTools.cs",
       "operations": [
         "import.pxf.execute",
         "import.pxf.plan"
@@ -21789,7 +21789,7 @@
     {
       "name": "eplan_language_remove",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/LanguageDestructiveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/LanguageDestructiveTools.cs",
       "operations": [
         "language.remove.execute",
         "language.remove.plan"
@@ -21913,7 +21913,7 @@
     {
       "name": "eplan_language_set",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/LanguageWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/LanguageWriteTools.cs",
       "operations": [
         "language.set.execute",
         "language.set.plan"
@@ -22040,7 +22040,7 @@
     {
       "name": "eplan_layout_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/LayoutTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/LayoutTools.cs",
       "operations": [
         "layout.get"
       ],
@@ -22112,7 +22112,7 @@
     {
       "name": "eplan_layout_place",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/LayoutWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/LayoutWriteTools.cs",
       "operations": [
         "layout.place.execute",
         "layout.place.plan"
@@ -22286,7 +22286,7 @@
     {
       "name": "eplan_layout_remove",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/LayoutRemoveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/LayoutRemoveTools.cs",
       "operations": [
         "layout.remove.execute",
         "layout.remove.plan"
@@ -22387,7 +22387,7 @@
     {
       "name": "eplan_macro_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/MacroTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/MacroTools.cs",
       "operations": [
         "macro.get"
       ],
@@ -22511,7 +22511,7 @@
     {
       "name": "eplan_macro_insert",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/MacroWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/MacroWriteTools.cs",
       "operations": [
         "macro.insert.execute",
         "macro.insert.plan"
@@ -22964,7 +22964,7 @@
     {
       "name": "eplan_macro_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/MacroTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/MacroTools.cs",
       "operations": [
         "macro.list"
       ],
@@ -23035,7 +23035,7 @@
     {
       "name": "eplan_macro_store",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/MacroStoreTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/MacroStoreTools.cs",
       "operations": [
         "macro.store"
       ],
@@ -23203,7 +23203,7 @@
     {
       "name": "eplan_masterdata_update",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/MasterDataUpdateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/MasterDataUpdateTools.cs",
       "operations": [
         "masterdata.update.execute",
         "masterdata.update.plan"
@@ -23272,7 +23272,7 @@
     {
       "name": "eplan_message_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/MessageTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/MessageTools.cs",
       "operations": [
         "message.list"
       ],
@@ -23355,7 +23355,7 @@
     {
       "name": "eplan_modelview_create",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ModelViewTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/ModelViewTools.cs",
       "operations": [
         "modelview.create.execute",
         "modelview.create.plan"
@@ -23511,7 +23511,7 @@
     {
       "name": "eplan_object_find",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ObjectReadTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Properties/ObjectReadTools.cs",
       "operations": [
         "object.find",
         "object.get",
@@ -24184,7 +24184,7 @@
     {
       "name": "eplan_object_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ObjectReadTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Properties/ObjectReadTools.cs",
       "operations": [
         "object.find",
         "object.get",
@@ -24870,7 +24870,7 @@
     {
       "name": "eplan_pack_build",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PackTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/PackTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -24903,7 +24903,7 @@
     {
       "name": "eplan_pack_enable",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PluginEnableTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/PluginEnableTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -24931,7 +24931,7 @@
     {
       "name": "eplan_pack_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PackTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/PackTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -24954,7 +24954,7 @@
     {
       "name": "eplan_pack_import",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PackTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/PackTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -24984,7 +24984,7 @@
     {
       "name": "eplan_pack_install",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PluginInstallTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/PluginInstallTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -25017,7 +25017,7 @@
     {
       "name": "eplan_pack_library_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PluginLibraryTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/PluginLibraryTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -25045,7 +25045,7 @@
     {
       "name": "eplan_pack_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PackTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/PackTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -25068,7 +25068,7 @@
     {
       "name": "eplan_page_create",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PageWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageWriteTools.cs",
       "operations": [
         "page.create.execute",
         "page.create.plan"
@@ -25501,7 +25501,7 @@
     {
       "name": "eplan_page_delete",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PageDestructiveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageDestructiveTools.cs",
       "operations": [
         "page.delete.execute",
         "page.delete.plan"
@@ -25689,7 +25689,7 @@
     {
       "name": "eplan_page_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PageTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageTools.cs",
       "operations": [
         "page.drawing.get",
         "page.get",
@@ -26276,7 +26276,7 @@
     {
       "name": "eplan_page_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PageTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageTools.cs",
       "operations": [
         "page.list"
       ],
@@ -26589,7 +26589,7 @@
     {
       "name": "eplan_page_open",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PageOpenTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageOpenTools.cs",
       "operations": [
         "page.open"
       ],
@@ -26730,7 +26730,7 @@
     {
       "name": "eplan_page_renumber",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PageDestructiveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageDestructiveTools.cs",
       "operations": [
         "page.renumber.execute",
         "page.renumber.plan"
@@ -26875,7 +26875,7 @@
     {
       "name": "eplan_page_review",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PageReviewTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageReviewTools.cs",
       "operations": [
         "page.review"
       ],
@@ -27213,7 +27213,7 @@
     {
       "name": "eplan_page_text_replace",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PageTextReplaceTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageTextReplaceTools.cs",
       "operations": [
         "page.text.replace.execute",
         "page.text.replace.plan"
@@ -27357,7 +27357,7 @@
     {
       "name": "eplan_page_update",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PageWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/PageWriteTools.cs",
       "operations": [
         "page.update.execute",
         "page.update.plan"
@@ -27577,7 +27577,7 @@
     {
       "name": "eplan_part_build",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PartBuildTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/PartBuildTools.cs",
       "operations": [
         "part.import.execute",
         "part.import.plan",
@@ -27713,7 +27713,7 @@
     {
       "name": "eplan_part_export",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/MasterDataExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/MasterDataExportTools.cs",
       "operations": [
         "part.export.plan",
         "part.export.run"
@@ -27837,7 +27837,7 @@
     {
       "name": "eplan_part_import",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PartMasterDataTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/PartMasterDataTools.cs",
       "operations": [
         "masterdata.backup",
         "part.import.execute",
@@ -28033,7 +28033,7 @@
     {
       "name": "eplan_part_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PartTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/PartTools.cs",
       "operations": [
         "part.list"
       ],
@@ -28157,7 +28157,7 @@
     {
       "name": "eplan_part_search",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PartTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/PartTools.cs",
       "operations": [
         "part.search"
       ],
@@ -28309,7 +28309,7 @@
     {
       "name": "eplan_part_sync",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PartMasterDataTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/PartMasterDataTools.cs",
       "operations": [
         "masterdata.backup",
         "part.sync.execute",
@@ -28510,7 +28510,7 @@
     {
       "name": "eplan_placeholder_apply",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PlaceholderWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/PlaceholderWriteTools.cs",
       "operations": [
         "placeholder.apply.execute",
         "placeholder.apply.plan"
@@ -28641,7 +28641,7 @@
     {
       "name": "eplan_placeholder_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PlaceholderTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/PlaceholderTools.cs",
       "operations": [
         "placeholder.list"
       ],
@@ -28744,7 +28744,7 @@
     {
       "name": "eplan_placement_create",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PlacementCreateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/PlacementCreateTools.cs",
       "operations": [
         "page.drawing.get",
         "page.get",
@@ -29325,7 +29325,7 @@
     {
       "name": "eplan_placement_delete",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PlacementDeleteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/PlacementDeleteTools.cs",
       "operations": [
         "placement.delete.execute",
         "placement.delete.plan"
@@ -29575,7 +29575,7 @@
     {
       "name": "eplan_placement_edit",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PlacementEditTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/PlacementEditTools.cs",
       "operations": [
         "placement.edit.execute",
         "placement.edit.plan"
@@ -30141,7 +30141,7 @@
     {
       "name": "eplan_placement_update",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PlacementUpdateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Placement/PlacementUpdateTools.cs",
       "operations": [
         "connection.create.execute",
         "connection.create.plan"
@@ -30690,7 +30690,7 @@
     {
       "name": "eplan_plan_apply",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PlanApplyTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Plans/PlanApplyTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -30787,7 +30787,7 @@
     {
       "name": "eplan_plan_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PlanTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Plans/PlanTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -30881,7 +30881,7 @@
     {
       "name": "eplan_plc_generate",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PlcGenerateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/PlcGenerateTools.cs",
       "operations": [
         "plc.generate.execute",
         "plc.generate.plan"
@@ -30977,7 +30977,7 @@
     {
       "name": "eplan_plc_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PlcTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/PlcTools.cs",
       "operations": [
         "plc.get"
       ],
@@ -31133,7 +31133,7 @@
     {
       "name": "eplan_plc_rack",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PlcRackTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/PlcRackTools.cs",
       "operations": [
         "plc.rack.execute",
         "plc.rack.plan"
@@ -31485,7 +31485,7 @@
     {
       "name": "eplan_plc_readdress",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/PlcReaddressTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/PlcReaddressTools.cs",
       "operations": [
         "plc.readdress.execute",
         "plc.readdress.plan"
@@ -31593,7 +31593,7 @@
     {
       "name": "eplan_potential_update",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PotentialUpdateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Connections/PotentialUpdateTools.cs",
       "operations": [
         "potential.update.execute",
         "potential.update.plan"
@@ -31804,7 +31804,7 @@
     {
       "name": "eplan_project_close",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ProjectSessionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectSessionTools.cs",
       "operations": [
         "project.close.execute",
         "project.close.plan"
@@ -31861,7 +31861,7 @@
     {
       "name": "eplan_project_create",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ProjectCreateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectCreateTools.cs",
       "operations": [
         "project.create.execute",
         "project.create.plan",
@@ -32006,7 +32006,7 @@
     {
       "name": "eplan_project_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ProjectTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectTools.cs",
       "operations": [
         "project.get"
       ],
@@ -32204,7 +32204,7 @@
     {
       "name": "eplan_project_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/ProjectTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectTools.cs",
       "operations": [
         "project.list"
       ],
@@ -32433,7 +32433,7 @@
     {
       "name": "eplan_project_open",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ProjectSessionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectSessionTools.cs",
       "operations": [
         "project.open.execute",
         "project.open.plan"
@@ -32497,7 +32497,7 @@
     {
       "name": "eplan_project_rename",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/ProjectSessionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectSessionTools.cs",
       "operations": [
         "project.rename.execute",
         "project.rename.plan"
@@ -32558,7 +32558,7 @@
     {
       "name": "eplan_project_translate",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/ProjectDestructiveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectDestructiveTools.cs",
       "operations": [
         "project.translate.execute",
         "project.translate.plan"
@@ -32686,7 +32686,7 @@
     {
       "name": "eplan_project_update",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ProjectWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/ProjectWriteTools.cs",
       "operations": [
         "project.update.execute",
         "project.update.plan"
@@ -32783,7 +32783,7 @@
     {
       "name": "eplan_property_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PropertyGetTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Properties/PropertyGetTools.cs",
       "operations": [
         "project.get",
         "property.read"
@@ -33276,7 +33276,7 @@
     {
       "name": "eplan_property_schema",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PropertySchemaTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Properties/PropertySchemaTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -33314,7 +33314,7 @@
     {
       "name": "eplan_property_set",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/PropertySetTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Properties/PropertySetTools.cs",
       "operations": [
         "project.get",
         "property.set.execute",
@@ -33837,7 +33837,7 @@
     {
       "name": "eplan_report_configure",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ReportSettingsTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ReportSettingsTools.cs",
       "operations": [
         "report.settings.execute",
         "report.settings.plan"
@@ -33888,7 +33888,7 @@
     {
       "name": "eplan_report_create",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ReportCreateTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ReportCreateTools.cs",
       "operations": [
         "report.create.execute",
         "report.create.plan"
@@ -34029,7 +34029,7 @@
     {
       "name": "eplan_report_update",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ReportWriteTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Exchange/ReportWriteTools.cs",
       "operations": [
         "report.update.execute",
         "report.update.plan"
@@ -34148,7 +34148,7 @@
     {
       "name": "eplan_revision_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/RevisionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/RevisionTools.cs",
       "operations": [
         "revision.list"
       ],
@@ -34235,7 +34235,7 @@
     {
       "name": "eplan_rule_check",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/RuleTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Packs/RuleTools.cs",
       "operations": [
         "device.renumber.plan",
         "device.update.plan",
@@ -34734,7 +34734,7 @@
     {
       "name": "eplan_selection_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/SelectionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/SelectionTools.cs",
       "operations": [
         "selection.get"
       ],
@@ -34959,7 +34959,7 @@
     {
       "name": "eplan_selection_set",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/SelectionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Pages/SelectionTools.cs",
       "operations": [
         "selection.set"
       ],
@@ -35192,7 +35192,7 @@
     {
       "name": "eplan_session_close",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/SessionLifecycleTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Session/SessionLifecycleTools.cs",
       "operations": [
         "project.list"
       ],
@@ -35322,7 +35322,7 @@
     {
       "name": "eplan_session_restart",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/SessionLifecycleTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Session/SessionLifecycleTools.cs",
       "operations": [
         "project.list"
       ],
@@ -35450,7 +35450,7 @@
     {
       "name": "eplan_session_select",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/SessionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Session/SessionTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -35510,7 +35510,7 @@
     {
       "name": "eplan_session_start",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/SessionLifecycleTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Session/SessionLifecycleTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -35527,7 +35527,7 @@
     {
       "name": "eplan_session_status",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/SessionTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Session/SessionTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -35642,7 +35642,7 @@
     {
       "name": "eplan_shield_create",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/ShieldTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Connections/ShieldTools.cs",
       "operations": [
         "shield.create.execute",
         "shield.create.plan"
@@ -35800,7 +35800,7 @@
     {
       "name": "eplan_structure_delete",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/StructureTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/StructureTools.cs",
       "operations": [
         "structure.delete.execute",
         "structure.delete.plan"
@@ -35906,7 +35906,7 @@
     {
       "name": "eplan_structure_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/StructureTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/StructureTools.cs",
       "operations": [
         "structure.list"
       ],
@@ -35973,7 +35973,7 @@
     {
       "name": "eplan_structure_rename",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/StructureRenameTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/StructureRenameTools.cs",
       "operations": [
         "structure.rename.execute",
         "structure.rename.plan"
@@ -36079,7 +36079,7 @@
     {
       "name": "eplan_structure_update",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/StructureTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Projects/StructureTools.cs",
       "operations": [
         "structure.update.execute",
         "structure.update.plan"
@@ -36189,7 +36189,7 @@
     {
       "name": "eplan_symbol_search",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/SymbolTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/SymbolTools.cs",
       "operations": [
         "symbol.search"
       ],
@@ -36388,7 +36388,7 @@
     {
       "name": "eplan_task_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/PlanApplyTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Plans/PlanApplyTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -36441,7 +36441,7 @@
     {
       "name": "eplan_terminal_renumber",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/TerminalDestructiveTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/TerminalDestructiveTools.cs",
       "operations": [
         "terminal.renumber.execute",
         "terminal.renumber.plan"
@@ -36582,7 +36582,7 @@
     {
       "name": "eplan_terminal_strip_get",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/TerminalTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/TerminalTools.cs",
       "operations": [
         "terminal.strip.get"
       ],
@@ -36685,7 +36685,7 @@
     {
       "name": "eplan_terminal_strip_list",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/TerminalTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Devices/TerminalTools.cs",
       "operations": [
         "terminal.strip.list"
       ],
@@ -36767,7 +36767,7 @@
     {
       "name": "eplan_tool_usage",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/UsageTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Common/UsageTools.cs",
       "operations": [],
       "api": [],
       "actions": [],
@@ -36856,7 +36856,7 @@
     {
       "name": "eplan_translation_add",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/TranslationAddTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/TranslationAddTools.cs",
       "operations": [
         "translation.keyword.set.execute",
         "translation.keyword.set.plan"
@@ -36914,7 +36914,7 @@
     {
       "name": "eplan_translation_export",
       "safety": "write",
-      "host": "src/EplanMcp.Host/Tools/MasterDataExportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/MasterDataExportTools.cs",
       "operations": [
         "translation.export.plan",
         "translation.export.run"
@@ -37016,7 +37016,7 @@
     {
       "name": "eplan_translation_import",
       "safety": "destructive",
-      "host": "src/EplanMcp.Host/Tools/TranslationImportTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/TranslationImportTools.cs",
       "operations": [
         "masterdata.backup",
         "translation.import.execute",
@@ -37141,7 +37141,7 @@
     {
       "name": "eplan_translation_keyword",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/TranslationKeywordTools.cs",
+      "host": "src/EplanMcp.Host/Tools/MasterData/TranslationKeywordTools.cs",
       "operations": [
         "translation.keyword.search"
       ],
@@ -37206,7 +37206,7 @@
     {
       "name": "eplan_workflow_plan",
       "safety": "read",
-      "host": "src/EplanMcp.Host/Tools/WorkflowTools.cs",
+      "host": "src/EplanMcp.Host/Tools/Plans/WorkflowTools.cs",
       "operations": [
         "device.list",
         "device.renumber.plan",

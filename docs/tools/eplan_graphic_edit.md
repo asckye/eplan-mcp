@@ -3,10 +3,10 @@
 | 项目字段 | 记录 |
 |---|---|
 | 状态 | Implemented (v0.5.1) |
-| 工具名 / 注册入口 / 契约快照 | `eplan_graphic_edit`；[GraphicEditTools](../../src/EplanMcp.Host/Tools/GraphicEditTools.cs)、[McpServerSetup](../../src/EplanMcp.Host/McpServerSetup.cs)、[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
+| 工具名 / 注册入口 / 契约快照 | `eplan_graphic_edit`；[GraphicEditTools](../../src/EplanMcp.Host/Tools/Pages/GraphicEditTools.cs)、[McpServerSetup](../../src/EplanMcp.Host/McpServerSetup.cs)、[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
 | 分组 / Profile | placement / full |
 | 安全分类与 MCP 注解 | Write；readOnly=false、destructive=false、idempotent=false、openWorld=false |
-| 模型说明与参数示例来源 | [工具 schema](../../src/EplanMcp.Host/Tools/GraphicEditTools.cs)、[usage](../../src/EplanMcp.Host/Tools/Usage/eplan_graphic_edit.md)；说明文字合计 ≤1000，schema 原文 ≤1000，usage ≤6000 字符 |
+| 模型说明与参数示例来源 | [工具 schema](../../src/EplanMcp.Host/Tools/Pages/GraphicEditTools.cs)、[usage](../../src/EplanMcp.Host/Tools/Usage/eplan_graphic_edit.md)；说明文字合计 ≤1000，schema 原文 ≤1000，usage ≤6000 字符 |
 | EPLAN 调用路线 | GraphicEditOperation → GraphicEditPlanner → IGraphicEditor → EplanGraphicEditor；Placement.Scale/DrawingOrder、Edit.BringToFront/SendToBack/CutOff、Group.Create/DeepUnGroup、Block.BreakUp、TextBase.DockText/UndockText、Rectangle.SetArea/HasChamfers/ChamferRadius、GraphicalPlacement.Pen/Layer |
 | API 证据 | [A101](../eplan/api-notes.md)：负责人 2026-11-05，EPLAN 2026.0.3，LargeWrite 新页逐项实测；每次写入后一次撤销恢复。读回遵循 A99，不读取 QRCode.GetQRCode/DimensionText；不跨事务保留原生对象。产品端到端验收见 [待验台账](../process/large-pending.md) |
 | 原生作用域与生命周期 | 开放项目中同页的 1–50 个 `eplan_object_find` 原样定位符；禁止重复。事务内重新解析原生对象，沿用 LockingStep / SafetyPoint / UndoStep / QuietModeStep |

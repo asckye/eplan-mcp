@@ -4,7 +4,7 @@
 
 | 项目字段 | 记录 |
 |---|---|
-| 工具名 / 注册入口 / 契约快照 | `eplan_macro_store`；[MacroStoreTools.cs](../../src/EplanMcp.Host/Tools/MacroStoreTools.cs)；[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
+| 工具名 / 注册入口 / 契约快照 | `eplan_macro_store`；[MacroStoreTools.cs](../../src/EplanMcp.Host/Tools/Placement/MacroStoreTools.cs)；[契约快照](../../tests/Contracts.Snapshots/server-contract.verified.json) |
 | 分组 / Profile / 状态 | macro / full / Implemented (v0.5.1)，实机待验 |
 | 状态 | Implemented (v0.5.1) |
 | 当前安全分类与 MCP 注解 | Read 导出；readOnly、destructive、idempotent、openWorld 均 false |
