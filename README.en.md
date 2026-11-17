@@ -26,6 +26,7 @@ Once your AI client is connected, ask or instruct it directly:
 - "Which devices are connected to the load side of =GAA+A1-FC1?"
 - "Create a page, insert a circuit, and show me the full change and the expected result first."
 - "On these pages, replace Motor with Drive in free text, English only, and preview it first."
+- "Check this page for drawings outside the frame, overlapping symbols and wires through symbols, fix it as suggested and check again."
 
 ## Why not let the AI write EPLAN scripts directly?
 
@@ -52,8 +53,8 @@ Installation needs no administrator rights. See the [getting started guide](docs
 | Area | What it does |
 |---|---|
 | Read | Projects, pages, devices, connections, cables, terminals, PLC, parts, symbols, revisions, messages, check results, macros, placeholders, properties, and page objects |
-| Draw and edit | Create, open, close and rename projects, fill in the title block, manage structure identifiers; create pages, place devices from parts or symbols, insert macros, place interruption and potential definition points, add text and graphics, generate connections, change the potential, colour and cross-section of potential definition points, delete placements, add shields, generate and readdress PLC pages, edit properties, replace page text |
-| Check and report | Run EPLAN checks, check against engineering pack rules, review pages against rule plugins (IEC 60204-1, IEC 81346 and others), create and update reports |
+| Draw and edit | Create, open, close and rename projects, fill in the title block, manage structure identifiers; create pages, place devices from parts or symbols, insert macros, place interruption and potential definition points, add text and graphics, generate connections, change the potential, colour and cross-section of potential definition points, delete placements, add shields, draw a PLC rack from data, generate and readdress PLC pages, edit properties, replace page text; Pro Panel 3D enclosure layout |
+| Check and report | Run EPLAN checks, check against engineering pack rules, review a page's drawing (outside the frame's drawing area, overlapping symbols, wires through symbols, text format, missing wire numbers and more, with suggested fixes) and against rule plugins (IEC 60204-1, IEC 81346 and others), create and update reports |
 | Numbering and translation | Number pages, devices, terminals, cables, and connections; generate cables; translate projects |
 | Import and export | Export PDF, DXF, images, PXF, part lists, labels, and untranslated text; import DXF/DWG, PXF, device and part lists, PLC data, and PDF comments |
 | Parts and translation databases | Query, import, sync, and export the system parts database; import and export the translation database |
@@ -82,7 +83,8 @@ Everything happens in the EPLAN session you are using. See the [architecture](do
 
 - Tested on EPLAN 2026.0.3. 2024, 2025, and 2027 are not yet verified (planned for [M7](docs/roadmap.md)); 2022 and 2023 are not supported ([ADR-0009](docs/adr/0009-supported-eplan-versions.md)).
 - 0.x releases ship an unsigned add-in ([ADR-0007](docs/adr/0007-licensing-and-distribution.md)).
-- Drawing is still improving: the acceptance test of redrawing a small project exactly is in progress, and Pro Panel 3D layout drawing is not supported.
+- Drawing is usable but does not promise to match an existing drawing item by item; review the page afterwards and check it yourself. Page review checks the drawing and its wiring, not compliance with a standard. Pro Panel 3D layout has tools for enclosures, rails, ducts, device placement and routing; routing is not yet verified on a live EPLAN.
+- Known issue: EPLAN occasionally crashes while many pages are reviewed in a row (under investigation). Review is read-only, but save your changes in EPLAN before long batch runs.
 - AI makes mistakes: try on a scratch project first and check the preview before approving.
 - Project content returned by tools enters your AI client; whether it reaches a model service depends on the client and model you use, so confirm this meets your confidentiality requirements before working on customer projects. Installing EplanMcp and connecting locally need no internet access.
 
