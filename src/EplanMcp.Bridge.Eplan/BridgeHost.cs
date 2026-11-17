@@ -121,7 +121,7 @@ internal static class BridgeHost
         IOperation[] operations =
         [
             apiPlan,
-            new ApiTryExecuteOperation(apiPlan, apiTrials, transactions),
+            new ApiTryExecuteOperation(apiPlan, apiTrials, transactions) { MakeBackup = (project, target) => ProjectBackups.Make(backup, pages, project, target) },
             new ActionTryPlanOperation(catalog, actions, selection),
             new ActionTryExecuteOperation(catalog, actions, new EplanSystemMessageReader(), transactions, selection),
             new SelectionOperation(catalog, selection, SelectionKind.Read),

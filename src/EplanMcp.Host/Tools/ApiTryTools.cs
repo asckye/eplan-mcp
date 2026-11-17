@@ -43,7 +43,7 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
             args.HostSession = _hostSession;
             args.ScratchPath = ScratchPaths.Canonical(resolved.Project.Path);
             var request = new WriteRequest<ApiTryArgs, ApiTryArgs>(Tool, ApiTryLifecycle.Effect(group) == "removes" ? ToolTier.Destructive : ToolTier.Write, OperationNames.ApiTryPlan, OperationNames.ApiTryExecute, args,
-                p => new() { Group = group, Project = p.ProjectPath, Parameters = args.Parameters, Fingerprint = p.Fingerprint, DataRoot = args.DataRoot, OutputId = args.OutputId, HostSession = args.HostSession, ScratchPath = args.ScratchPath }, dry_run, TimeSpan.FromSeconds(120), "Trying unverified API")
+                (p, backup) => new() { Group = group, Project = p.ProjectPath, Parameters = args.Parameters, Fingerprint = p.Fingerprint, DataRoot = args.DataRoot, OutputId = args.OutputId, HostSession = args.HostSession, ScratchPath = args.ScratchPath, Backup = backup }, dry_run, TimeSpan.FromSeconds(120), "Trying unverified API")
             { Unverified = true };
             WriteOutcome<ApiTryData> outcome = await writes.RunAsync<ApiTryArgs, ApiTryArgs, ApiTryData>(request, progress, cancellationToken).ConfigureAwait(false);
             ApiTryData? data = outcome.Data;

@@ -26,6 +26,7 @@ public sealed class ApiTryLifecycleTests
         args.Fingerprint = ((WritePlan)Planner().Execute(args)!).Fingerprint;
         return args;
     }
+    private static readonly string _backupFolder = Path.Combine(Path.GetTempPath(), "api-try-backup-test");
     private ApiTryData Execute(ApiTryArgs args) => (ApiTryData)new ApiTryExecuteOperation(Planner(), _dispatch, _transactions).Execute(args)!;
 
     [Theory]
@@ -46,6 +47,34 @@ public sealed class ApiTryLifecycleTests
         else
         { Assert.Null(data.Locator); Assert.Contains("removed line", data.Before["object:line:2"], StringComparison.Ordinal); }
     }
+    /// <summary>Review 2026-11-17: the approval promises a backup before a removal; the copy is made before the call.</summary>
+    [Fact]
+    public void ARemovalWithABackupTarget_CopiesTheProjectBeforeTheCall()
+    {
+        _dispatch.Remove = true;
+        _dispatch.Exists = true;
+        ApiTryArgs args = Planned(remove: true);
+        args.Backup = new BackupTarget { Path = _backupFolder };
+        var copies = new List<(string Project, string Target, int InvocationsBefore)>();
+        var execute = new ApiTryExecuteOperation(Planner(), _dispatch, _transactions) { MakeBackup = (project, target) => copies.Add((project.Path, target.Path, _dispatch.Invocations)) };
+        execute.Execute(args);
+        Assert.Equal([(Project, _backupFolder, 0)], copies);
+        Assert.Equal(1, _dispatch.Invocations);
+    }
+
+    [Fact]
+    public void ARemovalWithABackupTarget_DoesNotStartWithoutAWayToCopy()
+    {
+        _dispatch.Remove = true;
+        _dispatch.Exists = true;
+        ApiTryArgs args = Planned(remove: true);
+        args.Backup = new BackupTarget { Path = _backupFolder };
+        BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
+        Assert.Equal((ErrorReason.BackupFailed, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Equal(0, _dispatch.Invocations);
+        Assert.Empty(_transactions.Calls);
+    }
+
     [Fact]
     public void FactoryPlanningDoesNotConstruct_AndRecordsEffect()
     {

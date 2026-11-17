@@ -19,6 +19,8 @@ public sealed class ApiTryArgs
     public string HostSession { get; set; } = string.Empty;
     /// <summary>Canonical scratch path authorized by the Host for this call.</summary>
     public string ScratchPath { get; set; } = string.Empty;
+    /// <summary>Where the Host wants the project copied before a removal (Destructive tier, ADR-0013); null otherwise.</summary>
+    public BackupTarget? Backup { get; set; }
     /// <summary>Bridge-verified handle provenance for approval and audit.</summary>
     public string HandleSources { get; set; } = string.Empty;
 }

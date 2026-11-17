@@ -9,6 +9,12 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
     internal ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryDispatcher dispatch, ITransactionScopeFactory transactions, Func<Func<TimeSpan>> startClock)
         : this(planner, dispatch, transactions) => StartClock = startClock;
 
+    /// <summary>
+    /// Copies the project before a removal. The approval text promises this backup (ADR-0013); until 2026-11-17 the
+    /// target was dropped on the way and no copy was made. Without a way to copy, a removal does not start.
+    /// </summary>
+    public Action<OpenProject, BackupTarget>? MakeBackup { get; set; }
+
     public override string Name => OperationNames.ApiTryExecute;
     protected override ApiTryData Execute(ApiTryArgs args)
     {
@@ -19,6 +25,12 @@ public sealed class ApiTryExecuteOperation(ApiTryPlanOperation planner, IApiTryD
             if (plan.Changes.Count == 0 || string.IsNullOrEmpty(args.Fingerprint) || args.Fingerprint != plan.Fingerprint)
             { throw new BridgeErrorException(ErrorReason.PlanStale, "The trial plan changed; request a new plan."); }
             OperationContext.Current.ThrowIfCancellationRequested();
+            if (args.Backup is { } target)
+            {
+                if (MakeBackup is null)
+                { throw new BridgeErrorException(ErrorReason.BackupFailed, "No project backup is available for this removal; nothing was changed."); }
+                MakeBackup(new OpenProject { Name = plan.Project, Path = plan.ProjectPath }, target);
+            }
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         bool write = plan.Changes[0].Action == "write";

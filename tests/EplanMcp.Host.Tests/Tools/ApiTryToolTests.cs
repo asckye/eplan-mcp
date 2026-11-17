@@ -148,6 +148,30 @@ public sealed partial class ApiTryToolTests : IDisposable
         Assert.DoesNotContain(_harness.Bridge.Calls, c => c.Operation == OperationNames.ApiTryExecute);
     }
 
+    /// <summary>Review 2026-11-17: the approved removal reached the Bridge without the backup target the approval text promises.</summary>
+    [Fact]
+    public async Task ApprovedRemoval_SendsTheBackupTargetTheApprovalNamed()
+    {
+        const string group = "O:Eplan.EplApi.DataModel.Placement.Remove";
+        _harness.Bridge.Handlers[OperationNames.ApiTryPlan] = a =>
+        {
+            WritePlan plan = _harness.Plan([new() { Action = "write", Kind = "unverified API", Name = group }]);
+            plan.Details = new() { ["status"] = "dispatchable", ["lifecycle"] = "removes", ["rawParameters"] = ((ApiTryArgs)a!).Parameters };
+            return plan;
+        };
+        ApiTryArgs? executed = null;
+        _harness.Bridge.Handlers[OperationNames.ApiTryExecute] = a =>
+        {
+            executed = (ApiTryArgs)a!;
+            return new ApiTryData();
+        };
+        await Call(group: group);
+        ApprovalQuestion question = Assert.Single(_approval.Questions);
+        Assert.NotNull(question.BackupFolder);
+        Assert.NotNull(executed);
+        Assert.StartsWith(question.BackupFolder + Path.DirectorySeparatorChar, executed.Backup?.Path, StringComparison.OrdinalIgnoreCase);
+    }
+
     [Fact]
     public async Task OffUnknownExcludedAndMemberIdsNeverContactBridge()
     {
