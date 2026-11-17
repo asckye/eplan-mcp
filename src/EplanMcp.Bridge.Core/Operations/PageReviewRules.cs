@@ -9,6 +9,61 @@ namespace EplanMcp.Bridge.Core.Operations;
 public static class PageReviewRules
 {
     private static readonly string[] _coreFields = ["label", "colour"];
+    // Review check name -> issue code, and layout rule -> review check.
+    private static readonly Dictionary<string, string> _guardChecks = new(StringComparer.Ordinal)
+    { ["wire_through_symbol"] = "wire_through_symbol", ["net_overlap"] = "net_overlap", ["text_format"] = "text_format", ["cross_reference_clash"] = "cross_reference_clash" };
+    private static readonly Dictionary<string, string> _guardRules = new(StringComparer.Ordinal)
+    { ["R4"] = "wire_through_symbol", ["R5"] = "net_overlap", ["R6"] = "net_overlap", ["R8"] = "text_format", ["R9"] = "cross_reference_clash" };
+
+    /// <summary>
+    /// The layout guard over every placement and wire of the page, as measured: nets come from shared wire ends, polylines
+    /// are split into segments, and no free position is searched.
+    /// </summary>
+    private static double Deep(ConnectionCreatePlanner.Scene scene) => Math.Max(1, scene.Page.GridSize / 2);
+    private static string Device(DrawingPlacement p) => p.Properties.TryGetValue("name", out string? name) ? name.Split(':')[0] : "";
+    /// <summary>One device, or a device and its sub-device (live 2026-11-16: the pins of -KK1-X11 sit on the -KK1 box edge).</summary>
+    private static bool SameDevice(DrawingPlacement p, DrawingPlacement q)
+    {
+        string a = Device(p), b = Device(q);
+        return a.Length > 0 && b.Length > 0 && (a == b || a.StartsWith(b + "-", StringComparison.Ordinal) || b.StartsWith(a + "-", StringComparison.Ordinal));
+    }
+    /// <summary>
+    /// Live 2026-11-16 (official =F+A2&amp;EFS1/1): PLC plug outlines of 44 x 34 mm cover the pins of their neighbours; a wire that
+    /// ends on a pin inside the outline connects there and does not cross the symbol.
+    /// </summary>
+    private static bool EndsInside(ConnectionCreatePlanner.Scene scene, LayoutGuard.Violation v)
+    {
+        long line = v.Objects.Select(o => o.Oid).FirstOrDefault(oid => oid < 0);
+        if (line == 0 || -line - 1 >= scene.Graphical.Count || v.Geometry.Length != 4)
+        { return false; }
+        double[] b = v.Geometry;
+        double[][] route = scene.Graphical[(int)(-line - 1)];
+        // Live 2026-11-16 (=EC1+A3&EFS1/1): a wire through the symbol's own connection point is connected there.
+        string owner = FormattableString.Invariant($"{v.Objects[0].Type}/{v.Objects[0].Oid}/");
+        if (scene.Pins.Where(pin => pin.Key.StartsWith(owner, StringComparison.Ordinal)).Any(pin => route.Zip(route.Skip(1), (a, c) => OnSegment(pin.Value.Location, a, c)).Any(on => on)))
+        { return true; }
+        return route.Any(end => end[0] >= b[0] - 1e-6 && end[0] <= b[2] + 1e-6 && end[1] >= b[1] - 1e-6 && end[1] <= b[3] + 1e-6
+            && scene.Pins.Values.Any(pin => pin.Location.Length == 2 && Math.Abs(pin.Location[0] - end[0]) < 1e-6 && Math.Abs(pin.Location[1] - end[1]) < 1e-6));
+    }
+    private static bool OnSegment(double[] p, double[] a, double[] b) => p.Length == 2
+        && Math.Abs((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) < 1e-6
+        && p[0] >= Math.Min(a[0], b[0]) - 1e-6 && p[0] <= Math.Max(a[0], b[0]) + 1e-6 && p[1] >= Math.Min(a[1], b[1]) - 1e-6 && p[1] <= Math.Max(a[1], b[1]) + 1e-6;
+    internal static List<LayoutGuard.Violation> GuardViolations(ConnectionCreatePlanner.Scene scene)
+    {
+        IEnumerable<LayoutGuard.Segment> segments = scene.Graphical.Select((s, i) => (s, i)).Where(x => x.s.Length >= 2).SelectMany(x => x.s.Zip(x.s.Skip(1), (a, b) => new LayoutGuard.Segment
+        { Points = [a, b], Locator = new() { Oid = -x.i - 1 }, Changed = true })).Where(s => !s.Points[0].SequenceEqual(s.Points[1]));
+        var model = new LayoutGuard.Model
+        {
+            AllowUnknownGeometry = true,
+            Page = scene.Page,
+            Config = scene.Layout,
+            Pins = new(scene.Pins),
+            PointRoutes = scene.PointRoutes,
+            PointRouteGaps = scene.PointRouteGaps,
+            Lines = LayoutGuard.Networks(segments),
+        };
+        return LayoutGuard.Check(model, [.. scene.Page.Placements.Where(LayoutGuard.Positioned)], suggest: false, measured: true, searchViolations: false);
+    }
     public static JArray Check(ConnectionCreatePlanner.Scene scene, JObject actual, JObject request)
     {
         var issues = new JArray();
@@ -73,7 +128,15 @@ public static class PageReviewRules
             {
                 // Agent eval 2026-11-06: PLC boxes 24 mm apart touch; EPLAN read one edge as 235.9999999999999.
                 if (q.Bounds is { Length: 4 } b && a[0] < b[2] - 1e-6 && a[2] > b[0] + 1e-6 && a[1] < b[3] - 1e-6 && a[3] > b[1] + 1e-6 && (p.Properties.ContainsKey("name") || p.Kind == "Text") && (q.Properties.ContainsKey("name") || q.Kind == "Text"))
-                { Add("overlap", "warning", p.Location, [p.Locator, q.Locator], "Symbol or text bounds overlap.", "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(q.Locator) }); }
+                {
+                    // Owner decision 2026-11-16: one symbol on another is a drawing error; overlapping texts stay a warning.
+                    // Live 2026-11-16 (official =GAB1+A2&EFS1/1): a device symbol encloses its own connection points (-TB1, -TB1:13).
+                    bool symbols = p.Kind != "Text" && q.Kind != "Text" && !LayoutGuard.Related(p, q, scene.Page.Placements) && !SameDevice(p, q)
+                        // Live 2026-11-16: official pages touch by 0.25-1 mm (mated plugs, plug pins on a box edge, a breaker and its
+                        // potential point); outlines that overlap by half a grid both ways sit on each other.
+                        && Math.Min(a[2], b[2]) - Math.Max(a[0], b[0]) >= Deep(scene) && Math.Min(a[3], b[3]) - Math.Max(a[1], b[1]) >= Deep(scene);
+                    Add("overlap", symbols ? "error" : "warning", p.Location, [p.Locator, q.Locator], symbols ? "Symbol outlines overlap." : "Symbol or text bounds overlap.", "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(q.Locator) });
+                }
             }
         }
         // A145: the plot frame's evaluation grid keeps the title block, border and column header clear; without it the page edge.
@@ -98,7 +161,33 @@ public static class PageReviewRules
             foreach (double[] point in graphical.SelectMany(s => s).Where(Known).Where(p => p[0] != 0 || p[1] != 0).GroupBy(p => string.Join("/", p)).Select(g => g.First()))
             {
                 if (point[0] < area[0] - 1e-6 || point[1] < area[1] - 1e-6 || point[0] > area[2] + 1e-6 || point[1] > area[3] + 1e-6)
-                { Add("off_area", "error", point, [], FormattableString.Invariant($"Wire point leaves {where}; reroute it inside [{area[0]}, {area[1]}, {area[2]}, {area[3]}]."), "eplan_connection_create", new() { ["page"] = scene.Page.Page }); }
+                {
+                    // Live 2026-11-16 (official =EC1+A3&EFS1/1): an invisible wire point at (8, -4) lies off the page, like the A73
+                    // default coordinates; the drawing tools refuse off-page wires (ADR-0046 S2), so a point off the page only warns.
+                    bool onPage = scene.Page.PageSize is not { Length: 2 } s || point[0] >= -1e-6 && point[1] >= -1e-6 && point[0] <= s[0] + 1e-6 && point[1] <= s[1] + 1e-6;
+                    Add("off_area", onPage ? "error" : "warning", point, [], onPage
+                        ? FormattableString.Invariant($"Wire point leaves {where}; reroute it inside [{area[0]}, {area[1]}, {area[2]}, {area[3]}].")
+                        : "Wire point lies off the page and is not drawn; it may be an unreadable coordinate. Check the wire in EPLAN.", "eplan_connection_create", new() { ["page"] = scene.Page.Page });
+                }
+            }
+        }
+        // Owner 2026-11-16: the write-time layout rules over the whole page, so old, hand-drawn and api_try objects are checked too.
+        string[] guarded = [.. _guardChecks.Keys.Where(Enabled)];
+        if (guarded.Length > 0)
+        {
+            var reported = new HashSet<string>(StringComparer.Ordinal);
+            foreach (LayoutGuard.Violation v in GuardViolations(scene))
+            {
+                if (!_guardRules.TryGetValue(v.Rule, out string? check) || !guarded.Contains(check) || v.Message.StartsWith("R4 unverified", StringComparison.Ordinal) || v.Rule == "R4" && EndsInside(scene, v))
+                { continue; }
+                // Every placement and wire is "changed" here, so a pair can be found from both sides.
+                if (!reported.Add(v.Rule + ":" + string.Join(",", v.Objects.Select(o => FormattableString.Invariant($"{o.Type}/{o.Oid}")).OrderBy(s => s, StringComparer.Ordinal))))
+                { continue; }
+                DrawingLocator[] objects = [.. v.Objects.Where(o => o.Oid > 0)];
+                double[] at = v.Geometry.Length == 4 ? [(v.Geometry[0] + v.Geometry[2]) / 2, (v.Geometry[1] + v.Geometry[3]) / 2] : v.Geometry;
+                bool text = v.Rule is "R8" or "R9";
+                Add(_guardChecks[check], v.Rule == "R5" || v.Rule == "R4" ? "error" : "warning", at, objects, v.Message,
+                    text ? "eplan_placement_update" : "eplan_connection_create", text && objects.Length > 0 ? new() { ["locator"] = BridgeJson.FromObject(objects[0]) } : new() { ["page"] = scene.Page.Page });
             }
         }
         // MX_Dryer16 2026-11-08: cable texts ran across the +M location box border; the official pages keep them inside the box.

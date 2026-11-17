@@ -15690,6 +15690,10 @@
                 "cable_cores",
                 "box_crossings",
                 "off_area",
+                "wire_through_symbol",
+                "net_overlap",
+                "text_format",
+                "cross_reference_clash",
                 "eplan_messages",
                 "expected",
                 "rules"

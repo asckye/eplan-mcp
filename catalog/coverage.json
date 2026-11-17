@@ -1136,7 +1136,7 @@
       "dependencies": 139,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
-      "small": 7,
+      "small": 8,
       "medium": 11,
       "large": 18,
       "apiNotes": [
@@ -1345,7 +1345,7 @@
       "spec": "docs/tools/eplan_device_place.md",
       "small": 17,
       "medium": 7,
-      "large": 28,
+      "large": 29,
       "apiNotes": [
         "A13",
         "A14",
@@ -2194,7 +2194,7 @@
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
       "medium": 6,
-      "large": 16,
+      "large": 17,
       "apiNotes": [
         "A11"
       ],
@@ -2273,7 +2273,7 @@
       "spec": "docs/tools/eplan_page_review.md",
       "small": 5,
       "medium": 2,
-      "large": 3,
+      "large": 5,
       "apiNotes": [
         "A41",
         "A64",
@@ -2582,7 +2582,7 @@
       "spec": "docs/tools/eplan_placement_create.md",
       "small": 10,
       "medium": 3,
-      "large": 18,
+      "large": 19,
       "apiNotes": [
         "A54",
         "A88"
@@ -2639,7 +2639,7 @@
       "dependencies": 132,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
-      "small": 9,
+      "small": 10,
       "medium": 3,
       "large": 4,
       "apiNotes": [

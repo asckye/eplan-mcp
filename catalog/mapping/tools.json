@@ -16906,6 +16906,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewCableFixTests.cs"
           },
           {
+            "name": "PageReviewRulesTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewRulesTests.cs"
+          },
+          {
             "name": "SmallProjectRedrawDriverTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawDriverTests.cs"
@@ -19113,6 +19118,11 @@
             "name": "LayoutGuardWarningTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/LayoutGuardWarningTests.cs"
+          },
+          {
+            "name": "PageReviewLayoutFaultTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewLayoutFaultTests.cs"
           },
           {
             "name": "PageReviewRulePackTests",
@@ -26409,6 +26419,11 @@
             "file": "tests/EplanMcp.Large.Tests/PageOpenTests.cs"
           },
           {
+            "name": "PageReviewLayoutRuleTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewLayoutRuleTests.cs"
+          },
+          {
             "name": "PlacementTextCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementTextCreateTests.cs"
@@ -27056,6 +27071,16 @@
             "name": "PageReviewRulePackTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
+          },
+          {
+            "name": "PageReviewLayoutFaultTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewLayoutFaultTests.cs"
+          },
+          {
+            "name": "PageReviewLayoutRuleTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewLayoutRuleTests.cs"
           },
           {
             "name": "PageReviewRulePackTests",
@@ -29069,6 +29094,11 @@
             "file": "tests/EplanMcp.Large.Tests/MacroStoreTests.cs"
           },
           {
+            "name": "PageReviewLayoutFaultTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewLayoutFaultTests.cs"
+          },
+          {
             "name": "PlacementDeleteTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
@@ -30412,6 +30442,11 @@
             "name": "MoveTransactionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MoveTransactionTests.cs"
+          },
+          {
+            "name": "PageReviewRulesTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewRulesTests.cs"
           },
           {
             "name": "PageReviewTests",

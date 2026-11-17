@@ -85,8 +85,115 @@ public sealed class PageReviewRulesTests
         _scene.Graphical.Add([[8, 8], [8, 300]]);
         DrawingPlacement p = Placement(1, 8, "Function", "-K1");
         p.Bounds = [6, 6, 10, 10];
-        JArray issues = Review("off_area");
-        Assert.Equal("Wire point leaves the page; reroute it inside [0, 0, 420, 297].", (string?)Assert.Single(issues)["message"]);
+        JToken issue = Assert.Single(Review("off_area"));
+        // Live 2026-11-16: wire points off the page are not drawn and may be unreadable coordinates.
+        Assert.Equal("warning", (string?)issue["severity"]);
+        _scene.Page.DrawingArea = [4, 16, 416, 292];
+        p.Bounds = [6, 20, 10, 24];
+        _scene.Graphical[0] = [[8, 20], [8, 300]];
+        Assert.Equal("warning", (string?)Assert.Single(Review("off_area"))["severity"]);
+        _scene.Graphical[0] = [[8, 8], [8, 100]];
+        Assert.Equal(("error", "Wire point leaves the plot frame's drawing area; reroute it inside [4, 16, 416, 292]."),
+            ((string?)Assert.Single(Review("off_area"))["severity"], (string?)Assert.Single(Review("off_area"))["message"]));
+    }
+
+    [Fact]
+    public void SymbolOnSymbol_IsAnError_TextOnText_StaysAWarning()
+    {
+        Placement(1, 8, "Function", "-K1").Bounds = [4, 4, 12, 12];
+        DrawingPlacement k2 = Placement(2, 9, "Function", "-K2");
+        k2.Bounds = [8, 8, 16, 16];
+        Assert.Equal("error", (string?)Assert.Single(Review("overlaps"))["severity"]);
+        k2.Bounds = [11.75, 8, 16, 16]; // touching by 0.25 mm, like the official mated plugs
+        Assert.Equal("warning", (string?)Assert.Single(Review("overlaps"))["severity"]);
+        _scene.Page.Placements.Clear();
+        Placement(3, 8, "Text");
+        Placement(4, 9, "Text");
+        Assert.Equal("warning", (string?)Assert.Single(Review("overlaps"))["severity"]);
+    }
+
+    /// <summary>Live 2026-11-16: the official -TB1 device symbol encloses its connection points -TB1:13 and -TB1:+.</summary>
+    [Fact]
+    public void ADeviceSymbolOverItsOwnConnectionPoints_IsAWarning()
+    {
+        DrawingPlacement device = Placement(1, 44, "Function", "=GAB1+A2-TB1");
+        device.Bounds = [44, 136, 160, 176];
+        DrawingPlacement point = Placement(2, 140, "Function", "=GAB1+A2-TB1:13");
+        point.Bounds = [139, 135.75, 141, 142.25];
+        Assert.Equal("warning", (string?)Assert.Single(Review("overlaps"))["severity"]);
+    }
+
+    /// <summary>Live 2026-11-16: the pins of the sub-device -KK1-X11 sit 6 mm deep on the -KK1 box edge.</summary>
+    [Fact]
+    public void ABoxOverItsSubDevicePins_IsAWarning()
+    {
+        DrawingPlacement box = Placement(1, 44, "BoxedDevice", "=EC1+A3-EC1-KK1");
+        box.Bounds = [44, 236, 336, 300];
+        DrawingPlacement pin = Placement(2, 308, "Function", "=EC1+A3-EC1-KK1-X11:1");
+        pin.Bounds = [306.25, 235.75, 309.75, 242.25];
+        Assert.Equal("warning", (string?)Assert.Single(Review("overlaps"))["severity"]);
+    }
+
+    /// <summary>Live 2026-11-16: a wire runs through the connection point of a small DCPOL symbol.</summary>
+    [Fact]
+    public void AWireThroughTheSymbolsOwnPin_DoesNotCrossIt()
+    {
+        DrawingPlacement point = Placement(1, 292, "Function", "-QA1");
+        point.Location = [292, 380];
+        point.Bounds = [291.75, 377.25, 292.25, 380.25];
+        _scene.Pins["13/1/0"] = new() { Location = [292, 380] };
+        _scene.Graphical.Add([[292, 360], [292, 400]]);
+        Assert.Empty(Review("wire_through_symbol"));
+    }
+
+    /// <summary>Live 2026-11-16: a PLC plug outline covers its neighbour's pin, where the wire ends.</summary>
+    [Fact]
+    public void AWireEndingOnAPinInsideAnOutline_DoesNotCrossIt()
+    {
+        DrawingPlacement plug = Placement(1, 32, "Function", "-KE4:1.1");
+        plug.Location = [32, 228];
+        plug.Bounds = [21.75, 223.75, 66.25, 258.25];
+        Placement(2, 44, "Function", "-KE4:1.2").Bounds = [43, 240, 45, 242];
+        _scene.Pins["13/2/0"] = new() { Location = [44, 241] };
+        _scene.Graphical.Add([[44, 241], [44, 300]]);
+        Assert.Empty(Review("wire_through_symbol"));
+    }
+
+    [Fact]
+    public void WireAcrossASymbol_IsAnError()
+    {
+        DrawingPlacement k1 = Placement(1, 40, "Function", "-K1");
+        k1.Location = [40, 40];
+        k1.Bounds = [36, 32, 44, 48];
+        _scene.Graphical.Add([[20, 40], [60, 40]]);
+        JToken issue = Assert.Single(Review("wire_through_symbol"));
+        Assert.Equal(("wire_through_symbol", "error", 1L), ((string?)issue["code"], (string?)issue["severity"], (long)issue["objects"]![0]!["oid"]!));
+        Assert.Equal("eplan_connection_create", (string?)issue["fix"]!["tool"]);
+    }
+
+    [Theory]
+    [InlineData(new double[] { 20, 60, 60, 60 }, "error")]    // two nets on one line
+    [InlineData(new double[] { 20, 62, 60, 62 }, "warning")]  // half a grid apart
+    [InlineData(new double[] { 40, 60, 80, 60 }, null)]       // one net: the wires meet at x 40
+    public void ParallelWiresOfDifferentNets_AreReportedOnce(double[] other, string? severity)
+    {
+        _scene.Graphical.Add([[0, 60], [40, 60]]);
+        _scene.Graphical.Add([[other[0], other[1]], [other[2], other[3]]]);
+        JArray issues = Review("net_overlap");
+        if (severity is null)
+        { Assert.Empty(issues); }
+        else
+        { Assert.Equal(severity, (string?)Assert.Single(issues)["severity"]); }
+    }
+
+    [Fact]
+    public void TinyOrSlantedText_IsAWarningWithAMoveFix()
+    {
+        DrawingPlacement text = Placement(1, 100, "Text");
+        text.Properties["height_mm"] = "0.3";
+        text.Properties["angle"] = "45";
+        JToken issue = Assert.Single(Review("text_format"));
+        Assert.Equal(("text_format", "warning", "eplan_placement_update"), ((string?)issue["code"], (string?)issue["severity"], (string?)issue["fix"]!["tool"]));
     }
 
     private const string Page = "=F+A1/1";

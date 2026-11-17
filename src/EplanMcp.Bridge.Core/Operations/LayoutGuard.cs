@@ -304,16 +304,9 @@ public static class LayoutGuard
         // ADR-0046: an outline EPLAN cannot measure is an unverified deviation, not a reason to roll back.
         DrawingPlacement[] unmeasured = [.. changed.Where(p => Positioned(p) && !DrawingCoordinates.ValidBounds(p.Bounds))];
         changed = [.. changed.Except(unmeasured)];
-        string Point(double[] p) => string.Join(",", p.Select(n => n.ToString("R", CultureInfo.InvariantCulture)));
-        string Key(Segment s) => string.Join(";", s.Points.Select(Point).OrderBy(p => p, StringComparer.Ordinal));
-        actual.Lines = actual.Lines.GroupBy(Key, StringComparer.Ordinal).Select(g => g.First()).ToList();
-        var roots = actual.Lines.SelectMany(s => s.Points).Select(Point).Distinct(StringComparer.Ordinal).ToDictionary(p => p, p => p, StringComparer.Ordinal);
-        string Root(string p)
-        { while (roots[p] != p) { p = roots[p]; } return p; }
+        actual.Lines = Networks(actual.Lines);
         foreach (Segment s in actual.Lines)
-        { roots[Root(Point(s.Points[0]))] = Root(Point(s.Points[1])); }
-        foreach (Segment s in actual.Lines)
-        { s.Changed = !before.Lines.Any(b => Key(b) == Key(s)); s.Net = Root(Point(s.Points[0])); }
+        { s.Changed = !before.Lines.Any(b => SegmentKey(b) == SegmentKey(s)); }
         // ADR-0046: after a write only an outline outside Page.Size (S2) still rolls back. Other measured findings stay in
         // the project as readback deviations, reported with their objects, measured geometry and a fix. Live 2026-11-02:
         // searching a free position for every committed deviation ran past the write limit, so only a refusal searches;
@@ -336,6 +329,21 @@ public static class LayoutGuard
             .. unmeasured.Select(p => "Readback deviation (unverified): EPLAN reported no outline for " + Objects([p.Locator]) + "; check it with eplan_page_review."),
             .. violations.Select(v => v.Warning ? v.Message : "Readback deviation: " + v.Message + " Objects " + Objects(v.Objects) + ", measured ["
                 + string.Join(", ", v.Geometry.Select(n => n.ToString("0.##", CultureInfo.InvariantCulture))) + "]; adjust with eplan_placement_update or check with eplan_page_review.")];
+    }
+    private static string PointKey(double[] p) => string.Join(",", p.Select(n => n.ToString("R", CultureInfo.InvariantCulture)));
+    private static string SegmentKey(Segment s) => string.Join(";", s.Points.Select(PointKey).OrderBy(p => p, StringComparer.Ordinal));
+    /// <summary>Drops duplicate segments and names each by its network: segments that share an end point are one net.</summary>
+    public static List<Segment> Networks(IEnumerable<Segment> lines)
+    {
+        List<Segment> unique = [.. lines.GroupBy(SegmentKey, StringComparer.Ordinal).Select(g => g.First())];
+        var roots = unique.SelectMany(s => s.Points).Select(PointKey).Distinct(StringComparer.Ordinal).ToDictionary(p => p, p => p, StringComparer.Ordinal);
+        string Root(string p)
+        { while (roots[p] != p) { p = roots[p]; } return p; }
+        foreach (Segment s in unique)
+        { roots[Root(PointKey(s.Points[0]))] = Root(PointKey(s.Points[1])); }
+        foreach (Segment s in unique)
+        { s.Net = Root(PointKey(s.Points[0])); }
+        return unique;
     }
     // S2 (ADR-0046): without a known page size an outline outside the drawing area cannot be cleared, so it still refuses.
     private static bool OffPage(double[] geometry, double[]? size, bool allowUnknown = false) => size is not { Length: 2 } ? !allowUnknown
