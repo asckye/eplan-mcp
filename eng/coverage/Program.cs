@@ -9,7 +9,8 @@ namespace EplanMcp.Coverage;
 /// <summary>
 /// <c>scan</c> records the EPLAN API members the Bridge uses (needs EPLAN installed); <c>generate</c> writes the files
 /// derived from committed inputs (the wrappers catalog/wrappers.yaml selects, the tool mapping and the coverage report);
-/// <c>check</c> tells whether the committed ones are current, without EPLAN (a CI step runs it).
+/// <c>check</c> tells whether the committed ones are current, without EPLAN (a CI step runs it); <c>method-size</c> is the
+/// size gate for hand-written methods (<see cref="MethodSize"/>).
 /// </summary>
 internal static class Program
 {
@@ -61,8 +62,17 @@ internal static class Program
                 problems.ForEach(p => Console.WriteLine((github ? "::error title=Coverage files::" : "error: ") + p));
                 Console.WriteLine(problems.Count == 0 ? "Coverage files match their inputs." : $"{problems.Count} coverage file(s) out of date.");
                 return problems.Count == 0 ? 0 : 1;
+            case ["method-size"]:
+                bool actions = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
+                List<string> tooLong = MethodSize.Problems(MethodSize.Measure(root), MethodSize.ReadBaseline(root));
+                tooLong.ForEach(p => Console.WriteLine((actions ? "::error title=Method size::" : "error: ") + p));
+                Console.WriteLine(tooLong.Count == 0 ? "Method sizes are within the limit or the baseline." : $"{tooLong.Count} method size problem(s).");
+                return tooLong.Count == 0 ? 0 : 1;
+            case ["method-size", "--update"]:
+                Console.WriteLine($"Wrote {MethodSize.BaselinePath} with {MethodSize.Update(root)} entries.");
+                return 0;
             default:
-                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | generate | check | import-actions <folder> | import-verification <results.json> [<results.json> ...]");
+                Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | generate | check | import-actions <folder> | import-verification <results.json> [<results.json> ...] | method-size [--update]");
                 return 2;
         }
     }

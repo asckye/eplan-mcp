@@ -12,7 +12,7 @@
       3. every commit in origin/main..HEAD against eng\scripts\check-commit-message.sh (Conventional Commits, no AI
          attribution);
       4. locked restore, clean-tree check, Release build (warnings as errors), format (including the add-in when its
-         EPLAN API assemblies are installed), action catalog, coverage files, the Small and Medium
+         EPLAN API assemblies are installed), action catalog, coverage files, method size, the Small and Medium
          tests of the assemblies the changes since origin/main can affect (eng\scripts\affected-tests.ps1; -Full runs
          every assembly) with the test count floor, vulnerable packages;
       5. with -Push: push HEAD to main, only if origin/main has not moved since the rebase.
@@ -117,6 +117,7 @@ try {
     Step 'Format' { dotnet format $buildSolution --verify-no-changes --no-restore }
     Step 'Action catalog' { pwsh -NoProfile -File eng/scripts/check-action-catalog.ps1 }
     Step 'Coverage files' { dotnet run --project eng/coverage -c Release --no-build -- check }
+    Step 'Method size' { dotnet run --project eng/coverage -c Release --no-build -- method-size }
     Step 'Small and Medium tests' {
         $env:EPLANMCP_HANG_REPORT_DIR = $results
         $solution = 'EplanMcp.Ci.slnf'
