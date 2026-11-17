@@ -155,6 +155,21 @@ public sealed class LayoutGuardTests
         model.Page.PageSize = null;
         Assert.Equal(ErrorReason.CapabilityMissing, Assert.Throws<BridgeErrorException>(() => LayoutGuard.Check(model, [p])).Error.Reason);
     }
+    /// <summary>
+    /// A145, live 2026-11-16: a 1.5x page keeps symbol sizes and grid and prints smaller, so 0.6 mm text prints at 0.4 mm,
+    /// below the 0.5 mm minimum.
+    /// </summary>
+    [Theory]
+    [InlineData(420, 297, false)]
+    [InlineData(630, 445.5, true)]
+    public void R8_MinimumTextHeight_IsAPrintedSize(double width, double height, bool reported)
+    {
+        var model = new LayoutGuard.Model { Page = new() { PageSize = [width, height], PlotFrameSize = [420, 297], GridSize = 4 } };
+        DrawingPlacement text = Row("Text", 1, 40, 40);
+        text.Properties["height_mm"] = "0.6";
+        Assert.Equal(reported, LayoutGuard.Check(model, [text], false).Any(v => v.Rule == "R8"));
+    }
+
     /// <summary>A145: the frame grid read with the page bounds R1 when the caller gives no area.</summary>
     [Fact]
     public void R1_UsesThePageFrameArea()

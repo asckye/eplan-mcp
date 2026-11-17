@@ -63,6 +63,12 @@ public static class LayoutGuard
             : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: reliable drawing area unavailable; read page geometry before drawing.");
     }
     /// <summary>The caller's area, else the plot frame's evaluation grid read with the page (A145).</summary>
+    /// <summary>
+    /// A145: page size over frame size. A scaled page (official =EC1+A3&amp;EFS1/1, 1.5) keeps its symbols and grid and is printed
+    /// smaller, so only printed sizes such as the minimum text height scale with it. 1 when either size is unknown.
+    /// </summary>
+    public static double PrintScale(PageDrawingGeometry page) => page.PageSize is { Length: 2 } s && page.PlotFrameSize is { Length: 2 } f
+        && Finite(s[0]) && Finite(f[0]) && s[0] > 0 && f[0] > 0 ? s[0] / f[0] : 1;
     public static double[]? FrameArea(Model model) => model.DrawingArea ?? model.Page.DrawingArea;
     public static List<Violation> Check(Model model, IReadOnlyList<DrawingPlacement> changed, bool suggest = true, bool measured = false, bool searchViolations = true, TimeSpan? searchBudget = null)
     {
@@ -116,7 +122,7 @@ public static class LayoutGuard
             if (p.Parent is null && (!model.AllowUnknownGeometry || Finite(model.Page.GridSize) && model.Page.GridSize > 0) && p.Location.Any(n => !OnGrid(n, model.Page.GridSize)))
             { Add("R7", p, null, "Placement points and bends must lie on the page grid; pins are exempt."); }
             // A text whose height or angle EPLAN does not report is not a violation: only a reported bad value refuses.
-            bool badHeight = Height(p, out double height) && height < model.Config.MinimumTextHeightMm;
+            bool badHeight = Height(p, out double height) && height < model.Config.MinimumTextHeightMm * PrintScale(model.Page);
             bool badAngle = Angle(p, out double angle) && Math.Abs(angle - Math.Round(angle / 90) * 90) > 1e-6;
             if (Text(p) && (badHeight || badAngle))
             {

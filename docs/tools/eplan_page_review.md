@@ -52,7 +52,7 @@
 | `off_area` | error | 符号、文字的外框或导线点超出绘图区：图框评估区（边线以内、标题栏以上，A145），读不到时为页面边缘；`fix` 把所属对象按栅格移回区域内 |
 | `wire_through_symbol` | error | 布局守卫 R4 用于整页：导线从符号外框中间穿过。导线端点在外框内的引脚上，或经过符号自己的连接点时，不算穿过（官方 PLC 插头、连接点符号） |
 | `net_overlap` | error / warning | R5/R6：不同网络的导线共线重合为 error，平行间距小于一格为 warning；共用端点的导线算同一网络 |
-| `text_format` | warning | R8：文字高度小于 0.5 mm，或角度不是 0/90/180/270 |
+| `text_format` | warning | R8：文字打印高度小于 0.5 mm（按页比例换算，A145），或角度不是 0/90/180/270 |
 | `cross_reference_clash` | warning | R9：对象压在交叉引用文字上 |
 | `eplan_message` | 按消息级别 | 该页上已有的 EPLAN 检查消息（只读取，不运行检查） |
 | `expected_*` | error | 与目标清单的缺失、多余、不一致 |
