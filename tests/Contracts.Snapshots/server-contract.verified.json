@@ -15696,6 +15696,8 @@
                 "cross_reference_clash",
                 "path_straddle",
                 "page_setup",
+                "wire_number",
+                "placeholder_tag",
                 "eplan_messages",
                 "expected",
                 "rules"

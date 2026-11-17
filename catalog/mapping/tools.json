@@ -17706,6 +17706,11 @@
         ],
         "tests": [
           {
+            "name": "PageReviewRulesTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewRulesTests.cs"
+          },
+          {
             "name": "ConnectionNumberToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ConnectionNumberToolTests.cs"
@@ -26434,6 +26439,11 @@
             "file": "tests/EplanMcp.Large.Tests/PageReviewLayoutRuleTests.cs"
           },
           {
+            "name": "PageReviewNumberingTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewNumberingTests.cs"
+          },
+          {
             "name": "PageReviewSetupTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewSetupTests.cs"
@@ -26874,6 +26884,7 @@
         "P:Eplan.EplApi.DataModel.Connection.Properties",
         "P:Eplan.EplApi.DataModel.Connection.StartPin",
         "P:Eplan.EplApi.DataModel.Connection.StartSymbolReference",
+        "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_DESIGNATION",
         "P:Eplan.EplApi.DataModel.ConnectionPropertyList.CONNECTION_WIRECROSSSECTION",
         "P:Eplan.EplApi.DataModel.ConnectionPropertyList.POTENTIAL_NAME",
         "P:Eplan.EplApi.DataModel.ConnectionPropertyList.POTENTIAL_TYPE",
@@ -27102,6 +27113,11 @@
             "name": "PageReviewLayoutRuleTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewLayoutRuleTests.cs"
+          },
+          {
+            "name": "PageReviewNumberingTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewNumberingTests.cs"
           },
           {
             "name": "PageReviewRulePackTests",

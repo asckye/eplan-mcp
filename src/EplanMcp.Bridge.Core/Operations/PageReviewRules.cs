@@ -252,6 +252,34 @@ public static class PageReviewRules
             Odd("frame", "plot_frame", "plot frame");
             Odd("grid", "grid_size_mm", "grid");
         }
+        // Batch 3 (owner 2026-11-16): EPLAN's check reports missing potentials (P005001/P005010) and empty or unnumbered device
+        // tags (P017001/P017002), read here as eplan_message, but no message covers wires left without a number or tags left
+        // as a placeholder (eplan.help 2026 check run messages, classes 005 and 017).
+        // Live 2026-11-16 (official =EC1+A3&EFS1/1): the cores of the cables on this page carry their core marking as the number;
+        // they are left out. Wire.Cable is no cable test: every wire with a definition point reads "<definition-points>".
+        var cores = new HashSet<long>(actual["cables"]?.SelectMany(c => c["cores"] ?? new JArray()).Select(c => (long?)c["locator"]?["oid"] ?? 0) ?? []);
+        if (Enabled("wire_number") && actual["connections"] is JArray all && all.Where(w => !cores.Contains((long?)w["locator"]?["oid"] ?? 0)).ToArray() is { Length: > 0 } wires)
+        {
+            JToken[] open = [.. wires.Where(w => string.IsNullOrEmpty((string?)w["wireNumber"]))];
+            JObject numbering = new() { ["project"] = scene.Project.Name, ["overwrite"] = "none" };
+            if (open.Length == wires.Length)
+            { Add("wire_number", "info", [], [], FormattableString.Invariant($"None of the {wires.Length} wires on this page has a wire number yet; number them with eplan_connection_number when the drawing is done."), "eplan_connection_number", numbering); }
+            else if (open.Length > 0)
+            {
+                // Live 2026-11-16: the official =EC1+A3&EFS1/1 numbers some plain wires and not the ones inside boxes and plugs, as
+                // the EPLAN numbering schemes do; a page with some numbers is normal, so the open wires are one note, not warnings.
+                Add("wire_number", "info", [], [.. open.Take(20).Select(w => w["locator"] is JObject l ? l.ToObject<DrawingLocator>() : null).OfType<DrawingLocator>()],
+                    FormattableString.Invariant($"{open.Length} of {wires.Length} wires on this page have no wire number (up to 20 listed); check that the numbering scheme leaves them out on purpose."), "eplan_connection_number", numbering);
+            }
+        }
+        if (Enabled("placeholder_tag") && actual["devices"] is JArray devices)
+        {
+            foreach (JToken device in devices.Where(d => (string?)d["tag"] is { } tag && tag.Contains('?')))
+            {
+                Add("placeholder_tag", "warning", device["position"]?.ToObject<double[]>() ?? [], device["locator"] is JObject l ? [l.ToObject<DrawingLocator>()!] : [],
+                    "Device tag " + (string?)device["tag"] + " is still a placeholder; give the device its real tag.", "eplan_device_update", new() { ["project"] = scene.Project.Name, ["tag"] = device["tag"]!.DeepClone() });
+            }
+        }
         // MX_Dryer16 2026-11-08: cable texts ran across the +M location box border; the official pages keep them inside the box.
         // The box's own texts (its +M label sits on the corner) do not count.
         if (Enabled("box_crossings"))

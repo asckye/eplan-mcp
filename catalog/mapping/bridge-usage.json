@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-17",
-  "scannedSources": "299d6650",
-  "sourceHash": "sha256:94f39eb6d03ec0d9981cfbafb2c9d6362ed58995b393a06f19a687c051e9f65c",
+  "scannedSources": "8934d5af",
+  "sourceHash": "sha256:1efd4b02b4e630422f1824ead1aa10d3ee6ec06db6330cda31605b3affba4689",
   "operations": [
     {
       "name": "action.execute",
@@ -192849,6 +192849,17 @@
         "operations": [
           "connection.number.execute",
           "connection.number.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPageReviewReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/EplanPageReviewReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "page.review"
         ]
       },
       {

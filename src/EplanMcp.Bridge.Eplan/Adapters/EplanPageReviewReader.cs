@@ -40,10 +40,13 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
             static string Raw(PropertyValue value)
             { using (value) { return value.IsEmpty ? "" : value.ToString(); } }
             string crossSection = Raw(properties.CONNECTION_WIRECROSSSECTION), potentialName = Raw(properties.POTENTIAL_NAME), potentialType = Raw(properties.POTENTIAL_TYPE);
+            // Batch 3: the wire number is CONNECTION_DESIGNATION (31011); 31004 holds colour codes in the sample project (S6).
+            string wireNumber = Raw(properties.CONNECTION_DESIGNATION);
             CableDefinitionPlanner.Wire wire = inventory.Wires.FirstOrDefault(w => w.Locator.Oid == c.ObjectIdentifier) ?? EplanConnectionCreator.ReadCableWire(target.Path, page, c);
             wire.Path = wire.Points.Length == 2 && wire.Points.All(p => p.Length == 2) ? CableDefinitionPlanner.DrawnPath(scene, wire.Points[0], wire.Points[1]) : null;
             ((JArray)actual["connections"]!).Add(ConnectionRow(wire, End(c.StartPin), End(c.EndPin), c.ConnectionDefPoints.Select(p => p.ObjectIdentifier),
                 crossSection, potentialName, potentialType));
+            ((JObject)((JArray)actual["connections"]!).Last!)["wireNumber"] = wireNumber;
             GC.KeepAlive(c);
         }
         foreach (Cable cable in EplanNativePreconditions.Valid(native.AllPlacements).OfType<Cable>())

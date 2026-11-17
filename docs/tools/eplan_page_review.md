@@ -20,7 +20,7 @@
 |---|---|---|---|---|
 | `project` | string | 是 | — | 已打开项目的名称或路径 |
 | `page` | string | 是 | — | 完整页名，按序数精确匹配 |
-| `checks` | string[]（enum） | 否 | 全部 | 只做这些检查：`dangling_ends`、`unconnected_pins`、`overlaps`、`off_grid`、`unintended_junctions`、`interruption_pairing`、`cable_cores`、`box_crossings`、`off_area`、`wire_through_symbol`、`net_overlap`、`text_format`、`cross_reference_clash`、`path_straddle`、`page_setup`、`eplan_messages`、`expected`、`rules` |
+| `checks` | string[]（enum） | 否 | 全部 | 只做这些检查：`dangling_ends`、`unconnected_pins`、`overlaps`、`off_grid`、`unintended_junctions`、`interruption_pairing`、`cable_cores`、`box_crossings`、`off_area`、`wire_through_symbol`、`net_overlap`、`text_format`、`cross_reference_clash`、`path_straddle`、`page_setup`、`wire_number`、`placeholder_tag`、`eplan_messages`、`expected`、`rules` |
 | `rule_packs` | string[] | 否 | 当前作用域启用的规则插件 | 1–10 个不重复的已安装插件 ID；显式 `checks` 不含 `rules` 时不评估 |
 | `expected` | object | 否 | — | 目标清单，格式与绘图工具的输入一致：`devices`（名称、符号、位置）、`connections`（两端设备与连接点）、`cables`（名称、芯线与它们应属于的连接、颜色）、`interruptions`（名称、位置）、`texts`（内容、位置、角度）。给出时做 `expected` 检查 |
 | `tolerance_mm` | number | 否 | 0.5 | 位置比较的容差 |
@@ -37,6 +37,7 @@
   - `cursor`、`total`、`truncated`
   - `rulePacks[]`（实际评估规则时）：`{id,version,status,standards,rules,passed,failed,unknown,notApplicable}`；计数只覆盖本页，后四项按对象评估结果计数。`metadata.plugins` 列出实际使用的 `ID@版本`，不可读数据在 `metadata.warnings` 中说明。
 - 文本摘要第一行：`<page>: <errors> errors, <warnings> warnings` 或 `<page>: clean`，随后列出最多 5 条最严重的问题
+- EPLAN 自己的检查（eplan.help 2026 检查消息）已覆盖电位未定义（P005001、P005010）、设备标识为空或没有编号（P017001、P017002）、标识重复（P017005），体检不重复，跑过 `eplan_check_run` 后以 `eplan_message` 读出；线号缺失和占位标识没有对应消息，由 `wire_number`、`placeholder_tag` 补上。
 - 问题代码与判定依据：
 
 | code | 严重度 | 判定 |
@@ -56,6 +57,8 @@
 | `cross_reference_clash` | warning | R9：对象压在交叉引用文字上 |
 | `path_straddle` | warning | 设备的引脚落在与插入点不同的列：EPLAN 按插入点编列号，交叉引用会指错列。列边界来自图框列宽 12102（按页比例换算，A145）；容器不查；图框没存列宽时不查 |
 | `page_setup` | warning | 本页的图框或栅格与同类型页的多数不同（同类页至少 3 页、多数明确）；`fix` 用 `eplan_page_update` 改成多数页的 `plot_frame` 或 `grid_size_mm` |
+| `wire_number` | info | 普通导线（不含任何电缆的芯线）没有线号 `CONNECTION_DESIGNATION`（31011）：整页都没有时一条提示，部分没有时一条提示并列出最多 20 根。官方 `=EC1+A3&EFS1/1` 只给部分导线编号，这是编号方案的正常结果，所以不报 warning。`fix` 为 `eplan_connection_number`（`overwrite: none`） |
+| `placeholder_tag` | warning | 设备标识里还有 `?` 占位；`fix` 为 `eplan_device_update` |
 | `eplan_message` | 按消息级别 | 该页上已有的 EPLAN 检查消息（只读取，不运行检查） |
 | `expected_*` | error | 与目标清单的缺失、多余、不一致 |
 | `rule:<插件ID>/<规则名>` | mandatory 为 error，recommended 为 warning | 现有语法树解释器评估失败；附规则 `spec.source` 原样作为 `reference` |

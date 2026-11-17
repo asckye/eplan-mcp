@@ -3,7 +3,7 @@
 **操作层 4014 组：专用工具 627，通用读取 115，仅通用入口 2043，仅状态覆盖 7，其他可调用 11，明确不做 738，到不了 473；实机验证 1331**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-17 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 299d6650）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-17 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 8934d5af）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -227,7 +227,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_connection_create | write | connection.create.execute<br>connection.create.plan<br>project.get | 408 | 233 | 9 | 139 | 0 | 8/11/18 | A52 A55 A86 A93 A94 | — |
 | eplan_connection_generate | write | connection.generate.execute<br>connection.generate.plan | 90 | 41 | 1 | 45 | 1 | 6/2/12 | A3 A11 A13 A14 A19 | 2026-10-20 pass_with_findings（api-notes A19） |
 | eplan_connection_list | read | connection.list | 80 | 45 | 1 | 32 | 0 | 2/4/8 | — | 2026-10-20 pass（api-notes A19） |
-| eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 95 | 41 | 1 | 52 | 1 | 0/1/1 | A24 | — |
+| eplan_connection_number | destructive | connection.number.execute<br>connection.number.plan | 95 | 41 | 1 | 52 | 1 | 1/1/1 | A24 | — |
 | eplan_connection_route | write | connection.route.execute<br>connection.route.plan | 69 | 38 | 0 | 31 | 0 | 0/1/0 | A1 | — |
 | eplan_context_get | read | project.snapshot | 99 | 41 | 4 | 32 | 0 | 3/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 80 | 45 | 2 | 31 | 0 | 10/4/11 | — | 2026-10-19 pass（api-notes A12） |
@@ -273,10 +273,10 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_page_create | write | page.create.execute<br>page.create.plan | 85 | 36 | 1 | 41 | 0 | 14/18/21 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 70 | 35 | 0 | 35 | 0 | 3/10/1 | A15 A18 A24 | — |
 | eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 202 | 126 | 3 | 66 | 0 | 11/6/44 | A11 A12 A57 A80 | — |
-| eplan_page_list | read | page.list | 43 | 20 | 1 | 22 | 0 | 16/6/19 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
+| eplan_page_list | read | page.list | 43 | 20 | 1 | 22 | 0 | 16/6/20 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
 | eplan_page_open | read | page.open | 27 | 14 | 0 | 13 | 0 | 6/2/7 | A54 | — |
 | eplan_page_renumber | destructive | page.renumber.execute<br>page.renumber.plan | 72 | 29 | 0 | 42 | 1 | 2/2/2 | A18 A20 | 2026-10-20 pass（api-notes A20） |
-| eplan_page_review | read | page.review | 225 | 140 | 3 | 72 | 0 | 5/2/7 | A41 A64 A65 A72 A73 | — |
+| eplan_page_review | read | page.review | 226 | 140 | 3 | 72 | 0 | 5/2/8 | A41 A64 A65 A72 A73 | — |
 | eplan_page_text_replace | write | page.text.replace.execute<br>page.text.replace.plan | 79 | 38 | 0 | 41 | 0 | 1/2/1 | A41 | — |
 | eplan_page_update | write | page.update.execute<br>page.update.plan | 81 | 41 | 1 | 38 | 0 | 4/5/6 | A7 A13 A36 A49 | 2026-10-20 pass（api-notes A17） |
 | eplan_part_build | destructive | part.import.execute<br>part.import.plan<br>part.search | 70 | 23 | 2 | 30 | 0 | 1/1/1 | A30 | — |

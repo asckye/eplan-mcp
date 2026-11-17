@@ -264,6 +264,44 @@ public sealed class PageReviewRulesTests
         }
     }
 
+    [Theory]
+    [InlineData(new[] { "", "" }, "info", 1)]          // nothing numbered yet: one note
+    [InlineData(new[] { "101", "" }, "info", 1)]       // some numbered: one note listing the open wires
+    [InlineData(new[] { "101", "102" }, null, 0)]
+    public void WiresWithoutANumber(string[] numbers, string? severity, int count)
+    {
+        _actual["connections"] = new JArray(numbers.Select((n, i) => new JObject { ["wireNumber"] = n, ["locator"] = new JObject { ["project"] = "Line1", ["page"] = Page, ["type"] = 18, ["oid"] = i + 1, ["digest"] = new string('a', 64) } }));
+        JArray issues = Review("wire_number");
+        Assert.Equal(count, issues.Count);
+        if (severity is not null)
+        {
+            Assert.Equal(severity, (string?)issues[0]!["severity"]);
+            Assert.Equal(("eplan_connection_number", "none"), ((string?)issues[0]!["fix"]!["tool"], (string?)issues[0]!["fix"]!["args"]!["overwrite"]));
+        }
+    }
+
+    /// <summary>Live 2026-11-16: on =EC1+A3&amp;EFS1/1 every numbered connection was a cable core.</summary>
+    [Fact]
+    public void CableCores_DoNotCountAsNumberedWires()
+    {
+        JObject Wire(int oid, string number) => new() { ["wireNumber"] = number, ["locator"] = new JObject { ["project"] = "Line1", ["page"] = Page, ["type"] = 18, ["oid"] = oid, ["digest"] = new string('a', 64) } };
+        _actual["connections"] = new JArray(Wire(1, "1"), Wire(2, "2"), Wire(3, ""));
+        _actual["cables"] = new JArray(new JObject { ["cores"] = new JArray(Wire(1, "1"), Wire(2, "2")) });
+        Assert.Equal("info", (string?)Assert.Single(Review("wire_number"))["severity"]);
+    }
+
+    [Theory]
+    [InlineData("=GAA+A1-K?", true)]
+    [InlineData("=GAA+A1-K1", false)]
+    public void PlaceholderTags_AreAWarning(string tag, bool reported)
+    {
+        _actual["devices"] = new JArray(new JObject { ["tag"] = tag, ["position"] = new JArray(8, 8), ["locator"] = new JObject { ["project"] = "Line1", ["page"] = Page, ["type"] = 17, ["oid"] = 1, ["digest"] = new string('a', 64) } });
+        JArray issues = Review("placeholder_tag");
+        Assert.Equal(reported ? 1 : 0, issues.Count);
+        if (reported)
+        { Assert.Equal(tag, (string?)issues[0]!["fix"]!["args"]!["tag"]); }
+    }
+
     private const string Page = "=F+A1/1";
     private readonly ConnectionCreatePlanner.Scene _scene = new() { Project = new() { Name = "Line1" }, Page = new() { Page = Page, GridSize = 4 } };
     private readonly JObject _actual = JObject.Parse("""{"devices":[],"connections":[],"cables":[],"interruptions":[],"texts":[],"messages":[]}""");
