@@ -516,7 +516,15 @@ public sealed class ToolContractTests : IDisposable
         Tool api = Tools.Single(t => t.Name == ApiTools.SearchTool);
         Assert.InRange(api.Description!.Length + Descriptions(api.InputSchema), 1, 1000);
         Assert.InRange(api.InputSchema.GetRawText().Length, 1, 2000);
-        Assert.All(Tools.Where(t => t.Name is not (ApiTryTools.Tool or ApiTools.SearchTool or PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or ObjectReadTools.FindTool or ObjectReadTools.GetTool or PlacementCreateTools.Tool or AnnotationCreateTools.Tool or PlacementUpdateTools.Tool or PlacementEditTools.Tool or GraphicEditTools.Tool or MacroStoreTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or PageReviewTools.Tool or RuleTools.CheckTool)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Assert.All(Tools.Where(t => t.Name is not (ApiTryTools.Tool or ApiTools.SearchTool or PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or ObjectReadTools.FindTool or ObjectReadTools.GetTool or PlacementCreateTools.Tool or AnnotationCreateTools.Tool or PlacementUpdateTools.Tool or PlacementEditTools.Tool or GraphicEditTools.Tool or MacroStoreTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or PageReviewTools.Tool or RuleTools.CheckTool) && !_proseBudgeted.Contains(t.Name)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        // Review 2026-11-17: the budget above counts the whole schema, which left these tools one sentence that did not say
+        // what they do ("Creates pages."). The standard's TL-10 budgets the description and the parameter descriptions,
+        // about 250 tokens; these are held to that, and their schemas to their present size.
+        foreach (Tool tool in Tools.Where(t => _proseBudgeted.Contains(t.Name)))
+        {
+            Assert.InRange(tool.Description!.Length + Descriptions(tool.InputSchema), 1, 1000);
+            Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 1000);
+        }
         // API trials repeat the closed atom union for array elements; bound prose and the expanded schema separately.
         Tool apiTry = Tools.Single(t => t.Name == ApiTryTools.Tool);
         Assert.InRange(apiTry.Description!.Length + Descriptions(apiTry.InputSchema), 1, 1000);
@@ -574,6 +582,11 @@ public sealed class ToolContractTests : IDisposable
         JsonValueKind.Object => node.EnumerateObject().Sum(p => p.Name == "description" && p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString()!.Length : Descriptions(p.Value)),
         JsonValueKind.Array => node.EnumerateArray().Sum(Descriptions),
         _ => 0,
+    };
+
+    private static readonly HashSet<string> _proseBudgeted = new(StringComparer.Ordinal)
+    {
+        PageWriteTools.CreateTool, PageWriteTools.UpdateTool, ReportCreateTools.Tool, SymbolTools.Tool, PlacementDeleteTools.Tool,
     };
 
     private static int ToolNames(Tool tool) =>

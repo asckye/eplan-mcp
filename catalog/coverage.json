@@ -2115,7 +2115,7 @@
       "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
-      "small": 15,
+      "small": 16,
       "medium": 18,
       "large": 21,
       "apiNotes": [
@@ -2601,7 +2601,7 @@
       "dependencies": 65,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_delete.md",
-      "small": 3,
+      "small": 4,
       "medium": 1,
       "large": 4,
       "apiNotes": [
@@ -3383,7 +3383,7 @@
       "dependencies": 27,
       "actions": 0,
       "spec": "docs/tools/eplan_symbol_search.md",
-      "small": 4,
+      "small": 5,
       "medium": 3,
       "large": 11,
       "apiNotes": [

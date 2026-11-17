@@ -15,7 +15,7 @@ internal sealed class SymbolTools
     public const string Tool = "eplan_symbol_search";
 
     [McpServerTool(Name = Tool, Title = "Search project symbols", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(SymbolSearchResult))]
-    [Description("Finds symbols and pins (mm); variants 0–7=A–H. Example: {\"project\":\"Line1\"}.")]
+    [Description("Finds library symbols by library, name, text or kind and returns their pins (mm offsets) for eplan_device_place and eplan_connection_create; variants 0–7=A–H. Parts: eplan_part_search. Example: {\"project\":\"Line1\"}.")]
     public static async Task<CallToolResult> SearchAsync(
         IBridgeClient bridge,
         [Description("Project.")] string project,

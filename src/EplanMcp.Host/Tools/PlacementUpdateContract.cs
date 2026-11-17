@@ -22,7 +22,7 @@ internal static class PlacementUpdateContract
     {
         Name = "eplan_placement_update",
         Title = "Move placements on an EPLAN page",
-        Description = "Moves same-page symbols/text/lines/rectangles, or independently moves and rotates property text. Read eplan_page_get include_drawings locators. Use moves or property_moves (parent, property_id, property_index, x_mm, y_mm, angle_deg: 0/90/180/270). mm, bottom left, y up. Groups refused. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; no-op leaves none. Approval outside scratch; denial: APPROVAL_DENIED. See usage.",
+        Description = "Moves same-page symbols/text/lines/rectangles, or independently moves and rotates property text. Rotate, mirror, copy, align: eplan_placement_edit; delete: eplan_placement_delete. Read eplan_page_get include_drawings locators. Use moves or property_moves (parent, property_id, property_index, x_mm, y_mm, angle_deg: 0/90/180/270). mm, bottom left, y up. Groups refused. Use layout_guard:warn to reproduce existing drawings; keep refuse for free drawing. Omit dry_run to preview; false executes. One undo; no-op leaves none. Approval outside scratch; denial: APPROVAL_DENIED. See usage.",
         InputSchema = Input,
         OutputSchema = Output(),
         Annotations = new() { ReadOnlyHint = false, DestructiveHint = false, IdempotentHint = true, OpenWorldHint = false },

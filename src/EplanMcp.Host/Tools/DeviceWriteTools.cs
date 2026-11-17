@@ -111,7 +111,7 @@ internal sealed class DeviceWriteTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(DevicePlaceResult))]
     [Description(
-        "Places part devices, library symbols (including NO/NC, PLC), terminals, SPECIAL/DC black boxes, SPECIAL/BBDEF busbar definitions or dashed location boxes on circuit pages. " +
+        "Places part devices, library symbols (including NO/NC, PLC), terminals, SPECIAL/DC black boxes, SPECIAL/BBDEF busbar definitions or dashed location boxes on circuit pages. Macros: eplan_macro_insert; wires, nodes, potentials: eplan_connection_create; text and graphics: eplan_placement_create. " +
         "Location-box contents keep their own structure. join_device assigns the next same-category unplaced function. x/y: mm, bottom left, y up. " +
         "One Ctrl+Z undoes it. Omit dry_run to preview; false executes. Engineer approval outside scratch; denial: APPROVAL_DENIED. See usage.")]
     public static async Task<CallToolResult> DevicePlaceAsync(

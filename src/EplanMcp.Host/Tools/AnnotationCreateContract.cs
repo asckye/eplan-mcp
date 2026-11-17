@@ -14,7 +14,7 @@ internal static class AnnotationCreateContract
     {
         Name = AnnotationCreateTools.Tool,
         Title = "Create page annotations",
-        Description = "Creates hyperlinks, QR codes, splines, sectors, dimensions, placeholders and macro boxes on a Circuit, Overview or Graphics page. Coordinates: mm, bottom left, y up; angles: degrees. Omit dry_run to preview; false executes. One undo; approval outside scratch. layout_guard defaults to refuse; use warn for reproduction. Dimension values are calculated by EPLAN: linear/angular use first, second, end; baseline/incremental/continued use points and end; circle uses an existing full-circle arc locator and end. Use eplan_tool_usage for item fields. Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"spline\",\"points\":[[10,10],[20,20]]}]}",
+        Description = "Creates hyperlinks, QR codes, splines, sectors, dimensions, placeholders and macro boxes on a Circuit, Overview or Graphics page. Text, lines, rectangles, arcs, images: eplan_placement_create. Coordinates: mm, bottom left, y up; angles: degrees. Omit dry_run to preview; false executes. One undo; approval outside scratch. layout_guard defaults to refuse; use warn for reproduction. Dimension values are calculated by EPLAN: linear/angular use first, second, end; baseline/incremental/continued use points and end; circle uses an existing full-circle arc locator and end. Use eplan_tool_usage for item fields. Example: {\"project\":\"P\",\"page\":\"1\",\"items\":[{\"kind\":\"spline\",\"points\":[[10,10],[20,20]]}]}",
         InputSchema = Input,
         OutputSchema = Output(),
         Annotations = new() { ReadOnlyHint = false, DestructiveHint = false, IdempotentHint = false, OpenWorldHint = false }

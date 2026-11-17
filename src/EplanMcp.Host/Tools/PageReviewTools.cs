@@ -20,7 +20,7 @@ internal sealed class PageReviewTools
     public const string Tool = "eplan_page_review";
     internal static readonly string[] Checks = ["dangling_ends", "unconnected_pins", "overlaps", "off_grid", "unintended_junctions", "interruption_pairing", "cable_cores", "box_crossings", "off_area", "wire_through_symbol", "net_overlap", "text_format", "cross_reference_clash", "path_straddle", "page_setup", "wire_number", "placeholder_tag", "eplan_messages", "expected", "rules"];
     [McpServerTool(Name = Tool, Title = "Review a drawn EPLAN page", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Reviews wiring, geometry, targets and plugin rules. rule_packs selects installed plugins; omitted uses enabled rules. Read only. Coordinates: mm, bottom-left origin. See usage for standards and fixes. Example: {\"project\":\"Line1\",\"page\":\"=F+A1/1\"}.")]
+    [Description("Reviews a page's wiring, geometry, targets and plugin rules. EPLAN's own check: eplan_check_run; cabinet-locked rules: eplan_rule_check. rule_packs selects installed plugins; omitted uses enabled rules. Read only. Coordinates: mm, bottom-left origin. See usage for standards and fixes. Example: {\"project\":\"Line1\",\"page\":\"=F+A1/1\"}.")]
     public static async Task<CallToolResult> ReviewAsync(IBridgeClient bridge, TimeProvider clock, string project, string page,
         string[]? checks = null, JsonElement? expected = null, [Range(0, 100)] double tolerance_mm = 0.5,
         [Description("Not available yet: true is refused. For a picture of the page call eplan_export_image.")] bool include_image = false,

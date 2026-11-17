@@ -85,7 +85,7 @@ internal sealed class ProjectExportTools
     [Description(
         "Exports the parts list of an EPLAN project as one XML file into a new folder the server creates, for purchasing " +
         "or another program. The sample project takes about a minute and gives some 14 MB; to count parts, call " +
-        "eplan_part_list instead. Writes files there only; the project is not changed and no approval is needed. " +
+        "eplan_part_list instead; the shared parts database: eplan_part_export. Writes files there only; the project is not changed and no approval is needed. " +
         "Example: {\"file_name\": \"Line1 parts\"}.")]
     public static async Task<CallToolResult> ExportPartsAsync(
         ExportRunner exports,

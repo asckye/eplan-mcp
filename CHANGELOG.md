@@ -8,6 +8,7 @@
 ### 变更
 
 - `serve --profile core` 的 25 个工具改为围绕“按描述画一页、审图、修正”选取：加入 `eplan_device_place`、`eplan_connection_create`、`eplan_placement_create`、`eplan_placement_update`、`eplan_property_set`、`eplan_symbol_search`、`eplan_part_search`；`eplan_part_list`、`eplan_message_list`、`eplan_check_list`、`eplan_check_run`、`eplan_macro_get`、`eplan_report_update`、`eplan_export_pdf` 只在默认的 `full` 里。原来的 core 是早期的“读取加宏”组合，放不了符号、画不了线。删除类工具属于 Destructive，仍只在 `full`。服务器说明不再让 core 客户端调用它看不到的 `eplan_page_open`。
+- 20 个工具的说明改写或补了“这种情况用哪个工具”：`eplan_report_create`、`eplan_page_create` 原来的说明没有说工具做什么；画图类（`eplan_device_place`、`eplan_macro_insert`、`eplan_placement_create`、`eplan_annotation_create`、`eplan_connection_create`）和编辑类（`eplan_placement_update`、`eplan_placement_edit`、`eplan_placement_delete`、`eplan_graphic_edit`）互相指路；`eplan_plan_apply` 写明省略 `dry_run` 会直接执行。参数和返回结构没有变化。
 
 ### 修复
 

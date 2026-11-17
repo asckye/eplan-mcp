@@ -18,7 +18,7 @@ internal sealed class PropertySetTools
 
     [McpServerTool(Name = Tool, Title = "Set EPLAN properties", ReadOnly = false,
         Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Sets Function text and category-scoped PLC data. Omit/true dry_run previews; false executes. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. See usage.")]
+    [Description("Sets a device's function text and category-scoped PLC data. Page fields: eplan_page_update; title block: eplan_project_update; potentials: eplan_potential_update. Omit/true dry_run previews; false executes. One Ctrl+Z undoes a call. Outside scratch needs approval; denial: APPROVAL_DENIED. See usage.")]
     public static async Task<CallToolResult> SetAsync(IBridgeClient bridge, WritePipeline pipeline,
         RequestContext<CallToolRequestParams> context, IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)

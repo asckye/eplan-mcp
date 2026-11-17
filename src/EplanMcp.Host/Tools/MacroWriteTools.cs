@@ -36,7 +36,7 @@ internal sealed class MacroWriteTools
         OutputSchemaType = typeof(MacroInsertResult))]
     [Description(
         "Inserts a window macro or a part's group symbol macro (give macro or part, MultiLine on Circuit pages, Overview on Overview pages), " +
-        "its devices tagged and shown. One Ctrl+Z in EPLAN undoes insertion and value sets. macro_box:false removes boxes, true uses project settings. " +
+        "its devices tagged and shown. One symbol or part: eplan_device_place. One Ctrl+Z in EPLAN undoes insertion and value sets. macro_box:false removes boxes, true uses project settings. " +
         "x and y place the macro reference point in mm from the page's bottom left, y up. " +
         "values maps 1-20 exact, case-sensitive placeholder names to existing value sets from eplan_macro_get. " +
         "items inserts 1-20 macros across existing pages in one transaction. " +

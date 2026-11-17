@@ -23,7 +23,7 @@ internal sealed class PlanApplyTools
 
     [McpServerTool(Name = ApplyTool, Title = "Apply plan", ReadOnly = false, Destructive = true,
         Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Applies a compiled plan once, using its highest step tier for policy, one approval when required, and an initial backup. Denial returns POLICY_DENIED or APPROVAL_DENIED. Dry-run rechecks and previews without consumption. Waiting expiry or disconnect leaves the task running. Inspect results with eplan_plan_get or eplan_task_get. Example: {\"plan_id\":\"0123456789abcdef0123456789abcdef\",\"wait_seconds\":0}.")]
+    [Description("Applies a compiled plan once, using its highest step tier for policy, one approval when required, and an initial backup. Denial returns POLICY_DENIED or APPROVAL_DENIED. dry_run defaults to false here: omitting it executes; true rechecks and previews without consumption. Waiting expiry or disconnect leaves the task running. Inspect results with eplan_plan_get or eplan_task_get. Example: {\"plan_id\":\"0123456789abcdef0123456789abcdef\",\"wait_seconds\":0}.")]
     public static async Task<CallToolResult> ApplyAsync(PlanOrchestrator orchestrator, TaskRegistry tasks,
         RequestContext<CallToolRequestParams> context, [MinLength(1)] string plan_id, bool dry_run = false,
         [Range(0, 110)] int wait_seconds = 90, IProgress<ProgressNotificationValue>? progress = null,

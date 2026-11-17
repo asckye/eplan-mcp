@@ -50,7 +50,7 @@ internal sealed class MasterDataExportTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(PartExportResult))]
     [Description(
-        "Exports parts of EPLAN's parts database, which all projects share (not a project), as one file into a new " +
+        "Exports parts of EPLAN's parts database, which all projects share (a project's parts list: eplan_export_parts), as one file into a new " +
         "folder the server creates. Find the part numbers with eplan_part_search first. edz adds macros and pictures " +
         "but is slow (44 s, 128 MB for the sample); backup is EPLAN's restorable archive (.zw6) of the whole database. " +
         "Nothing is changed, no approval. Example: {\"parts\": [\"SIE.3RH2122-1HB40\"]}.")]

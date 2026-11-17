@@ -15,7 +15,7 @@ internal sealed class ReportCreateTools
     public const string Tool = "eplan_report_create";
 
     [McpServerTool(Name = Tool, Title = "Create report pages from a report block", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ReportCreateResult))]
-    [Description("Previews by default. Approval outside scratch.")]
+    [Description("Creates report pages of one type (table of contents, parts list, terminal diagram, ...) from a form, starting at first_page. Refresh existing reports: eplan_report_update. Omit/true dry_run previews; false executes. Approval outside scratch. See eplan_tool_usage. Example: {\"project\":\"Line1\",\"type\":\"TableOfContents\",\"form\":\"F06_002\",\"first_page\":\"&AAB1/102\"}.")]
     public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IProgress<ProgressNotificationValue> progress,
         string project,
         [AllowedValues("TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "InterconnectDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview")] string type,

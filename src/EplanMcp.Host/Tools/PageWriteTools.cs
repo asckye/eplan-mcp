@@ -36,7 +36,7 @@ internal sealed class PageWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageCreateResult))]
-    [Description("Creates pages. Omit/true previews; false executes. One undo; approval outside scratch.")]
+    [Description("Creates empty pages by full name with a description; then draw with eplan_device_place, eplan_macro_insert, eplan_connection_create or eplan_placement_create. Omit/true previews; false executes. One undo; approval outside scratch. Example: {\"project\":\"Line1\",\"pages\":[{\"name\":\"=GAA+A1&EFS1/60\",\"description\":\"Power supply\"}]}.")]
     public static async Task<CallToolResult> PageCreateAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,
@@ -110,7 +110,7 @@ internal sealed class PageWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(PageUpdateResult))]
-    [Description("Updates page text, frame or grid. Omit/true previews; false executes. One undo; approval outside scratch.")]
+    [Description("Updates a page's description, plot frame or grid. Objects on the page: eplan_placement_update (move), eplan_property_set (device text). Omit/true previews; false executes. One undo; approval outside scratch.")]
     public static async Task<CallToolResult> PageUpdateAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,

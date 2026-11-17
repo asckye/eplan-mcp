@@ -270,7 +270,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_pack_install | write | — | 0 | 0 | 0 | 0 | 0 | 1/1/1 | — | — |
 | eplan_pack_library_list | read | — | 0 | 0 | 0 | 0 | 0 | 1/1/0 | — | — |
 | eplan_pack_list | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
-| eplan_page_create | write | page.create.execute<br>page.create.plan | 85 | 36 | 1 | 41 | 0 | 15/18/21 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
+| eplan_page_create | write | page.create.execute<br>page.create.plan | 85 | 36 | 1 | 41 | 0 | 16/18/21 | A7 A9 A13 | 2026-10-20 pass（api-notes A17） |
 | eplan_page_delete | destructive | page.delete.execute<br>page.delete.plan | 70 | 35 | 0 | 35 | 0 | 3/10/1 | A15 A18 A24 | — |
 | eplan_page_get | read | page.drawing.get<br>page.get<br>project.get | 202 | 126 | 3 | 66 | 0 | 12/6/45 | A11 A12 A57 A80 | — |
 | eplan_page_list | read | page.list | 43 | 20 | 1 | 22 | 0 | 16/6/21 | A11 | 2026-10-20 pass_with_findings（api-notes A17） |
@@ -288,7 +288,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 74 | 39 | 0 | 35 | 0 | 1/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
 | eplan_placeholder_list | read | placeholder.list | 46 | 27 | 0 | 19 | 0 | 1/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
 | eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 337 | 202 | 3 | 125 | 0 | 10/3/19 | A54 A88 | — |
-| eplan_placement_delete | destructive | placement.delete.execute<br>placement.delete.plan | 175 | 101 | 2 | 65 | 0 | 3/1/4 | A87 | — |
+| eplan_placement_delete | destructive | placement.delete.execute<br>placement.delete.plan | 175 | 101 | 2 | 65 | 0 | 4/1/4 | A87 | — |
 | eplan_placement_edit | destructive | placement.edit.execute<br>placement.edit.plan | 473 | 285 | 4 | 176 | 0 | 3/3/2 | — | — |
 | eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 391 | 223 | 9 | 132 | 0 | 11/3/4 | A57 A72 A76 | — |
 | eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 2/8/5 | A14 A17 A39 | — |
@@ -326,7 +326,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_structure_list | read | structure.list | 30 | 13 | 1 | 15 | 0 | 0/0/2 | — | — |
 | eplan_structure_rename | destructive | structure.rename.execute<br>structure.rename.plan | 73 | 32 | 1 | 39 | 0 | 0/0/1 | — | — |
 | eplan_structure_update | write | structure.update.execute<br>structure.update.plan | 72 | 30 | 1 | 40 | 0 | 0/0/2 | — | — |
-| eplan_symbol_search | read | symbol.search | 68 | 39 | 1 | 27 | 0 | 4/3/11 | A52 A53 A55 | — |
+| eplan_symbol_search | read | symbol.search | 68 | 39 | 1 | 27 | 0 | 5/3/11 | A52 A53 A55 | — |
 | eplan_task_get | read | — | 0 | 0 | 0 | 0 | 0 | 1/3/3 | — | — |
 | eplan_terminal_renumber | destructive | terminal.renumber.execute<br>terminal.renumber.plan | 88 | 37 | 0 | 50 | 1 | 0/1/1 | A20 A24 | 2026-10-21 pass_with_findings（api-notes A24） |
 | eplan_terminal_strip_get | read | terminal.strip.get | 41 | 24 | 0 | 17 | 0 | 2/1/3 | — | — |
