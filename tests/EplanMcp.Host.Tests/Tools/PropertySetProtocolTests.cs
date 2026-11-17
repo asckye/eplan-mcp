@@ -115,7 +115,8 @@ public sealed class PropertySetProtocolTests : IDisposable
             Assert.Equal(20011, started["changes"]![0]!["property_id"]!.GetValue<int>());
             Assert.Equal("zh_CN", started["changes"]![0]!["language"]!.GetValue<string>());
             Assert.Equal(64, started["arguments"]!["argumentsHash"]!.GetValue<string>().Length);
-            Assert.DoesNotContain("old", started.ToJsonString(), StringComparison.Ordinal);
+            // The value's run of b's, not "old": the audited project path lies in a random temp folder that can contain "old".
+            Assert.DoesNotContain(new string('b', 20), started.ToJsonString(), StringComparison.Ordinal);
             Assert.DoesNotContain("new text", started.ToJsonString(), StringComparison.Ordinal);
             JsonObject outcome = records.Single(r => r["kind"]!.GetValue<string>() == "execution_result");
             Assert.Equal("committed", outcome["execution"]!.GetValue<string>());
