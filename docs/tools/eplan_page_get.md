@@ -23,7 +23,7 @@
 | `response_format` | enum `concise` / `detailed` | 否 | `concise` | `detailed` 额外返回全部非空的页属性 |
 | `language` | string | 否 | EPLAN 界面语言，没有文本时回退到其他语言 | 多语言文本的语言 |
 | `include_drawings` | bool | 否 | false | 读取栅格、边界及受支持绘图对象；省略或 false 时响应完全保持原样 |
-| `drawing_limit` | int | 否 | 50 | 每次最多 1–200 个对象，仍受响应预算限制 |
+| `drawing_limit` | int | 否 | 50 | 每次最多 1–200 个对象，仍受响应预算限制。插件只返回这一段，不再发整页（A146：模型视图页可有近 4 万个对象） |
 | `drawing_cursor` | string | 否 | — | 上次 `drawings.nextCursor`，仅可配合 include_drawings=true；其余参数保持相同，可改 drawing_limit |
 
 ## 3. 输出

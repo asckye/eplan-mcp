@@ -23,9 +23,11 @@ internal static class PageDrawingDiscovery
                 return ToolResults.Error(problem);
             }
 
+            // A sliced read binds the cursor to the fingerprint of every placement, not to the slice it returned.
+            bool sliced = geometry.PlacementTotal is not null;
             string query = PropertyGetPaging.Hash(JsonSerializer.Serialize(new
             {
-                geometry,
+                geometry = sliced ? (object)new { geometry.Project, geometry.Page, geometry.PlacementsFingerprint, geometry.PlacementTotal, geometry.GridSize, geometry.PageSize, geometry.PlotFrameSize, geometry.DrawingArea, geometry.ColumnEdges } : geometry,
                 args.Language,
                 args.IncludeProperties,
                 status.Handshake?.Eplan.ProcessId,
@@ -34,7 +36,8 @@ internal static class PageDrawingDiscovery
             PropertySchemaPaging paging = For(bridge, TimeProvider.System);
             var violations = new List<string>();
             int offset = paging.Offset(cursor, query, violations);
-            if (violations.Count > 0 || offset > geometry.Placements.Count)
+            int total = geometry.PlacementTotal ?? geometry.Placements.Count;
+            if (violations.Count > 0 || offset > total)
             {
                 return ToolResults.InvalidArguments(["/drawing_cursor is invalid, expired or stale; omit it to restart drawing discovery."]);
             }
@@ -46,9 +49,9 @@ internal static class PageDrawingDiscovery
                 PlotFrameSize = geometry.PlotFrameSize,
                 DrawingArea = geometry.DrawingArea,
                 BoundarySource = geometry.PageSize is null ? "unknown" : "Page.Size",
-                Total = geometry.Placements.Count,
+                Total = total,
                 // Agent eval 2026-11-06: property texts came first and filled the size budget, so wiring could not find its symbols.
-                Items = [.. geometry.Placements.OrderBy(row => row.Parent is null ? 0 : 1).Skip(offset).Take(limit).Select(row => new DrawingPlacement
+                Items = [.. (sliced ? geometry.Placements : geometry.Placements.OrderBy(row => row.Parent is null ? 0 : 1).Skip(offset)).Take(limit).Select(row => new DrawingPlacement
                 {
                     Locator = row.Locator, Kind = row.Kind, Location = row.Location, Bounds = row.Bounds, DrawingOrder = row.DrawingOrder, Parent = row.Parent,
                     Properties = row.Properties.ToDictionary(p => p.Key, p => ResultShaper.CleanFullText(p.Value), StringComparer.Ordinal),

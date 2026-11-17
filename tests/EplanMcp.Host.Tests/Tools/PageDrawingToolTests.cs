@@ -133,8 +133,32 @@ public sealed class PageDrawingToolTests
             Locator = new() { Project = geometry.Project, Page = "P", Type = 4, Oid = i, Digest = i.ToString("x64", CultureInfo.InvariantCulture) },
             Properties = textLength == 0 ? [] : new() { ["text"] = "en_US@" + new string('t', textLength) + "\u0007;" },
         })];
-        bridge.Handlers[OperationNames.PageDrawingGet] = _ => geometry;
+        // Like the Bridge (live 2026-11-16): a drawing limit returns the slice, parents first, with the page total and fingerprint.
+        bridge.Handlers[OperationNames.PageDrawingGet] = args => args is PageGetArgs { DrawingLimit: int limit } request
+            ? new PageDrawingGeometry
+            {
+                Project = geometry.Project,
+                Page = geometry.Page,
+                GridSize = geometry.GridSize,
+                DrawingArea = geometry.DrawingArea,
+                PageSize = geometry.PageSize,
+                PlotFrameSize = geometry.PlotFrameSize,
+                PlacementTotal = geometry.Placements.Count,
+                PlacementsFingerprint = geometry.Fingerprint(),
+                Placements = [.. geometry.Placements.OrderBy(p => p.Parent is null ? 0 : 1).Skip(request.DrawingOffset ?? 0).Take(limit)],
+            }
+            : geometry;
         return bridge;
+    }
+
+    [Fact]
+    public async Task EveryCall_AsksTheBridgeForTheSliceOnly()
+    {
+        FakeBridgeClient bridge = Bridge(52);
+        JsonElement first = Data(await Read(bridge, 50)).GetProperty("drawings");
+        await Read(bridge, 2, first.GetProperty("nextCursor").GetString());
+        PageGetArgs[] reads = [.. bridge.Calls.Where(c => c.Operation == OperationNames.PageDrawingGet).Select(c => (PageGetArgs)c.Args!)];
+        Assert.Equal([(0, 50), (50, 2)], reads.Select(r => (r.DrawingOffset ?? -1, r.DrawingLimit ?? -1)));
     }
 
     internal static Task<CallToolResult> Read(FakeBridgeClient bridge, int limit = 50, string? cursor = null, string format = "concise") =>

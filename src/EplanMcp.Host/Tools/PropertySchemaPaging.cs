@@ -17,6 +17,28 @@ internal sealed class PropertySchemaPaging(TimeProvider clock)
         return Base64Url.EncodeToString(bytes) + "." + Base64Url.EncodeToString(HMACSHA256.HashData(_key, bytes));
     }
 
+    /// <summary>
+    /// The offset of a signed, unexpired cursor before its query can be computed, for callers that need the offset to read
+    /// the data the query is built from; <see cref="Offset"/> still checks the query afterwards. Null when it is not valid.
+    /// </summary>
+    internal int? Peek(string cursor)
+    {
+        try
+        {
+            string[] parts = (cursor.Length <= 1024 ? cursor : string.Empty).Split('.');
+            if (parts.Length != 2)
+            { return null; }
+            byte[] bytes = Base64Url.DecodeFromChars(parts[0]);
+            string[] fields = Encoding.UTF8.GetString(bytes).Split(':');
+            return CryptographicOperations.FixedTimeEquals(HMACSHA256.HashData(_key, bytes), Base64Url.DecodeFromChars(parts[1])) && fields.Length == 3
+                && int.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out int offset) && offset > 0
+                && long.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out long expiry) && expiry > clock.GetUtcNow().ToUnixTimeSeconds()
+                ? offset : null;
+        }
+        catch (FormatException)
+        { return null; }
+    }
+
     internal int Offset(string? cursor, string query, List<string> violations)
     {
         if (cursor is null)

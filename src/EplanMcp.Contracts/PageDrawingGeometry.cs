@@ -22,6 +22,10 @@ public sealed class PageDrawingGeometry
     public double[]? ColumnEdges { get; set; }
     /// <summary>Supported placements and property children; excludes plot-frame descendants and part references.</summary>
     public List<DrawingPlacement> Placements { get; set; } = [];
+    /// <summary>When the request gave a drawing limit: the number of placements on the whole page, of which Placements is a slice.</summary>
+    public int? PlacementTotal { get; set; }
+    /// <summary>When the request gave a drawing limit: <see cref="Fingerprint"/> over every placement of the page.</summary>
+    public string? PlacementsFingerprint { get; set; }
 
     /// <summary>Serializer-independent page evidence for approval rechecks, including grid and observed bounds.</summary>
     public string Fingerprint()

@@ -1752,7 +1752,9 @@
                 "parent": null,
                 "properties": {}
               }
-            ]
+            ],
+            "placementTotal": null,
+            "placementsFingerprint": null
           },
           "revision": "initial",
           "pins": {
@@ -1835,7 +1837,9 @@
                 "parent": null,
                 "properties": {}
               }
-            ]
+            ],
+            "placementTotal": null,
+            "placementsFingerprint": null
           },
           "revision": "initial",
           "pins": {},
@@ -1846,7 +1850,7 @@
       ],
       "preservedEndpoints": []
     },
-    "fingerprint": "a786694c832461ffab19c1724364f82569a72572380877a7130cc91b8a7f1e23"
+    "fingerprint": "6c3262a1194bd074c320c3dce9b50c7bbd82560e6c3900de923dc6aabee56533"
   },
   "interruptionReadback": [
     {

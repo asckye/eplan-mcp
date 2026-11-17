@@ -28,6 +28,40 @@ public sealed class PageDrawingGetOperationTests
         Assert.Same(reader.Geometry, data);
     }
 
+    /// <summary>Live 2026-11-16: whole model view pages passed the 16 MiB reply limit; a limit returns a slice, parents first.</summary>
+    [Fact]
+    public void DrawingLimit_ReturnsASliceWithTheWholePageTotalAndFingerprint()
+    {
+        var reader = new Reader();
+        DrawingPlacement Row(long oid, bool child) => new() { Locator = new() { Oid = oid, Digest = new string('a', 64) }, Parent = child ? new() { Oid = 1 } : null };
+        reader.Geometry.Placements.AddRange([Row(10, child: true), Row(1, false), Row(2, false), Row(11, child: true)]);
+        string whole = reader.Geometry.Fingerprint();
+        var operation = new PageDrawingGetOperation(new Catalog(), reader);
+        var args = (PageGetArgs)operation.ParseArgs(JObject.Parse("""{"project":"Line1","page":"P","drawingOffset":1,"drawingLimit":2}"""));
+
+        var data = (PageDrawingGeometry)operation.Execute(args)!;
+
+        Assert.Equal([2L, 10L], data.Placements.Select(p => p.Locator.Oid));
+        Assert.Equal((4, whole), (data.PlacementTotal, data.PlacementsFingerprint));
+        Assert.Throws<BridgeErrorException>(() => operation.Execute(new PageGetArgs { Project = "Line1", Page = "P", DrawingLimit = 201 }));
+        Assert.Equal(4, reader.Geometry.Placements.Count);
+    }
+
+    /// <summary>The slice is a new result; every page field the reader gives must travel with it.</summary>
+    [Fact]
+    public void DrawingLimit_CopiesEveryPageField()
+    {
+        var reader = new Reader();
+        reader.Geometry.PageSize = [630, 445.5];
+        reader.Geometry.PlotFrameSize = [420, 297];
+        reader.Geometry.DrawingArea = [6, 24, 624, 438];
+        reader.Geometry.ColumnEdges = [6, 67.8, 624];
+        var data = (PageDrawingGeometry)new PageDrawingGetOperation(new Catalog(), reader).Execute(new PageGetArgs { Project = "Line1", Page = "P", DrawingLimit = 1 })!;
+        string[] sliceOnly = [nameof(PageDrawingGeometry.Placements), nameof(PageDrawingGeometry.PlacementTotal), nameof(PageDrawingGeometry.PlacementsFingerprint)];
+        foreach (var property in typeof(PageDrawingGeometry).GetProperties().Where(p => !sliceOnly.Contains(p.Name)))
+        { Assert.Equal(Newtonsoft.Json.JsonConvert.SerializeObject(property.GetValue(reader.Geometry)), Newtonsoft.Json.JsonConvert.SerializeObject(property.GetValue(data))); }
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]

@@ -26036,6 +26036,11 @@
             "file": "tests/EplanMcp.Large.Tests/MacroOverviewTests.cs"
           },
           {
+            "name": "ModelViewDrawingsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ModelViewDrawingsTests.cs"
+          },
+          {
             "name": "NoSideEffectTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/NoSideEffectTests.cs"

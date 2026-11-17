@@ -14,4 +14,14 @@ public sealed class PageGetArgs
 
     /// <summary>Whether to read every non-empty page property (<c>response_format: "detailed"</c>).</summary>
     public bool IncludeProperties { get; set; }
+
+    /// <summary>
+    /// page.drawing.get only: the first placement to return, in the order parents first. With <see cref="DrawingLimit"/> the
+    /// Bridge returns that slice, the page total and the fingerprint of every placement; without it, every placement.
+    /// Live 2026-11-16: model view pages of the sample project passed the 16 MiB reply limit when sent whole.
+    /// </summary>
+    public int? DrawingOffset { get; set; }
+
+    /// <summary>page.drawing.get only: how many placements to return, 1 to 200; null returns every placement.</summary>
+    public int? DrawingLimit { get; set; }
 }
