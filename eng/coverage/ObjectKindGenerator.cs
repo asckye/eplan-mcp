@@ -6,7 +6,7 @@ namespace EplanMcp.Coverage;
 internal static class ObjectKindGenerator
 {
     internal const string TypesPath = "src/EplanMcp.Contracts/Generated/ObjectReadTypes.g.cs";
-    internal const string DispatchPath = "src/EplanMcp.Bridge.Eplan/Adapters/ObjectKindDispatch.g.cs";
+    internal const string DispatchPath = "src/EplanMcp.Bridge.Eplan/Adapters/Properties/ObjectKindDispatch.g.cs";
     internal const string TablePath = "docs/tools/eplan_object_kinds.g.md";
     private const string Prefix = "Eplan.EplApi.DataModel.";
     internal sealed record Kind(string Name, string Type, string Dictionary, string PropertyOwner, string[] Sources, string? Reason);

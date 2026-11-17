@@ -7,7 +7,7 @@ namespace EplanMcp.Coverage;
 internal static partial class ApiTryGenerator
 {
     internal const string CatalogPath = "src/EplanMcp.Contracts/Generated/ApiTryCatalog.g.cs";
-    internal const string DispatchPath = "src/EplanMcp.Bridge.Eplan/Adapters/ApiTryDispatch.g.cs";
+    internal const string DispatchPath = "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs";
     internal const string ReportPath = "catalog/api-try.g.tsv";
     private static ApiIndexData Data(string root) =>
         RunCache.Get("try|" + root, () => DataCore(root));

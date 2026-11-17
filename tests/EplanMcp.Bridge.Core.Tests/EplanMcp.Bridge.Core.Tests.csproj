@@ -7,46 +7,46 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Hosting\FileBridgeLog.cs" Link="Hosting\FileBridgeLog.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Hosting\StartupFailureLog.cs" Link="Hosting\StartupFailureLog.cs" />
     <Compile Include="..\Shared\PlacementEditFixture.cs" Link="PlacementEditFixture.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanNativePreconditions.cs" Link="Adapters\EplanNativePreconditions.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanMacroReader.cs" Link="Adapters\EplanMacroReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Runtime\EplanNativePreconditions.cs" Link="Adapters\EplanNativePreconditions.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanMacroReader.cs" Link="Adapters\EplanMacroReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Generated\PlaceHolderApi.g.cs" Link="Adapters\Generated\PlaceHolderApi.g.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanMacroInserter.cs" Link="Adapters\EplanMacroInserter.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceRenamer.cs" Link="Adapters\EplanDeviceRenamer.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceRename.cs" Link="Adapters\EplanDeviceRename.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDevicePlacer.cs" Link="Adapters\EplanDevicePlacer.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.Arrays.cs" Link="Adapters\EplanApiTryDispatcher.Arrays.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.Results.cs" Link="Adapters\EplanApiTryDispatcher.Results.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanApiTryDispatcher.HandleChains.cs" Link="Adapters\EplanApiTryDispatcher.HandleChains.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanText.cs" Link="Adapters\EplanText.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanReportReader.cs" Link="Adapters\EplanReportReader.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanReportCreator.Schemes.cs" Link="Adapters\EplanReportCreator.Schemes.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanTextFormat.cs" Link="Adapters\EplanTextFormat.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlcReader.cs" Link="Adapters\EplanPlcReader.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolArrangement.cs" Link="Adapters\EplanSymbolArrangement.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanSymbolReader.cs" Link="Adapters\EplanSymbolReader.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.cs" Link="Adapters\EplanDeviceSymbolPlacement.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Assignment.cs" Link="Adapters\EplanDeviceSymbolPlacement.Assignment.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanFunctionAssignment.cs" Link="Adapters\EplanFunctionAssignment.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPins.cs" Link="Adapters\EplanPins.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDevicePartAssigner.Assignment.cs" Link="Adapters\EplanDevicePartAssigner.Assignment.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Plc.cs" Link="Adapters\EplanDeviceSymbolPlacement.Plc.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Terminal.cs" Link="Adapters\EplanDeviceSymbolPlacement.Terminal.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.Displays.cs" Link="Adapters\EplanDeviceSymbolPlacement.Displays.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanMacroInserter.cs" Link="Adapters\EplanMacroInserter.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDeviceRenamer.cs" Link="Adapters\EplanDeviceRenamer.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDeviceRename.cs" Link="Adapters\EplanDeviceRename.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDevicePlacer.cs" Link="Adapters\EplanDevicePlacer.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Api\EplanApiTryDispatcher.Arrays.cs" Link="Adapters\EplanApiTryDispatcher.Arrays.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Api\EplanApiTryDispatcher.Results.cs" Link="Adapters\EplanApiTryDispatcher.Results.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Api\EplanApiTryDispatcher.HandleChains.cs" Link="Adapters\EplanApiTryDispatcher.HandleChains.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Pages\EplanText.cs" Link="Adapters\EplanText.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Exchange\EplanReportReader.cs" Link="Adapters\EplanReportReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Exchange\EplanReportCreator.Schemes.cs" Link="Adapters\EplanReportCreator.Schemes.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Pages\EplanTextFormat.cs" Link="Adapters\EplanTextFormat.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanPlcReader.cs" Link="Adapters\EplanPlcReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanSymbolArrangement.cs" Link="Adapters\EplanSymbolArrangement.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanSymbolReader.cs" Link="Adapters\EplanSymbolReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDeviceSymbolPlacement.cs" Link="Adapters\EplanDeviceSymbolPlacement.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDeviceSymbolPlacement.Assignment.cs" Link="Adapters\EplanDeviceSymbolPlacement.Assignment.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanFunctionAssignment.cs" Link="Adapters\EplanFunctionAssignment.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanPins.cs" Link="Adapters\EplanPins.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDevicePartAssigner.Assignment.cs" Link="Adapters\EplanDevicePartAssigner.Assignment.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDeviceSymbolPlacement.Plc.cs" Link="Adapters\EplanDeviceSymbolPlacement.Plc.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDeviceSymbolPlacement.Terminal.cs" Link="Adapters\EplanDeviceSymbolPlacement.Terminal.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDeviceSymbolPlacement.Displays.cs" Link="Adapters\EplanDeviceSymbolPlacement.Displays.cs" />
     <Compile Include="..\Shared\ConnectionCreateLayout.cs" Link="ConnectionCreateLayout.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" Link="Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanConnectionCreator.Cables.cs" Link="Adapters\EplanConnectionCreator.Cables.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanVisibleNames.cs" Link="Adapters\EplanVisibleNames.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanConnectionCreator.Interruptions.cs" Link="Adapters\EplanConnectionCreator.Interruptions.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanDrawingReader.cs" Link="Adapters\EplanDrawingReader.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanConnectionScene.cs" Link="Adapters\EplanConnectionScene.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPageReviewReader.Evidence.cs" Link="Adapters\EplanPageReviewReader.Evidence.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementStyle.cs" Link="Adapters\EplanPlacementStyle.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementTextWriter.Annotations.cs" Link="Adapters\EplanPlacementTextWriter.Annotations.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementTextWriter.cs" Link="Adapters\EplanPlacementTextWriter.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementRemover.cs" Link="Adapters\EplanPlacementRemover.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\EplanPlacementMover.cs" Link="Adapters\EplanPlacementMover.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\TransactionScope.cs" Link="Adapters\TransactionScope.cs" />
-    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\FunctionTransactionScope.cs" Link="Adapters\FunctionTransactionScope.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\EplanDeviceSymbolPlacement.LocationBox.cs" Link="Adapters\EplanDeviceSymbolPlacement.LocationBox.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Connections\EplanConnectionCreator.Cables.cs" Link="Adapters\EplanConnectionCreator.Cables.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Properties\EplanVisibleNames.cs" Link="Adapters\EplanVisibleNames.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Connections\EplanConnectionCreator.Interruptions.cs" Link="Adapters\EplanConnectionCreator.Interruptions.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Pages\EplanDrawingReader.cs" Link="Adapters\EplanDrawingReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Connections\EplanConnectionScene.cs" Link="Adapters\EplanConnectionScene.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Pages\EplanPageReviewReader.Evidence.cs" Link="Adapters\EplanPageReviewReader.Evidence.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanPlacementStyle.cs" Link="Adapters\EplanPlacementStyle.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanPlacementTextWriter.Annotations.cs" Link="Adapters\EplanPlacementTextWriter.Annotations.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanPlacementTextWriter.cs" Link="Adapters\EplanPlacementTextWriter.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanPlacementRemover.cs" Link="Adapters\EplanPlacementRemover.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanPlacementMover.cs" Link="Adapters\EplanPlacementMover.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Runtime\TransactionScope.cs" Link="Adapters\TransactionScope.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Devices\FunctionTransactionScope.cs" Link="Adapters\FunctionTransactionScope.cs" />
     <Compile Include="..\Shared\PlanGuardReader.cs" Link="PlanGuardReader.cs" />
     <Compile Include="..\..\spikes\S26-action-run\R2\SpikeS26R2Assessment.cs" Link="Spikes\SpikeS26R2Assessment.cs" />
     <Compile Include="..\..\spikes\S26-action-run\R3\SpikeS26R3Assessment.cs" Link="Spikes\SpikeS26R3Assessment.cs" />

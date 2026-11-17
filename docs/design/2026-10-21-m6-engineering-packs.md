@@ -52,7 +52,7 @@
 |---|---|---|---|---|
 | 1 | 写入流水线 | 已实现 | `src/EplanMcp.Host/Safety/WritePipeline.cs`：规划 → 策略 → 写入暂停 → 审批 → 备份（Destructive）→ 审计 `execution_started` → 执行 → 审计 `execution_result` | 一次工具调用只有一对 `*.plan`/`*.execute` 操作、一个 Bridge 事务；计划的每一步复用这些段，计划级的部分要新建（ADR-0023） |
 | 2 | 变更清单与指纹 | 已实现（单步） | `src/EplanMcp.Contracts/Runtime/WritePlan.cs`（`Project`、`ProjectPath`、`Changes`、`Fingerprint`、`Details`）、`PlannedChange.cs`；`src/EplanMcp.Bridge.Core/Operations/Runtime/Fingerprint.cs`（排序后的行做 SHA-256）；每个工具只覆盖它触及的对象，行中多用 `ToStringIdentifier()`；`PLAN_STALE` 由各 `*ExecuteOperation.cs` 返回 | 运行时字符串标识含按打开分配的数据库号（S28），**不能用于跨调用保存的计划**；`dry_run` 不返回计划令牌 |
-| 3 | Destructive 备份 | 已实现 | `Safety/BackupFolders.cs`、`Bridge.Core/Operations/Projects/ProjectBackups.cs`、`Bridge.Eplan/Adapters/EplanProjectBackup.cs`（`CopyProject(…, Snapshot)`，核对页数） | 计划开始前的备份直接复用 |
+| 3 | Destructive 备份 | 已实现 | `Safety/BackupFolders.cs`、`Bridge.Core/Operations/Projects/ProjectBackups.cs`、`Bridge.Eplan/Adapters/Projects/EplanProjectBackup.cs`（`CopyProject(…, Snapshot)`，核对页数） | 计划开始前的备份直接复用 |
 | 4 | 结果恢复与写入暂停 | 已实现 | `Bridge.Core/Operations/Runtime/OutcomeRecords.cs`（内存，256 条）、`Host/Bridge/BridgeClient.Writes.cs`（`outcome.get` 轮询）、`Safety/DanglingWrites.cs`、`Safety/SuspensionStore.cs` | 逐步沿用；多步计划还需要计划级的结果（ADR-0023） |
 | 5 | 审计 | 已实现 | `src/EplanMcp.Host/Audit/AuditLog.cs`：`approval`、`suspension_release`、`execution_started`、`execution_result`、`writes_suspended`，哈希链；读和导出不审计 | 增加计划、工作区和包的记录种类 |
 | 6 | 审批 | 已实现 | `Safety/ApprovalService.cs`、`WorkbenchChannel.cs`、`EplanDialogChannel.cs`；决定绑定请求 ID、指纹、参数摘要，只用一次 | 计划级审批绑定计划哈希（ADR-0023） |
@@ -63,7 +63,7 @@
 | 11 | Bridge→Host 推送 | 部分 | `Bridge.Core/Server/BridgeConnection.cs` 只在调用期间发 `progress`；`EplanAddIn` 只实现 `IEplAddIn`、`IEplAddInShadowCopy`，没有订阅任何 EPLAN 事件 | 缓存失效需要事件（ADR-0026） |
 | 12 | 对象标识 | 部分 | 一律按名称：`Bridge.Core/Operations/Projects/ProjectResolver.cs`、页名、`DeviceTags.cs`（歧义时 `AMBIGUOUS_NAME`）；没有句柄和 `HANDLE_EXPIRED`（架构 8.1 只是设计）；分页游标 `Tools/PageCursor.cs` 只记偏移 | 需要跨调用的定位符（4.6） |
 | 13 | 项目与实例的身份 | 部分 | 项目只按规范化路径（`ScratchPaths.Canonical`）；实例按管道名 + 进程号（`Host/Bridge/BridgeEndpoint.cs`）和进程号 + 启动时间（`SuspensionStore.StartOf`） | 缓存键还缺打开代次（4.7） |
-| 14 | 缓存与快照 | 缺失 | `Bridge.Eplan/Adapters/EplanProjectReader.cs` 明确不缓存；没有快照、代次、观察计数 | 4.6、4.7 |
+| 14 | 缓存与快照 | 缺失 | `Bridge.Eplan/Adapters/Projects/EplanProjectReader.cs` 明确不缓存；没有快照、代次、观察计数 | 4.6、4.7 |
 | 15 | 宏 | 部分 | `macro.list` 只扫描 `.ema`（`Bridge.Core/Operations/Placement/MacroFiles.cs`）；`macro.get`（`Adapters/EplanMacroReader.cs`）返回表达类型、变体、设备；`macro.insert` 只接受 `$(MD_MACROS)` 下的窗口宏（M3b 设计 Q3） | 产品代码中没有页宏、占位符、值集；S29 已验证占位符和值集的读写（A33），见 4.10 |
 | 16 | 新建项目与还原 | 仅设计 | 产品代码中没有 `ProjectManager.CreateProject` 和项目还原；`eplan_scratch_create` 只出现在 ADR-0005 第 6 节和 ADR-0021 第 8 节；最接近的是 `eplan_import_pxf` 在 `<scratch>\imported\` 中新建项目（`Adapters/EplanProjectImporter.cs`、`Tools/ImportTools.cs`）。S27 已验证新建、还原和不打开项目判断版本（A31） | 4.5 的 `eplan_project_create`；剩余问题在 S30 |
 | 17 | 只读数据与导出 | 已实现 | 页、设备、连接、电缆、端子排、PLC、部件、消息、检查结果的读工具；导出 PDF/DXF/图片（`Host/Exports/ExportRunner.cs`，ADR-0012） | 快照提取和页面预览的基础；按工具逐个读取不适合整项目提取（4.6） |

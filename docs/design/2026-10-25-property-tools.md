@@ -23,8 +23,8 @@
 - A33：占位符“当前值”读取可能要求写锁；不能把所有 getter 都当安全只读。
 - A36：全属性读取可能产生数百万值；释放错误会使 EPLAN 内存耗尽或访问冲突退出。
 - A39：action 可有重编号、重复对象、外部数据等副作用，不能作为属性 setter 的通用后备路径。
-- [EplanProperties](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanProperties.cs) 已读已有属性和索引；[快照读取器](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanSnapshotReader.cs)按登记属性读取并管理生命周期。
-- [EplanPageDescriptions](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanPageDescriptions.cs)、[设备改名](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanDeviceRenamer.cs)、[占位符写入](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanPlaceholderWriter.cs)提供语义参考，不原样复用旧的属性列表获取方式。
+- [EplanProperties](../../src/EplanMcp.Bridge.Eplan/Adapters/Properties/EplanProperties.cs) 已读已有属性和索引；[快照读取器](../../src/EplanMcp.Bridge.Eplan/Adapters/Projects/EplanSnapshotReader.cs)按登记属性读取并管理生命周期。
+- [EplanPageDescriptions](../../src/EplanMcp.Bridge.Eplan/Adapters/Pages/EplanPageDescriptions.cs)、[设备改名](../../src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceRenamer.cs)、[占位符写入](../../src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlaceholderWriter.cs)提供语义参考，不原样复用旧的属性列表获取方式。
 - [SnapshotCanonical](../../src/EplanMcp.Bridge.Core/Operations/Projects/SnapshotCanonical.cs) 与 [SnapshotProfiles](../../src/EplanMcp.Contracts/Projects/SnapshotProfiles.cs)的登记集是快照哈希契约，不是全属性读权限或写白名单。
 
 外部 checklist：[covagashi/Eplan_2026_IA_MCP_scripts 的 live.py](https://github.com/Canary-ECAD/eplan-mcp/blob/0681c75cb5c2d75cbb6ca0db5e83625fdb1c6f4d/eplan-p8-mcp-server/mcp_server/api/actions/live.py)（原仓库已重定向，MIT，2026-10-25 查阅）。

@@ -41,7 +41,7 @@
 | 工具名 / 注册入口 / 契约快照 | `eplan_translation_add`，`McpServerSetup` 显式 `.WithTools<TranslationAddTools>`，契约快照 `tests/Contracts.Snapshots/server-contract.verified.json` |
 | 操作 | `translation.keyword.set.plan` → [`TranslationKeywordSetPlanOperation`](../../src/EplanMcp.Bridge.Core/Operations/MasterData/TranslationKeywordSetPlanOperation.cs)；`translation.keyword.set.execute` → [`TranslationKeywordSetExecuteOperation`](../../src/EplanMcp.Bridge.Core/Operations/MasterData/TranslationKeywordSetExecuteOperation.cs) |
 | 共用管线 | [`TranslationWrite`](../../src/EplanMcp.Bridge.Core/Operations/MasterData/TranslationWrite.cs)，与 `eplan_translation_import` 共用；表的构造与分类在 [`TranslationTable`](../../src/EplanMcp.Bridge.Core/Operations/MasterData/TranslationTable.cs)（`FromKeywords`、`Classify`、`Remap`、`Compare`） |
-| EPLAN 调用 | `MDTranslationDatabase` 的 `ExportDatabaseTexts` 与 `ImportDatabaseTexts`，适配器 [`EplanTranslationDatabaseWriter`](../../src/EplanMcp.Bridge.Eplan/Adapters/EplanTranslationDatabaseWriter.cs)（未改动） |
+| EPLAN 调用 | `MDTranslationDatabase` 的 `ExportDatabaseTexts` 与 `ImportDatabaseTexts`，适配器 [`EplanTranslationDatabaseWriter`](../../src/EplanMcp.Bridge.Eplan/Adapters/MasterData/EplanTranslationDatabaseWriter.cs)（未改动） |
 | 计划与审批 | 变化清单逐条列出新增词条与会被填上的译文（`create` / `update`）；**不会变的不进清单**，因为契约里 `PlannedChange.Action` 只有 create/update，它们进 `Details.keptTranslations` 供审批的人看 |
 | 指纹与 PLAN_STALE | 指纹是请求表自身的 SHA-256（`Fingerprint.Of`，行排序后哈希），所以词条换顺序不算变化，改一个字就算；库路径变了也算 |
 | 事务、回滚 | 主数据不在项目事务里，没有一步撤销；回退手段是执行前的 `.zw7` 备份，`execution` 按 [ADR-0010](../adr/0010-write-outcomes.md) 返回，导入开始后出错一律 `unknown` |
