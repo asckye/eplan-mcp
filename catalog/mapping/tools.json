@@ -17835,7 +17835,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_connection_route.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.6.0)",
         "apiNotes": [
           "A1"
         ],
@@ -19833,7 +19833,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_enclosure_place.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.2)",
         "apiNotes": [],
         "tests": [],
         "operationTests": [
@@ -22095,7 +22095,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_layout_get.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.2)",
         "apiNotes": [],
         "tests": [],
         "operationTests": [
@@ -22269,7 +22269,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_layout_place.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.2)",
         "apiNotes": [],
         "tests": [],
         "operationTests": [
@@ -22370,7 +22370,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_layout_remove.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.2)",
         "apiNotes": [],
         "tests": [],
         "operationTests": [
@@ -23494,7 +23494,7 @@
       ],
       "evidence": {
         "spec": "docs/tools/eplan_modelview_create.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.2)",
         "apiNotes": [],
         "tests": [],
         "operationTests": [
@@ -27658,7 +27658,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_part_build.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.2)",
         "apiNotes": [
           "A30"
         ],
@@ -31454,7 +31454,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_plc_rack.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.7.0)",
         "apiNotes": [
           "A85",
           "A93"
@@ -31787,7 +31787,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_potential_update.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.5.2)",
         "apiNotes": [],
         "tests": [],
         "operationTests": [
@@ -35212,7 +35212,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_session_close.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.7.0)",
         "apiNotes": [
           "A23"
         ],
@@ -35342,7 +35342,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_session_restart.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.7.0)",
         "apiNotes": [],
         "tests": [
           {
@@ -35516,7 +35516,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_session_start.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.6.0)",
         "apiNotes": [],
         "tests": [],
         "operationTests": []
@@ -36884,7 +36884,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_translation_add.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.6.0)",
         "apiNotes": [
           "A47"
         ],
@@ -37180,7 +37180,7 @@
       "actions": [],
       "evidence": {
         "spec": "docs/tools/eplan_translation_keyword.md",
-        "specStatus": "Implemented (Unreleased)",
+        "specStatus": "Implemented (v0.6.0)",
         "apiNotes": [
           "A27",
           "A47"
