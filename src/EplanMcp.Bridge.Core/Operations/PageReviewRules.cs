@@ -9,6 +9,8 @@ namespace EplanMcp.Bridge.Core.Operations;
 public static class PageReviewRules
 {
     private static readonly string[] _coreFields = ["label", "colour"];
+    // One page review shares this search time, like the drawing tools (LayoutGuard.FreePositionSearchBudget).
+    private static readonly TimeSpan _freeSearchBudget = TimeSpan.FromSeconds(2);
     // Review check name -> issue code, and layout rule -> review check.
     private static readonly Dictionary<string, string> _guardChecks = new(StringComparer.Ordinal)
     { ["wire_through_symbol"] = "wire_through_symbol", ["net_overlap"] = "net_overlap", ["text_format"] = "text_format", ["cross_reference_clash"] = "cross_reference_clash" };
@@ -48,11 +50,29 @@ public static class PageReviewRules
     private static bool OnSegment(double[] p, double[] a, double[] b) => p.Length == 2
         && Math.Abs((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) < 1e-6
         && p[0] >= Math.Min(a[0], b[0]) - 1e-6 && p[0] <= Math.Max(a[0], b[0]) + 1e-6 && p[1] >= Math.Min(a[1], b[1]) - 1e-6 && p[1] <= Math.Max(a[1], b[1]) + 1e-6;
-    internal static List<LayoutGuard.Violation> GuardViolations(ConnectionCreatePlanner.Scene scene)
+    internal static List<LayoutGuard.Violation> GuardViolations(ConnectionCreatePlanner.Scene scene) =>
+        LayoutGuard.Check(GuardModel(scene, linesChanged: true), [.. scene.Page.Placements.Where(LayoutGuard.Positioned)], suggest: false, measured: true, searchViolations: false);
+
+    /// <summary>
+    /// The nearest grid position where the symbol and its texts clear every rule, as the drawing tools search it; null when
+    /// none is found or the shared search time is used up. Existing wires count as obstacles, not as changes.
+    /// </summary>
+    private static double[]? FreePosition(ConnectionCreatePlanner.Scene scene, ref LayoutGuard.Model? model, DrawingPlacement symbol, Func<bool> expired)
+    {
+        if (expired() || !LayoutGuard.Positioned(symbol))
+        { return null; }
+        model ??= GuardModel(scene, linesChanged: false);
+        DrawingPlacement[] group = [symbol, .. scene.Page.Placements.Where(t => t.Parent is { } owner && owner.Oid == symbol.Locator.Oid && owner.Type == symbol.Locator.Type && LayoutGuard.Positioned(t))];
+        // The position must also pass eplan_placement_update's own move rule, or the suggested fix is refused (live 2026-11-16).
+        return LayoutGuard.FindFree(model, symbol, group, measured: true, expired: expired,
+            accept: trial => LayoutGuard.ClearOfOthers([.. scene.Page.Placements.Where(p => !group.Contains(p)), .. trial], trial));
+    }
+
+    private static LayoutGuard.Model GuardModel(ConnectionCreatePlanner.Scene scene, bool linesChanged)
     {
         IEnumerable<LayoutGuard.Segment> segments = scene.Graphical.Select((s, i) => (s, i)).Where(x => x.s.Length >= 2).SelectMany(x => x.s.Zip(x.s.Skip(1), (a, b) => new LayoutGuard.Segment
-        { Points = [a, b], Locator = new() { Oid = -x.i - 1 }, Changed = true })).Where(s => !s.Points[0].SequenceEqual(s.Points[1]));
-        var model = new LayoutGuard.Model
+        { Points = [a, b], Locator = new() { Oid = -x.i - 1 }, Changed = linesChanged })).Where(s => !s.Points[0].SequenceEqual(s.Points[1]));
+        return new LayoutGuard.Model
         {
             AllowUnknownGeometry = true,
             Page = scene.Page,
@@ -62,7 +82,6 @@ public static class PageReviewRules
             PointRouteGaps = scene.PointRouteGaps,
             Lines = LayoutGuard.Networks(segments),
         };
-        return LayoutGuard.Check(model, [.. scene.Page.Placements.Where(LayoutGuard.Positioned)], suggest: false, measured: true, searchViolations: false);
     }
     public static JArray Check(ConnectionCreatePlanner.Scene scene, JObject actual, JObject request)
     {
@@ -118,6 +137,9 @@ public static class PageReviewRules
                 Add("unconnected_pin", required ? "error" : "warning", pin.Value.Location, [owner.Locator], "Symbol pin has no graphical connection.", "eplan_connection_create", new() { ["page"] = scene.Page.Page, ["pin_index"] = pin.Key.Split('/').Last() });
             }
         }
+        LayoutGuard.Model? guardModel = null;
+        var searchTimer = System.Diagnostics.Stopwatch.StartNew();
+        bool Expired() => searchTimer.Elapsed >= _freeSearchBudget;
         foreach (DrawingPlacement p in placements)
         {
             if (Enabled("off_grid") && scene.Page.GridSize > 0 && p.Location.Any(v => Math.Abs(v / scene.Page.GridSize - Math.Round(v / scene.Page.GridSize)) > 1e-8))
@@ -135,7 +157,13 @@ public static class PageReviewRules
                         // Live 2026-11-16: official pages touch by 0.25-1 mm (mated plugs, plug pins on a box edge, a breaker and its
                         // potential point); outlines that overlap by half a grid both ways sit on each other.
                         && Math.Min(a[2], b[2]) - Math.Max(a[0], b[0]) >= Deep(scene) && Math.Min(a[3], b[3]) - Math.Max(a[1], b[1]) >= Deep(scene);
-                    Add("overlap", symbols ? "error" : "warning", p.Location, [p.Locator, q.Locator], symbols ? "Symbol outlines overlap." : "Symbol or text bounds overlap.", "eplan_placement_update", new() { ["locator"] = BridgeJson.FromObject(q.Locator) });
+                    // Owner 2026-11-16: an error carries the nearest free grid position, so a repair needs no trial moves.
+                    double[]? free = symbols ? FreePosition(scene, ref guardModel, q, Expired) : null;
+                    var move = new JObject { ["locator"] = BridgeJson.FromObject(q.Locator) };
+                    if (free is not null)
+                    { move["x"] = free[0]; move["y"] = free[1]; }
+                    Add("overlap", symbols ? "error" : "warning", p.Location, [p.Locator, q.Locator], !symbols ? "Symbol or text bounds overlap."
+                        : free is null ? "Symbol outlines overlap; no free grid position was found nearby, move it by hand." : FormattableString.Invariant($"Symbol outlines overlap; the nearest free position for the second symbol is [{free[0]}, {free[1]}] mm."), "eplan_placement_update", move);
                 }
             }
         }

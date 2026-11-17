@@ -225,7 +225,24 @@ public static class LayoutGuard
         }
         return result;
     }
-    public static double[]? FindFree(Model model, DrawingPlacement item, IReadOnlyList<DrawingPlacement> changed, int radius = 12, bool measured = false, Func<bool>? expired = null)
+    /// <summary>
+    /// The move rule of eplan_placement_update: a moved outline may not touch an unrelated outline, edges included. page holds
+    /// every placement at its predicted position, moved the ones that move; an unknown outline counts as its insertion point.
+    /// </summary>
+    public static bool ClearOfOthers(IReadOnlyList<DrawingPlacement> page, IReadOnlyList<DrawingPlacement> moved)
+    {
+        static double[] Box(DrawingPlacement p) => p.Bounds?.All(n => n == 0) != false ? [p.Location[0], p.Location[1], p.Location[0], p.Location[1]] : p.Bounds!;
+        var owners = new Owners(page);
+        foreach (DrawingPlacement m in moved)
+        {
+            double[] a = Box(m);
+            if (page.Any(p => Positioned(p) && !Same(p, m) && !Related(p, m, owners) && Box(p) is var b && a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1]))
+            { return false; }
+        }
+        return true;
+    }
+    public static double[]? FindFree(Model model, DrawingPlacement item, IReadOnlyList<DrawingPlacement> changed, int radius = 12, bool measured = false, Func<bool>? expired = null,
+        Func<IReadOnlyList<DrawingPlacement>, bool>? accept = null)
     {
         radius = Math.Min(12, Math.Max(0, radius));
         double g = model.Page.GridSize;
@@ -255,7 +272,7 @@ public static class LayoutGuard
             double[] point = item.Location.Select((n, i) => Math.Round(n / g, MidpointRounding.AwayFromZero) * g + offset[i] * g).ToArray();
             double[] delta = point.Zip(item.Location, (a, b) => a - b).ToArray();
             DrawingPlacement[] trial = changed.Except(closure).Concat(closure.Select(p => Shift(p, delta))).ToArray();
-            if (!Check(search, trial, false, measured).Any(v => !v.Warning || v.Rule is "R7" or "R9"))
+            if (!Check(search, trial, false, measured).Any(v => !v.Warning || v.Rule is "R7" or "R9") && accept?.Invoke(trial) != false)
             { return point; }
         }
         return null;

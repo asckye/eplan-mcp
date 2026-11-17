@@ -114,12 +114,8 @@ public static class PlacementMovePlanner
         }
         DrawingPlacement Predicted(DrawingPlacement p) => offsets.TryGetValue(p, out double[]? d) ? LayoutGuard.Shift(p, d) : p;
         DrawingPlacement[] predicted = page.Placements.Select(Predicted).ToArray();
-        foreach (DrawingPlacement moved in offsets.Keys.Where(p => LayoutGuard.Positioned(p) && offsets[p].Any(n => n != 0)))
-        {
-            double[] a = Box(moved);
-            Require(guard == "warn" || !page.Placements.Any(p => LayoutGuard.Positioned(p) && p != moved && !LayoutGuard.Related(Predicted(p), Predicted(moved), predicted) && Box(p) is var b
-                && a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1]), "/moves", "A moved outline conflicts with another placement.");
-        }
+        Require(guard == "warn" || LayoutGuard.ClearOfOthers(predicted, [.. offsets.Keys.Where(p => LayoutGuard.Positioned(p) && offsets[p].Any(n => n != 0)).Select(Predicted)]),
+            "/moves", "A moved outline conflicts with another placement.");
         var pins = scene.Pins.ToDictionary(p => p.Key, p => new SymbolConnectionPoint { Direction = p.Value.Direction, Location = p.Value.Location.ToArray() }, StringComparer.Ordinal);
         var before = new Dictionary<string, double[][]>(StringComparer.Ordinal);
         var after = new Dictionary<string, double[][]>(StringComparer.Ordinal);

@@ -11,6 +11,7 @@ namespace EplanMcp.Large.Tests;
 public sealed class PageReviewLayoutFaultTests(LiveEplan eplan, WriteHost host, ITestOutputHelper output) : IClassFixture<WriteHost>
 {
     private static readonly string[] _checks = ["overlaps", "off_area", "text_format"];
+    private static readonly string[] _overlaps = ["overlaps"];
 
     [Fact]
     public async Task DeliberateLayoutFaults_AreReported()
@@ -58,6 +59,17 @@ public sealed class PageReviewLayoutFaultTests(LiveEplan eplan, WriteHost host, 
         Assert.Contains(issues, i => i.GetProperty("code").GetString() == "overlap" && i.GetProperty("severity").GetString() == "error");
         Assert.Contains(issues, i => i.GetProperty("code").GetString() == "off_area" && i.GetProperty("severity").GetString() == "error");
         Assert.Contains(issues, i => i.GetProperty("code").GetString() == "text_format" && i.GetProperty("severity").GetString() == "warning");
+
+        // The overlap fix carries the nearest free position; applying it as given clears the error.
+        JsonElement overlap = issues.First(i => i.GetProperty("code").GetString() == "overlap" && i.GetProperty("severity").GetString() == "error");
+        JsonElement fix = overlap.GetProperty("fix");
+        Assert.True(fix.GetProperty("args").GetProperty("moves")[0].TryGetProperty("x_mm", out _), fix.GetRawText());
+        Dictionary<string, object?> repair = JsonSerializer.Deserialize<Dictionary<string, object?>>(fix.GetProperty("args").GetRawText())!;
+        repair["dry_run"] = false;
+        await Call(fix.GetProperty("tool").GetString()!, repair);
+        JsonElement after = await Call("eplan_page_review", new() { ["project"] = session.Project, ["page"] = page, ["checks"] = _overlaps, ["limit"] = 50 });
+        Assert.DoesNotContain(after.GetProperty("issues").EnumerateArray(), i => i.GetProperty("code").GetString() == "overlap" && i.GetProperty("severity").GetString() == "error");
+        await session.UndoAsync();
         await session.UndoAsync();
         await session.UndoAsync();
         await session.UndoAsync();

@@ -112,6 +112,27 @@ public sealed class PageReviewRulesTests
         Assert.Equal("warning", (string?)Assert.Single(Review("overlaps"))["severity"]);
     }
 
+    /// <summary>Owner 2026-11-16: an overlap error carries the nearest free grid position for the second symbol.</summary>
+    [Fact]
+    public void SymbolOnSymbol_FixMovesToTheNearestFreeGridPosition()
+    {
+        DrawingPlacement k1 = Placement(1, 40, "Function", "-K1");
+        k1.Location = [40, 40];
+        k1.Bounds = [36, 36, 44, 44];
+        DrawingPlacement k2 = Placement(2, 44, "Function", "-K2");
+        k2.Location = [44, 40];
+        k2.Bounds = [40, 36, 48, 44];
+        JToken issue = Assert.Single(Review("overlaps"));
+        JToken move = issue["fix"]!["args"]!["moves"]![0]!;
+        Assert.Equal(2L, (long)move["locator"]!["oid"]!);
+        double x = (double)move["x_mm"]!, y = (double)move["y_mm"]!;
+        Assert.Equal((0, 0), (x % 4, y % 4));
+        double[] moved = [x - 4, y - 4, x + 4, y + 4];
+        // eplan_placement_update refuses outlines that even touch (live 2026-11-16), so the suggestion keeps clear of the edge too.
+        Assert.False(moved[0] <= 44 && moved[2] >= 36 && moved[1] <= 44 && moved[3] >= 36, $"[{x}, {y}] still touches -K1");
+        Assert.Contains("nearest free position", (string?)issue["message"], StringComparison.Ordinal);
+    }
+
     /// <summary>Live 2026-11-16: the official -TB1 device symbol encloses its connection points -TB1:13 and -TB1:+.</summary>
     [Fact]
     public void ADeviceSymbolOverItsOwnConnectionPoints_IsAWarning()
