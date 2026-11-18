@@ -45,6 +45,14 @@
 ## 已实现的读取（2026-11-14）
 
 - `eplan_translation_keyword(query, exact, limit, cursor)`：按源文本精确或包含匹配，返回 `database`、`languages`、`keywords[{source, translations{语言: 文本}}]`、`total`、`nextCursor`，分页游标绑定 query 与 exact。
+
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `limit` | integer（1–100） | 否 | 25 | 每页最多返回的翻译关键词数。 |
+| `cursor` | string | 否 | `""` | 传入上一页的 `nextCursor` 继续查询。 |
+
 - 适配器用 `Open(bReadOnly: true)` 打开**配置的**库，读完 `Close()`；SQL Server 上的库返回 `CAPABILITY_MISSING` 并指向 `eplan_translation_export`，因为连接串可能含登录信息（SEC-12），不出 Bridge。
 - 匹配与排序在 Bridge.Core，可脱离 EPLAN 测试；`exact` 的收窄也在那里，一次读同时服务两种模式。
 

@@ -7,4 +7,4 @@ namespace EplanMcp.Host.Tests.Tools;
 /// is read-only". <c>serve</c> builds the tools once, on one thread, so only parallel tests see this.
 /// </summary>
 [CollectionDefinition(DisableParallelization = true)]
-public sealed class ToolBuildIsolation;
+public sealed class ToolBuildIsolation : ICollectionFixture<RegisteredToolFixture>;

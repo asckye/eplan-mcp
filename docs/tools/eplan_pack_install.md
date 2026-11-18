@@ -17,6 +17,9 @@
 | library | string | 是 | — | `eplan_pack_library_list` 返回的精确库名 |
 | plugin | string | 是 | — | 精确插件 ID |
 | version | string | 是 | — | 精确 SemVer 版本 |
+| `library` | string | 是 | — | 使用 `eplan_pack_library_list` 返回的精确库名。 |
+| `plugin` | string | 是 | — | 指定所选库中的精确插件 ID。 |
+| `version` | string | 是 | — | 指定该插件在库中的精确 SemVer 版本。 |
 
 ## 3. 输出
 `installed` 含 id/version/digest/outcome；outcome 为 installed 或 already_installed。`warnings` 报告不可读来源；此时 installed 为 null。摘要说明安装或未更改。

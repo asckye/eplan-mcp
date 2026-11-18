@@ -8,6 +8,18 @@
 整份替换柜、项目值和包根，保持每项目同包单版本；不修改 EPLAN 工程。
 ## 2. 输入
 必填 `project:string`、`expected_revision:integer>=0`、`cabinets:array`、`project_values:object`、`pack_roots:array`；`dry_run:boolean=true`，省略或 true 只预览，显式 false 才执行。柜含 id、可选 title、layers、values、structure（all 或 prefixes）；设置含 default/constraint；包根含 id/version（精确版本）。英文示例见用法文件。
+
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `project` | string | 是 | — | 已打开的目标项目。 |
+| `expected_revision` | integer（0–2147483646） | 是 | — | 传入 `eplan_cabinet_list` 返回的绑定修订号。 |
+| `cabinets` | object[] | 是 | — | 替换项目绑定中的完整柜体集合。 |
+| `project_values` | object | 是 | — | 按配置键指定项目级默认值或约束。 |
+| `pack_roots` | object[] | 是 | — | 指定要锁定的根包 ID 和精确版本。 |
+| `dry_run` | boolean | 否 | true | 预览绑定变更，显式传 `false` 才保存。 |
+
 ## 3. 输出
 对象包含 binding、changes（before/after 绑定）、dryRun、fingerprint（完整目标绑定的 SHA-256）、execution 和 hint。预览或内容未变化时 execution 为 not_started，实际发布为 committed；预览 hint 指明以相同参数并传 `dry_run: false` 再次调用。JSON 文本与 structuredContent 相同；双份预算 20k，证据超限拒绝，不截断实际校验。
 ## 4. 错误

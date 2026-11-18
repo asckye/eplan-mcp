@@ -11,3 +11,11 @@
 | 5. 实现 | 目录核对 Edit.SelectObjects(string,StringCollection,bool)、ClearSelection、OpenPageWithName、SetFocusToGED、SelectionSet.CurrentlyEdited/OpenedPages。先核对全部摘要才改变 UI；不开页要求当前项目，show_page 开页后再次核对（A41/A54/A61）。主线程 LockingStep 和静默 UI 调用，不建项目事务/撤销步；修改后聚焦 GED，再独立读回（B11），绝不假定无编辑器时一定选中。A57 属性放置不按共享 oid 替换成父对象。action_try 仅在批准后同一执行入口中 replace+show_page，聚焦失败或非精确读回即不运行 action；工程回滚不恢复 UI。 |
 | 7. 测试 | Small/Medium：预检、离线拒绝、读回缺失、add/clear、活动窗口与聚焦失败、审批拒绝与审计；LargeWrite 新页：初始化前后业务/绘图指纹不变，之后全部设计文件不变及单撤销历史保留；S45 已有无编辑器、跨页和属性放置的原生读回证据，新增聚焦与初始化断言待实机复验。 |
 | 后续 | 批量验证 harness 可把 selection 交给 action_try；本次不修改 harness。 |
+
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `locators` | object[]（最多 200 项） | 否 | — | 替换或追加选区时传同页定位符，清空选区时省略。 |
+| `mode` | string（replace / add / clear） | 否 | replace | 选择替换、追加或清空当前选区。 |
+| `show_page` | boolean | 否 | false | 在编辑器中打开或聚焦所选对象所在页。 |

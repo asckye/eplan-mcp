@@ -12,7 +12,21 @@ placement / full / Implemented（Large 15/15 通过，2026-11-01）。delete 为
 ## 2. 输入参数
 | 参数 | 类型 / 必填 / 默认 | 说明 |
 |---|---|---|
-| project / page / operation / locators | string / string / enum / locator[]；必填 | 已打开项目、精确 Circuit 页、delete/copy/rotate/mirror/align/distribute；1–50 个同页无重复的 `eplan_object_find` 原样定位符；copy：offset_mm/target_mm 二选一，copies=1（1–20），多份必须 step_mm，第 k 份为初始偏移+k×step（k 从 0 起），新根最多 50；rotate：quarter_turns=±1..±3，正逆时针，pivot_mm 默认各原点；mirror：axis=horizontal/vertical，coordinate_mm 为 y/x；align：alignment=left/right/top/bottom/centre_x/centre_y，coordinate_mm 默认首对象外框；distribute：axis=horizontal 沿 x、vertical 沿 y；dry_run=true，response_format=concise/detailed |
+| project / page / operation / locators | string / string / enum / locator[]；必填 | 已打开项目、精确 Circuit 页、delete/copy/rotate/mirror/align/distribute（另有 set_variant、set_arrangement，见下文）；1–50 个同页无重复的 `eplan_object_find` 原样定位符；copy：offset_mm/target_mm 二选一，copies=1（1–20），多份必须 step_mm，第 k 份为初始偏移+k×step（k 从 0 起），新根最多 50；rotate：quarter_turns=±1..±3，正逆时针，pivot_mm 默认各原点；mirror：axis=horizontal/vertical，coordinate_mm 为 y/x；align：alignment=left/right/top/bottom/centre_x/centre_y，coordinate_mm 默认首对象外框；distribute：axis=horizontal 沿 x、vertical 沿 y；dry_run=true，response_format=concise/detailed |
+| `project` | string / 必填 / — | 已打开的目标项目。 |
+| `page` | string / 必填 / — | 编辑对象所在电路图页的完整页名。 |
+| `operation` | string（delete / copy / rotate / mirror / align / distribute / set_variant / set_arrangement） / 必填 / — | 对所有选中对象执行同一种编辑操作。 |
+| `locators` | object[]（1–50 项） / 必填 / — | 传入同页、无重复的 `eplan_object_find` 原样定位符。 |
+| `offset_mm` | number[]（2 项） / 可选 / — | 首份复制相对原对象的位移 `[dx,dy]`（mm），与 `target_mm` 二选一。 |
+| `target_mm` | number[]（2 项） / 可选 / — | 首个根对象复制后的绝对原点 `[x,y]`（mm），与 `offset_mm` 二选一。 |
+| `step_mm` | number[]（2 项） / 可选 / — | 多份复制须给出相邻两份之间的位移 `[dx,dy]`（mm）。 |
+| `pivot_mm` | number[]（2 项） / 可选 / 未声明 | 旋转中心 `[x,y]`（mm），省略时绕各对象自身原点旋转。 |
+| `copies` | integer（1–20） / 可选 / 1 | 每个选中对象的复制份数。 |
+| `quarter_turns` | integer（-3 / -2 / -1 / 1 / 2 / 3） / 可选 / — | 旋转的四分之一圈数，正数为逆时针。 |
+| `axis` | string（horizontal / vertical） / 可选 / — | 选择镜像轴或等间距分布方向。 |
+| `coordinate_mm` | number（-10000–10000） / 可选 / 未声明 | 镜像时指定轴线坐标，对齐时可指定基准坐标（mm）。 |
+| `alignment` | string（left / right / top / bottom / centre_x / centre_y） / 可选 / — | 选择对齐所用的外框边或中心线。 |
+| `response_format` | string（concise / detailed） / 可选 / concise | `detailed` 在预算允许时附上编辑前后的场景。 |
 单位毫米、左下原点、y 向上；点和坐标限定 ±10000。对齐至少两项，分布至少三项，按外框等间隙且固定首尾，不吸附栅格。拒绝无关字段、非有限数、越界、重叠、组、独立属性放置与未支持种类；文字继承图层角度时拒绝旋转/镜像。
 ## 3. 输出
 结构化 project/page/operation/execution/dryRun/fingerprint/predicted/removedConnections/newLocators/noOp/recovered/backup 和可选 warning/before/after；predicted 含存在性、位置、外框、角度与子项/引脚。复制定位符仅执行后返回。文本摘要说明是否提交；不分页、不截断影响，超预算要求缩小选择或改 detailed。

@@ -18,6 +18,13 @@
 | 项目测试与夹具 | Small 参数、类型、成员、过期、回滚；Medium 默认预览/执行；LargeWrite 新页删除线、文字和功能及一次撤销，功能删除扩展待实机验证 |
 
 输入为 `{project,page,items:[locator...],dry_run}`。`items` 为 1–100 个由 `eplan_page_get include_drawings` 返回的同页定位器；默认 `dry_run:true`。允许 `Line`、`Arc`、`PolyLine`、`Rectangle`、`Text`、`PathText`、`Image`、`MacroBox`，包括 `grouped:true` 的组内对象。连接、属性文字、块及 `parent` 非空的块成员拒绝，`INVALID_ARGUMENT` 说明原因。跨项目/页或摘要已变化返回 `PLAN_STALE`，要求重新读取定位器。缺少外框不妨碍删除。
+
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `dry_run` | boolean | 否 | true | 预览删除清单，显式传 `false` 才进入审批和删除流程。 |
+
 输出含 `project`、`page`、`items`（批准对象的 type/oid）、`fingerprint`、`execution`、`dryRun`、`recovered`、`backup`、`warning` 和 `hint`。纯图形删除提交后核对目标消失且其它已发现对象摘要不变；预览不审批、不备份、不删除。
 
 支持删除 `Function`、`Terminal`、`InterruptionPoint`、`BoxedDevice`、`PLC` 和 `SymbolReference`（SPECIAL 角连接、T 节点；2026-11-07 MX_NFPA 第 5 页实测读作 `SymbolReference`）；DCP 连接点读作 `Function`。2026-11-10 起也支持 `PotentialDefinition`（电位连接点和电位定义点，A129）和 `ConnectionDefinitionPoint`（连接定义点）：它们决定导线的电位、颜色和截面，删除后同样提示重新生成连接（Codex 绘图评测里模型画错电位点后删不掉）。预览逐项显示功能名称及类型。删除功能连带删除其属性文字，删除器件最后一个已放置功能时也会删除器件及其部件引用。含功能的删除仅允许自动连线变化或消失，其余对象仍按身份和摘要核对；失败回滚仍校验完整页指纹。提交后的 `hint` 提示调用 `eplan_connection_generate` 更新该页连接。该扩展的实机验证待完成。

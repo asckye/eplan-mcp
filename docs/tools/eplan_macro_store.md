@@ -19,6 +19,17 @@
 
 必填 `project`、`operation`（`window` 存窗口宏，`page` 存页宏）、`name`；`dry_run` 默认 true，只返回变更清单和指纹，false 才写文件。窗口宏必填 project、page、locators（1–500）、name。representation 默认 multi_line，支持 MultiLine、Overview；variant 为 0–15，默认 0；reference_mm 默认对象外框左下角。页宏必填 project、pages（1–50 个精确页名）、name。description 接受字符串或语言文本字典，与 page_create 一致。
 
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `locators` | object[]（1–500 项） | 否 | — | 窗口宏须提供同页对象的 `eplan_object_find` 定位符。 |
+| `pages` | string[]（1–50 项） | 否 | — | 页宏须提供互不重复的完整页名。 |
+| `representation` | string（multi_line / MultiLine / Overview） | 否 | multi_line | 指定窗口宏的表示类型。 |
+| `variant` | integer（0–15） | 否 | 0 | 指定窗口宏的变量编号。 |
+| `reference_mm` | number[]（2 项） | 否 | 所选对象外框左下角 | 窗口宏的参考原点 `[x,y]`（mm）。 |
+| `description` | string 或 object | 否 | — | 宏说明文本，可按语言代码分别填写。 |
+
 name 仅接受 ASCII 字母、数字、`_`、`-`、`.` 组成的有效 Windows 文件名，自动补对应扩展名。文件限定在 Host 的 `exports/macros/` 下，已存在拒绝。执行返回 path、size、sha256，窗口宏另返回 variants；空文件、无法打开、缺请求变量或业务快照变化均报 EPLAN_OPERATION_FAILED。导出文件交由现有宏目录管理流程后，可供 macro_insert 使用。
 
 影响限于新增工具与导出文件，不引入依赖。待决定事项为空，实机验收由负责人执行。

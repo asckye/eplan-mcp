@@ -7,6 +7,14 @@
 检查显式项目中所选柜的本机已提升正式规则；候选接受不授予规则资格。复用规则解释器与计划编译器，不新增 Bridge 操作。
 输入：必填 `project`、`scope`（沿 context 的 pages/structures/kinds/locators）；可选 `cabinet`（多柜必填）、`rules`（精确锁内规则 ID）、`fix_plan=false`、`limit=50`（1–200）、`cursor`、`max_tokens=5000`（1–20000）。
 
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `fix_plan` | boolean | 否 | false | 为未通过的规则生成修复计划，启用时省略游标。 |
+| `limit` | integer（1–200） | 否 | 50 | 每页最多返回的规则检查结果数。 |
+| `max_tokens` | integer（1–20000） | 否 | 5000 | 限制本次响应的 token 数。 |
+
 输出：project/cabinet、四值 rules（规则版本、对象 locator、evidence、basis）、coverage、sources、total/nextCursor/truncated/budget、planId。完整求值后分页，按双份 JSON 预算减少行数；单行放不下则要求增加预算。游标绑定快照、绑定、来源与审核摘要，失效须重新查询。
 `fix_plan=true` 仅在稳定 stdio 会话中编译计划，不审批或执行。unknown、推断依据或不完整 fix 输入拒绝；同页修复保守视为冲突。计划固化失败前态和必须复查的规则，仍走原计划安全管线。
 

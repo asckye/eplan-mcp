@@ -13,6 +13,10 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
+| `project` | string | 是 | — | 已打开的目标项目。 |
+| `page` | string | 是 | — | 移动对象或属性文字所在页的完整页名。 |
+| `snap_to_grid` | boolean | 否 | true | 将换算后的绝对目标坐标吸附到页面栅格。 |
+| `response_format` | string（concise / detailed） | 否 | concise | 选择返回预算，`detailed` 可容纳较大的变更清单。 |
 
 显式 `project,page,moves[1..50]`；每项给 `eplan_page_get include_drawings` 的完整 locator（含 digest），以及绝对 `x_mm,y_mm` 或 `delta_mm:[dx,dy]`，两者互斥。请求≤256 KiB，严格成员/重复键/有限数；坐标 0–10,000 mm，增量允许负值。默认 `dry_run=true,snap_to_grid=true,response_format=concise`。
 增量先换算绝对目标，再按页栅格吸附（中点远离零）；结果固化绝对位置，重复使用增量不具有幂等性，后续执行必须消费固化计划。无组 Function、SymbolReference、PotentialDefinition、InterruptionPoint、Cable、ConnectionDefinitionPoint、Text、Line、Rectangle 及父符号的全部属性文字构成闭包。属性文字不可独立指定；重复 locator、父子同时指定、组/宏组/未知类型拒绝。A57 属性文字共享父对象号，以父归属和各自 digest 区分，不能按 oid 去重。Cable 定义线与 ConnectionDefinitionPoint 不参与自动连接，移动时允许穿过导线；其他对象的导线冲突检查、引脚与页界检查保留。电缆成员归属由 EPLAN 在生成连接后处理，再由 `eplan_page_review` 检查（A64/A75）。

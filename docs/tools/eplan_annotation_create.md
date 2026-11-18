@@ -25,6 +25,16 @@
 
 `project,page` 必填；Circuit、Overview 或 Graphics 页；`items` 1–50 项，严格成员和封闭 kind。坐标单位 mm、页左下原点、y 向上，有限且 0–10000。默认 `snap_to_grid:true`、`layout_guard:refuse`、`response_format:concise`，detailed 可容纳较大完整影响清单。可选 `show_page`；第 1 项的四种对象支持与 placement 一致的 `layer`、`pen`。复现已有图纸用 `layout_guard:warn`。
 
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `project` | string | 是 | — | 已打开的目标项目。 |
+| `page` | string | 是 | — | 放置注释的目标页全名。 |
+| `layout_guard` | string（refuse / warn） | 否 | refuse | 选择写前布局违规的处理方式，已知越界仍拒绝。 |
+| `snap_to_grid` | boolean | 否 | true | 将注释坐标吸附到页面栅格。 |
+| `response_format` | string（concise / detailed） | 否 | concise | 选择返回预算，`detailed` 可容纳较大的变更清单。 |
+
 | kind | 必填字段 | 可选字段 / 说明 |
 |---|---|---|
 | hyperlink | position、link、contents | contents 为语言到文字，沿用文字语言校验 |

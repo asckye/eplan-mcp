@@ -1,12 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
-using ModelContextProtocol.Server;
 
 namespace EplanMcp.Host.Tests.Tools;
 
@@ -16,22 +11,9 @@ namespace EplanMcp.Host.Tests.Tools;
 /// </summary>
 [Trait("Size", "Small")]
 [Collection(typeof(ToolBuildIsolation))]
-public sealed class ToolContractTests : IDisposable
+public sealed class ToolContractTests(RegisteredToolFixture fixture)
 {
-    private readonly ServiceProvider _services;
-    private readonly McpServerOptions _options;
-
-    public ToolContractTests()
-    {
-        var services = new ServiceCollection();
-        services.AddLogging(logging => logging.ClearProviders());
-        services.AddSingleton(HostConfig.Defaults(HostDataLocations.FromEnvironment()) with { ActionRun = ActionRunSwitch.On, ApiTry = ActionRunSwitch.On, ActionTry = ActionRunSwitch.On });
-        services.AddEplanMcp();
-        _services = services.BuildServiceProvider();
-        _options = _services.GetRequiredService<IOptions<McpServerOptions>>().Value;
-    }
-
-    public void Dispose() => _services.Dispose();
+    private Tool[] Tools => fixture.Tools;
 
     [Fact]
     public void ConnectionOptions_AreOptionalAndRestrictedToTheirItemKinds()
@@ -66,8 +48,6 @@ public sealed class ToolContractTests : IDisposable
         Assert.False(item.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal((false, false, true, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
     }
-
-    private Tool[] Tools => [.. _options.ToolCollection!.Select(t => t.ProtocolTool)];
 
     [Fact]
     public void MacroInsert_OffersExclusiveSourcesAndDefaultsToPreview()
@@ -731,7 +711,7 @@ public sealed class ToolContractTests : IDisposable
     [Fact]
     public void ServerInstructions_StayWithinTheBudget()
     {
-        Assert.InRange(_options.ServerInstructions!.Length, 1, 1200);
+        Assert.InRange(fixture.Options.ServerInstructions!.Length, 1, 1200);
     }
 
     private static IEnumerable<string?> Enum(JsonElement property) => property.GetProperty("enum").EnumerateArray().Select(v => v.GetString());

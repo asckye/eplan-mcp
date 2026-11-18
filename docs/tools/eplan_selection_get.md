@@ -10,3 +10,11 @@
 | 4. 错误 | INVALID_ARGUMENT：格式、分页或过期游标；CAPABILITY_MISSING：离线宿主；EPLAN_BUSY：关闭模态窗口后重试。Read 无 execution 状态。 |
 | 5. 实现 | 目录工具核对 HEServices.SelectionSet 的 GetCurrentProject(false)、CurrentlyEdited、Selection、OpenedPages、LockSelectionByDefault/LockProjectByDefault。只取直接 Selection，关闭默认锁；主线程 LockingStep 内映射，不释放借用对象（A9/A39），不建事务。A57 属性放置身份共享，不生成其定位符；属性号和相对位置加入选择指纹。新行为由 SelectionSpikeTests 打印，尚未实测。 |
 | 7. 测试 | Small/Medium：校验、游标绑定、预算、契约和假 Bridge；LargeWrite 新页：摘要往返、设计文件不变和单撤销历史保留；S45 spike 打印无编辑器、跨页及属性放置行为，仅编写未运行。 |
+
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `limit` | integer（1–200） | 否 | 50 | 每页最多返回的选中对象数。 |
+| `cursor` | string 或 null | 否 | null | 传入上一页的 `nextCursor` 继续读取选区。 |
+| `response_format` | string（concise / detailed） | 否 | concise | `detailed` 在定位符外附上对象名称。 |

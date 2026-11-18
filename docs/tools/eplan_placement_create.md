@@ -16,6 +16,10 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |---|---|---|---|---|
 | `show_page` | boolean | 否 | false | 绘制前打开或聚焦目标页，便于观看；仅影响界面，不修改数据，dry-run 也开页 |
+| `project` | string | 是 | — | 已打开的目标项目。 |
+| `page` | string | 是 | — | 接收新文字或图形的目标页全名。 |
+| `snap_to_grid` | boolean | 否 | true | 将放置坐标吸附到页面栅格。 |
+| `response_format` | string（concise / detailed） | 否 | concise | 选择返回预算，`concise` 为 5k token，`detailed` 为 20k token。 |
 
 `project,page` 显式必填；单一 `Circuit`、`Overview` 或 `Graphics` 页；`items` 1–50 项，严格成员且拒绝重复键。`dry_run=true`、`snap_to_grid=true`、`response_format=concise`（另可 detailed）；请求≤256 KiB。
 每项 `kind=text/line/rectangle/polyline/arc/ellipse/path_text/image`；text 与 path_text 必填 `position:[x_mm,y_mm]`、`contents:{语言代码:文字}`；text 另必填 `height_mm`（0.5–100），path_text 可省略高度以传入 EPLAN 默认值标记 `-16002`，显式高度仍限 0.5–100；每种语言≤500 字符，总数不限，每种语言非空且唯一，代码如 `en_US` 或语言无关 `??_??`。A54：缺项目显示语言的文字不显示，默认必须提供语言无关内容或至少项目显示语言，`layout_guard:warn` 时缺显示语言只告警；显示语言来自可信读取，不从工具参数自报。 `??_??` 不得与具体语言混用（A54 / T4b 实测）。

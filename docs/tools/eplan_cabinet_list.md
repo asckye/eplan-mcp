@@ -8,6 +8,16 @@
 分页检查柜映射、配置链、生效值和来源；未绑定时返回虚拟 default，不创建绑定。
 ## 2. 输入
 `project:string` 必填；`limit:integer=50`（1–200）、`cursor:string?`、`max_tokens:integer=5000`（1–20000）。英文示例：`{"project":"Line1"}`。
+
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `project` | string | 是 | — | 要读取柜体绑定的已打开项目。 |
+| `limit` | integer（1–200） | 否 | 50 | 每页最多返回的柜体数。 |
+| `cursor` | string 或 null | 否 | null | 传入上一页的 `nextCursor` 继续查询。 |
+| `max_tokens` | integer（1–20000） | 否 | 5000 | 限制本次响应的 token 数。 |
+
 ## 3. 输出
 对象包含 project、revision、locks、cabinets、total、nextCursor、truncated、hint、budget；每柜含 id/title/structure/layers/config，config 含 key/value/unit/constraints/trace。JSON 文本与 structuredContent 相同；摘要说明返回数量。游标绑定完整绑定摘要和已核验资源摘要；单柜超预算时拒绝并提示增大预算。
 ## 4. 错误

@@ -33,6 +33,24 @@
 
 `scale/stretch/set_length` 支持 `layout_guard:refuse/warn`，默认 refuse，语义与 placement_update 一致：已知页面越界仍拒绝，缺失证据警告。stretch 例：矩形 (10,10)–(20,20) 选中下边两角、偏移 [5,3]，结果 (10,13)–(20,20)。完整例子与各参数见 usage。
 
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `scale_x` | 未限定 | 否 | 未声明 | `scale` 的水平方向缩放倍数，取 0.01–100。 |
+| `scale_y` | 未限定 | 否 | 未声明 | `scale` 的垂直方向缩放倍数，取 0.01–100。 |
+| `origin_mm` | 未限定 | 否 | 未声明 | `scale` 必须给出缩放中心 `[x,y]`（mm）。 |
+| `to` | 未限定 | 否 | 未声明 | `order` 用 `front` 或 `back` 将图形置顶或置底。 |
+| `drawing_order` | 未限定 | 否 | 未声明 | `order` 用 0–127 的整数指定绘制顺序，与 `to` 二选一。 |
+| `dock_direction` | 未限定 | 否 | 未声明 | 指定第一个自由文字停靠到第二个文字的方向。 |
+| `radius_mm` | 未限定 | 否 | 未声明 | 指定矩形圆角或两线倒圆的半径（mm），矩形传 0 可取消圆角。 |
+| `anchor` | 未限定 | 否 | 未声明 | `set_length` 固定起点或终点，省略时固定起点。 |
+| `region_mm` | 未限定 | 否 | 未声明 | `stretch` 用 `[x1,y1,x2,y2]` 框选要移动的端点或角点（mm）。 |
+| `offset_mm` | 未限定 | 否 | 未声明 | `stretch` 用 `[dx,dy]` 指定选区内端点的位移（mm）。 |
+| `distance_mm` | 未限定 | 否 | 未声明 | `chamfer` 的倒角距离，单位为毫米且须大于零。 |
+| `layout_guard` | string（refuse / warn） | 否 | refuse | 控制缩放、拉伸或改线长时的布局违规处理，已知越界仍拒绝。 |
+| `response_format` | string（concise / detailed） | 否 | concise | `detailed` 在预算允许时附上编辑前后的证据。 |
+
 ## 输出与失败
 
 结果包含 project/page/operation/fingerprint/predicted/newLocators/noOp、execution/dryRun/recovered，可有 warning、hint、before/after。定位符改变后重新 find；新对象仅执行后可取得定位符。concise/detailed 均保留完整影响清单，超预算要求缩小选择。

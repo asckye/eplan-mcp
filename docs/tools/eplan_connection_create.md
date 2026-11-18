@@ -27,13 +27,19 @@ ADR-0049（0.5.0）：省略 `dry_run` 或传 `true` 只预览，不请求审批
 | generate | boolean，true | false 只放 corner、t_node、potential_point、interruption_point、potential_definition、autoconnect_break；跳过逻辑端点、路径/自动连线冲突与配对页检查。读回 actualPlacements，一步撤销；全部放完后自行调用 eplan_connection_generate 一次。其他 kind 返回 INVALID_ARGUMENT；默认行为不变。 |
 | dry_run / snap_to_grid | boolean，true / true | 省略 dry_run 只预览；执行传 `dry_run: false`；关闭吸附仍拒绝非栅格接线 |
 | response_format | concise / detailed，concise | Host 以 ResultShaper 清洗并限制 5k/20k token；展示裁剪不影响完整 guard |
+| `project` | string / 必填 / — | 已打开项目的名称或路径。 |
+| `items` | object[]（1–50 项） / 必填 / — | 本页要放置的连接项，按 `kind` 选择九个分支之一。 |
+| `snap_to_grid` | boolean / 可选 / true | 将连接坐标吸附到页面栅格。 |
+| `response_format` | string（concise / detailed） / 可选 / concise | 选择返回预算，`concise` 为 5k token，`detailed` 为 20k token。 |
+| `show_page` | boolean / 可选 / false | 绘制前在编辑器中打开或聚焦目标页。 |
+| `generate` | boolean / 可选 / true | 控制放置后是否生成连接，`false` 仅放置受支持的符号。 |
 
 独立 `{kind:"definition_point",position:[x,y],symbol?,symbol_variant?,color?,cross_section?,designation?}` 使用相同属性规则；线的一侧还没有设备、因而没有生成连接时（比如对端在别的页的中断点），定义点照样放在线上，`endpoints` 为 null，并写入 `warning`（A94）；color、cross_section、designation、part 可全部省略；position 必填，须位于本页既有图形自动连线的路径上，容差与 wire 定义点相同，否则 INVALID_ARGUMENT 指明最近线段；CDPNG 同样要求在线上。可单独调用或与 wire、node 同批，同次新建线仍用 wire.definition_point；生成前后既有连接数量及端点须不变。
 
 所有对象严格拒绝未知、重复、缺失和错误类型成员；数值递归检查有限性，错误附 JSON Pointer；请求上限 256 KiB。[预览快照](../../tests/Contracts.Snapshots/connection-create-contract.verified.json)与已注册 server-contract 同步维护，用法已嵌入工具目录。
 
 `cable_definition` 支持规划与执行：必填 `points`（定义线两点）、`designation`、`type_text`、`core_count`（1..50）、`cross_section_mm2`（正有限数）、`cores`；可选 `voltage`（电压文字，最多 64 字符，写 20044）、`core_labels_only`（布尔；true 时只给芯线写标记和颜色，不写芯线截面 31002，读回也不比对截面）。电缆创建后由 EPLAN 按完整标识计算显示标识（`-W3`），定义线的默认文字随之显示。每芯为 `{connection,label,colour}`；connection 严格二选一 `{locator:{project,page,type,oid,digest}}`（既有连接）或 `{item_index:0}`（本次 wire 的零基下标，允许前向引用）。每电缆至少一芯、不超过声明芯数，每调用合计最多 50 芯；按 designation+label 判重复，不同电缆可复用芯号，同一连接只能分配一次。数字 label 必须为声明范围内无前导零的正整数，文字标签以英文字母开头、最多 32 字符，仅含字母、数字、`_ . -`；colour 为 `BK BN RD OG YE GN BU VT GY WH PK TQ GNYE` 之一。型号文本原样作为输入，不查询或推断部件/选型，不批量重编号。
-七个 item 分支在已注册输入 schema 中封闭声明，保留中断点的显式对端页校验；沿属性/设备工具把说明文字与结构分别限额，描述及参数说明仍≤1,000 字符，结构 schema≤5,300 字符（含可选开页参数），共享坐标和 locator 定义避免重复。
+九个 item 分支在已注册输入 schema 中封闭声明，保留中断点的显式对端页校验；沿属性/设备工具把说明文字与结构分别限额，描述及参数说明仍≤1,000 字符，结构 schema≤5,300 字符（含可选开页参数），共享坐标和 locator 定义避免重复。
 预览另含 `cableDefinitions`、逐连接的 `coreImpact`（原 locator/属性、designation、label、colour、截面）和 `undoSteps`；既有导线为 6 步，同次新增路径生成另加 1 步、节点放置再加 1 步。审批列出相同步数。执行另含 `actualCores`，逐芯返回实际 designation/type、连接 oid/pins、label/colour；按 A55 允许未使用的功能结构（例如 `=GAA`）被丢弃，并在比较前去除空结构段（`+-W9`、`=+-W9` 等价于 `-W9`），非空位置段和设备标识仍须一致。
 定义线须正交、非零、在页界/栅格内，且恰好与显式芯线各相交一次；相交的其他连接、重复跨越、已归属其他电缆、分支/电位关系或跨页范围无法证明时拒绝。现有连接读取首批限可唯一证明的同页直连；同次 wire 可有转角，但生成后必须恰有两个显式端点。名称筛查覆盖全项目功能名；既有完整连接 locator、端点、几何、芯号/颜色/截面/归属与名称清单进入指纹，改变即重新规划或 stale；不新增计划落盘格式。
 

@@ -8,6 +8,17 @@
 
 `object` / `full` / Read；title 为 Find EPLAN objects，四注解为 true / false / true / false。支持范围见下表。输入闭合：object_type 为下表精确类型或下文的功能筛选名称；project 可省略，解析当前或唯一已打开项目；page 为精确页全名，name_contains 为名称子串（OrdinalIgnoreCase）；limit 默认 50、范围 1–200，cursor 不透明。输出 project 回显解析路径，status 为 supported / unsupported，reason 说明不支持原因；items 含 DrawingLocator（project/page/type/oid/digest）及 name；另有 nextCursor、truncated。按 type/oid 排序去重，只匹配精确运行时类型（功能筛选名称除外）；页自身 locator.page 为页名，未放置对象为 ""。游标十分钟有效，绑定 MCP 连接、Bridge 实例、项目、筛选条件及已返回内容指纹；续页重读前缀，变化报 INVALID_ARGUMENT，不能视为原子快照。双份 JSON 加摘要约 5k token，整行切页，单行超限明确报错。Bridge 每块最多 200 项，枚举上限 50000 项，超过时报 CAPABILITY_MISSING，需缩小页范围；主线程 LockingStep 内检查取消与 20 秒时限，不导航、不生成数据、不写项目、不释放借用对象。错误沿用共享 Read 信封：INVALID_ARGUMENT 修正参数或去掉游标；PROJECT_NOT_OPEN 用项目列表确认；PLAN_STALE 重新 find；无 execution。Small 使用假属性资源测试分页、拒读与释放；Medium 通过真实 MCP 和 Fake Bridge 验证发现、预算、游标与失败路径；Large 验证范围及零对象处理见下文。评测：find 后读英文属性并说明 Arc 的 supported（evals/tasks/object-properties.yaml）。
 
+### 参数（补，2026-11-18）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|---|---|---|---|---|
+| `object_type` | string（枚举） | 是 | — | 选择注册枚举中的精确 EPLAN 类型或功能筛选名称。 |
+| `project` | string | 否 | 当前项目 | 按名称或路径指定要查找的项目。 |
+| `limit` | integer（1–200） | 否 | 50 | 每页最多返回的对象数。 |
+| `cursor` | string | 否 | — | 传入上一页的 `nextCursor` 继续查找。 |
+| `page` | string | 否 | — | 按完整页名限定查找范围。 |
+| `name_contains` | string | 否 | — | 按名称子串筛选对象，忽略大小写。 |
+
 ## 目录生成的支持范围
 
 输入共 132 个名称：121 个 supported（119 个原生类型及 BlackBox、PLCTerminal 两个兼容筛选名称），11 个 unsupported。全部状态、枚举依据和属性字典由 `ObjectKindGenerator` 从目录生成，见 [完整类型表](eplan_object_kinds.g.md)，运行 `dotnet run --project eng/coverage -c Release -- generate` 更新，禁止手工维护。

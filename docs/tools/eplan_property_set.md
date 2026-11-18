@@ -18,6 +18,10 @@
 | changes | array，1–100 | 是 | — | 每项为 `{target,property,value,language?}`；最多 50 个对象 |
 | dry_run | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 | response_format | concise / detailed | 否 | concise | detailed 增加副作用守卫说明；完整变更清单始终保留 |
+| `project` | string | 是 | — | 已打开项目的名称或路径。 |
+| `dry_run` | boolean | 否 | true | 预览属性变更，显式传 `false` 才执行。 |
+| `response_format` | string（concise / detailed） | 否 | concise | `detailed` 附上副作用检查的说明。 |
+| `changes` | object[]（1–100 项） | 是 | — | 指定属性赋值清单，一次最多涉及 50 个目标对象。 |
 
 所有对象拒绝未知字段。target 与 property_get 共用互斥地址联合和 selector：设备全名（可限定页）或当前会话 function locator；其他对象不在白名单；非主功能必须使用完整 locator，不能按同名点替代。selector 恰选正整数 property_id 或正式 property_name，可带 index，但 `B1` 非索引属性拒绝 index。
 value 为 JSON 标量；`B1` 只接受最多 500 字符的字符串（仍受运行时更严格上限限制）。null/reset/delete 拒绝，空串可清空一个值。
