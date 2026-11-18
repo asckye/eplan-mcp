@@ -31,6 +31,13 @@ internal static class PlanStepCatalog
         schema["properties"]!.AsObject().Remove("dry_run");
         schema["properties"]!.AsObject().Remove("show_page");
         schema["required"]!.AsArray().Remove(schema["required"]!.AsArray().Single(n => n!.GetValue<string>() == "project"));
+        // The workflow tool shares these argument shapes and has its own prose budget.
+        if (e.Op is "page.renumber" or "device.renumber")
+        {
+            JsonNode fields = schema["properties"]!;
+            fields["step"]!.AsObject().Remove("description");
+            fields[e.Op == "page.renumber" ? "subpages" : "start"]!.AsObject().Remove("description");
+        }
         if (e.Op == "device.update") // Workflow predictions cover renaming only.
         {
             schema["properties"]!.AsObject().Remove("part");
@@ -41,7 +48,10 @@ internal static class PlanStepCatalog
         }
         if (e.Op is "page.create" or "page.update") // Workflow predictions retain single-language descriptions.
         {
-            schema["properties"]!["pages"]!["items"]!["properties"]!.AsObject().Remove("grid_size_mm");
+            JsonObject pageFields = schema["properties"]!["pages"]!["items"]!["properties"]!.AsObject();
+            pageFields.Remove("grid_size_mm");
+            pageFields["name"]!.AsObject().Remove("description");
+            pageFields["page_type"]?.AsObject().Remove("description");
             schema["properties"]!["pages"]!["items"]!["properties"]!["description"] = JsonNode.Parse("""{"description":"Max 500 chars","type":["string","null"]}""");
         }
         if (e.Op == "page.update") // Workflow predictions currently cover descriptions only.

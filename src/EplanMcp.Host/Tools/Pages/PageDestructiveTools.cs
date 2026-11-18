@@ -63,9 +63,9 @@ internal sealed class PageDestructiveTools
         [Description("From eplan_project_list")] string project,
         [Description("1-50 exact full names")] string[] pages,
         [Description("First page number")] int start,
-        int step = 1,
+        [Description("Numbering increment; default 1.")] int step = 1,
         [Description("Keep letters in numbers")] bool keep_text = false,
-        [AllowedValues("retain", "consecutive", "to_main")] string subpages = "retain",
+        [AllowedValues("retain", "consecutive", "to_main")][Description("How to number subpages; default retains them.")] string subpages = "retain",
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {

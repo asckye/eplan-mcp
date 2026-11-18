@@ -39,8 +39,8 @@ internal sealed class TerminalDestructiveTools
         [Description("E.g. Numerisch")] string scheme,
         [Description("1-50 names (eplan_terminal_strip_list); default: all")] string[]? strips = null,
         [Description("false: renumber all")] bool only_unnumbered = true,
-        int start = 1,
-        int step = 1,
+        [Description("First number; default 1.")] int start = 1,
+        [Description("Numbering increment; default 1.")] int step = 1,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {

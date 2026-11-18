@@ -54,8 +54,8 @@ internal sealed class DeviceDestructiveTools
         [Description("1-50 exact full names; default: whole project")] string[]? pages = null,
         [Description("false: renumber every tag")] bool only_unnumbered = true,
         [Description("Default: EPLAN's")] string? scheme = null,
-        int start = 1,
-        int step = 1,
+        [Description("First number; default 1.")] int start = 1,
+        [Description("Numbering increment; default 1.")] int step = 1,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {

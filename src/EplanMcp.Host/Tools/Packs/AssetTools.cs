@@ -51,12 +51,12 @@ internal sealed class AssetTools
         IBridgeClient bridge,
         ToolProfileChoice profile,
         [Description("Words")] string text = "",
-        [AllowedValues(AnyKind, "macro", "project", "project_backup", "basic_project", "form", "frame", "material_mapping", "document", "rule", "preview", "other", "candidate", "module", "gap")] string kind = AnyKind,
+        [AllowedValues(AnyKind, "macro", "project", "project_backup", "basic_project", "form", "frame", "material_mapping", "document", "rule", "preview", "other", "candidate", "module", "gap")][Description("Filter by asset kind; omit to search all kinds.")] string kind = AnyKind,
         [Description("Pack id")] string pack = "",
         [Description("dev or SemVer, with pack")] string version = "",
         [Description("Tag, subtype")] string tag = "",
         [Description("e.g. 2026.0.3")] string eplan_version = "",
-        [Range(1, PackTools.MaxLimit)] int limit = PackTools.DefaultLimit,
+        [Range(1, PackTools.MaxLimit)][Description("1-200")] int limit = PackTools.DefaultLimit,
         [Description("nextCursor")] string cursor = "",
         CancellationToken cancellationToken = default)
     {
@@ -258,11 +258,11 @@ internal sealed class AssetTools
     public static async Task<CallToolResult> AssetUpdateAsync(
         PackLibrary packs,
         [Description("Development pack id")] string pack,
-        [AllowedValues("candidate", "module", "material_mapping", "gap")] string kind,
+        [AllowedValues("candidate", "module", "material_mapping", "gap")][Description("Document kind; determines the required spec fields.")] string kind,
         [Description("e.g. motor-overload")] string name,
         [Description("The kind's content")] JsonElement spec,
-        string title = "",
-        string[]? tags = null,
+        [Description("Display title, up to 200 characters.")] string title = "",
+        [Description("Labels for filtering with eplan_asset_search.")] string[]? tags = null,
         [Description("asset or fact; page, note")] JsonElement? origin = null,
         CancellationToken cancellationToken = default)
     {
@@ -392,14 +392,16 @@ internal sealed class AssetTools
         "Acceptance grants no official standing; denial: APPROVAL_DENIED. Local data only. " +
         "Example: {\"pack\":\"acme.panels\",\"asset\":\"candidate/motor\",\"expected_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"decision\":\"accept\",\"source\":{\"asset\":\"document/guide.md\",\"location\":\"4.2\",\"hash\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}}.")]
     public static async Task<CallToolResult> AssetReviewAsync(
-        PackLibrary packs, KnowledgeReviewService reviews,
+        PackLibrary packs,
+        KnowledgeReviewService reviews,
         [Description("Development pack id")] string pack,
         [Description("Local candidate/name or gap/name")] string asset,
         [Description("Asset's exact SHA-256")] string expected_digest,
-        [AllowedValues("accept", "reject", "close_gap", "promote")] string decision,
+        [AllowedValues("accept", "reject", "close_gap", "promote")][Description("Review outcome for the candidate or gap.")] string decision,
         [Description("asset, location, hash")] JsonElement source,
         [Description("Promotion only: full v2 Rule envelope")] JsonElement? rule = null,
-        IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+        IProgress<ProgressNotificationValue>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
         PackTools.CheckId(pack, violations);

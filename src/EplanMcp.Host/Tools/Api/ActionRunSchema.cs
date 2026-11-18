@@ -28,7 +28,11 @@ internal static class ActionRunSchema
             tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);
             using Stream output = typeof(ActionRunSchema).Assembly.GetManifestResourceStream("EplanMcp.Host.Tools.ActionRun.output.json")!;
             tool.ProtocolTool.OutputSchema = JsonSerializer.Deserialize<JsonElement>(output);
-            usageSchema["properties"]!["topic"] = new JsonObject { ["type"] = "string" };
+            usageSchema["properties"]!["topic"] = new JsonObject
+            {
+                ["type"] = "string",
+                ["description"] = usageSchema["properties"]!["topic"]!["description"]!.DeepClone(),
+            };
             usageSchema["allOf"] = JsonNode.Parse("""[{"if":{"properties":{"tool":{"const":"eplan_action_run"}}},"else":{"properties":{"topic":{"enum":["examples","workflow","fields","errors"]}}}}]""");
         }
         usage.InputSchema = JsonSerializer.SerializeToElement(usageSchema);

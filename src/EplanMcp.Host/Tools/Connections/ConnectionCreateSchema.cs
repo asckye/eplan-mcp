@@ -60,6 +60,7 @@ internal static class ConnectionCreateSchema
         foreach (JsonNode? branch in items["items"]!["oneOf"]!.AsArray())
         { branch!.AsObject().Remove("type"); }
         items["$defs"] = new JsonObject { ["r"] = new JsonObject { ["enum"] = new JsonArray("Up", "Down", "Left", "Right") }, ["d"] = definitionFields, ["t"] = new JsonObject { ["type"] = "string", ["minLength"] = 1, ["maxLength"] = 200 }, ["p"] = Array(new() { ["type"] = "number", ["minimum"] = 0, ["maximum"] = 10000 }, 2, 2), ["i"] = Object(new() { ["locator"] = Locator(), ["pin_index"] = Integer(0, int.MaxValue) }), ["l"] = Object(new() { ["project"] = Text(32768), ["page"] = Text(1024), ["type"] = Integer(1, int.MaxValue), ["oid"] = new JsonObject { ["type"] = "integer", ["minimum"] = 1 }, ["digest"] = new JsonObject { ["type"] = "string", ["pattern"] = "^[0-9a-f]{64}$" } }) };
+        items["description"] = "1-50 connection placements on this page.";
         return items;
     }
 }

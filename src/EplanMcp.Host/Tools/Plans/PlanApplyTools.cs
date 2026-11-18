@@ -24,9 +24,14 @@ internal sealed class PlanApplyTools
     [McpServerTool(Name = ApplyTool, Title = "Apply plan", ReadOnly = false, Destructive = true,
         Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     [Description("Applies a compiled plan once, using its highest step tier for policy, one approval when required, and an initial backup. Denial returns POLICY_DENIED or APPROVAL_DENIED. dry_run defaults to false here: omitting it executes; true rechecks and previews without consumption. Waiting expiry or disconnect leaves the task running. Inspect results with eplan_plan_get or eplan_task_get. Example: {\"plan_id\":\"0123456789abcdef0123456789abcdef\",\"wait_seconds\":0}.")]
-    public static async Task<CallToolResult> ApplyAsync(PlanOrchestrator orchestrator, TaskRegistry tasks,
-        RequestContext<CallToolRequestParams> context, [MinLength(1)] string plan_id, bool dry_run = false,
-        [Range(0, 110)] int wait_seconds = 90, IProgress<ProgressNotificationValue>? progress = null,
+    public static async Task<CallToolResult> ApplyAsync(
+        PlanOrchestrator orchestrator,
+        TaskRegistry tasks,
+        RequestContext<CallToolRequestParams> context,
+        [MinLength(1)][Description("Plan ID returned by eplan_workflow_plan.")] string plan_id,
+        [Description("True rechecks the plan; omit or false to execute.")] bool dry_run = false,
+        [Range(0, 110)][Description("Wait 0-110 seconds; default 90, zero returns immediately.")] int wait_seconds = 90,
+        IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
         McpServer server = context.Server;
@@ -115,9 +120,13 @@ internal sealed class PlanApplyTools
     [McpServerTool(Name = TaskTool, Title = "Get task", ReadOnly = true, Destructive = false,
         Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
     [Description("Reads or waits for a plan task in its creating stdio session, without EPLAN access. Terminal results reference eplan_plan_get; failed tasks are successful queries. Waiting expiry or cancellation only stops this wait. Example: {\"task_id\":\"0123456789abcdef0123456789abcdef\",\"wait_seconds\":0}.")]
-    public static async Task<CallToolResult> GetAsync(TaskRegistry tasks, McpServer server,
-        [MinLength(1)] string task_id, [Range(0, 110)] int wait_seconds = 90,
-        IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+    public static async Task<CallToolResult> GetAsync(
+        TaskRegistry tasks,
+        McpServer server,
+        [MinLength(1)][Description("Task ID returned by eplan_plan_apply in this session.")] string task_id,
+        [Range(0, 110)][Description("Wait 0-110 seconds; default 90, zero returns immediately.")] int wait_seconds = 90,
+        IProgress<ProgressNotificationValue>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         try
         {

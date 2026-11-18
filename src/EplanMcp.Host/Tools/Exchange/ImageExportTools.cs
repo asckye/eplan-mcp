@@ -40,7 +40,7 @@ internal sealed class ImageExportTools
         IProgress<ProgressNotificationValue> progress,
         [Description("1-20 full page names")] string[] pages,
         [Description(ToolArguments.ProjectDescription)] string? project = null,
-        [AllowedValues("png", "jpg")] string format = "png",
+        [AllowedValues("png", "jpg")][Description("Output image encoding; default PNG.")] string format = "png",
         [Description("Pixels")][Range(MinWidth, MaxWidth)] int width_px = 1600,
         [Description("Also return the images; max 4 pages")] bool inline = false,
         CancellationToken cancellationToken = default)

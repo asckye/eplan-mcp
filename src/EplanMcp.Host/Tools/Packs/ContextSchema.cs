@@ -8,17 +8,17 @@ namespace EplanMcp.Host.Tools;
 internal static class ContextSchema
 {
     private static readonly JsonElement _scopeSchema = JsonDocument.Parse("""
-        {"type":"object","additionalProperties":false,"properties":{
-          "pages":{"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","minLength":1}},
-          "structures":{"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","pattern":"^(?:[=+&#][^=+&#/*?\\s]+)+$"}},
-          "kinds":{"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","enum":["page","function","connection"]}},
-          "locators":{"type":"array","minItems":1,"maxItems":200,"uniqueItems":true,"items":{"type":"object","additionalProperties":false,"required":["project","kind","type","oid"],"properties":{
-            "project":{"type":"string","minLength":1},"kind":{"type":"string","enum":["page","function","connection"]},"type":{"type":"integer","minimum":1},"oid":{"type":"integer","minimum":1},
-            "name":{"type":["string","null"]},"page":{"type":["string","null"]},"category":{"type":["string","null"]},"pos":{"type":["string","null"],"pattern":"^-?[0-9]+(?:\\.[0-9]+)?,-?[0-9]+(?:\\.[0-9]+)?$"}}}}}}
+        {"description":"Intersect the supplied object filters.","type":"object","additionalProperties":false,"properties":{
+          "pages":{"description":"Exact full page names.","type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","minLength":1}},
+          "structures":{"description":"Match complete structure segments.","type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","pattern":"^(?:[=+&#][^=+&#/*?\\s]+)+$"}},
+          "kinds":{"description":"Restrict snapshot objects by kind.","type":"array","minItems":1,"uniqueItems":true,"items":{"type":"string","enum":["page","function","connection"]}},
+          "locators":{"description":"Exact object locators from the snapshot.","type":"array","minItems":1,"maxItems":200,"uniqueItems":true,"items":{"type":"object","additionalProperties":false,"required":["project","kind","type","oid"],"properties":{
+            "project":{"description":"Project path from the snapshot locator.","type":"string","minLength":1},"kind":{"description":"Object kind from the snapshot.","type":"string","enum":["page","function","connection"]},"type":{"description":"EPLAN type number from the snapshot.","type":"integer","minimum":1},"oid":{"description":"Object identifier from the snapshot.","type":"integer","minimum":1},
+            "name":{"description":"Expected object name; omit to skip this check.","type":["string","null"]},"page":{"description":"Full page name","type":["string","null"]},"category":{"description":"Expected function category.","type":["string","null"]},"pos":{"description":"Expected function position as x,y in mm.","type":["string","null"],"pattern":"^-?[0-9]+(?:\\.[0-9]+)?,-?[0-9]+(?:\\.[0-9]+)?$"}}}}}}
         """).RootElement.Clone();
 
     private static readonly JsonElement _includeSchema = JsonDocument.Parse("""
-        {"type":"array","minItems":1,"uniqueItems":true,"default":["objects","facts","modules","config","capabilities"],"items":{"type":"string","enum":["plugins","objects","facts","modules","rules","config","capabilities"]}}
+        {"description":"Context sections to return; request plugins explicitly.","type":"array","minItems":1,"uniqueItems":true,"default":["objects","facts","modules","config","capabilities"],"items":{"type":"string","enum":["plugins","objects","facts","modules","rules","config","capabilities"]}}
         """).RootElement.Clone();
 
     internal static void Configure(IEnumerable<McpServerTool> tools)
@@ -26,7 +26,7 @@ internal static class ContextSchema
         McpServerTool tool = tools.Single(t => t.ProtocolTool.Name == ContextTools.GetTool);
         var input = JsonNode.Parse("""
             {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","additionalProperties":false,"properties":{
-              "project":{"type":["string","null"]},"cabinet":{"type":"string","minLength":1},"scope":{},"include":{},"max_tokens":{"type":"integer","minimum":1,"maximum":20000,"default":5000}}}
+              "project":{"description":"Open project; omit for offline global plugins.","type":["string","null"]},"cabinet":{"description":"Cabinet ID; required with multiple cabinets.","type":"string","minLength":1},"scope":{},"include":{},"max_tokens":{"description":"Response budget: 1-20000 tokens, default 5000.","type":"integer","minimum":1,"maximum":20000,"default":5000}}}
             """)!;
         input["properties"]!["scope"] = JsonNode.Parse(_scopeSchema.GetRawText());
         input["properties"]!["include"] = JsonNode.Parse(_includeSchema.GetRawText());

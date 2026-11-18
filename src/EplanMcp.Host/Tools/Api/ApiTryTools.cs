@@ -18,7 +18,7 @@ internal sealed partial class ApiTryTools(IBridgeClient bridge, WritePipeline wr
     private static readonly string[] _locatorFields = ["digest", "oid", "page", "project", "type"];
     [McpServerTool(Name = Tool, Title = "Try an unverified EPLAN API group", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiTryResult))]
     [Description("Try scratch APIs, including create/remove; execution needs per-call approval, full + apiTry:on. Remove uses destructive approval; undo is unverified. eplan_api_get supplies try_template; INVALID_ARGUMENT includes the closest template. Follow returned handles/collection locators across calls (type depth <=4); indexed properties are read-only. See eplan_tool_usage for examples. " + WriteToolDefaults.Description)]
-    public async Task<CallToolResult> TryAsync(IProgress<ProgressNotificationValue> progress, string group, string project, JsonElement parameters, bool dry_run = WriteToolDefaults.Preview, string? result_cursor = null, CancellationToken cancellationToken = default)
+    public async Task<CallToolResult> TryAsync(IProgress<ProgressNotificationValue> progress, [Description("Overload group ID from eplan_api_search or eplan_api_get.")] string group, [Description("Explicit open scratch project for the trial.")] string project, JsonElement parameters, [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview, string? result_cursor = null, CancellationToken cancellationToken = default)
     {
         try
         {

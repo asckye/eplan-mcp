@@ -23,11 +23,24 @@ internal sealed class RuleTools
     public const string CheckTool = "eplan_rule_check";
     [McpServerTool(Name = CheckTool, Title = "Check cabinet rules", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
     [Description("Checks locally promoted locked rules in a cabinet scope; returns pass/fail/unknown/not_applicable with evidence. Multiple cabinets require cabinet. fix_plan compiles declared repairs only; unknown or conflicting fixes refuse a plan. Never executes. Example: {\"project\":\"Line1\",\"scope\":{}}.")]
-    public static async Task<CallToolResult> CheckAsync(IBridgeClient bridge, PackLibrary packs, KnowledgeReviewService reviews,
-        PlanStore store, PlanTrust trust, TaskRegistry sessions, McpServer server, string project, JsonElement scope,
-        string? cabinet = null, string[]? rules = null, bool fix_plan = false, [Range(1, 200)] int limit = 50,
-        string? cursor = null, [Range(1, 20000)] int max_tokens = 5000,
-        IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+    public static async Task<CallToolResult> CheckAsync(
+        IBridgeClient bridge,
+        PackLibrary packs,
+        KnowledgeReviewService reviews,
+        PlanStore store,
+        PlanTrust trust,
+        TaskRegistry sessions,
+        McpServer server,
+        [Description("Open project")] string project,
+        JsonElement scope,
+        [Description("Cabinet ID; required with multiple cabinets.")] string? cabinet = null,
+        string[]? rules = null,
+        [Description("Build a repair plan for failed rules; omit cursor.")] bool fix_plan = false,
+        [Range(1, 200)][Description("1-200")] int limit = 50,
+        [Description("nextCursor of the last result.")] string? cursor = null,
+        [Range(1, 20000)][Description("Response budget: 1-20000 tokens, default 5000.")] int max_tokens = 5000,
+        IProgress<ProgressNotificationValue>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
         try
@@ -169,7 +182,7 @@ internal sealed class RuleTools
         McpServerTool tool = tools.Single(t => t.ProtocolTool.Name == CheckTool);
         JsonObject schema = JsonNode.Parse(tool.ProtocolTool.InputSchema.GetRawText())!.AsObject();
         schema["properties"]!["scope"] = JsonNode.Parse(tools.Single(t => t.ProtocolTool.Name == ContextTools.GetTool).ProtocolTool.InputSchema.GetProperty("properties").GetProperty("scope").GetRawText());
-        schema["properties"]!["rules"] = JsonNode.Parse("""{"type":"array","minItems":1,"maxItems":500,"uniqueItems":true,"items":{"type":"string","minLength":1}}""");
+        schema["properties"]!["rules"] = JsonNode.Parse("""{"description":"Exact locked rule IDs; omit to check all applicable rules.","type":"array","minItems":1,"maxItems":500,"uniqueItems":true,"items":{"type":"string","minLength":1}}""");
         tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(schema);
         tool.ProtocolTool.OutputSchema = JsonDocument.Parse("""{"type":"object","additionalProperties":false,"required":["project","cabinet","contextRef","coverage","planId","rules","sources","total","nextCursor","truncated","budget"],"properties":{"project":{"type":"string"},"cabinet":{"type":"string"},"contextRef":{"type":"object"},"coverage":{"type":"array","items":{"type":"string"}},"planId":{"type":["string","null"]},"rules":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["rule","version","locator","objectHash","status","evidence","basis"],"properties":{"rule":{"type":"string"},"version":{"type":"string"},"locator":{"type":["object","null"]},"objectHash":{"type":"string"},"status":{"type":"string","enum":["pass","fail","unknown","not_applicable"]},"evidence":{"type":"array","items":{"type":"object"}},"basis":{"type":"string","enum":["fact","inference"]}}}},"sources":{"type":"object"},"total":{"type":"integer"},"nextCursor":{"type":["string","null"]},"truncated":{"type":"boolean"},"budget":{"type":"integer"}}}""").RootElement.Clone();
     }

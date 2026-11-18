@@ -62,7 +62,7 @@ internal sealed class ImportTools
         [Description("Full page name")] string page,
         [Description("Path below the imports folder")] string file,
         [Description("fit: to the page; none: own size")][AllowedValues("fit", "none")] string scale = "fit",
-        [AllowedValues("center", "lower_left")] string position = "center",
+        [AllowedValues("center", "lower_left")][Description("Drawing placement on the page; default centres it.")] string position = "center",
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description(PageDisplay.Description)] bool show_page = false,
         IProgress<ProgressNotificationValue>? progress = null,

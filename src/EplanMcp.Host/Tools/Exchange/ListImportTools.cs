@@ -24,11 +24,12 @@ internal sealed class ListImportTools
         OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ImportListResult))]
     [Description("Imports device or project parts lists from imports. Omit/true previews; false executes with approval and a project backup, in scratch too. Parts may take over a minute; undo is unverified. Example: {\"project\":\"Line1\",\"kind\":\"devices\",\"file\":\"incoming/devices.xml\",\"dry_run\":true}.")]
     public static async Task<CallToolResult> ImportListAsync(
-        WritePipeline pipeline, ImportFiles files,
-        [MinLength(1)] string project,
-        [AllowedValues("devices", "parts")] string kind,
-        [StringLength(260, MinimumLength = 1)] string file,
-        [AllowedValues("xml", "csv")] string format = "xml",
+        WritePipeline pipeline,
+        ImportFiles files,
+        [MinLength(1)][Description("Open project")] string project,
+        [AllowedValues("devices", "parts")][Description("Project list to update from the import file.")] string kind,
+        [StringLength(260, MinimumLength = 1)][Description("Relative path beneath imports; extension must match format.")] string file,
+        [AllowedValues("xml", "csv")][Description("Default XML; CSV is only supported for devices.")] string format = "xml",
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)

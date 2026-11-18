@@ -8,12 +8,12 @@ internal static class PropertyGetContract
 {
     internal static JsonElement Input { get; } = JsonSerializer.Deserialize<JsonElement>("""
         {"type":"object","additionalProperties":false,"required":["queries"],"properties":{
-          "project":{"type":"string","minLength":1},"language":{"type":"string","pattern":"^[a-z]{2}_[A-Z]{2}$","maxLength":5},
-          "response_format":{"type":"string","enum":["concise","detailed"],"default":"concise"},
-          "limit":{"type":"integer","minimum":1,"maximum":200,"default":50},"cursor":{"type":"string","minLength":1},
-          "queries":{"type":"array","minItems":1,"maxItems":50,"items":{
+          "project":{"description":"Name or path; default: the current project.","type":"string","minLength":1},"language":{"description":"Text language, e.g. zh_CN; default: EPLAN UI, then others","type":"string","pattern":"^[a-z]{2}_[A-Z]{2}$","maxLength":5},
+          "response_format":{"description":"Detailed adds display text, translations and definition hints.","type":"string","enum":["concise","detailed"],"default":"concise"},
+          "limit":{"description":"1-200","type":"integer","minimum":1,"maximum":200,"default":50},"cursor":{"description":"nextCursor of the last result.","type":"string","minLength":1},
+          "queries":{"description":"1-50 target and property selections.","type":"array","minItems":1,"maxItems":50,"items":{
             "type":"object","additionalProperties":false,"required":["target","properties"],"properties":{
-              "target":{"$ref":"#/$defs/target"},"properties":{"type":"array","minItems":1,"maxItems":20,"items":{"$ref":"#/$defs/selector"}}
+              "target":{"$ref":"#/$defs/target"},"properties":{"description":"1-20 selectors by ID or exact formal name.","type":"array","minItems":1,"maxItems":20,"items":{"$ref":"#/$defs/selector"}}
           }}}
         },"$defs":{
           "selector":{"type":"object","additionalProperties":false,"properties":{

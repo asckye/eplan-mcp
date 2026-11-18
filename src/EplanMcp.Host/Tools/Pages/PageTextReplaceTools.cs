@@ -26,8 +26,8 @@ internal sealed class PageTextReplaceTools
         [Description("Literal, no regex"), MinLength(1), MaxLength(500)] string find,
         [Description("Empty deletes"), MaxLength(500)] string replace,
         [Description("Code, ??_?? or all")] string language,
-        bool case_sensitive = true,
-        [Range(1, 500)] int max_changes = 500,
+        [Description("Match letter case by default.")] bool case_sensitive = true,
+        [Range(1, 500)][Description("Refuse if changed entries exceed this cap (1-500).")] int max_changes = 500,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)

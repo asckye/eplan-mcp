@@ -16,15 +16,22 @@ internal sealed class ReportCreateTools
 
     [McpServerTool(Name = Tool, Title = "Create report pages from a report block", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ReportCreateResult))]
     [Description("Creates report pages of one type (table of contents, parts list, terminal diagram, ...) from a form, starting at first_page. Refresh existing reports: eplan_report_update. Omit/true dry_run previews; false executes. Approval outside scratch. See eplan_tool_usage. Example: {\"project\":\"Line1\",\"type\":\"TableOfContents\",\"form\":\"F06_002\",\"first_page\":\"&AAB1/102\"}.")]
-    public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IProgress<ProgressNotificationValue> progress,
-        string project,
-        [AllowedValues("TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "InterconnectDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview")] string type,
-        string form, string first_page,
-        string? filter_scheme = null, string? sort_scheme = null,
-        string? page_description = null,
-        string? filter_scheme_data = null, string? sort_scheme_data = null,
-        string? function_filter_scheme_data = null, string? function_sort_scheme_data = null,
-        bool dry_run = true, CancellationToken cancellationToken = default)
+    public static async Task<CallToolResult> CreateAsync(
+        WritePipeline pipeline,
+        IProgress<ProgressNotificationValue> progress,
+        [Description("Open project")] string project,
+        [AllowedValues("TitlePage", "TableOfContents", "PLCDiagram", "TerminalDiagram", "PartsSumList", "PartsList", "CableOverview", "CableConnectionDiagram", "InterconnectDiagram", "TerminalStripOverview", "DeviceList", "ConnectionList", "StructIdentifierOverview")][Description("Report type from eplan_page_get.")] string type,
+        [Description("Form name without extension, from eplan_page_get.")] string form,
+        [Description("Full name of a new or existing report page.")] string first_page,
+        [Description("Project filter scheme name from eplan_page_get.")] string? filter_scheme = null,
+        [Description("Project sort scheme name from eplan_page_get.")] string? sort_scheme = null,
+        [Description("Manual page text; omit for automatic descriptions.")] string? page_description = null,
+        [Description("Copy report filter data unchanged from eplan_page_get.")] string? filter_scheme_data = null,
+        [Description("Copy report sort data unchanged from eplan_page_get.")] string? sort_scheme_data = null,
+        [Description("Copy function filter data unchanged from eplan_page_get.")] string? function_filter_scheme_data = null,
+        [Description("Copy function sort data unchanged from eplan_page_get.")] string? function_sort_scheme_data = null,
+        [Description(WriteToolDefaults.Description)] bool dry_run = true,
+        CancellationToken cancellationToken = default)
     {
         var args = new ReportCreateArgs
         {

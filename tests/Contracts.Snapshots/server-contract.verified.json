@@ -9,17 +9,20 @@
         "type": "object",
         "properties": {
           "name": {
+            "description": "Exact action name from eplan_action_catalog_search.",
             "type": "string",
             "minLength": 1,
             "maxLength": 500
           },
           "limit": {
+            "description": "1-100",
             "type": "integer",
             "default": 20,
             "minimum": 1,
             "maximum": 100
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -200,6 +203,7 @@
             "maxLength": 500
           },
           "tier": {
+            "description": "Filter by catalog review tier.",
             "type": [
               "string",
               "null"
@@ -212,6 +216,7 @@
             ]
           },
           "source": {
+            "description": "Filter by catalog evidence source.",
             "type": [
               "string",
               "null"
@@ -224,6 +229,7 @@
             ]
           },
           "registry_kind": {
+            "description": "Filter registry entries by registration kind.",
             "type": [
               "string",
               "null"
@@ -236,12 +242,14 @@
             ]
           },
           "limit": {
+            "description": "1-100",
             "type": "integer",
             "default": 20,
             "minimum": 1,
             "maximum": 100
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -842,12 +850,15 @@
         "type": "object",
         "properties": {
           "project": {
+            "description": "Current open scratch project; close all other projects.",
             "type": "string"
           },
           "action": {
+            "description": "Exact name from eplan_action_catalog_get.",
             "type": "string"
           },
           "type": {
+            "description": "TYPE variant from eplan_action_catalog_get.",
             "type": [
               "string",
               "null"
@@ -855,6 +866,7 @@
             "default": null
           },
           "parameters": {
+            "description": "Catalog action parameters; at most 32 named values.",
             "type": "object",
             "maxProperties": 32,
             "additionalProperties": {
@@ -866,6 +878,7 @@
             }
           },
           "dry_run": {
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
             "default": true
           },
@@ -884,25 +897,31 @@
               ],
               "properties": {
                 "project": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Resolved project path from the locator."
                 },
                 "page": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Full page name"
                 },
                 "type": {
                   "type": "integer",
                   "minimum": 1,
-                  "maximum": 2147483647
+                  "maximum": 2147483647,
+                  "description": "EPLAN type number from the locator."
                 },
                 "oid": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 1,
+                  "description": "Object identifier from the locator."
                 },
                 "digest": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Identity digest from eplan_object_find; copy unchanged."
                 }
               }
-            }
+            },
+            "description": "One-page locators; omit to preserve selection, [] to clear."
           }
         },
         "required": [
@@ -1333,17 +1352,20 @@
         "type": "object",
         "properties": {
           "id": {
+            "description": "Exact index ID from eplan_api_search.",
             "type": "string",
             "minLength": 1,
             "maxLength": 4096
           },
           "limit": {
+            "description": "1-100",
             "type": "integer",
             "default": 20,
             "minimum": 1,
             "maximum": 100
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -1620,6 +1642,7 @@
             "maxLength": 500
           },
           "kind": {
+            "description": "Filter by the indexed API member or dictionary kind.",
             "type": [
               "string",
               "null"
@@ -1634,6 +1657,7 @@
             ]
           },
           "status": {
+            "description": "Filter by implementation or verification status.",
             "type": [
               "string",
               "null"
@@ -1647,12 +1671,14 @@
             ]
           },
           "limit": {
+            "description": "1-100",
             "type": "integer",
             "default": 20,
             "minimum": 1,
             "maximum": 100
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -1760,12 +1786,15 @@
         "type": "object",
         "properties": {
           "group": {
+            "description": "Overload group ID from eplan_api_search or eplan_api_get.",
             "type": "string"
           },
           "project": {
+            "description": "Explicit open scratch project for the trial.",
             "type": "string"
           },
           "parameters": {
+            "description": "Named arguments from the API group trial template.",
             "type": "object",
             "additionalProperties": {
               "oneOf": [
@@ -1929,6 +1958,7 @@
             }
           },
           "dry_run": {
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
             "default": true
           },
@@ -2906,6 +2936,7 @@
             "type": "string"
           },
           "decision": {
+            "description": "Review outcome for the candidate or gap.",
             "type": "string",
             "enum": [
               "accept",
@@ -2978,6 +3009,7 @@
             "default": ""
           },
           "kind": {
+            "description": "Filter by asset kind; omit to search all kinds.",
             "type": "string",
             "default": "any",
             "enum": [
@@ -3019,6 +3051,7 @@
             "default": ""
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "default": 50,
             "minimum": 1,
@@ -3138,6 +3171,7 @@
             "type": "string"
           },
           "kind": {
+            "description": "Document kind; determines the required spec fields.",
             "type": "string",
             "enum": [
               "candidate",
@@ -3154,10 +3188,12 @@
             "description": "The kind's content"
           },
           "title": {
+            "description": "Display title, up to 200 characters.",
             "type": "string",
             "default": ""
           },
           "tags": {
+            "description": "Labels for filtering with eplan_asset_search.",
             "type": [
               "array",
               "null"
@@ -3238,14 +3274,17 @@
         "type": "object",
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string"
           },
           "expected_revision": {
+            "description": "Revision returned by eplan_cabinet_list.",
             "type": "integer",
             "minimum": 0,
             "maximum": 2147483646
           },
           "cabinets": {
+            "description": "Complete replacement set of cabinets.",
             "type": "array",
             "items": {
               "$ref": "#/$defs/cabinet"
@@ -3255,6 +3294,7 @@
             "$ref": "#/$defs/settings"
           },
           "pack_roots": {
+            "description": "Root packs to lock for the binding.",
             "type": "array",
             "uniqueItems": true,
             "items": {
@@ -3266,9 +3306,11 @@
               ],
               "properties": {
                 "id": {
+                  "description": "Exact pack ID to lock.",
                   "type": "string"
                 },
                 "version": {
+                  "description": "Exact pack version to lock.",
                   "type": "string"
                 }
               }
@@ -3515,15 +3557,18 @@
         "type": "object",
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string"
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "default": 50,
             "minimum": 1,
             "maximum": 200
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -3531,6 +3576,7 @@
             "default": null
           },
           "max_tokens": {
+            "description": "Response budget: 1-20000 tokens, default 5000.",
             "type": "integer",
             "default": 5000,
             "minimum": 1,
@@ -4324,10 +4370,12 @@
             "default": false
           },
           "start": {
+            "description": "First number; default 1.",
             "type": "integer",
             "default": 1
           },
           "step": {
+            "description": "Numbering increment; default 1.",
             "type": "integer",
             "default": 1
           },
@@ -4880,9 +4928,11 @@
         "type": "object",
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string"
           },
           "page": {
+            "description": "Full page name",
             "type": "string"
           },
           "items": {
@@ -5257,17 +5307,21 @@
               "additionalProperties": true
             },
             "minItems": 1,
-            "maxItems": 50
+            "maxItems": 50,
+            "description": "1-50 connection placements on this page."
           },
           "dry_run": {
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
             "default": true
           },
           "snap_to_grid": {
+            "description": "Snap coordinates to the page grid by default.",
             "type": "boolean",
             "default": true
           },
           "response_format": {
+            "description": "Response budget: 5k tokens concise, 20k detailed.",
             "type": "string",
             "default": "concise",
             "enum": [
@@ -5276,10 +5330,12 @@
             ]
           },
           "show_page": {
+            "description": "Open or focus the page in the editor before drawing.",
             "type": "boolean",
             "default": false
           },
           "layout_guard": {
+            "description": "Default refuses layout conflicts; warn reports them.",
             "default": "refuse",
             "enum": [
               "refuse",
@@ -5287,6 +5343,7 @@
             ]
           },
           "generate": {
+            "description": "Generate connections by default; false places symbols only.",
             "type": "boolean",
             "default": true
           }
@@ -6394,20 +6451,24 @@
         "additionalProperties": false,
         "properties": {
           "project": {
+            "description": "Open project; omit for offline global plugins.",
             "type": [
               "string",
               "null"
             ]
           },
           "cabinet": {
+            "description": "Cabinet ID; required with multiple cabinets.",
             "type": "string",
             "minLength": 1
           },
           "scope": {
+            "description": "Intersect the supplied object filters.",
             "type": "object",
             "additionalProperties": false,
             "properties": {
               "pages": {
+                "description": "Exact full page names.",
                 "type": "array",
                 "minItems": 1,
                 "uniqueItems": true,
@@ -6417,6 +6478,7 @@
                 }
               },
               "structures": {
+                "description": "Match complete structure segments.",
                 "type": "array",
                 "minItems": 1,
                 "uniqueItems": true,
@@ -6426,6 +6488,7 @@
                 }
               },
               "kinds": {
+                "description": "Restrict snapshot objects by kind.",
                 "type": "array",
                 "minItems": 1,
                 "uniqueItems": true,
@@ -6439,6 +6502,7 @@
                 }
               },
               "locators": {
+                "description": "Exact object locators from the snapshot.",
                 "type": "array",
                 "minItems": 1,
                 "maxItems": 200,
@@ -6454,10 +6518,12 @@
                   ],
                   "properties": {
                     "project": {
+                      "description": "Project path from the snapshot locator.",
                       "type": "string",
                       "minLength": 1
                     },
                     "kind": {
+                      "description": "Object kind from the snapshot.",
                       "type": "string",
                       "enum": [
                         "page",
@@ -6466,32 +6532,38 @@
                       ]
                     },
                     "type": {
+                      "description": "EPLAN type number from the snapshot.",
                       "type": "integer",
                       "minimum": 1
                     },
                     "oid": {
+                      "description": "Object identifier from the snapshot.",
                       "type": "integer",
                       "minimum": 1
                     },
                     "name": {
+                      "description": "Expected object name; omit to skip this check.",
                       "type": [
                         "string",
                         "null"
                       ]
                     },
                     "page": {
+                      "description": "Full page name",
                       "type": [
                         "string",
                         "null"
                       ]
                     },
                     "category": {
+                      "description": "Expected function category.",
                       "type": [
                         "string",
                         "null"
                       ]
                     },
                     "pos": {
+                      "description": "Expected function position as x,y in mm.",
                       "type": [
                         "string",
                         "null"
@@ -6504,6 +6576,7 @@
             }
           },
           "include": {
+            "description": "Context sections to return; request plugins explicitly.",
             "type": "array",
             "minItems": 1,
             "uniqueItems": true,
@@ -6528,6 +6601,7 @@
             }
           },
           "max_tokens": {
+            "description": "Response budget: 1-20000 tokens, default 5000.",
             "type": "integer",
             "minimum": 1,
             "maximum": 20000,
@@ -8054,10 +8128,12 @@
             "default": null
           },
           "start": {
+            "description": "First number; default 1.",
             "type": "integer",
             "default": 1
           },
           "step": {
+            "description": "Numbering increment; default 1.",
             "type": "integer",
             "default": 1
           },
@@ -8806,6 +8882,7 @@
             "default": null
           },
           "format": {
+            "description": "Output image encoding; default PNG.",
             "type": "string",
             "default": "png",
             "enum": [
@@ -9126,6 +9203,7 @@
             "default": null
           },
           "color": {
+            "description": "PDF colour mode; default preserves colour.",
             "type": "string",
             "default": "color",
             "enum": [
@@ -9585,6 +9663,7 @@
             ]
           },
           "position": {
+            "description": "Drawing placement on the page; default centres it.",
             "type": "string",
             "default": "center",
             "enum": [
@@ -9731,10 +9810,12 @@
         "type": "object",
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string",
             "minLength": 1
           },
           "kind": {
+            "description": "Project list to update from the import file.",
             "type": "string",
             "enum": [
               "devices",
@@ -9742,11 +9823,13 @@
             ]
           },
           "file": {
+            "description": "Relative path beneath imports; extension must match format.",
             "type": "string",
             "minLength": 1,
             "maxLength": 260
           },
           "format": {
+            "description": "Default XML; CSV is only supported for devices.",
             "type": "string",
             "default": "xml",
             "enum": [
@@ -10250,6 +10333,7 @@
             "type": "string"
           },
           "converter": {
+            "description": "Select the converter matching the PBF or AML file.",
             "type": "string",
             "enum": [
               "PlcDcXMLExchangerUniversal",
@@ -12302,21 +12386,26 @@
         ],
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string"
           },
           "operation": {
+            "description": "Export selected placements or whole pages.",
             "enum": [
               "window",
               "page"
             ]
           },
           "name": {
+            "description": "New file name; matching macro suffix is optional.",
             "type": "string"
           },
           "page": {
+            "description": "Full page name",
             "type": "string"
           },
           "locators": {
+            "description": "One-page locators from eplan_object_find.",
             "type": "array",
             "minItems": 1,
             "maxItems": 500,
@@ -12325,6 +12414,7 @@
             }
           },
           "pages": {
+            "description": "1-50 distinct full page names for a page macro.",
             "type": "array",
             "minItems": 1,
             "maxItems": 50,
@@ -12333,6 +12423,7 @@
             }
           },
           "representation": {
+            "description": "Window representation; default multi_line.",
             "enum": [
               "multi_line",
               "MultiLine",
@@ -12341,12 +12432,14 @@
             "default": "multi_line"
           },
           "variant": {
+            "description": "Window variant 0-15; default 0.",
             "type": "integer",
             "minimum": 0,
             "maximum": 15,
             "default": 0
           },
           "reference_mm": {
+            "description": "Window origin [x,y] in mm; default: outline lower left.",
             "type": "array",
             "minItems": 2,
             "maxItems": 2,
@@ -12355,6 +12448,7 @@
             }
           },
           "description": {
+            "description": "Macro text, optionally keyed by language.",
             "oneOf": [
               {
                 "type": "string"
@@ -12368,6 +12462,7 @@
             ]
           },
           "dry_run": {
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
             "default": true
           }
@@ -12808,6 +12903,7 @@
         ],
         "properties": {
           "object_type": {
+            "description": "Exact EPLAN object type to look up.",
             "type": "string",
             "enum": [
               "Arc",
@@ -12945,22 +13041,27 @@
             ]
           },
           "project": {
+            "description": "Name or path; default: the current project.",
             "type": "string"
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "minimum": 1,
             "maximum": 200,
             "default": 50
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": "string"
           },
           "page": {
-            "type": "string"
+            "type": "string",
+            "description": "Full page name"
           },
           "name_contains": {
-            "type": "string"
+            "type": "string",
+            "description": "Case-insensitive substring of the object name."
           }
         }
       },
@@ -13083,6 +13184,7 @@
         ],
         "properties": {
           "object_type": {
+            "description": "Exact EPLAN object type to look up.",
             "type": "string",
             "enum": [
               "Arc",
@@ -13220,15 +13322,18 @@
             ]
           },
           "project": {
+            "description": "Name or path; default: the current project.",
             "type": "string"
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "minimum": 1,
             "maximum": 200,
             "default": 50
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": "string"
           },
           "locator": {
@@ -13243,30 +13348,38 @@
             ],
             "properties": {
               "project": {
-                "type": "string"
+                "type": "string",
+                "description": "Resolved project path from the locator."
               },
               "page": {
-                "type": "string"
+                "type": "string",
+                "description": "Full page name"
               },
               "type": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 2147483647
+                "maximum": 2147483647,
+                "description": "EPLAN type number from the locator."
               },
               "oid": {
                 "type": "integer",
-                "minimum": 1
+                "minimum": 1,
+                "description": "Object identifier from the locator."
               },
               "digest": {
-                "type": "string"
+                "type": "string",
+                "description": "Identity digest from eplan_object_find; copy unchanged."
               }
-            }
+            },
+            "description": "Unchanged locator from eplan_object_find."
           },
           "language": {
+            "description": "Text language, e.g. zh_CN; default: EPLAN UI, then others",
             "type": "string",
             "pattern": "^[a-z]{2}_[A-Z]{2}$"
           },
           "response_format": {
+            "description": "Detailed adds display text and translations.",
             "type": "string",
             "enum": [
               "concise",
@@ -14235,6 +14348,7 @@
             "maxLength": 100
           },
           "kind": {
+            "description": "Filter indexed packs by kind.",
             "type": [
               "string",
               "null"
@@ -14601,9 +14715,11 @@
               "type": "object",
               "properties": {
                 "name": {
+                  "description": "Full page name",
                   "type": "string"
                 },
                 "page_type": {
+                  "description": "Type of the new page; default Circuit.",
                   "type": [
                     "string",
                     "null"
@@ -14636,9 +14752,11 @@
                     {
                       "type": "null"
                     }
-                  ]
+                  ],
+                  "description": "Text or language-to-text object; max 500 chars per language"
                 },
                 "grid_size_mm": {
+                  "description": "Positive page grid pitch in mm; omit for the default.",
                   "type": [
                     "number",
                     "null"
@@ -15526,6 +15644,7 @@
             "type": "integer"
           },
           "step": {
+            "description": "Numbering increment; default 1.",
             "type": "integer",
             "default": 1
           },
@@ -15535,6 +15654,7 @@
             "default": false
           },
           "subpages": {
+            "description": "How to number subpages; default retains them.",
             "type": "string",
             "default": "retain",
             "enum": [
@@ -16362,10 +16482,12 @@
             "type": "string"
           },
           "case_sensitive": {
+            "description": "Match letter case by default.",
             "type": "boolean",
             "default": true
           },
           "max_changes": {
+            "description": "Refuse if changed entries exceed this cap (1-500).",
             "type": "integer",
             "default": 500,
             "minimum": 1,
@@ -16494,6 +16616,7 @@
               "type": "object",
               "properties": {
                 "name": {
+                  "description": "Full page name",
                   "type": "string"
                 },
                 "description": {
@@ -16516,15 +16639,18 @@
                     {
                       "type": "null"
                     }
-                  ]
+                  ],
+                  "description": "Text or language-to-text object; max 500 chars each; empty clears text"
                 },
                 "grid_size_mm": {
+                  "description": "Positive page grid pitch in mm; omit to keep the grid.",
                   "type": [
                     "number",
                     "null"
                   ]
                 },
                 "plot_frame": {
+                  "description": "Exact plot frame name; omit to keep the current frame.",
                   "type": [
                     "string",
                     "null"
@@ -16713,6 +16839,7 @@
             "default": null
           },
           "mode": {
+            "description": "How to handle new and existing parts; default adds new parts.",
             "type": "string",
             "default": "append_new",
             "enum": [
@@ -16722,6 +16849,7 @@
             ]
           },
           "match_by": {
+            "description": "Match existing parts by part number.",
             "type": "string",
             "default": "part_number",
             "enum": [
@@ -18974,14 +19102,17 @@
         ],
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string",
             "minLength": 1
           },
           "page": {
+            "description": "Full page name",
             "type": "string",
             "minLength": 1
           },
           "items": {
+            "description": "1-100 locators from eplan_page_get with include_drawings.",
             "type": "array",
             "minItems": 1,
             "maxItems": 100,
@@ -18990,6 +19121,7 @@
             }
           },
           "dry_run": {
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
             "default": true
           }
@@ -19129,14 +19261,17 @@
         ],
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string",
             "minLength": 1
           },
           "page": {
+            "description": "Full page name",
             "type": "string",
             "minLength": 1
           },
           "operation": {
+            "description": "Edit applied to all selected placements.",
             "enum": [
               "delete",
               "copy",
@@ -19149,6 +19284,7 @@
             ]
           },
           "locators": {
+            "description": "One-page locators from eplan_object_find.",
             "type": "array",
             "minItems": 1,
             "maxItems": 50,
@@ -19157,10 +19293,12 @@
             }
           },
           "property_arrangement": {
+            "description": "Exact localized arrangement name for this symbol.",
             "type": "string",
             "minLength": 1
           },
           "symbol_variant": {
+            "description": "Variant number for the placed symbol.",
             "type": "integer",
             "minimum": 0
           },
@@ -19177,12 +19315,14 @@
             "$ref": "#/$defs/point"
           },
           "copies": {
+            "description": "1-20 copies; default 1.",
             "type": "integer",
             "minimum": 1,
             "maximum": 20,
             "default": 1
           },
           "quarter_turns": {
+            "description": "Quarter turns; positive is counterclockwise.",
             "enum": [
               -3,
               -2,
@@ -19193,17 +19333,20 @@
             ]
           },
           "axis": {
+            "description": "Mirror axis or direction of distribution.",
             "enum": [
               "horizontal",
               "vertical"
             ]
           },
           "coordinate_mm": {
+            "description": "Mirror or alignment coordinate in mm.",
             "type": "number",
             "minimum": -10000,
             "maximum": 10000
           },
           "alignment": {
+            "description": "Outline edge or centre to align.",
             "enum": [
               "left",
               "right",
@@ -19219,6 +19362,7 @@
             "description": "Omit/true previews; false executes."
           },
           "response_format": {
+            "description": "Detailed adds scenes when they fit.",
             "enum": [
               "concise",
               "detailed"
@@ -19982,14 +20126,17 @@
         "type": "object",
         "properties": {
           "plan_id": {
+            "description": "Plan ID returned by eplan_workflow_plan.",
             "type": "string",
             "minLength": 1
           },
           "dry_run": {
+            "description": "True rechecks the plan; omit or false to execute.",
             "type": "boolean",
             "default": false
           },
           "wait_seconds": {
+            "description": "Wait 0-110 seconds; default 90, zero returns immediately.",
             "type": "integer",
             "default": 90,
             "minimum": 0,
@@ -20180,10 +20327,12 @@
         "type": "object",
         "properties": {
           "plan_id": {
+            "description": "Plan ID returned by eplan_workflow_plan.",
             "type": "string",
             "minLength": 1
           },
           "response_format": {
+            "description": "Detailed pages include step arguments, validation and diff.",
             "type": "string",
             "default": "concise",
             "enum": [
@@ -20192,12 +20341,14 @@
             ]
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "default": 50,
             "minimum": 1,
             "maximum": 200
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -21062,6 +21213,7 @@
             "default": null
           },
           "analog_input": {
+            "description": "First analog input, project format.",
             "type": [
               "string",
               "null"
@@ -21069,6 +21221,7 @@
             "default": null
           },
           "analog_output": {
+            "description": "First analog output, project format.",
             "type": [
               "string",
               "null"
@@ -21084,6 +21237,7 @@
             "default": null
           },
           "sorting": {
+            "description": "Order for assigning successive PLC addresses.",
             "type": "string",
             "default": "connection_point",
             "enum": [
@@ -21200,14 +21354,17 @@
         ],
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string",
             "minLength": 1
           },
           "page": {
+            "description": "Full page name",
             "type": "string",
             "minLength": 1
           },
           "items": {
+            "description": "1-50 locators with at least one property change each.",
             "type": "array",
             "minItems": 1,
             "maxItems": 50,
@@ -21219,6 +21376,7 @@
               ],
               "properties": {
                 "locator": {
+                  "description": "Potential definition locator from eplan_object_find.",
                   "type": "object",
                   "required": [
                     "project",
@@ -21229,27 +21387,34 @@
                   ]
                 },
                 "potential_name": {
+                  "description": "New potential name, 1-200 characters.",
                   "type": "string"
                 },
                 "signal_name": {
+                  "description": "New signal name, 1-200 characters.",
                   "type": "string"
                 },
                 "color": {
+                  "description": "EPLAN colour code, e.g. BU (property 31004).",
                   "type": "string"
                 },
                 "cross_section": {
+                  "description": "Conductor cross-section text, e.g. 1.5 (property 31002).",
                   "type": "string"
                 },
                 "potential_value": {
+                  "description": "Potential value text, e.g. 230V (property 33003).",
                   "type": "string"
                 },
                 "potential_type": {
+                  "description": "EPLAN potential type code (property 31006).",
                   "type": "integer"
                 }
               }
             }
           },
           "dry_run": {
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
             "default": true
           }
@@ -21412,6 +21577,7 @@
         "type": "object",
         "properties": {
           "mode": {
+            "description": "Create from a basic project or restore a backup.",
             "type": "string",
             "enum": [
               "basic_project",
@@ -22332,15 +22498,18 @@
         ],
         "properties": {
           "project": {
+            "description": "Name or path; default: the current project.",
             "type": "string",
             "minLength": 1
           },
           "language": {
+            "description": "Text language, e.g. zh_CN; default: EPLAN UI, then others",
             "type": "string",
             "pattern": "^[a-z]{2}_[A-Z]{2}$",
             "maxLength": 5
           },
           "response_format": {
+            "description": "Detailed adds display text, translations and definition hints.",
             "type": "string",
             "enum": [
               "concise",
@@ -22349,16 +22518,19 @@
             "default": "concise"
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "minimum": 1,
             "maximum": 200,
             "default": 50
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": "string",
             "minLength": 1
           },
           "queries": {
+            "description": "1-50 target and property selections.",
             "type": "array",
             "minItems": 1,
             "maxItems": 50,
@@ -22374,6 +22546,7 @@
                   "$ref": "#/$defs/target"
                 },
                 "properties": {
+                  "description": "1-20 selectors by ID or exact formal name.",
                   "type": "array",
                   "minItems": 1,
                   "maxItems": 20,
@@ -22921,6 +23094,7 @@
         "type": "object",
         "properties": {
           "object_type": {
+            "description": "Exact object type in the shipped property dictionary.",
             "type": "string",
             "enum": [
               "Arc",
@@ -22995,6 +23169,7 @@
             ]
           },
           "properties": {
+            "description": "Exact selectors; omit both filters for readable definitions.",
             "type": "array",
             "minItems": 1,
             "maxItems": 200,
@@ -23003,15 +23178,18 @@
               "additionalProperties": false,
               "properties": {
                 "property_id": {
+                  "description": "Numeric ID in the shipped dictionary.",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 2147483647
                 },
                 "property_name": {
+                  "description": "Exact formal name in the shipped dictionary.",
                   "type": "string",
                   "minLength": 1
                 },
                 "index": {
+                  "description": "Optional index; checked as int32 without expanding rows.",
                   "type": "integer",
                   "minimum": -2147483648,
                   "maximum": 2147483647
@@ -23042,11 +23220,13 @@
             }
           },
           "name_contains": {
+            "description": "Case-insensitive substring of the formal property name.",
             "type": "string",
             "minLength": 1,
             "maxLength": 500
           },
           "response_format": {
+            "description": "Detailed adds definition, source and version.",
             "type": "string",
             "default": "concise",
             "enum": [
@@ -23055,12 +23235,14 @@
             ]
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "default": 50,
             "minimum": 1,
             "maximum": 200
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -23480,6 +23662,7 @@
         ],
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string",
             "minLength": 1
           },
@@ -23489,6 +23672,7 @@
             "description": "Omit/true previews; false executes."
           },
           "response_format": {
+            "description": "Detailed includes side-effect guards.",
             "enum": [
               "concise",
               "detailed"
@@ -23497,6 +23681,7 @@
             "default": "concise"
           },
           "changes": {
+            "description": "1-100 assignments on at most 50 target objects.",
             "type": "array",
             "minItems": 1,
             "maxItems": 100,
@@ -23516,6 +23701,7 @@
                   "$ref": "#/$defs/selector"
                 },
                 "value": {
+                  "description": "Literal replacement allowed for the selected property.",
                   "type": [
                     "string",
                     "boolean",
@@ -23525,6 +23711,7 @@
                   "maxLength": 500
                 },
                 "language": {
+                  "description": "ISO language or ??_?? for 20011; omit for other properties.",
                   "type": "string",
                   "pattern": "^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"
                 }
@@ -24005,9 +24192,11 @@
         "type": "object",
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string"
           },
           "type": {
+            "description": "Report type from eplan_page_get.",
             "type": "string",
             "enum": [
               "TitlePage",
@@ -24026,12 +24215,15 @@
             ]
           },
           "form": {
+            "description": "Form name without extension, from eplan_page_get.",
             "type": "string"
           },
           "first_page": {
+            "description": "Full name of a new or existing report page.",
             "type": "string"
           },
           "filter_scheme": {
+            "description": "Project filter scheme name from eplan_page_get.",
             "type": [
               "string",
               "null"
@@ -24039,6 +24231,7 @@
             "default": null
           },
           "sort_scheme": {
+            "description": "Project sort scheme name from eplan_page_get.",
             "type": [
               "string",
               "null"
@@ -24046,6 +24239,7 @@
             "default": null
           },
           "page_description": {
+            "description": "Manual page text; omit for automatic descriptions.",
             "type": [
               "string",
               "null"
@@ -24053,6 +24247,7 @@
             "default": null
           },
           "filter_scheme_data": {
+            "description": "Copy report filter data unchanged from eplan_page_get.",
             "type": [
               "string",
               "null"
@@ -24060,6 +24255,7 @@
             "default": null
           },
           "sort_scheme_data": {
+            "description": "Copy report sort data unchanged from eplan_page_get.",
             "type": [
               "string",
               "null"
@@ -24067,6 +24263,7 @@
             "default": null
           },
           "function_filter_scheme_data": {
+            "description": "Copy function filter data unchanged from eplan_page_get.",
             "type": [
               "string",
               "null"
@@ -24074,6 +24271,7 @@
             "default": null
           },
           "function_sort_scheme_data": {
+            "description": "Copy function sort data unchanged from eplan_page_get.",
             "type": [
               "string",
               "null"
@@ -24081,6 +24279,7 @@
             "default": null
           },
           "dry_run": {
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
             "default": true
           }
@@ -24520,13 +24719,16 @@
         "type": "object",
         "properties": {
           "project": {
+            "description": "Open project",
             "type": "string"
           },
           "scope": {
+            "description": "Intersect the supplied object filters.",
             "type": "object",
             "additionalProperties": false,
             "properties": {
               "pages": {
+                "description": "Exact full page names.",
                 "type": "array",
                 "minItems": 1,
                 "uniqueItems": true,
@@ -24536,6 +24738,7 @@
                 }
               },
               "structures": {
+                "description": "Match complete structure segments.",
                 "type": "array",
                 "minItems": 1,
                 "uniqueItems": true,
@@ -24545,6 +24748,7 @@
                 }
               },
               "kinds": {
+                "description": "Restrict snapshot objects by kind.",
                 "type": "array",
                 "minItems": 1,
                 "uniqueItems": true,
@@ -24558,6 +24762,7 @@
                 }
               },
               "locators": {
+                "description": "Exact object locators from the snapshot.",
                 "type": "array",
                 "minItems": 1,
                 "maxItems": 200,
@@ -24573,10 +24778,12 @@
                   ],
                   "properties": {
                     "project": {
+                      "description": "Project path from the snapshot locator.",
                       "type": "string",
                       "minLength": 1
                     },
                     "kind": {
+                      "description": "Object kind from the snapshot.",
                       "type": "string",
                       "enum": [
                         "page",
@@ -24585,32 +24792,38 @@
                       ]
                     },
                     "type": {
+                      "description": "EPLAN type number from the snapshot.",
                       "type": "integer",
                       "minimum": 1
                     },
                     "oid": {
+                      "description": "Object identifier from the snapshot.",
                       "type": "integer",
                       "minimum": 1
                     },
                     "name": {
+                      "description": "Expected object name; omit to skip this check.",
                       "type": [
                         "string",
                         "null"
                       ]
                     },
                     "page": {
+                      "description": "Full page name",
                       "type": [
                         "string",
                         "null"
                       ]
                     },
                     "category": {
+                      "description": "Expected function category.",
                       "type": [
                         "string",
                         "null"
                       ]
                     },
                     "pos": {
+                      "description": "Expected function position as x,y in mm.",
                       "type": [
                         "string",
                         "null"
@@ -24623,6 +24836,7 @@
             }
           },
           "cabinet": {
+            "description": "Cabinet ID; required with multiple cabinets.",
             "type": [
               "string",
               "null"
@@ -24630,6 +24844,7 @@
             "default": null
           },
           "rules": {
+            "description": "Exact locked rule IDs; omit to check all applicable rules.",
             "type": "array",
             "minItems": 1,
             "maxItems": 500,
@@ -24640,16 +24855,19 @@
             }
           },
           "fix_plan": {
+            "description": "Build a repair plan for failed rules; omit cursor.",
             "type": "boolean",
             "default": false
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "default": 50,
             "minimum": 1,
             "maximum": 200
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -24657,6 +24875,7 @@
             "default": null
           },
           "max_tokens": {
+            "description": "Response budget: 1-20000 tokens, default 5000.",
             "type": "integer",
             "default": 5000,
             "minimum": 1,
@@ -24798,12 +25017,14 @@
         "type": "object",
         "properties": {
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "default": 50,
             "minimum": 1,
             "maximum": 200
           },
           "cursor": {
+            "description": "nextCursor of the last result.",
             "type": [
               "string",
               "null"
@@ -24811,6 +25032,7 @@
             "default": null
           },
           "response_format": {
+            "description": "Detailed adds object names to locators.",
             "type": "string",
             "default": "concise",
             "enum": [
@@ -24980,27 +25202,34 @@
               ],
               "properties": {
                 "project": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Resolved project path from the locator."
                 },
                 "page": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Full page name"
                 },
                 "type": {
                   "type": "integer",
                   "minimum": 1,
-                  "maximum": 2147483647
+                  "maximum": 2147483647,
+                  "description": "EPLAN type number from the locator."
                 },
                 "oid": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 1,
+                  "description": "Object identifier from the locator."
                 },
                 "digest": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Identity digest from eplan_object_find; copy unchanged."
                 }
               }
-            }
+            },
+            "description": "One-page locators from eplan_object_find; omit for clear."
           },
           "mode": {
+            "description": "How to change the selection; default replaces it.",
             "type": "string",
             "default": "replace",
             "enum": [
@@ -25010,6 +25239,7 @@
             ]
           },
           "show_page": {
+            "description": "Open or focus the selected page; omit to keep focus.",
             "type": "boolean",
             "default": false
           }
@@ -26334,6 +26564,7 @@
             "default": null
           },
           "kind": {
+            "description": "Filter symbols by placement kind.",
             "type": [
               "string",
               "null"
@@ -26354,6 +26585,7 @@
             ]
           },
           "limit": {
+            "description": "1-200",
             "type": "integer",
             "default": 50,
             "minimum": 1,
@@ -26497,10 +26729,12 @@
         "type": "object",
         "properties": {
           "task_id": {
+            "description": "Task ID returned by eplan_plan_apply in this session.",
             "type": "string",
             "minLength": 1
           },
           "wait_seconds": {
+            "description": "Wait 0-110 seconds; default 90, zero returns immediately.",
             "type": "integer",
             "default": 90,
             "minimum": 0,
@@ -26766,10 +27000,12 @@
             "default": true
           },
           "start": {
+            "description": "First number; default 1.",
             "type": "integer",
             "default": 1
           },
           "step": {
+            "description": "Numbering increment; default 1.",
             "type": "integer",
             "default": 1
           },
@@ -27367,7 +27603,8 @@
             ]
           },
           "topic": {
-            "type": "string"
+            "type": "string",
+            "description": "Only this section; omit for all."
           }
         },
         "required": [

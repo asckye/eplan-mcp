@@ -32,10 +32,10 @@ internal sealed class PlcReaddressTools
         [Description("Open project")] string project,
         [Description("First digital input, project format")] string? digital_input = null,
         [Description("First digital output, project format")] string? digital_output = null,
-        string? analog_input = null,
-        string? analog_output = null,
+        [Description("First analog input, project format.")] string? analog_input = null,
+        [Description("First analog output, project format.")] string? analog_output = null,
         [Description("One CPU; default: all")] string? cpu = null,
-        [AllowedValues("connection_point", "channel", "graphical")] string sorting = "connection_point",
+        [AllowedValues("connection_point", "channel", "graphical")][Description("Order for assigning successive PLC addresses.")] string sorting = "connection_point",
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)

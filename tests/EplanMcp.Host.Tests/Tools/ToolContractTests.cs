@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.DependencyInjection;
@@ -136,7 +137,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.Contains(ConnectionCreateTools.Tool, ToolProfiles.Core);
         Assert.Equal((false, false, false, false), (tool.Annotations!.ReadOnlyHint, tool.Annotations.DestructiveHint, tool.Annotations.IdempotentHint, tool.Annotations.OpenWorldHint));
         Assert.InRange(tool.Description!.Length, 1, 600);
-        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 5650);
+        Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 6150);
         Assert.Contains("string", tool.OutputSchema!.Value.GetProperty("properties").GetProperty("warning").GetProperty("type").ToString(), StringComparison.Ordinal);
         Assert.False(tool.InputSchema.GetProperty("additionalProperties").GetBoolean());
         Assert.Equal(50, tool.InputSchema.GetProperty("properties").GetProperty("items").GetProperty("maxItems").GetInt32());
@@ -473,6 +474,51 @@ public sealed class ToolContractTests : IDisposable
     }
 
     [Fact]
+    public void EveryInputProperty_IsDescribedOrNamedInTheUsageText()
+    {
+        var missing = new List<string>();
+        foreach (Tool tool in Tools.OrderBy(t => t.Name, StringComparer.Ordinal))
+        {
+            string usage = ToolUsageCatalog.Usage.TryGetValue(tool.Name, out var sections)
+                ? string.Join("\n\n", ToolUsageCatalog.Topics.Select(topic => sections[topic]))
+                : string.Empty;
+            var words = Regex.Matches(usage, @"\w+").Select(match => match.Value).ToHashSet(StringComparer.Ordinal);
+            Check(tool.Name, tool.InputSchema, string.Empty, words);
+        }
+
+        Assert.True(missing.Count == 0, string.Join(Environment.NewLine, missing));
+
+        void Check(string tool, JsonElement schema, string path, HashSet<string> words)
+        {
+            if (schema.ValueKind != JsonValueKind.Object)
+            {
+                return;
+            }
+            if (schema.TryGetProperty("properties", out JsonElement properties))
+            {
+                foreach (JsonProperty property in properties.EnumerateObject())
+                {
+                    JsonElement value = property.Value;
+                    string here = $"{path}/{property.Name}";
+                    bool reference = value.ValueKind == JsonValueKind.Object && value.TryGetProperty("$ref", out _)
+                        && value.EnumerateObject().Count() == 1;
+                    bool described = value.ValueKind == JsonValueKind.Object && value.TryGetProperty("description", out JsonElement description)
+                        && description.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(description.GetString());
+                    if (!reference && !described && !words.Contains(property.Name))
+                    {
+                        missing.Add($"{tool} {here}");
+                    }
+                    Check(tool, value, here, words);
+                }
+            }
+            if (schema.TryGetProperty("items", out JsonElement items))
+            {
+                Check(tool, items, path + "[]", words);
+            }
+        }
+    }
+
+    [Fact]
     public void EveryInputSchema_RejectsUnknownArguments()
     {
         Assert.All(Tools, t =>
@@ -513,29 +559,54 @@ public sealed class ToolContractTests : IDisposable
         // P24's specified nested scope includes the complete ObjectLocator contract; keep its larger schema bounded too.
         // P11 publishes seven existing argument schemas as one closed union; bound that required catalog separately.
         // Property tools share closed target/selector schemas; budget their prose and structural schema separately.
+        Assert.All(Tools, tool => Assert.InRange(tool.Description!.Length + Descriptions(tool.InputSchema), 1, 1000));
         Tool api = Tools.Single(t => t.Name == ApiTools.SearchTool);
         Assert.InRange(api.Description!.Length + Descriptions(api.InputSchema), 1, 1000);
         Assert.InRange(api.InputSchema.GetRawText().Length, 1, 2000);
-        Assert.All(Tools.Where(t => t.Name is not (ApiTryTools.Tool or ApiTools.SearchTool or PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or ObjectReadTools.FindTool or ObjectReadTools.GetTool or PlacementCreateTools.Tool or AnnotationCreateTools.Tool or PlacementUpdateTools.Tool or PlacementEditTools.Tool or GraphicEditTools.Tool or MacroStoreTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or PageReviewTools.Tool or RuleTools.CheckTool) && !_proseBudgeted.Contains(t.Name)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name == WorkflowTools.PlanTool ? 16000 : t.Name == ContextTools.GetTool ? 2000 : 1000));
+        Assert.All(Tools.Where(t => t.Name is not (ApiTryTools.Tool or ApiTools.SearchTool or PropertySchemaTools.Tool or PropertyGetTools.Tool or PropertySetTools.Tool or ObjectReadTools.FindTool or ObjectReadTools.GetTool or PlacementCreateTools.Tool or AnnotationCreateTools.Tool or PlacementUpdateTools.Tool or PlacementEditTools.Tool or GraphicEditTools.Tool or MacroStoreTools.Tool or MacroWriteTools.InsertTool or ImportTools.DxfTool or CabinetTools.BindTool or DeviceWriteTools.PlaceTool or ConnectionCreateTools.Tool or PageReviewTools.Tool or RuleTools.CheckTool) && !_proseBudgeted.Contains(t.Name)), t => Assert.InRange(t.Description!.Length + t.InputSchema.GetRawText().Length - ToolNames(t), 1, t.Name switch
+        {
+            WorkflowTools.PlanTool => 16000,
+            PluginLibraryTools.ListTool => 1050,
+            SelectionTools.SetTool => 1350,
+            PageTextReplaceTools.Tool => 1050,
+            AssetTools.SearchTool => 1100,
+            AssetTools.UpdateTool => 1150,
+            ProjectCreateTools.CreateTool => 1100,
+            ActionCatalogTools.SearchTool => 1150,
+            ContextTools.GetTool => 2800,
+            PlcReaddressTools.Tool => 1150,
+            AssetTools.ReviewTool => 1100,
+            ActionTryTools.Tool => 1650,
+            ListImportTools.ImportTool => 1050,
+            PotentialUpdateTools.Tool => 1500,
+            PartBuildTools.Tool => 1100,
+            _ => 1000,
+        }));
         // Review 2026-11-17: the budget above counts the whole schema, which left these tools one sentence that did not say
         // what they do ("Creates pages."). The standard's TL-10 budgets the description and the parameter descriptions,
         // about 250 tokens; these are held to that, and their schemas to their present size.
         foreach (Tool tool in Tools.Where(t => _proseBudgeted.Contains(t.Name)))
         {
             Assert.InRange(tool.Description!.Length + Descriptions(tool.InputSchema), 1, 1000);
-            Assert.InRange(tool.InputSchema.GetRawText().Length, 1, 1000);
+            Assert.InRange(tool.InputSchema.GetRawText().Length, 1, tool.Name switch
+            {
+                PageWriteTools.CreateTool => 1100,
+                PageWriteTools.UpdateTool => 1150,
+                ReportCreateTools.Tool => 1700,
+                _ => 1000,
+            });
         }
         // API trials repeat the closed atom union for array elements; bound prose and the expanded schema separately.
         Tool apiTry = Tools.Single(t => t.Name == ApiTryTools.Tool);
         Assert.InRange(apiTry.Description!.Length + Descriptions(apiTry.InputSchema), 1, 1000);
-        Assert.InRange(apiTry.InputSchema.GetRawText().Length, 1, 1800);
+        Assert.InRange(apiTry.InputSchema.GetRawText().Length, 1, 2050);
         Tool edit = Tools.Single(t => t.Name == PlacementEditTools.Tool);
         Assert.InRange(edit.Description!.Length + Descriptions(edit.InputSchema), 1, 1000);
         Assert.InRange(edit.InputSchema.GetRawText().Length, 1, 2500);
         foreach (Tool drawing in Tools.Where(t => t.Name is PlacementCreateTools.Tool or AnnotationCreateTools.Tool or GraphicEditTools.Tool or MacroStoreTools.Tool or ImportTools.DxfTool))
         {
             Assert.InRange(drawing.Description!.Length + Descriptions(drawing.InputSchema), 1, 1000);
-            Assert.InRange(drawing.InputSchema.GetRawText().Length, 1, 1000);
+            Assert.InRange(drawing.InputSchema.GetRawText().Length, 1, drawing.Name == MacroStoreTools.Tool ? 1400 : 1000);
         }
         Tool macroInsert = Tools.Single(t => t.Name == MacroWriteTools.InsertTool);
         Assert.InRange(macroInsert.Description!.Length + Descriptions(macroInsert.InputSchema), 1, 1000);
@@ -550,7 +621,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.InRange(review.InputSchema.GetRawText().Length, 1, 3500);
         Tool connection = Tools.Single(t => t.Name == ConnectionCreateTools.Tool);
         Assert.InRange(connection.Description!.Length + Descriptions(connection.InputSchema), 1, 1000);
-        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 5650); // +cable voltage 2026-11-02, +autoconnect_break 2026-11-06
+        Assert.InRange(connection.InputSchema.GetRawText().Length, 1, 6150); // +cable voltage 2026-11-02, +autoconnect_break 2026-11-06
         Tool move = Tools.Single(t => t.Name == PlacementUpdateTools.Tool);
         Assert.InRange(move.Description!.Length, 1, 600);
         Assert.InRange(move.Description.Length + Descriptions(move.InputSchema), 1, 1000);
@@ -608,6 +679,7 @@ public sealed class ToolContractTests : IDisposable
 
         Assert.Equal(Tools.Select(t => t.Name).Order(StringComparer.Ordinal), Enum(properties.GetProperty("tool")).Order(StringComparer.Ordinal));
         Assert.Equal("string", properties.GetProperty("topic").GetProperty("type").GetString());
+        Assert.Equal("Only this section; omit for all.", properties.GetProperty("topic").GetProperty("description").GetString());
         Assert.Equal(ToolUsageCatalog.Topics, Tools.Single(t => t.Name == UsageTools.UsageTool).InputSchema.GetProperty("allOf")[0].GetProperty("else").GetProperty("properties").GetProperty("topic").GetProperty("enum").EnumerateArray().Select(n => n.GetString()));
     }
 

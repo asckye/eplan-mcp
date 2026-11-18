@@ -276,10 +276,12 @@ internal sealed class PageWriteTools
     internal sealed class NewPage
     {
         [Required]
+        [Description("Full page name")]
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
         [AllowedValues("Circuit", "CircuitSingleLine", "Overview", "Graphics", "ModelView")]
+        [Description("Type of the new page; default Circuit.")]
         [JsonPropertyName("page_type")]
         public string? PageType { get; set; }
 
@@ -287,6 +289,7 @@ internal sealed class PageWriteTools
         [JsonPropertyName("description")]
         public object? Description { get; set; }
 
+        [Description("Positive page grid pitch in mm; omit for the default.")]
         [JsonPropertyName("grid_size_mm")]
         public double? GridSizeMm { get; set; }
     }
@@ -295,6 +298,7 @@ internal sealed class PageWriteTools
     internal sealed class PageText
     {
         [Required]
+        [Description("Full page name")]
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
 
@@ -302,9 +306,11 @@ internal sealed class PageWriteTools
         [JsonPropertyName("description")]
         public object? Description { get; set; }
 
+        [Description("Positive page grid pitch in mm; omit to keep the grid.")]
         [JsonPropertyName("grid_size_mm")]
         public double? GridSizeMm { get; set; }
 
+        [Description("Exact plot frame name; omit to keep the current frame.")]
         [JsonPropertyName("plot_frame")]
         public string? PlotFrame { get; set; }
     }

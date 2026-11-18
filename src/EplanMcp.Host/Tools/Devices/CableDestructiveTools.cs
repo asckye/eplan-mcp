@@ -39,8 +39,8 @@ internal sealed class CableDestructiveTools
         [Description("E.g. Standard")] string scheme,
         [Description("1-200 tags (eplan_device_list, category Cable); default: all")] string[]? cables = null,
         [Description("true: number only tags with '?'")] bool keep_existing = false,
-        int start = 1,
-        int step = 1,
+        [Description("First number; default 1.")] int start = 1,
+        [Description("Numbering increment; default 1.")] int step = 1,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         CancellationToken cancellationToken = default)
     {

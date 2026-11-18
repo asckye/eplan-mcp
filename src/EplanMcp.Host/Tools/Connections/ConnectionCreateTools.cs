@@ -28,13 +28,21 @@ internal sealed class ConnectionCreateTools
 
     [McpServerTool(Name = Tool, Title = "Create connection symbols and explicit wire paths", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     [Description("Creates SPECIAL nodes, interruptions, wires, cables, potentials and CDP/CDPNG on Circuit connections. Symbols, terminals: eplan_device_place. generate:false places nodes/potentials only; generate once after all placements. Undo: nodes only/interruptions/definition points 1; wires: 2 undo steps; cables: 6-8. Failure undoes all. layout_guard:warn reproduces drawings; default refuse draws freely. Omit dry_run to preview; false executes. Approval outside scratch; see usage. Example: {\"project\":\"Line1\",\"page\":\"=F+A1&EFS1/1\",\"items\":[{\"kind\":\"definition_point\",\"position\":[40,40],\"color\":\"RD\"}]}.")]
-    public static async Task<CallToolResult> CreateAsync(WritePipeline pipeline, IBridgeClient bridge,
-        string project, string page,
+    public static async Task<CallToolResult> CreateAsync(
+        WritePipeline pipeline,
+        IBridgeClient bridge,
+        [Description("Open project")] string project,
+        [Description("Full page name")] string page,
         [Description("See usage")] JsonElement[] items,
-        bool dry_run = WriteToolDefaults.Preview, bool snap_to_grid = true, [AllowedValues("concise", "detailed")] string response_format = "concise",
-        bool show_page = false,
-        IProgress<ProgressNotificationValue>? progress = null, PackLibrary? packs = null,
-        [AllowedValues("refuse", "warn")] string layout_guard = "refuse", bool generate = true, CancellationToken cancellationToken = default)
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
+        [Description("Snap coordinates to the page grid by default.")] bool snap_to_grid = true,
+        [AllowedValues("concise", "detailed")][Description("Response budget: 5k tokens concise, 20k detailed.")] string response_format = "concise",
+        [Description("Open or focus the page in the editor before drawing.")] bool show_page = false,
+        IProgress<ProgressNotificationValue>? progress = null,
+        PackLibrary? packs = null,
+        [AllowedValues("refuse", "warn")][Description("Default refuses layout conflicts; warn reports them.")] string layout_guard = "refuse",
+        [Description("Generate connections by default; false places symbols only.")] bool generate = true,
+        CancellationToken cancellationToken = default)
     {
         PageDisplay display = await PageDisplay.ShowAsync(bridge, show_page, project, page, cancellationToken).ConfigureAwait(false);
         try

@@ -26,11 +26,11 @@ internal static class PropertySetContract
     {
         JsonNode schema = JsonNode.Parse("""
             {"type":"object","additionalProperties":false,"required":["project","changes"],"properties":{
-              "project":{"type":"string","minLength":1},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},
-              "response_format":{"enum":["concise","detailed"],"type":"string","default":"concise"},
-              "changes":{"type":"array","minItems":1,"maxItems":100,"items":{"type":"object","additionalProperties":false,
+              "project":{"description":"Open project","type":"string","minLength":1},"dry_run":{"type":"boolean","default":true,"description":"Omit/true previews; false executes."},
+              "response_format":{"description":"Detailed includes side-effect guards.","enum":["concise","detailed"],"type":"string","default":"concise"},
+              "changes":{"description":"1-100 assignments on at most 50 target objects.","type":"array","minItems":1,"maxItems":100,"items":{"type":"object","additionalProperties":false,
                 "required":["target","property","value"],"properties":{"target":{"$ref":"#/$defs/target"},"property":{"$ref":"#/$defs/selector"},
-                  "value":{"type":["string","boolean","integer","number"],"maxLength":500},"language":{"type":"string","pattern":"^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"}}}}}}
+                  "value":{"description":"Literal replacement allowed for the selected property.","type":["string","boolean","integer","number"],"maxLength":500},"language":{"description":"ISO language or ??_?? for 20011; omit for other properties.","type":"string","pattern":"^([a-z]{2}_[A-Z]{2}|\\?\\?_\\?\\?)$"}}}}}}
             """)!;
         schema["$defs"] = JsonNode.Parse(PropertyGetContract.Input.GetRawText())!["$defs"]!.DeepClone();
         return JsonSerializer.SerializeToElement(schema);

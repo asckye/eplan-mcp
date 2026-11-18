@@ -24,12 +24,12 @@ internal sealed class PropertySchemaTools
     [Description("Describes shipped property IDs and read/write restrictions without EPLAN. Unknown facts are null. Example: {\"object_type\":\"Function\",\"name_contains\":\"TEXT\"}.")]
     public static CallToolResult Schema(
         PropertySchemaPaging paging,
-        string object_type,
+        [Description("Exact object type in the shipped property dictionary.")] string object_type,
         JsonElement? properties = null,
         string? name_contains = null,
-        [AllowedValues(ToolArguments.Concise, ToolArguments.Detailed)] string response_format = ToolArguments.Concise,
-        [Range(1, 200)] int limit = 50,
-        string? cursor = null,
+        [AllowedValues(ToolArguments.Concise, ToolArguments.Detailed)][Description("Detailed adds definition, source and version.")] string response_format = ToolArguments.Concise,
+        [Range(1, 200)][Description("1-200")] int limit = 50,
+        [Description("nextCursor of the last result.")] string? cursor = null,
         CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();

@@ -16,10 +16,10 @@ internal static class PropertySchemaContract
         JsonNode fields = input["properties"]!;
         fields["object_type"]!["enum"] = new JsonArray([.. PropertyCatalog.Entries.Select(e => e.ObjectType)
             .Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).Select(n => (JsonNode?)JsonValue.Create(n))]);
-        fields["name_contains"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":500}""");
+        fields["name_contains"] = JsonNode.Parse("""{"description":"Case-insensitive substring of the formal property name.","type":"string","minLength":1,"maxLength":500}""");
         fields["properties"] = JsonNode.Parse("""
-            {"type":"array","minItems":1,"maxItems":200,"items":{"type":"object","additionalProperties":false,
-            "properties":{"property_id":{"type":"integer","minimum":1,"maximum":2147483647},"property_name":{"type":"string","minLength":1},"index":{"type":"integer","minimum":-2147483648,"maximum":2147483647}},
+            {"description":"Exact selectors; omit both filters for readable definitions.","type":"array","minItems":1,"maxItems":200,"items":{"type":"object","additionalProperties":false,
+            "properties":{"property_id":{"description":"Numeric ID in the shipped dictionary.","type":"integer","minimum":1,"maximum":2147483647},"property_name":{"description":"Exact formal name in the shipped dictionary.","type":"string","minLength":1},"index":{"description":"Optional index; checked as int32 without expanding rows.","type":"integer","minimum":-2147483648,"maximum":2147483647}},
             "oneOf":[{"required":["property_id"],"not":{"required":["property_name"]}},{"required":["property_name"],"not":{"required":["property_id"]}}]}}
             """);
         input["not"] = JsonNode.Parse("""{"required":["properties","name_contains"]}""");

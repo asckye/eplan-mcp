@@ -25,11 +25,15 @@ internal sealed class PlcImportTools
 
     [McpServerTool(Name = Tool, Title = "Import PLC bus data", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ImportPlcResult))]
     [Description("Imports PLC bus data from the imports folder into a project without those devices. Omit/true previews; false executes with approval and a project backup. File preflight is incomplete; newly imported names already in the project roll the import back. Undo after commit is unverified. Example: {\"project\":\"Line1\",\"file\":\"plc/Phoenix1.pbf\",\"converter\":\"PlcDcXMLExchangerUniversal\",\"dry_run\":true}.")]
-    public static async Task<CallToolResult> ImportPlcAsync(WritePipeline pipeline, ImportFiles files,
+    public static async Task<CallToolResult> ImportPlcAsync(
+        WritePipeline pipeline,
+        ImportFiles files,
         [Description("From eplan_project_list")] string project,
         [Description("Path below imports; at most 100 MB")] string file,
-        [AllowedValues(Pbf, Aml)] string converter,
-        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview, IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+        [AllowedValues(Pbf, Aml)][Description("Select the converter matching the PBF or AML file.")] string converter,
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
+        IProgress<ProgressNotificationValue>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
         if (string.IsNullOrWhiteSpace(project))

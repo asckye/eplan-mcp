@@ -17,14 +17,17 @@ internal sealed class ApiTools
     [McpServerTool(Name = SearchTool, Title = "Search the offline EPLAN API catalog", ReadOnly = true,
         Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiSearchResult))]
     [Description("Discovers every catalogued operation overload group and property dictionary, including excluded APIs, without EPLAN. Filters intersect; names/text ignore case. verified means live_verified; implemented includes tested/verified. Summaries absent from the source are null. Example: {\"namespace\":\"Eplan.EplApi.HEServices\",\"member_name\":\"Translate\"}. Use eplan_api_get for signatures and evidence; catalog entries do not authorize execution.")]
-    public static CallToolResult Search(ApiIndex index,
+    public static CallToolResult Search(
+        ApiIndex index,
         [Description("Exact namespace including descendants.")][MinLength(1), MaxLength(500)] string? @namespace = null,
         [Description("Exact full declaring type, optionally prefixed T:.")][MinLength(1), MaxLength(500)] string? type = null,
         [Description("Member name substring.")][MinLength(1), MaxLength(500)] string? member_name = null,
         [Description("Documentation summary substring; unavailable summaries do not match.")][MinLength(1), MaxLength(500)] string? summary_text = null,
-        [AllowedValues("method", "property", "operator", "delegate_method", "data_dictionary")] string? kind = null,
-        [AllowedValues("implemented", "verified", "not_implemented", "excluded")] string? status = null,
-        [Range(1, 100)] int limit = 20, string? cursor = null, CancellationToken cancellationToken = default)
+        [AllowedValues("method", "property", "operator", "delegate_method", "data_dictionary")][Description("Filter by the indexed API member or dictionary kind.")] string? kind = null,
+        [AllowedValues("implemented", "verified", "not_implemented", "excluded")][Description("Filter by implementation or verification status.")] string? status = null,
+        [Range(1, 100)][Description("1-100")] int limit = 20,
+        [Description("nextCursor of the last result.")] string? cursor = null,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var violations = new List<string>();
@@ -52,8 +55,12 @@ internal sealed class ApiTools
     [McpServerTool(Name = GetTool, Title = "Describe an offline EPLAN API group", ReadOnly = true,
         Destructive = false, Idempotent = true, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(ApiGetResult))]
     [Description("Gets an offline API group by exact member ID, group key or dictionary type ID. Returns generated eplan_api_try templates with parameter kinds, sources and examples, or exclusion reasons and alternatives; then signatures and evidence. Pass nextCursor as cursor for more. Example: {\"id\":\"D:Function\"}. Discover IDs with eplan_api_search. Catalog status does not authorize execution.")]
-    public static CallToolResult Get(ApiIndex index, [MinLength(1), MaxLength(4096)] string id, [Range(1, 100)] int limit = 20,
-        string? cursor = null, CancellationToken cancellationToken = default)
+    public static CallToolResult Get(
+        ApiIndex index,
+        [MinLength(1), MaxLength(4096)][Description("Exact index ID from eplan_api_search.")] string id,
+        [Range(1, 100)][Description("1-100")] int limit = 20,
+        [Description("nextCursor of the last result.")] string? cursor = null,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var violations = new List<string>();

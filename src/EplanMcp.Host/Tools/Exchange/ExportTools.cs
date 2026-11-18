@@ -42,7 +42,7 @@ internal sealed class ExportTools
         [Description(ToolArguments.ProjectDescription)] string? project = null,
         [Description("1-50 full page names; default: all")] string[]? pages = null,
         [Description("PDF scheme; default: the current one")] string? scheme = null,
-        [AllowedValues("color", "grey", "black_white")] string color = "color",
+        [AllowedValues("color", "grey", "black_white")][Description("PDF colour mode; default preserves colour.")] string color = "color",
         [Description("File name only; .pdf is added")] string? file_name = null,
         CancellationToken cancellationToken = default)
     {

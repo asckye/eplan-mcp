@@ -25,13 +25,16 @@ internal sealed class ProjectCreateTools
         "per-call approval (APPROVAL_DENIED). If an older basic project fails, upgrades a scratch copy and retries once. " +
         WriteToolDefaults.Description + " Example: {\"mode\":\"basic_project\",\"file\":\"basics/GB_bas001.zw9\",\"name\":\"Line1\",\"dry_run\":true}.")]
     public static async Task<CallToolResult> CreateAsync(
-        WritePipeline pipeline, ImportFiles files, HostConfig config,
-        [AllowedValues("basic_project", "backup")] string mode,
+        WritePipeline pipeline,
+        ImportFiles files,
+        HostConfig config,
+        [AllowedValues("basic_project", "backup")][Description("Create from a basic project or restore a backup.")] string mode,
         [Description("Path below imports; at most 2 GB")][StringLength(260, MinimumLength = 1)] string file,
         [Description("New name, no path, dot or surrounding spaces")][StringLength(60, MinimumLength = 1)] string name,
         [Description("Full local path of a new folder; parent must exist")] string? destination = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
-        IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+        IProgress<ProgressNotificationValue>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         var violations = new List<string>();
         if (mode is not ("basic_project" or "backup"))

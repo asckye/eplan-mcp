@@ -44,6 +44,9 @@ internal static partial class DevicePlaceInputs
         schema["properties"]!["property_arrangement"]!["minLength"] = 1;
         schema["properties"]!["connection_designations"]!["items"] = JsonNode.Parse("""{"type":"string","minLength":1,"maxLength":64}""");
         schema["properties"]!["connection_descriptions"]!["items"] = JsonNode.Parse("""{"type":"string","maxLength":64}""");
+        // The usage text has no room for these two names; every other parameter of this tool is explained there (TL-11).
+        schema["properties"]!["connection_descriptions"]!["description"] = "Per pin, in pin order; symbol source only";
+        schema["properties"]!["plc_text"]!["description"] = "Plain text of the PLC point; stored language-neutral";
         foreach (JsonObject property in schema["properties"]!.AsObject().Select(p => p.Value).OfType<JsonObject>())
         { if (property["default"] is null) { property.Remove("default"); } }
     }

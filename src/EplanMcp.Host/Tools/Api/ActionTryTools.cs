@@ -16,7 +16,7 @@ internal sealed class ActionTryTools(ActionCatalogReader catalog, WritePipeline 
     public const string Tool = "eplan_action_try";
     [McpServerTool(Name = Tool, Title = "Try an unverified catalog action", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(JsonObject))]
     [Description("Try a catalog action in scratch (full, actionTry:on). Templates: eplan_action_catalog_get. selection: same-page locators; [] clears. Omit/true previews; false needs per-call approval (APPROVAL_DENIED). Never retry unknown outcomes. Example: {\"project\":\"Scratch\",\"action\":\"XGedZoomAllAction\"}")]
-    public async Task<CallToolResult> TryAsync(string project, string action, string? type = null, JsonElement? parameters = null, bool dry_run = WriteToolDefaults.Preview,
+    public async Task<CallToolResult> TryAsync([Description("Current open scratch project; close all other projects.")] string project, [Description("Exact name from eplan_action_catalog_get.")] string action, [Description("TYPE variant from eplan_action_catalog_get.")] string? type = null, JsonElement? parameters = null, [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         List<DrawingLocator>? selection = null, IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
     {
         ActionCatalogData? definitions = null;

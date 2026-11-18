@@ -19,12 +19,17 @@ internal sealed class PartBuildTools
     public const string Tool = "eplan_part_build";
     [McpServerTool(Name = Tool, Title = "Build parts from an Excel or CSV list", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, OutputSchemaType = typeof(PartBuildResult))]
     [Description("Builds parts from up to 50 rows of an imports .xlsx/.csv into EPLAN's shared parts database. Omit/true previews (validates rows, lists field differences); false executes with engineer approval and a master-data backup (restore it to undo). Headers: eplan_tool_usage. Example: {\"file\":\"parts.csv\"}.")]
-    public static async Task<CallToolResult> BuildAsync(IBridgeClient bridge, WritePipeline pipeline, ImportFiles files,
+    public static async Task<CallToolResult> BuildAsync(
+        IBridgeClient bridge,
+        WritePipeline pipeline,
+        ImportFiles files,
         [Description("Relative path below imports, .xlsx or UTF-8 .csv, at most 5 MB")] string file,
         [Description("Canonical field -> source header; omitted fields use their canonical header")] Dictionary<string, string>? mapping = null,
-        [AllowedValues("append_new", "update_existing", "update_and_append")] string mode = "append_new",
-        [AllowedValues("part_number")] string match_by = "part_number", [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
-        IProgress<ProgressNotificationValue>? progress = null, CancellationToken cancellationToken = default)
+        [AllowedValues("append_new", "update_existing", "update_and_append")][Description("How to handle new and existing parts; default adds new parts.")] string mode = "append_new",
+        [AllowedValues("part_number")][Description("Match existing parts by part number.")] string match_by = "part_number",
+        [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
+        IProgress<ProgressNotificationValue>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         string? temp = null;
         var locks = new List<FileStream>();
