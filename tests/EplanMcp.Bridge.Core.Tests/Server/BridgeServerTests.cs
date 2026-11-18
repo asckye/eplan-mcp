@@ -82,7 +82,8 @@ public sealed class BridgeServerTests : IDisposable
             disconnecting = DateTime.UtcNow;
         }
 
-        SpinWait.SpinUntil(() => _server.IdleSinceUtc is not null);
+        // Bounded: without a limit a server that never notices the disconnect hangs the run instead of failing the test.
+        Assert.True(SpinWait.SpinUntil(() => _server.IdleSinceUtc is not null, TimeSpan.FromSeconds(30)), "The server did not become idle within 30 s of the disconnect.");
         Assert.True(_server.IdleSinceUtc >= disconnecting);
     }
 

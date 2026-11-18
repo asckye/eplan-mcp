@@ -76,7 +76,7 @@ public sealed class PlacementTextWriterTests
         EplanProjects.Project = new(new Page { PageType = Enum.Parse<DocumentTypeManager.DocumentType>(type) });
         var text = PlacementTextStore.Args().Text;
         text.Contents = new() { ["??_??"] = "Panel" };
-        new EplanPlacementTextWriter().Validate("project", "+A1/1", text);
+        Assert.Null(Record.Exception(() => new EplanPlacementTextWriter().Validate("project", "+A1/1", text)));
     }
 
     [Theory]

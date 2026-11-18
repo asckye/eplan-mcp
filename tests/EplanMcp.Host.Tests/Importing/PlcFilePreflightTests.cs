@@ -13,7 +13,7 @@ public sealed class PlcFilePreflightTests
     public async Task UnknownVocabularyAndInternalReferences_AreSafeWithoutClaimingNameExtraction(string xml)
     {
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-        await PlcFilePreflight.ValidateAsync(stream, TestContext.Current.CancellationToken);
+        Assert.Null(await Record.ExceptionAsync(() => PlcFilePreflight.ValidateAsync(stream, TestContext.Current.CancellationToken)));
     }
 
     [Theory]

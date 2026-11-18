@@ -19,7 +19,8 @@ public sealed class LayoutGuardTests
     {
         DrawingPlacement text = Row("PropertyPlacement", 1);
         text.Bounds = [0, 0, 0, 0];
-        LayoutGuard.AfterWriting(Model(), new() { Page = new() { GridSize = 4, PageSize = [100, 100], Placements = [text] } });
+        // An unmeasured object refuses the write with an exception; this one counts as measured, so the check completes.
+        Assert.Null(Record.Exception(() => LayoutGuard.AfterWriting(Model(), new() { Page = new() { GridSize = 4, PageSize = [100, 100], Placements = [text] } })));
     }
     [Fact]
     public void MissingTextFormat_IsDeferredBeforeWriteAndOnlyWarnedAfterMeasurement()

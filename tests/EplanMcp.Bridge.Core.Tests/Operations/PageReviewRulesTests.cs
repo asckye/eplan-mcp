@@ -231,6 +231,25 @@ public sealed class PageReviewRulesTests
         { Assert.Equal(severity, (string?)Assert.Single(issues)["severity"]); }
     }
 
+    /// <summary>Test audit 2026-11-17: cross_reference_clash had a Large test only.</summary>
+    [Theory]
+    [InlineData(100, true)]   // on the cross-reference text
+    [InlineData(140, false)]  // clear of it
+    public void ASymbolOnACrossReferenceText_IsAWarningWithAMoveFix(double x, bool reported)
+    {
+        DrawingPlacement reference = Placement(1, 100, "Text");
+        reference.Properties["cross_reference"] = "true";
+        Placement(2, x, "Function", "-K1");
+        JArray issues = Review("cross_reference_clash");
+        if (!reported)
+        {
+            Assert.Empty(issues);
+            return;
+        }
+        JToken issue = Assert.Single(issues);
+        Assert.Equal(("cross_reference_clash", "warning", "eplan_placement_update"), ((string?)issue["code"], (string?)issue["severity"], (string?)issue["fix"]!["tool"]));
+    }
+
     [Fact]
     public void TinyOrSlantedText_IsAWarningWithAMoveFix()
     {
