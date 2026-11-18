@@ -130,7 +130,7 @@ internal static class ConnectionDefinitionPoints
             properties[field] = name.DeepClone();
         }
         // A potential's own line colour (31005) is what a connection on it draws with; the sample's potentials carry
-        // an explicit index where ours left the layer's (live 2026-11-14: 33 connections of the sixteen-page redraw).
+        // an explicit index where ours left the layer's (A116, live 2026-11-14: 33 connections of the sixteen-page redraw).
         foreach (string field in new[] { "potential_type", "line_color" })
         {
             if (value[field] is not { } number)

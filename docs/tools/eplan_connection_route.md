@@ -39,7 +39,7 @@ Pro Panel 的连接长度来自 3D 布线：把器件、导轨、线槽摆进安
 
 ## 5. 实现要点
 
-- **EPLAN 调用**：`project.InstallationSpaces` 按 36452 选空间；`space.Connection3Ds` 取连接；`ConnectionService3D.RouteConnections(List<Connection3D>, RoutingType)`（`RoutingWithNetwork` = 1、`RoutingWithoutNetwork` = 2）。已实测这条调用是确定的：样例清除后重新布线，508 根里 505 根长度不变（[A141](../eplan/api-notes/drawing-and-layout.md)）。
+- **EPLAN 调用**：`project.InstallationSpaces` 按 36452 选空间；`space.Connection3Ds` 取连接；`ConnectionService3D.RouteConnections(List<Connection3D>, RoutingType)`（`RoutingWithNetwork` = 1、`RoutingWithoutNetwork` = 2）。已实测这条调用是确定的：样例清除后重新布线，508 根里 505 根长度不变（[A141](../eplan/api-notes/connections-and-potentials.md)）。
 - 端点读取遵守 A141：端点是连接点位置时不读 `StartPin`，改用 `StartConnectionPointPosition` 的 `DeviceTag` 和 `Index`。
 - 写入包在一个事务里（`TransactionRunner`，撤销描述 `AI: eplan_connection_route`）；失败回滚。一步撤销未实机验证。连接两端不全在 3D 里的连接布不上，结果里如实列出，不回滚。
 - **待验证**：放线槽时布线段是否自动生成（否则要先调 `ConnectionService3D.CreateRoutingSegments(InstallationSpace)`）；布线后原理图连接的长度（31000/31003 或块值）是否随之更新——第二项决定 16 页对比能否直接看到效果。2026-11-14 第一次在重画项目副本上摆放时，配置的部件库里没有 Rittal 的机柜、线槽、导轨部件，机柜没有放上，两项都还没有答案。

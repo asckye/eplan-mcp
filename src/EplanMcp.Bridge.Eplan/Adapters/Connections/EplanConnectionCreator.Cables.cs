@@ -129,7 +129,7 @@ internal sealed partial class EplanConnectionCreator
                 {
                     Check(point.CableDefinitionLine?.ObjectIdentifier == cable.ObjectIdentifier, $"definition point membership: actual '{point.CableDefinitionLine?.Name ?? "<none>"}'");
                     Check(CableDefinitionPlanner.SameName(cable.Name, point.Name, page), $"definition point designation: expected '{cable.Name}'; actual '{point.Name}'");
-                    // Live 2026-11-02: EPLAN gives a definition point no visible name (empty even after AdjustVisibleName),
+                    // A81, Live 2026-11-02: EPLAN gives a definition point no visible name (empty even after AdjustVisibleName),
                     // while the cable now shows -W3; the old equality only held while both were empty.
                 }
                 using ConnectionPropertyList properties = run.Properties;

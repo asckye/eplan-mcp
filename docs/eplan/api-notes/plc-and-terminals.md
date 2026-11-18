@@ -112,3 +112,7 @@ M4c 编号工具依赖的文档说明；实测结果见 A24（S21 只用了空�
 - 这样的设备改名后，`RenameReadBack.MainName` 读回的是它的一个连接点，例如 `=GAA+A1-KR3A:L+`（第二次运行在此回滚）；"新标识 + `:` 连接点"算改名成功。
 - 证据：`PlcRackTests` 1/1 通过（684 s），提交 `97f347ed` 之上；前两次失败的日志在会话 scratchpad `after-adr59-1.log`、`plcrack-run.log`。
 
+### A157. 引脚代号带索引时读取 Pin.Name 抛出 IndexedPropertyException（2026-11-13，EPLAN 2026.0.3，16 页重绘）
+- **现象：** 读取代号带索引的引脚的 `Pin.Name` 时抛出 `IndexedPropertyException`（S063172），导致 `eplan_page_review` 对该页返回 `INTERNAL`。
+- **结论：** 读取器在单个引脚上捕获该异常，并将读不到的代号作为空串处理。
+- **证据：** `src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanPins.cs` 的 `EplanPins.Name`。

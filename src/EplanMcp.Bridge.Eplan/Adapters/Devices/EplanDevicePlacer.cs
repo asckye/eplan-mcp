@@ -82,7 +82,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer, IDeviceStripTransaction
         TerminalPlacementData? terminalData = null;
         if (main is not null && options?.Library is { } library)
         {
-            // Live 2026-11-08 (MX_Dryer11 =GAA/1, SE.C16N3TM160): a black-box template keeps its device connection points when
+            // A123, Live 2026-11-08 (MX_Dryer11 =GAA/1, SE.C16N3TM160): a black-box template keeps its device connection points when
             // only the box takes the library symbol, which leaves the symbol's pins without designations next to them.
             if (main.FunctionCategory == FunctionCategory.Blackbox)
             {

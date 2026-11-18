@@ -18,7 +18,7 @@ public sealed class PageGetArgs
     /// <summary>
     /// page.drawing.get only: the first placement to return, in the order parents first. With <see cref="DrawingLimit"/> the
     /// Bridge returns that slice, the page total and the fingerprint of every placement; without it, every placement.
-    /// Live 2026-11-16: model view pages of the sample project passed the 16 MiB reply limit when sent whole.
+    /// A146, Live 2026-11-16: model view pages of the sample project passed the 16 MiB reply limit when sent whole.
     /// </summary>
     public int? DrawingOffset { get; set; }
 

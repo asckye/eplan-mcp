@@ -100,7 +100,7 @@ internal sealed class EplanLayoutPlacer : ILayoutPlacer
     }
 
     /// <summary>
-    /// Moves the item by a world difference. MoveRelative works in the parent's own axes (live 2026-11-12: on the mounting
+    /// Moves the item by a world difference. MoveRelative works in the parent's own axes (A159, live 2026-11-12: on the mounting
     /// panel (0, 0, 40) moved the box 40 mm in world -Y), so each local axis is probed by 1 mm and moved back, and the
     /// world difference is solved in those axes; the message carries the numbers when the result still differs.
     /// </summary>

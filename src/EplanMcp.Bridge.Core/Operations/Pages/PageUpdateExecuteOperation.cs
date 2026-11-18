@@ -71,7 +71,7 @@ public sealed class PageUpdateExecuteOperation(IProjectCatalog catalog, IPageRea
         PageDescription after = PageUpdatePlanOperation.Changes((page, before), request.Language)
             ? descriptions.Write(request.Project.Path, page.Name, expected) : before;
         var planned = new PageDescription(null, expected);
-        // Live 2026-11-08 (=GAA/1 of the EES basic project): writing zh_CN cleared the language-independent placeholder
+        // A54, Live 2026-11-08 (=GAA/1 of the EES basic project): writing zh_CN cleared the language-independent placeholder
         // "{{Let's start}}". EPLAN drops ??_?? once a language is written, so only that loss is not a failure.
         bool independentDropped(string code) => code == "??_??" && string.IsNullOrEmpty(after.TextIn(code))
             && page.Edits(request.Language).Any(edit => edit.Key != "??_??");

@@ -53,7 +53,7 @@ internal sealed partial class EplanGraphicEditor
             foreach (Group group in groups)
             {
                 group.DeepUnGroup(true);
-                // Live 2026-11-05: DeepUnGroup leaves the emptied group on the page.
+                // A101, Live 2026-11-05: DeepUnGroup leaves the emptied group on the page.
                 if (group.IsValid)
                 { group.Remove(); }
             }

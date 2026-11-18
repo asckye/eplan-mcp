@@ -87,7 +87,7 @@ internal static class PlacementGridAndOverlapCheck
 
     private static string Device(DrawingPlacement p) => p.Properties.TryGetValue("name", out string? name) ? name.Split(':')[0] : "";
 
-    /// <summary>One device, or a device and its sub-device (live 2026-11-16: the pins of -KK1-X11 sit on the -KK1 box edge).</summary>
+    /// <summary>One device, or a device and its sub-device (A151, live 2026-11-16: the pins of -KK1-X11 sit on the -KK1 box edge).</summary>
     private static bool SameDevice(DrawingPlacement p, DrawingPlacement q)
     {
         string a = Device(p), b = Device(q);
@@ -190,7 +190,7 @@ internal static class LayoutRuleChecks
     }
 
     /// <summary>
-    /// Live 2026-11-16 (official =F+A2&amp;EFS1/1): PLC plug outlines of 44 x 34 mm cover the pins of their neighbours; a wire that
+    /// A152, Live 2026-11-16 (official =F+A2&amp;EFS1/1): PLC plug outlines of 44 x 34 mm cover the pins of their neighbours; a wire that
     /// ends on a pin inside the outline connects there and does not cross the symbol.
     /// </summary>
     private static bool EndsInside(PageScene scene, LayoutGuard.Violation v)
@@ -200,7 +200,7 @@ internal static class LayoutRuleChecks
         { return false; }
         double[] b = v.Geometry;
         double[][] route = scene.Graphical[(int)(-line - 1)];
-        // Live 2026-11-16 (=EC1+A3&EFS1/1): a wire through the symbol's own connection point is connected there.
+        // A152, Live 2026-11-16 (=EC1+A3&EFS1/1): a wire through the symbol's own connection point is connected there.
         string owner = FormattableString.Invariant($"{v.Objects[0].Type}/{v.Objects[0].Oid}/");
         if (scene.Pins.Where(pin => pin.Key.StartsWith(owner, StringComparison.Ordinal)).Any(pin => route.Zip(route.Skip(1), (a, c) => OnSegment(pin.Value.Location, a, c)).Any(on => on)))
         { return true; }

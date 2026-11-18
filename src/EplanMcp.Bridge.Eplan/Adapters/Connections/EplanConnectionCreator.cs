@@ -149,7 +149,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                         throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Interruption business name readback differs: requested '" + (string)interruption["name"]! + "', EPLAN stored '" + point.Name + "'. Supply the exact full name.");
                     }
                 }
-                // Owner 2026-11-02: the symbol's default arrangement shows the cross-reference, as after EPLAN's insert
+                // A156, Owner 2026-11-02: the symbol's default arrangement shows the cross-reference, as after EPLAN's insert
                 // command; an extra 24300 text switched the point to a user-defined arrangement.
                 placed.Location = new PointD((double)item.Row["position"]![0]!, (double)item.Row["position"]![1]!);
                 VerifySymbol(placed, item.Row);

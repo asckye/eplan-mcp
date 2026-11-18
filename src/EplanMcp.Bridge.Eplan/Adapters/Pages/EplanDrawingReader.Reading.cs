@@ -108,7 +108,7 @@ internal sealed partial class EplanDrawingReader
                     { WriteExceptionDiagnostics.Report(ex); propertyId = null; }
                     slot = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}#{1}", propertyId, index++);
                 }
-                // Live 2026-11-04: all members of a block report one identifier, so only their position tells them apart.
+                // A90, Live 2026-11-04: all members of a block report one identifier, so only their position tells them apart.
                 bool member = slot is null && blockChild && parent is not null;
                 string key = slot is not null ? FormattableString.Invariant($"{parent!.Type}/{parent.Oid}#{slot}")
                     : member ? FormattableString.Invariant($"{parent!.Type}/{parent.Oid}@{index++}")
@@ -183,8 +183,8 @@ internal sealed partial class EplanDrawingReader
             ReadStyle(placement, graphics, ref angle);
             // A75 catalog: DynamicConnectionLine derives from SymbolReference (DMClassId.InternalTypeId = 33),
             // but its wire outline is neither a layout symbol nor a container.
-            // Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
-            // Corpus 2026-11-17: SPECIAL/DC is the black box symbol; the official repair switch -QB1 (HVAC EFS/30) uses it on a
+            // A158, Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
+            // A147, Corpus 2026-11-17: SPECIAL/DC is the black box symbol; the official repair switch -QB1 (HVAC EFS/30) uses it on a
             // function whose category is not BlackBox, and its wires run into the box to the contacts inside.
             bool isContainer = ReadOptional(() => IsContainer(placement));
             string? containerOwner = ContainerOwner(placement, isContainer);
@@ -269,7 +269,7 @@ internal sealed partial class EplanDrawingReader
             {
                 bounds = null;
             }
-            // Live 2026-11-16 (official =K2+B2.Y1&MTC1/1): a model view part reports no outline on the first read of the page
+            // A146, Live 2026-11-16 (official =K2+B2.Y1&MTC1/1): a model view part reports no outline on the first read of the page
             // and a point at its insertion point on the next. Both carry no outline, and the digest must not change between
             // reads, or a drawing cursor goes stale.
             if (bounds is { Length: 4 } point && placement.GetType().Name == "ViewPart" && point[0] == point[2] && point[1] == point[3])
@@ -308,7 +308,7 @@ internal sealed partial class EplanDrawingReader
                 return placement switch
                 {
                     HyperLink hyperlink => new() { ["link"] = hyperlink.Link },
-                    // Live 2026-11-04: GetQRCode and DimensionText after the commit make EPLAN's undo fail with "step does not exist".
+                    // A99, Live 2026-11-04: GetQRCode and DimensionText after the commit make EPLAN's undo fail with "step does not exist".
                     QRCode code => new() { ["text"] = QrValue(code) },
                     MacroBox macro => new() { ["macro_name"] = macro.MacroName },
                     PolyLine polyline => new() { ["points"] = JsonConvert.SerializeObject(Enumerable.Range(0, polyline.NumberOfPoints).Select(i => XY(polyline.GetPointAt(i)))), ["closed"] = polyline.Closed.ToString().ToLowerInvariant() },

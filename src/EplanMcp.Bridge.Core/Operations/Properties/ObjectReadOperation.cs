@@ -19,7 +19,7 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
     /// Why the locator found nothing, so the caller does not have to guess: how many objects of this type the
     /// project holds, how many carry its number, and which of the locator's fields the first of those disagrees
     /// with. A fresh locator cannot help when the number is not there at all, and the message alone could not say
-    /// so (live 2026-11-14: eplan_object_get refused every locator eplan_object_find had just returned).
+    /// so (A140, live 2026-11-14: eplan_object_get refused every locator eplan_object_find had just returned).
     /// </summary>
     private static Dictionary<string, string> Mismatch(DrawingLocator locator, IReadOnlyList<ObjectSummary> objects)
     {
@@ -79,7 +79,7 @@ public sealed class ObjectReadOperation(IProjectCatalog catalog, IObjectReadAdap
         result.Locator = selected.Locator;
         // The object's own kind can be more specific than the requested type, and both the locator check and the
         // property list follow the object, not the request: a Terminal of the PLC category is described as
-        // plcterminal (live 2026-11-14: all 31 terminals of the sample redraw are, and object_get refused every
+        // plcterminal (A140, live 2026-11-14: all 31 terminals of the sample redraw are, and object_get refused every
         // one of them with check=not_found while the same locators read under PLCTerminal).
         string objectType = ObjectReadTypes.Types.FirstOrDefault(type =>
             string.Equals(type, selected.Kind, StringComparison.OrdinalIgnoreCase)) ?? args.ObjectType;

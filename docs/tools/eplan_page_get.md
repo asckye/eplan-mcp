@@ -64,7 +64,7 @@
 - 缺少 `page`：Host 的参数过滤器按 schema 的 `required` 在调用前返回 `INVALID_ARGUMENT`（SDK 自己只返回没有 reason 的通用错误，api-notes C）；显式传 `null` 或空串时由工具本身报告。
 - 页上的设备：`FunctionsFilter { Page = page }` 后取主功能（S6：0 ms）。不使用 `Page.Filter`（已列入 BannedSymbols）。
 - 多语言文本用 `GetStringToDisplay`；所有项目文本经过 ResultShaper。
-- 报表块依据 [A84](../eplan/api-notes/drawing-and-layout.md#a84-报表块读取与按报表块生成报表页2026-11-03eplan-20260325421electric-p8示例项目夹具只读生成只在-scratch-副本-largewrite)：在事务外从本次查询的新 Page 包装器读取 `Page.ReportBlock`，及时释放报表块与手工描述对象；字段失败独立记录警告，读取期间保持所有者存活（A80）。
+- 报表块依据 [A84](../eplan/api-notes/graphics-and-page-geometry.md#a84-报表块读取与按报表块生成报表页2026-11-03eplan-20260325421electric-p8示例项目夹具只读生成只在-scratch-副本-largewrite)：在事务外从本次查询的新 Page 包装器读取 `Page.ReportBlock`，及时释放报表块与手工描述对象；字段失败独立记录警告，读取期间保持所有者存活（A80）。
 - 可选发现调用只读类型化 invoke `page.drawing.get`，在既有主线程/LockingStep 中使用 T0a 适配器，不导航、不创建事务；绘图预算包含结构化和文本两份 JSON，先裁属性和设备，再裁绘图；单条无法容纳时明确报错，不返回无法前进的游标。
 
 ## 6. 写操作专项

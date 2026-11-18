@@ -25,7 +25,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         using (var parts = new FunctionBasePropertyList())
         {
             // Customer page: like the editor, the box takes the page's higher-level function (=GAA+P1), so it shows +P1, not
-            // =+P1. Live 2026-11-02: '=' is DESIGNATION_PLANT; DESIGNATION_FUNCTIONALASSIGNMENT is '==' and left the box =+P1.
+            // =+P1. A81, Live 2026-11-02: '=' is DESIGNATION_PLANT; DESIGNATION_FUNCTIONALASSIGNMENT is '==' and left the box =+P1.
             if (DrawingNames.HigherLevelFunctionOf(page.Name) is { Length: > 0 } function)
             { parts.DESIGNATION_PLANT = function; }
             parts.DESIGNATION_LOCATION = args.LocationBox!.Substring(1);

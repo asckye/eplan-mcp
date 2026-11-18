@@ -57,7 +57,7 @@ internal sealed class EplanModelViewWriter : IModelViewWriter
         string id = string.Empty;
         context.GetParameter("OBJECTID", ref id);
         Placement[] now = [.. EplanNativePreconditions.Valid(EplanPageDescriptions.Find(projectPath, view.Page).AllPlacements)];
-        // The view is not among Page.AllPlacements; OBJECTID is "<db>/190/<oid>/0", and the finder lists it (live 2026-11-12).
+        // The view is not among Page.AllPlacements; OBJECTID is "<db>/190/<oid>/0", and the finder lists it (A136, live 2026-11-12).
         string[] parts = (id ?? string.Empty).Split('/');
         ViewPlacement? placed = null;
         if (parts.Length > 2 && long.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out long oid))

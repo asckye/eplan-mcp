@@ -68,7 +68,7 @@ public static class PlacementMoveExecution
             // A75: points can be added before old crossings/core membership are reconciled by generation.
             DrawingPlacement[] cables = movedCables.Concat(actual.Page.Placements.Where(p => p.Kind == "Cable"
                 && movedCables.Any(c => c.Locator.Type == p.Locator.Type && c.Locator.Oid == p.Locator.Oid))).ToArray();
-            // The points' own property texts go with them, also when only one side still has the point (live 2026-11-02:
+            // The points' own property texts go with them, also when only one side still has the point (A73, live 2026-11-02:
             // an unnamed new point and its text were added, the old point's text was gone).
             // Points are judged per side, so another cable's point that changes owner still differs.
             DrawingPlacement[] before = [.. expected.Page.Placements.Where(p => cables.Any(c => PlacementMovePlanner.IsCablePoint(p, c)))];

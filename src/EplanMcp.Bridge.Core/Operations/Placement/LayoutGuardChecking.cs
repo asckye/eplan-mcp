@@ -69,7 +69,7 @@ public static partial class LayoutGuard
             if (b[0] < _area[0] || b[1] < _area[1] || b[2] > _area[2] || b[3] > _area[3]
                 || p.Location[0] < _area[0] || p.Location[1] < _area[1] || p.Location[0] > _area[2] || p.Location[1] > _area[3])
             {
-                // A macro's declared outline is not what EPLAN draws (live 2026-11-03: part overview macros fill the A3 page, as on the
+                // A macro's declared outline is not what EPLAN draws (A154, live 2026-11-03: part overview macros fill the A3 page, as on the
                 // sample's PLC overview pages). Inside a known page its objects are measured after the write, where only an off-page
                 // outline rolls back (ADR-0046); without a known page size the outline still refuses.
                 bool inPage = p.Kind == "Macro" && model.Page.PageSize is { Length: 2 } size && b[0] >= 0 && b[1] >= 0 && b[2] <= size[0] && b[3] <= size[1];

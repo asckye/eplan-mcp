@@ -171,7 +171,7 @@ internal sealed class PageTools
             data = await bridge.InvokeAsync<PageGetArgs, PageGetData>(OperationNames.PageGet, args, cancellationToken).ConfigureAwait(false);
             if (include_drawings)
             {
-                // Live 2026-11-16: whole model view pages passed the 16 MiB reply limit; the Bridge returns the requested slice.
+                // A146, Live 2026-11-16: whole model view pages passed the 16 MiB reply limit; the Bridge returns the requested slice.
                 int? offset = drawing_cursor is null ? 0 : PageDrawingDiscovery.For(bridge, TimeProvider.System).Peek(drawing_cursor);
                 if (offset is null)
                 { return ToolResults.InvalidArguments(["/drawing_cursor is invalid, expired or stale; omit it to restart drawing discovery."]); }

@@ -113,3 +113,8 @@
 - 运行时由 `Base.Internal.LicenseChecker` 检查调用栈，缺少授权时报告 "API License missing"。— XML。
 - Remote Client：没有找到官方的授权说明；客户端 DLL 不引用 Baseu，不做客户端授权检查。— 未验证。
 - **已验证（spike S0）**：在开发机的授权下，未签名的插件可以加载，并能读写 321 页的项目（A5）。其他授权类型仍然未知。
+
+### A160. 同时启动第二个 EPLAN 实例会停在系统消息窗口（2026-11-14，EPLAN 2026.0.3，已有 EPLAN 实例运行时）
+- **现象：** 第二个实例与第一个实例争用工作站设置，启动停在模态系统消息窗口。
+- **结论：** 会话启动工具检查已有进程；已有实例运行时拒绝启动第二个。
+- **证据：** `src/EplanMcp.Host/Addin/EplanLifecycle.cs` 的 `EplanLifecycle.StartAsync`（类注释）。

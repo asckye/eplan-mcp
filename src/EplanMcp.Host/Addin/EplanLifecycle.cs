@@ -19,7 +19,7 @@ internal sealed class EplanLifecycleException(string reason, string message, IRe
 /// Starts EPLAN for eplan_session_start (ADR-0058, docs/tools/eplan_session_start.md) the way install-addin does: the
 /// executable doctor finds, the variant on the command line, then the Bridge pipe of the process it started and a
 /// handshake. It refuses while any EPLAN runs: a second instance fights the first over the station settings and stops
-/// on a modal system messages window (live 2026-11-14). It never closes or forces anything.
+/// on a modal system messages window (A160, live 2026-11-14). It never closes or forces anything.
 /// </summary>
 internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses processes, IBridgeProbe bridge, TimeProvider time, AddinTimings timings, bool pinned)
 {

@@ -72,7 +72,7 @@ internal sealed class EplanPlcSchematics : IPlcSchematics
             configuration.Save(file);
             using var service = new PlcService();
             Project project = EplanProjects.ByPath(projectPath);
-            // Live 2026-11-08: generation can unplace functions that are already drawn and add pages nobody asked for.
+            // A122, Live 2026-11-08: generation can unplace functions that are already drawn and add pages nobody asked for.
             Dictionary<long, string?> before = ReadPlacements(project, function => devices.Any(device =>
                 function.Name == device.Tag || function.Name.StartsWith(device.Tag + ":", StringComparison.Ordinal)));
             string[] pagesBefore = [.. project.Pages.Select(page => page.Name)];

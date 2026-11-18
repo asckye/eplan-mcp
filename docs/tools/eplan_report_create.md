@@ -38,7 +38,7 @@
 
 ## 5. 实现
 
-依据 [A84](../eplan/api-notes/drawing-and-layout.md#a84-报表块读取与按报表块生成报表页2026-11-03eplan-20260325421electric-p8示例项目夹具只读生成只在-scratch-副本-largewrite)：在一个事务中 `ReportBlock.Create`、设置字段、`Reports.CreateReport`；提供数据时原样设置 `FilterSchemaData` / `SortSchemaData` / `FunctionFilterSchemaData` / `FunctionSortSchemaData`，方案名称照常设置。事务外使用新包装对象读回类型、表格与前后页清单；无页时回滚。经主线程 LockingStep / SafetyPoint / UndoStep / QuietModeStep；执行预算 300 秒、支持进度及取消。
+依据 [A84](../eplan/api-notes/graphics-and-page-geometry.md#a84-报表块读取与按报表块生成报表页2026-11-03eplan-20260325421electric-p8示例项目夹具只读生成只在-scratch-副本-largewrite)：在一个事务中 `ReportBlock.Create`、设置字段、`Reports.CreateReport`；提供数据时原样设置 `FilterSchemaData` / `SortSchemaData` / `FunctionFilterSchemaData` / `FunctionSortSchemaData`，方案名称照常设置。事务外使用新包装对象读回类型、表格与前后页清单；无页时回滚。经主线程 LockingStep / SafetyPoint / UndoStep / QuietModeStep；执行预算 300 秒、支持进度及取消。
 
 ## 6. 写入
 

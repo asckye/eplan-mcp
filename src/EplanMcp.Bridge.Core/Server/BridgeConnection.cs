@@ -232,7 +232,7 @@ internal sealed class BridgeConnection
     }
 
     /// <summary>
-    /// The response as one frame body. Live 2026-11-16: page drawings of the official model view page =GQA+B2.Y1&amp;MTC1/1
+    /// The response as one frame body. A146, Live 2026-11-16: page drawings of the official model view page =GQA+B2.Y1&amp;MTC1/1
     /// passed the 16 MiB frame limit and the Host dropped the connection as EPLAN_NOT_CONNECTED; an oversized response
     /// becomes RESOURCE_EXHAUSTED for that request and the connection stays.
     /// </summary>

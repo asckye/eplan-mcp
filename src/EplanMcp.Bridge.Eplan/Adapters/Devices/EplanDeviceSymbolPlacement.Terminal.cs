@@ -116,7 +116,7 @@ internal sealed partial class EplanDeviceSymbolPlacement
         }
         catch (PropertyNotFoundException)
         {
-            // Live 2026-11-03: GRAPHICS/KA1_PE terminals have no sort code property (S063109); the result only reports it.
+            // A86, Live 2026-11-03: GRAPHICS/KA1_PE terminals have no sort code property (S063109); the result only reports it.
         }
         TerminalStrip? owner = terminal.TerminalStrip;
         CheckTerminal(Same(name, strip.Name) && strip.IsMainFunction, $"strip reads back as '{strip.Name}', main function {strip.IsMainFunction}");

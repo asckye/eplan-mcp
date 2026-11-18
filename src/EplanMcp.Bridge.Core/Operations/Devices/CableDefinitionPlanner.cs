@@ -90,7 +90,7 @@ public static class CableDefinitionPlanner
             string[] pins = core["connection"]!["item_index"] is { } index
                 ? [Key(request["items"]![(int)index]!["from"]!), Key(request["items"]![(int)index]!["to"]!)] : core["before"]!["pins"]!.Values<string>().Select(p => p!).ToArray();
             JToken? locator = core["connection"]!["locator"];
-            // Live 2026-11-08 (MX_Dryer18 =BG/14): EPLAN reads the cores back in its own order (here by terminal designation), not
+            // A149, Live 2026-11-08 (MX_Dryer18 =BG/14): EPLAN reads the cores back in its own order (here by terminal designation), not
             // in the requested one, so each requested core is matched to the read core on its connection, then compared.
             int i = -1;
             for (int k = 0; k < actual.Count && i < 0; k++)

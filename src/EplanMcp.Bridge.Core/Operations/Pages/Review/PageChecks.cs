@@ -65,7 +65,7 @@ internal static class WireNumberCheck
 {
     public static void Run(ReviewContext c)
     {
-        // Live 2026-11-16 (official =EC1+A3&EFS1/1): the cores of the cables on this page carry their core marking as the number;
+        // A153, Live 2026-11-16 (official =EC1+A3&EFS1/1): the cores of the cables on this page carry their core marking as the number;
         // they are left out. Wire.Cable is no cable test: every wire with a definition point reads "<definition-points>".
         var cores = new HashSet<long>(c.Actual["cables"]?.SelectMany(cable => cable["cores"] ?? new JArray()).Select(core => (long?)core["locator"]?["oid"] ?? 0) ?? []);
         if (!c.Enabled("wire_number") || c.Actual["connections"] is not JArray all || all.Where(w => !cores.Contains((long?)w["locator"]?["oid"] ?? 0)).ToArray() is not { Length: > 0 } wires)
@@ -76,7 +76,7 @@ internal static class WireNumberCheck
         { c.Add("wire_number", "info", [], [], FormattableString.Invariant($"None of the {wires.Length} wires on this page has a wire number yet; number them with eplan_connection_number when the drawing is done."), "eplan_connection_number", numbering); }
         else if (open.Length > 0)
         {
-            // Live 2026-11-16: the official =EC1+A3&EFS1/1 numbers some plain wires and not the ones inside boxes and plugs, as
+            // A153, Live 2026-11-16: the official =EC1+A3&EFS1/1 numbers some plain wires and not the ones inside boxes and plugs, as
             // the EPLAN numbering schemes do; a page with some numbers is normal, so the open wires are one note, not warnings.
             c.Add("wire_number", "info", [], [.. open.Take(20).Select(w => w["locator"] is JObject l ? l.ToObject<DrawingLocator>() : null).OfType<DrawingLocator>()],
                 FormattableString.Invariant($"{open.Length} of {wires.Length} wires on this page have no wire number (up to 20 listed); check that the numbering scheme leaves them out on purpose."), "eplan_connection_number", numbering);
