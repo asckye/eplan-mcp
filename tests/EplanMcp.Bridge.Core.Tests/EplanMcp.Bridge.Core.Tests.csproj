@@ -38,6 +38,7 @@
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Properties\EplanVisibleNames.cs" Link="Adapters\EplanVisibleNames.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Connections\EplanConnectionCreator.Interruptions.cs" Link="Adapters\EplanConnectionCreator.Interruptions.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Pages\EplanDrawingReader.cs" Link="Adapters\EplanDrawingReader.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Pages\EplanDrawingReader.Reading.cs" Link="Adapters\EplanDrawingReader.Reading.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Connections\EplanConnectionScene.cs" Link="Adapters\EplanConnectionScene.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Pages\EplanPageReviewReader.Evidence.cs" Link="Adapters\EplanPageReviewReader.Evidence.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanPlacementStyle.cs" Link="Adapters\EplanPlacementStyle.cs" />

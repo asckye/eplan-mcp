@@ -16,7 +16,6 @@ EplanMcp.Bridge.Core/PropertySetPlanner.Plan(6)	275
 EplanMcp.Bridge.Eplan/BridgeHost.Start(4)	252
 EplanMcp.Bridge.Eplan/EplanApprovalDialog.Ask(2)	137
 EplanMcp.Bridge.Eplan/EplanDeviceSymbolPlacement.Create(5)	106
-EplanMcp.Bridge.Eplan/EplanDrawingReader.Read(3)	309
 EplanMcp.Bridge.Eplan/EplanGraphicEditor.PrepareEdit(3)	119
 EplanMcp.Bridge.Eplan/EplanPlacementTextWriter.Place(3)	104
 EplanMcp.Host/ActionRunTools.RunAsync(6)	101

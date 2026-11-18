@@ -35,7 +35,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         if (target.ReadOnly && !allowReadOnly)
         { throw new BridgeErrorException(ErrorReason.PolicyDenied, "Select a writable project."); }
         Page native = Page(target.Path, page);
-        PageDrawingGeometry geometry = new EplanDrawingReader().Read(target.Path, page, created)!;
+        PageDrawingGeometry geometry = EplanDrawingReader.Read(target.Path, page, created)!;
         geometry.Project = target.Path;
         var scene = new ConnectionCreatePlanner.Scene { Project = target, Page = geometry, PageType = native.PageType.ToString(), Complete = true };
         foreach (Placement placement in EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)).GroupBy(p => p.ToStringIdentifier(), StringComparer.Ordinal).Select(g => g.First()))

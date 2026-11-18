@@ -22,7 +22,6 @@ EplanMcp.Bridge.Core/PropertyPlacementMoves.Plan(3)	73
 EplanMcp.Bridge.Core/PropertyReadMapping.Read(6)	44
 EplanMcp.Bridge.Core/PropertySetPlanner.Plan(6)	72
 EplanMcp.Bridge.Eplan/EplanDeviceSymbolPlacement.Create(5)	55
-EplanMcp.Bridge.Eplan/EplanDrawingReader.Read(3)	141
 EplanMcp.Bridge.Eplan/EplanGraphicEditor.PrepareEdit(3)	46
 EplanMcp.Host/AnnotationCreatePlanning.Validate(3)	56
 EplanMcp.Host/ContextBuilder.ReadAsync(8)	65

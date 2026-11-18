@@ -54,7 +54,7 @@ public sealed class LayoutMeasurementTests
         EplanProjects.Project = new(page);
         try
         {
-            PageDrawingGeometry geometry = new EplanDrawingReader().Read("project", page.Name, [a])!;
+            PageDrawingGeometry geometry = EplanDrawingReader.Read("project", page.Name, [a])!;
             DrawingPlacement first = Assert.Single(geometry.Placements, p => p.Locator.Oid == a.ObjectIdentifier);
             DrawingPlacement second = Assert.Single(geometry.Placements, p => p.Locator.Oid == b.ObjectIdentifier);
             Assert.Equal(card.ToStringIdentifier(), first.Properties["layout_container_owner"]);
@@ -99,7 +99,7 @@ public sealed class LayoutMeasurementTests
             var reader = new EplanDrawingReader();
             PageDrawingGeometry before = reader.Read("project", page.Name)!;
             Assert.Empty(before.Placements);
-            PageDrawingGeometry actual = reader.Read("project", page.Name, [function])!;
+            PageDrawingGeometry actual = EplanDrawingReader.Read("project", page.Name, [function])!;
             Assert.Equal(2, actual.Placements.Count);
             DrawingPlacement text = Assert.Single(actual.Placements, p => p.Kind == "PropertyPlacement");
             Assert.Equal(function.ObjectIdentifier, text.Locator.Oid);
