@@ -57,6 +57,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionCatalogTests.cs"
           },
           {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
             "name": "ActionCatalogFileTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/ActionCatalogFileTests.cs"
@@ -567,6 +572,11 @@
             "name": "EvalRunTests",
             "size": "Small",
             "file": "tests/EplanMcp.Evals.Tests/Run/EvalRunTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "UsageToolsTests",
@@ -15241,6 +15251,11 @@
         ],
         "tests": [
           {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
             "name": "AssetGetToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/AssetGetToolTests.cs"
@@ -15268,6 +15283,11 @@
         "specStatus": "Implemented (v0.1.0)",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
           {
             "name": "AssetUpdateToolTests",
             "size": "Medium",
@@ -16904,11 +16924,6 @@
             "name": "PageReviewCableFixTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewCableFixTests.cs"
-          },
-          {
-            "name": "PageReviewRulesTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewRulesTests.cs"
           },
           {
             "name": "SmallProjectRedrawDriverTests",
@@ -25032,6 +25047,11 @@
             "file": "tests/EplanMcp.Host.Tests/Packs/PluginLibraryArgumentsTests.cs"
           },
           {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
             "name": "PluginLibraryToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Packs/PluginLibraryToolTests.cs"
@@ -27308,6 +27328,11 @@
         ],
         "tests": [
           {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
             "name": "ToolProfileTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolProfileTests.cs"
@@ -27667,6 +27692,11 @@
             "name": "PartBuildTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PartBuildTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "PartBuildToolTests",
@@ -30561,11 +30591,6 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/MoveTransactionTests.cs"
           },
           {
-            "name": "PageReviewRulesTests",
-            "size": "Small",
-            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PageReviewRulesTests.cs"
-          },
-          {
             "name": "PageReviewTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewTests.cs"
@@ -31574,6 +31599,11 @@
         "apiNotes": [],
         "tests": [
           {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
             "name": "ProjectToolsTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ProjectToolsTests.cs"
@@ -31789,7 +31819,13 @@
         "spec": "docs/tools/eplan_potential_update.md",
         "specStatus": "Implemented (v0.5.2)",
         "apiNotes": [],
-        "tests": [],
+        "tests": [
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          }
+        ],
         "operationTests": [
           {
             "name": "PotentialUpdateOperationTests",
@@ -35166,6 +35202,11 @@
             "name": "SelectionToolTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/SelectionToolTests.cs"
+          },
+          {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
           },
           {
             "name": "SelectionProtocolTests",

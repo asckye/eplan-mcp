@@ -7313,7 +7313,8 @@
             "items": {
               "type": "string",
               "maxLength": 64
-            }
+            },
+            "description": "Per pin, in pin order; symbol source only"
           },
           "location_box": {
             "type": [
@@ -7419,7 +7420,8 @@
               "null"
             ],
             "minLength": 1,
-            "maxLength": 256
+            "maxLength": 256,
+            "description": "Plain text of the PLC point; stored language-neutral"
           },
           "plc_plug_designation": {
             "type": [

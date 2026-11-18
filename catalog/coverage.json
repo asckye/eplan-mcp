@@ -743,7 +743,7 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_action_catalog_search.md",
-      "small": 1,
+      "small": 2,
       "medium": 3,
       "large": 1,
       "apiNotes": []
@@ -786,7 +786,7 @@
       "dependencies": 176,
       "actions": 0,
       "spec": "docs/tools/eplan_action_try.md",
-      "small": 3,
+      "small": 4,
       "medium": 3,
       "large": 2,
       "apiNotes": [
@@ -916,7 +916,7 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_asset_search.md",
-      "small": 0,
+      "small": 1,
       "medium": 2,
       "large": 0,
       "apiNotes": [
@@ -933,7 +933,7 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_asset_update.md",
-      "small": 0,
+      "small": 1,
       "medium": 1,
       "large": 0,
       "apiNotes": []
@@ -1136,7 +1136,7 @@
       "dependencies": 139,
       "actions": 0,
       "spec": "docs/tools/eplan_connection_create.md",
-      "small": 9,
+      "small": 8,
       "medium": 11,
       "large": 18,
       "apiNotes": [
@@ -2082,7 +2082,7 @@
       "dependencies": 0,
       "actions": 0,
       "spec": "docs/tools/eplan_pack_library_list.md",
-      "small": 1,
+      "small": 2,
       "medium": 1,
       "large": 0,
       "apiNotes": []
@@ -2295,7 +2295,7 @@
       "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_page_text_replace.md",
-      "small": 1,
+      "small": 2,
       "medium": 2,
       "large": 1,
       "apiNotes": [
@@ -2349,7 +2349,7 @@
       "dependencies": 30,
       "actions": 0,
       "spec": "docs/tools/eplan_part_build.md",
-      "small": 1,
+      "small": 2,
       "medium": 1,
       "large": 1,
       "apiNotes": [
@@ -2639,7 +2639,7 @@
       "dependencies": 132,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_update.md",
-      "small": 11,
+      "small": 10,
       "medium": 3,
       "large": 4,
       "apiNotes": [
@@ -2761,7 +2761,7 @@
       "dependencies": 41,
       "actions": 0,
       "spec": "docs/tools/eplan_plc_readdress.md",
-      "small": 0,
+      "small": 1,
       "medium": 0,
       "large": 1,
       "apiNotes": []
@@ -2779,7 +2779,7 @@
       "dependencies": 67,
       "actions": 0,
       "spec": "docs/tools/eplan_potential_update.md",
-      "small": 0,
+      "small": 1,
       "medium": 0,
       "large": 0,
       "apiNotes": []
@@ -3173,7 +3173,7 @@
       "dependencies": 141,
       "actions": 0,
       "spec": "docs/tools/eplan_selection_set.md",
-      "small": 2,
+      "small": 3,
       "medium": 1,
       "large": 1,
       "apiNotes": [

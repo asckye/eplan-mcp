@@ -628,7 +628,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.InRange(move.InputSchema.GetRawText().Length, 1, 3000);
         Tool place = Tools.Single(t => t.Name == DeviceWriteTools.PlaceTool);
         Assert.InRange(place.Description!.Length + Descriptions(place.InputSchema), 1, 1000);
-        Assert.InRange(place.InputSchema.GetRawText().Length, 1, 3850);
+        Assert.InRange(place.InputSchema.GetRawText().Length, 1, 4000); // +two parameter descriptions the full usage text has no room for (2026-11-18)
         Tool bind = Tools.Single(t => t.Name == CabinetTools.BindTool);
         Assert.InRange(bind.Description!.Length + Descriptions(bind.InputSchema), 1, 1000);
         Assert.InRange(bind.InputSchema.GetRawText().Length, 1, 4000);
