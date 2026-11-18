@@ -191,7 +191,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
                 {
                     int index = remaining.FindIndex(p => p[0] == before.StartDevice && p[1] == before.EndDevice);
                     if (index < 0)
-                    { throw Mismatch("existing connection " + before.StartDevice + " - " + before.EndDevice + " is gone after node placement"); }
+                    { throw Mismatch("existing connection " + before.StartDevice + " - " + before.EndDevice + " is gone after node placement; connections now: " + Listed(actual)); }
                     remaining.RemoveAt(index);
                 }
                 if (remaining.Count != 0)
@@ -239,7 +239,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             {
                 int index = added.FindIndex(p => p[0] == before[0] && p[1] == before[1]);
                 if (index < 0)
-                { throw Mismatch("existing connection " + before[0] + " - " + before[1] + " is gone after generation"); }
+                { throw Mismatch("existing connection " + before[0] + " - " + before[1] + " is gone after generation; connections now: " + Listed(actual)); }
                 added.RemoveAt(index);
             }
             if (plan["definitionPoints"] is not null && added.Any(p => preserved.Any(before => p[0] == before[0] && p[1] == before[1] || p[0] == before[1] && p[1] == before[0])))
@@ -276,6 +276,10 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             return actual;
         }
     }
+    // What EPLAN holds instead tells a lost connection from one whose ends changed.
+    private static string Listed(List<string?[]> connections) => connections.Count == 0 ? "none"
+        : string.Join("; ", connections.Select(p => (p[0] ?? "<potential>") + " - " + (p[1] ?? "<none>")));
+
     private static BridgeErrorException Mismatch(string detail) => new(ErrorReason.EplanOperationFailed, "Actual connection geometry or logical endpoints differ from the plan: " + detail + ".");
     private static BridgeErrorException Unknown() => new(ErrorReason.OutcomeUnknown, "Connection creation outcome is unknown; ask the engineer to inspect the project before further writes.") { Error = { Execution = ExecutionState.Unknown } };
 }

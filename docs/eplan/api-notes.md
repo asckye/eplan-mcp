@@ -164,6 +164,7 @@
 | A142 | 一个事务画 PLC 机架：图片没有主功能，改名读回为连接点 | 2026-11-15 | [plc-and-terminals](api-notes/plc-and-terminals.md#a142-一个事务画-plc-机架图片没有主功能改名读回为连接点2026-11-15eplan-20260325421electric-p8a-槽-largewrite-scratch-副本) |
 | A144 | 设置写入：USER 设置读回后恢复；PROJECT 设置写入不能撤销 | 2026-11-16 | [generic-api](api-notes/generic-api.md#a144-设置写入user-设置读回后恢复project-设置写入不能撤销2026-11-16eplan-20260325421electric-p8a-槽-largewrite-scratch-副本) |
 | A143 | 项目级创建在大项目里观察不到；两种创建一次撤销不恢复 | 2026-11-15 | [generic-api](api-notes/generic-api.md#a143-项目级创建在大项目里观察不到两种创建一次撤销不恢复2026-11-15eplan-20260325421electric-p8a-槽-largewrite-scratch-副本) |
+| A148 | T 节点按“来源 → 目标 1 → 目标 2”链式接线，目标 1 一侧没有设备时不生成任何连接 | 2026-11-17 | [drawing-and-layout](api-notes/drawing-and-layout.md) |
 | A147 | 官方项目回归样本里的读数：属性文字外框偏长、`SPECIAL/DC` 黑盒、P&ID 页、PLC 盒内的图形组 | 2026-11-17 | [drawing-and-layout](api-notes/drawing-and-layout.md#a147-官方项目回归样本里的读数属性文字外框偏长specialdc-黑盒pid-页plc-盒内的图形组2026-11-17eplan-20260325421electric-p8a-槽8-个官方-ees-项目的-scratch-还原副本只读) |
 | A146 | 模型视图页的绘图读取：对象多到超过回复上限，ViewPart 外框冷读和热读不同 | 2026-11-16 | [drawing-and-layout](api-notes/drawing-and-layout.md#a146-模型视图页的绘图读取对象多到超过回复上限viewpart-外框冷读和热读不同2026-11-16eplan-20260325421electric-p8a-槽示例项目-scratch-副本只读) |
 | A145 | 图框评估区就是绘图区：起点 12003/12004，高为行高 12002 之和 | 2026-11-16 | [drawing-and-layout](api-notes/drawing-and-layout.md#a145-图框评估区就是绘图区起点-1200312004高为行高-12002-之和2026-11-16eplan-20260325421electric-p8a-槽示例项目-scratch-副本只读) |

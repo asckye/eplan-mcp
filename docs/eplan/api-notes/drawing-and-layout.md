@@ -1,5 +1,12 @@
 # [EPLAN API 笔记](../api-notes.md)：绘图、布局与连接
 
+### A148. T 节点按“来源 → 目标 1 → 目标 2”链式接线，目标 1 一侧没有设备时不生成任何连接（2026-11-17，EPLAN 2026.0.3.25421，Electric P8，A 槽，LargeWrite scratch 新建页）
+- **现象：** 一条已生成的竖线（上、下各一个设备，1 条连接）上放 `SPECIAL/TOUR`，支路向右接一个角，角的另一端悬空，然后生成连接。变体 0（连接点顺序 Down、Up、Right，Right 偏 2 mm）、变体 1（Up、Down、Right）和变体 8（三点都在插入点的圆点）生成后原连接还在；变体 2、3（支路是目标 1）生成后这一页**一条连接都没有**，原来上下两个设备之间的连接也没了。
+- **结论：** 符号的连接点按 [目标 1, 来源, 目标 2] 排列，EPLAN 按来源 → 目标 1 → 目标 2 链式接线；目标 1 一侧到不了设备时整条链断开，来源和目标 2 之间也不连。来源或目标 2 一侧为空不影响另外两端（2026-11-02 的记录：`TOUR` 只有上、右两个设备时变体 1、2、3 生成 A–C，变体 0 不生成）。
+- **工具行为：** `eplan_connection_create` 不给 `variant` 时默认把支路当目标 1（官方 EES 的画法）。规划时如果目标 1 那一侧沿新旧线段到不了设备引脚、电位连接点或中断点，而目标 2 那一侧到得了，就改用同一来源、两个目标对调的变体；按符号库读到的连接点顺序选，不按变体编号。调用方给了 `variant` 时不改。支路以后接上设备，接线顺序是干线在前、支路在后；要支路在前，等支路画完再放 T 节点，或者给 `variant`。
+- **诊断：** “existing connection … is gone” 的失败信息现在附带 EPLAN 当时实际有的连接（`connections now: …`），能分清是连接丢了还是两端换了。
+- **证据：** `ConnectionCreateTests.TNodeOnGeneratedLine_OpenCornerBranch_PreservesLogicalConnection_TwoUndosRestore`：修复前在 main `9f300160` 和 `f3264f89` 上都失败（`connections now: none`），修复后 `ConnectionCreateTests` 25/25。原因是 2026-11-08 的 `f63f0078` 把默认从圆点改成方向变体时没有覆盖支路悬空的情况。
+
 ### A147. 官方项目回归样本里的读数：属性文字外框偏长、`SPECIAL/DC` 黑盒、P&ID 页、PLC 盒内的图形组（2026-11-17，EPLAN 2026.0.3.25421，Electric P8，A 槽，8 个官方 EES 项目的 scratch 还原副本，只读）
 - **属性文字外框比墨迹长：** `PropertyPlacement.GetBoundingBox(false)` 沿文字方向读得偏长。HVAC 示例 `==ASP01=SSA01++GEB01+F1&EFS/101` 上 `-KE11` 左侧右对齐的交叉引用文字，墨迹约在 x 25–39 mm，外框读成 [-5.55, 254.76, 39, 260.92]；`&EFS/22` 卡件上方的竖排文字墨迹止于约 290 mm（列号栏 292 mm 以下），外框到 301.8 mm。所以文字越出绘图区只能作提示，不能当错误。
 - **黑盒：** 维修开关 `-QB1`（`&EFS/30`）是符号 `SPECIAL/DC/0` 的 `Function`，读出的类别不是 `BlackBox`，导线竖穿进盒子接盒内的触点。读取器现在把 `SPECIAL/DC` 符号也当容器。

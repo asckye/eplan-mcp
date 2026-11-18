@@ -499,11 +499,16 @@ public sealed class ConnectionCreateTests(LiveEplan eplan, WriteHost host) : ICl
             JsonElement current = Assert.Single((await Connections()).EnumerateArray());
             Assert.Equal(original.GetProperty("from").GetRawText(), current.GetProperty("from").GetRawText());
             Assert.Equal(original.GetProperty("to").GetRawText(), current.GetProperty("to").GetRawText());
+            // A148: the branch reaches no device, so the line below is target 1 (the symbol's first point) and the branch
+            // target 2, whose pin is offset; branch first would lose the existing connection.
+            JsonElement[] points = [.. result.GetProperty("symbols")[0].GetProperty("symbol").GetProperty("connectionPoints").EnumerateArray()];
+            Assert.Equal(["Down", "Up", "Right"], points.Select(p => p.GetProperty("direction").GetString()));
+            JsonElement branch = points[2];
             JsonElement expected = JsonSerializer.SerializeToElement(new double[][][]
             {
                 [[30 * grid, 45 * grid], [30 * grid, 30 * grid]],
                 [[30 * grid, 25 * grid], [30 * grid, 30 * grid]],
-                [[30 * grid, 30 * grid], [34 * grid, 30 * grid]],
+                [[30 * grid + branch.GetProperty("location")[0].GetDouble(), 30 * grid], [34 * grid, 30 * grid]],
             });
             Assert.Equal(SegmentKeys(expected), SegmentKeys(await Graphics()));
             Assert.Equal(SegmentKeys(expected), SegmentKeys(result.GetProperty("graphicalAutoconnect")));

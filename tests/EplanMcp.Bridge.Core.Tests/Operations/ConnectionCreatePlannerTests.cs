@@ -81,6 +81,30 @@ public sealed class ConnectionCreatePlannerTests
         Assert.Equal(("TOUR", variant), ((string?)symbol["name"], (int)symbol["variant"]!));
     }
 
+    /// <summary>
+    /// A148 (live 2026-11-17): EPLAN wires source to target 1 to target 2; a branch that reaches no device yet may not be
+    /// target 1, or the existing connection along the line is lost. TOUR's points are [target 1, source, target 2].
+    /// </summary>
+    [Theory]
+    [InlineData(false, null, null, 0)]    // open branch: the line below becomes target 1
+    [InlineData(false, "Down", null, 1)]  // the same with the source below
+    [InlineData(true, null, null, 2)]     // the branch reaches a device: branch first, as on the EES pages
+    [InlineData(false, null, 2, 2)]       // a given variant is never changed
+    public void TNode_OnAnExistingLine_WithAnOpenBranch_KeepsTheChainClosed(bool branchPin, string? source, int? given, int variant)
+    {
+        var fixture = new ConnectionCreateFixture();
+        fixture.SplitLine(branchPin: branchPin);
+        fixture.Symbols.RemoveAll(s => s.Name == "TOUR");
+        fixture.Symbols.AddRange([ConnectionCreateFixture.Variant("TOUR", "TNodeRight", 0, "Down", "Up", "Right"), ConnectionCreateFixture.Variant("TOUR", "TNodeRight", 1, "Up", "Down", "Right"),
+            ConnectionCreateFixture.Variant("TOUR", "TNodeRight", 2, "Right", "Up", "Down"), ConnectionCreateFixture.Variant("TOUR", "TNodeRight", 3, "Right", "Down", "Up")]);
+        if (source is not null)
+        { fixture.Request["items"]![0]!["source"] = source; }
+        if (given is not null)
+        { fixture.Request["items"]![0]!["variant"] = given; }
+        JToken symbol = fixture.Plan()["symbols"]![0]!["symbol"]!;
+        Assert.Equal(("TOUR", variant), ((string?)symbol["name"], (int)symbol["variant"]!));
+    }
+
     [Theory]
     [InlineData("\"Down\"")]
     [InlineData("\"Up\"")]

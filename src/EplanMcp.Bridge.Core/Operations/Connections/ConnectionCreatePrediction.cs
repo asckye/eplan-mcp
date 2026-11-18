@@ -37,6 +37,8 @@ public static partial class ConnectionCreatePlanner
         private double[][][] _existingSegments = [];
         private List<double[][]> _segments = [];
         private (double[] Point, string Direction)[] _ports = [];
+        // T-nodes whose target order this prediction chose itself, with the other variants of the same symbol.
+        private readonly List<((double[] Point, string[] Directions, string Kind) Node, int Index, SymbolSearchItem Symbol, SymbolSearchItem[] Others)> _chosenTNodes = [];
         private HashSet<string> _nodeCentres = [];
         private Dictionary<string, HashSet<string>> _groups = [];
         private HashSet<string> _nodeOwners = [];
@@ -52,6 +54,7 @@ public static partial class ConnectionCreatePlanner
             BuildSegments();
             CheckSegments();
             GroupConnected();
+            KeepChainsClosed();
             PredictLogical();
             JObject result = Result(Layout());
             return Seal(result, expectedFingerprint);

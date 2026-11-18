@@ -82,8 +82,17 @@ public static partial class ConnectionCreatePlanner
 
         private void ResolveNode((double[] Point, string[] Directions, string Kind) node, List<SymbolSearchItem> special)
         {
-            SymbolSearchItem[] matches = Narrow(node, Matches(node, special));
+            SymbolSearchItem[] candidates = Matches(node, special);
+            SymbolSearchItem[] matches = Narrow(node, candidates);
             SymbolSearchItem symbol = matches.Length == 1 ? matches[0] : throw Missing("Select a verified SPECIAL variant with the requested cardinal pins using eplan_symbol_search.");
+            if (node.Kind == "t_node" && !_requestedVariants.ContainsKey(Key(node.Point)) && _directionalVariants.TryGetValue(Key(node.Point), out var directional) && symbol.Variant == directional.Number)
+            { _chosenTNodes.Add((node, _resolved.Count, symbol, [.. candidates.Where(s => s.Name == symbol.Name && s.Variant != symbol.Variant)])); }
+            _resolved.Add(Placed(node, symbol));
+        }
+
+        /// <summary>The symbol at its insertion point, so that its first pin (an interruption point's: the pin of its direction) lies on the node.</summary>
+        private JObject Placed((double[] Point, string[] Directions, string Kind) node, SymbolSearchItem symbol)
+        {
             double[] offset = (node.Kind == "interruption_point" ? symbol.ConnectionPoints.Last(p => p.Direction == node.Directions[0]) : symbol.ConnectionPoints[0]).Location;
             double[] position = [node.Point[0] - offset[0], node.Point[1] - offset[1]];
             foreach (SymbolConnectionPoint pin in symbol.ConnectionPoints)
@@ -93,10 +102,11 @@ public static partial class ConnectionCreatePlanner
             double[] outline = [bounds[0] + position[0], bounds[1] + position[1], bounds[2] + position[0], bounds[3] + position[1]];
             Require(position.All(v => v is >= 0 and <= 10000) && DrawingCoordinates.Contains(scene.Page.PageSize, [outline, [position[0], position[1], position[0], position[1]]]), "/items", "Keep the full symbol outline inside Page.Size and insertion coordinates in 0..10000 mm.");
             // Functional discovery metadata does not widen the existing routing-symbol contract.
-            _resolved.Add(new JObject { ["position"] = new JArray(position), ["symbol"] = BridgeJson.FromObject(new { symbol.Library, symbol.Name, symbol.Variant, symbol.Type, symbol.Kind, symbol.ConnectionPoints }), ["bounds"] = new JArray(outline) });
-            _resolved.Last!["boundsKnown"] = DrawingCoordinates.ValidBounds(found);
+            var placed = new JObject { ["position"] = new JArray(position), ["symbol"] = BridgeJson.FromObject(new { symbol.Library, symbol.Name, symbol.Variant, symbol.Type, symbol.Kind, symbol.ConnectionPoints }), ["bounds"] = new JArray(outline) };
+            placed["boundsKnown"] = DrawingCoordinates.ValidBounds(found);
             if (_interruptions.TryGetValue(Key(node.Point), out JObject? interruption))
-            { _resolved.Last!["interruption"] = interruption; }
+            { placed["interruption"] = interruption; }
+            return placed;
         }
 
         private void BuildSegments()
@@ -194,6 +204,50 @@ public static partial class ConnectionCreatePlanner
                 foreach (string key in group)
                 { _groups[key] = group; }
             }
+        }
+
+        /// <summary>
+        /// A148: EPLAN wires a T-node as a chain, source to target 1 to target 2 (its points are listed [target 1, source,
+        /// target 2]); with no device on target 1's side it generates no connection at all, also not between the other two.
+        /// The default makes the branch target 1 (EES). Where that side reaches no device yet and target 2's side does, the
+        /// variant with the same source and the targets exchanged keeps the chain closed. A given variant is never changed.
+        /// </summary>
+        private void KeepChainsClosed()
+        {
+            foreach (var chosen in _chosenTNodes)
+            {
+                List<SymbolConnectionPoint> points = chosen.Symbol.ConnectionPoints;
+                if (ReachesDevice(chosen.Node.Point, points[0].Direction) || !ReachesDevice(chosen.Node.Point, points[2].Direction))
+                { continue; }
+                SymbolSearchItem? exchanged = chosen.Others.Where(s => s.ConnectionPoints[0].Direction == points[2].Direction && s.ConnectionPoints[1].Direction == points[1].Direction)
+                    .OrderBy(s => s.Variant).FirstOrDefault();
+                if (exchanged is not null)
+                { _resolved[chosen.Index] = Placed(chosen.Node, exchanged); }
+            }
+        }
+
+        /// <summary>Whether the lines leaving the node in this direction lead to a device pin, a potential point or an interruption point, not counting the node itself.</summary>
+        private bool ReachesDevice(double[] node, string direction)
+        {
+            double[][][] lines = [.. _segments, .. _existingSegments.Where(e => !_splits.Any(s => ReferenceEquals(s.Segment, e)))];
+            double[]? next = _segments.Where(s => s.Any(p => p.SequenceEqual(node))).SelectMany(s => s).FirstOrDefault(p => !p.SequenceEqual(node) && Direction(node, p) == direction);
+            var seen = new HashSet<string>(StringComparer.Ordinal) { Key(node) };
+            var open = new Queue<double[]>();
+            if (next is not null && seen.Add(Key(next)))
+            { open.Enqueue(next); }
+            while (open.Count > 0)
+            {
+                double[] at = open.Dequeue();
+                string[] owners = [.. scene.Pins.Where(p => p.Value.Location.SequenceEqual(at)).Select(p => Owner(p.Key))];
+                if (owners.Any(o => !_nodeOwners.Contains(o)) || _nodes.TryGetValue(Key(at), out var added) && added.Kind is "potential_point" or "interruption_point")
+                { return true; }
+                // An existing corner or T-node passes the line on through all its pins (A64: one may be offset).
+                IEnumerable<double[]> onwards = lines.Where(s => s.Any(p => p.SequenceEqual(at))).SelectMany(s => s)
+                    .Concat(scene.Pins.Where(p => owners.Contains(Owner(p.Key), StringComparer.Ordinal)).Select(p => p.Value.Location));
+                foreach (double[] point in onwards.Where(p => seen.Add(Key(p))))
+                { open.Enqueue(point); }
+            }
+            return false;
         }
 
         private void PredictLogical()
