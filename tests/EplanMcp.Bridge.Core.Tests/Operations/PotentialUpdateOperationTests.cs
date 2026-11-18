@@ -61,6 +61,31 @@ public sealed class PotentialUpdateOperationTests
         Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Error.Reason, error.Error.Execution));
     }
 
+    /// <summary>
+    /// Security review 2026-11-17: the request names the project, and the name is resolved again at execution. The Host
+    /// sends the path the plan was approved for; a name that now opens another project changes nothing.
+    /// </summary>
+    [Theory]
+    [InlineData("project", true)]
+    [InlineData(null, true)]
+    [InlineData(@"D:\Other\project", false)]
+    public void Execute_ChecksTheProjectThePlanWasApprovedFor(string? plannedPath, bool written)
+    {
+        var world = new World();
+        JObject input = world.Input(("color", "BU"));
+        var args = new JObject { ["request"] = input.DeepClone(), ["fingerprint"] = world.Plan(input).Fingerprint, ["projectPath"] = plannedPath };
+
+        if (written)
+        {
+            world.Execute(args);
+            Assert.Equal("BU", world.Values["color"]);
+            return;
+        }
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => world.Execute(args));
+        Assert.Equal((ErrorReason.PlanStale, ExecutionState.NotStarted), (error.Error.Reason, error.Error.Execution));
+        Assert.Equal("WH", world.Values["color"]);
+    }
+
     [Fact]
     public void Plan_AnotherKindOrNoProperty_IsInvalid()
     {
@@ -118,6 +143,8 @@ public sealed class PotentialUpdateOperationTests
         private PotentialUpdateOperation Operation(bool execute) => new(new FakeCatalog(new OpenProject { Name = "project", Path = "project" }), this, this, Transactions, execute);
 
         public WritePlan Plan(JObject input) => ((JObject)Operation(false).Execute(input)!).ToObject<WritePlan>()!;
+
+        public JObject Execute(JObject args) => (JObject)Operation(true).Execute(args)!;
 
         public JObject Execute(JObject input, WritePlan plan) => (JObject)Operation(true).Execute(new JObject { ["request"] = input.DeepClone(), ["fingerprint"] = plan.Fingerprint })!;
     }

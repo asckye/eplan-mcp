@@ -30,6 +30,21 @@ public static class WriteArguments
             : open;
     }
 
+    /// <summary>
+    /// The project a plan was approved for must still be the one the request resolves to (security review 2026-11-17).
+    /// Requests that carry the caller's project name are resolved again at execution, and another open project could have
+    /// taken that name since the approval; their fingerprints cover the request as written, so the Host sends the plan's
+    /// project path beside the request instead of changing it. Without a planned path nothing is checked.
+    /// </summary>
+    public static void RequirePlanned(string? plannedPath, string resolvedPath)
+    {
+        if (plannedPath is { Length: > 0 } && !ProjectResolver.SamePath(resolvedPath, plannedPath))
+        {
+            throw NotStarted(new BridgeErrorException(ErrorReason.PlanStale,
+                "The project name now opens a different project than the one the plan was approved for; nothing was changed. Create a new plan."));
+        }
+    }
+
     /// <summary>Marks an error found before the transaction: nothing was changed (ADR-0010).</summary>
     public static BridgeErrorException NotStarted(BridgeErrorException error)
     {

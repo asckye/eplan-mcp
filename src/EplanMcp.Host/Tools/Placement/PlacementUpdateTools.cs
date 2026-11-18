@@ -25,7 +25,7 @@ internal sealed class PlacementUpdateTools
         try
         {
             var request = new WriteRequest<JsonElement, object>(Tool, ToolTier.Write, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionCreateExecute,
-                input, plan => new { request = input, fingerprint = plan.Fingerprint }, dryRun, PageWriteTools.DefaultLimit, "Moving placements");
+                input, plan => new { request = input, fingerprint = plan.Fingerprint, projectPath = plan.ProjectPath }, dryRun, PageWriteTools.DefaultLimit, "Moving placements");
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<JsonElement, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
             result["execution"] = outcome.Execution;

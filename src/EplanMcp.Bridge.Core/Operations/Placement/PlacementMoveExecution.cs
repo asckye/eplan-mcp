@@ -8,12 +8,13 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>A54: read every location inside the SafetyPoint; autoconnect is checked after commit, before CloseUndo.</summary>
 public static class PlacementMoveExecution
 {
-    public static JObject Execute(IPlacementMover mover, ITransactionScopeFactory transactions, JObject input, string fingerprint, string tool = "eplan_placement_update")
+    public static JObject Execute(IPlacementMover mover, ITransactionScopeFactory transactions, JObject input, string fingerprint, string tool = "eplan_placement_update", string? plannedProject = null)
     {
         PageScene scene;
         try
         { scene = mover.Read((string?)input["project"] ?? "", (string?)input["page"] ?? ""); }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
+        WriteArguments.RequirePlanned(plannedProject, scene.Project.Path);
         JObject plan = PlacementMovePlanner.Plan(input.ToString(Formatting.None), scene, fingerprint);
         plan["dryRun"] = false;
         if ((bool)plan["noOp"]!)

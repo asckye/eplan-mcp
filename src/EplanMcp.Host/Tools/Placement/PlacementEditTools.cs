@@ -20,7 +20,7 @@ internal sealed class PlacementEditTools
         ToolTier tier = input.TryGetProperty("operation", out JsonElement value) && value.ValueKind == JsonValueKind.String && value.GetString() == "delete" ? ToolTier.Destructive : ToolTier.Write;
         try
         {
-            var request = new WriteRequest<JsonElement, object>(Tool, tier, OperationNames.PlacementEditPlan, OperationNames.PlacementEditExecute, input, (plan, backup) => new { request = input, fingerprint = plan.Fingerprint, backup }, dry, PageWriteTools.DefaultLimit, "Editing placements");
+            var request = new WriteRequest<JsonElement, object>(Tool, tier, OperationNames.PlacementEditPlan, OperationNames.PlacementEditExecute, input, (plan, backup) => new { request = input, fingerprint = plan.Fingerprint, projectPath = plan.ProjectPath, backup }, dry, PageWriteTools.DefaultLimit, "Editing placements");
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<JsonElement, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
             result["execution"] = outcome.Execution;

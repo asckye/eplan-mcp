@@ -23,7 +23,7 @@ internal sealed class GraphicEditTools
         try
         {
             var request = new WriteRequest<JsonElement, object>(Tool, ToolTier.Write, OperationNames.GraphicEditPlan, OperationNames.GraphicEditExecute,
-                input, (plan, _) => new { request = input, fingerprint = plan.Fingerprint }, dry, PageWriteTools.DefaultLimit, "Editing page graphics");
+                input, (plan, _) => new { request = input, fingerprint = plan.Fingerprint, projectPath = plan.ProjectPath }, dry, PageWriteTools.DefaultLimit, "Editing page graphics");
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<JsonElement, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
             result["execution"] = outcome.Execution;

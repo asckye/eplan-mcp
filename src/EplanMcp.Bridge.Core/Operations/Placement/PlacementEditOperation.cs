@@ -12,7 +12,11 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
         bool symbolEdit = (string?)input["operation"] is "set_variant" or "set_arrangement";
         JObject before, plan;
         try
-        { before = editor.Inspect((string?)input["project"] ?? "", (string?)input["page"] ?? "", symbolEdit); plan = symbolEdit ? PlacementSymbolEdit.Plan(input, before, symbols, execute ? (string?)args["fingerprint"] ?? "" : null) : PlacementEditPlanner.Plan(input, before, execute ? (string?)args["fingerprint"] ?? "" : null); }
+        {
+            before = editor.Inspect((string?)input["project"] ?? "", (string?)input["page"] ?? "", symbolEdit);
+            if (execute)
+            { WriteArguments.RequirePlanned((string?)args["projectPath"], before["scene"]!["project"]!.ToObject<OpenProject>()!.Path); }
+            plan = symbolEdit ? PlacementSymbolEdit.Plan(input, before, symbols, execute ? (string?)args["fingerprint"] ?? "" : null) : PlacementEditPlanner.Plan(input, before, execute ? (string?)args["fingerprint"] ?? "" : null); }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         if (!execute)
         {

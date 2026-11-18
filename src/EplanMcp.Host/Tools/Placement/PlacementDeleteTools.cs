@@ -32,7 +32,7 @@ internal sealed class PlacementDeleteTools
         try
         {
             var request = new WriteRequest<JsonElement, object>(Tool, ToolTier.Destructive, OperationNames.PlacementDeletePlan, OperationNames.PlacementDeleteExecute,
-                input, (plan, backup) => new { request = input, fingerprint = plan.Fingerprint, backup }, dry, PageWriteTools.DefaultLimit, "Deleting drawing placements");
+                input, (plan, backup) => new { request = input, fingerprint = plan.Fingerprint, projectPath = plan.ProjectPath, backup }, dry, PageWriteTools.DefaultLimit, "Deleting drawing placements");
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<JsonElement, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
             result["execution"] = outcome.Execution;

@@ -32,7 +32,7 @@ internal sealed class PotentialUpdateTools
         try
         {
             var request = new WriteRequest<JsonElement, object>(Tool, ToolTier.Write, OperationNames.PotentialUpdatePlan, OperationNames.PotentialUpdateExecute,
-                input, (plan, _) => new { request = input, fingerprint = plan.Fingerprint }, dry, PageWriteTools.DefaultLimit, "Updating potential definitions");
+                input, (plan, _) => new { request = input, fingerprint = plan.Fingerprint, projectPath = plan.ProjectPath }, dry, PageWriteTools.DefaultLimit, "Updating potential definitions");
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<JsonElement, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
             result["execution"] = outcome.Execution;

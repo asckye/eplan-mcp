@@ -63,7 +63,7 @@ internal sealed class ConnectionCreateTools
             if (plugins.Length > 0)
             { args["plugin_sources"] = JsonSerializer.SerializeToNode(plugins); }
             var request = new WriteRequest<object, object>(Tool, ToolTier.Write, OperationNames.ConnectionCreatePlan, OperationNames.ConnectionCreateExecute,
-                args, plan => new { request = args, fingerprint = plan.Fingerprint }, dry_run, Limit(items), "Creating connections")
+                args, plan => new { request = args, fingerprint = plan.Fingerprint, projectPath = plan.ProjectPath }, dry_run, Limit(items), "Creating connections")
             {
                 AuditArguments = new { requested = items, effective = args, plugins },
                 BeforeExecute = packs is not null && resolution is not null ? PluginConsumerDefaults.BeforeExecute(packs, resolution, plugins, warnings) : null,

@@ -13,6 +13,8 @@ public class GraphicEditOperation(IGraphicEditor editor, ITransactionScopeFactor
         try
         {
             before = editor.Inspect((string?)input["project"] ?? "", (string?)input["page"] ?? "");
+            if (execute)
+            { WriteArguments.RequirePlanned((string?)args["projectPath"], before["scene"]!["project"]!.ToObject<OpenProject>()!.Path); }
             plan = GraphicEditPlanner.Plan(input, before, execute ? (string?)args["fingerprint"] ?? "" : null);
         }
         catch (BridgeErrorException error) { throw WriteArguments.NotStarted(error); }

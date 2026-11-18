@@ -47,6 +47,8 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
                 throw WriteArguments.Invalid(["Items require distinct identities and SHA-256 digests."]);
             }
             project = WriteArguments.Writable(catalog, (string)input["project"]!);
+            if (execute)
+            { WriteArguments.RequirePlanned((string?)args["projectPath"], project.Path); }
             before = Read(project.Path, (string)input["page"]!);
             foreach (DrawingLocator item in items)
             {

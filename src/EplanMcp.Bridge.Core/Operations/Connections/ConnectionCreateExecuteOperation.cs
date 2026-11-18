@@ -14,8 +14,8 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
         JObject input = args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["/request: supply the planned request."]));
         string fingerprint = (string?)args["fingerprint"] ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["/fingerprint: supply the plan fingerprint."]));
         if (input.ContainsKey("moves") || input.ContainsKey("property_moves"))
-        { return PlacementMoveExecution.Execute(mover ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Placement moving is unavailable in this Bridge.")), transactions, input, fingerprint); }
-        return new Execution(creator, generator, transactions, input, fingerprint).Run();
+        { return PlacementMoveExecution.Execute(mover ?? throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.CapabilityMissing, "Placement moving is unavailable in this Bridge.")), transactions, input, fingerprint, plannedProject: (string?)args["projectPath"]); }
+        return new Execution(creator, generator, transactions, input, fingerprint, (string?)args["projectPath"]).Run();
     }
 
     /// <summary>
@@ -23,7 +23,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
     /// (placement only, with definition points, with interruption points, or wires in two undo steps), each reading back
     /// what EPLAN holds before it reports the write as committed.
     /// </summary>
-    private sealed class Execution(IConnectionCreator creator, IConnectionGenerator generator, ITransactionScopeFactory transactions, JObject input, string fingerprint)
+    private sealed class Execution(IConnectionCreator creator, IConnectionGenerator generator, ITransactionScopeFactory transactions, JObject input, string fingerprint, string? plannedProject)
     {
         private PageScene _scene = new();
         private JObject _plan = new();
@@ -42,6 +42,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
             try
             {
                 _scene = creator.Read((string?)input["project"] ?? "", (string?)input["page"] ?? "");
+                WriteArguments.RequirePlanned(plannedProject, _scene.Project.Path);
                 _plan = ConnectionCreatePlanner.Plan(input.ToString(Formatting.None), _scene, creator, fingerprint);
                 _generate = (bool?)input["generate"] ?? true;
                 _place = _plan["cableDefinitions"] is null ? creator.Prepare(_scene.Project.Path, _scene.Page.Page, (JArray)_plan["symbols"]!, actual =>

@@ -14,6 +14,7 @@
 
 ### 修复
 
+- `eplan_connection_create`、`eplan_graphic_edit`、`eplan_placement_delete`、`eplan_placement_edit`、`eplan_placement_update`、`eplan_potential_update` 的写入也固定到计划时的项目：审批之后同名的另一个项目被打开时，执行报告 `PLAN_STALE`，什么都不改。此前只有其余写入工具有这项保护。
 - 项目重命名失败后把旧项目放回去也失败时，不再声称“旧项目已打开、副本已删除”：改为报告结果未知（`OUTCOME_UNKNOWN`），写入挂起到工程师检查为止。
 - 工程师确认解除写入挂起后，如果挂起文件删不掉，普通写入不再继续执行并记“已解除”，而是和 `eplan_plan_apply` 一样保持挂起（`WRITES_SUSPENDED`）。
 - `eplan_page_review` 的 `page_setup`：栅格 `4` 和 `4.0` 不再算作不同；本页的图框或栅格读不到时不再提示；只有超过一半的同类页用同一个值时才建议改过去。
