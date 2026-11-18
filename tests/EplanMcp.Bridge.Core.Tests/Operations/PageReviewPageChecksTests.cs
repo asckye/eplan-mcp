@@ -78,12 +78,19 @@ public sealed partial class PageReviewRulesTests
     [Theory]
     [InlineData(-9, "0")]
     [InlineData(8, "3")]
-    [InlineData(double.NaN, "0")]
     public void PathStraddle_PinOutsideKnownColumns_ReportsOutOfRangeColumn(double x, string column)
     {
         var p = ColumnDevice();
         _scene.Pins["13/1/0"] = new() { Location = [x, 8] };
         AssertColumnWarning(p, column, 1);
+    }
+
+    [Fact]
+    public void PathStraddle_PinWithUnreadablePosition_IsNotAColumn()
+    {
+        ColumnDevice();
+        _scene.Pins["13/1/0"] = new() { Location = [double.NaN, 8] };
+        Assert.Empty(Review("path_straddle"));
     }
 
     [Theory]
@@ -200,10 +207,10 @@ public sealed partial class PageReviewRulesTests
     }
 
     [Fact]
-    public void PageSetup_UniquePluralityBelowHalf_ReportsField()
+    public void PageSetup_MostCommonValueBelowHalf_SkipsField()
     {
         Setup(Frame("Other"), Frame("Other"), Frame("Mine"), Frame("B"), Frame("C"));
-        AssertSetupWarning(Assert.Single(Review("page_setup")), "plot_frame", "Other");
+        Assert.Empty(Review("page_setup"));
     }
 
     [Theory]
@@ -224,7 +231,7 @@ public sealed partial class PageReviewRulesTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void PageSetup_UnknownCurrentFields_ReportsKnownPeerValues(bool explicitNull)
+    public void PageSetup_UnknownCurrentFields_AreNotADifference(bool explicitNull)
     {
         var peer = new JObject { ["frame"] = "Other", ["grid"] = 8 };
         JObject setup = Setup(peer, (JObject)peer.DeepClone(), new());
@@ -235,9 +242,7 @@ public sealed partial class PageReviewRulesTests
             setup["frame"] = JValue.CreateNull();
             setup["grid"] = JValue.CreateNull();
         }
-        Assert.Collection(Review("page_setup"),
-            issue => AssertSetupWarning(issue, "plot_frame", "Other"),
-            issue => AssertSetupWarning(issue, "grid_size_mm", 8));
+        Assert.Empty(Review("page_setup"));
     }
 
     [Fact]
@@ -248,10 +253,10 @@ public sealed partial class PageReviewRulesTests
     }
 
     [Fact]
-    public void PageSetup_EqualGridWithDifferentJsonNumberTypes_ReportsPeerGrid()
+    public void PageSetup_EqualGridWithDifferentJsonNumberTypes_IsOneGrid()
     {
         Setup([.. Enumerable.Range(0, 3).Select(_ => new JObject { ["grid"] = 4.0 })]);
-        AssertSetupWarning(Assert.Single(Review("page_setup")), "grid_size_mm", 4.0);
+        Assert.Empty(Review("page_setup"));
     }
 
     [Theory]

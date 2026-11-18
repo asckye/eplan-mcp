@@ -17,7 +17,9 @@ internal static class ReviewGuard
     public static LayoutGuard.Model Model(ConnectionCreatePlanner.Scene scene, bool linesChanged)
     {
         IEnumerable<LayoutGuard.Segment> segments = scene.Graphical.Select((s, i) => (s, i)).Where(x => x.s.Length >= 2).SelectMany(x => x.s.Zip(x.s.Skip(1), (a, b) => new LayoutGuard.Segment
-        { Points = [a, b], Locator = new() { Oid = -x.i - 1 }, Changed = linesChanged })).Where(s => !s.Points[0].SequenceEqual(s.Points[1]));
+        { Points = [a, b], Locator = new() { Oid = -x.i - 1 }, Changed = linesChanged }))
+            // A point the reader could not measure is no geometry to check: the segment is left out, not reported.
+            .Where(s => s.Points.All(p => p.Length == 2 && !p.Any(n => double.IsNaN(n) || double.IsInfinity(n))) && !s.Points[0].SequenceEqual(s.Points[1]));
         return new LayoutGuard.Model
         {
             AllowUnknownGeometry = true,

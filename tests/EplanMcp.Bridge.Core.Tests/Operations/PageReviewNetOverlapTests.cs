@@ -195,9 +195,9 @@ public sealed partial class PageReviewRulesTests
     }
 
     [Fact]
-    public void NetOverlap_MissingCoordinateOnTwoPointRoute_ThrowsDuringGuardCheck()
+    public void NetOverlap_MissingCoordinateOnTwoPointRoute_LeavesTheSegmentOut()
     {
         _scene.Graphical.Add([[20, 0], []]);
-        Assert.Throws<IndexOutOfRangeException>(() => Review("net_overlap"));
+        Assert.Empty(Review("net_overlap"));
     }
 }

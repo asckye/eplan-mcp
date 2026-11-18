@@ -20,7 +20,7 @@ internal static class PathStraddleCheck
         {
             string owner = FormattableString.Invariant($"{p.Locator.Type}/{p.Locator.Oid}/");
             int home = Column(p.Location[0]);
-            int[] columns = [.. scene.Pins.Where(pin => pin.Key.StartsWith(owner, StringComparison.Ordinal) && pin.Value.Location.Length == 2).Select(pin => Column(pin.Value.Location[0])).Distinct()];
+            int[] columns = [.. scene.Pins.Where(pin => pin.Key.StartsWith(owner, StringComparison.Ordinal) && pin.Value.Location.Length == 2 && !double.IsNaN(pin.Value.Location[0]) && !double.IsInfinity(pin.Value.Location[0])).Select(pin => Column(pin.Value.Location[0])).Distinct()];
             if (home < 0 || home >= edges.Length - 1 || columns.All(column => column == home))
             { continue; }
             c.Add("path_straddle", "warning", p.Location, [p.Locator], FormattableString.Invariant($"Pins lie in columns {string.Join(", ", columns.Select(column => column + 1))}, the symbol is numbered in column {home + 1}; keep the symbol and its pins in one column."),
@@ -36,11 +36,16 @@ internal static class PageSetupCheck
     {
         if (!c.Enabled("page_setup") || c.Actual["pageSetup"] is not JObject setup || setup["peers"] is not JArray { Count: >= 3 } peers)
         { return; }
+        // 4 and 4.0 are one grid: numbers compare by value, not by how the reader wrote them.
+        static string Key(JToken? value) => value is null || value.Type == JTokenType.Null ? "null"
+            : value.Type is JTokenType.Integer or JTokenType.Float ? ((double)value).ToString("R", System.Globalization.CultureInfo.InvariantCulture)
+            : value.ToString(Newtonsoft.Json.Formatting.None);
         void Odd(string field, string argument, string label)
         {
-            var groups = peers.GroupBy(p => p[field]?.ToString(Newtonsoft.Json.Formatting.None) ?? "null", StringComparer.Ordinal).OrderByDescending(g => g.Count()).ToArray();
-            string mine = setup[field]?.ToString(Newtonsoft.Json.Formatting.None) ?? "null";
-            if (groups[0].Key == mine || groups[0].Key == "null" || groups.Length > 1 && groups[1].Count() == groups[0].Count() || groups.FirstOrDefault(g => g.Key == mine)?.Count() * 2 >= peers.Count)
+            var groups = peers.GroupBy(p => Key(p[field]), StringComparer.Ordinal).OrderByDescending(g => g.Count()).ToArray();
+            string mine = Key(setup[field]);
+            // An unread value is not a difference, and "most pages" means more than half of them.
+            if (groups[0].Key == mine || groups[0].Key == "null" || mine == "null" || groups[0].Count() * 2 <= peers.Count)
             { return; }
             JToken wanted = groups[0].First()[field]!;
             c.Add("page_setup", "warning", [], [], FormattableString.Invariant($"The {label} is {setup[field]}; {groups[0].Count()} of {peers.Count} {setup["type"]} pages use {wanted}."),

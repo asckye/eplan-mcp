@@ -56,7 +56,7 @@
 | `text_format` | warning | R8：文字打印高度小于 0.5 mm（按页比例换算，A145），或角度不是 0/90/180/270 |
 | `cross_reference_clash` | warning | R9：对象压在交叉引用文字上 |
 | `path_straddle` | warning | 设备的引脚落在与插入点不同的列：EPLAN 按插入点编列号，交叉引用会指错列。列边界来自图框列宽 12102（按页比例换算，A145）；容器不查；图框没存列宽时不查 |
-| `page_setup` | warning | 本页的图框或栅格与同类型页的多数不同（同类页至少 3 页、多数明确）；`fix` 用 `eplan_page_update` 改成多数页的 `plot_frame` 或 `grid_size_mm` |
+| `page_setup` | warning | 本页的图框或栅格与同类型页的多数不同（同类页至少 3 页，超过一半用同一个值；本页的值读不到时不提示；数值按大小比较，`4` 和 `4.0` 相同）；`fix` 用 `eplan_page_update` 改成多数页的 `plot_frame` 或 `grid_size_mm` |
 | `wire_number` | info | 普通导线（不含任何电缆的芯线）没有线号 `CONNECTION_DESIGNATION`（31011）：整页都没有时一条提示，部分没有时一条提示并列出最多 20 根。官方 `=EC1+A3&EFS1/1` 只给部分导线编号，这是编号方案的正常结果，所以不报 warning。`fix` 为 `eplan_connection_number`（`overwrite: none`） |
 | `placeholder_tag` | warning | 设备标识里还有 `?` 占位；`fix` 为 `eplan_device_update` |
 | `eplan_message` | 按消息级别 | 该页上已有的 EPLAN 检查消息（只读取，不运行检查） |
