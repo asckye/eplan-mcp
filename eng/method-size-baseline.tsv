@@ -30,7 +30,6 @@ EplanMcp.Host/AddinCommand.RegisterAsync(4)	110
 EplanMcp.Host/AssetTools.AssetUpdateAsync(9)	118
 EplanMcp.Host/BindingService.WriteAsync(8)	138
 EplanMcp.Host/ContextBuilder.ReadAsync(8)	198
-EplanMcp.Host/DevicePlaceInputs.Check(2)	106
 EplanMcp.Host/DeviceWriteTools.DevicePlaceAsync(37)	195
 EplanMcp.Host/MacroWriteTools.MacroInsertAsync(20)	117
 EplanMcp.Host/McpServerSetup.AddEplanMcp(1)	202

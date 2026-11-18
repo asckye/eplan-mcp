@@ -66,6 +66,29 @@ internal static partial class DevicePlaceInputs
     internal static List<string> Check(DevicePlaceArgs args, JsonElement[]? display)
     {
         List<string> problems = ToolArguments.WriteProjectViolations(args.Project);
+        CheckOptions(args, display, problems);
+        CheckPlc(args, problems);
+        if (args.TerminalStrip is { } strip)
+        {
+            CheckTerminal(args, display, strip, problems);
+            return problems;
+        }
+        if (args.TerminalNumber is not null || args.TerminalStripText is not null)
+        { problems.Add("/terminal_strip: terminal_number and terminal_strip_text require a terminal source."); }
+        if (args.LocationBox is { } structure)
+        {
+            CheckLocationBox(args, display, structure, problems);
+            return problems;
+        }
+        CheckBlackBox(args, display, problems);
+        CheckSource(args, display, problems);
+        if (display is not null)
+        { ReadDisplay(args, display, problems); }
+        return problems;
+    }
+
+    private static void CheckOptions(DevicePlaceArgs args, JsonElement[]? display, List<string> problems)
+    {
         if (args.PropertyArrangement is { } arrangement && (string.IsNullOrWhiteSpace(arrangement) || arrangement.Any(char.IsControl)))
         { problems.Add("/property_arrangement: supply an exact nonblank arrangement name without control characters."); }
         if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
@@ -85,6 +108,10 @@ internal static partial class DevicePlaceInputs
             if (text is not null && StoredLanguage().IsMatch(text) && !SerializedLanguages().IsMatch(text))
             { problems.Add("/" + field + ": use plain language-independent text (??_??) or only real languages such as zh_CN@text;en_US@text; do not mix them (A54)."); }
         }
+    }
+
+    private static void CheckPlc(DevicePlaceArgs args, List<string> problems)
+    {
         if (args.PlcConnectionPoint is not null || args.PlcAddress is not null || args.PlcSymbolicAddress is not null || args.PlcText is not null)
         {
             if (args.Part is not null || args.Library is null || args.TerminalStrip is not null || args.LocationBox is not null
@@ -93,40 +120,42 @@ internal static partial class DevicePlaceInputs
                 || args.PlcConnectionPoint is { Length: > 64 } || args.PlcConnectionPoint!.StartsWith(':'))
             { problems.Add("/plc_connection_point: require a symbol source, existing PLC tag and a nonempty point and optional address, symbolic address and text without controls (point at most 64 characters, others 256); omit a leading colon."); }
         }
-        if (args.TerminalStrip is not null)
-        {
-            if (args.Variant is not null && args.Part is null || args.Tag is not null
-                || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null || args.SymbolVariant is < 0)
-            { problems.Add("/terminal_strip: use an exclusive terminal source with optional library/symbol and symbol_variant; omit tag and other sources."); }
-            if ((args.Library is not null || args.Symbol is not null) && (string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
-                || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.Part is not null && args.SymbolVariant is null))
-            { problems.Add("/library: terminal symbols require a complete library/symbol pair without controls."); }
-            if (args.TerminalStrip.Length is < 2 or > 128 || args.TerminalStrip.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == ':')
-                || args.TerminalStrip.TrimEnd('-').LastIndexOf('-') < 0)
-            { problems.Add("/terminal_strip: require a short or full device tag, at most 128 characters, without whitespace, controls or colon."); }
-            if (args.TerminalNumber is not { Length: > 0 and <= 64 } number || number.Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.')))
-            { problems.Add("/terminal_number: require 1-64 letters, digits, '_' or '.'."); }
-            if (args.TerminalStripText is { } text && (string.IsNullOrWhiteSpace(text) || text.Length > 256 || text.Any(char.IsControl)))
-            { problems.Add("/terminal_strip_text: require nonempty text of at most 256 characters without controls."); }
-            if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))
-            { problems.Add("/x: x and y must be finite millimetre coordinates."); }
-            return problems;
-        }
-        if (args.TerminalNumber is not null || args.TerminalStripText is not null)
-        { problems.Add("/terminal_strip: terminal_number and terminal_strip_text require a terminal source."); }
-        if (args.LocationBox is { } structure)
-        {
-            if (structure.Length is < 2 or > 65 || structure[0] != '+' || structure.Skip(1).Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.'))
-                || args.Part is not null || args.Variant is not null || args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null
-                || args.Tag is not null || display is not null || args.ConnectionDesignations is not null)
-            { problems.Add("/location_box: use an exclusive +location identifier (1-64 letters, digits, '_' or '.'); no tag or symbol options."); }
-            if (!double.IsFinite(args.X) || !double.IsFinite(args.Y) || args.X < 0 || args.Y < 0
-                || args.CornerX is not { } x || args.CornerY is not { } y || !double.IsFinite(x) || !double.IsFinite(y) || x <= args.X || y <= args.Y)
-            { problems.Add("/corner_x: require finite lower-left x/y and upper-right corner_x/corner_y, with positive width and height."); }
-            else if (args.LocationBoxOutline is { } outline)
-            { problems.AddRange(OutlineProblems(args, outline)); }
-            return problems;
-        }
+    }
+
+    private static void CheckTerminal(DevicePlaceArgs args, JsonElement[]? display, string strip, List<string> problems)
+    {
+        if (args.Variant is not null && args.Part is null || args.Tag is not null
+            || args.LocationBox is not null || args.CornerX is not null || args.CornerY is not null || display is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null || args.SymbolVariant is < 0)
+        { problems.Add("/terminal_strip: use an exclusive terminal source with optional library/symbol and symbol_variant; omit tag and other sources."); }
+        if ((args.Library is not null || args.Symbol is not null) && (string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
+            || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.Part is not null && args.SymbolVariant is null))
+        { problems.Add("/library: terminal symbols require a complete library/symbol pair without controls."); }
+        if (strip.Length is < 2 or > 128 || strip.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == ':')
+            || strip.TrimEnd('-').LastIndexOf('-') < 0)
+        { problems.Add("/terminal_strip: require a short or full device tag, at most 128 characters, without whitespace, controls or colon."); }
+        if (args.TerminalNumber is not { Length: > 0 and <= 64 } number || number.Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.')))
+        { problems.Add("/terminal_number: require 1-64 letters, digits, '_' or '.'."); }
+        if (args.TerminalStripText is { } text && (string.IsNullOrWhiteSpace(text) || text.Length > 256 || text.Any(char.IsControl)))
+        { problems.Add("/terminal_strip_text: require nonempty text of at most 256 characters without controls."); }
+        if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))
+        { problems.Add("/x: x and y must be finite millimetre coordinates."); }
+    }
+
+    private static void CheckLocationBox(DevicePlaceArgs args, JsonElement[]? display, string structure, List<string> problems)
+    {
+        if (structure.Length is < 2 or > 65 || structure[0] != '+' || structure.Skip(1).Any(c => !char.IsLetterOrDigit(c) && c is not ('_' or '.'))
+            || args.Part is not null || args.Variant is not null || args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null
+            || args.Tag is not null || display is not null || args.ConnectionDesignations is not null)
+        { problems.Add("/location_box: use an exclusive +location identifier (1-64 letters, digits, '_' or '.'); no tag or symbol options."); }
+        if (!double.IsFinite(args.X) || !double.IsFinite(args.Y) || args.X < 0 || args.Y < 0
+            || args.CornerX is not { } x || args.CornerY is not { } y || !double.IsFinite(x) || !double.IsFinite(y) || x <= args.X || y <= args.Y)
+        { problems.Add("/corner_x: require finite lower-left x/y and upper-right corner_x/corner_y, with positive width and height."); }
+        else if (args.LocationBoxOutline is { } outline)
+        { problems.AddRange(OutlineProblems(args, outline)); }
+    }
+
+    private static void CheckBlackBox(DevicePlaceArgs args, JsonElement[]? display, List<string> problems)
+    {
         bool blackBox = string.Equals(args.Library, "SPECIAL", StringComparison.OrdinalIgnoreCase) && string.Equals(args.Symbol, "DC", StringComparison.OrdinalIgnoreCase);
         if (blackBox && (args.CornerX is not { } bx || args.CornerY is not { } by || !double.IsFinite(bx) || !double.IsFinite(by) || bx <= args.X || by <= args.Y))
         { problems.Add("/corner_x: a black box requires finite corner_x/corner_y above and right of x/y."); }
@@ -140,6 +169,10 @@ internal static partial class DevicePlaceInputs
         { problems.Add("/location_box_polyline: requires a location_box source."); }
         if (args.LocationBoxOutline is not null)
         { problems.Add("/location_box_outline: requires a location_box source."); }
+    }
+
+    private static void CheckSource(DevicePlaceArgs args, JsonElement[]? display, List<string> problems)
+    {
         bool part = !string.IsNullOrWhiteSpace(args.Part);
         bool symbol = args.Library is not null || args.Symbol is not null || args.SymbolVariant is not null && !part;
         if (!double.IsFinite(args.X) || !double.IsFinite(args.Y))
@@ -152,10 +185,12 @@ internal static partial class DevicePlaceInputs
         { problems.Add("/library: library and symbol must not contain control characters."); }
         if (args.ConnectionDesignations?.Any(s => string.IsNullOrWhiteSpace(s) || s.Length > 64 || s.Any(char.IsControl)) == true)
         { problems.Add("/connection_designations: each pin needs nonempty text of at most 64 characters without controls."); }
-        if (display is null)
-        { return problems; }
+    }
+
+    private static void ReadDisplay(DevicePlaceArgs args, JsonElement[] display, List<string> problems)
+    {
         if (display.Length > 8)
-        { problems.Add("/display_properties: at most 8 placements are allowed."); return problems; }
+        { problems.Add("/display_properties: at most 8 placements are allowed."); return; }
         args.DisplayProperties = [];
         for (int i = 0; i < display.Length; i++)
         {
@@ -170,7 +205,6 @@ internal static partial class DevicePlaceInputs
             { problems.Add(at + ": require allowed property_id and finite offset_x_mm, offset_y_mm; no other or duplicate members."); continue; }
             args.DisplayProperties.Add(new() { PropertyId = number, OffsetXmm = x, OffsetYmm = y });
         }
-        return problems;
     }
 
     private static bool Offset(JsonElement item, string name, out double value)

@@ -33,7 +33,6 @@ EplanMcp.Bridge.Eplan/EplanGraphicEditor.PrepareEdit(3)	46
 EplanMcp.Host/AnnotationCreatePlanning.Validate(3)	56
 EplanMcp.Host/ApprovalTexts.Change(3)	131
 EplanMcp.Host/ContextBuilder.ReadAsync(8)	65
-EplanMcp.Host/DevicePlaceInputs.Check(2)	164
 EplanMcp.Host/DeviceWriteTools.DevicePlaceAsync(37)	58
 EplanMcp.Host/MacroWriteTools.MacroInsertAsync(20)	44
 EplanMcp.Host/ObjectReadTools.ReadAsync(5)	62
