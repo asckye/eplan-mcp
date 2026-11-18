@@ -120,29 +120,56 @@ public static class CableDefinitionPlanner
         var items = (JArray)input["items"]!;
         if (!items.Any(i => (string?)i["kind"] == "cable_definition"))
         { return ""; }
-        var definitions = new JArray();
-        var impact = new JArray();
-        var keys = new HashSet<(string, string)>();
-        var assigned = new HashSet<string>(StringComparer.Ordinal);
-        var names = new HashSet<string>(StringComparer.Ordinal);
-        var candidates = new List<(JObject Reference, double[][] Points, Wire? Before)>();
-        for (int i = 0; i < items.Count; i++)
+        return new Addition(input, scene, result, point).Run();
+    }
+
+    /// <summary>
+    /// One call's cable definitions: the request is read item by item, every core is bound to exactly one wire of this
+    /// call or of the inventory, and each definition line must cross exactly its own cores once.
+    /// </summary>
+    private sealed class Addition(JObject input, Scene scene, JObject result, Func<JToken?, string, double[]> point)
+    {
+        private readonly JArray _items = (JArray)input["items"]!;
+        private readonly JArray _definitions = new();
+        private readonly JArray _impact = new();
+        private readonly HashSet<(string, string)> _keys = [];
+        private readonly HashSet<string> _assigned = new(StringComparer.Ordinal);
+        private readonly HashSet<string> _names = new(StringComparer.Ordinal);
+        private readonly List<(JObject Reference, double[][] Points, Wire? Before)> _candidates = [];
+
+        public string Run()
         {
-            if ((string?)items[i]["kind"] != "wire")
-            { continue; }
-            double grid = scene.Page.GridSize;
-            double[][] points = items[i]["points"]!.Select(p => p.Select(v => DrawingCoordinates.Snap((double)v, grid, (bool?)input["snap_to_grid"] ?? true)).ToArray()).ToArray();
-            string PinKey(JToken pin) => FormattableString.Invariant($"{pin["locator"]!["type"]}/{pin["locator"]!["oid"]}/{pin["pin_index"]}");
-            string[] pins = [PinKey(items[i]["from"]!), PinKey(items[i]["to"]!)];
-            if (!result["logicalAfterGenerate"]!.Any(g => g["pins"]!.Values<string>().OrderBy(p => p, StringComparer.Ordinal).SequenceEqual(pins.OrderBy(p => p, StringComparer.Ordinal)) && (bool?)g["potentialStartIsNull"] == false))
-            { throw Missing("a wire item has no predicted logical connection"); }
-            candidates.Add((new JObject { ["item_index"] = i }, points, null));
+            ReadWires();
+            for (int i = 0; i < _items.Count; i++)
+            {
+                if ((string?)_items[i]["kind"] == "cable_definition")
+                { ReadDefinition(i); }
+            }
+            Inventory inventory = ReadInventory();
+            BindCores(inventory);
+            CheckCrossings();
+            return Result(inventory);
         }
-        for (int i = 0; i < items.Count; i++)
+
+        private void ReadWires()
         {
-            JToken item = items[i];
-            if ((string?)item["kind"] != "cable_definition")
-            { continue; }
+            for (int i = 0; i < _items.Count; i++)
+            {
+                if ((string?)_items[i]["kind"] != "wire")
+                { continue; }
+                double grid = scene.Page.GridSize;
+                double[][] points = _items[i]["points"]!.Select(p => p.Select(v => DrawingCoordinates.Snap((double)v, grid, (bool?)input["snap_to_grid"] ?? true)).ToArray()).ToArray();
+                string PinKey(JToken pin) => FormattableString.Invariant($"{pin["locator"]!["type"]}/{pin["locator"]!["oid"]}/{pin["pin_index"]}");
+                string[] pins = [PinKey(_items[i]["from"]!), PinKey(_items[i]["to"]!)];
+                if (!result["logicalAfterGenerate"]!.Any(g => g["pins"]!.Values<string>().OrderBy(p => p, StringComparer.Ordinal).SequenceEqual(pins.OrderBy(p => p, StringComparer.Ordinal)) && (bool?)g["potentialStartIsNull"] == false))
+                { throw Missing("a wire item has no predicted logical connection"); }
+                _candidates.Add((new JObject { ["item_index"] = i }, points, null));
+            }
+        }
+
+        private void ReadDefinition(int i)
+        {
+            JToken item = _items[i];
             string at = "/items/" + i.ToString(CultureInfo.InvariantCulture);
             Members(item, at, "kind points designation type_text core_count cross_section_mm2 cores", "voltage cross_section_text core_labels_only");
             Require(item["core_labels_only"] is null || item["core_labels_only"]!.Type == JTokenType.Boolean, at + "/core_labels_only", "Supply a boolean.");
@@ -154,7 +181,7 @@ public static class CableDefinitionPlanner
             string designation = Text(item["designation"], at + "/designation", 128);
             int separator = designation.IndexOf('-');
             Require(designation[0] is '-' or '=' or '+' && separator >= 0 && separator + 1 < designation.Length && char.IsLetterOrDigit(designation[separator + 1]) && designation.All(c => char.IsLetterOrDigit(c) || "=+-_.".Contains(c)), at + "/designation", "Use an explicit literal cable designation, for example -W3.");
-            Require(!names.Any(n => SameName(n, designation, scene.Page.Page) || SameName(designation, n, scene.Page.Page)) && names.Add(designation), at + "/designation", "Do not create the same cable twice.");
+            Require(!_names.Any(n => SameName(n, designation, scene.Page.Page) || SameName(designation, n, scene.Page.Page)) && _names.Add(designation), at + "/designation", "Do not create the same cable twice.");
             Text(item["type_text"], at + "/type_text", 200);
             if (item["voltage"] is not null)
             { Text(item["voltage"], at + "/voltage", 64); }
@@ -162,77 +189,98 @@ public static class CableDefinitionPlanner
             Require(item["cross_section_mm2"]?.Type is JTokenType.Integer or JTokenType.Float && (double)item["cross_section_mm2"]! > 0, at + "/cross_section_mm2", "Supply a positive finite cross-section in mm2.");
             Require(item["cores"] is JArray { Count: >= 1 and <= 50 } cores && cores.Count <= (int)item["core_count"]!, at + "/cores", "Supply 1..50 cores without exceeding the declared count.");
             foreach (JToken core in (JArray)item["cores"]!)
-            {
-                string path = at + "/cores/" + ((JArray)item["cores"]!).IndexOf(core).ToString(CultureInfo.InvariantCulture);
-                Members(core, path, "connection label", "colour");
-                string label = Text(core["label"], path + "/label", 32);
-                Require(label.All(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '0' and <= '9' or '_' or '.' or '-')
-                    && (label[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z' || int.TryParse(label, NumberStyles.None, CultureInfo.InvariantCulture, out int number) && number >= 1 && number <= (int)item["core_count"]! && label == number.ToString(CultureInfo.InvariantCulture)), path + "/label", "Use a literal label or a canonical core number within the declared count.");
-                Require(keys.Add((designation, label)), path + "/label", "Duplicate cable designation + core label.");
-                Require(core["colour"] is null || core["colour"]!.Type == JTokenType.String && Colours.Split(' ').Contains((string)core["colour"]!, StringComparer.Ordinal), path + "/colour", "Use a colour code: " + Colours + ".");
-                Require(impact.Count < 50, path, "At most 50 cores are allowed across the entire call.");
-                Members(core["connection"], path + "/connection", core["connection"] is JObject connection && connection["item_index"] is not null ? "item_index" : "locator", "");
-                if (core["connection"]!["item_index"] is { } reference)
-                { Require(reference.Type == JTokenType.Integer && (double)reference >= 0 && (double)reference < items.Count && (string?)items[(int)reference]["kind"] == "wire", path + "/connection/item_index", "Reference a wire item in this call, including forward references."); }
-                else
-                {
-                    JToken locator = core["connection"]!["locator"]!;
-                    Members(locator, path + "/connection/locator", "project page type oid digest", "");
-                    Require(locator["project"]?.Type == JTokenType.String && locator["page"]?.Type == JTokenType.String && locator["type"]?.Type == JTokenType.Integer && (double)locator["type"]! is > 0 and <= int.MaxValue
-                        && locator["oid"]?.Type == JTokenType.Integer && long.TryParse(locator["oid"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out long oid) && oid > 0
-                        && locator["digest"]?.Type == JTokenType.String && ((string)locator["digest"]!).Length == 64 && ((string)locator["digest"]!).All(c => c is >= 'a' and <= 'f' or >= '0' and <= '9'), path + "/connection/locator", "Use an observed connection locator with positive type/oid and lowercase SHA-256 digest.");
-                }
-                impact.Add(new JObject { ["connection"] = core["connection"]!.DeepClone(), ["designation"] = designation, ["label"] = label, ["colour"] = core["colour"]?.DeepClone(), ["crossSectionMm2"] = item["cross_section_mm2"]!.DeepClone() });
-            }
+            { ReadCore(item, at, designation, core); }
             var definition = (JObject)item.DeepClone();
             definition["cross_section_text"] = (string?)item["cross_section_text"] ?? CrossSections.Format((double)item["cross_section_mm2"]!);
             // Live T8b: EPLAN gives a cable no page structure (stored as +-W9), unlike devices; name it like a device on this page.
             definition["name"] = designation.StartsWith("-", StringComparison.Ordinal) ? DevicePlaceRequest.DeviceStructureOf(scene.Page.Page) + designation : designation;
             definition["points"] = JArray.FromObject(line);
-            definitions.Add(definition);
+            _definitions.Add(definition);
         }
-        Inventory inventory = scene.ReadCables?.Invoke() ?? throw Missing("the cable inventory reader is unavailable");
-        if (!inventory.Complete || inventory.Wires.Count > 10000)
-        { throw Missing("the wire inventory is incomplete or too large"); }
-        Require(!inventory.Names.Any(n => names.Any(d => SameName(d, n, scene.Page.Page))), "/items", "A cable designation already exists; choose an explicit unused name.");
-        candidates.AddRange(inventory.Wires.Select(w => (new JObject { ["locator"] = BridgeJson.FromObject(w.Locator) }, w.Path ?? w.Points, (Wire?)w)));
-        foreach (JToken row in impact)
+
+        private void ReadCore(JToken item, string at, string designation, JToken core)
         {
-            var matches = candidates.Where(c => JToken.DeepEquals(c.Reference, row["connection"])).ToArray();
-            if (matches.Length != 1)
+            string path = at + "/cores/" + ((JArray)item["cores"]!).IndexOf(core).ToString(CultureInfo.InvariantCulture);
+            Members(core, path, "connection label", "colour");
+            string label = Text(core["label"], path + "/label", 32);
+            Require(label.All(c => c is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '0' and <= '9' or '_' or '.' or '-')
+                && (label[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z' || int.TryParse(label, NumberStyles.None, CultureInfo.InvariantCulture, out int number) && number >= 1 && number <= (int)item["core_count"]! && label == number.ToString(CultureInfo.InvariantCulture)), path + "/label", "Use a literal label or a canonical core number within the declared count.");
+            Require(_keys.Add((designation, label)), path + "/label", "Duplicate cable designation + core label.");
+            Require(core["colour"] is null || core["colour"]!.Type == JTokenType.String && Colours.Split(' ').Contains((string)core["colour"]!, StringComparer.Ordinal), path + "/colour", "Use a colour code: " + Colours + ".");
+            Require(_impact.Count < 50, path, "At most 50 cores are allowed across the entire call.");
+            Members(core["connection"], path + "/connection", core["connection"] is JObject connection && connection["item_index"] is not null ? "item_index" : "locator", "");
+            if (core["connection"]!["item_index"] is { } reference)
+            { Require(reference.Type == JTokenType.Integer && (double)reference >= 0 && (double)reference < _items.Count && (string?)_items[(int)reference]["kind"] == "wire", path + "/connection/item_index", "Reference a wire item in this call, including forward references."); }
+            else
             {
-                throw new BridgeErrorException(ErrorReason.PlanStale, FormattableString.Invariant(
-                    $"The connection locator changed; read the page and re-plan (connection {row["connection"]?["locator"]?["oid"]}, {matches.Length} matches among {inventory.Wires.Count} inventory wires)."));
+                JToken locator = core["connection"]!["locator"]!;
+                Members(locator, path + "/connection/locator", "project page type oid digest", "");
+                Require(locator["project"]?.Type == JTokenType.String && locator["page"]?.Type == JTokenType.String && locator["type"]?.Type == JTokenType.Integer && (double)locator["type"]! is > 0 and <= int.MaxValue
+                    && locator["oid"]?.Type == JTokenType.Integer && long.TryParse(locator["oid"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out long oid) && oid > 0
+                    && locator["digest"]?.Type == JTokenType.String && ((string)locator["digest"]!).Length == 64 && ((string)locator["digest"]!).All(c => c is >= 'a' and <= 'f' or >= '0' and <= '9'), path + "/connection/locator", "Use an observed connection locator with positive type/oid and lowercase SHA-256 digest.");
             }
-            var selected = matches[0];
-            Require(assigned.Add(selected.Reference.ToString(Formatting.None)), "/items", "Assign each connection only once.");
-            if (selected.Before is { } old && (HasCable(old.Cable) || old.Locator.Project != scene.Project.Path || old.Locator.Page != scene.Page.Page))
-            {
-                BridgeErrorException missing = Missing("a selected connection already has a cable or lies on another project or page; metadata names them");
-                missing.Error.Metadata!["cable"] = old.Cable ?? string.Empty;
-                missing.Error.Metadata["connectionPage"] = old.Locator.Project + " / " + old.Locator.Page;
-                throw missing;
-            }
-            row["before"] = selected.Before is null ? JValue.CreateNull() : BridgeJson.FromObject(selected.Before);
+            _impact.Add(new JObject { ["connection"] = core["connection"]!.DeepClone(), ["designation"] = designation, ["label"] = label, ["colour"] = core["colour"]?.DeepClone(), ["crossSectionMm2"] = item["cross_section_mm2"]!.DeepClone() });
         }
-        string Segment(double[][] pair) => string.Join("|", pair.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal));
-        var knownSegments = new HashSet<string>(candidates.SelectMany(w => w.Points.Zip(w.Points.Skip(1), (a, b) => Segment([a, b]))), StringComparer.Ordinal);
-        var allSegments = scene.Graphical.Concat(result["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!).ToArray();
-        foreach (JToken definition in definitions)
+
+        private Inventory ReadInventory()
         {
-            double[][] line = definition["points"]!.ToObject<double[][]>()!;
-            var crossed = candidates.Where(c => Crossings(line, c.Points) > 0).ToArray();
-            JToken[] expected = impact.Where(r => (string?)r["designation"] == (string?)definition["designation"]).Select(r => r["connection"]!).ToArray();
-            if (crossed.Any(c => Crossings(line, c.Points) != 1) || crossed.Length != expected.Length || crossed.Any(c => !expected.Any(e => JToken.DeepEquals(e, c.Reference)))
-                || allSegments.Any(s => Crossings(line, s) > 0 && !knownSegments.Contains(Segment(s))))
-            { throw Missing("the definition line does not cross exactly the planned cores once"); }
+            Inventory inventory = scene.ReadCables?.Invoke() ?? throw Missing("the cable inventory reader is unavailable");
+            if (!inventory.Complete || inventory.Wires.Count > 10000)
+            { throw Missing("the wire inventory is incomplete or too large"); }
+            Require(!inventory.Names.Any(n => _names.Any(d => SameName(d, n, scene.Page.Page))), "/items", "A cable designation already exists; choose an explicit unused name.");
+            _candidates.AddRange(inventory.Wires.Select(w => (new JObject { ["locator"] = BridgeJson.FromObject(w.Locator) }, w.Path ?? w.Points, (Wire?)w)));
+            return inventory;
         }
-        result["cableDefinitions"] = definitions;
-        result["coreImpact"] = impact;
-        result["generation"] = "A55: wires -> generate -> definition line -> generate -> committed bind -> generate -> cores -> generate; failure undoes all confirmed commits.";
-        result["undoSteps"] = 6 + (result["symbols"]!.Any() ? 1 : 0) + (result["graphicalAutoconnect"]!.Any() ? 1 : 0);
-        return Fingerprint.Of(inventory.Names.Select(n => "name:" + n).Concat(inventory.Wires.Select(w => BridgeJson.FromObject(w).ToString(Formatting.None))));
+
+        private void BindCores(Inventory inventory)
+        {
+            foreach (JToken row in _impact)
+            {
+                var matches = _candidates.Where(c => JToken.DeepEquals(c.Reference, row["connection"])).ToArray();
+                if (matches.Length != 1)
+                {
+                    throw new BridgeErrorException(ErrorReason.PlanStale, FormattableString.Invariant(
+                        $"The connection locator changed; read the page and re-plan (connection {row["connection"]?["locator"]?["oid"]}, {matches.Length} matches among {inventory.Wires.Count} inventory wires)."));
+                }
+                var selected = matches[0];
+                Require(_assigned.Add(selected.Reference.ToString(Formatting.None)), "/items", "Assign each connection only once.");
+                if (selected.Before is { } old && (HasCable(old.Cable) || old.Locator.Project != scene.Project.Path || old.Locator.Page != scene.Page.Page))
+                {
+                    BridgeErrorException missing = Missing("a selected connection already has a cable or lies on another project or page; metadata names them");
+                    missing.Error.Metadata!["cable"] = old.Cable ?? string.Empty;
+                    missing.Error.Metadata["connectionPage"] = old.Locator.Project + " / " + old.Locator.Page;
+                    throw missing;
+                }
+                row["before"] = selected.Before is null ? JValue.CreateNull() : BridgeJson.FromObject(selected.Before);
+            }
+        }
+
+        private void CheckCrossings()
+        {
+            string Segment(double[][] pair) => string.Join("|", pair.Select(p => new JArray(p).ToString(Formatting.None)).OrderBy(p => p, StringComparer.Ordinal));
+            var knownSegments = new HashSet<string>(_candidates.SelectMany(w => w.Points.Zip(w.Points.Skip(1), (a, b) => Segment([a, b]))), StringComparer.Ordinal);
+            var allSegments = scene.Graphical.Concat(result["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!).ToArray();
+            foreach (JToken definition in _definitions)
+            {
+                double[][] line = definition["points"]!.ToObject<double[][]>()!;
+                var crossed = _candidates.Where(c => Crossings(line, c.Points) > 0).ToArray();
+                JToken[] expected = _impact.Where(r => (string?)r["designation"] == (string?)definition["designation"]).Select(r => r["connection"]!).ToArray();
+                if (crossed.Any(c => Crossings(line, c.Points) != 1) || crossed.Length != expected.Length || crossed.Any(c => !expected.Any(e => JToken.DeepEquals(e, c.Reference)))
+                    || allSegments.Any(s => Crossings(line, s) > 0 && !knownSegments.Contains(Segment(s))))
+                { throw Missing("the definition line does not cross exactly the planned cores once"); }
+            }
+        }
+
+        private string Result(Inventory inventory)
+        {
+            result["cableDefinitions"] = _definitions;
+            result["coreImpact"] = _impact;
+            result["generation"] = "A55: wires -> generate -> definition line -> generate -> committed bind -> generate -> cores -> generate; failure undoes all confirmed commits.";
+            result["undoSteps"] = 6 + (result["symbols"]!.Any() ? 1 : 0) + (result["graphicalAutoconnect"]!.Any() ? 1 : 0);
+            return Fingerprint.Of(inventory.Names.Select(n => "name:" + n).Concat(inventory.Wires.Select(w => BridgeJson.FromObject(w).ToString(Formatting.None))));
+        }
     }
+
     /// <summary>Live T8b: a connection without a cable reads its cable name as the bare separator "+".</summary>
     internal static bool HasCable(string? name) => name is not null && name.Trim('=', '+', '&', ' ').Length > 0;
     private static int Crossings(double[][] line, double[][] points) => points.Zip(points.Skip(1), (a, b) =>

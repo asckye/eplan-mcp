@@ -1,7 +1,6 @@
 # Method bodies over a cyclomatic complexity of 40 when the gate was added (2026-11-17). Entries may only shrink or go; never add one.
 EplanMcp.Bridge.Core/ActionRunRequest.Check(5)	45
 EplanMcp.Bridge.Core/AnnotationCreation.Validate(1)	41
-EplanMcp.Bridge.Core/CableDefinitionPlanner.Add(4)	67
 EplanMcp.Bridge.Core/ConnectionDefinitionPoints.Plan(10)	55
 EplanMcp.Bridge.Core/DevicePlaceExecuteOperation.PlaceSymbol(4)	42
 EplanMcp.Bridge.Core/DeviceTerminalPlan.Check(1)	50

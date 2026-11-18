@@ -4,7 +4,8 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| 大方法拆分第四批（2026-11-18，`DevicePlaceRequest.Check`、`ConnectionCreateExecuteOperation.Execute` 拆进 `Execution`，只搬代码） | `ConnectionCreateTests`、`DevicePlaceTests` | 待运行：单元测试全部通过；推送后从主检出实机回归，预期 `ConnectionCreateTests` 25/25、`DevicePlaceTests` 与上次相同（21/30，9 个缺样例部件）。 |
+| 大方法拆分第五批（2026-11-18，`CableDefinitionPlanner.Add` 拆进 `Addition`，只搬代码） | `CableDefinitionTests` | 待运行：单元测试全部通过；与 `EplanDrawingReader.Read` 的拆分一起实机回归。 |
+| 大方法拆分第四批（2026-11-18，`DevicePlaceRequest.Check`、`ConnectionCreateExecuteOperation.Execute` 拆进 `Execution`，只搬代码） | `ConnectionCreateTests`、`DevicePlaceTests` | 已通过：2026-11-18，A 槽 Electric P8，EPLAN 2026.0.3.25421，`480ad4ff`：`ConnectionCreateTests` 25/25，`DevicePlaceTests` 21/30（9 个失败与上次相同，A 槽部件库没有样例部件，见下）。 |
 | 大方法拆分第一、二批（2026-11-17，`ConnectionCreatePlanner.Predict`、`DevicePlaceInputs.Check`、`LayoutGuard.Check`、`ApprovalTexts.Change`、`PlacementMovePlanner.Predict`、`PlanVerifier.Verify`） | `ConnectionCreateTests`、`PlacementMoveTests`、`LayoutGuardTests`、`LayoutGuardWarningTests`、`DevicePlaceTests`、`PlanApplyTests` | 已通过，当时有两项与拆分无关的失败（见下两行，连接一项已修复）：2026-11-17，A 槽 Electric P8，EPLAN 2026.0.3.25421，main `9f300160`：`ConnectionCreateTests` 24/25、`PlacementMoveTests` 2/2、`LayoutGuardTests` 5/5、`LayoutGuardWarningTests` 1/1、`PlanApplyTests` 2/2、`DevicePlaceTests` 21/30。 |
 | T 节点支路悬空时保住原有连接（2026-11-17，A148） | `ConnectionCreateTests` | 已通过：2026-11-18，A 槽 Electric P8，EPLAN 2026.0.3.25421，本修复所在提交：`ConnectionCreateTests` 25/25。原因是 `f63f0078` 的方向变体默认值把悬空的支路当成目标 1。 |
 | A 槽部件库缺样例部件（2026-11-17 回归时发现） | `DevicePlaceTests` 中用部件放置的 9 个用例 | 受阻：Electric P8 当前选用的部件库里没有 `SIE.3RH2122-1HB40` 等样例部件，返回 `PART_NOT_FOUND`（该判断的代码近期没有改动）。部件库选择是 EPLAN 的用户设置，测试不改它；恢复样例部件库后重跑。上一次 30/30 是 2026-11-10 B 槽 Pro Panel。 |
