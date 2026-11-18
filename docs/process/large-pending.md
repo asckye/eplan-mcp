@@ -4,6 +4,7 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| 连接预测拆分（2026-11-17，`ConnectionCreatePlanner.Predict` 按步骤拆进 `Prediction`，只搬代码） | `ConnectionCreateTests` | 待运行：单元测试与快照全部通过；提交当时负责人正在使用 Electric P8，实机回归推迟到 EPLAN 空闲时，预期 25 个用例结果不变。 |
 | PLC 生成保留已有表达（2026-11-08，MX_Dryer 重画时发现机架页被清空） | `ProjectToolsTests` | 待实机验证：对已有多线放置的设备执行 `eplan_plc_generate`，核对原放置仍在原页、新增页面只含请求页，以及异常结果在事务内回滚。 |
 | `eplan_session_close` / `eplan_session_restart`（2026-11-15） | `SessionLifecycleTests`（单独、最后运行） | 部分通过：2026-11-15，A 槽 Electric P8：开着 scratch 之外的副本 LargeOutside 时关闭被拒绝（`POLICY_DENIED`，只写项目名不带路径），EPLAN 仍在运行。第一次运行发现一条 10-20 留下、项目早已关闭的挂起也挡住了关闭，已改为只算打开的项目上的挂起。待运行：只开 scratch 项目的槽位上，重启关闭开着项目的 EPLAN 并重新启动同一变体。 |
 | 电位定义点修改 `eplan_potential_update`（cd7cc5ad，2026-11-10；A130） | `PotentialEngineeringTests`（用例待补） | 工具路径已在会话中实机使用（2026-11-10：通过式烘芯炉 N/NC 线改蓝色、MX_NFPA 三根变频器线加定义点后重新生成，审图 0 问题）；Large 用例待补。 |
