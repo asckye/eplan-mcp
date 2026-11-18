@@ -9,7 +9,8 @@
     <!-- Repository evidence is embedded so the Small reference check performs no file I/O. -->
     <EmbeddedResource Include="../../catalog/mapping/overlay.yaml" LogicalName="mapping-overlay.yaml" />
     <EmbeddedResource Include="../Contracts.Snapshots/server-contract.verified.json" LogicalName="tool-contract.json" />
-    <EmbeddedResource Include="../../src/EplanMcp.Bridge.Eplan/Adapters/*.cs" LogicalName="%(Filename)%(Extension)" />
+    <!-- The adapters lie in one folder per domain (2026-11-17); file names are unique across them, Generated is not referenced. -->
+    <EmbeddedResource Include="../../src/EplanMcp.Bridge.Eplan/Adapters/**/*.cs" Exclude="../../src/EplanMcp.Bridge.Eplan/Adapters/Generated/**" LogicalName="%(Filename)%(Extension)" />
     <EmbeddedResource Include="../../catalog/api-try.g.tsv" LogicalName="api-try.g.tsv" />
     <ProjectReference Include="..\..\src\EplanMcp.Host\EplanMcp.Host.csproj" Aliases="host" />
     <Compile Include="..\EplanMcp.Large.Tests\BatchVerificationData.cs" Link="BatchVerificationData.cs" />

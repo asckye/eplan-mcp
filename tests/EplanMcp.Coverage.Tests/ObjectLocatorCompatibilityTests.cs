@@ -49,9 +49,9 @@ public sealed class ObjectLocatorCompatibilityTests
             using EplanMcp.Contracts;
             using Newtonsoft.Json;
             """ + Doubles
-            + "static class EplanPins {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/EplanPins.cs", "Name") + "}\n"
-            + "class EplanPropertyReadAdapter {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/EplanPropertyReadAdapter.cs", "Describe", "End") + "}\n"
-            + "class EplanObjectReader {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/EplanObjectReader.cs", "Describe", "Legacy") + "}\n"
+            + "static class EplanPins {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanPins.cs", "Name") + "}\n"
+            + "class EplanPropertyReadAdapter {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/Properties/EplanPropertyReadAdapter.cs", "Describe", "End") + "}\n"
+            + "class EplanObjectReader {" + Methods("src/EplanMcp.Bridge.Eplan/Adapters/Properties/EplanObjectReader.cs", "Describe", "Legacy") + "}\n"
             + "class BeforeSlice {" + BeforeSlice + "}\n"
             + """
                 public static class Probe
