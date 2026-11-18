@@ -45,6 +45,14 @@ public static class WriteArguments
         }
     }
 
+    /// <summary>The writable project of this name, which must be the one the plan was approved for when a planned path is given.</summary>
+    public static OpenProject Writable(IProjectCatalog catalog, string project, string? plannedPath)
+    {
+        OpenProject open = Writable(catalog, project);
+        RequirePlanned(plannedPath, open.Path);
+        return open;
+    }
+
     /// <summary>Marks an error found before the transaction: nothing was changed (ADR-0010).</summary>
     public static BridgeErrorException NotStarted(BridgeErrorException error)
     {

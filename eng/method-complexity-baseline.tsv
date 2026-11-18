@@ -13,7 +13,7 @@ EplanMcp.Bridge.Core/LayoutPlaceRequest.Check(4)	57
 EplanMcp.Bridge.Core/MacroStoreOperation.Execute(1)	51
 EplanMcp.Bridge.Core/PlacementDeleteOperation.Execute(1)	54
 EplanMcp.Bridge.Core/PlacementEditPlanner.Plan(3)	108
-EplanMcp.Bridge.Core/PlacementMoveExecution.Execute(5)	83
+EplanMcp.Bridge.Core/PlacementMoveExecution.Execute(6)	80
 EplanMcp.Bridge.Core/PlacementTextCreateExecuteOperation.Execute(1)	65
 EplanMcp.Bridge.Core/PlacementTextCreateExecuteOperation.ParseArgs(1)	70
 EplanMcp.Bridge.Core/PlanStepExecuteOperation.Execute(1)	41

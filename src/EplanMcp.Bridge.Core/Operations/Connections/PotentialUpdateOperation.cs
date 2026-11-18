@@ -41,9 +41,7 @@ public class PotentialUpdateOperation(IProjectCatalog catalog, IPageDrawingReade
         try
         {
             (page, items) = Check(input);
-            project = WriteArguments.Writable(catalog, (string)input["project"]!);
-            if (execute)
-            { WriteArguments.RequirePlanned((string?)args["projectPath"], project.Path); }
+            project = WriteArguments.Writable(catalog, (string)input["project"]!, (string?)args["projectPath"]);
             PageDrawingGeometry geometry = drawings.Read(project.Path, page) ?? throw new BridgeErrorException(execute ? ErrorReason.PlanStale : ErrorReason.PageNotFound, "Read the target page with eplan_page_get.");
             foreach (var item in items)
             {
