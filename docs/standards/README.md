@@ -37,7 +37,8 @@
 | 规则 | 级别 | 本项目做法 | 依据 |
 |---|---|---|---|
 | TL-41 | SHOULD | 参数用 snake_case，结果字段大多用 camelCase（`HostJson` 用 Web 默认），少数工具的结果用 snake_case | 已发布契约；新工具的结果沿用 camelCase，参数沿用 snake_case |
-| TL-42 | SHOULD | `eplan_session_status`、`eplan_tool_usage`、`eplan_property_schema` 等名称末段不是动作词 | 已发布名称 |
+| TL-42 | SHOULD | `eplan_session_status`、`eplan_tool_usage`、`eplan_property_schema`、`eplan_plc_rack`、`eplan_translation_keyword` 的名称末段不是动作词 | 已发布名称；登记在 [工具动作词表](../tools/README.md) |
+| TL-15 | SHOULD | 16 个工具的互斥参数组没有全写在描述里（只在 schema 的 `oneOf`、用法文本或服务端校验中）；8 个工具用空字符串作 27 个可选参数的默认值，表示“未提供” | 已发布契约（2026-11-18 普查）；描述有字数预算，互斥关系写在用法文本里。新参数省略即未提供，不再用空字符串 |
 | TL-30、TL-08、TL-14、TL-05、TL-17、WS-01、WS-03、WS-12、WS-17、PRO-09、ENG-01、ENG-08、ENG-11 | MUST / SHOULD | 逐条见 ADR | [ADR-0053](../adr/0053-mcp-standard-exceptions.md) |
 
 ## 本地关卡的实现入口
