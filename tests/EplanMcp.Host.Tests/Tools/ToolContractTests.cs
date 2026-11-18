@@ -390,6 +390,51 @@ public sealed class ToolContractTests : IDisposable
         Assert.All(Tools, t => Assert.Matches("^eplan_([a-z]+|terminal_strip|page_text|action_catalog|pack_library)_([a-z]+|pdf_comments)$", t.Name));
     }
 
+    private const string ActionVerbs =
+        "add apply bind build check close configure create delete edit enable export find generate get import insert " +
+        "install list number open place plan readdress reassign remove rename renumber replace restart review route " +
+        "run search select set start store sync translate try update";
+    private const string ImportFormats = "dxf list pdf_comments plc pxf";
+    private const string ExportFormats = "dxf image labels parts pdf pxf untranslated";
+    private const string PublishedNounEndings =
+        "eplan_plc_rack eplan_property_schema eplan_session_status eplan_tool_usage eplan_translation_keyword";
+
+    [Fact]
+    public void EveryTool_UsesTheDocumentedClosedVerbList()
+    {
+        const string guidance = "Add the verb to docs/tools/README.md and to this list in the same change.";
+        string[] verbs = ActionVerbs.Split(' ');
+        string[] imports = ImportFormats.Split(' ');
+        string[] exports = ExportFormats.Split(' ');
+        string[] nounEndings = PublishedNounEndings.Split(' ');
+        foreach (Tool tool in Tools)
+        {
+            bool registered = tool.Name switch
+            {
+                string name when name.StartsWith("eplan_import_", StringComparison.Ordinal) =>
+                    imports.Contains(name["eplan_import_".Length..], StringComparer.Ordinal),
+                string name when name.StartsWith("eplan_export_", StringComparison.Ordinal) =>
+                    exports.Contains(name["eplan_export_".Length..], StringComparer.Ordinal),
+                string name => nounEndings.Contains(name, StringComparer.Ordinal)
+                    || verbs.Contains(name[(name.LastIndexOf('_') + 1)..], StringComparer.Ordinal),
+            };
+            Assert.True(registered, $"{tool.Name}: {guidance}");
+        }
+
+        using Stream stream = typeof(ToolContractTests).Assembly.GetManifestResourceStream("ToolDocs.README.md")
+            ?? throw new InvalidOperationException("Missing tool documentation resource: README.md");
+        using var reader = new StreamReader(stream);
+        string[] rows = reader.ReadToEnd().Split('\n');
+        string[] documented = rows.SkipWhile(row => !row.TrimEnd().EndsWith("| differs |", StringComparison.Ordinal))
+            .Skip(2)
+            .TakeWhile(row => row.StartsWith('|'))
+            .Select(row => row.Split('|')[1].Trim().Trim('`'))
+            .ToArray();
+        Assert.True(verbs.Order(StringComparer.Ordinal).SequenceEqual(documented.Order(StringComparer.Ordinal)),
+            $"Verb table and test list differ. Table only: {string.Join(", ", documented.Except(verbs))}. " +
+            $"Test only: {string.Join(", ", verbs.Except(documented))}. {guidance}");
+    }
+
     [Fact]
     public void EveryArgumentName_IsSnakeCase()
     {
