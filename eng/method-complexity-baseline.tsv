@@ -18,7 +18,6 @@ EplanMcp.Bridge.Core/MacroStoreOperation.Execute(1)	51
 EplanMcp.Bridge.Core/PlacementDeleteOperation.Execute(1)	54
 EplanMcp.Bridge.Core/PlacementEditPlanner.Plan(3)	108
 EplanMcp.Bridge.Core/PlacementMoveExecution.Execute(5)	83
-EplanMcp.Bridge.Core/PlacementMovePlanner.Predict(3)	129
 EplanMcp.Bridge.Core/PlacementTextCreateExecuteOperation.Execute(1)	65
 EplanMcp.Bridge.Core/PlacementTextCreateExecuteOperation.ParseArgs(1)	70
 EplanMcp.Bridge.Core/PlanStepExecuteOperation.Execute(1)	41
@@ -30,7 +29,6 @@ EplanMcp.Bridge.Eplan/EplanDeviceSymbolPlacement.Create(5)	55
 EplanMcp.Bridge.Eplan/EplanDrawingReader.Read(3)	141
 EplanMcp.Bridge.Eplan/EplanGraphicEditor.PrepareEdit(3)	46
 EplanMcp.Host/AnnotationCreatePlanning.Validate(3)	56
-EplanMcp.Host/ApprovalTexts.Change(3)	131
 EplanMcp.Host/ContextBuilder.ReadAsync(8)	65
 EplanMcp.Host/DeviceWriteTools.DevicePlaceAsync(37)	58
 EplanMcp.Host/MacroWriteTools.MacroInsertAsync(20)	44

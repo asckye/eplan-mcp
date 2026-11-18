@@ -10,7 +10,6 @@ EplanMcp.Bridge.Core/MacroInsertRequest.CheckAll(5)	112
 EplanMcp.Bridge.Core/PlacementDeleteOperation.Execute(1)	125
 EplanMcp.Bridge.Core/PlacementEditPlanner.Plan(3)	117
 EplanMcp.Bridge.Core/PlacementMoveExecution.Execute(5)	154
-EplanMcp.Bridge.Core/PlacementMovePlanner.Predict(3)	187
 EplanMcp.Bridge.Core/PlanStepGuardOperation.Check(2)	153
 EplanMcp.Bridge.Core/PlcRackExecuteOperation.Execute(1)	107
 EplanMcp.Bridge.Core/PropertyPlacementMoves.Plan(3)	113
