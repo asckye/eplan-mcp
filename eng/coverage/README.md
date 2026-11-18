@@ -11,7 +11,7 @@ dotnet run --project eng/coverage -c Release -- method-size
 dotnet run --project eng/coverage -c Release -- method-size --update
 ```
 
-`method-size` 是方法规模门禁（规范 4.1）：`src/` 下手写代码的方法体超过 100 行即失败，除非列在 `eng/method-size-baseline.tsv`；清单里的方法变长也失败。拆短或删除方法后运行 `--update`，它只降低和删除条目，不会把新的长方法加进清单。
+`method-size` 是方法规模门禁（规范 4.1）：`src/` 下手写代码的方法体超过 100 行，或圈复杂度超过 40（1 加每个分支、`&&`、`||`、`??`，方法里的局部函数和 lambda 算在内），即失败，除非列在 `eng/method-size-baseline.tsv` 或 `eng/method-complexity-baseline.tsv`；清单里的方法变大也失败。拆短或删除方法后运行 `--update`，它只降低和删除条目，不会把新的长方法加进清单。
 
 ## 导入批量实机证据
 

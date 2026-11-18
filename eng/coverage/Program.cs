@@ -64,12 +64,13 @@ internal static class Program
                 return problems.Count == 0 ? 0 : 1;
             case ["method-size"]:
                 bool actions = Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
-                List<string> tooLong = MethodSize.Problems(MethodSize.Measure(root), MethodSize.ReadBaseline(root));
+                List<string> tooLong = MethodSize.Problems(root);
                 tooLong.ForEach(p => Console.WriteLine((actions ? "::error title=Method size::" : "error: ") + p));
-                Console.WriteLine(tooLong.Count == 0 ? "Method sizes are within the limit or the baseline." : $"{tooLong.Count} method size problem(s).");
+                Console.WriteLine(tooLong.Count == 0 ? "Method sizes and complexities are within the limits or the baselines." : $"{tooLong.Count} method size problem(s).");
                 return tooLong.Count == 0 ? 0 : 1;
             case ["method-size", "--update"]:
-                Console.WriteLine($"Wrote {MethodSize.BaselinePath} with {MethodSize.Update(root)} entries.");
+                foreach (MethodSize.Measure measure in new[] { MethodSize.Lines, MethodSize.Complexity })
+                { Console.WriteLine($"Wrote {measure.BaselinePath} with {MethodSize.Update(root, measure)} entries."); }
                 return 0;
             default:
                 Console.Error.WriteLine("usage: EplanMcp.Coverage scan [--eplan-bin <Bin folder of the EPLAN installation>] | generate | check | import-actions <folder> | import-verification <results.json> [<results.json> ...] | method-size [--update]");

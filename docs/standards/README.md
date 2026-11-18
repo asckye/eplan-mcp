@@ -50,7 +50,7 @@
 | `local-gate.ps1` 的还原、构建与格式步骤 | 设置 `CI=true`、锁定还原、Release 构建和 `dotnet format --verify-no-changes --no-restore`；按插件项目求值的 `EplanBinPath`/API 引用检测 EPLAN 安装，齐全时选 `EplanMcp.slnx`，否则记录 `add-in not checked: EPLAN not installed` 并选 `EplanMcp.Ci.slnf`；CI 使用后者。 |
 | [`check-action-catalog.ps1`](../../eng/scripts/check-action-catalog.ps1) | Action 的 JSON Schema、ID、顺序、文档表格逐行内容与数量。 |
 | [`eng/coverage`](../../eng/coverage/README.md) 的 `check` | 生成文件一致性；扫描过期给出警告。 |
-| [`eng/coverage`](../../eng/coverage/README.md) 的 `method-size` | 规范 4.1 的规模触发线（`Q-01`）：`src/` 下手写代码的方法体超过 100 行即失败，除非列在 [`eng/method-size-baseline.tsv`](../../eng/method-size-baseline.tsv)（2026-11-17 加门禁时的 61 个旧方法）；清单里的方法只许变短或移除，`method-size --update` 只降低和删除条目，不新增。键是“项目/类型.方法(参数个数)”，不含文件路径。 |
+| [`eng/coverage`](../../eng/coverage/README.md) 的 `method-size` | 规范 4.1 的规模触发线（`Q-01`）：`src/` 下手写代码的方法体超过 100 行，或圈复杂度超过 40，即失败，除非列在对应的清单里：[`eng/method-size-baseline.tsv`](../../eng/method-size-baseline.tsv)（行数，2026-11-17 加门禁时 61 个，现 60 个）、[`eng/method-complexity-baseline.tsv`](../../eng/method-complexity-baseline.tsv)（复杂度，61 个；规范的触发线是 10–15，门禁线定在 40，先挡住最重的）。清单里的方法只许变小或移除，`method-size --update` 只降低和删除条目，不新增。键是“项目/类型.方法(参数个数)”，不含文件路径。 |
 | [`check-test-floor.ps1`](../../eng/scripts/check-test-floor.ps1) 与 [`tests/test-suites.json`](../../tests/test-suites.json) | 每程序集独立 TRX；缺结果、未知程序集、通过数低于 `minPassed` 或下限低于通过数的 80% 会失败，建议值为通过数的 90% 向下取整。 |
 | `dotnet list EplanMcp.Ci.slnf package --vulnerable --include-transitive` | High/Critical 漏洞检查。 |
 
