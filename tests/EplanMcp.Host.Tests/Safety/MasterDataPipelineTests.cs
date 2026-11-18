@@ -4,7 +4,6 @@ using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Tools;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EplanMcp.Host.Tests.Safety;
 
@@ -185,18 +184,7 @@ public sealed class MasterDataPipelineTests : IDisposable
 
     private Task<WriteOutcome<JsonObject>> Run(IApprovalChannel dialog, bool dryRun = false, HostConfig? config = null)
     {
-        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
-        config ??= HostConfig.Defaults(_locations);
-        var pipeline = new WritePipeline(
-            _bridge,
-            config,
-            SuspensionStore.For(_locations),
-            audit,
-            new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([dialog], config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(_locations, TimeProvider.System),
-            TimeProvider.System,
-            NullLogger<WritePipeline>.Instance);
+        var pipeline = TestWritePipeline.Create(_bridge, _locations, config, channels: [dialog]);
         var request = new WriteRequest<object, object>(Tool, ToolTier.Destructive, Plan, Execute, new { file = "relays.xml" }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(180));
         return pipeline.RunAsync<object, object, JsonObject>(request, TestContext.Current.CancellationToken);
     }

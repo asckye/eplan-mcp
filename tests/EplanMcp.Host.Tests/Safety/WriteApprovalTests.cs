@@ -4,7 +4,6 @@ using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Tools;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EplanMcp.Host.Tests.Safety;
 
@@ -378,18 +377,8 @@ public sealed class WriteApprovalTests : IDisposable
 
     private Task<WriteOutcome<JsonObject>> Run(IApprovalChannel[] channels, bool dryRun, OutsideScratchWrites outside = OutsideScratchWrites.Approve, object? arguments = null)
     {
-        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
         var config = new HostConfig([_locations.DefaultScratch], outside) { ApprovalTimeout = _timeout };
-        var pipeline = new WritePipeline(
-            _bridge,
-            config,
-            SuspensionStore.For(_locations),
-            audit,
-            new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService(channels, config, _clock, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(_locations, TimeProvider.System),
-            TimeProvider.System,
-            NullLogger<WritePipeline>.Instance);
+        var pipeline = TestWritePipeline.Create(_bridge, _locations, config, _clock, channels);
         var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, arguments ?? new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));
         return pipeline.RunAsync<object, object, JsonObject>(request, _progress, TestContext.Current.CancellationToken);
     }

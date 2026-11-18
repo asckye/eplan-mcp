@@ -2,10 +2,10 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
-using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Bridge;
+using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -63,12 +63,7 @@ public sealed class ProjectCreateRecoveryTests
         { Handshake = (_, _, _) => Task.FromResult(FakeChannel.CompatibleHandshake(e.ProcessId, operations: [plan, execute, OperationNames.OutcomeGet])) });
         await using var bridge = new BridgeClient(discovery, connector, NullLogger<BridgeClient>.Instance, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(10));
         var config = new HostConfig([harness.Locations.DefaultScratch], OutsideScratchWrites.Deny);
-        var audit = new AuditLog(harness.Locations.Audit, TimeProvider.System);
-        var suspensions = SuspensionStore.For(harness.Locations);
-        var pipeline = new WritePipeline(bridge, config, suspensions, audit,
-            new DanglingWrites(bridge, suspensions, audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([], config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(harness.Locations, TimeProvider.System), TimeProvider.System, NullLogger<WritePipeline>.Instance);
+        var pipeline = TestWritePipeline.Create(bridge, harness.Locations, config);
 
         var result = await ProjectCreateTools.CreateAsync(pipeline, new(harness.Locations), config, mode, "material" + extension, "Line1", dry_run: false, cancellationToken: TestContext.Current.CancellationToken);
         if (status == OutcomeStatus.Committed)

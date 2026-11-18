@@ -4,7 +4,6 @@ using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Tools;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EplanMcp.Host.Tests.Safety;
 
@@ -193,10 +192,7 @@ public sealed class WritePipelineTests : IDisposable
     {
         string root = Path.Combine(Path.GetTempPath(), "eplanmcp-scratch-" + Guid.NewGuid().ToString("N"));
         HostConfig config = HostConfig.Defaults(_locations) with { ScratchRoots = [root] };
-        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
-        var pipeline = new WritePipeline(_bridge, config, SuspensionStore.For(_locations), audit,
-            new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([], config, TimeProvider.System, NullLogger<ApprovalService>.Instance), new BackupFolders(_locations, TimeProvider.System), TimeProvider.System, NullLogger<WritePipeline>.Instance);
+        var pipeline = TestWritePipeline.Create(_bridge, _locations, config);
         WritePlan Plan(string? database)
         {
             WritePlan plan = PlanFor(Path.Combine(root, "Copy.elk"));
@@ -220,18 +216,7 @@ public sealed class WritePipelineTests : IDisposable
 
     private Task<WriteOutcome<JsonObject>> Run(bool dryRun = false, HostConfig? config = null)
     {
-        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
-        config ??= HostConfig.Defaults(_locations);
-        var pipeline = new WritePipeline(
-            _bridge,
-            config,
-            SuspensionStore.For(_locations),
-            audit,
-            new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([], config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(_locations, TimeProvider.System),
-            TimeProvider.System,
-            NullLogger<WritePipeline>.Instance);
+        var pipeline = TestWritePipeline.Create(_bridge, _locations, config);
         var request = new WriteRequest<object, object>(Tool, ToolTier.Write, Plan, Execute, new { pages = 1 }, plan => new { plan.Fingerprint }, dryRun, TimeSpan.FromSeconds(60));
         return pipeline.RunAsync<object, object, JsonObject>(request, TestContext.Current.CancellationToken);
     }

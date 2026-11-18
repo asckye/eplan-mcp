@@ -3,13 +3,11 @@ using System.Xml.Linq;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Contracts;
-using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Importing;
 using EplanMcp.Host.Safety;
 using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
-using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Tools;
@@ -112,12 +110,7 @@ public sealed class PartBuildToolTests : IDisposable
     public async Task DeniedMasterDataPolicy_PreventsApprovalBackupAndImport()
     {
         HostConfig config = HostConfig.Defaults(_harness.Locations) with { MasterDataWrites = MasterDataWrites.Deny };
-        var audit = new AuditLog(_harness.Locations.Audit, TimeProvider.System);
-        var suspensions = SuspensionStore.For(_harness.Locations);
-        var pipeline = new WritePipeline(_harness.Bridge, config, suspensions, audit,
-            new DanglingWrites(_harness.Bridge, suspensions, audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([_approval], config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(_harness.Locations, TimeProvider.System), TimeProvider.System, NullLogger<WritePipeline>.Instance);
+        var pipeline = TestWritePipeline.Create(_harness.Bridge, _harness.Locations, config, channels: [_approval]);
 
         JsonElement error = WriteToolHarness.Error(await PartBuildTools.BuildAsync(_harness.Bridge, pipeline, _files, "parts.csv", dry_run: false, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Equal(ErrorReason.PolicyDenied, error.GetProperty("reason").GetString());

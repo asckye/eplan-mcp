@@ -1,10 +1,9 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
-using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
-using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Tools;
@@ -40,18 +39,8 @@ public sealed class PageCreateToolTests : IDisposable
             Project = "Line1",
             Pages = [.. ((PageCreateArgs)args!).Pages.Select(p => new PageSummary { Name = p.Name, Type = p.PageType ?? "Circuit", Description = p.Description })],
         };
-        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
         var config = new HostConfig([_locations.DefaultScratch], OutsideScratchWrites.Deny);
-        _pipeline = new WritePipeline(
-            _bridge,
-            config,
-            SuspensionStore.For(_locations),
-            audit,
-            new DanglingWrites(_bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([], config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(_locations, TimeProvider.System),
-            TimeProvider.System,
-            NullLogger<WritePipeline>.Instance);
+        _pipeline = TestWritePipeline.Create(_bridge, _locations, config);
     }
 
     public void Dispose() => Directory.Delete(_locations.Root, recursive: true);

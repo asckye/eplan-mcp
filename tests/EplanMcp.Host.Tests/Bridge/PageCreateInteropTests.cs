@@ -9,6 +9,7 @@ using EplanMcp.Contracts;
 using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
+using EplanMcp.Host.Tests.Safety;
 using EplanMcp.Host.Tools;
 using Microsoft.Extensions.Logging.Abstractions;
 using ModelContextProtocol.Protocol;
@@ -49,17 +50,7 @@ public sealed class PageCreateInteropTests : IAsyncDisposable
             new NullLog());
         _server.Start();
         _client = new BridgeClient(new PipeBridgeDiscovery(_prefix), new PipeBridgeConnector(), NullLogger<BridgeClient>.Instance);
-        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
-        _pipeline = new WritePipeline(
-            _client,
-            HostConfig.Defaults(_locations),
-            SuspensionStore.For(_locations),
-            audit,
-            new DanglingWrites(_client, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService([], HostConfig.Defaults(_locations), TimeProvider.System, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(_locations, TimeProvider.System),
-            TimeProvider.System,
-            NullLogger<WritePipeline>.Instance);
+        _pipeline = TestWritePipeline.Create(_client, _locations);
     }
 
     public async ValueTask DisposeAsync()

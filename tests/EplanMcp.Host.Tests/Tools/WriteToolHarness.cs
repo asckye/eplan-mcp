@@ -1,9 +1,8 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
-using EplanMcp.Host.Audit;
 using EplanMcp.Host.Bridge;
 using EplanMcp.Host.Safety;
-using Microsoft.Extensions.Logging.Abstractions;
+using EplanMcp.Host.Tests.Safety;
 using ModelContextProtocol.Protocol;
 
 namespace EplanMcp.Host.Tests.Tools;
@@ -29,18 +28,8 @@ internal sealed class WriteToolHarness : IDisposable
             [new BridgeEndpoint("p", Environment.ProcessId)],
             new HandshakeResult { ProtocolVersion = 1, BridgeVersion = "b", Eplan = new EplanInstanceInfo { ProcessId = Environment.ProcessId, Version = "2026.0.3" } },
             null);
-        var audit = new AuditLog(Locations.Audit, TimeProvider.System);
         var config = new HostConfig([Locations.DefaultScratch], outsideScratch);
-        Pipeline = new WritePipeline(
-            Bridge,
-            config,
-            SuspensionStore.For(Locations),
-            audit,
-            new DanglingWrites(Bridge, SuspensionStore.For(Locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService(channels, config, TimeProvider.System, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(Locations, TimeProvider.System),
-            TimeProvider.System,
-            NullLogger<WritePipeline>.Instance);
+        Pipeline = TestWritePipeline.Create(Bridge, Locations, config, channels: channels);
     }
 
     public HostDataLocations Locations { get; }

@@ -516,21 +516,8 @@ public sealed class WorkbenchChannelTests : IAsyncDisposable
     private ApprovalService Service(params IApprovalChannel[] channels) =>
         new(channels, new HostConfig([_locations.DefaultScratch], OutsideScratchWrites.Approve), _clock, NullLogger<ApprovalService>.Instance);
 
-    private WritePipeline Pipeline(FakeBridgeClient bridge, params IApprovalChannel[] channels)
-    {
-        var audit = new AuditLog(_locations.Audit, TimeProvider.System);
-        var config = new HostConfig([_locations.DefaultScratch], OutsideScratchWrites.Approve);
-        return new WritePipeline(
-            bridge,
-            config,
-            SuspensionStore.For(_locations),
-            audit,
-            new DanglingWrites(bridge, SuspensionStore.For(_locations), audit, TimeProvider.System, NullLogger<DanglingWrites>.Instance),
-            new ApprovalService(channels, config, _clock, NullLogger<ApprovalService>.Instance),
-            new BackupFolders(_locations, TimeProvider.System),
-            TimeProvider.System,
-            NullLogger<WritePipeline>.Instance);
-    }
+    private WritePipeline Pipeline(FakeBridgeClient bridge, params IApprovalChannel[] channels) =>
+        TestWritePipeline.Create(bridge, _locations, approvalClock: _clock, channels: channels);
 
     /// <summary>A service provider without an MCP server, as in every test: the client then has no name.</summary>
     private sealed class ServiceProviderStub : IServiceProvider
