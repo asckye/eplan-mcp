@@ -34,14 +34,14 @@ internal sealed class PlcRackTools
         UseStructuredContent = true,
         OutputSchemaType = typeof(PlcRackResult))]
     [Description(
-        "Draws an ET 200SP rack from data in one undo step: each card's Overview on its empty Overview page, renamed with " +
+        "Draws an ET 200SP rack in the specified project in one undo step: each card's Overview on its empty Overview page, renamed with " +
         "its parts, then its picture beside the others on the empty rack page, joined to it. Omit/true previews; false " +
         "draws. Cards and an example: eplan_tool_usage.")]
     public static async Task<CallToolResult> PlcRackAsync(
         WritePipeline pipeline,
         [Description("Empty Circuit page")] string rack_page,
         [Description("1-20 cards, left to right")] JsonElement[] cards,
-        [Description("Project; default current")] string? project = null,
+        [Description("Open project")] string project,
         [Description("First picture [x, y] mm")] double[]? origin = null,
         [Description("Card on overview [x, y] mm")] double[]? overview_position = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,

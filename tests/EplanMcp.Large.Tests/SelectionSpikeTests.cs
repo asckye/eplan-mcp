@@ -114,7 +114,7 @@ public sealed class SelectionSpikeTests(LiveEplan eplan, WriteHost host) : IClas
             Assert.Empty(set.GetProperty("unselected").EnumerateArray());
             Assert.True((await host.CallAsync("eplan_selection_set", new() { ["mode"] = "add", ["locators"] = new[] { locators[1] } })).GetProperty("exact").GetBoolean());
             JsonElement first = await host.CallAsync("eplan_selection_get", new() { ["limit"] = 1 });
-            JsonElement second = await host.CallAsync("eplan_selection_get", new() { ["limit"] = 1, ["cursor"] = first.GetProperty("cursor").GetString() });
+            JsonElement second = await host.CallAsync("eplan_selection_get", new() { ["limit"] = 1, ["cursor"] = first.GetProperty("nextCursor").GetString() });
             Assert.Equal(2, first.GetProperty("total").GetInt32());
             Assert.Equal(locators.Select(l => l.GetProperty("digest").GetString()).Order(), new[] { first, second }.Select(p => p.GetProperty("items")[0].GetProperty("locator").GetProperty("digest").GetString()).Order());
             Assert.True((await host.CallAsync("eplan_selection_set", new() { ["mode"] = "clear" })).GetProperty("exact").GetBoolean());

@@ -34,7 +34,7 @@
   - `issues[]`：`{code, severity, page, position, objects[] (定位器), message, fix}`；`fix` 是建议的下一步：工具名和关键参数（例如 `eplan_placement_update` 移动到某坐标），只是建议，不自动执行
   - `cable_core_segment` 的目标位置需要完整的目标 `drawnPath`、其他连接的路径、Cable 的位置与定义线端点，以及有效页栅格。仅在定义线跨共享主干、目标存在平行独占分支时，沿分支方向平移到中点吸附位置，并与两端各留至少一格，作为 issue 的 `position`（Cable 定位器的绝对坐标）给出。A75 的 `(120,160)–(120,100)` 主干与 `(120,220)–(120,160)` 分支、栅格 4、水平定义线 `y=128`，得到 `(80,192)`。A73：实机移动电缆后芯线归属丢失、生成连接也不恢复，所以这个坐标只是建议，`fix` 是用 `eplan_connection_create` 重画电缆，不给移动参数；目前没有工具重新分配已有电缆的芯线。证据不足或没有平行分支时只给重画提示，不给坐标。
   - `expected`（给了 `expected` 时）：`{missing[], extra[], mismatched[]}`，每项带目标项的路径（如 `/cables/0/cores/1`）和实际读回
-  - `cursor`、`total`、`truncated`
+  - `nextCursor`、`total`、`truncated`
   - `rulePacks[]`（实际评估规则时）：`{id,version,status,standards,rules,passed,failed,unknown,notApplicable}`；计数只覆盖本页，后四项按对象评估结果计数。`metadata.plugins` 列出实际使用的 `ID@版本`，不可读数据在 `metadata.warnings` 中说明。
 - 文本摘要第一行：`<page>: <errors> errors, <warnings> warnings` 或 `<page>: clean`，随后列出最多 5 条最严重的问题
 - EPLAN 自己的检查（eplan.help 2026 检查消息）已覆盖电位未定义（P005001、P005010）、设备标识为空或没有编号（P017001、P017002）、标识重复（P017005），体检不重复，跑过 `eplan_check_run` 后以 `eplan_message` 读出；线号缺失和占位标识没有对应消息，由 `wire_number`、`placeholder_tag` 补上。

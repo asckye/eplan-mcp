@@ -22,7 +22,7 @@
 | `language` | string | 否 | GUI 语言及现有回退规则 | EPLAN ISO 代码，如 `zh_CN`；显式指定时不回退到其他译文 |
 | `response_format` | concise / detailed | 否 | concise | detailed 增加类型、显示、译文及定义提示 |
 | `limit` | integer，1–200 | 否 | 50 | 本页结果行上限；索引展开与预算可能要求续页 |
-| `cursor` | string | 否 | — | 原样传回上一页游标，其他参数保持一致 |
+| `cursor` | string | 否 | — | 原样传回上一页的 `nextCursor`，其他参数保持一致 |
 
 所有输入对象均 `additionalProperties: false`；数组上限、整数范围及枚举进入 inputSchema，不接受隐式类型转换；Host 用 System.Text.Json 检查 64 KiB 原始 UTF-8 JSON 输入上限，空白也计入。
 selector 恰选正整数 `property_id` 或精确、区分大小写的字典正式名称 `property_name`，可加 int32 `index`；不接受本地化名称、模糊别名或自定义标识名。
@@ -40,7 +40,7 @@ target/locator/selector 的形状及值读取留给 Bridge property.read 的 Par
 
 ## 3. 输出
 
-outputSchema 声明 `{project, items, total, cursor, truncated, warnings}`，可附 `hint`；字段使用 snake_case，project 回显实际解析项目。
+outputSchema 声明 `{project, items, total, nextCursor, truncated, warnings}`，可附 `hint`；属性行字段使用 snake_case，project 回显实际解析项目。
 concise 每行含 `query`（原请求的零基序号）、`target`、`property_id`、`index`、`status`、`value`、`language`；拒绝原因以 `reason` 保留，语言回退以 `fallback` 表示。
 status 枚举为 `value|empty|not_applicable|read_refused`；value 为类型对应的 JSON 原始值，非 value 行为 null，不能把空值当成不适用。
 detailed 增加 `value_type`、`read_only`、`computed`、`observed_at`、`display`、`texts`、`unit`、`format`、`source` 及必要的原长度信息；未知事实为 null。
@@ -50,7 +50,7 @@ total 仅表示本次明确选择集的结果行数；索引尚未枚举完时�
 cursor 不透明、十分钟有效，绑定名称解析后的查询、language、response_format、stdio 连接、EPLAN 管道实例、解析项目路径及已返回行的 SHA-256 指纹；JSON 成员顺序与空白不影响绑定，limit 可调整。续页重读前缀核对内容，computed 的 observed_at 不参与指纹；内容变化、过期或绑定不符返回 INVALID_ARGUMENT，提示去掉 cursor 重读，不宣称跨页原子快照。
 Host 尊重 Bridge 的 NextSelector/NextIndexOffset，按结果行分页；预算切页后未返回行必须仍可通过 cursor 取回，不能跳过块内剩余行。
 structuredContent 与兼容 JSON 文本块内容相同，附一行仅含数量的英文摘要；两个 JSON 副本与摘要共同计入 concise 约 5k / detailed 20k token 预算。
-预算截断时设置 `truncated: true`、cursor 和英文 hint；单行仍超限时返回明确的 INVALID_ARGUMENT，提示缩小请求或使用 concise、移除 cursor 从原选择集重读，不返回无进展空页或超出硬上限。
+预算截断时设置 `truncated: true`、nextCursor 和英文 hint；单行仍超限时返回明确的 INVALID_ARGUMENT，提示缩小请求或使用 concise、移除 cursor 从原选择集重读，不返回无进展空页或超出硬上限。
 Bridge 在返回 DTO 前清洗属性文本、display/texts/unit/format，单视图超过 500 字符标原长度；Host 保留这些视图及原长度，既有 ResultShaper 规则用于原因和地址文字，预算约束由 P5b 接入。
 敏感分类及无法可靠清洗的路径、联系人文本由 Bridge 在取值或返回 DTO 前拒绝；Host 不重复引入分类器。项目路径仅用于既有寻址身份；Bridge read_refused 行保持原状态与原因。
 

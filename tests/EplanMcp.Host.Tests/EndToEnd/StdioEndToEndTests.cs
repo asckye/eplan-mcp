@@ -232,7 +232,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
             Assert.InRange(ResultShaper.EstimateTokens(data.GetRawText()) + call.Content.Cast<TextContentBlock>().Sum(b => ResultShaper.EstimateTokens(b.Text)), 1, 20000);
             rows.AddRange(data.GetProperty("items").EnumerateArray());
             Assert.NotEmpty(data.GetProperty("items").EnumerateArray());
-            args["cursor"] = data.GetProperty("cursor").GetString();
+            args["cursor"] = data.GetProperty("nextCursor").GetString();
             if (args["cursor"] is null)
             {
                 Assert.Equal(206, data.GetProperty("total").GetInt32());
@@ -287,7 +287,7 @@ public sealed class StdioEndToEndTests : IAsyncLifetime
         Assert.False(item.GetProperty("write").GetProperty("write_allowed").GetBoolean());
         Assert.Equal(JsonValueKind.Null, item.GetProperty("write").GetProperty("api_writable").ValueKind);
         Assert.All(item.GetProperty("definition").EnumerateObject(), fact => Assert.Equal(JsonValueKind.Null, fact.Value.ValueKind));
-        args["cursor"] = first.GetProperty("cursor").GetString();
+        args["cursor"] = first.GetProperty("nextCursor").GetString();
         JsonElement second = PropertySchemaToolTests.Data(await Call(PropertySchemaTools.Tool, args));
         Assert.NotEqual(item.GetProperty("property_id").GetInt32(), second.GetProperty("items")[0].GetProperty("property_id").GetInt32());
         args["object_type"] = "Page";

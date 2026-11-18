@@ -46,6 +46,7 @@ public sealed class PlanTaskAcceptanceScenariosTests : PlanProtocolFixture
             _current = PlanVerificationTestData.Copy(_current, pages => PlanVerificationTestData.Description(pages[0].Objects[0], "Manual change"));
             JsonElement error = ContextToolTests.Error(await Call(client, PlanApplyTools.ApplyTool, new()
             {
+                ["dry_run"] = false,
                 ["plan_id"] = id
             }));
             Assert.Equal(ErrorReason.PlanStale, error.GetProperty("reason").GetString());
@@ -77,6 +78,7 @@ public sealed class PlanTaskAcceptanceScenariosTests : PlanProtocolFixture
             _fake.Projects.Add(new() { Name = "Other", Path = Path.Combine(_locations.DefaultScratch, "Other"), Current = true });
             JsonElement applied = ContextToolTests.Data(await Call(client, PlanApplyTools.ApplyTool, new()
             {
+                ["dry_run"] = false,
                 ["plan_id"] = id
             }));
             Assert.Equal("committed", applied.GetProperty("execution").GetString());
@@ -126,6 +128,7 @@ public sealed class PlanTaskAcceptanceScenariosTests : PlanProtocolFixture
             string id = await Compile(client);
             JsonElement receipt = ContextToolTests.Data(await Call(client, PlanApplyTools.ApplyTool, new()
             {
+                ["dry_run"] = false,
                 ["plan_id"] = id,
                 ["wait_seconds"] = 0
             }));

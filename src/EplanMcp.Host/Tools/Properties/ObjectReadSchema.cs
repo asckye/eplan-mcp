@@ -49,7 +49,7 @@ internal static class ObjectReadSchema
         {
             bool get = tool.ProtocolTool.Name == ObjectReadTools.GetTool;
             tool.ProtocolTool.InputSchema = Input(get);
-            JsonNode output = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project","status","reason","items","cursor","truncated"],"properties":{"project":{"type":"string"},"status":{"enum":["supported","unsupported"]},"reason":{"type":["string","null"]},"items":{"type":"array","maxItems":200},"cursor":{"type":["string","null"]},"truncated":{"type":"boolean"}}}""")!;
+            JsonNode output = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project","status","reason","items","nextCursor","truncated"],"properties":{"project":{"type":"string"},"status":{"enum":["supported","unsupported"]},"reason":{"type":["string","null"]},"items":{"type":"array","maxItems":200},"nextCursor":{"type":["string","null"]},"truncated":{"type":"boolean"}}}""")!;
             JsonNode fields = output["properties"]!;
             fields["items"]!["items"] = JsonNode.Parse(PropertyGetContract.Output.GetRawText())!["properties"]!["items"]!["items"]!.DeepClone();
             JsonNode row = fields["items"]!["items"]!;

@@ -125,7 +125,7 @@ public sealed class PropertyGetToolTests(LiveEplan eplan)
             JsonElement page = await eplan.CallAsync("eplan_property_get", args);
             Assert.Single(page.GetProperty("items").EnumerateArray());
             rows.AddRange(page.GetProperty("items").EnumerateArray());
-            string? cursor = page.GetProperty("cursor").GetString();
+            string? cursor = page.GetProperty("nextCursor").GetString();
             args["cursor"] = cursor;
             if (cursor is not null)
             {

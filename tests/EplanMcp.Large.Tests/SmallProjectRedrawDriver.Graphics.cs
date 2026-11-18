@@ -162,7 +162,7 @@ internal sealed partial class SmallProjectRedrawDriver
             JObject? response = await InvokeAsync(page, "eplan_page_review", args, [source], write: false);
             if (response is null)
             { return; }
-            cursor = Text(response["cursor"]);
+            cursor = Text(response["nextCursor"]);
             if (cursor is not null && !seen.Add(cursor))
             {
                 report.Warning(page, "Page review cursor repeated; remaining issues are unreadable.");

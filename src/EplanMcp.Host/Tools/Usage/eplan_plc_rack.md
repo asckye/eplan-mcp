@@ -2,7 +2,7 @@
 
 Preview a CPU with its bus adapter and two cards (changes nothing):
 
-    {"rack_page": "=K1+UC1&EFS1/1", "cards": [
+    {"project": "Line1", "rack_page": "=K1+UC1&EFS1/1", "cards": [
       {"tag": "=K1+UC1-KE1", "part": "SIE.6ES7510-1SJ01-0AB0", "overview_page": "=K1+UC1&EFA1/1", "picture_variant": 1,
        "sub_devices": [{"macro_suffix": "-K1", "tag": "=K1+UC1-KEC1", "part": "SIE.6ES7193-6AR00-0AA0"}]},
       {"tag": "=K1+UC1-KE2", "part": "SIE.6ES7136-6BA01-0CA0", "overview_page": "=K1+UC1&EFA1/2", "picture_variant": 6,
@@ -14,7 +14,7 @@ Draw it: the same call with "dry_run": false.
 
 ## Workflow
 
-1. Create the pages first with eplan_page_create: one empty Circuit page for the rack and one empty Overview page per card.
+1. Specify the open project by name or path. Create its pages first with eplan_page_create: one empty Circuit page for the rack and one empty Overview page per card.
 2. Look up each card's part with eplan_part_search; the part must name a window macro. eplan_macro_get lists the macro's MultiLine variants; ET 200SP pictures: DI/DQ light 5, dark 6, F-DI 6, CPU 1, CM PtP 3.
 3. Give every card a new full tag. Put the BaseUnit (light 0BA0 for the first card of a potential group, dark 0DA0 for the others) in extra_parts.
 4. Map sub-devices of the macro (a CPU's bus adapter, macro suffix -K1) with sub_devices; an unmapped one becomes the card's tag plus its suffix.

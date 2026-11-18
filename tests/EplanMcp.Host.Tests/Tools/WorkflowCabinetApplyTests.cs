@@ -61,7 +61,7 @@ public sealed partial class WorkflowCabinetTests
         await WithClient(async (client, store) =>
         {
             PlanRecord plan = await Record(client, store, Update());
-            JsonElement data = (await client.CallToolAsync("eplan_plan_apply", new Dictionary<string, object?> { ["plan_id"] = plan.Definition.PlanId }, cancellationToken: Token)).StructuredContent!.Value;
+            JsonElement data = (await client.CallToolAsync("eplan_plan_apply", new Dictionary<string, object?> { ["dry_run"] = false, ["plan_id"] = plan.Definition.PlanId }, cancellationToken: Token)).StructuredContent!.Value;
             Assert.Equal("not_started", data.GetProperty("execution").GetString());
             Assert.Equal(ErrorReason.PlanStale, data.GetProperty("error").GetProperty("reason").GetString());
             Assert.Contains("new plan", data.GetProperty("error").GetProperty("message").GetString()!, StringComparison.Ordinal);
@@ -90,7 +90,7 @@ public sealed partial class WorkflowCabinetTests
         await WithClient(async (client, store) =>
         {
             PlanRecord plan = await Record(client, store, Update());
-            JsonElement data = (await client.CallToolAsync("eplan_plan_apply", new Dictionary<string, object?> { ["plan_id"] = plan.Definition.PlanId }, cancellationToken: Token)).StructuredContent!.Value;
+            JsonElement data = (await client.CallToolAsync("eplan_plan_apply", new Dictionary<string, object?> { ["dry_run"] = false, ["plan_id"] = plan.Definition.PlanId }, cancellationToken: Token)).StructuredContent!.Value;
             Assert.Equal("not_started", data.GetProperty("execution").GetString());
             Assert.Equal(ErrorReason.PlanStale, data.GetProperty("error").GetProperty("reason").GetString());
         }, services => UseChannel(services, channel));
@@ -114,7 +114,7 @@ public sealed partial class WorkflowCabinetTests
         await WithClient(async (client, store) =>
         {
             PlanRecord plan = await Record(client, store, Update());
-            JsonElement data = (await client.CallToolAsync("eplan_plan_apply", new Dictionary<string, object?> { ["plan_id"] = plan.Definition.PlanId }, cancellationToken: Token)).StructuredContent!.Value;
+            JsonElement data = (await client.CallToolAsync("eplan_plan_apply", new Dictionary<string, object?> { ["dry_run"] = false, ["plan_id"] = plan.Definition.PlanId }, cancellationToken: Token)).StructuredContent!.Value;
             Assert.Equal("not_started", data.GetProperty("execution").GetString());
             Assert.Equal(ErrorReason.PlanStale, data.GetProperty("error").GetProperty("reason").GetString());
             PlanResult result = (await store.ReadAsync(plan.Definition.PlanId, Token))!.State.Result!;
@@ -175,7 +175,7 @@ public sealed partial class WorkflowCabinetTests
             };
             PlanRecord plan = await Record(client, store, request);
             Assert.Equal(bound ? "3" : "2", plan.Definition.CompilerVersion);
-            JsonElement data = ContextToolTests.Data(await client.CallToolAsync("eplan_plan_apply", new Dictionary<string, object?> { ["plan_id"] = plan.Definition.PlanId }, cancellationToken: Token));
+            JsonElement data = ContextToolTests.Data(await client.CallToolAsync("eplan_plan_apply", new Dictionary<string, object?> { ["dry_run"] = false, ["plan_id"] = plan.Definition.PlanId }, cancellationToken: Token));
             Assert.Equal("committed", data.GetProperty("execution").GetString());
             PlanResult result = (await store.ReadAsync(plan.Definition.PlanId, Token))!.State.Result!;
             Assert.Equal("passed", result.Verification);

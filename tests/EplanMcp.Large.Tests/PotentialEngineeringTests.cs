@@ -44,7 +44,7 @@ public sealed class PotentialEngineeringTests(LiveEplan eplan, WriteHost host) :
                     if (id is 33003 or 31006 or 31004 or 31002)
                     { values[id] = row.GetProperty("value").Clone(); }
                 }
-                read["cursor"] = propertiesReadback.GetProperty("cursor").GetString();
+                read["cursor"] = propertiesReadback.GetProperty("nextCursor").GetString();
                 Assert.InRange(++blocks, 1, 100);
             } while (read["cursor"] is not null && values.Count < 4);
         }

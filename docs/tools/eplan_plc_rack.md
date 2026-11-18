@@ -21,7 +21,7 @@
 ## 3. 决定：输入
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
 |---|---|---|---|---|
-| `project` | string | 是 | — | 已打开项目的名称或路径 |
+| `project` | string | 是 | — | 已打开项目的名称或路径。省略时 Host 在调用 Bridge 前返回 `INVALID_ARGUMENT` |
 | `rack_page` | string | 是 | — | 机架页完整页名；必须是已有的空 Circuit 页（第一版不建页，先用 `eplan_page_create`） |
 | `cards` | array，1–20 项 | 是 | — | 从左到右的卡片，见下 |
 | `origin` | [x, y] | 否 | [24, 264] | 第一张卡图片的插入点（mm，左下原点） |

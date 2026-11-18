@@ -47,7 +47,7 @@ public sealed class ObjectReadTests(LiveEplan eplan, WriteHost host) : IClassFix
                         Assert.False(string.IsNullOrWhiteSpace(row.GetProperty("property_name").GetString()));
                         hasValue |= row.GetProperty("status").GetString() == "value" && !string.IsNullOrWhiteSpace(row.GetProperty("value").ToString());
                     }
-                    args["cursor"] = read.GetProperty("cursor").GetString();
+                    args["cursor"] = read.GetProperty("nextCursor").GetString();
                     Assert.InRange(++pages, 1, 100);
                 } while (args["cursor"] is not null);
                 Assert.True(hasValue, objectType + " must expose at least one nonempty property.");

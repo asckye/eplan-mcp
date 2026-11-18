@@ -64,7 +64,7 @@ public sealed class PropertyGetContractTests
     {
         JsonElement output = PropertyGetContract.Output;
         CheckReferencesAndClosure(output, output);
-        Assert.Equal(["project", "items", "total", "cursor", "truncated", "warnings"], Strings(output.GetProperty("required")));
+        Assert.Equal(["project", "items", "total", "nextCursor", "truncated", "warnings"], Strings(output.GetProperty("required")));
         var rows = new JsonArray();
         foreach (string status in new[] { "value", "empty", "not_applicable", "read_refused" })
         {
@@ -86,14 +86,14 @@ public sealed class PropertyGetContractTests
             ["project"] = "Line1",
             ["items"] = rows,
             ["total"] = null,
-            ["cursor"] = "opaque",
+            ["nextCursor"] = "opaque",
             ["truncated"] = true,
             ["warnings"] = new JsonArray(),
             ["hint"] = "Pass cursor for the remaining rows.",
         };
         Assert.True(Accepts(output, JsonSerializer.SerializeToElement(result), output));
         result["total"] = 4;
-        result["cursor"] = null;
+        result["nextCursor"] = null;
         result["truncated"] = false;
         Assert.True(Accepts(output, JsonSerializer.SerializeToElement(result), output));
         result["execution"] = "not_started";

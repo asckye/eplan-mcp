@@ -77,11 +77,11 @@ internal sealed class ObjectReadTools
             if (errors.Count > 0)
             { return ToolResults.InvalidArguments(errors); }
             var items = new JsonArray();
-            var result = new JsonObject { ["project"] = args.Project, ["status"] = "supported", ["reason"] = null, ["items"] = items, ["cursor"] = null, ["truncated"] = false };
+            var result = new JsonObject { ["project"] = args.Project, ["status"] = "supported", ["reason"] = null, ["items"] = items, ["nextCursor"] = null, ["truncated"] = false };
             CallToolResult Page(bool more)
             {
                 result["truncated"] = more;
-                result["cursor"] = more ? digest + ":" + paging.Encode(seen, PropertyGetPaging.Hash(binding + digest)) : null;
+                result["nextCursor"] = more ? digest + ":" + paging.Encode(seen, PropertyGetPaging.Hash(binding + digest)) : null;
                 return ToolResults.Success(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"Read {items.Count} rows."), result);
             }
             do

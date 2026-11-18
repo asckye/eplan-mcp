@@ -82,7 +82,7 @@ internal sealed class PropertyGetTools
                 ["project"] = ResultShaper.CleanText(project.Project.Name),
                 ["items"] = items,
                 ["total"] = null,
-                ["cursor"] = null,
+                ["nextCursor"] = null,
                 ["truncated"] = false,
                 ["warnings"] = new JsonArray(),
             };
@@ -91,7 +91,7 @@ internal sealed class PropertyGetTools
             string summary = string.Empty;
             void Page(bool more)
             {
-                result["cursor"] = more ? digest + ":" + paging.Encode(seen, PropertyGetPaging.Hash(binding + digest)) : null;
+                result["nextCursor"] = more ? digest + ":" + paging.Encode(seen, PropertyGetPaging.Hash(binding + digest)) : null;
                 result["truncated"] = more;
                 if (more)
                 {

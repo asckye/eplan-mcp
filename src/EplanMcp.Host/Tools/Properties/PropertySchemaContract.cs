@@ -25,8 +25,8 @@ internal static class PropertySchemaContract
         input["not"] = JsonNode.Parse("""{"required":["properties","name_contains"]}""");
         tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(input);
         var output = JsonNode.Parse("""
-            {"type":"object","additionalProperties":false,"required":["catalog_version","object_type","items","total","cursor","truncated"],"properties":{
-            "catalog_version":{"type":"string"},"object_type":{"type":"string"},"total":{"type":"integer","minimum":0},"cursor":{"type":["string","null"]},"truncated":{"type":"boolean"},
+            {"type":"object","additionalProperties":false,"required":["catalog_version","object_type","items","total","nextCursor","truncated"],"properties":{
+            "catalog_version":{"type":"string"},"object_type":{"type":"string"},"total":{"type":"integer","minimum":0},"nextCursor":{"type":["string","null"]},"truncated":{"type":"boolean"},
             "items":{"type":"array","maxItems":200,"items":{"type":"object","additionalProperties":false,"required":["property_id","property_name","read","write"],"properties":{
             "property_id":{"type":["integer","null"]},"property_name":{"type":"string"},"read":{"type":"string"},
             "write":{"type":"object","additionalProperties":false,"required":["write_allowed","api_writable","reason"],"properties":{"write_allowed":{"type":"boolean"},"api_writable":{"type":["boolean","null"]},"reason":{"type":["string","null"]}}},

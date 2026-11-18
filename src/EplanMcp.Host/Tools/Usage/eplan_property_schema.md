@@ -10,7 +10,7 @@ Inspect a definition and its unknown runtime facts:
 
 ## Workflow
 
-Choose an exact object_type from the input enum. Use either properties or name_contains; omit both to list readable definitions. Repeat all arguments and pass the returned cursor for the next page. The full profile's property toolset provides this catalog tool; no project or target is accepted yet.
+Choose an exact object_type from the input enum. Use either properties or name_contains; omit both to list readable definitions. Repeat all arguments and pass nextCursor as cursor for the next page. The full profile's property toolset provides this catalog tool; no project or target is accepted yet.
 
 ## Fields
 
@@ -18,7 +18,7 @@ Choose an exact object_type from the input enum. Use either properties or name_c
 - property_id can be null when no public ID exists. read is readable or the shipped refusal category; it does not prove an instance adapter exists or has been live verified.
 - write.write_allowed comes only from the shipped whitelist (all false today); api_writable is null without runtime metadata. reason explains a denied write.
 - detailed adds obsolete, definition, source, version and runtime_differences. Unknown definition fields and runtime_differences are explicitly null, never unrestricted.
-- total counts matching definitions. truncated and cursor indicate more rows, including budget cuts. Concise fits about 5k tokens; detailed fits 20k, counting both JSON copies and the summary.
+- total counts matching definitions. truncated and nextCursor indicate more rows, including budget cuts. Concise fits about 5k tokens; detailed fits 20k, counting both JSON copies and the summary.
 - An optional selector index is checked as int32 only; it does not expand rows or establish instance bounds.
 
 ## Errors

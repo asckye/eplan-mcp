@@ -13075,7 +13075,7 @@
           "status",
           "reason",
           "items",
-          "cursor",
+          "nextCursor",
           "truncated"
         ],
         "properties": {
@@ -13154,7 +13154,7 @@
               }
             }
           },
-          "cursor": {
+          "nextCursor": {
             "type": [
               "string",
               "null"
@@ -13399,7 +13399,7 @@
           "status",
           "reason",
           "items",
-          "cursor",
+          "nextCursor",
           "truncated"
         ],
         "properties": {
@@ -13569,7 +13569,7 @@
               }
             }
           },
-          "cursor": {
+          "nextCursor": {
             "type": [
               "string",
               "null"
@@ -16114,7 +16114,7 @@
           "page",
           "summary",
           "issues",
-          "cursor",
+          "nextCursor",
           "total",
           "truncated"
         ],
@@ -16295,7 +16295,7 @@
               }
             }
           },
-          "cursor": {
+          "nextCursor": {
             "type": [
               "string",
               "null"
@@ -20123,7 +20123,7 @@
     {
       "name": "eplan_plan_apply",
       "title": "Apply plan",
-      "description": "Applies a compiled plan once, using its highest step tier for policy, one approval when required, and an initial backup. Denial returns POLICY_DENIED or APPROVAL_DENIED. dry_run defaults to false here: omitting it executes; true rechecks and previews without consumption. Waiting expiry or disconnect leaves the task running. Inspect results with eplan_plan_get or eplan_task_get. Example: {\"plan_id\":\"0123456789abcdef0123456789abcdef\",\"wait_seconds\":0}.",
+      "description": "Applies a compiled plan once, using its highest step tier for policy, one approval when required, and an initial backup. Denial returns POLICY_DENIED or APPROVAL_DENIED. Waiting expiry or disconnect leaves the task running. Inspect results with eplan_plan_get or eplan_task_get. Example: {\"plan_id\":\"0123456789abcdef0123456789abcdef\",\"dry_run\":false,\"wait_seconds\":0}.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -20133,9 +20133,9 @@
             "minLength": 1
           },
           "dry_run": {
-            "description": "True rechecks the plan; omit or false to execute.",
+            "description": "Omit/true previews; false executes.",
             "type": "boolean",
-            "default": false
+            "default": true
           },
           "wait_seconds": {
             "description": "Wait 0-110 seconds; default 90, zero returns immediately.",
@@ -21002,7 +21002,7 @@
     {
       "name": "eplan_plc_rack",
       "title": "Draw a PLC rack overview first",
-      "description": "Draws an ET 200SP rack from data in one undo step: each card's Overview on its empty Overview page, renamed with its parts, then its picture beside the others on the empty rack page, joined to it. Omit/true previews; false draws. Cards and an example: eplan_tool_usage.",
+      "description": "Draws an ET 200SP rack in the specified project in one undo step: each card's Overview on its empty Overview page, renamed with its parts, then its picture beside the others on the empty rack page, joined to it. Omit/true previews; false draws. Cards and an example: eplan_tool_usage.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -21016,12 +21016,8 @@
             "items": {}
           },
           "project": {
-            "description": "Project; default current",
-            "type": [
-              "string",
-              "null"
-            ],
-            "default": null
+            "description": "Open project",
+            "type": "string"
           },
           "origin": {
             "description": "First picture [x, y] mm",
@@ -21053,7 +21049,8 @@
         },
         "required": [
           "rack_page",
-          "cards"
+          "cards",
+          "project"
         ],
         "additionalProperties": false
       },
@@ -22728,7 +22725,7 @@
           "project",
           "items",
           "total",
-          "cursor",
+          "nextCursor",
           "truncated",
           "warnings"
         ],
@@ -22743,7 +22740,7 @@
             ],
             "minimum": 0
           },
-          "cursor": {
+          "nextCursor": {
             "type": [
               "string",
               "null"
@@ -23271,7 +23268,7 @@
           "object_type",
           "items",
           "total",
-          "cursor",
+          "nextCursor",
           "truncated"
         ],
         "properties": {
@@ -23285,7 +23282,7 @@
             "type": "integer",
             "minimum": 0
           },
-          "cursor": {
+          "nextCursor": {
             "type": [
               "string",
               "null"
@@ -25056,7 +25053,7 @@
           "unsupported",
           "unselected",
           "exact",
-          "cursor",
+          "nextCursor",
           "truncated"
         ],
         "properties": {
@@ -25128,7 +25125,7 @@
           "exact": {
             "type": "boolean"
           },
-          "cursor": {
+          "nextCursor": {
             "type": [
               "string",
               "null"
@@ -25259,7 +25256,7 @@
           "unsupported",
           "unselected",
           "exact",
-          "cursor",
+          "nextCursor",
           "truncated"
         ],
         "properties": {
@@ -25331,7 +25328,7 @@
           "exact": {
             "type": "boolean"
           },
-          "cursor": {
+          "nextCursor": {
             "type": [
               "string",
               "null"

@@ -99,7 +99,7 @@ internal sealed class PlanTaskAcceptanceSession : IAsyncDisposable
     public async Task<JsonElement> ApplyErrorAsync(string id)
     {
         _safeToClean = false;
-        CallToolResult call = await RawAsync(PlanApplyTools.ApplyTool, new() { ["plan_id"] = id });
+        CallToolResult call = await RawAsync(PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id });
         JsonElement data = call.StructuredContent!.Value;
         _safeToClean = data.TryGetProperty("execution", out JsonElement execution) && execution.GetString() != "unknown";
         Assert.True(call.IsError, WriteHost.Text(call));

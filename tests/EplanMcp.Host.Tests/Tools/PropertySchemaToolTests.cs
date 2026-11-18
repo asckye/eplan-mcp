@@ -19,7 +19,7 @@ public sealed class PropertySchemaToolTests
         PropertyDictionaryEntry[] expected = [.. PropertyCatalog.Entries.Where(e => e.ObjectType == "Function" && e.ReadRefusal is null)
             .OrderBy(e => e.PropertyId).ThenBy(e => e.PropertyName, StringComparer.Ordinal)];
         JsonElement first = Data(Query(paging, "Function", limit: 3));
-        string cursor = first.GetProperty("cursor").GetString()!;
+        string cursor = first.GetProperty("nextCursor").GetString()!;
         JsonElement second = Data(Query(paging, "Function", limit: 3, cursor: cursor));
         Assert.Equal(expected.Length, first.GetProperty("total").GetInt32());
         Assert.Equal(expected.Take(3).Select(e => e.PropertyId), Items(first).Select(e => e.GetProperty("property_id").GetInt32()).Cast<int?>());
@@ -32,7 +32,7 @@ public sealed class PropertySchemaToolTests
     public void Cursor_BindsFiltersTypeSelectorsFormatLimitAndHost_AndRejectsTamperingAndExpiry()
     {
         PropertySchemaPaging paging = Paging;
-        string cursor = Data(Query(paging, "Function", limit: 1)).GetProperty("cursor").GetString()!;
+        string cursor = Data(Query(paging, "Function", limit: 1)).GetProperty("nextCursor").GetString()!;
         Invalid(Query(paging, "Page", limit: 1, cursor: cursor));
         Invalid(Query(paging, "Function", name_contains: "TEXT", limit: 1, cursor: cursor));
         Invalid(Query(paging, "Function", Json("[{\"property_id\":20011}]"), limit: 1, cursor: cursor));
@@ -62,7 +62,7 @@ public sealed class PropertySchemaToolTests
         Assert.Equal(["FUNC_TEXT", "FUNC_TEXT_AUTOMATIC", "FUNC_TEXT_COMMON"], Items(data).Select(e => e.GetProperty("property_name").GetString()));
         Assert.Equal(3, data.GetProperty("total").GetInt32());
         Assert.False(data.GetProperty("truncated").GetBoolean());
-        Assert.Equal(JsonValueKind.Null, data.GetProperty("cursor").ValueKind);
+        Assert.Equal(JsonValueKind.Null, data.GetProperty("nextCursor").ValueKind);
         Assert.Empty(Items(Data(Query(Paging, "Function", name_contains: "NO_SUCH_PROPERTY"))));
     }
 
@@ -150,7 +150,7 @@ public sealed class PropertySchemaToolTests
                     Assert.Equal(JsonValueKind.Null, item.GetProperty("write").GetProperty("api_writable").ValueKind);
                     Assert.Equal(allowed ? null : "not_in_shipped_whitelist", item.GetProperty("write").GetProperty("reason").GetString());
                 });
-                cursor = data.GetProperty("cursor").GetString();
+                cursor = data.GetProperty("nextCursor").GetString();
             }
             while (cursor is not null);
         }
@@ -168,7 +168,7 @@ public sealed class PropertySchemaToolTests
             + ResultShaper.EstimateTokens(data.GetRawText());
         Assert.InRange(tokens, 1, budget);
         Assert.InRange(Items(data).Length, 1, 199);
-        string cursor = data.GetProperty("cursor").GetString()!;
+        string cursor = data.GetProperty("nextCursor").GetString()!;
         JsonElement next = Data(Query(paging, "Function", response_format: format, limit: 200, cursor: cursor));
         Assert.NotEqual(Items(data)[^1].GetProperty("property_id").GetInt32(), Items(next)[0].GetProperty("property_id").GetInt32());
     }

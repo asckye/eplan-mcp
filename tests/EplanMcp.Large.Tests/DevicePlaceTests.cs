@@ -146,7 +146,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
         {
             JsonElement read = await PartsCallAsync("eplan_object_find", new() { ["project"] = project, ["object_type"] = "PLCTerminal", ["limit"] = 200, ["cursor"] = cursor });
             objects.AddRange(read.GetProperty("items").EnumerateArray());
-            cursor = read.GetProperty("cursor").GetString();
+            cursor = read.GetProperty("nextCursor").GetString();
         } while (cursor is not null);
         return [.. objects];
     }

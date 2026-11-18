@@ -115,6 +115,7 @@ public sealed class PlanVersion2Tests(LiveEplan eplan)
             safeToClean = false;
             JsonElement receipt = await CallAsync(client, PlanApplyTools.ApplyTool, new()
             {
+                ["dry_run"] = false,
                 ["plan_id"] = id,
                 ["wait_seconds"] = 0
             });

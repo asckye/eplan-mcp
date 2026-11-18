@@ -273,7 +273,7 @@ public sealed class ToolContractTests : IDisposable
         Assert.Equal(2, selector.GetProperty("oneOf").GetArrayLength());
         Assert.Equal(["properties", "name_contains"], tool.InputSchema.GetProperty("not").GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         JsonElement output = tool.OutputSchema!.Value;
-        Assert.Equal(["catalog_version", "object_type", "items", "total", "cursor", "truncated"], output.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        Assert.Equal(["catalog_version", "object_type", "items", "total", "nextCursor", "truncated"], output.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
         JsonElement item = output.GetProperty("properties").GetProperty("items").GetProperty("items").GetProperty("properties");
         Assert.Contains("no_public_id", Enum(item.GetProperty("read")));
         Assert.Contains("runtime_identifier", Enum(item.GetProperty("read")));

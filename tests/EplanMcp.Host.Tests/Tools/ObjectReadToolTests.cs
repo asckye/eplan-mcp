@@ -60,7 +60,7 @@ public sealed class ObjectReadToolTests
             JsonElement result = PropertyGetToolTests.Data(await Read(bridge, paging, input));
             ids.AddRange(result.GetProperty("items").EnumerateArray().Select(r => r.GetProperty("locator").GetProperty("oid").GetInt64()));
             Assert.Equal(Project, result.GetProperty("project").GetString());
-            input["cursor"] = result.GetProperty("cursor").GetString();
+            input["cursor"] = result.GetProperty("nextCursor").GetString();
             Assert.Equal(input["cursor"] is not null, result.GetProperty("truncated").GetBoolean());
             Assert.InRange(ids.Count, 1, 17);
         } while (input["cursor"] is not null);
@@ -80,7 +80,7 @@ public sealed class ObjectReadToolTests
         var clock = new ManualTime(DateTimeOffset.UnixEpoch);
         var paging = new PropertySchemaPaging(clock);
         var input = new JsonObject { ["object_type"] = "Page", ["limit"] = 1 };
-        input["cursor"] = PropertyGetToolTests.Data(await Read(bridge, paging, input)).GetProperty("cursor").GetString();
+        input["cursor"] = PropertyGetToolTests.Data(await Read(bridge, paging, input)).GetProperty("nextCursor").GetString();
         switch (change)
         {
             case "filter":

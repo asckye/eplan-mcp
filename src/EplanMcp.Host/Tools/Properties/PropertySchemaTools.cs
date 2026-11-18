@@ -84,7 +84,7 @@ internal sealed class PropertySchemaTools
         void Page()
         {
             bool more = offset + items.Count < selected.Count;
-            result["cursor"] = more ? paging.Encode(offset + items.Count, query) : null;
+            result["nextCursor"] = more ? paging.Encode(offset + items.Count, query) : null;
             result["truncated"] = more;
             summary = string.Create(CultureInfo.InvariantCulture, $"Listed {items.Count} of {selected.Count} property definitions.")
                 + (more ? " Pass cursor for the rest or narrow the filters." : string.Empty);

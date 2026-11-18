@@ -7,6 +7,7 @@ namespace EplanMcp.Host.Tests.Tools;
 
 /// <summary>eplan_plc_rack's Host side: snake_case card fields reach the Bridge, a preview only plans, a draw executes.</summary>
 [Trait("Size", "Medium")]
+[Collection(typeof(ToolBuildIsolation))]
 public sealed class PlcRackToolTests : IDisposable
 {
     private readonly WriteToolHarness _harness = new();
@@ -53,10 +54,28 @@ public sealed class PlcRackToolTests : IDisposable
     }
 
     [Fact]
+    public async Task MissingProject_IsRejectedBeforeCallingTheBridge()
+    {
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            var args = new Dictionary<string, object?>
+            {
+                ["rack_page"] = "=K1+UC1&EFS1/1",
+                ["cards"] = new[] { new { tag = "=K1+UC1-KE1", part = "SIE.6ES7131", overview_page = "=K1+UC1&EFA1/1", picture_variant = 5 } },
+            };
+            CallToolResult call = await client.CallToolAsync(PlcRackTools.Tool, args, cancellationToken: TestContext.Current.CancellationToken);
+            JsonElement error = WriteToolHarness.Error(call);
+            Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());
+            Assert.Contains("Missing required argument 'project'", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+            Assert.Empty(_harness.Bridge.Calls);
+        });
+    }
+
+    [Fact]
     public async Task ACardThatIsNoObject_IsAnInvalidArgument()
     {
         CallToolResult result = await PlcRackTools.PlcRackAsync(_harness.Pipeline, "=K1+UC1&EFS1/1", [JsonDocument.Parse("\"KE1\"").RootElement],
-            cancellationToken: TestContext.Current.CancellationToken);
+            project: "Line1", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(ErrorReason.InvalidArgument, WriteToolHarness.Error(result).GetProperty("reason").GetString());
         Assert.Empty(_harness.Bridge.Calls);

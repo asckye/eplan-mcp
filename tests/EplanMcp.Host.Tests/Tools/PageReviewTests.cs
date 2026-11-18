@@ -67,7 +67,7 @@ public sealed class PageReviewTests
         JsonElement first = Data(await Review(limit: 1));
         Assert.Equal(3, first.GetProperty("summary").GetProperty("warnings").GetInt32());
         Assert.Equal(3, first.GetProperty("total").GetInt32());
-        string cursor = first.GetProperty("cursor").GetString()!;
+        string cursor = first.GetProperty("nextCursor").GetString()!;
         JsonElement next = Data(await Review(limit: 2, cursor: cursor));
         Assert.Equal(2, next.GetProperty("issues").GetArrayLength());
         Assert.False(next.GetProperty("truncated").GetBoolean());
@@ -95,7 +95,7 @@ public sealed class PageReviewTests
             Assert.Equal(150, data.GetProperty("summary").GetProperty("warnings").GetInt32());
             Assert.NotEmpty(data.GetProperty("issues").EnumerateArray());
             seen += data.GetProperty("issues").GetArrayLength();
-            cursor = data.GetProperty("cursor").GetString();
+            cursor = data.GetProperty("nextCursor").GetString();
         } while (cursor is not null);
         Assert.Equal(150, seen);
     }
@@ -121,7 +121,7 @@ public sealed class PageReviewTests
         Assert.Equal("/texts/0", first.GetProperty("expected").GetProperty("missing")[0].GetProperty("path").GetString());
         Assert.Equal(2, first.GetProperty("summary").GetProperty("errors").GetInt32());
         Assert.False(first.GetProperty("summary").GetProperty("clean").GetBoolean());
-        JsonElement second = Data(await Review(limit: 1, expected: target, cursor: first.GetProperty("cursor").GetString()));
+        JsonElement second = Data(await Review(limit: 1, expected: target, cursor: first.GetProperty("nextCursor").GetString()));
         Assert.Equal("/texts/1", second.GetProperty("expected").GetProperty("missing")[0].GetProperty("path").GetString());
         Assert.True(Data(await Review(checks: ["off_grid"], expected: target)).GetProperty("summary").GetProperty("clean").GetBoolean());
     }

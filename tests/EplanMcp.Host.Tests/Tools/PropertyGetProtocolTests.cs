@@ -81,7 +81,7 @@ public sealed class PropertyGetProtocolTests : IDisposable
                 Assert.Equal("Line1", data.GetProperty("project").GetString());
                 Assert.InRange(ResultShaper.EstimateTokens(data.GetRawText()) + call.Content.Cast<TextContentBlock>().Sum(b => ResultShaper.EstimateTokens(b.Text)), 1, 20000);
                 indexes.AddRange(data.GetProperty("items").EnumerateArray().Where(r => r.GetProperty("index").ValueKind != JsonValueKind.Null).Select(r => r.GetProperty("index").GetInt32()));
-                args["cursor"] = data.GetProperty("cursor").GetString();
+                args["cursor"] = data.GetProperty("nextCursor").GetString();
                 firstCursor ??= args["cursor"] as string;
                 if (args["cursor"] is null)
                 {

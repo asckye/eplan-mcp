@@ -19,7 +19,7 @@ public sealed partial class PlanApplyProtocolTests : PlanProtocolFixture
         await WithClient(async (client, _) =>
         {
             string id = await Compile(client);
-            CallToolResult call = await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id });
+            CallToolResult call = await Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id });
             JsonElement result = ContextToolTests.Data(call);
             Assert.Equal("committed", result.GetProperty("execution").GetString());
             Assert.Equal("passed", result.GetProperty("verification").GetString());
@@ -39,7 +39,7 @@ public sealed partial class PlanApplyProtocolTests : PlanProtocolFixture
         await WithClient(async (client, _) =>
         {
             string id = await Compile(client);
-            Task<CallToolResult> applying = Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id, ["wait_seconds"] = wait });
+            Task<CallToolResult> applying = Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id, ["wait_seconds"] = wait });
             await _bridge.BackupEntered.Task.WaitAsync(Token);
             if (wait != 0)
             {
@@ -68,7 +68,7 @@ public sealed partial class PlanApplyProtocolTests : PlanProtocolFixture
         await WithClient(async (client, services) =>
         {
             string id = await Compile(client);
-            JsonElement preview = ContextToolTests.Data(await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id, ["dry_run"] = true }));
+            JsonElement preview = ContextToolTests.Data(await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id }));
             Assert.Equal("not_started", preview.GetProperty("execution").GetString());
             Assert.NotEmpty(preview.GetProperty("steps")[0].GetProperty("changes").EnumerateArray());
             PlanStore store = services.GetRequiredService<PlanStore>();
@@ -76,8 +76,8 @@ public sealed partial class PlanApplyProtocolTests : PlanProtocolFixture
             Assert.Empty(_fake.Writes);
             Assert.DoesNotContain(_fake.Calls, c => c.Operation == OperationNames.ProjectBackup);
             Assert.False(Directory.Exists(_locations.Backups));
-            Assert.False((await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id })).IsError);
-            JsonElement replay = ContextToolTests.Error(await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id }));
+            Assert.False((await Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id })).IsError);
+            JsonElement replay = ContextToolTests.Error(await Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id }));
             Assert.Equal(ErrorReason.InvalidArgument, replay.GetProperty("reason").GetString());
             Assert.Contains("eplan_plan_get", replay.GetProperty("message").GetString(), StringComparison.Ordinal);
             Assert.Equal(2, _fake.Writes.Count);
@@ -90,7 +90,7 @@ public sealed partial class PlanApplyProtocolTests : PlanProtocolFixture
         await WithClient(async (client, services) =>
         {
             string id = await Compile(client);
-            await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id });
+            await Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id });
             string taskId = (await services.GetRequiredService<PlanStore>().ReadAsync(id, Token))!.State.TaskId!;
             await WithClient(async (other, _) =>
             {
@@ -98,7 +98,7 @@ public sealed partial class PlanApplyProtocolTests : PlanProtocolFixture
                 JsonElement missing = ContextToolTests.Error(await Call(other, PlanApplyTools.TaskTool, new() { ["task_id"] = "missing" }));
                 Assert.Equal(ErrorReason.ResourceNotFound, hidden.GetProperty("reason").GetString());
                 Assert.Equal(hidden.GetProperty("message").GetString(), missing.GetProperty("message").GetString());
-                JsonElement plan = ContextToolTests.Error(await Call(other, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id }));
+                JsonElement plan = ContextToolTests.Error(await Call(other, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id }));
                 Assert.Equal(ErrorReason.ResourceNotFound, plan.GetProperty("reason").GetString());
             }, s => s.AddSingleton(services.GetRequiredService<TaskRegistry>()));
         });

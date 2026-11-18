@@ -60,6 +60,7 @@ public sealed partial class PlanApplyProtocolTests
 
             var applyCall = await Call(client, PlanApplyTools.ApplyTool, new()
             {
+                ["dry_run"] = false,
                 ["plan_id"] = id
             });
             Assert.Equal(op == "macro.insert", applyCall.IsError == true);
@@ -210,6 +211,7 @@ public sealed partial class PlanApplyProtocolTests
             });
             JsonElement result = ContextToolTests.Data(await Call(client, PlanApplyTools.ApplyTool, new()
             {
+                ["dry_run"] = false,
                 ["plan_id"] = definition.PlanId
             }));
             Assert.Equal("committed", result.GetProperty("execution").GetString());

@@ -150,7 +150,7 @@ public sealed class PlcDisplaySpikeTests(LiveEplan eplan)
         {
             JsonElement objects = await eplan.CallAsync("eplan_object_find", new() { ["project"] = project, ["object_type"] = "PLCTerminal", ["page"] = page, ["limit"] = 200, ["cursor"] = cursor });
             found.AddRange(objects.GetProperty("items").EnumerateArray());
-            cursor = objects.GetProperty("cursor").GetString();
+            cursor = objects.GetProperty("nextCursor").GetString();
         } while (cursor is not null);
         foreach (JsonElement obj in found)
         {
@@ -158,7 +158,7 @@ public sealed class PlcDisplaySpikeTests(LiveEplan eplan)
             {
                 JsonElement properties = await eplan.CallAsync("eplan_object_get", new() { ["project"] = project, ["object_type"] = "PLCTerminal", ["locator"] = obj.GetProperty("locator"), ["language"] = "??_??", ["response_format"] = "detailed", ["limit"] = 200, ["cursor"] = cursor });
                 Print(phase + " properties", properties);
-                cursor = properties.GetProperty("cursor").GetString();
+                cursor = properties.GetProperty("nextCursor").GetString();
             } while (cursor is not null);
         }
         Print(phase + " placements/visible texts", await DrawingsAsync(project, page));

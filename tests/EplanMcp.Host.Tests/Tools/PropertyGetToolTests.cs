@@ -51,7 +51,7 @@ public sealed class PropertyGetToolTests
             indexes.AddRange(page.GetProperty("items").EnumerateArray().Select(r => r.GetProperty("index").GetInt32()));
             Assert.Equal("Line1", page.GetProperty("project").GetString());
             Assert.Empty(page.GetProperty("warnings").EnumerateArray());
-            cursor = page.GetProperty("cursor").GetString();
+            cursor = page.GetProperty("nextCursor").GetString();
             Assert.Equal(cursor is not null, page.GetProperty("truncated").GetBoolean());
             if (page.GetProperty("total").ValueKind == JsonValueKind.Number)
             {
@@ -135,7 +135,7 @@ public sealed class PropertyGetToolTests
             Assert.Equal(18, data.GetProperty("total").GetInt32());
             Assert.NotEmpty(data.GetProperty("items").EnumerateArray());
             indexes.AddRange(data.GetProperty("items").EnumerateArray().Select(r => r.GetProperty("index").GetInt32()));
-            cursor = data.GetProperty("cursor").GetString();
+            cursor = data.GetProperty("nextCursor").GetString();
             if (cursor is not null)
             {
                 Assert.Contains("cursor", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
@@ -282,7 +282,7 @@ public sealed class PropertyGetToolTests
         return data;
     }
 
-    private static string Cursor(JsonElement data) => data.GetProperty("cursor").GetString()!;
+    private static string Cursor(JsonElement data) => data.GetProperty("nextCursor").GetString()!;
 
     private static JsonElement Error(CallToolResult call) => PropertyGetRequestTests.Error(call);
 

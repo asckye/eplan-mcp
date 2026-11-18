@@ -72,10 +72,14 @@ internal sealed class SelectionTools
     internal static CallToolResult Shape(SelectionData data, int limit, int offset, string fingerprint, bool detailed, bool set)
     {
         IEnumerable<object> rows = data.Objects.Take(limit).Select(o => detailed ? (object)new { locator = o.Locator, name = ResultShaper.CleanText(o.Name) } : new { locator = o.Locator });
-        var result = JsonSerializer.SerializeToNode(new { project = data.Project, page = data.Page, items = rows, total = data.Total, unsupported = data.Unsupported, unselected = data.Unselected, exact = data.Exact, cursor = (string?)null, truncated = false }, HostJson.Options)!.AsObject();
+        var result = JsonSerializer.SerializeToNode(new { project = data.Project, page = data.Page, items = rows, total = data.Total, unsupported = data.Unsupported, unselected = data.Unselected, exact = data.Exact, nextCursor = (string?)null, truncated = false }, HostJson.Options)!.AsObject();
         JsonArray items = result["items"]!.AsArray();
         void Continue()
-        { bool more = offset + items.Count < data.Total; result["truncated"] = more; result["cursor"] = !set && more ? PageCursor.Encode(offset + items.Count, fingerprint) : null; }
+        {
+            bool more = offset + items.Count < data.Total;
+            result["truncated"] = more;
+            result["nextCursor"] = !set && more ? PageCursor.Encode(offset + items.Count, fingerprint) : null;
+        }
         while (items.Count > 0)
         {
             Continue();
@@ -108,7 +112,7 @@ internal sealed class SelectionTools
                 input["properties"]!["locators"] = LocatorArray("One-page locators from eplan_object_find; omit for clear.");
             }
             tool.ProtocolTool.InputSchema = JsonSerializer.SerializeToElement(input);
-            var output = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project","page","items","total","unsupported","unselected","exact","cursor","truncated"],"properties":{"project":{"type":["string","null"]},"page":{"type":["string","null"]},"items":{"type":"array","maxItems":200,"items":{"type":"object","additionalProperties":false,"required":["locator"],"properties":{"name":{"type":"string"}}}},"total":{"type":"integer"},"unsupported":{"type":"integer"},"exact":{"type":"boolean"},"cursor":{"type":["string","null"]},"truncated":{"type":"boolean"}}}""")!;
+            var output = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project","page","items","total","unsupported","unselected","exact","nextCursor","truncated"],"properties":{"project":{"type":["string","null"]},"page":{"type":["string","null"]},"items":{"type":"array","maxItems":200,"items":{"type":"object","additionalProperties":false,"required":["locator"],"properties":{"name":{"type":"string"}}}},"total":{"type":"integer"},"unsupported":{"type":"integer"},"exact":{"type":"boolean"},"nextCursor":{"type":["string","null"]},"truncated":{"type":"boolean"}}}""")!;
             output["properties"]!["items"]!["items"]!["properties"]!["locator"] = LocatorArray()["items"]!.DeepClone();
             output["properties"]!["unselected"] = LocatorArray();
             tool.ProtocolTool.OutputSchema = JsonSerializer.SerializeToElement(output);

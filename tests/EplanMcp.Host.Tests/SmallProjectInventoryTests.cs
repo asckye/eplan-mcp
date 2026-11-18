@@ -204,7 +204,7 @@ public sealed class SmallProjectInventoryTests
                 return Json(new
                 {
                     items = Enumerable.Range(args.TryGetProperty("cursor", out _) ? 101 : 1, 100).Select(i => Drawing("Arc", CircuitPage, i)).ToArray(),
-                    cursor = args.TryGetProperty("cursor", out _) ? "arcs-200" : "arcs-100",
+                    nextCursor = args.TryGetProperty("cursor", out _) ? "arcs-200" : "arcs-100",
                     truncated = true,
                 });
             }
@@ -361,7 +361,7 @@ public sealed class SmallProjectInventoryTests
         {
             "eplan_page_get" => PageResult(Page(input), []),
             "eplan_device_list" => Json(new { devices = System.Array.Empty<object>(), nextCursor = (string?)null, truncated = false }),
-            "eplan_object_find" or "eplan_object_get" => Json(new { items = System.Array.Empty<object>(), cursor = (string?)null, truncated = false }),
+            "eplan_object_find" or "eplan_object_get" => Json(new { items = System.Array.Empty<object>(), nextCursor = (string?)null, truncated = false }),
             "eplan_property_get" => PropertyResult(input),
             "eplan_symbol_search" => Json(new
             {
@@ -395,7 +395,7 @@ public sealed class SmallProjectInventoryTests
                 },
                 status = "value",
             })).ToArray(),
-            cursor = (string?)null,
+            nextCursor = (string?)null,
             truncated = false,
         });
     }

@@ -42,7 +42,7 @@ public sealed class SelectionToolTests
     {
         JsonElement first = Data(await SelectionTools.GetAsync(_bridge, 1, cancellationToken: TestContext.Current.CancellationToken));
         Assert.False(first.GetProperty("items")[0].TryGetProperty("name", out _));
-        string cursor = first.GetProperty("cursor").GetString()!;
+        string cursor = first.GetProperty("nextCursor").GetString()!;
         JsonElement second = Data(await SelectionTools.GetAsync(_bridge, 1, cursor, cancellationToken: TestContext.Current.CancellationToken));
         Assert.Equal(2, second.GetProperty("items")[0].GetProperty("locator").GetProperty("oid").GetInt32());
         ApiToolTests.AssertError(await SelectionTools.GetAsync(_bridge, 2, cursor, cancellationToken: TestContext.Current.CancellationToken));
@@ -59,6 +59,7 @@ public sealed class SelectionToolTests
         List<DrawingLocator> locators = [Row(1).Locator, Row(2).Locator];
         JsonElement data = Data(await SelectionTools.SetAsync(_bridge, locators, show_page: true, cancellationToken: TestContext.Current.CancellationToken));
         Assert.False(data.GetProperty("exact").GetBoolean());
+        Assert.Equal(JsonValueKind.Null, data.GetProperty("nextCursor").ValueKind);
         Assert.Equal(2, Assert.Single(data.GetProperty("unselected").EnumerateArray()).GetProperty("oid").GetInt32());
         Assert.Equal(locators, Assert.IsType<SelectionArgs>(_bridge.LastArgs).Locators);
         Assert.Empty(_bridge.Writes);
@@ -84,7 +85,7 @@ public sealed class SelectionToolTests
         var result = SelectionTools.Shape(data, 200, 0, "fingerprint", false, false);
         JsonElement content = Data(result);
         Assert.True(content.GetProperty("truncated").GetBoolean());
-        Assert.NotNull(content.GetProperty("cursor").GetString());
+        Assert.NotNull(content.GetProperty("nextCursor").GetString());
         Assert.Single(content.GetProperty("unselected").EnumerateArray());
         Assert.True(ResultShaper.ResultTokens(content.GetRawText()) <= 5000);
         Assert.Equal(data.Objects[0].Locator.Digest, content.GetProperty("items")[0].GetProperty("locator").GetProperty("digest").GetString());

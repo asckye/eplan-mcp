@@ -273,7 +273,7 @@ public sealed class PageReviewRulePackTests
             });
         }
         JsonElement first = WriteToolHarness.Structured(await fixture.ReviewAsync(["first.fixture"], ["off_grid"], limit: 1));
-        string cursor = first.GetProperty("cursor").GetString()!;
+        string cursor = first.GetProperty("nextCursor").GetString()!;
         Assert.Single(WriteToolHarness.Structured(await fixture.ReviewAsync(["first.fixture"], ["off_grid"], limit: 1, cursor: cursor)).GetProperty("issues").EnumerateArray());
         JsonElement error = WriteToolHarness.Error(await fixture.ReviewAsync(["second.fixture"], ["off_grid"], limit: 1, cursor: cursor));
         Assert.Equal(ErrorReason.InvalidArgument, error.GetProperty("reason").GetString());

@@ -20,7 +20,7 @@
 | `name_contains` | string，1–500 字符 | 否 | — | 正式名称的子串，OrdinalIgnoreCase；与 `properties` 互斥 |
 | `response_format` | concise / detailed | 否 | concise | detailed 加目录事实及显式未知字段 |
 | `limit` | integer，1–200 | 否 | 50 | 本页结果行上限；预算可能使实际行数更少 |
-| `cursor` | string | 否 | — | 原样传回上一页的 `cursor`，其他参数保持一致 |
+| `cursor` | string | 否 | — | 原样传回上一页的 `nextCursor`，其他参数保持一致 |
 
 所有输入对象拒绝未知字段；ID/正式名称只在该类型内精确解析，重复属性拒绝。
 两种筛选均省略时仅列 readable 定义；显式选择或名称筛选可查看排除分类，但绝不读取属性值。
@@ -28,7 +28,7 @@
 P2 不接受 `target` 或 `project`，未知参数返回 `INVALID_ARGUMENT`：实例定义依赖 P3/P4 的 Bridge 适配器，当前无法诚实提供。
 
 ## 3. 输出
-`outputSchema` 声明 `{catalog_version, object_type, items, total, cursor, truncated}`，字段名使用 snake_case。
+`outputSchema` 声明 `{catalog_version, object_type, items, total, nextCursor, truncated}`，属性定义字段使用 snake_case。
 每项包含 `property_id`（无公开 ID 时 null）、`property_name`、`read`（readable 或发布的拒绝分类）、`write`（`write_allowed`、`api_writable`、`reason`）。
 `write_allowed` 只查询发布白名单的版本/对象/ID；仅 EPLAN 2026 Function 的 20011、20027 为 true（`B1`，P7 Large 已验证），其余 false；`api_writable` 始终 null。
 detailed 增加 `obsolete`、`definition`、`source`、`version`、`runtime_differences`；definition 使用既有元数据 DTO，所有未知类型、边界、索引、单位、语言、许可等字段显式为 null。
@@ -36,7 +36,7 @@ detailed 增加 `obsolete`、`definition`、`source`、`version`、`runtime_diff
 按 numeric ID 升序、null ID 最后、正式名称 Ordinal 排序；`total` 是筛选后的定义行数，不是实例值或全项目总数。
 游标经签名，绑定当前 Host 会话、目录版本及查询（含 selector JSON、limit/format），10 分钟过期；目录不可变，无项目身份或实例快照承诺。
 摘要仅含数量：`Listed N of M property definitions.`；未完时附 `Pass cursor for the rest or narrow the filters.`。
-structuredContent 与 JSON 文本相同，两个副本加摘要一起预算：concise 约 5k token，detailed 硬上限 20k；整行分页，不截断属性定义，仍有行时 `truncated: true` 且 cursor 非 null。
+structuredContent 与 JSON 文本相同，两个副本加摘要一起预算：concise 约 5k token，detailed 硬上限 20k；整行分页，不截断属性定义，仍有行时 `truncated: true` 且 nextCursor 非 null。
 
 ## 4. 错误
 | reason | 情形 | 下一步 |

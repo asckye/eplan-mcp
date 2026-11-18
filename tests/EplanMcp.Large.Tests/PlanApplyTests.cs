@@ -25,7 +25,7 @@ public sealed class PlanApplyTests(WriteHost host) : IClassFixture<WriteHost>
         {
             JsonElement compiled = await host.CallAsync(WorkflowTools.PlanTool, Request(host.Writable, page));
             string planId = compiled.GetProperty("planId").GetString()!;
-            JsonElement receipt = await host.CallAsync(PlanApplyTools.ApplyTool, new() { ["plan_id"] = planId, ["wait_seconds"] = 0 });
+            JsonElement receipt = await host.CallAsync(PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = planId, ["wait_seconds"] = 0 });
             string taskId = receipt.GetProperty("taskId").GetString()!;
             JsonElement task = await host.CallAsync(PlanApplyTools.TaskTool, new() { ["task_id"] = taskId, ["wait_seconds"] = 110 });
             while (task.GetProperty("completedAt").ValueKind == JsonValueKind.Null)
@@ -81,7 +81,7 @@ public sealed class PlanApplyTests(WriteHost host) : IClassFixture<WriteHost>
         string[] backups = BackupFiles();
         JsonElement compiled = await host.CallAsync(WorkflowTools.PlanTool, Request(host.Outside, NextPage(before)));
         string planId = compiled.GetProperty("planId").GetString()!;
-        JsonElement error = await host.ErrorAsync(PlanApplyTools.ApplyTool, new() { ["plan_id"] = planId });
+        JsonElement error = await host.ErrorAsync(PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = planId });
         Assert.Equal(ErrorReason.PolicyDenied, error.GetProperty("reason").GetString());
         Assert.Equal("not_started", error.GetProperty("execution").GetString());
         Assert.Equal(files.OrderBy(p => p.Key, StringComparer.Ordinal), LiveSnapshots.DesignFiles(host.Outside).OrderBy(p => p.Key, StringComparer.Ordinal));
@@ -90,7 +90,7 @@ public sealed class PlanApplyTests(WriteHost host) : IClassFixture<WriteHost>
         JsonElement saved = await host.CallAsync(PlanTools.GetTool, new() { ["plan_id"] = planId });
         Assert.Equal("not_started", saved.GetProperty("status").GetString());
         Assert.NotNull(saved.GetProperty("taskId").GetString());
-        Assert.Equal(ErrorReason.InvalidArgument, (await host.ErrorAsync(PlanApplyTools.ApplyTool, new() { ["plan_id"] = planId })).GetProperty("reason").GetString());
+        Assert.Equal(ErrorReason.InvalidArgument, (await host.ErrorAsync(PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = planId })).GetProperty("reason").GetString());
     }
 
     private string[] BackupFiles() => Directory.Exists(Path.Combine(host.Home, "backups"))

@@ -151,7 +151,7 @@ internal sealed class AcceptanceRedrawDriver(
             foreach (JsonElement issue in review.GetProperty("issues").EnumerateArray())
             { output("Review issue: " + issue.GetRawText()); }
             issues.AddRange(review.GetProperty("issues").EnumerateArray());
-            cursor = review.GetProperty("cursor").GetString();
+            cursor = review.GetProperty("nextCursor").GetString();
             Assert.Equal(cursor is not null, review.GetProperty("truncated").GetBoolean());
             if (cursor is null)
             { Assert.Equal(review.GetProperty("total").GetInt32(), issues.Count); }

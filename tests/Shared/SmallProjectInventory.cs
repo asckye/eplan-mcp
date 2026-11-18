@@ -120,7 +120,7 @@ internal sealed class SmallProjectInventory(
             foreach (string kind in _supplementalKinds.Where(k => !objects.Values.Any(o => o.Kind == k)))
             {
                 ReadRows found = await ReadAllAsync("eplan_object_find", "items",
-                    new(args) { ["object_type"] = kind }, gaps, name + "/" + kind, cursorField: "cursor", maxItems: 200);
+                    new(args) { ["object_type"] = kind }, gaps, name + "/" + kind, maxItems: 200);
                 readers[kind] = new { status = found.Complete ? "complete" : "partial", count = found.Items.Count };
                 foreach (JsonElement item in found.Items)
                 {
@@ -131,7 +131,7 @@ internal sealed class SmallProjectInventory(
                     }
                     ReadRows properties = await ReadAllAsync("eplan_object_get", "items",
                         new() { ["project"] = project, ["object_type"] = kind, ["locator"] = locator, ["response_format"] = "detailed" },
-                        gaps, name + "/" + kind + "/" + key, cursorField: "cursor");
+                        gaps, name + "/" + kind + "/" + key);
                     objects.Add(key, new InventoryObject(kind, locator, Text(item, "name"), properties.Items, properties.Complete));
                 }
             }
@@ -440,7 +440,7 @@ internal sealed class SmallProjectInventory(
                 ["project"] = project,
                 ["queries"] = queries,
                 ["response_format"] = "detailed",
-            }, gaps, page + "/symbol identities", cursorField: "cursor");
+            }, gaps, page + "/symbol identities");
             foreach (JsonElement row in properties.Items)
             {
                 if (Member(row, "query") is not { ValueKind: JsonValueKind.Number } query
@@ -459,7 +459,7 @@ internal sealed class SmallProjectInventory(
     }
 
     private async Task<ReadRows> ReadAllAsync(string tool, string key, Dictionary<string, object?> args, List<string> gaps,
-        string context, string? container = null, string cursorField = "nextCursor", string cursorArgument = "cursor",
+        string context, string? container = null, string cursorArgument = "cursor",
         string limitArgument = "limit", Dictionary<string, object?>? extra = null, int? maxItems = null)
     {
         var rows = new ReadRows();
@@ -495,7 +495,7 @@ internal sealed class SmallProjectInventory(
                 return rows;
             }
             rows.Items.AddRange(items.EnumerateArray().Take(maxItems is { } maximum ? maximum - rows.Items.Count : int.MaxValue).Select(item => item.Clone()));
-            cursor = Text(data, cursorField);
+            cursor = Text(data, "nextCursor");
             if (cursor is null && Flag(data, "truncated"))
             {
                 gaps.Add($"{context}: {tool} is truncated without a continuation cursor.");

@@ -41,6 +41,7 @@ public sealed class PlanTaskAcceptanceScenariosTests(LiveEplan eplan)
         Assert.Equal(steps.Count, review.GetProperty("summary").GetProperty("totalSteps").GetInt32());
         JsonElement receipt = await run.WriteAsync(PlanApplyTools.ApplyTool, new()
         {
+            ["dry_run"] = false,
             ["plan_id"] = id,
             ["wait_seconds"] = 0
         });
@@ -127,7 +128,7 @@ public sealed class PlanTaskAcceptanceScenariosTests(LiveEplan eplan)
         string other = await run.ChangeSelectionToOtherProjectAsync();
         LiveSnapshots.Snapshot otherBefore = await LiveSnapshots.TakeAsync(bridge, new() { Project = other });
         Dictionary<string, string> otherFiles = LiveSnapshots.DesignFiles(other);
-        JsonElement receipt = await run.WriteAsync(PlanApplyTools.ApplyTool, new() { ["plan_id"] = id, ["wait_seconds"] = 0 });
+        JsonElement receipt = await run.WriteAsync(PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id, ["wait_seconds"] = 0 });
         Assert.Equal("succeeded", (await run.WaitAsync(receipt.GetProperty("taskId").GetString()!)).GetProperty("status").GetString());
         Assert.Equal("P25 verified", (await PageAsync(run, "+P25/10")).GetProperty("page").GetProperty("description").GetString());
         Assert.Equal("P25 setup", (await PageAsync(run, "+P25/11")).GetProperty("page").GetProperty("description").GetString());
@@ -155,7 +156,7 @@ public sealed class PlanTaskAcceptanceScenariosTests(LiveEplan eplan)
         await run.CreatePageAsync("+P25/10");
         Dictionary<string, string> files = LiveSnapshots.DesignFiles(run.Project);
         string id = await run.CompileAsync(new { op = "page.delete", args = new { pages = _approvalPages } });
-        JsonElement receipt = await run.WriteAsync(PlanApplyTools.ApplyTool, new() { ["plan_id"] = id, ["wait_seconds"] = 0 });
+        JsonElement receipt = await run.WriteAsync(PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id, ["wait_seconds"] = 0 });
         string taskId = receipt.GetProperty("taskId").GetString()!;
         JsonElement terminal;
         try

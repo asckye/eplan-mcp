@@ -20,7 +20,7 @@ public sealed partial class PlanApplyProtocolTests
         await WithClient(async (client, services) =>
         {
             string id = await Compile(client);
-            Task<CallToolResult> applying = Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id });
+            Task<CallToolResult> applying = Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id });
             await _bridge.BackupEntered.Task.WaitAsync(Token);
             string taskId = (await services.GetRequiredService<PlanStore>().ReadAsync(id, Token))!.State.TaskId!;
             await client.DisposeAsync();
@@ -47,7 +47,7 @@ public sealed partial class PlanApplyProtocolTests
         await WithClient(async (client, services) =>
         {
             string id = await Compile(client);
-            CallToolResult call = await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id });
+            CallToolResult call = await Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id });
             Assert.True(call.IsError);
             JsonElement result = call.StructuredContent!.Value;
             Assert.Equal("partially_committed", result.GetProperty("execution").GetString());
@@ -68,7 +68,7 @@ public sealed partial class PlanApplyProtocolTests
         await WithClient(async (client, _) =>
         {
             string id = await Compile(client);
-            JsonElement receipt = ContextToolTests.Data(await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id, ["wait_seconds"] = 0 }));
+            JsonElement receipt = ContextToolTests.Data(await Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id, ["wait_seconds"] = 0 }));
             string taskId = receipt.GetProperty("taskId").GetString()!;
             await _bridge.BackupEntered.Task.WaitAsync(Token);
             using var waiting = CancellationTokenSource.CreateLinkedTokenSource(Token);
@@ -91,7 +91,7 @@ public sealed partial class PlanApplyProtocolTests
         {
             string id = await Compile(client);
             using var waiting = CancellationTokenSource.CreateLinkedTokenSource(Token);
-            Task<CallToolResult> call = client.CallToolAsync(PlanApplyTools.ApplyTool, new Dictionary<string, object?> { ["plan_id"] = id }, cancellationToken: waiting.Token).AsTask();
+            Task<CallToolResult> call = client.CallToolAsync(PlanApplyTools.ApplyTool, new Dictionary<string, object?> { ["dry_run"] = false, ["plan_id"] = id }, cancellationToken: waiting.Token).AsTask();
             await _bridge.BackupEntered.Task.WaitAsync(Token);
             string taskId = (await services.GetRequiredService<PlanStore>().ReadAsync(id, Token))!.State.TaskId!;
             await client.SendNotificationAsync(NotificationMethods.CancelledNotification,
@@ -123,7 +123,7 @@ public sealed partial class PlanApplyProtocolTests
             string id = await Compile(client);
             var notifications = new List<(string Token, float Progress)>();
             Task<CallToolResult> applying = client.CallToolAsync(PlanApplyTools.ApplyTool,
-                new Dictionary<string, object?> { ["plan_id"] = id, ["wait_seconds"] = 10 },
+                new Dictionary<string, object?> { ["dry_run"] = false, ["plan_id"] = id, ["wait_seconds"] = 10 },
                 progress: new CallbackProgress("apply", notifications), cancellationToken: Token).AsTask();
             await _bridge.BackupEntered.Task.WaitAsync(Token);
             await AdvanceUntil(applying, TimeSpan.FromSeconds(5));
@@ -174,7 +174,7 @@ public sealed partial class PlanApplyProtocolTests
             {
                 _fake.Handlers[OperationNames.ProjectBackup] = _ => throw new EplanMcp.Host.Bridge.BridgeCallException(new BridgeError { Reason = ErrorReason.BackupFailed, Message = "Backup failed; inspect disk space." });
             }
-            CallToolResult call = await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id });
+            CallToolResult call = await Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id });
             JsonElement error = ContextToolTests.Error(call);
             Assert.Equal(reason, error.GetProperty("reason").GetString());
             Assert.Equal("not_started", call.StructuredContent!.Value.GetProperty("execution").GetString());
@@ -183,7 +183,7 @@ public sealed partial class PlanApplyProtocolTests
             JsonElement task = ContextToolTests.Data(await Call(client, PlanApplyTools.TaskTool, new() { ["task_id"] = taskId }));
             Assert.Equal("failed", task.GetProperty("status").GetString());
             Assert.Equal(reason, task.GetProperty("error").GetProperty("reason").GetString());
-            Assert.Equal(ErrorReason.InvalidArgument, ContextToolTests.Error(await Call(client, PlanApplyTools.ApplyTool, new() { ["plan_id"] = id })).GetProperty("reason").GetString());
+            Assert.Equal(ErrorReason.InvalidArgument, ContextToolTests.Error(await Call(client, PlanApplyTools.ApplyTool, new() { ["dry_run"] = false, ["plan_id"] = id })).GetProperty("reason").GetString());
             Assert.Empty(_fake.Writes);
         }, services =>
         {

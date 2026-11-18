@@ -37,8 +37,8 @@ internal static class PropertyGetContract
     private static JsonElement CreateOutput()
     {
         var schema = JsonNode.Parse("""
-            {"type":"object","additionalProperties":false,"required":["project","items","total","cursor","truncated","warnings"],"properties":{
-              "project":{"type":"string"},"total":{"type":["integer","null"],"minimum":0},"cursor":{"type":["string","null"]},
+            {"type":"object","additionalProperties":false,"required":["project","items","total","nextCursor","truncated","warnings"],"properties":{
+              "project":{"type":"string"},"total":{"type":["integer","null"],"minimum":0},"nextCursor":{"type":["string","null"]},
               "truncated":{"type":"boolean"},"warnings":{"type":"array","items":{"type":"string"}},"hint":{"type":"string"},
               "items":{"type":"array","maxItems":200,"items":{"type":"object","additionalProperties":false,
                 "required":["query","target","property_id","index","status","value","language"],"properties":{

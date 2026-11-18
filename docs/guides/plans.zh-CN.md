@@ -41,7 +41,7 @@
 5. 应用：[`eplan_plan_apply`](../tools/eplan_plan_apply.md) 可先用 `dry_run:true` 重新核对预览，再正式调用：
 
    ```json
-   {"plan_id":"<planId>","wait_seconds":0}
+   {"plan_id":"<planId>","dry_run":false,"wait_seconds":0}
    ```
 
    `dry_run` 不审批、不备份、不消耗计划。正式 apply 受理后计划只能用一次；不要重复提交来轮询。默认等待 90 秒，允许 0–110 秒，等待结束不代表执行被取消。
