@@ -41,7 +41,6 @@ EplanMcp.Host/PlanOrchestrator.ExecuteAsync(4)	348
 EplanMcp.Host/PlanOrchestrator.PrepareAsync(6)	228
 EplanMcp.Host/PlanReadModel.Page(6)	117
 EplanMcp.Host/PlanVerificationFacts.Check(3)	110
-EplanMcp.Host/PlanVerifier.Verify(3)	159
 EplanMcp.Host/ProjectCreateTools.CreateAsync(10)	123
 EplanMcp.Host/PropertyGetTools.ReadAsync(4)	179
 EplanMcp.Host/PropertySetTools.SetAsync(5)	103
