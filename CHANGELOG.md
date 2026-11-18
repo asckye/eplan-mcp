@@ -11,7 +11,6 @@
 - 20 个工具的说明改写或补了“这种情况用哪个工具”：`eplan_report_create`、`eplan_page_create` 原来的说明没有说工具做什么；画图类（`eplan_device_place`、`eplan_macro_insert`、`eplan_placement_create`、`eplan_annotation_create`、`eplan_connection_create`）和编辑类（`eplan_placement_update`、`eplan_placement_edit`、`eplan_placement_delete`、`eplan_graphic_edit`）互相指路；`eplan_plan_apply` 写明省略 `dry_run` 会直接执行。参数和返回结构没有变化。
 - 133 个工具的输入参数都有了说明：237 个参数在 schema 里补了一句说明（单位、范围、默认值、取值来源）；参数很多的 9 个工具按规范把说明放在 `eplan_tool_usage` 的用法文本里，用法文本缺的参数名已补上。新增检查：每个输入参数要么有说明，要么在该工具的用法文本里出现。
 - 启用 `eplan_action_run` 时，`eplan_tool_usage` 的 `topic` 参数不再丢失说明。
-
 - MCP SDK（`ModelContextProtocol`、`ModelContextProtocol.AspNetCore`）从 2.2.0 升到 2.4.0，随之把 `Microsoft.Extensions.Hosting`、`Microsoft.Extensions.Logging.Abstractions` 升到 10.0.14。工具契约没有变化；EPLAN 插件的依赖没有变化。
 
 ### 修复
