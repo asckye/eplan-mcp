@@ -155,6 +155,19 @@ public sealed class ProjectSessionAndPlcTests : IDisposable
         Assert.Equal("remove Oven 1", _sessions.Calls[^1]);
     }
 
+    /// <summary>Survey 2026-11-18: a failed put-back was swallowed and the error still said the old project was open again.</summary>
+    [Fact]
+    public void Rename_CopyNotOpened_AndTheOldProjectDoesNotReopen_IsAnUnknownOutcome()
+    {
+        ProjectRenameArgs args = RenameArgs("Oven 1");
+        _sessions.FailOpen = Path.Combine(_folder, "Oven 1.elk");
+        _sessions.FailReopen = Path.Combine(_folder, "Line2.elk");
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => Rename.Execute(args));
+        Assert.Equal((ErrorReason.OutcomeUnknown, ExecutionState.Unknown), (error.Error.Reason, error.Error.Execution));
+        Assert.Contains("putting the old project back failed", error.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("is open again", error.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Rename_OldFilesLeft_IsAWarningNotAFailure()
     {
@@ -255,13 +268,16 @@ public sealed class ProjectSessionAndPlcTests : IDisposable
         /// <summary>The link file EPLAN refuses to open.</summary>
         public string? FailOpen { get; set; }
 
+        /// <summary>The old project's link file, which EPLAN refuses to open again.</summary>
+        public string? FailReopen { get; set; }
+
         /// <summary>Stands for RemoveProject leaving the files.</summary>
         public bool KeepOnRemove { get; set; }
 
         public void Open(string linkFile)
         {
             Calls.Add("open " + Path.GetFileNameWithoutExtension(linkFile));
-            if (string.Equals(linkFile, FailOpen, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(linkFile, FailOpen, StringComparison.OrdinalIgnoreCase) || string.Equals(linkFile, FailReopen, StringComparison.OrdinalIgnoreCase))
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "EPLAN refused."); }
             if (!Ignore)
             { open.Add(new OpenProject { Name = Path.GetFileNameWithoutExtension(linkFile), Path = Path.ChangeExtension(linkFile, null), Current = true }); }

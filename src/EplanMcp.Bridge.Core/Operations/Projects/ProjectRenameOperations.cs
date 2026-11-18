@@ -124,7 +124,13 @@ public sealed class ProjectRenameExecuteOperation(IProjectCatalog catalog, IProj
         }
         if (opened is null)
         {
-            PutBack(request);
+            if (!PutBack(request))
+            {
+                // What EPLAN holds now is not known: say so, so that writes wait for the engineer.
+                throw new BridgeErrorException(ErrorReason.OutcomeUnknown,
+                    "EPLAN did not open the project under its new name, and putting the old project back failed; ask the engineer to check which project is open and whether the copy remains.", retryable: false)
+                { Error = { Execution = ExecutionState.Unknown } };
+            }
             throw WriteArguments.NotStarted(new BridgeErrorException(ErrorReason.EplanOperationFailed,
                 "EPLAN did not open the project under its new name; the old project is open again and the copy was removed.", retryable: false));
         }
@@ -145,7 +151,8 @@ public sealed class ProjectRenameExecuteOperation(IProjectCatalog catalog, IProj
         return data;
     }
 
-    private void PutBack(ProjectRenameRequest request)
+    /// <summary>Closes the copy, opens the old project again and removes the copy; false when a step failed.</summary>
+    private bool PutBack(ProjectRenameRequest request)
     {
         try
         {
@@ -154,10 +161,11 @@ public sealed class ProjectRenameExecuteOperation(IProjectCatalog catalog, IProj
             if (!catalog.ListOpenProjects().Any(p => string.Equals(p.Path, request.Project.Path, StringComparison.OrdinalIgnoreCase)))
             { sessions.Open(request.LinkFile); }
             sessions.Remove(request.NewLinkFile);
+            return true;
         }
         catch (BridgeErrorException)
         {
-            // Best effort: the error message tells the model what to check.
+            return false;
         }
     }
 }

@@ -137,19 +137,30 @@ public sealed partial class App : Application, IDisposable
     /// </summary>
     private async Task ExitAsync()
     {
-        try
+        int pending = Pending;
+        if (pending > 0)
         {
-            int pending = Pending;
-            if (pending > 0)
+            bool confirmed;
+            try
             {
                 Restore();
                 Loc loc = Loc.Current;
-                if (!WorkbenchDialog.Confirm(_window!, loc["Exit.Title"], loc.T("Exit.Message", pending), loc["Exit.Cancel"], loc["Exit.Confirm"]))
-                {
-                    return;
-                }
+                confirmed = WorkbenchDialog.Confirm(_window!, loc["Exit.Title"], loc.T("Exit.Message", pending), loc["Exit.Cancel"], loc["Exit.Confirm"]);
             }
+            catch (InvalidOperationException ex)
+            {
+                // A question that could not be shown was not answered: waiting approvals are not closed without a yes.
+                System.Diagnostics.Trace.TraceWarning("Exit confirmation unavailable: " + ex.GetType().Name);
+                confirmed = false;
+            }
+            if (!confirmed)
+            {
+                return;
+            }
+        }
 
+        try
+        {
             if (_server is not null)
             {
                 await _server.DisposeAsync().ConfigureAwait(true);

@@ -77,7 +77,11 @@ internal sealed class VmProcess : IVmLauncher
             {
                 try
                 { _process.Kill(); } // A service the job does not hold must not keep listening.
-                catch (Exception ex) when (ex is InvalidOperationException or Win32Exception) { /* Not started, or already gone. */ }
+                catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
+                {
+                    // Not started, or already gone; anything else shows in the trace.
+                    System.Diagnostics.Trace.TraceInformation("VM Host was not killed after a failed start: " + ex.GetType().Name);
+                }
                 _process.Dispose();
                 _job.Dispose();
                 throw;

@@ -163,9 +163,10 @@ public sealed class ThemeManager : INotifyPropertyChanged
         {
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
         }
-        catch (Exception) /* swallow(ui): unavailable system events leave Auto using its startup appearance sample without blocking initialization */
+        catch (Exception ex) /* swallow(ui): unavailable system events leave Auto using its startup appearance sample without blocking initialization */
         {
             // No system-event hookup means Auto simply stops updating; not worth failing startup.
+            System.Diagnostics.Trace.TraceInformation("System appearance events unavailable: " + ex.GetType().Name);
         }
 
         Apply();

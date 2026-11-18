@@ -260,6 +260,29 @@ public sealed class WriteApprovalTests : IDisposable
         Assert.Equal(("suspension_release", recorded), (Text(AuditRecords()[0], "kind"), Text(AuditRecords()[0], "decision")));
     }
 
+    /// <summary>
+    /// Survey 2026-11-18: a suspension file that cannot be deleted stays in force. The write went on all the same and the
+    /// log said "released"; the plan path already checked again.
+    /// </summary>
+    [Fact]
+    public async Task AConfirmedSuspension_WhoseFileCannotBeRemoved_StaysSuspended()
+    {
+        Suspend(_realProject, "earlier");
+        var dialog = new FakeApprovalChannel("eplan_dialog", ApprovalDecision.Granted);
+        string file = Directory.EnumerateFiles(Path.Combine(_locations.State, "suspended"), "project-*.json").Single();
+
+        BridgeError error;
+        using (new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+        {
+            error = await Fails(dialog);
+        }
+
+        Assert.Equal((ErrorReason.WritesSuspended, ExecutionState.NotStarted), (error.Reason, error.Execution));
+        Assert.Contains("could not be removed", error.Message, StringComparison.Ordinal);
+        Assert.Single(dialog.Questions);
+        Assert.Empty(_bridge.Writes);
+    }
+
     [Fact]
     public async Task ASuspensionWithoutAChannel_StaysSuspended()
     {

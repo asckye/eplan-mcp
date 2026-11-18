@@ -538,6 +538,13 @@ internal sealed partial class WritePipeline(
         }
 
         suspensions.Release(plan.ProjectPath, eplan.Eplan.ProcessId, started, plan.MasterData);
+        // A record that could not be deleted is still in force (fail closed), as on the plan path.
+        if (suspensions.Blocking(plan.ProjectPath, eplan.Eplan.ProcessId, started, plan.MasterData).Count > 0)
+        {
+            BridgeError remaining = Suspended(plan);
+            remaining.Message = $"Writes to '{plan.Project}' remain suspended: the engineer confirmed the check, but a suspension file could not be removed. Nothing was changed. Ask the engineer to check the suspension files.";
+            throw NotStarted(remaining);
+        }
         LogReleased(plan.ProjectPath, requestId);
     }
 

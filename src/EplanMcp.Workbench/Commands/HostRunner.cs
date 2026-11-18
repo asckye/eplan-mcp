@@ -153,7 +153,8 @@ internal sealed class HostProcess(string executable, IReadOnlyDictionary<string,
         }
         catch (Exception ex) when (ex is InvalidOperationException or Win32Exception)
         {
-            // it ended on its own meanwhile
+            // It ended on its own meanwhile; anything else shows in the trace.
+            System.Diagnostics.Trace.TraceInformation("Command was not killed: " + ex.GetType().Name);
         }
     }
 }

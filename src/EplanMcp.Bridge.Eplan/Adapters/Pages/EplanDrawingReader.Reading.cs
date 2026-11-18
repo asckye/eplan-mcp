@@ -40,7 +40,12 @@ internal sealed partial class EplanDrawingReader
                 { Walk(plotFrame.SubPlacements, excluded: true); }
             }
             catch (Exception ex) when (ex is BaseException or InvalidOperationException)
-            { /* A49: unavailable frame geometry uses the page-size boundary fallback. */ }
+            {
+                // A49: unavailable frame geometry uses the page-size boundary fallback. The frame's members were not all
+                // marked as seen, so the page's own placements may include some of them.
+                WriteExceptionDiagnostics.Report(ex);
+                OperationContext.Current.Warn("The plot frame's members could not all be read; the placements may include frame graphics.");
+            }
 
             Walk(EplanNativePreconditions.Valid(native).OrderByDescending(p => p is Block).ToArray(), excluded: false); // A13: include returned objects which are not yet visible to page enumeration.
             return _result;
@@ -81,7 +86,7 @@ internal sealed partial class EplanDrawingReader
                 try
                 { foreach (Terminal terminal in card.PLCTerminals ?? []) { _cardOwners[terminal.ToStringIdentifier()] = card.ToStringIdentifier(); } }
                 catch (Exception ex) when (ex is BaseException or InvalidOperationException)
-                { /* Unreadable membership grants no collision exemption. */ }
+                { WriteExceptionDiagnostics.Report(ex); /* Unreadable membership grants no collision exemption. */ }
             }
         }
 
@@ -367,7 +372,7 @@ internal sealed partial class EplanDrawingReader
                 { containerOwner = box.ToStringIdentifier(); }
             }
             catch (Exception ex) when (ex is BaseException or InvalidOperationException)
-            { /* Unreadable ownership grants no collision exemption. */ }
+            { WriteExceptionDiagnostics.Report(ex); /* Unreadable ownership grants no collision exemption. */ }
             return containerOwner;
         }
     }
