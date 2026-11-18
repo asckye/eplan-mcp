@@ -13,7 +13,6 @@ EplanMcp.Bridge.Core/GraphicEditGeometry.Plan(2)	44
 EplanMcp.Bridge.Core/GraphicEditPlanner.Plan(3)	62
 EplanMcp.Bridge.Core/GraphicEditPredictions.Plan(3)	49
 EplanMcp.Bridge.Core/GraphicEditVerification.Verify(4)	44
-EplanMcp.Bridge.Core/LayoutGuard.Check(6)	137
 EplanMcp.Bridge.Core/LayoutPlaceRequest.Check(4)	57
 EplanMcp.Bridge.Core/MacroStoreOperation.Execute(1)	51
 EplanMcp.Bridge.Core/PlacementDeleteOperation.Execute(1)	54

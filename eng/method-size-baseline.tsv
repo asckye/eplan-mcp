@@ -6,7 +6,6 @@ EplanMcp.Bridge.Core/DevicePlaceRequest.Check(7)	114
 EplanMcp.Bridge.Core/DeviceSymbolPlan.Create(3)	112
 EplanMcp.Bridge.Core/GraphicEditPlanner.Plan(3)	101
 EplanMcp.Bridge.Core/GraphicEditPredictions.Plan(3)	123
-EplanMcp.Bridge.Core/LayoutGuard.Check(6)	155
 EplanMcp.Bridge.Core/MacroInsertRequest.CheckAll(5)	112
 EplanMcp.Bridge.Core/PlacementDeleteOperation.Execute(1)	125
 EplanMcp.Bridge.Core/PlacementEditPlanner.Plan(3)	117
