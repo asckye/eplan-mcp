@@ -134,6 +134,20 @@ internal static class ApprovalTexts
     /// <summary>One change as one line, in the dialog's language; <paramref name="details"/> are the plan's.</summary>
     internal static string Change(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details = null)
     {
+        if (Direct(change, zh, details) is { } direct)
+        { return direct; }
+        string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", "structure" => "结构标识符", "project" => "项目", _ => change.Kind } : change.Kind;
+        string property = zh ? change.Property switch { "description" => "描述", "tag" => "标识", _ => change.Property ?? string.Empty } : change.Property ?? string.Empty;
+        string name = Value(change.Name, zh);
+        if (change.Kind == "UI selection")
+        { return "Replace/clear UI selection before action; nonempty opens/focuses its page. See selection JSON below. UI state is not rolled back."; }
+        // The first matching line wins, in this order.
+        return Imported(change, name, zh, details) ?? Lifecycle(change, kind, name, property, zh, details) ?? Scoped(change, kind, name, property, zh, details);
+    }
+
+    /// <summary>Changes worded without the shared kind, property and name; null for every other change.</summary>
+    private static string? Direct(PlannedChange change, bool zh, IReadOnlyDictionary<string, string>? details)
+    {
         if (change.Kind == "plugin" && change.Property == "global")
         { return $"{change.Action} plugin {Value(change.Name, zh)} globally"; }
         if (change is { Action: "add", Kind: "part" })
@@ -150,70 +164,78 @@ internal static class ApprovalTexts
             return $"Write {Value(change.Name, zh)}: " + string.Join("; ", parameters.Select(p => Value(p.Name, zh) + "=" + Value(p.Name is "PROJECTNAME" or "Project" ? Path.GetFileName(p.Value) : p.Value, zh)))
                 + "; " + string.Join("; ", (details?.GetValueOrDefault("effects") ?? string.Empty).Split(';').Select(s => Value(s, zh)));
         }
-        string kind = zh ? change.Kind switch { "page" => "页", "device" => "设备", "language" => "语言", "structure" => "结构标识符", "project" => "项目", _ => change.Kind } : change.Kind;
-        string property = zh ? change.Property switch { "description" => "描述", "tag" => "标识", _ => change.Property ?? string.Empty } : change.Property ?? string.Empty;
-        string name = Value(change.Name, zh);
-        if (change.Kind == "UI selection")
-        { return "Replace/clear UI selection before action; nonempty opens/focuses its page. See selection JSON below. UI state is not rolled back."; }
-        return change.Action switch
-        {
-            _ when change.Property == "list" => zh
-                ? $"从 {Value(details?.GetValueOrDefault("file") ?? "?", zh)} 导入项目的 {Value(change.Kind, zh)} 清单（{Value(details?.GetValueOrDefault("bytes") ?? "?", zh)} 字节，SHA-256 {Value(details?.GetValueOrDefault("sha256") ?? "?", zh)}）。现有清单及部件引用可能改变；逐行效果无法预报。转换器：{Value(details?.GetValueOrDefault("converter") ?? "?", zh)}；现有计数：{Value(details?.GetValueOrDefault("before") ?? "?", zh)}。"
-                : $"Import the {Value(change.Kind, zh)} list into this project from {Value(details?.GetValueOrDefault("file") ?? "?", zh)} ({Value(details?.GetValueOrDefault("bytes") ?? "?", zh)} bytes, SHA-256 {Value(details?.GetValueOrDefault("sha256") ?? "?", zh)}). Existing project list data and article references may change. Exact row-level effects are not known in advance. Converter: {Value(details?.GetValueOrDefault("converter") ?? "?", zh)}; before: {Value(details?.GetValueOrDefault("before") ?? "?", zh)}.",
-            // part.import.plan: the parts a file adds to or updates in the parts database, counted (ADR-0019).
-            "create" when change.Kind == "parts" => zh ? $"从 {name} 新增 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Add {Value(change.NewValue ?? "?", zh)} new parts from {name}",
-            _ when change.Kind == "parts" => zh ? $"从 {name} 更新部件库中已有的 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Update {Value(change.NewValue ?? "?", zh)} parts the database has, from {name}",
-
-            // part.sync.plan: the project changes too (S24 r15).
-            _ when change.Property == "stored parts" => zh
-                ? $"项目也会被修改：在项目 {name} 中存入 {Value(change.NewValue ?? "?", zh)} 个被引用的部件（现有 {Value(change.OldValue ?? "?", zh)} 个）"
-                : $"The project changes too: store {Value(change.NewValue ?? "?", zh)} referenced parts in project {name} (now {Value(change.OldValue ?? "?", zh)})",
-
-            // A macro's change names the page; what goes there is its value (macro.insert.plan).
-            "create" when change.Kind == "macro" => zh ? $"在页 {name} 上插入宏：{Value(change.NewValue ?? string.Empty, zh)}" : $"Insert a macro on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
-            // A device's change names the page too; the part, the tag and the point are its value (device.place.plan).
-            "create" when change.Kind == "device" => zh ? $"在页 {name} 上放置设备：{Value(change.NewValue ?? string.Empty, zh)}" : $"Place a device on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
-            // An import names the file, its size and SHA-256 (import.dxf.plan; M4c design 4.5).
-            "create" when change.Kind == "drawing" => zh ? $"在页 {name} 上导入图形：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import a drawing on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
-            "create" when change.Kind == "PDF comments" => zh ? $"向项目 {name} 导入 PDF 便笺（其他批注忽略，新增数执行后才知道）：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import PDF sticky notes into project {name} (other annotations ignored; new count unknown until import): {Value(change.NewValue ?? string.Empty, zh)}",
-            "create" when change.Kind == "report" => (zh ? $"从 {name} 创建 {property} 报表（{Value(change.NewValue ?? string.Empty, zh)}）" : $"Create {property} report ({Value(change.NewValue ?? string.Empty, zh)}) from {name}") + ReportSchemes(details, zh),
-            "create" when change.Kind == "project" => zh ? $"新建项目 {name}：{Value(change.NewValue ?? string.Empty, zh)}" : $"Create project {name}: {Value(change.NewValue ?? string.Empty, zh)}",
-            "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
-            "open" => zh ? $"打开{kind} {name}" : $"Open {kind} {name}",
-            "close" => zh ? $"关闭{kind} {name}" : $"Close {kind} {name}",
-            "delete" => (zh ? $"删除{kind} {name}" : $"Delete {kind} {name}") + (change.OldValue is null ? string.Empty : zh ? $"（{Value(change.OldValue, zh)}）" : $" ({Value(change.OldValue, zh)})"),
-            // Only EPLAN can tell which connections it adds or removes (eplan_connection_generate, tool spec 5).
-            // Only EPLAN's numbering rules give the new tags (eplan_device_renumber, tool spec 5): the scope, worded by the Bridge.
-            _ when change.Property == "device tags" => (zh ? "重新编号：" : "Renumber ") + Value(change.OldValue ?? string.Empty, zh),
-            _ when change.Property == "page number" => zh ? $"重新编号{kind} {name}" : $"Renumber {kind} {name}",
-            // The numbering tools of M4c (terminals, cables, wire numbers): the scope, worded by the Bridge.
-            _ when change.Property == "numbering" => (zh ? "重新编号：" : "Renumber ") + Value(change.OldValue ?? string.Empty, zh),
-            _ when change.Property == "PLC bus data" => PlcImport(name, details, zh),
-            _ when change.Kind == "cables" && change.Property == "generation" => GenerateCables(zh, details),
-            // Only the translation database tells which texts it fills in (eplan_project_translate, tool spec 5): the scope, worded by the Bridge.
-            _ when change.Property == "translations" => (zh ? "按翻译库翻译：" : "Translate with the translation database: ") + Value(change.OldValue ?? string.Empty, zh),
-            _ when change.Property == "connections" => zh
-                ? $"生成{kind} {name} 上的连接（现有 {Value(change.OldValue ?? "?", zh)} 个；可能新增或删除连接）"
-                : $"Generate connections on {kind} {name} (now {Value(change.OldValue ?? "?", zh)}; may add or remove connections)",
-            // The check replaces all the project's check messages; the scope is in the plan's details (check.run.plan).
-            _ when change.Property == "check messages" => CheckRun(change, zh, details),
-            // Only EPLAN can tell which report pages it creates or removes (eplan_report_update, tool spec 5; M4 design Q7).
-            _ when change.Property == "reports" => zh
-                ? $"更新全部报表（现有报表页 {Value(change.OldValue ?? "?", zh)} 页）；可能新建、替换或删除报表页"
-                : $"Update all reports ({Value(change.OldValue ?? "?", zh)} report pages now); may create, replace or delete report pages",
-            _ when change.Property == "report" => zh ? $"更新报表页 {name}" : $"Update report page {name}",
-            // EPLAN does not tell which value set is applied now (placeholder.apply.plan): only the new one; its values follow.
-            _ when change.Property == "value set" => zh
-                ? $"给占位符 {name} 应用值集 {Value(change.NewValue ?? "?", zh)}"
-                : $"Apply value set {Value(change.NewValue ?? "?", zh)} to placeholder {name}",
-            _ when change.Property == "languages" => zh
-                ? $"修改项目 {name} 的语言：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
-                : $"Change the languages of project {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
-            _ => zh
-                ? $"修改{kind} {name} 的{property}：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
-                : $"Change {property} of {kind} {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
-        };
+        return null;
     }
+
+    /// <summary>List imports and parts database changes; null for every other change.</summary>
+    private static string? Imported(PlannedChange change, string name, bool zh, IReadOnlyDictionary<string, string>? details) => change.Action switch
+    {
+        _ when change.Property == "list" => zh
+            ? $"从 {Value(details?.GetValueOrDefault("file") ?? "?", zh)} 导入项目的 {Value(change.Kind, zh)} 清单（{Value(details?.GetValueOrDefault("bytes") ?? "?", zh)} 字节，SHA-256 {Value(details?.GetValueOrDefault("sha256") ?? "?", zh)}）。现有清单及部件引用可能改变；逐行效果无法预报。转换器：{Value(details?.GetValueOrDefault("converter") ?? "?", zh)}；现有计数：{Value(details?.GetValueOrDefault("before") ?? "?", zh)}。"
+            : $"Import the {Value(change.Kind, zh)} list into this project from {Value(details?.GetValueOrDefault("file") ?? "?", zh)} ({Value(details?.GetValueOrDefault("bytes") ?? "?", zh)} bytes, SHA-256 {Value(details?.GetValueOrDefault("sha256") ?? "?", zh)}). Existing project list data and article references may change. Exact row-level effects are not known in advance. Converter: {Value(details?.GetValueOrDefault("converter") ?? "?", zh)}; before: {Value(details?.GetValueOrDefault("before") ?? "?", zh)}.",
+        // part.import.plan: the parts a file adds to or updates in the parts database, counted (ADR-0019).
+        "create" when change.Kind == "parts" => zh ? $"从 {name} 新增 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Add {Value(change.NewValue ?? "?", zh)} new parts from {name}",
+        _ when change.Kind == "parts" => zh ? $"从 {name} 更新部件库中已有的 {Value(change.NewValue ?? "?", zh)} 个部件" : $"Update {Value(change.NewValue ?? "?", zh)} parts the database has, from {name}",
+        // part.sync.plan: the project changes too (S24 r15).
+        _ when change.Property == "stored parts" => zh
+            ? $"项目也会被修改：在项目 {name} 中存入 {Value(change.NewValue ?? "?", zh)} 个被引用的部件（现有 {Value(change.OldValue ?? "?", zh)} 个）"
+            : $"The project changes too: store {Value(change.NewValue ?? "?", zh)} referenced parts in project {name} (now {Value(change.OldValue ?? "?", zh)})",
+        _ => null,
+    };
+
+    /// <summary>Create, open, close and delete; null for every other action.</summary>
+    private static string? Lifecycle(PlannedChange change, string kind, string name, string property, bool zh, IReadOnlyDictionary<string, string>? details) => change.Action switch
+    {
+        // A macro's change names the page; what goes there is its value (macro.insert.plan).
+        "create" when change.Kind == "macro" => zh ? $"在页 {name} 上插入宏：{Value(change.NewValue ?? string.Empty, zh)}" : $"Insert a macro on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
+        // A device's change names the page too; the part, the tag and the point are its value (device.place.plan).
+        "create" when change.Kind == "device" => zh ? $"在页 {name} 上放置设备：{Value(change.NewValue ?? string.Empty, zh)}" : $"Place a device on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
+        // An import names the file, its size and SHA-256 (import.dxf.plan; M4c design 4.5).
+        "create" when change.Kind == "drawing" => zh ? $"在页 {name} 上导入图形：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import a drawing on page {name}: {Value(change.NewValue ?? string.Empty, zh)}",
+        "create" when change.Kind == "PDF comments" => zh ? $"向项目 {name} 导入 PDF 便笺（其他批注忽略，新增数执行后才知道）：{Value(change.NewValue ?? string.Empty, zh)}" : $"Import PDF sticky notes into project {name} (other annotations ignored; new count unknown until import): {Value(change.NewValue ?? string.Empty, zh)}",
+        "create" when change.Kind == "report" => (zh ? $"从 {name} 创建 {property} 报表（{Value(change.NewValue ?? string.Empty, zh)}）" : $"Create {property} report ({Value(change.NewValue ?? string.Empty, zh)}) from {name}") + ReportSchemes(details, zh),
+        "create" when change.Kind == "project" => zh ? $"新建项目 {name}：{Value(change.NewValue ?? string.Empty, zh)}" : $"Create project {name}: {Value(change.NewValue ?? string.Empty, zh)}",
+        "create" => zh ? $"新建{kind} {name}" : $"Create {kind} {name}",
+        "open" => zh ? $"打开{kind} {name}" : $"Open {kind} {name}",
+        "close" => zh ? $"关闭{kind} {name}" : $"Close {kind} {name}",
+        "delete" => (zh ? $"删除{kind} {name}" : $"Delete {kind} {name}") + (change.OldValue is null ? string.Empty : zh ? $"（{Value(change.OldValue, zh)}）" : $" ({Value(change.OldValue, zh)})"),
+        _ => null,
+    };
+
+    /// <summary>Changes whose scope only EPLAN knows, and last the plain property change.</summary>
+    private static string Scoped(PlannedChange change, string kind, string name, string property, bool zh, IReadOnlyDictionary<string, string>? details) => change.Action switch
+    {
+        // Only EPLAN can tell which connections it adds or removes (eplan_connection_generate, tool spec 5).
+        // Only EPLAN's numbering rules give the new tags (eplan_device_renumber, tool spec 5): the scope, worded by the Bridge.
+        _ when change.Property == "device tags" => (zh ? "重新编号：" : "Renumber ") + Value(change.OldValue ?? string.Empty, zh),
+        _ when change.Property == "page number" => zh ? $"重新编号{kind} {name}" : $"Renumber {kind} {name}",
+        // The numbering tools of M4c (terminals, cables, wire numbers): the scope, worded by the Bridge.
+        _ when change.Property == "numbering" => (zh ? "重新编号：" : "Renumber ") + Value(change.OldValue ?? string.Empty, zh),
+        _ when change.Property == "PLC bus data" => PlcImport(name, details, zh),
+        _ when change.Kind == "cables" && change.Property == "generation" => GenerateCables(zh, details),
+        // Only the translation database tells which texts it fills in (eplan_project_translate, tool spec 5): the scope, worded by the Bridge.
+        _ when change.Property == "translations" => (zh ? "按翻译库翻译：" : "Translate with the translation database: ") + Value(change.OldValue ?? string.Empty, zh),
+        _ when change.Property == "connections" => zh
+            ? $"生成{kind} {name} 上的连接（现有 {Value(change.OldValue ?? "?", zh)} 个；可能新增或删除连接）"
+            : $"Generate connections on {kind} {name} (now {Value(change.OldValue ?? "?", zh)}; may add or remove connections)",
+        // The check replaces all the project's check messages; the scope is in the plan's details (check.run.plan).
+        _ when change.Property == "check messages" => CheckRun(change, zh, details),
+        // Only EPLAN can tell which report pages it creates or removes (eplan_report_update, tool spec 5; M4 design Q7).
+        _ when change.Property == "reports" => zh
+            ? $"更新全部报表（现有报表页 {Value(change.OldValue ?? "?", zh)} 页）；可能新建、替换或删除报表页"
+            : $"Update all reports ({Value(change.OldValue ?? "?", zh)} report pages now); may create, replace or delete report pages",
+        _ when change.Property == "report" => zh ? $"更新报表页 {name}" : $"Update report page {name}",
+        // EPLAN does not tell which value set is applied now (placeholder.apply.plan): only the new one; its values follow.
+        _ when change.Property == "value set" => zh
+            ? $"给占位符 {name} 应用值集 {Value(change.NewValue ?? "?", zh)}"
+            : $"Apply value set {Value(change.NewValue ?? "?", zh)} to placeholder {name}",
+        _ when change.Property == "languages" => zh
+            ? $"修改项目 {name} 的语言：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
+            : $"Change the languages of project {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
+        _ => zh
+            ? $"修改{kind} {name} 的{property}：{Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}"
+            : $"Change {property} of {kind} {name}: {Quoted(change.OldValue, zh)} → {Quoted(change.NewValue, zh)}",
+    };
 
     internal static string ReportSchemes(IReadOnlyDictionary<string, string>? details, bool zh) =>
         $"; filter: {Value(details?.GetValueOrDefault("filter_scheme") ?? string.Empty, zh)}; sort: {Value(details?.GetValueOrDefault("sort_scheme") ?? string.Empty, zh)}"
