@@ -4,7 +4,9 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
-| 连接预测拆分（2026-11-17，`ConnectionCreatePlanner.Predict` 按步骤拆进 `Prediction`，只搬代码） | `ConnectionCreateTests` | 待运行：单元测试与快照全部通过；提交当时负责人正在使用 Electric P8，实机回归推迟到 EPLAN 空闲时，预期 25 个用例结果不变。 |
+| 大方法拆分第一、二批（2026-11-17，`ConnectionCreatePlanner.Predict`、`DevicePlaceInputs.Check`、`LayoutGuard.Check`、`ApprovalTexts.Change`、`PlacementMovePlanner.Predict`、`PlanVerifier.Verify`） | `ConnectionCreateTests`、`PlacementMoveTests`、`LayoutGuardTests`、`LayoutGuardWarningTests`、`DevicePlaceTests`、`PlanApplyTests` | 已通过，剩两项与拆分无关的失败（见下两行）：2026-11-17，A 槽 Electric P8，EPLAN 2026.0.3.25421，main `9f300160`：`ConnectionCreateTests` 24/25、`PlacementMoveTests` 2/2、`LayoutGuardTests` 5/5、`LayoutGuardWarningTests` 1/1、`PlanApplyTests` 2/2、`DevicePlaceTests` 21/30。 |
+| 已有连接在生成后读不回（2026-11-17 回归时发现，拆分之前就存在） | `ConnectionCreateTests.TNodeOnGeneratedLine_OpenCornerBranch_PreservesLogicalConnection_TwoUndosRestore` | 待查：T 节点拆开已生成的线并加一个拐角时，执行阶段报“existing connection … is gone after generation”并回滚；预览正确。在拆分前的 `f3264f89` 上同样失败，上一次通过是 2026-11-05（main `9faf3790`，25/25），原因在两者之间。 |
+| A 槽部件库缺样例部件（2026-11-17 回归时发现） | `DevicePlaceTests` 中用部件放置的 9 个用例 | 受阻：Electric P8 当前选用的部件库里没有 `SIE.3RH2122-1HB40` 等样例部件，返回 `PART_NOT_FOUND`（该判断的代码近期没有改动）。部件库选择是 EPLAN 的用户设置，测试不改它；恢复样例部件库后重跑。上一次 30/30 是 2026-11-10 B 槽 Pro Panel。 |
 | PLC 生成保留已有表达（2026-11-08，MX_Dryer 重画时发现机架页被清空） | `ProjectToolsTests` | 待实机验证：对已有多线放置的设备执行 `eplan_plc_generate`，核对原放置仍在原页、新增页面只含请求页，以及异常结果在事务内回滚。 |
 | `eplan_session_close` / `eplan_session_restart`（2026-11-15） | `SessionLifecycleTests`（单独、最后运行） | 部分通过：2026-11-15，A 槽 Electric P8：开着 scratch 之外的副本 LargeOutside 时关闭被拒绝（`POLICY_DENIED`，只写项目名不带路径），EPLAN 仍在运行。第一次运行发现一条 10-20 留下、项目早已关闭的挂起也挡住了关闭，已改为只算打开的项目上的挂起。待运行：只开 scratch 项目的槽位上，重启关闭开着项目的 EPLAN 并重新启动同一变体。 |
 | 电位定义点修改 `eplan_potential_update`（cd7cc5ad，2026-11-10；A130） | `PotentialEngineeringTests`（用例待补） | 工具路径已在会话中实机使用（2026-11-10：通过式烘芯炉 N/NC 线改蓝色、MX_NFPA 三根变频器线加定义点后重新生成，审图 0 问题）；Large 用例待补。 |
