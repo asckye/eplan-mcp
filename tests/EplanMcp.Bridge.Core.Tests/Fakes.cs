@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
+using Eplan.EplApi.Base;
 using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Core.Threading;
@@ -79,6 +81,7 @@ internal sealed class FakePageReader : IPageReader
 
     public List<(string Path, string PageName, bool IncludeProperties, string? Language)> ReadCalls { get; } = [];
 
+    // UNVERIFIED (2026-11-18 survey E4-01): Filtered pages keep insertion order, and missing pages and functions use null and an empty list.
     public IReadOnlyList<PageSummary> ListPages(string projectPath, string? namePrefix, string? pageType, string? language)
     {
         ListCalls.Add((projectPath, namePrefix, pageType, language));
@@ -96,6 +99,7 @@ internal sealed class FakePageReader : IPageReader
             ? null
             : new PageContent
             {
+                // UNVERIFIED (2026-11-18 survey E4-02): Type display names append ' (UI)'.
                 Page = new PageDetail { Name = page.Name, Type = page.Type, TypeName = page.Type + " (UI)", Description = page.Description },
                 Functions = Functions.TryGetValue(page.Name, out List<FunctionRecord>? functions) ? functions : [],
                 Properties = includeProperties ? Properties : null,
@@ -266,6 +270,7 @@ internal sealed class FakePageWriter(FakePageReader pages) : IPageWriter
     /// <summary>The create (counted from 1) that throws like an EPLAN failure.</summary>
     public int? FailOn { get; set; }
 
+    // UNVERIFIED (2026-11-18 survey E4-03): Every language except xx_XX is accepted.
     public bool KnowsLanguage(string language) => language != "xx_XX";
 
     public PageSummary Create(string projectPath, PageName name, string pageType, string? description, string? language)
@@ -277,6 +282,7 @@ internal sealed class FakePageWriter(FakePageReader pages) : IPageWriter
         }
 
         string actual = Drop is null ? name.Text : name.Text.Replace(Drop, string.Empty, StringComparison.Ordinal);
+        // UNVERIFIED (2026-11-18 survey E4-04): Page creation rejects names differing only in case.
         if (pages.Pages.Any(p => string.Equals(p.Name, actual, StringComparison.OrdinalIgnoreCase)))
         {
             throw new BridgeErrorException(ErrorReason.AlreadyExists, "EPLAN: the name exists");
@@ -302,6 +308,7 @@ internal sealed class FakePageDescriptions : IPageDescriptions
 
     public Func<List<TextEntry>, List<TextEntry>>? Tamper { get; set; }
 
+    // UNVERIFIED (2026-11-18 survey E4-05): Missing descriptions use the empty result, with zh_CN as the default and only xx_XX rejected.
     public string? LanguageCode(string? language) => language is null ? GuiLanguage : language == "xx_XX" ? null : language;
 
     public PageDescription Read(string projectPath, string pageName)
@@ -323,7 +330,7 @@ internal sealed class FakePageDescriptions : IPageDescriptions
 /// the old tag gets the new name, without a check for duplicates. <see cref="Drop"/> stands for a structure part the
 /// category does not use; <see cref="LeaveBehind"/> for a function EPLAN did not rename.
 /// </summary>
-internal sealed class FakeDeviceRenamer : IDeviceRenamer
+internal sealed partial class FakeDeviceRenamer : IDeviceRenamer
 {
     /// <summary>Name, session identifier, main or not, page and, for main functions, the tag without structure.</summary>
     public List<(string Name, string Id, bool IsMain, string? Page, string DeviceTag)> Functions { get; } = [];
@@ -350,10 +357,27 @@ internal sealed class FakeDeviceRenamer : IDeviceRenamer
         {
             Tag = tag,
             DeviceTag = main.DeviceTag,
-            VisibleName = "-" + tag.Split('-')[^1],
+            VisibleName = Shown(tag, main.Page),
             Functions = [.. named.Select(f => new DeviceNames.NamedFunction { Name = f.Name, Id = f.Id, IsMain = f.IsMain, Page = f.Page })],
             SubFunctions = SubFunctions.TryGetValue(main.Id, out List<string>? subs) ? subs : [.. named.Where(f => !f.IsMain).Select(f => f.Name)],
         };
+    }
+
+    [GeneratedRegex("(?=[=+])")]
+    private static partial Regex StructureSegments();
+
+    private static string Shown(string name, string? page)
+    {
+        int device = name.IndexOf('-', StringComparison.Ordinal);
+        if (page is null || device < 0)
+        {
+            return "-" + name.Split('-')[^1];
+        }
+
+        // A45: omit matching plant and location segments, retaining the other segments in the shown tag.
+        string[] pageParts = StructureSegments().Split(DrawingNames.DeviceStructureOf(page));
+        string[] tagParts = StructureSegments().Split(name[..device]);
+        return string.Concat(tagParts.Where(part => !pageParts.Contains(part, StringComparer.Ordinal))) + name[device..];
     }
 
     public IReadOnlyList<string> FunctionNames(string projectPath) => [.. Functions.Select(f => f.Name)];
@@ -380,7 +404,7 @@ internal sealed class FakeDeviceRenamer : IDeviceRenamer
         return new RenameReadBack
         {
             MainName = Functions.First(f => f.IsMain && f.Name == actual).Name,
-            VisibleName = "-" + actual.Split('-')[^1],
+            VisibleName = Shown(actual, Functions.First(f => f.IsMain && f.Name == actual).Page),
             Remaining = Functions.Count(f => f.Name == tag),
             Renamed = Functions.Count(f => f.Name == actual),
         };
@@ -460,11 +484,13 @@ internal sealed class FakeMacroInserter(FakeDeviceReader project) : IMacroInsert
 
         List<MacroFunctionRecord> functions = Placed(number);
         project.Functions.AddRange(functions.Where(f => f.Main).Select(f => new FunctionRecord { Name = f.Name, VisibleName = f.VisibleName, IsMain = true, Category = f.Category, Page = pageName }));
+        // UNVERIFIED (2026-11-18 survey E4-06): Each insertion restarts object identifiers at the same index.
         Pages[pageName].Objects.AddRange(functions.Select((f, i) => "9/9/" + i.ToString(System.Globalization.CultureInfo.InvariantCulture) + "/0"));
         if (values is not null)
         {
             ApplyValues?.Invoke(values);
         }
+        // UNVERIFIED (2026-11-18 survey E4-07): Inserted objects outnumber functions by nine.
         return new PlacedMacro { Functions = functions, ObjectCount = functions.Count + 9, ArticleReferences = ArticleReferences };
     }
 }
@@ -533,6 +559,7 @@ internal sealed class FakeConnectionGenerator : IConnectionGenerator
 
     public List<string[]> Generates { get; } = [];
 
+    // UNVERIFIED (2026-11-18 survey E4-08): Each requested page gets an ordered, case-sensitive bucket, even when missing.
     public List<bool> Rebuilds { get; } = [];
 
     public IReadOnlyList<IReadOnlyList<ConnectionRecord>> ReadConnections(string projectPath, IReadOnlyList<string> pages) =>
@@ -552,6 +579,7 @@ internal sealed class FakeConnectionGenerator : IConnectionGenerator
                 connections = Connections[page] = [];
             }
 
+            // UNVERIFIED (2026-11-18 survey E4-09): Only stale record instances are removed.
             connections.RemoveAll(c => Stale.GetValueOrDefault(page)?.Contains(c) == true);
             connections.AddRange(Drawn.GetValueOrDefault(page) ?? []);
             Drawn.Remove(page);
@@ -566,7 +594,7 @@ internal sealed class FakeConnectionGenerator : IConnectionGenerator
 
 /// <summary>
 /// A project's pages and check messages, checked the way S6 and S11 found EPLAN checks (api-notes A11, A16): a check
-/// replaces the project's messages with <see cref="Found"/>. <see cref="OnRun"/> runs during the check, standing for
+/// publishes <see cref="Found"/> and keeps earlier whole-project summary hints. <see cref="OnRun"/> runs during the check, standing for
 /// whatever happens meanwhile; <see cref="Failure"/> is thrown after the change, like an EPLAN failure midway. Records
 /// every check.
 /// </summary>
@@ -591,13 +619,23 @@ internal sealed class FakeCheckRunner : ICheckRunner, IProjectMessageReader
     public void Run(string projectPath, IReadOnlyList<string>? pages, string scheme)
     {
         Runs.Add((pages?.ToArray(), scheme));
-        Messages = [.. Found];
+        // A20: a whole-project recheck appends region summaries (999) without duplicating the warnings.
+        if (pages is null && Messages.Any(IsSummary))
+        {
+            Messages = [.. Found.Where(message => !IsSummary(message)), .. Messages.Where(IsSummary), .. Found.Where(IsSummary)];
+        }
+        else
+        {
+            Messages = [.. Found];
+        }
         OnRun?.Invoke();
         if (Failure is not null)
         {
             throw Failure;
         }
     }
+
+    private static bool IsSummary(ProjectMessageRecord message) => message.Id == 999 && message.Category == "Hint";
 
     public IReadOnlyList<ProjectMessageRecord> ReadMessages(string projectPath) => [.. Messages];
 }
@@ -715,6 +753,7 @@ internal sealed class FakePageRemover(FakePageReader pages) : IPageRemover
 
     public RemovablePage? ReadPage(string projectPath, string pageName) =>
         pages.Pages.FirstOrDefault(p => p.Name == pageName) is { } page
+            // UNVERIFIED (2026-11-18 survey E4-29): Deletion fingerprints include only a synthetic page key and local function IDs.
             ? new RemovablePage { Name = page.Name, Type = page.Type, ObjectIds = ["page " + page.Name, .. Placed.Where(f => f.Page == page.Name).Select(f => f.Id)] }
             : null;
 
@@ -766,7 +805,8 @@ internal sealed class FakeDeviceRenumberer : IDeviceRenumberer
     public void Renumber(string projectPath, IReadOnlyList<string>? pages, bool onlyUnnumbered, string? scheme, int start, int increment)
     {
         Renumbers.Add((pages, onlyUnnumbered, scheme, start, increment));
-        if (scheme is not (null or "" or "Standard"))
+        // TheSchemeDefault_IsInvalidArgumentAndRolledBack_WithS12sSchemesAsCandidates: use the reported candidate list for validation.
+        if (!string.IsNullOrEmpty(scheme) && !NumberingSchemes.Candidates(InvalidSchemeMessage).Contains(scheme, StringComparer.Ordinal))
         {
             throw NumberingSchemes.Unknown(scheme, InvalidSchemeMessage, new InvalidOperationException(InvalidSchemeMessage));
         }
@@ -774,11 +814,13 @@ internal sealed class FakeDeviceRenumberer : IDeviceRenumberer
         foreach (PlacedFunction function in Functions.Where(f => pages is null || pages.Contains(f.Page!)))
         {
             string device = DeviceRenumberRequest.DeviceOf(function.Name);
-            if (Numbers.TryGetValue(device, out string? tag))
+            // A18/A20: PostNumerate selects question marks in the device tag before the connection point.
+            if ((!onlyUnnumbered || DeviceRenumberRequest.Unnumbered(device)) && Numbers.TryGetValue(device, out string? tag))
             {
                 function.Name = string.Concat(tag, function.Name.AsSpan(device.Length));
             }
 
+            // UNVERIFIED (2026-11-18 survey E4-10): Renumbering can replace every in-scope function ID regardless of name changes.
             if (NewIds)
             {
                 function.Id += "'";
@@ -792,7 +834,7 @@ internal sealed class FakeDeviceRenumberer : IDeviceRenumberer
 /// <summary>
 /// Pages of a <see cref="FakePageReader"/> renumbered the way S12 found <c>Renumber.Pages</c> per structure renumbers
 /// them (api-notes A18): in the order given, from the start in steps, each in its own structure, keeping its session
-/// identifier; EPLAN's check for a taken name is <see cref="Refuse"/>, otherwise a taken number gives two pages one name.
+/// identifier. A taken number refuses the write before any page changes.
 /// Records every call.
 /// </summary>
 internal sealed class FakePageRenumberer(FakePageReader pages) : IPageRenumberer
@@ -806,6 +848,19 @@ internal sealed class FakePageRenumberer(FakePageReader pages) : IPageRenumberer
     public string? PageId(string projectPath, string pageName) =>
         pages.Pages.FirstOrDefault(p => p.Name == pageName) is { } page ? Id(page) : null;
 
+    IReadOnlyList<string> IPageRenumberer.Renumber(string projectPath, IReadOnlyList<string> names, int start, int increment, bool keepText, string subpages)
+    {
+        try
+        {
+            return Renumber(projectPath, names, start, increment, keepText, subpages);
+        }
+        catch (BaseException error) when (error.Message.StartsWith("S029167", StringComparison.Ordinal))
+        {
+            // A20: EplanPageRenumberer maps the native conflict at the IPageRenumberer boundary.
+            throw new BridgeErrorException(ErrorReason.AlreadyExists, "EPLAN reports that a new page number is taken.", error);
+        }
+    }
+
     public IReadOnlyList<string> Renumber(string projectPath, IReadOnlyList<string> names, int start, int increment, bool keepText, string subpages)
     {
         Renumbers.Add(([.. names], start, increment, keepText, subpages));
@@ -815,15 +870,25 @@ internal sealed class FakePageRenumberer(FakePageReader pages) : IPageRenumberer
         }
 
         PageSummary[] targets = [.. names.Select(name => pages.Pages.First(p => p.Name == name))];
+        // UNVERIFIED (2026-11-18 survey E4-11): One sequence spans structures regardless of keepText and subpage mode.
+        string[] proposed = [.. targets.Select((page, i) =>
+            PageNames.StructureOf(page.Name) + "/" + (start + (i * increment)).ToString(System.Globalization.CultureInfo.InvariantCulture))];
+        // A20: a new name taken by an existing page raises S029167 and leaves the entire set unchanged.
+        if (pages.Pages.Except(targets).Any(page => proposed.Contains(page.Name, StringComparer.Ordinal)))
+        {
+            throw new BaseException("S029167: ambiguous page name.");
+        }
+
         for (int i = 0; i < targets.Length; i++)
         {
             Id(targets[i]);
-            targets[i].Name = PageNames.StructureOf(targets[i].Name) + "/" + (start + (i * increment)).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            targets[i].Name = proposed[i];
         }
 
-        return [.. targets.Select(p => p.Name)];
+        return proposed;
     }
 
+    // UNVERIFIED (2026-11-18 survey E4-12): Page IDs derived from the original name survive renumbering.
     private string Id(PageSummary page) => _ids.TryGetValue(page, out string? id) ? id : _ids[page] = "id " + page.Name;
 }
 

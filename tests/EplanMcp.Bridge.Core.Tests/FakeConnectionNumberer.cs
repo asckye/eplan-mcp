@@ -46,6 +46,7 @@ internal sealed class FakeConnectionNumberer : IConnectionNumberer
                 connection.Designation = number;
             }
 
+            // UNVERIFIED (2026-11-18 survey E4-14): All connection IDs can change even without a new designation.
             if (NewIds)
             {
                 connection.Id += "'";

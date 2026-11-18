@@ -34,6 +34,7 @@ internal sealed class FunctionPropertyList(FakeCableStore? store = null, Diction
     public PropertyValue FUNC_PLCSYMBOLICADDRESS_CALCULATED { get; set; } = new("");
     public PropertyValue FUNC_PLCDATATYPE { get; set; } = new("");
     public PropertyValue FUNC_SUPPRESSCROSSREFERENCE { get; set; } = new("");
+    // UNVERIFIED (2026-11-18 survey E4-26): Indexed properties alias the scalar key at id plus index.
     public PropertyValue this[Properties.Function id, int index]
     {
         get => this[(Properties.Function)((int)id + index)];

@@ -29,7 +29,12 @@ internal sealed class FunctionBasePropertyList(Action? checkAlive = null) : IDis
 {
     private PropertyValue _location = new("");
     public PropertyValue DESIGNATION_LOCATION { get { checkAlive?.Invoke(); return _location; } set { checkAlive?.Invoke(); _location = value; } }
-    public PropertyValue DESIGNATION_PLANT { get; set; } = new("");
+    // A88: assigning an empty plant designation raises S063111.
+    public PropertyValue DESIGNATION_PLANT
+    {
+        get;
+        set => field = value.IsEmpty ? throw new EmptyPropertyException("S063111: empty plant designation.") : value;
+    } = new("");
     public PropertyValue FUNC_CODE { get; set; } = new("");
     public PropertyValue FUNC_COUNTER { get; set; } = new("");
     public PropertyValue FUNC_PREFIX { get; set; } = new("");
@@ -43,7 +48,8 @@ internal sealed class PropertyValue(string text, Action? checkAlive = null) : ID
     public bool Disposed { get; private set; }
     public string Text { get { checkAlive?.Invoke(); return text; } }
     public bool IsEmpty => Text.Length == 0;
-    public override string ToString() => Text;
+    // A7: converting an empty property to text raises EmptyPropertyException.
+    public override string ToString() => IsEmpty ? throw new EmptyPropertyException("S063111: empty property.") : Text;
     public int ToInt() => int.Parse(Text, System.Globalization.CultureInfo.InvariantCulture);
     public double ToDouble() => double.Parse(Text, System.Globalization.CultureInfo.InvariantCulture);
     /// <summary>Indexed values (plot frame row heights and column widths); empty for a scalar property.</summary>

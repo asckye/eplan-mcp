@@ -123,6 +123,7 @@ internal class Rectangle(long oid = 101) : GraphicalPlacement(oid)
     public void Create(Page page) => page.AllPlacements = [.. page.AllPlacements, this];
     public void SetArea(PointD lower, PointD upper)
     {
+        // UNVERIFIED (2026-11-18 survey E4-27): A second SetArea on a non-default rectangle fails.
         Assert.True(LowerLeftCorner == default && UpperRightCorner == default);
         LowerLeftCorner = lower;
         UpperRightCorner = upper;

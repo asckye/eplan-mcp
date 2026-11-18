@@ -22,7 +22,11 @@ internal sealed class MultiLangString(string content = "") : IDisposable
         }
     }
     public string GetStringToDisplay(ISOCode.Language language) => _entries.GetValueOrDefault(language, _entries.GetValueOrDefault(ISOCode.Language.L___, ""));
-    public string GetString(ISOCode.Language language) => _entries[language];
+    // A11: a language-independent value has no text in a requested concrete language.
+    public string GetString(ISOCode.Language language) =>
+        _entries.Count == 1 && _entries.ContainsKey(ISOCode.Language.L___)
+            ? _entries.GetValueOrDefault(language, string.Empty)
+            : _entries[language];
     public int GetLanguageList(ref LanguageList languages) { languages.Values = [.. _entries.Keys]; return _entries.Count; }
     public void Dispose() => Disposed = true;
 }

@@ -32,6 +32,7 @@ internal sealed class FakeTerminalRenumberer : ITerminalRenumberer
 
     public IReadOnlyList<string> Schemes() => SchemeNames;
 
+    // UNVERIFIED (2026-11-18 survey E4-17): Strip lookup is ordinal, a missing strip returns null, and enumeration follows insertion order.
     public IReadOnlyList<PlacedFunction>? ReadTerminals(string projectPath, string? strip) =>
         strip is null ? [.. Strips.Values.SelectMany(t => t).Select(Copy)]
         : Strips.TryGetValue(strip, out List<PlacedFunction>? terminals) ? [.. terminals.Select(Copy)]
@@ -45,6 +46,7 @@ internal sealed class FakeTerminalRenumberer : ITerminalRenumberer
             throw SchemeChoice.Refused(scheme, FakeDeviceRenumberer.InvalidSchemeMessage, "terminal", new InvalidOperationException(FakeDeviceRenumberer.InvalidSchemeMessage));
         }
 
+        // UNVERIFIED (2026-11-18 survey E4-15): Numbering a selected strip can rename terminals on an unselected strip.
         foreach (PlacedFunction terminal in Strips.Where(s => Overreach || strips is null || strips.Contains(s.Key)).SelectMany(s => s.Value))
         {
             if ((Overreach || !onlyUnnumbered || TerminalRenumberRequest.Unnumbered(terminal.Name)) && Numbers.TryGetValue(terminal.Name, out string? name))
@@ -52,6 +54,7 @@ internal sealed class FakeTerminalRenumberer : ITerminalRenumberer
                 terminal.Name = name;
             }
 
+            // UNVERIFIED (2026-11-18 survey E4-16): All visited terminal IDs can change independent of renaming.
             if (NewIds)
             {
                 terminal.Id += "'";

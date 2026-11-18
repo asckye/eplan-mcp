@@ -9,7 +9,13 @@ namespace Eplan.EplApi.HEServices
     {
         [ThreadStatic]
         public static Func<string, string, Page, PointD, Function[]>? Create;
-        public Function[] CreateDevice(string part, string variant, Page page, PointD point) => Create!(part, variant, page, point);
+        public Function[] CreateDevice(string part, string variant, Page page, PointD point)
+        {
+            Function[] functions = Create!(part, variant, page, point);
+            // A85: only newly created, unplaced device functions change from temporary to persistent IDs on commit.
+            Transaction.Current?.TrackUnplacedDeviceFunctions(functions);
+            return functions;
+        }
         public void Dispose() { }
     }
 
@@ -19,7 +25,19 @@ namespace Eplan.EplApi.HEServices
         public static Action<Function, FunctionBasePropertyList, bool, bool>? Rename;
         [ThreadStatic]
         public static Func<Page, FunctionBase, bool>? Adjust;
-        public bool AdjustVisibleName(Page page, FunctionBase function) => Adjust?.Invoke(page, function) ?? false;
+        public bool AdjustVisibleName(Page page, FunctionBase function)
+        {
+            if (Adjust is { } adjust)
+            {
+                return adjust(page, function);
+            }
+
+            if (function is Eplan.EplApi.DataModel.EObjects.Cable cable)
+            {
+                cable.AdjustVisibleName(page);
+            }
+            return false;
+        }
         public void RenameDevice(Function main, FunctionBasePropertyList name, bool cdps, bool keep) => Rename!(main, name, cdps, keep);
         public void Dispose() { }
     }

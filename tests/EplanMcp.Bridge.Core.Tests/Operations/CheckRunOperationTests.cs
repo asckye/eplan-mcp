@@ -31,7 +31,13 @@ public sealed class CheckRunOperationTests
             _runner.Pages[name] = id;
         }
 
-        _runner.Found.AddRange([.. Enumerable.Range(1, 6).Select(i => Message(4000 + i, "Warning")), .. Enumerable.Range(1, 14).Select(i => Message(13000 + i, "Hint"))]);
+        _runner.Found.AddRange(Enumerable.Range(1, 6).Select(i => Message(4000 + i, "Warning")));
+        foreach (int i in Enumerable.Range(1, 14))
+        {
+            ProjectMessageRecord summary = Message(999, "Hint");
+            summary.Region = "Region " + i.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            _runner.Found.Add(summary);
+        }
         _transactions.Snapshot = () =>
         {
             List<ProjectMessageRecord> messages = _runner.Messages;
@@ -97,15 +103,15 @@ public sealed class CheckRunOperationTests
     [Fact]
     public void Execute_ChecksInOneTransaction_AndCountsAndListsAsCheckListDoes()
     {
-        _runner.Messages = [Message(1, "Error"), Message(2, "Error", done: true)];
+        _runner.Messages = [.. _runner.Found];
         _runner.Found.Insert(0, Message(7001, "Error", done: true));
         CheckRunArgs args = Args();
         args.Fingerprint = Plan(args).Fingerprint;
 
         CheckRunData data = Execute(args);
 
-        Assert.Equal(("Line1", 3, null, 2, null), (data.Project, data.PageCount, data.Scheme, data.Before, data.Warning));
-        Assert.Equal((20, 0, 6, 14), (data.Total, data.Errors, data.Warnings, data.Hints));
+        Assert.Equal(("Line1", 3, null, 20, null), (data.Project, data.PageCount, data.Scheme, data.Before, data.Warning));
+        Assert.Equal((34, 0, 6, 28), (data.Total, data.Errors, data.Warnings, data.Hints));
         Assert.Equal(20, data.Messages.Count);
         Assert.Equal((4001, "warning", "Connections", "message 4001"), (data.Messages[0].Number, data.Messages[0].Severity, data.Messages[0].Region, data.Messages[0].Text));
         Assert.Equal((null, string.Empty), Assert.Single(_runner.Runs));

@@ -41,6 +41,7 @@ internal sealed class FakeCableRenumberer : ICableRenumberer
                 cable.Name = tag;
             }
 
+            // UNVERIFIED (2026-11-18 survey E4-13): All cable IDs can change, including cables retaining their names.
             if (NewIds)
             {
                 cable.Id += "'";

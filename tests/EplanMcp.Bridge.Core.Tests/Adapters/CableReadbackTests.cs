@@ -52,7 +52,7 @@ public sealed class CableReadbackTests
         void ReadCores() => Read(() =>
         {
             JToken row = Assert.Single(adapter.ReadCores("project", "+A1/1", request, plan));
-            Assert.Equal("-W1", (string?)row["designation"]);
+            Assert.Equal("+-W1", (string?)row["designation"]);
             Assert.Equal("cable", (string?)row["type"]);
             Assert.Equal("1", (string?)row["label"]);
             Assert.Equal("BK", (string?)row["colour"]);

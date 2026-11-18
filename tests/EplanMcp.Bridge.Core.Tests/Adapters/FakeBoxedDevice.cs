@@ -17,6 +17,7 @@ internal sealed class BoxedDevice(long oid = 40) : Function(oid)
         get => _symbol;
         set
         {
+            // UNVERIFIED (2026-11-18 survey E4-18): Setting the variant before creation raises InvalidOperationException.
             if (!_created)
             { throw new InvalidOperationException("S063080: the object has not been created."); }
             _symbol = value;
@@ -64,6 +65,7 @@ internal sealed class BoxedDevice(long oid = 40) : Function(oid)
     public bool IsFunctionInside(Function function)
     {
         CheckNative?.Invoke();
+        // UNVERIFIED (2026-11-18 survey E4-19): An insertion point inside or on the rectangle suffices for membership.
         PointD point = function.Location;
         return point.X >= _area.LowerLeft.X && point.X <= _area.UpperRight.X
             && point.Y >= _area.LowerLeft.Y && point.Y <= _area.UpperRight.Y;

@@ -338,6 +338,7 @@ public sealed class ConnectionCreateExecutionTests
             Assert.Empty(Transactions.Calls);
             return () => { Events.Add("place"); State = 1; if (Failure == "placement") { throw Failed(); } if (MeasureAfterCommit == 0 && Measured is { } measured) { verifyLayout?.Invoke(measured); } };
         }
+        // UNVERIFIED (2026-11-18 survey E4-28): Default graphical readback uses the planner's predicted geometry.
         public List<double[][]> Graphical(string project, string page) => Failure == "graphical" ? [] : Drawn ?? Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!;
         public List<string?[]> Endpoints(string project, string page) => Failure == "endpoints" ? [["17/1/0", "17/9/0"]] : GeneratedEndpoints ?? [["17/1/0", "17/2/0"]];
         public void Generate(string projectPath, IReadOnlyList<string> pages, bool rebuild = false)

@@ -94,7 +94,8 @@ public sealed class PageRenumberOperationTests : IDisposable
 
         BridgeError error = Assert.Throws<BridgeErrorException>(() => Execute(args)).Error;
 
-        Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.RolledBack, "=GAA+A1&EFS1/1\n=GAA+A1&EFS1/2"), (error.Reason, error.Execution, error.Metadata!["existing"]));
+        Assert.Equal((ErrorReason.AlreadyExists, ExecutionState.RolledBack), (error.Reason, error.Execution));
+        Assert.Equal(_others.Concat(_probe), _pages.Pages.Select(page => page.Name));
         Assert.Contains("Rollback", _transactions.Calls);
     }
 

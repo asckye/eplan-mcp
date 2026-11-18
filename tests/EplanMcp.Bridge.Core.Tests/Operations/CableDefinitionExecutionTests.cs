@@ -361,6 +361,7 @@ public sealed class CableDefinitionExecutionTests
         private void RestoreContent()
         {
             PageScene scene = Fixture.Base.Scene;
+            // UNVERIFIED (2026-11-18 survey E4-21): Undo can restore content while renumbering roots and wires and reversing endpoints.
             if (RenumberOnUndo)
             {
                 string? Pin(string? key) => key is null ? null : string.Join("/", key.Split('/').Select((part, i) => i == 1 ? (int.Parse(part, System.Globalization.CultureInfo.InvariantCulture) + 100).ToString(System.Globalization.CultureInfo.InvariantCulture) : part));

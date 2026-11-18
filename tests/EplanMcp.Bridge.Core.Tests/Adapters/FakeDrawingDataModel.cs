@@ -23,7 +23,16 @@ internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
     public Page Page { get { CheckNative?.Invoke(); return _page; } set { CheckNative?.Invoke(); _page = value; } }
     public bool IsPlaced { get { CheckNative?.Invoke(); return _isPlaced ?? _page is not null; } set { CheckNative?.Invoke(); _isPlaced = value; } }
     public Action? CheckNative { get; set; }
-    public long ObjectIdentifier { get { CheckNative?.Invoke(); return oid; } }
+    private long _objectIdentifier = oid;
+    public long ObjectIdentifier
+    {
+        get
+        {
+            CheckNative?.Invoke();
+            return _objectIdentifier;
+        }
+        internal set => _objectIdentifier = value;
+    }
     public string Prefix { get; set; } = "53";
     public int IdentifierType { get; set; } = type;
     public short DrawingOrder { get; set; } = 64;
@@ -36,7 +45,8 @@ internal class Placement(long oid, int type = 4) : StorableObject, IDisposable
     public Group? Group { get; set; }
     public PointD[] Bounds { get; set; } = [new(0, 0), new(10, 10)];
     public Exception? BoundsError { get; set; }
-    public string ToStringIdentifier() => $"{Prefix}/{IdentifierType}/{ObjectIdentifier}/0";
+    // A85: newly created unplaced device functions use temporary IDs until commit.
+    public string ToStringIdentifier() => $"{Prefix}/{IdentifierType}/{ObjectIdentifier}/{(this is Function { TemporaryIdentifier: true } ? 1 : 0)}";
     public PointD[] GetBoundingBox() => BoundsError is { } error ? throw error : Bounds;
     public void Remove() => Page.AllPlacements = Page.AllPlacements.Where(p => !ReferenceEquals(p, this)).ToArray();
     public void Dispose() => throw new InvalidOperationException("Borrowed placement must never be disposed.");
@@ -48,12 +58,24 @@ internal sealed class Block() : Placement(901)
     public Exception? NameError { get; set; }
     public Exception? CountError { get; set; }
     public string Name { get => NameError is { } error ? throw error : _name; set => _name = value; }
-    public int Count => CountError is { } error ? throw error : SubPlacements.Length;
+    // A88: Block.Count excludes the optional symbol reference.
+    public int Count => CountError is { } error ? throw error : SubPlacements.Count(member => member is not SymbolReference);
     public Exception? SubPlacementsError { get; set; }
     private Placement[] _subPlacements = [];
     public Placement[] SubPlacements { get => SubPlacementsError is { } error ? throw error : _subPlacements; private set => _subPlacements = value; }
     public void Create(Page page, Placement[] members)
     {
+        // A88: Block.Create requires at least two members and allows at most one symbol reference.
+        ArgumentOutOfRangeException.ThrowIfLessThan(members.Length, 2, nameof(members));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(members.Count(member => member is SymbolReference), 1, nameof(members));
+
+        // A88/MacroGroupedPlacementTests: members acquire a shared new object number and block-relative locations.
+        long memberId = page.AllPlacements.Concat(members).Append(this).Max(placement => placement.ObjectIdentifier) + 1;
+        foreach (Placement member in members)
+        {
+            member.ObjectIdentifier = memberId;
+            member.Location = new(member.Location.X - Location.X, member.Location.Y - Location.Y);
+        }
         Page = page;
         SubPlacements = members;
         page.AllPlacements = [.. page.AllPlacements.Except(members), this];
@@ -131,6 +153,8 @@ internal class FunctionBase(long oid) : SymbolReference(oid)
 
 internal partial class Function(long oid = 1) : FunctionBase(oid)
 {
+    public bool TemporaryIdentifier { get; set; }
+    public bool AwaitingCommit { get; set; }
     private bool _main;
     public bool IsMainFunction { get { CheckNative?.Invoke(); return _main; } set { CheckNative?.Invoke(); _main = value; } }
     private readonly FunctionPropertyList _properties = new();
@@ -149,6 +173,8 @@ internal partial class Function(long oid = 1) : FunctionBase(oid)
         SymbolVariant.Name = variant.SymbolName;
         SymbolVariant.Variant = variant.VariantNr;
         page.AllPlacements = [.. page.AllPlacements, this];
+        // A13: page placement is immediate, but the finder sees the new function only after commit.
+        Transaction.Current?.TrackCreatedFunction(this);
         if (this is EObjects.Terminal terminal)
         { EObjects.Terminal.OnCreate?.Invoke(terminal); }
     }
@@ -262,15 +288,16 @@ internal sealed class DMObjectsFinder(Project project) : IDisposable
         Assert.False(project.RejectUnfilteredFunctions && filter is null, "A whole-project function scan is forbidden for this read.");
         project.FunctionQueries.Add((filter?.Name, filter?.ExactNameMatching ?? false, filter?.FunctionCategory));
         if (project.FindFunctions is { } find)
-        { return find(filter); }
+        { return [.. find(filter).Where(f => !f.AwaitingCommit)]; }
         IEnumerable<Function> functions = project.Pages.SelectMany(p => p.AllPlacements).OfType<Function>().Concat(project.UnplacedFunctions);
-        return [.. functions.Where(f => (filter?.Name is not { } name || (filter.ExactNameMatching ? f.Name == name : f.Name.StartsWith(name, StringComparison.Ordinal)))
+        return [.. functions.Where(f => !f.AwaitingCommit && (filter?.Name is not { } name || (filter.ExactNameMatching ? f.Name == name : f.Name.StartsWith(name, StringComparison.Ordinal)))
             && (filter?.FunctionCategory is not { } category || f.FunctionCategory == category)
             && (filter?.Page is null || f.Page == filter.Page)
             && !(project.OmitTerminalsFromFunctions && f is EObjects.Terminal))];
     }
     public Connection[] GetConnections(object? filter) => project.FindConnections?.Invoke() ?? [];
-    public Page[] GetPages(PagesFilter filter) => [.. project.Pages.Where(p => p.Name.StartsWith(filter.Name, StringComparison.OrdinalIgnoreCase))];
+    // A11: a full-name prefix matches page names case-sensitively.
+    public Page[] GetPages(PagesFilter filter) => [.. project.Pages.Where(p => p.Name.StartsWith(filter.Name, StringComparison.Ordinal))];
     public void Dispose() { }
 }
 

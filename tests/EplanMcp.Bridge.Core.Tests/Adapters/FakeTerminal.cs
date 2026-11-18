@@ -10,6 +10,7 @@ internal sealed class TerminalStrip() : Function(2)
     public void Create(Project project, MasterData.FunctionDefinition definition)
     {
         Assert.Equal(Eplan.EplApi.Base.Enums.FunctionCategory.TerminalDefText, definition.FunctionCategory);
+        // UNVERIFIED (2026-11-18 survey E4-20): A newly created unplaced strip is absent from subsequent navigator searches.
         DefinedIn = project;
     }
 }
