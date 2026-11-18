@@ -5,7 +5,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 internal static class TNodeFixture
 {
     // A75: PageReviewTests "cable" native helper read, page =GAA+A1&EFS1/103, node 423458.
-    internal static ConnectionCreatePlanner.Scene Scene() => new()
+    internal static PageScene Scene() => new()
     {
         Page = new()
         {

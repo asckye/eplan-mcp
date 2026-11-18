@@ -74,7 +74,7 @@
 | `TIMEOUT` | 页面对象过多，超过 20 秒 | 减少 `checks` 或分批 |
 
 ## 5. 实现要点
-- Bridge 只读：复用 `ConnectionCreatePlanner.Scene` 的读取（连接点、图形线段、逻辑连接、符号外框）、`CableDefinitionPlanner` 的电缆清单与 `DrawnPath`、中断点读取；不打开编辑器、不改当前项目。
+- Bridge 只读：复用 `PageScene` 的读取（连接点、图形线段、逻辑连接、符号外框）、`CableDefinitionPlanner` 的电缆清单与 `DrawnPath`、中断点读取；不打开编辑器、不改当前项目。
 - 检查规则写在 Bridge.Core 的纯函数里（输入是读回的场景），Small 测试可以覆盖每条规则；`expected` 的比较在 Host 中完成，复用验收驱动已有的比较逻辑，把它从测试代码移到产品代码。
 - 图片：用 `eplan_export_image` 已有的导出路径写到 Host 的临时目录，读入后删除；不写项目目录。
 - 预计 1–5 秒；超过 2 秒发进度通知，支持取消。

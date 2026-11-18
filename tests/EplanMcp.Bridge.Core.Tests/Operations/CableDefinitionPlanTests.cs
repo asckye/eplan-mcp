@@ -153,7 +153,7 @@ public sealed class CableDefinitionPlanTests : IDisposable
     private sealed class Creator(CableDefinitionFixture fixture) : IConnectionCreator, IConnectionGenerator
     {
         internal int Prepares { get; private set; }
-        public ConnectionCreatePlanner.Scene Read(string project, string page) => fixture.Base.Scene;
+        public PageScene Read(string project, string page) => fixture.Base.Scene;
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => fixture.Base.Read(projectPath, args);
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => throw new InvalidOperationException("No interruption scope expected.");
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => throw new InvalidOperationException("No transaction expected.");

@@ -5,7 +5,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>A75: retain detached evidence for every connection definition point, including failed owning-route lookups.</summary>
 internal static class ConnectionPointRouting
 {
-    internal static void Initialize(ConnectionCreatePlanner.Scene scene)
+    internal static void Initialize(PageScene scene)
     {
         scene.PointRoutes.Clear();
         scene.PointRouteGaps.Clear();
@@ -13,7 +13,7 @@ internal static class ConnectionPointRouting
         { scene.PointRouteGaps[FormattableString.Invariant($"{point.Locator.Type}/{point.Locator.Oid}")] = "no connection lists it"; }
     }
 
-    internal static void Record(ConnectionCreatePlanner.Scene scene, IEnumerable<string> owners, string? startKey, string? endKey)
+    internal static void Record(PageScene scene, IEnumerable<string> owners, string? startKey, string? endKey)
     {
         double[][]? path = null;
         string? reason = null;

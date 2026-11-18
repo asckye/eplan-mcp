@@ -9,8 +9,8 @@ internal static class PlacementMoveMismatch
 {
     private const int Limit = 20;
 
-    internal static BridgeErrorException Create(string check, string detail, ConnectionCreatePlanner.Scene before,
-        ConnectionCreatePlanner.Scene expected, ConnectionCreatePlanner.Scene actual, JObject[] observed, object expectedFact, object actualFact)
+    internal static BridgeErrorException Create(string check, string detail, PageScene before,
+        PageScene expected, PageScene actual, JObject[] observed, object expectedFact, object actualFact)
     {
         var added = new JArray();
         var removed = new JArray();

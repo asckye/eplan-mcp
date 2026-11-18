@@ -127,7 +127,7 @@ public sealed class PlacementUpdateTests
 
     private sealed class Mover : IConnectionCreator, IPlacementMover, ITransactionScopeFactory
     {
-        public ConnectionCreatePlanner.Scene Scene { get; private set; }
+        public PageScene Scene { get; private set; }
         public bool Fail { get; init; }
         public JObject Interruptions(string project, IReadOnlyList<string> pages) => new() { ["pages"] = new JArray(), ["points"] = new JArray() };
         public ITransactionScopeFactory PlacementTransactions(string project, bool undoCommitted = false) => this;
@@ -140,8 +140,8 @@ public sealed class PlacementUpdateTests
             if (property)
             { Scene.Page.Placements.Add(new() { Kind = "PropertyPlacement", Locator = new() { Project = path, Page = "P", Type = 4, Oid = 1, Digest = new string('b', 64) }, Parent = Scene.Page.Placements[0].Locator, Location = [20, 20], Bounds = [20, 20, 25, 25], Properties = new() { ["grouped"] = "false", ["property_id"] = "20214", ["property_index"] = "0", ["angle_deg"] = "0", ["docked"] = "false" } }); }
         }
-        public ConnectionCreatePlanner.Scene Read(string project, string page) => Clone(Scene);
-        public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
+        public PageScene Read(string project, string page) => Clone(Scene);
+        public Action Prepare(PageScene scene, JArray moves) => () =>
         {
             DrawingPlacement target = Scene.Page.Placements.Single(p => p.Locator.Digest == (string)moves[0]!["locator"]!["digest"]!);
             target.Location = moves[0]!["after"]!.Values<double>().ToArray();
@@ -164,14 +164,14 @@ public sealed class PlacementUpdateTests
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Injected failure after moving the first item."); }
         };
         public ITransactionScope Begin(string undoDescription) { Assert.Equal("AI: eplan_placement_update", undoDescription); Transactions++; return new Scope(this, Clone(Scene)); }
-        private sealed class Scope(Mover mover, ConnectionCreatePlanner.Scene before) : ITransactionScope
+        private sealed class Scope(Mover mover, PageScene before) : ITransactionScope
         {
             public void Commit() { }
             public void CloseUndo() => mover.Closed++;
             public void Rollback() => mover.Scene = before;
             public void Dispose() { }
         }
-        private static ConnectionCreatePlanner.Scene Clone(ConnectionCreatePlanner.Scene scene) => BridgeJson.FromObject(scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
+        private static PageScene Clone(PageScene scene) => BridgeJson.FromObject(scene).ToObject<PageScene>(BridgeJson.Serializer)!;
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => throw new NotSupportedException();
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => throw new NotSupportedException();

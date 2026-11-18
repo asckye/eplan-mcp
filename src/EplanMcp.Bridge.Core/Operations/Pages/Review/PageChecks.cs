@@ -12,7 +12,7 @@ internal static class PathStraddleCheck
 {
     public static void Run(ReviewContext c)
     {
-        ConnectionCreatePlanner.Scene scene = c.Scene;
+        PageScene scene = c.Scene;
         if (!c.Enabled("path_straddle") || scene.Page.ColumnEdges is not { Length: > 2 } edges)
         { return; }
         int Column(double x) => Array.FindLastIndex(edges, e => e <= x + 1e-6);

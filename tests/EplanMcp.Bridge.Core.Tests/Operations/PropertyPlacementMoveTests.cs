@@ -332,7 +332,7 @@ public sealed class PropertyPlacementMoveTests
 
     private sealed class Mover : IPlacementMover
     {
-        internal ConnectionCreatePlanner.Scene Scene { get; private set; }
+        internal PageScene Scene { get; private set; }
         internal DrawingPlacement Child => Scene.Page.Placements[1];
         internal JObject Request { get; }
         internal FakeTransactions Transactions { get; } = new();
@@ -359,12 +359,12 @@ public sealed class PropertyPlacementMoveTests
                 ["property_moves"] = new JArray(new JObject
                 { ["parent"] = BridgeJson.FromObject(fixture.Root.Locator), ["property_id"] = 20214, ["property_index"] = 0, ["x_mm"] = 50, ["y_mm"] = 50, ["angle_deg"] = angle })
             };
-            Transactions.Snapshot = () => { ConnectionCreatePlanner.Scene saved = Clone(); return () => Scene = saved; };
+            Transactions.Snapshot = () => { PageScene saved = Clone(); return () => Scene = saved; };
         }
-        private ConnectionCreatePlanner.Scene Clone() => BridgeJson.FromObject(Scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
-        public ConnectionCreatePlanner.Scene Read(string project, string page)
+        private PageScene Clone() => BridgeJson.FromObject(Scene).ToObject<PageScene>(BridgeJson.Serializer)!;
+        public PageScene Read(string project, string page)
         {
-            ConnectionCreatePlanner.Scene result = Clone();
+            PageScene result = Clone();
             if (Transactions.Calls.Contains("Commit") && !Transactions.Calls.Contains("Rollback"))
             {
                 if (Failure == "committed")
@@ -374,7 +374,7 @@ public sealed class PropertyPlacementMoveTests
             }
             return result;
         }
-        public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
+        public Action Prepare(PageScene scene, JArray moves) => () =>
         {
             Child.Location = moves[0]!["after"]!.Values<double>().ToArray();
             Child.Bounds = ReadbackBounds?.ToArray() ?? moves[0]!["bounds"]!.Values<double>().ToArray();

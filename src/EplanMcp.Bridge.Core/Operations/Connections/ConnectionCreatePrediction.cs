@@ -11,7 +11,7 @@ public static partial class ConnectionCreatePlanner
     /// One prediction, in the order <see cref="Run"/> lists: what the request asks for, then the page as it would be after it.
     /// Each step reads what the steps before it left in the fields; the order of the checks is the order of the refusals.
     /// </summary>
-    private sealed partial class Prediction(JObject input, Scene scene, ISymbolReader reader)
+    private sealed partial class Prediction(JObject input, PageScene scene, ISymbolReader reader)
     {
         private readonly List<double[][]> _paths = [];
         private readonly HashSet<string> _endpointPins = new(StringComparer.Ordinal);

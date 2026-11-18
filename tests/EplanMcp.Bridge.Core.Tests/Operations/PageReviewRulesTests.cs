@@ -81,7 +81,7 @@ public sealed partial class PageReviewRulesTests
     }
 
     private const string Page = "=F+A1/1";
-    private readonly ConnectionCreatePlanner.Scene _scene = new() { Project = new() { Name = "Line1" }, Page = new() { Page = Page, GridSize = 4 } };
+    private readonly PageScene _scene = new() { Project = new() { Name = "Line1" }, Page = new() { Page = Page, GridSize = 4 } };
     private readonly JObject _actual = JObject.Parse("""{"devices":[],"connections":[],"cables":[],"interruptions":[],"texts":[],"messages":[]}""");
     private JArray Review(string check, JObject? expected = null) => PageReviewRules.Check(_scene, _actual, new() { ["checks"] = new JArray(check), ["expected"] = expected });
     private DrawingPlacement Placement(long oid, double x = 8, string kind = "Function", string? name = null)
@@ -109,7 +109,7 @@ public sealed partial class PageReviewRulesTests
     public void LoggedDanglingFixture_OriginIsSkipped_RealEndRequiresRepair(bool repaired)
     {
         // A73: dynamicLines/423455 persists after repair; the segment supplies the actual BAT pin positions.
-        var scene = new ConnectionCreatePlanner.Scene { Project = new() { Name = "LargeWrite" }, Page = new() { Page = "=GAA+A1&EFS1/103", GridSize = 4 } };
+        var scene = new PageScene { Project = new() { Name = "LargeWrite" }, Page = new() { Page = "=GAA+A1&EFS1/103", GridSize = 4 } };
         scene.Graphical.Add([[0, 0], [200, 160]]);
         if (repaired)
         {

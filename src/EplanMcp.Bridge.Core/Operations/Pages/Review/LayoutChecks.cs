@@ -11,10 +11,10 @@ internal static class ReviewGuard
     /// The layout guard over every placement and wire of the page, as measured: nets come from shared wire ends, polylines
     /// are split into segments, and no free position is searched.
     /// </summary>
-    public static List<LayoutGuard.Violation> Violations(ConnectionCreatePlanner.Scene scene) =>
+    public static List<LayoutGuard.Violation> Violations(PageScene scene) =>
         LayoutGuard.Check(Model(scene, linesChanged: true), [.. scene.Page.Placements.Where(LayoutGuard.Positioned)], suggest: false, measured: true, searchViolations: false);
 
-    public static LayoutGuard.Model Model(ConnectionCreatePlanner.Scene scene, bool linesChanged)
+    public static LayoutGuard.Model Model(PageScene scene, bool linesChanged)
     {
         IEnumerable<LayoutGuard.Segment> segments = scene.Graphical.Select((s, i) => (s, i)).Where(x => x.s.Length >= 2).SelectMany(x => x.s.Zip(x.s.Skip(1), (a, b) => new LayoutGuard.Segment
         { Points = [a, b], Locator = new() { Oid = -x.i - 1 }, Changed = linesChanged }))
@@ -44,7 +44,7 @@ internal static class PlacementGridAndOverlapCheck
 
     public static void Run(ReviewContext c)
     {
-        ConnectionCreatePlanner.Scene scene = c.Scene;
+        PageScene scene = c.Scene;
         LayoutGuard.Model? guardModel = null;
         var searchTimer = System.Diagnostics.Stopwatch.StartNew();
         bool Expired() => searchTimer.Elapsed >= _freeSearchBudget;
@@ -83,7 +83,7 @@ internal static class PlacementGridAndOverlapCheck
         c.Schematic && p.Kind is not ("Text" or "Block") && q.Kind is not ("Text" or "Block") && !LayoutGuard.Related(p, q, c.Scene.Page.Placements) && !SameDevice(p, q)
         && Math.Min(a[2], b[2]) - Math.Max(a[0], b[0]) >= Deep(c.Scene) && Math.Min(a[3], b[3]) - Math.Max(a[1], b[1]) >= Deep(c.Scene);
 
-    private static double Deep(ConnectionCreatePlanner.Scene scene) => Math.Max(1, scene.Page.GridSize / 2);
+    private static double Deep(PageScene scene) => Math.Max(1, scene.Page.GridSize / 2);
 
     private static string Device(DrawingPlacement p) => p.Properties.TryGetValue("name", out string? name) ? name.Split(':')[0] : "";
 
@@ -98,7 +98,7 @@ internal static class PlacementGridAndOverlapCheck
     /// The nearest grid position where the symbol and its texts clear every rule, as the drawing tools search it; null when
     /// none is found or the shared search time is used up. Existing wires count as obstacles, not as changes.
     /// </summary>
-    private static double[]? FreePosition(ConnectionCreatePlanner.Scene scene, ref LayoutGuard.Model? model, DrawingPlacement symbol, Func<bool> expired)
+    private static double[]? FreePosition(PageScene scene, ref LayoutGuard.Model? model, DrawingPlacement symbol, Func<bool> expired)
     {
         if (expired() || !LayoutGuard.Positioned(symbol))
         { return null; }
@@ -115,7 +115,7 @@ internal static class OffAreaCheck
 {
     public static void Run(ReviewContext c)
     {
-        ConnectionCreatePlanner.Scene scene = c.Scene;
+        PageScene scene = c.Scene;
         // A145: the plot frame's evaluation grid keeps the title block, border and column header clear; without it the page edge.
         double[]? area = scene.Page.DrawingArea ?? (scene.Page.PageSize is { Length: 2 } size ? [0, 0, size[0], size[1]] : null);
         if (!c.Enabled("off_area") || area is null)
@@ -167,7 +167,7 @@ internal static class LayoutRuleChecks
 
     public static void Run(ReviewContext c)
     {
-        ConnectionCreatePlanner.Scene scene = c.Scene;
+        PageScene scene = c.Scene;
         // Model view pages are projections of the 3D layout and P&ID pages draw pipes and plant pictures: their outlines
         // cross by design (hundreds of findings on the official &ETC1 pages, A147), so the schematic rules do not apply.
         string[] guarded = !c.Schematic ? [] : [.. _guardChecks.Keys.Where(c.Enabled)];
@@ -193,7 +193,7 @@ internal static class LayoutRuleChecks
     /// Live 2026-11-16 (official =F+A2&amp;EFS1/1): PLC plug outlines of 44 x 34 mm cover the pins of their neighbours; a wire that
     /// ends on a pin inside the outline connects there and does not cross the symbol.
     /// </summary>
-    private static bool EndsInside(ConnectionCreatePlanner.Scene scene, LayoutGuard.Violation v)
+    private static bool EndsInside(PageScene scene, LayoutGuard.Violation v)
     {
         long line = v.Objects.Select(o => o.Oid).FirstOrDefault(oid => oid < 0);
         if (line == 0 || -line - 1 >= scene.Graphical.Count || v.Geometry.Length != 4)

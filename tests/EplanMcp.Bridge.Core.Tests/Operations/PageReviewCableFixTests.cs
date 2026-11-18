@@ -9,7 +9,7 @@ namespace EplanMcp.Bridge.Core.Tests.Operations;
 [Trait("Size", "Small")]
 public sealed class PageReviewCableFixTests
 {
-    private readonly ConnectionCreatePlanner.Scene _scene = TNodeFixture.Scene();
+    private readonly PageScene _scene = TNodeFixture.Scene();
     private readonly DrawingLocator _cable = new() { Project = "LargeWrite", Page = "=GAA+A1&EFS1/103", Type = 17, Oid = 69845, Digest = new string('a', 64) };
 
     private (JObject Actual, JObject Request) Evidence()

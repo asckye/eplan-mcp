@@ -37,7 +37,7 @@ public sealed class PlacementUpdateContractTests
         JsonElement example = JsonDocument.Parse(usage.ReplaceLineEndings("\n").Split("```json\n", StringSplitOptions.None)[1].Split("```", StringSplitOptions.None)[0]).RootElement;
         Assert.True(PropertyGetContractTests.Accepts(PlacementUpdateContract.Input, example, PlacementUpdateContract.Input));
         Assert.Equal((false, false, true, false), (PlacementUpdateContract.Definition.Annotations!.ReadOnlyHint, PlacementUpdateContract.Definition.Annotations.DestructiveHint, PlacementUpdateContract.Definition.Annotations.IdempotentHint, PlacementUpdateContract.Definition.Annotations.OpenWorldHint));
-        var scene = new ConnectionCreatePlanner.Scene
+        var scene = new PageScene
         {
             Complete = true,
             Project = new() { Name = "Line1", Path = "scratch-project" },

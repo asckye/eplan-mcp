@@ -162,7 +162,7 @@ public sealed class PotentialDefinitionTests
             }
         }
         public JObject Execute() => Assert.IsType<JObject>(new OperationContext("potential", true, null).Run(() => new ConnectionCreateExecuteOperation(this, this, Transactions).Execute(new JObject { ["request"] = _fixture.Request, ["fingerprint"] = _fixture.Plan()["fingerprint"] })));
-        public ConnectionCreatePlanner.Scene Read(string project, string page) => _fixture.Scene;
+        public PageScene Read(string project, string page) => _fixture.Scene;
         public List<SymbolSearchItem> Read(string project, SymbolSearchArgs args) => _fixture.Read(project, args);
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(_fixture.Scene);
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () => { };

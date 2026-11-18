@@ -24,7 +24,7 @@ A75/A73：移动闭包含 Cable 时，按移动前或移动后 reader 的 name �
 A72：属性放置读回附带 `properties.displayed_property_id`，用于区分只读计算值与可写文字。同名中断点组内确有位置改变时，只允许其 20201 块属性的 text/display 与摘要重算；点数、名称、父归属、位置、外框及其余属性仍精确核验。失败恢复仍须核对原始完整指纹。
 `show_page=true` 时返回 `pageShown`：开页成功为 true，失败为 false 并在 `hint` 说明原因；开页失败仍照常写入。省略或 false 时原结果不变。
 返回 `execution=not_started,dryRun=true,noOp`、栅格/`Page.Size`、闭包逐对象 locator/parent/before/requested/after/snapped/bounds，以及 `graphicalChanges` 的引脚/前后线段、`connectionChanges` 的受影响逻辑端点对和完整页 fingerprint。零增量/同绝对位置保持原位（即使原位不在栅格），或吸附回原位为 no-op，不创建事务。
-复用 `ConnectionCreatePlanner.Scene` 的完整页/引脚/自动线/逻辑端点证据；组归属进入绘图 digest。自动线按相向共线引脚预测，必须与读取基线相符，否则缺能力；逻辑端点列表标明受影响连接；移动保留逻辑端点，之后用 `eplan_connection_generate` 独立生成，其有效修改另占一个撤销步骤。页界不以图框尺寸兜底，属性文字完整外框也须在页内；移动后的对象碰撞拒绝。
+复用 `PageScene` 的完整页/引脚/自动线/逻辑端点证据；组归属进入绘图 digest。自动线按相向共线引脚预测，必须与读取基线相符，否则缺能力；逻辑端点列表标明受影响连接；移动保留逻辑端点，之后用 `eplan_connection_generate` 独立生成，其有效修改另占一个撤销步骤。页界不以图框尺寸兜底，属性文字完整外框也须在页内；移动后的对象碰撞拒绝。
 `INVALID_ARGUMENT` 带 JSON Pointer；旧 locator 或完整页 fingerprint 变化为 `PLAN_STALE`；组归属/范围/边界/连线无法证明为 `CAPABILITY_MISSING`。concise/detailed 为 5k/20k 预算，完整清单装不下就拒绝，不截断。预检失败为 `not_started`；执行失败已证明恢复为 `rolled_back`，否则 `OUTCOME_UNKNOWN/unknown`。
 ## 实现与验证
 `EplanPlacementMover.Prepare` 在事务创建之前检查移动根对象、所属项目和所在页的只读/写保护状态（api-notes A76），明确受保护时返回 `EPLAN_OPERATION_FAILED/not_started`，不移动任何对象。

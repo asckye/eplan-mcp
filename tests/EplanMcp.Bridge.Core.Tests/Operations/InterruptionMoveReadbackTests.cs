@@ -45,7 +45,7 @@ public sealed class InterruptionMoveReadbackTests
 
     private sealed class Mover : IPlacementMover
     {
-        internal ConnectionCreatePlanner.Scene Scene { get; private set; } = new()
+        internal PageScene Scene { get; private set; } = new()
         {
             Complete = true,
             Project = new() { Name = "LargeWrite", Path = "scratch-project" },
@@ -84,8 +84,8 @@ public sealed class InterruptionMoveReadbackTests
             Input = new() { ["project"] = Scene.Project.Name, ["page"] = Scene.Page.Page, ["moves"] = new JArray(new JObject { ["locator"] = BridgeJson.FromObject(Scene.Page.Placements[1].Locator), ["x_mm"] = 400, ["y_mm"] = 160 }) };
             Transactions.Snapshot = () => { var saved = Clone(Scene); return () => Scene = saved; };
         }
-        public ConnectionCreatePlanner.Scene Read(string project, string page) => Clone(Scene);
-        public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
+        public PageScene Read(string project, string page) => Clone(Scene);
+        public Action Prepare(PageScene scene, JArray moves) => () =>
         {
             Scene.Page.Placements[1].Location = [400, 160];
             Scene.Page.Placements[1].Bounds = [399, 159, 401, 161];
@@ -112,6 +112,6 @@ public sealed class InterruptionMoveReadbackTests
                     break;
             }
         };
-        private static ConnectionCreatePlanner.Scene Clone(ConnectionCreatePlanner.Scene scene) => BridgeJson.FromObject(scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
+        private static PageScene Clone(PageScene scene) => BridgeJson.FromObject(scene).ToObject<PageScene>(BridgeJson.Serializer)!;
     }
 }

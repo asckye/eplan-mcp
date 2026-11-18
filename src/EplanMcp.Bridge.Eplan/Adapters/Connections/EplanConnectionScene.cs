@@ -5,7 +5,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal static class EplanConnectionScene
 {
-    internal static void ReadPins(ConnectionCreatePlanner.Scene scene, IEnumerable<Placement> placements)
+    internal static void ReadPins(PageScene scene, IEnumerable<Placement> placements)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (SymbolReference reference in EplanNativePreconditions.Valid(placements).OfType<SymbolReference>())

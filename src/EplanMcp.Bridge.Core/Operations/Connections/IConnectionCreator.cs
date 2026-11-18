@@ -5,7 +5,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>A52/S40: discover before writing; read actual pin identities; compensate only the current project's placement.</summary>
 public interface IConnectionCreator : ISymbolReader
 {
-    public ConnectionCreatePlanner.Scene Read(string project, string page);
+    public PageScene Read(string project, string page);
     public LayoutGuard.Model Measure(string project, string page);
     public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null);
     public List<string?[]> Endpoints(string project, string page);

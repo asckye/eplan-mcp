@@ -321,7 +321,7 @@ public sealed class ConnectionCreateExecutionTests
         }
         public JObject Arguments() => new() { ["request"] = Fixture.Request, ["fingerprint"] = Fixture.Plan()["fingerprint"] };
         public JObject Execute() => Assert.IsType<JObject>(new OperationContext("test", true, null).Run(() => Operation.Execute(Arguments())));
-        public ConnectionCreatePlanner.Scene Read(string project, string page)
+        public PageScene Read(string project, string page)
         {
             OperationContext.Current.ThrowIfCancellationRequested();
             if (State == 0)

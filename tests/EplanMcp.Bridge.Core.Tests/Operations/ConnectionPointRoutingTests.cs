@@ -68,7 +68,7 @@ public sealed class ConnectionPointRoutingTests
         Assert.False(scene.PointRouteGaps.ContainsKey("59/69919"));
     }
 
-    private static ConnectionCreatePlanner.Scene Scene() => new()
+    private static PageScene Scene() => new()
     {
         Page = new() { Placements = [new() { Kind = "ConnectionDefinitionPoint", Locator = new() { Type = 59, Oid = 69919 } }] },
         Pins = new()
@@ -78,7 +78,7 @@ public sealed class ConnectionPointRoutingTests
         }
     };
 
-    private static void AddPaths(ConnectionCreatePlanner.Scene scene)
+    private static void AddPaths(PageScene scene)
     {
         scene.Page.Placements.Add(new() { Kind = "SymbolReference", Locator = new() { Type = 13, Oid = 3 } });
         scene.Page.Placements.Add(new() { Kind = "SymbolReference", Locator = new() { Type = 13, Oid = 4 } });

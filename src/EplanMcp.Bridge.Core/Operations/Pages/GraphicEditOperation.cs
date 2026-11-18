@@ -18,7 +18,7 @@ public class GraphicEditOperation(IGraphicEditor editor, ITransactionScopeFactor
         catch (BridgeErrorException error) { throw WriteArguments.NotStarted(error); }
         if (!execute)
         {
-            var scene = before["scene"]!.ToObject<ConnectionCreatePlanner.Scene>()!;
+            var scene = before["scene"]!.ToObject<PageScene>()!;
             return (JObject)Protocol.BridgeJson.FromObject(new WritePlan
             {
                 Project = scene.Project.Name,

@@ -20,7 +20,7 @@ internal sealed partial class EplanGraphicEditor : IGraphicEditor
         OpenProject target = ProjectResolver.Resolve(new EplanProjectCatalog().ListOpenProjects(), project);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(target.Path));
         Page nativePage = EplanDeviceReader.FindPage(finder, page) ?? throw new BridgeErrorException(ErrorReason.PageNotFound, "Select an existing page with eplan_page_list.");
-        ConnectionCreatePlanner.Scene scene = Optional(() => new EplanConnectionCreator(false).Read(target.Path, page)) ?? new ConnectionCreatePlanner.Scene
+        PageScene scene = Optional(() => new EplanConnectionCreator(false).Read(target.Path, page)) ?? new PageScene
         {
             Project = target,
             Page = new EplanDrawingReader().Read(target.Path, page)!,
@@ -53,7 +53,7 @@ internal sealed partial class EplanGraphicEditor : IGraphicEditor
         };
     }
 
-    private static JObject State(Placement native, ConnectionCreatePlanner.Scene scene, bool blockMember, int childIndex = -1)
+    private static JObject State(Placement native, PageScene scene, bool blockMember, int childIndex = -1)
     {
         DrawingPlacement? row = blockMember ? null : scene.Page.Placements.FirstOrDefault(p => p.Locator.Type == SnapshotCanonical.TypeOf(native.ToStringIdentifier()) && p.Locator.Oid == native.ObjectIdentifier && (childIndex < 0 ? p.Parent is null : p.Properties.TryGetValue("property_index", out string index) && index == childIndex.ToString(System.Globalization.CultureInfo.InvariantCulture)));
         var state = row is null ? new JObject { ["kind"] = native.GetType().Name, ["properties"] = new JObject() } : (JObject)BridgeJson.FromObject(row);
@@ -99,7 +99,7 @@ internal sealed partial class EplanGraphicEditor : IGraphicEditor
         return state;
     }
 
-    private static JObject Locator(Placement native, ConnectionCreatePlanner.Scene scene)
+    private static JObject Locator(Placement native, PageScene scene)
     {
         SnapshotObject identity = EplanObjectReader.Describe(native, native.GetType().Name.ToLowerInvariant());
         return (JObject)BridgeJson.FromObject(new DrawingLocator { Project = scene.Project.Path, Page = scene.Page.Page, Type = identity.Type, Oid = identity.Oid, Digest = SnapshotCanonical.Sha256(JsonConvert.SerializeObject(identity)) });

@@ -9,7 +9,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>A57: parent, displayed property and zero-based collection index identify each context text.</summary>
 internal static class PropertyPlacementMoves
 {
-    internal static JObject Plan(JObject input, ConnectionCreatePlanner.Scene scene, string? expected)
+    internal static JObject Plan(JObject input, PageScene scene, string? expected)
     {
         ConnectionCreatePlanner.Members(input, "", "project page property_moves", "dry_run snap_to_grid response_format layout_guard");
         LayoutGuard.Mode(input["layout_guard"]);

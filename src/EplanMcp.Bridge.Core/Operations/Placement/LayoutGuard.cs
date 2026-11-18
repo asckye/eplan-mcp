@@ -228,7 +228,7 @@ public static partial class LayoutGuard
         Location = p.Location.Length == 2 && p.Location.All(Finite) ? p.Location.Select((n, i) => n + delta[i]).ToArray() : p.Location,
         Bounds = ZeroBounds(p) ? p.Bounds : p.Bounds?.Select((n, i) => n + delta[i % 2]).ToArray()
     };
-    public static Model From(ConnectionCreatePlanner.Scene scene) => new() { Page = scene.Page, Config = scene.Layout, Pins = new(scene.Pins), PointRoutes = scene.PointRoutes, PointRouteGaps = scene.PointRouteGaps, Lines = scene.Graphical.Select((s, i) => new Segment { Points = s, Net = null, Locator = new() { Oid = -i - 1 } }).ToList() };
+    public static Model From(PageScene scene) => new() { Page = scene.Page, Config = scene.Layout, Pins = new(scene.Pins), PointRoutes = scene.PointRoutes, PointRouteGaps = scene.PointRouteGaps, Lines = scene.Graphical.Select((s, i) => new Segment { Points = s, Net = null, Locator = new() { Oid = -i - 1 } }).ToList() };
     public static DrawingPlacement Proposed(string kind, double[] location, double[]? bounds, int index = 0) => new() { Kind = kind, Location = location, Bounds = bounds, Locator = new() { Oid = -index - 1 } };
     public static bool Overlaps(double[] a, double[] b, double clearance = 0) => a[0] < b[2] + clearance && a[2] + clearance > b[0] && a[1] < b[3] + clearance && a[3] + clearance > b[1];
     private static bool Text(DrawingPlacement p) => p.Kind is "Text" or "PathText" or "PropertyPlacement" or "HyperLink" or "DimensionItem" or "DimensionCircle";

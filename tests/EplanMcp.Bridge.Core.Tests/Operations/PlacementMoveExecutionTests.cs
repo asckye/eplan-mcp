@@ -145,7 +145,7 @@ public sealed class PlacementMoveExecutionTests
     internal sealed class Mover : IPlacementMover
     {
         internal MoveFixture Fixture { get; } = new();
-        internal ConnectionCreatePlanner.Scene Scene { get; set; }
+        internal PageScene Scene { get; set; }
         internal FakeTransactions Transactions { get; } = new();
         internal string? Failure { get; set; }
         internal bool BreakRestore { get; set; }
@@ -160,13 +160,13 @@ public sealed class PlacementMoveExecutionTests
             Scene = Fixture.Scene;
             Transactions.Snapshot = () =>
             {
-                ConnectionCreatePlanner.Scene saved = Clone(Scene);
+                PageScene saved = Clone(Scene);
                 return () => { Scene = saved; if (BreakRestore) { Scene.Page.GridSize = 2; } };
             };
         }
-        public ConnectionCreatePlanner.Scene Read(string project, string page)
+        public PageScene Read(string project, string page)
         {
-            ConnectionCreatePlanner.Scene copy = Clone(Scene);
+            PageScene copy = Clone(Scene);
             if (Moves > 0 && Transactions.Calls.Contains("Commit") && !Transactions.Calls.Contains("Rollback"))
             {
                 copy.Graphical = Failure == "graphical" ? [] : [[[25, 20], [40, 20]]];
@@ -177,7 +177,7 @@ public sealed class PlacementMoveExecutionTests
             }
             return copy;
         }
-        public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
+        public Action Prepare(PageScene scene, JArray moves) => () =>
         {
             foreach (JToken row in moves)
             {
@@ -209,6 +209,6 @@ public sealed class PlacementMoveExecutionTests
         };
         internal JObject Execute(string? fingerprint = null, string tool = "eplan_placement_update") => Assert.IsType<JObject>(new OperationContext("move", true, null).Run(() => PlacementMoveExecution.Execute(this, Transactions, Fixture.Request,
             fingerprint ?? (string)PlacementMovePlanner.Plan(Fixture.Request.ToString(), Scene)["fingerprint"]!, tool)));
-        private static ConnectionCreatePlanner.Scene Clone(ConnectionCreatePlanner.Scene scene) => BridgeJson.FromObject(scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
+        private static PageScene Clone(PageScene scene) => BridgeJson.FromObject(scene).ToObject<PageScene>(BridgeJson.Serializer)!;
     }
 }

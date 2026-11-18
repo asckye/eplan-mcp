@@ -18,7 +18,7 @@ public interface IConnectionDefinitionPointWriter
 internal static class ConnectionDefinitionPoints
 {
     internal static JObject Plan(JToken value, string at, double[][] path, string from, string to, int index,
-        ConnectionCreatePlanner.Scene scene, List<SymbolSearchItem> variants, bool existing = false, Func<PartsDatabaseContent>? parts = null)
+        PageScene scene, List<SymbolSearchItem> variants, bool existing = false, Func<PartsDatabaseContent>? parts = null)
     {
         ConnectionCreatePlanner.Members(value, at, existing ? "kind position" : "", "position symbol symbol_variant function_definition representation_type type_code color cross_section designation part part_variant part_count");
         void Require(bool condition, string field, string message) => ConnectionCreatePlanner.Require(condition, at + field, message);

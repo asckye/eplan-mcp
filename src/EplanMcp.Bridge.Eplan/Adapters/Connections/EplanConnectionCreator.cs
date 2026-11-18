@@ -27,9 +27,9 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     private static double[] XY(PointD point) => [point.X, point.Y];
     private static IEnumerable<SymbolVariant> Variants(string project) => EplanProjects.ByPath(project).SymbolLibraries.Where(l => l.Name == "SPECIAL")
         .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP" or "ACBP" || s.Type == Symbol.SymbolType.InterruptionPoint).SelectMany(s => s.Variants);
-    public ConnectionCreatePlanner.Scene Read(string project, string page) => Read(project, page, []);
+    public PageScene Read(string project, string page) => Read(project, page, []);
     public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(new EplanConnectionCreator(false).Read(project, page));
-    internal ConnectionCreatePlanner.Scene Read(string project, string page, IReadOnlyList<Placement> created)
+    internal PageScene Read(string project, string page, IReadOnlyList<Placement> created)
     {
         OpenProject target = ProjectResolver.Resolve(new EplanProjectCatalog().ListOpenProjects(), project);
         if (target.ReadOnly && !allowReadOnly)
@@ -37,7 +37,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         Page native = Page(target.Path, page);
         PageDrawingGeometry geometry = EplanDrawingReader.Read(target.Path, page, created)!;
         geometry.Project = target.Path;
-        var scene = new ConnectionCreatePlanner.Scene { Project = target, Page = geometry, PageType = native.PageType.ToString(), Complete = true };
+        var scene = new PageScene { Project = target, Page = geometry, PageType = native.PageType.ToString(), Complete = true };
         foreach (Placement placement in EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)).GroupBy(p => p.ToStringIdentifier(), StringComparer.Ordinal).Select(g => g.First()))
         {
             if (!geometry.Placements.Any(p => p.Locator.Type == SnapshotCanonical.TypeOf(placement.ToStringIdentifier()) && p.Locator.Oid == placement.ObjectIdentifier))
@@ -68,7 +68,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         scene.ReadCables = () => ReadCables(target.Path, page, scene);
         return scene;
     }
-    private static CableDefinitionPlanner.Inventory ReadCables(string project, string page, ConnectionCreatePlanner.Scene scene)
+    private static CableDefinitionPlanner.Inventory ReadCables(string project, string page, PageScene scene)
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
         var inventory = new CableDefinitionPlanner.Inventory { Complete = true, Names = EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => f.Name).Where(n => !string.IsNullOrEmpty(n)).ToList() };
@@ -226,7 +226,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         foreach (string page in pages)
         {
             Page native = Page(project, page);
-            ConnectionCreatePlanner.Scene scene = Read(project, page);
+            PageScene scene = Read(project, page);
             if (!scene.Complete || scene.PageType != "Circuit" || scene.Page.PageSize is null || scene.Page.Placements.Count > 10000)
             { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Read a complete Circuit counterpart page within 10000 placements."); }
             scene.Pins.Clear();

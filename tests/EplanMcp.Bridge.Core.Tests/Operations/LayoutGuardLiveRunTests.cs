@@ -21,7 +21,7 @@ public sealed class LayoutGuardLiveRunTests
             Location = [x, 160],
             Bounds = [x - 1.25, 158.75, x + 1.25, 161.25]
         };
-        var scene = new ConnectionCreatePlanner.Scene
+        var scene = new PageScene
         {
             Page = new() { GridSize = 4, PageSize = [420, 297], Placements = [point] },
             PointRoutes = new() { [FormattableString.Invariant($"59/{oid}")] = [[[x, 128], [x, 192]]] }

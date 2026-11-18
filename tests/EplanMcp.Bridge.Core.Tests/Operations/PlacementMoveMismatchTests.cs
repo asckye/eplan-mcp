@@ -10,8 +10,8 @@ public sealed class PlacementMoveMismatchTests
     [Fact]
     public void CountMismatch_ListsAreLimitedToTwentyAndTotalsRetainEveryPlacement()
     {
-        var expected = new ConnectionCreatePlanner.Scene();
-        var actual = new ConnectionCreatePlanner.Scene();
+        var expected = new PageScene();
+        var actual = new PageScene();
         for (int i = 0; i < 22; i++)
         { actual.Page.Placements.Add(new() { Kind = "Text", Locator = new() { Type = 45, Oid = i + 100 } }); }
         for (int i = 0; i < 21; i++)

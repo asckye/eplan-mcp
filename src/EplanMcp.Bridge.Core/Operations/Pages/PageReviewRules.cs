@@ -28,9 +28,9 @@ public static class PageReviewRules
         EplanMessagesCheck.Run,
     ];
 
-    internal static List<LayoutGuard.Violation> GuardViolations(ConnectionCreatePlanner.Scene scene) => ReviewGuard.Violations(scene);
+    internal static List<LayoutGuard.Violation> GuardViolations(PageScene scene) => ReviewGuard.Violations(scene);
 
-    public static JArray Check(ConnectionCreatePlanner.Scene scene, JObject actual, JObject request)
+    public static JArray Check(PageScene scene, JObject actual, JObject request)
     {
         var context = new ReviewContext(scene, actual, request);
         foreach (Action<ReviewContext> check in _checks)

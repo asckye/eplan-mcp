@@ -16,7 +16,7 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
         if (!execute)
         {
-            var scene = before["scene"]!.ToObject<ConnectionCreatePlanner.Scene>()!;
+            var scene = before["scene"]!.ToObject<PageScene>()!;
             var changes = (bool)plan["noOp"]! ? new List<PlannedChange>() : plan["predicted"]!.Select(p => new PlannedChange { Action = "edit", Kind = "placement", Name = scene.Page.Page + ":" + PlacementEditPlanner.Id(p["locator"]!), Property = (string)plan["operation"]!, NewValue = "position=" + p["location"]!.ToString(Formatting.None) + "; angle(rad)=" + p["angle"] + "; tag=" + p["properties"]?["name"] }).ToList();
             changes.AddRange(plan["removedConnections"]!.Select(c => new PlannedChange { Action = "delete", Kind = "connection", Name = PlacementEditPlanner.Id(c), OldValue = c.ToString(Formatting.None) }));
             return (JObject)Bridge.Core.Protocol.BridgeJson.FromObject(new WritePlan { Project = scene.Project.Name, ProjectPath = scene.Project.Path, Fingerprint = (string)plan["fingerprint"]!, Changes = changes, Details = new() { ["preview"] = Public(plan).ToString(Formatting.None) } });

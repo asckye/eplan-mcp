@@ -33,11 +33,11 @@ public static class CableDefinitionPlanner
     public const string Colours = "BK BN RD OG YE GN BU VT GY WH PK TQ GNYE";
 
     /// <summary>The single drawn path between two pins through corner or T-node pin positions within their outlines; null when none or several.</summary>
-    public static double[][]? DrawnPath(ConnectionCreatePlanner.Scene scene, double[] from, double[] to)
+    public static double[][]? DrawnPath(PageScene scene, double[] from, double[] to)
         => DrawnPath(scene, from, to, out _);
 
     /// <summary>Reports the paths found by the bounded search, which stops once uniqueness is disproved.</summary>
-    public static double[][]? DrawnPath(ConnectionCreatePlanner.Scene scene, double[] from, double[] to, out int pathCount)
+    public static double[][]? DrawnPath(PageScene scene, double[] from, double[] to, out int pathCount)
     {
         static string P(double[] p) => FormattableString.Invariant($"{p[0]:R},{p[1]:R}");
         // A75 live helper read: a T node's branch pin is offset from its two trunk pins.
@@ -115,7 +115,7 @@ public static class CableDefinitionPlanner
         }
     }
 
-    internal static string Add(JObject input, Scene scene, JObject result, Func<JToken?, string, double[]> point)
+    internal static string Add(JObject input, PageScene scene, JObject result, Func<JToken?, string, double[]> point)
     {
         var items = (JArray)input["items"]!;
         if (!items.Any(i => (string?)i["kind"] == "cable_definition"))
@@ -127,7 +127,7 @@ public static class CableDefinitionPlanner
     /// One call's cable definitions: the request is read item by item, every core is bound to exactly one wire of this
     /// call or of the inventory, and each definition line must cross exactly its own cores once.
     /// </summary>
-    private sealed class Addition(JObject input, Scene scene, JObject result, Func<JToken?, string, double[]> point)
+    private sealed class Addition(JObject input, PageScene scene, JObject result, Func<JToken?, string, double[]> point)
     {
         private readonly JArray _items = (JArray)input["items"]!;
         private readonly JArray _definitions = new();

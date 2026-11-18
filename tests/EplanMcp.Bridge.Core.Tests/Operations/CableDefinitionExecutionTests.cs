@@ -279,7 +279,7 @@ public sealed class CableDefinitionExecutionTests
             if (Failure == "cancel" && stage == "cores")
             { OperationContext.Current.Cancel(); }
         }
-        public ConnectionCreatePlanner.Scene Read(string project, string page)
+        public PageScene Read(string project, string page)
         {
             Assert.False(_abortedCreation);
             if (Events.Contains("undo", StringComparer.Ordinal))
@@ -360,7 +360,7 @@ public sealed class CableDefinitionExecutionTests
         }
         private void RestoreContent()
         {
-            ConnectionCreatePlanner.Scene scene = Fixture.Base.Scene;
+            PageScene scene = Fixture.Base.Scene;
             if (RenumberOnUndo)
             {
                 string? Pin(string? key) => key is null ? null : string.Join("/", key.Split('/').Select((part, i) => i == 1 ? (int.Parse(part, System.Globalization.CultureInfo.InvariantCulture) + 100).ToString(System.Globalization.CultureInfo.InvariantCulture) : part));

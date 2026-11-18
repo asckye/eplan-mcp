@@ -12,7 +12,7 @@ public static partial class PlacementMovePlanner
     /// One move prediction, in the order <see cref="Run"/> lists: the request, the targets and what follows them, the
     /// layout after the move, then the autoconnect lines that change. The order of the checks is the order of the refusals.
     /// </summary>
-    private sealed class Prediction(JObject input, ConnectionCreatePlanner.Scene scene)
+    private sealed class Prediction(JObject input, PageScene scene)
     {
         private readonly List<(DrawingPlacement Row, double[] Requested)> _targets = [];
         private readonly Dictionary<DrawingPlacement, double[]> _offsets = [];

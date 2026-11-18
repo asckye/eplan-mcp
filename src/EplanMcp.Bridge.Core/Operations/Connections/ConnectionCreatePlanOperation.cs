@@ -10,7 +10,7 @@ public sealed class ConnectionCreatePlanOperation(IConnectionCreator creator) : 
     public override string Name => OperationNames.ConnectionCreatePlan;
     protected override WritePlan Execute(JObject args)
     {
-        ConnectionCreatePlanner.Scene scene = creator.Read((string?)args["project"] ?? "", (string?)args["page"] ?? "");
+        PageScene scene = creator.Read((string?)args["project"] ?? "", (string?)args["page"] ?? "");
         bool moving = args.ContainsKey("moves") || args.ContainsKey("property_moves");
         if (moving)
         { scene.SymbolBounds.Clear(); }

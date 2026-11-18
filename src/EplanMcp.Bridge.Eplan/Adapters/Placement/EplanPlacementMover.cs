@@ -11,8 +11,8 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>A54: line endpoints move together; A57 property text is selected by parent, property and collection slot.</summary>
 internal sealed class EplanPlacementMover : IPlacementMover
 {
-    public ConnectionCreatePlanner.Scene Read(string project, string page) => new EplanConnectionCreator(readSymbolBounds: false).Read(project, page);
-    public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves)
+    public PageScene Read(string project, string page) => new EplanConnectionCreator(readSymbolBounds: false).Read(project, page);
+    public Action Prepare(PageScene scene, JArray moves)
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(scene.Project.Path));

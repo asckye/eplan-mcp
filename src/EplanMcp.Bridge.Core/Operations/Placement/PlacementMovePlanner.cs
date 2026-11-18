@@ -7,14 +7,14 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>A54/A57: read-only absolute planning; property children share their parent's identifier, never its digest.</summary>
 public static partial class PlacementMovePlanner
 {
-    public static JObject Plan(string json, ConnectionCreatePlanner.Scene scene, string? expectedFingerprint = null)
+    public static JObject Plan(string json, PageScene scene, string? expectedFingerprint = null)
     {
         try
         { return Predict(json, scene, expectedFingerprint); }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
     }
 
-    private static JObject Predict(string json, ConnectionCreatePlanner.Scene scene, string? expectedFingerprint)
+    private static JObject Predict(string json, PageScene scene, string? expectedFingerprint)
     {
         Require(System.Text.Encoding.UTF8.GetByteCount(json) <= 256 * 1024, "", "Keep requests within 256 KiB.");
         JObject input;

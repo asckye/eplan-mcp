@@ -26,7 +26,7 @@ public sealed class PlacementMoverTests
         var transactions = new FakeTransactions();
         try
         {
-            var scene = new ConnectionCreatePlanner.Scene { Project = new() { Path = "project" }, Page = new() { Page = page.Name } };
+            var scene = new PageScene { Project = new() { Path = "project" }, Page = new() { Page = page.Name } };
             BridgeError error = Assert.Throws<BridgeErrorException>(() =>
             {
                 Action move = new EplanPlacementMover().Prepare(scene, new JArray(Row(text, null, [50, 55])));
@@ -60,7 +60,7 @@ public sealed class PlacementMoverTests
             var reader = new EplanDrawingReader();
             PageDrawingGeometry before = reader.Read("project", page.Name)!;
             before.Project = "project";
-            var scene = new ConnectionCreatePlanner.Scene { Project = new() { Path = "project" }, Page = before, Complete = true };
+            var scene = new PageScene { Project = new() { Path = "project" }, Page = before, Complete = true };
             JObject request = new()
             {
                 ["project"] = "project",
@@ -181,7 +181,7 @@ public sealed class PlacementMoverTests
         EplanProjects.Project = new(page);
         try
         {
-            var scene = new ConnectionCreatePlanner.Scene { Project = new() { Path = "project" }, Page = new() { Page = page.Name } };
+            var scene = new PageScene { Project = new() { Path = "project" }, Page = new() { Page = page.Name } };
             var rows = new JArray();
             foreach (Placement root in new Placement[] { symbol, text, line, rectangle })
             {

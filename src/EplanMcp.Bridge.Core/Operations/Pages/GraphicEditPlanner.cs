@@ -35,7 +35,7 @@ public static class GraphicEditPlanner
         Require(input["dry_run"] is null || input["dry_run"]!.Type == JTokenType.Boolean, "dry_run must be boolean.");
         Require(input["response_format"] is null || input["response_format"]!.Type == JTokenType.String && (string?)input["response_format"] is "concise" or "detailed", "Use concise or detailed.");
         Require(input["locators"] is JArray { Count: >= 1 and <= 50 }, "Supply 1..50 locators from eplan_object_find.");
-        var scene = before["scene"]!.ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
+        var scene = before["scene"]!.ToObject<PageScene>(BridgeJson.Serializer)!;
         Require((string?)input["page"] == scene.Page.Page && ((string?)input["project"] == scene.Project.Name || ProjectResolver.SamePath((string)input["project"]!, scene.Project.Path)), "All locators must belong to the explicit project/page.");
         var selected = new JArray(input["locators"]!.Select(l => Resolve(l, before).DeepClone()));
         Require(selected.Select(o => Id(o["locator"]!)).Distinct(StringComparer.Ordinal).Count() == selected.Count, "Remove duplicate locators.");

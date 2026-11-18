@@ -9,7 +9,7 @@ public static class InterruptionPointPlanning
     private static readonly string[] _identity = ["page", "name", "position", "pin", "direction"];
     public static string Endpoint(string page, string name) => "<interruption:" + new JArray(page, name).ToString(Formatting.None) + ">";
     public static string[] Pages(JObject plan) => plan["affectedPages"]!.Values<string>().Select(p => p!).ToArray();
-    public static void Plan(JObject plan, ConnectionCreatePlanner.Scene scene, IConnectionCreator reader)
+    public static void Plan(JObject plan, PageScene scene, IConnectionCreator reader)
     {
         JToken[] requested = plan["symbols"]!.Where(s => s["interruption"]?["counterpart_pages"] is not null).ToArray();
         string[] pages = requested.SelectMany(s => s["interruption"]!["counterpart_pages"]!.Values<string>()).Select(p => p!).Append(scene.Page.Page).Distinct(StringComparer.Ordinal).OrderBy(p => p, StringComparer.Ordinal).ToArray();

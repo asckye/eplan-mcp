@@ -304,7 +304,7 @@ public sealed class CableDefinitionPlannerTests
     [Fact]
     public void DrawnPath_RunsThroughNodePinsOnly_AndIsNullWhenAmbiguous()
     {
-        var scene = new EplanMcp.Bridge.Core.Operations.ConnectionCreatePlanner.Scene();
+        var scene = new EplanMcp.Bridge.Core.Operations.PageScene();
         scene.Page.Placements.Add(new() { Kind = "SymbolReference", Locator = new() { Type = 42, Oid = 9 } });
         scene.Pins["17/1/0"] = new() { Location = [10, 10], Direction = "Up" };
         scene.Pins["17/2/0"] = new() { Location = [30, 30], Direction = "Left" };

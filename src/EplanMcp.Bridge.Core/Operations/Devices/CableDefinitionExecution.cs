@@ -7,7 +7,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 internal static class CableDefinitionExecution
 {
     internal static JObject Run(IConnectionCreator creator, IConnectionGenerator generator, ITransactionScopeFactory transactions,
-        ConnectionCreatePlanner.Scene scene, JObject input, JObject plan)
+        PageScene scene, JObject input, JObject plan)
     {
         string project = scene.Project.Path, page = scene.Page.Page;
         if (creator is not ICableDefinitionWriter writer || plan["interruptionScope"] is not null)

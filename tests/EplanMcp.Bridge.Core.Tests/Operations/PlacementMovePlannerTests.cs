@@ -63,7 +63,7 @@ public sealed class PlacementMovePlannerTests
     public void SceneWithACableReader_SerializesWithoutFollowingTheReader()
     {
         // The reader's closure refers back to the scene; serializing the scene must not follow it (regression 2026-10-31).
-        var scene = new ConnectionCreatePlanner.Scene();
+        var scene = new PageScene();
         scene.ReadCables = () => throw new InvalidOperationException(scene.PageType);
         Newtonsoft.Json.Linq.JToken json = EplanMcp.Bridge.Core.Protocol.BridgeJson.FromObject(scene);
         Assert.Null(json["readCables"]);
@@ -406,7 +406,7 @@ public sealed class PlacementMovePlannerTests
 
 internal sealed class MoveFixture
 {
-    internal ConnectionCreatePlanner.Scene Scene { get; } = new()
+    internal PageScene Scene { get; } = new()
     {
         Complete = true,
         Project = new() { Name = "Line1", Path = "scratch-project" },

@@ -10,7 +10,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReader
 {
-    public (ConnectionCreatePlanner.Scene Scene, JObject Actual) Read(string project, string page, JObject request)
+    public (PageScene Scene, JObject Actual) Read(string project, string page, JObject request)
     {
         OpenProject target = ProjectResolver.Resolve(new EplanProjectCatalog().ListOpenProjects(), project);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(target.Path));

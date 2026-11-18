@@ -15,7 +15,7 @@ internal sealed class PlacementEditFixture : IPlacementEditor, ITransactionScope
     public int Backups { get; private set; }
     public PlacementEditFixture(string path = "project")
     {
-        var scene = new ConnectionCreatePlanner.Scene
+        var scene = new PageScene
         {
             Complete = true,
             Project = new() { Name = "Line1", Path = path },
@@ -57,8 +57,8 @@ internal sealed class PlacementEditFixture : IPlacementEditor, ITransactionScope
         ["locators"] = new JArray((indices.Length == 0 ? [0] : indices).Select(i => Data["objects"]![i]!["locator"]!.DeepClone()))
     };
     public JObject Inspect(string project, string page, bool symbolEdit = false) => (JObject)Data.DeepClone();
-    public ConnectionCreatePlanner.Scene Read(string project, string page) => Data["scene"]!.ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
-    public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
+    public PageScene Read(string project, string page) => Data["scene"]!.ToObject<PageScene>(BridgeJson.Serializer)!;
+    public Action Prepare(PageScene scene, JArray moves) => () =>
     {
         foreach (JToken move in moves)
         {

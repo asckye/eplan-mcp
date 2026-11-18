@@ -78,7 +78,7 @@ public sealed class DynamicConnectionLineLayoutTests
         Bounds = [111.75, 155.75, 120.25, 164.25]
     };
 
-    private static ConnectionCreatePlanner.Scene Scene() => new()
+    private static PageScene Scene() => new()
     {
         Page = new()
         {

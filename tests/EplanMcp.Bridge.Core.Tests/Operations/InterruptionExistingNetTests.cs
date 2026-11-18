@@ -113,7 +113,7 @@ public sealed class InterruptionExistingNetTests
         private readonly List<double[][]> _added = [];
         internal Rehearsal()
         {
-            ConnectionCreatePlanner.Scene scene = Fixture.Scene;
+            PageScene scene = Fixture.Scene;
             scene.Pins.Clear();
             scene.Page.Placements.Clear();
             scene.Page.PageSize = [500, 300];
@@ -198,7 +198,7 @@ public sealed class InterruptionExistingNetTests
         internal JObject Plan() => ConnectionCreatePlanner.Plan(Fixture.Request.ToString(), Fixture.Scene, this);
         internal JObject Execute() => Assert.IsType<JObject>(new OperationContext("live-rehearsal", true, null).Run(() =>
             new ConnectionCreateExecuteOperation(this, this, Transactions).Execute(new JObject { ["request"] = Fixture.Request.DeepClone(), ["fingerprint"] = Plan()["fingerprint"] })));
-        public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Fixture.Scene : new() { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = [.. Fixture.Scene.Graphical, .. _added] };
+        public PageScene Read(string project, string page) => State == 0 ? Fixture.Scene : new() { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = [.. Fixture.Scene.Graphical, .. _added] };
         public List<SymbolSearchItem> Read(string projectPath, SymbolSearchArgs args) => Fixture.Read(projectPath, args);
         public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(Read(project, page));
         public Action Prepare(string project, string page, JArray symbols, Action<LayoutGuard.Model>? verifyLayout = null) => () =>

@@ -67,7 +67,7 @@ public sealed class PlacementMoveWireAnnotationTests
     {
         var fixture = new Fixture("Cable");
         LayoutGuard.Model before = LayoutGuard.From(fixture.Scene);
-        var measuredScene = BridgeJson.FromObject(fixture.Scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
+        var measuredScene = BridgeJson.FromObject(fixture.Scene).ToObject<PageScene>(BridgeJson.Serializer)!;
         measuredScene.Page.Placements[^1] = LayoutGuard.Shift(fixture.Target, [0, 64]);
         LayoutGuard.Model measured = LayoutGuard.From(measuredScene);
         Assert.Contains(LayoutGuard.AfterWriting(before, measured), s => s.StartsWith("Layout after write: R1-R9", StringComparison.Ordinal));
@@ -107,7 +107,7 @@ public sealed class PlacementMoveWireAnnotationTests
 
     private sealed class Fixture
     {
-        internal ConnectionCreatePlanner.Scene Scene { get; } = TNodeFixture.Scene();
+        internal PageScene Scene { get; } = TNodeFixture.Scene();
         internal DrawingPlacement Target { get; }
         internal JObject Request { get; }
 

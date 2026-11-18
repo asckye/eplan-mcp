@@ -10,7 +10,7 @@ public static class PlacementMoveExecution
 {
     public static JObject Execute(IPlacementMover mover, ITransactionScopeFactory transactions, JObject input, string fingerprint, string tool = "eplan_placement_update")
     {
-        ConnectionCreatePlanner.Scene scene;
+        PageScene scene;
         try
         { scene = mover.Read((string?)input["project"] ?? "", (string?)input["page"] ?? ""); }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
@@ -19,8 +19,8 @@ public static class PlacementMoveExecution
         if ((bool)plan["noOp"]!)
         { return plan; }
         Action move = mover.Prepare(scene, (JArray)plan["moves"]!);
-        ConnectionCreatePlanner.Scene Read() => mover.Read(scene.Project.Path, scene.Page.Page);
-        var expected = BridgeJson.FromObject(scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
+        PageScene Read() => mover.Read(scene.Project.Path, scene.Page.Page);
+        var expected = BridgeJson.FromObject(scene).ToObject<PageScene>(BridgeJson.Serializer)!;
         JToken[] rows = plan["moves"]!.ToArray();
         LayoutGuard.Model beforeLayout = LayoutGuard.From(scene);
         beforeLayout.SetsTextAttribute = LayoutGuard.TextMoveIntent(scene.Page.Placements.Where(p => (input.ContainsKey("property_moves") || p.Parent is null)
@@ -56,7 +56,7 @@ public static class PlacementMoveExecution
             r["locator"]!.ToObject<DrawingLocator>(BridgeJson.Serializer)!, p.Locator) && !JToken.DeepEquals(r["before"], r["after"]))).ToArray();
         void Verify(bool committed)
         {
-            ConnectionCreatePlanner.Scene actual = Read();
+            PageScene actual = Read();
             // A75: points can be added before old crossings/core membership are reconciled by generation.
             DrawingPlacement[] cables = movedCables.Concat(actual.Page.Placements.Where(p => p.Kind == "Cable"
                 && movedCables.Any(c => c.Locator.Type == p.Locator.Type && c.Locator.Oid == p.Locator.Oid))).ToArray();

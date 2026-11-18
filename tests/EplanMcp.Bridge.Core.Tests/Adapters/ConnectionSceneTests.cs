@@ -37,7 +37,7 @@ public sealed class ConnectionSceneTests
             GraphicalConnectionPoints = [new() { Index = 0 }, new() { Index = 0 }],
         };
         var device = new Function(2) { Location = new(24, 8), GraphicalConnectionPoints = [new() { Index = 0, Direction = "Left" }] };
-        var scene = new ConnectionCreatePlanner.Scene();
+        var scene = new PageScene();
         EplanConnectionScene.ReadPins(scene, [point, device]);
         Assert.Equal("17/2/0", Assert.Single(scene.Pins).Key);
     }
@@ -54,7 +54,7 @@ public sealed class ConnectionSceneTests
         pole.GraphicalConnections = [line];
         drive.GraphicalConnections = [line];
         port.GraphicalConnections = [touch];
-        var scene = new ConnectionCreatePlanner.Scene();
+        var scene = new PageScene();
 
         EplanConnectionScene.ReadPins(scene, [pole, drive, port]);
 
@@ -70,7 +70,7 @@ public sealed class ConnectionSceneTests
         {
             GraphicalConnectionPoints = [new() { Index = 0, Location = new(120, 160) }, new() { Index = 0, Location = new(200, 160) }],
         };
-        var scene = new ConnectionCreatePlanner.Scene { Page = new() { GridSize = 4 }, Graphical = [[[120, 160], [200, 160]]] };
+        var scene = new PageScene { Page = new() { GridSize = 4 }, Graphical = [[[120, 160], [200, 160]]] };
         EplanConnectionScene.ReadPins(scene, [wire]);
         Assert.Empty(scene.Pins);
         JArray issues = PageReviewRules.Check(scene, JObject.Parse("""{"connections":[]}"""), new() { ["checks"] = new JArray("dangling_ends") });

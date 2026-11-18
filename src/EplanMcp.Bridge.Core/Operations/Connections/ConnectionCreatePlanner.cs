@@ -8,25 +8,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>A52: complete-page prediction before either committed placement or generation.</summary>
 public static partial class ConnectionCreatePlanner
 {
-    public sealed class Scene
-    {
-        public OpenProject Project { get; set; } = new();
-        public PageDrawingGeometry Page { get; set; } = new();
-        public string PageType { get; set; } = "Circuit";
-        public bool Complete { get; set; }
-        public Dictionary<string, SymbolConnectionPoint> Pins { get; set; } = [];
-        public Dictionary<string, List<double[][]>> PointRoutes { get; set; } = [];
-        public Dictionary<string, string> PointRouteGaps { get; set; } = [];
-        public List<double[][]> Graphical { get; set; } = [];
-        public List<ConnectionRecord> Logical { get; set; } = [];
-        public Dictionary<string, double[]> SymbolBounds { get; set; } = [];
-        public LayoutGuard.Options Layout { get; set; } = new();
-        // A reader, not scene data: plans that serialize the scene (placement move) must not follow its closure back here.
-        [Newtonsoft.Json.JsonIgnore]
-        public Func<CableDefinitionPlanner.Inventory>? ReadCables { get; set; }
-    }
-
-    public static JObject Plan(string json, Scene scene, ISymbolReader reader, string? expectedFingerprint = null)
+    public static JObject Plan(string json, PageScene scene, ISymbolReader reader, string? expectedFingerprint = null)
     {
         try
         { return Predict(json, scene, reader, expectedFingerprint); }
@@ -39,7 +21,7 @@ public static partial class ConnectionCreatePlanner
         }
     }
 
-    private static JObject Predict(string json, Scene scene, ISymbolReader reader, string? expectedFingerprint)
+    private static JObject Predict(string json, PageScene scene, ISymbolReader reader, string? expectedFingerprint)
         => new Prediction(Parse(json), scene, reader).Run(expectedFingerprint);
 
     private static JObject Parse(string json)
@@ -82,7 +64,7 @@ public static partial class ConnectionCreatePlanner
 
     private static string Opposite(string d) => d switch { "Up" => "Down", "Down" => "Up", "Left" => "Right", "Right" => "Left", _ => "" };
     private static string SegmentKey(double[][] segment) => string.Join("|", segment.Select(FormatPoint).OrderBy(p => p, StringComparer.Ordinal));
-    internal static IEnumerable<double[][]> ExpectedGraphical(Scene scene, JObject plan)
+    internal static IEnumerable<double[][]> ExpectedGraphical(PageScene scene, JObject plan)
     {
         var split = new HashSet<string>(plan["splitSegments"]?.Select(s => SegmentKey(s["segment"]!.ToObject<double[][]>()!)) ?? [], StringComparer.Ordinal);
         return scene.Graphical.Where(s => !split.Contains(SegmentKey(s))).Concat(plan["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!);
@@ -100,7 +82,7 @@ public static partial class ConnectionCreatePlanner
     internal static bool Intersects(double[][] a, double[][] b) => Box(a)[0] <= Box(b)[2] && Box(a)[2] >= Box(b)[0] && Box(a)[1] <= Box(b)[3] && Box(a)[3] >= Box(b)[1];
     internal static void Require(bool valid, string at, string message) { if (!valid) { throw WriteArguments.Invalid([at + ": " + message]); } }
     // Names the first failed scene check so the caller can tell which page object blocks drawing.
-    private static string? SceneGap(Scene scene, bool checkPins = true)
+    private static string? SceneGap(PageScene scene, bool checkPins = true)
     {
         if (!scene.Complete)
         { return "a page placement has no drawing record"; }

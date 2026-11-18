@@ -610,7 +610,7 @@ public sealed class ConnectionDefinitionPointTests
         }
         public JObject Execute() => Assert.IsType<JObject>(new OperationContext("definition-test", true, null).Run(() => new ConnectionCreateExecuteOperation(this, this, Transactions)
             .Execute(new JObject { ["request"] = Fixture.Request, ["fingerprint"] = Fixture.Plan()["fingerprint"] })));
-        public ConnectionCreatePlanner.Scene Read(string project, string page) => State == 0 ? Fixture.Scene : new()
+        public PageScene Read(string project, string page) => State == 0 ? Fixture.Scene : new()
         { Page = Fixture.Scene.Page, Layout = Fixture.Scene.Layout, Pins = Fixture.Scene.Pins, Graphical = Drawn ?? [.. Fixture.Scene.Graphical, .. Fixture.Plan()["graphicalAutoconnect"]!.ToObject<List<double[][]>>()!] };
         public PartsDatabaseContent Read(string? language, IReadOnlyList<string>? buildNumbers = null) => Fixture.Read(language);
         public List<SymbolSearchItem> Read(string project, SymbolSearchArgs args) => Fixture.Read(project, args);

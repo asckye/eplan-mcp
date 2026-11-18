@@ -217,7 +217,7 @@ public sealed class PlacementMoveCablePointTests
 
     private sealed class Mover : IPlacementMover
     {
-        internal ConnectionCreatePlanner.Scene Scene { get; private set; } = TNodeFixture.Scene();
+        internal PageScene Scene { get; private set; } = TNodeFixture.Scene();
         internal FakeTransactions Transactions { get; } = new();
         internal string? Failure { get; init; }
         internal bool AfterCommit { get; init; }
@@ -279,7 +279,7 @@ public sealed class PlacementMoveCablePointTests
             };
             Transactions.Snapshot = () =>
             {
-                ConnectionCreatePlanner.Scene saved = Clone(Scene);
+                PageScene saved = Clone(Scene);
                 return () => { Scene = saved; _moved = false; };
             };
         }
@@ -303,15 +303,15 @@ public sealed class PlacementMoveCablePointTests
             Properties = new() { ["property_id"] = "31004", ["property_index"] = "0", ["grouped"] = "false" }
         };
 
-        public ConnectionCreatePlanner.Scene Read(string project, string page)
+        public PageScene Read(string project, string page)
         {
-            ConnectionCreatePlanner.Scene copy = Clone(Scene);
+            PageScene copy = Clone(Scene);
             if (_moved && AfterCommit && Transactions.Calls.Contains("Commit"))
             { Inject(copy); }
             return copy;
         }
 
-        public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => () =>
+        public Action Prepare(PageScene scene, JArray moves) => () =>
         {
             foreach (JToken row in moves)
             {
@@ -331,7 +331,7 @@ public sealed class PlacementMoveCablePointTests
             { Inject(Scene); }
         };
 
-        private void Inject(ConnectionCreatePlanner.Scene scene)
+        private void Inject(PageScene scene)
         {
             DrawingPlacement point = scene.Page.Placements.Single(p => p.Locator.Oid == 69846);
             switch (Failure)
@@ -396,6 +396,6 @@ public sealed class PlacementMoveCablePointTests
 
         internal JObject Plan() => PlacementMovePlanner.Plan(Request.ToString(), Scene);
         internal JObject Execute() => Assert.IsType<JObject>(new OperationContext("cable-move", true, null).Run(() => PlacementMoveExecution.Execute(this, Transactions, Request, (string)Plan()["fingerprint"]!)));
-        private static ConnectionCreatePlanner.Scene Clone(ConnectionCreatePlanner.Scene scene) => BridgeJson.FromObject(scene).ToObject<ConnectionCreatePlanner.Scene>(BridgeJson.Serializer)!;
+        private static PageScene Clone(PageScene scene) => BridgeJson.FromObject(scene).ToObject<PageScene>(BridgeJson.Serializer)!;
     }
 }

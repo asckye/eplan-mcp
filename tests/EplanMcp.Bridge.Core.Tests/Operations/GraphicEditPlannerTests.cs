@@ -372,7 +372,7 @@ public sealed class GraphicEditPlannerTests
             rows[i]["pen"] = new JObject { ["color"] = -16002 };
             rows[i]["layer"] = 1;
         }
-        var scene = new ConnectionCreatePlanner.Scene { Project = new() { Name = "Line1", Path = "project" }, Page = new() { Project = "project", Page = "P", PageSize = [1000, 1000], GridSize = 1 }, Complete = true };
+        var scene = new PageScene { Project = new() { Name = "Line1", Path = "project" }, Page = new() { Project = "project", Page = "P", PageSize = [1000, 1000], GridSize = 1 }, Complete = true };
         scene.Page.Placements = rows.Select(r => r.ToObject<DrawingPlacement>(BridgeJson.Serializer)!).ToList();
         return new JObject { ["scene"] = BridgeJson.FromObject(scene), ["objects"] = new JArray(rows), ["functions"] = new JArray(), ["connections"] = new JArray() };
     }

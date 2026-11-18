@@ -37,7 +37,7 @@ public sealed class PlacementMoveEvidenceTests
         {
             string before = JsonConvert.SerializeObject(f.Scene);
             await File.WriteAllTextAsync(file, before, TestContext.Current.CancellationToken);
-            ConnectionCreatePlanner.Scene scene = JsonConvert.DeserializeObject<ConnectionCreatePlanner.Scene>(await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken))!;
+            PageScene scene = JsonConvert.DeserializeObject<PageScene>(await File.ReadAllTextAsync(file, TestContext.Current.CancellationToken))!;
             foreach (JObject move in new[] { MoveFixture.Move(f.Root.Locator, [0, 0]), new JObject { ["locator"] = f.Request["moves"]![0]!["locator"]!.DeepClone(), ["x_mm"] = 20, ["y_mm"] = 20 } })
             {
                 f.Request["moves"] = new JArray(move);

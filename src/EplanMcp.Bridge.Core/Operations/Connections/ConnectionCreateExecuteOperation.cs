@@ -25,7 +25,7 @@ public sealed class ConnectionCreateExecuteOperation(IConnectionCreator creator,
     /// </summary>
     private sealed class Execution(IConnectionCreator creator, IConnectionGenerator generator, ITransactionScopeFactory transactions, JObject input, string fingerprint)
     {
-        private ConnectionCreatePlanner.Scene _scene = new();
+        private PageScene _scene = new();
         private JObject _plan = new();
         private Action _place = () => { };
         private bool _generate = true;

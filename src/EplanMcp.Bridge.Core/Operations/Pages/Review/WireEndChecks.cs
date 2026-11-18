@@ -9,7 +9,7 @@ internal static class WireBendGridCheck
 {
     public static void Run(ReviewContext c)
     {
-        ConnectionCreatePlanner.Scene scene = c.Scene;
+        PageScene scene = c.Scene;
         foreach (double[] point in c.Graphical.SelectMany(s => s).Where(ReviewContext.Known).GroupBy(p => string.Join("/", p)).Select(g => g.First()))
         {
             OperationContext.Current.ThrowIfCancellationRequested();
@@ -39,7 +39,7 @@ internal static class UnconnectedPinsCheck
 {
     public static void Run(ReviewContext c)
     {
-        ConnectionCreatePlanner.Scene scene = c.Scene;
+        PageScene scene = c.Scene;
         foreach (var pin in scene.Pins)
         {
             DrawingPlacement? owner = c.Owner(pin.Key);

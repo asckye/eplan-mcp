@@ -10,7 +10,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// </summary>
 internal sealed class ReviewContext
 {
-    public ReviewContext(ConnectionCreatePlanner.Scene scene, JObject actual, JObject request)
+    public ReviewContext(PageScene scene, JObject actual, JObject request)
     {
         Scene = scene;
         Actual = actual;
@@ -21,7 +21,7 @@ internal sealed class ReviewContext
         Placements = scene.Page.Placements.Where(p => p.Parent is null || p.Properties.ContainsKey("text")).ToArray();
     }
 
-    public ConnectionCreatePlanner.Scene Scene { get; }
+    public PageScene Scene { get; }
     public JObject Actual { get; }
     public JObject Request { get; }
     /// <summary>The caller's expected objects by kind; empty when none were given.</summary>

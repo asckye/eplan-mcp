@@ -259,7 +259,7 @@ public sealed class ConnectionDeferredGenerationTests
         internal JObject Execute() => Assert.IsType<JObject>(new OperationContext("deferred", true, null).Run(() =>
             new ConnectionCreateExecuteOperation(this, this, Transactions).Execute(new JObject
             { ["request"] = Fixture.Request, ["fingerprint"] = Fixture.Plan()["fingerprint"] })));
-        public ConnectionCreatePlanner.Scene Read(string project, string page) => !_written ? Fixture.Scene : new()
+        public PageScene Read(string project, string page) => !_written ? Fixture.Scene : new()
         {
             Project = Fixture.Scene.Project,
             Layout = Fixture.Scene.Layout,

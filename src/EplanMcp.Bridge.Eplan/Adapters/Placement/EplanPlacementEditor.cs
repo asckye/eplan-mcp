@@ -11,8 +11,8 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>A39/A54/A57: borrowed roots and children are never disposed. New behaviour: PlacementEditSpikeTests.</summary>
 internal sealed partial class EplanPlacementEditor : IPlacementEditor
 {
-    public ConnectionCreatePlanner.Scene Read(string project, string page) => new EplanPlacementMover().Read(project, page);
-    public Action Prepare(ConnectionCreatePlanner.Scene scene, JArray moves) => new EplanPlacementMover().Prepare(scene, moves);
+    public PageScene Read(string project, string page) => new EplanPlacementMover().Read(project, page);
+    public Action Prepare(PageScene scene, JArray moves) => new EplanPlacementMover().Prepare(scene, moves);
     public JObject Inspect(string project, string page, bool symbolEdit = false)
     {
         MainThread.Assert();

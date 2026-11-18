@@ -26,7 +26,7 @@ public sealed class LayoutGuardReboundPointTests
     [InlineData("drawn path not unique (2 paths)")]
     public void FifthRun_ReboundExistingPointsWithoutRoutes_WarnOncePerPointThroughResultSummary(string reason)
     {
-        var scene = new ConnectionCreatePlanner.Scene
+        var scene = new PageScene
         {
             Page = new() { GridSize = 4, PageSize = [420, 297] },
             Layout = new() { Strict = true }
@@ -46,7 +46,7 @@ public sealed class LayoutGuardReboundPointTests
             scene.Graphical.Add([[x, y - 32], [x, y + 32]]);
             scene.PointRouteGaps[FormattableString.Invariant($"59/{oid}")] = reason;
         }
-        LayoutGuard.Model before = LayoutGuard.From(JsonConvert.DeserializeObject<ConnectionCreatePlanner.Scene>(JsonConvert.SerializeObject(scene))!);
+        LayoutGuard.Model before = LayoutGuard.From(JsonConvert.DeserializeObject<PageScene>(JsonConvert.SerializeObject(scene))!);
         foreach (DrawingPlacement point in scene.Page.Placements)
         { point.Properties["binding"] = "mixed cable rebinding"; }
         LayoutGuard.Model actual = LayoutGuard.From(scene);

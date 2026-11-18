@@ -14,11 +14,11 @@ internal static class SpikeReadback
     {
         Page[] pages = names.Select(n => project.Pages.Single(p => p.Name == n)).ToArray();
         SymbolReference[] references = pages.SelectMany(p => p.AllPlacements.OfType<SymbolReference>()).ToArray();
-        var scenes = pages.ToDictionary(p => p.Name, _ => new ConnectionCreatePlanner.Scene(), StringComparer.Ordinal);
+        var scenes = pages.ToDictionary(p => p.Name, _ => new PageScene(), StringComparer.Ordinal);
         var segments = new JArray();
         foreach (SymbolReference reference in references)
         {
-            ConnectionCreatePlanner.Scene scene = scenes[reference.Page.Name];
+            PageScene scene = scenes[reference.Page.Name];
             if (reference is not DynamicConnectionLine)
             {
                 string identifier = reference.ToStringIdentifier();
@@ -60,7 +60,7 @@ internal static class SpikeReadback
             Pin? start = connection.StartPin, end = connection.EndPin;
             if (start?.ParentFunction is { } a && end?.ParentFunction is { } b && a.Page.Name == b.Page.Name)
             {
-                ConnectionCreatePlanner.Scene scene = scenes[a.Page.Name];
+                PageScene scene = scenes[a.Page.Name];
                 scene.Graphical = segments.Where(s => (string?)s["page"] == a.Page.Name).Select(s => new[] { s["start"]!.ToObject<double[]>()!, s["end"]!.ToObject<double[]>()! }).ToList();
                 double[][]? path = CableDefinitionPlanner.DrawnPath(scene, At(a, start), At(b, end));
                 row["drawnPath"] = path is null ? JValue.CreateNull() : JArray.FromObject(path);

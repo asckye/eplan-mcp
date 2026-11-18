@@ -8,7 +8,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 /// <summary>Live T8b: undo can renumber identifiers; verify restored business content independently of planning.</summary>
 internal static class CableDefinitionRestoration
 {
-    internal static JObject Capture(ConnectionCreatePlanner.Scene scene)
+    internal static JObject Capture(PageScene scene)
     {
         CableDefinitionPlanner.Inventory cables = scene.ReadCables?.Invoke()
             ?? throw new InvalidOperationException("Restoration cable inventory is unavailable.");

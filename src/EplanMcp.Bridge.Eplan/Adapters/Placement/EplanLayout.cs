@@ -9,7 +9,7 @@ internal static class EplanLayout
 {
     internal static LayoutGuard.Model Read(string project, string page)
     {
-        ConnectionCreatePlanner.Scene scene = new EplanConnectionCreator(false).Read(project, page);
+        PageScene scene = new EplanConnectionCreator(false).Read(project, page);
         LayoutGuard.Model model = LayoutGuard.From(scene);
         model.ReadActual = () => Measure(project, page, []);
         return model;

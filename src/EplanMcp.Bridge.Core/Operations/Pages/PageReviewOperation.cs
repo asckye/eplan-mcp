@@ -4,7 +4,7 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 public sealed class PageReviewOperation(PageReviewOperation.IReader reader) : Operation<JObject, JObject>
 {
-    public interface IReader { public (ConnectionCreatePlanner.Scene Scene, JObject Actual) Read(string project, string page, JObject request); }
+    public interface IReader { public (PageScene Scene, JObject Actual) Read(string project, string page, JObject request); }
     public override string Name => Contracts.OperationNames.PageReview;
     protected override JObject Execute(JObject args)
     {

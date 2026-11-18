@@ -47,7 +47,7 @@ internal sealed class EplanProjectLanguages
 
 internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = true)
 {
-    public ConnectionCreatePlanner.Scene Read(string project, string page) => throw new NotSupportedException(readSymbolBounds.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    public PageScene Read(string project, string page) => throw new NotSupportedException(readSymbolBounds.ToString(System.Globalization.CultureInfo.InvariantCulture));
 }
 
 internal static class EplanDeviceReader
