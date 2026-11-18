@@ -62,34 +62,13 @@ internal sealed class DevicePlaceRequest
     /// <summary>Every argument problem at once (the MCP server standard), then the project, the page and the part.</summary>
     public static DevicePlaceRequest Check(DevicePlaceArgs args, IProjectCatalog catalog, IPageReader pages, IDeviceRenamer names, IPartsDatabase parts, IDevicePlacer placer, IPlcReader? plc = null)
     {
-        if (args.PropertyArrangement is { } arrangement && (string.IsNullOrWhiteSpace(arrangement) || arrangement.Any(char.IsControl)))
-        { throw WriteArguments.Invalid(["/property_arrangement: supply an exact nonblank arrangement name without controls."]); }
-        if (DeviceJoinMode.Problem(args) is { } joinProblem)
-        { throw WriteArguments.Invalid([joinProblem]); }
-        if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
-        { throw WriteArguments.Invalid(["/display_properties: part templates accept symbol selection; display and pin overrides require the symbol route."]); }
         bool box = args.LocationBox is not null;
         bool blackBox = DeviceSymbolPlan.BlackBox(args);
         bool terminal = args.TerminalStrip is not null;
-        DevicePlcPlan.Check(args);
-        DeviceTerminalPlan.Check(args);
-        DeviceSymbolPlan.CheckBox(args);
-        // Codex drawing eval 2026-11-10: corners and T-nodes asked for here got "'tag' is required" eight times in one redraw.
-        if (string.Equals(args.Library, "SPECIAL", StringComparison.OrdinalIgnoreCase) && ConnectionSymbolKind(args.Symbol) is { } kind)
-        { throw WriteArguments.Invalid([$"/symbol: SPECIAL/{args.Symbol} is a connection symbol, not a device; place it with eplan_connection_create, item kind {kind}."]); }
-        if (!box && !terminal && args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null && !DevicePlacementRoute.UsesPart(args) || args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
-        { throw WriteArguments.Invalid(["/library: symbol, display properties and pin designations or descriptions require a complete symbol source."]); }
-        var violations = new List<string>();
-        AddIf(violations, args.SymbolVariant is < 0, "/symbol_variant: use a nonnegative integer.");
-        AddIf(violations, DevicePlacementRoute.UsesPart(args) && (args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null), "Part placement accepts a symbol override; display and pin options require the symbol route.");
-        WriteArguments.RequireProject(args.Project, violations);
+        CheckSources(args, box, terminal);
         string tag = terminal ? args.TerminalStrip! : args.Tag?.Trim() ?? string.Empty;
         string part = args.Part?.Trim() ?? string.Empty;
-        AddIf(violations, string.IsNullOrEmpty(args.Page), "'page' is required: a full circuit page name such as =GAA+A1&EFS1/60, as eplan_page_list returns it.");
-        AddIf(violations, !box && !terminal && args.Library is null && (part.Length == 0 || part.Any(char.IsControl)), "'part' is required: a part number such as SIE.3RH2122-1HB40, as eplan_part_search returns it.");
-        AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
-        AddIf(violations, !box && (tag.Length > 0 || args.Library is not null || terminal) && TagProblem(tag) is not null, "'tag' " + TagProblem(tag));
-        AddIf(violations, DeviceSymbolPlan.ConnectionPoint(args) && args.ConnectionDesignations is not { Length: 1 }, "/connection_designations: a device connection point needs its one pin designation; EPLAN names it tag:pin, such as -PF1:1.");
+        List<string> violations = ArgumentProblems(args, box, terminal, tag, part);
         if (violations.Count > 0)
         {
             throw WriteArguments.Invalid(violations);
@@ -105,55 +84,23 @@ internal sealed class DevicePlaceRequest
         PartSearchItem? chosen = args.Part is null && (box || terminal || args.Library is not null) ? new PartSearchItem() : ChooseVariant(FindPart(parts.Read(null), part), args.Variant?.Trim() is { Length: > 0 } variant ? variant : null, violations);
         violations.AddRange(PageProblems(page, args.X, args.Y));
         if (box || blackBox)
-        {
-            if (box && (page.Width is not { } w || page.Height is not { } h || !Finite(w) || !Finite(h) || w <= 0 || h <= 0))
-            { violations.Add("/location_box: page bounds are unknown; select a page with readable bounds."); }
-            violations.AddRange(PageProblems(page, args.CornerX!.Value, args.CornerY!.Value));
-        }
+        { violations.AddRange(BoxPageProblems(args, page, box)); }
         if (violations.Count > 0)
         {
             throw WriteArguments.Invalid(violations);
         }
 
-        string full = box ? args.LocationBox! : tag.StartsWith("-", StringComparison.Ordinal) ? DeviceStructureOf(page.Name) + tag : tag;
-        if (terminal)
-        { full += ":" + args.TerminalNumber; }
-        if (args.PlcConnectionPoint is not null)
-        { full += ":" + DevicePlcPlan.Suffix(args); }
-        // The sample names device connection points after their pin (-PF1:1 has pin 1); A86 joins them to the black box by that name.
-        if (DeviceSymbolPlan.ConnectionPoint(args) && args.ConnectionDesignations is { Length: > 0 } pins)
-        { full += ":" + pins[0]; }
+        string full = FullName(args, page, box, terminal, tag);
         string[] existing = terminal || args.PlcConnectionPoint is not null ? [.. names.FunctionNames(project.Path)] : box ? [.. names.FunctionNames(project.Path), FormattableString.Invariant($"bounds:{page.Width},{page.Height}")] : [];
         if (terminal && existing.FirstOrDefault(n => SameName(full.Substring(0, full.LastIndexOf(':')), n, ignoreCase: true)) is { } canonical)
         { full = canonical + ":" + args.TerminalNumber; }
         if (args.PlcConnectionPoint is not null && existing.FirstOrDefault(n => SameName(DevicePlcPlan.Parent(args, full), n, ignoreCase: true)) is { } card)
         { full = card + ":" + DevicePlcPlan.Suffix(args); }
         if (args.PlcConnectionPoint is not null)
-        {
-            string parent = DevicePlcPlan.Parent(args, full);
-            PlcRecord? state = plc?.ReadPlc(project.Path, parent, TextLanguages.Independent, detailed: true);
-            if (state?.Plc is null)
-            { throw new BridgeErrorException(ErrorReason.DeviceNotFound, "An existing native PLC card is required; create it explicitly first."); }
-            // MX_Dryer11 2026-11-08: a point placed after the overview was addressed is another function of the channel and stays
-            // without an address unless it takes the overview's; take it when the caller gave none, so the plan lists it.
-            if (args.PlcAddress is null && state.Channels.FirstOrDefault(c => SameName(full, c.Name, ignoreCase: true) && !string.IsNullOrEmpty(c.Address)) is { } addressed)
-            { args.PlcAddress = addressed.Address; }
-            if (args.PlcAddress is not null && state.Channels.Any(c => SameName(full, c.Name, ignoreCase: true)
-                && c.Address is not null && !string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
-            { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC channel already uses a different address; keep its address for another representation."); }
-            if (args.PlcAddress is not null && state.Channels.Any(c => !SameName(full, c.Name, ignoreCase: true) && string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
-            { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC card already has the I/O address; choose a free address."); }
-            existing = [.. existing, Protocol.BridgeJson.FromObject(state).ToString(Newtonsoft.Json.Formatting.None)];
-        }
+        { existing = [.. existing, PlcState(args, plc, project, full)]; }
         // MX_Dryer 2026-11-08: official pages put each field device in its own +M box, so only an exact repeat conflicts.
         IReadOnlyList<string> functions = terminal || args.PlcConnectionPoint is not null || box ? existing : names.FunctionNames(project.Path);
-        string[] taken = box ? [.. page.LocationBoxStructures.Where(n => string.Equals(n, MacroTargetPage.BoxKey(full, args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value), StringComparison.OrdinalIgnoreCase))] :
-        [
-            .. functions
-                .Where(n => full.Length > 0 && ((terminal || args.PlcConnectionPoint is not null
-                    ? SameName(full, n, ignoreCase: true) : Carries(full, n)) || WithoutEmptyFunction(n).StartsWith(BareOf(full, n) + ":", StringComparison.OrdinalIgnoreCase)))
-                .Distinct(StringComparer.Ordinal),
-        ];
+        string[] taken = TakenNames(args, page, box, terminal, full, functions);
         if (args.JoinDevice == true && taken.FirstOrDefault(n => SameName(full, n, ignoreCase: true)) is { } joinedTag)
         { full = joinedTag; }
         string? plcWarning = null;
@@ -176,6 +123,89 @@ internal sealed class DevicePlaceRequest
         if (DevicePlacementRoute.UsesPart(args) && args.Library is null)
         { request.CheckLayout(args); }
         return request;
+    }
+
+    private static void CheckSources(DevicePlaceArgs args, bool box, bool terminal)
+    {
+        if (args.PropertyArrangement is { } arrangement && (string.IsNullOrWhiteSpace(arrangement) || arrangement.Any(char.IsControl)))
+        { throw WriteArguments.Invalid(["/property_arrangement: supply an exact nonblank arrangement name without controls."]); }
+        if (DeviceJoinMode.Problem(args) is { } joinProblem)
+        { throw WriteArguments.Invalid([joinProblem]); }
+        if (DevicePlacementRoute.UsesPart(args) && args.Library is not null && (args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
+        { throw WriteArguments.Invalid(["/display_properties: part templates accept symbol selection; display and pin overrides require the symbol route."]); }
+        DevicePlcPlan.Check(args);
+        DeviceTerminalPlan.Check(args);
+        DeviceSymbolPlan.CheckBox(args);
+        // Codex drawing eval 2026-11-10: corners and T-nodes asked for here got "'tag' is required" eight times in one redraw.
+        if (string.Equals(args.Library, "SPECIAL", StringComparison.OrdinalIgnoreCase) && ConnectionSymbolKind(args.Symbol) is { } kind)
+        { throw WriteArguments.Invalid([$"/symbol: SPECIAL/{args.Symbol} is a connection symbol, not a device; place it with eplan_connection_create, item kind {kind}."]); }
+        if (!box && !terminal && args.Library is null && (args.Symbol is not null || args.SymbolVariant is not null && !DevicePlacementRoute.UsesPart(args) || args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null))
+        { throw WriteArguments.Invalid(["/library: symbol, display properties and pin designations or descriptions require a complete symbol source."]); }
+    }
+
+    private static List<string> ArgumentProblems(DevicePlaceArgs args, bool box, bool terminal, string tag, string part)
+    {
+        var violations = new List<string>();
+        AddIf(violations, args.SymbolVariant is < 0, "/symbol_variant: use a nonnegative integer.");
+        AddIf(violations, DevicePlacementRoute.UsesPart(args) && (args.DisplayProperties is not null || args.ConnectionDesignations is not null || args.ConnectionDescriptions is not null), "Part placement accepts a symbol override; display and pin options require the symbol route.");
+        WriteArguments.RequireProject(args.Project, violations);
+        AddIf(violations, string.IsNullOrEmpty(args.Page), "'page' is required: a full circuit page name such as =GAA+A1&EFS1/60, as eplan_page_list returns it.");
+        AddIf(violations, !box && !terminal && args.Library is null && (part.Length == 0 || part.Any(char.IsControl)), "'part' is required: a part number such as SIE.3RH2122-1HB40, as eplan_part_search returns it.");
+        AddIf(violations, !(Finite(args.X) && Finite(args.Y) && args.X >= 0 && args.Y >= 0), "'x' and 'y' must be numbers from 0: millimetres from the page's bottom left corner, y up.");
+        AddIf(violations, !box && (tag.Length > 0 || args.Library is not null || terminal) && TagProblem(tag) is not null, "'tag' " + TagProblem(tag));
+        AddIf(violations, DeviceSymbolPlan.ConnectionPoint(args) && args.ConnectionDesignations is not { Length: 1 }, "/connection_designations: a device connection point needs its one pin designation; EPLAN names it tag:pin, such as -PF1:1.");
+        return violations;
+    }
+
+    private static IEnumerable<string> BoxPageProblems(DevicePlaceArgs args, MacroTargetPage page, bool box)
+    {
+        if (box && (page.Width is not { } w || page.Height is not { } h || !Finite(w) || !Finite(h) || w <= 0 || h <= 0))
+        { yield return "/location_box: page bounds are unknown; select a page with readable bounds."; }
+        foreach (string problem in PageProblems(page, args.CornerX!.Value, args.CornerY!.Value))
+        { yield return problem; }
+    }
+
+    private static string FullName(DevicePlaceArgs args, MacroTargetPage page, bool box, bool terminal, string tag)
+    {
+        string full = box ? args.LocationBox! : tag.StartsWith("-", StringComparison.Ordinal) ? DeviceStructureOf(page.Name) + tag : tag;
+        if (terminal)
+        { full += ":" + args.TerminalNumber; }
+        if (args.PlcConnectionPoint is not null)
+        { full += ":" + DevicePlcPlan.Suffix(args); }
+        // The sample names device connection points after their pin (-PF1:1 has pin 1); A86 joins them to the black box by that name.
+        if (DeviceSymbolPlan.ConnectionPoint(args) && args.ConnectionDesignations is { Length: > 0 } pins)
+        { full += ":" + pins[0]; }
+        return full;
+    }
+
+    /// <summary>The card's state for the fingerprint; the point takes the address its channel already has when the caller gave none.</summary>
+    private static string PlcState(DevicePlaceArgs args, IPlcReader? plc, OpenProject project, string full)
+    {
+        string parent = DevicePlcPlan.Parent(args, full);
+        PlcRecord? state = plc?.ReadPlc(project.Path, parent, TextLanguages.Independent, detailed: true);
+        if (state?.Plc is null)
+        { throw new BridgeErrorException(ErrorReason.DeviceNotFound, "An existing native PLC card is required; create it explicitly first."); }
+        // MX_Dryer11 2026-11-08: a point placed after the overview was addressed is another function of the channel and stays
+        // without an address unless it takes the overview's; take it when the caller gave none, so the plan lists it.
+        if (args.PlcAddress is null && state.Channels.FirstOrDefault(c => SameName(full, c.Name, ignoreCase: true) && !string.IsNullOrEmpty(c.Address)) is { } addressed)
+        { args.PlcAddress = addressed.Address; }
+        if (args.PlcAddress is not null && state.Channels.Any(c => SameName(full, c.Name, ignoreCase: true)
+            && c.Address is not null && !string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
+        { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC channel already uses a different address; keep its address for another representation."); }
+        if (args.PlcAddress is not null && state.Channels.Any(c => !SameName(full, c.Name, ignoreCase: true) && string.Equals(c.Address, args.PlcAddress, StringComparison.OrdinalIgnoreCase)))
+        { throw new BridgeErrorException(ErrorReason.AlreadyExists, "This PLC card already has the I/O address; choose a free address."); }
+        return Protocol.BridgeJson.FromObject(state).ToString(Newtonsoft.Json.Formatting.None);
+    }
+
+    private static string[] TakenNames(DevicePlaceArgs args, MacroTargetPage page, bool box, bool terminal, string full, IReadOnlyList<string> functions)
+    {
+        return box ? [.. page.LocationBoxStructures.Where(n => string.Equals(n, MacroTargetPage.BoxKey(full, args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value), StringComparison.OrdinalIgnoreCase))] :
+        [
+            .. functions
+                .Where(n => full.Length > 0 && ((terminal || args.PlcConnectionPoint is not null
+                    ? SameName(full, n, ignoreCase: true) : Carries(full, n)) || WithoutEmptyFunction(n).StartsWith(BareOf(full, n) + ":", StringComparison.OrdinalIgnoreCase)))
+                .Distinct(StringComparer.Ordinal),
+        ];
     }
     public List<string> LayoutWarnings { get; private set; } = [];
     public void CheckLayout(DevicePlaceArgs args)
