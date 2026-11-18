@@ -200,7 +200,7 @@
 | 动作词 | 含义及通常返回值 | 工具 | differs |
 |---|---|---|---|
 | `add` | 写；向共享翻译库添加关键词、补空翻译，返回新增、补全和保留的数量。 | `eplan_translation_add` | — |
-| `apply` | 写；应用已选的值或操作，通常先预览，返回执行状态及变更。 | `eplan_placeholder_apply`、`eplan_plan_apply` | `eplan_plan_apply`（省略 dry_run 即执行一次性计划，可先返回任务） |
+| `apply` | 写；应用已选的值或操作，通常先预览，返回执行状态及变更。 | `eplan_placeholder_apply`、`eplan_plan_apply` | `eplan_plan_apply`（执行一次性计划，可先返回任务） |
 | `bind` | 写；替换项目的柜配置、值和版本锁，返回绑定、差异和执行状态。 | `eplan_cabinet_bind` | — |
 | `build` | 写；把输入构建为可用资源。工程包生成不可覆盖的已安装版本，返回版本、摘要和位置。 | `eplan_pack_build`、`eplan_part_build` | `eplan_part_build`（按表格逐行新建或更新共享库部件，返回行差异和读回） |
 | `check` | 读；在柜的范围内核对锁定规则，返回判定和证据，可附修复计划标识。 | `eplan_rule_check` | — |

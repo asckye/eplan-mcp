@@ -5,6 +5,12 @@
 
 ## [Unreleased]
 
+### 破坏性变化
+
+- 续页字段统一：`eplan_object_find`、`eplan_object_get`、`eplan_page_review`、`eplan_property_get`、`eplan_property_schema`、`eplan_selection_get`、`eplan_selection_set` 的结果里，下一页的游标由 `cursor` 改名为 `nextCursor`，与其余列表工具一致。传入参数仍叫 `cursor`。旧名不保留。
+- `eplan_plan_apply` 默认只预览：不传 `dry_run` 不再执行，要执行必须传 `"dry_run": false`，与其余写工具一致。
+- `eplan_plc_rack` 的 `project` 必填：以前 schema 写成可选，实际不传就失败；现在 Host 直接返回 `INVALID_ARGUMENT`。
+
 ### 变更
 
 - `serve --profile core` 的 25 个工具改为围绕“按描述画一页、审图、修正”选取：加入 `eplan_device_place`、`eplan_connection_create`、`eplan_placement_create`、`eplan_placement_update`、`eplan_property_set`、`eplan_symbol_search`、`eplan_part_search`；`eplan_part_list`、`eplan_message_list`、`eplan_check_list`、`eplan_check_run`、`eplan_macro_get`、`eplan_report_update`、`eplan_export_pdf` 只在默认的 `full` 里。原来的 core 是早期的“读取加宏”组合，放不了符号、画不了线。删除类工具属于 Destructive，仍只在 `full`。服务器说明不再让 core 客户端调用它看不到的 `eplan_page_open`。

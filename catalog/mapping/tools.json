@@ -15119,6 +15119,11 @@
             "file": "tests/EplanMcp.Evals.Tests/TaskSetTests.cs"
           },
           {
+            "name": "UnverifiedWriteTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Safety/UnverifiedWriteTests.cs"
+          },
+          {
             "name": "ApiTryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
