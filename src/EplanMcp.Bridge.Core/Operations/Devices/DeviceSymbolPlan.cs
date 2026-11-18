@@ -20,8 +20,29 @@ internal static class DeviceSymbolPlan
         { throw new BridgeErrorException(ErrorReason.CapabilityMissing, "Symbol discovery is unavailable; use a Bridge with symbol search.", metadata: new Dictionary<string, string> { ["missing"] = "symbol.search" }); }
         bool box = args.LocationBox is not null;
         bool terminal = args.TerminalStrip is not null;
-        string? library = box ? "SPECIAL" : terminal ? args.Library ?? "IEC_symbol" : args.Library, name = box ? args.LocationBoxPolyline == true ? "SC2" : "SC" : terminal ? args.Symbol ?? "X" : args.Symbol;
-        int? variant = box ? 0 : terminal ? args.SymbolVariant ?? 0 : args.SymbolVariant;
+        CheckSource(args, box, terminal);
+        SymbolSearchItem symbol = Find(args, request, reader, box, terminal);
+        CheckSymbolKind(args, symbol, terminal);
+        CheckSymbolShape(args, symbol, box, terminal);
+        List<PlannedChange> changes = Changes(args, request, symbol, box);
+        TerminalPlacementData? terminalData = terminal ? DeviceTerminalPlan.Describe(args, request, changes) : null;
+        DevicePlcPlan.Describe(args, request, changes);
+        request.CheckLayout(args);
+        WarnIncomplete(args, request, symbol, terminal);
+        string resolved = BridgeJson.FromObject(symbol).ToString(Formatting.None);
+        Dictionary<string, string> details = Details(args, request, resolved, box, terminalData, changes);
+        return new WritePlan
+        {
+            Project = request.Project.Name,
+            ProjectPath = request.Project.Path,
+            Changes = changes,
+            Fingerprint = Fingerprint.Of([request.StateFingerprint(), resolved, BridgeJson.FromObject(changes).ToString(Formatting.None), BridgeJson.FromObject(args.StripDefinition).ToString(Formatting.None)]),
+            Details = details,
+        };
+    }
+
+    private static void CheckSource(DevicePlaceArgs args, bool box, bool terminal)
+    {
         if (!box && !terminal && (args.Variant is not null && args.Part is null || string.IsNullOrWhiteSpace(args.Library) || string.IsNullOrWhiteSpace(args.Symbol)
             || args.Library!.Any(char.IsControl) || args.Symbol!.Any(char.IsControl) || args.SymbolVariant is null or < 0))
         { throw WriteArguments.Invalid(["/library: specify an exclusive library, symbol and nonnegative symbol_variant source."]); }
@@ -31,6 +52,12 @@ internal static class DeviceSymbolPlan
         { throw WriteArguments.Invalid(["/display_properties: require at most 8 allowed property IDs and finite relative offsets."]); }
         if (args.ConnectionDesignations?.Any(p => string.IsNullOrWhiteSpace(p) || p.Length > 64 || p.Any(char.IsControl)) == true)
         { throw WriteArguments.Invalid(["/connection_designations: require nonempty text of at most 64 characters without controls."]); }
+    }
+
+    private static SymbolSearchItem Find(DevicePlaceArgs args, DevicePlaceRequest request, ISymbolReader reader, bool box, bool terminal)
+    {
+        string? library = box ? "SPECIAL" : terminal ? args.Library ?? "IEC_symbol" : args.Library, name = box ? args.LocationBoxPolyline == true ? "SC2" : "SC" : terminal ? args.Symbol ?? "X" : args.Symbol;
+        int? variant = box ? 0 : terminal ? args.SymbolVariant ?? 0 : args.SymbolVariant;
         List<SymbolSearchItem> found = [.. reader.Read(request.Project.Path, new() { Library = library, NameContains = name })
             .Where(s => string.Equals(s.Library, library, StringComparison.OrdinalIgnoreCase) && string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase) && s.Variant == variant)];
         List<SymbolSearchItem> exact = [.. found.Where(s => s.Library == library && s.Name == name)];
@@ -40,7 +67,11 @@ internal static class DeviceSymbolPlan
         { throw new BridgeErrorException(ErrorReason.SymbolNotFound, "Select an exact library, symbol and variant from eplan_symbol_search."); }
         if (found.Count > 1)
         { throw ProjectResolver.Ambiguous("symbol", name!, found.Select(s => s.Library + "/" + s.Name), "Select the exact library and symbol spelling from eplan_symbol_search."); }
-        SymbolSearchItem symbol = found[0];
+        return found[0];
+    }
+
+    private static void CheckSymbolKind(DevicePlaceArgs args, SymbolSearchItem symbol, bool terminal)
+    {
         if (PlugSymbol(args) && ((symbol.Type.Length > 0 && symbol.Type != "TextFunction")
             || (symbol.FunctionCategory is not null && symbol.FunctionCategory != "ConnectorDefText")))
         { throw WriteArguments.Invalid(["/symbol: SPECIAL/PDEF requires a TextFunction with ConnectorDefText category."]); }
@@ -61,6 +92,10 @@ internal static class DeviceSymbolPlan
         }
         else if (symbol.FunctionCategory == "PLCTerminal")
         { throw WriteArguments.Invalid(["/plc_connection_point: PLC points require an existing card and a connection-point designation."]); }
+    }
+
+    private static void CheckSymbolShape(DevicePlaceArgs args, SymbolSearchItem symbol, bool box, bool terminal)
+    {
         if (symbol.ConnectionPoints.Any(p => p.Location.Length != 2 || p.Location.Any(v => double.IsNaN(v) || double.IsInfinity(v))))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The symbol has invalid pin geometry; select another symbol with eplan_symbol_search."); }
         if (BlackBox(args) && ((symbol.Type.Length > 0 && symbol.Type != "BoxFunction") || (symbol.FunctionCategory is not null && symbol.FunctionCategory != "Blackbox")))
@@ -74,6 +109,10 @@ internal static class DeviceSymbolPlan
         if (args.ConnectionDescriptions is { } descriptions && (args.Library is null || descriptions.Length != symbol.ConnectionPoints.Count
             || descriptions.Any(p => p is null || p.Length > 64 || p.Any(char.IsControl))))
         { throw WriteArguments.Invalid(["/connection_descriptions: supply a symbol source and one description (at most 64 characters, empty for none) per symbol connection point."]); }
+    }
+
+    private static List<PlannedChange> Changes(DevicePlaceArgs args, DevicePlaceRequest request, SymbolSearchItem symbol, bool box)
+    {
         var changes = new List<PlannedChange>
         {
             new() { Action = "create", Kind = box ? "location_box" : "function", Name = request.Page.Name, NewValue = box
@@ -98,9 +137,11 @@ internal static class DeviceSymbolPlan
         { changes.Add(new() { Action = "update", Kind = "pin", Name = request.Tag, Property = "20022[" + (i + 1).ToString(CultureInfo.InvariantCulture) + "]", NewValue = args.ConnectionDesignations![i] }); }
         for (int i = 0; i < (args.ConnectionDescriptions?.Length ?? 0); i++)
         { changes.Add(new() { Action = "update", Kind = "pin", Name = request.Tag, Property = "20023[" + (i + 1).ToString(CultureInfo.InvariantCulture) + "]", NewValue = args.ConnectionDescriptions![i] }); }
-        TerminalPlacementData? terminalData = terminal ? DeviceTerminalPlan.Describe(args, request, changes) : null;
-        DevicePlcPlan.Describe(args, request, changes);
-        request.CheckLayout(args);
+        return changes;
+    }
+
+    private static void WarnIncomplete(DevicePlaceArgs args, DevicePlaceRequest request, SymbolSearchItem symbol, bool terminal)
+    {
         if (terminal && (symbol.FunctionCategory is null || symbol.Type.Length == 0))
         { request.LayoutWarnings.Add("Terminal symbol category is unavailable or type is unknown; verify native Terminal category after placement."); }
         if (BlackBox(args) && (symbol.Type.Length == 0 || symbol.FunctionCategory is null))
@@ -109,7 +150,10 @@ internal static class DeviceSymbolPlan
         { request.LayoutWarnings.Add("Busbar definition metadata is incomplete; verify native type and category after placement."); }
         if (PlugSymbol(args) && (symbol.Type.Length == 0 || symbol.FunctionCategory is null))
         { request.LayoutWarnings.Add("Plug symbol metadata is incomplete; verify native type and category after placement."); }
-        string resolved = BridgeJson.FromObject(symbol).ToString(Formatting.None);
+    }
+
+    private static Dictionary<string, string> Details(DevicePlaceArgs args, DevicePlaceRequest request, string resolved, bool box, TerminalPlacementData? terminalData, List<PlannedChange> changes)
+    {
         var details = new Dictionary<string, string> { ["symbol"] = resolved, ["tag"] = request.Tag, ["pageSizeKnown"] = request.Page.Width is null ? "false" : "true" };
         if (args.Part is not null)
         { details["part"] = request.Part; details["variant"] = request.Variant; }
@@ -120,14 +164,7 @@ internal static class DeviceSymbolPlan
         { details["blackBox"] = BridgeJson.FromObject(new BlackBoxData { Tag = request.Tag, Bounds = [args.X, args.Y, args.CornerX!.Value, args.CornerY!.Value] }).ToString(Formatting.None); changes[0].NewValue += FormattableString.Invariant($"; corners ({args.X}, {args.Y}) to ({args.CornerX}, {args.CornerY})"); }
         if (terminalData is not null)
         { details["terminal"] = BridgeJson.FromObject(terminalData).ToString(Formatting.None); }
-        return new WritePlan
-        {
-            Project = request.Project.Name,
-            ProjectPath = request.Project.Path,
-            Changes = changes,
-            Fingerprint = Fingerprint.Of([request.StateFingerprint(), resolved, BridgeJson.FromObject(changes).ToString(Formatting.None), BridgeJson.FromObject(args.StripDefinition).ToString(Formatting.None)]),
-            Details = details,
-        };
+        return details;
     }
 
     internal static void CheckBox(DevicePlaceArgs args)

@@ -6,7 +6,6 @@ EplanMcp.Bridge.Core/ConnectionCreateExecuteOperation.Execute(1)	99
 EplanMcp.Bridge.Core/ConnectionDefinitionPoints.Plan(10)	55
 EplanMcp.Bridge.Core/DevicePlaceExecuteOperation.PlaceSymbol(4)	42
 EplanMcp.Bridge.Core/DevicePlaceRequest.Check(7)	104
-EplanMcp.Bridge.Core/DeviceSymbolPlan.Create(3)	117
 EplanMcp.Bridge.Core/DeviceTerminalPlan.Check(1)	50
 EplanMcp.Bridge.Core/DeviceUpdateRequest.Check(6)	49
 EplanMcp.Bridge.Core/GraphicEditGeometry.Plan(2)	44

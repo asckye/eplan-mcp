@@ -3,7 +3,6 @@ EplanMcp.Bridge.Core/CableDefinitionPlanner.Add(4)	115
 EplanMcp.Bridge.Core/ConnectionCreateExecuteOperation.Execute(1)	264
 EplanMcp.Bridge.Core/DevicePlaceExecuteOperation.Execute(1)	115
 EplanMcp.Bridge.Core/DevicePlaceRequest.Check(7)	114
-EplanMcp.Bridge.Core/DeviceSymbolPlan.Create(3)	112
 EplanMcp.Bridge.Core/GraphicEditPlanner.Plan(3)	101
 EplanMcp.Bridge.Core/GraphicEditPredictions.Plan(3)	123
 EplanMcp.Bridge.Core/MacroInsertRequest.CheckAll(5)	112
