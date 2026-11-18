@@ -12,6 +12,8 @@
 - 133 个工具的输入参数都有了说明：237 个参数在 schema 里补了一句说明（单位、范围、默认值、取值来源）；参数很多的 9 个工具按规范把说明放在 `eplan_tool_usage` 的用法文本里，用法文本缺的参数名已补上。新增检查：每个输入参数要么有说明，要么在该工具的用法文本里出现。
 - 启用 `eplan_action_run` 时，`eplan_tool_usage` 的 `topic` 参数不再丢失说明。
 
+- MCP SDK（`ModelContextProtocol`、`ModelContextProtocol.AspNetCore`）从 2.2.0 升到 2.4.0，随之把 `Microsoft.Extensions.Hosting`、`Microsoft.Extensions.Logging.Abstractions` 升到 10.0.14。工具契约没有变化；EPLAN 插件的依赖没有变化。
+
 ### 修复
 
 - `eplan_connection_create`、`eplan_graphic_edit`、`eplan_placement_delete`、`eplan_placement_edit`、`eplan_placement_update`、`eplan_potential_update` 的写入也固定到计划时的项目：审批之后同名的另一个项目被打开时，执行报告 `PLAN_STALE`，什么都不改。此前只有其余写入工具有这项保护。

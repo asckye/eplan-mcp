@@ -10,13 +10,13 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Official MCP C# SDK (Apache-2.0); 2.x implements the 2026-07-28 revision and keeps 2025-11-25 clients working. -->
-    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageVersion Include="ModelContextProtocol" Version="2.4.0" />
     <!-- Apache-2.0; official, actively maintained SDK HTTP transport on Kestrel (ADR-0018).
          Must match ModelContextProtocol. Alternative: custom HTTP transport, rejected to keep SDK protocol handling. -->
-    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.4.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
     <!-- MIT. The Workbench logs through its ILogger (coding standards 6); the Host gets the same version through Hosting. -->
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
     <!--
       Bridge JSON (MIT). Compile-time only in the Bridge: EPLAN 2026 ships 13.0.3 and the add-in uses that copy
       (coding standards 9.7). Never raise above the version in the EPLAN Bin directory.
