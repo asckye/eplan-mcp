@@ -30,6 +30,20 @@ public sealed class ToolContractTests(RegisteredToolFixture fixture)
     }
 
     [Fact]
+    public void PlacementDeletionReportsOptionalReadbackRows()
+    {
+        JsonElement schema = Tools.Single(t => t.Name == PlacementDeleteTools.Tool).OutputSchema!.Value;
+        Assert.DoesNotContain(schema.GetProperty("required").EnumerateArray(), field => field.GetString() is "alsoRemoved" or "changed" or "changedTotal");
+        JsonElement properties = schema.GetProperty("properties");
+        JsonElement points = properties.GetProperty("alsoRemoved").GetProperty("items");
+        Assert.Equal(["type", "oid", "kind", "name"], points.GetProperty("required").EnumerateArray().Select(p => p.GetString()));
+        JsonElement changes = properties.GetProperty("changed");
+        Assert.Equal(20, changes.GetProperty("maxItems").GetInt32());
+        Assert.Equal(["changed", "added"], Enum(changes.GetProperty("items").GetProperty("properties").GetProperty("change")));
+        Assert.Equal("integer", properties.GetProperty("changedTotal").GetProperty("type").GetString());
+    }
+
+    [Fact]
     public void ConnectionOptions_AreOptionalAndRestrictedToTheirItemKinds()
     {
         JsonElement[] branches = Tools.Single(t => t.Name == ConnectionCreateTools.Tool).InputSchema

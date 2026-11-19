@@ -106,7 +106,7 @@ public sealed class PlacementRemoverTests
         BridgeError connectionError = Assert.Throws<BridgeErrorException>(() => new EplanPlacementRemover().Prepare("project", page.Name, [Locator(connection)])).Error;
 
         Assert.Equal("Invalid arguments: Block members and property text cannot be deleted separately.", propertyError.Message);
-        Assert.Equal("Invalid arguments: Cannot delete DynamicConnectionLine: devices, connections and blocks are excluded.", connectionError.Message);
+        Assert.Equal("Invalid arguments: Cannot delete DynamicConnectionLine: select a supported independent graphic or function placement, including cable definition lines.", connectionError.Message);
         Assert.Equal(ErrorReason.InvalidArgument, propertyError.Reason);
         Assert.Equal(ErrorReason.InvalidArgument, connectionError.Reason);
     }

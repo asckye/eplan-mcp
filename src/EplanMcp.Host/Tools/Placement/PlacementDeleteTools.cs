@@ -124,6 +124,19 @@ internal sealed class PlacementDeleteTools
                 "dryRun": {"type":"boolean"},
                 "recovered": {"type":"boolean"},
                 "backup": {"type":["string","null"]},
+                "alsoRemoved": {
+                  "type":"array","minItems":1,"items":{
+                    "type":"object","additionalProperties":false,"required":["type","oid","kind","name"],
+                    "properties":{"type":{"type":"integer"},"oid":{"type":"integer"},"kind":{"const":"ConnectionDefinitionPoint"},"name":{"type":["string","null"]}}
+                  }
+                },
+                "changed": {
+                  "type":"array","minItems":1,"maxItems":20,"items":{
+                    "type":"object","additionalProperties":false,"required":["type","oid","kind","name","change"],
+                    "properties":{"type":{"type":"integer"},"oid":{"type":"integer"},"kind":{"type":"string"},"name":{"type":["string","null"]},"change":{"enum":["changed","added"]}}
+                  }
+                },
+                "changedTotal":{"type":"integer","minimum":21},
                 "warning": {"type":["string","null"]},
                 "hint": {"type":["string","null"]},
                 "unplaced": {"type":"array","items":{"type":"string"}},
@@ -144,7 +157,7 @@ internal sealed class PlacementDeleteTools
                 },
                 {
                   "required": ["unplaced","dependents"],
-                  "not": {"required":["page"]},
+                  "not": {"anyOf":[{"required":["page"]},{"required":["changed"]},{"required":["alsoRemoved"]},{"required":["changedTotal"]}]},
                   "properties": {
                     "items": {"items":{
                       "type": "object",

@@ -190,9 +190,7 @@ public sealed class PlacementDeleteTests
     }
 
     [Theory]
-    [InlineData("change")]
     [InlineData("remove")]
-    [InlineData("add")]
     [InlineData("target")]
     [InlineData("target_connection")]
     [InlineData("property")]
@@ -204,14 +202,8 @@ public sealed class PlacementDeleteTests
             {
                 switch (mutation)
                 {
-                    case "change":
-                        page.Placements[0].Locator.Digest = new string('c', 64);
-                        break;
                     case "remove":
                         page.Placements.Clear();
-                        break;
-                    case "add":
-                        page.Placements.Add(World.Row("Text", 4));
                         break;
                     case "target":
                         DrawingPlacement target = World.Row("Function", 1);
@@ -234,17 +226,19 @@ public sealed class PlacementDeleteTests
         };
         JObject input = world.Input();
         WritePlan plan = world.Plan(input);
+        world.Page.Placements[1].Properties["name"] = "Neighbour";
         string before = world.Page.Fingerprint();
 
         BridgeError error = Assert.Throws<BridgeErrorException>(() => world.Execute(input, plan)).Error;
 
         Assert.Equal(ErrorReason.EplanOperationFailed, error.Reason);
         Assert.Equal(ExecutionState.RolledBack, error.Execution);
+        Assert.Contains(mutation == "remove" ? "missing: Line 4/2 Neighbour" : "remaining:", error.Message, StringComparison.Ordinal);
         Assert.Equal(before, world.Page.Fingerprint());
     }
 
     [Fact]
-    public void GraphicsOnlyDeletionStillRollsBackAutoconnectChanges()
+    public void GraphicsOnlyDeletionReportsAutoconnectChanges()
     {
         var world = new World("Line")
         {
@@ -254,11 +248,9 @@ public sealed class PlacementDeleteTests
         JObject input = world.Input();
         WritePlan plan = world.Plan(input);
 
-        BridgeError error = Assert.Throws<BridgeErrorException>(() => world.Execute(input, plan)).Error;
-
-        Assert.Equal(ErrorReason.EplanOperationFailed, error.Reason);
-        Assert.Equal(ExecutionState.RolledBack, error.Execution);
-        Assert.Equal(plan.Fingerprint, world.Page.Fingerprint());
+        JObject result = world.Execute(input, plan);
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal("DynamicConnectionLine", (string?)result["changed"]![0]!["kind"]);
     }
 
     [Theory]
@@ -392,12 +384,10 @@ public sealed class PlacementDeleteTests
         Assert.Empty(world.Transactions.Calls);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void PartialFailureOrUnexpectedChangeRollsBackEverything(bool unexpected)
+    [Fact]
+    public void PartialFailureRollsBackEverything()
     {
-        var world = new World("Line") { Unexpected = unexpected, ThrowAfterRemove = !unexpected };
+        var world = new World("Line") { ThrowAfterRemove = true };
         JObject input = world.Input();
         WritePlan plan = world.Plan(input);
         BridgeError error = Assert.Throws<BridgeErrorException>(() => world.Execute(input, plan)).Error;
@@ -405,12 +395,40 @@ public sealed class PlacementDeleteTests
         Assert.Equal(2, world.Page.Placements.Count);
     }
 
+    [Fact]
+    public void CableDeletionPreviewsItsDefinitionPointsAndReportsTheirRemoval()
+    {
+        var world = new World("Cable") { AfterRemove = page => page.Placements.RemoveAll(p => p.Kind == "ConnectionDefinitionPoint") };
+        world.Page.Placements.Add(World.Row("ConnectionDefinitionPoint", 3));
+        JObject input = world.Input();
+        WritePlan plan = world.Plan(input);
+        Assert.Equal("Removes the cable definition line; EPLAN also removes the connection definition points it placed on the wires.", Assert.Single(plan.Changes).OldValue);
+        JObject result = world.Execute(input, plan);
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal("Line", Assert.Single(world.Page.Placements).Kind);
+        Assert.True(JToken.DeepEquals(JArray.Parse("""[{"type":4,"oid":3,"kind":"ConnectionDefinitionPoint","name":null}]"""), result["alsoRemoved"]));
+        Assert.Null(result["changed"]);
+    }
+
+    [Fact]
+    public void DeviceDeletionReportsItsUpdatedNeighbour()
+    {
+        var world = new World("Function") { AfterRemove = page => page.Placements[0].Locator.Digest = new string('c', 64) };
+        world.Page.Placements[1].Properties["name"] = "PLC input";
+        JObject input = world.Input();
+        JObject result = world.Execute(input, world.Plan(input));
+        Assert.Equal(ExecutionState.Committed, (string?)result["execution"]);
+        Assert.Equal("EPLAN also updated 1 other object(s) on the page; see changed.", (string?)result["warning"]);
+        Assert.True(JToken.DeepEquals(JArray.Parse("""[{"type":4,"oid":2,"kind":"Line","name":"PLC input","change":"changed"}]"""), result["changed"]));
+        Assert.Null(result["changedTotal"]);
+        Assert.Null(result["alsoRemoved"]);
+    }
+
     private sealed class World : IPageDrawingReader, IPlacementRemover
     {
         public PageDrawingGeometry Page { get; set; }
         public FakeTransactions Transactions { get; } = new();
         public int Backups { get; private set; }
-        public bool Unexpected { get; init; }
         public bool ThrowAfterRemove { get; init; }
         public bool MissingPage { get; set; }
         public Action<PageDrawingGeometry>? AfterRemove { get; init; }
@@ -436,8 +454,6 @@ public sealed class PlacementDeleteTests
         {
             Page.Placements.RemoveAll(p => items.Any(l => DrawingLocators.Matches(l, p.Locator) || p.Parent is { } parent && parent.Type == l.Type && parent.Oid == l.Oid));
             AfterRemove?.Invoke(Page);
-            if (Unexpected)
-            { Page.Placements[0].Locator.Digest = new string('c', 64); }
             if (ThrowAfterRemove)
             { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Injected failure."); }
         };

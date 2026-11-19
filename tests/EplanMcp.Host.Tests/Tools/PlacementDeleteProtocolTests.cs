@@ -86,7 +86,11 @@ public sealed class PlacementDeleteProtocolTests
             plan.Details = new() { ["preview"] = "{\"project\":\"Line1\",\"page\":\"page\",\"fingerprint\":\"f1\",\"items\":[{\"type\":4,\"oid\":1}]}" };
             return plan;
         };
-        harness.Bridge.Handlers[OperationNames.PlacementDeleteExecute] = _ => JsonNode.Parse("{\"project\":\"Line1\",\"page\":\"page\",\"fingerprint\":\"f1\",\"items\":[{\"type\":4,\"oid\":1}]}")!.AsObject();
+        harness.Bridge.Handlers[OperationNames.PlacementDeleteExecute] = _ => JsonNode.Parse("""
+            {"project":"Line1","page":"page","fingerprint":"f1","items":[{"type":4,"oid":1}],
+             "alsoRemoved":[{"type":5,"oid":2,"kind":"ConnectionDefinitionPoint","name":null}],
+             "changed":[{"type":4,"oid":3,"kind":"PLC","name":"PLC1","change":"changed"}]}
+            """)!.AsObject();
         await PreviewProtocolHarness.RunAsync(harness, async client =>
         {
             Dictionary<string, object?> args = new() { ["project"] = "Line1", ["page"] = "page", ["items"] = new[] { new { project = harness.ProjectPath, page = "page", type = 4, oid = 1, digest = new string('a', 64) } } };
@@ -109,6 +113,8 @@ public sealed class PlacementDeleteProtocolTests
             {
                 Assert.Single(harness.Bridge.Writes);
                 Assert.NotNull(result.GetProperty("backup").GetString());
+                Assert.Equal(JsonValueKind.Null, result.GetProperty("alsoRemoved")[0].GetProperty("name").ValueKind);
+                Assert.Equal("changed", result.GetProperty("changed")[0].GetProperty("change").GetString());
             }
         });
     }

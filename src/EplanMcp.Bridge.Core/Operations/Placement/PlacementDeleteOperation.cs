@@ -57,7 +57,7 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
                 }
                 if (!Allowed(row.Kind))
                 {
-                    throw WriteArguments.Invalid([$"Cannot delete {row.Kind}: only independent graphical placements are allowed; devices, connections and blocks are excluded."]);
+                    throw WriteArguments.Invalid([$"Cannot delete {row.Kind}: select a supported independent graphic or function placement, including cable definition lines."]);
                 }
                 targets.Add(row);
             }
@@ -93,7 +93,9 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
                         Action = "delete",
                         Kind = function ? "function" : "drawing",
                         Name = function ? name + " (" + row.Kind + ")" : name,
-                        OldValue = function ? "Removing the last placed function also deletes its device and part references." : null
+                        OldValue = row.Kind == "Cable"
+                            ? "Removes the cable definition line; EPLAN also removes the connection definition points it placed on the wires."
+                            : function ? "Removing the last placed function also deletes its device and part references." : null
                     };
                 }).ToList(),
                 Details = new() { ["preview"] = result.ToString(Formatting.None) }
@@ -103,12 +105,7 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
         string unchanged = before.Fingerprint();
         PageDrawingGeometry expected = Read(project.Path, before.Page);
         expected.Placements.RemoveAll(p => items.Any(l => DrawingLocators.Matches(l, p.Locator) || p.Parent is { } parent && parent.Type == l.Type && parent.Oid == l.Oid));
-        PageDrawingGeometry? expectedWithoutConnections = hasFunctions ? new PageDrawingGeometry
-        {
-            GridSize = expected.GridSize,
-            PageSize = expected.PageSize,
-            Placements = expected.Placements.Where(p => p.Kind is not ("Connection" or "DynamicConnectionLine")).ToList()
-        } : null;
+        PlacementDeleteReadback? readback = null;
         Committed<bool> committed = TransactionRunner.Run(transactions, Tool, () =>
         {
             remove();
@@ -116,16 +113,8 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
         }, verifyCommitted: _ =>
         {
             PageDrawingGeometry actual = Read(project.Path, before.Page);
-            bool targetsRemain = hasFunctions && actual.Placements.Any(p => items.Any(l => p.Locator.Type == l.Type && p.Locator.Oid == l.Oid
-                || p.Parent is { } parent && parent.Type == l.Type && parent.Oid == l.Oid));
-            if (hasFunctions)
-            {
-                actual.Placements.RemoveAll(p => p.Kind is "Connection" or "DynamicConnectionLine");
-            }
-            if (targetsRemain || actual.Fingerprint() != (expectedWithoutConnections ?? expected).Fingerprint())
-            {
-                throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Deletion changed objects outside the plan or left targets behind.");
-            }
+            readback = PlacementDeleteReadback.Compare(expected.Placements, actual.Placements, targets, targets.Any(p => p.Kind == "Cable"));
+            readback.Verify();
         }, verifyRollback: () =>
         {
             if (Read(project.Path, before.Page).Fingerprint() != unchanged)
@@ -134,7 +123,7 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
             }
         });
         result["execution"] = ExecutionState.Committed;
-        result["warning"] = committed.Warning;
+        readback!.AddTo(result, committed.Warning);
         if (hasFunctions)
         {
             result["hint"] = "Call eplan_connection_generate for the page so connections follow the removed symbols.";
@@ -143,10 +132,10 @@ public class PlacementDeleteOperation(IProjectCatalog catalog, IPageDrawingReade
     }
 
     // MX_NFPA 2026-11-07: SPECIAL corners and T-nodes read as SymbolReference; removing one changes the connections like a function.
-    // Codex review eval 2026-11-10: potential points and potential or connection definition points change the connections' potential,
-    // colour and cross-section, so they are removed and regenerated the same way (A129).
-    private static bool IsFunction(string kind) => kind is "Function" or "Terminal" or "InterruptionPoint" or "BoxedDevice" or "PLC" or "SymbolReference" or "LocationBox"
-        or "PotentialDefinition" or "ConnectionDefinitionPoint";
+    // A129: potential points and potential or connection definition points change the connections' potential,
+    // colour and cross-section, so they are removed and regenerated the same way.
+    internal static bool IsFunction(string kind) => kind is "Function" or "Terminal" or "InterruptionPoint" or "BoxedDevice" or "PLC" or "SymbolReference" or "LocationBox"
+        or "PotentialDefinition" or "ConnectionDefinitionPoint" or "Cable";
     private PageDrawingGeometry Read(string project, string page) => drawings.Read(project, page) ?? throw new BridgeErrorException(execute ? ErrorReason.PlanStale : ErrorReason.PageNotFound, "Read the target page with eplan_page_get.");
     private static BridgeErrorException Stale() => new(ErrorReason.PlanStale, "A drawing locator or page changed; call eplan_page_get with include_drawings again.");
 }

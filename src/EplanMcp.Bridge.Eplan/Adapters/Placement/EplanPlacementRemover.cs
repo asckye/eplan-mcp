@@ -33,7 +33,7 @@ internal sealed class EplanPlacementRemover : IPlacementRemover
             if (members.Contains(placement.ToStringIdentifier()) || placement is PropertyPlacement)
             { throw WriteArguments.Invalid(["Block members and property text cannot be deleted separately."]); }
             if (!PlacementDeleteOperation.Allowed(placement.GetType().Name))
-            { throw WriteArguments.Invalid([$"Cannot delete {placement.GetType().Name}: devices, connections and blocks are excluded."]); }
+            { throw WriteArguments.Invalid([$"Cannot delete {placement.GetType().Name}: select a supported independent graphic or function placement, including cable definition lines."]); }
         }
         return selected;
     }

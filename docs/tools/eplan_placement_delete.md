@@ -26,9 +26,13 @@
 | `unplaced` | string[] | 否 | 省略 | 1–20 个互异的完整设备标识。使用时省略 `page` 和 `items`。 |
 | `dry_run` | boolean | 否 | true | 预览删除清单，显式传 `false` 才进入审批和删除流程。 |
 
-输出含 `project`、`page`、`items`（批准对象的 type/oid）、`fingerprint`、`execution`、`dryRun`、`recovered`、`backup`、`warning` 和 `hint`。纯图形删除提交后核对目标消失且其它已发现对象摘要不变；预览不审批、不备份、不删除。
+输出含 `project`、`page`、`items`（批准对象的 type/oid）、`fingerprint`、`execution`、`dryRun`、`recovered`、`backup`、`warning` 和 `hint`。预览不审批、不备份、不删除。
 
-支持删除 `Function`、`Terminal`、`InterruptionPoint`、`BoxedDevice`、`PLC` 和 `SymbolReference`（SPECIAL 角连接、T 节点；2026-11-07 MX_NFPA 第 5 页实测读作 `SymbolReference`）；DCP 连接点读作 `Function`。2026-11-10 起也支持 `PotentialDefinition`（电位连接点和电位定义点，A129）和 `ConnectionDefinitionPoint`（连接定义点）：它们决定导线的电位、颜色和截面，删除后同样提示重新生成连接（Codex 绘图评测里模型画错电位点后删不掉）。预览逐项显示功能名称及类型。删除功能连带删除其属性文字，删除器件最后一个已放置功能时也会删除器件及其部件引用。含功能的删除仅允许自动连线变化或消失，其余对象仍按身份和摘要核对；失败回滚仍校验完整页指纹。提交后的 `hint` 提示调用 `eplan_connection_generate` 更新该页连接。该扩展的实机验证待完成。
+支持删除 `Function`、`Terminal`、`InterruptionPoint`、`BoxedDevice`、`PLC` 和 `SymbolReference`（SPECIAL 角连接、T 节点；2026-11-07 MX_NFPA 第 5 页实测读作 `SymbolReference`）；DCP 连接点读作 `Function`。2026-11-10 起也支持 `PotentialDefinition`（电位连接点和电位定义点，A129）和 `ConnectionDefinitionPoint`（连接定义点）：它们决定导线的电位、颜色和截面，删除后同样提示重新生成连接。预览逐项显示功能名称及类型。删除功能连带删除其属性文字，删除器件最后一个已放置功能时也会删除器件及其部件引用。含功能的删除忽略自动连接行的变化。提交后的 `hint` 提示调用 `eplan_connection_generate` 更新该页连接。该扩展的实机验证待完成。
+支持删除电缆定义线（`Cable`）。EPLAN 同时删除它在导线交点放置的连接定义点。可选的 `alsoRemoved` 列出随之消失的点，每项含 `type`、`oid`、`kind` 和可为空的 `name`。
+
+提交后按根对象核对。目标或其成员残留、无关根对象消失会触发补偿撤销，错误中最多列出 10 项。撤销并核对完整页指纹成功时为 `rolled_back`，无法验证撤销时为 `OUTCOME_UNKNOWN`。其它根对象的摘要或其子行摘要集合变化，以及新增根对象，均随提交结果返回。可选的 `changed` 最多列出 20 项，字段与 `alsoRemoved` 相同，另含 `change`（`changed` 或 `added`）。有变化时 `warning` 给出总数，超过 20 项时还返回整数 `changedTotal`。
+
 删除不能由新增可选参数替代，独立破坏性工具让审批清楚显示操作目的。宏框删除只移除框，引用对象保留（A87）；其它组合对象不展开。
 
 ### 按标识删除未放置功能
