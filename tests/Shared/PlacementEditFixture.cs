@@ -56,7 +56,7 @@ internal sealed class PlacementEditFixture : IPlacementEditor, ITransactionScope
         ["operation"] = op,
         ["locators"] = new JArray((indices.Length == 0 ? [0] : indices).Select(i => Data["objects"]![i]!["locator"]!.DeepClone()))
     };
-    public JObject Inspect(string project, string page, bool symbolEdit = false) => (JObject)Data.DeepClone();
+    public JObject Inspect(string project, string page, bool symbolEdit = false, bool rename = false) => (JObject)Data.DeepClone();
     public PageScene Read(string project, string page) => Data["scene"]!.ToObject<PageScene>(BridgeJson.Serializer)!;
     public Action Prepare(PageScene scene, JArray moves) => () =>
     {
@@ -71,6 +71,8 @@ internal sealed class PlacementEditFixture : IPlacementEditor, ITransactionScope
             row["bounds"] = root["bounds"]!.DeepClone();
         }
     };
+    public Dictionary<string, int>? Counts { get; set; } = new(StringComparer.Ordinal);
+    public IReadOnlyDictionary<string, int>? InterruptionCounts(string projectPath) => Counts;
     public Action PrepareEdit(JObject input, JObject before) => () => Mutation?.Invoke();
     public ITransactionScope Begin(string undoDescription)
     {

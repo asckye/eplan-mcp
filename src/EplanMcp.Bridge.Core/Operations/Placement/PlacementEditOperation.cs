@@ -9,20 +9,28 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
     protected override JObject Execute(JObject args)
     {
         JObject input = execute ? args["request"] as JObject ?? throw WriteArguments.NotStarted(WriteArguments.Invalid(["Supply request."])) : args;
-        bool symbolEdit = (string?)input["operation"] is "set_variant" or "set_arrangement";
+        bool rename = (string?)input["operation"] == "rename";
+        bool symbolEdit = (string?)input["operation"] is "set_variant" or "set_arrangement" or "rename";
         JObject before, plan;
         try
         {
-            before = editor.Inspect((string?)input["project"] ?? "", (string?)input["page"] ?? "", symbolEdit);
+            before = editor.Inspect((string?)input["project"] ?? "", (string?)input["page"] ?? "", symbolEdit, rename);
             if (execute)
             { WriteArguments.RequirePlanned((string?)args["projectPath"], before["scene"]!["project"]!.ToObject<OpenProject>()!.Path); }
-            plan = symbolEdit ? PlacementSymbolEdit.Plan(input, before, symbols, execute ? (string?)args["fingerprint"] ?? "" : null) : PlacementEditPlanner.Plan(input, before, execute ? (string?)args["fingerprint"] ?? "" : null);
+            plan = symbolEdit ? PlacementSymbolEdit.Plan(input, before, editor, symbols, execute ? (string?)args["fingerprint"] ?? "" : null) : PlacementEditPlanner.Plan(input, before, execute ? (string?)args["fingerprint"] ?? "" : null);
         }
         catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
+        if (rename && (bool)plan["noOp"]!)
+        {
+            // The Host returns this preview directly when the plan has no changes.
+            PlacementSymbolEdit.Verify(before, before, plan, reportRename: true);
+        }
         if (!execute)
         {
             var scene = before["scene"]!.ToObject<PageScene>()!;
-            var changes = (bool)plan["noOp"]! ? new List<PlannedChange>() : plan["predicted"]!.Select(p => new PlannedChange { Action = "edit", Kind = "placement", Name = scene.Page.Page + ":" + PlacementEditPlanner.Id(p["locator"]!), Property = (string)plan["operation"]!, NewValue = "position=" + p["location"]!.ToString(Formatting.None) + "; angle(rad)=" + p["angle"] + "; tag=" + p["properties"]?["name"] }).ToList();
+            List<PlannedChange> changes = (bool)plan["noOp"]! ? [] : plan["predicted"]!
+                .Where(p => (bool?)p["noOp"] != true)
+                .Select(p => PlannedEdit(scene.Page.Page, (string)plan["operation"]!, p)).ToList();
             changes.AddRange(plan["removedConnections"]!.Select(c => new PlannedChange { Action = "delete", Kind = "connection", Name = PlacementEditPlanner.Id(c), OldValue = c.ToString(Formatting.None) }));
             return (JObject)Bridge.Core.Protocol.BridgeJson.FromObject(new WritePlan { Project = scene.Project.Name, ProjectPath = scene.Project.Path, Fingerprint = (string)plan["fingerprint"]!, Changes = changes, Details = new() { ["preview"] = Public(plan).ToString(Formatting.None) } });
         }
@@ -41,10 +49,21 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
             try
             { change = editor.PrepareEdit(input, before); }
             catch (BridgeErrorException ex) { throw WriteArguments.NotStarted(ex); }
-            void Verify()
-            { after = editor.Inspect((string)input["project"]!, (string)input["page"]!, symbolEdit); if (symbolEdit) { PlacementSymbolEdit.Verify(before, after, plan); } else { VerifyResult(before, after, plan); } }
-            Action restore = () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { if (!JToken.DeepEquals(before, editor.Inspect((string)input["project"]!, (string)input["page"]!, symbolEdit))) { throw Mismatch(); } return true; });
-            Committed<bool> result = TransactionRunner.Run(transactions, PlacementEditPlanner.Tool, () => { change(); Verify(); return true; }, _ => true, _ => Verify(), restore);
+            void Verify(bool committed)
+            {
+                after = editor.Inspect((string)input["project"]!, (string)input["page"]!, symbolEdit, rename);
+                if (symbolEdit)
+                { PlacementSymbolEdit.Verify(before, after, plan, reportRename: committed); }
+                else
+                { VerifyResult(before, after, plan); }
+            }
+            Action restore = () => new OperationContext(OperationContext.Current.RequestId, true, null).Run(() => { if (!JToken.DeepEquals(before, editor.Inspect((string)input["project"]!, (string)input["page"]!, symbolEdit, rename))) { throw Mismatch(); } return true; });
+            Committed<bool> result = TransactionRunner.Run(transactions, PlacementEditPlanner.Tool, () =>
+            {
+                change();
+                Verify(committed: false);
+                return true;
+            }, _ => true, _ => Verify(committed: true), restore);
             plan["warning"] = string.Join(" ", new[] { (string?)plan["warning"], result.Warning }.Where(w => !string.IsNullOrEmpty(w)));
         }
         if ((string?)input["response_format"] == "detailed" && after is not null)
@@ -52,6 +71,31 @@ public class PlacementEditOperation(IPlacementEditor editor, ITransactionScopeFa
         plan["execution"] = ExecutionState.Committed;
         return Public(plan);
     }
+    private static PlannedChange PlannedEdit(string page, string operation, JToken row)
+    {
+        string target = page + ":" + PlacementEditPlanner.Id(row["locator"]!);
+        if (operation == "rename")
+        {
+            return new PlannedChange
+            {
+                Action = "update",
+                Kind = "InterruptionPoint",
+                Name = target,
+                Property = "name",
+                OldValue = (string?)row["oldName"],
+                NewValue = (string?)row["name"]
+            };
+        }
+        return new PlannedChange
+        {
+            Action = "edit",
+            Kind = "placement",
+            Name = target,
+            Property = operation,
+            NewValue = "position=" + row["location"]!.ToString(Formatting.None) + "; angle(rad)=" + row["angle"] + "; tag=" + row["properties"]?["name"]
+        };
+    }
+
     private sealed class Result(JObject data) : JObject(data), IWriteExecution { public string Execution => (string?)this["execution"] ?? ExecutionState.NotStarted; }
     public static JObject Public(JObject plan) { var result = new Result(plan); result.Remove("moveInput"); result.Remove("movePlan"); return result; }
     public static void VerifyResult(JObject before, JObject after, JObject plan)

@@ -35,6 +35,9 @@ internal sealed class DeviceUpdateRequest
     public DevicePartTarget? Main { get; private set; }
     public PartSearchItem? Part { get; private set; }
     public int Count { get; private set; } = 1;
+    public int? Position { get; private set; }
+    public string? ReplacePart { get; private set; }
+    public DevicePart? OldPart => Position is int index ? Main!.Parts[index] : null;
     public bool UpdateFromParts { get; private set; }
     public string ResultTag => !Rename && Main is not null ? Main.Name : NewTag;
     public string PreviousTag => !Rename && Main is not null ? Main.Name : Device.Tag;
@@ -48,24 +51,7 @@ internal sealed class DeviceUpdateRequest
     public static DeviceUpdateRequest Check(DeviceUpdateArgs args, IProjectCatalog catalog, IDeviceReader reader, IDeviceRenamer renamer,
         IPartsDatabase? parts = null, IDevicePartAssigner? assigner = null)
     {
-        var violations = new List<string>();
-        WriteArguments.RequireProject(args.Project, violations);
-        string tag = args.Tag?.Trim() ?? string.Empty;
-        string newTag = args.NewTag?.Trim() ?? string.Empty;
-        string? part = args.Part?.Trim();
-        AddIf(violations, tag.Length == 0, "'tag' is required: the device's tag, such as =GAA+A1-KF1 or -KF1.");
-        AddIf(violations, newTag.Length == 0 && part is null && !args.UpdateFromParts, "At least one of 'new_tag', 'part' or 'update_from_parts' is required.");
-        AddIf(violations, args.UpdateFromParts && (newTag.Length > 0 || part is not null || assigner is null), "'update_from_parts' stands alone: assign the parts and rename in earlier calls.");
-        AddIf(violations, newTag.Length > 0 && NewTagProblem(newTag) is not null, "'new_tag' " + NewTagProblem(newTag));
-        AddIf(violations, part is not null && (part.Length == 0 || part.Any(char.IsControl)), "'part' must be a nonempty part number without control characters.");
-        AddIf(violations, args.Variant is not null && (part is null || string.IsNullOrWhiteSpace(args.Variant) || args.Variant.Any(char.IsControl)), "'variant' requires 'part' and must be nonempty without control characters.");
-        AddIf(violations, args.Count.HasValue && (part is null || args.Count <= 0), "'count' requires 'part' and must be a positive integer.");
-        AddIf(violations, part is not null && (parts is null || assigner is null), "Use eplan_device_update for part assignment; this execution path accepts renaming only.");
-        if (violations.Count > 0)
-        {
-            throw WriteArguments.Invalid(violations);
-        }
-
+        (string tag, string newTag, string? part) = Validate(args, parts, assigner);
         OpenProject project = WriteArguments.Writable(catalog, args.Project);
         DevicePartTarget? main = part is null && !args.UpdateFromParts ? null : MainFunction(assigner!, project.Path, tag, includeTerminals: newTag.Length == 0);
         if (args.UpdateFromParts && main!.Parts.Count == 0)
@@ -93,24 +79,13 @@ internal sealed class DeviceUpdateRequest
                     && (string.Equals(name, target, StringComparison.OrdinalIgnoreCase) || name.StartsWith(target + ":", StringComparison.OrdinalIgnoreCase)))
                 .Distinct(StringComparer.Ordinal),
         ];
-        PartSearchItem? selected = null;
-        if (part is not null)
-        {
-            PartsDatabaseContent database = parts!.Read(null);
-            List<PartSearchItem> exact = [.. database.Parts.Where(p => string.Equals(p.PartNumber, part, StringComparison.Ordinal))];
-            if (exact.Count == 0)
-            { exact = [.. database.Parts.Where(p => string.Equals(p.PartNumber, part, StringComparison.OrdinalIgnoreCase))]; }
-            string[] numbers = [.. exact.Select(p => p.PartNumber).Distinct(StringComparer.Ordinal)];
-            if (numbers.Length > 1)
-            { throw ProjectResolver.Ambiguous("part", part, numbers, "Pass the exact part number from eplan_part_search."); }
-            if (numbers.Length == 0)
-            { throw new BridgeErrorException(ErrorReason.PartNotFound, "No matching part exists; use eplan_part_search to find the part number."); }
-            string variant = args.Variant?.Trim() ?? "1";
-            selected = exact.FirstOrDefault(p => string.Equals(p.Variant, variant, StringComparison.Ordinal))
-                ?? throw Invalid($"Part '{numbers[0]}' has no variant '{variant}'; use eplan_part_search to find its variants.");
-            if (main!.Parts.Any(p => p.PartNumber == selected.PartNumber && p.Variant == selected.Variant))
-            { throw Invalid("There is nothing to change: the function already references this part and variant."); }
-        }
+        int? position = args.ReplacePart is null ? null : ReplacementPosition(main!.Parts, args.ReplacePart.Trim());
+        if (position is int oldIndex && args.Count is null && main!.Parts[oldIndex].Count <= 0)
+        { throw Invalid("Supply a positive count: the reference being replaced has no positive quantity to inherit."); }
+        PartSearchItem? selected = part is null ? null : SelectPart(parts!, part, args.Variant);
+        if (selected is not null && (main!.Parts.Any(p => p.PartNumber == selected.PartNumber && p.Variant == selected.Variant)
+            || position is int replaced && args.ReplacePart!.Trim() == part && main.Parts[replaced].Variant == selected.Variant))
+        { throw Invalid("There is nothing to change: the function already references this part and variant."); }
         DeviceNames? destination = taken.Length > 0 && device.Functions.Count > 0 && device.Functions.All(f => !f.IsMain && DeviceNames.PointCategory(f.Category))
             ? renamer.ReadDevice(project.Path, target) : null;
         return new DeviceUpdateRequest(project, device, target, taken)
@@ -118,10 +93,72 @@ internal sealed class DeviceUpdateRequest
             Rename = newTag.Length > 0,
             Main = main,
             Part = selected,
-            Count = args.Count ?? 1,
+            Position = position,
+            ReplacePart = args.ReplacePart?.Trim(),
+            Count = args.Count ?? (position is int index ? main!.Parts[index].Count : 1),
             UpdateFromParts = args.UpdateFromParts,
             MergeTarget = destination?.Functions.Any(f => f.Category == "PLCBox") == true ? destination : null,
         };
+    }
+
+    private static (string Tag, string NewTag, string? Part) Validate(DeviceUpdateArgs args, IPartsDatabase? parts, IDevicePartAssigner? assigner)
+    {
+        var violations = new List<string>();
+        WriteArguments.RequireProject(args.Project, violations);
+        string tag = args.Tag?.Trim() ?? string.Empty;
+        string newTag = args.NewTag?.Trim() ?? string.Empty;
+        string? part = args.Part?.Trim();
+        AddIf(violations, tag.Length == 0, "'tag' is required: the device's tag, such as =GAA+A1-KF1 or -KF1.");
+        AddIf(violations, newTag.Length == 0 && part is null && !args.UpdateFromParts, "At least one of 'new_tag', 'part' or 'update_from_parts' is required.");
+        AddIf(violations, args.UpdateFromParts && (newTag.Length > 0 || part is not null || assigner is null), "'update_from_parts' stands alone: assign the parts and rename in earlier calls.");
+        AddIf(violations, newTag.Length > 0 && NewTagProblem(newTag) is not null, "'new_tag' " + NewTagProblem(newTag));
+        AddIf(violations, part is not null && (part.Length == 0 || part.Any(char.IsControl)), "'part' must be a nonempty part number without control characters.");
+        AddIf(violations, args.ReplacePart is not null && (part is null || args.UpdateFromParts || string.IsNullOrWhiteSpace(args.ReplacePart) || args.ReplacePart.Any(char.IsControl)),
+            "'replace_part' requires 'part', excludes 'update_from_parts' and must be nonempty without control characters.");
+        AddIf(violations, args.Variant is not null && (part is null || string.IsNullOrWhiteSpace(args.Variant) || args.Variant.Any(char.IsControl)), "'variant' requires 'part' and must be nonempty without control characters.");
+        AddIf(violations, args.Count.HasValue && (part is null || args.Count <= 0), "'count' requires 'part' and must be a positive integer.");
+        AddIf(violations, part is not null && (parts is null || assigner is null), "Use eplan_device_update for part assignment; this execution path accepts renaming only.");
+        if (violations.Count > 0)
+        {
+            throw WriteArguments.Invalid(violations);
+        }
+
+        return (tag, newTag, part);
+    }
+
+    private static PartSearchItem SelectPart(IPartsDatabase parts, string part, string? requestedVariant)
+    {
+        PartsDatabaseContent database = parts.Read(null);
+        List<PartSearchItem> exact = [.. database.Parts.Where(p => string.Equals(p.PartNumber, part, StringComparison.Ordinal))];
+        if (exact.Count == 0)
+        { exact = [.. database.Parts.Where(p => string.Equals(p.PartNumber, part, StringComparison.OrdinalIgnoreCase))]; }
+        string[] numbers = [.. exact.Select(p => p.PartNumber).Distinct(StringComparer.Ordinal)];
+        if (numbers.Length > 1)
+        { throw ProjectResolver.Ambiguous("part", part, numbers, "Pass the exact part number from eplan_part_search."); }
+        if (numbers.Length == 0)
+        { throw new BridgeErrorException(ErrorReason.PartNotFound, "No matching part exists; use eplan_part_search to find the part number."); }
+        string variant = requestedVariant?.Trim() ?? "1";
+        return exact.FirstOrDefault(p => string.Equals(p.Variant, variant, StringComparison.Ordinal))
+            ?? throw Invalid($"Part '{numbers[0]}' has no variant '{variant}'; use eplan_part_search to find its variants.");
+    }
+
+    private static int ReplacementPosition(List<DevicePart> references, string oldNumber)
+    {
+        int[] Matches(StringComparison comparison) => Enumerable.Range(0, references.Count)
+            .Where(i => string.Equals(references[i].PartNumber, oldNumber, comparison)).ToArray();
+        int[] matches = Matches(StringComparison.Ordinal);
+        if (matches.Length == 0)
+        { matches = Matches(StringComparison.OrdinalIgnoreCase); }
+        if (matches.Length == 1)
+        { return matches[0]; }
+        string inventory = references.Count == 0 ? "(none)" : string.Join(", ", references.Select(p => $"{p.PartNumber} / {p.Variant}"));
+        throw Invalid($"'replace_part' must identify exactly one reference. Current references: {inventory}.");
+    }
+
+    internal IEnumerable<DevicePart> ExpectedReferences()
+    {
+        var updated = new DevicePart { PartNumber = Part!.PartNumber, Variant = Part.Variant, Count = Count };
+        return Position is int position ? Main!.Parts.Select((p, i) => i == position ? updated : p) : Main!.Parts.Append(updated);
     }
 
     /// <summary>The plan's state: each function to rename by name and session identifier, and how many carry the new tag.</summary>
@@ -131,10 +168,15 @@ internal sealed class DeviceUpdateRequest
             .Concat(Main is null ? [] : Main.Parts.Select(p => FormattableString.Invariant($"{p.PartNumber}\t{p.Variant}\t{p.Count}")).Append(Main.Id).Append(Main.Name))
             .Concat(Part is null ? [] : new[] { Part.PartNumber, Part.Variant ?? string.Empty })
             .Concat(Part is null || Count == 1 ? [] : ["count " + Count.ToString(CultureInfo.InvariantCulture)])
+            .Concat(ReplacePart is null ? [] : ["replace_part " + ReplacePart])
             .Concat(UpdateFromParts ? ["update from parts"] : []));
 
-    internal static string ReferencesFingerprint(IEnumerable<DevicePart> references) =>
-        Fingerprint.Of(references.Select(p => FormattableString.Invariant($"{p.PartNumber}\t{p.Variant}\t{p.Count}")));
+    internal static bool SameReferences(IEnumerable<DevicePart> actual, IEnumerable<DevicePart> expected)
+    {
+        static (string Part, string? Variant, int Count) Identity(DevicePart reference) =>
+            (reference.PartNumber, reference.Variant, reference.Count);
+        return actual.Select(Identity).SequenceEqual(expected.Select(Identity));
+    }
 
     internal static DevicePartTarget MainFunction(IDevicePartAssigner assigner, string path, string tag, bool includeTerminals = false)
     {
@@ -196,7 +238,7 @@ internal sealed class DeviceUpdateRequest
     private static string? NewTagProblem(string newTag) =>
         newTag.Length == 0 ? "is required: the new tag, in full (=GAA+A1-KF10) or from '-' (-KF10) to keep the structure."
         : newTag.Any(c => char.IsWhiteSpace(c) || char.IsControl(c)) ? "must not contain white space or control characters."
-        : newTag.IndexOf(':') >= 0 ? "must not contain ':'; existing connection point suffixes are preserved."
+        : newTag.IndexOf(':') >= 0 ? "must not contain ':'; existing connection point suffixes are preserved. To rename an interruption point use eplan_placement_edit with operation rename."
         : newTag.LastIndexOf('-') is int dash && (dash < 0 || dash == newTag.Length - 1) ? "needs a device part after '-', such as -KF10."
         : null;
 

@@ -388,7 +388,7 @@ public sealed partial class DevicePartAssignmentTests
                 Name = committed && Mismatch == "name" ? "wrong" : renamer.Renames.Count > 0 && !transactions.Calls.Contains("Rollback") ? renamer.Renames[^1].NewTag : m.Name,
                 Tag = renamer.Renames.Count > 0 && !transactions.Calls.Contains("Rollback") ? renamer.Renames[^1].NewTag : m.Tag,
                 VisibleName = m.VisibleName, Page = m.Page,
-                Parts = committed && Mismatch == "part" ? [] : [.. m.Parts.Select(p => new DevicePart { PartNumber = p.PartNumber, Variant = p.Variant, Count = committed && Mismatch == "count" ? 1 : p.Count })],
+                Parts = committed && Mismatch == "part" ? [] : [.. (committed && Mismatch == "order" ? m.Parts.Take(1).Concat(m.Parts.Skip(1).Reverse()) : m.Parts).Select(p => new DevicePart { PartNumber = p.PartNumber, Variant = p.Variant, Count = committed && Mismatch == "count" ? 1 : p.Count })],
             })];
         }
         public void AddPart(string projectPath, string mainId, string part, string variant, int count = 1)
@@ -398,7 +398,17 @@ public sealed partial class DevicePartAssignmentTests
             Counts.Add(count);
             Targets.Single(m => m.Id == mainId).Parts.Add(new DevicePart { PartNumber = part, Variant = variant, Count = count });
         }
-        public ITransactionScopeFactory PartTransactions(string projectPath) => transactions;
+        public void ReplacePart(string projectPath, string mainId, int position, string part, string variant, int count)
+        {
+            Assert.DoesNotContain("Commit", transactions.Calls);
+            Targets.Single(m => m.Id == mainId).Parts[position] = new DevicePart { PartNumber = part, Variant = variant, Count = count };
+        }
+        public int PartScopes { get; private set; }
+        public ITransactionScopeFactory PartTransactions(string projectPath)
+        {
+            PartScopes++;
+            return transactions;
+        }
         public (int Count, string? Warning) AssignUnplacedFunctions(string projectPath, string tag)
         {
             Assert.Contains("Commit", transactions.Calls);

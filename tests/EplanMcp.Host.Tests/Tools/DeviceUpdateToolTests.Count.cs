@@ -35,6 +35,25 @@ public sealed partial class DeviceUpdateToolTests
     }
 
     [Fact]
+    public async Task ReplacePartCrossesPlanAndExecutionAndReportsOldReference()
+    {
+        _harness.Bridge.Handlers[OperationNames.DeviceUpdateExecute] = _ => new DeviceUpdateData
+        {
+            ReplacedPart = new ReplacedPart { PartNumber = "OLD", Variant = "A", Count = 3 }
+        };
+        await PreviewProtocolHarness.RunAsync(_harness, async client =>
+        {
+            JsonElement result = WriteToolHarness.Structured(await client.CallToolAsync("eplan_device_update", new Dictionary<string, object?>
+            { ["project"] = "Line1", ["tag"] = "-K1", ["part"] = "NEW", ["replace_part"] = "OLD", ["dry_run"] = false }, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.All(_harness.Bridge.Calls.Where(c => c.Operation is OperationNames.DeviceUpdatePlan or OperationNames.DeviceUpdateExecute),
+                c => Assert.Equal("OLD", ((DeviceUpdateArgs)c.Args!).ReplacePart));
+            JsonElement old = result.GetProperty("replacedPart");
+            Assert.Equal(("OLD", "A", 3), (old.GetProperty("partNumber").GetString(), old.GetProperty("variant").GetString(), old.GetProperty("count").GetInt32()));
+            Assert.Contains("update_from_parts", result.GetProperty("hint").GetString(), StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
     public async Task CountViolationFromBridgeReturnsWithoutWrite()
     {
         _harness.Bridge.Handlers[OperationNames.DeviceUpdatePlan] = _ => throw new BridgeCallException(

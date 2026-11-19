@@ -33,17 +33,18 @@ internal sealed class DeviceWriteTools
         OpenWorld = false,
         UseStructuredContent = true,
         OutputSchemaType = typeof(DeviceUpdateResult))]
-    [Description("Renames a device; PLC-only modules may join a PLC box. Appends a part to its main or exact terminal. Give new_tag, part, or both. One undo. Omit/true dry_run previews; false executes. Approval outside scratch. See usage.")]
+    [Description("Renames devices or adds/replaces parts on main functions or exact terminals. One undo. Approval outside scratch.")]
     public static async Task<CallToolResult> DeviceUpdateAsync(
         WritePipeline pipeline,
         [Description("Open project")] string project,
         [Description("Current full or shown tag")] string tag,
-        [Description("New tag; '-' keeps structure")] string? new_tag = null,
+        [Description("New tag; - keeps structure")] string? new_tag = null,
         [Description(WriteToolDefaults.Description)] bool dry_run = WriteToolDefaults.Preview,
         [Description("Part number")] string? part = null,
         [Description("Variant, default 1")] string? variant = null,
-        [Description("Alone: parts' data")] bool update_from_parts = false,
-        [Description("Positive count with part; default 1")] int? count = null,
+        [Description("Transfer part data alone")] bool update_from_parts = false,
+        [Description("Quantity; old count or 1 by default")] int? count = null,
+        [Description("Old number to replace with part")] string? replace_part = null,
         IProgress<ProgressNotificationValue>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -53,14 +54,14 @@ internal sealed class DeviceWriteTools
             return ToolResults.InvalidArguments(violations);
         }
 
-        var args = new DeviceUpdateArgs { Project = project, Tag = tag ?? string.Empty, NewTag = new_tag ?? string.Empty, Part = part, Variant = variant, Count = count, UpdateFromParts = update_from_parts };
+        var args = new DeviceUpdateArgs { Project = project, Tag = tag ?? string.Empty, NewTag = new_tag ?? string.Empty, Part = part, Variant = variant, Count = count, ReplacePart = replace_part, UpdateFromParts = update_from_parts };
         var request = new WriteRequest<DeviceUpdateArgs, DeviceUpdateArgs>(
             UpdateTool,
             ToolTier.Write,
             OperationNames.DeviceUpdatePlan,
             OperationNames.DeviceUpdateExecute,
             args,
-            plan => new DeviceUpdateArgs { Project = args.Project, Tag = args.Tag, NewTag = args.NewTag, Part = args.Part, Variant = args.Variant, Count = args.Count, UpdateFromParts = args.UpdateFromParts, Fingerprint = plan.Fingerprint },
+            plan => new DeviceUpdateArgs { Project = args.Project, Tag = args.Tag, NewTag = args.NewTag, Part = args.Part, Variant = args.Variant, Count = args.Count, ReplacePart = args.ReplacePart, UpdateFromParts = args.UpdateFromParts, Fingerprint = plan.Fingerprint },
             dry_run,
             PageWriteTools.DefaultLimit,
             "Updating the device");
@@ -75,6 +76,9 @@ internal sealed class DeviceWriteTools
         }
 
         bool committed = outcome.Execution == ExecutionState.Committed;
+        ReplacedPart? replaced = outcome.Data?.ReplacedPart;
+        if (outcome.Recovered && outcome.Plan.Details?.GetValueOrDefault("replacedPart") is { } prior)
+        { replaced = JsonSerializer.Deserialize<ReplacedPart>(prior, HostJson.Options); }
         var result = new DeviceUpdateResult
         {
             Project = ResultShaper.CleanText(outcome.Data?.Project ?? outcome.Plan.Project),
@@ -83,6 +87,7 @@ internal sealed class DeviceWriteTools
             Fingerprint = outcome.Plan.Fingerprint,
             Changes = [.. ResultShaper.CleanChanges(outcome.Plan.Changes)],
             Device = outcome.Data is { } data ? Device(data) : Planned(outcome.Plan),
+            ReplacedPart = replaced is { } old ? new ReplacedPart { PartNumber = ResultShaper.CleanText(old.PartNumber), Variant = ResultShaper.CleanText(old.Variant), Count = old.Count } : null,
             AssignedFunctions = outcome.Data?.AssignedFunctions ?? 0,
             Undo = committed ? "AI: " + UpdateTool : null,
             Recovered = outcome.Recovered,
@@ -90,6 +95,12 @@ internal sealed class DeviceWriteTools
                 ? "The response was lost, but EPLAN reported the update as committed; check the device with eplan_device_get."
                 : ResultShaper.CleanText(outcome.Data?.Warning),
         };
+        if (replace_part is not null)
+        {
+            string? warning = outcome.Plan.Details?.GetValueOrDefault("warning");
+            result.Hint = string.Join(" ", new[] { result.Hint, warning, "Call eplan_device_update separately with update_from_parts to transfer the part data." }.Where(h => !string.IsNullOrEmpty(h)));
+            return ToolResults.Success(committed ? "Replaced one part reference. Ctrl+Z restores the update." : "Dry run: would replace one part reference.", result);
+        }
         string what = $"a device and its {ToolResults.Count(Math.Max(0, result.Device.Functions - 1), "auxiliary function")}";
         return ToolResults.Success(
             part is not null ? committed ? "Updated one device and appended one part reference; Ctrl+Z in EPLAN undoes this step." : "Dry run: would update one device and append one part reference. Nothing was changed."

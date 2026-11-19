@@ -10,7 +10,7 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 
 internal sealed partial class EplanPlacementEditor
 {
-    private static JObject InspectSymbols(string projectPath, string pageName)
+    private static JObject InspectSymbols(string projectPath, string pageName, bool rename)
     {
         var target = WriteArguments.Writable(new EplanProjectCatalog(), projectPath);
         projectPath = target.Path;
@@ -18,7 +18,7 @@ internal sealed partial class EplanPlacementEditor
         using var finder = new DMObjectsFinder(project);
         Page page = EplanDeviceReader.FindPage(finder, pageName) ?? throw new BridgeErrorException(EplanMcp.Contracts.ErrorReason.PageNotFound, "Page not found.");
         var objects = new JArray();
-        foreach (Placement root in EplanNativePreconditions.Valid(page.AllPlacements).Where(p => p is not PropertyPlacement))
+        foreach (Placement root in EplanNativePreconditions.Valid(page.AllPlacements).Where(p => rename || p is not PropertyPlacement))
         {
             var identity = EplanObjectReader.Describe(root, root.GetType().Name.ToLowerInvariant());
             SymbolVariant? variant = null;
@@ -27,6 +27,12 @@ internal sealed partial class EplanPlacementEditor
             { variant = root is SymbolReference symbol ? symbol.SymbolVariant : null; }
             catch (Exception ex) when (ex is BaseException or InvalidOperationException) { unreadable = true; }
             var row = new JObject { ["locator"] = JObject.FromObject(new EplanMcp.Contracts.DrawingLocator { Project = projectPath, Page = pageName, Type = identity.Type, Oid = identity.Oid, Digest = SnapshotCanonical.Sha256(JsonConvert.SerializeObject(identity)) }, Bridge.Core.Protocol.BridgeJson.Serializer), ["kind"] = root.GetType().Name, ["location"] = new JArray(root.Location.X, root.Location.Y), ["symbol"] = unreadable ? new JObject() : variant is null ? null : new JObject { ["library"] = variant.SymbolLibraryName, ["name"] = variant.SymbolName, ["variant"] = variant.VariantNr } };
+            if (rename && root is InterruptionPoint point)
+            {
+                row["root"] = point.Group is null;
+                row["name"] = point.Name;
+                row["visibleName"] = point.VisibleName;
+            }
             if (root is SymbolReference reference)
             {
                 row["arrangement"] = EplanSymbolArrangement.SelectedName(reference);
@@ -40,6 +46,22 @@ internal sealed partial class EplanPlacementEditor
         }
         return new JObject { ["scene"] = new JObject { ["project"] = new JObject { ["name"] = project.ProjectName, ["path"] = projectPath }, ["page"] = new JObject { ["page"] = pageName } }, ["objects"] = objects };
     }
+    public IReadOnlyDictionary<string, int>? InterruptionCounts(string projectPath)
+    {
+        MainThread.Assert();
+        try
+        {
+            using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
+            return finder.GetInterruptionPoints(null).GroupBy(p => p.Name, StringComparer.Ordinal)
+                .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+        }
+        catch (Exception ex) when (ex is not (System.OperationCanceledException or global::Eplan.EplApi.DataModel.OperationCanceledException))
+        {
+            WriteExceptionDiagnostics.Report(ex);
+            return null;
+        }
+    }
+
     private static void EditSymbols(JObject input, JObject before)
     {
         Project project = EplanProjects.ByPath((string)before["scene"]!["project"]!["path"]!);
@@ -48,7 +70,19 @@ internal sealed partial class EplanPlacementEditor
         foreach (JToken locator in input["locators"]!)
         {
             OperationContext.Current.ThrowIfCancellationRequested();
-            var root = (SymbolReference)page.AllPlacements.Single(p => p.ObjectIdentifier == (long)locator["oid"]! && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == (int)locator["type"]!);
+            var root = page.AllPlacements.OfType<SymbolReference>().Single(p => p.ObjectIdentifier == (long)locator["oid"]! && SnapshotCanonical.TypeOf(p.ToStringIdentifier()) == (int)locator["type"]!);
+            if ((string?)input["operation"] == "rename")
+            {
+                var point = (InterruptionPoint)root;
+                string expanded = InterruptionNames.Expand(page.Name, ((string)input["name"]!).Trim());
+                var currentName = new InterruptionNameReadback(InterruptionNames.NativeName(page.Name, expanded), point.Name);
+                if (!currentName.CarriesRequestedName)
+                {
+                    EplanNativePreconditions.Writable(point);
+                    EplanConnectionCreator.NameInterruption(page, point, expanded);
+                }
+                continue;
+            }
             EplanNativePreconditions.Writable(root);
             if ((string?)input["operation"] == "set_arrangement")
             { EplanSymbolArrangement.Select(root, (string)input["property_arrangement"]!); continue; }

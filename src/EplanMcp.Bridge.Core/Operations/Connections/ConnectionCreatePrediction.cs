@@ -184,8 +184,7 @@ public static partial class ConnectionCreatePlanner
             Require(item["property_arrangement"] is null || item["property_arrangement"]!.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)item["property_arrangement"]) && !((string)item["property_arrangement"]!).Any(char.IsControl), at + "/property_arrangement", "Supply an exact nonblank arrangement name without controls.");
             Require(item["sort_code"] is null || item["sort_code"]!.Type == JTokenType.Integer
                 && long.TryParse(item["sort_code"]!.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out _), at + "/sort_code", "Supply a nonnegative Int64 integer.");
-            Require(item["name"]?.Type == JTokenType.String && ((string)item["name"]!).Length is >= 1 and <= 200 && !string.IsNullOrWhiteSpace((string?)item["name"])
-                && !((string)item["name"]!).Any(char.IsControl), at + "/name", "Supply the shared name, 1..200 characters: 24V or -24V takes this page's higher-level function, =F-24V stays as written.");
+            string name = InterruptionNames.Validate(item["name"], at + "/name");
             Require(item["direction"]?.Type == JTokenType.String, at + "/direction", "Supply Up, Down, Left or Right.");
             Require(item["counterpart_pages"] is null || item["counterpart_pages"] is JArray { Count: >= 1 and <= 20 } scope && scope.All(p => p.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)p))
                 && scope.Values<string>().Distinct(StringComparer.Ordinal).Count() == scope.Count, at + "/counterpart_pages", "Supply 1..20 distinct exact counterpart pages.");
@@ -202,12 +201,7 @@ public static partial class ConnectionCreatePlanner
                 _requestedVariants.Add(Key(point), ((int)explicitVariant, at + "/symbol_variant"));
             }
             var interruption = (JObject)item.DeepClone();
-            // PDF redraw 2026-11-06: an interruption point's tag carries the higher-level function only, as in the sample (=GAA-2L1
-            // on =GAA+A1 shows -2L1). On a page without one, =-L1 shows L1; a location in the tag makes EPLAN show the full name.
-            string shared = (string)item["name"]!;
-            // A121: a project without page structure (NFPA basic projects) shows a leading '=' as written, so none is added there.
-            string function = scene.Page.Page.Contains('/') ? "=" + DrawingNames.HigherLevelFunctionOf(scene.Page.Page) : string.Empty;
-            interruption["name"] = shared[0] is '=' or '+' ? shared : function + (shared[0] == '-' ? "" : "-") + shared;
+            interruption["name"] = InterruptionNames.Expand(scene.Page.Page, name);
             _interruptions.Add(Key(point), interruption);
         }
 

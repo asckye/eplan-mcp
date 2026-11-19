@@ -59,7 +59,12 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
                 && !(request.PointsOnly && DeviceUpdateRequest.BelongsTo(back.MainName, request.NewTag)))
             { throw Misnamed(request, back.MainName); }
             if (request.Part is { } part)
-            { assigner!.AddPart(request.Project.Path, request.Main!.Id, part.PartNumber, part.Variant!, request.Count); }
+            {
+                if (request.Position is int position)
+                { assigner!.ReplacePart(request.Project.Path, request.Main!.Id, position, part.PartNumber, part.Variant!, request.Count); }
+                else
+                { assigner!.AddPart(request.Project.Path, request.Main!.Id, part.PartNumber, part.Variant!, request.Count); }
+            }
             return back;
         }, verifyCommitted: back =>
         {
@@ -69,18 +74,17 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             {
                 // A93: the second transaction stays inside the undo step.
                 assigner!.TransferPartData(request.Project.Path, request.Main!.Id);
-                if (DeviceUpdateRequest.ReferencesFingerprint(DeviceUpdateRequest.MainFunction(assigner, request.Project.Path, request.NewTag, includeTerminals: true).Parts)
-                    != DeviceUpdateRequest.ReferencesFingerprint(request.Main.Parts))
+                if (!DeviceUpdateRequest.SameReferences(DeviceUpdateRequest.MainFunction(assigner, request.Project.Path, request.NewTag, includeTerminals: true).Parts,
+                    request.Main.Parts))
                 { throw InvalidArgument("EPLAN changed the part references while updating from them; the change was rolled back."); }
                 return;
             }
-            if (request.Part is not { } part)
+            if (request.Part is null)
             { return; }
             // A79/A82: reacquire the target function and its ArticleReferences after commit.
             DevicePartTarget main = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.NewTag, includeTerminals: !request.Rename);
-            if (main.IsMain != request.Main!.IsMain || main.Category != request.Main.Category || !request.Rename && main.Id != request.Main!.Id || main.Name != request.ResultTag || DeviceUpdateRequest.ReferencesFingerprint(main.Parts)
-                != DeviceUpdateRequest.ReferencesFingerprint(request.Main!.Parts.Append(new DevicePart { PartNumber = part.PartNumber, Variant = part.Variant, Count = request.Count })))
-            { throw InvalidArgument("The committed function or added part reference did not match the plan; the change was rolled back."); }
+            if (main.IsMain != request.Main!.IsMain || main.Category != request.Main.Category || !request.Rename && main.Id != request.Main!.Id || main.Name != request.ResultTag || !DeviceUpdateRequest.SameReferences(main.Parts, request.ExpectedReferences()))
+            { throw InvalidArgument("The committed function or its part references did not match the plan; the change was rolled back."); }
             if (assignTemplates)
             { (assignedFunctions, assignmentWarning) = assigner!.AssignUnplacedFunctions(request.Project.Path, request.NewTag); }
         }, verifyRollback: () =>
@@ -90,7 +94,7 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             if (request.Main is not { } before)
             { return; }
             DevicePartTarget restored = DeviceUpdateRequest.MainFunction(assigner!, request.Project.Path, request.Device.Tag, includeTerminals: !request.Rename);
-            if (restored.IsMain != before.IsMain || restored.Category != before.Category || !request.Rename && restored.Id != before.Id || restored.Name != before.Name || DeviceUpdateRequest.ReferencesFingerprint(restored.Parts) != DeviceUpdateRequest.ReferencesFingerprint(before.Parts))
+            if (restored.IsMain != before.IsMain || restored.Category != before.Category || !request.Rename && restored.Id != before.Id || restored.Name != before.Name || !DeviceUpdateRequest.SameReferences(restored.Parts, before.Parts))
             { throw new InvalidOperationException("The original function and part references were not restored."); }
         });
         string warning = LayoutGuard.Summary([committed.Warning, assignmentWarning]);
@@ -104,6 +108,7 @@ public sealed class DeviceUpdateExecuteOperation(IProjectCatalog catalog, IDevic
             Pages = [.. request.Pages.Take(DeviceUpdateRequest.MaxPages)],
             Part = request.Part?.PartNumber,
             Variant = request.Part?.Variant,
+            ReplacedPart = request.OldPart is { } old ? new ReplacedPart { PartNumber = old.PartNumber, Variant = old.Variant, Count = old.Count } : null,
             AssignedFunctions = assignedFunctions,
             Warning = warning.Length == 0 ? null : warning,
         };

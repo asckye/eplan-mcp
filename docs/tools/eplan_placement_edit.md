@@ -12,10 +12,10 @@ placement / full / Implemented（Large 15/15 通过，2026-11-01）。delete 为
 ## 2. 输入参数
 | 参数 | 类型 / 必填 / 默认 | 说明 |
 |---|---|---|
-| project / page / operation / locators | string / string / enum / locator[]；必填 | 已打开项目、精确 Circuit 页、delete/copy/rotate/mirror/align/distribute（另有 set_variant、set_arrangement，见下文）；1–50 个同页无重复的 `eplan_object_find` 原样定位符；copy：offset_mm/target_mm 二选一，copies=1（1–20），多份必须 step_mm，第 k 份为初始偏移+k×step（k 从 0 起），新根最多 50；rotate：quarter_turns=±1..±3，正逆时针，pivot_mm 默认各原点；mirror：axis=horizontal/vertical，coordinate_mm 为 y/x；align：alignment=left/right/top/bottom/centre_x/centre_y，coordinate_mm 默认首对象外框；distribute：axis=horizontal 沿 x、vertical 沿 y；dry_run=true，response_format=concise/detailed |
+| project / page / operation / locators | string / string / enum / locator[]；必填 | 已打开项目、精确 Circuit 页、delete/copy/rotate/mirror/align/distribute（另有 set_variant、set_arrangement、rename，见下文）；1–50 个同页无重复的 `eplan_object_find` 原样定位符；copy：offset_mm/target_mm 二选一，copies=1（1–20），多份必须 step_mm，第 k 份为初始偏移+k×step（k 从 0 起），新根最多 50；rotate：quarter_turns=±1..±3，正逆时针，pivot_mm 默认各原点；mirror：axis=horizontal/vertical，coordinate_mm 为 y/x；align：alignment=left/right/top/bottom/centre_x/centre_y，coordinate_mm 默认首对象外框；distribute：axis=horizontal 沿 x、vertical 沿 y；dry_run=true，response_format=concise/detailed |
 | `project` | string / 必填 / — | 已打开的目标项目。 |
 | `page` | string / 必填 / — | 编辑对象所在电路图页的完整页名。 |
-| `operation` | string（delete / copy / rotate / mirror / align / distribute / set_variant / set_arrangement） / 必填 / — | 对所有选中对象执行同一种编辑操作。 |
+| `operation` | string（delete / copy / rotate / mirror / align / distribute / set_variant / set_arrangement / rename） / 必填 / — | 对所有选中对象执行同一种编辑操作。 |
 | `locators` | object[]（1–50 项） / 必填 / — | 传入同页、无重复的 `eplan_object_find` 原样定位符。 |
 | `offset_mm` | number[]（2 项） / 可选 / — | 首份复制相对原对象的位移 `[dx,dy]`（mm），与 `target_mm` 二选一。 |
 | `target_mm` | number[]（2 项） / 可选 / — | 首个根对象复制后的绝对原点 `[x,y]`（mm），与 `offset_mm` 二选一。 |
@@ -24,6 +24,7 @@ placement / full / Implemented（Large 15/15 通过，2026-11-01）。delete 为
 | `copies` | integer（1–20） / 可选 / 1 | 每个选中对象的复制份数。 |
 | `quarter_turns` | integer（-3 / -2 / -1 / 1 / 2 / 3） / 可选 / — | 旋转的四分之一圈数，正数为逆时针。 |
 | `axis` | string（horizontal / vertical） / 可选 / — | 选择镜像轴或等间距分布方向。 |
+| `name` | string / rename 必填 | 中断点新名称，去除首尾空格后为 1–128 字符，不能含空白或控制字符，可含冒号。 |
 | `coordinate_mm` | number（-10000–10000） / 可选 / 未声明 | 镜像时指定轴线坐标，对齐时可指定基准坐标（mm）。 |
 | `alignment` | string（left / right / top / bottom / centre_x / centre_y） / 可选 / — | 选择对齐所用的外框边或中心线。 |
 | `response_format` | string（concise / detailed） / 可选 / concise | `detailed` 在预算允许时附上编辑前后的场景。 |
@@ -44,3 +45,7 @@ Small：分支/枚举/参数、数学、首对象对齐、等间隙、边界和 
 
 ## 属性排列
 `operation:"set_arrangement"` 与 `property_arrangement` 按该符号 `PropertyPlacementsSchemas.All` 的 Name 精确匹配（含本地化文字）；不存在时列出可用名称并在写入前拒绝。例如 BP 变量 A 可选 `左,0°`；不改变符号变量。设置 Selected 后旧属性放置失效，重新获取并读回 Selected.Name 和属性 19307（无法读取只警告）；一次事务、一步撤销，当前名称相同为 noOp。该写入与默认属性文字位置仍待 LargeWrite 实测。
+
+## 中断点改名
+
+`operation:"rename"` 只接受同页的 InterruptionPoint 根对象。短名按创建工具的页结构规则展开；例如在 `=GAA+A1&EFS1/1` 上，`-XD4:2c` 展开为 `=GAA-XD4:2c`。计划按完整名称列出每项的 `oldName`、`name` 和 `noOp`。项目范围的 `peersOld`、`peersNew` 分别统计具有对应名称的其他中断点，排除本行对象；读取失败时为 null 并附警告。全部同名时不产生撤销步。实际改名沿用符号编辑的审批与一次撤销，回读报告实际存储的 `name` 和可见名称 `visibleName`。项目若省略请求的结构但保留设备名称，改名成功，结果按名称给出一次结构丢失警告；同名判断与同名点计数采用相同规则。随后调用 `eplan_connection_generate` 更新该页的连接与交叉引用。

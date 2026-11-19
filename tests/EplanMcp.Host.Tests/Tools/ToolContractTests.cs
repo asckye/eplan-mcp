@@ -16,6 +16,25 @@ public sealed class ToolContractTests(RegisteredToolFixture fixture)
     private Tool[] Tools => fixture.Tools;
 
     [Fact]
+    public void DeviceReplacementAndInterruptionRenameExposeTheirContract()
+    {
+        Tool device = Tools.Single(t => t.Name == DeviceWriteTools.UpdateTool);
+        Tool placement = Tools.Single(t => t.Name == PlacementEditTools.Tool);
+        Assert.True(device.InputSchema.GetProperty("properties").TryGetProperty("replace_part", out _));
+        JsonElement output = device.OutputSchema!.Value;
+        Assert.True(output.GetProperty("properties").TryGetProperty("replacedPart", out _));
+        Assert.False(output.TryGetProperty("required", out JsonElement required) && required.EnumerateArray().Any(p => p.GetString() == "replacedPart"));
+        Assert.Contains("rename", Enum(placement.InputSchema.GetProperty("properties").GetProperty("operation")));
+        Assert.Contains("rename", Enum(placement.OutputSchema!.Value.GetProperty("properties").GetProperty("operation")));
+        Assert.Equal("string", placement.InputSchema.GetProperty("properties").GetProperty("name").GetProperty("type").GetString());
+        foreach (Tool tool in new[] { device, placement })
+        {
+            Assert.All(tool.InputSchema.GetProperty("properties").EnumerateObject(),
+                p => Assert.False(string.IsNullOrWhiteSpace(p.Value.GetProperty("description").GetString())));
+        }
+    }
+
+    [Fact]
     public void PlacementDeleteOffersOptionalUnplacedTagsAndDefaultsToDestructivePreview()
     {
         Tool tool = Tools.Single(t => t.Name == PlacementDeleteTools.Tool);

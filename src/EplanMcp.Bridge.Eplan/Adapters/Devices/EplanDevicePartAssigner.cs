@@ -44,11 +44,35 @@ internal sealed partial class EplanDevicePartAssigner : IDevicePartAssigner
     public void AddPart(string projectPath, string mainId, string part, string variant, int count = 1)
     {
         MainThread.Assert();
-        Function main = Find(EplanProjects.ByPath(projectPath)).Single(f => (f.IsMainFunction || f.FunctionCategory.ToString() == "Terminal") && f.ToStringIdentifier() == mainId);
+        Function main = FindTarget(projectPath, mainId);
         // A82: AddArticleReference appends the checked part and is read back through ArticleReferences.
         main.AddArticleReference(part, variant, checked((uint)count));
         GC.KeepAlive(main);
     }
+
+    public void ReplacePart(string projectPath, string mainId, int position, string part, string variant, int count)
+    {
+        MainThread.Assert();
+        Function main = FindTarget(projectPath, mainId);
+        ArticleReference[] references = main.ArticleReferences;
+        if (position < 0 || position >= references.Length)
+        { throw new BridgeErrorException(ErrorReason.PlanStale, "The part position changed. Preview the replacement again."); }
+        var following = references.Skip(position + 1).Select(r => (r.PartNr, r.VariantNr, r.Count)).ToArray();
+        // Remove from the end so the remaining references keep their positions.
+        for (int i = references.Length - 1; i >= position; i--)
+        {
+            main.ArticleReferences[i].RemoveArticleReference();
+        }
+        main.AddArticleReference(part, variant, checked((uint)count));
+        foreach (var reference in following)
+        {
+            main.AddArticleReference(reference.PartNr, reference.VariantNr, checked((uint)reference.Count));
+        }
+        GC.KeepAlive(main);
+    }
+
+    private static Function FindTarget(string projectPath, string mainId) =>
+        Find(EplanProjects.ByPath(projectPath)).Single(f => (f.IsMainFunction || f.FunctionCategory.ToString() == "Terminal") && f.ToStringIdentifier() == mainId);
 
     public ITransactionScopeFactory PartTransactions(string projectPath) => new PartFactory(projectPath);
 

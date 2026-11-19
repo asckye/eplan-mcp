@@ -179,6 +179,7 @@ public sealed class PlcRackExecuteTests : IDisposable
                 : [];
         }
 
+        public void ReplacePart(string projectPath, string mainId, int position, string part, string variant, int count) => throw new NotSupportedException();
         public void AddPart(string projectPath, string mainId, string part, string variant, int count = 1)
         {
             Assert.DoesNotContain("Commit", transactions.Calls);

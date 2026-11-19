@@ -21,11 +21,13 @@ public sealed class DeviceUpdateData
     /// <summary>The pages those functions are on, in EPLAN's order, at most 20.</summary>
     public List<string> Pages { get; set; } = [];
 
-    /// <summary>The appended part number, read back after commit; null for a rename only.</summary>
+    /// <summary>The assigned part number, read back after commit; null for a rename only.</summary>
     public string? Part { get; set; }
 
-    /// <summary>The appended part variant, read back after commit; null for a rename only.</summary>
+    /// <summary>The assigned part variant, read back after commit; null for a rename only.</summary>
     public string? Variant { get; set; }
+
+    public ReplacedPart? ReplacedPart { get; set; }
 
     /// <summary>The number of unplaced part functions assigned to matching placed secondary functions.</summary>
     public int AssignedFunctions { get; set; }

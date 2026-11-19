@@ -9,7 +9,7 @@
 | 状态 | Implemented (v0.1.0) |
 
 ## 1. 这个工具解决什么任务
-"把 `-KF1` 改成 `-KF10`""把 `=GAA+A1-FC1` 挪到 `=GAB1` 下"。代理给出设备的现有标识和新标识，工具把整个设备改名：主功能和全部辅助功能（包括其他页上的触点，即交叉引用）一起改，设备保持完整。还可给现有设备的唯一主功能或精确匹配的单个端子追加部件引用；部件来自当前部件库，不会替换原有引用。
+"把 `-KF1` 改成 `-KF10`""把 `=GAA+A1-FC1` 挪到 `=GAB1` 下"。代理给出设备的现有标识和新标识，工具把整个设备改名：主功能和全部辅助功能（包括其他页上的触点，即交叉引用）一起改，设备保持完整。还可给现有设备的唯一主功能或精确匹配的单个端子追加或按位置替换来自当前部件库的部件引用。
 
 ## 2. 输入参数
 | 参数 | 类型 | 必填 | 默认值 | 说明（写给模型看的） |
@@ -17,16 +17,20 @@
 | `project` | string | 是 | — | 项目名，或 `eplan_project_list` 返回的 `path`。写工具必须显式给出 |
 | `tag` | string | 是 | — | 现有的设备标识。完整标识（如 `=GAA+A1-KF1`）总是唯一；短标识（如 `-KF1`）在多个结构下出现时返回 `AMBIGUOUS_NAME` |
 | `new_tag` | string | 否 | — | 新标识：完整标识（如 `=GAA+A1-KF10`）；或以 `-` 开头的短标识（如 `-KF10`），表示保留设备现在的结构 |
-| `part` | string | 否 | — | 要追加的部件号；与 `new_tag`、`update_from_parts` 至少一个；按部件库精确或唯一不区分大小写匹配 |
+| `part` | string | 否 | — | 要分配的部件号；与 `new_tag`、`update_from_parts` 至少一个；按部件库精确或唯一不区分大小写匹配 |
+| `replace_part` | string | 否 | — | 随 `part` 指定现有引用。去除首尾空格后必须非空，不能含控制字符；优先精确匹配，否则忽略大小写，须唯一。零个或多个匹配会列出现有部件号和变体。同料号只能换变体。 |
 | `variant` | string | 否 | "1" | 部件变体；只能随 `part` 提供，必须在库中存在 |
-| `count` | integer | 否 | 1 | 追加部件数量，必须为正整数，只能随 `part` 提供 |
+| `count` | integer | 否 | 追加为 1，替换沿用原数量 | 分配部件数量，必须为正整数，只能随 `part` 提供 |
 | `update_from_parts` | boolean | 否 | false | 把已引用部件的数据写到功能上；必须单独调用（A93） |
 | `dry_run` | boolean | 否 | true | 省略或 true 只预览，不审批、不写入；执行须显式 false |
 
 - `tag` 的查找规则与 `eplan_device_get` 相同；另支持全部为非主 `PLCTerminal` 的模块标识。此类模块可改名到已有 `PLCBox` 的标识，保留各点后缀。
 - 给出 `new_tag` 时不能为空，不能含空白和控制字符，必须含有 `-` 开头的设备部分；与现有标识相同时返回 `INVALID_ARGUMENT`。只改大小写（`-kf1` → `-KF1`）是允许的。
 
+To rename an interruption point use eplan_placement_edit with operation rename.
+
 ## 3. 输出
+替换计划按原位置列出旧、新部件号、变体和数量。若有后续引用，计划会提示其覆盖属性将随重新添加而恢复为部件值。一次 SafetyPoint 和一次撤销涵盖完整替换；提交后按顺序核对每个引用。结果的可选顶层 `replacedPart` 含原 `partNumber`、`variant` 和 `count`。需传递部件数据时另行调用 `update_from_parts`。
 省略或 `dry_run: true` 返回设备变更清单 `changes`、`fingerprint` 和 `execution: not_started`；`hint` 提示以相同参数显式传 `dry_run: false` 执行。
 ```json
 {
@@ -116,7 +120,7 @@
 - 例如 `{"project":"Line1","tag":"=GAA+A1-SF91","part":"SIE.3SB3400-0B","variant":"1"}`；`new_tag` 可同时提供。
 - 规划按 `FUNC_IDENTDEVICETAG` 查找唯一主功能（已放置或未放置），数量不为 1 时返回 `INVALID_ARGUMENT` 并报告数量；只赋值部件时允许功能名称带连接点后缀。已引用相同部件和变体时拒绝 `nothing to change`。
 - 变更清单增加 `add part <part> (variant <v>) to <tag>`；指纹包含主功能身份、现有部件引用和所选库部件与数量，执行前重新核对。
-- 同一事务内先执行请求的改名，再以 `Function.AddArticleReference(part, variant, count)` 追加引用（A82）。提交后按设备标识重新获取主功能及 `ArticleReferences`（A79）；缺少新引用或数量不符时回滚。原有引用保持不变。
+- 追加模式下，同一事务内先执行请求的改名，再以 `Function.AddArticleReference(part, variant, count)` 追加引用（A82）。提交后按设备标识重新获取主功能及 `ArticleReferences`（A79）；缺少新引用或数量不符时回滚。原有引用保持不变。
 - 追加部件产生未放置功能时，仅将类别及引脚名称序列与已有已放置非主功能完全相同的项 `Assign` 到该功能；引脚不同的不动。每次事务重新取得原生对象，分配和部件追加保留同一个撤销步骤，返回 `assignedFunctions` 数量。
 - `{"tag":...,"update_from_parts":true}` 单独调用，放在最后一个部件之后：用 `DeviceService.UpdateDevice` 把已引用部件的功能定义、连接点数据和技术参数写到功能上，和 EPLAN 的设备更新相同（A93）。必须单独调用，不能和 `part`、`new_tag` 同时给；功能没有部件引用时拒绝。一步撤销还原这些数据。
 - `device.part`、`device.variant` 返回本次赋值的部件和变体；只改名时为 null。只赋值部件时，`tag` 与 `previousTag` 都返回主功能的实际完整名称（可能带 `:1` 等连接点后缀），主功能可直接交给 `eplan_device_get`；端子用 `eplan_terminal_strip_get` 定位；`functions=1`，`pages` 只含目标功能所在页。
@@ -128,4 +132,4 @@
 - 端子已由之前的放置事务提交；本次沿用 `Function.AddArticleReference(part, variant, count)`，提交后按原完整名称重新读取身份、类别、主功能标志及 `ArticleReferences`，保留已有引用，一个撤销步骤恢复。A87 的新建连接定义点限制不扩展为本次新建对象。
 - 新增 Small/Medium 覆盖精确端子、歧义、其他类别、改名拒绝与默认预览；Large `ExistingNonMainTerminal_AssignsPart_ReadsArticleReferences_OneUndoRestores` 在 LargeWrite 放置 `IEC_symbol/X2_2/0` 后追加 `PXC.3211813`，独立读回并撤销，待实测。
 
-- `count` 省略为 1；只追加指定数量的一条引用，已有引用不变。`BusbarMain_SecondPartWithCountTwo_ReadsQuantity_OneUndoRestores` 在 LargeWrite 的 BBDEF 主功能已有 `RIT.3581000` 后追加 `RIT.9340030` 数量 2，读回并比较一步撤销快照，NOT RUN。
+- 追加模式下 `count` 省略为 1；只追加指定数量的一条引用，已有引用不变。`BusbarMain_SecondPartWithCountTwo_ReadsQuantity_OneUndoRestores` 在 LargeWrite 的 BBDEF 主功能已有 `RIT.3581000` 后追加 `RIT.9340030` 数量 2，读回并比较一步撤销快照，NOT RUN。

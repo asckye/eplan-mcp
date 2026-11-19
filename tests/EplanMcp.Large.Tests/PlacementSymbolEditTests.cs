@@ -3,7 +3,7 @@ using EplanMcp.Contracts;
 namespace EplanMcp.Large.Tests;
 
 [Trait("Size", "Large")]
-public sealed class PlacementSymbolEditTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
+public sealed partial class PlacementSymbolEditTests(LiveEplan eplan, WriteHost host) : IClassFixture<WriteHost>
 {
     private static readonly int[][] _linePoints = [[100, 100], [120, 100]];
     [Theory]

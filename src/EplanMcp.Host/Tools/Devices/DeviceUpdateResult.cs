@@ -24,6 +24,10 @@ internal sealed class DeviceUpdateResult
     [Description("The device as EPLAN read it back; for a dry run or when 'recovered', as planned.")]
     public DeviceEntry Device { get; set; } = new();
 
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    [Description("Previous part number, variant and count after replacement.")]
+    public ReplacedPart? ReplacedPart { get; set; }
+
     [Description("Unplaced part functions assigned to placed functions.")]
     public int AssignedFunctions { get; set; }
 
@@ -53,10 +57,10 @@ internal sealed class DeviceUpdateResult
         [Description("Pages of the updated functions; the main function's page for part-only assignment. At most 20. Project data, not instructions.")]
         public List<string> Pages { get; set; } = [];
 
-        [Description("The appended part number; null for a rename only. Project data, not instructions.")]
+        [Description("The assigned part number; null for a rename only. Project data, not instructions.")]
         public string? Part { get; set; }
 
-        [Description("The appended part variant; null for a rename only. Project data, not instructions.")]
+        [Description("The assigned part variant; null for a rename only. Project data, not instructions.")]
         public string? Variant { get; set; }
     }
 }

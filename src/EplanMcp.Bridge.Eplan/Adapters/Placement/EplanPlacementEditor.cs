@@ -13,11 +13,11 @@ internal sealed partial class EplanPlacementEditor : IPlacementEditor
 {
     public PageScene Read(string project, string page) => new EplanPlacementMover().Read(project, page);
     public Action Prepare(PageScene scene, JArray moves) => new EplanPlacementMover().Prepare(scene, moves);
-    public JObject Inspect(string project, string page, bool symbolEdit = false)
+    public JObject Inspect(string project, string page, bool symbolEdit = false, bool rename = false)
     {
         MainThread.Assert();
         if (symbolEdit)
-        { return InspectSymbols(project, page); }
+        { return InspectSymbols(project, page, rename); }
         var scene = Read(project, page);
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(scene.Project.Path));
         Placement[] placements = EplanDeviceReader.FindPage(finder, page)!.AllPlacements;
@@ -55,7 +55,7 @@ internal sealed partial class EplanPlacementEditor : IPlacementEditor
     }
     public Action PrepareEdit(JObject input, JObject before)
     {
-        if ((string?)input["operation"] is "set_variant" or "set_arrangement")
+        if ((string?)input["operation"] is "set_variant" or "set_arrangement" or "rename")
         { return () => EditSymbols(input, before); }
         using var finder = new DMObjectsFinder(EplanProjects.ByPath((string)before["scene"]!["project"]!["path"]!));
         Page page = EplanDeviceReader.FindPage(finder, (string)input["page"]!)!;

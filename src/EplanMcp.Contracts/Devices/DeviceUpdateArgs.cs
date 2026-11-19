@@ -12,13 +12,16 @@ public sealed class DeviceUpdateArgs
     /// <summary>The new tag: full, or starting with <c>-</c> to keep the device's structure.</summary>
     public string NewTag { get; set; } = string.Empty;
 
-    /// <summary>Optional part number to append to the device's unique main function.</summary>
+    /// <summary>Part number to append or substitute on the selected function.</summary>
     public string? Part { get; set; }
+
+    /// <summary>The part number of the unique existing reference to replace in place.</summary>
+    public string? ReplacePart { get; set; }
 
     /// <summary>The part variant; defaults to 1 and requires <see cref="Part"/>.</summary>
     public string? Variant { get; set; }
 
-    /// <summary>Positive quantity of the appended part; defaults to 1 and requires Part.</summary>
+    /// <summary>Positive quantity; defaults to the old count for replacement or 1 for append and requires Part.</summary>
     public int? Count { get; set; }
 
     /// <summary>Transfers the data of the parts already referenced to the function, as EPLAN's device update does (A93). Stands alone.</summary>

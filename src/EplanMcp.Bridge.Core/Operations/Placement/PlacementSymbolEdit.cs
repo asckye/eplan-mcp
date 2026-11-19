@@ -5,34 +5,33 @@ namespace EplanMcp.Bridge.Core.Operations;
 
 internal static class PlacementSymbolEdit
 {
-    public static JObject Plan(JObject input, JObject before, ISymbolReader? symbols, string? fingerprint)
+    public static JObject Plan(JObject input, JObject before, IPlacementEditor editor, ISymbolReader? symbols, string? fingerprint)
     {
-        void Require(bool valid, string message)
-        { if (!valid) { throw WriteArguments.Invalid([message]); } }
         bool arrangement = (string?)input["operation"] == "set_arrangement";
-        string field = arrangement ? "property_arrangement" : "symbol_variant";
-        ConnectionCreatePlanner.Members(input, "", "project page operation locators " + field, "dry_run response_format");
-        Require(input.ToString(Formatting.None).Length <= 65536 && input["locators"] is JArray { Count: >= 1 and <= 50 }, "Supply 1..50 locators within 64 KiB.");
-        Require(input["project"]?.Type == JTokenType.String && input["page"]?.Type == JTokenType.String && (string?)input["page"] == (string?)before["scene"]!["page"]!["page"], "Use the explicit open project and page.");
-        Require((string?)input["project"] == (string?)before["scene"]!["project"]!["name"] || ProjectResolver.SamePath((string)input["project"]!, (string)before["scene"]!["project"]!["path"]!), "Use the explicit open project.");
-        Require(input["dry_run"] is null || input["dry_run"]!.Type == JTokenType.Boolean, "dry_run must be boolean.");
-        Require(input["response_format"] is null || (string?)input["response_format"] is "concise" or "detailed", "Use concise or detailed.");
-        Require(arrangement || input["symbol_variant"]?.Type == JTokenType.Integer && input["symbol_variant"]!.Value<double>() is >= 0 and <= int.MaxValue, "symbol_variant must be a nonnegative integer.");
-        Require(!arrangement || input[field]?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)input[field]), "property_arrangement must be a nonempty exact name.");
+        bool rename = (string?)input["operation"] == "rename";
+        string field = rename ? "name" : arrangement ? "property_arrangement" : "symbol_variant";
+        Validate(input, before, field, rename, arrangement);
         string hash = Fingerprint.Of([input.ToString(Formatting.None), before.ToString(Formatting.None)]);
         if (fingerprint is not null && fingerprint != hash)
         { throw new BridgeErrorException(ErrorReason.PlanStale, "Object evidence changed; find and preview again."); }
         var predicted = new JArray();
         string? warning = null;
+        string? fullName = null;
+        IReadOnlyDictionary<string, int>? counts = null;
+        if (rename)
+        {
+            fullName = PlacementRename.FullName(input);
+            counts = editor.InterruptionCounts((string)before["scene"]!["project"]!["path"]!);
+            if (counts is null)
+            { warning = "Project interruption point counts could not be read."; }
+        }
         foreach (JToken locator in input["locators"]!)
         {
-            ConnectionCreatePlanner.Members(locator, "/locators", "project page type oid digest", "");
-            Require(locator["type"]?.Type == JTokenType.Integer && locator["oid"]?.Type == JTokenType.Integer && locator["digest"]?.Type == JTokenType.String && (string?)locator["page"] == (string?)input["page"] && locator["project"]?.Type == JTokenType.String && ProjectResolver.SamePath((string)locator["project"]!, (string)before["scene"]!["project"]!["path"]!), "Supply exact same-page find locators.");
-            JToken root = before["objects"]!.SingleOrDefault(o => JToken.DeepEquals(o["locator"], locator)) ?? throw new BridgeErrorException(ErrorReason.PlanStale, "Refresh the exact find locator.");
-            Require(!predicted.Any(p => JToken.DeepEquals(p["locator"], locator)), "Remove duplicate locators.");
-            Require(root["symbol"] is JObject, "The selected object has no symbol.");
+            JToken root = Resolve(input, before, locator, predicted, rename);
             var row = (JObject)root.DeepClone();
-            if (arrangement)
+            if (rename)
+            { PlacementRename.Predict(row, (string)input["page"]!, fullName!, counts); }
+            else if (arrangement)
             {
                 string[]? names = (root["arrangements"] as JArray)?.Values<string>().Select(n => n!).ToArray();
                 Require(names is null || names.Contains((string)input[field]!, StringComparer.Ordinal), "Unknown property arrangement. Available names: " + string.Join(", ", names ?? []));
@@ -53,15 +52,80 @@ internal static class PlacementSymbolEdit
             }
             predicted.Add(row);
         }
-        return new JObject { ["project"] = before["scene"]!["project"]!["name"]!.DeepClone(), ["page"] = input["page"]!.DeepClone(), ["operation"] = input["operation"]!.DeepClone(), ["fingerprint"] = hash, ["predicted"] = predicted, ["removedConnections"] = new JArray(), ["newLocators"] = new JArray(), ["noOp"] = predicted.All(p => before["objects"]!.Any(o => JToken.DeepEquals(p, o))), ["warning"] = warning + (arrangement ? "" : " Symbol connection directions may change; call eplan_connection_generate if needed.") };
+        bool noOp = rename ? predicted.All(p => (bool)p["noOp"]!) : predicted.All(p => before["objects"]!.Any(o => JToken.DeepEquals(p, o)));
+        var plan = new JObject
+        {
+            ["project"] = before["scene"]!["project"]!["name"]!.DeepClone(),
+            ["page"] = input["page"]!.DeepClone(),
+            ["operation"] = input["operation"]!.DeepClone(),
+            ["fingerprint"] = hash,
+            ["predicted"] = predicted,
+            ["removedConnections"] = new JArray(),
+            ["newLocators"] = new JArray(),
+            ["noOp"] = noOp,
+            ["warning"] = arrangement || rename ? warning ?? string.Empty : warning + " Symbol connection directions may change; call eplan_connection_generate if needed."
+        };
+        if (rename)
+        { plan["hint"] = "Call eplan_connection_generate for the page so the interruption point's connections and cross-references follow."; }
+        return plan;
     }
-    public static void Verify(JObject before, JObject after, JObject plan)
+    private static void Require(bool valid, string message)
+    {
+        if (!valid)
+        { throw WriteArguments.Invalid([message]); }
+    }
+
+    private static void Validate(JObject input, JObject before, string field, bool rename, bool arrangement)
+    {
+        ConnectionCreatePlanner.Members(input, "", "project page operation locators " + field, "dry_run response_format");
+        Require(input.ToString(Formatting.None).Length <= 65536 && input["locators"] is JArray { Count: >= 1 and <= 50 }, "Supply 1..50 locators within 64 KiB.");
+        Require(input["project"]?.Type == JTokenType.String && input["page"]?.Type == JTokenType.String && (string?)input["page"] == (string?)before["scene"]!["page"]!["page"], "Use the explicit open project and page.");
+        Require((string?)input["project"] == (string?)before["scene"]!["project"]!["name"] || ProjectResolver.SamePath((string)input["project"]!, (string)before["scene"]!["project"]!["path"]!), "Use the explicit open project.");
+        Require(input["dry_run"] is null || input["dry_run"]!.Type == JTokenType.Boolean, "dry_run must be boolean.");
+        Require(input["response_format"] is null || (string?)input["response_format"] is "concise" or "detailed", "Use concise or detailed.");
+        Require(rename || arrangement || input["symbol_variant"]?.Type == JTokenType.Integer && input["symbol_variant"]!.Value<double>() is >= 0 and <= int.MaxValue, "symbol_variant must be a nonnegative integer.");
+        Require(!arrangement || input[field]?.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string?)input[field]), "property_arrangement must be a nonempty exact name.");
+    }
+
+    private static JToken Resolve(JObject input, JObject before, JToken locator, JArray predicted, bool rename)
+    {
+        ConnectionCreatePlanner.Members(locator, "/locators", "project page type oid digest", "");
+        Require(locator["type"]?.Type == JTokenType.Integer && locator["oid"]?.Type == JTokenType.Integer && locator["digest"]?.Type == JTokenType.String && (string?)locator["page"] == (string?)input["page"] && locator["project"]?.Type == JTokenType.String && ProjectResolver.SamePath((string)locator["project"]!, (string)before["scene"]!["project"]!["path"]!), "Supply exact same-page find locators.");
+        JToken root = before["objects"]!.SingleOrDefault(o => JToken.DeepEquals(o["locator"], locator)) ?? throw new BridgeErrorException(ErrorReason.PlanStale, "Refresh the exact find locator.");
+        Require(!predicted.Any(p => JToken.DeepEquals(p["locator"], locator)), "Remove duplicate locators.");
+        Require(rename || root["symbol"] is JObject, "The selected object has no symbol.");
+        return root;
+    }
+
+    public static void Verify(JObject before, JObject after, JObject plan, bool reportRename)
     {
         var expected = (JObject)before.DeepClone();
+        // A rename requests one full name for the entire selection.
+        string? structureWarning = null;
         foreach (JToken row in plan["predicted"]!)
         {
             JToken original = expected["objects"]!.Single(o => PlacementEditPlanner.Id(o["locator"]!) == PlacementEditPlanner.Id(row["locator"]!));
             JToken actual = after["objects"]!.Single(o => PlacementEditPlanner.Id(o["locator"]!) == PlacementEditPlanner.Id(row["locator"]!));
+            if ((string?)plan["operation"] == "rename")
+            {
+                string requestedName = (string)row["name"]!;
+                if (actual["name"]?.Type != JTokenType.String)
+                { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "The interruption point's stored name could not be read."); }
+                var name = new InterruptionNameReadback(requestedName, (string)actual["name"]!);
+                if (!name.CarriesRequestedName)
+                { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, $"Interruption point name readback differs: requested '{requestedName}', stored '{name.StoredName}'."); }
+                original["name"] = name.StoredName;
+                original["visibleName"] = actual["visibleName"]?.DeepClone();
+                original["locator"] = actual["locator"]!.DeepClone();
+                if (reportRename)
+                {
+                    row["name"] = name.StoredName;
+                    row["visibleName"] = actual["visibleName"]?.DeepClone();
+                    row["locator"] = actual["locator"]!.DeepClone();
+                    structureWarning ??= name.StructureWarning;
+                }
+                continue;
+            }
             if ((string?)plan["operation"] == "set_arrangement")
             { original["arrangement"] = actual["arrangement"]?.Type == JTokenType.String ? row["arrangement"]!.DeepClone() : actual["arrangement"]?.DeepClone(); if (actual["arrangement"]?.Type != JTokenType.String) { plan["warning"] = (string?)plan["warning"] + " Selected arrangement could not be read."; } }
             else
@@ -76,6 +140,12 @@ internal static class PlacementSymbolEdit
         }
         if (!JToken.DeepEquals(expected, after))
         { throw new BridgeErrorException(ErrorReason.EplanOperationFailed, "Symbol or position readback differs; the edit is rolled back."); }
+        if ((string?)plan["operation"] == "rename")
+        {
+            if (structureWarning is not null)
+            { plan["warning"] = LayoutGuard.Summary([(string?)plan["warning"], structureWarning]); }
+            return;
+        }
         plan["predicted"] = new JArray(after["objects"]!.Where(o => plan["predicted"]!.Any(p => PlacementEditPlanner.Id(p["locator"]!) == PlacementEditPlanner.Id(o["locator"]!))).Select(o => o.DeepClone()));
     }
 }

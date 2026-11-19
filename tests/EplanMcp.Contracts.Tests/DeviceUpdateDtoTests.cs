@@ -22,11 +22,11 @@ public sealed class DeviceUpdateDtoTests
     [Fact]
     public void PartAssignmentArgumentsRoundTripAcrossPipeSerializers()
     {
-        var args = new DeviceUpdateArgs { Project = "Line1", Tag = "=GAA+A1-SF91", Part = "SIE.3SB3400-0B", Variant = "1" };
+        var args = new DeviceUpdateArgs { Project = "Line1", Tag = "=GAA+A1-SF91", Part = "SIE.3SB3400-0B", Variant = "1", ReplacePart = "OLD" };
         DeviceUpdateArgs bridge = JsonConvert.DeserializeObject<DeviceUpdateArgs>(System.Text.Json.JsonSerializer.Serialize(args, JsonSerializerOptions.Web))!;
         Assert.Equal((string.Empty, args.Part, args.Variant), (bridge.NewTag, bridge.Part, bridge.Variant));
         DeviceUpdateArgs host = System.Text.Json.JsonSerializer.Deserialize<DeviceUpdateArgs>(JsonConvert.SerializeObject(bridge))!;
-        Assert.Equal((args.Part, args.Variant), (host.Part, host.Variant));
+        Assert.Equal((args.Part, args.Variant, args.ReplacePart), (host.Part, host.Variant, host.ReplacePart));
     }
 
     [Fact]

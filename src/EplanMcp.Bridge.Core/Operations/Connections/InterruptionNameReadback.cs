@@ -9,6 +9,8 @@ public sealed class InterruptionNameReadback(string requestedName, string stored
 
     public string StoredName { get; } = storedName;
 
+    public bool CarriesRequestedName => StoredName == RequestedName || KeepsDeviceWithoutStructure;
+
     public string? StructureWarning
     {
         get
