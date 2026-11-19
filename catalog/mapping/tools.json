@@ -15748,6 +15748,7 @@
         "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
         "M:Eplan.EplApi.DataModel.EObjects.Cable.GetSourcesAndTargets(System.Collections.Generic.ICollection{Eplan.EplApi.DataModel.StorableObject},System.Collections.Generic.ICollection{Eplan.EplApi.DataModel.StorableObject})",
         "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor",
         "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
@@ -15777,6 +15778,7 @@
         "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_CABLEWIRECROSSSECTION",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Pin.Name",
         "P:Eplan.EplApi.DataModel.Pin.ParentFunction",
@@ -15788,6 +15790,7 @@
         "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
         "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
         "P:Eplan.EplApi.DataModel.StorableObject.IsValid",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
         "T:Eplan.EplApi.Base.BaseException",
         "T:Eplan.EplApi.Base.Enums.FunctionCategory",
         "T:Eplan.EplApi.Base.ISOCode",
@@ -15955,6 +15958,7 @@
         "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.FunctionCategory",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Pin.Name",
         "P:Eplan.EplApi.DataModel.Pin.ParentFunction",
@@ -15967,6 +15971,7 @@
         "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
         "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
         "P:Eplan.EplApi.DataModel.StorableObject.IsValid",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
         "T:Eplan.EplApi.ApplicationFramework.QuietModeStep",
         "T:Eplan.EplApi.ApplicationFramework.QuietModes",
         "T:Eplan.EplApi.Base.BaseException",
@@ -16112,6 +16117,7 @@
         "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.FunctionCategory",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Pin.Name",
         "P:Eplan.EplApi.DataModel.Placement.Page",
@@ -16130,6 +16136,7 @@
         "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
         "P:Eplan.EplApi.DataModel.PropertyValue.Item(System.Int32)",
         "P:Eplan.EplApi.DataModel.StorableObject.IsValid",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
         "P:Eplan.EplApi.DataModel.StorableObject.Properties",
         "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingIds",
         "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingValues",
@@ -16153,6 +16160,7 @@
         "T:Eplan.EplApi.DataModel.FunctionsFilter",
         "T:Eplan.EplApi.DataModel.IndexedPropertyException",
         "T:Eplan.EplApi.DataModel.NotIndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.Page",
         "T:Eplan.EplApi.DataModel.Pin",
         "T:Eplan.EplApi.DataModel.Project",
         "T:Eplan.EplApi.DataModel.ProjectLockingException",
@@ -17493,6 +17501,7 @@
         "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.PagesFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.PagesFilter.Name",
@@ -18130,6 +18139,7 @@
         "M:Eplan.EplApi.DataModel.AnyPropertyId.Dispose",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
         "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor",
         "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
         "M:Eplan.EplApi.DataModel.PropertyValue.Dispose",
@@ -18158,6 +18168,7 @@
         "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_TEXT",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Pin.Name",
         "P:Eplan.EplApi.DataModel.Placement.Page",
@@ -18175,6 +18186,7 @@
         "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
         "P:Eplan.EplApi.DataModel.PropertyValue.Item(System.Int32)",
         "P:Eplan.EplApi.DataModel.StorableObject.IsValid",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
         "P:Eplan.EplApi.DataModel.StorableObject.Properties",
         "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingIds",
         "P:Eplan.EplApi.DataModel.UniversalPropertyList.ExistingValues",
@@ -18192,6 +18204,7 @@
         "T:Eplan.EplApi.DataModel.FunctionsFilter",
         "T:Eplan.EplApi.DataModel.IndexedPropertyException",
         "T:Eplan.EplApi.DataModel.NotIndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.Page",
         "T:Eplan.EplApi.DataModel.Pin",
         "T:Eplan.EplApi.DataModel.Project",
         "T:Eplan.EplApi.DataModel.ProjectManager",
@@ -18282,6 +18295,11 @@
             "name": "DeviceAndConnectionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DeviceAndConnectionTests.cs"
+          },
+          {
+            "name": "DeviceListedTagsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeviceListedTagsTests.cs"
           },
           {
             "name": "DevicePlaceTests",
@@ -18399,6 +18417,7 @@
         "P:Eplan.EplApi.DataModel.ProjectManager.LockProjectByDefault",
         "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
         "P:Eplan.EplApi.DataModel.StorableObject.IsValid",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
         "T:Eplan.EplApi.Base.Enums.FunctionCategory",
         "T:Eplan.EplApi.DataModel.DMObjectsFinder",
         "T:Eplan.EplApi.DataModel.Function",
@@ -18483,6 +18502,11 @@
             "name": "DeviceAndConnectionTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DeviceAndConnectionTests.cs"
+          },
+          {
+            "name": "DeviceListedTagsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeviceListedTagsTests.cs"
           },
           {
             "name": "DevicePlaceTests",
@@ -19514,6 +19538,7 @@
         "M:Eplan.EplApi.DataModel.ArticleReference.RemoveArticleReference",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
         "M:Eplan.EplApi.DataModel.Function.AddArticleReference(System.String,System.String,System.UInt32)",
         "M:Eplan.EplApi.DataModel.Function.Assign(Eplan.EplApi.DataModel.Function)",
         "M:Eplan.EplApi.DataModel.FunctionBasePropertyList.#ctor",
@@ -19575,6 +19600,7 @@
         "P:Eplan.EplApi.DataModel.FunctionPropertyList.FUNC_DEVICETAG_FULLNAME",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
         "P:Eplan.EplApi.DataModel.Page.AllPlacements",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Pin.Name",
@@ -19630,6 +19656,7 @@
         "T:Eplan.EplApi.DataModel.FunctionPropertyList",
         "T:Eplan.EplApi.DataModel.FunctionsFilter",
         "T:Eplan.EplApi.DataModel.IndexedPropertyException",
+        "T:Eplan.EplApi.DataModel.Page",
         "T:Eplan.EplApi.DataModel.Pin",
         "T:Eplan.EplApi.DataModel.Project",
         "T:Eplan.EplApi.DataModel.ProjectLockingException",
@@ -24119,6 +24146,11 @@
             "file": "tests/EplanMcp.Large.Tests/DeferredInterruptionTests.cs"
           },
           {
+            "name": "DeviceListedTagsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeviceListedTagsTests.cs"
+          },
+          {
             "name": "DevicePlaceTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/DevicePlaceTests.cs"
@@ -26542,6 +26574,11 @@
             "name": "AcceptanceRedrawTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/AcceptanceRedrawTests.cs"
+          },
+          {
+            "name": "DeviceListedTagsTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/DeviceListedTagsTests.cs"
           },
           {
             "name": "DevicePlaceTests",
@@ -31146,6 +31183,7 @@
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
         "M:Eplan.EplApi.DataModel.FunctionsFilter.#ctor",
         "M:Eplan.EplApi.DataModel.ProjectManager.#ctor",
         "M:Eplan.EplApi.DataModel.PropertyValue.ToMultiLangString",
@@ -31184,6 +31222,7 @@
         "P:Eplan.EplApi.DataModel.FunctionsFilter.ExactNameMatching",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.FunctionCategory",
         "P:Eplan.EplApi.DataModel.FunctionsFilter.Name",
+        "P:Eplan.EplApi.DataModel.FunctionsFilter.Page",
         "P:Eplan.EplApi.DataModel.Page.Name",
         "P:Eplan.EplApi.DataModel.Pin.Name",
         "P:Eplan.EplApi.DataModel.Pin.ParentFunction",
@@ -31195,6 +31234,7 @@
         "P:Eplan.EplApi.DataModel.ProjectManager.OpenProjects",
         "P:Eplan.EplApi.DataModel.PropertyValue.IsEmpty",
         "P:Eplan.EplApi.DataModel.StorableObject.IsValid",
+        "P:Eplan.EplApi.DataModel.StorableObject.ObjectIdentifier",
         "T:Eplan.EplApi.Base.BaseException",
         "T:Eplan.EplApi.Base.Enums.FunctionCategory",
         "T:Eplan.EplApi.Base.ISOCode",

@@ -40,7 +40,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
         }
 
         // A null filter returns every function (S6); FunctionsFilter.Page and FunctionCategory narrow it (S6).
-        Function[] functions = EplanNativePreconditions.Valid(finder.GetFunctions(page is null && category is null ? null : filter)).ToArray();
+        Function[] functions = page is null && category is null ? AllFunctions(finder) : EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray();
         return
         [
             .. functions.Select(f => new FunctionRecord
@@ -62,7 +62,7 @@ internal sealed class EplanDeviceReader : IDeviceReader
         using var finder = new DMObjectsFinder(project);
         return
         [
-            .. EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray()
+            .. AllFunctions(finder)
                 .Where(f => f.IsMainFunction)
                 .Select(f => new FunctionName { Name = f.Name ?? string.Empty, VisibleName = f.VisibleName ?? string.Empty }),
         ];
@@ -163,6 +163,33 @@ internal sealed class EplanDeviceReader : IDeviceReader
     internal static Function? FindMain(DMObjectsFinder finder, string tag) => FindMain(finder, tag, _ => true);
 
     /// <summary>
+    /// Every function of the project. A170, live 2026-11-19 (sample project): <c>GetFunctions(null)</c> and an empty
+    /// filter leave out functions that a filter by page returns (the coil =EC1+A3-EC1-QA1-K1 among them), and a filter by
+    /// name does not find them either; the unfiltered read alone has the unplaced ones. Both are read, each function once.
+    /// </summary>
+    internal static Function[] AllFunctions(DMObjectsFinder finder)
+    {
+        var seen = new HashSet<(Type, long)>();
+        var all = new List<Function>();
+        void Add(IEnumerable<Function> functions)
+        {
+            foreach (Function function in EplanNativePreconditions.Valid(functions))
+            {
+                if (seen.Add((function.GetType(), function.ObjectIdentifier)))
+                { all.Add(function); }
+            }
+        }
+        Add(finder.GetFunctions(null));
+        foreach (Page page in EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray())
+        {
+            using var filter = new FunctionsFilter();
+            filter.Page = page;
+            Add(finder.GetFunctions(filter));
+        }
+        return [.. all];
+    }
+
+    /// <summary>
     /// The same, preferring the main function <paramref name="preferred"/> accepts: a tag can have further main functions,
     /// such as a second representation or a function in a black box (api-notes A12).
     /// </summary>
@@ -172,6 +199,13 @@ internal sealed class EplanDeviceReader : IDeviceReader
         filter.Name = tag;
         filter.ExactNameMatching = true;
         Function[] mains = [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().Where(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal))];
+        if (mains.Length == 0)
+        {
+            // A170 (issue 664): the name filter does not find every function a page or category filter lists. A miss is
+            // checked against every function, the way the device list reads them; only a real miss pays for it.
+            mains = [.. AllFunctions(finder).Where(f => f.IsMainFunction && string.Equals(f.Name, tag, StringComparison.Ordinal))];
+        }
+
         return mains.FirstOrDefault(preferred) ?? mains.FirstOrDefault();
     }
 

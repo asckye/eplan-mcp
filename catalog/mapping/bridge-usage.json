@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-19",
-  "scannedSources": "4020e81a + uncommitted changes",
-  "sourceHash": "sha256:5795b2efd29fcf6b157092adf2ea4390fdde18881a0539c92a770261dd4584ac",
+  "scannedSources": "c37eed1b + uncommitted changes",
+  "sourceHash": "sha256:e8344b2b9af769d4bc57a8a386c53a57e1f76f8065dc2335a02c54fd51bc23e6",
   "operations": [
     {
       "name": "action.execute",
@@ -159265,6 +159265,31 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "FindMain",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -159292,26 +159317,6 @@
         ],
         "operations": [
           "device.list"
-        ]
-      },
-      {
-        "adapter": "EplanDeviceReader",
-        "member": "ReadMainFunctionNames",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "cable.get",
-          "cable.renumber.execute",
-          "cable.renumber.plan",
-          "connection.list",
-          "device.get",
-          "device.update.execute",
-          "device.update.plan",
-          "macro.insert.execute",
-          "macro.insert.plan",
-          "plc.get"
         ]
       },
       {
@@ -160219,6 +160224,31 @@
         "operations": [
           "device.place.execute",
           "device.place.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
         ]
       },
       {
@@ -165514,6 +165544,31 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
         ]
       },
       {
@@ -205188,6 +205243,31 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "ReadFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -232864,6 +232944,31 @@
         ]
       },
       {
+        "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "AssignUnplacedFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Assignment.cs",
@@ -253396,6 +253501,31 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "FindMain",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -262990,6 +263120,31 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "Detail",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -264663,6 +264818,31 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
         ]
       },
       {
@@ -275547,6 +275727,31 @@
         ],
         "operations": [
           "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
+        "member": "AllFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "cable.get",
+          "cable.reassign.execute",
+          "cable.reassign.plan",
+          "cable.renumber.execute",
+          "cable.renumber.plan",
+          "connection.list",
+          "device.get",
+          "device.list",
+          "device.place.execute",
+          "device.place.plan",
+          "device.update.execute",
+          "device.update.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "plc.get"
         ]
       },
       {

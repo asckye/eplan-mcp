@@ -1,5 +1,14 @@
 # [EPLAN API 笔记](../api-notes.md)：读取、快照与项目生命周期
 
+### A170. GetFunctions(null) 不返回项目的全部功能；按名称过滤也找不到被漏掉的那些（2026-11-19，EPLAN 2026.0.3.25421，Pro Panel，B 槽，示例项目只读）
+- **起因：** [asckye/eplan-mcp#664](https://github.com/asckye/eplan-mcp/issues/664)（EPLAN 2025.0.3）报告 `eplan_device_list` 列出的标识用 `eplan_device_get` 查不到。在 2026 的示例项目上重现：线圈 `=EC1+A3-EC1-QA1-K1`（主功能，页 `=EC1+A3&EFS1/1`，标识全是普通字符）。
+- **现象：** `FunctionsFilter.FunctionCategory = Coil` 或 `FunctionsFilter.Page` 能读到它；`DMObjectsFinder.GetFunctions(null)` 和传一个没有任何条件的 `FunctionsFilter` 都读不到它；`FunctionsFilter.Name` 加 `ExactNameMatching` 也读不到它。
+- **规模：** 逐页用 `FunctionsFilter.Page` 读取 321 页再合并，和 `GetFunctions(null)` 比（按标识、类别、是否主功能去重）：只有逐页读得到的 112 个，集中在流体页和 `=EC1+A3&EFS1/1`，类别有 Distributor 30、Terminal 20、FluidOperatingElement 13、DeviceEndTerminal 11，也有 Coil、Motor、NoContact；只有 `GetFunctions(null)` 读得到的 197 个，都没有页（未放置）。
+- **结论：** “空过滤器返回全部功能”（S6 的记录）不成立。要读全部功能，得把 `GetFunctions(null)` 和每一页的 `FunctionsFilter.Page` 结果合并。EPLAN 为什么漏掉这些功能没有查到。
+- **工具行为：** 新增 `EplanDeviceReader.AllFunctions`（两种读法合并，按运行时类型和对象标识去重），用于不带页和类别的 `eplan_device_list`、主功能名称清单（查重、按显示名找设备）、按名称过滤找不到时的兜底（`eplan_device_get`、按设备的 `eplan_connection_list`、`eplan_cable_get`、`eplan_plc_get`）。按页或按类别的读取不变。
+- **耗时：** 示例项目上一次查不到的 `eplan_device_get`（两次完整读取）154 毫秒；不带条件的列表翻完 2241 行共 12 次调用 8.6 秒，改动前没有量过。
+- **证据：** `DeviceListedTagsTests`：改前 91 个列表标识有 1 个查不到；改后 0 个，逐页与不带条件的对比“只有逐页读得到”为 0（2/2）。同一次运行 `CableTests` 4/4、`DevicePlaceTests` 33/33。
+- **未验证：** EPLAN 2025 和报告人的项目（标识形态 `=A1+B1-K1`，不是嵌套标识）。其他直接调用 `GetFunctions(null)` 的地方（电缆清单的名称、对象查找等）没有改。
 ### A169. 大量连续读取时 EPLAN 偶发退出（ucrtbase.dll 0xc0000409，偏移 0xa527e）：未能重现，原因未知（2026-11-19，EPLAN 2026.0.3.25421，Electric P8，A 槽）
 - **记录到的崩溃：** Windows 应用程序日志里 2026-11-13 至 11-17 共 6 次同一故障桶：`EPLAN.exe`，出错模块 `ucrtbase.dll`，异常代码 0xc0000409，偏移 `0xa527e`（与 2026-11-01、11-02 记录的偏移相同）。按进程号对上插件日志，崩溃前在做的都是密集读取：11-14 三次（`api.try.plan`；连续 `project.snapshot` 和 `object.find`；连续 `object.get`），11-17 两次（连续 `page.review`，EPLAN 启动约 3 分钟、评审 124 和 129 页之后）。
 - **11-17 两次的位置：** 都在评审官方楼宇自动化宏项目（8 个项目中的第 5 个）的页宏原理图页时；一次在该项目第 10 页之后，一次在第 15 页之后，后一次通过了前一次停下的那一页。不是某一页必现。
