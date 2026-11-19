@@ -804,7 +804,7 @@
         "placement.text.create.plan",
         "project.get"
       ],
-      "apiIds": 337,
+      "apiIds": 338,
       "operationGroups": 202,
       "dataDictionary": 3,
       "dependencies": 125,
@@ -1130,7 +1130,7 @@
         "connection.create.plan",
         "project.get"
       ],
-      "apiIds": 408,
+      "apiIds": 409,
       "operationGroups": 233,
       "dataDictionary": 9,
       "dependencies": 139,
@@ -1337,7 +1337,7 @@
         "device.place.plan",
         "project.get"
       ],
-      "apiIds": 429,
+      "apiIds": 430,
       "operationGroups": 237,
       "dataDictionary": 8,
       "dependencies": 136,
@@ -1600,7 +1600,7 @@
         "graphic.edit.execute",
         "graphic.edit.plan"
       ],
-      "apiIds": 344,
+      "apiIds": 345,
       "operationGroups": 211,
       "dataDictionary": 3,
       "dependencies": 123,
@@ -1620,7 +1620,7 @@
         "import.dxf.execute",
         "import.dxf.plan"
       ],
-      "apiIds": 245,
+      "apiIds": 246,
       "operationGroups": 139,
       "dataDictionary": 3,
       "dependencies": 94,
@@ -1962,7 +1962,7 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 457,
+      "apiIds": 458,
       "operationGroups": 280,
       "dataDictionary": 63,
       "dependencies": 166,
@@ -1984,7 +1984,7 @@
         "object.get",
         "project.get"
       ],
-      "apiIds": 538,
+      "apiIds": 539,
       "operationGroups": 361,
       "dataDictionary": 63,
       "dependencies": 166,
@@ -2164,7 +2164,7 @@
         "page.get",
         "project.get"
       ],
-      "apiIds": 202,
+      "apiIds": 203,
       "operationGroups": 126,
       "dataDictionary": 3,
       "dependencies": 66,
@@ -2265,7 +2265,7 @@
       "operations": [
         "page.review"
       ],
-      "apiIds": 226,
+      "apiIds": 227,
       "operationGroups": 140,
       "dataDictionary": 3,
       "dependencies": 72,
@@ -2574,7 +2574,7 @@
         "placement.text.create.plan",
         "project.get"
       ],
-      "apiIds": 337,
+      "apiIds": 338,
       "operationGroups": 202,
       "dataDictionary": 3,
       "dependencies": 125,
@@ -2597,7 +2597,7 @@
         "placement.delete.execute",
         "placement.delete.plan"
       ],
-      "apiIds": 183,
+      "apiIds": 184,
       "operationGroups": 106,
       "dataDictionary": 2,
       "dependencies": 68,
@@ -2617,7 +2617,7 @@
         "placement.edit.execute",
         "placement.edit.plan"
       ],
-      "apiIds": 479,
+      "apiIds": 480,
       "operationGroups": 288,
       "dataDictionary": 4,
       "dependencies": 179,
@@ -2635,7 +2635,7 @@
         "connection.create.execute",
         "connection.create.plan"
       ],
-      "apiIds": 391,
+      "apiIds": 392,
       "operationGroups": 223,
       "dataDictionary": 9,
       "dependencies": 132,
@@ -2775,7 +2775,7 @@
         "potential.update.execute",
         "potential.update.plan"
       ],
-      "apiIds": 184,
+      "apiIds": 185,
       "operationGroups": 107,
       "dataDictionary": 2,
       "dependencies": 67,

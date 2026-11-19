@@ -335,7 +335,7 @@ internal sealed partial class EplanDrawingReader
                         ["radius_y_mm"] = arc.Kind.ToString() == "Ellipse" ? Number(DrawingCoordinates.ApiToMillimetres(arc.SecondRadius)) : null,
                         ["ellipse_angle"] = arc.Kind.ToString() == "Ellipse" ? Number(arc.ElipseAngle) : null
                     },
-                    Image image => new() { ["file"] = Path.GetFileName(imagePath = PathMap.SubstitutePath(image.FileName, projectPath)) },
+                    Image image => new() { ["file"] = Path.GetFileName(imagePath = EplanPaths.Substitute(image.FileName, projectPath)) },
                     _ => [],
                 };
             }

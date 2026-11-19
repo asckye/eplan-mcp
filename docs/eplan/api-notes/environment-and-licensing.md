@@ -1,5 +1,11 @@
 # [EPLAN API 笔记](../api-notes.md)：环境、授权与注册
 
+### B17. PathMap.SubstitutePath(String, String) 从 EPLAN 2026 才有；2025 上调用它的方法整个无法编译（2026-11-19，官方 API 文档 2025 与 2026；用户报告 EPLAN 2025.0.3.23616）
+- **依据：** eplan.help 的 API 文档，2025 版 `PathMap.SubstitutePath` 只有 `SubstitutePath(String)`，2026 版另有 `SubstitutePath(String, String)`（按项目解析变量）。2026-11-19 读取。
+- **现象（用户报告，[asckye/eplan-mcp#664](https://github.com/asckye/eplan-mcp/issues/664)，v0.6.0，EPLAN Electric P8 2025.0.3.23616）：** `page.drawing.get` 和 `connection.create.plan` 抛 `System.MissingMethodException: … PathMap.SubstitutePath(System.String, System.String)`，栈顶是页面读取里读单个对象的方法。页上没有图片也一样失败：运行时编译一个方法时要解析它引用的全部成员，缺一个就整个方法编译失败。
+- **结论：** ADR-0009 背景里“插件用到的 API 在 2022–2027 的文档中都存在，签名相同”不成立，至少这一个重载是 2026 新增的。其他成员没有逐个对照过 2024、2025 的文档。
+- **工具行为：** 两处解析图片路径的调用改走 `EplanPaths.Substitute`：两参数重载放在单独的、不内联的方法里，第一次调用抛 `MissingMethodException` 时记下来，此后直接用一参数的 `SubstitutePath(String)`。在没有两参数重载的平台上，项目自己的路径变量不解析，按 EPLAN 给的原样返回。
+- **未验证：** 本机只有 2026；2025 上的效果等报告人用修复后的构建确认。2026 上行为不变。
 ### A1. 环境与进程
 - **从桌面启动的 EPLAN 会继承 explorer 的环境变量。** 用户 PATH 原始长度 4604 字符时，Windows 登录过程没有加载 `HKCU\Environment` 下的任何变量，explorer 和 EPLAN 的 `TEMP=TMP=C:\WINDOWS\TEMP`；把 PATH 缩到 316 字符并广播 `WM_SETTINGCHANGE("Environment")` 后，explorer 立即恢复正常，不需要重新登录。— 读取进程 PEB 中的环境块验证。
 - **`TEMP=C:\WINDOWS\TEMP` 时，EPLAN 的 C# 脚本全部无法编译**，系统消息为 `CS2001 未能找到源文件 C:\WINDOWS\TEMP\xxxx.0.cs` / `CS2008`。用 Windows PowerShell 5.1 的 `Add-Type`（同为 .NET Framework CodeDOM）可以在 EPLAN 之外复现；TEMP 改为用户目录后正常。— 实机复现。

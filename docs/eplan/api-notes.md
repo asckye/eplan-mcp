@@ -189,6 +189,7 @@
 | A162 | 未放置的功能可以用 Remove() 删除；删掉端子排的未放置定义不影响它的端子，一次撤销恢复 | 2026-11-18 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
 | A161 | 端子排定义是类别 TerminalDefText 的主功能，说明文字是它的功能文本；只放端子时自动产生未放置的定义 | 2026-11-18 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
 | A160 | 同时启动第二个 EPLAN 实例会停在系统消息窗口 | 2026-11-14 | [environment-and-licensing](api-notes/environment-and-licensing.md#a160-同时启动第二个-eplan-实例会停在系统消息窗口2026-11-14eplan-202603已有-eplan-实例运行时) |
+| B17 | PathMap.SubstitutePath(String, String) 从 EPLAN 2026 才有；2025 上调用它的方法整个无法编译 | 2026-11-19 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
 | B1 | 程序集与目标框架 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b1-程序集与目标框架) |
 | B2 | 插件 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b2-插件add-in) |
 | B3 | 自定义 Action | 2026-10-12（原章节） | [actions](api-notes/actions.md#b3-自定义-action) |

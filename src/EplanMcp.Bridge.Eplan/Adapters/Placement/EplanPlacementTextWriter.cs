@@ -133,7 +133,7 @@ internal sealed partial class EplanPlacementTextWriter : IPlacementTextWriter
                 var image = new Image();
                 // XML: reference the checked imports file; neither copy nor overwrite project files.
                 image.Create(Find(projectPath, page), text.FilePath, Point(text.Position), Point(text.EndPosition), false, false);
-                return Styled(image, () => new() { Kind = "image", Position = XY(image.LowerLeftCorner), EndPosition = XY(image.UpperRightCorner), File = text.File, FilePath = PathMap.SubstitutePath(image.FileName, projectPath), Sha256 = text.Sha256 });
+                return Styled(image, () => new() { Kind = "image", Position = XY(image.LowerLeftCorner), EndPosition = XY(image.UpperRightCorner), File = text.File, FilePath = EplanPaths.Substitute(image.FileName, projectPath), Sha256 = text.Sha256 });
             }
             if (text.Kind == "line")
             {

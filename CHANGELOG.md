@@ -32,6 +32,7 @@
 
 ### 修复
 
+- EPLAN 2025 上读页面图形不再失败：`eplan_page_get` 带图形、`eplan_connection_create` 等所有要读页面的工具此前在 2025.0.3 上报 `INTERNAL`（`MissingMethodException`，`PathMap.SubstitutePath` 的两参数重载是 2026 才有的）。现在缺这个重载时改用一参数的。2025 仍未经我们实测，这一条等报告人确认（[asckye/eplan-mcp#664](https://github.com/asckye/eplan-mcp/issues/664)）。
 - `eplan_placement_delete` 删除器件后不再因为 EPLAN 顺带更新了旁边的对象而报失败：目标已删除、没有无关对象消失时返回 `committed`，被 EPLAN 更新或新增的对象列在 `changed`（最多 20 个，超出时给 `changedTotal`）并给警告。目标没删掉或无关对象消失时仍然失败并撤销，错误信息现在列出是哪些对象。
 - `eplan_connection_create`、`eplan_graphic_edit`、`eplan_placement_delete`、`eplan_placement_edit`、`eplan_placement_update`、`eplan_potential_update` 的写入也固定到计划时的项目：审批之后同名的另一个项目被打开时，执行报告 `PLAN_STALE`，什么都不改。此前只有其余写入工具有这项保护。
 - 项目重命名失败后把旧项目放回去也失败时，不再声称“旧项目已打开、副本已删除”：改为报告结果未知（`OUTCOME_UNKNOWN`），写入挂起到工程师检查为止。

@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-19",
-  "scannedSources": "03db0fa5 + uncommitted changes",
-  "sourceHash": "sha256:5e222d8a436106be8935fe28a94d166ca70772407966aff5f874b767707346d9",
+  "scannedSources": "4020e81a + uncommitted changes",
+  "sourceHash": "sha256:5795b2efd29fcf6b157092adf2ea4390fdde18881a0539c92a770261dd4584ac",
   "operations": [
     {
       "name": "action.execute",
@@ -154663,13 +154663,11 @@
           "plc.rack.execute",
           "plc.rack.plan"
         ]
-      }
-    ],
-    "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String,System.String)": [
+      },
       {
-        "adapter": "EplanDrawingReader.Reading",
-        "member": "ReadGraphics",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Pages/EplanDrawingReader.Reading.cs",
+        "adapter": "EplanPaths",
+        "member": "Substitute",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanPaths.cs",
         "access": [
           "call"
         ],
@@ -154697,17 +154695,39 @@
           "plc.rack.plan",
           "potential.update.plan"
         ]
-      },
+      }
+    ],
+    "M:Eplan.EplApi.Base.PathMap.SubstitutePath(System.String,System.String)": [
       {
-        "adapter": "EplanPlacementTextWriter",
-        "member": "Place",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementTextWriter.cs",
+        "adapter": "EplanPaths",
+        "member": "ForProject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanPaths.cs",
         "access": [
           "call"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
           "graphic.edit.plan",
-          "placement.text.create.execute"
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
         ]
       }
     ],
@@ -249048,38 +249068,6 @@
         ]
       },
       {
-        "adapter": "EplanDrawingReader.Reading",
-        "member": "ReadGraphics",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Pages/EplanDrawingReader.Reading.cs",
-        "access": [
-          "type"
-        ],
-        "operations": [
-          "api.try.execute",
-          "api.try.plan",
-          "connection.create.execute",
-          "connection.create.plan",
-          "device.place.execute",
-          "device.place.plan",
-          "graphic.edit.plan",
-          "import.dxf.execute",
-          "import.dxf.plan",
-          "macro.insert.execute",
-          "macro.insert.plan",
-          "object.find",
-          "object.get",
-          "page.drawing.get",
-          "page.review",
-          "placement.delete.plan",
-          "placement.edit.plan",
-          "placement.text.create.execute",
-          "plan.step.execute",
-          "plc.rack.execute",
-          "plc.rack.plan",
-          "potential.update.plan"
-        ]
-      },
-      {
         "adapter": "EplanMacroReader",
         "member": "MacroRoot",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanMacroReader.cs",
@@ -249114,15 +249102,67 @@
         ]
       },
       {
-        "adapter": "EplanPlacementTextWriter",
-        "member": "Place",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementTextWriter.cs",
+        "adapter": "EplanPaths",
+        "member": "ForProject",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanPaths.cs",
         "access": [
           "type"
         ],
         "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
           "graphic.edit.plan",
-          "placement.text.create.execute"
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPaths",
+        "member": "Substitute",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanPaths.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
         ]
       }
     ],
