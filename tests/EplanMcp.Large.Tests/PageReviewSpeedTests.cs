@@ -7,6 +7,7 @@ namespace EplanMcp.Large.Tests;
 /// Prints object counts and review times; fails above 15 seconds, three quarters of the review's hard limit. Live
 /// 2026-11-16: =EC1+A3&amp;EFS1/1 (3870 objects) takes about 9 s with any single check: reading the page (connections,
 /// cables, pins) dominates, and the layout rules add under a second.
+/// Live 2026-11-19 (A168): that page took 15 s in slot B and 6.2 s after empty property texts lost their outline read.
 /// </summary>
 [Trait("Size", "Large")]
 public sealed class PageReviewSpeedTests(LiveEplan eplan, ITestOutputHelper output)
@@ -39,7 +40,9 @@ public sealed class PageReviewSpeedTests(LiveEplan eplan, ITestOutputHelper outp
         } while (cursor is not null);
 
         var slow = new List<string>();
-        foreach ((string page, int total) in counts.OrderByDescending(c => c.Total).Take(6))
+        // Live 2026-11-19: since model view pages are counted (A146) they fill the first six; the schematic page that took
+        // 9 s on 2026-11-16 is reviewed by name as well.
+        foreach ((string page, int total) in counts.OrderByDescending(c => c.Total).Take(6).Concat(counts.Where(c => c.Page == "=EC1+A3&EFS1/1")).Distinct())
         {
             var watch = Stopwatch.StartNew();
             JsonElement review = await eplan.CallAsync("eplan_page_review", new() { ["project"] = eplan.ProjectPath, ["page"] = page, ["checks"] = _layout, ["limit"] = 1 });

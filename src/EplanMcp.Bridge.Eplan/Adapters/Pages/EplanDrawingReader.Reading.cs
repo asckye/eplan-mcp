@@ -27,17 +27,28 @@ internal sealed partial class EplanDrawingReader
         private readonly Dictionary<string, string> _cardOwners = new(StringComparer.Ordinal);
         private readonly HashSet<string> _seen = new(StringComparer.Ordinal);
         private bool _metadataUnavailable;
+        // Where a read spends its time, by step; one line in the add-in log per page review.
+        private readonly Dictionary<string, long> _ticks = new(StringComparer.Ordinal);
+        private void Add(string step, long ticks) => _ticks[step] = (_ticks.TryGetValue(step, out long sum) ? sum : 0) + ticks;
+        private T Timed<T>(string step, Func<T> read)
+        {
+            long start = System.Diagnostics.Stopwatch.GetTimestamp();
+            try
+            { return read(); }
+            finally
+            { Add(step, System.Diagnostics.Stopwatch.GetTimestamp() - start); }
+        }
 
         public PageDrawingGeometry Run()
         {
             CheckSizes();
             ReadDrawingArea();
-            Placement[] native = [.. page.AllPlacements, .. created];
-            ReadCardOwners(native);
+            Placement[] native = Timed("all", () => (Placement[])[.. page.AllPlacements, .. created]);
+            Timed("cards", () => { ReadCardOwners(native); return 0; });
             try
             {
                 if (page.PlotFrame is { } plotFrame)
-                { Walk(plotFrame.SubPlacements, excluded: true); }
+                { Timed("frame", () => { Walk(plotFrame.SubPlacements, excluded: true); return 0; }); }
             }
             catch (Exception ex) when (ex is BaseException or InvalidOperationException)
             {
@@ -48,6 +59,7 @@ internal sealed partial class EplanDrawingReader
             }
 
             Walk(EplanNativePreconditions.Valid(native).OrderByDescending(p => p is Block).ToArray(), excluded: false); // A13: include returned objects which are not yet visible to page enumeration.
+            LastProfile = string.Join("; ", _ticks.OrderByDescending(p => p.Value).Select(p => FormattableString.Invariant($"{p.Key} {p.Value * 1000 / System.Diagnostics.Stopwatch.Frequency}")));
             return _result;
         }
 
@@ -112,7 +124,7 @@ internal sealed partial class EplanDrawingReader
                 bool member = slot is null && blockChild && parent is not null;
                 string key = slot is not null ? FormattableString.Invariant($"{parent!.Type}/{parent.Oid}#{slot}")
                     : member ? FormattableString.Invariant($"{parent!.Type}/{parent.Oid}@{index++}")
-                    : placement.ToStringIdentifier();
+                    : Timed("identifier", placement.ToStringIdentifier);
                 if ((placement is PropertyPlacement && parent is null && !excluded) || !_seen.Add(key))
                 {
                     continue;
@@ -121,7 +133,7 @@ internal sealed partial class EplanDrawingReader
                 { _seen.Add(placement.ToStringIdentifier()); }
 
                 DrawingPlacement? row = !excluded && (placement is SymbolReference or PropertyPlacement or Block || placement.GetType() == typeof(Text)
-                    || placement is PathText or PolyLine or Arc or Image or HyperLink or QRCode or DimensionItem or DimensionCircle or PlaceHolder or MacroBox || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? ReadPlacement(placement, parent, slot, blockChild) : null;
+                    || placement is PathText or PolyLine or Arc or Image or HyperLink or QRCode or DimensionItem or DimensionCircle or PlaceHolder or MacroBox || placement.GetType() == typeof(Line) || placement.GetType() == typeof(Rectangle)) ? Timed(excluded ? "row.frame" : placement is PropertyPlacement ? "row.property" : placement is SymbolReference ? "row.symbol" : "row.graphic", () => ReadPlacement(placement, parent, slot, blockChild)) : null;
                 if (row is not null)
                 {
                     _result.Placements.Add(row);
@@ -130,14 +142,14 @@ internal sealed partial class EplanDrawingReader
                 IEnumerable<Placement> children;
                 try
                 {
-                    children = placement switch
+                    children = Timed<IEnumerable<Placement>>("children", () => placement switch
                     {
                         Group group => group.SubPlacements,
                         Block block => block.SubPlacements,
                         SymbolReference symbol => symbol.PropertyPlacements,
                         IPropertyPlacementsContainer container => container.PropertyPlacements,
                         _ => [],
-                    };
+                    });
                 }
                 catch (Exception ex) when (ex is BaseException or InvalidOperationException)
                 {
@@ -153,11 +165,11 @@ internal sealed partial class EplanDrawingReader
         private DrawingPlacement ReadPlacement(Placement placement, DrawingLocator? parent, string? slot, bool blockChild)
         {
             _metadataUnavailable = false;
-            double[] location = ReadLocation(placement);
-            double[]? bounds = ReadBounds(placement);
-            string? display = ReadOptional(() => (placement as PropertyPlacement)?.GetDisplayString());
-            if (bounds is null && display == "")
-            { bounds = [0, 0, 0, 0]; } // A53/A54: empty property text has no visible ink.
+            double[] location = Timed("location", () => ReadLocation(placement));
+            string? display = Timed("display", () => ReadOptional(() => (placement as PropertyPlacement)?.GetDisplayString()));
+            // A53/A54: empty property text has no visible ink. A168, live 2026-11-19 (=EC1+A3&EFS1/1): 2416 of its 3239
+            // property texts display nothing; EPLAN gave each a point or no outline, and asking took half of the page read.
+            double[]? bounds = display == "" ? [0, 0, 0, 0] : Timed("bounds", () => ReadBounds(placement));
 
             using MultiLangString? contents = ReadOptional(() => placement switch { PropertyPlacement p => p.Contents, HyperLink h => h.Contents, Text t => t.Contents, _ => null });
             string? text = ReadOptional(() => contents?.GetAsString());
@@ -186,8 +198,8 @@ internal sealed partial class EplanDrawingReader
             // A158, Live 2026-11-01: a placed terminal strip definition has no symbol variant; it is never a container.
             // A147, Corpus 2026-11-17: SPECIAL/DC is the black box symbol; the official repair switch -QB1 (HVAC EFS/30) uses it on a
             // function whose category is not BlackBox, and its wires run into the box to the contacts inside.
-            bool isContainer = ReadOptional(() => IsContainer(placement));
-            string? containerOwner = ContainerOwner(placement, isContainer);
+            bool isContainer = Timed("container", () => ReadOptional(() => IsContainer(placement)));
+            string? containerOwner = Timed("owner", () => ContainerOwner(placement, isContainer));
             if (_metadataUnavailable)
             { graphics["read_warning"] = "Some placement metadata is unavailable; inspect this placement in EPLAN."; }
             string digest = SnapshotCanonical.Sha256(JsonConvert.SerializeObject(new
@@ -221,7 +233,7 @@ internal sealed partial class EplanDrawingReader
                 {
                     ["coordinate_space"] = blockChild ? "block-relative; absolute geometry unverified" : null,
                     ["layout_symbol"] = placement is SymbolReference && placement.GetType().Name is not ("LocationBox" or "Cable" or "DynamicConnectionLine") ? "true" : null,
-                    ["symbol"] = placement is SymbolReference reference ? SymbolOf(reference) : null,
+                    ["symbol"] = placement is SymbolReference reference ? Timed("symbolOf", () => SymbolOf(reference)) : null,
                     ["layout_container_owner"] = containerOwner,
                     ["layout_container"] = isContainer ? "true" : null,
                     ["grouped"] = grouped?.ToString().ToLowerInvariant(),

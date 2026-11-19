@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-19",
-  "scannedSources": "d6462efb + uncommitted changes",
-  "sourceHash": "sha256:187a6978ae821b7ab3072fe7af4f10c64fc254ef418e0b0657d0ebc8b0e50f8a",
+  "scannedSources": "03db0fa5 + uncommitted changes",
+  "sourceHash": "sha256:5e222d8a436106be8935fe28a94d166ca70772407966aff5f874b767707346d9",
   "operations": [
     {
       "name": "action.execute",
@@ -175257,7 +175257,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "call"
@@ -186803,7 +186851,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -187407,7 +187503,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -216406,7 +216550,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -222590,7 +222782,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -222799,7 +223039,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -222919,7 +223207,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -232379,7 +232715,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -233608,6 +233992,30 @@
           "plc.rack.execute",
           "plc.rack.plan"
         ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.EndSymbolRef": [
@@ -233692,6 +234100,30 @@
           "plc.rack.execute",
           "plc.rack.plan"
         ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnection.StartConnectionPoint": [
@@ -233745,6 +234177,30 @@
       {
         "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -233849,6 +234305,30 @@
           "plc.rack.execute",
           "plc.rack.plan"
         ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.SymbolReference.GraphicalConnectionPoints": [
@@ -233925,7 +234405,7 @@
       },
       {
         "adapter": "EplanConnectionScene",
-        "member": "ReadPins",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -234010,6 +234490,30 @@
       {
         "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -234117,7 +234621,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -234612,7 +235164,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "get"
@@ -251615,7 +252215,79 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "type"
@@ -255093,7 +255765,79 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "type"
@@ -276827,7 +277571,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "type"
@@ -277352,6 +278144,54 @@
         ]
       },
       {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
         "adapter": "EplanPotentialEditor",
         "member": "Select",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanPotentialEditor.cs",
@@ -277842,6 +278682,17 @@
         ],
         "operations": [
           "modelview.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPageReviewReader",
+        "member": "Read",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Pages/EplanPageReviewReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "page.review"
         ]
       },
       {
@@ -279839,7 +280690,55 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "type"
@@ -287063,7 +287962,79 @@
       },
       {
         "adapter": "EplanConnectionScene",
+        "member": "End",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPoints",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "type"
@@ -287426,6 +288397,30 @@
       {
         "adapter": "EplanConnectionScene",
         "member": "ReadPins",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanConnectionScene",
+        "member": "ReadPinsAndGraphical",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionScene.cs",
         "access": [
           "type"

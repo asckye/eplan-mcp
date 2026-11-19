@@ -1,6 +1,7 @@
 using Eplan.EplApi.DataModel;
 using Eplan.EplApi.DataModel.EObjects;
 using EplanMcp.Bridge.Core;
+using EplanMcp.Bridge.Core.Diagnostics;
 using EplanMcp.Bridge.Core.Operations;
 using EplanMcp.Bridge.Core.Protocol;
 using EplanMcp.Contracts;
@@ -8,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace EplanMcp.Bridge.Eplan.Adapters;
 
-internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReader
+internal sealed partial class EplanPageReviewReader(IBridgeLog? log = null) : PageReviewOperation.IReader
 {
     public (PageScene Scene, JObject Actual) Read(string project, string page, JObject request)
     {
@@ -16,21 +17,33 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(target.Path));
         Page[] pages = EplanNativePreconditions.Valid(finder.GetPages(null)).ToArray();
         Page native = pages.SingleOrDefault(p => string.Equals(p.Name, page, StringComparison.Ordinal)) ?? throw new BridgeErrorException(ErrorReason.PageNotFound, "Page not found; use eplan_page_list.");
-        var scene = new EplanConnectionCreator(readSymbolBounds: false, allowReadOnly: true).Read(target.Path, page);
+        // Owner 2026-11-16: =EC1+A3&EFS1/1 (3870 objects) takes about 9 s to read. One log line per review says where it goes.
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var times = new List<string>();
+        void Lap(string section)
+        { times.Add(FormattableString.Invariant($"{section} {watch.ElapsedMilliseconds}")); watch.Restart(); }
+        var scene = new EplanConnectionCreator(readSymbolBounds: false, allowReadOnly: true).Read(target.Path, page, [], Lap);
+        // One read of the page's placements serves the lookups below; the wrappers stay inside this read.
+        Placement[] placed = EplanNativePreconditions.Valid(native.AllPlacements).ToArray();
+        var functions = new Dictionary<long, Function>();
+        foreach (Function function in placed.OfType<Function>())
+        { if (!functions.ContainsKey(function.ObjectIdentifier)) { functions.Add(function.ObjectIdentifier, function); } }
         // Local 2026 XML: DynamicConnectionLine.GetGraphics returns the line representation; native objects stay in this read. Large verifies it.
-        foreach (DynamicConnectionLine line in EplanNativePreconditions.Valid(native.AllPlacements).OfType<DynamicConnectionLine>())
+        foreach (DynamicConnectionLine line in placed.OfType<DynamicConnectionLine>())
         { if (line.GetGraphics() is global::Eplan.EplApi.DataModel.Graphics.Line graphic) { scene.Graphical.Add([[graphic.StartPoint.X, graphic.StartPoint.Y], [graphic.EndPoint.X, graphic.EndPoint.Y]]); } }
         var actual = new JObject { ["devices"] = new JArray(), ["connections"] = new JArray(), ["cables"] = new JArray(), ["interruptions"] = new JArray(), ["texts"] = new JArray(), ["messages"] = new JArray() };
         foreach (DrawingPlacement p in scene.Page.Placements.Where(p => p.Parent is null))
         {
             OperationContext.Current.ThrowIfCancellationRequested();
             JObject Row() => new() { ["position"] = new JArray(p.Location), ["locator"] = BridgeJson.FromObject(p.Locator) };
-            if (EplanNativePreconditions.Valid(native.AllPlacements).OfType<Function>().FirstOrDefault(f => f.ObjectIdentifier == p.Locator.Oid) is { } f && f is not Cable)
+            if (functions.TryGetValue(p.Locator.Oid, out Function? f) && f is not Cable)
             { JObject row = Row(); row["tag"] = f.Name; row["category"] = f.FunctionCategory.ToString(); row["main"] = f.IsMainFunction; row["library"] = f.SymbolVariant?.SymbolLibraryName; row["symbol"] = f.SymbolVariant?.SymbolName; row["symbol_variant"] = f.SymbolVariant?.VariantNr; row["pins"] = JObject.FromObject(f.Pins.ToDictionary(p => p.Index.ToString(System.Globalization.CultureInfo.InvariantCulture), p => EplanPins.Name(p) ?? "")); row["placement"] = BridgeJson.FromObject(p); ((JArray)actual["devices"]!).Add(row); }
             if (p.Kind == "Text")
             { JObject row = Row(); row["text"] = p.Properties["text"]; row["angle"] = p.Properties.TryGetValue("angle", out string? angle) && double.TryParse(angle, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double degrees) ? degrees : null; ((JArray)actual["texts"]!).Add(row); }
         }
+        Lap("devices");
         CableDefinitionPlanner.Inventory inventory = scene.ReadCables!();
+        Lap("cableInventory");
         foreach (Connection c in EplanNativePreconditions.Valid(finder.GetConnections(null)).Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
         {
             OperationContext.Current.ThrowIfCancellationRequested();
@@ -49,7 +62,8 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
             ((JObject)((JArray)actual["connections"]!).Last!)["wireNumber"] = wireNumber;
             GC.KeepAlive(c);
         }
-        foreach (Cable cable in EplanNativePreconditions.Valid(native.AllPlacements).OfType<Cable>())
+        Lap("connections");
+        foreach (Cable cable in placed.OfType<Cable>())
         {
             DrawingPlacement placement = scene.Page.Placements.First(p => p.Parent is null && p.Kind == "Cable" && p.Locator.Oid == cable.ObjectIdentifier);
             double[][]? points = null;
@@ -63,6 +77,7 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
             { WriteExceptionDiagnostics.Report(ex); }
             ((JArray)actual["cables"]!).Add(CableRow(cable.Name, placement.Locator, cable.CableConnections.Select(w => w.ObjectIdentifier), (JArray)actual["connections"]!, placement.Location, points));
         }
+        Lap("cables");
         bool Enabled(string check) => request["checks"] is not JArray checks || checks.Values<string>().Contains(check, StringComparer.Ordinal);
         if (Enabled("interruption_pairing") || (request["expected"] as JObject)?["interruptions"] is not null)
         {
@@ -92,6 +107,8 @@ internal sealed partial class EplanPageReviewReader : PageReviewOperation.IReade
             foreach (ProjectMessageRecord m in new EplanProjectMessageReader().ReadMessages(target.Path).Where(m => !m.Done && m.Page == page))
             { ((JArray)actual["messages"]!).Add(new JObject { ["text"] = m.Text, ["severity"] = m.Category == "Error" ? "error" : m.Category == "Warning" ? "warning" : "info", ["objects"] = new JArray(scene.Page.Placements.Where(p => p.Properties.TryGetValue("name", out string? name) && name == m.ObjectName).Select(p => BridgeJson.FromObject(p.Locator))) }); }
         }
+        Lap("rest");
+        log?.Write(BridgeLogLevel.Information, FormattableString.Invariant($"page_review read, ms: {string.Join("; ", times)}; placements {scene.Page.Placements.Count}; geometry steps: {EplanDrawingReader.LastProfile}"));
         return (scene, actual);
     }
 }

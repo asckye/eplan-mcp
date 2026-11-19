@@ -29,7 +29,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         .SelectMany(l => l.Symbols).Where(s => s.Name is "CO" or "TLRO" or "TLRU" or "TOUL" or "TOUR" or "PCP" or "ACBP" || s.Type == Symbol.SymbolType.InterruptionPoint).SelectMany(s => s.Variants);
     public PageScene Read(string project, string page) => Read(project, page, []);
     public LayoutGuard.Model Measure(string project, string page) => LayoutGuard.From(new EplanConnectionCreator(false).Read(project, page));
-    internal PageScene Read(string project, string page, IReadOnlyList<Placement> created)
+    internal PageScene Read(string project, string page, IReadOnlyList<Placement> created, Action<string>? lap = null)
     {
         OpenProject target = ProjectResolver.Resolve(new EplanProjectCatalog().ListOpenProjects(), project);
         if (target.ReadOnly && !allowReadOnly)
@@ -37,17 +37,33 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
         Page native = Page(target.Path, page);
         PageDrawingGeometry geometry = EplanDrawingReader.Read(target.Path, page, created)!;
         geometry.Project = target.Path;
+        lap?.Invoke("geometry");
         var scene = new PageScene { Project = target, Page = geometry, PageType = native.PageType.ToString(), Complete = true };
-        foreach (Placement placement in EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)).GroupBy(p => p.ToStringIdentifier(), StringComparer.Ordinal).Select(g => g.First()))
+        // One identifier per placement and a set of the read locators: comparing every placement with every row
+        // called ToStringIdentifier once per comparison.
+        Placement[] placed = EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)).ToArray();
+        var read = new HashSet<(int Type, long Oid)>(geometry.Placements.Select(p => (p.Locator.Type, p.Locator.Oid)));
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (Placement placement in placed)
         {
-            if (!geometry.Placements.Any(p => p.Locator.Type == SnapshotCanonical.TypeOf(placement.ToStringIdentifier()) && p.Locator.Oid == placement.ObjectIdentifier))
+            string identifier = placement.ToStringIdentifier();
+            if (seen.Add(identifier) && !read.Contains((SnapshotCanonical.TypeOf(identifier), placement.ObjectIdentifier)))
             { scene.Complete = false; }
         }
-        EplanConnectionScene.ReadPins(scene, EplanNativePreconditions.Valid(native.AllPlacements.Concat(created)));
-        scene.Graphical = Graphical(target.Path, page, scene.Pins);
+        lap?.Invoke("complete");
+        if (created.Count == 0)
+        { scene.Graphical = EplanConnectionScene.ReadPinsAndGraphical(scene, placed, lap); }
+        else
+        {
+            // A13: placements just returned by a write are not all in the page's own list yet; the segments keep coming from it.
+            EplanConnectionScene.ReadPins(scene, placed);
+            scene.Graphical = Graphical(target.Path, page, scene.Pins);
+        }
+        lap?.Invoke("pinsAndGraphical");
         foreach (SymbolVariant variant in readSymbolBounds ? Variants(target.Path) : [])
         { scene.SymbolBounds.Add(FormattableString.Invariant($"{variant.SymbolName}/{variant.VariantNr}"), Outline(variant)); }
         scene.Logical = Endpoints(target.Path, page).Select(p => new ConnectionRecord { StartDevice = p[0], EndDevice = p[1] }).ToList();
+        lap?.Invoke("logical");
         if (geometry.Placements.Any(p => p.Kind == nameof(ConnectionDefinitionPoint)))
         {
             ConnectionPointRouting.Initialize(scene);
@@ -64,6 +80,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     end?.ParentFunction is { } b ? Key(b, end.Index) : null);
             }
         }
+        lap?.Invoke("definitionPoints");
         scene.Layout = EplanLayout.Config(scene.ConfigLayoutMembers);
         scene.ReadCables = () => ReadCables(target.Path, page, scene);
         return scene;

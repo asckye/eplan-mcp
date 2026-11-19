@@ -10,6 +10,8 @@ namespace EplanMcp.Bridge.Eplan.Adapters;
 /// <summary>A3/A14/A39/A52-A54: bounded to one page; borrowed objects are never disposed, no property lists are acquired.</summary>
 internal sealed partial class EplanDrawingReader : IPageDrawingReader
 {
+    /// <summary>Milliseconds per step of the last read on this thread, largest first; diagnostics only.</summary>
+    [ThreadStatic] internal static string? LastProfile;
     public PageDrawingGeometry? Read(string projectPath, string pageName) => Read(projectPath, pageName, []);
     internal static PageDrawingGeometry? Read(string projectPath, string pageName, IReadOnlyList<Placement> created)
     {
