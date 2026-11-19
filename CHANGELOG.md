@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-19
+
 ### 新增
 
 - `eplan_placement_delete` 可以删除电缆定义线（`Cable`），不必为改一根电缆整页重画；随它消失的连接定义点列在结果的 `alsoRemoved` 里。
