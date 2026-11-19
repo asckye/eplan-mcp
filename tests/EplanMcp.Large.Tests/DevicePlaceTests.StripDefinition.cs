@@ -52,4 +52,57 @@ public sealed partial class DevicePlaceTests
         Assert.Equal(before.GetRawText(), (await Drawings()).GetRawText());
         Assert.Equal(business, (await session.SnapshotAsync()).Hash);
     }
+
+    /// <summary>
+    /// A161: the description of a terminal strip is the function text of its definition. A strip whose terminals were
+    /// placed without asking for a definition has an unplaced one with no text; both are changed by eplan_property_set.
+    /// </summary>
+    [Fact]
+    public async Task StripDefinitionText_PlacedAndUnplaced_IsChangedByPropertySet_UndoRestores()
+    {
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        string page = await NewPageAsync(session.Project);
+        string business = (await session.SnapshotAsync()).Hash;
+        string placed = "-XD7" + page[Prefix.Length..], bare = "-XD8" + page[Prefix.Length..];
+        JsonElement a = await eplan.CallAsync("eplan_device_place", new()
+        {
+            ["project"] = session.Project,
+            ["page"] = page,
+            ["terminal_strip"] = placed,
+            ["terminal_number"] = "1",
+            ["terminal_strip_text"] = "Old text",
+            ["terminal_strip_position"] = (double[])[72d, 120d],
+            ["x"] = 100,
+            ["y"] = 160,
+            ["dry_run"] = false
+        });
+        JsonElement b = await eplan.CallAsync("eplan_device_place", new() { ["project"] = session.Project, ["page"] = page, ["terminal_strip"] = bare, ["terminal_number"] = "1", ["x"] = 140, ["y"] = 160, ["dry_run"] = false });
+        (string Tag, string Text)[] strips = [(a.GetProperty("terminal").GetProperty("strip").GetString()!, "New text"), (b.GetProperty("terminal").GetProperty("strip").GetString()!, "Spare strip")];
+        async Task<JsonElement> Device(string tag) => (await eplan.CallAsync("eplan_device_get", new() { ["project"] = session.Project, ["tag"] = tag, ["language"] = "??_??" })).GetProperty("device");
+        Assert.Equal(("TerminalDefText", "Old text"), ((await Device(strips[0].Tag)).GetProperty("category").GetString(), (await Device(strips[0].Tag)).GetProperty("text").GetString()));
+        JsonElement unplaced = await Device(strips[1].Tag);
+        Assert.Equal(("TerminalDefText", JsonValueKind.Null), (unplaced.GetProperty("category").GetString(), unplaced.GetProperty("page").ValueKind));
+        foreach ((string tag, string text) in strips)
+        {
+            JsonElement set = await eplan.CallAsync("eplan_property_set", new()
+            {
+                ["project"] = session.Project,
+                ["dry_run"] = false,
+                ["changes"] = new[] { new Dictionary<string, object?> { ["target"] = new { device_tag = tag }, ["property"] = new { property_id = 20011 }, ["language"] = "??_??", ["value"] = text } }
+            });
+            TestContext.Current.TestOutputHelper!.WriteLine("Strip text set: " + set);
+            Assert.Equal(ExecutionState.Committed, set.GetProperty("execution").GetString());
+            Assert.Equal(text, (await Device(tag)).GetProperty("text").GetString());
+        }
+        JsonElement refused = await eplan.ErrorAsync("eplan_property_set", new()
+        {
+            ["project"] = session.Project,
+            ["dry_run"] = true,
+            ["changes"] = new[] { new Dictionary<string, object?> { ["target"] = new { device_tag = strips[0].Tag }, ["property"] = new { property_id = 20027 }, ["value"] = "x" } }
+        });
+        Assert.Equal("POLICY_DENIED", refused.GetProperty("reason").GetString());
+        for (int i = 0; i < 4; i++)
+        { await session.UndoAsync(); }
+        Assert.Equal(business, (await session.SnapshotAsync()).Hash);
+    }
 }

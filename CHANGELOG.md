@@ -5,6 +5,10 @@
 
 ## [Unreleased]
 
+### 新增
+
+- `eplan_property_set` 可以改端子排的说明文字：按端子排的设备标识写其定义的功能文本（属性 20011），已放置和未放置的定义都可以。以前按标识写会被拒绝（`POLICY_DENIED`，运行时类型不在范围内）。定义的其余属性仍不开放。
+
 ### 破坏性变化
 
 - 续页字段统一：`eplan_object_find`、`eplan_object_get`、`eplan_page_review`、`eplan_property_get`、`eplan_property_schema`、`eplan_selection_get`、`eplan_selection_set` 的结果里，下一页的游标由 `cursor` 改名为 `nextCursor`，与其余列表工具一致。传入参数仍叫 `cursor`。旧名不保留。

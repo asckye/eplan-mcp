@@ -1,5 +1,11 @@
 # [EPLAN API 笔记](../api-notes.md)：PLC、电缆与端子编号
 
+### A161. 端子排定义是类别 TerminalDefText 的主功能，说明文字是它的功能文本；只放端子时自动产生未放置的定义（2026-11-18，EPLAN 2026.0.3.25421，Electric P8，A 槽，LargeWrite scratch 新页）
+- **现象：** `eplan_device_place` 带 `terminal_strip_text` 和 `terminal_strip_position` 放端子，得到一个已放置的端子排定义：`eplan_device_get` 读作类别 `TerminalDefText`、有页、`text` 是给的文字。只给 `terminal_strip` 和 `terminal_number`、不要求定义时，同样得到一个 `TerminalDefText` 的主定义，但**没有放置**：`page` 为空，`text` 为空，变更清单写的是 `main definition; function text (??_??): ; unplaced`。
+- **结论：** 端子排的说明文字就是这个定义的功能文本（属性 20011），已放置和未放置的定义都能读写。运行时类是 `TerminalStrip`，是 `Function` 的派生类，属性列表相同。图上没有画定义的端子排，在导航器里仍有一个空的未放置定义。
+- **工具行为：** `eplan_property_set` 按设备标识写端子排定义的 20011（语言 `??_??` 或项目语言），其余属性仍然拒绝（`POLICY_DENIED`）。此前按标识写会被拒，消息是 `The target runtime object type is outside the published scope.`，原因是写入会话只把 `PLC`、`Terminal`、`BusTerminal` 当作功能。
+- **证据：** `DevicePlaceTests.StripDefinitionText_PlacedAndUnplaced_IsChangedByPropertySet_UndoRestores`：已放置的定义由 `Old text` 改为 `New text`，未放置的定义由空改为 `Spare strip`，20027 被拒，四步撤销后项目快照与之前相同。
+
 ### A24. 电缆、端子、PLC 的读取与编号（spike S21，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S21](../../../spikes/S21-cables-terminals/README.md)。示例项目的 scratch 副本。
 - `DMObjectsFinder` 能读出电缆（按类别 78 根）、端子排（45 个对象，实际 27 排：18 排各返回两次，2026-10-21 实机测试）、端子（1331）、PLC 盒（20）、插头（170）、连接（2060）；`Cable.GetSourcesAndTargets` 给出电缆两端的设备或端子，`TerminalStrip.Terminals`、`PLC.PLCTerminals` 给出所属的端子。— S21。

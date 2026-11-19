@@ -4,6 +4,8 @@
 
 | 变更集 / 定位 | 受影响 Large 类 | 状态与剩余条件 / 证据 |
 |---|---|---|
+| `DevicePlaceTests` 改在 B 槽运行（2026-11-18，负责人同意；A 槽 Electric P8 的数据目录是负责人自己的，没有样例部件，9 个用例报 `PART_NOT_FOUND`） | `DevicePlaceTests` | 已通过：2026-11-18，B 槽 Pro Panel，EPLAN 2026.0.3.25421，`a926aa45`：30/30。以后这个类用 `-Slot B` 运行。 |
+| 端子排定义的说明文字可写（2026-11-18，A161；写入会话把 `TerminalStrip` 按功能处理，规划器限定只开放 20011） | `DevicePlaceTests#StripDefinitionText_PlacedAndUnplaced_IsChangedByPropertySet_UndoRestores`、`PropertySetToolTests` | 已通过：2026-11-18，A 槽 Electric P8，EPLAN 2026.0.3.25421，工作树构建（提交前）：新用例 1/1，`PropertySetToolTests` 1/1。 |
 | 0.8.0 契约修正（2026-11-18，七个工具的结果字段 `cursor` 改为 `nextCursor`，`eplan_plan_apply` 默认预览，`eplan_plc_rack` 的 `project` 必填；实机测试只改了字段名和显式的 `dry_run:false`） | `PlanApplyTests`、`PlanVersion2Tests`、`ObjectReadTests`、`PropertyGetToolTests`、`PlcRackTests` | 已通过：2026-11-18，A 槽 Electric P8，EPLAN 2026.0.3.25421，`f9c986cf`：`PlanApplyTests` 2/2，`PlanVersion2Tests` 1/1（另 1 个大夹具计时用例未设 `EPLANMCP_LARGE_FIXTURE` 跳过），`ObjectReadTests` 16/16，`PropertyGetToolTests` 3/3，`PlcRackTests` 1/1。 |
 | 六个按原始请求执行的写入工具核对计划时的项目（2026-11-18，执行参数多带 `projectPath`，Bridge 端解析后核对；`PageScene` 抽出为独立类，只改名） | `ConnectionCreateTests`、`PlacementMoveTests`、`PlacementDeleteTests`、`GraphicEditTests` | 已通过：2026-11-18，A 槽 Electric P8，EPLAN 2026.0.3.25421，`58d27a43`：`ConnectionCreateTests` 25/25，`PlacementMoveTests` 2/2，`PlacementDeleteTests` 1/1，`GraphicEditTests` 17/17。 |
 | 页面读取补诊断和图框成员警告（2026-11-18，`EplanDrawingReader.Reading`，只加记录和一条警告） | `PageDrawingDiscoveryTests`、`PlacementMoveTests` | 已通过：2026-11-18，A 槽 Electric P8，EPLAN 2026.0.3.25421，`60c9f2d1`：`PageDrawingDiscoveryTests` 1/1，`PlacementMoveTests` 2/2。 |

@@ -94,13 +94,8 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                 continue;
             }
 
-            if (string.IsNullOrEmpty(obj.Category) || (obj.Main != true || entry.PropertyId is not (20011 or 20027))
-                && !PropertyWriteWhitelist.Entries.ContainsKey((version, "Function", entry.PropertyId, obj.Category!))
-                || obj.Main == true && entry.PropertyId is not (20011 or 20027) && obj.Category != "PLCBox"
-                || obj.Main != true && (obj.Category is not ("PLCTerminal" or "BusTerminal" or "Terminal" or "Busbar") || target.Locator is null))
-            {
-                Add(at + "/target", "Use a supported category; non-main functions require an exact locator.", ErrorReason.PolicyDenied);
-            }
+            if (CategoryRefusal(obj, entry.PropertyId, version, target.Locator is not null) is { } refusal)
+            { Add(at + refusal.Path, refusal.Message, ErrorReason.PolicyDenied); }
 
             resolved.Add((obj, change, entry.PropertyId, i));
         }
@@ -319,6 +314,22 @@ public sealed class PropertySetPlanner(IPropertyReadAdapter reader)
                 "propertyName" => "property_name",
                 _ => p.Name,
             }, p.Value)));
+
+    /// <summary>
+    /// Why this property of this function is outside the published scope, or null. Main functions publish 20011 and
+    /// 20027, a main PLC box its listed fields, the listed non-main categories theirs through an exact locator; a
+    /// terminal strip definition publishes its function text only (A161).
+    /// </summary>
+    private static (string Path, string Message)? CategoryRefusal(SnapshotObject obj, int propertyId, int version, bool located)
+    {
+        if (obj.Category == "TerminalDefText" && propertyId != 20011)
+        { return ("/property", "A terminal strip definition publishes its function text (20011) only."); }
+        return string.IsNullOrEmpty(obj.Category) || (obj.Main != true || propertyId is not (20011 or 20027))
+                && !PropertyWriteWhitelist.Entries.ContainsKey((version, "Function", propertyId, obj.Category!))
+            || obj.Main == true && propertyId is not (20011 or 20027) && obj.Category != "PLCBox"
+            || obj.Main != true && (obj.Category is not ("PLCTerminal" or "BusTerminal" or "Terminal" or "Busbar") || !located)
+            ? ("/target", "Use a supported category; non-main functions require an exact locator.") : null;
+    }
 
     private static void Refuse(List<PropertyViolation> violations, Dictionary<string, string>? metadata = null)
     {

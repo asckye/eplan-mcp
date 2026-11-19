@@ -58,6 +58,37 @@ public sealed class PropertySetTerminalBusbarTests
         Assert.Equal(0, session.Writes);
     }
 
+    /// <summary>
+    /// A161 (live 2026-11-18): a terminal strip definition is a main function of category TerminalDefText and its
+    /// description is the function text. Writing it by device tag was refused because the runtime class is TerminalStrip.
+    /// </summary>
+    [Fact]
+    public void StripDefinition_FunctionTextIsWrittenByTag()
+    {
+        using FakePropertySetSession session = Session("TerminalDefText", 20011);
+        session.Inventory[0].Main = true;
+        PropertySetChange change = Change(session, 20011);
+        change.Target = new PropertyTarget(deviceTag: session.Inventory[0].Name);
+        var args = new PropertySetArgs { Project = PropertySetPlannerTests.Project, Changes = [change], Approved = session.Plan([change]) };
+        Assert.Equal(ExecutionState.Committed, PropertySetExecuteTests.Execute(session, new FakeTransactions(), args).Execution);
+        Assert.Equal(1, session.Writes);
+    }
+
+    [Theory]
+    [InlineData(20027)]
+    [InlineData(20367)]
+    public void StripDefinition_PublishesItsFunctionTextOnly(int id)
+    {
+        using FakePropertySetSession session = Session("TerminalDefText", id);
+        session.Inventory[0].Main = true;
+        PropertySetChange change = Change(session, id);
+        change.Target = new PropertyTarget(deviceTag: session.Inventory[0].Name);
+        BridgeErrorException error = Assert.Throws<BridgeErrorException>(() => session.Plan([change]));
+        Assert.Equal(ErrorReason.PolicyDenied, error.Error.Reason);
+        Assert.Contains("function text (20011) only", error.Error.Metadata!["violations"], StringComparison.Ordinal);
+        Assert.Equal(0, session.Writes);
+    }
+
     [Theory]
     [InlineData(20367)]
     [InlineData(20809)]

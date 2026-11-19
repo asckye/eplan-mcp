@@ -12,7 +12,7 @@ EplanMcp.Bridge.Core/PropertyPlacementMoves.Plan(3)	113
 EplanMcp.Bridge.Core/PropertyReadMapping.Read(6)	107
 EplanMcp.Bridge.Core/PropertyReadOperation.Read(4)	107
 EplanMcp.Bridge.Core/PropertySetExecuteOperation.Execute(1)	104
-EplanMcp.Bridge.Core/PropertySetPlanner.Plan(6)	275
+EplanMcp.Bridge.Core/PropertySetPlanner.Plan(6)	270
 EplanMcp.Bridge.Eplan/BridgeHost.Start(4)	252
 EplanMcp.Bridge.Eplan/EplanApprovalDialog.Ask(2)	137
 EplanMcp.Bridge.Eplan/EplanDeviceSymbolPlacement.Create(5)	106
