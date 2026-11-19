@@ -29,6 +29,10 @@ public sealed class OfficialCorpusReviewTests(WriteHost host, ITestOutputHelper 
         Assert.SkipWhen(folder is null || !Directory.Exists(folder), $"Set {CorpusVariable} to a folder holding official EPLAN .zw1 backups.");
         string[] archives = [.. Directory.EnumerateFiles(folder!, "*.zw1", SearchOption.AllDirectories).Order(StringComparer.Ordinal)];
         Assert.NotEmpty(archives);
+        // Crash investigation 2026-11-19: EPLAN died twice on 2026-11-17 while this test reviewed the macro project; several
+        // passes over the corpus in one EPLAN give an intermittent crash more chances.
+        if (int.TryParse(Environment.GetEnvironmentVariable(CorpusVariable + "_REPEAT"), out int repeat) && repeat > 1)
+        { archives = [.. Enumerable.Repeat(archives, repeat).SelectMany(a => a)]; }
 
         var errors = new List<string>();
         var restoreFailures = new List<string>();

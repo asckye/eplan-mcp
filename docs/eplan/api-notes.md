@@ -179,6 +179,7 @@
 | A157 | 引脚代号带索引时读取 Pin.Name 抛出 IndexedPropertyException | 2026-11-13 | [plc-and-terminals](api-notes/plc-and-terminals.md#a157-引脚代号带索引时读取-pinname-抛出-indexedpropertyexception2026-11-13eplan-20260316-页重绘) |
 | A158 | 已放置的端子排定义可以没有符号变体 | 2026-11-01 | [symbols-and-layout](api-notes/symbols-and-layout.md#a158-已放置的端子排定义可以没有符号变体2026-11-01eplan-202603绘图读取中的端子排定义) |
 | A159 | 安装板上 MoveRelative 的位移按父对象坐标轴解释 | 2026-11-12 | [symbols-and-layout](api-notes/symbols-and-layout.md#a159-安装板上-moverelative-的位移按父对象坐标轴解释2026-11-12eplan-2026033d-安装板) |
+| A169 | 大量连续读取时 EPLAN 偶发退出（ucrtbase.dll 0xc0000409）：未能重现，原因未知 | 2026-11-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md) |
 | A168 | 页面读取慢在属性文字的外框和重复读取图形连接，不在连接扫描 | 2026-11-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md) |
 | A167 | 给电缆挂部件后芯线变成未分配，要再传一次部件数据；重新分配芯线不起作用 | 2026-11-19 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
 | A166 | 中断点改名：写 InterruptionPoint.Name，名称可以带冒号 | 2026-11-19 | [connections-and-potentials](api-notes/connections-and-potentials.md) |
