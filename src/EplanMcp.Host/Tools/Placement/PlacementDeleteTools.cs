@@ -18,21 +18,42 @@ internal sealed class PlacementDeleteTools
     {
         JsonElement input = JsonSerializer.SerializeToElement(context.Params?.Arguments ?? new Dictionary<string, JsonElement>());
         var errors = new List<string>();
-        foreach (string name in new[] { "project", "page" })
-        { if (!input.TryGetProperty(name, out JsonElement text) || text.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(text.GetString())) { errors.Add("/" + name + " requires a nonempty string."); } }
+        bool byTag = input.TryGetProperty("unplaced", out JsonElement unplaced);
+        RequireText(input, "project", errors);
+        if (!byTag)
+        {
+            RequireText(input, "page", errors);
+        }
         if (input.TryGetProperty("dry_run", out JsonElement flag) && flag.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
-        { errors.Add("/dry_run must be boolean."); }
-        if (!input.TryGetProperty("items", out JsonElement items) || items.ValueKind != JsonValueKind.Array || items.GetArrayLength() is < 1 or > 100)
-        { errors.Add("/items requires 1..100 drawing locators."); }
+        {
+            errors.Add("/dry_run must be boolean.");
+        }
+        if (byTag)
+        {
+            foreach (JsonProperty property in input.EnumerateObject().Where(p => p.Name is not ("project" or "unplaced" or "dry_run")))
+            {
+                errors.Add($"/{property.Name} must be omitted with unplaced.");
+            }
+            string?[]? tags = unplaced.ValueKind == JsonValueKind.Array
+                ? unplaced.EnumerateArray().Select(t => t.ValueKind == JsonValueKind.String ? t.GetString() : null).ToArray() : null;
+            UnplacedDeleteTags.Validate(tags, errors);
+        }
         else
-        { foreach (JsonElement item in items.EnumerateArray()) { if (item.ValueKind != JsonValueKind.Object || !item.TryGetProperty("type", out JsonElement type) || type.ValueKind != JsonValueKind.Number || !type.TryGetInt32(out int t) || t < 1 || !item.TryGetProperty("oid", out JsonElement oid) || oid.ValueKind != JsonValueKind.Number || !oid.TryGetInt64(out long id) || id < 1) { errors.Add("/items requires integer type/oid drawing locators."); } } }
+        {
+            ValidateItems(input, errors);
+        }
         if (errors.Count > 0)
-        { BridgeError error = ToolResults.InvalidArgumentError(errors); error.Execution = ExecutionState.NotStarted; return ToolResults.Error(error); }
+        {
+            BridgeError error = ToolResults.InvalidArgumentError(errors);
+            error.Execution = ExecutionState.NotStarted;
+            return ToolResults.Error(error);
+        }
         bool dry = WriteToolDefaults.IsPreview(input);
         try
         {
-            var request = new WriteRequest<JsonElement, object>(Tool, ToolTier.Destructive, OperationNames.PlacementDeletePlan, OperationNames.PlacementDeleteExecute,
-                input, (plan, backup) => new { request = input, fingerprint = plan.Fingerprint, projectPath = plan.ProjectPath, backup }, dry, PageWriteTools.DefaultLimit, "Deleting drawing placements");
+            var request = new WriteRequest<JsonElement, object>(Tool, ToolTier.Destructive, byTag ? OperationNames.UnplacedDeletePlan : OperationNames.PlacementDeletePlan,
+                byTag ? OperationNames.UnplacedDeleteExecute : OperationNames.PlacementDeleteExecute,
+                input, (plan, backup) => new { request = input, fingerprint = plan.Fingerprint, projectPath = plan.ProjectPath, backup }, dry, PageWriteTools.DefaultLimit, byTag ? "Deleting unplaced functions" : "Deleting drawing placements");
             WriteOutcome<JsonObject> outcome = await pipeline.RunAsync<JsonElement, object, JsonObject>(request, progress, cancellationToken).ConfigureAwait(false);
             JsonObject result = outcome.Data ?? JsonNode.Parse(outcome.Plan.Details!["preview"])!.AsObject();
             result["execution"] = outcome.Execution;
@@ -40,18 +61,101 @@ internal sealed class PlacementDeleteTools
             result["recovered"] = outcome.Recovered;
             result["backup"] = outcome.Backup;
             if (dry)
-            { result["hint"] = WriteToolDefaults.ExecutionHint; }
+            {
+                result["hint"] = WriteToolDefaults.ExecutionHint;
+            }
+            if (byTag)
+            {
+                return ToolResults.Success(dry ? "Previewed unplaced function deletion." : "Deleted the listed unplaced functions and verified their dependents.", ContextBuilder.Clean(result));
+            }
             return ToolResults.Success(dry ? "Previewed drawing deletion. Nothing was changed." : "Drawing placements deleted; one Ctrl+Z restores them.", ContextBuilder.Clean(result));
         }
-        catch (BridgeCallException ex) { ex.Error.Execution ??= ExecutionState.NotStarted; return ToolResults.Error(ex.Error); }
+        catch (BridgeCallException ex)
+        {
+            ex.Error.Execution ??= ExecutionState.NotStarted;
+            return ToolResults.Error(ex.Error);
+        }
     }
+
+    private static void RequireText(JsonElement input, string name, List<string> errors)
+    {
+        if (!input.TryGetProperty(name, out JsonElement text) || text.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(text.GetString()))
+        {
+            errors.Add("/" + name + " requires a nonempty string.");
+        }
+    }
+
+    private static void ValidateItems(JsonElement input, List<string> errors)
+    {
+        if (!input.TryGetProperty("items", out JsonElement items) || items.ValueKind != JsonValueKind.Array || items.GetArrayLength() is < 1 or > 100)
+        {
+            errors.Add("/items requires 1..100 drawing locators.");
+            return;
+        }
+        foreach (JsonElement item in items.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object || !item.TryGetProperty("type", out JsonElement type) || type.ValueKind != JsonValueKind.Number
+                || !type.TryGetInt32(out int t) || t < 1 || !item.TryGetProperty("oid", out JsonElement oid) || oid.ValueKind != JsonValueKind.Number
+                || !oid.TryGetInt64(out long id) || id < 1)
+            {
+                errors.Add("/items requires integer type/oid drawing locators.");
+            }
+        }
+    }
+
     internal static void Configure(IEnumerable<McpServerTool> tools)
     {
         ModelContextProtocol.Protocol.Tool tool = tools.Single(t => t.ProtocolTool.Name == Tool).ProtocolTool;
-        tool.Description = "Deletes 1-100 graphics or function placements by eplan_page_get locators (eplan_placement_edit also deletes, by eplan_object_find locators). Refuses connections, property text and block members. Deleting the last placed function removes its device and part references. dry_run defaults true; false needs approval and backup. One undo. See eplan_tool_usage.";
-        JsonNode schema = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project","page","items"],"properties":{"project":{"description":"Open project","type":"string","minLength":1},"page":{"description":"Full page name","type":"string","minLength":1},"items":{"description":"1-100 locators from eplan_page_get with include_drawings.","type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/$defs/locator"}},"dry_run":{"description":"Omit/true previews; false executes.","type":"boolean","default":true}}}""")!;
+        tool.Description = "Deletes unplaced functions by full device tag, or 1-100 graphics or function placements by eplan_page_get locators (eplan_placement_edit also deletes, by eplan_object_find locators). Refuses connections, property text and block members. Deleting the last placed function removes its device and part references. dry_run defaults true; false needs approval and backup. One undo for page deletions. See eplan_tool_usage.";
+        JsonNode schema = JsonNode.Parse("""{"type":"object","additionalProperties":false,"required":["project"],"properties":{"project":{"description":"Open project","type":"string","minLength":1},"page":{"description":"Full page name","type":"string","minLength":1},"items":{"description":"1-100 locators from eplan_page_get with include_drawings.","type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/$defs/locator"}},"unplaced":{"description":"Unplaced device tags to delete; omit page and items","type":"array","minItems":1,"maxItems":20,"uniqueItems":true,"items":{"type":"string","minLength":2,"maxLength":128}},"dry_run":{"description":"Omit/true previews; false executes.","type":"boolean","default":true}}}""")!;
         schema["$defs"] = JsonNode.Parse(PlacementUpdateContract.Input.GetProperty("$defs").GetRawText());
         tool.InputSchema = JsonSerializer.SerializeToElement(schema);
-        tool.OutputSchema = JsonDocument.Parse("""{"type":"object","additionalProperties":false,"required":["project","page","items","fingerprint","execution","dryRun","recovered","backup"],"properties":{"project":{"type":"string"},"page":{"type":"string"},"items":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["type","oid"],"properties":{"type":{"type":"integer"},"oid":{"type":"integer"}}}},"fingerprint":{"type":"string"},"execution":{"enum":["not_started","committed"]},"dryRun":{"type":"boolean"},"recovered":{"type":"boolean"},"backup":{"type":["string","null"]},"warning":{"type":["string","null"]},"hint":{"type":["string","null"]}}}""").RootElement.Clone();
+        tool.OutputSchema = JsonDocument.Parse("""
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["project", "items", "fingerprint", "execution", "dryRun", "recovered", "backup"],
+              "properties": {
+                "project": {"type":"string"},
+                "page": {"type":"string"},
+                "items": {"type":"array"},
+                "fingerprint": {"type":"string"},
+                "execution": {"enum":["not_started","committed"]},
+                "dryRun": {"type":"boolean"},
+                "recovered": {"type":"boolean"},
+                "backup": {"type":["string","null"]},
+                "warning": {"type":["string","null"]},
+                "hint": {"type":["string","null"]},
+                "unplaced": {"type":"array","items":{"type":"string"}},
+                "dependents": {"type":"integer"}
+              },
+              "oneOf": [
+                {
+                  "required": ["page"],
+                  "not": {"anyOf":[{"required":["unplaced"]},{"required":["dependents"]}]},
+                  "properties": {
+                    "items": {"items":{
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["type","oid"],
+                      "properties": {"type":{"type":"integer"},"oid":{"type":"integer"}}
+                    }}
+                  }
+                },
+                {
+                  "required": ["unplaced","dependents"],
+                  "not": {"required":["page"]},
+                  "properties": {
+                    "items": {"items":{
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["type","oid","name","category"],
+                      "properties": {"type":{"type":"integer"},"oid":{"type":"integer"},"name":{"type":"string"},"category":{"type":"string"}}
+                    }}
+                  }
+                }
+              ]
+            }
+            """).RootElement.Clone();
     }
 }

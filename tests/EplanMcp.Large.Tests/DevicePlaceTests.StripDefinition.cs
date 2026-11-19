@@ -6,6 +6,113 @@ namespace EplanMcp.Large.Tests;
 public sealed partial class DevicePlaceTests
 {
     [Fact]
+    public async Task UnplacedStripDefinition_IsDeletedByTag_UndoRestores()
+    {
+        const string Delete = "eplan_placement_delete";
+        await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);
+        await using var destructive = new DestructiveHost();
+        await destructive.InitializeAsync();
+        Assert.Equal(destructive.Writable, session.Project, ignoreCase: true);
+        string page = await NewPageAsync(session.Project);
+        string suffix = page[Prefix.Length..];
+        var output = TestContext.Current.TestOutputHelper!;
+        output.WriteLine("H0 after page creation: " + (await session.SnapshotAsync()).Hash);
+
+        async Task<JsonElement> Place(string label, double x, bool placeDefinition = false)
+        {
+            var args = new Dictionary<string, object?>
+            {
+                ["project"] = session.Project,
+                ["page"] = page,
+                ["terminal_strip"] = label + suffix,
+                ["terminal_number"] = "1",
+                ["x"] = x,
+                ["y"] = 160,
+                ["dry_run"] = false
+            };
+            if (placeDefinition)
+            {
+                args["terminal_strip_text"] = "Placed definition";
+                args["terminal_strip_position"] = new[] { 72d, 120d };
+            }
+            return await eplan.CallAsync("eplan_device_place", args);
+        }
+        Dictionary<string, object?> Device(string tag) => new() { ["project"] = session.Project, ["tag"] = tag };
+        Dictionary<string, object?> ByTag(string tag) => new() { ["project"] = session.Project, ["unplaced"] = new[] { tag } };
+        async Task<(bool Succeeded, JsonElement Result)> LogCall(string label, string tool, Dictionary<string, object?> args)
+        {
+            var outcome = await destructive.CallOrErrorAsync(tool, args);
+            output.WriteLine($"{label} ({(outcome.Succeeded ? "result" : "error")}): {outcome.Result.GetRawText()}");
+            return outcome;
+        }
+        void ApproveDefinition(string tag, int dependents)
+        {
+            string count = dependents == 0 ? "" : $" ({dependents} functions named {tag}:… exist)";
+            destructive.Approvals.Approve(Delete, session.Project, [$"delete function {tag} (TerminalDefText, unplaced){count}"]);
+        }
+
+        JsonElement first = await Place("-XD81", 96);
+        string strip = first.GetProperty("terminal").GetProperty("strip").GetString()!;
+        output.WriteLine("H1 after first terminal: " + (await session.SnapshotAsync()).Hash);
+        JsonElement device = (await eplan.CallAsync("eplan_device_get", Device(strip))).GetProperty("device");
+        Assert.Equal(("TerminalDefText", JsonValueKind.Null), (device.GetProperty("category").GetString(), device.GetProperty("page").ValueKind));
+
+        JsonElement placed = await Place("-XD82", 132, placeDefinition: true);
+        string placedTag = placed.GetProperty("terminal").GetProperty("strip").GetString()!;
+        JsonElement refusal = await destructive.ErrorAsync(Delete, ByTag(placedTag));
+        Assert.Equal(ErrorReason.InvalidArgument, refusal.GetProperty("reason").GetString());
+        string before = (await session.SnapshotAsync()).Hash;
+        Dictionary<string, object?> deletion = ByTag(strip);
+        JsonElement preview = await destructive.CallAsync(Delete, deletion);
+        output.WriteLine("Unplaced preview: " + preview.GetRawText());
+        Assert.Equal(strip, Assert.Single(preview.GetProperty("items").EnumerateArray()).GetProperty("name").GetString());
+        Assert.Equal(1, preview.GetProperty("dependents").GetInt32());
+        Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+
+        ApproveDefinition(strip, 1);
+        deletion["dry_run"] = false;
+        var deleted = await LogCall("Delete unplaced strip", Delete, deletion);
+        await LogCall("Strip after deletion", "eplan_device_get", Device(strip));
+        await LogCall("Page devices after deletion", "eplan_device_list",
+            new() { ["project"] = session.Project, ["page"] = page, ["include_auxiliary"] = true, ["limit"] = 200 });
+        Assert.Equal(ExecutionState.Committed, deleted.Result.GetProperty("execution").GetString());
+        await session.UndoAsync();
+        Assert.Equal(before, (await session.SnapshotAsync()).Hash);
+
+        JsonElement third = await Place("-XD83", 168);
+        string thirdStrip = third.GetProperty("terminal").GetProperty("strip").GetString()!;
+        string terminal = third.GetProperty("device").GetProperty("tag").GetString()!;
+        string beforePageDelete = (await session.SnapshotAsync()).Hash;
+        JsonElement drawings = (await eplan.CallAsync("eplan_page_get",
+            new() { ["project"] = session.Project, ["page"] = page, ["include_drawings"] = true, ["drawing_limit"] = 200, ["response_format"] = "detailed" })).GetProperty("drawings");
+        JsonElement target = drawings.GetProperty("items").EnumerateArray().Single(row => row.GetProperty("kind").GetString() == "Terminal"
+            && row.GetProperty("properties").GetProperty("name").GetString() == terminal);
+        destructive.Approvals.Approve(Delete, session.Project,
+            [$"delete function {terminal} (Terminal) (Removing the last placed function also deletes its device and part references.)"]);
+        var terminalDelete = await LogCall("Delete third terminal from page", Delete,
+            new() { ["project"] = session.Project, ["page"] = page, ["items"] = new[] { target.GetProperty("locator") }, ["dry_run"] = false });
+        var empty = await LogCall("Third strip after terminal deletion", "eplan_device_get", Device(thirdStrip));
+        Assert.Equal(ExecutionState.Committed, terminalDelete.Result.GetProperty("execution").GetString());
+        if (empty.Succeeded && !empty.Result.GetProperty("truncated").GetBoolean()
+            && empty.Result.GetProperty("device").GetProperty("category").GetString() == "TerminalDefText"
+            && empty.Result.GetProperty("device").GetProperty("page").ValueKind == JsonValueKind.Null
+            && empty.Result.GetProperty("functions").GetArrayLength() == 0)
+        {
+            Dictionary<string, object?> emptyDelete = ByTag(thirdStrip);
+            JsonElement emptyPreview = await destructive.CallAsync(Delete, emptyDelete);
+            output.WriteLine("Third strip preview: " + emptyPreview.GetRawText());
+            ApproveDefinition(thirdStrip, emptyPreview.GetProperty("dependents").GetInt32());
+            emptyDelete["dry_run"] = false;
+            var emptyResult = await LogCall("Delete empty strip", Delete, emptyDelete);
+            await LogCall("Third strip after definition deletion", "eplan_device_get", Device(thirdStrip));
+            Assert.Equal(ExecutionState.Committed, emptyResult.Result.GetProperty("execution").GetString());
+            await session.UndoAsync();
+        }
+        await session.UndoAsync();
+        Assert.Equal(beforePageDelete, (await session.SnapshotAsync()).Hash);
+    }
+
+    [Fact]
     [Trait("Difference", "D6")]
     public async Task StripDefinition_RequestedPositionAndFunctionText_PrintPageDisplay_OneUndoRestores()
     {

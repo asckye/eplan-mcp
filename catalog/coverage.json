@@ -112,7 +112,7 @@
     }
   },
   "dependencies": {
-    "used": 2968,
+    "used": 2969,
     "registered": 9823
   },
   "dictionaryProperties": {
@@ -2592,13 +2592,15 @@
       "name": "eplan_placement_delete",
       "safety": "destructive",
       "operations": [
+        "function.unplaced.delete.execute",
+        "function.unplaced.delete.plan",
         "placement.delete.execute",
         "placement.delete.plan"
       ],
-      "apiIds": 175,
-      "operationGroups": 101,
+      "apiIds": 180,
+      "operationGroups": 105,
       "dataDictionary": 2,
-      "dependencies": 65,
+      "dependencies": 66,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_delete.md",
       "small": 4,
@@ -9581,6 +9583,7 @@
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
@@ -15167,6 +15170,7 @@
         "eplan_page_get",
         "eplan_page_review",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_plc_get",
         "eplan_plc_rack",
@@ -24826,6 +24830,7 @@
         "eplan_device_place",
         "eplan_device_update",
         "eplan_graphic_edit",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",
@@ -24910,6 +24915,7 @@
         "eplan_placeholder_apply",
         "eplan_placeholder_list",
         "eplan_placement_create",
+        "eplan_placement_delete",
         "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_plc_generate",

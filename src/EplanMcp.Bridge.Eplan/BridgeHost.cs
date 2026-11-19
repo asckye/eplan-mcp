@@ -199,8 +199,8 @@ internal static class BridgeHost
             new PlacementEditExecuteOperation(new EplanPlacementEditor(), transactions, (project, target) => ProjectBackups.Make(backup, pages, project, target), new EplanSymbolReader()),
             new GraphicEditOperation(new EplanGraphicEditor(), transactions, false),
             new GraphicEditExecuteOperation(new EplanGraphicEditor(), transactions),
-            new PlacementDeleteOperation(catalog, new EplanDrawingReader(), new EplanPlacementRemover(), transactions, false, (project, target) => ProjectBackups.Make(backup, pages, project, target)),
-            new PlacementDeleteExecuteOperation(catalog, new EplanDrawingReader(), new EplanPlacementRemover(), transactions, (project, target) => ProjectBackups.Make(backup, pages, project, target)),
+            .. PlacementDeleteOperations(catalog, transactions,
+                (project, target) => ProjectBackups.Make(backup, pages, project, target)),
             new PotentialUpdateOperation(catalog, new EplanDrawingReader(), new EplanPotentialEditor(), transactions, false),
             new PotentialUpdateExecuteOperation(catalog, new EplanDrawingReader(), new EplanPotentialEditor(), transactions),
             new ConnectionCreateExecuteOperation(connectionCreator, generator, transactions, new EplanPlacementMover()),
@@ -306,6 +306,14 @@ internal static class BridgeHost
         server.Start();
         return server;
     }
+
+    private static IOperation[] PlacementDeleteOperations(IProjectCatalog catalog, ITransactionScopeFactory transactions, Action<OpenProject, BackupTarget?> backup) =>
+    [
+        new PlacementDeleteOperation(catalog, new EplanDrawingReader(), new EplanPlacementRemover(), transactions, false, backup),
+        new PlacementDeleteExecuteOperation(catalog, new EplanDrawingReader(), new EplanPlacementRemover(), transactions, backup),
+        new UnplacedFunctionDeleteOperation(catalog, new EplanUnplacedFunctionRemover(), transactions, false, backup),
+        new UnplacedFunctionDeleteExecuteOperation(catalog, new EplanUnplacedFunctionRemover(), transactions, backup)
+    ];
 
     /// <summary>The operations of writes to system master data and their backup (ADR-0019).</summary>
     private static IOperation[] MasterDataOperations(IProjectCatalog catalog, IPageReader pages, IProjectBackup backup, ITransactionScopeFactory transactions)

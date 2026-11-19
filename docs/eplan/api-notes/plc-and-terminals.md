@@ -1,5 +1,12 @@
 # [EPLAN API 笔记](../api-notes.md)：PLC、电缆与端子编号
 
+### A162. 未放置的功能可以用 Remove() 删除；删掉端子排的未放置定义不影响它的端子，一次撤销恢复（2026-11-18，EPLAN 2026.0.3.25421，Electric P8，A 槽，LargeWrite scratch 新页）
+- **现象：** 端子排 `+A1-XD813` 只有一个已放置的端子 `+A1-XD813:1` 和一个未放置的定义（类别 `TerminalDefText`，A161）。对这个定义调用 `Remove()`（`Function.IsPlaced` 为 false）成功。之后 `eplan_device_get` 按 `+A1-XD813` 查返回 `DEVICE_NOT_FOUND`；页上的端子 `+A1-XD813:1` 仍在，名称、类别、页都没有变。一次撤销后项目快照与删除前相同。
+- **空的端子排定义怎么来的：** 把端子排 `+A1-XD833` 唯一的端子从页上删掉（`eplan_placement_delete` 的 `items` 路线）后，`eplan_device_get` 读出一个类别 `TerminalDefText`、`page` 为空、`functions` 为空的设备。这个空定义再用 `Remove()` 删除后，按标识查不到设备。两步各撤销一次，快照恢复。
+- **结论：** 未放置的功能可以直接删除，不需要先放到页上；删除端子排的未放置定义不连带删除端子。
+- **工具行为：** `eplan_placement_delete` 的 `unplaced` 给 1–20 个完整设备标识，只删除名称与标识完全相同且未放置的功能。标识下有已放置的功能时拒绝（`INVALID_ARGUMENT`，提示用 `items` 路线）；名称以“标识:”开头的功能不删除，提交前核对它们没有变化，否则回滚。放置状态读不到时按已放置处理。
+- **证据：** `DevicePlaceTests.UnplacedStripDefinition_IsDeletedByTag_UndoRestores`（1/1），同一次运行 `PlacementDeleteTests` 1/1。
+
 ### A161. 端子排定义是类别 TerminalDefText 的主功能，说明文字是它的功能文本；只放端子时自动产生未放置的定义（2026-11-18，EPLAN 2026.0.3.25421，Electric P8，A 槽，LargeWrite scratch 新页）
 - **现象：** `eplan_device_place` 带 `terminal_strip_text` 和 `terminal_strip_position` 放端子，得到一个已放置的端子排定义：`eplan_device_get` 读作类别 `TerminalDefText`、有页、`text` 是给的文字。只给 `terminal_strip` 和 `terminal_number`、不要求定义时，同样得到一个 `TerminalDefText` 的主定义，但**没有放置**：`page` 为空，`text` 为空，变更清单写的是 `main definition; function text (??_??): ; unplaced`。
 - **结论：** 端子排的说明文字就是这个定义的功能文本（属性 20011），已放置和未放置的定义都能读写。运行时类是 `TerminalStrip`，是 `Function` 的派生类，属性列表相同。图上没有画定义的端子排，在导航器里仍有一个空的未放置定义。

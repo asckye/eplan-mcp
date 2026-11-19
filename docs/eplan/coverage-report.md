@@ -3,7 +3,7 @@
 **操作层 4014 组：专用工具 627，通用读取 115，仅通用入口 2043，仅状态覆盖 7，其他可调用 11，明确不做 738，到不了 473；实机验证 1331**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-19 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 db98d739 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-19 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 64af0695 + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -37,13 +37,13 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 14191 个 ID（方法 1392，属性 1925，类型 658，字段和枚举值 10199，action 17），其中 14168 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
+Bridge 共用到 14192 个 ID（方法 1392，属性 1925，类型 659，字段和枚举值 10199，action 17），其中 14169 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
 | `Eplan.EplApi.ApplicationFramework` | 32 |
 | `Eplan.EplApi.Base` | 979 |
-| `Eplan.EplApi.DataModel` | 8622 |
+| `Eplan.EplApi.DataModel` | 8623 |
 | `Eplan.EplApi.DataModel.E3D` | 562 |
 | `Eplan.EplApi.DataModel.EObjects` | 124 |
 | `Eplan.EplApi.DataModel.Graphics` | 672 |
@@ -72,7 +72,7 @@ Bridge 共用到 14191 个 ID（方法 1392，属性 1925，类型 658，字段�
 - 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 2792 / 4342（64.3%）。
 - 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 992 / 1799（55.1%），live_verified 179 / 1799（9.9%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 7996 个，未过时的共 8585 个。
-- 依赖层：Bridge 用到 2968 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
+- 依赖层：Bridge 用到 2969 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 137 行：工具到达 49，action_try 可尝试 35（离线规则，不代表实机验证）。
 - action 名称：Bridge 用到 19 个，没有整个排除的 action 共 64 个。
 
@@ -288,7 +288,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 74 | 39 | 0 | 35 | 0 | 1/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
 | eplan_placeholder_list | read | placeholder.list | 46 | 27 | 0 | 19 | 0 | 1/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |
 | eplan_placement_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 337 | 202 | 3 | 125 | 0 | 10/3/19 | A54 A88 | — |
-| eplan_placement_delete | destructive | placement.delete.execute<br>placement.delete.plan | 175 | 101 | 2 | 65 | 0 | 4/1/4 | A87 | — |
+| eplan_placement_delete | destructive | function.unplaced.delete.execute<br>function.unplaced.delete.plan<br>placement.delete.execute<br>placement.delete.plan | 180 | 105 | 2 | 66 | 0 | 4/1/4 | A87 | — |
 | eplan_placement_edit | destructive | placement.edit.execute<br>placement.edit.plan | 473 | 285 | 4 | 176 | 0 | 3/3/2 | — | — |
 | eplan_placement_update | write | connection.create.execute<br>connection.create.plan | 391 | 223 | 9 | 132 | 0 | 10/3/4 | A57 A72 A76 | — |
 | eplan_plan_apply | destructive | — | 0 | 0 | 0 | 0 | 0 | 2/8/5 | A14 A17 A39 | — |

@@ -16,6 +16,20 @@ public sealed class ToolContractTests(RegisteredToolFixture fixture)
     private Tool[] Tools => fixture.Tools;
 
     [Fact]
+    public void PlacementDeleteOffersOptionalUnplacedTagsAndDefaultsToDestructivePreview()
+    {
+        Tool tool = Tools.Single(t => t.Name == PlacementDeleteTools.Tool);
+        JsonElement schema = tool.InputSchema;
+        Assert.Equal(["project"], schema.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        JsonElement properties = schema.GetProperty("properties");
+        JsonElement tags = properties.GetProperty("unplaced");
+        Assert.Equal((1, 20, true), (tags.GetProperty("minItems").GetInt32(), tags.GetProperty("maxItems").GetInt32(), tags.GetProperty("uniqueItems").GetBoolean()));
+        Assert.True(properties.GetProperty("dry_run").GetProperty("default").GetBoolean());
+        Assert.True(tool.Annotations!.DestructiveHint);
+        Assert.False(tool.Annotations.ReadOnlyHint);
+    }
+
+    [Fact]
     public void ConnectionOptions_AreOptionalAndRestrictedToTheirItemKinds()
     {
         JsonElement[] branches = Tools.Single(t => t.Name == ConnectionCreateTools.Tool).InputSchema
@@ -618,6 +632,7 @@ public sealed class ToolContractTests(RegisteredToolFixture fixture)
                 PageWriteTools.CreateTool => 1100,
                 PageWriteTools.UpdateTool => 1150,
                 ReportCreateTools.Tool => 1700,
+                PlacementDeleteTools.Tool => 1076,
                 _ => 1000,
             });
         }

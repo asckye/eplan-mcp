@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-19",
-  "scannedSources": "db98d739 + uncommitted changes",
-  "sourceHash": "sha256:59362737a5fef2d95f9d5dfa83e28a9933bd534bf3fd933000f2b4fe1fc33d0a",
+  "scannedSources": "64af0695 + uncommitted changes",
+  "sourceHash": "sha256:b0646ccb27b233dfd012c19f4c8f2c8f43ce3154ae31637fe31dd6f94e282cd5",
   "operations": [
     {
       "name": "action.execute",
@@ -213,6 +213,14 @@
       "name": "export.untranslated.run",
       "class": "ProjectExportRunOperation",
       "kind": "ProjectExportKind.Untranslated"
+    },
+    {
+      "name": "function.unplaced.delete.execute",
+      "class": "UnplacedFunctionDeleteExecuteOperation"
+    },
+    {
+      "name": "function.unplaced.delete.plan",
+      "class": "UnplacedFunctionDeleteOperation"
     },
     {
       "name": "graphic.edit.execute",
@@ -1101,6 +1109,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -1161,6 +1170,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -1222,6 +1232,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -1556,6 +1567,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -1616,6 +1628,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -151496,6 +151509,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -151556,6 +151570,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -151617,6 +151632,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -151951,6 +151967,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -152011,6 +152028,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -152074,6 +152092,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -152134,6 +152153,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -158226,6 +158246,28 @@
         ]
       },
       {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Plans/EplanPlanFunctionReader.cs",
@@ -159538,6 +159580,7 @@
         "operations": [
           "api.try.execute",
           "api.try.plan",
+          "function.unplaced.delete.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -160609,6 +160652,7 @@
         "operations": [
           "api.try.execute",
           "api.try.plan",
+          "function.unplaced.delete.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -168831,6 +168875,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -168891,6 +168936,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -168961,6 +169007,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -170675,6 +170722,17 @@
         "operations": [
           "placement.delete.plan"
         ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.Placement.Scale(System.Double,System.Double)": [
@@ -171760,6 +171818,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -172050,6 +172109,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -174621,6 +174681,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -174681,6 +174742,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -174743,6 +174805,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -174805,6 +174868,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -174876,6 +174940,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -175862,6 +175927,28 @@
         ]
       },
       {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Plans/EplanPlanFunctionReader.cs",
@@ -176582,6 +176669,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -176702,6 +176790,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -176763,6 +176852,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -176884,6 +176974,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177005,6 +177096,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177068,6 +177160,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177128,6 +177221,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177191,6 +177285,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177251,6 +177346,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177314,6 +177410,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177383,6 +177480,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177454,6 +177552,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177514,6 +177613,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177577,6 +177677,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177646,6 +177747,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177718,6 +177820,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177778,6 +177881,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177841,6 +177945,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -177901,6 +178006,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -183628,6 +183734,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -183832,6 +183939,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -199934,6 +200042,17 @@
         ]
       },
       {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
         "adapter": "EplanSnapshotReader",
         "member": "FunctionObject",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Projects/EplanSnapshotReader.cs",
@@ -200581,6 +200700,17 @@
         ],
         "operations": [
           "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
         ]
       },
       {
@@ -202541,6 +202671,39 @@
         ],
         "operations": [
           "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
         ]
       },
       {
@@ -218194,6 +218357,7 @@
         "operations": [
           "api.try.execute",
           "api.try.plan",
+          "function.unplaced.delete.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -219565,6 +219729,17 @@
         "operations": [
           "graphic.edit.plan",
           "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
         ]
       },
       {
@@ -223323,6 +223498,17 @@
         ]
       },
       {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "PlacementStatus",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
         "adapter": "EplanNativePreconditions",
         "member": "HasPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanNativePreconditions.cs",
@@ -223926,6 +224112,17 @@
         ],
         "operations": [
           "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
         ]
       },
       {
@@ -226516,6 +226713,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -227070,6 +227268,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -227234,6 +227433,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -227604,6 +227804,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -228307,6 +228508,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -228515,6 +228717,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -231500,6 +231703,18 @@
         ]
       },
       {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get",
+          "set"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
         "adapter": "EplanNativePreconditions",
         "member": "HasPage",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanNativePreconditions.cs",
@@ -231557,6 +231772,7 @@
           "export.image.run",
           "export.pdf.plan",
           "export.pdf.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -232570,6 +232786,28 @@
         ],
         "operations": [
           "placement.text.create.execute"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
         ]
       },
       {
@@ -243559,6 +243797,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -243619,6 +243858,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -243680,6 +243920,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -244014,6 +244255,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -244074,6 +244316,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -244184,6 +244427,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -244244,6 +244488,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -244305,6 +244550,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -244639,6 +244885,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -244699,6 +244946,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -253242,6 +253490,39 @@
         ]
       },
       {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Find",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Plans/EplanPlanFunctionReader.cs",
@@ -253470,6 +253751,7 @@
         "operations": [
           "api.try.execute",
           "api.try.plan",
+          "function.unplaced.delete.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -253501,6 +253783,7 @@
         "operations": [
           "api.try.execute",
           "api.try.plan",
+          "function.unplaced.delete.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -262220,6 +262503,50 @@
         ]
       },
       {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Functions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Key",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "PlacementStatus",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "Prepare",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      },
+      {
         "adapter": "EplanPlanFunctionReader",
         "member": "Enumerate",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Plans/EplanPlanFunctionReader.cs",
@@ -262439,6 +262766,7 @@
         "operations": [
           "api.try.execute",
           "api.try.plan",
+          "function.unplaced.delete.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -273241,6 +273569,19 @@
         ]
       }
     ],
+    "T:Eplan.EplApi.DataModel.OperationCanceledException": [
+      {
+        "adapter": "EplanUnplacedFunctionRemover",
+        "member": "PlacementStatus",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "function.unplaced.delete.plan"
+        ]
+      }
+    ],
     "T:Eplan.EplApi.DataModel.Option": [
       {
         "adapter": "ApiTryDispatch",
@@ -275263,6 +275604,7 @@
         "operations": [
           "api.try.execute",
           "api.try.plan",
+          "function.unplaced.delete.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -275294,6 +275636,7 @@
         "operations": [
           "api.try.execute",
           "api.try.plan",
+          "function.unplaced.delete.plan",
           "object.find",
           "object.get",
           "property.read",
@@ -279957,6 +280300,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -280639,6 +280983,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -280802,6 +281147,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -281576,6 +281922,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -285104,6 +285451,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -285871,6 +286219,7 @@
           "export.image.run",
           "export.pdf.plan",
           "export.pdf.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",
@@ -287372,6 +287721,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -287493,6 +287843,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -287556,6 +287907,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -287616,6 +287968,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -287679,6 +288032,7 @@
           "device.place.plan",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -287739,6 +288093,7 @@
           "device.place.execute",
           "device.renumber.execute",
           "device.update.execute",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.list.execute",
@@ -290401,6 +290756,7 @@
           "export.pxf.run",
           "export.untranslated.plan",
           "export.untranslated.run",
+          "function.unplaced.delete.plan",
           "graphic.edit.plan",
           "import.dxf.execute",
           "import.dxf.plan",

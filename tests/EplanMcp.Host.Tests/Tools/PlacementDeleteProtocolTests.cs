@@ -9,6 +9,70 @@ namespace EplanMcp.Host.Tests.Tools;
 [Collection(typeof(ToolBuildIsolation))]
 public sealed class PlacementDeleteProtocolTests
 {
+    private static readonly string[] _stripTags = ["-X1"];
+    private static readonly string[] _overlappingTags = ["-X1", "-X1:1"];
+    private static readonly string[] _conflictingPaths = ["/page", "/items", "/unplaced/0", "/unplaced/1"];
+
+    [Fact]
+    public async Task UnplacedPreviewAndApprovedExecutionUseThePlannedProjectPath()
+    {
+        var channel = new FakeApprovalChannel("test", ApprovalDecision.Granted);
+        using var harness = new WriteToolHarness(OutsideScratchWrites.Deny, channel);
+        const string Preview = """{"project":"Line1","unplaced":["-X1"],"items":[{"type":4,"oid":1,"name":"-X1","category":"TerminalDefText"}],"dependents":1,"fingerprint":"f1"}""";
+        harness.Bridge.Handlers[OperationNames.UnplacedDeletePlan] = _ =>
+        {
+            WritePlan plan = harness.Plan([new() { Action = "delete", Kind = "function", Name = "-X1 (TerminalDefText, unplaced)" }]);
+            plan.Details = new() { ["preview"] = Preview };
+            return plan;
+        };
+        harness.Bridge.Handlers[OperationNames.UnplacedDeleteExecute] = _ => JsonNode.Parse(Preview)!.AsObject();
+        await PreviewProtocolHarness.RunAsync(harness, async client =>
+        {
+            var args = new Dictionary<string, object?> { ["project"] = "Line1", ["unplaced"] = _stripTags };
+            JsonElement preview = WriteToolHarness.Structured(await client.CallToolAsync("eplan_placement_delete", args, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal(ExecutionState.NotStarted, preview.GetProperty("execution").GetString());
+            Assert.Equal(1, preview.GetProperty("dependents").GetInt32());
+            Assert.Empty(harness.Bridge.Writes);
+            Assert.Empty(channel.Questions);
+            args["dry_run"] = false;
+            JsonElement result = WriteToolHarness.Structured(await client.CallToolAsync("eplan_placement_delete", args, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Equal(ExecutionState.Committed, result.GetProperty("execution").GetString());
+            Assert.Single(channel.Questions);
+            Assert.Single(harness.Bridge.Writes);
+            var call = Assert.Single(harness.Bridge.Calls, c => c.Operation == OperationNames.UnplacedDeleteExecute);
+            JsonElement sent = JsonSerializer.SerializeToElement(call.Args);
+            Assert.Equal(harness.ProjectPath, sent.GetProperty("projectPath").GetString());
+            Assert.Equal("f1", sent.GetProperty("fingerprint").GetString());
+            Assert.Equal("Line1", sent.GetProperty("request").GetProperty("project").GetString());
+            Assert.Equal(JsonValueKind.Object, sent.GetProperty("backup").ValueKind);
+        });
+    }
+
+    [Fact]
+    public async Task MixedRoutesAndMissingPageLocatorsAreRefusedBeforeBridge()
+    {
+        using var harness = new WriteToolHarness(OutsideScratchWrites.Deny);
+        await PreviewProtocolHarness.RunAsync(harness, async client =>
+        {
+            var args = new Dictionary<string, object?> { ["project"] = "Line1" };
+            async Task<JsonElement> Error() => WriteToolHarness.Error(await client.CallToolAsync("eplan_placement_delete", args, cancellationToken: TestContext.Current.CancellationToken));
+            JsonElement missing = await Error();
+            Assert.Equal(ErrorReason.InvalidArgument, missing.GetProperty("reason").GetString());
+            Assert.Contains("/page", missing.ToString(), StringComparison.Ordinal);
+            Assert.Contains("/items", missing.ToString(), StringComparison.Ordinal);
+            args["unplaced"] = _overlappingTags;
+            args["page"] = null;
+            args["items"] = Array.Empty<object>();
+            JsonElement mixed = await Error();
+            Assert.Equal(ErrorReason.InvalidArgument, mixed.GetProperty("reason").GetString());
+            foreach (string path in _conflictingPaths)
+            {
+                Assert.Contains(path, mixed.ToString(), StringComparison.Ordinal);
+            }
+            Assert.Empty(harness.Bridge.Calls);
+        });
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
