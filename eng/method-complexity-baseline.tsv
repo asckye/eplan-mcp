@@ -28,7 +28,6 @@ EplanMcp.Host/ContextBuilder.ReadAsync(8)	65
 EplanMcp.Host/DeviceWriteTools.DevicePlaceAsync(37)	58
 EplanMcp.Host/MacroWriteTools.MacroInsertAsync(20)	44
 EplanMcp.Host/ObjectReadTools.ReadAsync(5)	62
-EplanMcp.Host/PageReviewTools.ReviewAsync(15)	45
 EplanMcp.Host/PartBuildResult.Compare(4)	42
 EplanMcp.Host/PartBuildTools.BuildAsync(10)	51
 EplanMcp.Host/PlacementCreatePlanning.Plan(6)	49

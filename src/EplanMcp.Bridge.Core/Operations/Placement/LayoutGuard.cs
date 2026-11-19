@@ -56,11 +56,16 @@ public static partial class LayoutGuard
         if (new[] { c.SymbolClearanceMm, c.ParallelSpacingMm ?? (model.AllowUnknownGeometry && (!Finite(model.Page.GridSize) || model.Page.GridSize <= 0) ? 0 : model.Page.GridSize), c.MinimumTextHeightMm, c.MarginMm }.Any(n => !Finite(n) || n < 0)
             || !model.AllowUnknownGeometry && (!Finite(model.Page.GridSize) || model.Page.GridSize <= 0) || c.MinimumTextHeightMm <= 0)
         { throw WriteArguments.Invalid(["layout: use finite nonnegative distances, positive text height and page grid."]); }
-        double[]? area = FrameArea(model) ?? (model.Page.PageSize is { Length: 2 } s && s.All(n => Finite(n) && n > 0) ? [c.MarginMm, c.MarginMm, s[0] - c.MarginMm, s[1] - c.MarginMm] : null);
-        if (model.AllowUnknownGeometry && area is null)
+        return UsableArea(model.Page, FrameArea(model), c.MarginMm, model.AllowUnknownGeometry)
+            ?? throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: reliable drawing area unavailable; read page geometry before drawing.");
+    }
+    internal static double[]? UsableArea(PageDrawingGeometry page, double[]? frame, double margin, bool allowUnknown)
+    {
+        double[]? area = frame ?? (page.PageSize is { Length: 2 } s && s.All(n => Finite(n) && n > 0)
+            ? [margin, margin, s[0] - margin, s[1] - margin] : null);
+        if (allowUnknown && area is null)
         { return [double.MinValue, double.MinValue, double.MaxValue, double.MaxValue]; }
-        return DrawingCoordinates.ValidBounds(area) && area![0] < area[2] && area[1] < area[3] ? area
-            : throw new BridgeErrorException(ErrorReason.CapabilityMissing, "R1: reliable drawing area unavailable; read page geometry before drawing.");
+        return DrawingCoordinates.ValidBounds(area) && area![0] < area[2] && area[1] < area[3] ? area : null;
     }
     /// <summary>The caller's area, else the plot frame's evaluation grid read with the page (A145).</summary>
     /// <summary>

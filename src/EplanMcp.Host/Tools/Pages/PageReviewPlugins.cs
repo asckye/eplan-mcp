@@ -9,20 +9,24 @@ namespace EplanMcp.Host.Tools;
 
 internal static class PageReviewPlugins
 {
-    internal sealed record Selection(string ProjectPath, IReadOnlyList<ReviewRulePack> Packs, IReadOnlyList<string> Warnings);
+    internal sealed record Selection(string ProjectPath, PageReviewLayout Layout, IReadOnlyList<ReviewRulePack> Packs, IReadOnlyList<string> Warnings);
 
     internal static async Task<Selection> SelectAsync(IBridgeClient bridge, PackLibrary? packs, string project,
-        string page, string[]? ids, CancellationToken token)
+        string page, string[]? ids, string[]? checks, CancellationToken token)
     {
+        bool reviewRules = checks is null || checks.Contains("rules", StringComparer.Ordinal);
         if (packs is null)
         {
-            if (ids is not null)
+            if (reviewRules && ids is not null)
             { throw new BridgeCallException(ToolResults.InvalidArgumentError(["/rule_packs: No installed plugins contain rules."])); }
-            return new(project, [], []);
+            return new(project, new(), [], []);
         }
         string path = Path.IsPathFullyQualified(project) ? project
             : (await bridge.InvokeAsync<ProjectGetArgs, ProjectGetData>(OperationNames.ProjectGet, new() { Project = project }, token).ConfigureAwait(false)).Project.Path;
         PluginResolution resolution = await new PluginResolver(packs).ResolveAsync(path, token, page: page).ConfigureAwait(false);
+        PageReviewLayout layout = PageReviewLayout.Read(resolution, ScratchPaths.IsInside(path, packs.Config.ScratchRoots));
+        if (!reviewRules)
+        { return new(path, layout, [], resolution.Warnings); }
         IReadOnlyList<PluginDescriptor> selected = resolution.Enabled.GroupBy(p => p.Id, StringComparer.Ordinal).Select(g => g.Last()).ToArray();
         if (ids is not null)
         {
@@ -42,7 +46,7 @@ internal static class PageReviewPlugins
                 }
             }
             catch (Exception ex) when (PluginConfigurationReader.Unreadable(ex))
-            { return new(path, [], ["The installed plugin directory is unreadable; rule review is unavailable."]); }
+            { return new(path, layout, [], [.. resolution.Warnings, "The installed plugin directory is unreadable; rule review is unavailable."]); }
             IReadOnlyList<ReviewRulePack> available = await ReviewRulePacks.LoadAsync(packs, installed, token).ConfigureAwait(false);
             installed = available.Where(p => p.Rules.Count > 0 || p.Warnings.Count > 0).Select(p => p.Plugin)
                 .GroupBy(p => p.Id, StringComparer.Ordinal).Select(g => g.First()).ToList();
@@ -57,10 +61,33 @@ internal static class PageReviewPlugins
         ReviewRulePack[] used = loaded.Where(p => p.Rules.Count > 0).ToArray();
         if (used.Any(p => p.Plugin.Manifest?.Signoff?.Status != "signed") && !ScratchPaths.IsInside(path, packs.Config.ScratchRoots))
         { throw new BridgeCallException(ToolResults.InvalidArgumentError(["/rule_packs: Draft plugins can review scratch projects only; an engineer must sign off the plugin before use on other projects."])); }
-        return new(path, used, [.. used.Length > 0 ? resolution.Warnings : [], .. loaded.SelectMany(p => p.Warnings)]);
+        return new(path, layout, used, [.. resolution.Warnings, .. loaded.SelectMany(p => p.Warnings)]);
     }
 
     internal static async Task ApplyAsync(JsonObject data, Selection selection, string page, CancellationToken token)
+    {
+        selection.Layout.ApplySources(data);
+        string[] allWarnings = [.. selection.Layout.Warnings, .. selection.Warnings];
+        JsonArray summaries = selection.Packs.Count == 0 ? new() : await EvaluateAsync(data, selection, page, token).ConfigureAwait(false);
+        if (summaries.Count > 0)
+        { data["rulePacks"] = summaries; }
+        if (summaries.Count > 0 || allWarnings.Length > 0)
+        {
+            var metadata = data["metadata"] as JsonObject ?? new JsonObject();
+            if (summaries.Count > 0)
+            { metadata["plugins"] = new JsonArray(selection.Packs.Select(p => (JsonNode?)JsonValue.Create($"{p.Plugin.Id}@{p.Plugin.Version}")).ToArray()); }
+            if (allWarnings.Length > 0)
+            {
+                var warnings = new JsonArray(allWarnings.Take(20).Select(w => (JsonNode?)JsonValue.Create(w.Length > 300 ? w[..300] + "..." : w)).ToArray());
+                if (allWarnings.Length > 20)
+                { warnings.Add($"{allWarnings.Length - 20} more plugin read warnings; inspect the installed rule resources."); }
+                metadata["warnings"] = warnings;
+            }
+            data["metadata"] = metadata;
+        }
+    }
+
+    private static async Task<JsonArray> EvaluateAsync(JsonObject data, Selection selection, string page, CancellationToken token)
     {
         var summaries = new JsonArray();
         var facts = new PageReviewFacts(data["actual"]!.AsObject(), new JsonObject
@@ -84,21 +111,6 @@ internal static class PageReviewPlugins
                 ["notApplicable"] = Count(RuleStatus.NotApplicable),
             });
         }
-        if (summaries.Count > 0)
-        { data["rulePacks"] = summaries; }
-        if (summaries.Count > 0 || selection.Warnings.Count > 0)
-        {
-            var metadata = data["metadata"] as JsonObject ?? new JsonObject();
-            if (summaries.Count > 0)
-            { metadata["plugins"] = new JsonArray(selection.Packs.Select(p => (JsonNode?)JsonValue.Create($"{p.Plugin.Id}@{p.Plugin.Version}")).ToArray()); }
-            if (selection.Warnings.Count > 0)
-            {
-                var warnings = new JsonArray(selection.Warnings.Take(20).Select(w => (JsonNode?)JsonValue.Create(w.Length > 300 ? w[..300] + "..." : w)).ToArray());
-                if (selection.Warnings.Count > 20)
-                { warnings.Add($"{selection.Warnings.Count - 20} more plugin read warnings; inspect the installed rule resources."); }
-                metadata["warnings"] = warnings;
-            }
-            data["metadata"] = metadata;
-        }
+        return summaries;
     }
 }

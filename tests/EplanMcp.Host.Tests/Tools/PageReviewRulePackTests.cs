@@ -103,7 +103,7 @@ public sealed class PageReviewRulePackTests
     }
 
     [Fact]
-    public async Task ChecksWithoutRules_DoNotResolveOrEvaluatePlugins()
+    public async Task ChecksWithoutRules_ResolveLayoutWithoutEvaluatingRulePacks()
     {
         using var fixture = new PageReviewRulePackFixture();
         fixture.WritePack();
@@ -113,7 +113,7 @@ public sealed class PageReviewRulePackTests
         Assert.Empty(result.GetProperty("issues").EnumerateArray());
         Assert.False(result.TryGetProperty("rulePacks", out _));
         Assert.False(result.TryGetProperty("metadata", out _));
-        Assert.Equal(OperationNames.PageReview, Assert.Single(fixture.Bridge.Calls).Operation);
+        Assert.Equal([OperationNames.ProjectGet, OperationNames.PageReview], fixture.Bridge.Calls.Select(call => call.Operation));
     }
 
     [Theory]

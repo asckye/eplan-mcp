@@ -7,6 +7,7 @@
 
 ### 新增
 
+- `eplan_page_review` 的布局阈值可以由规则插件提供：`review.layout.parallel_spacing_mm`（平行线间距）、`review.layout.minimum_text_height_mm`（最小字高）、`review.layout.margin_mm`（页边距），按插件的作用域（全局、项目、柜、页）取值；没有插件值时用 `config.json` 的 `layout`，再没有用内置默认值。结果新增 `layout`，列出实际用的值和各自的来源。类型不对、超出范围或让整页没有可画区域的值不采用并给警告，评审不会因此失败。画图工具的布局检查仍读 `config.json`。
 - `eplan_placement_delete` 可以删除未放置的功能：新参数 `unplaced` 给 1–20 个设备标识（此时不传 `page` 和 `items`），用来清掉图上没有画、只留在导航器里的端子排定义和未放置器件。仍是破坏性操作：默认只预览，执行要审批并先备份。标识下有已放置的对象时拒绝；标识下属的端子等功能不会被连带删除（A162）。
 - `eplan_property_set` 可以改端子排的说明文字：按端子排的设备标识写其定义的功能文本（属性 20011），已放置和未放置的定义都可以。以前按标识写会被拒绝（`POLICY_DENIED`，运行时类型不在范围内）。定义的其余属性仍不开放。
 

@@ -28,6 +28,18 @@
 | `limit` / `cursor` | integer / string | 否 | 50 / — | 问题清单分页 |
 | `response_format` | enum `concise` / `detailed` | 否 | `concise` | `detailed` 时每条问题附上涉及对象的完整读回 |
 
+### 布局阈值
+
+每次审查按项目和页面解析一次已启用插件的配置。每项依次取插件值、加载项读取的 `%USERPROFILE%\EplanMcp\config.json` 中的 `layout` 值、内置默认值。`rule_packs` 选择评估的规则包，显式选择 `checks` 时也使用当前作用域的布局阈值。绘图工具继续使用 `config.json` 中的布局配置。
+
+| 可选插件键 | 范围（毫米） | 审查中的作用与内置默认值 |
+|---|---|---|
+| `review.layout.parallel_spacing_mm` | 0 ≤ 数值 ≤ 100 | 不同网络平行段的间距小于此值时，R6 报告 `net_overlap` 警告。默认随页面网格。 |
+| `review.layout.minimum_text_height_mm` | 0 < 数值 ≤ 100 | R8 按打印比例检查已读到的文字高度，过小则报告 `text_format`。默认 0.5 mm。 |
+| `review.layout.margin_mm` | 0 ≤ 数值 ≤ 100 | 图框未提供绘图区时，符号重叠的修复建议使用页面尺寸扣除四边边距后的区域。默认 10 mm。`off_area` 此时仍按页面边缘判断。 |
+
+结果的 `layout` 返回 `parallelSpacingMm`（`null` 表示随页面网格）、`minimumTextHeightMm`、`marginMm`。`layout.sources` 用同名字段逐项记录 `plugin:<插件 ID>`、`config` 或 `default`。插件值类型错误、越界或边距耗尽页面时，该项回退到下一来源，`metadata.warnings` 给出插件与键名。
+
 ## 3. 输出
 - `structuredContent`：
   - `summary`：`{errors, warnings, infos, clean}`，`clean` 为 true 表示没有 error 和 warning
@@ -93,7 +105,7 @@
 2. `clean` 为 false 时，按 `issues[].fix` 用已有工具逐条修复。
 3. 再次调用审查；最多 3 轮。仍有问题时停止修复，把剩余问题原样报告给工程师。
 
-按标准审图时，先用 `eplan_pack_library_list` 的 `kind:"standard"` 查找插件，安装后在审图中传 `rule_packs`。省略则使用当前作用域启用的规则插件；无规则时行为不变。`pack.json.signoff` 省略视为 `draft`，只能审 scratch；`signed` 需有 `signedBy` 和 `signedAt`。本审查不要求柜体绑定、standing 或 official 提升。规则只查插件收录的项目，不代表符合整部标准，最终由工程师判断。`fix` 指向要用的工具：导线用 `eplan_connection_create` 放 `definition_point`，设备用 `eplan_device_update` 改 `new_tag`，取值看 `message`；忽略 `spec.fix` 工作流。分页指纹包含 `rule_packs`。
+按标准审图时，先用 `eplan_pack_library_list` 的 `kind:"standard"` 查找插件，安装后在审图中传 `rule_packs`。省略则使用当前作用域启用的规则插件；无规则时省略规则包汇总。`pack.json.signoff` 省略视为 `draft`，只能审 scratch；`signed` 需有 `signedBy` 和 `signedAt`。本审查不要求柜体绑定、standing 或 official 提升。规则只查插件收录的项目，不代表符合整部标准，最终由工程师判断。`fix` 指向要用的工具：导线用 `eplan_connection_create` 放 `definition_point`，设备用 `eplan_device_update` 改 `new_tag`，取值看 `message`；忽略 `spec.fix` 工作流。分页指纹包含 `rule_packs`。
 
 ## 9. 首片细节（2026-10-31）
 - 首片完成规则与目标比较；`include_image=true` 返回 `INVALID_ARGUMENT`，提示用 `eplan_export_image` 的 `inline`，图片预算与临时文件清理留后续。

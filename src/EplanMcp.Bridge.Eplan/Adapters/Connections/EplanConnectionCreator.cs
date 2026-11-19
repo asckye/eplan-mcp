@@ -64,7 +64,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
                     end?.ParentFunction is { } b ? Key(b, end.Index) : null);
             }
         }
-        scene.Layout = EplanLayout.Config();
+        scene.Layout = EplanLayout.Config(scene.ConfigLayoutMembers);
         scene.ReadCables = () => ReadCables(target.Path, page, scene);
         return scene;
     }

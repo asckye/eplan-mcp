@@ -20,6 +20,14 @@ public sealed class PageScene
     public List<ConnectionRecord> Logical { get; set; } = [];
     public Dictionary<string, double[]> SymbolBounds { get; set; } = [];
     public LayoutGuard.Options Layout { get; set; } = new();
+    [Newtonsoft.Json.JsonIgnore]
+    public HashSet<string> ConfigLayoutMembers { get; } = new(StringComparer.OrdinalIgnoreCase);
+    internal PageScene WithLayout(LayoutGuard.Options layout)
+    {
+        var scene = (PageScene)MemberwiseClone();
+        scene.Layout = layout;
+        return scene;
+    }
     // A reader, not scene data: plans that serialize the scene (placement move) must not follow its closure back here.
     [Newtonsoft.Json.JsonIgnore]
     public Func<CableDefinitionPlanner.Inventory>? ReadCables { get; set; }

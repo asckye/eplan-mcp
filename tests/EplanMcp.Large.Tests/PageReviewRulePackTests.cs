@@ -1,4 +1,6 @@
 using System.Text.Json;
+using EplanMcp.Host;
+using EplanMcp.Tests;
 
 namespace EplanMcp.Large.Tests;
 
@@ -9,6 +11,26 @@ public sealed class PageReviewRulePackTests(LiveEplan eplan, WriteHost host) : I
     private static readonly int[] _wire = [80, 140];
     private static readonly string[] _packs = ["iec-60204-1", "iec-81346"];
     private static readonly string[] _rulesOnly = ["rules"];
+    private static readonly string[] _netOverlapOnly = ["net_overlap"];
+
+    [Fact]
+    public async Task EnabledDraftSpacing_OverridesTheScratchPageConfiguration()
+    {
+        JsonElement pages = await host.CallAsync("eplan_page_list", new() { ["project"] = host.Writable, ["page_type"] = "Circuit", ["limit"] = 1 });
+        string page = Assert.Single(pages.GetProperty("pages").EnumerateArray()).GetProperty("name").GetString()!;
+        var args = new Dictionary<string, object?> { ["project"] = host.Writable, ["page"] = page, ["checks"] = _netOverlapOnly };
+        JsonElement before = await host.CallAsync("eplan_page_review", args);
+        TestContext.Current.TestOutputHelper?.WriteLine("Before enabling the plugin: " + before.GetRawText());
+        string? source = before.GetProperty("layout").GetProperty("sources").GetProperty("parallelSpacingMm").GetString();
+        Assert.True(source is "config" or "default", before.GetRawText());
+
+        await PageReviewLayoutPluginFixture.InstallAsync(new HostDataLocations(host.Home), new() { ["review.layout.parallel_spacing_mm"] = 100 }, TestContext.Current.CancellationToken);
+        JsonElement after = await host.CallAsync("eplan_page_review", args);
+        TestContext.Current.TestOutputHelper?.WriteLine("After enabling the plugin: " + after.GetRawText());
+        JsonElement layout = after.GetProperty("layout");
+        Assert.Equal(100, layout.GetProperty("parallelSpacingMm").GetDouble());
+        Assert.Equal("plugin:" + PageReviewLayoutPluginFixture.Id, layout.GetProperty("sources").GetProperty("parallelSpacingMm").GetString());
+    }
 
     [Fact]
     public async Task BuiltinIecPlugins_ReportLetterAndWireColour_AndARightColourPasses()
@@ -16,7 +38,7 @@ public sealed class PageReviewRulePackTests(LiveEplan eplan, WriteHost host) : I
         Assert.NotNull(host);
         foreach (string plugin in _packs)
         {
-            (bool installed, JsonElement result) = await eplan.CallOrErrorAsync("eplan_pack_install", new() { ["library"] = "builtin", ["plugin"] = plugin, ["version"] = "0.1.0" });
+            (bool installed, JsonElement result) = await eplan.CallOrErrorAsync("eplan_pack_install", new() { ["library"] = "builtin", ["plugin"] = plugin, ["version"] = "1.0.0" });
             Assert.True(installed, result.GetRawText());
         }
         await using PlanStepLiveSession session = await PlanStepLiveSession.StartAsync(eplan);

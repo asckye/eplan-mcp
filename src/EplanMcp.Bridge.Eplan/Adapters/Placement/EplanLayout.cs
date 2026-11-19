@@ -20,10 +20,14 @@ internal static class EplanLayout
         model.Lines = PlacementMovePlanner.Autoconnect(model.Pins).Values.Select(s => new LayoutGuard.Segment { Points = s }).ToList();
         return model;
     }
-    internal static LayoutGuard.Options Config()
+    internal static LayoutGuard.Options Config(ISet<string>? present = null)
     {
         string file = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "EplanMcp", "config.json");
-        return File.Exists(file) ? JObject.Parse(File.ReadAllText(file))["layout"]?.ToObject<LayoutGuard.Options>() ?? new() : new();
+        JToken? layout = File.Exists(file) ? JObject.Parse(File.ReadAllText(file))["layout"] : null;
+        LayoutGuard.Options options = layout?.ToObject<LayoutGuard.Options>() ?? new();
+        if (present is not null && layout is JObject members)
+        { present.UnionWith(members.Properties().Select(p => p.Name)); }
+        return options;
     }
     internal static IReadOnlyList<DrawingPlacement> Device(string project, DevicePlaceArgs args, LayoutGuard.Model model)
     {

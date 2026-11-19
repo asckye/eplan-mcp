@@ -10,6 +10,28 @@ internal static class PageReviewRuleSchema
     {
         JsonNode output = JsonNode.Parse(tool.OutputSchema!.Value.GetRawText())!;
         JsonNode properties = output["properties"]!;
+        output["required"]!.AsArray().Add("layout");
+        properties["layout"] = JsonNode.Parse("""
+            {
+              "type":"object","additionalProperties":false,
+              "required":["parallelSpacingMm","minimumTextHeightMm","marginMm","sources"],
+              "properties":{
+                "parallelSpacingMm":{"type":["number","null"]},
+                "minimumTextHeightMm":{"type":"number"},
+                "marginMm":{"type":"number"},
+                "sources":{
+                  "type":"object","additionalProperties":false,
+                  "required":["parallelSpacingMm","minimumTextHeightMm","marginMm"],
+                  "properties":{
+                    "parallelSpacingMm":{"$ref":"#/$defs/layoutSource"},
+                    "minimumTextHeightMm":{"$ref":"#/$defs/layoutSource"},
+                    "marginMm":{"$ref":"#/$defs/layoutSource"}
+                  }
+                }
+              }
+            }
+            """);
+        output["$defs"]!["layoutSource"] = JsonNode.Parse("""{"type":"string","pattern":"^(config|default|plugin:[a-z0-9]+(?:[.-][a-z0-9]+)*)$"}""");
         JsonNode issue = properties["issues"]!["items"]!["properties"]!;
         issue["code"] = new JsonObject { ["anyOf"] = new JsonArray(issue["code"]!.DeepClone(), JsonNode.Parse("""{"type":"string","pattern":"^rule(?:_unknown)?:[^/]+/[^/]+$"}""")) };
         issue["reference"] = new JsonObject();

@@ -16116,7 +16116,8 @@
           "issues",
           "nextCursor",
           "total",
-          "truncated"
+          "truncated",
+          "layout"
         ],
         "properties": {
           "project": {
@@ -16308,6 +16309,50 @@
           "truncated": {
             "type": "boolean"
           },
+          "layout": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "parallelSpacingMm",
+              "minimumTextHeightMm",
+              "marginMm",
+              "sources"
+            ],
+            "properties": {
+              "parallelSpacingMm": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "minimumTextHeightMm": {
+                "type": "number"
+              },
+              "marginMm": {
+                "type": "number"
+              },
+              "sources": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "parallelSpacingMm",
+                  "minimumTextHeightMm",
+                  "marginMm"
+                ],
+                "properties": {
+                  "parallelSpacingMm": {
+                    "$ref": "#/$defs/layoutSource"
+                  },
+                  "minimumTextHeightMm": {
+                    "$ref": "#/$defs/layoutSource"
+                  },
+                  "marginMm": {
+                    "$ref": "#/$defs/layoutSource"
+                  }
+                }
+              }
+            }
+          },
           "rulePacks": {
             "type": "array",
             "items": {
@@ -16437,6 +16482,10 @@
               "target": {},
               "actual": {}
             }
+          },
+          "layoutSource": {
+            "type": "string",
+            "pattern": "^(config|default|plugin:[a-z0-9]+(?:[.-][a-z0-9]+)*)$"
           }
         }
       },

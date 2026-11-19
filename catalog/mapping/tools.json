@@ -26519,6 +26519,11 @@
             "file": "tests/EplanMcp.Large.Tests/PageReviewNumberingTests.cs"
           },
           {
+            "name": "PageReviewRulePackTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PageReviewRulePackTests.cs"
+          },
+          {
             "name": "PageReviewSetupTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewSetupTests.cs"
@@ -27230,7 +27235,13 @@
             "file": "tests/EplanMcp.Large.Tests/PlotFrameAreaTests.cs"
           }
         ],
-        "operationTests": []
+        "operationTests": [
+          {
+            "name": "PageReviewLayoutTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewLayoutTests.cs"
+          }
+        ]
       },
       "live": [],
       "dataDictionary": []

@@ -35,12 +35,18 @@ public sealed class PageReviewContractTests
         Assert.InRange(ToolProfiles.Core.Count, 1, ToolProfiles.CoreLimit);
         Assert.NotNull(tool.OutputSchema);
         var bridge = new FakeBridgeClient();
-        bridge.Handlers[OperationNames.PageReview] = _ => JsonNode.Parse("""{"project":"Resolved","page":"=F+A1/1","issues":[],"actual":{"devices":[],"connections":[],"cables":[],"interruptions":[],"texts":[],"messages":[]}}""")!.AsObject();
+        bridge.Handlers[OperationNames.PageReview] = _ => JsonNode.Parse("""{"project":"Resolved","page":"=F+A1/1","layout":{"parallelSpacingMm":null,"minimumTextHeightMm":0.5,"marginMm":10,"sources":{"parallelSpacingMm":"default","minimumTextHeightMm":"default","marginMm":"default"}},"issues":[],"actual":{"devices":[],"connections":[],"cables":[],"interruptions":[],"texts":[],"messages":[]}}""")!.AsObject();
         CallToolResult result = await PageReviewTools.ReviewAsync(bridge, new ManualTime(DateTimeOffset.UnixEpoch), "Line1", "=F+A1/1", cancellationToken: TestContext.Current.CancellationToken);
         Assert.False(result.IsError == true);
         Assert.Equal("Resolved", result.StructuredContent!.Value.GetProperty("project").GetString());
         foreach (JsonElement required in tool.OutputSchema.Value.GetProperty("required").EnumerateArray())
         { Assert.True(result.StructuredContent.Value.TryGetProperty(required.GetString()!, out _)); }
+        JsonElement layout = tool.OutputSchema.Value.GetProperty("properties").GetProperty("layout");
+        Assert.False(layout.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(["parallelSpacingMm", "minimumTextHeightMm", "marginMm", "sources"], layout.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
+        JsonElement sources = layout.GetProperty("properties").GetProperty("sources");
+        Assert.False(sources.GetProperty("additionalProperties").GetBoolean());
+        Assert.Equal(["parallelSpacingMm", "minimumTextHeightMm", "marginMm"], sources.GetProperty("required").EnumerateArray().Select(v => v.GetString()));
     }
     [Theory]
     [InlineData(ErrorReason.PageNotFound)]

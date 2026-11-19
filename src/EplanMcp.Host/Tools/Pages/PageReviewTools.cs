@@ -46,21 +46,16 @@ internal sealed class PageReviewTools
         { return ToolResults.InvalidArguments(errors); }
         try
         {
-            PageReviewPlugins.Selection? selection = checks is null || checks.Contains("rules", StringComparer.Ordinal)
-                ? await PageReviewPlugins.SelectAsync(bridge, packs, project, page, rule_packs, cancellationToken).ConfigureAwait(false) : null;
+            PageReviewPlugins.Selection selection = await PageReviewPlugins.SelectAsync(bridge, packs, project, page, rule_packs, checks, cancellationToken).ConfigureAwait(false);
             DateTimeOffset started = clock.GetUtcNow();
             using ITimer timer = clock.CreateTimer(_ => { if (!cancellationToken.IsCancellationRequested) { progress?.Report(new() { Progress = (float)(clock.GetUtcNow() - started).TotalSeconds, Message = "Reviewing page" }); } }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5));
-            JsonObject data = await bridge.InvokeAsync<object, JsonObject>(OperationNames.PageReview, new { project, page, checks, expected, tolerance_mm }, TimeSpan.FromSeconds(20), null, cancellationToken).ConfigureAwait(false);
+            object request = selection.Layout.Request(project, page, checks, expected, tolerance_mm);
+            JsonObject data = await bridge.InvokeAsync<object, JsonObject>(OperationNames.PageReview, request, TimeSpan.FromSeconds(20), null, cancellationToken).ConfigureAwait(false);
             JsonObject actual = data["actual"]!.AsObject();
             actual["interruptions"] = new JsonArray(actual["interruptions"]!.AsArray().Where(p => p!["page"]!.GetValue<string>() == page).Select(p => p!.DeepClone()).ToArray());
             JsonArray issues = data["issues"]!.AsArray();
-            if (selection is not null)
-            { await PageReviewPlugins.ApplyAsync(data, selection, page, cancellationToken).ConfigureAwait(false); }
-            if (target is JsonObject wanted && (checks is null || checks.Contains("expected", StringComparer.Ordinal)))
-            {
-                foreach (JsonNode? d in ExpectedReview.Compare(wanted, actual, page, tolerance_mm))
-                { issues.Add(new JsonObject { ["code"] = "expected_" + d!["kind"], ["severity"] = "error", ["page"] = page, ["position"] = (d["target"]?["position"] ?? d["actual"]?["position"])?.DeepClone(), ["objects"] = new JsonArray(d["actual"]?["locator"] is { } located ? [located.DeepClone()] : []), ["message"] = "Target difference at " + d["path"], ["fix"] = new JsonObject { ["tool"] = "eplan_tool_usage", ["args"] = new JsonObject { ["tool"] = "eplan_placement_create" } }, ["difference"] = d.DeepClone() }); }
-            }
+            await PageReviewPlugins.ApplyAsync(data, selection, page, cancellationToken).ConfigureAwait(false);
+            AddExpected(issues, target, actual, checks, page, tolerance_mm);
             JsonNode[] all = issues.Select(i => i!).OrderBy(i => i["severity"]!.GetValue<string>() switch { "error" => 0, "warning" => 1, _ => 2 }).ToArray();
             int Count(string severity) => all.Count(i => i["severity"]!.GetValue<string>() == severity);
             int errorCount = Count("error"), warnings = Count("warning");
@@ -103,6 +98,25 @@ internal sealed class PageReviewTools
             return ToolResults.Success(ResultShaper.CleanText(summary) + string.Concat(data["issues"]!.AsArray().Take(5).Select(i => "\n" + i!["code"] + ": " + ResultShaper.CleanText(i["message"]?.ToString()))), ContextBuilder.Clean(data));
         }
         catch (BridgeCallException ex) { return ToolResults.Error(ex.Error); }
+    }
+    private static void AddExpected(JsonArray issues, JsonNode? target, JsonObject actual, string[]? checks, string page, double tolerance)
+    {
+        if (target is not JsonObject wanted || checks is not null && !checks.Contains("expected", StringComparer.Ordinal))
+        { return; }
+        foreach (JsonNode difference in ExpectedReview.Compare(wanted, actual, page, tolerance).OfType<JsonNode>())
+        {
+            issues.Add(new JsonObject
+            {
+                ["code"] = "expected_" + difference["kind"],
+                ["severity"] = "error",
+                ["page"] = page,
+                ["position"] = (difference["target"]?["position"] ?? difference["actual"]?["position"])?.DeepClone(),
+                ["objects"] = new JsonArray(difference["actual"]?["locator"] is { } located ? [located.DeepClone()] : []),
+                ["message"] = "Target difference at " + difference["path"],
+                ["fix"] = new JsonObject { ["tool"] = "eplan_tool_usage", ["args"] = new JsonObject { ["tool"] = "eplan_placement_create" } },
+                ["difference"] = difference.DeepClone(),
+            });
+        }
     }
     private static JsonNode Readback(JsonNode row)
     {

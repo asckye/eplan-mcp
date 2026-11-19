@@ -104,6 +104,7 @@ flowchart LR
 - 全局启用和登记的共享目录库存放在数据根的 `state\plugins.json`，不放进安全配置 `config.json`；每次解析时读取，修改后立即生效。MCP 工具只能改启用列表（需审批）；登记库只能由人在 Workbench 或命令行中操作。
 - 内置库在程序目录 `plugin-libraries\builtin`，与程序文件同等可信；安装时只核对包摘要与索引一致。
 - 首批消费者不新增公开参数：`eplan_connection_create` 中断点省略 `symbol` 时取 `defaults.interruption.symbol`；`eplan_device_place` 新建端子排定义时取 `defaults.strip_definition.symbol` 和 `.variant`。
+- `eplan_page_review` 读取三个可选数值键（单位 mm）：`review.layout.parallel_spacing_mm` 控制不同网络平行段间距（0–100），`review.layout.minimum_text_height_mm` 控制最小打印字高（大于 0 且不超过 100），`review.layout.margin_mm` 控制无图框绘图区时重叠修复建议采用的边距（0–100，扣除后须有可用绘图区）。审查逐项回退到加载项布局配置和内置默认值。
 - `iec-base` 在 P1 只含插入符号默认值；导线颜色和 IEC 81346 字母代码需要工程师审核，放到 P2。
 
 ## 5. 安全与数据完整性
