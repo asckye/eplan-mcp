@@ -1,5 +1,6 @@
 using Eplan.EplApi.Base;
 using Eplan.EplApi.DataModel;
+using Eplan.EplApi.DataModel.EObjects;
 using Eplan.EplApi.DataModel.Graphics;
 using EplanMcp.Bridge.Core;
 using EplanMcp.Bridge.Core.Operations;
@@ -35,7 +36,15 @@ internal sealed class EplanPlacementRemover : IPlacementRemover
             if (!PlacementDeleteOperation.Allowed(placement.GetType().Name))
             { throw WriteArguments.Invalid([$"Cannot delete {placement.GetType().Name}: select a supported independent graphic or function placement, including cable definition lines."]); }
         }
-        return selected;
+        // A163: removing a cable definition line leaves the definition points EPLAN placed for it on the wires,
+        // still named after the cable; they go first so the wires stop counting as the cable's cores.
+        var cables = new HashSet<long>(selected.OfType<Cable>().Select(c => c.ObjectIdentifier));
+        if (cables.Count == 0)
+        { return selected; }
+        var chosen = new HashSet<long>(selected.Select(p => p.ObjectIdentifier));
+        Placement[] points = all.OfType<ConnectionDefinitionPoint>()
+            .Where(p => !chosen.Contains(p.ObjectIdentifier) && p.CableDefinitionLine is { } line && cables.Contains(line.ObjectIdentifier)).ToArray<Placement>();
+        return [.. points, .. selected];
     }
 
     private static Placement[] Members(Block block)

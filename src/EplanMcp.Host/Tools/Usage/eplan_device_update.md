@@ -38,7 +38,7 @@ Omit dry_run to preview. Use dry_run:false to execute the same arguments.
   - `part`, `variant`: the assigned reference; null for rename only.
 - `undo`: the step in EPLAN's undo list, `AI: eplan_device_update`; null for a dry run.
 - `recovered`: true for a commit recovered after response loss; check with eplan_device_get.
-- `replacedPart`: old partNumber, variant and count after replacement. Call again with update_from_parts alone to transfer data.
+- `replacedPart`: old partNumber, variant and count after replacement. Call again with update_from_parts alone to transfer data. A cable needs that call after part: its cores are unassigned until then.
 - `hint`: next check, or null.
 - `assignedFunctions`: unplaced functions merged after part assignment.
 

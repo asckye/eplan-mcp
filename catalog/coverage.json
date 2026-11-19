@@ -2597,10 +2597,10 @@
         "placement.delete.execute",
         "placement.delete.plan"
       ],
-      "apiIds": 180,
-      "operationGroups": 105,
+      "apiIds": 183,
+      "operationGroups": 106,
       "dataDictionary": 2,
-      "dependencies": 66,
+      "dependencies": 68,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_delete.md",
       "small": 4,
@@ -8838,6 +8838,7 @@
       "tools": [
         "eplan_api_try",
         "eplan_connection_create",
+        "eplan_placement_delete",
         "eplan_placement_update"
       ],
       "route": "dedicated"

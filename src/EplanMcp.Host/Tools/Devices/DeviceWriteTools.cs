@@ -95,6 +95,8 @@ internal sealed class DeviceWriteTools
                 ? "The response was lost, but EPLAN reported the update as committed; check the device with eplan_device_get."
                 : ResultShaper.CleanText(outcome.Data?.Warning),
         };
+        if (outcome.Plan.Details?.GetValueOrDefault("cableCores") is { Length: > 0 } cores)
+        { result.Hint = string.IsNullOrEmpty(result.Hint) ? cores : result.Hint + " " + cores; }
         if (replace_part is not null)
         {
             string? warning = outcome.Plan.Details?.GetValueOrDefault("warning");

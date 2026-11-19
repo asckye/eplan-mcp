@@ -9,6 +9,7 @@
 
 - `eplan_placement_delete` 可以删除电缆定义线（`Cable`），不必为改一根电缆整页重画；随它消失的连接定义点列在结果的 `alsoRemoved` 里。
 - `eplan_device_update` 可以替换部件：新参数 `replace_part` 给功能上现有的部件号，与 `part`（可带 `variant`、`count`）一起用。新部件占原来的位置，后面的部件引用按原顺序保留；不传 `count` 时沿用原数量。结果新增 `replacedPart`。把部件数据写到功能上仍是另一次调用（`update_from_parts`）。
+- `eplan_device_update` 给电缆加或替换部件时，结果的 `hint` 写明还要对这根电缆单独调用一次 `update_from_parts`：部件挂上后芯线是未分配的，检查会报“功能多于部件提供的功能”，`eplan_cable_reassign` 不能代替这一步。
 - `eplan_placement_edit` 新增操作 `rename`：按定位符给中断点改名（参数 `name`），名称可以带 `:`，如 `-XD4:2c`；短名按页面结构展开，规则与 `eplan_connection_create` 创建中断点时相同。预览列出旧名、新名，以及项目里还有多少个中断点叫旧名、新名（`peersOld`、`peersNew`）。`eplan_device_update` 的 `new_tag` 遇到 `:` 时指向这个操作。
 - `eplan_page_review` 的布局阈值可以由规则插件提供：`review.layout.parallel_spacing_mm`（平行线间距）、`review.layout.minimum_text_height_mm`（最小字高）、`review.layout.margin_mm`（页边距），按插件的作用域（全局、项目、柜、页）取值；没有插件值时用 `config.json` 的 `layout`，再没有用内置默认值。结果新增 `layout`，列出实际用的值和各自的来源。类型不对、超出范围或让整页没有可画区域的值不采用并给警告，评审不会因此失败。画图工具的布局检查仍读 `config.json`。
 - `eplan_placement_delete` 可以删除未放置的功能：新参数 `unplaced` 给 1–20 个设备标识（此时不传 `page` 和 `items`），用来清掉图上没有画、只留在导航器里的端子排定义和未放置器件。仍是破坏性操作：默认只预览，执行要审批并先备份。标识下有已放置的对象时拒绝；标识下属的端子等功能不会被连带删除（A162）。

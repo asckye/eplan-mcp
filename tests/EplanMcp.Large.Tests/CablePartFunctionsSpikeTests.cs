@@ -39,7 +39,8 @@ public sealed class CablePartFunctionsSpikeTests(LiveEplan eplan, DestructiveHos
             {
                 string project = session.Project;
                 string page = (await session.CreatePagesAsync(1)).Single();
-                await using BridgeClient bridge = await LiveSnapshots.BridgeAsync(eplan.ProcessId);
+                // Live 2026-11-19: a third client beside the host's and the provider's found no EPLAN; reuse the provider's.
+                var bridge = (BridgeClient)provider.GetRequiredService<IBridgeClient>();
                 var (created, creation) = await CablePage.CreateAsync(host, bridge, project, page);
                 Log("S0 creation", creation);
                 if (!created)
@@ -58,32 +59,28 @@ public sealed class CablePartFunctionsSpikeTests(LiveEplan eplan, DestructiveHos
                 var part = await ChoosePartAsync(project);
                 if (part is null)
                 {
-                    Log("S1", "No cable part with at least three verified function templates was found.");
+                    Log("S1", "No cable part with at least four cores was found.");
                     return;
                 }
                 var update = new Dictionary<string, object?> { ["project"] = project, ["tag"] = tag, ["dry_run"] = false };
                 await WriteAsync("S1", "eplan_device_update", new(update) { ["part"] = part.Value.Number, ["variant"] = part.Value.Variant });
                 await ObserveAsync("S1", project, page, tag, runCheck: true);
-                await WriteAsync("S2", "eplan_device_update", new(update) { ["update_from_parts"] = true });
-                await ObserveAsync("S2", project, page, tag, runCheck: true);
-
+                // Live 2026-11-19, 3G part on three wires without PE potential: two cores were taken after
+                // update_from_parts, the third stayed free and the check kept its message. This run uses a part
+                // with a spare core and asks whether reassigning alone assigns the cores.
                 var reassign = new Dictionary<string, object?> { ["project"] = project, ["cables"] = new[] { tag } };
                 var (planned, preview) = await host.CallOrErrorAsync("eplan_cable_reassign", reassign);
-                Log("S3 preview", preview);
+                Log("S2 preview", preview);
                 if (planned)
                 {
                     host.Approvals.Approve("eplan_cable_reassign", project,
                         [$"update cables {WriteHost.WritableName}: cores '{preview.GetProperty("scope").GetString()}' -> 'assigned by EPLAN'"]);
-                    await WriteAsync("S3", "eplan_cable_reassign", new(reassign) { ["dry_run"] = false });
+                    await WriteAsync("S2", "eplan_cable_reassign", new(reassign) { ["dry_run"] = false });
                 }
+                await ObserveAsync("S2", project, page, tag, runCheck: true);
+                await WriteAsync("S3", "eplan_device_update", new(update) { ["update_from_parts"] = true });
                 await ObserveAsync("S3", project, page, tag, runCheck: true);
-                var initialPoints = setup.Placements.Where(row => row.Kind == "ConnectionDefinitionPoint")
-                    .Select(row => (row.Locator.Type, row.Locator.Oid)).ToHashSet();
-                await ClearPointNamesAsync(project, page, cable.Locator, initialPoints);
-                await ObserveAsync("S4", project, page, tag, runCheck: true);
             }
-            // The session has reopened any fixture projects it closed while selecting LargeWrite.
-            await ObserveNativeCableAsync(eplan.ProjectPath);
         }
         finally
         {
@@ -128,7 +125,7 @@ public sealed class CablePartFunctionsSpikeTests(LiveEplan eplan, DestructiveHos
                     }
                     var templates = await CollectionAsync(project, Master + "MDPart.FunctionTemplatePositions", handle.Value);
                     Log("S1 candidate", new { number, variant, group, templateCount = templates?.Count });
-                    if (templates?.Count >= 3)
+                    if (templates?.Count >= 5)
                     {
                         Log("S1 selected", part);
                         return (number, variant);

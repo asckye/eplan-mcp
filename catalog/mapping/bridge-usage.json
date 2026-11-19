@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-19",
-  "scannedSources": "d6462efb",
-  "sourceHash": "sha256:7f1c21b80809bba7a77ed3a4aab7bcaa45b5fdb4b28883d8b48b565ed5b16db1",
+  "scannedSources": "d6462efb + uncommitted changes",
+  "sourceHash": "sha256:187a6978ae821b7ab3072fe7af4f10c64fc254ef418e0b0657d0ebc8b0e50f8a",
   "operations": [
     {
       "name": "action.execute",
@@ -192412,6 +192412,17 @@
         "operations": [
           "connection.create.execute"
         ]
+      },
+      {
+        "adapter": "EplanPlacementRemover",
+        "member": "Select",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementRemover.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.delete.plan"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.ConnectionDefinitionPoint.FunctionDefinition": [
@@ -251627,6 +251638,17 @@
         ]
       },
       {
+        "adapter": "EplanPlacementRemover",
+        "member": "Select",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.delete.plan"
+        ]
+      },
+      {
         "adapter": "ObjectKindDispatch",
         "member": "Matches",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Properties/ObjectKindDispatch.g.cs",
@@ -260110,6 +260132,17 @@
           "plan.step.execute",
           "plc.rack.execute",
           "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementRemover",
+        "member": "Select",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementRemover.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.delete.plan"
         ]
       },
       {

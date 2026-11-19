@@ -1,6 +1,7 @@
 using System.Text.Json;
 using EplanMcp.Contracts;
 using EplanMcp.Host.Bridge;
+using EplanMcp.Host.Tools;
 
 namespace EplanMcp.Host.Tests.Tools;
 
@@ -53,6 +54,26 @@ public sealed partial class DeviceUpdateToolTests
         });
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PartOnACable_HintSaysTheCoresStillNeedThePartData(bool dryRun)
+    {
+        _harness.Bridge.Handlers[OperationNames.DeviceUpdatePlan] = _ =>
+        {
+            WritePlan plan = _harness.Plan([new PlannedChange { Action = "add", Kind = "part", Name = "+A1-W9", Property = "1", NewValue = "LAPP.00100234" }]);
+            plan.Details = new Dictionary<string, string>
+            { ["tag"] = "+A1-W9", ["previousTag"] = "+A1-W9", ["part"] = "LAPP.00100234", ["variant"] = "1", ["functions"] = "1", ["cableCores"] = "Cores wait for update_from_parts." };
+            return plan;
+        };
+        _harness.Bridge.Handlers[OperationNames.DeviceUpdateExecute] = _ => new DeviceUpdateData
+        { Project = "Line1", Tag = "+A1-W9", PreviousTag = "+A1-W9", Part = "LAPP.00100234", Variant = "1", Functions = 1 };
+
+        JsonElement data = WriteToolHarness.Structured(await DeviceWriteTools.DeviceUpdateAsync(_harness.Pipeline, "Line1", "+A1-W9", dry_run: dryRun,
+            part: "LAPP.00100234", variant: "1", cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.EndsWith("Cores wait for update_from_parts.", data.GetProperty("hint").GetString(), StringComparison.Ordinal);
+    }
     [Fact]
     public async Task CountViolationFromBridgeReturnsWithoutWrite()
     {

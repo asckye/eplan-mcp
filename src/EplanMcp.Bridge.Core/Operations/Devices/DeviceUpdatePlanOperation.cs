@@ -46,8 +46,17 @@ public sealed class DeviceUpdatePlanOperation(IProjectCatalog catalog, IDeviceRe
         {
             plan.Details!["warning"] = "Later references are re-added in order. Their overridden properties reset to the part values.";
         }
+        if (request.Part is not null && request.Main?.Category == "Cable")
+        {
+            // A167: a part put on a cable leaves its cores unassigned until the part data is transferred.
+            plan.Details!["cableCores"] = CableCoresHint;
+        }
         return plan;
     }
+
+    internal const string CableCoresHint = "The cable's wires are not assigned to the part's cores yet, so the check reports more functions than the part provides: " +
+        "call eplan_device_update with update_from_parts for this cable (eplan_cable_reassign does not do it). " +
+        "A wire stays unassigned when no core fits it; with three wires without PE potential a 3G part left one over, a 4G part none.";
 
     private static PlannedChange PartChange(DeviceUpdateRequest request, PartSearchItem part) => request.OldPart is { } old
         ? new PlannedChange

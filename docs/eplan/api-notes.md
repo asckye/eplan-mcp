@@ -179,6 +179,11 @@
 | A157 | 引脚代号带索引时读取 Pin.Name 抛出 IndexedPropertyException | 2026-11-13 | [plc-and-terminals](api-notes/plc-and-terminals.md#a157-引脚代号带索引时读取-pinname-抛出-indexedpropertyexception2026-11-13eplan-20260316-页重绘) |
 | A158 | 已放置的端子排定义可以没有符号变体 | 2026-11-01 | [symbols-and-layout](api-notes/symbols-and-layout.md#a158-已放置的端子排定义可以没有符号变体2026-11-01eplan-202603绘图读取中的端子排定义) |
 | A159 | 安装板上 MoveRelative 的位移按父对象坐标轴解释 | 2026-11-12 | [symbols-and-layout](api-notes/symbols-and-layout.md#a159-安装板上-moverelative-的位移按父对象坐标轴解释2026-11-12eplan-2026033d-安装板) |
+| A167 | 给电缆挂部件后芯线变成未分配，要再传一次部件数据；重新分配芯线不起作用 | 2026-11-19 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
+| A166 | 中断点改名：写 InterruptionPoint.Name，名称可以带冒号 | 2026-11-19 | [connections-and-potentials](api-notes/connections-and-potentials.md) |
+| A165 | 替换功能上的部件：RemoveArticleReference() 加重新添加，在默认的安全点事务里完成 | 2026-11-19 | [master-data-and-parts](api-notes/master-data-and-parts.md) |
+| A164 | 删除接在 PLC 端子上的器件后，EPLAN 会改动相邻的 PLC 端子 | 2026-11-19 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
+| A163 | Cable.Remove() 不删除电缆在导线上的连接定义点 | 2026-11-19 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
 | A162 | 未放置的功能可以用 Remove() 删除；删掉端子排的未放置定义不影响它的端子，一次撤销恢复 | 2026-11-18 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
 | A161 | 端子排定义是类别 TerminalDefText 的主功能，说明文字是它的功能文本；只放端子时自动产生未放置的定义 | 2026-11-18 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
 | A160 | 同时启动第二个 EPLAN 实例会停在系统消息窗口 | 2026-11-14 | [environment-and-licensing](api-notes/environment-and-licensing.md#a160-同时启动第二个-eplan-实例会停在系统消息窗口2026-11-14eplan-202603已有-eplan-实例运行时) |

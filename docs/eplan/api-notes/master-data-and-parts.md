@@ -1,5 +1,12 @@
 # [EPLAN API 笔记](../api-notes.md)：主数据、部件与翻译库
 
+### A165. 替换功能上的部件：ArticleReference.RemoveArticleReference() 加重新添加，在默认的安全点事务里完成（2026-11-19，EPLAN 2026.0.3.25421，Pro Panel，B 槽，LargeWrite scratch 新页）
+- **依据：** 安装目录的 API 文档：`ArticleReference.PartNr` 只读，引用不能改指向；`RemoveArticleReference()` 把引用从对象上移除（设备固定时抛 `FixedDeviceException`）。`Function.AddArticleReference` 只能追加在末尾。
+- **现象：** 对一个带部件的已放置器件，从最后一个引用往前移除到要替换的位置，添加新部件，再按原来的部件号、变体、数量把后面的引用加回去。提交后 `eplan_device_get` 读到的引用顺序、数量与预期相同，新部件在旧部件原来的位置；一次撤销后旧引用恢复。这些调用在工具默认的安全点事务里成功，不需要 A93 给“第一个部件”用的事务范围。
+- **结论：** 替换部件是“移除 + 添加”；要保持引用顺序，被替换位置之后的引用必须移除后重新添加，它们上面改过的属性会回到部件的值。
+- **工具行为：** `eplan_device_update` 的 `replace_part` 给出功能现在带的部件号，`part`（和 `variant`、`count`）是新部件；不给 `count` 时沿用旧引用的数量。结果带 `replacedPart`。把部件数据写到功能上仍然是单独一次 `update_from_parts`。
+- **证据：** `DevicePlaceTests.PlacedDevice_PartIsReplaced_ReferencesReadBack_UndoRestores`（1/1）。
+
 ### A27. 部件库与翻译库的只读访问（spike S24，2026-10-21，EPLAN 2026.0.3.25421，Electric P8，在调度器中）
 详细数据见 [spike S24](../../../spikes/S24-master-data/README.md)。
 - 开发机的部件库是 `$(MD_PARTS)\EPLAN_parts.alk`：40 字节的链接文件，指向同目录的 `EPLAN_parts.adb\`（与项目数据相同格式的目录，3.9 MB）；`MDPartsDatabase.Type` 报告 `ACCESS`。翻译库是 `$(md_translate)\Translate.db`，类型 `EPLAN`。— S24。

@@ -1,5 +1,11 @@
 # [EPLAN API 笔记](../api-notes.md)：连接、节点与电位
 
+### A166. 中断点改名：写 InterruptionPoint.Name，名称可以带冒号（2026-11-19，EPLAN 2026.0.3.25421，Pro Panel，B 槽，LargeWrite scratch 新页）
+- **现象：** `InterruptionPoint` 是 `SymbolReference`，不是 `Function`，按设备标识查不到。对已放置的中断点写 `Name`（与 `eplan_connection_create` 创建时相同的写法，随后调整可见名称），`-XD4:2c` 这样带冒号的名称写入成功，读回的完整名称带页的结构标识（`=GAA-XD4:2c`）；一次撤销恢复旧名。计划报告项目里另有 16 个中断点与改名前同名（没有逐个核对它们改名后的状态）。
+- **结论：** 中断点可以原地改名，不需要删除重画；改名只写这一个点；按名称配对的规则，它会从原来的链里拿出来、接到新名字的链上。有的项目把中断点名称存成不带结构标识的形式，读回比较要按“带或不带结构标识都算同一个名字”处理。
+- **工具行为：** `eplan_placement_edit` 的操作 `rename` 加 `name`，只接受中断点；计划里给出旧名 → 新名，以及项目里旧名、新名各有多少个其他中断点（`peersOld`、`peersNew`）。`eplan_device_update` 的 `new_tag` 仍然拒绝冒号，拒绝消息指向这个操作。改完要对该页调用 `eplan_connection_generate`。
+- **证据：** `PlacementSymbolEditTests`（5/5，含 `InterruptionPoint_IsRenamedToATerminalStyleName_ReadBack_UndoRestores`），`InterruptionVisibleNameTests` 2/2。
+
 ### A148. T 节点按“来源 → 目标 1 → 目标 2”链式接线，目标 1 一侧没有设备时不生成任何连接（2026-11-17，EPLAN 2026.0.3.25421，Electric P8，A 槽，LargeWrite scratch 新建页）
 - **现象：** 一条已生成的竖线（上、下各一个设备，1 条连接）上放 `SPECIAL/TOUR`，支路向右接一个角，角的另一端悬空，然后生成连接。变体 0（连接点顺序 Down、Up、Right，Right 偏 2 mm）、变体 1（Up、Down、Right）和变体 8（三点都在插入点的圆点）生成后原连接还在；变体 2、3（支路是目标 1）生成后这一页**一条连接都没有**，原来上下两个设备之间的连接也没了。
 - **结论：** 符号的连接点按 [目标 1, 来源, 目标 2] 排列，EPLAN 按来源 → 目标 1 → 目标 2 链式接线；目标 1 一侧到不了设备时整条链断开，来源和目标 2 之间也不连。来源或目标 2 一侧为空不影响另外两端（2026-11-02 的记录：`TOUR` 只有上、右两个设备时变体 1、2、3 生成 A–C，变体 0 不生成）。

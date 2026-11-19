@@ -20,6 +20,17 @@ public sealed partial class DevicePartAssignmentTests
     }
 
     [Theory]
+    [InlineData("Cable", true)]
+    [InlineData("BusBarDefText", false)]
+    public void PartOnACable_PlanSaysTheCoresStillNeedThePartData(string category, bool expected)
+    {
+        const string part = "LAPP.00100234";
+        _store.Targets[0].Category = category;
+        _store.Database.Parts.Add(new PartSearchItem { PartNumber = part, Variant = "1" });
+        WritePlan plan = Plan(new DeviceUpdateArgs { Project = "Line1", Tag = Tag, Part = part });
+        Assert.Equal(expected, plan.Details!.ContainsKey("cableCores"));
+    }
+    [Theory]
     [InlineData(null, 1)]
     [InlineData(1, 1)]
     [InlineData(2, 2)]

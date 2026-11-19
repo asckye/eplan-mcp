@@ -1,5 +1,27 @@
 # [EPLAN API 笔记](../api-notes.md)：PLC、电缆与端子编号
 
+### A167. 给电缆挂部件后芯线变成未分配，要再传一次部件数据；重新分配芯线不起作用（2026-11-19，EPLAN 2026.0.3.25421，Pro Panel，B 槽，LargeWrite scratch 新页，两次运行）
+- **起因：** 画图时给电缆挂部件后，检查报“该设备使用的功能多于部件提供的功能”。当时怀疑是工具把电缆名写到了连接定义点上，或者连接定义点的功能定义不对。
+- **对照：** 工具画的电缆 `+A1-W9`（三根导线）和示例项目里原生的电缆 `+B1-WG2` 结构相同：连接定义点都带电缆名，功能定义都是 `Wire/1/4`；电缆的 `FunctionTemplates` 列的是页上的芯线功能。把连接定义点的 `Name` 写成空，读回不变。两个怀疑都不成立。
+- **现象（挂部件前）：** `FunctionTemplates` 是页上的三根芯线，检查没有这条消息。
+- **现象（`AddArticleReference` 之后）：** `FunctionTemplates` 变成电缆自己加上部件的全部芯线模板，芯线模板都没有放置（`page` 为空，每次读取对象标识都不同），页上的三根芯线不在其中；检查报上面的消息。
+- **现象（再调用 `eplan_cable_reassign`）：** 返回 `committed`，`changed` 为空，`FunctionTemplates` 和检查消息都不变。
+- **现象（再调用 `update_from_parts`）：** 页上的芯线回到 `FunctionTemplates` 里。部件 `LAPP.00100234`（4G0,75，四根芯线）时三根导线都分配上，剩一个未放置的模板，检查消息消失；部件 `LAPP.00100224`（3G0,75，三根芯线）时只分配上两根，剩一个未放置的模板，检查消息仍在。
+- **结论：** 给电缆挂部件只加了引用，芯线要靠传部件数据这一步才分配到部件的芯线上；导线找不到合适的芯线时保持未分配，检查就报这条消息。3G 部件剩下的那根芯线为什么不接第三根导线没有读到（三根导线都没有 PE 电位，推测剩下的是 PE 芯线，未证实）。
+- **工具行为：** `eplan_device_update` 给电缆加或替换部件时，结果的 `hint` 写明还要对这根电缆调用一次 `update_from_parts`，`eplan_cable_reassign` 不能代替。
+- **证据：** `CablePartFunctionsSpikeTests`（探针，`Spike=C7`）两次运行的输出。
+### A164. 删除接在 PLC 端子上的器件后，EPLAN 会改动相邻的 PLC 端子（2026-11-19，EPLAN 2026.0.3.25421，Pro Panel，B 槽，LargeWrite scratch 新页）
+- **现象：** 页上一个 PLC 卡的端子 `=GAA+A1-KF103:X10:2` 接着一个器件。删除这个器件（`Remove()`）并提交后，页面快照里除了被删的对象，这个 PLC 端子的内容也变了；它的对象标识和类型没有变，没有别的对象出现或消失。
+- **结论：** 删除一个对象后，EPLAN 可以在同一事务里更新它的邻居（这里是 PLC 端子）。“删除后页面上其余对象必须与删除前完全相同”不成立。
+- **工具行为：** `eplan_placement_delete` 按根对象的（类型，对象标识）比较删除前后：计划内的对象还在，或计划外的对象不见了，才算失败；其余对象的内容变化照常提交，列在结果的 `changed`（最多 20 条，`changedTotal` 是总数）并给一条警告。此前同一情况报失败，而删除其实已经完成。
+- **证据：** `PlacementDeleteCableTests.DeviceWiredToAPlcPoint_IsDeleted_Committed_ListsWhatElseChanged`（1/1）：结果 `committed`，`changed` 只有上面这个端子。
+
+### A163. Cable.Remove() 不删除电缆在导线上的连接定义点（2026-11-19，EPLAN 2026.0.3.25421，Pro Panel，B 槽，LargeWrite scratch 新页）
+- **现象：** `eplan_connection_create` 画的电缆 `+A1-W9`：一条电缆定义线（`Cable`）和它在三根导线上放的三个连接定义点（`ConnectionDefinitionPoint`，名称都是 `+A1-W9`）。只对电缆定义线调用 `Remove()`，定义线消失，三个连接定义点留在页上，名称不变。
+- **结论：** 删除电缆定义线不连带删除它的连接定义点；留下的点仍然带着电缆名，导线继续算作这根电缆的芯线。连接定义点的 `CableDefinitionLine` 指回它所属的定义线，可以据此找到它们。
+- **工具行为：** `eplan_placement_delete` 接受 `Cable`；删除电缆定义线时先删 `CableDefinitionLine` 指向它的连接定义点，再删定义线，这些点列在结果的 `alsoRemoved`。一次撤销全部恢复。
+- **证据：** `PlacementDeleteCableTests.CableDefinitionLine_IsDeleted_WithItsDefinitionPoints_UndoRestores`：改之前失败（结果里没有 `alsoRemoved`，点还在）；改之后 1/1，`alsoRemoved` 是三个连接定义点。
+
 ### A162. 未放置的功能可以用 Remove() 删除；删掉端子排的未放置定义不影响它的端子，一次撤销恢复（2026-11-18，EPLAN 2026.0.3.25421，Electric P8，A 槽，LargeWrite scratch 新页）
 - **现象：** 端子排 `+A1-XD813` 只有一个已放置的端子 `+A1-XD813:1` 和一个未放置的定义（类别 `TerminalDefText`，A161）。对这个定义调用 `Remove()`（`Function.IsPlaced` 为 false）成功。之后 `eplan_device_get` 按 `+A1-XD813` 查返回 `DEVICE_NOT_FOUND`；页上的端子 `+A1-XD813:1` 仍在，名称、类别、页都没有变。一次撤销后项目快照与删除前相同。
 - **空的端子排定义怎么来的：** 把端子排 `+A1-XD833` 唯一的端子从页上删掉（`eplan_placement_delete` 的 `items` 路线）后，`eplan_device_get` 读出一个类别 `TerminalDefText`、`page` 为空、`functions` 为空的设备。这个空定义再用 `Remove()` 删除后，按标识查不到设备。两步各撤销一次，快照恢复。
