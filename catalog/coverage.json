@@ -70,7 +70,7 @@
       "byTools": 2785,
       "partial": 202,
       "automatedTest": 2785,
-      "liveVerified": 1331,
+      "liveVerified": 1332,
       "envBlocked": 15,
       "undocumented": 134
     },
@@ -88,7 +88,7 @@
       "byTools": 985,
       "partial": 103,
       "automatedTest": 985,
-      "liveVerified": 179,
+      "liveVerified": 180,
       "envBlocked": 12,
       "undocumented": 66
     },
@@ -140,7 +140,7 @@
       "scope": "Eplan.EplApi.DataModel",
       "denominator": 1247,
       "implemented": 947,
-      "liveVerified": 556
+      "liveVerified": 557
     },
     {
       "scope": "Eplan.EplApi.DataModel.E3D",
@@ -866,7 +866,7 @@
       "spec": "docs/tools/eplan_api_try.md",
       "small": 7,
       "medium": 4,
-      "large": 3,
+      "large": 4,
       "apiNotes": [
         "A39",
         "A56",
@@ -1008,7 +1008,7 @@
       "spec": "docs/tools/eplan_cable_get.md",
       "small": 2,
       "medium": 2,
-      "large": 3,
+      "large": 4,
       "apiNotes": [
         "A24"
       ]
@@ -1028,7 +1028,7 @@
       "spec": "docs/tools/eplan_cable_reassign.md",
       "small": 0,
       "medium": 0,
-      "large": 1,
+      "large": 2,
       "apiNotes": []
     },
     {
@@ -1075,7 +1075,7 @@
       "spec": "docs/tools/eplan_check_list.md",
       "small": 2,
       "medium": 3,
-      "large": 3,
+      "large": 4,
       "apiNotes": [
         "A12"
       ],
@@ -1105,7 +1105,7 @@
       "spec": "docs/tools/eplan_check_run.md",
       "small": 0,
       "medium": 1,
-      "large": 3,
+      "large": 4,
       "apiNotes": [
         "A11",
         "A16",
@@ -1160,9 +1160,9 @@
       "dependencies": 45,
       "actions": 1,
       "spec": "docs/tools/eplan_connection_generate.md",
-      "small": 7,
+      "small": 8,
       "medium": 2,
-      "large": 12,
+      "large": 13,
       "apiNotes": [
         "A3",
         "A11",
@@ -1195,7 +1195,7 @@
       "spec": "docs/tools/eplan_connection_list.md",
       "small": 2,
       "medium": 4,
-      "large": 8,
+      "large": 9,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-20",
@@ -1345,7 +1345,7 @@
       "spec": "docs/tools/eplan_device_place.md",
       "small": 18,
       "medium": 7,
-      "large": 29,
+      "large": 30,
       "apiNotes": [
         "A13",
         "A14",
@@ -1395,15 +1395,15 @@
         "device.update.execute",
         "device.update.plan"
       ],
-      "apiIds": 148,
-      "operationGroups": 68,
+      "apiIds": 150,
+      "operationGroups": 69,
       "dataDictionary": 4,
-      "dependencies": 53,
+      "dependencies": 54,
       "actions": 0,
       "spec": "docs/tools/eplan_device_update.md",
-      "small": 5,
+      "small": 6,
       "medium": 2,
-      "large": 5,
+      "large": 6,
       "apiNotes": [
         "A3",
         "A13",
@@ -1970,7 +1970,7 @@
       "spec": "docs/tools/eplan_object_find.md",
       "small": 3,
       "medium": 1,
-      "large": 16,
+      "large": 17,
       "apiNotes": [
         "A57",
         "A60"
@@ -2458,7 +2458,7 @@
       "spec": "docs/tools/eplan_part_search.md",
       "small": 3,
       "medium": 2,
-      "large": 6,
+      "large": 7,
       "apiNotes": [],
       "latestLive": {
         "date": "2026-10-21",
@@ -2605,7 +2605,7 @@
       "spec": "docs/tools/eplan_placement_delete.md",
       "small": 4,
       "medium": 1,
-      "large": 4,
+      "large": 5,
       "apiNotes": [
         "A87"
       ]
@@ -2617,10 +2617,10 @@
         "placement.edit.execute",
         "placement.edit.plan"
       ],
-      "apiIds": 473,
-      "operationGroups": 285,
+      "apiIds": 479,
+      "operationGroups": 288,
       "dataDictionary": 4,
-      "dependencies": 176,
+      "dependencies": 179,
       "actions": 0,
       "spec": "docs/tools/eplan_placement_edit.md",
       "small": 3,
@@ -3387,7 +3387,7 @@
       "spec": "docs/tools/eplan_symbol_search.md",
       "small": 5,
       "medium": 3,
-      "large": 11,
+      "large": 12,
       "apiNotes": [
         "A52",
         "A53",
@@ -7953,12 +7953,13 @@
     {
       "unit": "O:Eplan.EplApi.DataModel.ArticleReference.RemoveArticleReference",
       "layer": "operation",
-      "status": "automated_test",
+      "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_device_update"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.ArticleReference.VariantNr",
@@ -9670,6 +9671,7 @@
         "eplan_object_find",
         "eplan_object_get",
         "eplan_page_review",
+        "eplan_placement_edit",
         "eplan_property_get",
         "eplan_property_set"
       ],
@@ -15673,6 +15675,7 @@
         "eplan_macro_store",
         "eplan_page_get",
         "eplan_placement_create",
+        "eplan_placement_edit",
         "eplan_plc_get",
         "eplan_plc_rack",
         "eplan_rule_check",
@@ -33137,6 +33140,7 @@
         "eplan_api_try",
         "eplan_connection_create",
         "eplan_device_place",
+        "eplan_placement_edit",
         "eplan_placement_update",
         "eplan_shield_create"
       ],
@@ -72697,7 +72701,7 @@
   },
   "routes": {
     "api_try_only": {
-      "count": 2043,
+      "count": 2042,
       "live_verified": 908
     },
     "declined": {
@@ -72705,8 +72709,8 @@
       "live_verified": 0
     },
     "dedicated": {
-      "count": 627,
-      "live_verified": 423
+      "count": 628,
+      "live_verified": 424
     },
     "generic_read": {
       "count": 115,
@@ -72753,7 +72757,7 @@
       "denominator": 5983,
       "routes": {
         "api_try_only": {
-          "count": 2305,
+          "count": 2304,
           "live_verified": 915
         },
         "declined": {
@@ -72761,8 +72765,8 @@
           "live_verified": 0
         },
         "dedicated": {
-          "count": 839,
-          "live_verified": 503
+          "count": 840,
+          "live_verified": 504
         },
         "generic_read": {
           "count": 287,
@@ -72786,7 +72790,7 @@
       "denominator": 3109,
       "routes": {
         "api_try_only": {
-          "count": 951,
+          "count": 950,
           "live_verified": 85
         },
         "declined": {
@@ -72794,8 +72798,8 @@
           "live_verified": 0
         },
         "dedicated": {
-          "count": 404,
-          "live_verified": 174
+          "count": 405,
+          "live_verified": 175
         },
         "generic_read": {
           "count": 32,

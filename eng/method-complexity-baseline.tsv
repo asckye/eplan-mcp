@@ -4,14 +4,13 @@ EplanMcp.Bridge.Core/AnnotationCreation.Validate(1)	41
 EplanMcp.Bridge.Core/ConnectionDefinitionPoints.Plan(10)	55
 EplanMcp.Bridge.Core/DevicePlaceExecuteOperation.PlaceSymbol(4)	42
 EplanMcp.Bridge.Core/DeviceTerminalPlan.Check(1)	50
-EplanMcp.Bridge.Core/DeviceUpdateRequest.Check(6)	49
 EplanMcp.Bridge.Core/GraphicEditGeometry.Plan(2)	44
 EplanMcp.Bridge.Core/GraphicEditPlanner.Plan(3)	62
 EplanMcp.Bridge.Core/GraphicEditPredictions.Plan(3)	49
 EplanMcp.Bridge.Core/GraphicEditVerification.Verify(4)	44
 EplanMcp.Bridge.Core/LayoutPlaceRequest.Check(4)	57
 EplanMcp.Bridge.Core/MacroStoreOperation.Execute(1)	51
-EplanMcp.Bridge.Core/PlacementDeleteOperation.Execute(1)	54
+EplanMcp.Bridge.Core/PlacementDeleteOperation.Execute(1)	45
 EplanMcp.Bridge.Core/PlacementEditPlanner.Plan(3)	108
 EplanMcp.Bridge.Core/PlacementMoveExecution.Execute(6)	80
 EplanMcp.Bridge.Core/PlacementTextCreateExecuteOperation.Execute(1)	65

@@ -7,6 +7,9 @@
 
 ### 新增
 
+- `eplan_placement_delete` 可以删除电缆定义线（`Cable`），不必为改一根电缆整页重画；随它消失的连接定义点列在结果的 `alsoRemoved` 里。
+- `eplan_device_update` 可以替换部件：新参数 `replace_part` 给功能上现有的部件号，与 `part`（可带 `variant`、`count`）一起用。新部件占原来的位置，后面的部件引用按原顺序保留；不传 `count` 时沿用原数量。结果新增 `replacedPart`。把部件数据写到功能上仍是另一次调用（`update_from_parts`）。
+- `eplan_placement_edit` 新增操作 `rename`：按定位符给中断点改名（参数 `name`），名称可以带 `:`，如 `-XD4:2c`；短名按页面结构展开，规则与 `eplan_connection_create` 创建中断点时相同。预览列出旧名、新名，以及项目里还有多少个中断点叫旧名、新名（`peersOld`、`peersNew`）。`eplan_device_update` 的 `new_tag` 遇到 `:` 时指向这个操作。
 - `eplan_page_review` 的布局阈值可以由规则插件提供：`review.layout.parallel_spacing_mm`（平行线间距）、`review.layout.minimum_text_height_mm`（最小字高）、`review.layout.margin_mm`（页边距），按插件的作用域（全局、项目、柜、页）取值；没有插件值时用 `config.json` 的 `layout`，再没有用内置默认值。结果新增 `layout`，列出实际用的值和各自的来源。类型不对、超出范围或让整页没有可画区域的值不采用并给警告，评审不会因此失败。画图工具的布局检查仍读 `config.json`。
 - `eplan_placement_delete` 可以删除未放置的功能：新参数 `unplaced` 给 1–20 个设备标识（此时不传 `page` 和 `items`），用来清掉图上没有画、只留在导航器里的端子排定义和未放置器件。仍是破坏性操作：默认只预览，执行要审批并先备份。标识下有已放置的对象时拒绝；标识下属的端子等功能不会被连带删除（A162）。
 - `eplan_property_set` 可以改端子排的说明文字：按端子排的设备标识写其定义的功能文本（属性 20011），已放置和未放置的定义都可以。以前按标识写会被拒绝（`POLICY_DENIED`，运行时类型不在范围内）。定义的其余属性仍不开放。
@@ -27,6 +30,7 @@
 
 ### 修复
 
+- `eplan_placement_delete` 删除器件后不再因为 EPLAN 顺带更新了旁边的对象而报失败：目标已删除、没有无关对象消失时返回 `committed`，被 EPLAN 更新或新增的对象列在 `changed`（最多 20 个，超出时给 `changedTotal`）并给警告。目标没删掉或无关对象消失时仍然失败并撤销，错误信息现在列出是哪些对象。
 - `eplan_connection_create`、`eplan_graphic_edit`、`eplan_placement_delete`、`eplan_placement_edit`、`eplan_placement_update`、`eplan_potential_update` 的写入也固定到计划时的项目：审批之后同名的另一个项目被打开时，执行报告 `PLAN_STALE`，什么都不改。此前只有其余写入工具有这项保护。
 - 项目重命名失败后把旧项目放回去也失败时，不再声称“旧项目已打开、副本已删除”：改为报告结果未知（`OUTCOME_UNKNOWN`），写入挂起到工程师检查为止。
 - 工程师确认解除写入挂起后，如果挂起文件删不掉，普通写入不再继续执行并记“已解除”，而是和 `eplan_plan_apply` 一样保持挂起（`WRITES_SUSPENDED`）。

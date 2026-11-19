@@ -15134,6 +15134,11 @@
             "file": "tests/EplanMcp.Large.Tests/BatchVerification.cs"
           },
           {
+            "name": "CablePartFunctionsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CablePartFunctionsSpikeTests.cs"
+          },
+          {
             "name": "PlcDisplaySpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlcDisplaySpikeTests.cs"
@@ -15840,6 +15845,11 @@
             "file": "tests/EplanMcp.Large.Tests/CableDefinitionTests.cs"
           },
           {
+            "name": "CablePartFunctionsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CablePartFunctionsSpikeTests.cs"
+          },
+          {
             "name": "CableTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CableTests.cs"
@@ -15996,6 +16006,11 @@
         "specStatus": "Implemented (v0.5.1)",
         "apiNotes": [],
         "tests": [
+          {
+            "name": "CablePartFunctionsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CablePartFunctionsSpikeTests.cs"
+          },
           {
             "name": "ProjectToolsTests",
             "size": "Large",
@@ -16275,6 +16290,11 @@
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
           },
           {
+            "name": "CablePartFunctionsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CablePartFunctionsSpikeTests.cs"
+          },
+          {
             "name": "CheckAndReportTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/CheckAndReportTests.cs"
@@ -16434,6 +16454,11 @@
             "name": "CheckRunToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/CheckRunToolTests.cs"
+          },
+          {
+            "name": "CablePartFunctionsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CablePartFunctionsSpikeTests.cs"
           },
           {
             "name": "CheckAndReportTests",
@@ -17286,6 +17311,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/AcceptanceRedrawDriverTests.cs"
           },
           {
+            "name": "PlacementRenameTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementRenameTests.cs"
+          },
+          {
             "name": "PlacementSymbolEditTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementSymbolEditTests.cs"
@@ -17364,6 +17394,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PlacementDeleteCableTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteCableTests.cs"
           },
           {
             "name": "PlacementEditSpikeTests",
@@ -17567,6 +17602,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PlacementDeleteCableTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteCableTests.cs"
           },
           {
             "name": "PlacementMoveTests",
@@ -19190,6 +19230,11 @@
             "file": "tests/EplanMcp.Large.Tests/PlacementArrangementTests.cs"
           },
           {
+            "name": "PlacementDeleteCableTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteCableTests.cs"
+          },
+          {
             "name": "PlacementDeleteTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
@@ -19463,6 +19508,7 @@
         "M:Eplan.EplApi.Base.Languages.#ctor",
         "M:Eplan.EplApi.Base.LockingException.GetAllFailed2LockAsString",
         "M:Eplan.EplApi.Base.MultiLangString.GetStringToDisplay(Eplan.EplApi.Base.ISOCode.Language)",
+        "M:Eplan.EplApi.DataModel.ArticleReference.RemoveArticleReference",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
         "M:Eplan.EplApi.DataModel.Function.AddArticleReference(System.String,System.String,System.UInt32)",
@@ -19573,6 +19619,7 @@
         "T:Eplan.EplApi.Base.Languages",
         "T:Eplan.EplApi.Base.LockingException",
         "T:Eplan.EplApi.Base.MultiLangString",
+        "T:Eplan.EplApi.DataModel.ArticleReference",
         "T:Eplan.EplApi.DataModel.DMObjectsFinder",
         "T:Eplan.EplApi.DataModel.EmptyPropertyException",
         "T:Eplan.EplApi.DataModel.Function",
@@ -19641,6 +19688,11 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/SmallProjectRedrawOverviewTests.cs"
           },
           {
+            "name": "ToolContractTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
+          },
+          {
             "name": "DeviceUpdateToolTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/DeviceUpdateToolTests.cs"
@@ -19649,6 +19701,11 @@
             "name": "PageReviewRulePackTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Tools/PageReviewRulePackTests.cs"
+          },
+          {
+            "name": "CablePartFunctionsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CablePartFunctionsSpikeTests.cs"
           },
           {
             "name": "DevicePlaceTests",
@@ -24041,6 +24098,11 @@
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
           },
           {
+            "name": "CablePartFunctionsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CablePartFunctionsSpikeTests.cs"
+          },
+          {
             "name": "ConnectionCreateTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ConnectionCreateTests.cs"
@@ -28295,6 +28357,11 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
           },
           {
+            "name": "CablePartFunctionsSpikeTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/CablePartFunctionsSpikeTests.cs"
+          },
+          {
             "name": "Layout3DSpikeTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/Layout3DSpikeTests.cs"
@@ -29604,6 +29671,11 @@
             "file": "tests/EplanMcp.Large.Tests/MacroGroupedPlacementTests.cs"
           },
           {
+            "name": "PlacementDeleteCableTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteCableTests.cs"
+          },
+          {
             "name": "PlacementDeleteTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PlacementDeleteTests.cs"
@@ -29660,6 +29732,7 @@
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.#ctor(Eplan.EplApi.DataModel.Project)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetConnections(Eplan.EplApi.DataModel.ConnectionsFilter)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetFunctions(Eplan.EplApi.DataModel.FunctionsFilter)",
+        "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetInterruptionPoints(Eplan.EplApi.DataModel.InterruptionPointsFilter)",
         "M:Eplan.EplApi.DataModel.DMObjectsFinder.GetPages(Eplan.EplApi.DataModel.PagesFilter)",
         "M:Eplan.EplApi.DataModel.Function.SetSymbolVariant(Eplan.EplApi.DataModel.MasterData.SymbolVariant,System.Boolean)",
         "M:Eplan.EplApi.DataModel.Graphics.PolyLine.GetPointAt(System.Int32)",
@@ -29703,6 +29776,8 @@
         "M:Eplan.EplApi.HEServices.Edit.#ctor",
         "M:Eplan.EplApi.HEServices.Edit.Mirror(Eplan.EplApi.DataModel.Placement[],Eplan.EplApi.Base.PointD,Eplan.EplApi.Base.PointD,System.Boolean)",
         "M:Eplan.EplApi.HEServices.Edit.Rotate(Eplan.EplApi.DataModel.Placement[],Eplan.EplApi.Base.PointD,System.Double)",
+        "M:Eplan.EplApi.HEServices.NameService.#ctor",
+        "M:Eplan.EplApi.HEServices.NameService.AdjustVisibleName(Eplan.EplApi.DataModel.Page,Eplan.EplApi.DataModel.FunctionBase)",
         "M:Eplan.EplApi.HEServices.SelectionSet.#ctor",
         "M:Eplan.EplApi.HEServices.SelectionSet.GetCurrentProject(System.Boolean)",
         "P:Eplan.EplApi.Base.Languages.GuiLanguage",
@@ -29770,6 +29845,7 @@
         "P:Eplan.EplApi.DataModel.FunctionBase.Location",
         "P:Eplan.EplApi.DataModel.FunctionBase.Name",
         "P:Eplan.EplApi.DataModel.FunctionBase.Properties",
+        "P:Eplan.EplApi.DataModel.FunctionBase.VisibleName",
         "P:Eplan.EplApi.DataModel.FunctionDefinition.ConnectionPoints",
         "P:Eplan.EplApi.DataModel.FunctionDefinition.FunctionCategory",
         "P:Eplan.EplApi.DataModel.FunctionDefinition.Group",
@@ -30060,6 +30136,7 @@
         "T:Eplan.EplApi.DataModel.MergedConnection",
         "T:Eplan.EplApi.DataModel.MergedFunction",
         "T:Eplan.EplApi.DataModel.NetDefinitionPoint",
+        "T:Eplan.EplApi.DataModel.OperationCanceledException",
         "T:Eplan.EplApi.DataModel.Option",
         "T:Eplan.EplApi.DataModel.OptionBase",
         "T:Eplan.EplApi.DataModel.OptionFragment",
@@ -30111,6 +30188,7 @@
         "T:Eplan.EplApi.DataModel.UniversalPropertyList",
         "T:Eplan.EplApi.DataModel.ViewPart",
         "T:Eplan.EplApi.HEServices.Edit",
+        "T:Eplan.EplApi.HEServices.NameService",
         "T:Eplan.EplApi.HEServices.SelectionSet"
       ],
       "actions": [],
@@ -30175,6 +30253,11 @@
             "name": "PlacementEditTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementEditTests.cs"
+          },
+          {
+            "name": "PlacementRenameTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/PlacementRenameTests.cs"
           },
           {
             "name": "PlacementSymbolEditTests",
@@ -36401,6 +36484,11 @@
             "name": "PageReviewTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/PageReviewTests.cs"
+          },
+          {
+            "name": "PlacementDeleteCableTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/PlacementDeleteCableTests.cs"
           },
           {
             "name": "PlacementSymbolEditTests",

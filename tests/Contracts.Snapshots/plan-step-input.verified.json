@@ -185,18 +185,26 @@
                     "type": "string"
                   },
                   "new_tag": {
-                    "description": "New tag; '-' keeps structure",
+                    "description": "New tag; - keeps structure",
                     "type": "string"
                   },
                   "update_from_parts": {
-                    "description": "Alone: parts' data",
+                    "description": "Transfer part data alone",
                     "type": "boolean",
                     "default": false
                   },
                   "count": {
-                    "description": "Positive count with part; default 1",
+                    "description": "Quantity; old count or 1 by default",
                     "type": [
                       "integer",
+                      "null"
+                    ],
+                    "default": null
+                  },
+                  "replace_part": {
+                    "description": "Old number to replace with part",
+                    "type": [
+                      "string",
                       "null"
                     ],
                     "default": null

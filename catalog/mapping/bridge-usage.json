@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-19",
-  "scannedSources": "522bb57b + uncommitted changes",
-  "sourceHash": "sha256:64b037698ee242920127993169927462f89e301147e99db155c70604327b4c9c",
+  "scannedSources": "d6462efb",
+  "sourceHash": "sha256:7f1c21b80809bba7a77ed3a4aab7bcaa45b5fdb4b28883d8b48b565ed5b16db1",
   "operations": [
     {
       "name": "action.execute",
@@ -156535,6 +156535,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanDevicePartAssigner",
+        "member": "ReplacePart",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.update.execute"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.ArticleReferencePropertyList.Exists(Eplan.EplApi.DataModel.Properties.ArticleReference)": [
@@ -158190,6 +158201,17 @@
       },
       {
         "adapter": "EplanPlacementEditor",
+        "member": "InterruptionCounts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.cs",
         "access": [
@@ -159804,6 +159826,17 @@
         ],
         "operations": [
           "page.review"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InterruptionCounts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "placement.edit.plan"
         ]
       },
       {
@@ -164869,6 +164902,17 @@
         "operations": [
           "device.update.execute",
           "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDevicePartAssigner",
+        "member": "ReplacePart",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.update.execute"
         ]
       },
       {
@@ -175286,7 +175330,7 @@
       },
       {
         "adapter": "EplanDevicePartAssigner",
-        "member": "AddPart",
+        "member": "FindTarget",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
         "access": [
           "call"
@@ -181793,6 +181837,7 @@
         "operations": [
           "connection.create.execute",
           "device.place.execute",
+          "placement.edit.plan",
           "shield.create.execute"
         ]
       }
@@ -181858,6 +181903,7 @@
         "operations": [
           "connection.create.execute",
           "device.place.execute",
+          "placement.edit.plan",
           "shield.create.execute"
         ]
       }
@@ -189847,6 +189893,17 @@
         ]
       },
       {
+        "adapter": "EplanDevicePartAssigner",
+        "member": "ReplacePart",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.update.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceReader",
         "member": "Parts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
@@ -190057,6 +190114,17 @@
           "device.update.execute",
           "device.update.plan",
           "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDevicePartAssigner",
+        "member": "ReplacePart",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.update.execute"
         ]
       },
       {
@@ -190274,6 +190342,17 @@
           "device.update.execute",
           "device.update.plan",
           "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDevicePartAssigner",
+        "member": "ReplacePart",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.update.execute"
         ]
       },
       {
@@ -199393,6 +199472,17 @@
         ]
       },
       {
+        "adapter": "EplanDevicePartAssigner",
+        "member": "ReplacePart",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.update.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceReader",
         "member": "ReadDevice",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
@@ -199747,7 +199837,7 @@
       },
       {
         "adapter": "EplanDevicePartAssigner",
-        "member": "AddPart",
+        "member": "FindTarget",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
         "access": [
           "get"
@@ -200327,7 +200417,7 @@
       },
       {
         "adapter": "EplanDevicePartAssigner",
-        "member": "AddPart",
+        "member": "FindTarget",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
         "access": [
           "get"
@@ -201818,7 +201908,8 @@
           "set"
         ],
         "operations": [
-          "connection.create.execute"
+          "connection.create.execute",
+          "placement.edit.plan"
         ]
       },
       {
@@ -202664,6 +202755,39 @@
       },
       {
         "adapter": "EplanPlacementEditor",
+        "member": "EditSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InspectSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InterruptionCounts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
         "member": "Inspect",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.cs",
         "access": [
@@ -203151,6 +203275,17 @@
           "plan.step.execute",
           "plc.rack.execute",
           "plc.rack.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InspectSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
         ]
       },
       {
@@ -218687,7 +218822,8 @@
           "get"
         ],
         "operations": [
-          "connection.create.execute"
+          "connection.create.execute",
+          "placement.edit.plan"
         ]
       },
       {
@@ -219706,6 +219842,17 @@
         ],
         "operations": [
           "placeholder.apply.execute"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "EditSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
         ]
       },
       {
@@ -223318,6 +223465,17 @@
         ],
         "operations": [
           "macro.store"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InspectSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "placement.edit.plan"
         ]
       },
       {
@@ -250083,6 +250241,17 @@
         ]
       },
       {
+        "adapter": "EplanDevicePartAssigner",
+        "member": "ReplacePart",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.update.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceReader",
         "member": "Parts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
@@ -253424,6 +253593,17 @@
       {
         "adapter": "EplanPlacementEditor",
         "member": "InspectSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InterruptionCounts",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
         "access": [
           "type"
@@ -261912,6 +262092,18 @@
       },
       {
         "adapter": "EplanDevicePartAssigner",
+        "member": "FindTarget",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDevicePartAssigner",
         "member": "ReadMainFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
         "access": [
@@ -261921,6 +262113,17 @@
           "device.update.execute",
           "device.update.plan",
           "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDevicePartAssigner",
+        "member": "ReplacePart",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePartAssigner.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.update.execute"
         ]
       },
       {
@@ -262929,7 +263132,8 @@
           "type"
         ],
         "operations": [
-          "connection.create.execute"
+          "connection.create.execute",
+          "placement.edit.plan"
         ]
       },
       {
@@ -263013,6 +263217,7 @@
         "operations": [
           "connection.create.execute",
           "device.place.execute",
+          "placement.edit.plan",
           "shield.create.execute"
         ]
       },
@@ -270423,6 +270628,28 @@
         ]
       },
       {
+        "adapter": "EplanPlacementEditor",
+        "member": "EditSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
+        "adapter": "EplanPlacementEditor",
+        "member": "InspectSymbols",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
         "adapter": "ObjectKindDispatch",
         "member": "Matches",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Properties/ObjectKindDispatch.g.cs",
@@ -273571,6 +273798,17 @@
     ],
     "T:Eplan.EplApi.DataModel.OperationCanceledException": [
       {
+        "adapter": "EplanPlacementEditor",
+        "member": "InterruptionCounts",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanPlacementEditor.Symbols.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "placement.edit.plan"
+        ]
+      },
+      {
         "adapter": "EplanUnplacedFunctionRemover",
         "member": "PlacementStatus",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Placement/EplanUnplacedFunctionRemover.cs",
@@ -274270,7 +274508,8 @@
           "type"
         ],
         "operations": [
-          "connection.create.execute"
+          "connection.create.execute",
+          "placement.edit.plan"
         ]
       },
       {
@@ -275654,6 +275893,7 @@
         "operations": [
           "connection.create.execute",
           "device.place.execute",
+          "placement.edit.plan",
           "shield.create.execute"
         ]
       },
@@ -289959,6 +290199,7 @@
         "operations": [
           "connection.create.execute",
           "device.place.execute",
+          "placement.edit.plan",
           "shield.create.execute"
         ]
       }

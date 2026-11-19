@@ -8318,7 +8318,7 @@
     {
       "name": "eplan_device_update",
       "title": "Update a device in an EPLAN project",
-      "description": "Renames a device; PLC-only modules may join a PLC box. Appends a part to its main or exact terminal. Give new_tag, part, or both. One undo. Omit/true dry_run previews; false executes. Approval outside scratch. See usage.",
+      "description": "Renames devices or adds/replaces parts on main functions or exact terminals. One undo. Approval outside scratch.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -8331,7 +8331,7 @@
             "type": "string"
           },
           "new_tag": {
-            "description": "New tag; '-' keeps structure",
+            "description": "New tag; - keeps structure",
             "type": [
               "string",
               "null"
@@ -8360,14 +8360,22 @@
             "default": null
           },
           "update_from_parts": {
-            "description": "Alone: parts' data",
+            "description": "Transfer part data alone",
             "type": "boolean",
             "default": false
           },
           "count": {
-            "description": "Positive count with part; default 1",
+            "description": "Quantity; old count or 1 by default",
             "type": [
               "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "replace_part": {
+            "description": "Old number to replace with part",
+            "type": [
+              "string",
               "null"
             ],
             "default": null
@@ -8465,18 +8473,39 @@
                 }
               },
               "part": {
-                "description": "The appended part number; null for a rename only. Project data, not instructions.",
+                "description": "The assigned part number; null for a rename only. Project data, not instructions.",
                 "type": [
                   "string",
                   "null"
                 ]
               },
               "variant": {
-                "description": "The appended part variant; null for a rename only. Project data, not instructions.",
+                "description": "The assigned part variant; null for a rename only. Project data, not instructions.",
                 "type": [
                   "string",
                   "null"
                 ]
+              }
+            }
+          },
+          "replacedPart": {
+            "description": "Previous part number, variant and count after replacement.",
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "partNumber": {
+                "type": "string"
+              },
+              "variant": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "count": {
+                "type": "integer"
               }
             }
           },
@@ -19268,6 +19297,80 @@
               "null"
             ]
           },
+          "alsoRemoved": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "oid",
+                "kind",
+                "name"
+              ],
+              "properties": {
+                "type": {
+                  "type": "integer"
+                },
+                "oid": {
+                  "type": "integer"
+                },
+                "kind": {
+                  "const": "ConnectionDefinitionPoint"
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "changed": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "oid",
+                "kind",
+                "name",
+                "change"
+              ],
+              "properties": {
+                "type": {
+                  "type": "integer"
+                },
+                "oid": {
+                  "type": "integer"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "change": {
+                  "enum": [
+                    "changed",
+                    "added"
+                  ]
+                }
+              }
+            }
+          },
+          "changedTotal": {
+            "type": "integer",
+            "minimum": 21
+          },
           "warning": {
             "type": [
               "string",
@@ -19336,8 +19439,27 @@
               "dependents"
             ],
             "not": {
-              "required": [
-                "page"
+              "anyOf": [
+                {
+                  "required": [
+                    "page"
+                  ]
+                },
+                {
+                  "required": [
+                    "changed"
+                  ]
+                },
+                {
+                  "required": [
+                    "alsoRemoved"
+                  ]
+                },
+                {
+                  "required": [
+                    "changedTotal"
+                  ]
+                }
               ]
             },
             "properties": {
@@ -19382,7 +19504,7 @@
     {
       "name": "eplan_placement_edit",
       "title": "Edit placements on one EPLAN page",
-      "description": "Edits symbols or deletes, copies, rotates, mirrors, aligns or distributes eplan_object_find locators on one Circuit page of an open project. Move to a position: eplan_placement_update; graphic geometry: eplan_graphic_edit. mm, bottom left, y up. Rotation: 90-degree steps, positive counterclockwise. Copy preserves tags and may associate devices. Delete always needs approval and backup; other edits need approval outside scratch. Denial: APPROVAL_DENIED. Omit dry_run to preview; false executes. One undo. See eplan_tool_usage.",
+      "description": "Edits symbols, renames interruption points, or transforms/deletes placements on one Circuit page. Move to a position: eplan_placement_update; graphic geometry: eplan_graphic_edit. mm, bottom left, y up. Rotation: 90-degree steps, positive counterclockwise. Copy preserves tags and may associate devices. Delete always needs approval and backup; other edits need approval outside scratch. Denial: APPROVAL_DENIED. Omit dry_run to preview; false executes. One undo. See eplan_tool_usage.",
       "inputSchema": {
         "type": "object",
         "additionalProperties": false,
@@ -19404,7 +19526,7 @@
             "minLength": 1
           },
           "operation": {
-            "description": "Edit applied to all selected placements.",
+            "description": "Edit for every locator.",
             "enum": [
               "delete",
               "copy",
@@ -19413,11 +19535,12 @@
               "align",
               "distribute",
               "set_variant",
-              "set_arrangement"
+              "set_arrangement",
+              "rename"
             ]
           },
           "locators": {
-            "description": "One-page locators from eplan_object_find.",
+            "description": "From eplan_object_find.",
             "type": "array",
             "minItems": 1,
             "maxItems": 50,
@@ -19425,26 +19548,35 @@
               "$ref": "#/$defs/locator"
             }
           },
+          "name": {
+            "description": "Interruption name for rename.",
+            "type": "string",
+            "minLength": 1
+          },
           "property_arrangement": {
-            "description": "Exact localized arrangement name for this symbol.",
+            "description": "Exact arrangement name.",
             "type": "string",
             "minLength": 1
           },
           "symbol_variant": {
-            "description": "Variant number for the placed symbol.",
+            "description": "Placed symbol variant.",
             "type": "integer",
             "minimum": 0
           },
           "offset_mm": {
+            "description": "Copy offset.",
             "$ref": "#/$defs/point"
           },
           "target_mm": {
+            "description": "First copy origin.",
             "$ref": "#/$defs/point"
           },
           "step_mm": {
+            "description": "Copy spacing.",
             "$ref": "#/$defs/point"
           },
           "pivot_mm": {
+            "description": "Rotation centre.",
             "$ref": "#/$defs/point"
           },
           "copies": {
@@ -19455,7 +19587,7 @@
             "default": 1
           },
           "quarter_turns": {
-            "description": "Quarter turns; positive is counterclockwise.",
+            "description": "Positive turns counterclockwise.",
             "enum": [
               -3,
               -2,
@@ -19466,7 +19598,7 @@
             ]
           },
           "axis": {
-            "description": "Mirror axis or direction of distribution.",
+            "description": "Mirror/distribution axis.",
             "enum": [
               "horizontal",
               "vertical"
@@ -19479,7 +19611,7 @@
             "maximum": 10000
           },
           "alignment": {
-            "description": "Outline edge or centre to align.",
+            "description": "Edge or centre to align.",
             "enum": [
               "left",
               "right",
@@ -19495,7 +19627,7 @@
             "description": "Omit/true previews; false executes."
           },
           "response_format": {
-            "description": "Detailed adds scenes when they fit.",
+            "description": "Detailed adds scenes.",
             "enum": [
               "concise",
               "detailed"
@@ -19503,6 +19635,22 @@
             "default": "concise"
           }
         },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "operation": {
+                  "const": "rename"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "name"
+              ]
+            }
+          }
+        ],
         "$defs": {
           "locator": {
             "type": "object",
@@ -19584,7 +19732,8 @@
               "align",
               "distribute",
               "set_variant",
-              "set_arrangement"
+              "set_arrangement",
+              "rename"
             ]
           },
           "execution": {
@@ -28485,18 +28634,26 @@
                           "type": "string"
                         },
                         "new_tag": {
-                          "description": "New tag; '-' keeps structure",
+                          "description": "New tag; - keeps structure",
                           "type": "string"
                         },
                         "update_from_parts": {
-                          "description": "Alone: parts' data",
+                          "description": "Transfer part data alone",
                           "type": "boolean",
                           "default": false
                         },
                         "count": {
-                          "description": "Positive count with part; default 1",
+                          "description": "Quantity; old count or 1 by default",
                           "type": [
                             "integer",
+                            "null"
+                          ],
+                          "default": null
+                        },
+                        "replace_part": {
+                          "description": "Old number to replace with part",
+                          "type": [
+                            "string",
                             "null"
                           ],
                           "default": null
