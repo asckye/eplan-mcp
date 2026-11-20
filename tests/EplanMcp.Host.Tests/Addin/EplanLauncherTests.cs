@@ -101,6 +101,47 @@ public sealed class EplanLauncherTests
     }
 
     [Fact]
+    public async Task AnEplanBehindItsSystemMessagesWindow_HasThatWindowClosedAndThenCloses()
+    {
+        _eplan.Dialogs.Add(EplanTestWindows.SystemMessages);
+
+        Launch launch = await Launcher.RunAsync(_result, Register, TimeSpan.Zero, _loaded.Add);
+
+        Assert.Equal(["close window Mensajes del sistema", "close 4000"], _eplan.Log.Skip(1));
+        Assert.Equal((true, AddinNote.SystemMessagesClosed), (launch.Closed, launch.Result.Notes.Single()));
+        Assert.Equal("system messages", Assert.Single(launch.Close.ClosedWindows).Name);
+        Assert.Empty(launch.Close.InTheWay);
+    }
+
+    [Fact]
+    public async Task AnEplanBehindAWindowNotOnTheList_IsLeftOpenWithThatWindowNamedAndUntouched()
+    {
+        _eplan.Dialogs.Add(EplanTestWindows.SavePrompt);
+
+        Launch launch = await Launcher.RunAsync(_result, Register, TimeSpan.Zero, _loaded.Add);
+
+        Assert.Equal((false, AddinNote.CloseEplan), (launch.Closed, launch.Result.Notes.Single()));
+        Assert.Equal(EplanTestWindows.SavePrompt, Assert.Single(launch.Close.InTheWay));
+        Assert.Empty(launch.Close.ClosedWindows);
+        Assert.DoesNotContain(_eplan.Log, l => l.StartsWith("close window", StringComparison.Ordinal));
+        Assert.Contains(EplanTestWindows.SavePrompt, _eplan.Dialogs);
+        Assert.False(_eplan.Instances.Single().Exited);
+    }
+
+    [Fact]
+    public async Task AnEplanBehindBothKinds_HasOnlyTheSystemMessagesWindowClosed()
+    {
+        _eplan.Dialogs.AddRange([EplanTestWindows.SystemMessages, EplanTestWindows.SavePrompt]);
+
+        Launch launch = await Launcher.RunAsync(_result, Register, TimeSpan.Zero, _loaded.Add);
+
+        Assert.False(launch.Closed);
+        Assert.Equal([EplanTestWindows.SavePrompt], _eplan.Dialogs);
+        Assert.Equal(EplanTestWindows.SavePrompt, Assert.Single(launch.Close.InTheWay));
+        Assert.Equal([AddinNote.SystemMessagesClosed, AddinNote.CloseEplan], launch.Result.Notes);
+    }
+
+    [Fact]
     public async Task AnEplanStillStartingAfterTheWait_IsLeftAloneAndNotLoaded()
     {
         _eplan.PipeAfterLooks = null;

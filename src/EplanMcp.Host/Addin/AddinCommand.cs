@@ -224,11 +224,11 @@ internal sealed class AddinCommand
 
         if (!first.Closed)
         {
-            return first.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = new(AddinProblem.PathMismatch, loaded) };
+            return NotClosed(first);
         }
 
         starting?.Invoke(AddinAction.Uninstall, result);
-        Launch undo = await _launcher.RunAsync(result, UnregisterArguments(variant), _timings.Settle, _ => { }).ConfigureAwait(false);
+        Launch undo = await _launcher.RunAsync(Carry(result, first), UnregisterArguments(variant), _timings.Settle, _ => { }).ConfigureAwait(false);
         if (undo.Problem is { } undoProblem)
         {
             return undo.Result with { Outcome = undoProblem.Problem == AddinProblem.NotLoaded ? AddinOutcome.NotConfirmed : AddinOutcome.Failed, Problem = undoProblem };
@@ -236,12 +236,12 @@ internal sealed class AddinCommand
 
         if (!undo.Closed)
         {
-            return undo.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = new(AddinProblem.PathMismatch, loaded) };
+            return NotClosed(undo);
         }
 
         // Nothing is registered now, so whatever loads in this start is this registration, saying its path or not.
         starting?.Invoke(AddinAction.Install, result);
-        Launch again = await _launcher.RunAsync(result, RegisterArguments(variant, dll), TimeSpan.Zero, h =>
+        Launch again = await _launcher.RunAsync(Carry(result, undo), RegisterArguments(variant, dll), TimeSpan.Zero, h =>
         {
             if (h is not null && (h.AddinPath is null || Loads(h, dll)))
             {
@@ -273,6 +273,24 @@ internal sealed class AddinCommand
 
         return again.Result with { Outcome = AddinOutcome.NotConfirmed, Problem = new(AddinProblem.PathMismatch, again.Handshake.AddinPath ?? string.Empty) };
     }
+
+    /// <summary>
+    /// An EPLAN that stayed open keeps the earlier registration from being undone, so that is the problem to report, not
+    /// the path it loaded from (#664): naming the windows left open, without the close note that would say it twice.
+    /// </summary>
+    private static AddinResult NotClosed(Launch launch) => launch.Result with
+    {
+        Outcome = AddinOutcome.NotConfirmed,
+        Notes = [.. launch.Result.Notes.Where(n => n != AddinNote.CloseEplan)],
+        Problem = new(AddinProblem.EplanNotClosed, launch.Result.ProcessId?.ToString(CultureInfo.InvariantCulture) ?? "?",
+            Windows: launch.Close.InTheWay.Count > 0 ? string.Join(", ", launch.Close.InTheWay) : null),
+    };
+
+    /// <summary>Keeps the note that a start closed EPLAN's system messages window for the result of the starts after it.</summary>
+    private static AddinResult Carry(AddinResult result, Launch launch) =>
+        launch.Result.Notes.Contains(AddinNote.SystemMessagesClosed) && !result.Notes.Contains(AddinNote.SystemMessagesClosed)
+            ? result with { Notes = [.. result.Notes, AddinNote.SystemMessagesClosed] }
+            : result;
 
     private static AddinIssue HandshakeFailed(Launch launch) =>
         new(AddinProblem.HandshakeFailed, launch.Result.ProcessId?.ToString(CultureInfo.InvariantCulture) ?? "?");

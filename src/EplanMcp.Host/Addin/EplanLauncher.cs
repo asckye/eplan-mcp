@@ -6,9 +6,13 @@ namespace EplanMcp.Host.Addin;
 
 /// <summary>
 /// One start of EPLAN for install-addin: <see cref="Result"/> with the process ID (and <see cref="AddinNote.CloseEplan"/>
-/// when EPLAN did not close), what went wrong, the handshake of its Bridge, and whether EPLAN closed.
+/// when EPLAN did not close, <see cref="AddinNote.SystemMessagesClosed"/> when its system messages window was closed),
+/// what went wrong, the handshake of its Bridge, and how closing EPLAN went.
 /// </summary>
-internal sealed record Launch(AddinResult Result, AddinIssue? Problem, HandshakeResult? Handshake, bool Closed);
+internal sealed record Launch(AddinResult Result, AddinIssue? Problem, HandshakeResult? Handshake, EplanClose Close)
+{
+    public bool Closed => Close.Closed;
+}
 
 /// <summary>
 /// Starts EPLAN with an <c>EplApiModuleAction</c> command, waits for the Bridge pipe of the process it started, asks the
@@ -33,7 +37,7 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
         }
         catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or IOException)
         {
-            return new(result, new(AddinProblem.StartFailed, ex.Message), null, Closed: true);
+            return new(result, new(AddinProblem.StartFailed, ex.Message), null, EplanClose.Gone);
         }
 
         using (started)
@@ -43,16 +47,27 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
             switch (await WaitForPipeAsync(started).ConfigureAwait(false))
             {
                 case null:
-                    return new(result, new(AddinProblem.EplanExited, pid), null, Closed: true);
+                    return new(result, new(AddinProblem.EplanExited, pid), null, EplanClose.Gone);
                 case false:
-                    return new(result, new(AddinProblem.NotLoaded, pid), null, Closed: false);
+                    return new(result, new(AddinProblem.NotLoaded, pid), null, EplanClose.LeftOpen);
             }
 
             HandshakeResult? handshake = await HandshakeAsync(started.Id).ConfigureAwait(false);
             await Task.Delay(settle, time).ConfigureAwait(false);
             loaded(handshake);
-            bool closed = await CloseAsync(started).ConfigureAwait(false);
-            return new(closed ? result : result with { Notes = [.. result.Notes, AddinNote.CloseEplan] }, null, handshake, closed);
+            EplanClose close = await CloseAsync(started).ConfigureAwait(false);
+            IEnumerable<AddinNote> notes = result.Notes;
+            if (close.ClosedWindows.Count > 0 && !result.Notes.Contains(AddinNote.SystemMessagesClosed))
+            {
+                notes = notes.Append(AddinNote.SystemMessagesClosed);
+            }
+
+            if (!close.Closed)
+            {
+                notes = notes.Append(AddinNote.CloseEplan);
+            }
+
+            return new(result with { Notes = [.. notes] }, null, handshake, close);
         }
     }
 
@@ -100,5 +115,5 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
         }
     }
 
-    private Task<bool> CloseAsync(IStartedEplan started) => EplanCloser.CloseAsync(started, time, timings, CancellationToken.None);
+    private Task<EplanClose> CloseAsync(IStartedEplan started) => EplanCloser.CloseAsync(started, time, timings, CancellationToken.None);
 }

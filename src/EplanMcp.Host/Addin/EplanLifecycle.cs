@@ -110,10 +110,12 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
     }
 
     /// <summary>
-    /// Asks the EPLAN with <paramref name="processId"/> to close as its close button would and waits up to a minute; true
-    /// when it exited. It never forces EPLAN: one that stays open (a dialog, a system messages window) is left running.
+    /// Asks the EPLAN with <paramref name="processId"/> to close as its close button would and waits up to a minute,
+    /// closing on the way the windows on the <see cref="HarmlessWindows"/> list such as the system messages window
+    /// (ADR-0063). It never forces EPLAN: one that stays open behind another window is left running, and the result
+    /// names that window.
     /// </summary>
-    public async Task<bool> CloseAsync(int processId, CancellationToken cancellationToken)
+    public async Task<EplanClose> CloseAsync(int processId, CancellationToken cancellationToken)
     {
         if (Pinned)
         {

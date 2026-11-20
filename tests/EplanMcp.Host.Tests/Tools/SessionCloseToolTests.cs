@@ -120,6 +120,32 @@ public sealed class SessionCloseToolTests : IDisposable
     }
 
     [Fact]
+    public async Task TheSystemMessagesWindow_IsClosedFirst_AndNamedInTheResult()
+    {
+        _eplan.Dialogs.Add(EplanTestWindows.SystemMessages);
+
+        var data = WriteToolHarness.Structured(await CloseAsync(_pid, dryRun: false));
+
+        Assert.Equal("committed", data.GetProperty("execution").GetString());
+        Assert.Equal("system messages", Assert.Single(data.GetProperty("closedWindows").EnumerateArray()).GetString());
+        Assert.DoesNotContain(_pid, _eplan.Running());
+    }
+
+    [Fact]
+    public async Task AWindowNotOnTheList_IsNamedInTheTimeout_AndLeftAlone()
+    {
+        _eplan.Dialogs.Add(EplanTestWindows.SavePrompt);
+
+        var error = WriteToolHarness.Error(await CloseAsync(_pid, dryRun: false));
+
+        Assert.Equal(ErrorReason.Timeout, error.GetProperty("reason").GetString());
+        Assert.Equal("'EPLAN' (#32770)", error.GetProperty("metadata").GetProperty("windows").GetString());
+        Assert.Contains("'EPLAN' (#32770)", error.GetProperty("message").GetString(), StringComparison.Ordinal);
+        Assert.Contains(EplanTestWindows.SavePrompt, _eplan.Dialogs);
+        Assert.Contains(_pid, _eplan.Running());
+    }
+
+    [Fact]
     public async Task APinnedHttpHost_CannotClose()
     {
         var error = WriteToolHarness.Error(await CloseAsync(_pid, dryRun: false, pinned: true));

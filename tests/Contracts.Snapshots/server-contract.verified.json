@@ -25723,6 +25723,13 @@
           "execution": {
             "description": "not_started (dry run or refused) or committed (EPLAN exited).",
             "type": "string"
+          },
+          "closedWindows": {
+            "description": "EPLAN windows closed so that EPLAN could close, such as 'system messages'; their messages stay in EPLAN's system log.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -25799,6 +25806,13 @@
               "execution": {
                 "description": "not_started (dry run or refused) or committed (EPLAN exited).",
                 "type": "string"
+              },
+              "closedWindows": {
+                "description": "EPLAN windows closed so that EPLAN could close, such as 'system messages'; their messages stay in EPLAN's system log.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           },

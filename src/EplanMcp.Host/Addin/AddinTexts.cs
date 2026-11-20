@@ -52,15 +52,14 @@ internal static class AddinTexts
             AddinProblem.EplanExited => zh
                 ? $"EPLAN（进程 {d}）在加载插件之前就退出了，没有确认{(install ? "注册，没有记录" : "撤销，记录保留")}：如果关掉了登录或授权对话框，请重新运行"
                 : $"EPLAN (process {d}) exited before it loaded the add-in, so the {(install ? "registration is not confirmed and not recorded" : "unregistration is not confirmed and the record is kept")}: if a sign-in or licence dialog was closed, run again",
-            AddinProblem.NotLoaded => zh
-                ? $"EPLAN（进程 {d}）没有在等待时间内启动完成（插件没有加载），所以没有关闭它：如果它显示登录、授权对话框或系统消息窗口，请处理后等它启动完成，再自己关闭 EPLAN，然后运行 eplanmcp doctor 检查{(install ? string.Empty : "；记录保留，可以再运行一次 uninstall-addin")}"
-                : $"EPLAN (process {d}) did not finish starting in time (the add-in did not load), so it was left open: if it shows a sign-in or licence dialog or a system messages window, deal with it and let EPLAN start, close EPLAN yourself, then check with eplanmcp doctor{(install ? string.Empty : "; the record is kept, so uninstall-addin can be run again")}",
+            AddinProblem.NotLoaded => NotLoaded(d, install, zh),
             AddinProblem.PathMismatch when d.Length == 0 => zh
                 ? "EPLAN 加载的是不报告路径的旧版插件，它的位置未知，看不出这次的注册是否生效"
                 : "EPLAN loaded an older add-in that does not report its path, so where it was registered from is unknown and whether this registration took cannot be told",
             AddinProblem.PathMismatch => zh
                 ? $"EPLAN 从另一个位置加载了插件：{d}。那里的旧注册仍然有效，这次的注册没有生效"
                 : $"EPLAN loaded the add-in from another path: {d}. The earlier registration still holds; this one did not take",
+            AddinProblem.EplanNotClosed => NotClosed(issue, zh),
             AddinProblem.HandshakeFailed => zh
                 ? $"EPLAN（进程 {d}）加载了插件，但插件没有回应握手，看不出加载的是哪一个注册，所以没有继续：请关闭所有 EPLAN 后重新运行，仍然这样时用 eplanmcp doctor 查看插件"
                 : $"EPLAN (process {d}) loaded the add-in, but the add-in did not answer the handshake, so which registration loaded cannot be told and nothing more was done: close every EPLAN and run again, and if it happens again, check the add-in with eplanmcp doctor",
@@ -69,6 +68,18 @@ internal static class AddinTexts
                 : $"Cannot update the record of registrations, so {(install ? "uninstalling will not undo this one" : "the next uninstall-addin undoes it again")}: {d}",
             _ => throw new UnreachableException($"Problem {issue.Problem} has no text."),
         };
+    }
+
+    private static string NotLoaded(string d, bool install, bool zh) => zh
+        ? $"EPLAN（进程 {d}）没有在等待时间内启动完成（插件没有加载），所以没有关闭它：如果它显示登录、授权对话框或系统消息窗口，请处理后等它启动完成，再自己关闭 EPLAN，然后运行 eplanmcp doctor 检查{(install ? string.Empty : "；记录保留，可以再运行一次 uninstall-addin")}"
+        : $"EPLAN (process {d}) did not finish starting in time (the add-in did not load), so it was left open: if it shows a sign-in or licence dialog or a system messages window, deal with it and let EPLAN start, close EPLAN yourself, then check with eplanmcp doctor{(install ? string.Empty : "; the record is kept, so uninstall-addin can be run again")}";
+
+    private static string NotClosed(AddinIssue issue, bool zh)
+    {
+        string d = issue.Detail;
+        return zh
+            ? $"EPLAN（进程 {d}）没有按要求关闭{(issue.Windows is { } open ? $"（开着的窗口：{open}）" : string.Empty)}，所以无法撤销之前的注册，没有继续：请处理它显示的窗口并自己关闭 EPLAN，然后重新运行 install-addin"
+            : $"EPLAN (process {d}) did not close when asked{(issue.Windows is { } windows ? $" (windows open: {windows})" : string.Empty)}, so the earlier registration could not be undone and nothing more was done: deal with the window it shows and close EPLAN yourself, then run install-addin again";
     }
 
     public static string Note(AddinNote note, bool zh) => note switch
@@ -81,8 +92,11 @@ internal static class AddinTexts
             : $"Outside the supported range {EplanVersions.Range}, so nothing was registered (ADR-0009)",
         AddinNote.EplanMissing => zh ? "这个 EPLAN 已经不在了，没有可撤销的注册，记录已删除" : "This EPLAN is gone, so there is nothing to unregister; the record is removed",
         AddinNote.CloseEplan => zh
-            ? "这个 EPLAN 没有按要求关闭，请自己关闭它；它显示了系统消息窗口时，请先关闭那个窗口"
-            : "This EPLAN did not close when asked; close it yourself, first closing its system messages window if it shows one",
+            ? "这个 EPLAN 没有按要求关闭，请自己关闭它；它显示了窗口时，请先处理那个窗口"
+            : "This EPLAN did not close when asked; close it yourself, first dealing with any window it shows",
+        AddinNote.SystemMessagesClosed => zh
+            ? @"为了让 EPLAN 能够关闭，关掉了它的系统消息窗口；其中的消息保存在 EPLAN 的系统日志 C:\Users\Public\EPLAN\<变体>\EplLog.eldb 中"
+            : @"EPLAN's system messages window was closed so that EPLAN could close; what it showed is kept in EPLAN's system log, C:\Users\Public\EPLAN\<variant>\EplLog.eldb",
         _ => throw new UnreachableException($"Note {note} has no text."),
     };
 
