@@ -52,7 +52,7 @@ For the first run, you can use Workbench's status page directly; the command abo
 
 ## 5. Connect a Client
 
-On Workbench's "MCP and clients" page, select your client, preview the changes, then write them. Workbench calls Host's `client-config`, which uses the actual absolute path of the current `eplanmcp.exe`. The engineer performs these steps. Open Workbench from the extracted folder, or run CLI commands from PowerShell opened from Start; configuration commands refuse writes inside a Claude Desktop session's redirected MSIX environment.
+On Workbench's "AI Clients" page, select your client, preview the changes, then write them. Workbench calls Host's `client-config`, which uses the actual absolute path of the current `eplanmcp.exe`. The engineer performs these steps. Open Workbench from the extracted folder, or run CLI commands from PowerShell opened from Start; configuration commands refuse writes inside a Claude Desktop session's redirected MSIX environment.
 
 ### Claude Code: Local Plugin Recommended
 
@@ -96,7 +96,7 @@ If EPLAN is not running yet, ask the model to call `eplan_session_start` (Electr
 
 First use EPLAN's project copy feature to put a test copy in `%USERPROFILE%\EplanMcp\scratch\`, then open the copy in EPLAN; do not set a real project's directory as scratch. Ask the model to find the copy's full page name, then preview a single page description change using `eplan_page_update` with `dry_run: true`. Check it before executing on the copy. After this tool succeeds, you can undo it with one Ctrl+Z in EPLAN.
 
-Ordinary project writes in scratch are allowed automatically. Real projects require approval for each write by default; `config.json` can also be set to deny them. Destructive operations (such as deleting pages or renumbering) require approval even in scratch. A backup is made after approval; if the backup fails, the operation does not run. Writing to the system parts database affects all projects, requires approval and a backup even when initiated in scratch, and cannot be undone with Ctrl+Z.
+Ordinary project writes in scratch are allowed automatically. Real projects require approval for each write by default; `writesOutsideScratch` in `config.json` can also be set to deny them (`deny`). The engineer can turn off "Normal write manual approval" on Workbench's "Settings" page, in the status bar or on the approvals page (`allow`): ordinary writes to real projects then run without a question, and the change reaches running sessions at once. Nobody looks at each change while it is off, so use it only for a long run of small, undoable changes, and turn it back on afterwards. Destructive operations (such as deleting pages or renumbering) require approval even in scratch. A backup is made after approval; if the backup fails, the operation does not run. Writing to the system parts database affects all projects, requires approval and a backup even when initiated in scratch, and cannot be undone with Ctrl+Z. These two kinds, unverified writes and lifting a write suspension always ask, whatever that switch says.
 
 Open `workbench\EplanMcp.Workbench.exe` in your program folder yourself, or enable startup at sign-in in its settings; Host will not start it for you. Ordinary project approvals go to Workbench first. Check the tray notification and "Approval queue"; the window will not take focus. If Workbench is unavailable, an EPLAN dialog is used instead. If the connection drops after delivery, the request is cancelled without opening a second dialog. System master data approvals still appear only in EPLAN.
 
@@ -139,7 +139,7 @@ claude plugin marketplace remove eplanmcp-local
 
 If you used the configuration route, you can run `& $eplanMcp client-config --remove` before uninstalling to remove server entries previously written and recorded by the command. You can also specify a client, such as `client-config claude-desktop --remove`. Check any manually written project configuration yourself.
 
-If you used a VM connection, remove `eplan-vm` on the host, then choose "Stop service" → "Remove network access" → "Delete key" in the VM; see [Remove the VM connection](#remove-the-vm-connection).
+If you used a VM connection, remove `eplan-vm` on the host, then choose "Stop service" → "Remove network access" in the VM; see [Remove the VM connection](#remove-the-vm-connection).
 
 Disable startup at sign-in in Workbench settings and remove client configuration as described above. Close EPLAN and clients, then choose "Unregister" in Workbench. It calls `uninstall-addin` for all recorded registrations and may start EPLAN; handle any windows yourself. After success, exit Workbench from the tray and delete the entire program folder. If unregistering fails, keep the files, resolve the issue, and retry. The CLI alternative is `& $eplanMcp uninstall-addin`.
 
@@ -151,26 +151,23 @@ Uninstallation retains all data in the data root; delete it yourself only after 
 
 Use this when EPLAN runs in a VM and the AI client runs on the host computer. Host (`eplanmcp.exe`), Bridge, approvals, audit, scratch projects, and exports all stay in the VM. Only MCP requests and results cross the network.
 
-Clients must support Streamable HTTP and custom headers: Claude Code, Codex, Gemini CLI, Qwen Code, Kimi Code CLI, CodeBuddy Code, OpenCode, Qwen Agent, Cursor, and VS Code Copilot. Claude Desktop cannot use this connection: its configuration file supports only local stdio servers, while remote connectors use HTTPS from Anthropic's backend and cannot reach this private VM HTTP address. Spike S19 tested the connection only with Claude Code; the other clients still need individual acceptance testing. Qwen Agent's configuration could not be verified against official documentation. Cross-machine connections and UAC still need testing on real machines.
+Clients must support Streamable HTTP: Claude Code, Codex, Gemini CLI, Qwen Code, Kimi Code CLI, CodeBuddy Code, OpenCode, Qwen Agent, Cursor, and VS Code Copilot. Claude Desktop cannot use this connection: its configuration file supports only local stdio servers, while remote connectors use HTTPS from Anthropic's backend and cannot reach this private VM HTTP address. Spike S19 tested the connection only with Claude Code; the other clients still need individual acceptance testing. Qwen Agent's configuration could not be verified against official documentation. Cross-machine connections and UAC still need testing on real machines.
 
-**Use only a private network between the host and VM. HTTP is unencrypted: keys and project data travel in plaintext.** The examples use `192.168.56.2` for the VM and `192.168.56.1` for the host. Replace these with mutually reachable IPv4 addresses on your network; do not use `0.0.0.0` or loopback addresses.
+**Use only a private network between the host and VM. HTTP is unencrypted and there is no key: project data travels in plaintext, and any program that can reach the port can call the tools. Access is limited only by the Windows Firewall rule created below; do not start the service when that rule is missing or was changed.** The examples use `192.168.56.2` for the VM and `192.168.56.1` for the host. Replace these with mutually reachable IPv4 addresses on your network; do not use `0.0.0.0` or loopback addresses.
 
 ### In the VM: start the service
 
-1. Follow [Download and Verification](#2-download-and-sha-256-verification) and [Install and Register](#3-install-and-register-the-eplan-add-in) to extract the entire ZIP and register the add-in, then start EPLAN. Open Workbench → "MCP and clients" and scroll to "VM connection" at the bottom.
+1. Follow [Download and Verification](#2-download-and-sha-256-verification) and [Install and Register](#3-install-and-register-the-eplan-add-in) to extract the entire ZIP and register the add-in, then start EPLAN. Open Workbench → "MCP Server" and find "VM connection".
 2. Select the VM's address in "VM IPv4". "Port" defaults to `8766`; enter the AI client's host computer address in "Host computer IPv4".
-3. Under "Shared key", choose "Generate key", then "Copy" for use on the host computer.
-4. Choose "Allow network access" and have an administrator consent in the Windows UAC dialog. The inbound rule allows only the selected TCP port, this `eplanmcp.exe`, and the single host IPv4, on Domain and Private profiles only.
-5. If several EPLAN instances are running, select the target in "EPLAN instance (PID)"; use "Refresh instances" if it is missing. Choose "Start service" and check for `Listening at http://<VM IPv4>:<port>/mcp. Keep the Workbench running.` Each service stays bound to one instance; it will not switch to another if that instance exits.
+3. Choose "Allow network access" and have an administrator consent in the Windows UAC dialog. The inbound rule allows only the selected TCP port, this `eplanmcp.exe`, and the single host IPv4, on Domain and Private profiles only. **This rule is the only access control**: once it exists, check that the rule the page shows matches what you entered.
+4. If several EPLAN instances are running, select the target in "EPLAN instance (PID)"; use "Refresh instances" if it is missing. Choose "Start service" and check for `Listening at http://<VM IPv4>:<port>/mcp. Keep the Workbench running.` Each service stays bound to one instance; it will not switch to another if that instance exits.
 
 The service never starts automatically during installation or at sign-in. A service started by Workbench stops when Workbench exits. Closing the window only minimises it to the tray; exit from the tray to stop it.
 
-CLI alternative (do not start a second service alongside Workbench's): first run these in ordinary PowerShell. `vm-key create` replaces any existing key; `show` reveals the full key, so use it only when needed.
+CLI alternative (do not start a second service alongside Workbench's): first run these in ordinary PowerShell.
 
 ```powershell
 $eplanMcp = 'D:\EplanMcp\eplanmcp.exe'
-& $eplanMcp vm-key create
-& $eplanMcp vm-key show
 & $eplanMcp vm-instances --format json
 & $eplanMcp vm-firewall show --port 8766 --host-address 192.168.56.1
 ```
@@ -190,27 +187,26 @@ Return to the ordinary window to start the service. Omit `--process` for a singl
 ### On the host computer: connect clients
 
 1. Verify and extract **the entire ZIP of the same version**, then open `workbench\EplanMcp.Workbench.exe`. This copy is only for the configuration wizard; no EPLAN installation or add-in registration is needed.
-2. Open "MCP and clients" and select "VM ↔ host" at the top. Enter "VM address (IPv4)", "Remote port", and "Shared key" (the full 43-character key generated in the VM, without spaces).
+2. Open "AI Clients" and select "VM ↔ host" at the top. Enter "VM address (IPv4)" and "Remote port".
 3. Choose "Test connection" and check that it reports a connection, server version, and tool count. This tests the connection without calling EPLAN tools.
 4. Tick the clients, choose "Preview and write", review the differences, then choose "Write configuration". The remote server entry is named `eplan-vm`. Read each card's result, then restart the clients. This mode writes remote client configuration; local plugin setup is covered in section 5.
 
-CLI alternative: use a text editor to save just the key as one line in a temporary file, `.\vm-key.txt`, on the host. **Never put the key in command arguments or create the file with a command containing the literal key.** Open PowerShell from Start and run these lines individually: test, preview, then write only after a successful test and review. Replace the client name with any supported name listed above.
+CLI alternative: open PowerShell from Start and run these lines individually: test, preview, then write only after a successful test and review. Replace the client name with any supported name listed above.
 
 ```powershell
 $eplanMcp = 'D:\EplanMcp\eplanmcp.exe'
 $vmUrl = 'http://192.168.56.2:8766/mcp'
-Get-Content -LiteralPath '.\vm-key.txt' | & $eplanMcp vm-test --url $vmUrl --key-stdin
-Get-Content -LiteralPath '.\vm-key.txt' | & $eplanMcp client-config claude-code --vm --url $vmUrl --key-stdin --dry-run
-Get-Content -LiteralPath '.\vm-key.txt' | & $eplanMcp client-config claude-code --vm --url $vmUrl --key-stdin
-Remove-Item -LiteralPath '.\vm-key.txt'
+& $eplanMcp vm-test --url $vmUrl
+& $eplanMcp client-config claude-code --vm --url $vmUrl --dry-run
+& $eplanMcp client-config claude-code --vm --url $vmUrl
 ```
 
-Delete the temporary key file when finished, even if a step fails. Restart the client after a successful write.
+Restart the client after a successful write.
 
-### Keys, paths, and approvals
+### Access control, paths, and approvals
 
-- The VM stores its key encrypted with the current Windows user's DPAPI. **Host client configuration files and their backups contain the plaintext key; `claude mcp get eplan-vm` also prints it in full.** Do not share these files, output, or screenshots.
-- In the VM, choose "Stop service", then "Regenerate key". The old key becomes invalid immediately. Rewrite host client configurations with the new key, start the service again, test, and restart the clients. CLI `vm-key create` also invalidates the old key immediately.
+- From 0.9.0 the VM connection no longer uses a shared key ([ADR-0062](../adr/0062-vm-http-without-shared-key.md)). The `eplan-vm` entries that 0.8.0 and earlier wrote into host client configurations carry the key in plaintext: after upgrading, run "Preview and write" once on the host and the entry is replaced by one without a key. Old configuration backups (`.bak_<time>`) still contain the old key; delete them yourself when you no longer need them.
+- **Do not turn off "Normal write manual approval" while the VM service is running** unless you accept the consequence: with both in effect, a program that can reach the port can change real projects without anyone confirming.
 - All paths given to tools are **VM paths**. Scratch projects, exports, backups, and import files are in the VM. Exported files are not copied to the host automatically; `inline` images can still return through MCP.
 - Approvals appear in the VM's Workbench or EPLAN dialog, with `via network: <address>` beside the client name. The engineer reviews and answers them in the VM; network access does not relax approval or scratch rules.
 
@@ -222,25 +218,19 @@ Run the `vm-test` command above on the host and check its failure code. Add `--f
 |---|---|
 | `unreachable` | Confirm the VM service is listening. Check the firewall rule, host source IPv4, VM IPv4, and port, and that the private network connects both machines. |
 | `timed_out` | A request exceeded 10 seconds. Check whether the VM is paused, the service is responsive, or network packets are being lost or dropped by the firewall, then test again. |
-| `unauthorized` (401) | The key is wrong or has been replaced. Copy the current key from the VM, test again, and rewrite the configurations. |
 | `forbidden` (403) | The request has an unapproved `Origin` header, often from a browser-based client. Have the engineer check `httpAllowedOrigins` in the VM's `config.json`, add only the actual trusted Origin, then restart the service. The list is empty by default; `vm-test` sends no Origin. |
-| `rate_limited` (429) | Ten authentication failures from one source address within a minute lock that address for one minute. Stop automatic retries, wait a minute, then test with the current key. One client connection may make several failed requests. |
-| `protocol_error` | Check that the URL is `http://<IPv4>:<port>/mcp` and the input is the full 43-character key. Check protocol and software versions; retry with the same ZIP version on both machines. |
+| `protocol_error` | Check that the URL is `http://<IPv4>:<port>/mcp`. Check protocol and software versions; retry with the same ZIP version on both machines. A client of 0.8.0 or earlier that cannot reach a 0.9.0 service needs the same version on both sides. |
 
 Run `& $eplanMcp doctor` **in the VM**: `http.service` lists services for this data root and their bound addresses/ports; `vm.firewall` reports whether the rule exists and its actual scope. Check the program path, TCP port, host address, and Domain/Private profiles. These checks do not change rules or replace a connection test from the host.
 
 ### Remove the VM connection
 
-On the host, select clients in "VM ↔ host" mode, choose "Remove entry", confirm removal of `eplan-vm`, then restart the clients. Alternatively, run `& $eplanMcp client-config --vm --remove` to remove recorded remote entries; no address or key is needed. In the VM, choose "Stop service" → "Remove network access" (requires UAC consent) → "Delete key".
+On the host, select clients in "VM ↔ host" mode, choose "Remove entry", confirm removal of `eplan-vm`, then restart the clients. Alternatively, run `& $eplanMcp client-config --vm --remove` to remove recorded remote entries; no address is needed. In the VM, choose "Stop service" → "Remove network access" (requires UAC consent).
 
-For the CLI alternative, stop the foreground service in the VM with Ctrl+C, remove the rule in administrator PowerShell, then delete the key in the original ordinary window. Use the same port, host IPv4, and program path used to create the rule.
+For the CLI alternative, stop the foreground service in the VM with Ctrl+C, then remove the rule in administrator PowerShell. Use the same port, host IPv4, and program path used to create the rule.
 
 ```powershell
 & 'D:\EplanMcp\eplanmcp.exe' vm-firewall remove --port 8766 --host-address 192.168.56.1
-```
-
-```powershell
-& $eplanMcp vm-key delete
 ```
 
 ---

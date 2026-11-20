@@ -61,7 +61,7 @@ Add-in SHA-256: <64 位小写十六进制 SHA-256>  EplanMcp-addin-v0.5.0.zip
 - [ ] 授权须包含 API Extension（API 扩展）。
 - [ ] 授权须允许加载未签名 API 插件；0.x 插件未签名（[ADR-0007](../adr/0007-licensing-and-distribution.md)）。
 - [ ] Windows 10/11 x64；本机安装与连接无需管理员权限，虚拟机网络权限需管理员授权。
-- [ ] 客户端：Claude Code 与其他 stdio MCP 客户端；虚拟机连接须支持 Streamable HTTP 和自定义请求头，Claude 桌面版不适用，仅限宿主机与虚拟机私有网络、HTTP 不加密；仅 Claude Code 连接已实测，其他客户端、跨机器连接与 UAC 待验收，见[虚拟机部署](../getting-started/zh-CN.md#10-虚拟机部署)。
+- [ ] 客户端：Claude Code 与其他 stdio MCP 客户端；虚拟机连接须支持 Streamable HTTP，Claude 桌面版不适用，仅限宿主机与虚拟机私有网络、HTTP 不加密且没有密钥（访问只靠防火墙规则，ADR-0062）；仅 Claude Code 连接已实测，其他客户端、跨机器连接与 UAC 待验收，见[虚拟机部署](../getting-started/zh-CN.md#10-虚拟机部署)。
 
 补齐上述附件和发布说明后，在 `release-addin.ps1` 保留的临时 worktree 上打包：
 

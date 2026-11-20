@@ -15,7 +15,7 @@ EplanMcp 是一个 MCP 服务器，让 AI 代理通过 EPLAN .NET API 安全地�
 
 版本边界见 [ADR-0009](docs/adr/0009-supported-eplan-versions.md)、[版本兼容性](docs/eplan/eplan-versions.md)，实测环境见 [API 验证记录](docs/eplan/api-notes.md)。
 
-EPLAN 在虚拟机、客户端在宿主机时，客户端须支持 Streamable HTTP 和自定义请求头，Claude 桌面版不适用。仅在宿主机与虚拟机间的私有网络使用；HTTP 不加密，密钥与项目数据明文传输，宿主机配置及备份含明文密钥。一个服务固定连接一个 EPLAN 实例，配置网络权限需管理员授权；仅 Claude Code 连接已实测，其他客户端、跨机器连接与 UAC 仍待实机验收。步骤及边界见[虚拟机部署](docs/getting-started/zh-CN.md#10-虚拟机部署)。
+EPLAN 在虚拟机、客户端在宿主机时，客户端须支持 Streamable HTTP，Claude 桌面版不适用。仅在宿主机与虚拟机间的私有网络使用；HTTP 不加密、没有密钥，项目数据明文传输，访问只靠只放行宿主机的 Windows 防火墙规则限制。一个服务固定连接一个 EPLAN 实例，配置网络权限需管理员授权；仅 Claude Code 连接已实测，其他客户端、跨机器连接与 UAC 仍待实机验收。步骤及边界见[虚拟机部署](docs/getting-started/zh-CN.md#10-虚拟机部署)。
 
 ## 快速开始
 

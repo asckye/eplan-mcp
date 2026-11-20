@@ -16,7 +16,7 @@
 | 客户端（未验证） | client (unverified) | MCP 客户端自报的名称 |
 | scratch | scratch | 测试和获准写入使用的项目区域 |
 | 已过期 / 已取消 | Expired / Cancelled | 问题的结束状态 |
-| 密钥 | key | 虚拟机连接的共享密钥，见 ADR-0018 |
+| 密钥 | key | 0.8.0 及更早版本里虚拟机连接的共享密钥（ADR-0018）；ADR-0062 起不再使用 |
 | Workbench | Workbench | 产品名称 EplanMcp Workbench |
 
 审计中 Workbench 渠道的标识是 `workbench`；界面区分发起写入的 AI、客户端自报名称及工程师回答的渠道。

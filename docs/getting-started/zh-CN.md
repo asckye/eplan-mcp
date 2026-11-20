@@ -52,7 +52,7 @@ Pro Panel 把变体名换成 `'Pro Panel'`；两个都用时重复传入 `--vari
 
 ## 5. 连接客户端
 
-在 Workbench 的“MCP 与客户端”页选择客户端，预览差异后写入；实际写入由 Host 的 `client-config` 完成，使用当前 `eplanmcp.exe` 的绝对路径。安装、注册和改配置由工程师自己操作；请从解压目录打开 Workbench，命令行则从开始菜单打开 PowerShell，不从 Claude 桌面版会话中运行配置命令（MSIX 重定向下会拒绝写入）。
+在 Workbench 的“AI 客户端”页选择客户端，预览差异后写入；实际写入由 Host 的 `client-config` 完成，使用当前 `eplanmcp.exe` 的绝对路径。安装、注册和改配置由工程师自己操作；请从解压目录打开 Workbench，命令行则从开始菜单打开 PowerShell，不从 Claude 桌面版会话中运行配置命令（MSIX 重定向下会拒绝写入）。
 
 ### Claude Code：推荐本地插件
 
@@ -96,7 +96,7 @@ EPLAN 还没有启动时，可以让模型调用 `eplan_session_start` 启动（
 
 先用 EPLAN 的项目复制功能，把试验副本放到 `%USERPROFILE%\EplanMcp\scratch\`，再在 EPLAN 中打开副本；不要把真实项目的目录设为 scratch。让模型查出副本的完整页名，再用 `eplan_page_update` 的 `dry_run: true` 预览一处页描述修改，核对后在副本上执行。这个工具成功后可在 EPLAN 中按一次 Ctrl+Z 撤销。
 
-普通项目写入在 scratch 内自动放行；真实项目默认逐次审批，`config.json` 也可设为拒绝。Destructive 操作（如删页、重编号）在 scratch 内也要审批，批准后先备份，备份失败就不执行。写系统部件库影响所有项目，即使在 scratch 中也要审批并先备份，不能指望 Ctrl+Z 恢复部件库。
+普通项目写入在 scratch 内自动放行；真实项目默认逐次审批，`config.json` 的 `writesOutsideScratch` 也可设为拒绝（`deny`）。工程师可以在 Workbench 的“偏好与安全”页、状态栏或审批页关闭“普通写入人工审批”（`allow`）：此后真实项目上的普通写入不再询问，切换对正在运行的会话立即生效。关闭后没有人逐个看 AI 的改动，只在你确实需要连续做大量可撤销的小改动时使用，用完改回。Destructive 操作（如删页、重编号）在 scratch 内也要审批，批准后先备份，备份失败就不执行。写系统部件库影响所有项目，即使在 scratch 中也要审批并先备份，不能指望 Ctrl+Z 恢复部件库。这两类、未验证的写入和解除写入暂停，不受上面那个开关影响，始终询问。
 
 工程师自己打开程序目录中的 `workbench\EplanMcp.Workbench.exe`，或在其设置中启用登录自启动；Host 不会替你启动它。普通项目审批先送 Workbench，查看托盘提醒和“审批队列”；窗口不会抢焦点。Workbench 不可用时改用 EPLAN 对话框；已送达后断开则取消，不会再弹第二份。系统主数据审批仍只在 EPLAN 中显示。
 
@@ -139,7 +139,7 @@ claude plugin marketplace remove eplanmcp-local
 
 对于配置路线，可在卸载前运行 `& $eplanMcp client-config --remove`，移除记录中过去写入的服务器项；也可指定客户端，例如 `client-config claude-desktop --remove`。手工写的项目配置由你自己检查。
 
-用过虚拟机连接时，先在宿主机移除 `eplan-vm`，再在虚拟机“停止服务”→“移除网络权限”→“删除密钥”，见[移除虚拟机连接](#移除虚拟机连接)。
+用过虚拟机连接时，先在宿主机移除 `eplan-vm`，再在虚拟机“停止服务”→“移除网络权限”，见[移除虚拟机连接](#移除虚拟机连接)。
 
 卸载时先在 Workbench 设置中关闭登录自启动，移除上述客户端配置，关闭 EPLAN 和客户端，再在 Workbench 点击“撤销注册”。它调用 `uninstall-addin` 撤销全部记录，可能启动 EPLAN；遇到窗口由你处理。确认成功后从托盘退出 Workbench，删除整个程序目录。撤销失败先保留文件、处理问题后重试；命令行也可执行 `& $eplanMcp uninstall-addin`。
 
@@ -151,26 +151,23 @@ claude plugin marketplace remove eplanmcp-local
 
 适用于 EPLAN 在虚拟机中、AI 客户端在宿主机上。Host（`eplanmcp.exe`）、Bridge、审批、审计、scratch 和导出都在虚拟机中，只有 MCP 请求与结果跨网络。
 
-客户端须支持 Streamable HTTP 和自定义请求头：Claude Code、Codex、Gemini CLI、Qwen Code、Kimi Code CLI、CodeBuddy Code、OpenCode、Qwen Agent、Cursor、VS Code Copilot。Claude 桌面版不能用：其配置文件只支持本机 stdio，远程连接器由 Anthropic 后端通过 HTTPS 连接，无法访问这里的私有虚拟机 HTTP 地址。spike S19 只实测了 Claude Code 的连接；其他客户端尚未逐个实机验收，Qwen Agent 还缺少官方配置文档核对，跨机器连接与 UAC 仍待实机验证。
+客户端须支持 Streamable HTTP：Claude Code、Codex、Gemini CLI、Qwen Code、Kimi Code CLI、CodeBuddy Code、OpenCode、Qwen Agent、Cursor、VS Code Copilot。Claude 桌面版不能用：其配置文件只支持本机 stdio，远程连接器由 Anthropic 后端通过 HTTPS 连接，无法访问这里的私有虚拟机 HTTP 地址。spike S19 只实测了 Claude Code 的连接；其他客户端尚未逐个实机验收，Qwen Agent 还缺少官方配置文档核对，跨机器连接与 UAC 仍待实机验证。
 
-**只在宿主机与虚拟机之间的私有网络使用。HTTP 不加密，密钥和项目数据在网络上是明文。** 下例用虚拟机 `192.168.56.2`、宿主机 `192.168.56.1`，请换成两端实际可互通的 IPv4；不要用 `0.0.0.0` 或回环地址。
+**只在宿主机与虚拟机之间的私有网络使用。HTTP 不加密，也没有密钥：项目数据在网络上是明文，凡是能连到这个端口的程序都可以调用工具。访问只靠下面建立的 Windows 防火墙规则限制，规则不在或被改动时不要启动服务。** 下例用虚拟机 `192.168.56.2`、宿主机 `192.168.56.1`，请换成两端实际可互通的 IPv4；不要用 `0.0.0.0` 或回环地址。
 
 ### 虚拟机中：启动服务
 
-1. 按[下载与校验](#2-下载与-sha-256-校验)、[安装与注册](#3-安装与注册-eplan-插件)解压整个 ZIP、注册插件，再启动 EPLAN。打开 Workbench →“MCP 与客户端”，滚到页底的“虚拟机连接”。
+1. 按[下载与校验](#2-下载与-sha-256-校验)、[安装与注册](#3-安装与注册-eplan-插件)解压整个 ZIP、注册插件，再启动 EPLAN。打开 Workbench →“MCP 服务”，找到“虚拟机连接”。
 2. 在“虚拟机 IPv4(I)”选择虚拟机的地址，“端口(P)”默认 `8766`；“宿主机 IPv4(H)”填运行 AI 客户端的宿主机地址。
-3. 在“共享密钥”处点击“生成密钥”，再点“复制”，交给宿主机配置使用。
-4. 点击“允许网络访问”，在 Windows 弹出的 UAC 对话框中由管理员同意。入站规则只允许所选 TCP 端口、当前 `eplanmcp.exe`、宿主机这一个 IPv4，且只在域/专用网络配置文件中生效。
-5. 有多个 EPLAN 时，在“EPLAN 实例（进程号）(I)”选择目标；未列出时点“刷新实例”。点击“启动服务”，确认出现 `正在监听 http://<虚拟机 IPv4>:<端口>/mcp。请保持工作台运行。` 的提示。一个服务固定对应一个实例；该实例退出后不会自动换连其他实例。
+3. 点击“允许网络访问”，在 Windows 弹出的 UAC 对话框中由管理员同意。入站规则只允许所选 TCP 端口、当前 `eplanmcp.exe`、宿主机这一个 IPv4，且只在域/专用网络配置文件中生效。**这条规则是唯一的访问控制**：建好后核对页面上显示的“实际规则”与你填写的一致。
+4. 有多个 EPLAN 时，在“EPLAN 实例（进程号）(I)”选择目标；未列出时点“刷新实例”。点击“启动服务”，确认出现 `正在监听 http://<虚拟机 IPv4>:<端口>/mcp。请保持工作台运行。` 的提示。一个服务固定对应一个实例；该实例退出后不会自动换连其他实例。
 
 服务不会随安装或登录自动启动。Workbench 启动的服务随 Workbench 退出停止；关闭窗口只是缩到托盘，需从托盘退出才停止。
 
-命令行替代步骤（不要与 Workbench 重复启动）：先在普通 PowerShell 中执行。`vm-key create` 会替换已有密钥，`show` 会显示完整密钥；只在需要时查看。
+命令行替代步骤（不要与 Workbench 重复启动）：先在普通 PowerShell 中执行。
 
 ```powershell
 $eplanMcp = 'D:\EplanMcp\eplanmcp.exe'
-& $eplanMcp vm-key create
-& $eplanMcp vm-key show
 & $eplanMcp vm-instances --format json
 & $eplanMcp vm-firewall show --port 8766 --host-address 192.168.56.1
 ```
@@ -190,27 +187,26 @@ $eplanMcp = 'D:\EplanMcp\eplanmcp.exe'
 ### 宿主机上：连接客户端
 
 1. 校验并解压**同版本的整个 ZIP**，打开 `workbench\EplanMcp.Workbench.exe`。这里只用配置向导，无需安装 EPLAN 或注册插件。
-2. 打开“MCP 与客户端”，在页顶选择“虚拟机 ↔ 宿主机”。填“虚拟机 IPv4 地址(A)”、“远程端口(O)”和“共享密钥(K)”（虚拟机生成的完整 43 字符密钥，不含空格）。
+2. 打开“AI 客户端”，在页顶选择“虚拟机 ↔ 宿主机”。填“虚拟机 IPv4 地址(A)”和“远程端口(O)”。
 3. 点击“测试连接(T)”，确认已连接并显示服务器版本和工具数；这只测试连接，不调用 EPLAN 工具。
 4. 勾选客户端，点击“预览并写入”，核对差异后选“写入配置(W)”。写入的远程服务器名为 `eplan-vm`。查看各卡片结果，再重启客户端；此模式使用远程配置，不生成本地插件市场。
 
-命令行方式：用文本编辑器将密钥单独存为宿主机上的临时单行文件 `.\vm-key.txt`。**不要把密钥放在命令参数中，也不要用含密钥字面量的命令创建文件。** 从开始菜单打开 PowerShell，分行执行：先测试，再预览，成功且核对预览后才写入；客户端名可换成上文支持的名称。
+命令行方式：从开始菜单打开 PowerShell，分行执行：先测试，再预览，成功且核对预览后才写入；客户端名可换成上文支持的名称。
 
 ```powershell
 $eplanMcp = 'D:\EplanMcp\eplanmcp.exe'
 $vmUrl = 'http://192.168.56.2:8766/mcp'
-Get-Content -LiteralPath '.\vm-key.txt' | & $eplanMcp vm-test --url $vmUrl --key-stdin
-Get-Content -LiteralPath '.\vm-key.txt' | & $eplanMcp client-config claude-code --vm --url $vmUrl --key-stdin --dry-run
-Get-Content -LiteralPath '.\vm-key.txt' | & $eplanMcp client-config claude-code --vm --url $vmUrl --key-stdin
-Remove-Item -LiteralPath '.\vm-key.txt'
+& $eplanMcp vm-test --url $vmUrl
+& $eplanMcp client-config claude-code --vm --url $vmUrl --dry-run
+& $eplanMcp client-config claude-code --vm --url $vmUrl
 ```
 
-结束后无论成功或失败都删除临时密钥文件，写入成功后重启客户端。
+写入成功后重启客户端。
 
-### 密钥、路径与审批
+### 访问控制、路径与审批
 
-- 虚拟机的密钥用当前 Windows 用户的 DPAPI 加密保存；**宿主机客户端配置及其备份含明文密钥，`claude mcp get eplan-vm` 也会原样打印密钥**，不要分享文件、输出或截图。
-- 在虚拟机先“停止服务”，再选“重新生成密钥”，旧密钥立即失效；用新密钥重写宿主机配置，再启动服务、测试连接并重启客户端。CLI 的 `vm-key create` 同样会立即使旧密钥失效。
+- 从 0.9.0 起虚拟机连接不再使用共享密钥（[ADR-0062](../adr/0062-vm-http-without-shared-key.md)）。0.8.0 及更早版本写进宿主机客户端配置的 `eplan-vm` 条目里带着明文密钥：升级后在宿主机重新“预览并写入”一次，条目会换成不带密钥的；旧的配置备份文件（`.bak_<时间>`）里仍有旧密钥，不再需要时自己删除。
+- **不要在虚拟机服务运行期间关闭“普通写入人工审批”**，除非你清楚后果：两者同时生效时，能连到端口的程序可以不经任何人确认地修改真实项目。
 - 给工具的路径都是**虚拟机路径**，scratch、导出、备份和导入文件也在虚拟机中；导出文件不会自动复制到宿主机，`inline` 图片仍可经 MCP 返回。
 - 审批出现在虚拟机的 Workbench 或 EPLAN 对话框中，客户端名称旁显示 `via network: <地址>`（当前实现固定为英文）。由工程师在虚拟机中核对并回答；网络连接不放宽审批或 scratch 规则。
 
@@ -222,25 +218,19 @@ Remove-Item -LiteralPath '.\vm-key.txt'
 |---|---|
 | `unreachable` | 确认虚拟机服务正在监听；核对防火墙规则、宿主机来源 IPv4、虚拟机 IPv4 和端口，确保两端私有网络互通。 |
 | `timed_out` | 单次请求等待超过 10 秒；检查虚拟机是否暂停、服务是否响应、网络是否丢包或被防火墙丢弃，再测试。 |
-| `unauthorized`（401） | 密钥错误或已换新；从虚拟机复制当前密钥，重新测试并重写配置。 |
 | `forbidden`（403） | 请求携带不允许的 `Origin` 头，常见于浏览器客户端；由工程师核对虚拟机 `config.json` 的 `httpAllowedOrigins`，只添加可信的实际 Origin，再重启服务。允许列表默认空；`vm-test` 不发送 Origin。 |
-| `rate_limited`（429） | 同一来源地址一分钟内认证失败 10 次后，锁定该地址一分钟；停下自动重试，等一分钟后用当前密钥测试。一次客户端连接可能发出多个失败请求。 |
-| `protocol_error` | 核对 URL 为 `http://<IPv4>:<端口>/mcp`、输入是完整的 43 字符密钥；检查协议和两端版本，使用同版本 ZIP 后重试。 |
+| `protocol_error` | 核对 URL 为 `http://<IPv4>:<端口>/mcp`；检查协议和两端版本，使用同版本 ZIP 后重试。0.8.0 及更早的客户端连不上 0.9.0 的服务时，两端换成同一版本。 |
 
 在**虚拟机**运行 `& $eplanMcp doctor`：`http.service` 列出本数据目录的服务及绑定地址/端口，`vm.firewall` 列出规则是否存在和实际放行范围。核对程序路径、TCP 端口、宿主机地址及域/专用配置文件；这些检查不修改规则，也不代替宿主机连接测试。
 
 ### 移除虚拟机连接
 
-在宿主机的“虚拟机 ↔ 宿主机”模式勾选客户端，点击“移除配置”，确认移除 `eplan-vm`，再重启客户端；或运行 `& $eplanMcp client-config --vm --remove`，清理记录中的远程条目，无需地址和密钥。虚拟机中依次点击“停止服务”→“移除网络权限”（需 UAC）→“删除密钥”。
+在宿主机的“虚拟机 ↔ 宿主机”模式勾选客户端，点击“移除配置”，确认移除 `eplan-vm`，再重启客户端；或运行 `& $eplanMcp client-config --vm --remove`，清理记录中的远程条目，无需地址。虚拟机中依次点击“停止服务”→“移除网络权限”（需 UAC）。
 
-命令行方式：先在虚拟机停止前台服务（Ctrl+C），在管理员 PowerShell 中移除规则，再回到原普通窗口删除密钥；使用建立规则时的相同端口、宿主机 IPv4 和程序路径。
+命令行方式：先在虚拟机停止前台服务（Ctrl+C），再在管理员 PowerShell 中移除规则；使用建立规则时的相同端口、宿主机 IPv4 和程序路径。
 
 ```powershell
 & 'D:\EplanMcp\eplanmcp.exe' vm-firewall remove --port 8766 --host-address 192.168.56.1
-```
-
-```powershell
-& $eplanMcp vm-key delete
 ```
 
 ---
