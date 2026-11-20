@@ -937,4 +937,23 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
+  </Style>  <!-- A toast (the 2026-11-20 design, section 5.3): elevated, rounded, with the pop-up shadow; a dot and the message. -->
+  <Style x:Key="Workbench.Toast" TargetType="Border">
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Toast}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Toast}" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="MaxWidth" Value="420" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Effect">
+      <Setter.Value>
+        <DropShadowEffect BlurRadius="30" ShadowDepth="10" Direction="270" Opacity="0.16" />
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.ToastText" TargetType="TextBlock" BasedOn="{StaticResource Primer.Text}">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
   </Style></ResourceDictionary>

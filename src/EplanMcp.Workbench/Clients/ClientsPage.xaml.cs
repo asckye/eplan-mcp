@@ -4,7 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Shell;
-using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
 
 namespace EplanMcp.Workbench.Clients;
@@ -97,8 +96,14 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
             button.ToolTip = help.Length > 0 ? help : button == RefreshButton ? loc.T("Shell.Shortcut", loc["Clients.Refresh"], "F5") : null;
         }
 
-        ErrorBanner.Visibility = view.Error is null ? Visibility.Collapsed : Visibility.Visible;
-        ErrorText.Text = view.Error is { } error ? loc.T("Status.Error", error) : string.Empty;
+        ErrorBanner.Visibility = Visibility.Collapsed; // every message is a toast (owner, 2026-11-20)
+        string errorText = view.Error is { } error ? loc.T("Status.Error", error) : string.Empty;
+        if (errorText.Length > 0 && errorText != ErrorText.Text)
+        {
+            Toasts.Show(errorText, ToastTone.Error);
+        }
+
+        ErrorText.Text = errorText;
         ErrorDetails.Text = view.ErrorDetails ?? string.Empty;
         ErrorDetails.Visibility = view.ErrorDetails is null ? Visibility.Collapsed : Visibility.Visible;
         Cards.ItemsSource = null;
@@ -172,7 +177,7 @@ public partial class ClientsPage : UserControl, IWorkbenchPage
     private void Say(string text)
     {
         StatusText.Text = text;
-        AccessibleStatus.Announce(StatusText);
+        Toasts.Show(text, ToastTone.Info);
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();

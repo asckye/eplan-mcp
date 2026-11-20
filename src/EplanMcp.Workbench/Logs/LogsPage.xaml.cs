@@ -64,13 +64,13 @@ public partial class LogsPage : UserControl, IWorkbenchPage
         {
             string zip = _view.ExportDiagnosticsZip();
             BannerText.Text = Loc.Current.T("Logs.DiagCreated", zip);
-            Banner.Visibility = Visibility.Visible;
+            Toasts.Show(BannerText.Text, ToastTone.Success);
             AccessibleStatus.Announce(BannerText);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             BannerText.Text = Loc.Current.T("Logs.DiagFailed", ex.Message);
-            Banner.Visibility = Visibility.Visible;
+            Toasts.Show(BannerText.Text, ToastTone.Error);
             AccessibleStatus.Announce(BannerText);
         }
     }
@@ -124,7 +124,7 @@ public partial class LogsPage : UserControl, IWorkbenchPage
         string text = string.Join(Environment.NewLine, view.Visible.Select(r => $"{r.Time} [{r.Level}] {r.Source}: {r.Message}"));
         Clipboard.SetText(text);
         BannerText.Text = Loc.Current.T("Logs.Copied", view.Visible.Count);
-        Banner.Visibility = Visibility.Visible;
+        Toasts.Show(BannerText.Text, ToastTone.Success);
         AccessibleStatus.Announce(BannerText);
     }
 

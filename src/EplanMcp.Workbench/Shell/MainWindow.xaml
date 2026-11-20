@@ -185,6 +185,10 @@
       </DockPanel>
     </Border>
 
+    <!-- ============ TOASTS: bottom right, above the status bar; they take no input ============ -->
+    <StackPanel x:Name="ToastLayer" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="{StaticResource Ui.Gap.ToastLayer}" IsHitTestVisible="False" />
+    <TextBlock x:Name="ToastAnnouncer" Grid.Row="1" Height="1" Opacity="0" Visibility="Collapsed" VerticalAlignment="Top" AutomationProperties.LiveSetting="Polite" />
+
     <!-- ============ COMMAND PALETTE OVERLAY (Ctrl+K) ============ -->
     <Grid x:Name="CommandLayer" Grid.RowSpan="3" Visibility="Collapsed">
       <Border Style="{StaticResource Primer.Overlay}" MouseLeftButtonUp="OnCommandScrim" />

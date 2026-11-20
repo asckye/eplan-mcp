@@ -37,7 +37,7 @@
           <Button x:Name="RemoveButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Clients.Remove}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnRemove" />
           <Button x:Name="WriteButton" Style="{StaticResource Primer.Primary}" Content="{l:Tr Clients.Write}" Click="OnWrite" />
         </StackPanel>
-        <TextBlock x:Name="StatusText" Style="{StaticResource Primer.Muted}" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="None"
+        <TextBlock x:Name="StatusText" Visibility="Collapsed" Style="{StaticResource Primer.Muted}" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="None"
                    AutomationProperties.LiveSetting="Polite" />
       </DockPanel>
     </Border>
@@ -85,7 +85,7 @@
                 </StackPanel>
                 <Button x:Name="TestVm" Grid.Column="4" VerticalAlignment="Bottom" Content="{l:Tr VmHost.Test}" Style="{StaticResource Primer.Secondary}" Click="OnTestVm" />
               </Grid>
-              <TextBlock x:Name="VmTestStatus" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LiveSetting="Polite" />
+              <TextBlock x:Name="VmTestStatus" Visibility="Collapsed" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LiveSetting="Polite" />
               <Border Style="{StaticResource Primer.Alert.Info}" Margin="{StaticResource Ui.Gap.Top.XS}">
                 <TextBlock Text="{l:Tr VmHost.Plaintext}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" />
               </Border>

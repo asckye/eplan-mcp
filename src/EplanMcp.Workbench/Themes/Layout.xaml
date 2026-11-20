@@ -78,6 +78,9 @@
   <Thickness x:Key="Ui.Inset.StatusPill">7,0</Thickness>
   <Thickness x:Key="Ui.Inset.CommandButton">10,0</Thickness>
   <Thickness x:Key="Ui.Inset.QueuePane">10</Thickness>
+  <Thickness x:Key="Ui.Inset.Toast">14,8</Thickness>
+  <Thickness x:Key="Ui.Gap.Toast">0,8,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.ToastLayer">0,0,16,10</Thickness>
   <Thickness x:Key="Ui.Inset.SettingsCard">20</Thickness>
   <Thickness x:Key="Ui.Gap.Bottom.Card">0,0,0,20</Thickness>
   <Thickness x:Key="Ui.Inset.Preview">8</Thickness>

@@ -109,7 +109,10 @@ public partial class ClientsPage
         if (VmTestStatus.Text != view.VmStatus)
         {
             VmTestStatus.Text = view.VmStatus;
-            AccessibleStatus.Announce(VmTestStatus);
+            if (view.VmStatus != Loc.Current["VmHost.Help"])
+            {
+                Toasts.Show(view.VmStatus, ToastTone.Info);
+            }
         }
     }
 }

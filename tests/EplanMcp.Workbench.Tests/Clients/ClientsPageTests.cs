@@ -7,6 +7,7 @@ using EplanMcp.Workbench.Clients;
 using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Shell;
 using EplanMcp.Workbench.Tests.Commands;
+using EplanMcp.Workbench.Tests.Shell;
 using TiaOpenness.Gui.Localization;
 using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 
@@ -134,13 +135,14 @@ public sealed class ClientsPageTests(WpfContext wpf) : IDisposable
     public void ACommandRefusedAsAWhole_IsAnErrorBanner()
     {
         _host.Answer = _ => new HostRun(1, Snapshots.Example("client-config-json", "refused"));
+        using var toasts = new ToastLog();
         wpf.RunWithLanguage(AppLanguage.English, () => WithPage((window, page) =>
         {
             window.Navigate(WorkbenchPage.Clients, NavigationOrigin.Menu);
             WpfContext.Drain();
 
-            Assert.True(((FrameworkElement)page.FindName("ErrorBanner")).IsVisible);
             Assert.StartsWith("Error: client-config must run as eplanmcp.exe itself", ((TextBlock)page.FindName("ErrorText")).Text, StringComparison.Ordinal);
+            Assert.Contains(toasts.Heard, h => h.Tone == ToastTone.Error && h.Text.StartsWith("Error: client-config", StringComparison.Ordinal));
         }));
     }
 

@@ -184,7 +184,7 @@ public partial class AuditPage : UserControl, IWorkbenchPage
         (string? text, string? details, bool failed) = view.State == AuditState.Failed
             ? (Loc.Current.T("Audit.Unreadable", view.Folder), view.Problem, true)
             : (view.Verification, view.VerificationDetails, view.VerificationFailed);
-        Banner.Visibility = text is null ? Visibility.Collapsed : Visibility.Visible;
+        Banner.Visibility = Visibility.Collapsed; // every message is a toast (owner, 2026-11-20)
         Banner.SetResourceReference(StyleProperty, failed ? "Primer.Alert.Error" : "Primer.Alert.Success");
         BannerIcon.SetResourceReference(StyleProperty, failed ? "Primer.AlertIcon.Error" : "Primer.AlertIcon.Success");
         string severity = Loc.Current[failed ? "Audit.Error" : "Audit.Done"];
@@ -192,7 +192,10 @@ public partial class AuditPage : UserControl, IWorkbenchPage
         if (BannerText.Text != shown)
         {
             BannerText.Text = shown;
-            AccessibleStatus.Announce(BannerText);
+            if (shown.Length > 0)
+            {
+                Toasts.Show(shown, failed ? ToastTone.Error : ToastTone.Success);
+            }
         }
 
         BannerDetails.Text = details ?? string.Empty;
@@ -236,7 +239,11 @@ public partial class AuditPage : UserControl, IWorkbenchPage
     {
         bool opened = _view is { } view && _shell.Open(view.Folder);
         Notice.Text = opened ? string.Empty : Loc.Current.T("Audit.FolderFailed", _view?.Folder ?? string.Empty);
-        Notice.Visibility = opened ? Visibility.Collapsed : Visibility.Visible;
+        Notice.Visibility = Visibility.Collapsed;
+        if (!opened)
+        {
+            Toasts.Show(Notice.Text, ToastTone.Error);
+        }
         if (!opened)
         {
             AccessibleStatus.Announce(Notice);

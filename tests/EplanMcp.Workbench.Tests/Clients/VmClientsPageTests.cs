@@ -7,6 +7,7 @@ using EplanMcp.Workbench.Clients;
 using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Shell;
 using EplanMcp.Workbench.Tests.Commands;
+using EplanMcp.Workbench.Tests.Shell;
 using TiaOpenness.Gui.Localization;
 using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 
@@ -109,6 +110,7 @@ public sealed class VmClientsPageTests(WpfContext wpf)
     public void BusyTest_DisablesModeAndFieldsAndActions_ThenShowsFailure(AppLanguage language) =>
         wpf.RunWithLanguage(language, () => WithPage((page, _) =>
         {
+            using var toasts = new ToastLog();
             EnterVm(page);
             Fill(page);
             TaskCompletionSource<HostRun> held = _host.Hold();
@@ -123,8 +125,8 @@ public sealed class VmClientsPageTests(WpfContext wpf)
             Assert.Equal(Visibility.Visible, ((ProgressBar)page.FindName("Working")).Visibility);
             held.SetResult(new(1, Snapshots.Example("vm-test-json", "forbidden")));
             WpfContext.DrainUntil(() => ((Button)page.FindName("TestVm")).IsEnabled, "Connection test did not finish.");
-            Assert.Equal(Visibility.Visible, ((FrameworkElement)page.FindName("ErrorBanner")).Visibility);
             Assert.Contains(Loc.Current["VmHost.Forbidden"], ((TextBlock)page.FindName("ErrorText")).Text, StringComparison.Ordinal);
+            Assert.Contains(toasts.Heard, h => h.Tone == ToastTone.Error && h.Text.Contains(Loc.Current["VmHost.Forbidden"], StringComparison.Ordinal));
         }));
 
     [Theory]

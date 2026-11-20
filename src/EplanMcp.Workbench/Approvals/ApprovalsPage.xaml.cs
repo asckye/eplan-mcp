@@ -395,9 +395,24 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     private void Answer(bool approve)
     {
         _focusOnShow = true;
+        QuestionItem? shown = _view?.Shown;
         if (_view?.Answer(approve) != true)
         {
             _focusOnShow = false;
+            return;
+        }
+
+        // What the answer did, in a toast: the release keeps or lifts the suspension, an approval approves or rejects.
+        if (shown is not null)
+        {
+            (string key, ToastTone tone) = (shown.IsRelease, approve) switch
+            {
+                (true, true) => ("Toast.Released", ToastTone.Success),
+                (true, false) => ("Toast.KeptSuspended", ToastTone.Warning),
+                (false, true) => ("Toast.Approved", ToastTone.Success),
+                _ => ("Toast.Rejected", ToastTone.Error),
+            };
+            Toasts.Show(Loc.Current.T(key, shown.Tool), tone);
         }
     }
 

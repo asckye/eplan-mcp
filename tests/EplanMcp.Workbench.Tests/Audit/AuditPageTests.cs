@@ -10,6 +10,7 @@ using EplanMcp.Workbench.Audit;
 using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Shell;
 using EplanMcp.Workbench.Tests.Commands;
+using EplanMcp.Workbench.Tests.Shell;
 using TiaOpenness.Gui.Localization;
 using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 
@@ -229,11 +230,11 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
             window.Navigate(WorkbenchPage.Audit, NavigationOrigin.Menu);
             Settle(page);
 
+            using var toasts = new ToastLog();
             Click((Button)page.FindName("FolderButton"));
 
-            var notice = (TextBlock)page.FindName("Notice");
-            Assert.True(notice.IsVisible);
-            Assert.Equal($"Windows 无法打开 {_directory}。", notice.Text);
+            // Every message is a toast (owner, 2026-11-20).
+            Assert.Contains(($"Windows 无法打开 {_directory}。", ToastTone.Error), toasts.Heard);
         }));
     }
 
@@ -256,6 +257,7 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
     {
         Write("2026-10-20", Line("2026-10-20T12:00:00Z", "approval", "eplan_page_create", "P1", "\"decision\":\"granted\""));
         using var locked = new FileStream(Path.Combine(_directory, "2026-10-20.jsonl"), FileMode.Open, FileAccess.Read, FileShare.None);
+        using var toasts = new ToastLog();
         wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
         {
             window.Navigate(WorkbenchPage.Audit, NavigationOrigin.Menu);
@@ -263,7 +265,8 @@ public sealed class AuditPageTests(WpfContext wpf) : IDisposable
 
             Assert.StartsWith("错误：无法读取", ((TextBlock)page.FindName("BannerText")).Text, StringComparison.Ordinal);
             Assert.False(((FrameworkElement)page.FindName("Empty")).IsVisible);
-            Assert.True(((FrameworkElement)page.FindName("BannerDetails")).IsVisible);
+            Assert.NotEmpty(((TextBox)page.FindName("BannerDetails")).Text);
+            Assert.Contains(toasts.Heard, h => h.Tone == ToastTone.Error && h.Text.StartsWith("错误：无法读取", StringComparison.Ordinal));
         }));
     }
 

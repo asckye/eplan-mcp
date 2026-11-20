@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Shell;
-using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
 
 namespace EplanMcp.Workbench.Settings;
@@ -114,10 +113,9 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
             _showing = false;
         }
 
-        PolicyError.Visibility = saved ? Visibility.Collapsed : Visibility.Visible;
         if (!saved)
         {
-            AccessibleStatus.Announce(PolicyError);
+            Toasts.Show(PolicyError.Text, ToastTone.Error);
         }
     }
 
@@ -131,7 +129,10 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
         if (int.TryParse(raw, NumberStyles.None, CultureInfo.InvariantCulture, out int seconds))
         {
             bool saved = _policy.SetApprovalTimeoutSeconds(seconds);
-            PolicyError.Visibility = saved ? Visibility.Collapsed : Visibility.Visible;
+            if (!saved)
+            {
+                Toasts.Show(PolicyError.Text, ToastTone.Error);
+            }
         }
     }
 
@@ -147,10 +148,9 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
         _showing = true;
         LoginSwitch.IsChecked = done ? on : !on;
         _showing = false;
-        LoginError.Visibility = done ? Visibility.Collapsed : Visibility.Visible;
         if (!done)
         {
-            AccessibleStatus.Announce(LoginError);
+            Toasts.Show(LoginError.Text, ToastTone.Error);
         }
     }
 
@@ -163,10 +163,9 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
 
         bool opened = _shell.Open(_config);
         ConfigProblem.Text = opened ? string.Empty : Loc.Current.T("Settings.OpenFailed", _config);
-        ConfigProblem.Visibility = opened ? Visibility.Collapsed : Visibility.Visible;
         if (!opened)
         {
-            AccessibleStatus.Announce(ConfigProblem);
+            Toasts.Show(ConfigProblem.Text, ToastTone.Error);
         }
     }
 

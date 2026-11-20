@@ -1,6 +1,5 @@
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
@@ -8,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using EplanMcp.Workbench.Settings;
 using EplanMcp.Workbench.Shell;
+using EplanMcp.Workbench.Tests.Shell;
 using Microsoft.Win32;
 using TiaOpenness.Gui.Localization;
 using static EplanMcp.Workbench.Tests.Shell.TestWindows;
@@ -99,7 +99,7 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
     }
 
     [Fact]
-    public void WhenWindowsRefuses_TheSwitchGoesBack_AndSaysSoInPlace()
+    public void WhenWindowsRefuses_TheSwitchGoesBack_AndSaysSoInAToast()
     {
         using (RegistryKey run = Registry.CurrentUser.CreateSubKey(RunKey))
         {
@@ -111,11 +111,12 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
         wpf.RunWithLanguage(AppLanguage.Chinese, () => WithDrawer((window, drawer) =>
         {
             var toggle = (ToggleButton)drawer.FindName("LoginSwitch");
+            using var toasts = new ToastLog();
 
             Toggle(toggle);
 
             Assert.False(toggle.IsChecked);
-            Assert.True(((FrameworkElement)drawer.FindName("LoginError")).IsVisible);
+            Assert.Contains((((TextBlock)drawer.FindName("LoginError")).Text, ToastTone.Error), toasts.Heard); // every message is a toast
             Assert.Null(Value(StartAtLogin.ValueName));
         }));
     }
@@ -139,7 +140,7 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
     }
 
     [Fact]
-    public void AConfigWindowsCannotOpen_IsSaidBesideTheButton()
+    public void AConfigWindowsCannotOpen_IsSaidInAToast()
     {
         _shellWorks = false;
         string config = Path.Combine(_root.FullName, "config.json");
@@ -148,11 +149,10 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
         {
             page.OpenStorageCategory();
             WpfContext.Drain();
+            using var toasts = new ToastLog();
             Click((Button)page.FindName("ConfigButton"));
 
-            var problem = (TextBlock)page.FindName("ConfigProblem");
-            Assert.True(problem.IsVisible);
-            Assert.Equal($"Windows 无法打开 {config}。", problem.Text);
+            Assert.Contains(($"Windows 无法打开 {config}。", ToastTone.Error), toasts.Heard); // every message is a toast
         }));
     }
 

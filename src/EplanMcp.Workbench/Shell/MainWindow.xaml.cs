@@ -108,6 +108,8 @@ public partial class MainWindow : Window
         Loc.Current.LanguageChanged += OnLanguageChanged;
         ThemeManager.Current.PropertyChanged += (_, _) => Dispatcher.BeginInvoke(ApplyTexts);
         Closed += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
+        Toasts.Wanted += OnToast;
+        Closed += (_, _) => Toasts.Wanted -= OnToast;
         StateChanged += (_, _) => ApplyWindowState();
         SourceInitialized += (_, _) => WindowShape.RoundCorners(this);
 
@@ -373,6 +375,8 @@ public partial class MainWindow : Window
 
     private void OnCommandScrim(object sender, MouseButtonEventArgs e) => CloseCommandPalette();
 
+    private void OnToast(string text, ToastTone tone) => Dispatcher.BeginInvoke(() => Toasts.Add(ToastLayer, ToastAnnouncer, text, tone));
+
     private void OnArrived(QuestionItem item)
     {
         Reminder reminder = ReminderFor(IsVisible, WindowState == WindowState.Minimized, IsActive);
@@ -385,6 +389,12 @@ public partial class MainWindow : Window
         if (reminder.HasFlag(Reminder.Notify))
         {
             NotificationWanted?.Invoke(item);
+        }
+
+        // In the open window, a question that arrives while another page shows is said in a toast as well.
+        if (IsVisible && WindowState != WindowState.Minimized && CurrentPage != WorkbenchPage.Approvals)
+        {
+            Toasts.Show(Loc.Current.T("Toast.Arrived", item.Tool), item.IsDestructive ? ToastTone.Warning : ToastTone.Info);
         }
     }
 

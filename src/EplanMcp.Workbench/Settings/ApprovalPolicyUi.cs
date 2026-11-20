@@ -14,8 +14,21 @@ internal static class ApprovalPolicyUi
     internal static Func<DependencyObject, bool> ConfirmOff { get; set; } = Ask;
 
     /// <summary>Null when the engineer kept approval on; else whether the file took the new value.</summary>
-    public static bool? Set(SafetyPolicyStore policy, bool require, DependencyObject from) =>
-        !require && !ConfirmOff(from) ? null : policy.SetRequireNormalWriteApproval(require);
+    public static bool? Set(SafetyPolicyStore policy, bool require, DependencyObject from)
+    {
+        if (!require && !ConfirmOff(from))
+        {
+            return null;
+        }
+
+        bool saved = policy.SetRequireNormalWriteApproval(require);
+        if (saved)
+        {
+            Toasts.Show(Loc.Current[require ? "Toast.ApprovalOn" : "Toast.ApprovalOff"], require ? ToastTone.Success : ToastTone.Warning);
+        }
+
+        return saved;
+    }
 
     private static bool Ask(DependencyObject from)
     {

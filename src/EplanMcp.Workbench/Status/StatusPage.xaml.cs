@@ -92,8 +92,14 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         }
 
         Working.Visibility = running ? Visibility.Visible : Visibility.Collapsed;
-        ErrorBanner.Visibility = view.Error is null ? Visibility.Collapsed : Visibility.Visible;
-        ErrorText.Text = view.Error is { } error ? loc.T("Status.Error", error) : string.Empty;
+        ErrorBanner.Visibility = Visibility.Collapsed; // every message is a toast (owner, 2026-11-20)
+        string errorText = view.Error is { } error ? loc.T("Status.Error", error) : string.Empty;
+        if (errorText.Length > 0 && errorText != ErrorText.Text)
+        {
+            Toasts.Show(errorText, ToastTone.Error);
+        }
+
+        ErrorText.Text = errorText;
         ErrorDetails.Text = view.ErrorDetails ?? string.Empty;
         IReadOnlyList<StatusLine> suspensions = view.Suspensions;
         SuspensionBanner.Visibility = suspensions.Count > 0 ? Visibility.Visible : Visibility.Collapsed;

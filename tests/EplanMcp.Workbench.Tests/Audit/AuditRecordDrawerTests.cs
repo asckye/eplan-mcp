@@ -9,6 +9,7 @@ using EplanMcp.Workbench.Audit;
 using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Shell;
 using EplanMcp.Workbench.Tests.Commands;
+using EplanMcp.Workbench.Tests.Shell;
 using TiaOpenness.Gui.Localization;
 using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 
@@ -77,11 +78,10 @@ public sealed class AuditRecordDrawerTests(WpfContext wpf) : IDisposable
             window.OpenRecord(Record());
             var drawer = (AuditRecordDrawer)window.FindName("RecordPane");
 
+            using var toasts = new ToastLog();
             Click((Button)drawer.FindName("FolderButton"));
 
-            var problem = (TextBlock)drawer.FindName("FolderProblem");
-            Assert.True(problem.IsVisible);
-            Assert.Equal($"Windows 无法打开 {_directory}。", problem.Text);
+            Assert.Contains(($"Windows 无法打开 {_directory}。", ToastTone.Error), toasts.Heard);
             window.CloseRecord();
         }));
     }

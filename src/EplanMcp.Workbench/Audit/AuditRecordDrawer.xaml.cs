@@ -4,6 +4,7 @@ using System.Windows.Input;
 using EplanMcp.Workbench.Approvals;
 using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
+using EplanMcp.Workbench.Shell;
 
 namespace EplanMcp.Workbench.Audit;
 
@@ -35,7 +36,11 @@ public partial class AuditRecordDrawer : UserControl
     internal void ShowFolder(bool opened, string? folder)
     {
         FolderProblem.Text = opened ? string.Empty : Loc.Current.T("Audit.FolderFailed", folder ?? string.Empty);
-        FolderProblem.Visibility = opened ? Visibility.Collapsed : Visibility.Visible;
+        FolderProblem.Visibility = Visibility.Collapsed;
+        if (!opened)
+        {
+            Toasts.Show(FolderProblem.Text, ToastTone.Error);
+        }
         if (!opened)
         {
             AccessibleStatus.Announce(FolderProblem);
