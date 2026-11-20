@@ -52,15 +52,25 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
     /// <summary>False: EPLAN takes the close request but stays open (behind a system messages window, for example).</summary>
     public bool ClosesWhenAsked { get; set; } = true;
 
+    /// <summary>
+    /// Windows every started EPLAN shows besides its main frame (<see cref="MainFrame"/>), such as a modal dialog. While
+    /// one is open the main window is disabled, so a close request is not sent (api-notes A172); closing a window
+    /// removes it.
+    /// </summary>
+    public List<EplanWindow> Dialogs { get; } = [];
+
     public Exception? StartFails { get; set; }
 
     /// <summary>How many handshakes fail before the Bridge answers (int.MaxValue: never).</summary>
     public int HandshakeFailures { get; set; }
 
-    /// <summary>What happened, in order: "start &lt;exe&gt; &lt;arguments&gt;", "close &lt;id&gt;" for each request.</summary>
+    /// <summary>What happened, in order: "start &lt;exe&gt; &lt;arguments&gt;", "close &lt;id&gt;" for each request, "close window &lt;title&gt;".</summary>
     public List<string> Log { get; } = [];
 
     public IReadOnlyList<Instance> Instances => _instances;
+
+    /// <summary>The main frame of every fake EPLAN, which owns its dialogs.</summary>
+    public static EplanWindow MainFrame { get; } = new(100, "AfxMDIFrame140u", "EPLAN Electric P8", Enabled: true, Owner: 0, []);
 
     public IReadOnlyList<int> Running() => [.. Others, .. _instances.Where(i => !i.Exited).Select(i => i.Id)];
 
@@ -153,8 +163,18 @@ internal sealed partial class FakeEplan : IEplanProcesses, IBridgeProbe
         {
             eplan.Log.Add($"close {id}");
             Calls.Add("close");
-            Exited |= _refreshed && eplan.HasWindow && eplan.ClosesWhenAsked && ++_closeRequests > eplan.IgnoresCloses;
-            return eplan.HasWindow;
+            bool enabled = eplan.HasWindow && eplan.Dialogs.Count == 0;
+            Exited |= _refreshed && enabled && eplan.ClosesWhenAsked && ++_closeRequests > eplan.IgnoresCloses;
+            return enabled;
+        }
+
+        public IReadOnlyList<EplanWindow> Windows() => Exited ? [] : [MainFrame with { Enabled = eplan.Dialogs.Count == 0 }, .. eplan.Dialogs];
+
+        public void CloseWindow(EplanWindow window)
+        {
+            eplan.Log.Add($"close window {window.Title}");
+            Calls.Add("close window");
+            eplan.Dialogs.Remove(window);
         }
 
         public void Dispose() => Disposed = true;
