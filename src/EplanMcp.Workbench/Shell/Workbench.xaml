@@ -230,10 +230,19 @@
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.Rail}" />
   </Style>
 
+  <!-- The rail's icons in the 2026-11-20 design, on a 24 x 24 box, drawn as strokes. -->
+  <Geometry x:Key="Workbench.Icon.Project">M22,19 A2,2 0 0 1 20,21 H4 A2,2 0 0 1 2,19 V5 A2,2 0 0 1 4,3 H9 L11,6 H20 A2,2 0 0 1 22,8 Z</Geometry>
+  <Geometry x:Key="Workbench.Icon.Approvals">M12,22 C12,22 20,18 20,12 V5 L12,2 L4,5 V12 C4,18 12,22 12,22 Z M9,12 L11,14 L15,10</Geometry>
+  <Geometry x:Key="Workbench.Icon.Mcp">M4,2 H20 A2,2 0 0 1 22,4 V8 A2,2 0 0 1 20,10 H4 A2,2 0 0 1 2,8 V4 A2,2 0 0 1 4,2 Z M4,14 H20 A2,2 0 0 1 22,16 V20 A2,2 0 0 1 20,22 H4 A2,2 0 0 1 2,20 V16 A2,2 0 0 1 4,14 Z M6,6 H6.01 M6,18 H6.01</Geometry>
+  <Geometry x:Key="Workbench.Icon.Clients">M4,3 H20 A2,2 0 0 1 22,5 V15 A2,2 0 0 1 20,17 H4 A2,2 0 0 1 2,15 V5 A2,2 0 0 1 4,3 Z M8,21 H16 M12,17 V21</Geometry>
+  <Geometry x:Key="Workbench.Icon.Checks">M9,11 L12,14 L22,4 M21,12 V19 A2,2 0 0 1 19,21 H5 A2,2 0 0 1 3,19 V5 A2,2 0 0 1 5,3 H16</Geometry>
+  <Geometry x:Key="Workbench.Icon.Audit">M14,2 H6 A2,2 0 0 0 4,4 V20 A2,2 0 0 0 6,22 H18 A2,2 0 0 0 20,20 V8 Z M14,2 V8 H20 M16,13 H8 M16,17 H8</Geometry>
+  <Geometry x:Key="Workbench.Icon.Logs">M4,17 L10,11 L4,5 M12,19 H20</Geometry>
+  <Geometry x:Key="Workbench.Icon.Settings">M15,12 A3,3 0 1 1 9,12 A3,3 0 1 1 15,12 M19.4,15 A1.65,1.65 0 0 0 19.73,16.82 L19.79,16.88 A2,2 0 1 1 16.96,19.71 L16.9,19.65 A1.65,1.65 0 0 0 15.08,19.32 A1.65,1.65 0 0 0 14.08,20.83 V21 A2,2 0 0 1 10.08,21 V20.91 A1.65,1.65 0 0 0 9,19.4 A1.65,1.65 0 0 0 7.18,19.73 L7.12,19.79 A2,2 0 1 1 4.29,16.96 L4.35,16.9 A1.65,1.65 0 0 0 4.68,15.08 A1.65,1.65 0 0 0 3.17,14.08 H3 A2,2 0 0 1 3,10.08 H3.09 A1.65,1.65 0 0 0 4.6,9 A1.65,1.65 0 0 0 4.27,7.18 L4.21,7.12 A2,2 0 1 1 7.04,4.29 L7.1,4.35 A1.65,1.65 0 0 0 8.92,4.68 H9 A1.65,1.65 0 0 0 10,3.17 V3 A2,2 0 0 1 14,3 V3.09 A1.65,1.65 0 0 0 15,4.6 A1.65,1.65 0 0 0 16.82,4.27 L16.88,4.21 A2,2 0 1 1 19.71,7.04 L19.65,7.1 A1.65,1.65 0 0 0 19.32,8.92 V9 A1.65,1.65 0 0 0 20.83,10 H21 A2,2 0 0 1 21,14 H20.91 A1.65,1.65 0 0 0 19.4,15 Z</Geometry>
   <Style x:Key="Workbench.RailItem" TargetType="RadioButton">
     <Setter Property="GroupName" Value="Pages" />
-    <Setter Property="Width" Value="48" />
-    <Setter Property="Height" Value="44" />
+    <Setter Property="Width" Value="46" />
+    <Setter Property="Height" Value="42" />
     <Setter Property="Margin" Value="{StaticResource Ui.Gap.RailItem}" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
@@ -242,25 +251,25 @@
       <Setter.Value>
         <ControlTemplate TargetType="RadioButton">
           <Grid>
-            <Border x:Name="Indicator" Width="3" Height="22" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.RailIndicator}" CornerRadius="0,3,3,0"
+            <Border x:Name="Indicator" Width="3" Height="24" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.RailIndicator}" CornerRadius="0,3,3,0"
                     Background="{DynamicResource Accent.Button}" Visibility="Collapsed" />
             <Border x:Name="Surface" Background="Transparent" CornerRadius="8">
               <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Path x:Name="Glyph" Style="{StaticResource Primer.Icon}" Width="{StaticResource Ui.IconSize.Rail}" Height="{StaticResource Ui.IconSize.Rail}" Data="{TemplateBinding ux:Ux.Icon}"
-                      Stroke="{TemplateBinding Foreground}" HorizontalAlignment="Center" />
+                      Stroke="{TemplateBinding Foreground}" StrokeThickness="1.85" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" HorizontalAlignment="Center" />
                 <ContentPresenter x:Name="Label" Margin="{StaticResource Ui.Gap.RailLabel}" HorizontalAlignment="Center" RecognizesAccessKey="False">
                   <ContentPresenter.Resources>
                     <Style TargetType="TextBlock">
-                      <Setter Property="FontSize" Value="10.5" />
+                      <Setter Property="FontSize" Value="10" />
                       <Setter Property="FontWeight" Value="Medium" />
                     </Style>
                   </ContentPresenter.Resources>
                 </ContentPresenter>
               </StackPanel>
             </Border>
-            <Border x:Name="Count" MinWidth="16" Height="16" Padding="{StaticResource Ui.Inset.RailBadge}" CornerRadius="8" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.RailBadge}"
+            <Border x:Name="Count" MinWidth="15" Height="15" Padding="{StaticResource Ui.Inset.RailBadge}" CornerRadius="7.5" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.RailBadge}"
                     Background="{DynamicResource Accent.Button}">
-              <TextBlock Text="{TemplateBinding Tag}" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource Text.OnAccent}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <TextBlock Text="{TemplateBinding Tag}" FontFamily="{DynamicResource Ui.FontMono}" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource Text.OnAccent}" HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
           </Grid>
           <ControlTemplate.Triggers>
@@ -292,20 +301,20 @@
 
   <Style x:Key="Workbench.IdeSubBar" TargetType="Border">
     <Setter Property="MinHeight" Value="38" />
-    <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Pane}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
     <Setter Property="BorderThickness" Value="0,0,0,1" />
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.IdeSubBar}" />
   </Style>
 
   <Style x:Key="Workbench.LeftPane" TargetType="Border">
-    <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Pane}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
     <Setter Property="BorderThickness" Value="0,0,1,0" />
   </Style>
 
   <Style x:Key="Workbench.RightPane" TargetType="Border">
-    <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Pane}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
     <Setter Property="BorderThickness" Value="1,0,0,0" />
   </Style>
@@ -327,19 +336,73 @@
   </Style>
 
   <Style x:Key="Workbench.StatusBar" TargetType="Border">
-    <Setter Property="MinHeight" Value="28" />
+    <Setter Property="Height" Value="26" />
     <Setter Property="Background" Value="{DynamicResource Workbench.sidebarBg}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
     <Setter Property="BorderThickness" Value="0,1,0,0" />
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.StatusBar}" />
   </Style>
 
+  <!--
+    The shell's small buttons in the 2026-11-20 design: bar-pill (status bar segments), the command button with its
+    key chip, the title bar's text button, and the window buttons (34 x 28, the close one red on hover).
+  -->
   <Style x:Key="Workbench.StatusPill" TargetType="Button">
-    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Height" Value="24" />
     <Setter Property="MinWidth" Value="24" />
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.StatusPill}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <!-- The pill is drawn 20 px high as designed; the button around it is 24 px, the smallest target (WCAG 2.5.8). -->
+          <Grid Background="Transparent">
+            <Border x:Name="Bd" Height="20" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+              <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
+            </Border>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="Workbench.StatusDot" TargetType="Ellipse">
+    <Setter Property="Width" Value="{StaticResource Ui.IconSize.Dot}" />
+    <Setter Property="Height" Value="{StaticResource Ui.IconSize.Dot}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Fill" Value="{DynamicResource State.Success.Text}" />
+  </Style>
+
+  <Style x:Key="Workbench.Kbd" TargetType="Border">
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Kbd}" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.KbdText" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="10.5" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+  </Style>
+
+  <Style x:Key="Workbench.CommandButton" TargetType="Button">
+    <Setter Property="Height" Value="26" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.CommandButton}" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />
+    <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
     <Setter Property="FontSize" Value="11.5" />
     <Setter Property="Cursor" Value="Hand" />
@@ -347,13 +410,65 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="Button">
-          <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+          <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+            <ContentPresenter VerticalAlignment="Center" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="Workbench.TitleButton" TargetType="Button">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
             <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
               <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
               <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.TitleTextButton" TargetType="Button" BasedOn="{StaticResource Workbench.TitleButton}">
+    <Setter Property="Width" Value="NaN" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Horizontal.XS}" />
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+  <Style x:Key="Workbench.WindowButton" TargetType="Button" BasedOn="{StaticResource Workbench.TitleButton}">
+    <Setter Property="Width" Value="34" />
+  </Style>
+  <Style x:Key="Workbench.CloseButton" TargetType="Button" BasedOn="{StaticResource Workbench.WindowButton}">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6">
+            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.CloseHover}" />
+              <Setter Property="Foreground" Value="{DynamicResource Text.OnAccent}" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>

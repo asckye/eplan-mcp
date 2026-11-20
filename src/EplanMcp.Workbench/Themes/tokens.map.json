@@ -1,8 +1,9 @@
 {
   "_why": {
     "Primer.cardSel": "fill-track until the approvals list takes v2's selection: accent and red text on fill-selected-inactive stay under 4.5:1.",
-    "dark.Ant.colorFillSecondary": "v2's accent on fill-track is 2.97:1 in dark, under the 3:1 a progress fill needs; bg-grouped clears it.",
-    "keys left out": "keep the vendored TIA value; high contrast follows the system colours and is not generated."
+    "dark.Ant.colorFillSecondary": "the accent on fill-track is 2.97:1 in dark, under the 3:1 a progress fill needs; bg-pane clears it (bg-grouped did until the 2026-11-20 design lightened it).",
+    "keys left out": "keep the vendored TIA value; high contrast follows the system colours and is not generated.",
+    "dark accent": "the 2026-11-20 design has #3B82F6 in dark; white text on it is 3.68:1, so the accent stays #2563EB (the design's own dark hover) and the hover goes one step darker."
   },
   "all": {
     "Ant.colorBgContainerDisabled": "fill-track",
@@ -19,7 +20,7 @@
     "Ant.colorLinkHover": "accent-text",
     "Ant.colorPrimary": "accent",
     "Ant.colorPrimaryActive": "accent",
-    "Ant.colorPrimaryHover": "accent",
+    "Ant.colorPrimaryHover": "accent-hover",
     "Ant.colorSuccessBorder": "success",
     "Ant.colorTextDisabled": "label-tertiary",
     "Ant.colorTextLightSolid": "label-on-accent",
@@ -28,16 +29,16 @@
     "Primer.accent": "accent-text",
     "Primer.bg": "bg-window",
     "Primer.card": "bg-elevated",
-    "Primer.cardBorder": "separator",
+    "Primer.cardBorder": "line",
     "Primer.cardSel": "fill-track",
     "Primer.cardSoft": "bg-grouped",
     "Primer.checkBorder": "border-control",
-    "Primer.codeBg": "bg-grouped",
+    "Primer.codeBg": "bg-code",
     "Primer.codeText": "label",
     "Primer.countWarningBg": "warning-tint",
     "Primer.diffGreen": "success-text",
     "Primer.diffRed": "destructive-text",
-    "Primer.divider": "separator",
+    "Primer.divider": "line",
     "Primer.focusInner": "bg-window",
     "Primer.focusOuter": "focus-ring",
     "Primer.hoverText": "label",
@@ -46,12 +47,12 @@
     "Primer.menuBg": "bg-elevated",
     "Primer.noteAccent": "accent-text",
     "Primer.noteBg": "accent-tint",
-    "Primer.noteBorder": "accent",
+    "Primer.noteBorder": "accent-border",
     "Primer.ok": "success-text",
     "Primer.okBg": "success-tint",
     "Primer.onAccent": "label-on-accent",
     "Primer.pill": "fill-control",
-    "Primer.pillHover": "fill-selected-inactive",
+    "Primer.pillHover": "bg-hover",
     "Primer.primaryBg": "accent",
     "Primer.primaryText": "label-on-accent",
     "Primer.selectedText": "label",
@@ -60,11 +61,13 @@
     "Primer.textMuted": "label-secondary",
     "Primer.warn": "warning-text",
     "Primer.warnBg": "warning-tint",
+    "Workbench.closeHover": "close-hover",
     "Workbench.navSelected": "fill-selected-inactive",
     "Workbench.navSelectedText": "label",
+    "Workbench.paneBg": "bg-pane",
     "Workbench.sidebarBg": "bg-sidebar"
   },
   "dark": {
-    "Ant.colorFillSecondary": "bg-grouped"
+    "Ant.colorFillSecondary": "bg-pane"
   }
 }

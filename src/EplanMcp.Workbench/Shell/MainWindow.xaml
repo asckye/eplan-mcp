@@ -55,34 +55,44 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
-          <Button x:Name="PaneToggleButton" Style="{StaticResource Primer.WindowButton}" Width="28" Height="28" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnTogglePane" ToolTip="{l:Tr Shell.Collapse}" AutomationProperties.Name="{l:Tr Shell.Collapse}">
-            <Path Width="{StaticResource Ui.IconSize.Toolbar}" Height="{StaticResource Ui.IconSize.Toolbar}" Stretch="Uniform" Stroke="{DynamicResource Text.Secondary}" StrokeThickness="1.7" Data="M3,3 H21 V21 H3 Z M9,3 V21" />
+          <Button x:Name="PaneToggleButton" Style="{StaticResource Workbench.TitleButton}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnTogglePane" ToolTip="{l:Tr Shell.Collapse}" AutomationProperties.Name="{l:Tr Shell.Collapse}">
+            <Path Width="{StaticResource Ui.IconSize.Pane}" Height="{StaticResource Ui.IconSize.Pane}" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.9" StrokeLineJoin="Round" Data="M5,3 H19 A2,2 0 0 1 21,5 V19 A2,2 0 0 1 19,21 H5 A2,2 0 0 1 3,19 V5 A2,2 0 0 1 5,3 Z M9,3 V21" />
           </Button>
-          <Border Width="22" Height="22" CornerRadius="6" Background="{DynamicResource Accent.Button}" Margin="{StaticResource Ui.Gap.Right.XS}">
-            <Path Width="{StaticResource Ui.IconSize.Caption}" Height="{StaticResource Ui.IconSize.Caption}" Stretch="Uniform" Stroke="{DynamicResource Text.OnAccent}" StrokeThickness="2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                  Data="M4,6 H20 M4,12 H14 M4,18 H20" />
+          <Border Width="24" Height="24" CornerRadius="6" Background="{DynamicResource Accent.Button}" Margin="{StaticResource Ui.Gap.Right.XS}">
+            <Path Width="{StaticResource Ui.IconSize.Emblem}" Height="{StaticResource Ui.IconSize.Emblem}" Stretch="Uniform" Stroke="{DynamicResource Text.OnAccent}" StrokeThickness="2.3" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                  Data="M4,6 H20 M4,12 H14 M4,18 H20 M19.2,12 A2.2,2.2 0 1 1 14.8,12 A2.2,2.2 0 1 1 19.2,12" />
           </Border>
           <TextBlock x:Name="Brand" Text="{l:Tr App.Name}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" VerticalAlignment="Center" />
           <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Muted}" FontSize="12" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XS}" />
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.XS}" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
-          <Button x:Name="CommandPaletteButton" Style="{StaticResource Workbench.StatusPill}" Content="{l:Tr Shell.QuickJump}" AutomationProperties.Name="{l:Tr Shell.CommandPalette}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnOpenCommandPalette" />
-          <Button x:Name="ThemeToggleButton" Style="{StaticResource Primer.WindowButton}" Width="28" Height="28" Click="OnQuickTheme" ToolTip="{l:Tr Shell.ThemeToggle}" AutomationProperties.Name="{l:Tr Shell.ThemeToggle}">
-            <Path Width="{StaticResource Ui.IconSize.Toolbar}" Height="{StaticResource Ui.IconSize.Toolbar}" Stretch="Uniform" Stroke="{DynamicResource Text.Secondary}" StrokeThickness="1.8" Data="M21,12.8 A9,9 0 1,1 11.2,3 A7,7 0 0,0 21,12.8 Z" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
+          <Button x:Name="CommandPaletteButton" Style="{StaticResource Workbench.CommandButton}" AutomationProperties.Name="{l:Tr Shell.CommandPalette}" AutomationProperties.AcceleratorKey="Ctrl+K" Margin="{StaticResource Ui.Gap.Right.Title}" Click="OnOpenCommandPalette">
+            <StackPanel Orientation="Horizontal">
+              <Path Width="{StaticResource Ui.IconSize.Caption}" Height="{StaticResource Ui.IconSize.Caption}" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center"
+                    Data="M18,11 A7,7 0 1 1 4,11 A7,7 0 1 1 18,11 M16,16 L21,21" />
+              <TextBlock Text="{l:Tr Shell.QuickJump}" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XS}" />
+              <Border Style="{StaticResource Workbench.Kbd}" Margin="{StaticResource Ui.Gap.Left.XS}">
+                <TextBlock x:Name="CommandKeyText" Style="{StaticResource Workbench.KbdText}" />
+              </Border>
+            </StackPanel>
           </Button>
-          <Button x:Name="LangToggleButton" Style="{StaticResource Workbench.StatusPill}" Margin="{StaticResource Ui.Gap.Left.XXS}" Click="OnQuickLang" ToolTip="{l:Tr Shell.LangToggle}" AutomationProperties.Name="{l:Tr Shell.LangToggle}" />
+          <Button x:Name="ThemeToggleButton" Style="{StaticResource Workbench.TitleButton}" Margin="{StaticResource Ui.Gap.Right.Title}" Click="OnQuickTheme" ToolTip="{l:Tr Shell.ThemeToggle}" AutomationProperties.Name="{l:Tr Shell.ThemeToggle}">
+            <Path x:Name="ThemeGlyph" Width="{StaticResource Ui.IconSize.Theme}" Height="{StaticResource Ui.IconSize.Theme}" Stretch="Uniform" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+          </Button>
+          <Button x:Name="LangToggleButton" Style="{StaticResource Workbench.TitleTextButton}" Click="OnQuickLang" ToolTip="{l:Tr Shell.LangToggle}" AutomationProperties.Name="{l:Tr Shell.LangToggle}" />
           <Button x:Name="PendingBadge" Style="{StaticResource Primer.PendingBadge}" Visibility="Collapsed" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnPendingBadge" />
+          <Border Width="1" Height="16" Background="{DynamicResource Border.Strong}" Margin="{StaticResource Ui.Gap.TitleDivider}" />
         </StackPanel>
 
         <StackPanel x:Name="WindowButtons" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
-          <Button x:Name="MinimizeButton" Style="{StaticResource Primer.WindowButton}" Click="OnMinimize">
+          <Button x:Name="MinimizeButton" Style="{StaticResource Workbench.WindowButton}" Click="OnMinimize">
             <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0,5 L10,5" />
           </Button>
-          <Button x:Name="MaximizeButton" Style="{StaticResource Primer.WindowButton}" Margin="{StaticResource Ui.Inset.Horizontal.XXS}" Click="OnMaximize">
+          <Button x:Name="MaximizeButton" Style="{StaticResource Workbench.WindowButton}" Click="OnMaximize">
             <Path x:Name="MaximizeGlyph" Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 H9.5 V9.5 H0.5 Z" />
           </Button>
-          <Button x:Name="CloseButton" Style="{StaticResource Primer.WindowButton}" Click="OnClose">
+          <Button x:Name="CloseButton" Style="{StaticResource Workbench.CloseButton}" Click="OnClose">
             <Path Style="{StaticResource Workbench.CaptionGlyph}" Data="M0.5,0.5 L9.5,9.5 M9.5,0.5 L0.5,9.5" />
           </Button>
         </StackPanel>
@@ -104,41 +114,42 @@
           </Grid.RowDefinitions>
 
           <StackPanel Grid.Row="0" HorizontalAlignment="Center">
-            <RadioButton x:Name="ProjectItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{DynamicResource Icon.Project}" Content="{l:Tr Rail.Project}"
+            <RadioButton x:Name="ProjectItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Project}" Content="{l:Tr Rail.Project}"
                          AutomationProperties.Name="{l:Tr Page.Project}" AutomationProperties.AcceleratorKey="Ctrl+1"
                          AutomationProperties.PositionInSet="1" AutomationProperties.SizeOfSet="8" Click="OnMenuClick" />
-            <RadioButton x:Name="ApprovalsItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{DynamicResource Icon.Bell}" Content="{l:Tr Rail.Approvals}"
+            <RadioButton x:Name="ApprovalsItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Approvals}" Content="{l:Tr Rail.Approvals}"
                          AutomationProperties.Name="{l:Tr Page.Approvals}" AutomationProperties.AcceleratorKey="Ctrl+2"
                          AutomationProperties.PositionInSet="2" AutomationProperties.SizeOfSet="8" Click="OnMenuClick" />
 
             <Border Width="26" Height="1" Background="{DynamicResource Border.Layer}" Margin="{StaticResource Ui.Gap.RailDivider}" />
 
-            <RadioButton x:Name="McpItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{DynamicResource Icon.Api}" Content="{l:Tr Rail.Mcp}"
+            <RadioButton x:Name="McpItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Mcp}" Content="{l:Tr Rail.Mcp}"
                          AutomationProperties.Name="{l:Tr Page.Mcp}" AutomationProperties.AcceleratorKey="Ctrl+3"
                          AutomationProperties.PositionInSet="3" AutomationProperties.SizeOfSet="8" Click="OnMenuClick" />
-            <RadioButton x:Name="ClientsItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{DynamicResource Icon.Robot}" Content="{l:Tr Rail.Clients}"
+            <RadioButton x:Name="ClientsItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Clients}" Content="{l:Tr Rail.Clients}"
                          AutomationProperties.Name="{l:Tr Page.Clients}" AutomationProperties.AcceleratorKey="Ctrl+4"
                          AutomationProperties.PositionInSet="4" AutomationProperties.SizeOfSet="8" Click="OnMenuClick" />
 
             <Border Width="26" Height="1" Background="{DynamicResource Border.Layer}" Margin="{StaticResource Ui.Gap.RailDivider}" />
 
-            <RadioButton x:Name="StatusItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{DynamicResource Icon.Health}" Content="{l:Tr Rail.Status}"
+            <RadioButton x:Name="StatusItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Checks}" Content="{l:Tr Rail.Status}"
                          AutomationProperties.Name="{l:Tr Page.Status}" AutomationProperties.AcceleratorKey="Ctrl+5"
                          AutomationProperties.PositionInSet="5" AutomationProperties.SizeOfSet="8" Click="OnMenuClick" />
-            <RadioButton x:Name="AuditItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{DynamicResource Icon.Audit}" Content="{l:Tr Rail.Audit}"
+            <RadioButton x:Name="AuditItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Audit}" Content="{l:Tr Rail.Audit}"
                          AutomationProperties.Name="{l:Tr Page.Audit}" AutomationProperties.AcceleratorKey="Ctrl+6"
                          AutomationProperties.PositionInSet="6" AutomationProperties.SizeOfSet="8" Click="OnMenuClick" />
-            <RadioButton x:Name="LogsItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{DynamicResource Icon.FileText}" Content="{l:Tr Rail.Logs}"
+            <RadioButton x:Name="LogsItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Logs}" Content="{l:Tr Rail.Logs}"
                          AutomationProperties.Name="{l:Tr Page.Logs}" AutomationProperties.AcceleratorKey="Ctrl+7"
                          AutomationProperties.PositionInSet="7" AutomationProperties.SizeOfSet="8" Click="OnMenuClick" />
           </StackPanel>
 
-          <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="{StaticResource Ui.Gap.RailBottom}">
-            <Border Width="26" Height="1" Background="{DynamicResource Border.Layer}" Margin="{StaticResource Ui.Gap.RailBottomDivider}" />
-            <RadioButton x:Name="SettingsItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{DynamicResource Icon.Setting}" Content="{l:Tr Rail.Settings}"
+          <Border Grid.Row="1" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,1,0,0" Padding="{StaticResource Ui.Inset.RailBottom}">
+          <StackPanel HorizontalAlignment="Center">
+            <RadioButton x:Name="SettingsItem" Style="{StaticResource Workbench.RailItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Settings}" Content="{l:Tr Rail.Settings}"
                          AutomationProperties.Name="{l:Tr Page.Settings}" AutomationProperties.AcceleratorKey="Ctrl+,"
                          AutomationProperties.PositionInSet="8" AutomationProperties.SizeOfSet="8" Click="OnMenuClick" />
           </StackPanel>
+          </Border>
         </Grid>
       </Border>
 
@@ -154,18 +165,22 @@
       </Grid>
     </Grid>
 
-    <!-- ============ BOTTOM 28px STATUS BAR ============ -->
+    <!-- ============ BOTTOM 26px STATUS BAR ============ -->
     <Border Grid.Row="2" Style="{StaticResource Workbench.StatusBar}" AutomationProperties.Name="{l:Tr Shell.StatusBar}">
       <DockPanel>
         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-          <Button x:Name="ApprovalStatusButton" Style="{StaticResource Workbench.StatusPill}" Margin="{StaticResource Ui.Gap.Right.XS}" ToolTip="{l:Tr Shell.StatusApprovalHint}" Click="OnStatusApprovalToggle" />
-          <Button x:Name="AuditStatusButton" Style="{StaticResource Workbench.StatusPill}" Content="{l:Tr Rail.Audit}" AutomationProperties.Name="{l:Tr Page.Audit}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnStatusAuditClick" />
-          <TextBlock x:Name="VersionStatusText" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11" VerticalAlignment="Center" />
+          <Button x:Name="ApprovalStatusButton" Style="{StaticResource Workbench.StatusPill}" Margin="{StaticResource Ui.Gap.Right.XS}" ToolTip="{l:Tr Shell.StatusApprovalHint}" Click="OnStatusApprovalToggle">
+            <StackPanel Orientation="Horizontal">
+              <Ellipse x:Name="ApprovalStatusDot" Style="{StaticResource Workbench.StatusDot}" />
+              <TextBlock x:Name="ApprovalStatusText" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+            </StackPanel>
+          </Button>
+          <Button x:Name="AuditStatusButton" Style="{StaticResource Workbench.StatusPill}" FontFamily="{DynamicResource Ui.FontMono}" Content="{l:Tr Rail.Audit}" AutomationProperties.Name="{l:Tr Page.Audit}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnStatusAuditClick" />
+          <TextBlock x:Name="VersionStatusText" Style="{StaticResource Primer.Mono.textMuted}" FontSize="10.5" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XXS}" />
         </StackPanel>
-
         <DockPanel VerticalAlignment="Center">
           <Path x:Name="PipeIcon" DockPanel.Dock="Left" Width="{StaticResource Ui.IconSize.Status}" Height="{StaticResource Ui.IconSize.Status}" Margin="{StaticResource Ui.Gap.Right.XS}" VerticalAlignment="Center" />
-          <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Muted}" FontSize="11.5" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
+          <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Muted}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
         </DockPanel>
       </DockPanel>
     </Border>

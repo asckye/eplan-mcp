@@ -36,7 +36,7 @@ public sealed class ThemeTokenResourceTests(WpfContext wpf)
     }
 
     [Fact]
-    public void LayoutResources_HaveTheWpfTypesTheViewsNeed_AndStayOnTheGrid()
+    public void LayoutResources_HaveTheWpfTypesTheViewsNeed_AndAreWholePixels()
     {
         wpf.Run(() =>
         {
@@ -56,7 +56,9 @@ public sealed class ThemeTokenResourceTests(WpfContext wpf)
                     dimensions = [Assert.IsType<double>(value)];
                 }
 
-                Assert.All(dimensions, n => Assert.True(n % 4 == 0, $"{key}: {n.ToString(CultureInfo.InvariantCulture)}"));
+                // The 2026-11-20 design (eplan-workbench-design.html) sets its own pixel values (3, 5, 7, 10, 13 ...), so the
+                // 4 px grid no longer holds; whole pixels keep every edge sharp at 100 % scale.
+                Assert.All(dimensions, n => Assert.True(n % 1 == 0, $"{key}: {n.ToString(CultureInfo.InvariantCulture)}"));
             }
 
             var strong = new TextBlock { Style = (Style)Application.Current.FindResource("Ui.Text.BodyStrong") };

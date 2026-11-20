@@ -8,16 +8,16 @@
   <SolidColorBrush x:Key="Primer.accent" Color="#93C5FD" /><!-- accent-text -->
   <SolidColorBrush x:Key="Primer.bg" Color="#0C1017" /><!-- bg-window -->
   <SolidColorBrush x:Key="Primer.card" Color="#161D2B" /><!-- bg-elevated -->
-  <SolidColorBrush x:Key="Primer.cardBorder" Color="#263247" /><!-- separator -->
+  <SolidColorBrush x:Key="Primer.cardBorder" Color="#232D3F" /><!-- line -->
   <SolidColorBrush x:Key="Primer.cardSel" Color="#1A2333" /><!-- fill-track -->
-  <SolidColorBrush x:Key="Primer.cardSoft" Color="#131A26" /><!-- bg-grouped -->
+  <SolidColorBrush x:Key="Primer.cardSoft" Color="#1C2536" /><!-- bg-grouped -->
   <SolidColorBrush x:Key="Primer.checkBorder" Color="#64748B" /><!-- border-control -->
-  <SolidColorBrush x:Key="Primer.codeBg" Color="#131A26" /><!-- bg-grouped -->
+  <SolidColorBrush x:Key="Primer.codeBg" Color="#0E131C" /><!-- bg-code -->
   <SolidColorBrush x:Key="Primer.codeText" Color="#F1F5F9" /><!-- label -->
-  <SolidColorBrush x:Key="Primer.countWarningBg" Color="#38270D" /><!-- warning-tint -->
+  <SolidColorBrush x:Key="Primer.countWarningBg" Color="#24F59E0B" /><!-- warning-tint -->
   <SolidColorBrush x:Key="Primer.diffGreen" Color="#4ADE80" /><!-- success-text -->
-  <SolidColorBrush x:Key="Primer.diffRed" Color="#FDA4AF" /><!-- destructive-text -->
-  <SolidColorBrush x:Key="Primer.divider" Color="#263247" /><!-- separator -->
+  <SolidColorBrush x:Key="Primer.diffRed" Color="#FB7185" /><!-- destructive-text -->
+  <SolidColorBrush x:Key="Primer.divider" Color="#232D3F" /><!-- line -->
   <SolidColorBrush x:Key="Primer.focusInner" Color="#0C1017" /><!-- bg-window -->
   <SolidColorBrush x:Key="Primer.focusOuter" Color="#60A5FA" /><!-- focus-ring -->
   <SolidColorBrush x:Key="Primer.hoverText" Color="#F1F5F9" /><!-- label -->
@@ -25,43 +25,45 @@
   <SolidColorBrush x:Key="Primer.inputBorder" Color="#64748B" /><!-- border-control -->
   <SolidColorBrush x:Key="Primer.menuBg" Color="#161D2B" /><!-- bg-elevated -->
   <SolidColorBrush x:Key="Primer.noteAccent" Color="#93C5FD" /><!-- accent-text -->
-  <SolidColorBrush x:Key="Primer.noteBg" Color="#172554" /><!-- accent-tint -->
-  <SolidColorBrush x:Key="Primer.noteBorder" Color="#2563EB" /><!-- accent -->
+  <SolidColorBrush x:Key="Primer.noteBg" Color="#263B82F6" /><!-- accent-tint -->
+  <SolidColorBrush x:Key="Primer.noteBorder" Color="#5760A5FA" /><!-- accent-border -->
   <SolidColorBrush x:Key="Primer.ok" Color="#4ADE80" /><!-- success-text -->
-  <SolidColorBrush x:Key="Primer.okBg" Color="#0E2C1A" /><!-- success-tint -->
+  <SolidColorBrush x:Key="Primer.okBg" Color="#2422C55E" /><!-- success-tint -->
   <SolidColorBrush x:Key="Primer.onAccent" Color="#FFFFFF" /><!-- label-on-accent -->
   <SolidColorBrush x:Key="Primer.pill" Color="#222C3F" /><!-- fill-control -->
-  <SolidColorBrush x:Key="Primer.pillHover" Color="#243045" /><!-- fill-selected-inactive -->
+  <SolidColorBrush x:Key="Primer.pillHover" Color="#232E42" /><!-- bg-hover -->
   <SolidColorBrush x:Key="Primer.primaryBg" Color="#2563EB" /><!-- accent -->
   <SolidColorBrush x:Key="Primer.primaryText" Color="#FFFFFF" /><!-- label-on-accent -->
   <SolidColorBrush x:Key="Primer.selectedText" Color="#F1F5F9" /><!-- label -->
   <SolidColorBrush x:Key="Primer.text" Color="#F1F5F9" /><!-- label -->
   <SolidColorBrush x:Key="Primer.textFaint" Color="#94A3B8" /><!-- label-secondary -->
   <SolidColorBrush x:Key="Primer.textMuted" Color="#94A3B8" /><!-- label-secondary -->
-  <SolidColorBrush x:Key="Primer.warn" Color="#FCD34D" /><!-- warning-text -->
-  <SolidColorBrush x:Key="Primer.warnBg" Color="#38270D" /><!-- warning-tint -->
+  <SolidColorBrush x:Key="Primer.warn" Color="#FBBF24" /><!-- warning-text -->
+  <SolidColorBrush x:Key="Primer.warnBg" Color="#24F59E0B" /><!-- warning-tint -->
   <SolidColorBrush x:Key="Ant.colorBgContainerDisabled" Color="#1A2333" /><!-- fill-track -->
   <SolidColorBrush x:Key="Ant.colorBgMask" Color="#9E000000" /><!-- scrim -->
   <SolidColorBrush x:Key="Ant.colorBgSpotlight" Color="#F5161D2B" /><!-- toast-bg -->
-  <SolidColorBrush x:Key="Ant.colorBorder" Color="#263247" /><!-- separator -->
+  <SolidColorBrush x:Key="Ant.colorBorder" Color="#324056" /><!-- separator -->
   <SolidColorBrush x:Key="Ant.colorError" Color="#BE123C" /><!-- destructive -->
-  <SolidColorBrush x:Key="Ant.colorErrorBg" Color="#3B121D" /><!-- destructive-tint -->
+  <SolidColorBrush x:Key="Ant.colorErrorBg" Color="#24F43F5E" /><!-- destructive-tint -->
   <SolidColorBrush x:Key="Ant.colorErrorBorder" Color="#BE123C" /><!-- destructive -->
   <SolidColorBrush x:Key="Ant.colorErrorSolid" Color="#BE123C" /><!-- destructive -->
   <SolidColorBrush x:Key="Ant.colorErrorSolidActive" Color="#BE123C" /><!-- destructive -->
   <SolidColorBrush x:Key="Ant.colorErrorSolidHover" Color="#BE123C" /><!-- destructive -->
-  <SolidColorBrush x:Key="Ant.colorFillSecondary" Color="#131A26" /><!-- bg-grouped -->
+  <SolidColorBrush x:Key="Ant.colorFillSecondary" Color="#121824" /><!-- bg-pane -->
   <SolidColorBrush x:Key="Ant.colorLinkHover" Color="#93C5FD" /><!-- accent-text -->
   <SolidColorBrush x:Key="Ant.colorPrimary" Color="#2563EB" /><!-- accent -->
   <SolidColorBrush x:Key="Ant.colorPrimaryActive" Color="#2563EB" /><!-- accent -->
-  <SolidColorBrush x:Key="Ant.colorPrimaryHover" Color="#2563EB" /><!-- accent -->
+  <SolidColorBrush x:Key="Ant.colorPrimaryHover" Color="#1D4ED8" /><!-- accent-hover -->
   <SolidColorBrush x:Key="Ant.colorSuccessBorder" Color="#22C55E" /><!-- success -->
   <SolidColorBrush x:Key="Ant.colorTextDisabled" Color="#64748B" /><!-- label-tertiary -->
   <SolidColorBrush x:Key="Ant.colorTextLightSolid" Color="#FFFFFF" /><!-- label-on-accent -->
   <SolidColorBrush x:Key="Ant.colorWarningBorder" Color="#F59E0B" /><!-- warning -->
   <SolidColorBrush x:Key="Ant.controlItemBgActiveHover" Color="#243045" /><!-- fill-selected-inactive -->
+  <SolidColorBrush x:Key="Workbench.closeHover" Color="#E11D48" /><!-- close-hover -->
   <SolidColorBrush x:Key="Workbench.navSelected" Color="#243045" /><!-- fill-selected-inactive -->
   <SolidColorBrush x:Key="Workbench.navSelectedText" Color="#F1F5F9" /><!-- label -->
+  <SolidColorBrush x:Key="Workbench.paneBg" Color="#121824" /><!-- bg-pane -->
   <SolidColorBrush x:Key="Workbench.sidebarBg" Color="#10151F" /><!-- bg-sidebar -->
   <!-- END v2 tokens -->
   <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
@@ -73,6 +75,8 @@
   <SolidColorBrush x:Key="Surface.Code" Color="{Binding Color, Source={StaticResource Primer.codeBg}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Selected" Color="{Binding Color, Source={StaticResource Primer.cardSel}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Hover" Color="{Binding Color, Source={StaticResource Primer.pillHover}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Pane" Color="{Binding Color, Source={StaticResource Workbench.paneBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.CloseHover" Color="{Binding Color, Source={StaticResource Workbench.closeHover}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Scrim" Color="{Binding Color, Source={StaticResource Ant.colorBgMask}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Tooltip" Color="{Binding Color, Source={StaticResource Ant.colorBgSpotlight}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Primary" Color="{Binding Color, Source={StaticResource Primer.text}, Mode=OneWay}" />
@@ -80,6 +84,7 @@
   <SolidColorBrush x:Key="Text.Secondary" Color="{Binding Color, Source={StaticResource Primer.textMuted}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Faint" Color="{Binding Color, Source={StaticResource Primer.textFaint}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Disabled" Color="{Binding Color, Source={StaticResource Ant.colorTextDisabled}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.Strong" Color="{Binding Color, Source={StaticResource Ant.colorBorder}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Selected" Color="{Binding Color, Source={StaticResource Primer.selectedText}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.OnAccent" Color="{Binding Color, Source={StaticResource Primer.onAccent}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.OnHighlight" Color="{Binding Color, Source={StaticResource Ant.colorWhite}, Mode=OneWay}" />

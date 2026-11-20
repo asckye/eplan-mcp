@@ -81,6 +81,7 @@ public partial class MainWindow : Window
         string version = typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.8.0";
         Brand.ToolTip = "EplanMcp " + version;
         VersionStatusText.Text = "v" + version;
+        CommandKeyText.Text = "Ctrl+K";
 
         ProjectPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
         McpPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
@@ -105,6 +106,7 @@ public partial class MainWindow : Window
         CommandBindings.Add(new CommandBinding(TogglePaneCommand, (_, _) => ToggleLeftPane(), CanNavigate));
 
         Loc.Current.LanguageChanged += OnLanguageChanged;
+        ThemeManager.Current.PropertyChanged += (_, _) => Dispatcher.BeginInvoke(ApplyTexts);
         Closed += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
         StateChanged += (_, _) => ApplyWindowState();
 
@@ -481,9 +483,12 @@ public partial class MainWindow : Window
 
         bool manual = _policy?.RequireNormalWriteApproval ?? true;
         string approvalLabel = loc[_policy?.WritesDenied == true ? "Shell.StatusWritesDenied" : manual ? "Shell.StatusApprovalOn" : "Shell.StatusApprovalOff"];
-        ApprovalStatusButton.Content = approvalLabel;
+        ApprovalStatusText.Text = approvalLabel;
         AutomationProperties.SetName(ApprovalStatusButton, approvalLabel);
-        ApprovalStatusButton.SetResourceReference(ForegroundProperty, manual ? "State.Success.Text" : "State.Warning.Text");
+        // The design: a green dot and plain text while approval is on, an amber dot and amber semibold text while it is off.
+        ApprovalStatusDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, manual ? "State.Success.Text" : "State.Warning.Text");
+        ApprovalStatusButton.SetResourceReference(ForegroundProperty, manual ? "Text.Secondary" : "State.Warning.Text");
+        ApprovalStatusText.FontWeight = manual ? FontWeights.Normal : FontWeights.SemiBold;
 
         string pending = loc.T("Tray.Pending", _pending);
         PendingBadge.Visibility = _pending > 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -540,6 +545,10 @@ public partial class MainWindow : Window
         Title = loc.T("Shell.WindowTitle", page);
         CurrentPageText.Text = "/ " + page;
         LangToggleButton.Content = loc[loc.Language == AppLanguage.Chinese ? "Settings.Chinese" : "Settings.English"];
+        // A moon while the theme is light (the click goes dark), a sun while it is dark.
+        ThemeGlyph.Data = Geometry.Parse(ThemeManager.Current.EffectivelyDark
+            ? "M17,12 A5,5 0 1 1 7,12 A5,5 0 1 1 17,12 M12,1 V3 M12,21 V23 M4.22,4.22 L5.64,5.64 M18.36,18.36 L19.78,19.78 M1,12 H3 M21,12 H23 M4.22,19.78 L5.64,18.36 M18.36,5.64 L19.78,4.22"
+            : "M21,12.79 A9,9 0 1 1 11.21,3 A7,7 0 0 0 21,12.79 Z");
         foreach ((_, string key, string shortcut, RadioButton item, _) in _pages)
         {
             item.ToolTip = loc.T("Shell.Shortcut", loc[key], shortcut);

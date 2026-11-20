@@ -172,7 +172,7 @@ internal static class Catalogue
         ("Shell.StatusApprovalOff", "Auto-approve writes", "自动放行（普通写入）"),
         ("Shell.StatusWritesDenied", "Writes outside scratch denied", "scratch 以外禁止写入"),
         ("Shell.StatusApprovalHint", "Click to toggle manual approval for routine writes (destructive, master data and suspension releases remain gated).", "点击一键切换普通写入人工审批（破坏性删除、主数据与暂停解除仍强制确认）。"),
-        ("Shell.QuickJump", "Commands (Ctrl+K)", "命令面板（Ctrl+K）"),
+        ("Shell.QuickJump", "Commands & Jump", "命令与快捷跳转"),
         ("Shell.CommandPalette", "Command palette", "命令面板"),
         ("Shell.CommandPlaceholder", "Type a view or action…", "输入视图名称或操作……"),
         ("Shell.CmdToggleTheme", "Toggle Light / Dark theme", "切换浅色与深色主题"),

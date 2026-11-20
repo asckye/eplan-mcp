@@ -16,6 +16,9 @@
   <SolidColorBrush x:Key="Workbench.navSelected" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
   <SolidColorBrush x:Key="Workbench.navSelectedText" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
   <SolidColorBrush x:Key="Primer.primaryText" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}" />
+  <!-- The 2026-11-20 design: side panes are the window, the close button hovers as the system selection. -->
+  <SolidColorBrush x:Key="Workbench.paneBg" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.closeHover" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
   <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Layer" Color="{Binding Color, Source={StaticResource Primer.card}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Input" Color="{Binding Color, Source={StaticResource Primer.input}, Mode=OneWay}" />
@@ -25,6 +28,8 @@
   <SolidColorBrush x:Key="Surface.Code" Color="{Binding Color, Source={StaticResource Primer.codeBg}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Selected" Color="{Binding Color, Source={StaticResource Primer.cardSel}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Hover" Color="{Binding Color, Source={StaticResource Primer.pillHover}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.Pane" Color="{Binding Color, Source={StaticResource Workbench.paneBg}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Surface.CloseHover" Color="{Binding Color, Source={StaticResource Workbench.closeHover}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Scrim" Color="{Binding Color, Source={StaticResource Ant.colorBgMask}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Tooltip" Color="{Binding Color, Source={StaticResource Ant.colorBgSpotlight}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Primary" Color="{Binding Color, Source={StaticResource Primer.text}, Mode=OneWay}" />
@@ -32,6 +37,7 @@
   <SolidColorBrush x:Key="Text.Secondary" Color="{Binding Color, Source={StaticResource Primer.textMuted}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Faint" Color="{Binding Color, Source={StaticResource Primer.textFaint}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Disabled" Color="{Binding Color, Source={StaticResource Ant.colorTextDisabled}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="Border.Strong" Color="{Binding Color, Source={StaticResource Ant.colorBorder}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.Selected" Color="{Binding Color, Source={StaticResource Primer.selectedText}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.OnAccent" Color="{Binding Color, Source={StaticResource Primer.onAccent}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Text.OnHighlight" Color="{Binding Color, Source={StaticResource Ant.colorWhite}, Mode=OneWay}" />
