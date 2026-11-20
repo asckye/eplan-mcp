@@ -391,8 +391,8 @@ public sealed class SmallProjectRedrawMacroTests
         {
             ["name"] = source["name"]?.DeepClone(),
             ["grouped"] = "true",
-            ["height_mm"] = source["height"]?.ToString(),
-            ["angle"] = source["angle"]?.ToString(),
+            ["height_mm"] = (string?)source["height"],
+            ["angle"] = (string?)source["angle"],
         },
     };
     private static JObject Point(double x, double y) => new() { ["x"] = x, ["y"] = y };
