@@ -158,6 +158,32 @@
     </Setter>
   </Style>
 
+  <!--
+    ADR-0035 and ADR-0010: where one answer is the safe one, it is the primary button (Reject for a Destructive write,
+    Keep suspended for a release); the Destructive action is the danger button and only opens the typed confirmation.
+  -->
+  <Style x:Key="Workbench.AnswerPrimary" TargetType="Button" BasedOn="{StaticResource Primer.Primary}">
+    <Setter Property="MinWidth" Value="120" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="ContentTemplate">
+      <Setter.Value>
+        <DataTemplate>
+          <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+        </DataTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.AnswerDanger" TargetType="Button" BasedOn="{StaticResource Primer.Danger}">
+    <Setter Property="MinWidth" Value="120" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="ContentTemplate">
+      <Setter.Value>
+        <DataTemplate>
+          <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+        </DataTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
   <!-- APR-08: project data, read only, selectable, focusable, in the mono font, never markup. -->
   <Style x:Key="Workbench.ProjectData" TargetType="TextBox" BasedOn="{StaticResource Primer.Input}">
     <Setter Property="IsReadOnly" Value="True" />

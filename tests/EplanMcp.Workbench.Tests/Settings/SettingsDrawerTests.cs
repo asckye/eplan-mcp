@@ -42,6 +42,7 @@ public sealed class SettingsDrawerTests(WpfContext wpf)
         {
             AppTheme theme = ThemeManager.Current.Theme;
             BrandAccent accent = AccentManager.Current.Accent;
+            Func<DependencyObject, bool> confirmOff = ApprovalPolicyUi.ConfirmOff;
             using var temp = new TempDir();
             string config = Path.Combine(temp.Path, "config.json");
             var policy = new SafetyPolicyStore(config);
@@ -56,6 +57,18 @@ public sealed class SettingsDrawerTests(WpfContext wpf)
                 // Safety: toggle normal-write approval off -> config.json updated to writesOutsideScratch=allow
                 var apSwitch = (ToggleButton)page.FindName("ApprovalSwitch");
                 Assert.True(apSwitch.IsChecked);
+
+                // Turning it off asks first; kept on, the switch goes back and the file is not written.
+                bool confirmed = false;
+                ApprovalPolicyUi.ConfirmOff = _ => confirmed;
+                apSwitch.IsChecked = false;
+                WpfContext.Drain();
+                Assert.True(apSwitch.IsChecked);
+                Assert.True(policy.RequireNormalWriteApproval);
+                Assert.False(File.Exists(config));
+                Assert.False(((FrameworkElement)page.FindName("PolicyError")).IsVisible);
+
+                confirmed = true;
                 apSwitch.IsChecked = false;
                 WpfContext.Drain();
                 Assert.False(policy.RequireNormalWriteApproval);
@@ -77,6 +90,7 @@ public sealed class SettingsDrawerTests(WpfContext wpf)
             }
             finally
             {
+                ApprovalPolicyUi.ConfirmOff = confirmOff;
                 AccentManager.Current.Accent = accent;
                 ThemeManager.Current.Theme = theme;
             }

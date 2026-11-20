@@ -51,3 +51,12 @@
 
 - 原引用 `../standards/security.md` → [项目威胁模型](../architecture/architecture.md#13-威胁模型)。
 - 原引用 `../standards/workbench-ui.md` → [Workbench 实现记录](../design/2026-10-20-m5-operability.md#workbench-implementation)。
+
+## 2026-11-20 落实说明
+
+按本 ADR 在 Workbench 中实现（`ApprovalsPage`、`DestructiveConfirmDialog`）。与第 2 条的两处差别，原因都是审批协议（`ApprovalAskParams`）里没有页号、设备这类结构化的目标字段，而第 5 条规定协议不变：
+
+- 确认值用问题里的项目名称（`Project.Name`），项目没有名称时用工具名；不是页号。
+- 批准按钮的文字是“执行 <工具名>…”，不是“删除页…”这样的具体动作。
+
+要做到输入页号、按钮写具体动作，需要给审批协议加目标字段，属于进程间协议的改动，另行提议。另外，按项目负责人 2026-11-20 的决定，解除写入暂停（ADR-0010）的问题上“保持暂停”用主要样式，但没有任何按键回答它；回车拒绝仍只对破坏性问题生效。

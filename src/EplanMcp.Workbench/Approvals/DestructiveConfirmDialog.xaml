@@ -1,0 +1,35 @@
+<Window
+    x:Class="EplanMcp.Workbench.Approvals.DestructiveConfirmDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
+    Width="548" SizeToContent="Height" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+    Style="{StaticResource Workbench.Window}">
+  <!--
+    ADR-0035, second step of approving a Destructive write: what it changes, that it cannot be undone here, and a value
+    to type. The action stays disabled until the value matches; Cancel is the default, so Enter and Esc go back.
+  -->
+  <Border Padding="{StaticResource Ui.Padding.Modal}" AutomationProperties.IsDialog="True" AutomationProperties.Name="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}">
+    <StackPanel>
+      <DockPanel>
+        <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Error}" Width="{StaticResource Ui.IconSize.Large}" Height="{StaticResource Ui.IconSize.Large}" Margin="{StaticResource Ui.Gap.DialogIcon}" VerticalAlignment="Top" />
+        <StackPanel>
+          <TextBlock x:Name="Heading" Style="{StaticResource Primer.ContainerTitle}" AutomationProperties.HeadingLevel="Level1" TextWrapping="Wrap" TextTrimming="None" />
+          <TextBlock x:Name="Message" Text="{l:Tr Confirm.Message}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XS}" />
+          <TextBlock x:Name="Backup" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XS}" />
+          <DockPanel Margin="{StaticResource Ui.Gap.ChangesLabel}">
+            <TextBlock DockPanel.Dock="Right" Text="{l:Tr Question.FromProject}" Style="{StaticResource Primer.Muted}" />
+            <TextBlock x:Name="ChangesLabel" Text="{l:Tr Question.Changes}" Style="{StaticResource Primer.SectionLabel}" />
+          </DockPanel>
+          <TextBox x:Name="Changes" Style="{StaticResource Workbench.ProjectData}" MaxHeight="240" AutomationProperties.LabeledBy="{Binding ElementName=ChangesLabel}" />
+          <TextBlock x:Name="TypeLabel" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.SM}" />
+          <TextBox x:Name="Typed" Style="{StaticResource Primer.Input}" Margin="{StaticResource Ui.Gap.Top.XS}" TextChanged="OnTyped" AutomationProperties.LabeledBy="{Binding ElementName=TypeLabel}" />
+        </StackPanel>
+      </DockPanel>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="{StaticResource Ui.Gap.Top.LG}">
+        <Button x:Name="CancelButton" Style="{StaticResource Primer.Secondary}" MinWidth="88" IsDefault="True" IsCancel="True" />
+        <Button x:Name="ActionButton" Style="{StaticResource Primer.Danger}" MinWidth="88" IsEnabled="False" Margin="{StaticResource Ui.Gap.Left.XS}" Click="OnAction" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>

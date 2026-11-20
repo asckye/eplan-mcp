@@ -48,8 +48,8 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
     /// <summary>The change list as plain lines, then how many the limit left out (APR-08).</summary>
     public string Changes => string.Join(Environment.NewLine, _changes.MoreLines == 0 ? _changes.Lines : [.. _changes.Lines, Loc.Current.T("Question.MoreLines", _changes.MoreLines)]);
 
-    /// <summary>For an approval, how to undo it; for a release, what to check first, never Ctrl+Z (APR-07).</summary>
-    public string Note => IsRelease ? Text("Question.ReleaseNote") : Loc.Current.T("Question.Undo", Tool);
+    /// <summary>For a Write, how to undo it; for a Destructive write, that only the backup restores it (ADR-0035); for a release, what to check first, never Ctrl+Z (APR-07).</summary>
+    public string Note => IsRelease ? Text("Question.ReleaseNote") : IsDestructive ? Text("Confirm.Message") : Loc.Current.T("Question.Undo", Tool);
 
     /// <summary>Where a Destructive write backs the project up first (APR-09); empty for any other.</summary>
     public string Backup => !IsDestructive ? string.Empty
@@ -62,9 +62,20 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
         ProjectText.Line(record.Tool),
         record.Project is { } project ? Loc.Current.T("Question.ScopeProject", ProjectText.Line(project)) : Loc.Current.T("Question.ScopeInstance", record.ProcessId ?? 0));
 
-    public string ApproveLabel => Text(IsRelease ? "Question.Continue" : "Question.Approve");
+    /// <summary>A Destructive write names what runs and ends in an ellipsis: a typed confirmation follows (ADR-0035).</summary>
+    public string ApproveLabel => IsRelease ? Text("Question.Continue") : IsDestructive ? Loc.Current.T("Question.ApproveDestructive", Tool) : Text("Question.Approve");
 
-    public string RejectLabel => Text(IsRelease ? "Question.KeepSuspended" : "Question.Reject");
+    public string RejectLabel => Text(IsRelease ? "Question.KeepSuspended" : IsDestructive ? "Question.RejectDefault" : "Question.Reject");
+
+    /// <summary>Which answer is the safe one, said in words above the buttons; empty for a Write, whose answers are equal (ADR-0014).</summary>
+    public string AnswerHint => IsRelease ? Text("Question.ReleaseHint") : IsDestructive ? Text("Question.DestructiveHint") : string.Empty;
+
+    /// <summary>
+    /// What the engineer types to approve a Destructive write (ADR-0035): a structured field of the question, never text
+    /// from the change list. The protocol has no page or device field, so it is the project's name, or the tool when the
+    /// project has none.
+    /// </summary>
+    public string ConfirmValue => ProjectName.Length > 0 ? ProjectName : Tool;
 
     public TimeSpan Left => Countdown.Left(Question, clock.GetUtcNow());
 

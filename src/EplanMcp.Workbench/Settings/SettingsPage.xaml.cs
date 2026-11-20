@@ -104,8 +104,9 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
             return;
         }
 
-        bool saved = _policy.SetRequireNormalWriteApproval(ApprovalSwitch.IsChecked == true);
-        if (!saved)
+        bool? answer = ApprovalPolicyUi.Set(_policy, ApprovalSwitch.IsChecked == true, this);
+        bool saved = answer != false;
+        if (answer != true)
         {
             // Nothing changed: show what the file says again.
             _showing = true;

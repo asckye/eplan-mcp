@@ -151,7 +151,27 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         ApprovalPolicyBar.Visibility = _policy is not null && ApprovalsTab.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void ApplyButtons() => RejectButton.IsEnabled = ApproveButton.IsEnabled = _view?.CanAnswer == true;
+    private void ApplyButtons()
+    {
+        RejectButton.IsEnabled = ApproveButton.IsEnabled = _view?.CanAnswer == true;
+        QuestionItem? shown = _view?.Shown;
+        bool destructive = shown?.IsDestructive == true;
+        // A Write keeps two equal buttons (ADR-0014). The safe answer is primary for a Destructive write (ADR-0035)
+        // and for a release (ADR-0010); the Destructive action is the danger button.
+        string reject = destructive || shown?.IsRelease == true ? "Workbench.AnswerPrimary" : "Workbench.Answer";
+        string approve = destructive ? "Workbench.AnswerDanger" : "Workbench.Answer";
+        if (!ReferenceEquals(RejectButton.Style, FindResource(reject)))
+        {
+            RejectButton.Style = (Style)FindResource(reject);
+        }
+
+        if (!ReferenceEquals(ApproveButton.Style, FindResource(approve)))
+        {
+            ApproveButton.Style = (Style)FindResource(approve);
+        }
+
+        AnswerHint.Visibility = shown?.AnswerHint.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
 
     private void OnViewChanged(object? sender, PropertyChangedEventArgs e) => Dispatcher.BeginInvoke(() =>
     {
@@ -217,7 +237,7 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     {
         if (_policy is { } policy)
         {
-            policy.SetRequireNormalWriteApproval(!policy.RequireNormalWriteApproval);
+            ApprovalPolicyUi.Set(policy, !policy.RequireNormalWriteApproval, this);
         }
     }
 
@@ -327,7 +347,41 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
 
     private void OnReject(object sender, RoutedEventArgs e) => Answer(approve: false);
 
-    private void OnApprove(object sender, RoutedEventArgs e) => Answer(approve: true);
+    /// <summary>Asks for the typed confirmation of a Destructive write (ADR-0035); a test replaces it.</summary>
+    internal Func<QuestionItem, bool>? ConfirmDestructive { get; set; }
+
+    private void OnApprove(object sender, RoutedEventArgs e)
+    {
+        if (_view is not { CanAnswer: true, Shown: { } shown })
+        {
+            return;
+        }
+
+        // The second step of a Destructive approval. The countdown keeps running behind the dialog, and the answer
+        // below is refused if the question ended meanwhile.
+        if (shown.IsDestructive && !(ConfirmDestructive ?? (item => DestructiveConfirmDialog.Confirm(Window.GetWindow(this)!, item)))(shown))
+        {
+            return;
+        }
+
+        if (ReferenceEquals(_view.Shown, shown))
+        {
+            Answer(approve: true);
+        }
+    }
+
+    /// <summary>
+    /// ADR-0035: on a Destructive question Enter answers Reject, the one key that answers and only towards safety. A
+    /// button that has the focus handles Enter itself, so this is reached from the heading and the read-only texts.
+    /// </summary>
+    private void OnDetailKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && _view is { CanAnswer: true, Shown.IsDestructive: true })
+        {
+            e.Handled = true;
+            Answer(approve: false);
+        }
+    }
 
     private void Answer(bool approve)
     {

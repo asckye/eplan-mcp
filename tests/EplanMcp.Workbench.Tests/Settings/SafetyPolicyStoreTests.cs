@@ -30,6 +30,38 @@ public sealed class SafetyPolicyStoreTests : IDisposable
     }
 
     [Fact]
+    public void TurningApprovalOff_AsksFirst_AndTurningItOnNeverAsks()
+    {
+        SafetyPolicyStore store = Loaded();
+        Func<System.Windows.DependencyObject, bool> before = ApprovalPolicyUi.ConfirmOff;
+        int asked = 0;
+        bool answer = false;
+        ApprovalPolicyUi.ConfirmOff = _ =>
+        {
+            asked++;
+            return answer;
+        };
+        try
+        {
+            Assert.Null(ApprovalPolicyUi.Set(store, require: false, from: null!)); // kept: nothing written
+            Assert.True(store.RequireNormalWriteApproval);
+            Assert.False(File.Exists(Config));
+
+            answer = true;
+            Assert.True(ApprovalPolicyUi.Set(store, require: false, from: null!));
+            Assert.False(store.RequireNormalWriteApproval);
+            Assert.Equal(2, asked);
+
+            Assert.True(ApprovalPolicyUi.Set(store, require: true, from: null!));
+            Assert.True(store.RequireNormalWriteApproval);
+            Assert.Equal(2, asked);
+        }
+        finally
+        {
+            ApprovalPolicyUi.ConfirmOff = before;
+        }
+    }
+    [Fact]
     public void TheSwitch_WritesAllowAndApprove_AndKeepsTheRestOfTheFile()
     {
         File.WriteAllText(Config, """{"scratchRoots":["C:\\Scratch"],"writesOutsideScratch":"approve"}""");

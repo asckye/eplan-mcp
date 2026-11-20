@@ -463,7 +463,7 @@ public partial class MainWindow : Window
     {
         if (_policy is { } policy)
         {
-            policy.SetRequireNormalWriteApproval(!policy.RequireNormalWriteApproval);
+            ApprovalPolicyUi.Set(policy, !policy.RequireNormalWriteApproval, this);
         }
     }
 

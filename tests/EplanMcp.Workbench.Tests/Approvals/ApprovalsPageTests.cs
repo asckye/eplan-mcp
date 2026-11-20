@@ -543,6 +543,95 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         });
     }
 
+    [Fact]
+    public void ADestructiveQuestion_HasRejectAsThePrimaryButton_AndApprovesOnlyAfterTheTypedConfirmation()
+    {
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithPage((window, page) =>
+        {
+            Question question = Add("r1", ask: Asks.Write(tier: QuestionTier.Destructive, tool: "eplan_page_delete"));
+            Open();
+            Button reject = Button(page, "RejectButton");
+            Button approve = Button(page, "ApproveButton");
+
+            // ADR-0035: the safe answer is primary; the action names what runs and only opens the confirmation.
+            Assert.Same(page.FindResource("Workbench.AnswerPrimary"), reject.Style);
+            Assert.Same(page.FindResource("Workbench.AnswerDanger"), approve.Style);
+            Assert.Equal(("拒绝（默认）", "执行 eplan_page_delete…"), (AutomationProperties.GetName(reject), AutomationProperties.GetName(approve)));
+            Assert.False(approve.IsDefault || approve.IsCancel);
+            Assert.True(((TextBlock)page.FindName("AnswerHint")).IsVisible);
+
+            var asked = new List<string>();
+            bool confirmed = false;
+            page.ConfirmDestructive = item =>
+            {
+                asked.Add(item.ConfirmValue);
+                return confirmed;
+            };
+
+            Press(approve);
+            Assert.Equal(["Line1"], asked); // a structured field of the question, not text from the change list
+            Assert.Null(question.End);
+
+            confirmed = true;
+            Press(approve);
+            Assert.Equal(QuestionEnd.Approved, question.End);
+        }));
+    }
+
+    [Fact]
+    public void Enter_RejectsADestructiveQuestion_AndAnswersNothingOnAWrite()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            Question write = Add("r1");
+            Open();
+            var title = (TextBlock)page.FindName("QuestionTitle");
+            Enter(title);
+            Assert.Null(write.End); // ADR-0014: no key answers a Write
+            Assert.False(((TextBlock)page.FindName("AnswerHint")).IsVisible);
+
+            Question destructive = Add("r2", ask: Asks.Write("r2", tier: QuestionTier.Destructive));
+            _view!.Select(Item(destructive));
+            WpfContext.Drain();
+            Enter(title);
+            Assert.Null(destructive.End); // the 500 ms have not passed (ResponseGuard)
+
+            Open();
+            Enter(title);
+            Assert.Equal(QuestionEnd.Rejected, destructive.End);
+            Assert.Null(write.End);
+        }));
+    }
+
+    [Fact]
+    public void ARelease_HasKeepSuspendedAsThePrimaryButton_AndNoKeyAnswersIt()
+    {
+        wpf.Run(() => WithPage((window, page) =>
+        {
+            Question release = Add("r1", 150, Asks.Release("r1"));
+            Open();
+
+            Assert.Same(page.FindResource("Workbench.AnswerPrimary"), Button(page, "RejectButton").Style);
+            Assert.Same(page.FindResource("Workbench.Answer"), Button(page, "ApproveButton").Style);
+            Enter((TextBlock)page.FindName("QuestionTitle"));
+            Assert.Null(release.End);
+        }));
+    }
+
+    [Theory]
+    [InlineData("Line1", "Line1", true)]
+    [InlineData("  Line1 ", "Line1", true)]
+    [InlineData("line1", "Line1", false)]
+    [InlineData("Line", "Line1", false)]
+    [InlineData("", "", false)]
+    public void TheTypedConfirmation_MustBeTheExactValue(string typed, string value, bool matches) =>
+        Assert.Equal(matches, DestructiveConfirmDialog.Matches(typed, value));
+
+    private static void Enter(UIElement element)
+    {
+        element.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(element)!, 0, Key.Enter) { RoutedEvent = Keyboard.KeyDownEvent });
+        WpfContext.Drain();
+    }
     private void WithPage(Action<MainWindow, ApprovalsPage> test) => With(window =>
     {
         _queue = new ApprovalQueue(_clock);

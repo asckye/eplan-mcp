@@ -81,7 +81,7 @@
         <shell:EmptyState x:Name="Empty" Grid.Row="1" Grid.ColumnSpan="2" Title="{l:Tr Approvals.Empty}" Text="{l:Tr Approvals.EmptyText}" />
 
         <ScrollViewer x:Name="DetailArea" Grid.Row="1" Grid.Column="1" Margin="{StaticResource Ui.Gap.Left.LG}" Background="{DynamicResource Surface.Subtle}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                      Focusable="False" AutomationProperties.Name="{l:Tr Approvals.Detail}" DataContext="{Binding Shown}">
+                      Focusable="False" AutomationProperties.Name="{l:Tr Approvals.Detail}" DataContext="{Binding Shown}" KeyDown="OnDetailKeyDown">
           <StackPanel x:Name="Detail" Margin="{StaticResource Ui.Inset.Detail}">
             <TextBlock x:Name="QuestionTitle" Text="{Binding Title}" Style="{StaticResource Primer.ContainerTitle}" TextWrapping="Wrap" TextTrimming="None"
                        Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
@@ -157,6 +157,7 @@
               </DockPanel>
               <ProgressBar x:Name="CountdownBar" Style="{StaticResource Primer.Progress}" Tag="{Binding Tone}" Value="{Binding Remaining, Mode=OneWay}" Maximum="100" Margin="{StaticResource Ui.Gap.Countdown}"
                            AutomationProperties.Name="{l:Tr Question.TimeLeft}" />
+              <TextBlock x:Name="AnswerHint" Text="{Binding AnswerHint}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Bottom.SM}" />
               <UniformGrid x:Name="Answers" Rows="1" Columns="2" HorizontalAlignment="Right">
                 <Button x:Name="RejectButton" Style="{StaticResource Workbench.Answer}" Content="{Binding RejectLabel}" AutomationProperties.Name="{Binding RejectLabel}"
                         IsDefault="False" IsCancel="False" Margin="{StaticResource Ui.Gap.Right.XXS}" Click="OnReject" />
