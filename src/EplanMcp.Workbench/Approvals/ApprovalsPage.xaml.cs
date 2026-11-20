@@ -313,18 +313,32 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         AiCallRow[] visible = [.. rows];
         CallsList.ItemsSource = visible;
         CallsEmpty.Visibility = visible.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
-        CallInspectorText.Text = visible.Length > 0 ? visible[0].RawDetail : string.Empty;
+        ShowCall(visible.Length > 0 ? visible[0] : null);
     }
 
     private void OnCallsFilterChanged(object sender, RoutedEventArgs e) => ApplyCallsFilter();
 
     private void OnCallsReload(object sender, RoutedEventArgs e) => ReloadCalls();
 
+    /// <summary>The inspector shows one record: its summary and the text as the log has it; nothing without one.</summary>
+    private void ShowCall(AiCallRow? row)
+    {
+        CallSummary.DataContext = row;
+        CallInspectorText.Text = row?.RawDetail ?? string.Empty;
+    }
+
+    private void OnInspectorToggle(object sender, RoutedEventArgs e)
+    {
+        bool shown = InspectorToggle.IsChecked == true;
+        CallInspector.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        InspectorColumn.Width = shown ? new GridLength(344) : new GridLength(0);
+    }
+
     private void OnCallSelected(object sender, SelectionChangedEventArgs e)
     {
         if (CallsList.SelectedItem is AiCallRow row)
         {
-            CallInspectorText.Text = row.RawDetail;
+            ShowCall(row);
         }
     }
 

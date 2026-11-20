@@ -444,6 +444,11 @@
     <Setter Property="TextElement.Foreground" Value="{DynamicResource State.Error.Text}" />
   </Style>
 
+  <Style x:Key="Workbench.Tag.Success" TargetType="Border" BasedOn="{StaticResource Workbench.Tag}">
+    <Setter Property="Background" Value="{DynamicResource State.Success.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource State.Success.Border}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource State.Success.Text}" />
+  </Style>
   <Style x:Key="Workbench.FactCard" TargetType="Border" BasedOn="{StaticResource Workbench.Card}">
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.FactCard}" />
     <Setter Property="Margin" Value="{StaticResource Ui.Gap.FactCard}" />
@@ -692,6 +697,41 @@
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
               <Setter TargetName="Hover" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource State.Info.Background}" />
+              <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource State.Info.Border}" />
+              <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
+              <Setter Property="FontWeight" Value="SemiBold" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <!-- The compact pill of a filter row (24 px), and the same pill as an on/off button. -->
+  <Style x:Key="Workbench.IdePill.Compact" TargetType="RadioButton" BasedOn="{StaticResource Workbench.IdePill}">
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="FontSize" Value="11.5" />
+  </Style>
+  <Style x:Key="Workbench.IdePill.Toggle" TargetType="ToggleButton">
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.IdePill}" />
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Border x:Name="Bd" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+              <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
               <Setter TargetName="Bd" Property="Background" Value="{DynamicResource State.Info.Background}" />
               <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource State.Info.Border}" />
               <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />

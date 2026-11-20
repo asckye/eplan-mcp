@@ -206,13 +206,14 @@
         <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeSubBar}">
           <DockPanel>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-              <TextBox x:Name="CallsSearch" Width="200" Style="{StaticResource Primer.Input}" Margin="{StaticResource Ui.Gap.Right.XS}" TextChanged="OnCallsFilterChanged" />
-              <Button x:Name="CallsReload" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Approvals.CallsRefresh}" Click="OnCallsReload" />
+              <TextBox x:Name="CallsSearch" Width="210" Style="{StaticResource Primer.Input}" Margin="{StaticResource Ui.Gap.Right.XS}" TextChanged="OnCallsFilterChanged" />
+              <Button x:Name="CallsReload" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Approvals.CallsRefresh}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnCallsReload" />
+              <ToggleButton x:Name="InspectorToggle" Style="{StaticResource Workbench.IdePill.Toggle}" Content="{l:Tr Approvals.Inspector}" IsChecked="True" Click="OnInspectorToggle" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-              <RadioButton x:Name="CallsAll" GroupName="CallsFilter" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Approvals.CallsAll}" IsChecked="True" Checked="OnCallsFilterChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
-              <RadioButton x:Name="CallsWrite" GroupName="CallsFilter" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Approvals.CallsWrite}" Checked="OnCallsFilterChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
-              <RadioButton x:Name="CallsFailed" GroupName="CallsFilter" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Approvals.CallsFailed}" Checked="OnCallsFilterChanged" />
+              <RadioButton x:Name="CallsAll" GroupName="CallsFilter" Style="{StaticResource Workbench.IdePill.Compact}" Content="{l:Tr Approvals.CallsAll}" IsChecked="True" Checked="OnCallsFilterChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+              <RadioButton x:Name="CallsWrite" GroupName="CallsFilter" Style="{StaticResource Workbench.IdePill.Compact}" Content="{l:Tr Approvals.CallsWrite}" Checked="OnCallsFilterChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+              <RadioButton x:Name="CallsFailed" GroupName="CallsFilter" Style="{StaticResource Workbench.IdePill.Compact}" Content="{l:Tr Approvals.CallsFailed}" Checked="OnCallsFilterChanged" />
             </StackPanel>
           </DockPanel>
         </Border>
@@ -220,31 +221,93 @@
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="320" />
+            <ColumnDefinition x:Name="InspectorColumn" Width="344" />
           </Grid.ColumnDefinitions>
           <Grid Grid.Column="0">
-            <ListView x:Name="CallsList" ScrollViewer.HorizontalScrollBarVisibility="Auto" SelectionChanged="OnCallSelected">
+            <ListView x:Name="CallsList" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" SelectionChanged="OnCallSelected">
               <ListView.View>
                 <GridView>
-                  <GridViewColumn x:Name="CallTimeCol" Width="130" DisplayMemberBinding="{Binding Time}" />
-                  <GridViewColumn x:Name="CallToolCol" Width="200" DisplayMemberBinding="{Binding Tool}" />
-                  <GridViewColumn x:Name="CallKindCol" Width="110" DisplayMemberBinding="{Binding Kind}" />
-                  <GridViewColumn x:Name="CallProjectCol" Width="200" DisplayMemberBinding="{Binding Project}" />
-                  <GridViewColumn x:Name="CallResultCol" Width="120" DisplayMemberBinding="{Binding Result}" />
+                  <GridViewColumn x:Name="CallTimeCol" Width="130">
+                    <GridViewColumn.CellTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Time}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11.5" />
+                      </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                  </GridViewColumn>
+                  <GridViewColumn x:Name="CallToolCol" Width="230">
+                    <GridViewColumn.CellTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" FontSize="12.5" FontWeight="Medium" />
+                      </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                  </GridViewColumn>
+                  <GridViewColumn x:Name="CallKindCol" Width="140">
+                    <GridViewColumn.CellTemplate>
+                      <DataTemplate>
+                        <Border x:Name="KindTag" Style="{StaticResource Workbench.Tag}" HorizontalAlignment="Left">
+                          <TextBlock Text="{Binding Kind}" VerticalAlignment="Center" />
+                        </Border>
+                        <DataTemplate.Triggers>
+                          <DataTrigger Binding="{Binding IsWrite}" Value="True">
+                            <Setter TargetName="KindTag" Property="Style" Value="{StaticResource Workbench.Tag.Accent}" />
+                          </DataTrigger>
+                        </DataTemplate.Triggers>
+                      </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                  </GridViewColumn>
+                  <GridViewColumn x:Name="CallProjectCol" Width="200">
+                    <GridViewColumn.CellTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Project}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="12" />
+                      </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                  </GridViewColumn>
+                  <GridViewColumn x:Name="CallResultCol" Width="130">
+                    <GridViewColumn.CellTemplate>
+                      <DataTemplate>
+                        <Border x:Name="ResultTag" Style="{StaticResource Workbench.Tag.Success}" HorizontalAlignment="Left">
+                          <TextBlock Text="{Binding Result}" VerticalAlignment="Center" />
+                        </Border>
+                        <DataTemplate.Triggers>
+                          <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                            <Setter TargetName="ResultTag" Property="Style" Value="{StaticResource Workbench.Tag.Error}" />
+                          </DataTrigger>
+                        </DataTemplate.Triggers>
+                      </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                  </GridViewColumn>
                 </GridView>
               </ListView.View>
             </ListView>
             <shell:EmptyState x:Name="CallsEmpty" Title="{l:Tr Approvals.CallsEmpty}" Text="{l:Tr Approvals.CallsEmptyText}" Visibility="Collapsed" />
           </Grid>
 
-          <Border Grid.Column="1" Style="{StaticResource Workbench.RightPane}" Padding="{StaticResource Ui.Inset.Pane}">
+          <!-- The inspector (344 px): the chosen record as a summary card, then as the log wrote it. -->
+          <Border x:Name="CallInspector" Grid.Column="1" Style="{StaticResource Workbench.RightPane}" Padding="{StaticResource Ui.Inset.CardBody}">
             <DockPanel>
-              <TextBlock DockPanel.Dock="Top" Text="{l:Tr Approvals.Inspector}" Style="{StaticResource Ui.Text.BodyStrong}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-              <TextBox x:Name="CallInspectorText" Style="{StaticResource Workbench.ProjectData}" />
+              <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.CardBody}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+                <StackPanel x:Name="CallSummary">
+                  <TextBlock Text="{l:Tr Audit.Tool}" Style="{StaticResource Workbench.FactCaption}" />
+                  <TextBlock Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" TextWrapping="Wrap" TextTrimming="None" />
+                  <TextBlock Text="{l:Tr Audit.Project}" Style="{StaticResource Workbench.FactCaption}" Margin="{StaticResource Ui.Gap.ChangesLabel}" />
+                  <TextBlock Text="{Binding Project}" Style="{StaticResource Primer.Mono.text}" TextWrapping="Wrap" TextTrimming="None" />
+                  <TextBlock Text="{l:Tr Audit.Result}" Style="{StaticResource Workbench.FactCaption}" Margin="{StaticResource Ui.Gap.ChangesLabel}" />
+                  <TextBlock Text="{Binding Result}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
+                  <TextBlock Text="{l:Tr Audit.Time}" Style="{StaticResource Workbench.FactCaption}" Margin="{StaticResource Ui.Gap.ChangesLabel}" />
+                  <TextBlock Text="{Binding Time}" Style="{StaticResource Primer.Mono.text}" />
+                </StackPanel>
+              </Border>
+              <Border Style="{StaticResource Workbench.Card}" Padding="0">
+                <DockPanel>
+                  <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.CardHeader}">
+                    <TextBlock x:Name="CallRecordLabel" Text="{l:Tr Approvals.Inspector}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" VerticalAlignment="Center" />
+                  </Border>
+                  <TextBox x:Name="CallInspectorText" Style="{StaticResource Workbench.ProjectData}" BorderThickness="0" Background="Transparent" AutomationProperties.LabeledBy="{Binding ElementName=CallRecordLabel}" />
+                </DockPanel>
+              </Border>
             </DockPanel>
           </Border>
         </Grid>
-      </DockPanel>
-    </Grid>
+      </DockPanel>    </Grid>
   </DockPanel>
 </UserControl>
