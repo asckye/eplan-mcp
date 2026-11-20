@@ -140,3 +140,12 @@
 - **现象：** 第二个实例与第一个实例争用工作站设置，启动停在模态系统消息窗口。
 - **结论：** 会话启动工具检查已有进程；已有实例运行时拒绝启动第二个。
 - **证据：** `src/EplanMcp.Host/Addin/EplanLifecycle.cs` 的 `EplanLifecycle.StartAsync`（类注释）。
+
+### A172. The system messages window at start-up: how to recognise it, and why EPLAN does not close behind it (2026-11-20, EPLAN Electric P8 2025.0.3.23616, Spanish user interface; reporter of #664)
+- **Situation:** two `S046001` errors at every start (a script that another EPLAN tool registered and later deleted) make EPLAN open its system messages window right after the licence selection.
+- **Window:** a dialog of class `#32770`, title localized ("Mensajes del sistema"), owned by EPLAN's main frame (class `AfxMDIFrame140u`). Its child controls: the messages grid `1011` (class `BCGPGridCtrl:` followed by addresses that change between starts), the detail box `1076` (`Edit`), "show all sessions" `1112`, "file" `1012` and "close" `2` (`Button`). The licence selection dialog is also a `#32770`, but it is owned by the splash screen (`SplashWnd`) and has none of `1011`, `1076` or `1112`.
+- **Modal:** while it is open the main frame is disabled. `Process.CloseMainWindow` then returns `false` and sends nothing, so asking EPLAN to close does nothing for as long as the window stays (watched for 200 s).
+- **Closing it:** `WM_CLOSE` to the dialog closes it, as its close button does; the main frame is enabled again at once, and `CloseMainWindow` then closed EPLAN within about 1 s. Nothing else was asked.
+- **Its content:** the grid is not exposed to UI Automation (a `Pane` without items) and the detail box is empty until a message is selected, so the messages cannot be read from the window. They are in `EplLog.eldb` (A1): `TSysSession_v100.ProcessId` gives the session of an EPLAN process, and that session's rows in `TSysMsg_v100` with `ErrorLevel` 4 (`MessageLevel.Error`) are the two `S046001` messages.
+- **Tool behaviour:** the closer of `install-addin`, `eplan_session_close` and `eplan_session_restart` closes this window, and only windows on the same list, before asking EPLAN to close (`HarmlessWindows`, ADR-0063); it says it did, and points to `EplLog.eldb`. Any other window is left open and named.
+- **Verified:** live on 2025.0.3.23616 in two starts. Not checked on 2026; whether 2026 shows the same layout is not verified.
