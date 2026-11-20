@@ -125,13 +125,15 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
     {
         string config = Path.Combine(_root.FullName, "config.json");
         File.WriteAllText(config, "{\n  \"writesOutsideScratch\": \"approve\"\u202E\n}");
-        wpf.Run(() => WithDrawer((window, drawer) =>
+        wpf.Run(() => WithDrawer((window, page) =>
         {
-            var text = (TextBox)drawer.FindName("ConfigText");
+            page.OpenStorageCategory();
+            WpfContext.Drain();
+            var text = (TextBox)page.FindName("ConfigText");
             Assert.True(text.IsReadOnly);
             Assert.Equal(string.Join(Environment.NewLine, "{", "  \"writesOutsideScratch\": \"approve\"", "}"), text.Text);
 
-            Click((Button)drawer.FindName("ConfigButton"));
+            Click((Button)page.FindName("ConfigButton"));
             Assert.Equal([config], _opened);
         }));
     }
@@ -142,11 +144,13 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
         _shellWorks = false;
         string config = Path.Combine(_root.FullName, "config.json");
         File.WriteAllText(config, "{}");
-        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithDrawer((window, drawer) =>
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithDrawer((window, page) =>
         {
-            Click((Button)drawer.FindName("ConfigButton"));
+            page.OpenStorageCategory();
+            WpfContext.Drain();
+            Click((Button)page.FindName("ConfigButton"));
 
-            var problem = (TextBlock)drawer.FindName("ConfigProblem");
+            var problem = (TextBlock)page.FindName("ConfigProblem");
             Assert.True(problem.IsVisible);
             Assert.Equal($"Windows 无法打开 {config}。", problem.Text);
         }));
@@ -155,19 +159,21 @@ public sealed class StartAtLoginTests(WpfContext wpf) : IDisposable
     [Fact]
     public void WithoutConfigJson_TheDefaultsApply_AndThereIsNothingToOpen()
     {
-        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithDrawer((window, drawer) =>
+        wpf.RunWithLanguage(AppLanguage.Chinese, () => WithDrawer((window, page) =>
         {
-            Assert.Equal("没有 config.json：使用默认值。", ((TextBox)drawer.FindName("ConfigText")).Text);
-            Assert.False(((Button)drawer.FindName("ConfigButton")).IsEnabled);
+            page.OpenStorageCategory();
+            WpfContext.Drain();
+            Assert.Equal("没有 config.json：使用默认值。", ((TextBox)page.FindName("ConfigText")).Text);
+            Assert.False(((Button)page.FindName("ConfigButton")).IsEnabled);
         }));
     }
 
-    private void WithDrawer(Action<MainWindow, SettingsDrawer> test) => With(window =>
+    private void WithDrawer(Action<MainWindow, SettingsPage> test) => With(window =>
     {
-        window.AttachSettings(new StartAtLogin(RunKey, Executable), Path.Combine(_root.FullName, "config.json"), new FakeShell(_opened, _shellWorks));
+        window.AttachSettings(new StartAtLogin(RunKey, Executable), Path.Combine(_root.FullName, "config.json"), shell: new FakeShell(_opened, _shellWorks));
         window.OpenSettings();
-        test(window, (SettingsDrawer)window.FindName("SettingsPane"));
-        window.CloseSettings();
+        WpfContext.Drain();
+        test(window, (SettingsPage)window.FindName("SettingsPage"));
     });
 
     /// <summary>Turns the switch as a screen reader or the keyboard does, through its toggle pattern.</summary>

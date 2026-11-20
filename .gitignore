@@ -27,6 +27,8 @@ coverage/
 # ---- Runtime data produced by local runs (audit logs, scratch projects, exports) ----
 .local/
 logs/
+# ... but not the Workbench Logs page sources.
+!/src/EplanMcp.Workbench/Logs/
 *.log
 
 # ---- NuGet ----

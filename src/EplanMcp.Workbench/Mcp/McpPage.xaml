@@ -1,0 +1,72 @@
+<UserControl
+    x:Class="EplanMcp.Workbench.Mcp.McpPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
+    xmlns:vm="clr-namespace:EplanMcp.Workbench.Vm"
+    Focusable="False">
+  <!-- Dedicated MCP Server Page (TIA 2-Card Layout: Transport + Target Platform) -->
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
+      <DockPanel>
+        <Button x:Name="GoClientsButton" DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Mcp.GoClients}" Click="OnGoClients" />
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock x:Name="PageTitle" Text="{l:Tr Mcp.Title}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" VerticalAlignment="Center"
+                     AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel Margin="{StaticResource Ui.Inset.PageWide}" MaxWidth="820">
+        <!-- Card 1: Transport & Endpoint (inline expanded key-free VM HTTP panel) -->
+        <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+          <StackPanel>
+            <TextBlock Text="{l:Tr Mcp.TransportCard}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14.5" AutomationProperties.HeadingLevel="Level2" />
+            <TextBlock Text="{l:Tr Mcp.TransportHelp}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+
+            <Grid Margin="{StaticResource Ui.Gap.SectionTop}" KeyboardNavigation.TabNavigation="Once">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Border Grid.Column="0" Padding="{StaticResource Ui.Inset.StatCard}" CornerRadius="8" Background="{DynamicResource Surface.Subtle}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="1">
+                <StackPanel>
+                  <RadioButton x:Name="StdioChoice" GroupName="McpTransport" Style="{StaticResource Primer.Radio}" Content="{l:Tr Mcp.LocalStdio}" IsChecked="True" Checked="OnTransportChanged" />
+                  <TextBlock Text="{l:Tr Mcp.LocalStdioDesc}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+                </StackPanel>
+              </Border>
+              <Border Grid.Column="2" Padding="{StaticResource Ui.Inset.StatCard}" CornerRadius="8" Background="{DynamicResource Surface.Subtle}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="1">
+                <StackPanel>
+                  <RadioButton x:Name="HttpChoice" GroupName="McpTransport" Style="{StaticResource Primer.Radio}" Content="{l:Tr Mcp.RemoteHttp}" Checked="OnTransportChanged" />
+                  <TextBlock Text="{l:Tr Mcp.RemoteHttpDesc}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+                </StackPanel>
+              </Border>
+            </Grid>
+
+            <!-- Inline expanded Key-Free VM HTTP section -->
+            <Border x:Name="HttpSection" Visibility="Collapsed" Margin="{StaticResource Ui.Gap.Top.Normal}" Padding="{StaticResource Ui.Inset.SectionTop}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,1,0,0">
+              <StackPanel>
+                <Border Style="{StaticResource Primer.Alert.Info}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+                  <TextBlock Text="{l:Tr Mcp.KeyFreeNote}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" />
+                </Border>
+                <vm:VmPanel x:Name="VmConnection" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <!-- Card 2: Target EPLAN Platform & Host Executable -->
+        <Border Style="{StaticResource Workbench.Card}">
+          <StackPanel>
+            <TextBlock Text="{l:Tr Mcp.PlatformCard}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14.5" AutomationProperties.HeadingLevel="Level2" />
+            <TextBlock Text="{l:Tr Mcp.PlatformHelp}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+            <TextBlock Text="{l:Tr Mcp.HostPathLabel}" Style="{StaticResource Primer.SectionLabel}" Margin="{StaticResource Ui.Gap.Top.SM}" />
+            <TextBox x:Name="HostPathBox" Style="{StaticResource Workbench.CodeValue}" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

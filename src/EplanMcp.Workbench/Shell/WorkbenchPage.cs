@@ -1,10 +1,14 @@
 namespace EplanMcp.Workbench.Shell;
 
-/// <summary>The pages of the Workbench (docs/design/2026-10-20-m5-operability.md#workbench-implementation), in menu order; Ctrl+1 to Ctrl+4 (KEY-07).</summary>
+/// <summary>The eight pages of the Workbench (TIA Automation Studio 4.0 IDE order: Ctrl+1 to Ctrl+7, Ctrl+,).</summary>
 public enum WorkbenchPage
 {
+    Project,
     Approvals,
-    Audit,
-    Status,
+    Mcp,
     Clients,
+    Status,
+    Audit,
+    Logs,
+    Settings,
 }

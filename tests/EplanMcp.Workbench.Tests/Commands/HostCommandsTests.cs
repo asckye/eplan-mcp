@@ -49,7 +49,7 @@ public sealed class HostCommandsTests
         if (JsonNode.Parse(json)!["schemaVersion"]!.GetValue<int>() != HostCommands.SchemaVersion)
         {
             _host.Answer = _ => new(0, json);
-            ClientConfigReport vm = await Commands.ConfigureVmClientsAsync(["cursor"], ClientConfigMode.DryRun, "http://192.168.56.2:8766/mcp", new string('A', 43), TestContext.Current.CancellationToken);
+            ClientConfigReport vm = await Commands.ConfigureVmClientsAsync(["cursor"], ClientConfigMode.DryRun, "http://192.168.56.2:8766/mcp", TestContext.Current.CancellationToken);
             Assert.Equal((2, "eplan-vm"), (vm.SchemaVersion, vm.Server.Name));
             return;
         }

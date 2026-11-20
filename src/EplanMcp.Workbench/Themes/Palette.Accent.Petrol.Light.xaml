@@ -1,0 +1,21 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Engineering Petrol accent override (Light, WCAG AA verified). Applied only when High Contrast is off. -->
+  <SolidColorBrush x:Key="Primer.accent" Color="#00666E" />
+  <SolidColorBrush x:Key="Primer.focusOuter" Color="#007078" />
+  <SolidColorBrush x:Key="Primer.noteAccent" Color="#00666E" />
+  <SolidColorBrush x:Key="Primer.noteBg" Color="#E6F5F6" />
+  <SolidColorBrush x:Key="Primer.noteBorder" Color="#007078" />
+  <SolidColorBrush x:Key="Primer.primaryBg" Color="#007078" />
+  <SolidColorBrush x:Key="Ant.colorLinkHover" Color="#00666E" />
+  <SolidColorBrush x:Key="Ant.colorPrimary" Color="#007078" />
+  <SolidColorBrush x:Key="Ant.colorPrimaryActive" Color="#007078" />
+  <SolidColorBrush x:Key="Ant.colorPrimaryHover" Color="#006168" />
+  <SolidColorBrush x:Key="Accent.Text" Color="#00666E" />
+  <SolidColorBrush x:Key="Accent.Graphic" Color="#007078" />
+  <SolidColorBrush x:Key="Accent.Button" Color="#007078" />
+  <SolidColorBrush x:Key="Accent.HoverText" Color="#00666E" />
+  <SolidColorBrush x:Key="Border.FocusOuter" Color="#007078" />
+  <SolidColorBrush x:Key="State.Info.Text" Color="#00666E" />
+  <SolidColorBrush x:Key="State.Info.Background" Color="#E6F5F6" />
+  <SolidColorBrush x:Key="State.Info.Border" Color="#007078" />
+</ResourceDictionary>

@@ -52,12 +52,13 @@ internal sealed class ClientConfigCommand
 
     internal ClientConfigReport Run(ClientConfigRequest request, TextReader? input = null)
     {
+        _ = input;
         RemoteServer? remote = null;
         try
         {
             if (request.Vm && request.Mode != ClientConfigMode.Remove)
             {
-                remote = RemoteServer.Read(request.Url!, input ?? (Console.IsInputRedirected ? Console.In : TextReader.Null));
+                remote = RemoteServer.Create(request.Url!);
             }
         }
         catch (ClientConfigException ex)

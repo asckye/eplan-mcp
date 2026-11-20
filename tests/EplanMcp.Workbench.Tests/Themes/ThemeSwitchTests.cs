@@ -30,12 +30,12 @@ public sealed class ThemeSwitchTests(WpfContext wpf)
                 window.Show();
                 manager.Theme = AppTheme.Dark;
                 WpfContext.Drain();
-                // v2 bg-window (ADR-0034): the design value follows the approved design (UI-37), the behaviour does not.
-                Assert.Equal(Color.FromRgb(0x1E, 0x1E, 0x1E), Token("Primer.bg"));
+                // Automation Studio 4.0 bg-window tokens (cool neutral Light #F4F6F9, midnight slate Dark #0C1017).
+                Assert.Equal(Color.FromRgb(0x0C, 0x10, 0x17), Token("Primer.bg"));
                 Assert.Equal(Token("Primer.bg"), ((SolidColorBrush)surface.Background).Color);
                 manager.Theme = AppTheme.Light;
                 WpfContext.Drain();
-                Assert.Equal(Color.FromRgb(0xFF, 0xFF, 0xFF), Token("Primer.bg"));
+                Assert.Equal(Color.FromRgb(0xF4, 0xF6, 0xF9), Token("Primer.bg"));
                 Assert.Equal(Token("Primer.bg"), ((SolidColorBrush)surface.Background).Color);
                 Assert.Equal(dictionaries, resources.MergedDictionaries.Count);
             }

@@ -53,7 +53,7 @@ internal static class PolicyEngine
         _ when masterData is not null && config.MasterDataWrites == MasterDataWrites.Deny => new(PolicyVerdict.Deny, MasterDataDenied),
         _ when masterData is { Server: true } => new(PolicyVerdict.Deny, MasterDataServerDenied),
         _ when !inScratch && config.WritesOutsideScratch == OutsideScratchWrites.Deny => new(PolicyVerdict.Deny, OutsideScratchDenied),
-        ToolTier.Write when inScratch && masterData is null => new(PolicyVerdict.Allow),
+        ToolTier.Write when masterData is null && (inScratch || config.WritesOutsideScratch == OutsideScratchWrites.Allow) => new(PolicyVerdict.Allow),
         _ => new(PolicyVerdict.NeedsApproval),
     };
 }

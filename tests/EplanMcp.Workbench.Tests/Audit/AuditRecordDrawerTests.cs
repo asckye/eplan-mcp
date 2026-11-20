@@ -96,10 +96,12 @@ public sealed class AuditRecordDrawerTests(WpfContext wpf) : IDisposable
 
             window.Open(null);
             Assert.False(((FrameworkElement)window.FindName("RecordLayer")).IsVisible);
-            window.OpenSettings();
+            MainWindow.CommandPaletteCommand.Execute(null, window);
+            WpfContext.Drain();
+            Assert.True(((FrameworkElement)window.FindName("CommandLayer")).IsVisible);
             window.Open(null);
 
-            Assert.False(((FrameworkElement)window.FindName("SettingsLayer")).IsVisible);
+            Assert.False(((FrameworkElement)window.FindName("CommandLayer")).IsVisible);
             Assert.True(MainWindow.NavigateCommand.CanExecute(WorkbenchPage.Status, window));
         }));
     }

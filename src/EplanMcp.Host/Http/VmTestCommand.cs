@@ -44,19 +44,19 @@ internal static class VmTestCommand
         try
         {
             Require(RemoteServer.ValidUrl(url));
-            RemoteServer remote = RemoteServer.Read(url, input);
+            _ = input;
             var parameters = new JsonObject
             {
                 ["protocolVersion"] = Protocol,
                 ["capabilities"] = new JsonObject(),
                 ["clientInfo"] = new JsonObject { ["name"] = "eplanmcp-vm-test", ["version"] = HostInfo.Version },
             };
-            using JsonDocument initialized = await SendAsync(http, remote, url, 1, "initialize", parameters, cancellationToken).ConfigureAwait(false);
+            using JsonDocument initialized = await SendAsync(http, url, 1, "initialize", parameters, cancellationToken).ConfigureAwait(false);
             JsonElement init = Result(initialized, 1);
             Require(init.GetProperty("protocolVersion").GetString() == Protocol && init.GetProperty("capabilities").ValueKind == JsonValueKind.Object);
             JsonElement server = init.GetProperty("serverInfo");
             string name = Text(server.GetProperty("name")), version = Text(server.GetProperty("version"));
-            using JsonDocument listed = await SendAsync(http, remote, url, 2, "tools/list", new JsonObject(), cancellationToken).ConfigureAwait(false);
+            using JsonDocument listed = await SendAsync(http, url, 2, "tools/list", new JsonObject(), cancellationToken).ConfigureAwait(false);
             JsonElement list = Result(listed, 2), tools = list.GetProperty("tools");
             Require(tools.ValueKind == JsonValueKind.Array && (!list.TryGetProperty("nextCursor", out JsonElement cursor) || cursor.ValueKind == JsonValueKind.Null));
             foreach (JsonElement tool in tools.EnumerateArray())
@@ -89,12 +89,11 @@ internal static class VmTestCommand
         }
     }
 
-    private static async Task<JsonDocument> SendAsync(HttpClient http, RemoteServer remote, string url, int id, string method, JsonObject parameters, CancellationToken cancellationToken)
+    private static async Task<JsonDocument> SendAsync(HttpClient http, string url, int id, string method, JsonObject parameters, CancellationToken cancellationToken)
     {
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         limit.CancelAfter(RequestTimeout); // Includes headers, JSON bodies and an SSE stream that never finishes an event.
         using var request = new HttpRequestMessage(HttpMethod.Post, url);
-        remote.Authorize(request);
         request.Headers.Accept.ParseAdd("application/json, text/event-stream");
         request.Headers.Add("MCP-Protocol-Version", Protocol);
         request.Headers.Add("Mcp-Method", method);

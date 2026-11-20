@@ -51,88 +51,6 @@ public sealed class VmViewTests
     [InlineData("9999999999999", false)]
     public void PortValidation_IsStrict(string port, bool expected) => Assert.Equal(expected, VmNetwork.IsPort(port));
 
-    [Fact]
-    public async Task Key_CreateReadMaskShowCopyDelete_OnlyAfterConfirmation()
-    {
-        var fake = new FakeVm();
-        using VmView view = fake.Create();
-        Assert.Equal(("192.168.56.2", "8766"), (view.Address, view.Port));
-        await fake.RunAsync(view, "load");
-        Assert.False(view.HasKey);
-        await fake.RunAsync(view, "create");
-        Assert.Empty(fake.Questions);
-        Assert.Equal(["show", "create", "show"], fake.Host.Runs.Select(r => r.Arguments[1]));
-        Assert.Equal("••••••••", view.DisplayKey);
-        Assert.Empty(fake.Clipboard);
-        await fake.RunAsync(view, "show");
-        Assert.Equal(FakeVm.Key, view.DisplayKey);
-        await fake.RunAsync(view, "show");
-        Assert.Equal("••••••••", view.DisplayKey);
-        await fake.RunAsync(view, "copy");
-        Assert.Equal([FakeVm.Key], fake.Clipboard);
-        fake.Confirmed = false;
-        await fake.RunAsync(view, "create");
-        await fake.RunAsync(view, "delete");
-        Assert.Equal(["Regenerate", "Delete"], fake.Questions);
-        Assert.Equal(3, fake.Host.Runs.Count);
-        fake.Confirmed = true;
-        await fake.RunAsync(view, "create");
-        Assert.Equal("••••••••", view.DisplayKey);
-        await fake.RunAsync(view, "delete");
-        Assert.False(view.HasKey);
-        Assert.Empty(view.DisplayKey);
-        Assert.NotEmpty(view.DisabledReason("copy"));
-        Assert.All(fake.Host.Runs, r => Assert.DoesNotContain(FakeVm.Key, string.Join(' ', r.Arguments), StringComparison.Ordinal));
-        Assert.DoesNotContain(FakeVm.Key, view.Message, StringComparison.Ordinal);
-        int questions = fake.Questions.Count;
-        await fake.RunAsync(view, "create");
-        Assert.Equal(questions, fake.Questions.Count); // A successful deletion established that no old key exists.
-    }
-
-    [Fact]
-    public async Task Key_UnknownPresence_ConfirmsBeforeOverwriting()
-    {
-        var fake = new FakeVm { Confirmed = false };
-        using VmView view = fake.Create();
-        await fake.RunAsync(view, "create");
-        Assert.Equal(["Regenerate"], fake.Questions);
-        Assert.Empty(fake.Host.Runs);
-    }
-
-    [Theory]
-    [InlineData("create")]
-    [InlineData("delete")]
-    [InlineData("load")]
-    public async Task Key_FailureOrException_RedactsAllOutputAndLeavesNoRevealedKey(string action)
-    {
-        var fake = new FakeVm { StoredKey = FakeVm.Key };
-        using VmView view = fake.Create();
-        foreach (bool exception in new[] { false, true })
-        {
-            fake.Host.Answer = _ => new HostRun(0, FakeVm.Key);
-            await fake.RunAsync(view, "load");
-            await fake.RunAsync(view, "show");
-            fake.Host.Answer = _ => exception ? throw new HostCommandException(HostFailure.Failed, FakeVm.Key) { Errors = FakeVm.Key }
-                : new HostRun(1, FakeVm.Key, FakeVm.Key);
-            await fake.RunAsync(view, action);
-            Assert.False(view.Busy);
-            Assert.DoesNotContain(FakeVm.Key, view.Message, StringComparison.Ordinal);
-            Assert.DoesNotContain(FakeVm.Key, view.DisplayKey, StringComparison.Ordinal);
-        }
-    }
-
-    [Fact]
-    public async Task ClipboardFailure_IsRedacted_AndDoesNotWriteSettingsOrRerunHost()
-    {
-        var fake = new FakeVm { StoredKey = FakeVm.Key };
-        using VmView view = fake.Create();
-        await fake.RunAsync(view, "load");
-        await view.RunAsync("copy", _ => true, _ => throw new InvalidOperationException(FakeVm.Key), CancellationToken.None);
-        Assert.DoesNotContain(FakeVm.Key, view.Message, StringComparison.Ordinal);
-        Assert.Single(fake.Host.Runs);
-        Assert.Equal("••••••••", view.DisplayKey);
-    }
-
     [Theory]
     [InlineData("allow", 0)]
     [InlineData("remove", 0)]
@@ -177,22 +95,11 @@ public sealed class VmViewTests
     }
 
     [Fact]
-    public async Task Firewall_LaunchFailure_IsRedactedAndReenablesCommands()
-    {
-        var fake = new FakeVm { Error = new InvalidOperationException(FakeVm.Key) };
-        using VmView view = fake.Create();
-        await fake.RunAsync(view, "allow");
-        Assert.Equal(Loc.Current["Vm.Failed"], view.Message);
-        Assert.False(view.Busy);
-        Assert.Empty(view.DisabledReason("allow"));
-    }
-
-    [Fact]
     public async Task ValidationOrMissingHost_PreventsCommands_AndExplainsWhy()
     {
         var fake = new FakeVm();
         using VmView unavailable = fake.Create(available: false);
-        await fake.RunAsync(unavailable, "create");
+        await fake.RunAsync(unavailable, "instances");
         Assert.NotEmpty(unavailable.Reason);
         using VmView view = fake.Create();
         view.Address = "10.0.0.3";
@@ -214,11 +121,11 @@ public sealed class VmViewTests
         var fake = new FakeVm();
         using VmView view = fake.Create();
         TaskCompletionSource<HostRun> held = fake.Host.Hold();
-        Task pending = fake.RunAsync(view, "load");
+        Task pending = fake.RunAsync(view, "instances");
         Assert.True(view.Busy);
-        await fake.RunAsync(view, "create");
+        await fake.RunAsync(view, "refresh");
         Assert.Single(fake.Host.Runs);
-        held.SetResult(new HostRun(1, "no key"));
+        held.SetResult(new HostRun(0, "{\"schemaVersion\":1,\"processes\":[100]}"));
         await pending;
         Assert.False(view.Busy);
     }

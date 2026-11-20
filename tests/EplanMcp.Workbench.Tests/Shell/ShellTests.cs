@@ -3,15 +3,14 @@ using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using EplanMcp.Workbench.Shell;
-using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
 using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 
 namespace EplanMcp.Workbench.Tests.Shell;
 
 /// <summary>
-/// The shell (docs/design/2026-10-20-m5-operability.md#workbench-implementation): one way to change the page, where focus goes, the window
-/// title, the Sider's breakpoint, the menu as one group, and the minimum size.
+/// The Automation Studio 4.0 shell: 8-page Activity Rail (Ctrl+1..7, Ctrl+,), single navigation path, focus on page heading,
+/// window title, Ctrl+Tab cycling, and minimum size.
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Medium")]
@@ -19,15 +18,19 @@ public sealed class ShellTests(WpfContext wpf)
 {
     public static TheoryData<WorkbenchPage, Key, string, string> Pages => new()
     {
-        { WorkbenchPage.Approvals, Key.D1, "Approvals", "审批队列" },
-        { WorkbenchPage.Audit, Key.D2, "Audit", "审计" },
-        { WorkbenchPage.Status, Key.D3, "Status", "状态" },
-        { WorkbenchPage.Clients, Key.D4, "MCP and clients", "MCP 与客户端" },
+        { WorkbenchPage.Project, Key.D1, "Project", "项目工作区" },
+        { WorkbenchPage.Approvals, Key.D2, "Approvals", "协作与审批" },
+        { WorkbenchPage.Mcp, Key.D3, "MCP Server", "MCP 服务" },
+        { WorkbenchPage.Clients, Key.D4, "AI Clients", "AI 客户端" },
+        { WorkbenchPage.Status, Key.D5, "Checks", "环境检查" },
+        { WorkbenchPage.Audit, Key.D6, "Audit", "审计记录" },
+        { WorkbenchPage.Logs, Key.D7, "Logs", "运行日志" },
+        { WorkbenchPage.Settings, Key.OemComma, "Settings", "偏好与安全" },
     };
 
     [Theory]
     [MemberData(nameof(Pages))]
-    public void CtrlAndANumber_ShowsThePage_NamesItInTheTitle_AndFocusesItsHeading(WorkbenchPage page, Key key, string english, string chinese)
+    public void CtrlShortcut_ShowsThePage_NamesItInTheTitle_AndFocusesItsHeading(WorkbenchPage page, Key key, string english, string chinese)
     {
         wpf.RunWithLanguage(AppLanguage.English, () => With(window =>
         {
@@ -66,48 +69,30 @@ public sealed class ShellTests(WpfContext wpf)
     {
         wpf.Run(() => With(window =>
         {
+            Assert.Equal(WorkbenchPage.Approvals, window.CurrentPage);
             MainWindow.CycleCommand.Execute("-1", window);
-            Assert.Equal(WorkbenchPage.Clients, window.CurrentPage);
+            Assert.Equal(WorkbenchPage.Project, window.CurrentPage);
+            MainWindow.CycleCommand.Execute("-1", window);
+            Assert.Equal(WorkbenchPage.Settings, window.CurrentPage);
             MainWindow.CycleCommand.Execute("1", window);
-            MainWindow.CycleCommand.Execute("1", window);
-            Assert.Equal(WorkbenchPage.Audit, window.CurrentPage);
+            Assert.Equal(WorkbenchPage.Project, window.CurrentPage);
         }));
     }
 
     [Fact]
-    public void TheMenu_IsOneGroupOfFourItems_EachWithItsPositionAndShortcut()
+    public void TheActivityRail_HasEightItems_EachWithItsPositionAndShortcut()
     {
         wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
         {
             RadioButton[] items = [.. Enum.GetValues<WorkbenchPage>().Select(p => Item(window, p))];
+            string[] shortcuts = ["Ctrl+1", "Ctrl+2", "Ctrl+3", "Ctrl+4", "Ctrl+5", "Ctrl+6", "Ctrl+7", "Ctrl+,"];
 
-            Assert.Equal(KeyboardNavigationMode.Once, KeyboardNavigation.GetTabNavigation((DependencyObject)items[0].Parent));
+            Assert.Equal(KeyboardNavigationMode.Once, KeyboardNavigation.GetTabNavigation((DependencyObject)window.FindName("Menu")));
             for (int i = 0; i < items.Length; i++)
             {
-                Assert.Equal((i + 1, 4, $"Ctrl+{i + 1}"), (AutomationProperties.GetPositionInSet(items[i]), AutomationProperties.GetSizeOfSet(items[i]), AutomationProperties.GetAcceleratorKey(items[i])));
-                Assert.Equal($"{AutomationProperties.GetName(items[i])}（Ctrl+{i + 1}）", items[i].ToolTip);
+                Assert.Equal((i + 1, 8, shortcuts[i]), (AutomationProperties.GetPositionInSet(items[i]), AutomationProperties.GetSizeOfSet(items[i]), AutomationProperties.GetAcceleratorKey(items[i])));
+                Assert.Equal($"{AutomationProperties.GetName(items[i])}（{shortcuts[i]}）", items[i].ToolTip);
             }
-        }));
-    }
-
-    [Fact]
-    public void TheSider_FollowsTheBreakpoint_UntilChosenByHand_AndAgainAfterCrossingIt()
-    {
-        wpf.Run(() => With(window =>
-        {
-            var sider = (FrameworkElement)window.FindName("Sider");
-            var toggle = (Button)window.FindName("SiderToggle");
-
-            Resize(window, 1200);
-            Assert.Equal((232d, false), (sider.Width, Ux.GetCompact(sider)));
-            Resize(window, 980);
-            Assert.Equal((64d, true), (sider.Width, Ux.GetCompact(sider)));
-            Click(toggle);
-            Resize(window, 970);
-            Assert.Equal(232d, sider.Width);
-            Resize(window, 1100);
-            Resize(window, 970);
-            Assert.Equal(64d, sider.Width);
         }));
     }
 

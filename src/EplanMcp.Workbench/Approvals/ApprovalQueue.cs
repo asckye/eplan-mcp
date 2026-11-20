@@ -22,6 +22,12 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
     private int _reserved;
     private long _sequence;
 
+    /// <summary>
+    /// When true, routine project writes (<see cref="QuestionKind.Approval"/>, non-destructive, no backup/master-data target)
+    /// are auto-approved on arrival without waiting; destructive writes, master data and suspension releases always ask.
+    /// </summary>
+    public bool AutoApproveNormalWrites { get; set; }
+
     /// <summary>A question arrived or changed.</summary>
     public event Action<Question>? Changed;
 
@@ -128,7 +134,14 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
 
         if (question is not null)
         {
-            Changed?.Invoke(question);
+            if (AutoApproveNormalWrites && IsNormalRoutineWrite(ask))
+            {
+                Finish(question, QuestionEnd.Approved);
+            }
+            else
+            {
+                Changed?.Invoke(question);
+            }
         }
 
         if (changed)
@@ -138,6 +151,12 @@ internal sealed class ApprovalQueue(TimeProvider clock, int capacity = ApprovalQ
 
         return question;
     }
+
+    private static bool IsNormalRoutineWrite(ApprovalAskParams ask) =>
+        ask.Kind == QuestionKind.Approval
+        && ask.Tier == QuestionTier.Write
+        && ask.Suspension is null
+        && string.IsNullOrEmpty(ask.BackupFolder);
 
     /// <summary>The engineer's answer; false when the question no longer waits (it expired, or was cancelled first).</summary>
     public bool Answer(Question question, bool approve) => Finish(question, approve ? QuestionEnd.Approved : QuestionEnd.Rejected);

@@ -7,10 +7,13 @@ using EplanMcp.Workbench.Audit;
 using EplanMcp.Workbench.Clients;
 using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Logging;
+using EplanMcp.Workbench.Logs;
+using EplanMcp.Workbench.Project;
 using EplanMcp.Workbench.Protocol;
 using EplanMcp.Workbench.Settings;
 using EplanMcp.Workbench.Shell;
 using EplanMcp.Workbench.Status;
+using EplanMcp.Workbench.Themes;
 using Microsoft.Extensions.Logging;
 using TiaOpenness.Gui.Localization;
 using TiaOpenness.Gui.Themes;
@@ -18,9 +21,8 @@ using TiaOpenness.Gui.Themes;
 namespace EplanMcp.Workbench;
 
 /// <summary>
-/// The Workbench process (M5 design 4.4): one per user and data root; settings, fonts, language, theme, the approval
-/// pipe and its queue, the window and the tray. Closing the window only hides it to the tray; exiting goes through the
-/// tray menu (NAV-09, DLG-11).
+/// The Workbench process (M5 design 4.4): one per user and data root; settings, fonts, language, theme, dual accent,
+/// normal-write approval policy, the approval pipe and its queue, the 8-page IDE window and the tray.
 /// </summary>
 public sealed partial class App : Application, IDisposable
 {
@@ -32,12 +34,12 @@ public sealed partial class App : Application, IDisposable
     private ApprovalQueue? _queue;
     private ApprovalServer? _server;
     private ApprovalQueueView? _view;
+    private SafetyPolicyStore? _policy;
     private bool _listening;
     private TrayIcon? _tray;
     private MainWindow? _window;
     private Vm.VmView? _vm;
 
-    /// <summary>How many questions wait now; exiting with any asks first (DLG-11).</summary>
     internal int Pending { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -46,7 +48,7 @@ public sealed partial class App : Application, IDisposable
         _instance = new SingleInstance(WorkbenchPipeName.ForCurrentUser(_locations.Root));
         if (!_instance.IsFirst)
         {
-            _instance.SignalFirst(); // the Workbench that runs comes to the front; this one ends
+            _instance.SignalFirst();
             Shutdown();
             return;
         }
@@ -54,11 +56,17 @@ public sealed partial class App : Application, IDisposable
         _settings = WorkbenchSettings.Load(_locations.Settings);
         WorkbenchFonts.Apply(Resources);
         Loc.Current.Language = _settings.Language ?? Loc.FromSystem();
-        ThemeManager.Current.Initialize(_settings.Theme);
+        // Light / Dark only in UI (Auto normalized to Light/Dark while High Contrast stays automatic).
+        AppTheme startupTheme = _settings.Theme == AppTheme.Dark ? AppTheme.Dark : AppTheme.Light;
+        ThemeManager.Current.Initialize(startupTheme);
+        AccentManager.Current.Initialize(_settings.Accent);
 
-        // From here on, what the engineer picks in the settings drawer is remembered.
         Loc.Current.LanguageChanged += (_, _) => Remember(_settings with { Language = Loc.Current.Language });
         ThemeManager.Current.PropertyChanged += OnThemeChanged;
+        AccentManager.Current.PropertyChanged += OnAccentChanged;
+
+        _policy = new SafetyPolicyStore(_locations.Config);
+        _policy.Load(_settings.RequireNormalWriteApproval);
 
         _window = new MainWindow { HideOnClose = true };
         MainWindow = _window;
@@ -69,17 +77,38 @@ public sealed partial class App : Application, IDisposable
         _log = new FileLog(_locations.Logs, TimeProvider.System);
         _uiLogger = _log.CreateLogger("Workbench");
         DispatcherUnhandledException += OnUnhandled;
-        _queue = new ApprovalQueue(TimeProvider.System);
+        _queue = new ApprovalQueue(TimeProvider.System)
+        {
+            AutoApproveNormalWrites = !_policy.RequireNormalWriteApproval,
+        };
+        _policy.Changed += () =>
+        {
+            if (_queue is not null && _policy is not null)
+            {
+                _queue.AutoApproveNormalWrites = !_policy.RequireNormalWriteApproval;
+                Remember(_settings with { RequireNormalWriteApproval = _policy.RequireNormalWriteApproval });
+            }
+        };
+
         _view = new ApprovalQueueView(_queue, TimeProvider.System);
         _view.Follow(Dispatcher, ShowQueue);
         _window.Attach(_view);
-        IHostRunner? runner = ProgramLocation.FindHost(AppContext.BaseDirectory) is { } executable ? new HostProcess(executable) : null;
+        _window.AttachPolicy(_policy, _locations.Audit);
+
+        string? hostExecutable = ProgramLocation.FindHost(AppContext.BaseDirectory);
+        IHostRunner? runner = hostExecutable is not null ? new HostProcess(hostExecutable) : null;
         var host = new HostCommands(runner);
+        var clients = new ClientsView(host, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+        _vm = new Vm.VmView(runner, new Vm.VmElevation(), Vm.VmNetwork.Addresses());
+
+        _window.AttachProject(new ProjectView(host, _locations.Audit));
         _window.AttachAudit(new AuditView(_locations.Audit, host, TimeProvider.System));
         _window.AttachStatus(new StatusView(host, () => _listening && _queue.IsAccepting));
-        _window.AttachClients(new ClientsView(host, Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)));
-        _window.AttachVm(_vm = new Vm.VmView(runner, new Vm.VmElevation(), Vm.VmNetwork.Addresses()));
-        _window.AttachSettings(StartAtLogin.ForCurrentUser(), _locations.Config);
+        _window.AttachClients(clients);
+        _window.AttachMcp(_vm, clients, hostExecutable);
+        _window.AttachLogs(new LogsView(_locations.Logs, _locations.Config));
+        _window.AttachSettings(StartAtLogin.ForCurrentUser(), _locations.Config, _policy);
+
         _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
         _listening = _server.Start();
         ShowQueue();
@@ -103,10 +132,6 @@ public sealed partial class App : Application, IDisposable
 
     private void Restore() => _window?.Restore();
 
-    /// <summary>
-    /// A fault in a page is logged and the Workbench goes on: ending it would close every waiting question (DLG-11) and
-    /// send the next ones to the EPLAN dialog for no reason of the engineer's.
-    /// </summary>
     private void OnUnhandled(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         if (_uiLogger is not null)
@@ -120,7 +145,6 @@ public sealed partial class App : Application, IDisposable
     [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled exception on the UI thread; the Workbench goes on")]
     private static partial void LogUnhandled(ILogger logger, Exception exception);
 
-    /// <summary>The waiting count in the tray and the Header, and whether questions are taken (STS-09 to STS-11).</summary>
     private void ShowQueue()
     {
         Pending = _queue?.PendingCount ?? 0;
@@ -131,10 +155,6 @@ public sealed partial class App : Application, IDisposable
         }
     }
 
-    /// <summary>
-    /// Exit from the tray: with questions waiting, only after the engineer confirms (DLG-11); they then return to their
-    /// Hosts as closed.
-    /// </summary>
     private async Task ExitAsync()
     {
         int pending = Pending;
@@ -149,10 +169,10 @@ public sealed partial class App : Application, IDisposable
             }
             catch (InvalidOperationException ex)
             {
-                // A question that could not be shown was not answered: waiting approvals are not closed without a yes.
                 System.Diagnostics.Trace.TraceWarning("Exit confirmation unavailable: " + ex.GetType().Name);
                 confirmed = false;
             }
+
             if (!confirmed)
             {
                 return;
@@ -185,6 +205,14 @@ public sealed partial class App : Application, IDisposable
         if (e.PropertyName == nameof(ThemeManager.Theme))
         {
             Remember(_settings with { Theme = ThemeManager.Current.Theme });
+        }
+    }
+
+    private void OnAccentChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AccentManager.Accent))
+        {
+            Remember(_settings with { Accent = AccentManager.Current.Accent });
         }
     }
 

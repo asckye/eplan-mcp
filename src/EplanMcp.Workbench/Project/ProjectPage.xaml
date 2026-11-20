@@ -1,0 +1,134 @@
+<UserControl
+    x:Class="EplanMcp.Workbench.Project.ProjectPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
+    Focusable="False">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition x:Name="LeftCol" Width="256" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <!-- Left 256px Project & Workspace Tree Pane -->
+    <Border x:Name="LeftPane" Style="{StaticResource Workbench.LeftPane}">
+      <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="{StaticResource Ui.Inset.ListCard}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,0,0,1">
+          <TextBlock Text="{l:Tr Project.Tree}" Style="{StaticResource Primer.SectionLabel}" />
+        </Border>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+          <StackPanel Margin="{StaticResource Ui.Inset.TreePad}">
+            <TextBlock Text="{l:Tr Project.ToolsGroup}" Style="{StaticResource Workbench.SiderSection}" />
+            <RadioButton x:Name="NodeOverview" GroupName="ProjectTree" Style="{StaticResource Workbench.NavItem}" Content="{l:Tr Project.Overview}" IsChecked="True" Checked="OnNodeChanged" />
+            <RadioButton x:Name="NodeEnv" GroupName="ProjectTree" Style="{StaticResource Workbench.NavItem}" Content="{l:Tr Project.Diagnostics}" Checked="OnNodeChanged" />
+            <RadioButton x:Name="NodeActivity" GroupName="ProjectTree" Style="{StaticResource Workbench.NavItem}" Content="{l:Tr Project.RecentActivity}" Checked="OnNodeChanged" />
+
+            <TextBlock Text="{l:Tr Project.SessionGroup}" Style="{StaticResource Workbench.SiderSection}" Margin="{StaticResource Ui.Gap.Top.Normal}" />
+            <ItemsControl x:Name="SessionTree" Focusable="False" Margin="{StaticResource Ui.Inset.TreeItems}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Margin="{StaticResource Ui.Gap.Bottom.XS}" Padding="{StaticResource Ui.Inset.MiniCard}" CornerRadius="7" Background="{DynamicResource Surface.Layer}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="1">
+                    <StackPanel>
+                      <TextBlock Text="{Binding Title}" Style="{StaticResource Primer.Mono.text}" FontSize="11.5" />
+                      <TextBlock Text="{Binding Detail}" Style="{StaticResource Primer.Muted}" FontSize="11.5" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+
+    <!-- Right IDE Workspace Canvas -->
+    <DockPanel Grid.Column="1">
+      <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button x:Name="JumpApprovalsButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Project.JumpApprovals}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnJumpApprovals" />
+            <Button x:Name="JumpMcpButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Project.JumpMcp}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnJumpMcp" />
+            <Button x:Name="RefreshButton" Style="{StaticResource Primer.Primary}" Content="{l:Tr Project.Refresh}" AutomationProperties.AcceleratorKey="F5" Click="OnRefresh" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Project}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" VerticalAlignment="Center"
+                       AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
+          </StackPanel>
+        </DockPanel>
+      </Border>
+
+      <ProgressBar x:Name="Working" DockPanel.Dock="Top" Style="{StaticResource Primer.Progress}" IsIndeterminate="True" Visibility="Collapsed" />
+
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+        <StackPanel Margin="{StaticResource Ui.Inset.PageCompact}" MaxWidth="920">
+          <!-- Overview Panel -->
+          <StackPanel x:Name="OverviewPanel">
+            <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+              <StackPanel>
+                <TextBlock Text="{l:Tr Project.SessionGroup}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" />
+                <TextBlock x:Name="SessionSummaryText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+                <TextBlock x:Name="NoSessionHelp" Text="{l:Tr Project.NoSessionHelp}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+              </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Workbench.Card}">
+              <StackPanel>
+                <TextBlock x:Name="RecentHeading" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
+                <ListView x:Name="OverviewActivityList" MaxHeight="340" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                  <ListView.View>
+                    <GridView>
+                      <GridViewColumn x:Name="ColTime" Width="130" DisplayMemberBinding="{Binding Time}" />
+                      <GridViewColumn x:Name="ColTool" Width="220" DisplayMemberBinding="{Binding Tool}" />
+                      <GridViewColumn x:Name="ColProject" Width="260" DisplayMemberBinding="{Binding Project}" />
+                      <GridViewColumn x:Name="ColResult" Width="130" DisplayMemberBinding="{Binding Result}" />
+                    </GridView>
+                  </ListView.View>
+                </ListView>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- Environment Panel -->
+          <StackPanel x:Name="EnvPanel" Visibility="Collapsed">
+            <Border Style="{StaticResource Workbench.Card}">
+              <StackPanel>
+                <TextBlock Text="{l:Tr Project.Diagnostics}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
+                <ItemsControl x:Name="SessionDetailList" Focusable="False">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Padding="{StaticResource Ui.Inset.RowDivider}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,0,0,1">
+                        <StackPanel>
+                          <TextBlock Text="{Binding Title}" Style="{StaticResource Primer.Mono.text}" />
+                          <TextBlock Text="{Binding Detail}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- Full Activity Panel -->
+          <StackPanel x:Name="ActivityPanel" Visibility="Collapsed">
+            <Border Style="{StaticResource Workbench.Card}">
+              <StackPanel>
+                <TextBlock Text="{l:Tr Project.RecentActivity}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
+                <ListView x:Name="FullActivityList" MaxHeight="520" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                  <ListView.View>
+                    <GridView>
+                      <GridViewColumn x:Name="ColTime2" Width="130" DisplayMemberBinding="{Binding Time}" />
+                      <GridViewColumn x:Name="ColTool2" Width="220" DisplayMemberBinding="{Binding Tool}" />
+                      <GridViewColumn x:Name="ColProject2" Width="260" DisplayMemberBinding="{Binding Project}" />
+                      <GridViewColumn x:Name="ColResult2" Width="130" DisplayMemberBinding="{Binding Result}" />
+                    </GridView>
+                  </ListView.View>
+                </ListView>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+    </DockPanel>
+  </Grid>
+</UserControl>

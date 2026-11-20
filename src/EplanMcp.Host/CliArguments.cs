@@ -139,7 +139,7 @@ internal sealed record CliArguments(
         }
 
         ClientConfigMode mode = remove ? ClientConfigMode.Remove : dryRun ? ClientConfigMode.DryRun : ClientConfigMode.Write;
-        bool validVm = vm ? !plugin && (remove ? url is null && !keyStdin : url is not null && RemoteServer.ValidUrl(url) && keyStdin) : url is null && !keyStdin;
+        bool validVm = vm ? !plugin && (remove ? url is null && !keyStdin : url is not null && RemoteServer.ValidUrl(url)) : url is null && !keyStdin;
         return !validVm || (dryRun && remove) || (clients.Count == 0 && !remove) || (plugin && (remove || clients.Count != 1 || clients[0].Name != "claude-code"))
             ? null : new(CliCommand.ClientConfig, json, new(clients, mode, plugin, vm, url));
     }

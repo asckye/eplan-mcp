@@ -1,0 +1,54 @@
+<UserControl
+    x:Class="EplanMcp.Workbench.Logs.LogsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
+    xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
+    Focusable="False">
+  <!-- Runtime Logs Page (TIA 1:1 Layout: IDE Filter Bar + Structured Stream + Bottom Storage Strip) -->
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBox x:Name="SearchBox" Width="190" Style="{StaticResource Primer.Input}" Margin="{StaticResource Ui.Gap.Right.XS}" TextChanged="OnFilterChanged" />
+          <Button x:Name="RefreshButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Logs.Refresh}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnRefresh" />
+          <Button x:Name="CopyButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Logs.Copy}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnCopy" />
+          <Button x:Name="FolderButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Logs.OpenFolder}" Margin="{StaticResource Ui.Gap.Right.XS}" Click="OnOpenFolder" />
+          <Button x:Name="DiagButton" Style="{StaticResource Primer.Primary}" Content="{l:Tr Logs.ExportDiag}" Click="OnExportDiag" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Logs}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.SM}"
+                     AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
+          <RadioButton x:Name="FilterAll" GroupName="LogLevel" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Logs.All}" IsChecked="True" Checked="OnFilterChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+          <RadioButton x:Name="FilterWarn" GroupName="LogLevel" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Logs.Warn}" Checked="OnFilterChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+          <RadioButton x:Name="FilterError" GroupName="LogLevel" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Logs.Error}" Checked="OnFilterChanged" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <Border x:Name="Banner" DockPanel.Dock="Top" Style="{StaticResource Primer.Alert.Info}" Margin="{StaticResource Ui.Gap.LogBanner}" Visibility="Collapsed">
+      <TextBlock x:Name="BannerText" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+    </Border>
+
+    <Border DockPanel.Dock="Bottom" Style="{StaticResource Workbench.IdeSubBar}">
+      <DockPanel>
+        <Button x:Name="StorageLink" DockPanel.Dock="Right" Style="{StaticResource Workbench.StatusPill}" Content="{l:Tr Logs.StorageLink}" Click="OnGoStorage" />
+        <TextBlock x:Name="FolderFooter" Style="{StaticResource Primer.Mono.textMuted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+      </DockPanel>
+    </Border>
+
+    <Grid>
+      <ListView x:Name="LogList" ScrollViewer.HorizontalScrollBarVisibility="Auto" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+        <ListView.View>
+          <GridView>
+            <GridViewColumn x:Name="ColTime" Width="88" DisplayMemberBinding="{Binding Time}" />
+            <GridViewColumn x:Name="ColLevel" Width="76" DisplayMemberBinding="{Binding Level}" />
+            <GridViewColumn x:Name="ColSource" Width="170" DisplayMemberBinding="{Binding Source}" />
+            <GridViewColumn x:Name="ColMessage" Width="620" DisplayMemberBinding="{Binding Message}" />
+          </GridView>
+        </ListView.View>
+      </ListView>
+      <shell:EmptyState x:Name="Empty" Title="{l:Tr Logs.Empty}" Text="{l:Tr Logs.EmptyText}" Visibility="Collapsed" />
+    </Grid>
+  </DockPanel>
+</UserControl>

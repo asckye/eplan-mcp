@@ -27,6 +27,6 @@ internal sealed record VmTestRequest(string Url, bool Json)
             }
         }
 
-        return keyStdin && url is not null && RemoteServer.ValidUrl(url) ? new(url, json) : null;
+        return url is not null && RemoteServer.ValidUrl(url) ? new(url, json) : null;
     }
 }

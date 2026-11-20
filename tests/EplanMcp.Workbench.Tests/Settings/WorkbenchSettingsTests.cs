@@ -41,7 +41,7 @@ public sealed class WorkbenchSettingsTests : IDisposable
             System.IO.File.WriteAllText(File, content);
         }
 
-        Assert.Equal(new WorkbenchSettings(null, AppTheme.Auto), WorkbenchSettings.Load(File));
+        Assert.Equal(new WorkbenchSettings(null, AppTheme.Light), WorkbenchSettings.Load(File));
     }
 
     [Fact]

@@ -12,16 +12,21 @@ using System.Windows.Media;
 using EplanMcp.Workbench.Approvals;
 using EplanMcp.Workbench.Audit;
 using EplanMcp.Workbench.Clients;
+using EplanMcp.Workbench.Logs;
+using EplanMcp.Workbench.Project;
 using EplanMcp.Workbench.Settings;
 using EplanMcp.Workbench.Status;
+using EplanMcp.Workbench.Themes;
 using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
+using TiaOpenness.Gui.Themes;
 
 namespace EplanMcp.Workbench.Shell;
 
 /// <summary>
-/// The Workbench window (docs/design/2026-10-20-m5-operability.md#workbench-implementation): Sider, Header and the pages. Every page change goes through
-/// <see cref="Navigate"/> (NAV-02), so the focus rules live in one place.
+/// The Automation Studio 4.0 Native Desktop IDE Workbench window: 40 px titlebar, 60 px far-left Activity Rail,
+/// 8 dedicated pages (Project, Approvals, MCP Server, AI Clients, Checks, Audit, Logs, Settings), 26 px status bar,
+/// and Ctrl+K command palette. Every page change goes through <see cref="Navigate"/> (NAV-02).
 /// </summary>
 public partial class MainWindow : Window
 {
@@ -31,41 +36,74 @@ public partial class MainWindow : Window
 
     public static readonly RoutedUICommand RegionCommand = new("Region", nameof(RegionCommand), typeof(MainWindow));
 
-    /// <summary>F5: the current page reads or runs again (KEY-07).</summary>
+    /// <summary>F5: refreshes the current page (KEY-07).</summary>
     public static readonly RoutedUICommand RefreshCommand = new("Refresh", nameof(RefreshCommand), typeof(MainWindow));
 
-    /// <summary>Ctrl+F: to the audit page's filters (KEY-07).</summary>
+    /// <summary>Ctrl+F: opens the audit page and focuses its filters (KEY-07).</summary>
     public static readonly RoutedUICommand FindCommand = new("Find", nameof(FindCommand), typeof(MainWindow));
 
-    /// <summary>Below this window width the Sider shows icons only (3.1).</summary>
-    private const double CompactBelow = 992;
+    /// <summary>Ctrl+K: opens the quick command palette.</summary>
+    public static readonly RoutedUICommand CommandPaletteCommand = new("CommandPalette", nameof(CommandPaletteCommand), typeof(MainWindow));
+
+    /// <summary>Ctrl+B: toggles secondary left tree/nav panes.</summary>
+    public static readonly RoutedUICommand TogglePaneCommand = new("TogglePane", nameof(TogglePaneCommand), typeof(MainWindow));
+
+    private sealed record PaletteEntry(string Label, Action Execute)
+    {
+        public override string ToString() => Label;
+    }
 
     private readonly (WorkbenchPage Page, string Key, string Shortcut, RadioButton Item, FrameworkElement View)[] _pages;
-    private bool? _compactChosen;
     private ApprovalChannelState _channel;
     private int _pending;
-    private IInputElement? _settingsOpener;
+    private bool _leftPaneOpen = true;
+    private SafetyPolicyStore? _policy;
     private IInputElement? _recordOpener;
+    private IInputElement? _commandOpener;
     private WindowState _lastState = WindowState.Normal;
+    private PaletteEntry[] _paletteAll = [];
 
     public MainWindow()
     {
         InitializeComponent();
         _pages =
         [
-            (WorkbenchPage.Approvals, "Page.Approvals", "Ctrl+1", ApprovalsItem, ApprovalsPage),
-            (WorkbenchPage.Audit, "Page.Audit", "Ctrl+2", AuditItem, AuditPage),
-            (WorkbenchPage.Status, "Page.Status", "Ctrl+3", StatusItem, StatusPage),
+            (WorkbenchPage.Project, "Page.Project", "Ctrl+1", ProjectItem, ProjectPage),
+            (WorkbenchPage.Approvals, "Page.Approvals", "Ctrl+2", ApprovalsItem, ApprovalsPage),
+            (WorkbenchPage.Mcp, "Page.Mcp", "Ctrl+3", McpItem, McpPage),
             (WorkbenchPage.Clients, "Page.Clients", "Ctrl+4", ClientsItem, ClientsPage),
+            (WorkbenchPage.Status, "Page.Status", "Ctrl+5", StatusItem, StatusPage),
+            (WorkbenchPage.Audit, "Page.Audit", "Ctrl+6", AuditItem, AuditPage),
+            (WorkbenchPage.Logs, "Page.Logs", "Ctrl+7", LogsItem, LogsPage),
+            (WorkbenchPage.Settings, "Page.Settings", "Ctrl+,", SettingsItem, SettingsPage),
         ];
-        Brand.ToolTip = "EplanMcp " + typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0];
-        // The shortcuts reach no page while the settings drawer covers the window (DLG-10).
+
+        string version = typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0] ?? "0.8.0";
+        Brand.ToolTip = "EplanMcp " + version;
+        VersionStatusText.Text = "v" + version;
+
+        ProjectPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
+        McpPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
+        ClientsPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
+        StatusPage.ExportDiagnosticsRequested += () =>
+        {
+            Navigate(WorkbenchPage.Logs, NavigationOrigin.Shortcut);
+            LogsPage.ExportDiagnostics();
+        };
+        LogsPage.StorageSettingsRequested += () =>
+        {
+            Navigate(WorkbenchPage.Settings, NavigationOrigin.Shortcut);
+            SettingsPage.OpenStorageCategory();
+        };
+
         CommandBindings.Add(new CommandBinding(NavigateCommand, (_, e) => Navigate((WorkbenchPage)e.Parameter, NavigationOrigin.Shortcut), CanNavigate));
         CommandBindings.Add(new CommandBinding(CycleCommand, (_, e) => Cycle(int.Parse((string)e.Parameter, CultureInfo.InvariantCulture)), CanNavigate));
         CommandBindings.Add(new CommandBinding(RegionCommand, (_, e) => MoveRegion(int.Parse((string)e.Parameter, CultureInfo.InvariantCulture)), CanNavigate));
         CommandBindings.Add(new CommandBinding(RefreshCommand, (_, _) => Refresh(), CanNavigate));
         CommandBindings.Add(new CommandBinding(FindCommand, (_, _) => Find(), CanNavigate));
-        SizeChanged += (_, _) => ApplySider();
+        CommandBindings.Add(new CommandBinding(CommandPaletteCommand, (_, _) => OpenCommandPalette(), CanNavigate));
+        CommandBindings.Add(new CommandBinding(TogglePaneCommand, (_, _) => ToggleLeftPane(), CanNavigate));
+
         Loc.Current.LanguageChanged += OnLanguageChanged;
         Closed += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
         StateChanged += (_, _) => ApplyWindowState();
@@ -96,6 +134,11 @@ public partial class MainWindow : Window
             view.Visibility = each == page ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        if (page == WorkbenchPage.Settings)
+        {
+            SettingsPage.Refresh();
+        }
+
         ApplyTexts();
         Rearm(page == WorkbenchPage.Approvals);
         if (origin != NavigationOrigin.Menu && IsLoaded)
@@ -104,6 +147,9 @@ public partial class MainWindow : Window
             ((IWorkbenchPage)_pages[(int)page].View).FocusHeading();
         }
     }
+
+    /// <summary>Navigates directly to the dedicated Settings page (Ctrl+,).</summary>
+    public void OpenSettings() => Navigate(WorkbenchPage.Settings, NavigationOrigin.Shortcut);
 
     protected override void OnClosing(CancelEventArgs e)
     {
@@ -115,35 +161,42 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>A new question wants a tray notification: the window is hidden or minimized (STS-09).</summary>
     internal event Action<QuestionItem>? NotificationWanted;
 
-    /// <summary>Gives the approval queue page its state; the app does, once.</summary>
     internal void Attach(ApprovalQueueView view)
     {
         ApprovalsPage.View = view;
         view.Arrived += OnArrived;
     }
 
-    /// <summary>Gives the audit page its state, and for tests the shell that opens folders; the app does, once.</summary>
+    internal void AttachProject(ProjectView view) => ProjectPage.Attach(view);
+
+    internal void AttachPolicy(SafetyPolicyStore policy, string? auditFolder = null)
+    {
+        _policy = policy;
+        _policy.Changed += () => Dispatcher.BeginInvoke(ApplyStatus);
+        ApprovalsPage.AttachPolicy(policy, auditFolder);
+        ApplyStatus();
+    }
+
     internal void AttachAudit(AuditView view, IShellOpen? shell = null)
     {
         AuditPage.Attach(view, shell);
         AuditPage.RecordOpened += OpenRecord;
     }
 
-    /// <summary>Gives the settings drawer the login entry and config.json, and for tests the shell; the app does, once.</summary>
-    internal void AttachSettings(StartAtLogin login, string configFile, IShellOpen? shell = null) => SettingsPane.Attach(login, configFile, shell);
+    internal void AttachLogs(LogsView view, IShellOpen? shell = null) => LogsPage.Attach(view, shell);
 
-    /// <summary>Gives the status page its state; the app does, once.</summary>
+    internal void AttachSettings(StartAtLogin login, string configFile, SafetyPolicyStore? policy = null, IShellOpen? shell = null) =>
+        SettingsPage.Attach(login, configFile, policy ?? _policy, shell);
+
     internal void AttachStatus(StatusView view) => StatusPage.Attach(view);
 
-    /// <summary>Gives the client page its state; the app does, once.</summary>
     internal void AttachClients(ClientsView view) => ClientsPage.Attach(view);
 
-    internal void AttachVm(Vm.VmView view) => ClientsPage.VmConnection.Attach(view);
+    internal void AttachMcp(Vm.VmView vm, ClientsView? clients = null, string? hostExecutable = null) =>
+        McpPage.Attach(vm, clients, hostExecutable);
 
-    /// <summary>Opens a record's details over a scrim, focus on its title; closing gives focus back (DLG-10).</summary>
     internal void OpenRecord(AuditRecord record)
     {
         _recordOpener = Keyboard.FocusedElement;
@@ -159,29 +212,19 @@ public partial class MainWindow : Window
         _recordOpener = null;
     }
 
-    /// <summary>
-    /// What a new question may do to be noticed, and no more (APR-14, PRI-07): flash the taskbar button when the window
-    /// is not active, and a tray notification when it is hidden or minimized. It never activates, raises or shows the
-    /// window, changes the page or moves focus.
-    /// </summary>
     internal static Reminder ReminderFor(bool visible, bool minimized, bool active) =>
         (active ? Reminder.None : Reminder.Flash) | (!visible || minimized ? Reminder.Notify : Reminder.None);
 
-    /// <summary>
-    /// From the tray or a notification: the window comes back with the queue, and with the question the notification was
-    /// about selected (STS-09, APR-14); without waiting questions the page stays as it was.
-    /// </summary>
     internal void Open(QuestionItem? question)
     {
-        // A reminder opens the queue: no drawer may stay over it, holding the shortcuts and the focus (DLG-10).
         if (RecordLayer.Visibility == Visibility.Visible)
         {
             CloseRecord();
         }
 
-        if (SettingsLayer.Visibility == Visibility.Visible)
+        if (CommandLayer.Visibility == Visibility.Visible)
         {
-            CloseSettings();
+            CloseCommandPalette();
         }
 
         Restore();
@@ -196,18 +239,10 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>
-    /// Shows the queue in the Header (STS-10, STS-11): without the pipe name, or without a place that is neither waiting
-    /// nor reserved by a handshake, questions are not taken.
-    /// </summary>
     internal void ShowQueue(ApprovalQueue queue, bool listening) => ShowApprovals(
         !listening ? ApprovalChannelState.NameTaken : queue.IsAccepting ? ApprovalChannelState.Accepting : ApprovalChannelState.Full,
         queue.PendingCount);
 
-    /// <summary>
-    /// Shows whether approvals are taken and how many questions wait (STS-10, STS-11); a change of state is announced
-    /// (STS-02).
-    /// </summary>
     public void ShowApprovals(ApprovalChannelState channel, int pending)
     {
         bool changed = channel != _channel;
@@ -219,7 +254,6 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>Shows the window from the tray or for a second start, in front: the engineer asked for it (NAV-09).</summary>
     public void Restore()
     {
         Show();
@@ -231,25 +265,104 @@ public partial class MainWindow : Window
         Activate();
     }
 
-    /// <summary>Opens the settings drawer over a scrim, focus on its title; closing gives focus back (DLG-10).</summary>
-    public void OpenSettings()
-    {
-        _settingsOpener = Keyboard.FocusedElement;
-        SettingsPane.Refresh();
-        SettingsLayer.Visibility = Visibility.Visible;
-        UpdateLayout();
-        SettingsPane.FocusHeading();
-    }
-
-    public void CloseSettings()
-    {
-        SettingsLayer.Visibility = Visibility.Collapsed;
-        (_settingsOpener ?? SettingsButton).Focus();
-        _settingsOpener = null;
-    }
-
     private void CanNavigate(object sender, CanExecuteRoutedEventArgs e) =>
-        e.CanExecute = SettingsLayer.Visibility != Visibility.Visible && RecordLayer.Visibility != Visibility.Visible;
+        e.CanExecute = RecordLayer.Visibility != Visibility.Visible && CommandLayer.Visibility != Visibility.Visible;
+
+    private void ToggleLeftPane()
+    {
+        _leftPaneOpen = !_leftPaneOpen;
+        ProjectPage.SetLeftPaneVisible(_leftPaneOpen);
+        SettingsPage.SetLeftPaneVisible(_leftPaneOpen);
+    }
+
+    private void OpenCommandPalette()
+    {
+        _commandOpener = Keyboard.FocusedElement;
+        Loc loc = Loc.Current;
+        var items = new List<PaletteEntry>();
+        foreach ((WorkbenchPage page, string key, string shortcut, _, _) in _pages)
+        {
+            items.Add(new PaletteEntry(loc.T("Shell.Shortcut", loc[key], shortcut), () => Navigate(page, NavigationOrigin.Shortcut)));
+        }
+
+        items.Add(new PaletteEntry(loc["Shell.CmdToggleApproval"], ToggleApprovalPolicy));
+        items.Add(new PaletteEntry(loc["Shell.CmdToggleTheme"], ToggleTheme));
+        items.Add(new PaletteEntry(loc["Shell.CmdToggleAccent"], () => AccentManager.Current.Accent = AccentManager.Current.Accent == BrandAccent.Cobalt ? BrandAccent.Petrol : BrandAccent.Cobalt));
+        items.Add(new PaletteEntry(loc["Shell.CmdToggleLang"], ToggleLanguage));
+
+        _paletteAll = [.. items];
+        CommandSearch.Text = string.Empty;
+        CommandList.ItemsSource = _paletteAll;
+        CommandList.SelectedIndex = 0;
+        CommandLayer.Visibility = Visibility.Visible;
+        UpdateLayout();
+        Keyboard.Focus(CommandSearch);
+    }
+
+    private void CloseCommandPalette()
+    {
+        CommandLayer.Visibility = Visibility.Collapsed;
+        Keyboard.Focus(_commandOpener ?? _pages[(int)CurrentPage].Item);
+        _commandOpener = null;
+    }
+
+    private void ExecutePaletteSelection()
+    {
+        if (CommandList.SelectedItem is PaletteEntry entry)
+        {
+            CloseCommandPalette();
+            entry.Execute();
+        }
+    }
+
+    private void OnCommandSearchChanged(object sender, TextChangedEventArgs e)
+    {
+        string q = CommandSearch.Text.Trim();
+        CommandList.ItemsSource = q.Length == 0
+            ? _paletteAll
+            : _paletteAll.Where(p => p.Label.Contains(q, StringComparison.OrdinalIgnoreCase)).ToArray();
+        if (CommandList.Items.Count > 0)
+        {
+            CommandList.SelectedIndex = 0;
+        }
+    }
+
+    private void OnCommandPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            CloseCommandPalette();
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            ExecutePaletteSelection();
+        }
+        else if (e.Key == Key.Down && CommandList.Items.Count > 0)
+        {
+            CommandList.SelectedIndex = Math.Min(CommandList.Items.Count - 1, CommandList.SelectedIndex + 1);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Up && CommandList.Items.Count > 0)
+        {
+            CommandList.SelectedIndex = Math.Max(0, CommandList.SelectedIndex - 1);
+            e.Handled = true;
+        }
+    }
+
+    private void OnCommandListKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            ExecutePaletteSelection();
+        }
+    }
+
+    private void OnCommandPick(object sender, MouseButtonEventArgs e) => ExecutePaletteSelection();
+
+    private void OnCommandScrim(object sender, MouseButtonEventArgs e) => CloseCommandPalette();
 
     private void OnArrived(QuestionItem item)
     {
@@ -266,10 +379,6 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>
-    /// F6 and Shift+F6 go round the regions (NAV-08): Sider, Header, the page body, and on the approval queue the shown
-    /// question. Each stop is the region's natural focus; it is never an answer button.
-    /// </summary>
     private void MoveRegion(int step)
     {
         var regions = new List<(UIElement Region, Action Focus)>
@@ -297,21 +406,29 @@ public partial class MainWindow : Window
 
     private void Refresh()
     {
-        if (CurrentPage == WorkbenchPage.Audit)
+        switch (CurrentPage)
         {
-            AuditPage.Refresh();
-        }
-        else if (CurrentPage == WorkbenchPage.Status)
-        {
-            StatusPage.Refresh();
-        }
-        else if (CurrentPage == WorkbenchPage.Clients)
-        {
-            ClientsPage.Refresh();
+            case WorkbenchPage.Project:
+                ProjectPage.Refresh();
+                break;
+            case WorkbenchPage.Audit:
+                AuditPage.Refresh();
+                break;
+            case WorkbenchPage.Status:
+                StatusPage.Refresh();
+                break;
+            case WorkbenchPage.Clients:
+                ClientsPage.Refresh();
+                break;
+            case WorkbenchPage.Logs:
+                LogsPage.Refresh();
+                break;
+            case WorkbenchPage.Settings:
+                SettingsPage.Refresh();
+                break;
         }
     }
 
-    /// <summary>Ctrl+F opens the audit page if need be, then focuses its first filter.</summary>
     private void Find()
     {
         Navigate(WorkbenchPage.Audit, NavigationOrigin.Shortcut);
@@ -320,9 +437,33 @@ public partial class MainWindow : Window
 
     private void Cycle(int step) => Navigate((WorkbenchPage)(((int)CurrentPage + step + _pages.Length) % _pages.Length), NavigationOrigin.Shortcut);
 
-    private void OnSettings(object sender, RoutedEventArgs e) => OpenSettings();
-
     private void OnPendingBadge(object sender, RoutedEventArgs e) => Navigate(WorkbenchPage.Approvals, NavigationOrigin.Reminder);
+
+    private void OnTogglePane(object sender, RoutedEventArgs e) => ToggleLeftPane();
+
+    private void OnOpenCommandPalette(object sender, RoutedEventArgs e) => OpenCommandPalette();
+
+    private void OnQuickTheme(object sender, RoutedEventArgs e) => ToggleTheme();
+
+    private void OnQuickLang(object sender, RoutedEventArgs e) => ToggleLanguage();
+
+    private void OnStatusApprovalToggle(object sender, RoutedEventArgs e) => ToggleApprovalPolicy();
+
+    private void OnStatusAuditClick(object sender, RoutedEventArgs e) => Navigate(WorkbenchPage.Audit, NavigationOrigin.Shortcut);
+
+    private static void ToggleTheme() =>
+        ThemeManager.Current.Theme = ThemeManager.Current.EffectivelyDark ? AppTheme.Light : AppTheme.Dark;
+
+    private static void ToggleLanguage() =>
+        Loc.Current.Language = Loc.Current.Language == AppLanguage.Chinese ? AppLanguage.English : AppLanguage.Chinese;
+
+    private void ToggleApprovalPolicy()
+    {
+        if (_policy is { } policy)
+        {
+            policy.SetRequireNormalWriteApproval(!policy.RequireNormalWriteApproval);
+        }
+    }
 
     private void ApplyStatus()
     {
@@ -337,6 +478,13 @@ public partial class MainWindow : Window
         PipeIcon.SetResourceReference(StyleProperty, icon);
         PipeText.ToolTip = help.Length == 0 ? PipeText.Text : PipeText.Text + Environment.NewLine + loc[help];
         AutomationProperties.SetHelpText(PipeText, help.Length == 0 ? string.Empty : loc[help]);
+
+        bool manual = _policy?.RequireNormalWriteApproval ?? true;
+        string approvalLabel = loc[manual ? "Shell.StatusApprovalOn" : "Shell.StatusApprovalOff"];
+        ApprovalStatusButton.Content = approvalLabel;
+        AutomationProperties.SetName(ApprovalStatusButton, approvalLabel);
+        ApprovalStatusButton.SetResourceReference(ForegroundProperty, manual ? "State.Success.Text" : "State.Warning.Text");
+
         string pending = loc.T("Tray.Pending", _pending);
         PendingBadge.Visibility = _pending > 0 ? Visibility.Visible : Visibility.Collapsed;
         PendingBadge.Content = _pending.ToString(CultureInfo.CurrentCulture);
@@ -346,45 +494,17 @@ public partial class MainWindow : Window
         AutomationProperties.SetHelpText(ApprovalsItem, _pending > 0 ? pending : string.Empty);
     }
 
-    private void OnSettingsClosed(object? sender, EventArgs e) => CloseSettings();
-
-    private void OnScrim(object sender, MouseButtonEventArgs e) => CloseSettings();
-
     private void OnRecordClosed(object? sender, EventArgs e) => CloseRecord();
 
     private void OnRecordScrim(object sender, MouseButtonEventArgs e) => CloseRecord();
 
     private void OnRecordFolder(object? sender, EventArgs e) => RecordPane.ShowFolder(AuditPage.OpenFolder(), AuditPage.Folder);
 
-    private void OnSiderToggle(object sender, RoutedEventArgs e)
-    {
-        _compactChosen = !Ux.GetCompact(Sider);
-        ApplySider();
-    }
-
-    /// <summary>A choice by hand holds until the window crosses the breakpoint; then the width decides again (3.1).</summary>
-    private void ApplySider()
-    {
-        bool narrow = ActualWidth > 0 && ActualWidth < CompactBelow;
-        if (_compactChosen == narrow)
-        {
-            _compactChosen = null;
-        }
-
-        bool compact = _compactChosen ?? narrow;
-        Ux.SetCompact(Sider, compact);
-        Sider.Width = compact ? 64 : 232;
-        Brand.Visibility = SiderSection.Visibility = SiderStatus.Visibility = compact ? Visibility.Collapsed : Visibility.Visible;
-        Ux.SetIcon(SiderToggle, (Geometry)FindResource(compact ? "Icon.MenuUnfold" : "Icon.MenuFold"));
-        ApplyTexts();
-    }
-
     private void OnLanguageChanged(object? sender, EventArgs e) => ApplyTexts();
 
     private void OnMenuClick(object sender, RoutedEventArgs e) =>
         Navigate(_pages.Single(p => ReferenceEquals(p.Item, sender)).Page, NavigationOrigin.Menu);
 
-    /// <summary>The approval page just became visible, or the window did with it on top: the 500 ms start over (APR-04).</summary>
     private void Rearm(bool shown)
     {
         if (shown && IsVisible && WindowState != WindowState.Minimized && CurrentPage == WorkbenchPage.Approvals)
@@ -393,11 +513,6 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>
-    /// Windows gives focus back to the last control on activation (S18); when that is an answer button, focus goes to the
-    /// question's title instead (APR-03). Focus anywhere else stays: moving it would be a focus change of our own, and
-    /// one that is not needed for safety.
-    /// </summary>
     private void Refocus()
     {
         if (ApprovalsPage.HasAnswerFocus)
@@ -412,28 +527,24 @@ public partial class MainWindow : Window
         Rearm(_lastState == WindowState.Minimized && WindowState != WindowState.Minimized);
         _lastState = WindowState;
 
-        // A maximized chrome-less window reaches past the screen by its resize border; keep the content on screen.
         Root.Margin = maximized ? SystemParameters.WindowResizeBorderThickness : new Thickness(0);
         MaximizeGlyph.Data = Geometry.Parse(maximized ? "M2.5,0.5 H9.5 V7.5 M0.5,2.5 H7.5 V9.5 H0.5 Z" : "M0.5,0.5 H9.5 V9.5 H0.5 Z");
         ApplyTexts();
     }
 
-    /// <summary>Texts that code sets: names and tooltips that change with state, and the window title (NAV-03).</summary>
     private void ApplyTexts()
     {
         Loc loc = Loc.Current;
         Language = System.Windows.Markup.XmlLanguage.GetLanguage(loc.Language == AppLanguage.Chinese ? "zh-CN" : "en-US");
         string page = loc[_pages[(int)CurrentPage].Key];
         Title = loc.T("Shell.WindowTitle", page);
-        CurrentPageText.Text = page;
+        CurrentPageText.Text = "/ " + page;
+        LangToggleButton.Content = loc[loc.Language == AppLanguage.Chinese ? "Settings.Chinese" : "Settings.English"];
         foreach ((_, string key, string shortcut, RadioButton item, _) in _pages)
         {
             item.ToolTip = loc.T("Shell.Shortcut", loc[key], shortcut);
         }
 
-        string toggle = loc[Ux.GetCompact(Sider) ? "Shell.Expand" : "Shell.Collapse"];
-        SiderToggle.Content = toggle;
-        AutomationProperties.SetName(SiderToggle, toggle);
         ApplyStatus();
         Label(MinimizeButton, "Shell.Minimize");
         Label(MaximizeButton, WindowState == WindowState.Maximized ? "Shell.Restore" : "Shell.Maximize");

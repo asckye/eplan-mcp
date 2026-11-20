@@ -57,7 +57,7 @@ internal sealed partial class VmView
         }
     }
 
-    private string PlainError(string text) => string.Join(Environment.NewLine, Regex.Replace(_key is { } key ? text.Replace(key, "[redacted]", StringComparison.Ordinal) : text,
+    private static string PlainError(string text) => string.Join(Environment.NewLine, Regex.Replace(text,
         "[A-Za-z0-9_-]{43,}", "[redacted]").Split('\n').Where(line => line.Length > 0).TakeLast(20).Select(line => ProjectText.Line(line)));
     private void StopService()
     {

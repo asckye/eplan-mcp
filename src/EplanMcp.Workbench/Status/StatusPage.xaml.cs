@@ -1,15 +1,17 @@
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
+using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Shell;
 using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
 
 namespace EplanMcp.Workbench.Status;
 
-/// <summary>The status page over its <see cref="StatusView"/>: runs doctor each time the page opens and on Refresh (F5).</summary>
+/// <summary>The status and environment checks page over <see cref="StatusView"/>: runs doctor on open and F5.</summary>
 public partial class StatusPage : UserControl, IWorkbenchPage
 {
     private StatusView? _view;
@@ -33,6 +35,8 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         Unloaded += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
     }
 
+    public event Action? ExportDiagnosticsRequested;
+
     public FrameworkElement? Heading => PageTitle;
 
     public void FocusHeading() => Keyboard.Focus(PageTitle);
@@ -44,7 +48,6 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         Show();
     }
 
-    /// <summary>Runs doctor, unless it is running or there is no Host to run.</summary>
     internal void Refresh()
     {
         if (_view is { State: not StatusState.Running, CanRun: true })
@@ -71,10 +74,9 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         if (Caption.Text != caption)
         {
             Caption.Text = caption;
-            AccessibleStatus.Announce(Caption); // STS-02: doctor finished, or failed
+            AccessibleStatus.Announce(Caption);
         }
 
-        // NAV-05: without a Host the page says why and Refresh stays off.
         RefreshButton.IsEnabled = view.CanRun && !running;
         AutomationProperties.SetHelpText(RefreshButton, view.CanRun ? string.Empty : loc["Host.Missing"]);
         Variants.ItemsSource = view.Variants;
@@ -88,6 +90,7 @@ public partial class StatusPage : UserControl, IWorkbenchPage
             AutomationProperties.SetHelpText(button, help);
             button.ToolTip = help;
         }
+
         Working.Visibility = running ? Visibility.Visible : Visibility.Collapsed;
         ErrorBanner.Visibility = view.Error is null ? Visibility.Collapsed : Visibility.Visible;
         ErrorText.Text = view.Error is { } error ? loc.T("Status.Error", error) : string.Empty;
@@ -96,9 +99,20 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         SuspensionBanner.Visibility = suspensions.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         Suspensions.ItemsSource = suspensions;
         Groups.ItemsSource = view.Groups;
+
+        StatusLine[] allLines = [.. view.Groups.SelectMany(g => g.Lines)];
+        int okCount = allLines.Count(l => l.Status is CheckStatus.Ok or CheckStatus.Info);
+        int warnCount = allLines.Count(l => l.Status == CheckStatus.Warning);
+        int failCount = allLines.Count(l => l.Status == CheckStatus.Failure);
+        StatPass.Text = okCount.ToString(CultureInfo.InvariantCulture);
+        StatWarn.Text = warnCount.ToString(CultureInfo.InvariantCulture);
+        StatFail.Text = failCount.ToString(CultureInfo.InvariantCulture);
+        StatOverall.Text = failCount > 0 ? loc["Status.Failure"] : warnCount > 0 ? loc["Status.Warning"] : loc["Status.Ok"];
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
+
+    private void OnExportDiag(object sender, RoutedEventArgs e) => ExportDiagnosticsRequested?.Invoke();
 
     private void OnVariantChanged(object sender, RoutedEventArgs e) => Dispatcher.BeginInvoke(Show);
 

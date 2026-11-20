@@ -12,10 +12,11 @@ public partial class VmPanel : UserControl
 {
     private VmView? _view;
     private bool _loaded;
+
     public VmPanel()
     {
         InitializeComponent();
-        Confirm = kind => WorkbenchDialog.Confirm(Window.GetWindow(this)!, Loc.Current["Vm." + kind + "Title"], Loc.Current["Vm." + kind + "Message"], Loc.Current["Exit.Cancel"], Loc.Current["Vm." + kind + "Confirm"]);
+        Confirm = _ => true;
         Loaded += (_, _) => { Loc.Current.LanguageChanged += OnLanguage; Show(); };
         Unloaded += (_, _) => Loc.Current.LanguageChanged -= OnLanguage;
         IsVisibleChanged += (_, _) =>
@@ -23,24 +24,15 @@ public partial class VmPanel : UserControl
             if (IsVisible && !_loaded && _view is { Reason.Length: 0 } view)
             {
                 _loaded = true;
-                _ = LoadAsync(view);
+                _ = view.RunAsync("instances", Confirm, CopyText, CancellationToken.None);
             }
         };
     }
 
     internal Func<string, bool> Confirm { get; set; }
-    internal Action<string> CopyText { get; set; } = Clipboard.SetText;
-    private async Task LoadAsync(VmView view)
-    {
-        await view.RunAsync("load", Confirm, CopyText, CancellationToken.None).ConfigureAwait(true);
-        await view.RunAsync("instances", Confirm, CopyText, CancellationToken.None).ConfigureAwait(true);
-    }
 
-    private void OnInstance(object sender, SelectionChangedEventArgs e)
-    {
-        if (_view is { } view)
-        { view.SelectedProcess = Instance.SelectedItem as int?; Show(); }
-    }
+    internal Action<string> CopyText { get; set; } = Clipboard.SetText;
+
     internal void Attach(VmView view)
     {
         Address.ItemsSource = view.Addresses;
@@ -52,7 +44,17 @@ public partial class VmPanel : UserControl
         Show();
     }
 
+    private void OnInstance(object sender, SelectionChangedEventArgs e)
+    {
+        if (_view is { } view)
+        {
+            view.SelectedProcess = Instance.SelectedItem as int?;
+            Show();
+        }
+    }
+
     private void OnLanguage(object? sender, EventArgs e) => Show();
+
     private void OnInput(object sender, RoutedEventArgs e)
     {
         if (_view is { } view)
@@ -79,14 +81,13 @@ public partial class VmPanel : UserControl
         }
 
         IsEnabled = true;
-        // Explicit names: a Label's text does not reach the field's name through LabeledBy on every WPF servicing release.
         foreach ((FrameworkElement field, string key) in new (FrameworkElement, string)[]
-            { (Address, "Vm.Address"), (Instance, "Vm.Instance"), (Port, "Vm.Port"), (HostAddress, "Vm.Host"), (KeyValue, "Vm.Key"), (FirewallValue, "Vm.Network") })
+            { (Address, "Vm.Address"), (Instance, "Vm.Instance"), (Port, "Vm.Port"), (HostAddress, "Vm.Host"), (FirewallValue, "Vm.Network") })
         {
             AutomationProperties.SetName(field, WorkbenchDialog.Plain(Loc.Current[key]));
         }
 
-        foreach (ButtonBase button in new ButtonBase[] { Generate, Reveal, Copy, Delete, Allow, Remove, Refresh, Instances, Start, Stop })
+        foreach (ButtonBase button in new ButtonBase[] { Allow, Remove, Refresh, Instances, Start, Stop })
         {
             string reason = view.DisabledReason((string)button.Tag);
             button.IsEnabled = reason.Length == 0;
@@ -95,7 +96,7 @@ public partial class VmPanel : UserControl
             button.ToolTip = reason.Length > 0 ? reason : button == Allow || button == Remove ? Loc.Current["Vm.Uac"] : null;
         }
 
-        (Generate.Content, KeyValue.Text, Reveal.IsChecked, FirewallValue.Text) = (view.KeyAction, view.DisplayKey, view.Shown, view.Firewall);
+        FirewallValue.Text = view.Firewall;
         foreach ((Control field, TextBlock error, string text) in new[] { ((Control)Address, AddressError, view.AddressError), (Port, PortError, view.PortError), (HostAddress, HostError, view.HostError) })
         {
             if (error.Text != text)
@@ -103,6 +104,7 @@ public partial class VmPanel : UserControl
                 error.Text = text;
                 AccessibleStatus.Announce(error);
             }
+
             string help = field != HostAddress && view.Running ? Loc.Current["Vm.StopFirst"] : text;
             AutomationProperties.SetHelpText(field, help);
             field.ToolTip = help;
@@ -110,7 +112,10 @@ public partial class VmPanel : UserControl
         }
 
         if (!ReferenceEquals(Instance.ItemsSource, view.Processes))
-        { Instance.ItemsSource = view.Processes; }
+        {
+            Instance.ItemsSource = view.Processes;
+        }
+
         Instance.IsEnabled = Address.IsEnabled = Port.IsEnabled = !view.Busy && !view.Running;
         AutomationProperties.SetHelpText(Instance, view.Running ? Loc.Current["Vm.StopFirst"] : view.DisabledReason("start"));
         Instance.ToolTip = AutomationProperties.GetHelpText(Instance);
@@ -118,7 +123,11 @@ public partial class VmPanel : UserControl
         Working.Visibility = view.Busy || view.Starting ? Visibility.Visible : Visibility.Collapsed;
         ServiceIcon.SetResourceReference(StyleProperty, view.ServiceFailed ? "Primer.AlertIcon.Error" : "Primer.AlertIcon.Info");
         if (ServiceStatus.Text != view.ServiceStatus)
-        { ServiceStatus.Text = view.ServiceStatus; AccessibleStatus.Announce(ServiceStatus); }
+        {
+            ServiceStatus.Text = view.ServiceStatus;
+            AccessibleStatus.Announce(ServiceStatus);
+        }
+
         StatusIcon.SetResourceReference(StyleProperty, view.Failed ? "Primer.AlertIcon.Error" : "Primer.AlertIcon.Info");
         string status = view.Reason.Length > 0 ? view.Reason : view.Message;
         if (Status.Text != status)

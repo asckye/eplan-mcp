@@ -171,7 +171,12 @@ internal static class DoctorChecks
         string source = File.Exists(locations.ConfigFile) ? locations.ConfigFile : "默认值";
         string sourceEn = File.Exists(locations.ConfigFile) ? locations.ConfigFile : "defaults";
         string roots = string.Join("; ", config.ScratchRoots);
-        (string outside, string outsideEn) = config.WritesOutsideScratch == OutsideScratchWrites.Deny ? ("禁止", "denied") : ("需要审批", "need approval");
+        (string outside, string outsideEn) = config.WritesOutsideScratch switch
+        {
+            OutsideScratchWrites.Deny => ("禁止", "denied"),
+            OutsideScratchWrites.Allow => ("自动放行（破坏性与主数据仍需审批）", "auto-approved (destructive and master data still require approval)"),
+            _ => ("需要审批", "need approval"),
+        };
         string timeout = HostConfig.Seconds(config.ApprovalTimeout);
         string lifetime = config.PlanLifetimeHours.ToString(CultureInfo.InvariantCulture);
         (string masterData, string masterDataEn) = config.MasterDataWrites == MasterDataWrites.Deny ? ("禁止", "denied") : ("每次审批并先备份", "approved each time, backed up first");

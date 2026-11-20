@@ -189,7 +189,7 @@ internal sealed partial class ClientsView : INotifyPropertyChanged
         try
         {
             ClientConfigReport report = plugin ? await _host.GeneratePluginAsync(mode == ClientConfigMode.DryRun, cancellationToken).ConfigureAwait(true)
-                : VmMode ? await _host.ConfigureVmClientsAsync([.. cards.Select(c => c.Name)], mode, VmUrl, _vmKey, cancellationToken).ConfigureAwait(true)
+                : VmMode ? await _host.ConfigureVmClientsAsync([.. cards.Select(c => c.Name)], mode, VmUrl, cancellationToken).ConfigureAwait(true)
                 : await _host.ConfigureClientsAsync([.. cards.Select(c => c.Name)], mode, cancellationToken).ConfigureAwait(true);
             (_error, _refused, State) = (null, report.Problem, report.Problem is null ? ClientsState.Ready : ClientsState.Failed);
             if (plugin)

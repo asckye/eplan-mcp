@@ -44,9 +44,18 @@ public sealed class HostConfigTests
         Assert.Equal(TimeSpan.FromSeconds(seconds), config!.ApprovalTimeout);
     }
 
+    [Fact]
+    public void Parse_WritesOutsideScratchAllow_IsAccepted()
+    {
+        (HostConfig? config, string? problem) = HostConfig.Parse("""{"writesOutsideScratch":"allow"}""", _locations);
+
+        Assert.Null(problem);
+        Assert.Equal(OutsideScratchWrites.Allow, config!.WritesOutsideScratch);
+    }
+
     [Theory]
     [InlineData("""{"scratchRoot":"D:\\Scratch"}""", "scratchRoot")]
-    [InlineData("""{"writesOutsideScratch":"allow"}""", "is not valid")]
+    [InlineData("""{"writesOutsideScratch":"unknown"}""", "is not valid")]
     [InlineData("""{"writesOutsideScratch":1}""", "is not valid")]
     [InlineData("""{"masterDataWrites":"allow"}""", "is not valid")]
     [InlineData("""{"masterDataWrites":true}""", "is not valid")]

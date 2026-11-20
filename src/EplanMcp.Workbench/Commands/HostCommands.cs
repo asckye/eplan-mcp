@@ -46,14 +46,14 @@ internal sealed class HostCommands(IHostRunner? runner)
         catch (JsonException) { return string.Empty; }
     }
 
-    public Task<VmConnectionReport> TestVmAsync(string url, string key, CancellationToken cancellationToken) =>
-        RunAsync<VmConnectionReport>(["vm-test", "--url", url, "--key-stdin", "--format", "json"], ClientConfigTimeout, key, 1, cancellationToken);
+    public Task<VmConnectionReport> TestVmAsync(string url, CancellationToken cancellationToken) =>
+        RunAsync<VmConnectionReport>(["vm-test", "--url", url, "--format", "json"], ClientConfigTimeout, null, 1, cancellationToken);
 
-    public async Task<ClientConfigReport> ConfigureVmClientsAsync(IReadOnlyList<string> clients, ClientConfigMode mode, string url, string key, CancellationToken cancellationToken)
+    public async Task<ClientConfigReport> ConfigureVmClientsAsync(IReadOnlyList<string> clients, ClientConfigMode mode, string url, CancellationToken cancellationToken)
     {
-        string[] options = mode switch { ClientConfigMode.Remove => ["--remove"], ClientConfigMode.DryRun => ["--url", url, "--key-stdin", "--dry-run"], _ => ["--url", url, "--key-stdin"] };
+        string[] options = mode switch { ClientConfigMode.Remove => ["--remove"], ClientConfigMode.DryRun => ["--url", url, "--dry-run"], _ => ["--url", url] };
         VmClientConfigReport report = await RunAsync<VmClientConfigReport>(["client-config", .. clients, "--vm", .. options, "--format", "json"],
-            mode == ClientConfigMode.DryRun ? ClientConfigTimeout : ClientConfigWriteTimeout, mode == ClientConfigMode.Remove ? null : key, 2, cancellationToken).ConfigureAwait(false);
+            mode == ClientConfigMode.DryRun ? ClientConfigTimeout : ClientConfigWriteTimeout, null, 2, cancellationToken).ConfigureAwait(false);
         return new(report.SchemaVersion, report.Mode, new(report.Server.Name, string.Empty, []), report.Problem, report.Clients);
     }
 

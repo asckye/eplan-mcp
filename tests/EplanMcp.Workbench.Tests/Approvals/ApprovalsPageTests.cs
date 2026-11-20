@@ -161,7 +161,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
     {
         wpf.Run(() => WithPage((window, page) =>
         {
-            var settings = (Button)window.FindName("SettingsButton");
+            var settings = (RadioButton)window.FindName("SettingsItem");
             Focus(window, settings);
 
             Add("r1");
@@ -314,7 +314,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             var detail = (FrameworkElement)page.FindName("DetailArea");
             var list = (FrameworkElement)page.FindName("Questions");
 
-            Resize(window, 1000); // the Sider stays wide, the page is under 760
+            Resize(window, 800); // narrow window puts page under 760
             Assert.True(page.ActualWidth < 760);
             Assert.Equal((2, 0, 2, 2), (Grid.GetRow(detail), Grid.GetColumn(detail), Grid.GetColumnSpan(detail), Grid.GetColumnSpan(list)));
             Assert.True(detail.TranslatePoint(default, page).Y >= list.TranslatePoint(new Point(0, list.ActualHeight), page).Y);
@@ -486,7 +486,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         {
             Add("r1");
             Open();
-            Focus(window, (UIElement)window.FindName("SettingsButton")); // in the Sider
+            Focus(window, (UIElement)window.FindName("SettingsItem")); // in the Sider
             var stops = new List<object>();
             for (int i = 0; i < 5; i++)
             {
@@ -504,10 +504,6 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             MoveRegion("-1");
             Assert.Same(page.FindName("QuestionTitle"), Focused(window));
             Assert.Contains(window.InputBindings.OfType<KeyBinding>(), b => b.Key == Key.F6 && b.Modifiers == ModifierKeys.Shift && b.Command == MainWindow.RegionCommand);
-
-            window.OpenSettings();
-            Assert.False(MainWindow.RegionCommand.CanExecute("1", window));
-            window.CloseSettings();
 
             void MoveRegion(string direction)
             {

@@ -1,19 +1,24 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EplanMcp.Workbench.Themes;
 using TiaOpenness.Gui.Localization;
 using TiaOpenness.Gui.Themes;
 
 namespace EplanMcp.Workbench.Settings;
 
 /// <summary>
-/// What the engineer chose in the settings drawer (docs/design/2026-10-20-m5-operability.md#workbench-implementation), kept in <c>workbench\settings.json</c> of
-/// the data root. Nothing here changes how approvals work (APR-16): the deadline and the channels are the Host's.
+/// What the engineer chose in the Workbench settings page, kept in <c>workbench\settings.json</c> of the data root.
 /// </summary>
 /// <param name="Language">The interface language; null follows the system's (LOC-10).</param>
-/// <param name="Theme">Follow Windows, light or dark (COL-09); high contrast follows Windows regardless (COL-02).</param>
-/// <remarks>Start at login is not kept here: the Run entry itself is the record (<see cref="StartAtLogin"/>).</remarks>
-internal sealed record WorkbenchSettings(AppLanguage? Language = null, AppTheme Theme = AppTheme.Auto)
+/// <param name="Theme">Light or dark (COL-09); high contrast follows Windows automatically (COL-02).</param>
+/// <param name="Accent">Brand accent: Precision Cobalt or Engineering Petrol.</param>
+/// <param name="RequireNormalWriteApproval">Whether routine project writes ask for manual approval; destructive, master data and suspension releases always require confirmation.</param>
+internal sealed record WorkbenchSettings(
+    AppLanguage? Language = null,
+    AppTheme Theme = AppTheme.Light,
+    BrandAccent Accent = BrandAccent.Cobalt,
+    bool RequireNormalWriteApproval = true)
 {
     private static readonly JsonSerializerOptions _options = new()
     {

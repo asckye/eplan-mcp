@@ -16,6 +16,9 @@ internal enum OutsideScratchWrites
 
     /// <summary>Allowed after the engineer approves each one (ADR-0005); the default since M3a ended (M3 design Q5).</summary>
     Approve,
+
+    /// <summary>Normal writes proceed without manual approval; Destructive writes, master data, unverified writes and suspension releases still require confirmation.</summary>
+    Allow,
 }
 
 /// <summary>What writes to EPLAN's system master data, such as the parts database, need (ADR-0019).</summary>

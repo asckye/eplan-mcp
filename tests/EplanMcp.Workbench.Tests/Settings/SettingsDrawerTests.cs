@@ -1,9 +1,11 @@
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using EplanMcp.Workbench.Settings;
 using EplanMcp.Workbench.Shell;
+using EplanMcp.Workbench.Themes;
 using TiaOpenness.Gui.Localization;
 using TiaOpenness.Gui.Themes;
 using static EplanMcp.Workbench.Tests.Shell.TestWindows;
@@ -11,88 +13,79 @@ using static EplanMcp.Workbench.Tests.Shell.TestWindows;
 namespace EplanMcp.Workbench.Tests.Settings;
 
 /// <summary>
-/// The settings drawer (docs/design/2026-10-20-m5-operability.md#workbench-implementation): a modal pane with its title focused, Tab kept inside, Esc
-/// and the scrim closing it with focus back on the opener; language and theme apply at once.
+/// The dedicated Settings page: navigated from the bottom of the left Activity Rail (Ctrl+,),
+/// switching Language, Light/Dark theme, Dual Brand Accent (Cobalt / Petrol), and Normal-Write Manual Approval at once.
 /// </summary>
 [Collection(WpfTestGroup.Name)]
 [Trait("Size", "Medium")]
 public sealed class SettingsDrawerTests(WpfContext wpf)
 {
     [Fact]
-    public void Opening_FocusesTheDrawersTitle_AndEscGivesTheFocusBack()
-    {
-        wpf.Run(() => With(window =>
-        {
-            var opener = (Button)window.FindName("SettingsButton");
-            opener.Focus();
-
-            Click(opener);
-            var drawer = (SettingsDrawer)window.FindName("SettingsPane");
-            Border pane = Pane(drawer);
-            Assert.Equal(Visibility.Visible, Layer(window).Visibility);
-            Assert.Same(drawer.FindName("Heading"), Keyboard.FocusedElement);
-            Assert.True(AutomationProperties.GetIsDialog(pane));
-            Assert.Equal(KeyboardNavigationMode.Cycle, KeyboardNavigation.GetTabNavigation(pane));
-
-            Escape(drawer);
-
-            Assert.Equal(Visibility.Collapsed, Layer(window).Visibility);
-            Assert.Same(opener, Keyboard.FocusedElement);
-        }));
-    }
-
-    [Fact]
-    public void WhileOpen_ThePageShortcutsDoNothing()
+    public void OpeningSettings_ShowsDedicatedSettingsPage_AndFocusesItsHeading()
     {
         wpf.Run(() => With(window =>
         {
             window.OpenSettings();
+            WpfContext.Drain();
 
-            Assert.False(MainWindow.NavigateCommand.CanExecute(WorkbenchPage.Audit, window));
-            window.CloseSettings();
-            Assert.True(MainWindow.NavigateCommand.CanExecute(WorkbenchPage.Audit, window));
+            var page = (SettingsPage)window.FindName("SettingsPage");
+            Assert.Equal(WorkbenchPage.Settings, window.CurrentPage);
+            Assert.Equal(Visibility.Visible, page.Visibility);
+            Assert.Same(page.Heading, Keyboard.FocusedElement);
         }));
     }
 
     [Fact]
-    public void ChoosingALanguageOrATheme_AppliesAtOnce()
+    public void ChoosingLanguageThemeAccentOrApproval_AppliesAtOnce()
     {
         wpf.RunWithLanguage(AppLanguage.Chinese, () => With(window =>
         {
             AppTheme theme = ThemeManager.Current.Theme;
+            BrandAccent accent = AccentManager.Current.Accent;
+            using var temp = new TempDir();
+            string config = Path.Combine(temp.Path, "config.json");
+            var policy = new SafetyPolicyStore(config);
+            policy.Load(fallbackRequireApproval: true);
+            window.AttachPolicy(policy);
+            window.AttachSettings(new StartAtLogin(@"Software\EplanMcp.Tests\Unused", "unused.exe"), config, policy);
             try
             {
                 window.OpenSettings();
-                var drawer = (SettingsDrawer)window.FindName("SettingsPane");
-                RadioButton[] segments = [.. Descendants<RadioButton>(drawer)];
+                var page = (SettingsPage)window.FindName("SettingsPage");
+
+                // Safety: toggle normal-write approval off -> config.json updated to writesOutsideScratch=allow
+                var apSwitch = (ToggleButton)page.FindName("ApprovalSwitch");
+                Assert.True(apSwitch.IsChecked);
+                apSwitch.IsChecked = false;
+                WpfContext.Drain();
+                Assert.False(policy.RequireNormalWriteApproval);
+                Assert.Contains("\"writesOutsideScratch\": \"allow\"", File.ReadAllText(config), StringComparison.Ordinal);
+
+                // Appearance: Light / Dark + Dual Brand Accent (Cobalt / Petrol) + Language
+                Choose((RadioButton)page.FindName("NavAppearance"));
+                RadioButton[] segments = [.. Descendants<RadioButton>(page)];
 
                 Choose(segments.Single(r => AutomationProperties.GetName(r) == "English"));
                 Assert.Equal(AppLanguage.English, Loc.Current.Language);
-                Assert.Equal("Approvals – EplanMcp Workbench", window.Title);
+                Assert.Equal("Settings – EplanMcp Workbench", window.Title);
+
                 Choose(segments.Single(r => AutomationProperties.GetName(r) == "Dark"));
-                Assert.True(ThemeManager.Current.EffectivelyDark || ThemeManager.Current.EffectivelyHighContrast);
                 Assert.Equal(AppTheme.Dark, ThemeManager.Current.Theme);
+
+                Choose((RadioButton)page.FindName("AccentPetrolRadio"));
+                Assert.Equal(BrandAccent.Petrol, AccentManager.Current.Accent);
             }
             finally
             {
+                AccentManager.Current.Accent = accent;
                 ThemeManager.Current.Theme = theme;
             }
         }));
     }
 
-    private static Grid Layer(MainWindow window) => (Grid)window.FindName("SettingsLayer");
-
-    private static Border Pane(SettingsDrawer drawer) => (Border)drawer.Content;
-
     private static void Choose(RadioButton segment)
     {
         segment.IsChecked = true;
-        WpfContext.Drain();
-    }
-
-    private static void Escape(UIElement element)
-    {
-        element.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(element), 0, Key.Escape) { RoutedEvent = Keyboard.PreviewKeyDownEvent });
         WpfContext.Drain();
     }
 
@@ -112,5 +105,14 @@ public sealed class SettingsDrawerTests(WpfContext wpf)
                 yield return inner;
             }
         }
+    }
+
+    private sealed class TempDir : IDisposable
+    {
+        private readonly DirectoryInfo _dir = Directory.CreateTempSubdirectory("eplanmcp-settings-test-");
+
+        public string Path => _dir.FullName;
+
+        public void Dispose() => _dir.Delete(recursive: true);
     }
 }
