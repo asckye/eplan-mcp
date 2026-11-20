@@ -570,7 +570,7 @@ internal static class PageExportComparer
             // Location so an inconsistent exported value remains visible rather than discarding it.
             string? axis = (int?)property["id"] switch { 19002 => "x", 19003 => "y", _ => null };
             if (axis is not null && IsNumber(origin?[axis])
-                && double.TryParse(property["value"]?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double coordinate))
+                && TryNumber(property["value"], out double coordinate))
             { property["value"] = coordinate - (double)origin![axis]!; }
         }
         return normalized;
@@ -587,7 +587,7 @@ internal static class PageExportComparer
         {
             string id = property["id"]?.ToString() ?? "";
             if (_coordinateProperties.TryGetValue(id, out string? axis)
-                && double.TryParse(property["value"]?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double coordinate))
+                && TryNumber(property["value"], out double coordinate))
             { property["value"] = coordinate + (double)origin[axis]!; }
             else if (id == "19103")
             {
@@ -632,7 +632,7 @@ internal static class PageExportComparer
 
     private static JToken AngleOrderValue(JToken value)
     {
-        if (!double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double angle)
+        if (!TryNumber(value, out double angle)
             || !double.IsFinite(angle) || angle == -16002)
         { return value.DeepClone(); }
         double normalized = (angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
@@ -726,10 +726,26 @@ internal static class PageExportComparer
 
     private static bool IsNumber(JToken? value) => value?.Type is JTokenType.Integer or JTokenType.Float;
 
+    /// <summary>
+    /// Reads a JSON number, or a string holding one in the invariant culture. <see cref="JToken.ToString()"/> formats a
+    /// JSON number in the current culture, so under a culture with a decimal comma it cannot be parsed back invariantly.
+    /// </summary>
+    private static bool TryNumber(JToken? value, out double number)
+    {
+        if (IsNumber(value))
+        {
+            number = value!.Value<double>();
+            return true;
+        }
+
+        number = 0;
+        return value?.Type == JTokenType.String && double.TryParse((string?)value, NumberStyles.Float, CultureInfo.InvariantCulture, out number);
+    }
+
     private static bool SameAngle(JToken? source, JToken? target, double fullTurn)
     {
-        if (!double.TryParse(source?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double left)
-            || !double.TryParse(target?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double right)
+        if (!TryNumber(source, out double left)
+            || !TryNumber(target, out double right)
             || !double.IsFinite(left) || !double.IsFinite(right))
         { return false; }
         if (left == -16002 || right == -16002)
