@@ -9,6 +9,7 @@
     <Compile Include="..\Shared\PlacementEditFixture.cs" Link="PlacementEditFixture.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Runtime\EplanNativePreconditions.cs" Link="Adapters\EplanNativePreconditions.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Runtime\EplanPaths.cs" Link="Adapters\EplanPaths.cs" />
+    <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Runtime\EplanTextBounds.cs" Link="Adapters\EplanTextBounds.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanMacroReader.cs" Link="Adapters\EplanMacroReader.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Generated\PlaceHolderApi.g.cs" Link="Adapters\Generated\PlaceHolderApi.g.cs" />
     <Compile Include="..\..\src\EplanMcp.Bridge.Eplan\Adapters\Placement\EplanMacroInserter.cs" Link="Adapters\EplanMacroInserter.cs" />

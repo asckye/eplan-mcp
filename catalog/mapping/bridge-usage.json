@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
-  "scannedOn": "2026-11-19",
-  "scannedSources": "c37eed1b + uncommitted changes",
-  "sourceHash": "sha256:e8344b2b9af769d4bc57a8a386c53a57e1f76f8065dc2335a02c54fd51bc23e6",
+  "scannedOn": "2026-11-20",
+  "scannedSources": "e4f76c05 + uncommitted changes",
+  "sourceHash": "sha256:bb99aae8c4bb3c0901789bb979639cca778960ddb7c51a14657d76e5eb8a61ea",
   "operations": [
     {
       "name": "action.execute",
@@ -167585,6 +167585,38 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanTextBounds",
+        "member": "Of",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanTextBounds.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
       }
     ],
     "M:Eplan.EplApi.DataModel.Graphics.PropertyPlacement.GetBoundingBox(System.Boolean)": [
@@ -167600,9 +167632,9 @@
         ]
       },
       {
-        "adapter": "EplanDrawingReader.Reading",
-        "member": "Outline",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Pages/EplanDrawingReader.Reading.cs",
+        "adapter": "EplanTextBounds",
+        "member": "Absolute",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanTextBounds.cs",
         "access": [
           "call"
         ],
@@ -249790,6 +249822,70 @@
           "selection.get",
           "selection.set"
         ]
+      },
+      {
+        "adapter": "EplanTextBounds",
+        "member": "Absolute",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanTextBounds.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanTextBounds",
+        "member": "Of",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanTextBounds.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
       }
     ],
     "T:Eplan.EplApi.Base.PointD3D": [
@@ -268829,6 +268925,70 @@
         ],
         "operations": [
           "placement.delete.plan"
+        ]
+      },
+      {
+        "adapter": "EplanTextBounds",
+        "member": "Absolute",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanTextBounds.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
+        ]
+      },
+      {
+        "adapter": "EplanTextBounds",
+        "member": "Of",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Runtime/EplanTextBounds.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute",
+          "api.try.plan",
+          "connection.create.execute",
+          "connection.create.plan",
+          "device.place.execute",
+          "device.place.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
+          "macro.insert.execute",
+          "macro.insert.plan",
+          "object.find",
+          "object.get",
+          "page.drawing.get",
+          "page.review",
+          "placement.delete.plan",
+          "placement.edit.plan",
+          "placement.text.create.execute",
+          "plan.step.execute",
+          "plc.rack.execute",
+          "plc.rack.plan",
+          "potential.update.plan"
         ]
       }
     ],

@@ -309,7 +309,7 @@ internal sealed partial class EplanDrawingReader
             { RectangleD area = device.GetLogicalArea(); return new[] { area.LowerLeft, area.UpperRight }.SelectMany(XY).ToArray(); }
             if (placement is LocationBox box)
             { RectangleD area = box.GetLogicalArea(); return new[] { area.LowerLeft, area.UpperRight }.SelectMany(XY).ToArray(); }
-            return (placement is PropertyPlacement p ? p.GetBoundingBox(false) : placement.GetBoundingBox()).SelectMany(XY).ToArray();
+            return (placement is PropertyPlacement p ? EplanTextBounds.Of(p) : placement.GetBoundingBox()).SelectMany(XY).ToArray();
         }
 
         private Dictionary<string, string?> ReadGraphics(Placement placement, out string? imagePath)

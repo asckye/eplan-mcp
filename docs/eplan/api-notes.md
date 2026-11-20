@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；直接写进对应的主题文件（末尾追加），同时在下面的索引表加一行。
-- 当前下一个可用编号：**A163、B17**。A58、A59 有意留空，不复用。并行分支先协调编号。主题文件：`actions`、`clients-and-host`、`connections-and-potentials`（含 3D 布线）、`symbols-and-layout`（含 3D 布置）、`graphics-and-page-geometry`、`environment-and-licensing`、`generic-api`（`eplan_api_try` 与批量验证）、`master-data-and-parts`、`plc-and-terminals`、`reads-and-snapshots`（含项目打开、新建、改名）、`transactions-and-undo`、`writes-and-placement`。2026-11-14 已把原“新条目”一节的 73 条全部归档。
+- 当前下一个可用编号：**A171、B19**。A58、A59 有意留空，不复用。并行分支先协调编号。主题文件：`actions`、`clients-and-host`、`connections-and-potentials`（含 3D 布线）、`symbols-and-layout`（含 3D 布置）、`graphics-and-page-geometry`、`environment-and-licensing`、`generic-api`（`eplan_api_try` 与批量验证）、`master-data-and-parts`、`plc-and-terminals`、`reads-and-snapshots`（含项目打开、新建、改名）、`transactions-and-undo`、`writes-and-placement`。2026-11-14 已把原“新条目”一节的 73 条全部归档。
 - C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -191,6 +191,7 @@
 | A161 | 端子排定义是类别 TerminalDefText 的主功能，说明文字是它的功能文本；只放端子时自动产生未放置的定义 | 2026-11-18 | [plc-and-terminals](api-notes/plc-and-terminals.md) |
 | A160 | 同时启动第二个 EPLAN 实例会停在系统消息窗口 | 2026-11-14 | [environment-and-licensing](api-notes/environment-and-licensing.md#a160-同时启动第二个-eplan-实例会停在系统消息窗口2026-11-14eplan-202603已有-eplan-实例运行时) |
 | B17 | PathMap.SubstitutePath(String, String) 从 EPLAN 2026 才有；2025 上调用它的方法整个无法编译 | 2026-11-19 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
+| B18 | PropertyPlacement.GetBoundingBox(Boolean) 也是 EPLAN 2026 才有 | 2026-11-19 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
 | B1 | 程序集与目标框架 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b1-程序集与目标框架) |
 | B2 | 插件 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b2-插件add-in) |
 | B3 | 自定义 Action | 2026-10-12（原章节） | [actions](api-notes/actions.md#b3-自定义-action) |

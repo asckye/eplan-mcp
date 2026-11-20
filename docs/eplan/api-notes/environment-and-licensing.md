@@ -6,6 +6,12 @@
 - **结论：** ADR-0009 背景里“插件用到的 API 在 2022–2027 的文档中都存在，签名相同”不成立，至少这一个重载是 2026 新增的。其他成员没有逐个对照过 2024、2025 的文档。
 - **工具行为：** 两处解析图片路径的调用改走 `EplanPaths.Substitute`：两参数重载放在单独的、不内联的方法里，第一次调用抛 `MissingMethodException` 时记下来，此后直接用一参数的 `SubstitutePath(String)`。在没有两参数重载的平台上，项目自己的路径变量不解析，按 EPLAN 给的原样返回。
 - **未验证：** 本机只有 2026；2025 上的效果等报告人用修复后的构建确认。2026 上行为不变。
+### B18. PropertyPlacement.GetBoundingBox(Boolean) 也是 EPLAN 2026 才有（2026-11-19，官方 API 文档 2025 与 2026；报告人用 2025.0.3 的程序集编译）
+- **依据：** eplan.help 的 API 文档，2025 版 `PropertyPlacement.GetBoundingBox` 只有无参数的 `GetBoundingBox()`，2026 版另有 `GetBoundingBox(Boolean)`。2026-11-19 读取。
+- **来源：** [asckye/eplan-mcp#664](https://github.com/asckye/eplan-mcp/issues/664) 的报告人把 `6d14f7ec` 的插件按 EPLAN 2025.0.3 的 API 程序集编译，手写代码里有三处编不过：B17 的 `PathMap.SubstitutePath(String, String)`、这里的 `GetBoundingBox(Boolean)`（页面读取里算属性文字外框），以及 `MDPartsDatabase.ImportMode.ReplaceAndAppend`。生成的 `ApiTryDispatch.g.cs` 另有两千多处（`eplan_api_try` 本来只在 2026 上开放）。编译结果是报告人的，我们没有 2025 的程序集，未复核；其中这一条按官方文档核实了。
+- **判断：** 枚举成员编译后是常量，按 2026 编译的插件在 2025 上不会因为 `ReplaceAndAppend` 抛 `MissingFieldException`；2025 是否接受这个值未验证。`GetBoundingBox(Boolean)` 是方法调用，和 B17 一样会让调用它的方法整个编译失败，而它在读每个放置对象外框的路径上。
+- **工具行为：** 属性文字外框改走 `EplanTextBounds.Of`，做法同 B17：带参数的重载放在单独的、不内联的方法里，缺少时记下来，此后用无参数的 `GetBoundingBox()`。在 2026 上无参数的外框是相对属主的（A87），2025 上是否相同未验证；所以 2025 上属性文字的外框可能不是页面坐标，受影响的是按外框做的判断（评审里的文字重叠、越界）。
+- **未验证：** 2025 上的效果等报告人确认。2026 上行为不变。
 ### A1. 环境与进程
 - **从桌面启动的 EPLAN 会继承 explorer 的环境变量。** 用户 PATH 原始长度 4604 字符时，Windows 登录过程没有加载 `HKCU\Environment` 下的任何变量，explorer 和 EPLAN 的 `TEMP=TMP=C:\WINDOWS\TEMP`；把 PATH 缩到 316 字符并广播 `WM_SETTINGCHANGE("Environment")` 后，explorer 立即恢复正常，不需要重新登录。— 读取进程 PEB 中的环境块验证。
 - **`TEMP=C:\WINDOWS\TEMP` 时，EPLAN 的 C# 脚本全部无法编译**，系统消息为 `CS2001 未能找到源文件 C:\WINDOWS\TEMP\xxxx.0.cs` / `CS2008`。用 Windows PowerShell 5.1 的 `Add-Type`（同为 .NET Framework CodeDOM）可以在 EPLAN 之外复现；TEMP 改为用户目录后正常。— 实机复现。
