@@ -147,17 +147,17 @@ public sealed class PlacementUpdateTests
             target.Location = moves[0]!["after"]!.Values<double>().ToArray();
             target.Bounds = moves[0]!["bounds"]!.Values<double>().ToArray();
             if (moves[0]!["angle"] is { } angle)
-            { target.Properties["angle_deg"] = angle.ToString(); target.Properties["docked"] = "false"; }
+            { target.Properties["angle_deg"] = (string)angle!; target.Properties["docked"] = "false"; }
             if (moves[0]!["style"] is JObject style)
             {
                 foreach (JProperty field in style.Properties())
                 {
                     if (field.Name == "pen")
-                    { foreach (JProperty p in ((JObject)field.Value).Properties()) { target.Properties["pen_" + p.Name] = p.Value.ToString(); } }
+                    { foreach (JProperty p in ((JObject)field.Value).Properties()) { target.Properties["pen_" + p.Name] = (string)p.Value!; } }
                     else if (field.Name == "height_mm")
-                    { target.Properties["height_raw_mm"] = field.Value.ToString(); target.Properties["height_mm"] = (double)field.Value == -16002 ? "from_layer" : field.Value.ToString(); }
+                    { target.Properties["height_raw_mm"] = (string)field.Value!; target.Properties["height_mm"] = (double)field.Value == -16002 ? "from_layer" : (string)field.Value!; }
                     else
-                    { target.Properties[field.Name] = field.Value.Type == JTokenType.Boolean ? field.Value.ToString().ToLowerInvariant() : field.Value.ToString(); }
+                    { target.Properties[field.Name] = field.Value.Type == JTokenType.Boolean ? field.Value.ToString().ToLowerInvariant() : (string)field.Value!; }
                 }
             }
             if (Fail)
