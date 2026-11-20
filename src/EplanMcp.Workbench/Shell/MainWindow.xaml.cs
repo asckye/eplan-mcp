@@ -109,6 +109,7 @@ public partial class MainWindow : Window
         ThemeManager.Current.PropertyChanged += (_, _) => Dispatcher.BeginInvoke(ApplyTexts);
         Closed += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
         StateChanged += (_, _) => ApplyWindowState();
+        SourceInitialized += (_, _) => WindowShape.RoundCorners(this);
 
         // APR-03, APR-04: when the window comes back, the buttons wait again and focus is on the question, not a button.
         IsVisibleChanged += (_, e) => Rearm(e.NewValue is true);
@@ -129,11 +130,17 @@ public partial class MainWindow : Window
     /// </summary>
     public void Navigate(WorkbenchPage page, NavigationOrigin origin)
     {
+        bool changed = CurrentPage != page;
         CurrentPage = page;
         foreach ((WorkbenchPage each, _, _, RadioButton item, FrameworkElement view) in _pages)
         {
             item.IsChecked = each == page;
             view.Visibility = each == page ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (changed && IsLoaded)
+        {
+            WindowShape.Enter(_pages[(int)page].View);
         }
 
         if (page == WorkbenchPage.Settings)

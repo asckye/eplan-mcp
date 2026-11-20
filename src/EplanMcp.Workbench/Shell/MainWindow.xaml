@@ -17,7 +17,7 @@
     Width="1240" Height="800" MinWidth="800" MinHeight="640" WindowStartupLocation="CenterScreen"
     WindowStyle="None" ResizeMode="CanResize" Style="{StaticResource Workbench.Window}">
   <chrome:WindowChrome.WindowChrome>
-    <chrome:WindowChrome CaptionHeight="40" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+    <chrome:WindowChrome CaptionHeight="40" ResizeBorderThickness="6" GlassFrameThickness="0,0,0,1" CornerRadius="8" UseAeroCaptionButtons="False" />
   </chrome:WindowChrome.WindowChrome>
   <Window.InputBindings>
     <KeyBinding Key="D1" Modifiers="Control" Command="{x:Static shell:MainWindow.NavigateCommand}" CommandParameter="{x:Static shell:WorkbenchPage.Project}" />
@@ -188,9 +188,12 @@
     <!-- ============ COMMAND PALETTE OVERLAY (Ctrl+K) ============ -->
     <Grid x:Name="CommandLayer" Grid.RowSpan="3" Visibility="Collapsed">
       <Border Style="{StaticResource Primer.Overlay}" MouseLeftButtonUp="OnCommandScrim" />
-      <Border Width="480" MaxHeight="380" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.CommandPalette}" Style="{StaticResource Workbench.Card}" Padding="0"
+      <Border Width="560" MaxHeight="420" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.CommandPalette}" Style="{StaticResource Workbench.Card}" CornerRadius="12" Padding="0"
               AutomationProperties.IsDialog="True" AutomationProperties.Name="{l:Tr Shell.CommandPalette}"
               PreviewKeyDown="OnCommandPreviewKeyDown">
+        <Border.Effect>
+          <DropShadowEffect BlurRadius="48" ShadowDepth="18" Direction="270" Opacity="0.2" />
+        </Border.Effect>
         <DockPanel>
           <Border DockPanel.Dock="Top" Padding="{StaticResource Ui.Inset.CommandSearch}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,0,0,1">
             <TextBox x:Name="CommandSearch" Style="{StaticResource Primer.Input}" TextChanged="OnCommandSearchChanged" />

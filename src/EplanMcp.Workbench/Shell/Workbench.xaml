@@ -274,6 +274,7 @@
           <Grid>
             <Border x:Name="Indicator" Width="3" Height="24" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.RailIndicator}" CornerRadius="0,3,3,0"
                     Background="{DynamicResource Accent.Button}" Visibility="Collapsed" />
+            <Border x:Name="Hover" Background="{DynamicResource Surface.Hover}" CornerRadius="8" Opacity="0" />
             <Border x:Name="Surface" Background="Transparent" CornerRadius="8">
               <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Path x:Name="Glyph" Style="{StaticResource Primer.Icon}" Width="{StaticResource Ui.IconSize.Rail}" Height="{StaticResource Ui.IconSize.Rail}" Data="{TemplateBinding ux:Ux.Icon}"
@@ -298,10 +299,24 @@
               <Setter TargetName="Count" Property="Visibility" Value="Collapsed" />
             </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Surface" Property="Background" Value="{DynamicResource Surface.Hover}" />
+              <Trigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.ExitActions>
               <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Hover" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="Surface" Property="Background" Value="{DynamicResource State.Info.Background}" />
               <Setter TargetName="Indicator" Property="Visibility" Value="Visible" />
               <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
@@ -366,6 +381,7 @@
       <Setter.Value>
         <ControlTemplate TargetType="ListBoxItem">
           <Grid>
+            <Border x:Name="Hover" Background="{DynamicResource Surface.Hover}" CornerRadius="8" Opacity="0" />
             <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
               <ContentPresenter />
             </Border>
@@ -373,9 +389,23 @@
           </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter Property="Background" Value="{DynamicResource Surface.Hover}" />
+              <Trigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.ExitActions>
             </Trigger>
             <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Hover" Property="Visibility" Value="Collapsed" />
               <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
               <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
               <Setter TargetName="SelectionBar" Property="Visibility" Value="Visible" />
@@ -465,13 +495,27 @@
         <ControlTemplate TargetType="Button">
           <!-- The pill is drawn 20 px high as designed; the button around it is 24 px, the smallest target (WCAG 2.5.8). -->
           <Grid Background="Transparent">
+            <Border x:Name="Hover" Height="20" Background="{DynamicResource Surface.Hover}" CornerRadius="4" Opacity="0" />
             <Border x:Name="Bd" Height="20" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
               <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
             </Border>
           </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+              <Trigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.ExitActions>
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
@@ -538,12 +582,28 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="Button">
-          <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
-          </Border>
+          <Grid>
+            <Border x:Name="Hover" Background="{DynamicResource Surface.Hover}" CornerRadius="6" Opacity="0" />
+            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+              <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
+            </Border>
+          </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+              <Trigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.ExitActions>
               <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
             </Trigger>
           </ControlTemplate.Triggers>
@@ -565,12 +625,28 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="Button">
-          <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6">
-            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
-          </Border>
+          <Grid>
+            <Border x:Name="Hover" Background="{DynamicResource Surface.CloseHover}" CornerRadius="6" Opacity="0" />
+            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6">
+              <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
+            </Border>
+          </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.CloseHover}" />
+              <Trigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.ExitActions>
               <Setter Property="Foreground" Value="{DynamicResource Text.OnAccent}" />
             </Trigger>
           </ControlTemplate.Triggers>
@@ -590,15 +666,32 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="RadioButton">
-          <Border x:Name="Bd" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
-            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
-          </Border>
+          <Grid>
+            <Border x:Name="Hover" Background="{DynamicResource Surface.Hover}" CornerRadius="6" Opacity="0" />
+            <Border x:Name="Bd" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+              <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" RecognizesAccessKey="False" />
+            </Border>
+          </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+              <Trigger.EnterActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.EnterActions>
+              <Trigger.ExitActions>
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.12" />
+                  </Storyboard>
+                </BeginStoryboard>
+              </Trigger.ExitActions>
               <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Hover" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="Bd" Property="Background" Value="{DynamicResource State.Info.Background}" />
               <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource State.Info.Border}" />
               <Setter Property="Foreground" Value="{DynamicResource Accent.Text}" />
