@@ -4,6 +4,7 @@
 |---|---|
 | 状态 | Accepted |
 | 日期 | 2026-10-20（提出）· 2026-10-21（接受：项目负责人明确答复"可以"）· 2026-10-21（修改第 8、10 条：spike S19 之后，项目负责人选择"一个服务对应一个 EPLAN，不要会话"） |
+| 后续修订 | [ADR-0062](0062-vm-http-without-shared-key.md)（Proposed，2026-11-20）提议去掉共享密钥和失败锁定，由只放行宿主机的防火墙规则加 Host 头和 Origin 校验把关。接受之前本 ADR 第 4、5、10 条不变。 |
 | 决策人 | 项目负责人 |
 | 门的类型 | 双向门（1.0 发布前）：只是在 stdio 之外多一种传输方式；但"虚拟机中的服务只由工程师启动""所有请求都要密钥"放宽时要新的 ADR |
 | 影响 | 补充 [ADR-0002](0002-host-bridge-process-model.md)（Host 多一种运行方式，Host 与 Bridge 的关系不变）；新的信任边界 TB7（[security.md](https://github.com/asckye/eplan-mcp/blob/7bd1953f548dcd6f43765d467a304044c936495f/docs/standards/security.md)）；[ADR-0011](0011-approval-out-of-band.md) 的审批方式不变 |
