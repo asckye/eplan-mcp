@@ -57,7 +57,7 @@ internal static class McpServerSetup
         services.TryAddSingleton<BackupFolders>();
         services.TryAddSingleton<PlanProjectBackup>();
         services.TryAddSingleton<PlanOrchestrator>();
-        services.TryAddSingleton<WritePipeline>();
+        services.AddWritePipeline();
         services.TryAddSingleton<ExportFolders>();
         services.TryAddSingleton<ExportRunner>();
         services.TryAddSingleton(ActionRunCatalog.Process);

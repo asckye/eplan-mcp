@@ -160,23 +160,6 @@ public sealed class ApprovalQueueTests
     }
 
     [Fact]
-    public async Task AutoApproveNormalWrites_ApprovesRoutineWrites_ButStillGatesDestructiveAndSuspensionReleases()
-    {
-        var queue = new ApprovalQueue(_clock) { AutoApproveNormalWrites = true };
-
-        Question normal = queue.Add(Asks.Write("w1"))!;
-        Assert.Equal(QuestionEnd.Approved, normal.End);
-        Assert.Equal(WorkbenchDecision.Approved, await normal.Decision.Task);
-        Assert.Empty(queue.Pending);
-
-        Question destructive = queue.Add(Asks.Write("d1", tier: QuestionTier.Destructive, tool: "eplan_page_delete"))!;
-        Question release = queue.Add(Asks.Release("s1"))!;
-        Assert.Null(destructive.End);
-        Assert.Null(release.End);
-        Assert.Equal([destructive, release], queue.Pending);
-    }
-
-    [Fact]
     public void AConfirmedRelease_HasNoWriteOutcome()
     {
         var queue = new ApprovalQueue(_clock);

@@ -13,7 +13,7 @@ namespace EplanMcp.Host.Plans;
 /// <summary>P23 must pass a worker token, never a request's wait token.</summary>
 internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary packs, PlanStore store, PlanTrust trust,
     TaskRegistry tasks, SuspensionStore suspensions, DanglingWrites dangling, ApprovalService approvals, AuditLog audit,
-    BackupFolders folders, PlanProjectBackup backup)
+    BackupFolders folders, PlanProjectBackup backup, LiveWritePolicy? livePolicy = null)
 {
     public async Task<PlanPreparation> PrepareAsync(McpServer server, string planId, bool dryRun,
         CallProgress? progress, CancellationToken cancellationToken, Action<TaskRecord>? admittedTask = null)
@@ -73,7 +73,7 @@ internal sealed partial class PlanOrchestrator(IBridgeClient bridge, PackLibrary
             // Plan settlement above tolerates an unavailable audit; a new write does not (ADR-0010 section 2).
             await dangling.SettleOnceAsync(cancellationToken).ConfigureAwait(false);
             ToolTier tier = record.Definition.Steps.Max(s => s.Tier);
-            PolicyDecision policy = PolicyEngine.Decide(tier, ScratchPaths.IsInside(record.Definition.Project.Path, packs.Config.ScratchRoots), packs.Config);
+            PolicyDecision policy = PolicyEngine.Decide(tier, ScratchPaths.IsInside(record.Definition.Project.Path, packs.Config.ScratchRoots), livePolicy?.Current() ?? packs.Config);
             if (policy.Verdict == PolicyVerdict.Deny)
             {
                 throw Failure(ErrorReason.PolicyDenied, policy.Message!);

@@ -45,7 +45,7 @@ public sealed class SettingsDrawerTests(WpfContext wpf)
             using var temp = new TempDir();
             string config = Path.Combine(temp.Path, "config.json");
             var policy = new SafetyPolicyStore(config);
-            policy.Load(fallbackRequireApproval: true);
+            policy.Load();
             window.AttachPolicy(policy);
             window.AttachSettings(new StartAtLogin(@"Software\EplanMcp.Tests\Unused", "unused.exe"), config, policy);
             try

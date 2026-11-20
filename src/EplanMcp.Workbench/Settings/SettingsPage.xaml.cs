@@ -64,6 +64,7 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
             if (_policy is not null)
             {
                 ApprovalSwitch.IsChecked = _policy.RequireNormalWriteApproval;
+                ApprovalSwitch.IsEnabled = !_policy.WritesDenied;
                 Timeout60.IsChecked = _policy.ApprovalTimeoutSeconds == 60;
                 Timeout120.IsChecked = _policy.ApprovalTimeoutSeconds is not (60 or 300);
                 Timeout300.IsChecked = _policy.ApprovalTimeoutSeconds == 300;
@@ -104,6 +105,14 @@ public partial class SettingsPage : UserControl, IWorkbenchPage
         }
 
         bool saved = _policy.SetRequireNormalWriteApproval(ApprovalSwitch.IsChecked == true);
+        if (!saved)
+        {
+            // Nothing changed: show what the file says again.
+            _showing = true;
+            ApprovalSwitch.IsChecked = _policy.RequireNormalWriteApproval;
+            _showing = false;
+        }
+
         PolicyError.Visibility = saved ? Visibility.Collapsed : Visibility.Visible;
         if (!saved)
         {

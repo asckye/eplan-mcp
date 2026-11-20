@@ -144,8 +144,10 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     {
         bool manual = _policy?.RequireNormalWriteApproval ?? true;
         Loc loc = Loc.Current;
-        PolicyBadgeText.Text = loc[manual ? "Approvals.PolicyManual" : "Approvals.PolicyAuto"];
+        bool denied = _policy?.WritesDenied == true;
+        PolicyBadgeText.Text = loc[denied ? "Approvals.PolicyDenied" : manual ? "Approvals.PolicyManual" : "Approvals.PolicyAuto"];
         PolicyToggleButton.Content = loc[manual ? "Approvals.ToggleToAuto" : "Approvals.ToggleToManual"];
+        PolicyToggleButton.IsEnabled = !denied;
         ApprovalPolicyBar.Visibility = _policy is not null && ApprovalsTab.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
     }
 

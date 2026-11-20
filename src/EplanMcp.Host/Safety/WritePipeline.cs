@@ -62,9 +62,13 @@ internal sealed partial class WritePipeline(
     ApprovalService approvals,
     BackupFolders backups,
     TimeProvider clock,
-    ILogger<WritePipeline> logger)
+    ILogger<WritePipeline> logger,
+    LiveWritePolicy? policy = null)
 {
     private int _inFlight;
+
+    /// <summary>writesOutsideScratch as config.json says now (ADR-0061); the start-up configuration where no live policy is given.</summary>
+    private HostConfig PolicyNow() => policy?.Current() ?? config;
 
     /// <summary>Runs <paramref name="request"/> without reporting progress.</summary>
     public Task<WriteOutcome<TData>> RunAsync<TArgs, TExecuteArgs, TData>(WriteRequest<TArgs, TExecuteArgs> request, CancellationToken cancellationToken) =>
@@ -135,7 +139,7 @@ internal sealed partial class WritePipeline(
         }
 
         // Nobody is asked anything about a write the policy forbids anyway.
-        PolicyDecision decision = PolicyEngine.Decide(request.Tier, !project || ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots), config, masterData);
+        PolicyDecision decision = PolicyEngine.Decide(request.Tier, !project || ScratchPaths.IsInside(plan.ProjectPath, config.ScratchRoots), PolicyNow(), masterData);
         if (request.Unverified && decision.Verdict != PolicyVerdict.Deny)
         { decision = new(PolicyVerdict.NeedsApproval); }
         if (decision.Verdict == PolicyVerdict.Deny)

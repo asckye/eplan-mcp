@@ -5,101 +5,119 @@ using System.Text.Json.Nodes;
 namespace EplanMcp.Workbench.Settings;
 
 /// <summary>
-/// Shared live safety policy bridge between Workbench UI (Status Bar, Approvals bar, Settings page),
-/// the approval queue, and Host <c>config.json</c>.
-/// Toggling normal-write approval updates <c>writesOutsideScratch</c> (<c>approve</c> / <c>allow</c>);
-/// destructive deletes, master-data writes, and ADR-0010 suspension releases are always gated.
+/// What the Workbench shows and changes of the Host's write policy: <c>writesOutsideScratch</c> and
+/// <c>approvalTimeoutSeconds</c> in the Host's <c>config.json</c>. That file is the only source: the Host reads the
+/// value at every write (ADR-0061), so what is shown here is what the next write gets. The Workbench never answers an
+/// approval for the engineer. A change that cannot be saved changes nothing, and <c>deny</c> is not a state of the
+/// switch: it is shown as it is and only an edit of the file lifts it.
 /// </summary>
 internal sealed class SafetyPolicyStore(string? configFile = null)
 {
     private static readonly JsonSerializerOptions _writeOptions = new() { WriteIndented = true };
 
-    private bool _requireNormalWriteApproval = true;
+    private string _mode = "approve";
     private int _approvalTimeoutSeconds = 120;
 
     public event Action? Changed;
 
     public string? ConfigFile { get; } = configFile;
 
-    public bool RequireNormalWriteApproval => _requireNormalWriteApproval;
+    /// <summary>False only when the file says <c>allow</c>: ordinary writes outside scratch then run without approval.</summary>
+    public bool RequireNormalWriteApproval => _mode != "allow";
+
+    /// <summary>True when the file says <c>deny</c>: writes outside scratch are refused, and the switch does not apply.</summary>
+    public bool WritesDenied => _mode == "deny";
 
     public int ApprovalTimeoutSeconds => _approvalTimeoutSeconds;
 
-    public void Load(bool fallbackRequireApproval = true)
+    /// <summary>Reads the file. Without one, or with one that cannot be read, the Host asks for approval, and so this shows.</summary>
+    public void Load()
     {
-        bool require = fallbackRequireApproval;
+        string mode = "approve";
         int timeout = 120;
-        if (ConfigFile is { Length: > 0 } path && File.Exists(path))
+        if (Read() is { } root)
         {
-            try
+            string? value = Text(root["writesOutsideScratch"])?.ToLowerInvariant();
+            if (value is "deny" or "allow")
             {
-                if (JsonNode.Parse(File.ReadAllText(path)) is JsonObject root)
-                {
-                    if (root["writesOutsideScratch"]?.GetValue<string>() is { } mode)
-                    {
-                        require = !string.Equals(mode, "allow", StringComparison.OrdinalIgnoreCase);
-                    }
-
-                    if (root["approvalTimeoutSeconds"]?.GetValue<int>() is >= 60 and <= 300 and var secs)
-                    {
-                        timeout = secs;
-                    }
-                }
+                mode = value;
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
+
+            if (root["approvalTimeoutSeconds"] is JsonValue seconds && seconds.TryGetValue(out int secs) && secs is >= 60 and <= 300)
             {
-                // Keep fallback when config.json cannot be parsed; SettingsPage still surfaces the raw text.
+                timeout = secs;
             }
         }
 
-        _requireNormalWriteApproval = require;
+        _mode = mode;
         _approvalTimeoutSeconds = timeout;
         Changed?.Invoke();
     }
 
+    /// <summary>False, with nothing changed, when the file cannot be written or the policy is <c>deny</c>.</summary>
     public bool SetRequireNormalWriteApproval(bool require)
     {
-        _requireNormalWriteApproval = require;
-        bool saved = UpdateConfig(root => root["writesOutsideScratch"] = require ? "approve" : "allow");
+        string mode = require ? "approve" : "allow";
+        if (WritesDenied || !UpdateConfig(root => root["writesOutsideScratch"] = mode))
+        {
+            return false;
+        }
+
+        _mode = mode;
         Changed?.Invoke();
-        return saved;
+        return true;
     }
 
     public bool SetApprovalTimeoutSeconds(int seconds)
     {
-        if (seconds is < 60 or > 300)
+        if (seconds is < 60 or > 300 || !UpdateConfig(root => root["approvalTimeoutSeconds"] = seconds))
         {
             return false;
         }
 
         _approvalTimeoutSeconds = seconds;
-        bool saved = UpdateConfig(root => root["approvalTimeoutSeconds"] = seconds);
         Changed?.Invoke();
-        return saved;
+        return true;
+    }
+
+    private static string? Text(JsonNode? node) => node is JsonValue value && value.TryGetValue(out string? text) ? text : null;
+
+    /// <summary>The file's object; null without a file, and when it cannot be read or is not a JSON object.</summary>
+    private JsonObject? Read()
+    {
+        if (ConfigFile is not { Length: > 0 } path || !File.Exists(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            return JsonNode.Parse(File.ReadAllText(path)) as JsonObject;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        {
+            return null;
+        }
     }
 
     private bool UpdateConfig(Action<JsonObject> mutate)
     {
         if (ConfigFile is not { Length: > 0 } path)
         {
-            return true;
+            return true; // no file behind this store: the value lives in memory only
         }
 
         try
         {
-            JsonObject root;
-            if (File.Exists(path))
+            // A file that is there but is not a JSON object is the engineer's to repair, not ours to replace.
+            JsonObject? root = File.Exists(path) ? JsonNode.Parse(File.ReadAllText(path)) as JsonObject : new JsonObject();
+            if (root is null)
             {
-                root = JsonNode.Parse(File.ReadAllText(path)) as JsonObject ?? new JsonObject();
-            }
-            else
-            {
-                root = new JsonObject();
+                return false;
             }
 
             mutate(root);
-            string dir = Path.GetDirectoryName(path)!;
-            Directory.CreateDirectory(dir);
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             string tmp = path + ".tmp";
             File.WriteAllText(tmp, root.ToJsonString(_writeOptions));
             File.Move(tmp, path, overwrite: true);

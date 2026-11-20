@@ -480,7 +480,7 @@ public partial class MainWindow : Window
         AutomationProperties.SetHelpText(PipeText, help.Length == 0 ? string.Empty : loc[help]);
 
         bool manual = _policy?.RequireNormalWriteApproval ?? true;
-        string approvalLabel = loc[manual ? "Shell.StatusApprovalOn" : "Shell.StatusApprovalOff"];
+        string approvalLabel = loc[_policy?.WritesDenied == true ? "Shell.StatusWritesDenied" : manual ? "Shell.StatusApprovalOn" : "Shell.StatusApprovalOff"];
         ApprovalStatusButton.Content = approvalLabel;
         AutomationProperties.SetName(ApprovalStatusButton, approvalLabel);
         ApprovalStatusButton.SetResourceReference(ForegroundProperty, manual ? "State.Success.Text" : "State.Warning.Text");

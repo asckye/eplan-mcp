@@ -66,7 +66,7 @@ public sealed partial class App : Application, IDisposable
         AccentManager.Current.PropertyChanged += OnAccentChanged;
 
         _policy = new SafetyPolicyStore(_locations.Config);
-        _policy.Load(_settings.RequireNormalWriteApproval);
+        _policy.Load();
 
         _window = new MainWindow { HideOnClose = true };
         MainWindow = _window;
@@ -77,15 +77,13 @@ public sealed partial class App : Application, IDisposable
         _log = new FileLog(_locations.Logs, TimeProvider.System);
         _uiLogger = _log.CreateLogger("Workbench");
         DispatcherUnhandledException += OnUnhandled;
-        _queue = new ApprovalQueue(TimeProvider.System)
-        {
-            AutoApproveNormalWrites = !_policy.RequireNormalWriteApproval,
-        };
+        // The Host decides whether a write needs approval, from config.json at the moment of the write (ADR-0061).
+        // The queue never answers for the engineer: whatever the Host still asks about is shown.
+        _queue = new ApprovalQueue(TimeProvider.System);
         _policy.Changed += () =>
         {
-            if (_queue is not null && _policy is not null)
+            if (_policy is not null)
             {
-                _queue.AutoApproveNormalWrites = !_policy.RequireNormalWriteApproval;
                 Remember(_settings with { RequireNormalWriteApproval = _policy.RequireNormalWriteApproval });
             }
         };

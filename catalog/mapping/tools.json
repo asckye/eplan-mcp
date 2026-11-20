@@ -37157,11 +37157,6 @@
             "file": "tests/EplanMcp.Host.Tests/Tools/DiscoveryToolsTests.cs"
           },
           {
-            "name": "HttpEndToEndTests",
-            "size": "Medium",
-            "file": "tests/EplanMcp.Host.Tests/Http/HttpEndToEndTests.cs"
-          },
-          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
