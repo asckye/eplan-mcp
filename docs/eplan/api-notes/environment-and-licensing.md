@@ -12,6 +12,16 @@
 - **判断：** 枚举成员编译后是常量，按 2026 编译的插件在 2025 上不会因为 `ReplaceAndAppend` 抛 `MissingFieldException`；2025 是否接受这个值未验证。`GetBoundingBox(Boolean)` 是方法调用，和 B17 一样会让调用它的方法整个编译失败，而它在读每个放置对象外框的路径上。
 - **工具行为：** 属性文字外框改走 `EplanTextBounds.Of`，做法同 B17：带参数的重载放在单独的、不内联的方法里，缺少时记下来，此后用无参数的 `GetBoundingBox()`。在 2026 上无参数的外框是相对属主的（A87），2025 上是否相同未验证；所以 2025 上属性文字的外框可能不是页面坐标，受影响的是按外框做的判断（评审里的文字重叠、越界）。
 - **未验证：** 2025 上的效果等报告人确认。2026 上行为不变。
+### B19. 2025 与 2026 的 API 差异实测；`IPropertyPlacementsContainer` 在 2025.0.3 的两个补丁构建之间才出现（2026-11-20，本机按 EPLAN 2025.0.3.23406 的 Platform 程序集提取目录并试编译）
+- **做法：** 项目负责人提供了 EPLAN 2025.0.3.23406 的安装文件。用仓库里的提取工具（`eng/catalog`）对它的 `Platform\Bin` 生成一份目录，与 `catalog/eplan-2026.0.3`（2026.0.3.25421）逐项对比，再与 `catalog/mapping/bridge-usage.json` 求交集；另按这套程序集编译 `a75bd7e2` 的插件。2025 的程序集和提取出的目录都只留在本机，没有进仓库。
+- **目录对比：** 类型和成员（不含枚举值和属性字典）2025 有 8913 个，2026 有 9015 个；只在 2026 的 164 个（方法 74、属性 40、构造函数 18、类 12、枚举 6、接口 2，其余是生命周期条目），只在 2025 的 62 个。属性字典 2025 有 6605 项，2026 有 9521 项，只在 2026 的 2916 项，没有只在 2025 的。两项合计 3080，与 #664 报告人给的“3187 个只在 2026”同一量级；口径和补丁构建不同，没有逐项对齐。
+- **插件用到而 2025 没有的：** 类型和成员 63 个，集中在 3D 导入导出（`Import3D` 整个类、`Export3D` 的 IFC/JT/STEP 重载）、母线折弯、`MDUserDefinedPropertyDefinition` 的属性、`PlanningSegment` 的链接、`DeviceService.CreateTerminalDevice`、`PlcService.GetAvailableFormats`、`Placement.Tooltip`、`Placement.CopyTo(Group, …)`，以及 B17、B18 的两个重载；绝大多数只经 `eplan_api_try` 的生成代码到达。按名字估算，用到的属性标识里约 2700 个是 2026 才有的（部件和部件引用各约 485、223 个，另外十类对象各约 214 个）。
+- **试编译：** 8325 处不同的错误，8318 处在生成的 `ApiTryDispatch.g.cs`。手写代码 7 处：B17、B18、`MDPartsDatabase.ImportMode.ReplaceAndAppend`（`EplanPartsDatabaseWriter`），以及 4 处用到 `Eplan.EplApi.DataModel.IPropertyPlacementsContainer`（`EplanDrawingReader.Reading`、`EplanPageTexts`、`EplanPlacementMover` 两处）。
+- **新发现：** `IPropertyPlacementsContainer` 这个类型名在 2025.0.3.23406 的 `Eplan.EplApi.DataModelu.dll` 里不存在，2026 有。而报告人用 2025.0.3.23616 编译 `6d14f7ec`（当时这 4 处已经在代码里）时没有报它。所以它是在 23406 与 23616 之间加进来的：**同一个 2025.0.3 的不同补丁构建，API 也不一样**，判断能否运行不能只看“2025.0.3”。
+- **判断（未在 2025 上运行过）：** 按 2026 编译的插件在 23406 上，引用这个接口的方法第一次执行时类型加载失败；这几个方法在带图形的页面读取、页面文字读取和移动属性文字的路径上，所以这些工具在 23406 上很可能整个不可用，B17、B18 那样的运行时回退解决不了。
+- **工具行为：** 没有改动。是否为它加回退（按类型名反射取 `PropertyPlacements`），与 [ADR-0060](../../adr/0060-per-version-bridge-builds.md) 的决定一起定。
+- **未验证：** 23406 与 23616 之间的其他差异；2025 上任何运行时行为（本机没有可运行的 2025）。
+
 ### A1. 环境与进程
 - **从桌面启动的 EPLAN 会继承 explorer 的环境变量。** 用户 PATH 原始长度 4604 字符时，Windows 登录过程没有加载 `HKCU\Environment` 下的任何变量，explorer 和 EPLAN 的 `TEMP=TMP=C:\WINDOWS\TEMP`；把 PATH 缩到 316 字符并广播 `WM_SETTINGCHANGE("Environment")` 后，explorer 立即恢复正常，不需要重新登录。— 读取进程 PEB 中的环境块验证。
 - **`TEMP=C:\WINDOWS\TEMP` 时，EPLAN 的 C# 脚本全部无法编译**，系统消息为 `CS2001 未能找到源文件 C:\WINDOWS\TEMP\xxxx.0.cs` / `CS2008`。用 Windows PowerShell 5.1 的 `Add-Type`（同为 .NET Framework CodeDOM）可以在 EPLAN 之外复现；TEMP 改为用户目录后正常。— 实机复现。

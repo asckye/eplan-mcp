@@ -193,6 +193,7 @@
 | A160 | 同时启动第二个 EPLAN 实例会停在系统消息窗口 | 2026-11-14 | [environment-and-licensing](api-notes/environment-and-licensing.md#a160-同时启动第二个-eplan-实例会停在系统消息窗口2026-11-14eplan-202603已有-eplan-实例运行时) |
 | B17 | PathMap.SubstitutePath(String, String) 从 EPLAN 2026 才有；2025 上调用它的方法整个无法编译 | 2026-11-19 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
 | B18 | PropertyPlacement.GetBoundingBox(Boolean) 也是 EPLAN 2026 才有 | 2026-11-19 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
+| B19 | 2025 与 2026 的 API 差异实测；IPropertyPlacementsContainer 在 2025.0.3 的两个补丁构建之间才出现 | 2026-11-20 | [environment-and-licensing](api-notes/environment-and-licensing.md) |
 | B1 | 程序集与目标框架 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b1-程序集与目标框架) |
 | B2 | 插件 | 2026-10-12（原章节） | [environment-and-licensing](api-notes/environment-and-licensing.md#b2-插件add-in) |
 | B3 | 自定义 Action | 2026-10-12（原章节） | [actions](api-notes/actions.md#b3-自定义-action) |
