@@ -78,6 +78,10 @@ internal sealed class EplanProcesses : IEplanProcesses
             }
         }
 
+        public IReadOnlyList<EplanWindow> Windows() => EplanWindows.Of(process.Id);
+
+        public void CloseWindow(EplanWindow window) => EplanWindows.Close(window);
+
         public void Dispose() => process.Dispose();
     }
 }

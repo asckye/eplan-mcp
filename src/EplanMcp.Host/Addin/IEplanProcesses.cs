@@ -36,4 +36,10 @@ internal interface IStartedEplan : IDisposable
 
     /// <summary>Asks EPLAN to close as the window's close button does; false when it has no enabled main window.</summary>
     public bool CloseMainWindow();
+
+    /// <summary>Its visible top-level windows, for the closer to find what keeps EPLAN open (<see cref="HarmlessWindows"/>).</summary>
+    public IReadOnlyList<EplanWindow> Windows();
+
+    /// <summary>Asks one of its windows to close as that window's close button does; never forces anything.</summary>
+    public void CloseWindow(EplanWindow window);
 }
