@@ -40,6 +40,8 @@
 | TL-42 | SHOULD | `eplan_session_status`、`eplan_tool_usage`、`eplan_property_schema`、`eplan_plc_rack`、`eplan_translation_keyword` 的名称末段不是动作词 | 已发布名称；登记在 [工具动作词表](../tools/README.md) |
 | TL-15 | SHOULD | 16 个工具的互斥参数组没有全写在描述里（只在 schema 的 `oneOf`、用法文本或服务端校验中）；8 个工具用空字符串作 27 个可选参数的默认值，表示“未提供” | 已发布契约（2026-11-18 普查）；描述有字数预算，互斥关系写在用法文本里。新参数省略即未提供，不再用空字符串 |
 | TL-30、TL-08、TL-14、TL-05、TL-17、WS-01、WS-03、WS-12、WS-17、PRO-09、ENG-01、ENG-08、ENG-11 | MUST / SHOULD | 逐条见 ADR | [ADR-0053](../adr/0053-mcp-standard-exceptions.md) |
+| HTTP 请求认证（手册 SEC-16：每个请求带 `Authorization: Bearer`，失败限流） | MUST | 虚拟机 HTTP 不做请求认证，也不按来源限速；靠只放行宿主机的防火墙规则、Host 头和 Origin 校验 | [ADR-0062](../adr/0062-vm-http-without-shared-key.md)（2026-11-20 负责人接受） |
+| 真实项目的写入由人确认（[ADR-0005](../adr/0005-safety-model.md) 的默认做法） | — | 工程师可以把 `writesOutsideScratch` 设为 `allow`，真实项目上的普通写入不再询问；默认值不变 | [ADR-0061](../adr/0061-auto-allow-ordinary-writes.md)（2026-11-20 负责人接受） |
 
 ## 本地关卡的实现入口
 
