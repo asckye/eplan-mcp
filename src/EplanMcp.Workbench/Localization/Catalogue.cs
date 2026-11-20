@@ -290,6 +290,8 @@ internal static class Catalogue
         ("Question.Reject", "Reject", "拒绝"),
         ("Question.Continue", "Checked, continue", "已核实，继续"),
         ("Question.KeepSuspended", "Keep suspended", "保持暂停"),
+        ("Question.Pending", "Pending", "待处理"),
+        ("Question.Decision", "Your answer", "您的回答"),
         ("Question.RejectDefault", "Reject (default)", "拒绝（默认）"),
         ("Question.ApproveDestructive", "Run {0}…", "执行 {0}…"),
         ("Question.DestructiveHint", "Enter rejects. To approve, press the action button and type the project name.", "按 Enter 即拒绝。要批准，请点右侧的动作按钮，再输入项目名称。"),

@@ -34,6 +34,18 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
 
     public string Tool => ProjectText.Line(Ask.Tool);
 
+    /// <summary>The kind as the queue's code word, the same in both languages, as in the audit log.</summary>
+    public string KindCode => IsRelease ? "SUSPENSION" : IsDestructive ? "DESTRUCTIVE" : "WRITE";
+
+    /// <summary>When the question arrived, local time.</summary>
+    public string ArrivedText => Question.Arrived.ToLocalTime().ToString("HH:mm:ss", CultureInfo.CurrentCulture);
+
+    /// <summary>The Host's ID of the write and when it arrived, for the detail's header.</summary>
+    public string IdLine => ProjectText.Line(RequestId, 64) + " · " + ArrivedText;
+
+    /// <summary>Waiting, or how it ended, for the status tag.</summary>
+    public string Status => IsPending ? Text("Question.Pending") : Result;
+
     public string Tier => Text(IsDestructive ? "Question.Destructive" : "Question.Write");
 
     public string ProjectName => ProjectText.Line(Ask.Project.Name);

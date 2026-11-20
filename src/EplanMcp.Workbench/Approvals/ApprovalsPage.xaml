@@ -30,7 +30,7 @@
 
     <Grid>
       <!-- SUB-TAB 1: APPROVALS QUEUE (ADR-0014 / ADR-0035 / ADR-0010) -->
-      <Grid x:Name="Layout" Margin="{StaticResource Ui.Inset.ApprovalsGrid}">
+      <Grid x:Name="Layout">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
@@ -38,11 +38,13 @@
           <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="300" />
+          <ColumnDefinition Width="274" />
           <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.Bottom.SM}" Style="{StaticResource Primer.SegmentGroup}">
+        <!-- The queue pane (274 px): the two groups, then the rows of the chosen one. -->
+        <Border x:Name="QueuePane" Grid.RowSpan="2" Style="{StaticResource Workbench.LeftPane}" />
+        <Border Grid.Row="0" HorizontalAlignment="Left" Margin="{StaticResource Ui.Inset.QueuePane}" Style="{StaticResource Primer.SegmentGroup}">
           <StackPanel x:Name="Groups" Orientation="Horizontal" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle"
                       AutomationProperties.Name="{l:Tr Approvals.Groups}">
             <RadioButton x:Name="WaitingGroup" GroupName="QuestionGroup" Style="{StaticResource Primer.Segment}" IsChecked="True" Checked="OnGroup" />
@@ -50,40 +52,60 @@
           </StackPanel>
         </Border>
 
-        <ListBox x:Name="Questions" Grid.Row="1" Style="{StaticResource Primer.List}" ItemContainerStyle="{StaticResource Workbench.QuestionRow}"
+        <ListBox x:Name="Questions" Grid.Row="1" Style="{StaticResource Primer.List}" Background="Transparent" BorderThickness="0" Margin="{StaticResource Ui.Inset.QueueList}"
+                 ItemContainerStyle="{StaticResource Workbench.QuestionRow}"
                  ItemsSource="{Binding Pending}" AutomationProperties.Name="{l:Tr Approvals.List}"
                  SelectionChanged="OnSelectionChanged" KeyDown="OnListKeyDown" MouseDoubleClick="OnListOpen">
           <ListBox.ItemTemplate>
             <DataTemplate>
-              <StackPanel Margin="{StaticResource Ui.Inset.Vertical.XS}">
+              <StackPanel>
                 <DockPanel>
-                  <Border DockPanel.Dock="Right" Style="{StaticResource Primer.Tag}" Margin="{StaticResource Ui.Gap.Left.XS}" Visibility="{Binding IsDestructive, Converter={StaticResource BoolToVisibility}}">
-                    <TextBlock Text="{Binding Tier}" Style="{StaticResource Primer.Text.diffRed}" />
-                  </Border>
-                  <TextBlock Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" />
+                  <TextBlock DockPanel.Dock="Right" Text="{Binding ArrivedText}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="10.5" />
+                  <TextBlock x:Name="Code" Text="{Binding KindCode}" Style="{StaticResource Workbench.MonoStrong}" FontSize="10.5" Foreground="{DynamicResource Accent.Text}" />
                 </DockPanel>
-                <TextBlock Text="{Binding Kind}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Top.XXS}" TextWrapping="Wrap" TextTrimming="None" />
-                <TextBlock Text="{Binding ProjectName}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Top.XXS}" TextWrapping="Wrap" TextTrimming="None" />
-                <TextBlock Text="{Binding CountdownText}" Style="{StaticResource Primer.ToneText}" Tag="{Binding Tone}" Margin="{StaticResource Ui.Gap.Top.XXS}" TextWrapping="Wrap" TextTrimming="None"
+                <TextBlock Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" FontSize="12.5" FontWeight="Medium" Margin="{StaticResource Ui.Gap.Top.XXS}" TextWrapping="Wrap" TextTrimming="None" />
+                <DockPanel Margin="{StaticResource Ui.Gap.Top.XXS}">
+                  <TextBlock DockPanel.Dock="Right" Text="{Binding Result}" Style="{StaticResource Primer.Muted}" FontSize="11" FontWeight="Medium" Margin="{StaticResource Ui.Gap.Left.XS}"
+                             Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}" />
+                  <TextBlock Text="{Binding ProjectName}" Style="{StaticResource Primer.Muted}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" />
+                </DockPanel>
+                <TextBlock Text="{Binding CountdownText}" Style="{StaticResource Primer.ToneText}" Tag="{Binding Tone}" FontSize="11" Margin="{StaticResource Ui.Gap.Top.XXS}" TextWrapping="Wrap" TextTrimming="None"
                            Visibility="{Binding IsPending, Converter={StaticResource BoolToVisibility}}" />
-                <TextBlock Text="{Binding Result}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Top.XXS}" TextWrapping="Wrap" TextTrimming="None"
-                           Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}" />
                 <DockPanel Margin="{StaticResource Ui.Gap.Top.XXS}" Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}">
                   <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top"
                         Visibility="{Binding OutcomeIsWarning, Converter={StaticResource BoolToVisibility}}" />
-                  <TextBlock Text="{Binding Outcome}" Style="{StaticResource Primer.ToneText}" Tag="{Binding OutcomeTone}" TextWrapping="Wrap" TextTrimming="None" />
+                  <TextBlock Text="{Binding Outcome}" Style="{StaticResource Primer.ToneText}" Tag="{Binding OutcomeTone}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" />
                 </DockPanel>
               </StackPanel>
+              <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsDestructive}" Value="True">
+                  <Setter TargetName="Code" Property="Foreground" Value="{DynamicResource State.Error.Text}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsRelease}" Value="True">
+                  <Setter TargetName="Code" Property="Foreground" Value="{DynamicResource State.Warning.Text}" />
+                </DataTrigger>
+              </DataTemplate.Triggers>
             </DataTemplate>
           </ListBox.ItemTemplate>
         </ListBox>
 
-        <shell:EmptyState x:Name="Empty" Grid.Row="1" Grid.ColumnSpan="2" Title="{l:Tr Approvals.Empty}" Text="{l:Tr Approvals.EmptyText}" />
+        <shell:EmptyState x:Name="Empty" Grid.Row="1" Grid.Column="1" Title="{l:Tr Approvals.Empty}" Text="{l:Tr Approvals.EmptyText}" />
 
-        <ScrollViewer x:Name="DetailArea" Grid.Row="1" Grid.Column="1" Margin="{StaticResource Ui.Gap.Left.LG}" Background="{DynamicResource Surface.Subtle}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+        <ScrollViewer x:Name="DetailArea" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                       Focusable="False" AutomationProperties.Name="{l:Tr Approvals.Detail}" DataContext="{Binding Shown}" KeyDown="OnDetailKeyDown">
-          <StackPanel x:Name="Detail" Margin="{StaticResource Ui.Inset.Detail}">
-            <TextBlock x:Name="QuestionTitle" Text="{Binding Title}" Style="{StaticResource Primer.ContainerTitle}" TextWrapping="Wrap" TextTrimming="None"
+          <StackPanel x:Name="Detail" Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="820" HorizontalAlignment="Left">
+            <!-- Kind, status, and the request with its arrival time. -->
+            <StackPanel Orientation="Horizontal">
+              <Border x:Name="KindTag" Style="{StaticResource Workbench.Tag.Accent}" Margin="{StaticResource Ui.Gap.Tag}">
+                <TextBlock Text="{Binding KindCode}" VerticalAlignment="Center" />
+              </Border>
+              <Border x:Name="StatusTag" Style="{StaticResource Workbench.Tag}" Margin="{StaticResource Ui.Gap.Tag}">
+                <TextBlock Text="{Binding Status}" VerticalAlignment="Center" />
+              </Border>
+              <TextBlock Text="{Binding IdLine}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11.5" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <TextBlock x:Name="QuestionTitle" Text="{Binding Title}" Style="{StaticResource Primer.ContainerTitle}" FontSize="16" Margin="{StaticResource Ui.Gap.Top.SM}" TextWrapping="Wrap" TextTrimming="None"
                        Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
 
             <Border Margin="{StaticResource Ui.Gap.Top.SM}" Style="{StaticResource Primer.Alert.Error}" Visibility="{Binding IsDestructive, Converter={StaticResource BoolToVisibility}}">
@@ -97,80 +119,88 @@
               </DockPanel>
             </Border>
 
-            <Border Margin="{StaticResource Ui.Gap.Top.SM}" Style="{StaticResource Workbench.GroupCard}">
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="Auto" />
-                  <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto" MinHeight="24" />
-                  <RowDefinition Height="Auto" MinHeight="24" />
-                  <RowDefinition Height="Auto" MinHeight="24" />
-                  <RowDefinition Height="Auto" MinHeight="24" />
-                  <RowDefinition Height="Auto" MinHeight="24" />
-                  <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <TextBlock Text="{l:Tr Question.Tool}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Right.SM}" />
-                <TextBlock Grid.Column="1" Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" TextWrapping="Wrap" TextTrimming="None" />
-                <TextBlock Grid.Row="1" Text="{l:Tr Question.Tier}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Right.SM}" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Tier}" Style="{StaticResource Primer.Text}" />
-                <TextBlock Grid.Row="2" Text="{l:Tr Question.Project}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Right.SM}" VerticalAlignment="Top" />
-                <StackPanel Grid.Row="2" Grid.Column="1">
-                  <TextBlock Text="{Binding ProjectName}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
-                  <TextBlock Text="{Binding ProjectPath}" Style="{StaticResource Primer.Mono.text}" TextWrapping="Wrap" TextTrimming="None" />
+            <!-- The facts as cards: a caption over a value. -->
+            <WrapPanel Margin="{StaticResource Ui.Gap.Top.Normal}">
+              <Border Style="{StaticResource Workbench.FactCard}" MinWidth="180">
+                <StackPanel>
+                  <TextBlock Text="{l:Tr Question.Tool}" Style="{StaticResource Workbench.FactCaption}" />
+                  <TextBlock Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" TextWrapping="Wrap" TextTrimming="None" />
+                  <TextBlock Text="{Binding Tier}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Top.XXS}" />
                 </StackPanel>
-                <TextBlock Grid.Row="3" Text="{l:Tr Question.Eplan}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Right.SM}" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Eplan}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
-                <TextBlock Grid.Row="4" Text="{l:Tr Question.Client}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Right.SM}" />
-                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Client}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
-                <TextBlock Grid.Row="5" Text="{l:Tr Question.Suspended}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Right.SM}"
-                           Visibility="{Binding IsRelease, Converter={StaticResource BoolToVisibility}}" />
-                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Suspension}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None"
-                           Visibility="{Binding IsRelease, Converter={StaticResource BoolToVisibility}}" />
-              </Grid>
-            </Border>
+              </Border>
+              <Border Style="{StaticResource Workbench.FactCard}" MinWidth="180" MaxWidth="360">
+                <StackPanel>
+                  <TextBlock Text="{l:Tr Question.Project}" Style="{StaticResource Workbench.FactCaption}" />
+                  <TextBlock Text="{Binding ProjectName}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
+                  <TextBlock Text="{Binding ProjectPath}" Style="{StaticResource Primer.Mono.textMuted}" Margin="{StaticResource Ui.Gap.Top.XXS}" TextWrapping="Wrap" TextTrimming="None" />
+                </StackPanel>
+              </Border>
+              <Border Style="{StaticResource Workbench.FactCard}" MinWidth="180" MaxWidth="360">
+                <StackPanel>
+                  <TextBlock Text="{l:Tr Question.Client}" Style="{StaticResource Workbench.FactCaption}" />
+                  <TextBlock Text="{Binding Client}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
+                  <TextBlock Text="{Binding Eplan}" Style="{StaticResource Primer.Muted}" Margin="{StaticResource Ui.Gap.Top.XXS}" TextWrapping="Wrap" TextTrimming="None" />
+                </StackPanel>
+              </Border>
+              <Border Style="{StaticResource Workbench.FactCard}" MinWidth="180" MaxWidth="360" Visibility="{Binding IsRelease, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                  <TextBlock Text="{l:Tr Question.Suspended}" Style="{StaticResource Workbench.FactCaption}" />
+                  <TextBlock Text="{Binding Suspension}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" />
+                </StackPanel>
+              </Border>
+            </WrapPanel>
 
-            <DockPanel Margin="{StaticResource Ui.Gap.ChangesLabel}">
-              <TextBlock DockPanel.Dock="Right" Text="{l:Tr Question.FromProject}" Style="{StaticResource Primer.Muted}" />
-              <TextBlock x:Name="ChangesLabel" Text="{l:Tr Question.Changes}" Style="{StaticResource Primer.SectionLabel}" />
-            </DockPanel>
-            <TextBox x:Name="Changes" Text="{Binding Changes, Mode=OneWay}" Style="{StaticResource Workbench.ProjectData}" MaxHeight="280"
-                     AutomationProperties.LabeledBy="{Binding ElementName=ChangesLabel}" />
+            <!-- The change list: a card with a header strip; the text is project data, plain and read only (APR-08). -->
+            <Border Style="{StaticResource Workbench.Card}" Padding="0" Margin="{StaticResource Ui.Gap.Top.XXS}">
+              <StackPanel>
+                <Border Style="{StaticResource Workbench.CardHeader}">
+                  <DockPanel VerticalAlignment="Center">
+                    <TextBlock DockPanel.Dock="Right" Text="{l:Tr Question.FromProject}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11" VerticalAlignment="Center" />
+                    <TextBlock x:Name="ChangesLabel" Text="{l:Tr Question.Changes}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level2" />
+                  </DockPanel>
+                </Border>
+                <TextBox x:Name="Changes" Text="{Binding Changes, Mode=OneWay}" Style="{StaticResource Workbench.ProjectData}" BorderThickness="0" Background="Transparent" MaxHeight="280"
+                         AutomationProperties.LabeledBy="{Binding ElementName=ChangesLabel}" />
+              </StackPanel>
+            </Border>
             <TextBlock Text="{Binding Note}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XS}" />
 
-            <StackPanel Margin="{StaticResource Ui.Gap.Top.SM}" Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}">
-              <TextBlock Text="{Binding Result}" Style="{StaticResource Ui.Text.BodyStrong}" TextWrapping="Wrap" TextTrimming="None" />
-              <DockPanel Margin="{StaticResource Ui.Gap.Top.XXS}">
-                <Path x:Name="OutcomeWarning" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}"
-                      VerticalAlignment="Top" Visibility="{Binding OutcomeIsWarning, Converter={StaticResource BoolToVisibility}}" />
-                <TextBlock x:Name="OutcomeText" Text="{Binding Outcome}" Style="{StaticResource Primer.ToneText}" Tag="{Binding OutcomeTone}" TextWrapping="Wrap"
-                           TextTrimming="None" />
-              </DockPanel>
-            </StackPanel>
+            <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Top.Normal}" Visibility="{Binding IsPending, Converter={StaticResource NotBoolToVisibility}}">
+              <StackPanel>
+                <TextBlock Text="{Binding Result}" Style="{StaticResource Ui.Text.BodyStrong}" TextWrapping="Wrap" TextTrimming="None" />
+                <DockPanel Margin="{StaticResource Ui.Gap.Top.XXS}">
+                  <Path x:Name="OutcomeWarning" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}"
+                        VerticalAlignment="Top" Visibility="{Binding OutcomeIsWarning, Converter={StaticResource BoolToVisibility}}" />
+                  <TextBlock x:Name="OutcomeText" Text="{Binding Outcome}" Style="{StaticResource Primer.ToneText}" Tag="{Binding OutcomeTone}" TextWrapping="Wrap"
+                             TextTrimming="None" />
+                </DockPanel>
+              </StackPanel>
+            </Border>
 
-            <StackPanel x:Name="Waiting" Margin="{StaticResource Ui.Gap.Top.Normal}" Visibility="{Binding IsPending, Converter={StaticResource BoolToVisibility}}">
-              <DockPanel>
-                <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Right.XS}"
-                      Visibility="{Binding IsWarning, Converter={StaticResource BoolToVisibility}}" />
-                <TextBlock x:Name="CountdownText" Text="{Binding CountdownText}" Style="{StaticResource Primer.ToneText}" Tag="{Binding Tone}" TextWrapping="Wrap" TextTrimming="None" />
-              </DockPanel>
-              <ProgressBar x:Name="CountdownBar" Style="{StaticResource Primer.Progress}" Tag="{Binding Tone}" Value="{Binding Remaining, Mode=OneWay}" Maximum="100" Margin="{StaticResource Ui.Gap.Countdown}"
-                           AutomationProperties.Name="{l:Tr Question.TimeLeft}" />
-              <TextBlock x:Name="AnswerHint" Text="{Binding AnswerHint}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Bottom.SM}" />
-              <UniformGrid x:Name="Answers" Rows="1" Columns="2" HorizontalAlignment="Right">
-                <Button x:Name="RejectButton" Style="{StaticResource Workbench.Answer}" Content="{Binding RejectLabel}" AutomationProperties.Name="{Binding RejectLabel}"
-                        IsDefault="False" IsCancel="False" Margin="{StaticResource Ui.Gap.Right.XXS}" Click="OnReject" />
-                <Button x:Name="ApproveButton" Style="{StaticResource Workbench.Answer}" Content="{Binding ApproveLabel}" AutomationProperties.Name="{Binding ApproveLabel}"
-                        IsDefault="False" IsCancel="False" Margin="{StaticResource Ui.Gap.Left.XXS}" Click="OnApprove" />
-              </UniformGrid>
-            </StackPanel>
+            <!-- The action card: time left, which answer is the safe one, then the two answers. -->
+            <Border x:Name="Waiting" Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Top.Normal}" Visibility="{Binding IsPending, Converter={StaticResource BoolToVisibility}}">
+              <StackPanel>
+                <DockPanel>
+                  <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Warning}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Right.XS}"
+                        Visibility="{Binding IsWarning, Converter={StaticResource BoolToVisibility}}" />
+                  <TextBlock x:Name="CountdownText" Text="{Binding CountdownText}" Style="{StaticResource Primer.ToneText}" Tag="{Binding Tone}" TextWrapping="Wrap" TextTrimming="None" />
+                </DockPanel>
+                <ProgressBar x:Name="CountdownBar" Style="{StaticResource Primer.Progress}" Tag="{Binding Tone}" Value="{Binding Remaining, Mode=OneWay}" Maximum="100" Margin="{StaticResource Ui.Gap.Countdown}"
+                             AutomationProperties.Name="{l:Tr Question.TimeLeft}" />
+                <TextBlock x:Name="AnswerHint" Text="{Binding AnswerHint}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Bottom.SM}" />
+                <UniformGrid x:Name="Answers" Rows="1" Columns="2" HorizontalAlignment="Right">
+                  <Button x:Name="RejectButton" Style="{StaticResource Workbench.Answer}" Content="{Binding RejectLabel}" AutomationProperties.Name="{Binding RejectLabel}"
+                          IsDefault="False" IsCancel="False" Margin="{StaticResource Ui.Gap.Right.XXS}" Click="OnReject" />
+                  <Button x:Name="ApproveButton" Style="{StaticResource Workbench.Answer}" Content="{Binding ApproveLabel}" AutomationProperties.Name="{Binding ApproveLabel}"
+                          IsDefault="False" IsCancel="False" Margin="{StaticResource Ui.Gap.Left.XXS}" Click="OnApprove" />
+                </UniformGrid>
+              </StackPanel>
+            </Border>
           </StackPanel>
         </ScrollViewer>
 
         <TextBlock x:Name="Announcer" Grid.Row="3" Height="1" Opacity="0" AutomationProperties.LiveSetting="Assertive" />
       </Grid>
-
       <!-- SUB-TAB 2: ALL AI CALLS HISTORY (TIA 1:1 Pattern) -->
       <DockPanel x:Name="CallsPanel" Visibility="Collapsed">
         <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeSubBar}">

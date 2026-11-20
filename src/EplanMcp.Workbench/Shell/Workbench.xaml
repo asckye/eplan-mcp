@@ -207,11 +207,6 @@
     <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
   </Style>
 
-  <!-- CTL-05: a question row is named by the question itself, and the name follows its countdown. -->
-  <Style x:Key="Workbench.QuestionRow" TargetType="ListBoxItem" BasedOn="{StaticResource Primer.TableItem}">
-    <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
-  </Style>
-
   <!-- Native password editing and UIA masking, with the same theme tokens as other inputs. -->
   <Style x:Key="Workbench.Password" TargetType="PasswordBox">
     <Setter Property="MinHeight" Value="{StaticResource Ui.ControlHeight}" />
@@ -353,6 +348,88 @@
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.IdeCard}" />
   </Style>
 
+  <!--
+    The approval queue of the 2026-11-20 design: a row is a rounded tile that turns into a card with an accent bar when
+    selected (sel-row); tags are 21 px pills in a tone; a fact card holds a caption over a value.
+  -->
+  <Style x:Key="Workbench.QuestionRow" TargetType="ListBoxItem">
+    <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.QueueRow}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.QueueRow}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Grid>
+            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+              <ContentPresenter />
+            </Border>
+            <Border x:Name="SelectionBar" Width="2.5" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.SelectionBar}" CornerRadius="0,3,3,0" Background="{DynamicResource Accent.Button}" Visibility="Collapsed" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Background" Value="{DynamicResource Surface.Hover}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
+              <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+              <Setter TargetName="SelectionBar" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="Workbench.Tag" TargetType="Border">
+    <Setter Property="Height" Value="21" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Tag}" />
+    <Setter Property="CornerRadius" Value="5" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Text.Secondary}" />
+    <Setter Property="TextElement.FontSize" Value="11" />
+    <Setter Property="TextElement.FontWeight" Value="Medium" />
+  </Style>
+  <Style x:Key="Workbench.Tag.Accent" TargetType="Border" BasedOn="{StaticResource Workbench.Tag}">
+    <Setter Property="Background" Value="{DynamicResource State.Info.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource State.Info.Border}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource Accent.Text}" />
+  </Style>
+  <Style x:Key="Workbench.Tag.Warning" TargetType="Border" BasedOn="{StaticResource Workbench.Tag}">
+    <Setter Property="Background" Value="{DynamicResource State.Warning.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource State.Warning.Border}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource State.Warning.Text}" />
+  </Style>
+  <Style x:Key="Workbench.Tag.Error" TargetType="Border" BasedOn="{StaticResource Workbench.Tag}">
+    <Setter Property="Background" Value="{DynamicResource State.Error.Background}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource State.Error.Border}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource State.Error.Text}" />
+  </Style>
+
+  <Style x:Key="Workbench.FactCard" TargetType="Border" BasedOn="{StaticResource Workbench.Card}">
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.FactCard}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.FactCard}" />
+  </Style>
+  <Style x:Key="Workbench.FactCaption" TargetType="TextBlock" BasedOn="{StaticResource Primer.Muted}">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Bottom.XS}" />
+  </Style>
+  <Style x:Key="Workbench.CardHeader" TargetType="Border">
+    <Setter Property="Height" Value="36" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.CardHeader}" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Pane}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="CornerRadius" Value="10,10,0,0" />
+  </Style>
   <Style x:Key="Workbench.StatCard" TargetType="Border">
     <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />

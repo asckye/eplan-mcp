@@ -321,7 +321,8 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Assert.True(detail.ActualHeight > list.ActualHeight);
 
             Resize(window, 1400);
-            Assert.Equal((1, 1, 1, 1), (Grid.GetRow(detail), Grid.GetColumn(detail), Grid.GetColumnSpan(detail), Grid.GetColumnSpan(list)));
+            // Wide: beside the queue pane from the top, next to the groups and the list.
+            Assert.Equal((0, 2, 1, 1, 1), (Grid.GetRow(detail), Grid.GetRowSpan(detail), Grid.GetColumn(detail), Grid.GetColumnSpan(detail), Grid.GetColumnSpan(list)));
         }));
     }
 

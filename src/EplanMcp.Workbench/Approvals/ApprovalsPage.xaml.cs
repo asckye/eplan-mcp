@@ -171,6 +171,8 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         }
 
         AnswerHint.Visibility = shown?.AnswerHint.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        KindTag.Style = (Style)FindResource(destructive ? "Workbench.Tag.Error" : shown?.IsRelease == true ? "Workbench.Tag.Warning" : "Workbench.Tag.Accent");
+        StatusTag.Style = (Style)FindResource(shown?.IsPending == true ? "Workbench.Tag.Warning" : "Workbench.Tag");
     }
 
     private void OnViewChanged(object? sender, PropertyChangedEventArgs e) => Dispatcher.BeginInvoke(() =>
@@ -394,15 +396,16 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
 
     private void Arrange()
     {
+        // Side by side, the detail fills the right of the queue pane; in a narrow window it goes below the list.
         bool wide = ActualWidth == 0 || ActualWidth >= SideBySide;
         NarrowDetailRow.Height = wide || DetailArea.Visibility != Visibility.Visible ? GridLength.Auto : new GridLength(2, GridUnitType.Star);
         Grid.SetColumnSpan(Questions, wide ? 1 : 2);
-        Grid.SetRow(DetailArea, wide ? 1 : 2);
+        Grid.SetColumnSpan(QueuePane, wide ? 1 : 2);
+        Grid.SetRow(DetailArea, wide ? 0 : 2);
+        Grid.SetRowSpan(DetailArea, wide ? 2 : 1);
         Grid.SetColumn(DetailArea, wide ? 1 : 0);
         Grid.SetColumnSpan(DetailArea, wide ? 1 : 2);
-        DetailArea.Margin = wide ? (Thickness)FindResource("Ui.Gap.Left.LG") : (Thickness)FindResource("Ui.Gap.Top.LG");
     }
-
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         ApplyTexts();
