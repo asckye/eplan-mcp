@@ -1,4 +1,4 @@
-<!-- Vendored from TIA Portal Openness MCP, src/Studio/Gui/Themes/Primer.xaml at commit c89b7c20. Copyright (c) 2026 bulaofen0036-coder. MIT License, see THIRD-PARTY-NOTICES.md. Changed below: text selection paints with Primer.primaryBg instead of Primer.accent, because the v2 design (ADR-0034) splits the accent fill under white text from the accent text colour. Radii 7/6/12, a filled segmented control, a sliding 38 px switch, a thin scroll thumb whose line buttons show on hover, a soft focus halo on inputs, and the design's type scale (body 12.5, caption 11) (2026-11-20 design). -->
+<!-- Vendored from TIA Portal Openness MCP, src/Studio/Gui/Themes/Primer.xaml at commit c89b7c20. Copyright (c) 2026 bulaofen0036-coder. MIT License, see THIRD-PARTY-NOTICES.md. Changed below: text selection paints with Primer.primaryBg instead of Primer.accent, because the v2 design (ADR-0034) splits the accent fill under white text from the accent text colour. Radii 7/6/12, a filled segmented control, a sliding 38 px switch, a thin scroll thumb whose line buttons show on hover, a soft focus halo on inputs, the design's type scale (body 12.5, caption 11), and quiet table headers (11, medium, muted, on the pane colour) (2026-11-20 design). -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=System.Runtime" xmlns:ux="clr-namespace:TiaOpenness.Gui.Controls" xmlns:controls="clr-namespace:TiaOpenness.Gui.Controls" xmlns:vm="clr-namespace:TiaOpenness.Gui.ViewModels" xmlns:themes="clr-namespace:TiaOpenness.Gui.Themes" xmlns:l="clr-namespace:TiaOpenness.Gui.Localization">
   <!--
     The workbench vocabulary, drawn to the Ant Design v5 specification.
@@ -2971,17 +2971,18 @@
     <Setter Property="BorderThickness" Value="1"/>
   </Style>
   <Style TargetType="GridViewColumnHeader">
-    <Setter Property="Background" Value="{DynamicResource Primer.cardSoft}"/>
-    <Setter Property="Foreground" Value="{DynamicResource Primer.text}"/>
+    <Setter Property="Background" Value="{DynamicResource Workbench.paneBg}"/>
+    <Setter Property="Foreground" Value="{DynamicResource Primer.textMuted}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource Primer.cardBorder}"/>
-    <Setter Property="FontWeight" Value="SemiBold"/>
-    <Setter Property="Padding" Value="12,8"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="Padding" Value="14,8"/>
     <Setter Property="HorizontalContentAlignment" Value="Left"/>
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="GridViewColumnHeader">
           <Grid>
-            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0,1,1" Padding="{TemplateBinding Padding}">
+            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0,0,1" Padding="{TemplateBinding Padding}">
               <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" RecognizesAccessKey="True"/>
             </Border>
             <Thumb x:Name="PART_HeaderGripper" HorizontalAlignment="Right" Width="8" Cursor="SizeWE" Opacity="0"/>
