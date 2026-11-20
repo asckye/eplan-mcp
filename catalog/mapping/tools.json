@@ -12535,9 +12535,14 @@
         "M:Eplan.EplApi.HEServices.Translate.TranslateObjects(Eplan.EplApi.DataModel.StorableObject[])",
         "M:Eplan.EplApi.HEServices.Translate.TranslateText(System.String,Eplan.EplApi.DataModel.Project)",
         "M:Eplan.EplApi.MasterData.MDAccessoryList.AddAccessoryListPosition",
+        "M:Eplan.EplApi.MasterData.MDAccessoryList.RemoveAccessoryListPosition(Eplan.EplApi.MasterData.MDAccessoryListPosition)",
         "M:Eplan.EplApi.MasterData.MDAccessoryPlacement.AddAccessoryPlacementPosition",
+        "M:Eplan.EplApi.MasterData.MDAccessoryPlacement.RemoveAccessoryPlacementPosition(Eplan.EplApi.MasterData.MDAccessoryPlacementPosition)",
+        "M:Eplan.EplApi.MasterData.MDConnectionCategory.Remove",
         "M:Eplan.EplApi.MasterData.MDConnectionPointInfo.AddConnectionPointPosition",
+        "M:Eplan.EplApi.MasterData.MDConnectionPointInfo.RemoveConnectionPointPosition(Eplan.EplApi.MasterData.MDConnectionPointPosition)",
         "M:Eplan.EplApi.MasterData.MDConstruction.AddDrillingPosition",
+        "M:Eplan.EplApi.MasterData.MDConstruction.RemoveDrillingPosition(Eplan.EplApi.MasterData.MDDrillingPosition)",
         "M:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.GetProperty(Eplan.EplApi.MasterData.MDAnyPropertyId)",
         "M:Eplan.EplApi.MasterData.MDFunctionTemplatePosition.MDFunctionTemplatePositionPropertyList.SetProperty(Eplan.EplApi.MasterData.MDAnyPropertyId,Eplan.EplApi.MasterData.MDPropertyValue)",
         "M:Eplan.EplApi.MasterData.MDPart.AddAccessoryPosition",
@@ -12555,6 +12560,17 @@
         "M:Eplan.EplApi.MasterData.MDPart.Duplicate",
         "M:Eplan.EplApi.MasterData.MDPart.Duplicate(System.String,System.String)",
         "M:Eplan.EplApi.MasterData.MDPart.ReadArticleTerminalInfoFromMacro",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveAccessoryPosition(Eplan.EplApi.MasterData.MDAccessoryPosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveAssemblyPosition(Eplan.EplApi.MasterData.MDPartAssemblyPosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveDoorPosition(Eplan.EplApi.MasterData.MDDoorPosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveLockedMountingAreaPosition(Eplan.EplApi.MasterData.MDPartLockedMountingAreaPosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveModulePosition(Eplan.EplApi.MasterData.MDPartModulePosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveMountingPanelPosition(Eplan.EplApi.MasterData.MDPartMountingPanelPosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemovePartConstructionPosition(Eplan.EplApi.MasterData.MDPartPartConstructionPosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveSafetyRelatedValuePosition(Eplan.EplApi.MasterData.MDPartSafetyRelatedValuePosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveSupportBarPosition(Eplan.EplApi.MasterData.MDPartSupportBarPosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveSymbolPosition(Eplan.EplApi.MasterData.MDSymbolPosition)",
+        "M:Eplan.EplApi.MasterData.MDPart.RemoveUserDefinedPropertyPosition(Eplan.EplApi.MasterData.MDUserDefinedPropertyPosition)",
         "M:Eplan.EplApi.MasterData.MDPart.SumUpFunctionTemplates",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.AddAccessoryList(System.String)",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.AddAccessoryPlacement(System.String)",
@@ -12581,6 +12597,14 @@
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.GetPartVariantsByERPNumber(System.String)",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.GetParts(Eplan.EplApi.MasterData.MDPartsDatabaseItemPropertyList)",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.ImportToDictionary(Eplan.EplApi.Base.ISOCode.Language[])",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveAccessoryList(Eplan.EplApi.MasterData.MDAccessoryList)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveAccessoryPlacement(Eplan.EplApi.MasterData.MDAccessoryPlacement)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveAllTranslations",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveConnectionPointInfo(Eplan.EplApi.MasterData.MDConnectionPointInfo)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveConstruction(Eplan.EplApi.MasterData.MDConstruction)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveCustomer(Eplan.EplApi.MasterData.MDAddress)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveManufacturer(Eplan.EplApi.MasterData.MDAddress)",
+        "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveTranslation(Eplan.EplApi.Base.ISOCode.Language[])",
         "M:Eplan.EplApi.MasterData.MDPartsDatabase.Translate",
         "M:Eplan.EplApi.MasterData.MDPartsDatabaseItem.GetTimeStampOfLastChange",
         "M:Eplan.EplApi.MasterData.MDPartsDatabaseItem.ToDataModelIdentifier",
@@ -12607,6 +12631,7 @@
         "M:Eplan.EplApi.MasterData.MDSymbolLibrary.Close",
         "M:Eplan.EplApi.MasterData.MDSymbolLibrary.GetSymbol(System.Int32)",
         "M:Eplan.EplApi.MasterData.MDSymbolLibraryPropertyList.Exists(Eplan.EplApi.MasterData.Properties.MDSymbolLibrary)",
+        "M:Eplan.EplApi.MasterData.MDSymbolPosition.RemoveSymbolPosition",
         "M:Eplan.EplApi.MasterData.MDSymbolPropertyList.Exists(Eplan.EplApi.MasterData.Properties.MDSymbol)",
         "M:Eplan.EplApi.MasterData.MDSymbolVariantPropertyList.Exists(Eplan.EplApi.MasterData.Properties.MDSymbolVariant)",
         "M:Eplan.EplApi.MasterData.MDUserDefinedPropertyDefinition.Load",
@@ -15125,6 +15150,11 @@
             "name": "UnverifiedWriteTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Safety/UnverifiedWriteTests.cs"
+          },
+          {
+            "name": "ApiTryPartsDatabaseTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ApiTryPartsDatabaseTests.cs"
           },
           {
             "name": "ApiTryTests",
@@ -24148,6 +24178,11 @@
             "file": "tests/EplanMcp.Large.Tests/AnnotationCreateTests.cs"
           },
           {
+            "name": "ApiTryPartsDatabaseTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ApiTryPartsDatabaseTests.cs"
+          },
+          {
             "name": "ApiTryTests",
             "size": "Large",
             "file": "tests/EplanMcp.Large.Tests/ApiTryTests.cs"
@@ -28429,6 +28464,11 @@
             "name": "PartToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/PartToolsInteropTests.cs"
+          },
+          {
+            "name": "ApiTryPartsDatabaseTests",
+            "size": "Large",
+            "file": "tests/EplanMcp.Large.Tests/ApiTryPartsDatabaseTests.cs"
           },
           {
             "name": "CablePartFunctionsSpikeTests",

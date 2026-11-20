@@ -14,7 +14,13 @@ internal static partial class ApiTryGenerator
     internal static bool BannedFactory(ApiEntry entry, ApiDetail member, HashSet<string> banned) => member.Note == "Create" && banned.Contains("M:" + entry.Type[2..] + ".#ctor");
     private static readonly string[] _lifecyclePrefixes = ["Create", "Remove", "Delete", "Erase"];
     private static readonly string[] _sessionPrefixes = ["Destroy", "Init", "init", "Freeze", "Lock"];
-    internal static bool Lifecycle(ApiEntry entry) => _lifecyclePrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal));
+    private static readonly string[] _symbolLibraryTypes = ["T:Eplan.EplApi.MasterData.MDSymbolLibrary", "T:Eplan.EplApi.MasterData.MDSymbol", "T:Eplan.EplApi.MasterData.MDSymbolVariant"];
+    // ADR-0059 tier 2: an object of the parts database is not a project object. Adding to it and removing from it are
+    // the same kind of write: no undo step, guarded by the master data target (ADR-0054: a scratch copy, backed up first).
+    // Symbol libraries are system master data outside the parts database and wait for tier 3.
+    internal static bool PartsDatabaseObject(ApiEntry entry) => entry.Type.StartsWith("T:Eplan.EplApi.MasterData.", StringComparison.Ordinal)
+        && entry.Type != "T:" + ApiTryServices.PartsManagement && !_symbolLibraryTypes.Contains(entry.Type, StringComparer.Ordinal);
+    internal static bool Lifecycle(ApiEntry entry) => !PartsDatabaseObject(entry) && _lifecyclePrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal));
     internal static string? LifecycleExclusion(ApiEntry entry, ApiDetail member)
     {
         if (_sessionPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)))
@@ -31,7 +37,8 @@ internal static partial class ApiTryGenerator
         if (ApiTryServices.Exclusion(entry, member) is { } reason)
         { return reason; }
         // ADR-0059 tier 1: creating or removing a project object that carries a part, symbol or definition changes the
-        // project, not the parts database, and is an ordinary write; master data types themselves stay out (tiers 2, 3).
+        // project, not the parts database, and is an ordinary write. Parts database objects never reach this line
+        // (PartsDatabaseObject); project master data types and the system symbol libraries stay out (tier 3).
         return entry.Type.Contains(".MasterData.", StringComparison.Ordinal) ? "masterdata_or_parts_management" : null;
     }
     internal static ApiEntry[] Factories(ApiIndexData data, JsonElement[] constructors, JsonElement[] types)

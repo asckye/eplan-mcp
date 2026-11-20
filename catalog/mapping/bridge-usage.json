@@ -1,7 +1,7 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-20",
-  "scannedSources": "1bdcd668",
+  "scannedSources": "f70abffa + uncommitted changes",
   "sourceHash": "sha256:ecd90760b470a2c7f8499b437e4572d6e46c470ae5093f6d04dba5a0faa276ee",
   "operations": [
     {
@@ -184887,7 +184887,46 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.MasterData.MDAccessoryList.RemoveAccessoryListPosition(Eplan.EplApi.MasterData.MDAccessoryListPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.MasterData.MDAccessoryPlacement.AddAccessoryPlacementPosition": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDAccessoryPlacement.RemoveAccessoryPlacementPosition(Eplan.EplApi.MasterData.MDAccessoryPlacementPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDConnectionCategory.Remove": [
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
@@ -184913,7 +184952,33 @@
         ]
       }
     ],
+    "M:Eplan.EplApi.MasterData.MDConnectionPointInfo.RemoveConnectionPointPosition(Eplan.EplApi.MasterData.MDConnectionPointPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
     "M:Eplan.EplApi.MasterData.MDConstruction.AddDrillingPosition": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDConstruction.RemoveDrillingPosition(Eplan.EplApi.MasterData.MDDrillingPosition)": [
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
@@ -185135,6 +185200,149 @@
       }
     ],
     "M:Eplan.EplApi.MasterData.MDPart.ReadArticleTerminalInfoFromMacro": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveAccessoryPosition(Eplan.EplApi.MasterData.MDAccessoryPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveAssemblyPosition(Eplan.EplApi.MasterData.MDPartAssemblyPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveDoorPosition(Eplan.EplApi.MasterData.MDDoorPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveLockedMountingAreaPosition(Eplan.EplApi.MasterData.MDPartLockedMountingAreaPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveModulePosition(Eplan.EplApi.MasterData.MDPartModulePosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveMountingPanelPosition(Eplan.EplApi.MasterData.MDPartMountingPanelPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemovePartConstructionPosition(Eplan.EplApi.MasterData.MDPartPartConstructionPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveSafetyRelatedValuePosition(Eplan.EplApi.MasterData.MDPartSafetyRelatedValuePosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveSupportBarPosition(Eplan.EplApi.MasterData.MDPartSupportBarPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveSymbolPosition(Eplan.EplApi.MasterData.MDSymbolPosition)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPart.RemoveUserDefinedPropertyPosition(Eplan.EplApi.MasterData.MDUserDefinedPropertyPosition)": [
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
@@ -185648,6 +185856,110 @@
       }
     ],
     "M:Eplan.EplApi.MasterData.MDPartsDatabase.ImportToDictionary(Eplan.EplApi.Base.ISOCode.Language[])": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveAccessoryList(Eplan.EplApi.MasterData.MDAccessoryList)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveAccessoryPlacement(Eplan.EplApi.MasterData.MDAccessoryPlacement)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveAllTranslations": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveConnectionPointInfo(Eplan.EplApi.MasterData.MDConnectionPointInfo)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveConstruction(Eplan.EplApi.MasterData.MDConstruction)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveCustomer(Eplan.EplApi.MasterData.MDAddress)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveManufacturer(Eplan.EplApi.MasterData.MDAddress)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDPartsDatabase.RemoveTranslation(Eplan.EplApi.Base.ISOCode.Language[])": [
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
@@ -186324,6 +186636,19 @@
       }
     ],
     "M:Eplan.EplApi.MasterData.MDSymbolLibraryPropertyList.Exists(Eplan.EplApi.MasterData.Properties.MDSymbolLibrary)": [
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "api.try.execute"
+        ]
+      }
+    ],
+    "M:Eplan.EplApi.MasterData.MDSymbolPosition.RemoveSymbolPosition": [
       {
         "adapter": "ApiTryHandleDispatch",
         "member": "Invoke",
@@ -294096,6 +294421,17 @@
         "operations": [
           "api.try.execute",
           "api.try.plan"
+        ]
+      },
+      {
+        "adapter": "ApiTryHandleDispatch",
+        "member": "Invoke",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Api/ApiTryDispatch.g.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "api.try.execute"
         ]
       },
       {

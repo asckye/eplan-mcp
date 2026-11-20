@@ -1,9 +1,9 @@
 # EPLAN API 覆盖报告
 
-**操作层 4014 组：专用工具 628，通用读取 115，仅通用入口 2042，仅状态覆盖 7，其他可调用 11，明确不做 738，到不了 473；实机验证 1332**
+**操作层 4014 组：专用工具 628，通用读取 115，仅通用入口 2067，仅状态覆盖 7，其他可调用 11，明确不做 738，到不了 448；实机验证 1332**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-20 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 1bdcd668）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-20 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 f70abffa + uncommitted changes）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -14,22 +14,22 @@
 |---|---:|---:|---:|
 | 专用工具（dedicated） | 628 | 628 / 4014（15.6%） | 424 |
 | 通用读取（generic_read） | 115 | 115 / 4014（2.9%） | 0 |
-| 仅通用入口（api_try_only） | 2042 | 2042 / 4014（50.9%） | 908 |
+| 仅通用入口（api_try_only） | 2067 | 2067 / 4014（51.5%） | 908 |
 | 仅状态覆盖（state_only） | 7 | 7 / 4014（0.2%） | 0 |
 | 其他可调用（other） | 11 | 11 / 4014（0.3%） | 0 |
 | 明确不做（declined） | 738 | 738 / 4014（18.4%） | 0 |
-| 到不了（none） | 473 | 473 / 4014（11.8%） | 0 |
+| 到不了（none） | 448 | 448 / 4014（11.2%） | 0 |
 
 - 明确不做（declined）：没有工具到达，且通用入口的每个签名都因下列原因排除，或整个类型按下列原因结案；仍计入分母。按原因：property_id_tables 109，addin_infrastructure 78，settings_write 74，shared_interactive_state 65，file_masterdata_macro_tools 57，covered_by_object_find 54，abstract_no_public_implementation 46，external_path_parameter 42，masterdata_message_objects 39，catalog:banned_symbol 29，enumerator_type 29，dialog_decision_context 26，offline_host_application 22，masterdata_management 14，diagnostic_infrastructure 10，covered_by_translation_tool 9，exception_type 9，lifecycle_or_creation 9，locking_internals 8，covered_by_tool 5，write_pipeline_owned 4。原因的取舍见 eng/coverage/Reporting/CoverageRoutes.cs 的 DeclinedReasons 和 DeclinedTypes。
 - refused_unsafe 按拒绝侧所在的组去重计数，仍在分母中；被拒绝的侧不计 api_try，其他侧或专用工具仍可使该组 callable，单元状态不变。
 
 | 操作层分母 | tools | api_try | callable | refused_unsafe |
 |---:|---:|---:|---:|---:|
-| 4014 | 2792 | 2585 | 2803 | 5 |
+| 4014 | 2817 | 2610 | 2828 | 5 |
 
 - api_try 在操作层分母外还可到达 0 组，不加入可调用数或分母；原因：无。
 - C 级方法的逐签名选择、读写分类和排除理由见 [生成清单](../../catalog/api-try.g.tsv)；未实机验证，不计为 live_verified。
-- C 级方法选择：read 1806 组，write 1119 组；排除（按签名）：catalog:internal 168，external_path_parameter 145，lifecycle_or_creation 97，settings_write 84，catalog:banned_symbol 66，catalog:deprecated 39，shared_interactive_state 39，unsupported_parameter 38，masterdata_or_parts_management 36，transient_creation 36，settings_or_scheme_parameter 35，printer_parameter 32，abstract_service 29，static_or_nonpublic 24，masterdata_management 16，catalog:not_applicable 14，generic_or_collection_parameter 14，catalog:deprecated: obsolete_attribute 14，enumerator_type 13，no_public_default_constructor 13，entry_type_excluded 10，unsupported_return 9，external_destination 8，masterdata_copy_pending 7，application_or_session_state 5，unsupported_settings_read 5，external_or_application_effect 5，ref_out 4，unscoped_object_identifier 4，static_not_project_scoped 4，database_parameter 4，array_or_params 2，unsupported_required_modifier 1，factory_constructor_unavailable 1，catalog:internal: native_signature 1，owns_transaction 1。
+- C 级方法选择：read 1806 组，write 1144 组；排除（按签名）：catalog:internal 168，external_path_parameter 145，lifecycle_or_creation 97，settings_write 84，catalog:banned_symbol 66，catalog:deprecated 39，shared_interactive_state 39，unsupported_parameter 38，masterdata_or_parts_management 36，transient_creation 36，settings_or_scheme_parameter 35，printer_parameter 32，abstract_service 29，static_or_nonpublic 24，masterdata_management 16，catalog:not_applicable 14，generic_or_collection_parameter 14，catalog:deprecated: obsolete_attribute 14，enumerator_type 13，no_public_default_constructor 13，entry_type_excluded 10，unsupported_return 9，external_destination 8，masterdata_copy_pending 7，application_or_session_state 5，unsupported_settings_read 5，external_or_application_effect 5，ref_out 4，unscoped_object_identifier 4，static_not_project_scoped 4，database_parameter 4，array_or_params 2，unsupported_required_modifier 1，factory_constructor_unavailable 1，catalog:internal: native_signature 1，owns_transaction 1。
 - 计数单位（[设计文档](../design/2026-10-21-api-capability-coverage.md)第 3 节，负责人 2026-10-21 的决定 Q1–Q3）：操作层按重载组，同一类型中同名的方法或对象属性算一组，对象属性计入操作层（Q1），另给出只算方法的数字；数据字典按对象类型，Bridge 用到它的某个属性 ID 或它的 `<对象>PropertyList` 类型就算这个对象类型已实现；action 按行，带 TYPE 的行另算。类型、构造函数、`Finalize`/`Dispose`、字段、枚举值只作为依赖计数，不算覆盖率。
 - 通用读取计数：数据字典类型的 kind 在 ObjectReadTypes 中 supported 时，也经 eplan_object_find / eplan_object_get 计为 implemented；通用路径有 Small/Medium 测试时计为 automated_test；该路径的 live_verified 仅限生成器中按 api-notes A60/A62 明确列出的已读 kind，不由支持范围推定，未支持类型保留原原因。
 - 扫描漏记的可执行别名仅按 overlay 的 `reached-by-tool` 逐组、逐重载补入；必须列出工具、实际调用和接收列表的代码位置，以及扫描已识别的等价组。本轮只补各列表打开父值必经的按 ID getter，不向每个列表推定带索引重载、命名属性 ID、枚举 getter、转换 getter 或 setter。
@@ -37,7 +37,7 @@
 - 工具级的证据代表工具到达的全部单元，所以 automated_test 和 live_verified 是上限：一次实机运行不一定走到工具的每个分支。到达关系也偏向"可能到达"：扫描判断不了的分支都算到达。
 
 ## 1. Bridge 用到的 EPLAN API
-Bridge 共用到 14192 个 ID（方法 1392，属性 1925，类型 659，字段和枚举值 10199，action 17），其中 14169 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
+Bridge 共用到 14217 个 ID（方法 1417，属性 1925，类型 659，字段和枚举值 10199，action 17），其中 14194 个能被某个 Bridge 操作到达，23 个只属于基础设施。按命名空间：
 
 | 命名空间 | ID 数 |
 |---|---:|
@@ -55,22 +55,22 @@ Bridge 共用到 14192 个 ID（方法 1392，属性 1925，类型 659，字段�
 | `Eplan.EplApi.EServices.Ged` | 19 |
 | `Eplan.EplApi.HEServices` | 601 |
 | `Eplan.EplApi.HEServices.Exceptions` | 1 |
-| `Eplan.EplApi.MasterData` | 2219 |
+| `Eplan.EplApi.MasterData` | 2244 |
 | `（action）` | 17 |
 
 ## 2. 登记与实现覆盖
 | 层 | 登记 | 排除（原因：数量） | 分母 | implemented | 其中经工具 | 其中部分重载 | automated_test | live_verified | env_blocked | 无文档 |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 2792 / 4014（69.6%） | 2785 | 202 | 2785 / 4014（69.4%） | 1332 / 4014（33.2%） | 15 | 134 |
-| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 992 / 1799（55.1%） | 985 | 103 | 985 / 1799（54.8%） | 180 / 1799（10.0%） | 12 | 66 |
+| 操作层（重载组，主分母） | 4649 | deprecated：54，internal：147，not_applicable：106，overlay:gui：72，overlay:not_applicable：253，overlay:unsafe：3 | 4014 | 2817 / 4014（70.2%） | 2810 | 202 | 2810 / 4014（70.0%） | 1332 / 4014（33.2%） | 15 | 134 |
+| 　其中方法 | 2203 | deprecated：23，internal：124，not_applicable：53，overlay:gui：32，overlay:not_applicable：172 | 1799 | 1017 / 1799（56.5%） | 1010 | 103 | 1010 / 1799（56.1%） | 180 / 1799（10.0%） | 12 | 66 |
 | 　其中对象属性 | 2371 | deprecated：31，internal：1，overlay:gui：40，overlay:not_applicable：81，overlay:unsafe：3 | 2215 | 1800 / 2215（81.3%） | 1800 | 99 | 1800 / 2215（81.3%） | 1152 / 2215（52.0%） | 3 | 68 |
 | 数据字典（对象类型） | 69 | deprecated：1 | 68 | 68 / 68（100.0%） | 68 | 0 | 68 / 68（100.0%） | 19 / 68（27.9%） | 0 | 0 |
 | action（按行） | 177 | backward_compat：6，installer_registration：3，interactive_ui：15，one_off_migration：2，outside_scratch_scope：3，printing：2，script_code_level：3，settings_write_disabled：6 | 137 | 49 / 137（35.8%） | 48 | 0 | 49 / 137（35.8%） | 19 / 137（13.9%） | 0 | 0 |
 | 　其中带 TYPE 的行 | 103 | outside_scratch_scope：3，printing：2，settings_write_disabled：1 | 97 | 45 / 97（46.4%） | 45 | 0 | 45 / 97（46.4%） | 18 / 97（18.6%） | 0 | 0 |
 
 排除原因中带 `overlay:` 的来自 overlay.yaml（第 7 节），其余是目录的机械规则（设计文档第 3.3 节）。
-- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 2792 / 4342（64.3%）。
-- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 992 / 1799（55.1%），live_verified 180 / 1799（10.0%）。
+- 主分母的推导：登记 4649 组（其中 75 组运算符和委托成员不在方法、属性两行中，已全部被机械规则排除），目录的机械规则排除后 4342 组，再按 overlay 排除后 4014 组。按机械排除后的 4342 组计，implemented 为 2817 / 4342（64.9%）。
+- 只算方法：机械排除后 2003 组，overlay 排除后 1799 组，implemented 1017 / 1799（56.5%），live_verified 180 / 1799（10.0%）。
 - 数据字典的属性 ID（不进分母，只作参考）：Bridge 用到 7996 个，未过时的共 8585 个。
 - 依赖层：Bridge 用到 2969 个类型和类型层成员，目录登记 9823 个（只计数，不算覆盖率）。
 - action 137 行：工具到达 49，action_try 可尝试 35（离线规则，不代表实机验证）。
@@ -87,10 +87,10 @@ action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 4
 
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 方法 | 3109 | 405 / 175 | 32 / 0 | 950 / 85 | 7 / 0 | 15 / 0 | 556 / 0 | 1144 / 0 | 260 |
+| 方法 | 3109 | 405 / 175 | 32 / 0 | 975 / 85 | 7 / 0 | 15 / 0 | 556 / 0 | 1119 / 0 | 260 |
 | 普通属性 | 2636 | 435 / 329 | 255 / 0 | 1354 / 830 | 0 / 0 | 0 / 0 | 258 / 0 | 334 / 0 | 1159 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5983 | 840 / 504 | 287 / 0 | 2304 / 915 | 7 / 0 | 15 / 0 | 814 / 0 | 1716 / 0 | 1419 |
+| 合计 | 5983 | 840 / 504 | 287 / 0 | 2329 / 915 | 7 / 0 | 15 / 0 | 814 / 0 | 1691 / 0 | 1419 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
@@ -112,7 +112,7 @@ Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 | `Eplan.EplApi.EServices.Ged` | 90 | 15 / 90（16.7%） | 15 / 90（16.7%） | 0 | 14 |
 | `Eplan.EplApi.HEServices` | 417 | 279 / 417（66.9%） | 279 / 417（66.9%） | 0 | 84 |
 | `Eplan.EplApi.HEServices.Exceptions` | 2 | 0 / 2（0.0%） | 0 / 2（0.0%） | 0 | 0 |
-| `Eplan.EplApi.MasterData` | 592 | 446 / 592（75.3%） | 446 / 592（75.3%） | 0 | 157 |
+| `Eplan.EplApi.MasterData` | 592 | 471 / 592（79.6%） | 471 / 592（79.6%） | 0 | 157 |
 | `Eplan.EplApi.Starter` | 14 | 0 / 14（0.0%） | 0 / 14（0.0%） | 0 | 0 |
 | `Eplan.EplApi.System` | 22 | 0 / 22（0.0%） | 0 / 22（0.0%） | 0 | 0 |
 
@@ -211,7 +211,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_annotation_create | write | page.drawing.get<br>page.get<br>placement.text.create.execute<br>placement.text.create.plan<br>project.get | 339 | 202 | 3 | 125 | 0 | 1/0/1 | A93 A97 | — |
 | eplan_api_get | read | — | 0 | 0 | 0 | 0 | 0 | 5/4/0 | A77 | — |
 | eplan_api_search | read | — | 0 | 0 | 0 | 0 | 0 | 2/3/0 | — | — |
-| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 13885 | 2668 | 69 | 2853 | 0 | 7/4/4 | A39 A56 A67 A68 A76 A77 | — |
+| eplan_api_try | destructive | api.try.execute<br>api.try.plan<br>project.get | 13910 | 2693 | 69 | 2853 | 0 | 7/4/5 | A39 A56 A67 A68 A76 A77 | — |
 | eplan_asset_get | read | — | 0 | 0 | 0 | 0 | 0 | 0/1/0 | — | — |
 | eplan_asset_review | write | — | 0 | 0 | 0 | 0 | 0 | 2/1/0 | — | — |
 | eplan_asset_search | read | — | 0 | 0 | 0 | 0 | 0 | 1/2/0 | A33 | — |
@@ -261,7 +261,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_masterdata_update | destructive | masterdata.update.execute<br>masterdata.update.plan | 35 | 15 | 0 | 19 | 1 | 0/0/1 | — | — |
 | eplan_message_list | read | message.list | 7 | 4 | 0 | 3 | 0 | 1/2/2 | A1 A11 | — |
 | eplan_modelview_create | write | modelview.create.execute<br>modelview.create.plan | 128 | 66 | 1 | 60 | 1 | 0/0/0 | — | — |
-| eplan_object_find | read | object.find<br>object.get<br>project.get | 462 | 281 | 63 | 168 | 0 | 3/1/18 | A57 A60 | — |
+| eplan_object_find | read | object.find<br>object.get<br>project.get | 462 | 281 | 63 | 168 | 0 | 3/1/19 | A57 A60 | — |
 | eplan_object_get | read | object.find<br>object.get<br>project.get | 543 | 362 | 63 | 168 | 0 | 2/1/4 | — | — |
 | eplan_pack_build | write | — | 0 | 0 | 0 | 0 | 0 | 0/3/0 | — | — |
 | eplan_pack_enable | write | — | 0 | 0 | 0 | 0 | 0 | 1/1/0 | — | — |
@@ -283,7 +283,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_part_export | write | part.export.plan<br>part.export.run | 34 | 11 | 0 | 19 | 2 | 1/2/2 | A30 | 2026-10-27 pass（Large 测试 README） |
 | eplan_part_import | destructive | masterdata.backup<br>part.import.execute<br>part.import.plan | 87 | 28 | 2 | 39 | 2 | 1/5/1 | A30 | 2026-10-21 pass（api-notes A30；Large 测试 README） |
 | eplan_part_list | read | part.list | 46 | 24 | 1 | 19 | 0 | 1/2/3 | — | 2026-10-19 pass_with_findings（api-notes A12） |
-| eplan_part_search | read | part.search | 54 | 21 | 2 | 16 | 0 | 3/2/7 | — | 2026-10-21 pass（api-notes A30） |
+| eplan_part_search | read | part.search | 54 | 21 | 2 | 16 | 0 | 3/2/8 | — | 2026-10-21 pass（api-notes A30） |
 | eplan_part_sync | destructive | masterdata.backup<br>part.sync.execute<br>part.sync.plan | 122 | 54 | 1 | 62 | 2 | 1/1/1 | A30 | 2026-10-21 pass（docs/tools/eplan_part_sync.md；api-notes A30） |
 | eplan_placeholder_apply | write | placeholder.apply.execute<br>placeholder.apply.plan | 74 | 39 | 0 | 35 | 0 | 1/1/1 | A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README；api-notes A33） |
 | eplan_placeholder_list | read | placeholder.list | 46 | 27 | 0 | 19 | 0 | 1/1/1 | A11 A14 A33 | 2026-10-22 pass_with_findings（Large 测试 README） |

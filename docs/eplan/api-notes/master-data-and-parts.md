@@ -1,5 +1,15 @@
 # [EPLAN API 笔记](../api-notes.md)：主数据、部件与翻译库
 
+### A171. 通过 eplan_api_try 删除部件库对象：加一个再删掉，集合数量恢复；句柄约十分钟后过期（2026-11-20，EPLAN 2026.0.3.25421，Pro Panel，B 槽，部件库副本）
+- **环境：** `MasterDataOnCopyTests` 把 B 槽的部件库指到 `scratch\masterdata-copy` 下的副本后运行 `ApiTryPartsDatabaseTests`；每次写入都经审批并先备份副本（ADR-0019、ADR-0054）。运行前后正在用的两个库 29 个文件的 SHA-256 相同，B 槽设置还原后与备份无差异。
+- **做法：** 每一对先调 `Add…` 得到对象句柄，再把同一个句柄交给对应的 `Remove…`，前后各读一次集合数量。
+- **结果（17 组删除成功）：** 部件上的位置：附件 0→1→0、门 0→1→0、安装板 0→1→0、部件构造 2→3→2、安全相关值 0→1→0、支撑条 0→1→0，锁定安装区域删除成功但目录里没有可读的集合可数。部件库里的对象：附件清单 39→40→39、附件布置 30→31→30、连接点信息 83→84→83、钻孔图 69→70→69、客户 0→1→0、制造商 11→12→11；它们的位置（附件清单位置、附件布置位置、连接点位置、钻孔位置）各 0→1→0。
+- **`Add…` 被拒绝的两组：** `MDPart.AddAssemblyPosition`、`MDPart.AddModulePosition` 在所选部件上返回 `EPLAN_OPERATION_FAILED` 并回滚，两次运行都如此。原因没有查：可能与部件类型有关，没有证据。对应的 `RemoveAssemblyPosition`、`RemoveModulePosition` 因此未验证。
+- **句柄会过期：** 一轮约 40 次写入、每次先备份，开头取得的部件库句柄约十分钟后再用时返回 `PLAN_STALE`（“The object handle expired; obtain it again in this session”）。重新调 `MDPartsManagement.OpenDatabase` 和 `GetPart` 取新句柄即可。
+- **不带对象参数的服务调用要求 scratch 项目是当前项目：** `MDPartsManagement.OpenDatabase` 在另一个项目排在前面时返回 `POLICY_DENIED`（“A service without explicit object arguments requires the target scratch project to be current”）。
+- **连接数：** 测试里除 Host 和它的服务容器各一个连接外再开一个，第三个找不到 EPLAN（与 2026-11-19 探测测试的记录一致）。
+- **工具行为：** 部件库对象的 `Remove…` 不按项目对象的生命周期处理（没有撤销步骤，不做项目观测），与 `Add…` 同为主数据写入：EPLAN 当前配置的部件库必须是 scratch 根目录下的文件副本，每次审批，先备份（ADR-0059 修订记录 2026-11-20）。
+- **未验证：** `MDPart.RemoveSymbolPosition`、`MDSymbolPosition.RemoveSymbolPosition`（需要符号库参数）、`MDPart.RemoveUserDefinedPropertyPosition`、`MDPartsDatabase.RemoveAllTranslations`、`RemoveTranslation`、`MDConnectionCategory.Remove`，以及上面两组。写入是否在关闭数据库句柄之前就落盘没有单独查。
 ### A165. 替换功能上的部件：ArticleReference.RemoveArticleReference() 加重新添加，在默认的安全点事务里完成（2026-11-19，EPLAN 2026.0.3.25421，Pro Panel，B 槽，LargeWrite scratch 新页）
 - **依据：** 安装目录的 API 文档：`ArticleReference.PartNr` 只读，引用不能改指向；`RemoveArticleReference()` 把引用从对象上移除（设备固定时抛 `FixedDeviceException`）。`Function.AddArticleReference` 只能追加在末尾。
 - **现象：** 对一个带部件的已放置器件，从最后一个引用往前移除到要替换的位置，添加新部件，再按原来的部件号、变体、数量把后面的引用加回去。提交后 `eplan_device_get` 读到的引用顺序、数量与预期相同，新部件在旧部件原来的位置；一次撤销后旧引用恢复。这些调用在工具默认的安全点事务里成功，不需要 A93 给“第一个部件”用的事务范围。

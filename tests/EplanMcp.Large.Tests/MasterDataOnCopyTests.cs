@@ -7,7 +7,7 @@ namespace EplanMcp.Large.Tests;
 [Trait("Size", "Large")]
 public sealed class MasterDataOnCopyTests
 {
-    private static readonly string[] _tests = ["PartBuildTests", "PartImportTests", "PartSyncTests", "TranslationImportTests"];
+    private static readonly string[] _tests = ["PartBuildTests", "PartImportTests", "PartSyncTests", "TranslationImportTests", "ApiTryPartsDatabaseTests"];
 
     /// <summary>The parts database the copy was made from; <c>PartBuildTests</c> compares the fresh copy with it and checks it stays unchanged.</summary>
     public const string PartsSource = "EPLANMCP_LARGE_PARTS_SOURCE";
@@ -65,6 +65,7 @@ public sealed class MasterDataOnCopyTests
             await Run("PartImportTests", () => new PartImportTests().ATestPart_IsAddedOnceAfterABackup_ThenLeftAsItIs());
             await Run("PartSyncTests", () => new PartSyncTests().TheCopysParts_AreSynchronizedAfterTwoBackups_ThenThereIsNothingToDo());
             await Run("TranslationImportTests", () => new TranslationImportTests().TestEntry_IsAddedOnceAndReimportAddsNothing_WithApprovalAndBackupEveryTime());
+            await Run("ApiTryPartsDatabaseTests", () => new ApiTryPartsDatabaseTests().ObjectsAddedToTheCopy_AreRemovedAgain());
             await Guard("end");
         }
         finally

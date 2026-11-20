@@ -81,7 +81,7 @@ internal static partial class ApiTryGenerator
         { return lifecycleReason; }
         if (!service && member.Note == "factory_constructor_unavailable")
         { return "factory_constructor_unavailable"; }
-        if (entry.Name == "Dispose" || entry.Name.StartsWith('#') && !Factory(member) || !service && _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)) && !Lifecycle(entry))
+        if (entry.Name == "Dispose" || entry.Name.StartsWith('#') && !Factory(member) || !service && _excludedPrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal)) && !Lifecycle(entry) && !(PartsDatabaseObject(entry) && _lifecyclePrefixes.Any(p => entry.Name.StartsWith(p, StringComparison.Ordinal))))
         { return "lifecycle_or_creation"; }
         if (member.Static || member.Access is not null)
         { return "static_or_nonpublic"; }

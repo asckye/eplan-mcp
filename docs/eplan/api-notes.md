@@ -8,7 +8,7 @@
 
 - 依赖 EPLAN 行为前，先在本索引查证；没有记录就先查官方文档或在获准的 scratch 范围验证，记录版本、条件、精确输入、结论与证据，再编写依赖它的代码。不能运行实机时登记待验，不宣称验证完成。
 - 新条目使用 `### A<n>. 标题（日期、版本、变体与条件）`（验证记录）或 `### B<n>. 标题（日期）`（官方文档/反射），按“事实 — 出处 / 验证方式”记录，保留输入、结论和证据；直接写进对应的主题文件（末尾追加），同时在下面的索引表加一行。
-- 当前下一个可用编号：**A171、B19**。A58、A59 有意留空，不复用。并行分支先协调编号。主题文件：`actions`、`clients-and-host`、`connections-and-potentials`（含 3D 布线）、`symbols-and-layout`（含 3D 布置）、`graphics-and-page-geometry`、`environment-and-licensing`、`generic-api`（`eplan_api_try` 与批量验证）、`master-data-and-parts`、`plc-and-terminals`、`reads-and-snapshots`（含项目打开、新建、改名）、`transactions-and-undo`、`writes-and-placement`。2026-11-14 已把原“新条目”一节的 73 条全部归档。
+- 当前下一个可用编号：**A172、B19**。A58、A59 有意留空，不复用。并行分支先协调编号。主题文件：`actions`、`clients-and-host`、`connections-and-potentials`（含 3D 布线）、`symbols-and-layout`（含 3D 布置）、`graphics-and-page-geometry`、`environment-and-licensing`、`generic-api`（`eplan_api_try` 与批量验证）、`master-data-and-parts`、`plc-and-terminals`、`reads-and-snapshots`（含项目打开、新建、改名）、`transactions-and-undo`、`writes-and-placement`。2026-11-14 已把原“新条目”一节的 73 条全部归档。
 - C 节和 D5 沿用原标识，不改编号。
 - 原文上下文：A 类未单列日期时为 2026-10-12（EPLAN 2026.0.3，Pro Panel，Windows 11），B 类未单列日期时为 2026-10-12；各条另有日期或环境时以条目为准。原章节上下文与出处缩写统一保留如下。
 
@@ -179,6 +179,7 @@
 | A157 | 引脚代号带索引时读取 Pin.Name 抛出 IndexedPropertyException | 2026-11-13 | [plc-and-terminals](api-notes/plc-and-terminals.md#a157-引脚代号带索引时读取-pinname-抛出-indexedpropertyexception2026-11-13eplan-20260316-页重绘) |
 | A158 | 已放置的端子排定义可以没有符号变体 | 2026-11-01 | [symbols-and-layout](api-notes/symbols-and-layout.md#a158-已放置的端子排定义可以没有符号变体2026-11-01eplan-202603绘图读取中的端子排定义) |
 | A159 | 安装板上 MoveRelative 的位移按父对象坐标轴解释 | 2026-11-12 | [symbols-and-layout](api-notes/symbols-and-layout.md#a159-安装板上-moverelative-的位移按父对象坐标轴解释2026-11-12eplan-2026033d-安装板) |
+| A171 | 通过 eplan_api_try 删除部件库对象：加一个再删掉，集合数量恢复；句柄约十分钟后过期 | 2026-11-20 | [master-data-and-parts](api-notes/master-data-and-parts.md) |
 | A170 | GetFunctions(null) 不返回项目的全部功能；按名称过滤也找不到被漏掉的那些 | 2026-11-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md) |
 | A169 | 大量连续读取时 EPLAN 偶发退出（ucrtbase.dll 0xc0000409）：未能重现，原因未知 | 2026-11-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md) |
 | A168 | 页面读取慢在属性文字的外框和重复读取图形连接，不在连接扫描 | 2026-11-19 | [reads-and-snapshots](api-notes/reads-and-snapshots.md) |

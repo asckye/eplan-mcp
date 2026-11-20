@@ -48,6 +48,47 @@ public sealed class ApiTryLifecycleGeneratorTests
         ApiEntry entry = Entry("Create", [new(name, type)]);
         Assert.Null(ApiTryGenerator.Exclusion(entry, entry.Details[0], null));
     }
+    private static ApiEntry MasterData(string type, string name, ApiParameter[]? parameters = null) => new(
+        new("M:" + type + "." + name, "O:" + type + "." + name, "method", name, "registered", null, [], false),
+        type[..type.LastIndexOf('.')], "T:" + type, name, null, [],
+        [new("overload", "M:" + type + "." + name, type + "." + name + "() : System.Void", Parameters: parameters ?? [], ReturnType: "System.Void")]);
+
+    [Theory]
+    [InlineData("Eplan.EplApi.MasterData.MDPart", "RemoveSymbolPosition")]
+    [InlineData("Eplan.EplApi.MasterData.MDPartsDatabase", "RemoveManufacturer")]
+    [InlineData("Eplan.EplApi.MasterData.MDSymbolPosition", "RemoveSymbolPosition")]
+    public void RemovingAPartsDatabaseObject_IsAMasterDataWriteWithoutALifecycleEffect(string type, string name)
+    {
+        // ADR-0059 tier 2: the master data target of the write asks for the scratch copy, approval and a backup.
+        // No argument here: a handle argument needs the reachable handle types, which this rule does not decide.
+        ApiEntry entry = MasterData(type, name);
+        Assert.False(ApiTryGenerator.Lifecycle(entry));
+        Assert.Null(ApiTryGenerator.Exclusion(entry, entry.Details[0], null));
+        Assert.False(ApiTryGenerator.ReadMethod(entry));
+        Assert.Null(ApiTryLifecycle.Effect(entry.Row.Group));
+        Assert.True(EplanMcp.Bridge.Core.Operations.ApiTryMasterData.Changes(type));
+    }
+
+    [Theory]
+    [InlineData("Eplan.EplApi.MasterData.MDSymbolLibrary", "Remove")]
+    [InlineData("Eplan.EplApi.MasterData.MDSymbol", "Remove")]
+    [InlineData("Eplan.EplApi.MasterData.MDSymbolVariant", "Remove")]
+    [InlineData("Eplan.EplApi.DataModel.MasterData.SymbolVariant", "Remove")]
+    public void SymbolLibrariesStayOut_TheyAreNotInThePartsDatabase(string type, string name)
+    {
+        ApiEntry entry = MasterData(type, name);
+        Assert.Equal("masterdata_or_parts_management", ApiTryGenerator.Exclusion(entry, entry.Details[0], null));
+    }
+
+    [Theory]
+    [InlineData("CreateDatabase")]
+    [InlineData("RemoveDatabase")]
+    public void PartsManagementKeepsItsOwnRule(string name)
+    {
+        ApiEntry entry = MasterData(ApiTryServices.PartsManagement, name);
+        Assert.Equal("masterdata_management", ApiTryGenerator.Exclusion(entry, entry.Details[0], null));
+    }
+
     [Theory]
     [InlineData("Destroy")]
     [InlineData("Dispose")]
