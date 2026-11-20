@@ -31,7 +31,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath '.\EplanMcp-<version>.zip'
 
 关闭 EPLAN，打开 **`D:\EplanMcp\workbench\EplanMcp.Workbench.exe`**（其他位置替换前缀）。在 Workbench 状态页勾选检测到的 Electric P8、Pro Panel 等所需变体，点击“注册 EPLAN 插件”，读取每个变体的结果。首次运行后保持程序目录位置不变。
 
-注册会启动 EPLAN，等待插件加载，再请求正常关闭这个实例。遇到登录、授权或系统消息窗口，请自己处理并关闭；不要强制结束进程。只有注册成功后，再启动平常使用的 EPLAN 并打开项目。
+注册会启动 EPLAN，等待插件加载，再请求正常关闭这个实例。遇到登录或授权窗口，请自己处理并关闭；不要强制结束进程。EPLAN 启动时显示的系统消息窗口会被自动关闭，以便 EPLAN 能够退出，其中的消息保留在 EPLAN 的系统日志里。只有注册成功后，再启动平常使用的 EPLAN 并打开项目。
 
 需要补注册时可再用 Workbench；命令行方式如下，路径换成自己的程序目录。后续命令沿用同一窗口里的 `$eplanMcp`：
 

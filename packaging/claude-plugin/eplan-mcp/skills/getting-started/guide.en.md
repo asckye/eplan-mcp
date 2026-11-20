@@ -31,7 +31,7 @@ Extract the entire ZIP, which contains one top-level folder, `EplanMcp-<version>
 
 Close EPLAN and open **`D:\EplanMcp\workbench\EplanMcp.Workbench.exe`** (adjust the prefix for your location). On the status page, tick the detected variants you use, such as Electric P8 and Pro Panel, then choose "Register EPLAN add-in" and read each result. Keep the program folder at this location afterwards.
 
-Registration starts EPLAN, waits for the add-in to load, then requests a normal shutdown of that instance. Handle and close any login, licence, or system message windows yourself; do not force the process to end. Only after registration succeeds should you start your usual EPLAN instance and open a project.
+Registration starts EPLAN, waits for the add-in to load, then requests a normal shutdown of that instance. Handle and close any login or licence windows yourself; do not force the process to end. A system messages window that EPLAN shows at start-up is closed for you so that EPLAN can close, and its messages stay in EPLAN's system log. Only after registration succeeds should you start your usual EPLAN instance and open a project.
 
 Use Workbench again to register another variant, or use these commands after closing EPLAN. Adjust the program path; subsequent commands reuse `$eplanMcp` in the same PowerShell window:
 
