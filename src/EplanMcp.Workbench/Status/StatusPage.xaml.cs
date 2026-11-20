@@ -108,6 +108,10 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         StatWarn.Text = warnCount.ToString(CultureInfo.InvariantCulture);
         StatFail.Text = failCount.ToString(CultureInfo.InvariantCulture);
         StatOverall.Text = failCount > 0 ? loc["Status.Failure"] : warnCount > 0 ? loc["Status.Warning"] : loc["Status.Ok"];
+        // The design: the overall state in its tone, the counts of warnings and failures in theirs once above zero.
+        StatOverall.SetResourceReference(TextBlock.ForegroundProperty, failCount > 0 ? "State.Error.Text" : warnCount > 0 ? "State.Warning.Text" : "State.Success.Text");
+        StatWarn.SetResourceReference(TextBlock.ForegroundProperty, warnCount > 0 ? "State.Warning.Text" : "Text.Primary");
+        StatFail.SetResourceReference(TextBlock.ForegroundProperty, failCount > 0 ? "State.Error.Text" : "Text.Primary");
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();

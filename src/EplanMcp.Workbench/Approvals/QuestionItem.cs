@@ -79,8 +79,8 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
 
     public string RejectLabel => Text(IsRelease ? "Question.KeepSuspended" : IsDestructive ? "Question.RejectDefault" : "Question.Reject");
 
-    /// <summary>Which answer is the safe one, said in words above the buttons; empty for a Write, whose answers are equal (ADR-0014).</summary>
-    public string AnswerHint => IsRelease ? Text("Question.ReleaseHint") : IsDestructive ? Text("Question.DestructiveHint") : string.Empty;
+    /// <summary>What the two answers do, beside them: which one is the safe one, or for a Write that they are equal (ADR-0014).</summary>
+    public string AnswerHint => Text(IsRelease ? "Question.ReleaseHint" : IsDestructive ? "Question.DestructiveHint" : "Question.WriteHint");
 
     /// <summary>
     /// What the engineer types to approve a Destructive write (ADR-0035): a structured field of the question, never text

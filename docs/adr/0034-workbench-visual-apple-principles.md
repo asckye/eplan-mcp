@@ -63,3 +63,15 @@
 - **字体**（决定 3）：不再随软件分发 Maple Mono CN：`WorkbenchFonts` 只用 Windows 自带字体，项目文件、发布流程（`release-package.ps1`、`release.yml`）和第三方声明里的字体部分已删除，`eng/scripts/get-fonts.ps1` 已删除。
 - **外壳**（2026-11-15，第 2 步）：侧边栏按 v2 改为 232 px（收起 64 px），用 `bg-sidebar` 底色；品牌图标、"Workbench"分组标题、v2 样式的导航项（当前项用 `fill-selected-inactive`，审批项显示等待数）；审批通道状态从页头移到侧边栏底部；页头去掉面包屑，改为 28 px 大标题。新增的三个颜色键以 `Workbench.` 开头，从 `tokens.json` 生成，高对比主题跟随系统颜色。间距按 4 px 网格取最接近设计稿的值（设计稿的 10 px 内边距取 8 px）。窗口最小宽度保持 960 px（`ShellTests` 要求能放进最小的工作区，设计稿是 1024 px）。页头的等待数按钮暂留，审批页按 v2 改造时（第 3 步）连同页面自己的标题一起处理。
 - **页面标题**（2026-11-15，第 3 步第一部分）：页面大标题回到各页自己的页头（28 px 粗体，仍是一级标题、可聚焦不可 Tab），外壳页头只留等待数和窗口按钮，高度降到 40 px；审批页去掉副标题。审计和状态页的副标题带实时信息，保留。
+
+## 2026-11-20 修订：第 3 条（字体）
+
+项目负责人 2026-11-20 给出新的界面设计稿（`eplan-workbench-design.html`），要求 Workbench “完全按照这个来做”；对比渲染后指出“和设计稿差很多”，答复“按照设计搞做”。设计稿的字体是 Inter 和 JetBrains Mono，所以第 3 条改为：
+
+- 界面文字用随软件分发的 **Inter**（Regular、SemiBold、Bold），中文回退到 Microsoft YaHei UI（设计稿自己的回退），再回退到 Segoe UI Variable、Segoe UI。
+- 标识符、路径、代码类文字用随软件分发的 **JetBrains Mono**（Regular、Bold），回退 Cascadia Mono、Consolas。
+- 两种字体都是 SIL OFL 1.1，编进 `EplanMcp.Workbench.dll`，不需要单独的打包步骤；第三方声明已登记。安装包大约多 1.8 MB。
+- 设计稿里的 Noto Sans SC 不随软件分发（简体中文字体约 10 MB 以上）；中文用系统的 Microsoft YaHei UI。
+- 不再用 SF 字体和 SF Symbols 的规定不变。
+
+同时按设计稿把基准字号调小：正文与控件 12.5、次要文字 12、说明 11。

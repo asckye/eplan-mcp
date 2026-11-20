@@ -27,7 +27,7 @@
                  AutomationProperties.Name="{l:Tr Status.Running}" Visibility="Collapsed" />
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-      <StackPanel Margin="{StaticResource Ui.Inset.PageCanvas}" MaxWidth="920">
+      <StackPanel Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="860" HorizontalAlignment="Left">
         <Border x:Name="ErrorBanner" Margin="{StaticResource Ui.Gap.Bottom.SM}" Style="{StaticResource Primer.Alert.Error}" Visibility="Collapsed">
           <DockPanel>
             <Path DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Error}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
@@ -55,44 +55,44 @@
         </Border>
 
         <!-- 4-Stat Summary Strip (TIA Pattern) -->
-        <Grid Margin="{StaticResource Ui.Gap.Bottom.SM}">
+        <Grid Margin="{StaticResource Ui.Gap.Bottom.Normal}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="12" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="12" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="12" />
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
-          <Border Grid.Column="0" Style="{StaticResource Workbench.StatCard}">
+          <Border Grid.Column="0" Style="{StaticResource Workbench.StatCard}" Padding="{StaticResource Ui.Inset.StatTile}">
             <StackPanel>
-              <TextBlock Text="{l:Tr Status.StatOverall}" Style="{StaticResource Primer.Muted}" FontSize="11.5" />
-              <TextBlock x:Name="StatOverall" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="15" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+              <TextBlock Text="{l:Tr Status.StatOverall}" Style="{StaticResource Primer.Muted}" FontSize="11" />
+              <TextBlock x:Name="StatOverall" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="16" Margin="{StaticResource Ui.Gap.Top.XXS}" />
             </StackPanel>
           </Border>
-          <Border Grid.Column="2" Style="{StaticResource Workbench.StatCard}">
+          <Border Grid.Column="2" Style="{StaticResource Workbench.StatCard}" Padding="{StaticResource Ui.Inset.StatTile}">
             <StackPanel>
-              <TextBlock Text="{l:Tr Status.StatPass}" Style="{StaticResource Primer.Muted}" FontSize="11.5" />
-              <TextBlock x:Name="StatPass" Style="{StaticResource Workbench.MonoStrong}" FontSize="15" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+              <TextBlock Text="{l:Tr Status.StatPass}" Style="{StaticResource Primer.Muted}" FontSize="11" />
+              <TextBlock x:Name="StatPass" Style="{StaticResource Workbench.MonoStrong}" FontSize="16" Margin="{StaticResource Ui.Gap.Top.XXS}" />
             </StackPanel>
           </Border>
-          <Border Grid.Column="4" Style="{StaticResource Workbench.StatCard}">
+          <Border Grid.Column="4" Style="{StaticResource Workbench.StatCard}" Padding="{StaticResource Ui.Inset.StatTile}">
             <StackPanel>
-              <TextBlock Text="{l:Tr Status.StatWarn}" Style="{StaticResource Primer.Muted}" FontSize="11.5" />
-              <TextBlock x:Name="StatWarn" Style="{StaticResource Workbench.MonoStrong}" FontSize="15" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+              <TextBlock Text="{l:Tr Status.StatWarn}" Style="{StaticResource Primer.Muted}" FontSize="11" />
+              <TextBlock x:Name="StatWarn" Style="{StaticResource Workbench.MonoStrong}" FontSize="16" Margin="{StaticResource Ui.Gap.Top.XXS}" />
             </StackPanel>
           </Border>
-          <Border Grid.Column="6" Style="{StaticResource Workbench.StatCard}">
+          <Border Grid.Column="6" Style="{StaticResource Workbench.StatCard}" Padding="{StaticResource Ui.Inset.StatTile}">
             <StackPanel>
-              <TextBlock Text="{l:Tr Status.StatFail}" Style="{StaticResource Primer.Muted}" FontSize="11.5" />
-              <TextBlock x:Name="StatFail" Style="{StaticResource Workbench.MonoStrong}" FontSize="15" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+              <TextBlock Text="{l:Tr Status.StatFail}" Style="{StaticResource Primer.Muted}" FontSize="11" />
+              <TextBlock x:Name="StatFail" Style="{StaticResource Workbench.MonoStrong}" FontSize="16" Margin="{StaticResource Ui.Gap.Top.XXS}" />
             </StackPanel>
           </Border>
         </Grid>
 
         <!-- EPLAN Add-in Registration Card -->
-        <GroupBox Margin="{StaticResource Ui.Gap.Bottom.SM}" AutomationProperties.Name="{l:Tr Addin.Title}">
+        <GroupBox Style="{StaticResource Workbench.CardGroup}" Padding="{StaticResource Ui.Inset.CheckRow}" Margin="{StaticResource Ui.Gap.Bottom.Normal}" AutomationProperties.Name="{l:Tr Addin.Title}">
           <GroupBox.Header>
             <TextBlock Text="{l:Tr Addin.Title}" AutomationProperties.HeadingLevel="Level2" TextWrapping="Wrap" />
           </GroupBox.Header>
@@ -118,28 +118,44 @@
         <ItemsControl x:Name="Groups" Focusable="False">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <GroupBox Margin="{StaticResource Ui.Gap.Bottom.SM}" AutomationProperties.Name="{Binding Title}">
+              <GroupBox Style="{StaticResource Workbench.CardGroup}" Margin="{StaticResource Ui.Gap.Bottom.Normal}" AutomationProperties.Name="{Binding Title}">
                 <GroupBox.Header>
                   <TextBlock Text="{Binding Title}" AutomationProperties.HeadingLevel="Level2" TextWrapping="Wrap" TextTrimming="None" />
                 </GroupBox.Header>
-                <ItemsControl ItemsSource="{Binding Lines}" Focusable="False">
+                <!-- One row per check, divided by a line: a round icon, the text, the state as a tag on the right. -->
+                <ItemsControl ItemsSource="{Binding Lines}" Focusable="False" AlternationCount="10000">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <DockPanel Margin="{StaticResource Ui.Inset.Vertical.XXS}">
-                        <Path x:Name="Icon" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Success}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Icon}" VerticalAlignment="Top" />
-                        <TextBlock DockPanel.Dock="Left" Text="{Binding Severity}" Style="{StaticResource Ui.Text.BodyStrong}" Margin="{StaticResource Ui.Gap.Right.XS}" VerticalAlignment="Top" />
-                        <TextBlock Text="{Binding Text}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" VerticalAlignment="Top"
-                                   AutomationProperties.Name="{Binding AccessibleName}" />
-                      </DockPanel>
+                      <Border x:Name="Row" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,1,0,0" Padding="{StaticResource Ui.Inset.CheckRow}">
+                        <DockPanel>
+                          <Border x:Name="IconBack" DockPanel.Dock="Left" Style="{StaticResource Workbench.CheckIcon}" Margin="{StaticResource Ui.Gap.Right.SM}">
+                            <Path x:Name="Icon" Style="{StaticResource Primer.AlertIcon.Success}" Width="{StaticResource Ui.IconSize.Caption}" Height="{StaticResource Ui.IconSize.Caption}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          </Border>
+                          <Border x:Name="Tag" DockPanel.Dock="Right" Style="{StaticResource Workbench.Tag.Success}" Margin="{StaticResource Ui.Gap.Left.XS}" VerticalAlignment="Top">
+                            <TextBlock Text="{Binding Severity}" VerticalAlignment="Center" />
+                          </Border>
+                          <TextBlock Text="{Binding Text}" Style="{StaticResource Primer.Text}" FontSize="13" TextWrapping="Wrap" TextTrimming="None" VerticalAlignment="Top"
+                                     AutomationProperties.Name="{Binding AccessibleName}" />
+                        </DockPanel>
+                      </Border>
                       <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType=ContentPresenter}}" Value="0">
+                          <Setter TargetName="Row" Property="BorderThickness" Value="0" />
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding Status}" Value="{x:Static commands:CheckStatus.Info}">
                           <Setter TargetName="Icon" Property="Style" Value="{StaticResource Primer.AlertIcon.Info}" />
+                          <Setter TargetName="IconBack" Property="Background" Value="{DynamicResource State.Info.Background}" />
+                          <Setter TargetName="Tag" Property="Style" Value="{StaticResource Workbench.Tag}" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Status}" Value="{x:Static commands:CheckStatus.Warning}">
                           <Setter TargetName="Icon" Property="Style" Value="{StaticResource Primer.AlertIcon.Warning}" />
+                          <Setter TargetName="IconBack" Property="Background" Value="{DynamicResource State.Warning.Background}" />
+                          <Setter TargetName="Tag" Property="Style" Value="{StaticResource Workbench.Tag.Warning}" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Status}" Value="{x:Static commands:CheckStatus.Failure}">
                           <Setter TargetName="Icon" Property="Style" Value="{StaticResource Primer.AlertIcon.Error}" />
+                          <Setter TargetName="IconBack" Property="Background" Value="{DynamicResource State.Error.Background}" />
+                          <Setter TargetName="Tag" Property="Style" Value="{StaticResource Workbench.Tag.Error}" />
                         </DataTrigger>
                       </DataTemplate.Triggers>
                     </DataTemplate>

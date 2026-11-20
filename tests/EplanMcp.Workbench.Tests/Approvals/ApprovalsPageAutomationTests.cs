@@ -52,8 +52,8 @@ public sealed class ApprovalsPageAutomationTests(WpfContext wpf) : IDisposable
         {
             Loc loc = Loc.Current;
             Assert.Equal(
-                ("拒绝", "批准", loc["Approvals.List"], loc["Approvals.Detail"], loc["Approvals.Groups"]),
-                (Name(page, "RejectButton"), Name(page, "ApproveButton"), Name(page, "Questions"), Name(page, "DetailArea"), Name(page, "Groups")));
+                ("拒绝", "批准", loc.T("Approvals.Waiting", 3), loc["Approvals.Detail"], loc.T("Approvals.Answered", 0)),
+                (Name(page, "RejectButton"), Name(page, "ApproveButton"), Name(page, "Questions"), Name(page, "DetailArea"), Name(page, "AnsweredList")));
         }));
     }
 

@@ -76,6 +76,12 @@
   <Thickness x:Key="Ui.Inset.StatusPill">7,0</Thickness>
   <Thickness x:Key="Ui.Inset.CommandButton">10,0</Thickness>
   <Thickness x:Key="Ui.Inset.QueuePane">10</Thickness>
+  <Thickness x:Key="Ui.Gap.QueueSection">6,4,6,8</Thickness>
+  <Thickness x:Key="Ui.Gap.QueueSectionNext">6,12,6,8</Thickness>
+  <Thickness x:Key="Ui.Inset.PillCount">5,0</Thickness>
+  <Thickness x:Key="Ui.Inset.CheckRow">16,12</Thickness>
+  <Thickness x:Key="Ui.Gap.Bottom.Normal">0,0,0,16</Thickness>
+  <Thickness x:Key="Ui.Inset.StatTile">14</Thickness>
   <Thickness x:Key="Ui.Inset.QueueList">10,0,10,10</Thickness>
   <Thickness x:Key="Ui.Inset.QueueRow">12,10</Thickness>
   <Thickness x:Key="Ui.Gap.QueueRow">0,0,0,4</Thickness>

@@ -30,7 +30,7 @@
   <SolidColorBrush x:Key="Primer.ok" Color="#4ADE80" /><!-- success-text -->
   <SolidColorBrush x:Key="Primer.okBg" Color="#2422C55E" /><!-- success-tint -->
   <SolidColorBrush x:Key="Primer.onAccent" Color="#FFFFFF" /><!-- label-on-accent -->
-  <SolidColorBrush x:Key="Primer.pill" Color="#222C3F" /><!-- fill-control -->
+  <SolidColorBrush x:Key="Primer.pill" Color="#161D2B" /><!-- bg-elevated -->
   <SolidColorBrush x:Key="Primer.pillHover" Color="#232E42" /><!-- bg-hover -->
   <SolidColorBrush x:Key="Primer.primaryBg" Color="#2563EB" /><!-- accent -->
   <SolidColorBrush x:Key="Primer.primaryText" Color="#FFFFFF" /><!-- label-on-accent -->

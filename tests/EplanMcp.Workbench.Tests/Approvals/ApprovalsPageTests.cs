@@ -101,7 +101,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Assert.True(icon.IsVisible);
             Assert.Equal(page.FindResource("Primer.warn"), text.Foreground);
             Assert.StartsWith("结果未知：写入已暂停", text.Text, StringComparison.Ordinal);
-            var rows = (ListBox)page.FindName("Questions");
+            var rows = (ListBox)page.FindName("AnsweredList"); // answered questions are in their own section
             Assert.Single(Descendants<System.Windows.Shapes.Path>(rows), p => p.IsVisible && p.Style == page.FindResource("Primer.AlertIcon.Warning")); // the row of r1
 
             window.Open(Item(done));
@@ -286,17 +286,16 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Question question = Add("r1");
             Open();
             Press(Button(page, "ApproveButton"));
-            var waiting = (RadioButton)page.FindName("WaitingGroup");
-            var answered = (RadioButton)page.FindName("AnsweredGroup");
-            Assert.Equal(("等待中（0）", "已回答（1）"), ((string)waiting.Content, (string)answered.Content));
-            Assert.Equal(KeyboardNavigationMode.Once, KeyboardNavigation.GetTabNavigation((DependencyObject)page.FindName("Groups")));
+            // Both sections show at once (the 2026-11-20 design): the counts beside their captions, the lists named with them.
+            Assert.Equal(("0", "1"), (((TextBlock)page.FindName("WaitingCount")).Text, ((TextBlock)page.FindName("AnsweredCount")).Text));
+            Assert.Equal("等待中（0）", AutomationProperties.GetName((ListBox)page.FindName("Questions")));
+            Assert.True(((FrameworkElement)page.FindName("NoPending")).IsVisible);
 
-            answered.IsChecked = true;
-            var list = (ListBox)page.FindName("Questions");
+            var list = (ListBox)page.FindName("AnsweredList");
             list.SelectedIndex = 0;
             WpfContext.Drain();
 
-            Assert.Equal("已回答的问题", AutomationProperties.GetName(list));
+            Assert.Equal("已回答（1）", AutomationProperties.GetName(list));
             Assert.Same(question, _view!.Shown!.Question);
             Assert.Equal("已批准", _view.Shown.Result);
             Assert.False(((FrameworkElement)page.FindName("Waiting")).IsVisible);
@@ -457,7 +456,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             window.Open(Item(second));
             WpfContext.Drain();
             Assert.Same(second, _view.Shown!.Question);
-            Assert.True(((RadioButton)page.FindName("AnsweredGroup")).IsChecked);
+            Assert.Same(_view.Shown, ((ListBox)page.FindName("AnsweredList")).SelectedItem);
             Assert.False(_view.CanAnswer);
         }));
     }
@@ -530,17 +529,17 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             var window = new MainWindow { ShowActivated = false };
             window.Show();
             WpfContext.Drain();
-            var group = (RadioButton)((ApprovalsPage)window.FindName("ApprovalsPage")).FindName("WaitingGroup");
+            var group = (ListBox)((ApprovalsPage)window.FindName("ApprovalsPage")).FindName("Questions");
             Loc.Current.Language = AppLanguage.English;
-            string english = (string)group.Content;
+            string english = AutomationProperties.GetName(group);
             Loc.Current.Language = AppLanguage.Chinese;
-            Assert.NotEqual(english, group.Content);
+            Assert.NotEqual(english, AutomationProperties.GetName(group));
 
             window.Close();
             WpfContext.Drain();
             Loc.Current.Language = AppLanguage.English;
 
-            Assert.NotEqual(english, group.Content); // no handler of the closed page is left on the catalogue
+            Assert.NotEqual(english, AutomationProperties.GetName(group)); // no handler of the closed page is left on the catalogue
         });
     }
 
@@ -589,7 +588,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             var title = (TextBlock)page.FindName("QuestionTitle");
             Enter(title);
             Assert.Null(write.End); // ADR-0014: no key answers a Write
-            Assert.False(((TextBlock)page.FindName("AnswerHint")).IsVisible);
+            Assert.Equal(Loc.Current["Question.WriteHint"], ((TextBlock)page.FindName("AnswerHint")).Text);
 
             Question destructive = Add("r2", ask: Asks.Write("r2", tier: QuestionTier.Destructive));
             _view!.Select(Item(destructive));

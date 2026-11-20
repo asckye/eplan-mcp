@@ -6,7 +6,7 @@
     xmlns:shell="clr-namespace:EplanMcp.Workbench.Shell"
     Focusable="False">
   <!--
-    Audit Hash-Chain Page (TIA 1:1 Layout: Unified IDE Bar + Secondary Filter Subbar + Virtualized Audit Table).
+    Audit (2026-11-20 design): the bar, the filters, the table with mono cells and the record kind as a tag.
   -->
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
@@ -74,15 +74,47 @@
     </Border>
 
     <Grid>
-      <ListView x:Name="Records" AutomationProperties.Name="{l:Tr Audit.List}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+      <ListView x:Name="Records" BorderThickness="0" AutomationProperties.Name="{l:Tr Audit.List}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto" KeyDown="OnListKeyDown" MouseDoubleClick="OnListOpen">
         <ListView.View>
           <GridView>
-            <GridViewColumn x:Name="TimeColumn" Width="160" DisplayMemberBinding="{Binding Time}" />
-            <GridViewColumn x:Name="KindColumn" Width="120" DisplayMemberBinding="{Binding Kind}" />
-            <GridViewColumn x:Name="ToolColumn" Width="180" DisplayMemberBinding="{Binding Tool}" />
-            <GridViewColumn x:Name="ProjectColumn" Width="260" DisplayMemberBinding="{Binding Project}" />
-            <GridViewColumn x:Name="ResultColumn" Width="140" DisplayMemberBinding="{Binding Result}" />
+            <GridViewColumn x:Name="TimeColumn" Width="160">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Time}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11.5" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn x:Name="KindColumn" Width="140">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <Border Style="{StaticResource Workbench.Tag}" HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding Kind}" VerticalAlignment="Center" />
+                  </Border>
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn x:Name="ToolColumn" Width="200">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Tool}" Style="{StaticResource Primer.Mono.text}" FontSize="12" FontWeight="Medium" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn x:Name="ProjectColumn" Width="260">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Project}" Style="{StaticResource Primer.Mono.text}" FontSize="11.5" TextTrimming="CharacterEllipsis" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn x:Name="ResultColumn" Width="160">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Result}" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11.5" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
           </GridView>
         </ListView.View>
       </ListView>

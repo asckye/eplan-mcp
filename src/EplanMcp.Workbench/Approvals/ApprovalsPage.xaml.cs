@@ -27,7 +27,7 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     private ApprovalQueueView? _view;
     private SafetyPolicyStore? _policy;
     private string? _auditFolder;
-    private IReadOnlyList<AiCallRow> _allCalls = [];
+    private List<AiCallRow> _allCalls = [];
     private bool _focusOnShow;
 
     public ApprovalsPage()
@@ -105,7 +105,6 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         ApprovalsTab.IsChecked = true;
         if (_view is not null && (_view.Pending.Contains(item) || _view.Answered.Contains(item)))
         {
-            (item.IsPending ? WaitingGroup : AnsweredGroup).IsChecked = true;
             _view.Select(item);
         }
     }
@@ -113,8 +112,10 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     internal void FocusList()
     {
         UpdateLayout();
-        object? row = Questions.Items.Count == 0 ? null : Questions.ItemContainerGenerator.ContainerFromItem(Questions.SelectedItem ?? Questions.Items[0]);
-        Keyboard.Focus(row as IInputElement ?? (WaitingGroup.IsChecked == true ? WaitingGroup : AnsweredGroup));
+        // The selected row in whichever section holds it, else the first waiting row, else the first answered one.
+        ListBox list = AnsweredList.SelectedItem is not null || Questions.Items.Count == 0 && AnsweredList.Items.Count > 0 ? AnsweredList : Questions;
+        object? row = list.Items.Count == 0 ? null : list.ItemContainerGenerator.ContainerFromItem(list.SelectedItem ?? list.Items[0]);
+        Keyboard.Focus(row as IInputElement ?? list);
     }
 
     internal void Rearm()
@@ -127,8 +128,11 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     {
         bool shown = _view?.Shown is not null;
         DetailArea.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
-        Empty.Visibility = _view?.IsEmpty != false && WaitingGroup.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-        Questions.SelectedItem = _view?.Shown;
+        Empty.Visibility = shown ? Visibility.Collapsed : Visibility.Visible;
+        NoPending.Visibility = _view?.Pending.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
+        // One selection across both sections: the shown question, in the section that holds it.
+        Questions.SelectedItem = _view?.Shown is { IsPending: true } waiting ? waiting : null;
+        AnsweredList.SelectedItem = _view?.Shown is { IsPending: false } answered ? answered : null;
         ApplyButtons();
         ApplyTexts();
         ApplyPolicy();
@@ -149,6 +153,7 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         PolicyToggleButton.Content = loc[manual ? "Approvals.ToggleToAuto" : "Approvals.ToggleToManual"];
         PolicyToggleButton.IsEnabled = !denied;
         ApprovalPolicyBar.Visibility = _policy is not null && ApprovalsTab.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        PolicyDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, manual && !denied ? "State.Success.Text" : "State.Warning.Text");
     }
 
     private void ApplyButtons()
@@ -170,7 +175,6 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
             ApproveButton.Style = (Style)FindResource(approve);
         }
 
-        AnswerHint.Visibility = shown?.AnswerHint.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         KindTag.Style = (Style)FindResource(destructive ? "Workbench.Tag.Error" : shown?.IsRelease == true ? "Workbench.Tag.Warning" : "Workbench.Tag.Accent");
         StatusTag.Style = (Style)FindResource(shown?.IsPending == true ? "Workbench.Tag.Warning" : "Workbench.Tag");
     }
@@ -204,18 +208,6 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     {
         Announcer.Text = text;
         AccessibleStatus.Announce(Announcer);
-    }
-
-    private void OnGroup(object sender, RoutedEventArgs e)
-    {
-        if (_view is null || Questions is null)
-        {
-            return;
-        }
-
-        Questions.ItemsSource = AnsweredGroup.IsChecked == true ? _view.Answered : _view.Pending;
-        AutomationProperties.SetName(Questions, Loc.Current[AnsweredGroup.IsChecked == true ? "Approvals.AnsweredList" : "Approvals.List"]);
-        Show();
     }
 
     private void OnModeChanged(object sender, RoutedEventArgs e)
@@ -283,6 +275,7 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
 
         _allCalls = list;
         ApplyCallsFilter();
+        ApplyTexts();
     }
 
     private void ApplyCallsFilter()
@@ -344,7 +337,7 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
 
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_view is not null && Questions.SelectedItem is QuestionItem item && item != _view.Shown)
+        if (_view is not null && sender is ListBox { SelectedItem: QuestionItem item } && item != _view.Shown)
         {
             _view.Select(item);
         }
@@ -429,10 +422,15 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     private void ApplyTexts()
     {
         Loc loc = Loc.Current;
-        WaitingGroup.Content = loc.T("Approvals.Waiting", _view?.Pending.Count ?? 0);
-        AnsweredGroup.Content = loc.T("Approvals.Answered", _view?.Answered.Count ?? 0);
-        AutomationProperties.SetName(WaitingGroup, (string)WaitingGroup.Content);
-        AutomationProperties.SetName(AnsweredGroup, (string)AnsweredGroup.Content);
+        int waiting = _view?.Pending.Count ?? 0;
+        int answered = _view?.Answered.Count ?? 0;
+        WaitingCount.Text = waiting.ToString(CultureInfo.CurrentCulture);
+        AnsweredCount.Text = answered.ToString(CultureInfo.CurrentCulture);
+        AutomationProperties.SetName(Questions, loc.T("Approvals.Waiting", waiting));
+        AutomationProperties.SetName(AnsweredList, loc.T("Approvals.Answered", answered));
+        PendingCountText.Text = waiting.ToString(CultureInfo.CurrentCulture);
+        PendingCountPill.Visibility = waiting > 0 ? Visibility.Visible : Visibility.Collapsed;
+        CallsCountText.Text = _allCalls.Count.ToString(CultureInfo.CurrentCulture);
         CallTimeCol.Header = loc["Audit.Time"];
         CallToolCol.Header = loc["Audit.Tool"];
         CallKindCol.Header = loc["Audit.Kind"];
