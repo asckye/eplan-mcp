@@ -88,7 +88,7 @@ internal sealed partial class EplanConnectionCreator(bool readSymbolBounds = tru
     private static CableDefinitionPlanner.Inventory ReadCables(string project, string page, PageScene scene)
     {
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(project));
-        var inventory = new CableDefinitionPlanner.Inventory { Complete = true, Names = EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => f.Name).Where(n => !string.IsNullOrEmpty(n)).ToList() };
+        var inventory = new CableDefinitionPlanner.Inventory { Complete = true, Names = EplanDeviceReader.AllFunctions(finder).Select(f => f.Name).Where(n => !string.IsNullOrEmpty(n)).ToList() };
         foreach (Connection connection in EplanNativePreconditions.Valid(finder.GetConnections(null)).ToArray().Where(c => EplanConnectionReader.PageOf(c)?.Name == page))
         {
             Pin? start = connection.StartPin, end = connection.EndPin;

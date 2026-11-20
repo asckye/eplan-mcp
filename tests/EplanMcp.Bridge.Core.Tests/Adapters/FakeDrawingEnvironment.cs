@@ -63,4 +63,7 @@ internal static class EplanDeviceReader
         using var filter = new FunctionsFilter { Name = tag, ExactNameMatching = true };
         return finder.GetFunctions(filter).FirstOrDefault(f => f.IsMainFunction && preferred(f));
     }
+
+    /// <summary>The fake finder's unfiltered read is complete; the native gap (A170) exists only in EPLAN.</summary>
+    public static Function[] AllFunctions(DMObjectsFinder finder) => [.. EplanNativePreconditions.Valid(finder.GetFunctions(null))];
 }

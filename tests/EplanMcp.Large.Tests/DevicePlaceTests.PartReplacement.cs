@@ -29,7 +29,7 @@ public sealed partial class DevicePlaceTests
         string number = candidate.GetProperty("partNumber").GetString()!;
         string variant = candidate.GetProperty("variant").GetString()!;
         JsonElement placed = await PartsCallAsync("eplan_device_place", new()
-        { ["project"] = project, ["page"] = page, ["part"] = Part, ["x"] = 80, ["y"] = 160, ["tag"] = "-KF9" + page[Prefix.Length..], ["dry_run"] = false });
+        { ["project"] = project, ["page"] = page, ["part"] = Part, ["x"] = 80, ["y"] = 160, ["tag"] = FreshTag(page), ["dry_run"] = false });
         string tag = placed.GetProperty("device").GetProperty("tag").GetString()!;
         JsonElement before = (await AssignmentDeviceAsync(project, tag)).GetProperty("parts");
         int count = Assert.Single(before.EnumerateArray(), p => p.GetProperty("partNumber").GetString() == Part).GetProperty("count").GetInt32();

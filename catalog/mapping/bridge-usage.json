@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-20",
-  "scannedSources": "f70abffa + uncommitted changes",
-  "sourceHash": "sha256:ecd90760b470a2c7f8499b437e4572d6e46c470ae5093f6d04dba5a0faa276ee",
+  "scannedSources": "aae591c0",
+  "sourceHash": "sha256:e820b2d7f66497017b098de7d6cc399de3011df9db8118740a235987a46313ce",
   "operations": [
     {
       "name": "action.execute",
@@ -159168,30 +159168,6 @@
         ]
       },
       {
-        "adapter": "EplanConnectionCreator",
-        "member": "ReadCables",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Connections/EplanConnectionCreator.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "connection.create.execute",
-          "connection.create.plan",
-          "device.place.execute",
-          "device.place.plan",
-          "graphic.edit.plan",
-          "import.dxf.execute",
-          "import.dxf.plan",
-          "macro.insert.execute",
-          "macro.insert.plan",
-          "page.review",
-          "placement.edit.plan",
-          "plan.step.execute",
-          "plc.rack.execute",
-          "plc.rack.plan"
-        ]
-      },
-      {
         "adapter": "EplanCableGenerator",
         "member": "Read",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanCableGenerator.cs",
@@ -159253,17 +159229,6 @@
         ]
       },
       {
-        "adapter": "EplanDevicePlacer",
-        "member": "ReadCommitted",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDevicePlacer.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      },
-      {
         "adapter": "EplanDeviceReader",
         "member": "AllFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
@@ -159276,16 +159241,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },
@@ -159321,37 +159298,6 @@
         ]
       },
       {
-        "adapter": "EplanDeviceRenamer",
-        "member": "FunctionNames",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceRenamer.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "device.place.execute",
-          "device.place.plan",
-          "device.update.execute",
-          "device.update.plan",
-          "plc.rack.execute",
-          "plc.rack.plan"
-        ]
-      },
-      {
-        "adapter": "EplanDeviceRenamer",
-        "member": "Named",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceRenamer.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "device.place.execute",
-          "device.place.plan",
-          "device.update.execute",
-          "device.update.plan",
-          "plc.rack.execute"
-        ]
-      },
-      {
         "adapter": "EplanDeviceRenumberer",
         "member": "Functions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceRenumberer.cs",
@@ -159361,17 +159307,6 @@
         "operations": [
           "device.renumber.execute",
           "device.renumber.plan"
-        ]
-      },
-      {
-        "adapter": "EplanDeviceRenumberer",
-        "member": "Renumber",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceRenumberer.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "device.renumber.execute"
         ]
       },
       {
@@ -159400,17 +159335,6 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "device.place.execute"
-        ]
-      },
-      {
-        "adapter": "EplanDeviceSymbolPlacement",
-        "member": "PrepareStrip",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
           "call"
         ],
@@ -160229,16 +160153,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },
@@ -165550,16 +165486,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },
@@ -205603,16 +205551,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },
@@ -233306,16 +233266,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },
@@ -253927,16 +253899,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },
@@ -263547,16 +263531,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },
@@ -265250,16 +265246,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },
@@ -276224,16 +276232,28 @@
           "cable.reassign.plan",
           "cable.renumber.execute",
           "cable.renumber.plan",
+          "connection.create.execute",
+          "connection.create.plan",
           "connection.list",
           "device.get",
           "device.list",
           "device.place.execute",
           "device.place.plan",
+          "device.renumber.execute",
+          "device.renumber.plan",
           "device.update.execute",
           "device.update.plan",
+          "graphic.edit.plan",
+          "import.dxf.execute",
+          "import.dxf.plan",
           "macro.insert.execute",
           "macro.insert.plan",
+          "page.review",
+          "placement.edit.plan",
+          "plan.step.execute",
           "plc.get",
+          "plc.rack.execute",
+          "plc.rack.plan",
           "project.get"
         ]
       },

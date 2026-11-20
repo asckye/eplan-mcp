@@ -36,7 +36,7 @@ internal sealed class EplanDeviceRenumberer : IDeviceRenumberer
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         Function[] inScope = pages is null
-            ? EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray()
+            ? EplanDeviceReader.AllFunctions(finder)
             : [.. pages.SelectMany(page => Functions(finder, page) ?? throw new InvalidOperationException("A page the operation resolved is gone."))];
 
         // PostNumerate raised an access violation, which ends EPLAN, when it got a function whose device tag has no '?':
@@ -78,7 +78,7 @@ internal sealed class EplanDeviceRenumberer : IDeviceRenumberer
     {
         if (page is null)
         {
-            return EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray();
+            return EplanDeviceReader.AllFunctions(finder);
         }
 
         if (EplanDeviceReader.FindPage(finder, page) is not { } target)

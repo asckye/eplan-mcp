@@ -134,7 +134,7 @@ internal sealed class EplanDevicePlacer : IDevicePlacer, IDeviceStripTransaction
         string tag = result.Category == "Terminal" ? result.MainName : result.MainName.Split(':')[0];
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
         IEnumerable<Function> functions = result.Category == "Terminal"
-            ? EplanNativePreconditions.Valid(finder.GetTerminals(null)) : EplanNativePreconditions.Valid(finder.GetFunctions(null));
+            ? EplanNativePreconditions.Valid(finder.GetTerminals(null)) : EplanDeviceReader.AllFunctions(finder);
         Read([.. functions
             .Where(f => f.Name == tag || result.Category != "Terminal" && f.Name.StartsWith(tag + ":", StringComparison.Ordinal))], result);
     }

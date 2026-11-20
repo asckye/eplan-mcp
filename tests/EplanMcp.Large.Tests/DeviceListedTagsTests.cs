@@ -12,6 +12,24 @@ public sealed class DeviceListedTagsTests(LiveEplan eplan, ITestOutputHelper out
 {
     private static readonly string[] _categories = ["Coil", "Motor", "Terminal", "Cable", "PLCBox"];
 
+    /// <summary>
+    /// A170: the coil =EC1+A3-EC1-QA1-K1 is one of the placed functions the unfiltered read omits. Renaming another
+    /// device onto its tag would merge the two in EPLAN (A13), so the plan must refuse it. A dry run: nothing is written.
+    /// </summary>
+    [Fact]
+    public async Task RenamingOntoATagTheUnfilteredReadOmits_IsRefusedAsTaken()
+    {
+        const string taken = "=EC1+A3-EC1-QA1-K1";
+        JsonElement list = await eplan.CallAsync("eplan_device_list", new() { ["project"] = eplan.ProjectPath, ["category"] = "Coil", ["limit"] = 200 });
+        string source = list.GetProperty("devices").EnumerateArray().Where(d => d.GetProperty("main").GetBoolean())
+            .Select(d => d.GetProperty("tag").GetString()!).First(t => t.Length > 0 && t != taken);
+
+        var (planned, answer) = await eplan.CallOrErrorAsync("eplan_device_update", new() { ["project"] = eplan.ProjectPath, ["tag"] = source, ["new_tag"] = taken, ["dry_run"] = true });
+
+        output.WriteLine(source + " -> " + taken + ": " + answer.GetRawText()[..Math.Min(600, answer.GetRawText().Length)]);
+        Assert.False(planned, "The rename onto a taken tag was planned.");
+        Assert.Equal(EplanMcp.Contracts.ErrorReason.AlreadyExists, answer.GetProperty("reason").GetString());
+    }
     [Fact]
     public async Task ListedMainTags_AreFoundByDeviceGet_AndAMissStaysFast()
     {

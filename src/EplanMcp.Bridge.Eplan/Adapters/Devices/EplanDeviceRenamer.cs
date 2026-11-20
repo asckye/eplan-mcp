@@ -36,7 +36,7 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
     {
         MainThread.Assert();
         using var finder = new DMObjectsFinder(EplanProjects.ByPath(projectPath));
-        return [.. EplanNativePreconditions.Valid(finder.GetFunctions(null)).ToArray().Select(f => f.Name ?? string.Empty)];
+        return [.. EplanDeviceReader.AllFunctions(finder).Select(f => f.Name ?? string.Empty)];
     }
 
     private static string? Category(Function function)
@@ -62,10 +62,10 @@ internal sealed class EplanDeviceRenamer : IDeviceRenamer
         return new RenameReadBack { MainName = main.Name ?? string.Empty, VisibleName = main.VisibleName ?? string.Empty };
     }
 
-    /// <summary>Every function carrying the device tag, including its connection-point suffixes.</summary>
+    /// <summary>Every function carrying the device tag, including its connection-point suffixes. The complete read (A170): the unfiltered one omits placed functions, and a rename onto an omitted tag would merge two devices unseen (A13).</summary>
     private static Function[] Named(DMObjectsFinder finder, string tag)
     {
-        return [.. EplanNativePreconditions.Valid(finder.GetFunctions(null)).Where(f => f.Name == tag || (f.Name ?? string.Empty).StartsWith(tag + ":", StringComparison.Ordinal))];
+        return [.. EplanDeviceReader.AllFunctions(finder).Where(f => f.Name == tag || (f.Name ?? string.Empty).StartsWith(tag + ":", StringComparison.Ordinal))];
     }
 
     /// <summary>The main function (A12), or the first point of a device made only of points (A89, <see cref="DeviceNames.PointCategory"/>).</summary>

@@ -274,7 +274,7 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
     {
         string project = await eplan.WriteProjectAsync();
         string page = await NewPageAsync(project);
-        string tag = "-KF9" + page[Prefix.Length..];
+        string tag = FreshTag(page);
         Dictionary<string, object?> args = new() { ["project"] = project, ["page"] = page, ["part"] = Part, ["x"] = 80, ["y"] = 160, ["tag"] = tag };
 
         JsonElement dryRun = await eplan.CallAsync("eplan_device_place", new(args) { ["dry_run"] = true });
@@ -329,6 +329,14 @@ public sealed partial class DevicePlaceTests(LiveEplan eplan, WriteHost host) : 
     }
 
     /// <summary>A new circuit page after the last numbered page of =GAA+A1&amp;EFS1 in the copy.</summary>
+    /// <summary>
+    /// A tag no earlier run used. Deleting a test page deletes the placed coil but leaves the part's unplaced contacts
+    /// under the tag, and page numbers are reused: live 2026-11-20 the tag made from the page number alone was taken
+    /// by four such leftovers (ALREADY_EXISTS on the dry run).
+    /// </summary>
+    private static string FreshTag(string page) =>
+        "-KF9" + page[Prefix.Length..] + (DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond % 100000).ToString("D5", System.Globalization.CultureInfo.InvariantCulture);
+
     private async Task<string> NewPageAsync(string project)
     {
         int last = 0;
