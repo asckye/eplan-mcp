@@ -25,12 +25,16 @@ internal sealed partial class EplanDeviceSymbolPlacement
         using var finder = new DMObjectsFinder(project);
         using var filter = new FunctionsFilter { Name = parent, ExactNameMatching = true, FunctionCategory = FunctionCategory.PLCBox };
         PLC[] cards = [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray().OfType<PLC>().Where(p => p.IsMainFunction && DevicePlaceRequest.SameName(parent, p.Name))];
+        // A170: the filter by name and category misses functions the unfiltered read omits; only then the complete read.
+        if (cards.Length == 0)
+        { cards = [.. EplanDeviceReader.NamedFunctions(finder, parent).OfType<PLC>().Where(p => p.IsMainFunction && p.FunctionCategory == FunctionCategory.PLCBox)]; }
         Require(cards.Length == 1);
         _plcCardId = cards[0].ObjectIdentifier;
         // PDF redraw 2026-11-06: EPLAN pairs a point with its overview point by card, function definition, plug and designation, so an
         // output channel takes the definition of its overview point; a point without one stays the symbol's digital input.
         using var twins = new FunctionsFilter { Name = tag, ExactNameMatching = true, FunctionCategory = FunctionCategory.PLCTerminal };
-        FunctionDefinition definition = EplanNativePreconditions.Valid(finder.GetFunctions(twins)).FirstOrDefault(f => f.FunctionCategory == FunctionCategory.PLCTerminal && f.IsPlaced && f.Page.PageType == DocumentTypeManager.DocumentType.Overview)?.FunctionDefinition
+        // A170: a twin the filter misses would leave the new point with the symbol's default input definition.
+        FunctionDefinition definition = (EplanNativePreconditions.Valid(finder.GetFunctions(twins)).FirstOrDefault(f => f.FunctionCategory == FunctionCategory.PLCTerminal && f.IsPlaced && f.Page.PageType == DocumentTypeManager.DocumentType.Overview) ?? OverviewTwin(project, finder, tag))?.FunctionDefinition
             ?? project.FunctionDefinitionLibrary.FunctionDefinitions.Single(d => d.FunctionCategory == FunctionCategory.PLCTerminal
                 && FormattableString.Invariant($"{d.Group}/{d.Id}") == _symbol.PlcInputDefinition);
         Require(definition.ConnectionPoints.Length == _symbol.ConnectionPoints.Count);
@@ -45,6 +49,22 @@ internal sealed partial class EplanDeviceSymbolPlacement
         // A55/live T7c: relations may be null before commit; compare names rather than object identifiers.
         Require(terminal.PLC is null || DevicePlaceRequest.SameName(parent, terminal.PLC.Name));
         return terminal;
+    }
+
+    /// <summary>
+    /// The point's overview representation, read page by page on the overview pages only. The filter by name and
+    /// category misses functions the unfiltered read omits (A170); a read by page does not, and this path must not
+    /// scan every function of the project inside its transaction.
+    /// </summary>
+    private static Function? OverviewTwin(Project project, DMObjectsFinder finder, string tag)
+    {
+        foreach (Page overview in EplanNativePreconditions.Valid(project.Pages).ToArray().Where(p => p.PageType == DocumentTypeManager.DocumentType.Overview))
+        {
+            using var onPage = new FunctionsFilter { Page = overview };
+            if (EplanNativePreconditions.Valid(finder.GetFunctions(onPage)).FirstOrDefault(f => f.FunctionCategory == FunctionCategory.PLCTerminal && f.IsPlaced && f.Name == tag) is { } twin)
+            { return twin; }
+        }
+        return null;
     }
 
     private static void WritePlcPoint(FunctionPropertyList properties, DevicePlaceArgs args)

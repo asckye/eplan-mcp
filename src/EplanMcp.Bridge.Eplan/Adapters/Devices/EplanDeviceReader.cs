@@ -190,6 +190,20 @@ internal sealed class EplanDeviceReader : IDeviceReader
     }
 
     /// <summary>
+    /// Every function with exactly this name. A filter by name misses the functions the unfiltered read omits, also with
+    /// a category beside the name (A170, probe 2026-11-20: 0 of 40 found), so the complete read is merged in; each
+    /// function once, the filter's own order first.
+    /// </summary>
+    internal static Function[] NamedFunctions(DMObjectsFinder finder, string name)
+    {
+        using var filter = new FunctionsFilter { Name = name, ExactNameMatching = true };
+        var seen = new HashSet<long>();
+        return [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).ToArray()
+            .Concat(AllFunctions(finder).Where(f => string.Equals(f.Name, name, StringComparison.Ordinal)))
+            .Where(f => seen.Add(f.ObjectIdentifier))];
+    }
+
+    /// <summary>
     /// The same, preferring the main function <paramref name="preferred"/> accepts: a tag can have further main functions,
     /// such as a second representation or a function in a black box (api-notes A12).
     /// </summary>

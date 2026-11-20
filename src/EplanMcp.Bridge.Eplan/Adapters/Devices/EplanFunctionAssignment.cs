@@ -18,8 +18,8 @@ internal static class EplanFunctionAssignment
     internal static Function[] Functions(Project project, string tag)
     {
         using var finder = new DMObjectsFinder(project);
-        using var filter = new FunctionsFilter { Name = tag, ExactNameMatching = true };
-        return [.. EplanNativePreconditions.Valid(finder.GetFunctions(filter)).OrderBy(f => f.ObjectIdentifier)];
+        // A170: a placed function the name filter misses would never get its unplaced template assigned.
+        return [.. EplanDeviceReader.NamedFunctions(finder, tag).OrderBy(f => f.ObjectIdentifier)];
     }
 
     internal static string[] Pins(Function function) => [.. function.Pins.Select(p => EplanPins.Name(p) ?? string.Empty)];

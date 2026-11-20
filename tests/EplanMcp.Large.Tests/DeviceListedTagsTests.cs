@@ -13,6 +13,32 @@ public sealed class DeviceListedTagsTests(LiveEplan eplan, ITestOutputHelper out
     private static readonly string[] _categories = ["Coil", "Motor", "Terminal", "Cable", "PLCBox"];
 
     /// <summary>
+    /// A170, second look: which read returns what. The helper add-in compares the unfiltered read, the read per page,
+    /// each page's AllPlacements and the unfiltered typed reads on the fixture; read only. The numbers go to the output.
+    /// </summary>
+    [Fact]
+    public async Task FunctionReads_ComparedNatively()
+    {
+        string helper = OfflineHost.RepositoryFile("tests", "EplanMcp.Large.ConnectionHelper", "EplanMcp.Large.ConnectionHelper.dll");
+        string request = Path.Combine(Path.GetTempPath(), "eplanmcp-function-reads-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(request, JsonSerializer.Serialize(new { project = eplan.ProjectPath }));
+        await PlanStepLiveSession.ActionAsync("EplApiModuleAction /register:\"" + helper + "\" /Quiet");
+        try
+        {
+            await PlanStepLiveSession.ActionAsync("EplanMcpLargeFunctionReadsProbe /REQUEST:\"" + request + "\"");
+            string result = File.ReadAllText(request + ".result.json");
+            output.WriteLine(result);
+            File.Copy(request + ".result.json", Path.Combine(Path.GetTempPath(), "eplanmcp-function-reads-latest.json"), overwrite: true);
+            Assert.True(JsonDocument.Parse(result).RootElement.GetProperty("success").GetBoolean(), result);
+        }
+        finally
+        {
+            await PlanStepLiveSession.ActionAsync("EplApiModuleAction /unregister:\"EplanMcp.Large.ConnectionHelper\" /Quiet");
+            File.Delete(request);
+            File.Delete(request + ".result.json");
+        }
+    }
+    /// <summary>
     /// A170: the coil =EC1+A3-EC1-QA1-K1 is one of the placed functions the unfiltered read omits. Renaming another
     /// device onto its tag would merge the two in EPLAN (A13), so the plan must refuse it. A dry run: nothing is written.
     /// </summary>

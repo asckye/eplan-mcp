@@ -1337,8 +1337,8 @@
         "device.place.plan",
         "project.get"
       ],
-      "apiIds": 431,
-      "operationGroups": 237,
+      "apiIds": 432,
+      "operationGroups": 238,
       "dataDictionary": 8,
       "dependencies": 136,
       "actions": 0,
@@ -14195,9 +14195,10 @@
       "status": "live_verified",
       "partial": false,
       "tools": [
-        "eplan_api_try"
+        "eplan_api_try",
+        "eplan_device_place"
       ],
-      "route": "api_try_only"
+      "route": "dedicated"
     },
     {
       "unit": "O:Eplan.EplApi.DataModel.EObjects.PLC.GetAvailableSchemeList",
@@ -72987,16 +72988,16 @@
   },
   "routes": {
     "api_try_only": {
-      "count": 2067,
-      "live_verified": 908
+      "count": 2066,
+      "live_verified": 907
     },
     "declined": {
       "count": 738,
       "live_verified": 0
     },
     "dedicated": {
-      "count": 628,
-      "live_verified": 424
+      "count": 629,
+      "live_verified": 425
     },
     "generic_read": {
       "count": 115,
@@ -73043,16 +73044,16 @@
       "denominator": 5983,
       "routes": {
         "api_try_only": {
-          "count": 2329,
-          "live_verified": 915
+          "count": 2328,
+          "live_verified": 914
         },
         "declined": {
           "count": 814,
           "live_verified": 0
         },
         "dedicated": {
-          "count": 840,
-          "live_verified": 504
+          "count": 841,
+          "live_verified": 505
         },
         "generic_read": {
           "count": 287,
@@ -73109,16 +73110,16 @@
       "denominator": 2636,
       "routes": {
         "api_try_only": {
-          "count": 1354,
-          "live_verified": 830
+          "count": 1353,
+          "live_verified": 829
         },
         "declined": {
           "count": 258,
           "live_verified": 0
         },
         "dedicated": {
-          "count": 435,
-          "live_verified": 329
+          "count": 436,
+          "live_verified": 330
         },
         "generic_read": {
           "count": 255,

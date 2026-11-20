@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-20",
-  "scannedSources": "bfa986ac",
-  "sourceHash": "sha256:e820b2d7f66497017b098de7d6cc399de3011df9db8118740a235987a46313ce",
+  "scannedSources": "eed3e08d",
+  "sourceHash": "sha256:bf2f0638bab6bd659845d996f6ad6700db35b926d784440acc786aa6fd29bfd1",
   "operations": [
     {
       "name": "action.execute",
@@ -5380,6 +5380,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "read"
@@ -20911,6 +20922,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "read"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "read"
@@ -159288,6 +159310,19 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "call"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "ReadFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -159343,16 +159378,14 @@
         ]
       },
       {
-        "adapter": "EplanFunctionAssignment",
-        "member": "Functions",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanFunctionAssignment.cs",
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "call"
         ],
         "operations": [
-          "device.place.execute",
-          "device.update.execute",
-          "plc.rack.execute"
+          "device.place.execute"
         ]
       },
       {
@@ -165533,6 +165566,19 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "new"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "ReadFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -165577,16 +165623,14 @@
         ]
       },
       {
-        "adapter": "EplanFunctionAssignment",
-        "member": "Functions",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanFunctionAssignment.cs",
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "new"
         ],
         "operations": [
-          "device.place.execute",
-          "device.update.execute",
-          "plc.rack.execute"
+          "device.place.execute"
         ]
       },
       {
@@ -198751,6 +198795,17 @@
         "operations": [
           "api.try.execute"
         ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
       }
     ],
     "P:Eplan.EplApi.DataModel.EObjects.PLC.IsCPU": [
@@ -200486,6 +200541,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "get"
@@ -202717,6 +202783,19 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "ReadFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -202885,6 +202964,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "get"
@@ -205316,6 +205406,19 @@
         ]
       },
       {
+        "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
@@ -205324,19 +205427,6 @@
         ],
         "operations": [
           "device.place.execute"
-        ]
-      },
-      {
-        "adapter": "EplanFunctionAssignment",
-        "member": "Functions",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanFunctionAssignment.cs",
-        "access": [
-          "set"
-        ],
-        "operations": [
-          "device.place.execute",
-          "device.update.execute",
-          "plc.rack.execute"
         ]
       },
       {
@@ -205489,6 +205579,19 @@
         ]
       },
       {
+        "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
@@ -205497,19 +205600,6 @@
         ],
         "operations": [
           "device.place.execute"
-        ]
-      },
-      {
-        "adapter": "EplanFunctionAssignment",
-        "member": "Functions",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanFunctionAssignment.cs",
-        "access": [
-          "set"
-        ],
-        "operations": [
-          "device.place.execute",
-          "device.update.execute",
-          "plc.rack.execute"
         ]
       },
       {
@@ -205597,6 +205687,17 @@
         "operations": [
           "device.renumber.execute",
           "device.renumber.plan"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "set"
+        ],
+        "operations": [
+          "device.place.execute"
         ]
       },
       {
@@ -220814,6 +220915,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.cs",
         "access": [
@@ -224346,6 +224458,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "get"
@@ -227947,6 +228070,17 @@
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "ReadSpecialCommitted",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.LocationBox.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "get"
         ],
@@ -233289,6 +233423,19 @@
           "plc.rack.execute",
           "plc.rack.plan",
           "project.get"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "get"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
         ]
       },
       {
@@ -247525,6 +247672,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "PrepareStrip",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
@@ -253995,6 +254153,19 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "ReadDevice",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -254154,6 +254325,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "type"
@@ -256104,6 +256286,17 @@
         ]
       },
       {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
         "adapter": "EplanReportCreator",
         "member": "Create",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Exchange/EplanReportCreator.cs",
@@ -256209,6 +256402,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "type"
@@ -263591,6 +263795,19 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "ReadDevice",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -263767,6 +263984,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "type"
@@ -265293,6 +265521,19 @@
       },
       {
         "adapter": "EplanDeviceReader",
+        "member": "NamedFunctions",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute",
+          "device.update.execute",
+          "plc.rack.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceReader",
         "member": "ReadFunctions",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceReader.cs",
         "access": [
@@ -265337,16 +265578,14 @@
         ]
       },
       {
-        "adapter": "EplanFunctionAssignment",
-        "member": "Functions",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanFunctionAssignment.cs",
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "type"
         ],
         "operations": [
-          "device.place.execute",
-          "device.update.execute",
-          "plc.rack.execute"
+          "device.place.execute"
         ]
       },
       {
@@ -276374,6 +276613,17 @@
       },
       {
         "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateTerminal",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Terminal.cs",
         "access": [
@@ -282078,6 +282328,17 @@
       {
         "adapter": "EplanDeviceSymbolPlacement",
         "member": "CreateFunction",
+        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
+        "access": [
+          "type"
+        ],
+        "operations": [
+          "device.place.execute"
+        ]
+      },
+      {
+        "adapter": "EplanDeviceSymbolPlacement",
+        "member": "OverviewTwin",
         "file": "src/EplanMcp.Bridge.Eplan/Adapters/Devices/EplanDeviceSymbolPlacement.Plc.cs",
         "access": [
           "type"

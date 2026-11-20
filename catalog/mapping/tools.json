@@ -18782,6 +18782,7 @@
         "P:Eplan.EplApi.DataModel.Connection.StartSymbolReference",
         "P:Eplan.EplApi.DataModel.ConnectionPropertyList.Property(Eplan.EplApi.DataModel.AnyPropertyId)",
         "P:Eplan.EplApi.DataModel.ConnectionsFilter.Function",
+        "P:Eplan.EplApi.DataModel.EObjects.PLC.FunctionCategory",
         "P:Eplan.EplApi.DataModel.EObjects.PLC.IsCPU",
         "P:Eplan.EplApi.DataModel.EObjects.PLC.PLCTerminals",
         "P:Eplan.EplApi.DataModel.EObjects.PLC.Properties",

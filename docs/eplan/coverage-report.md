@@ -1,9 +1,9 @@
 # EPLAN API 覆盖报告
 
-**操作层 4014 组：专用工具 628，通用读取 115，仅通用入口 2067，仅状态覆盖 7，其他可调用 11，明确不做 738，到不了 448；实机验证 1332**
+**操作层 4014 组：专用工具 629，通用读取 115，仅通用入口 2066，仅状态覆盖 7，其他可调用 11，明确不做 738，到不了 448；实机验证 1332**
 
 > 由 `dotnet run --project eng/coverage -- generate` 从仓库中的文件生成，不要手工修改；CI 用 `check` 核对它与输入一致。机器可读的同一份数据在 `catalog/coverage.json`。说明见 [catalog/README.md](../../catalog/README.md)。
-> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-20 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 bfa986ac）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
+> 输入：目录 `catalog/eplan-2026.0.3/`（SDK 部分已提交，action 部分已提交）；`catalog/mapping/bridge-usage.json`（2026-11-20 在 EPLAN 2026.0.3.25421 的程序集上扫描，Bridge 源码 eed3e08d）；`catalog/mapping/tools.json`；`catalog/mapping/overlay.yaml`；`catalog/mapping/api-totals.json`。
 
 ## 口径
 - 可调用汇总与既有 implemented 使用同一操作层分母（含 overlay 排除）：tools 沿用 implemented（包含基础设施路径），api_try 为生成清单中 read/write 的组与 ApiTryCatalog.PropertyGroups 的去重并集，callable 为 tools ∪ api_try。可调用表示有试调用入口，仍需相应开关、scratch、参数上下文与审批，不代表实机成功；不改变单元状态或实机证据。
@@ -12,9 +12,9 @@
 
 | 路线 | 组数 | 占 4014 的比例 | 实机验证组数 |
 |---|---:|---:|---:|
-| 专用工具（dedicated） | 628 | 628 / 4014（15.6%） | 424 |
+| 专用工具（dedicated） | 629 | 629 / 4014（15.7%） | 425 |
 | 通用读取（generic_read） | 115 | 115 / 4014（2.9%） | 0 |
-| 仅通用入口（api_try_only） | 2067 | 2067 / 4014（51.5%） | 908 |
+| 仅通用入口（api_try_only） | 2066 | 2066 / 4014（51.5%） | 907 |
 | 仅状态覆盖（state_only） | 7 | 7 / 4014（0.2%） | 0 |
 | 其他可调用（other） | 11 | 11 / 4014（0.3%） | 0 |
 | 明确不做（declined） | 738 | 738 / 4014（18.4%） | 0 |
@@ -88,9 +88,9 @@ action 注册总数 2498；Actions 区段 2213、交互 268、程序集 action 4
 | 成员种类 | 全量分母 | 专用工具 | 通用读取 | 仅通用入口 | 仅状态覆盖 | 其他可调用 | 到不了 | 实机验证合计 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | 方法 | 3109 | 405 / 175 | 32 / 0 | 975 / 85 | 7 / 0 | 15 / 0 | 556 / 0 | 1119 / 0 | 260 |
-| 普通属性 | 2636 | 435 / 329 | 255 / 0 | 1354 / 830 | 0 / 0 | 0 / 0 | 258 / 0 | 334 / 0 | 1159 |
+| 普通属性 | 2636 | 436 / 330 | 255 / 0 | 1353 / 829 | 0 / 0 | 0 / 0 | 258 / 0 | 334 / 0 | 1159 |
 | 其他成员 | 238 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 238 / 0 | 0 |
-| 合计 | 5983 | 840 / 504 | 287 / 0 | 2329 / 915 | 7 / 0 | 15 / 0 | 814 / 0 | 1691 / 0 | 1419 |
+| 合计 | 5983 | 841 / 505 | 287 / 0 | 2328 / 914 | 7 / 0 | 15 / 0 | 814 / 0 | 1691 / 0 | 1419 |
 
 Bridge 用到、目录中却没有的 ID（1 个）：`A:XEsUndoAction`。
 
@@ -232,7 +232,7 @@ API ID 是工具经 Bridge 操作到达的全部 ID；操作层、数据字典�
 | eplan_context_get | read | project.snapshot | 99 | 41 | 4 | 32 | 0 | 3/5/3 | A20 A33 A34 A35 A36 A39 | — |
 | eplan_device_get | read | device.get | 84 | 48 | 2 | 32 | 0 | 10/4/12 | — | 2026-10-19 pass（api-notes A12） |
 | eplan_device_list | read | device.list | 36 | 21 | 0 | 15 | 0 | 7/2/13 | A11 A12 | 2026-10-21 pass（api-notes A24） |
-| eplan_device_place | write | device.place.execute<br>device.place.plan<br>project.get | 431 | 237 | 8 | 136 | 0 | 18/7/30 | A13 A14 A26 A53 A55 A82 A85 | — |
+| eplan_device_place | write | device.place.execute<br>device.place.plan<br>project.get | 432 | 238 | 8 | 136 | 0 | 18/7/30 | A13 A14 A26 A53 A55 A82 A85 | — |
 | eplan_device_renumber | destructive | device.renumber.execute<br>device.renumber.plan | 80 | 35 | 0 | 44 | 1 | 2/1/1 | A14 A18 A20 | 2026-10-20 pass_with_findings（api-notes A20） |
 | eplan_device_update | write | device.update.execute<br>device.update.plan | 153 | 71 | 4 | 55 | 0 | 6/2/7 | A3 A13 A79 A82 A85 A93 | 2026-10-20 pass（api-notes A17） |
 | eplan_enclosure_place | write | layout.enclosure.place.execute<br>layout.enclosure.place.plan | 132 | 62 | 2 | 53 | 0 | 0/0/0 | — | — |
