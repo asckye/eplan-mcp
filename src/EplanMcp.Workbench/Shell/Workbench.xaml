@@ -942,7 +942,9 @@
     <Setter Property="Padding" Value="{StaticResource Ui.Inset.Toast}" />
     <Setter Property="Margin" Value="{StaticResource Ui.Gap.Toast}" />
     <Setter Property="CornerRadius" Value="8" />
-    <Setter Property="MaxWidth" Value="420" />
+    <!-- Every toast has the same size (owner, 2026-11-20): one width, a longer message wraps; one minimum height. -->
+    <Setter Property="Width" Value="360" />
+    <Setter Property="MinHeight" Value="36" />
     <Setter Property="HorizontalAlignment" Value="Right" />
     <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Border.Strong}" />

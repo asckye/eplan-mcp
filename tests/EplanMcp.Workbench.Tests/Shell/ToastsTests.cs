@@ -31,6 +31,14 @@ public sealed class ToastsTests(WpfContext wpf)
             Assert.False(layer.IsHitTestVisible);
             Assert.Equal((HorizontalAlignment.Right, VerticalAlignment.Bottom), (layer.HorizontalAlignment, layer.VerticalAlignment));
             Assert.Equal("saved", announcer.Text);
+
+            // One size for every toast: a short and a long message are equally wide, the long one wraps.
+            Toasts.Show(new string('x', 200), ToastTone.Error);
+            WpfContext.Drain();
+            window.UpdateLayout();
+            var shown = layer.Children.Cast<FrameworkElement>().ToList();
+            Assert.Equal(shown[0].ActualWidth, shown[1].ActualWidth);
+            Assert.True(shown[1].ActualHeight > shown[0].ActualHeight);
             Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting(announcer));
         }));
     }

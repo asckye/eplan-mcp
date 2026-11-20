@@ -54,7 +54,7 @@ internal static class Toasts
         });
         var label = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Center };
         label.SetResourceReference(FrameworkElement.StyleProperty, "Workbench.ToastText");
-        var row = new DockPanel();
+        var row = new DockPanel { VerticalAlignment = VerticalAlignment.Center };
         DockPanel.SetDock(dot, Dock.Left);
         row.Children.Add(dot);
         row.Children.Add(label);
