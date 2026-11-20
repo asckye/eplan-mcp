@@ -27,6 +27,17 @@ internal sealed class ClientCard(string name) : IAccessibleItem
 
     public string Title => Loc.Current["Clients.Name." + ClientsView.Key(Name)];
 
+    /// <summary>The two letters on the card's avatar, from the client's id (the same in both languages): claude-desktop is CD, codex CO.</summary>
+    public string Code
+    {
+        get
+        {
+            string[] words = Name.Split('-', StringSplitOptions.RemoveEmptyEntries);
+            string code = words.Length > 1 ? string.Concat(words[0][0], words[1][0]) : Name.Length > 1 ? Name[..2] : Name;
+            return code.ToUpperInvariant();
+        }
+    }
+
     public bool IsSelected { get; set; }
 
     /// <summary>The client's configuration file, or the folder that holds it, is on this computer.</summary>

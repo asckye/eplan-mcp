@@ -5,7 +5,7 @@
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
     Focusable="False">
   <!--
-    Dedicated AI Clients Configuration Page (TIA 1:1 Layout: IDE Top Bar + 11 Client Grid + Compact Marketplace + Single Bottom Action Bar).
+    AI clients (2026-11-20 design): the bar, the client tiles three to a row, the marketplace card, the action bar.
     VM server hosting lives on the dedicated McpPage; shared keys are removed.
   -->
   <DockPanel>
@@ -18,7 +18,7 @@
           <Button x:Name="RefreshButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Clients.Refresh}" AutomationProperties.AcceleratorKey="F5" Click="OnRefresh" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Clients}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.SM}"
+          <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Clients}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="13" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.SM}"
                      AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
           <Button x:Name="EditMcpButton" Style="{StaticResource Workbench.StatusPill}" Click="OnEditMcp" ToolTip="{l:Tr Clients.EditMcp}">
             <TextBlock x:Name="TransportBadge" Style="{StaticResource Primer.Mono.textMuted}" />
@@ -43,7 +43,7 @@
     </Border>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-      <StackPanel Margin="{StaticResource Ui.Inset.PageCanvas}" MaxWidth="980">
+      <StackPanel Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="920">
         <TextBlock x:Name="PageCaption" Text="{l:Tr Clients.Caption}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Bottom.SM}" />
 
         <Border x:Name="ErrorBanner" Margin="{StaticResource Ui.Gap.Bottom.SM}" Style="{StaticResource Primer.Alert.Error}" Visibility="Collapsed">
@@ -95,24 +95,43 @@
 
         <!-- 11 AI Client Cards -->
         <ItemsControl x:Name="Cards" Focusable="False" AutomationProperties.Name="{l:Tr Clients.List}">
+          <!-- The design's client grid: three tiles to a row; a chosen tile has the accent outline on the accent tint. -->
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-              <WrapPanel />
+              <UniformGrid Columns="3" />
             </ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <Border Width="296" Margin="{StaticResource Ui.Gap.Wrap.SM}" Padding="{StaticResource Ui.Inset.ClientCard}" Style="{StaticResource Workbench.Card}">
-                <CheckBox Style="{StaticResource Primer.Checkbox}" IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                          AutomationProperties.Name="{Binding AccessibleName}" AutomationProperties.HelpText="{Binding Problem}" VerticalAlignment="Top">
-                  <StackPanel Margin="{StaticResource Ui.Gap.Left.XXS}">
-                    <TextBlock Text="{Binding Title}" Style="{StaticResource Ui.Text.BodyStrong}" TextWrapping="Wrap" TextTrimming="None" />
-                    <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" TextTrimming="None" />
-                    <TextBlock Text="{Binding Problem}" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XXS}" />
-                    <TextBlock Text="{Binding ResultText}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+              <CheckBox Style="{StaticResource Workbench.ClientTile}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Margin="{StaticResource Ui.Gap.Wrap.XS}"
+                        AutomationProperties.Name="{Binding AccessibleName}" AutomationProperties.HelpText="{Binding Problem}">
+                <DockPanel>
+                  <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="7" Background="{DynamicResource State.Info.Background}" Margin="{StaticResource Ui.Gap.Right.SM}" VerticalAlignment="Top">
+                    <TextBlock Text="{Binding Code}" Style="{StaticResource Workbench.MonoStrong}" FontSize="11" Foreground="{DynamicResource Accent.Text}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <StackPanel>
+                    <DockPanel>
+                      <TextBlock x:Name="Found" DockPanel.Dock="Right" Text="{l:Tr Clients.Found}" Style="{StaticResource Primer.Muted}" FontSize="10" Foreground="{DynamicResource State.Success.Text}" />
+                      <TextBlock Text="{Binding Title}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" TextTrimming="CharacterEllipsis" />
+                    </DockPanel>
+                    <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Primer.Muted}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+                    <TextBlock x:Name="ProblemLine" Text="{Binding Problem}" Style="{StaticResource Primer.Text.warn}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" />
+                    <TextBlock x:Name="ResultLine" Text="{Binding ResultText}" Style="{StaticResource Primer.Text}" FontSize="11" TextWrapping="Wrap" TextTrimming="None" />
                   </StackPanel>
-                </CheckBox>
-              </Border>
+                </DockPanel>
+              </CheckBox>
+              <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Problem}" Value="{x:Null}">
+                  <Setter TargetName="ProblemLine" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ResultText}" Value="{x:Null}">
+                  <Setter TargetName="ResultLine" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Detected}" Value="False">
+                  <Setter TargetName="Found" Property="Text" Value="{l:Tr Clients.None}" />
+                  <Setter TargetName="Found" Property="Foreground" Value="{DynamicResource Text.Secondary}" />
+                </DataTrigger>
+              </DataTemplate.Triggers>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>

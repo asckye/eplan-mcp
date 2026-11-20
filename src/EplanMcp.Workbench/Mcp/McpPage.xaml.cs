@@ -58,6 +58,7 @@ public partial class McpPage : UserControl, IWorkbenchPage
         StdioChoice.IsChecked = !vm;
         HttpChoice.IsChecked = vm;
         HttpSection.Visibility = vm ? Visibility.Visible : Visibility.Collapsed;
+        ApplyTags(vm);
         _syncing = false;
     }
 
@@ -70,8 +71,19 @@ public partial class McpPage : UserControl, IWorkbenchPage
 
         bool vm = HttpChoice.IsChecked == true;
         HttpSection.Visibility = vm ? Visibility.Visible : Visibility.Collapsed;
+        ApplyTags(vm);
         _clients?.SetVmMode(vm);
     }
 
     private void OnGoClients(object sender, RoutedEventArgs e) => NavigateRequested?.Invoke(WorkbenchPage.Clients);
+
+    /// <summary>The bar's tag names the transport; the card's tag says what it exposes on the network.</summary>
+    private void ApplyTags(bool vm)
+    {
+        Loc loc = Loc.Current;
+        TransportTagText.Text = loc[vm ? "Mcp.TagHttp" : "Mcp.TagStdio"];
+        TransportTag.Style = (Style)FindResource(vm ? "Workbench.Tag.Accent" : "Workbench.Tag.Success");
+        ExposureTagText.Text = loc[vm ? "Mcp.ExposureHttp" : "Mcp.ExposureStdio"];
+        ExposureTag.Style = (Style)FindResource(vm ? "Workbench.Tag.Warning" : "Workbench.Tag.Success");
+    }
 }
