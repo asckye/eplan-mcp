@@ -14,7 +14,7 @@
       4. locked restore, clean-tree check, Release build (warnings as errors), format (including the add-in when its
          EPLAN API assemblies are installed), action catalog, coverage files, method size, the Small and Medium
          tests of the assemblies the changes since origin/main can affect (eng\scripts\affected-tests.ps1; -Full runs
-         every assembly) with the test count floor, vulnerable packages;
+         every assembly) with the test count floor, vulnerable packages, the release lock files;
       5. with -Push: push HEAD to main, only if origin/main has not moved since the rebase.
 
     CI still runs every test assembly on every push to main as a non-blocking check; a red run is fixed with a
@@ -144,6 +144,15 @@ try {
                 ForEach-Object { "$($package.id) $($package.resolvedVersion): $($_.severity) $($_.advisoryurl)" } })
         if ($found.Count -gt 0) { $found | ForEach-Object { Write-Error $_ -ErrorAction Continue }; $global:LASTEXITCODE = 1 }
     }
+    # release-package.ps1 publishes Host and Workbench for win-x64 with their own lock file in locked mode. A package
+    # update that refreshes only packages.lock.json passes everything above and fails at packaging (v0.8.0). Last step:
+    # it rewrites the two projects' restore output for win-x64. --force: an up-to-date restore skips the comparison.
+    Step 'Release lock files' {
+        dotnet restore src/EplanMcp.Host -r win-x64 -p:SelfContained=true -p:NuGetLockFilePath=packages.win-x64.lock.json "-p:PublishProfileFullPath=$((Resolve-Path eng/installer/Release.pubxml).Path)" --force
+        if ($LASTEXITCODE -ne 0) { return }
+        dotnet restore src/EplanMcp.Workbench -r win-x64 -p:SelfContained=true -p:NuGetLockFilePath=packages.win-x64.lock.json --force
+    }
+    Assert-CleanTree
 } finally {
     $env:CI = $previousCI
     $env:EPLANMCP_HANG_REPORT_DIR = $previousHangReport

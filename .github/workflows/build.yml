@@ -106,3 +106,11 @@ jobs:
               ForEach-Object { "$($package.id) $($package.resolvedVersion): $($_.severity) $($_.advisoryurl)" } })
           $found | ForEach-Object { Write-Output "::error::$_" }
           if ($found.Count -gt 0) { exit 1 }
+      # release-package.ps1 publishes Host and Workbench for win-x64 with packages.win-x64.lock.json in locked mode; a
+      # package update that refreshes only packages.lock.json would otherwise fail first at packaging.
+      - name: Release lock files
+        shell: pwsh
+        run: |
+          dotnet restore src/EplanMcp.Host -r win-x64 -p:SelfContained=true -p:NuGetLockFilePath=packages.win-x64.lock.json "-p:PublishProfileFullPath=$((Resolve-Path eng/installer/Release.pubxml).Path)" --force
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          dotnet restore src/EplanMcp.Workbench -r win-x64 -p:SelfContained=true -p:NuGetLockFilePath=packages.win-x64.lock.json --force
