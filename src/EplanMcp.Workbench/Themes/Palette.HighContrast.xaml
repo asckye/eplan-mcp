@@ -19,7 +19,23 @@
   <!-- The 2026-11-20 design: side panes are the window, the close button hovers as the system selection. -->
   <SolidColorBrush x:Key="Workbench.paneBg" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
   <SolidColorBrush x:Key="Workbench.closeHover" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
-  <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
+  <!-- High contrast: the settings tiles' miniatures and swatches in the system's colours. -->
+  <SolidColorBrush x:Key="Workbench.previewLightFrame" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewLightLine" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewLightRail" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewLightPanel" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewLightAccent" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewLightBar" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewDarkFrame" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewDarkLine" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewDarkRail" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewDarkPanel" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewDarkAccent" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.previewDarkBar" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.swatchCobalt" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.swatchCobaltHalo" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.swatchPetrol" Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" />
+  <SolidColorBrush x:Key="Workbench.swatchPetrolHalo" Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" />  <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Layer" Color="{Binding Color, Source={StaticResource Primer.card}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Input" Color="{Binding Color, Source={StaticResource Primer.input}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Button" Color="{Binding Color, Source={StaticResource Primer.pill}, Mode=OneWay}" />

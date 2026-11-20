@@ -259,6 +259,15 @@ internal static class Catalogue
 
         // Dedicated Settings page (Ctrl+,)
         ("Settings.NavSafety", "Safety and approvals", "安全与审批"),
+        ("Settings.SafetyIntro", "Configure the write gate for AI and Windows startup.", "控制 AI 写入门禁与系统自启策略。"),
+        ("Settings.AppearanceIntro", "Cool neutral surfaces; Windows High Contrast is handled automatically.", "清冷中性的桌面配色；Windows 高对比度模式由系统自动处理。"),
+        ("Settings.StorageIntro", "Local folders, the Host's configuration and version information.", "本地数据目录、宿主配置与版本信息。"),
+        ("Settings.LoginHelp", "Runs in the tray so AI approval questions arrive at once.", "后台驻留托盘，以便随时接收 AI 审批请求。"),
+        ("Settings.LanguageHelp", "Switches all views and dialogs at once.", "立即切换所有视图与对话框的文字。"),
+        ("Settings.ThemeLightName", "Light · Cool Neutral", "浅色 · 清冷中性"),
+        ("Settings.ThemeDarkName", "Dark · Midnight Slate", "深色 · 午夜石板"),
+        ("Settings.AccentCobaltHint", "Default accent", "默认强调色"),
+        ("Settings.AccentPetrolHint", "Alternative accent", "备选强调色"),
         ("Settings.NavAppearance", "Appearance and language", "外观与语言"),
         ("Settings.NavStorage", "Storage and about", "存储与关于"),
         ("Settings.ApprovalTitle", "Normal write manual approval", "普通写入人工审批"),

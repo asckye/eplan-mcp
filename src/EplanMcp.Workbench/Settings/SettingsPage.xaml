@@ -3,10 +3,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
+    xmlns:ux="clr-namespace:TiaOpenness.Gui.Controls"
     xmlns:themes="clr-namespace:TiaOpenness.Gui.Themes"
     xmlns:localThemes="clr-namespace:EplanMcp.Workbench.Themes"
     Focusable="False">
-  <!-- Dedicated Settings Page (TIA 236px Left Category Nav + 740px Right Column) -->
+  <!--
+    Settings (2026-11-20 design): a 236 px navigation pane with icons, then one column (max 740) per category: a heading,
+    an intro, and cards whose rows carry the title and help on the left and the control on the right.
+  -->
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition x:Name="LeftCol" Width="236" />
@@ -14,150 +18,233 @@
     </Grid.ColumnDefinitions>
 
     <Border x:Name="LeftPane" Style="{StaticResource Workbench.LeftPane}">
-      <StackPanel Margin="{StaticResource Ui.Inset.SettingsNav}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
-        <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Settings}" Style="{StaticResource Workbench.SiderSection}" Margin="{StaticResource Ui.Gap.SettingsNavLabel}"
+      <StackPanel Margin="{StaticResource Ui.Inset.QueuePane}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
+        <TextBlock x:Name="PageTitle" Text="{l:Tr Page.Settings}" Style="{StaticResource Workbench.SectionCaption}" Margin="{StaticResource Ui.Gap.QueueSection}"
                    AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
-        <RadioButton x:Name="NavSafety" GroupName="SettingsNav" Style="{StaticResource Workbench.NavItem}" Content="{l:Tr Settings.NavSafety}" IsChecked="True" Checked="OnCategoryChanged" />
-        <RadioButton x:Name="NavAppearance" GroupName="SettingsNav" Style="{StaticResource Workbench.NavItem}" Content="{l:Tr Settings.NavAppearance}" Checked="OnCategoryChanged" />
-        <RadioButton x:Name="NavStorage" GroupName="SettingsNav" Style="{StaticResource Workbench.NavItem}" Content="{l:Tr Settings.NavStorage}" Checked="OnCategoryChanged" />
+        <RadioButton x:Name="NavSafety" GroupName="SettingsNav" Style="{StaticResource Workbench.SettingsNavItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Approvals}" Content="{l:Tr Settings.NavSafety}" IsChecked="True" Checked="OnCategoryChanged" />
+        <RadioButton x:Name="NavAppearance" GroupName="SettingsNav" Style="{StaticResource Workbench.SettingsNavItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Sun}" Content="{l:Tr Settings.NavAppearance}" Checked="OnCategoryChanged" />
+        <RadioButton x:Name="NavStorage" GroupName="SettingsNav" Style="{StaticResource Workbench.SettingsNavItem}" ux:Ux.Icon="{StaticResource Workbench.Icon.Database}" Content="{l:Tr Settings.NavStorage}" Checked="OnCategoryChanged" />
       </StackPanel>
     </Border>
 
     <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-      <StackPanel Margin="{StaticResource Ui.Inset.PageWide}" MaxWidth="740">
-        <!-- 1. Safety & Approvals -->
+      <StackPanel Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="740">
+        <!-- 1. Safety and approvals -->
         <StackPanel x:Name="SafetySection">
-          <TextBlock Text="{l:Tr Settings.NavSafety}" Style="{StaticResource Primer.ContainerTitle}" Margin="{StaticResource Ui.Gap.Bottom.SM}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{l:Tr Settings.NavSafety}" Style="{StaticResource Workbench.PageHeading}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{l:Tr Settings.SafetyIntro}" Style="{StaticResource Workbench.PageIntro}" />
 
-          <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+          <Border Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.SettingsCard}" Margin="{StaticResource Ui.Gap.Bottom.Card}">
             <StackPanel>
-              <TextBlock Text="{l:Tr Settings.ApprovalTitle}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" />
-              <TextBlock Text="{l:Tr Settings.ApprovalDesc}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XXS}" />
-              <ToggleButton x:Name="ApprovalSwitch" Style="{StaticResource Primer.Switch}" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.Top.SM}"
-                            Content="{l:Tr Settings.ApprovalSwitch}" AutomationProperties.Name="{l:Tr Settings.ApprovalSwitch}"
-                            Checked="OnApprovalChanged" Unchecked="OnApprovalChanged" />
+              <DockPanel>
+                <ToggleButton x:Name="ApprovalSwitch" DockPanel.Dock="Right" Style="{StaticResource Primer.Switch}" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.Left.Normal}"
+                              AutomationProperties.Name="{l:Tr Settings.ApprovalSwitch}" Checked="OnApprovalChanged" Unchecked="OnApprovalChanged" />
+                <StackPanel>
+                  <TextBlock Text="{l:Tr Settings.ApprovalTitle}" Style="{StaticResource Workbench.RowTitle}" />
+                  <TextBlock Text="{l:Tr Settings.ApprovalDesc}" Style="{StaticResource Workbench.RowHelp}" />
+                </StackPanel>
+              </DockPanel>
               <TextBlock x:Name="PolicyError" Text="{l:Tr Settings.SaveFailed}" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap"
                          Margin="{StaticResource Ui.Gap.Top.XS}" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
 
-              <Border Margin="{StaticResource Ui.Gap.Top.Normal}" Padding="{StaticResource Ui.Inset.SectionTopSM}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,1,0,0">
+              <Border Style="{StaticResource Workbench.RowDivider}">
                 <DockPanel>
                   <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <RadioButton x:Name="Timeout60" GroupName="ApprovalTimeout" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Settings.Timeout60}" Tag="60" Checked="OnTimeoutChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
-                    <RadioButton x:Name="Timeout120" GroupName="ApprovalTimeout" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Settings.Timeout120}" Tag="120" Checked="OnTimeoutChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
-                    <RadioButton x:Name="Timeout300" GroupName="ApprovalTimeout" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Settings.Timeout300}" Tag="300" Checked="OnTimeoutChanged" />
+                    <RadioButton x:Name="Timeout60" GroupName="ApprovalTimeout" Style="{StaticResource Workbench.IdePill.Mono}" Content="{l:Tr Settings.Timeout60}" Tag="60" Checked="OnTimeoutChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+                    <RadioButton x:Name="Timeout120" GroupName="ApprovalTimeout" Style="{StaticResource Workbench.IdePill.Mono}" Content="{l:Tr Settings.Timeout120}" Tag="120" Checked="OnTimeoutChanged" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+                    <RadioButton x:Name="Timeout300" GroupName="ApprovalTimeout" Style="{StaticResource Workbench.IdePill.Mono}" Content="{l:Tr Settings.Timeout300}" Tag="300" Checked="OnTimeoutChanged" />
                   </StackPanel>
                   <StackPanel>
-                    <TextBlock Text="{l:Tr Settings.TimeoutLabel}" Style="{StaticResource Ui.Text.BodyStrong}" />
-                    <TextBlock Text="{l:Tr Settings.TimeoutHelp}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" />
+                    <TextBlock Text="{l:Tr Settings.TimeoutLabel}" Style="{StaticResource Workbench.RowTitle}" />
+                    <TextBlock Text="{l:Tr Settings.TimeoutHelp}" Style="{StaticResource Workbench.RowHelp}" />
                   </StackPanel>
                 </DockPanel>
               </Border>
             </StackPanel>
           </Border>
 
-          <Border Style="{StaticResource Workbench.Card}">
+          <Border Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.SettingsCard}">
             <StackPanel>
-              <TextBlock x:Name="LoginLabel" Text="{l:Tr Settings.Login}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" />
-              <ToggleButton x:Name="LoginSwitch" Style="{StaticResource Primer.Switch}" Margin="{StaticResource Ui.Gap.Top.XS}" HorizontalAlignment="Left" Content="{l:Tr Settings.LoginSwitch}"
-                            AutomationProperties.Name="{l:Tr Settings.LoginSwitch}" Checked="OnLogin" Unchecked="OnLogin" />
+              <DockPanel>
+                <ToggleButton x:Name="LoginSwitch" DockPanel.Dock="Right" Style="{StaticResource Primer.Switch}" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.Normal}"
+                              AutomationProperties.Name="{l:Tr Settings.LoginSwitch}" Checked="OnLogin" Unchecked="OnLogin" />
+                <StackPanel>
+                  <TextBlock x:Name="LoginLabel" Text="{l:Tr Settings.LoginSwitch}" Style="{StaticResource Workbench.RowTitle}" />
+                  <TextBlock Text="{l:Tr Settings.LoginHelp}" Style="{StaticResource Workbench.RowHelp}" />
+                </StackPanel>
+              </DockPanel>
               <TextBlock x:Name="LoginError" Text="{l:Tr Settings.LoginFailed}" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" TextTrimming="None"
                          Margin="{StaticResource Ui.Gap.Top.XS}" Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
             </StackPanel>
           </Border>
         </StackPanel>
 
-        <!-- 2. Appearance & Language (Light / Dark only + Dual Brand Accent Cobalt / Petrol) -->
+        <!-- 2. Appearance and language: tiles for the theme and the accent, pills for the language. -->
         <StackPanel x:Name="AppearanceSection" Visibility="Collapsed">
-          <TextBlock Text="{l:Tr Settings.NavAppearance}" Style="{StaticResource Primer.ContainerTitle}" Margin="{StaticResource Ui.Gap.Bottom.SM}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{l:Tr Settings.NavAppearance}" Style="{StaticResource Workbench.PageHeading}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{l:Tr Settings.AppearanceIntro}" Style="{StaticResource Workbench.PageIntro}" />
 
-          <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+          <Border Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.SettingsCard}" Margin="{StaticResource Ui.Gap.Bottom.Card}">
             <StackPanel>
-              <TextBlock x:Name="ThemeLabel" Text="{l:Tr Settings.Theme}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" />
-              <StackPanel Orientation="Horizontal" Margin="{StaticResource Ui.Gap.Top.SM}" AutomationProperties.LabeledBy="{Binding ElementName=ThemeLabel}"
-                          AutomationProperties.Name="{l:Tr Settings.Theme}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
-                <RadioButton x:Name="ThemeLightRadio" GroupName="Theme" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.ThemeLight}" AutomationProperties.Name="{l:Tr Settings.ThemeLight}"
-                             IsChecked="{Binding IsLight, Source={x:Static themes:ThemeManager.Current}}" />
-                <RadioButton x:Name="ThemeDarkRadio" GroupName="Theme" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.ThemeDark}" AutomationProperties.Name="{l:Tr Settings.ThemeDark}"
-                             IsChecked="{Binding IsDark, Source={x:Static themes:ThemeManager.Current}}" />
-              </StackPanel>
-              <TextBlock Text="{l:Tr Settings.HighContrast}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+              <TextBlock x:Name="ThemeLabel" Text="{l:Tr Settings.Theme}" Style="{StaticResource Workbench.RowTitle}" />
+              <UniformGrid Rows="1" Margin="{StaticResource Ui.Gap.Top.SM}" AutomationProperties.LabeledBy="{Binding ElementName=ThemeLabel}"
+                           AutomationProperties.Name="{l:Tr Settings.Theme}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
+                <RadioButton x:Name="ThemeLightRadio" GroupName="Theme" Style="{StaticResource Workbench.Tile}" AutomationProperties.Name="{l:Tr Settings.ThemeLight}" Margin="{StaticResource Ui.Gap.Right.XS}"
+                             IsChecked="{Binding IsLight, Source={x:Static themes:ThemeManager.Current}}">
+                  <StackPanel>
+                    <Border Height="62" CornerRadius="6" Padding="{StaticResource Ui.Inset.Preview}" Background="{DynamicResource Workbench.previewLightFrame}" BorderBrush="{DynamicResource Workbench.previewLightLine}" BorderThickness="1">
+                      <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="16" CornerRadius="3" Background="{DynamicResource Workbench.previewLightRail}" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+                        <Border CornerRadius="4" Padding="{StaticResource Ui.Inset.Preview}" Background="{DynamicResource Workbench.previewLightPanel}" BorderBrush="{DynamicResource Workbench.previewLightLine}" BorderThickness="1">
+                          <StackPanel>
+                            <Border Height="8" Width="48" CornerRadius="4" HorizontalAlignment="Left" Background="{DynamicResource Workbench.previewLightAccent}" />
+                            <Border Height="6" Width="80" CornerRadius="3" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.Top.XXS}" Background="{DynamicResource Workbench.previewLightBar}" />
+                            <Border Height="6" Width="56" CornerRadius="3" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.Top.XXS}" Background="{DynamicResource Workbench.previewLightBar}" />
+                          </StackPanel>
+                        </Border>
+                      </DockPanel>
+                    </Border>
+                    <TextBlock Text="{l:Tr Settings.ThemeLightName}" Style="{StaticResource Workbench.RowTitle}" FontSize="12.5" Margin="{StaticResource Ui.Gap.Top.XS}" />
+                  </StackPanel>
+                </RadioButton>
+                <RadioButton x:Name="ThemeDarkRadio" GroupName="Theme" Style="{StaticResource Workbench.Tile}" AutomationProperties.Name="{l:Tr Settings.ThemeDark}"
+                             IsChecked="{Binding IsDark, Source={x:Static themes:ThemeManager.Current}}">
+                  <StackPanel>
+                    <Border Height="62" CornerRadius="6" Padding="{StaticResource Ui.Inset.Preview}" Background="{DynamicResource Workbench.previewDarkFrame}" BorderBrush="{DynamicResource Workbench.previewDarkLine}" BorderThickness="1">
+                      <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="16" CornerRadius="3" Background="{DynamicResource Workbench.previewDarkRail}" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+                        <Border CornerRadius="4" Padding="{StaticResource Ui.Inset.Preview}" Background="{DynamicResource Workbench.previewDarkPanel}" BorderBrush="{DynamicResource Workbench.previewDarkLine}" BorderThickness="1">
+                          <StackPanel>
+                            <Border Height="8" Width="48" CornerRadius="4" HorizontalAlignment="Left" Background="{DynamicResource Workbench.previewDarkAccent}" />
+                            <Border Height="6" Width="80" CornerRadius="3" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.Top.XXS}" Background="{DynamicResource Workbench.previewDarkBar}" />
+                            <Border Height="6" Width="56" CornerRadius="3" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.Top.XXS}" Background="{DynamicResource Workbench.previewDarkBar}" />
+                          </StackPanel>
+                        </Border>
+                      </DockPanel>
+                    </Border>
+                    <TextBlock Text="{l:Tr Settings.ThemeDarkName}" Style="{StaticResource Workbench.RowTitle}" FontSize="12.5" Margin="{StaticResource Ui.Gap.Top.XS}" />
+                  </StackPanel>
+                </RadioButton>
+              </UniformGrid>
+              <TextBlock Text="{l:Tr Settings.HighContrast}" Style="{StaticResource Workbench.RowHelp}" Margin="{StaticResource Ui.Gap.Top.XS}" />
             </StackPanel>
           </Border>
 
-          <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+          <Border Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.SettingsCard}" Margin="{StaticResource Ui.Gap.Bottom.Card}">
             <StackPanel>
-              <TextBlock x:Name="AccentLabel" Text="{l:Tr Settings.AccentLabel}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" />
-              <StackPanel Orientation="Horizontal" Margin="{StaticResource Ui.Gap.Top.SM}" AutomationProperties.LabeledBy="{Binding ElementName=AccentLabel}"
-                          AutomationProperties.Name="{l:Tr Settings.AccentLabel}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
-                <RadioButton x:Name="AccentCobaltRadio" GroupName="BrandAccent" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.AccentCobalt}" AutomationProperties.Name="{l:Tr Settings.AccentCobalt}"
-                             IsChecked="{Binding IsCobalt, Source={x:Static localThemes:AccentManager.Current}}" />
-                <RadioButton x:Name="AccentPetrolRadio" GroupName="BrandAccent" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.AccentPetrol}" AutomationProperties.Name="{l:Tr Settings.AccentPetrol}"
-                             IsChecked="{Binding IsPetrol, Source={x:Static localThemes:AccentManager.Current}}" />
-              </StackPanel>
+              <TextBlock x:Name="AccentLabel" Text="{l:Tr Settings.AccentLabel}" Style="{StaticResource Workbench.RowTitle}" />
+              <UniformGrid Rows="1" Margin="{StaticResource Ui.Gap.Top.SM}" AutomationProperties.LabeledBy="{Binding ElementName=AccentLabel}"
+                           AutomationProperties.Name="{l:Tr Settings.AccentLabel}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
+                <RadioButton x:Name="AccentCobaltRadio" GroupName="BrandAccent" Style="{StaticResource Workbench.Tile}" AutomationProperties.Name="{l:Tr Settings.AccentCobalt}" Margin="{StaticResource Ui.Gap.Right.XS}"
+                             IsChecked="{Binding IsCobalt, Source={x:Static localThemes:AccentManager.Current}}">
+                  <DockPanel>
+                    <Border DockPanel.Dock="Left" Width="34" Height="34" CornerRadius="17" Background="{DynamicResource Workbench.swatchCobaltHalo}" Margin="{StaticResource Ui.Gap.Right.SM}">
+                      <Ellipse Width="{StaticResource Ui.IconSize.Swatch}" Height="{StaticResource Ui.IconSize.Swatch}" Fill="{DynamicResource Workbench.swatchCobalt}" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                      <TextBlock Text="{l:Tr Settings.AccentCobalt}" Style="{StaticResource Workbench.RowTitle}" FontSize="12.5" />
+                      <TextBlock Text="{l:Tr Settings.AccentCobaltHint}" Style="{StaticResource Primer.Muted}" FontSize="11" />
+                    </StackPanel>
+                  </DockPanel>
+                </RadioButton>
+                <RadioButton x:Name="AccentPetrolRadio" GroupName="BrandAccent" Style="{StaticResource Workbench.Tile}" AutomationProperties.Name="{l:Tr Settings.AccentPetrol}"
+                             IsChecked="{Binding IsPetrol, Source={x:Static localThemes:AccentManager.Current}}">
+                  <DockPanel>
+                    <Border DockPanel.Dock="Left" Width="34" Height="34" CornerRadius="17" Background="{DynamicResource Workbench.swatchPetrolHalo}" Margin="{StaticResource Ui.Gap.Right.SM}">
+                      <Ellipse Width="{StaticResource Ui.IconSize.Swatch}" Height="{StaticResource Ui.IconSize.Swatch}" Fill="{DynamicResource Workbench.swatchPetrol}" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                      <TextBlock Text="{l:Tr Settings.AccentPetrol}" Style="{StaticResource Workbench.RowTitle}" FontSize="12.5" />
+                      <TextBlock Text="{l:Tr Settings.AccentPetrolHint}" Style="{StaticResource Primer.Muted}" FontSize="11" />
+                    </StackPanel>
+                  </DockPanel>
+                </RadioButton>
+              </UniformGrid>
             </StackPanel>
           </Border>
 
-          <Border Style="{StaticResource Workbench.Card}">
-            <StackPanel>
-              <TextBlock x:Name="LanguageLabel" Text="{l:Tr Settings.Language}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" />
-              <StackPanel Orientation="Horizontal" Margin="{StaticResource Ui.Gap.Top.SM}" AutomationProperties.LabeledBy="{Binding ElementName=LanguageLabel}"
+          <Border Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.SettingsCard}">
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" AutomationProperties.LabeledBy="{Binding ElementName=LanguageLabel}"
                           AutomationProperties.Name="{l:Tr Settings.Language}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
-                <RadioButton GroupName="Language" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.Chinese}" AutomationProperties.Name="{l:Tr Settings.Chinese}"
+                <RadioButton GroupName="Language" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Settings.Chinese}" AutomationProperties.Name="{l:Tr Settings.Chinese}" Margin="{StaticResource Ui.Gap.Right.XXS}"
                              IsChecked="{Binding IsChinese, Source={x:Static l:Loc.Current}}" />
-                <RadioButton GroupName="Language" Style="{StaticResource Primer.Segment}" Content="{l:Tr Settings.English}" AutomationProperties.Name="{l:Tr Settings.English}"
+                <RadioButton GroupName="Language" Style="{StaticResource Workbench.IdePill}" Content="{l:Tr Settings.English}" AutomationProperties.Name="{l:Tr Settings.English}"
                              IsChecked="{Binding IsEnglish, Source={x:Static l:Loc.Current}}" />
               </StackPanel>
-            </StackPanel>
+              <StackPanel>
+                <TextBlock x:Name="LanguageLabel" Text="{l:Tr Settings.Language}" Style="{StaticResource Workbench.RowTitle}" />
+                <TextBlock Text="{l:Tr Settings.LanguageHelp}" Style="{StaticResource Workbench.RowHelp}" />
+              </StackPanel>
+            </DockPanel>
           </Border>
         </StackPanel>
 
-        <!-- 3. Storage & About -->
+        <!-- 3. Storage and about: the brand card, the folders, config.json. -->
         <StackPanel x:Name="StorageSection" Visibility="Collapsed">
-          <TextBlock Text="{l:Tr Settings.NavStorage}" Style="{StaticResource Primer.ContainerTitle}" Margin="{StaticResource Ui.Gap.Bottom.SM}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{l:Tr Settings.NavStorage}" Style="{StaticResource Workbench.PageHeading}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{l:Tr Settings.StorageIntro}" Style="{StaticResource Workbench.PageIntro}" />
 
-          <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+          <Border Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.SettingsCard}" Margin="{StaticResource Ui.Gap.Bottom.Card}">
+            <DockPanel>
+              <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="{DynamicResource Accent.Button}" Margin="{StaticResource Ui.Gap.Right.SM}" VerticalAlignment="Top">
+                <Path Width="{StaticResource Ui.IconSize.Brand}" Height="{StaticResource Ui.IconSize.Brand}" Stretch="Uniform" Stroke="{DynamicResource Text.OnAccent}" StrokeThickness="2.3" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                      Data="M4,6 H20 M4,12 H14 M4,18 H20 M19.2,12 A2.2,2.2 0 1 1 14.8,12 A2.2,2.2 0 1 1 19.2,12" />
+              </Border>
+              <StackPanel>
+                <TextBlock Text="{l:Tr Settings.AboutTitle}" Style="{StaticResource Workbench.RowTitle}" FontSize="14.5" />
+                <TextBlock x:Name="VersionLine" Style="{StaticResource Primer.Mono.textMuted}" FontSize="12" Margin="{StaticResource Ui.Gap.Top.XXS}" />
+                <TextBlock Text="{l:Tr Settings.AboutLicense}" Style="{StaticResource Workbench.RowHelp}" Margin="{StaticResource Ui.Gap.Top.XS}" />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+
+          <Border Style="{StaticResource Workbench.Card}" Padding="0" Margin="{StaticResource Ui.Gap.Bottom.Card}">
             <StackPanel>
-              <TextBlock Text="{l:Tr Settings.StorageDirs}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-              <DockPanel Margin="{StaticResource Ui.Inset.Vertical.XXS}">
-                <Button DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Settings.OpenDir}" Click="OnOpenRoot" />
-                <StackPanel>
-                  <TextBlock Text="{l:Tr Settings.DirRoot}" Style="{StaticResource Ui.Text.BodyStrong}" />
-                  <TextBlock x:Name="DirRootPath" Style="{StaticResource Primer.Mono.textMuted}" TextWrapping="Wrap" />
+              <Border Style="{StaticResource Workbench.CardHeader}">
+                <TextBlock Text="{l:Tr Settings.StorageDirs}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" VerticalAlignment="Center" />
+              </Border>
+              <DockPanel Margin="{StaticResource Ui.Inset.CheckRow}">
+                <Button DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" MinHeight="28" Content="{l:Tr Settings.OpenDir}" Click="OnOpenRoot" VerticalAlignment="Center" />
+                <Border DockPanel.Dock="Left" Style="{StaticResource Workbench.FolderTile}"><Path Style="{StaticResource Workbench.FolderGlyph}" /></Border>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="{l:Tr Settings.DirRoot}" Style="{StaticResource Workbench.RowTitle}" FontSize="12.5" />
+                  <TextBlock x:Name="DirRootPath" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
               </DockPanel>
-              <DockPanel Margin="{StaticResource Ui.Inset.Vertical.XXS}">
-                <Button DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Settings.OpenDir}" Click="OnOpenAudit" />
-                <StackPanel>
-                  <TextBlock Text="{l:Tr Settings.DirAudit}" Style="{StaticResource Ui.Text.BodyStrong}" />
-                  <TextBlock x:Name="DirAuditPath" Style="{StaticResource Primer.Mono.textMuted}" TextWrapping="Wrap" />
+              <DockPanel Margin="{StaticResource Ui.Inset.CheckRow}">
+                <Button DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" MinHeight="28" Content="{l:Tr Settings.OpenDir}" Click="OnOpenAudit" VerticalAlignment="Center" />
+                <Border DockPanel.Dock="Left" Style="{StaticResource Workbench.FolderTile}"><Path Style="{StaticResource Workbench.FolderGlyph}" /></Border>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="{l:Tr Settings.DirAudit}" Style="{StaticResource Workbench.RowTitle}" FontSize="12.5" />
+                  <TextBlock x:Name="DirAuditPath" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
               </DockPanel>
-              <DockPanel Margin="{StaticResource Ui.Inset.Vertical.XXS}">
-                <Button DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Settings.OpenDir}" Click="OnOpenLogs" />
-                <StackPanel>
-                  <TextBlock Text="{l:Tr Settings.DirLogs}" Style="{StaticResource Ui.Text.BodyStrong}" />
-                  <TextBlock x:Name="DirLogsPath" Style="{StaticResource Primer.Mono.textMuted}" TextWrapping="Wrap" />
+              <DockPanel Margin="{StaticResource Ui.Inset.CheckRow}">
+                <Button DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" MinHeight="28" Content="{l:Tr Settings.OpenDir}" Click="OnOpenLogs" VerticalAlignment="Center" />
+                <Border DockPanel.Dock="Left" Style="{StaticResource Workbench.FolderTile}"><Path Style="{StaticResource Workbench.FolderGlyph}" /></Border>
+                <StackPanel VerticalAlignment="Center">
+                  <TextBlock Text="{l:Tr Settings.DirLogs}" Style="{StaticResource Workbench.RowTitle}" FontSize="12.5" />
+                  <TextBlock x:Name="DirLogsPath" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
               </DockPanel>
             </StackPanel>
           </Border>
 
-          <Border Style="{StaticResource Workbench.Card}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+          <Border Style="{StaticResource Workbench.Card}" Padding="0">
             <StackPanel>
-              <TextBlock x:Name="ConfigLabel" Text="{l:Tr Settings.Config}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" />
-              <TextBlock x:Name="ConfigPath" Style="{StaticResource Primer.Mono.textMuted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XXS}" />
-              <TextBox x:Name="ConfigText" Style="{StaticResource Workbench.ProjectData}" MaxHeight="220" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LabeledBy="{Binding ElementName=ConfigLabel}" />
-              <Button x:Name="ConfigButton" Style="{StaticResource Primer.Secondary}" Content="{l:Tr Settings.OpenConfig}" Margin="{StaticResource Ui.Gap.Top.XS}" HorizontalAlignment="Left" Click="OnOpenConfig" />
-              <TextBlock x:Name="ConfigProblem" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}"
-                         Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
-            </StackPanel>
-          </Border>
-
-          <Border Style="{StaticResource Workbench.Card}">
-            <StackPanel>
-              <TextBlock Text="{l:Tr Settings.AboutTitle}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="14" />
-              <TextBlock x:Name="VersionLine" Style="{StaticResource Primer.Mono.textMuted}" Margin="{StaticResource Ui.Gap.Top.XXS}" />
-              <TextBlock Text="{l:Tr Settings.AboutLicense}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}" />
+              <Border Style="{StaticResource Workbench.CardHeader}">
+                <DockPanel VerticalAlignment="Center">
+                  <Button x:Name="ConfigButton" DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" MinHeight="24" Content="{l:Tr Settings.OpenConfig}" Click="OnOpenConfig" />
+                  <TextBlock x:Name="ConfigLabel" Text="{l:Tr Settings.Config}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" VerticalAlignment="Center" />
+                </DockPanel>
+              </Border>
+              <StackPanel Margin="{StaticResource Ui.Inset.CardBody}">
+                <TextBlock x:Name="ConfigPath" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11.5" TextWrapping="Wrap" />
+                <TextBox x:Name="ConfigText" Style="{StaticResource Workbench.ProjectData}" MaxHeight="220" Margin="{StaticResource Ui.Gap.Top.XS}" AutomationProperties.LabeledBy="{Binding ElementName=ConfigLabel}" />
+                <TextBlock x:Name="ConfigProblem" Style="{StaticResource Primer.Text.diffRed}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XS}"
+                           Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
+              </StackPanel>
             </StackPanel>
           </Border>
         </StackPanel>

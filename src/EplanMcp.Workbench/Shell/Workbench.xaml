@@ -260,6 +260,112 @@
   <Geometry x:Key="Workbench.Icon.Audit">M14,2 H6 A2,2 0 0 0 4,4 V20 A2,2 0 0 0 6,22 H18 A2,2 0 0 0 20,20 V8 Z M14,2 V8 H20 M16,13 H8 M16,17 H8</Geometry>
   <Geometry x:Key="Workbench.Icon.Logs">M4,17 L10,11 L4,5 M12,19 H20</Geometry>
   <Geometry x:Key="Workbench.Icon.Settings">M15,12 A3,3 0 1 1 9,12 A3,3 0 1 1 15,12 M19.4,15 A1.65,1.65 0 0 0 19.73,16.82 L19.79,16.88 A2,2 0 1 1 16.96,19.71 L16.9,19.65 A1.65,1.65 0 0 0 15.08,19.32 A1.65,1.65 0 0 0 14.08,20.83 V21 A2,2 0 0 1 10.08,21 V20.91 A1.65,1.65 0 0 0 9,19.4 A1.65,1.65 0 0 0 7.18,19.73 L7.12,19.79 A2,2 0 1 1 4.29,16.96 L4.35,16.9 A1.65,1.65 0 0 0 4.68,15.08 A1.65,1.65 0 0 0 3.17,14.08 H3 A2,2 0 0 1 3,10.08 H3.09 A1.65,1.65 0 0 0 4.6,9 A1.65,1.65 0 0 0 4.27,7.18 L4.21,7.12 A2,2 0 1 1 7.04,4.29 L7.1,4.35 A1.65,1.65 0 0 0 8.92,4.68 H9 A1.65,1.65 0 0 0 10,3.17 V3 A2,2 0 0 1 14,3 V3.09 A1.65,1.65 0 0 0 15,4.6 A1.65,1.65 0 0 0 16.82,4.27 L16.88,4.21 A2,2 0 1 1 19.71,7.04 L19.65,7.1 A1.65,1.65 0 0 0 19.32,8.92 V9 A1.65,1.65 0 0 0 20.83,10 H21 A2,2 0 0 1 21,14 H20.91 A1.65,1.65 0 0 0 19.4,15 Z</Geometry>
+  <!-- Settings (2026-11-20 design): the navigation row, the heading and intro of a category, a row's title and help. -->
+  <Geometry x:Key="Workbench.Icon.Sun">M16,12 A4,4 0 1 1 8,12 A4,4 0 1 1 16,12 M12,2 V4 M12,20 V22 M4.93,4.93 L6.34,6.34 M17.66,17.66 L19.07,19.07 M2,12 H4 M20,12 H22 M4.93,19.07 L6.34,17.66 M17.66,6.34 L19.07,4.93</Geometry>
+  <Geometry x:Key="Workbench.Icon.Database">M21,5 A9,3 0 1 1 3,5 A9,3 0 1 1 21,5 M3,5 V19 A9,3 0 0 0 21,19 V5 M3,12 A9,3 0 0 0 21,12</Geometry>
+  <Style x:Key="Workbench.SettingsNavItem" TargetType="RadioButton">
+    <Setter Property="GroupName" Value="SettingsNav" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.NavRow}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.QueueRow}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Grid>
+            <Border x:Name="Surface" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="7" Padding="{TemplateBinding Padding}">
+              <StackPanel Orientation="Horizontal">
+                <Path x:Name="Glyph" Style="{StaticResource Primer.Icon}" Width="{StaticResource Ui.IconSize.Pane}" Height="{StaticResource Ui.IconSize.Pane}" Data="{TemplateBinding ux:Ux.Icon}" Stroke="{DynamicResource Text.Secondary}" StrokeThickness="1.9" VerticalAlignment="Center" />
+                <ContentPresenter Margin="{StaticResource Ui.Gap.Left.XS}" VerticalAlignment="Center" RecognizesAccessKey="False" />
+              </StackPanel>
+            </Border>
+            <Border x:Name="SelectionBar" Width="2.5" HorizontalAlignment="Left" Margin="{StaticResource Ui.Gap.SelectionBar}" CornerRadius="0,3,3,0" Background="{DynamicResource Accent.Button}" Visibility="Collapsed" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Surface" Property="Background" Value="{DynamicResource Surface.Hover}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Surface" Property="Background" Value="{DynamicResource Surface.Layer}" />
+              <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+              <Setter TargetName="SelectionBar" Property="Visibility" Value="Visible" />
+              <Setter TargetName="Glyph" Property="Stroke" Value="{DynamicResource Accent.Text}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.PageHeading" TargetType="TextBlock" BasedOn="{StaticResource Ui.Text.BodyStrong}">
+    <Setter Property="FontSize" Value="16" />
+  </Style>
+  <Style x:Key="Workbench.PageIntro" TargetType="TextBlock" BasedOn="{StaticResource Primer.Muted}">
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.PageIntro}" />
+  </Style>
+  <Style x:Key="Workbench.RowTitle" TargetType="TextBlock" BasedOn="{StaticResource Ui.Text.BodyStrong}">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style x:Key="Workbench.RowHelp" TargetType="TextBlock" BasedOn="{StaticResource Primer.Muted}">
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Top.XXS}" />
+  </Style>
+  <Style x:Key="Workbench.RowDivider" TargetType="Border">
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Top.Normal}" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.SettingsRow}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="0,1,0,0" />
+  </Style>
+  <!-- ver-tile: a choice drawn as a card; the chosen one has the accent outline on the accent tint. -->
+  <Style x:Key="Workbench.Tile" TargetType="RadioButton">
+    <Setter Property="FocusVisualStyle" Value="{StaticResource Primer.Focus}" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Primary}" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Tile}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Border x:Name="Bd" Background="{DynamicResource Surface.Layer}" BorderBrush="{DynamicResource Border.Strong}" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}">
+            <ContentPresenter RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Surface.Hover}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Bd" Property="Background" Value="{DynamicResource State.Info.Background}" />
+              <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Accent.Button}" />
+              <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <Style x:Key="Workbench.FolderTile" TargetType="Border">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Subtle}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Right.SM}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style x:Key="Workbench.FolderGlyph" TargetType="Path" BasedOn="{StaticResource Primer.Icon}">
+    <Setter Property="Width" Value="{StaticResource Ui.IconSize.Pane}" />
+    <Setter Property="Height" Value="{StaticResource Ui.IconSize.Pane}" />
+    <Setter Property="Data" Value="{StaticResource Workbench.Icon.Project}" />
+    <Setter Property="Stroke" Value="{DynamicResource Accent.Text}" />
+    <Setter Property="StrokeThickness" Value="1.9" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
   <Style x:Key="Workbench.RailItem" TargetType="RadioButton">
     <Setter Property="GroupName" Value="Pages" />
     <Setter Property="Width" Value="46" />
@@ -801,5 +907,8 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
+  </Style>
+  <Style x:Key="Workbench.IdePill.Mono" TargetType="RadioButton" BasedOn="{StaticResource Workbench.IdePill}">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
   </Style>
 </ResourceDictionary>

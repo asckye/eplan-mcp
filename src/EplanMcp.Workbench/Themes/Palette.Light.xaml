@@ -66,7 +66,23 @@
   <SolidColorBrush x:Key="Workbench.paneBg" Color="#F7F8FB" /><!-- bg-pane -->
   <SolidColorBrush x:Key="Workbench.sidebarBg" Color="#ECEFF4" /><!-- bg-sidebar -->
   <!-- END v2 tokens -->
-  <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
+  <!-- The settings tiles' miniatures and swatches show the other theme and accent too, so they are the same in every palette. -->
+  <SolidColorBrush x:Key="Workbench.previewLightFrame" Color="#F4F6F9" />
+  <SolidColorBrush x:Key="Workbench.previewLightLine" Color="#D0D7E2" />
+  <SolidColorBrush x:Key="Workbench.previewLightRail" Color="#ECEFF4" />
+  <SolidColorBrush x:Key="Workbench.previewLightPanel" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="Workbench.previewLightAccent" Color="#1D4ED8" />
+  <SolidColorBrush x:Key="Workbench.previewLightBar" Color="#CBD5E1" />
+  <SolidColorBrush x:Key="Workbench.previewDarkFrame" Color="#0C1017" />
+  <SolidColorBrush x:Key="Workbench.previewDarkLine" Color="#324056" />
+  <SolidColorBrush x:Key="Workbench.previewDarkRail" Color="#10151F" />
+  <SolidColorBrush x:Key="Workbench.previewDarkPanel" Color="#161D2B" />
+  <SolidColorBrush x:Key="Workbench.previewDarkAccent" Color="#3B82F6" />
+  <SolidColorBrush x:Key="Workbench.previewDarkBar" Color="#475569" />
+  <SolidColorBrush x:Key="Workbench.swatchCobalt" Color="#1D4ED8" />
+  <SolidColorBrush x:Key="Workbench.swatchCobaltHalo" Color="#2E1D4ED8" />
+  <SolidColorBrush x:Key="Workbench.swatchPetrol" Color="#007A82" />
+  <SolidColorBrush x:Key="Workbench.swatchPetrolHalo" Color="#2E007A82" />  <SolidColorBrush x:Key="Surface.Window" Color="{Binding Color, Source={StaticResource Primer.bg}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Layer" Color="{Binding Color, Source={StaticResource Primer.card}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Input" Color="{Binding Color, Source={StaticResource Primer.input}, Mode=OneWay}" />
   <SolidColorBrush x:Key="Surface.Button" Color="{Binding Color, Source={StaticResource Primer.pill}, Mode=OneWay}" />

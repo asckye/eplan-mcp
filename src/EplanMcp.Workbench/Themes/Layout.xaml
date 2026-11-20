@@ -55,6 +55,8 @@
   <sys:Double x:Key="Ui.IconSize.Large">20</sys:Double>
   <sys:Double x:Key="Ui.IconSize.Dot">6</sys:Double>
   <sys:Double x:Key="Ui.IconSize.Pane">15</sys:Double>
+  <sys:Double x:Key="Ui.IconSize.Brand">22</sys:Double>
+  <sys:Double x:Key="Ui.IconSize.Swatch">28</sys:Double>
   <sys:Double x:Key="Ui.IconSize.Emblem">13</sys:Double>
   <sys:Double x:Key="Ui.IconSize.Theme">14</sys:Double>
   <!-- The shell of the 2026-11-20 design (eplan-workbench-design.html): its own pixel values, not the 4 px grid. -->
@@ -76,6 +78,13 @@
   <Thickness x:Key="Ui.Inset.StatusPill">7,0</Thickness>
   <Thickness x:Key="Ui.Inset.CommandButton">10,0</Thickness>
   <Thickness x:Key="Ui.Inset.QueuePane">10</Thickness>
+  <Thickness x:Key="Ui.Inset.SettingsCard">20</Thickness>
+  <Thickness x:Key="Ui.Gap.Bottom.Card">0,0,0,20</Thickness>
+  <Thickness x:Key="Ui.Inset.Preview">8</Thickness>
+  <Thickness x:Key="Ui.Inset.NavRow">12,8</Thickness>
+  <Thickness x:Key="Ui.Inset.Tile">11,9</Thickness>
+  <Thickness x:Key="Ui.Gap.PageIntro">0,4,0,20</Thickness>
+  <Thickness x:Key="Ui.Inset.SettingsRow">0,16,0,0</Thickness>
   <Thickness x:Key="Ui.Gap.QueueSection">6,4,6,8</Thickness>
   <Thickness x:Key="Ui.Gap.QueueSectionNext">6,12,6,8</Thickness>
   <Thickness x:Key="Ui.Inset.PillCount">5,0</Thickness>
