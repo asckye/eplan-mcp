@@ -1,3 +1,4 @@
+using System.Globalization;
 using EplanMcp.Tests;
 using Newtonsoft.Json.Linq;
 
@@ -128,6 +129,28 @@ public sealed class PageExportRoundFourTests
         target["placements"]![0]!["members"]![0]!["endAngle"] = 3.552713678800501e-15;
 
         Assert.False(PageExportComparer.Compare(JObject.Parse(source), target).HasDifferences);
+    }
+
+    [Fact]
+    public void Compare_UnderACultureWithADecimalComma_StillTreatsWholeTurnsAsEquivalent()
+    {
+        // JToken.ToString() formats a JSON number in the current culture; es-ES writes 6,28 and the comparer read it
+        // back as a different angle.
+        CultureInfo previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("es-ES");
+            var left = new JObject { ["placements"] = new JArray(new JObject { ["type"] = "Arc", ["startAngle"] = 0.0, ["endAngle"] = 0.5 }) };
+            var right = (JObject)left.DeepClone();
+            right["placements"]![0]!["startAngle"] = 2 * Math.PI;
+            right["placements"]![0]!["endAngle"] = 0.5 + 3.552713678800501e-15;
+
+            Assert.False(PageExportComparer.Compare(left, right).HasDifferences);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     [Theory]
