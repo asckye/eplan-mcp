@@ -99,6 +99,9 @@ internal sealed class SessionLifecycleTools
 
     private static string Closed(SessionCloseResult result) => result.Execution == ExecutionState.Committed
         ? string.Create(CultureInfo.InvariantCulture, $"Closed EPLAN process {result.ProcessId}.")
+            + (result.ClosedWindows.Count > 0
+                ? $" Its {string.Join(", ", result.ClosedWindows)} window was closed first; what it showed is in EPLAN's system log, EplLog.eldb."
+                : string.Empty)
         : "Dry run: EPLAN can be closed; call again with dry_run: false.";
 
     private static async Task<(SessionStartResult? Result, BridgeError? Error)> StartCoreAsync(
@@ -155,7 +158,7 @@ internal sealed class SessionLifecycleTools
             return (check.Result, null);
         }
 
-        bool closed;
+        EplanClose closed;
         try
         {
             closed = await lifecycle.CloseAsync(processId, cancellationToken).ConfigureAwait(false);
@@ -165,16 +168,27 @@ internal sealed class SessionLifecycleTools
             return (null, Error(ex));
         }
 
-        if (!closed)
+        if (!closed.Closed)
         {
+            string windows = string.Join(", ", closed.InTheWay);
+            var metadata = new Dictionary<string, string>();
+            if (closed.InTheWay.Count > 0)
+            {
+                metadata["windows"] = windows;
+            }
+
             return (null, new BridgeError
             {
                 Reason = ErrorReason.Timeout,
                 Retryable = false,
-                Message = "EPLAN was asked to close but is still running after 1 minute; it may show a dialog. It was not forced; ask the engineer to look at it.",
+                Message = closed.InTheWay.Count > 0
+                    ? $"EPLAN was asked to close but is still running after 1 minute behind {windows}. It was not forced and that window was left alone; ask the engineer to answer it."
+                    : "EPLAN was asked to close but is still running after 1 minute; it may show a dialog. It was not forced; ask the engineer to look at it.",
+                Metadata = metadata,
             });
         }
 
+        check.Result.ClosedWindows = [.. closed.ClosedWindows.Select(c => c.Name).Distinct()];
         check.Result.Execution = ExecutionState.Committed;
         return (check.Result, null);
     }
@@ -274,6 +288,9 @@ internal sealed class SessionCloseResult
 
     [Description("not_started (dry run or refused) or committed (EPLAN exited).")]
     public string Execution { get; set; } = string.Empty;
+
+    [Description("EPLAN windows closed so that EPLAN could close, such as 'system messages'; their messages stay in EPLAN's system log.")]
+    public List<string> ClosedWindows { get; set; } = [];
 
     internal sealed class ProjectEntry
     {

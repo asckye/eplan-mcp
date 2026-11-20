@@ -73,12 +73,24 @@ public sealed class AddinOutputTests
                 Environment.NewLine,
                 @"插件：C:\app\bridge\net481\EplanMcp.Bridge.Eplan.dll",
                 "[已注册] EPLAN 2026.0.3.25421 Electric P8（进程 4000）  " + Eplan,
-                "    这个 EPLAN 没有按要求关闭，请自己关闭它；它显示了系统消息窗口时，请先关闭那个窗口",
+                "    这个 EPLAN 没有按要求关闭，请自己关闭它；它显示了窗口时，请先处理那个窗口",
                 "[拒绝] EPLAN 2026.0.3.25421 Pro Panel  " + Eplan,
                 "    EPLAN 正在运行（进程 1234）：这时执行命令会另起一个装着全部插件的 EPLAN；运行中的 EPLAN 是哪个变体判断不出来，所以有任何 EPLAN 在运行时都不执行。请先关闭所有 EPLAN，然后重新运行",
                 string.Empty),
             AddinOutput.Text(report, CultureInfo.GetCultureInfo("zh-CN")));
         Assert.StartsWith(@"add-in: C:\app\bridge\net481\EplanMcp.Bridge.Eplan.dll" + Environment.NewLine + "[registered] EPLAN 2026.0.3.25421 Electric P8 (process 4000)  ", AddinOutput.Text(report, CultureInfo.GetCultureInfo("de-DE")), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EplanNotClosed_NamesTheWindowsLeftOpen_OrNoneWhenNoneWasSeen()
+    {
+        AddinIssue withWindow = new(AddinProblem.EplanNotClosed, "4000", Windows: "'Guardar' (#32770)");
+        AddinIssue without = new(AddinProblem.EplanNotClosed, "4000");
+
+        Assert.StartsWith("EPLAN (process 4000) did not close when asked (windows open: 'Guardar' (#32770)), so the earlier registration could not be undone",
+            AddinTexts.Problem(withWindow, AddinAction.Install, zh: false), StringComparison.Ordinal);
+        Assert.Contains("（开着的窗口：'Guardar' (#32770)）", AddinTexts.Problem(withWindow, AddinAction.Install, zh: true), StringComparison.Ordinal);
+        Assert.StartsWith("EPLAN (process 4000) did not close when asked, so", AddinTexts.Problem(without, AddinAction.Install, zh: false), StringComparison.Ordinal);
     }
 
     [Fact]

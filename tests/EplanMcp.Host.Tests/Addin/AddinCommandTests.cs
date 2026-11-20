@@ -250,7 +250,7 @@ public sealed class AddinCommandTests : IDisposable
     }
 
     [Fact]
-    public async Task Install_WhenTheEplanWithAnOlderAddinDoesNotClose_SaysThePathIsUnknown()
+    public async Task Install_WhenTheEplanWithAnOlderAddinDoesNotClose_SaysEplanDidNotClose()
     {
         _eplan.Registered["Electric P8"] = OldDll;
         _eplan.ReportsPath = false;
@@ -259,7 +259,7 @@ public sealed class AddinCommandTests : IDisposable
         AddinReport report = await Command.InstallAsync(["Electric P8"]);
 
         AddinResult result = report.Results.Single();
-        Assert.Equal((AddinOutcome.NotConfirmed, new AddinIssue(AddinProblem.PathMismatch, string.Empty), AddinNote.CloseEplan), (result.Outcome, result.Problem, result.Notes.Single()));
+        Assert.Equal((AddinOutcome.NotConfirmed, new AddinIssue(AddinProblem.EplanNotClosed, "4000"), 0), (result.Outcome, result.Problem, result.Notes.Count));
         Assert.Single(_eplan.Instances);
     }
 
@@ -286,9 +286,39 @@ public sealed class AddinCommandTests : IDisposable
         AddinReport report = await Command.InstallAsync(["Electric P8"]);
 
         AddinResult result = report.Results.Single();
-        Assert.Equal((AddinOutcome.NotConfirmed, new AddinIssue(AddinProblem.PathMismatch, OldDll), AddinNote.CloseEplan), (result.Outcome, result.Problem, result.Notes.Single()));
+        Assert.Equal((AddinOutcome.NotConfirmed, new AddinIssue(AddinProblem.EplanNotClosed, "4000"), 0), (result.Outcome, result.Problem, result.Notes.Count));
         Assert.Single(_eplan.Instances);
         Assert.False(File.Exists(Record.FilePath));
+    }
+
+    [Fact]
+    public async Task Install_WhenTheSystemMessagesWindowKeepsTheOldRegistrationsEplanOpen_ClosesItAndRegistersAgain()
+    {
+        _eplan.Registered["Electric P8"] = OldDll;
+        _eplan.Dialogs.Add(EplanTestWindows.SystemMessages);
+
+        AddinReport report = await Command.InstallAsync(["Electric P8"]);
+
+        AddinResult result = report.Results.Single();
+        Assert.Equal((AddinOutcome.Registered, (AddinIssue?)null, AddinNote.SystemMessagesClosed), (result.Outcome, result.Problem, result.Notes.Single()));
+        Assert.Equal(3, _eplan.Instances.Count);
+        Assert.Equal(Dll, _eplan.Registered["Electric P8"]);
+    }
+
+    [Fact]
+    public async Task Install_WhenAWindowNotOnTheListKeepsTheOldRegistrationsEplanOpen_SaysEplanDidNotCloseAndNamesIt()
+    {
+        _eplan.Registered["Electric P8"] = OldDll;
+        _eplan.Dialogs.Add(EplanTestWindows.SavePrompt);
+
+        AddinReport report = await Command.InstallAsync(["Electric P8"]);
+
+        AddinResult result = report.Results.Single();
+        Assert.Equal((AddinOutcome.NotConfirmed, new AddinIssue(AddinProblem.EplanNotClosed, "4000", Windows: "'EPLAN' (#32770)")), (result.Outcome, result.Problem));
+        Assert.Empty(result.Notes);
+        Assert.Contains(EplanTestWindows.SavePrompt, _eplan.Dialogs);
+        Assert.Single(_eplan.Instances);
+        Assert.Equal(OldDll, _eplan.Registered["Electric P8"]);
     }
 
     [Theory]

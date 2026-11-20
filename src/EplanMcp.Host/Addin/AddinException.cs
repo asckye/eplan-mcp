@@ -36,6 +36,12 @@ internal enum AddinProblem
     /// <summary>The started EPLAN loaded the add-in from another path, or from one an older add-in does not report (an empty detail).</summary>
     PathMismatch,
 
+    /// <summary>
+    /// The EPLAN started to check the registration, or the one that undoes the earlier registration, did not close when
+    /// asked, so the earlier registration could not be undone; <see cref="AddinIssue.Windows"/> names what kept it open.
+    /// </summary>
+    EplanNotClosed,
+
     /// <summary>The Bridge of the started EPLAN did not answer the handshake, so which add-in loaded cannot be told.</summary>
     HandshakeFailed,
 
@@ -57,10 +63,17 @@ internal enum AddinNote
 
     /// <summary>The started EPLAN did not close when asked; the engineer closes it.</summary>
     CloseEplan,
+
+    /// <summary>EPLAN's system messages window was closed so that EPLAN could close (ADR-0063); its messages stay in EplLog.eldb.</summary>
+    SystemMessagesClosed,
 }
 
-/// <summary>A problem and what was found, in English (paths, process IDs, messages); <see cref="Installed"/> lists the installed variants for <see cref="AddinProblem.VariantNotFound"/>.</summary>
-internal sealed record AddinIssue(AddinProblem Problem, string Detail, string? Installed = null);
+/// <summary>
+/// A problem and what was found, in English (paths, process IDs, messages); <see cref="Installed"/> lists the installed
+/// variants for <see cref="AddinProblem.VariantNotFound"/>, <see cref="Windows"/> the EPLAN windows left open for
+/// <see cref="AddinProblem.EplanNotClosed"/>.
+/// </summary>
+internal sealed record AddinIssue(AddinProblem Problem, string Detail, string? Installed = null, string? Windows = null);
 
 internal sealed class AddinException : Exception
 {
