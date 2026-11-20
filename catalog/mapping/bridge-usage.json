@@ -1,8 +1,8 @@
 {
   "eplanApi": "2026.0.3.25421",
   "scannedOn": "2026-11-20",
-  "scannedSources": "e4f76c05 + uncommitted changes",
-  "sourceHash": "sha256:bb99aae8c4bb3c0901789bb979639cca778960ddb7c51a14657d76e5eb8a61ea",
+  "scannedSources": "1bdcd668",
+  "sourceHash": "sha256:ecd90760b470a2c7f8499b437e4572d6e46c470ae5093f6d04dba5a0faa276ee",
   "operations": [
     {
       "name": "action.execute",
@@ -159285,7 +159285,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {
@@ -159604,17 +159605,6 @@
         "operations": [
           "project.translate.execute",
           "project.translate.plan"
-        ]
-      },
-      {
-        "adapter": "EplanProjectReader",
-        "member": "Read",
-        "file": "src/EplanMcp.Bridge.Eplan/Adapters/Projects/EplanProjectReader.cs",
-        "access": [
-          "call"
-        ],
-        "operations": [
-          "project.get"
         ]
       },
       {
@@ -160248,7 +160238,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {
@@ -165568,7 +165559,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {
@@ -205295,7 +205287,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {
@@ -232997,7 +232990,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {
@@ -253617,7 +253611,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {
@@ -263236,7 +263231,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {
@@ -264938,7 +264934,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {
@@ -275911,7 +275908,8 @@
           "device.update.plan",
           "macro.insert.execute",
           "macro.insert.plan",
-          "plc.get"
+          "plc.get",
+          "project.get"
         ]
       },
       {

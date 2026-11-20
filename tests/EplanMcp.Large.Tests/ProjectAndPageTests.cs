@@ -21,7 +21,7 @@ public sealed class ProjectAndPageTests(LiveEplan eplan)
 
         JsonElement counts = data.GetProperty("counts");
         Assert.Equal(LiveEplan.ProjectName, data.GetProperty("project").GetProperty("name").GetString());
-        Assert.Equal((321, 504, 2060, 2900), (counts.GetProperty("pages").GetInt32(), counts.GetProperty("devices").GetInt32(), counts.GetProperty("connections").GetInt32(), counts.GetProperty("partReferences").GetInt32()));
+        Assert.Equal((321, 507, 2060, 2900), (counts.GetProperty("pages").GetInt32(), counts.GetProperty("devices").GetInt32(), counts.GetProperty("connections").GetInt32(), counts.GetProperty("partReferences").GetInt32()));
         Dictionary<string, int> byType = data.GetProperty("pagesByType").EnumerateArray().ToDictionary(t => t.GetProperty("type").GetString()!, t => t.GetProperty("count").GetInt32());
         Assert.Equal((34, 32, 16), (byType["Circuit"], byType["TerminalDiagram"], byType["PLCDiagram"]));
     }
