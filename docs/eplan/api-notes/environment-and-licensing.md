@@ -22,6 +22,16 @@
 - **工具行为：** 没有改动。是否为它加回退（按类型名反射取 `PropertyPlacements`），与 [ADR-0060](../../adr/0060-per-version-bridge-builds.md) 的决定一起定。
 - **未验证：** 23406 与 23616 之间的其他差异；2025 上任何运行时行为（本机没有可运行的 2025）。
 
+### B20. The 2025.0.3.23616 catalog in the repository; members the add-in uses that it does not have (2026-11-20, `catalog/eplan-2025.0.3` from EPLAN 2025.0.3.23616; reporter of #664)
+- **Source:** `catalog/eplan-2025.0.3`, extracted with the unchanged `EplanMcp.Catalog extract` from the `Platform\Bin` of an EPLAN 2025.0.3.23616 installation (`assemblies.json` records the file versions). It is compared with `catalog/eplan-2026.0.3` by `EplanMcp.Catalog diff`, which unfolds enum values and data dictionary properties and marks the IDs `catalog/mapping/bridge-usage.json` lists. Result: `catalog/mapping/eplan-2026.0.3-vs-2025.0.3.g.tsv`. Unlike the 23406 catalog of B19, this one is in the repository, so the comparison can be repeated.
+- **Result:** 3,187 IDs exist only in 2026.0.3 and the add-in uses 2,374 of them; 96 exist only in 2025.0.3 and the add-in uses none. The counts include enum values and data dictionary properties, so they are not comparable item by item with B19. All but four are used only by the generated `ApiTryDispatch.g.cs`. The four:
+  - `PathMap.SubstitutePath(String, String)` in `EplanPaths.cs` (B17).
+  - `PropertyPlacement.GetBoundingBox(Boolean)` in `EplanTextBounds.cs` (B18).
+  - `MDPartsDatabase.ImportMode.ReplaceAndAppend` in `EplanPartsDatabaseWriter.cs` (B18, B19).
+  - `InstallationSpace.Connection3Ds` in `EplanConnectionRouter.cs` and the generated `ObjectKindDispatch.g.cs`. 2025 has no such member on `InstallationSpace`, so code compiled against 2025 binds to the inherited `Placement3D.Connection3Ds` without an error. On a copy of the EPLAN sample project that member lists none of a space's 3D connections: the router built against 2025 found 0 in A1, while collecting the connections of the space's placements found 176 in A1 and 332 in A2, the numbers of A141. What a 2026 build does there on 2025 is not verified.
+- **Confirms B19:** `Eplan.EplApi.DataModel.IPropertyPlacementsContainer` is in this catalog (`types.jsonl`), so 23616 has the interface that 23406 lacks, and it is not in the difference list.
+- **Verified:** the four members by building the add-in of `6d14f7ec` against the 2025.0.3.23616 assemblies (2,781 distinct errors, 2,778 of them in `ApiTryDispatch.g.cs`); the 3D connection counts live on EPLAN Electric P8 2025.0.3.23616. Not verified on 2026, and not checked against 2024.
+
 ### A1. 环境与进程
 - **从桌面启动的 EPLAN 会继承 explorer 的环境变量。** 用户 PATH 原始长度 4604 字符时，Windows 登录过程没有加载 `HKCU\Environment` 下的任何变量，explorer 和 EPLAN 的 `TEMP=TMP=C:\WINDOWS\TEMP`；把 PATH 缩到 316 字符并广播 `WM_SETTINGCHANGE("Environment")` 后，explorer 立即恢复正常，不需要重新登录。— 读取进程 PEB 中的环境块验证。
 - **`TEMP=C:\WINDOWS\TEMP` 时，EPLAN 的 C# 脚本全部无法编译**，系统消息为 `CS2001 未能找到源文件 C:\WINDOWS\TEMP\xxxx.0.cs` / `CS2008`。用 Windows PowerShell 5.1 的 `Add-Type`（同为 .NET Framework CodeDOM）可以在 EPLAN 之外复现；TEMP 改为用户目录后正常。— 实机复现。
