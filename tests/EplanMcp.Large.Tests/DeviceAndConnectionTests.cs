@@ -16,7 +16,9 @@ public sealed class DeviceAndConnectionTests(LiveEplan eplan)
         JsonElement all = await eplan.CallAsync("eplan_device_list", new() { ["limit"] = 1 });
         JsonElement onPage = await eplan.CallAsync("eplan_device_list", new() { ["page"] = "=GAA+A1&EFS1/1", ["limit"] = 200 });
 
-        Assert.Equal(504, all.GetProperty("total").GetInt32());
+        // A170: 507 since the unfiltered list also reads page by page; GetFunctions(null) alone gives 504 and misses
+        // three devices, =EC1+A3-EC1-QA1-K1 among them. eplan_project_get still counts with GetFunctions(null).
+        Assert.Equal(507, all.GetProperty("total").GetInt32());
         string[] tags = [.. onPage.GetProperty("devices").EnumerateArray().Select(d => d.GetProperty("tag").GetString()!)];
         Assert.Contains(Breaker, tags);
         Assert.Equal(tags.Length, tags.Distinct(StringComparer.Ordinal).Count());
