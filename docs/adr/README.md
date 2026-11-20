@@ -66,3 +66,4 @@
 | [0057](0057-discovery-profile-dispatch.md) | discovery Profile 用按安全级别分开的两个分发工具调用其余工具 | Accepted | 双向门 |
 | [0058](0058-eplan-lifecycle-tools.md) | Host 可以启动、关闭和重启本机的 EPLAN，关闭只在打开的项目都在 scratch 时自动进行 | Accepted | 双向门 |
 | [0059](0059-operation-layer-remaining-categories.md) | 操作层余下三类按档开放：带部件的项目对象、部件库副本和系统主数据、锁定与冻结 | Accepted | 双向门 |
+| [0060](0060-per-version-bridge-builds.md) | 每个支持的 EPLAN 版本各构建一份插件（修订 ADR-0009 的“一份构建”） | Proposed（2026-11-20 提出，等项目负责人确认） | 双向门 |
