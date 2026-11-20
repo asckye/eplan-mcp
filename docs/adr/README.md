@@ -69,3 +69,4 @@
 | [0060](0060-per-version-bridge-builds.md) | 每个支持的 EPLAN 版本各构建一份插件（修订 ADR-0009 的“一份构建”） | Proposed（2026-11-20 提出，等项目负责人确认） | 双向门 |
 | [0061](0061-auto-allow-ordinary-writes.md) | 工程师可以关闭普通写入的审批：`writesOutsideScratch` 增加 `allow`（修订 ADR-0005） | Accepted | 单向门 |
 | [0062](0062-vm-http-without-shared-key.md) | 虚拟机 HTTP 不再用共享密钥，由只放行宿主机的防火墙规则加 Host 头和 Origin 校验把关（修订 ADR-0018） | Accepted | 单向门 |
+| [0063](0063-eplan-window-watch.md) | Host 看守 EPLAN 的窗口：名单内的无害窗口自动关闭，其余如实报告 | Proposed（2026-11-20 提出，等项目负责人确认） | 单向门 |
