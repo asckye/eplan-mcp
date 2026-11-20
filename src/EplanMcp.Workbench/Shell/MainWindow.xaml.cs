@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using EplanMcp.Workbench.Approvals;
+using EplanMcp.Workbench.Protocol;
 using EplanMcp.Workbench.Audit;
 using EplanMcp.Workbench.Clients;
 using EplanMcp.Workbench.Logs;
@@ -377,8 +378,18 @@ public partial class MainWindow : Window
 
     private void OnToast(string text, ToastTone tone) => Dispatcher.BeginInvoke(() => Toasts.Add(ToastLayer, ToastAnnouncer, text, tone));
 
+    /// <summary>
+    /// The project and the EPLAN of the last question, for the title bar and the status bar (the 2026-11-20 design). The
+    /// Workbench learns them only from questions; texts from the Host are project data, made plain first.
+    /// </summary>
+    internal (string Project, string Eplan)? EplanEnvironment { get; private set; }
+
     private void OnArrived(QuestionItem item)
     {
+        EplanInstance eplan = item.Question.Ask.Eplan;
+        string variant = eplan.Variant is { Length: > 0 } name ? " · " + ProjectText.Line(name) : string.Empty;
+        EplanEnvironment = (item.ProjectName, "EPLAN " + ProjectText.Line(eplan.Version) + variant);
+        Dispatcher.BeginInvoke(ApplyTexts);
         Reminder reminder = ReminderFor(IsVisible, WindowState == WindowState.Minimized, IsActive);
         if (reminder.HasFlag(Reminder.Flash) && new WindowInteropHelper(this).Handle is var handle && handle != IntPtr.Zero)
         {
@@ -560,7 +571,12 @@ public partial class MainWindow : Window
         Language = System.Windows.Markup.XmlLanguage.GetLanguage(loc.Language == AppLanguage.Chinese ? "zh-CN" : "en-US");
         string page = loc[_pages[(int)CurrentPage].Key];
         Title = loc.T("Shell.WindowTitle", page);
-        CurrentPageText.Text = "/ " + page;
+        // The design names the project after the app; before any question names one, the page.
+        CurrentPageText.Text = "/ " + (EplanEnvironment is { Project.Length: > 0 } known ? known.Project : page);
+        EnvPill.Visibility = EplanEnvironment is null ? Visibility.Collapsed : Visibility.Visible;
+        EnvText.Text = EplanEnvironment?.Eplan ?? string.Empty;
+        EnvStatusText.Visibility = EnvPill.Visibility;
+        EnvStatusText.Text = EplanEnvironment is { } env ? env.Eplan + "  " + env.Project : string.Empty;
         LangToggleButton.Content = loc[loc.Language == AppLanguage.Chinese ? "Settings.Chinese" : "Settings.English"];
         // A moon while the theme is light (the click goes dark), a sun while it is dark.
         ThemeGlyph.Data = Geometry.Parse(ThemeManager.Current.EffectivelyDark

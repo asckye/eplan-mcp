@@ -64,6 +64,13 @@
           </Border>
           <TextBlock x:Name="Brand" Text="{l:Tr App.Name}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="12.5" VerticalAlignment="Center" />
           <TextBlock x:Name="CurrentPageText" Style="{StaticResource Primer.Muted}" FontSize="12" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XS}" />
+          <!-- The EPLAN the last question came from (the 2026-11-20 design's environment pill); hidden until one is known. -->
+          <Border x:Name="EnvPill" Visibility="Collapsed" Style="{StaticResource Workbench.EnvPill}">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+              <Ellipse Style="{StaticResource Workbench.StatusDot}" />
+              <TextBlock x:Name="EnvText" Style="{StaticResource Primer.Mono.textMuted}" FontSize="11" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+            </StackPanel>
+          </Border>
         </StackPanel>
 
         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" chrome:WindowChrome.IsHitTestVisibleInChrome="True">
@@ -179,6 +186,7 @@
           <TextBlock x:Name="VersionStatusText" Style="{StaticResource Primer.Mono.textMuted}" FontSize="10.5" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XXS}" />
         </StackPanel>
         <DockPanel VerticalAlignment="Center">
+          <TextBlock x:Name="EnvStatusText" DockPanel.Dock="Left" Visibility="Collapsed" Style="{StaticResource Primer.Mono.text}" FontSize="11" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.Status}" />
           <Path x:Name="PipeIcon" DockPanel.Dock="Left" Width="{StaticResource Ui.IconSize.Status}" Height="{StaticResource Ui.IconSize.Status}" Margin="{StaticResource Ui.Gap.Right.XS}" VerticalAlignment="Center" />
           <TextBlock x:Name="PipeText" Style="{StaticResource Primer.Muted}" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="None" AutomationProperties.LiveSetting="Polite" />
         </DockPanel>

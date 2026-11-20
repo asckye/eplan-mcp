@@ -958,4 +958,14 @@
   <Style x:Key="Workbench.ToastText" TargetType="TextBlock" BasedOn="{StaticResource Primer.Text}">
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
+  </Style>  <!-- The title bar's environment pill: mono text with a dot, on the elevated surface with a thin border. -->
+  <Style x:Key="Workbench.EnvPill" TargetType="Border">
+    <Setter Property="Height" Value="22" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.Horizontal.XS}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.Left.XS}" />
+    <Setter Property="CornerRadius" Value="5" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Layer}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="BorderThickness" Value="1" />
   </Style></ResourceDictionary>
