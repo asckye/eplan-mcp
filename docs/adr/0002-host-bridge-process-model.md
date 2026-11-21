@@ -5,7 +5,7 @@
 | 状态 | Accepted |
 | 后续修订 | [ADR-0018](0018-vm-http-transport.md) 补充了 Host 在虚拟机中通过 HTTP 提供 MCP 的运行方式。 |
 | 后续修订 | [ADR-0058](0058-eplan-lifecycle-tools.md)（2026-11-14）改变进程关系：EPLAN 不再只由人启动，Host 可以按工程师的要求启动、关闭和重启 EPLAN |
-| 后续修订 | [ADR-0065](0065-workbench-as-host-client.md)（Proposed，2026-11-20）提议 Workbench 启动自己的 Host 子进程，作为客户端读取项目数据并执行工程师发起的操作 |
+| 后续修订 | [ADR-0065](0065-workbench-as-host-client.md)（2026-11-21 接受）Workbench 启动自己的 Host 子进程，作为客户端读取项目数据并执行工程师发起的操作 |
 | 日期 | 2026-10-12（提出）· 2026-10-13（接受） |
 | 决策人 | 项目负责人 |
 | 门的类型 | 单向门：后续所有代码都建立在这个拆分之上 |

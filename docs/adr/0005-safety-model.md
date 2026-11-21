@@ -3,7 +3,7 @@
 | 项 | 内容 |
 |---|---|
 | 状态 | Accepted |
-| 后续修订 | [ADR-0021](0021-action-run-whitelist.md) 为 action 白名单增加按条目标定级别的例外。[ADR-0023](0023-plan-approval-and-backup.md) 将审批范围扩展到整个组合计划。[ADR-0024](0024-pack-trust-and-container.md) 将工程包纳入威胁模型。；[ADR-0065](0065-workbench-as-host-client.md)（Proposed，2026-11-20）提议 Workbench 启动自己的 Host 子进程，作为客户端读取项目数据并执行工程师发起的操作 |
+| 后续修订 | [ADR-0021](0021-action-run-whitelist.md) 为 action 白名单增加按条目标定级别的例外。[ADR-0023](0023-plan-approval-and-backup.md) 将审批范围扩展到整个组合计划。[ADR-0024](0024-pack-trust-and-container.md) 将工程包纳入威胁模型。；[ADR-0065](0065-workbench-as-host-client.md)（2026-11-21 接受）Workbench 启动自己的 Host 子进程，作为客户端读取项目数据并执行工程师发起的操作 |
 | 后续修订 | [ADR-0059](0059-operation-layer-remaining-categories.md)（2026-11-15）修订对操作层余下三类成员的排除（带部件的项目对象、部件库副本和系统主数据、锁定与冻结）；另见 [ADR-0010](0010-write-outcomes.md)、[ADR-0046](0046-readback-deviation-warnings.md) |
 | 后续修订 | [ADR-0061](0061-auto-allow-ordinary-writes.md)（2026-11-20）给 `writesOutsideScratch` 增加 `allow`：工程师可以关闭普通写入的审批，Destructive、主数据、未验证写入和解除暂停仍然每次审批；默认值不变，Host 每次写入时读这个值。 |
 | 日期 | 2026-10-12（提出）· 2026-10-13（接受） |

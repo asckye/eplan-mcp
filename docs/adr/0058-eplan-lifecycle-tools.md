@@ -5,7 +5,7 @@
 | 状态 | Accepted（项目负责人 2026-11-14："ADR-0057 和 0058 都按你的建议接受"） |
 | 日期 | 2026-11-14（提出）· 2026-11-14（接受） |
 | 决策人 | 项目负责人 |
-| 后续修订 | [ADR-0063](0063-eplan-window-watch.md)（Proposed，2026-11-20）提议在启动、重启和关闭 EPLAN 时由 Host 关闭名单内的无害窗口（先是系统消息窗口），其余窗口只报告；接受之前本 ADR 不变。 |
+| 后续修订 | [ADR-0063](0063-eplan-window-watch.md)（2026-11-21 接受）在启动、重启和关闭 EPLAN 时由 Host 关闭名单内的无害窗口（先是系统消息窗口），其余窗口只报告。 |
 | 门的类型 | 双向门：三个工具都是新增的，默认只在 `full` 中；撤回只需删除工具，现有进程模型照旧 |
 | 影响 | 改变 [ADR-0002](0002-host-bridge-process-model.md) 的进程关系：EPLAN 不再只由人启动；关闭 EPLAN 涉及 [ADR-0005](0005-safety-model.md) 的数据安全。按 CLAUDE.md 硬性规则 3 只提议 |
 | 相关依据 | [M10 设计](../design/2026-10-30-m10-capability-expansion.md)第 3 节第 2 项（负责人 2026-10-30 接受，2026-11-14 提前）、`eng/scripts/eplan-addin.ps1`、[ADR-0018](0018-vm-http-transport.md) |
