@@ -786,7 +786,7 @@
       "dependencies": 176,
       "actions": 0,
       "spec": "docs/tools/eplan_action_try.md",
-      "small": 4,
+      "small": 5,
       "medium": 3,
       "large": 2,
       "apiNotes": [
@@ -864,7 +864,7 @@
       "dependencies": 2853,
       "actions": 0,
       "spec": "docs/tools/eplan_api_try.md",
-      "small": 7,
+      "small": 8,
       "medium": 4,
       "large": 5,
       "apiNotes": [
@@ -1312,7 +1312,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_device_list.md",
       "small": 7,
-      "medium": 2,
+      "medium": 3,
       "large": 13,
       "apiNotes": [
         "A11",
@@ -2147,7 +2147,7 @@
       "dependencies": 35,
       "actions": 0,
       "spec": "docs/tools/eplan_page_delete.md",
-      "small": 3,
+      "small": 4,
       "medium": 10,
       "large": 1,
       "apiNotes": [
@@ -2193,7 +2193,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_list.md",
       "small": 16,
-      "medium": 6,
+      "medium": 7,
       "large": 23,
       "apiNotes": [
         "A11"
@@ -2844,7 +2844,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_project_get.md",
       "small": 5,
-      "medium": 3,
+      "medium": 4,
       "large": 9,
       "apiNotes": [
         "A11"
@@ -3018,7 +3018,7 @@
       "dependencies": 183,
       "actions": 0,
       "spec": "docs/tools/eplan_property_set.md",
-      "small": 3,
+      "small": 4,
       "medium": 1,
       "large": 3,
       "apiNotes": [
@@ -3270,7 +3270,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_session_status.md",
       "small": 4,
-      "medium": 3,
+      "medium": 4,
       "large": 10,
       "apiNotes": [],
       "latestLive": {

@@ -574,6 +574,11 @@
             "file": "tests/EplanMcp.Evals.Tests/Run/EvalRunTests.cs"
           },
           {
+            "name": "HostToolClientTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/HostToolClientTests.cs"
+          },
+          {
             "name": "ToolContractTests",
             "size": "Small",
             "file": "tests/EplanMcp.Host.Tests/Tools/ToolContractTests.cs"
@@ -15117,6 +15122,11 @@
             "file": "tests/EplanMcp.Evals.Tests/Run/EvalRunTests.cs"
           },
           {
+            "name": "HostToolClientTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/HostToolClientTests.cs"
+          },
+          {
             "name": "NativePreconditionTests",
             "size": "Small",
             "file": "tests/EplanMcp.Bridge.Core.Tests/Adapters/NativePreconditionTests.cs"
@@ -18521,6 +18531,11 @@
             "name": "DeviceToolsInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/DeviceToolsInteropTests.cs"
+          },
+          {
+            "name": "ProjectPageTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/ProjectPageTests.cs"
           },
           {
             "name": "StdioEndToEndTests",
@@ -25799,6 +25814,11 @@
             "file": "tests/EplanMcp.Host.Tests/Safety/ApprovalTextsTests.cs"
           },
           {
+            "name": "HostToolClientTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/HostToolClientTests.cs"
+          },
+          {
             "name": "WorkbenchJsonTests",
             "size": "Small",
             "file": "tests/EplanMcp.Workbench.Protocol.Tests/WorkbenchJsonTests.cs"
@@ -26629,6 +26649,11 @@
             "name": "ProjectPageInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
+          },
+          {
+            "name": "ProjectPageTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/ProjectPageTests.cs"
           },
           {
             "name": "ReportCreateToolTests",
@@ -32418,6 +32443,11 @@
             "file": "tests/EplanMcp.Host.Tests/Bridge/ProjectPageInteropTests.cs"
           },
           {
+            "name": "ProjectPageTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/ProjectPageTests.cs"
+          },
+          {
             "name": "StdioEndToEndTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/EndToEnd/StdioEndToEndTests.cs"
@@ -34067,6 +34097,11 @@
           "B13"
         ],
         "tests": [
+          {
+            "name": "HostToolClientTests",
+            "size": "Small",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/HostToolClientTests.cs"
+          },
           {
             "name": "SmallProjectRedrawMacroTests",
             "size": "Small",
@@ -35876,6 +35911,11 @@
             "name": "EplanMcpClientTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Evals.Tests/Server/EplanMcpClientTests.cs"
+          },
+          {
+            "name": "ProjectPageTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Project/ProjectPageTests.cs"
           },
           {
             "name": "SessionSelectInteropTests",
