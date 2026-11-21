@@ -5,7 +5,11 @@ using EplanMcp.Host.Bridge;
 namespace EplanMcp.Host.Addin;
 
 /// <summary>What starting EPLAN gave: the process, the variant and version it runs, and its Bridge's handshake.</summary>
-internal sealed record EplanStart(int ProcessId, string Variant, string Version, HandshakeResult Handshake, double Seconds);
+internal sealed record EplanStart(int ProcessId, string Variant, string Version, HandshakeResult Handshake, double Seconds)
+{
+    /// <summary>The harmless windows closed while waiting for the add-in (ADR-0063 decision 6).</summary>
+    public IReadOnlyList<ClosedWindow> ClosedWindows { get; init; } = [];
+}
 
 /// <summary>Why starting or closing EPLAN did not happen as asked; maps onto an MCP error reason.</summary>
 internal sealed class EplanLifecycleException(string reason, string message, IReadOnlyDictionary<string, string>? metadata = null) : Exception(message)
@@ -21,7 +25,7 @@ internal sealed class EplanLifecycleException(string reason, string message, IRe
 /// handshake. It refuses while any EPLAN runs: a second instance fights the first over the station settings and stops
 /// on a modal system messages window (A160, live 2026-11-14). It never closes or forces anything.
 /// </summary>
-internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses processes, IBridgeProbe bridge, TimeProvider time, AddinTimings timings, bool pinned)
+internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses processes, IBridgeProbe bridge, TimeProvider time, AddinTimings timings, bool pinned, bool closeHarmless = true)
 {
     /// <summary>The longest wait for the Bridge after starting: EPLAN with its splash, licence check and add-ins.</summary>
     public static readonly TimeSpan StartWait = TimeSpan.FromSeconds(180);
@@ -32,8 +36,15 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
     /// </summary>
     public bool Pinned { get; } = pinned;
 
-    public static EplanLifecycle ForMachine(bool pinned) => new(AddinMachine.FromWindows(), new EplanProcesses(),
-        new BridgeProbe(new PipeBridgeDiscovery(), new PipeBridgeConnector()), TimeProvider.System, AddinTimings.Default with { Load = StartWait }, pinned);
+    /// <summary>Records the windows this lifecycle closed in the audit (ADR-0063 decision 3); none in tests.</summary>
+    internal WindowWatch? Watch { get; init; }
+
+    /// <summary><paramref name="closeHarmless"/>: whether listed windows are closed or only reported (<c>eplanWindowWatch</c>, ADR-0063).</summary>
+    public static EplanLifecycle ForMachine(bool pinned, bool closeHarmless = true, WindowWatch? watch = null) => new(AddinMachine.FromWindows(), new EplanProcesses(),
+        new BridgeProbe(new PipeBridgeDiscovery(), new PipeBridgeConnector()), TimeProvider.System, AddinTimings.Default with { Load = StartWait }, pinned, closeHarmless)
+    {
+        Watch = watch,
+    };
 
     /// <summary>The variants of the newest supported installation, which <see cref="StartAsync"/> starts from.</summary>
     public IReadOnlyList<string> Variants() => Newest()?.Variants ?? [];
@@ -66,6 +77,8 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
         using IStartedEplan eplan = processes.Start(installation.Exe, $"/Variant:\"{chosen}\"");
         string pid = eplan.Id.ToString(CultureInfo.InvariantCulture);
         TimeSpan reported = TimeSpan.Zero;
+        TimeSpan swept = TimeSpan.Zero;
+        var closed = new List<ClosedWindow>();
         while (!bridge.IsUp(eplan.Id))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -78,9 +91,14 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
             TimeSpan elapsed = time.GetElapsedTime(started);
             if (elapsed >= timings.Load)
             {
-                throw new EplanLifecycleException(ErrorReason.Timeout,
-                    "EPLAN started but its EplanMcp add-in did not answer in time; it may be waiting on a dialog, or the add-in is not registered for this variant. EPLAN was left running.",
-                    new Dictionary<string, string> { ["process"] = pid, ["variant"] = chosen });
+                throw await TimedOutAsync(eplan, pid, chosen, closed, cancellationToken).ConfigureAwait(false);
+            }
+
+            // ADR-0063 decision 6: a harmless window such as the system messages window keeps the add-in from loading.
+            if (elapsed - swept >= timings.Resend)
+            {
+                EplanCloser.Sweep(eplan, closed, closeHarmless);
+                swept = elapsed;
             }
 
             if (elapsed - reported >= TimeSpan.FromSeconds(5))
@@ -96,7 +114,8 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
         {
             if (await bridge.HandshakeAsync(eplan.Id, cancellationToken).ConfigureAwait(false) is { } handshake)
             {
-                return new EplanStart(eplan.Id, chosen, installation.Version, handshake, Math.Round(time.GetElapsedTime(started).TotalSeconds, 1));
+                await RecordAsync(closed, eplan.Id, "eplan_session_start", cancellationToken).ConfigureAwait(false);
+                return new EplanStart(eplan.Id, chosen, installation.Version, handshake, Math.Round(time.GetElapsedTime(started).TotalSeconds, 1)) { ClosedWindows = closed };
             }
 
             if (i == EplanLauncher.HandshakeTries)
@@ -125,7 +144,36 @@ internal sealed class EplanLifecycle(AddinMachine machine, IEplanProcesses proce
 
         using IStartedEplan eplan = processes.Attach(processId) ?? throw new EplanLifecycleException(ErrorReason.SessionNotSelected,
             $"No EPLAN with process {processId.ToString(CultureInfo.InvariantCulture)} runs in this Windows session; call eplan_session_status.");
-        return await EplanCloser.CloseAsync(eplan, time, timings, cancellationToken).ConfigureAwait(false);
+        EplanClose close = await EplanCloser.CloseAsync(eplan, time, timings, cancellationToken, closeHarmless).ConfigureAwait(false);
+        await RecordAsync(close.ClosedWindows, processId, "eplan_session_close", cancellationToken).ConfigureAwait(false);
+        return close;
+    }
+
+    private Task RecordAsync(IReadOnlyList<ClosedWindow> closed, int processId, string trigger, CancellationToken cancellationToken) =>
+        Watch is { } watch && closed.Count > 0 ? watch.RecordAsync(closed, processId, trigger, cancellationToken) : Task.CompletedTask;
+
+    /// <summary>
+    /// ADR-0063 decision 7: a start that timed out behind a window not on the list leaves EPLAN to the engineer and names
+    /// the window; with nothing in the way, EPLAN is asked to close as its close button would, never forced, so that it
+    /// does not block the next start.
+    /// </summary>
+    private async Task<EplanLifecycleException> TimedOutAsync(IStartedEplan eplan, string pid, string variant, List<ClosedWindow> closed, CancellationToken cancellationToken)
+    {
+        List<EplanWindow> inTheWay = EplanCloser.Sweep(eplan, closed, closeHarmless);
+        await RecordAsync(closed, eplan.Id, "eplan_session_start", cancellationToken).ConfigureAwait(false);
+        var metadata = new Dictionary<string, string> { ["process"] = pid, ["variant"] = variant };
+        if (inTheWay.Count > 0)
+        {
+            metadata["windows"] = string.Join(", ", inTheWay);
+            return new EplanLifecycleException(ErrorReason.Timeout,
+                $"EPLAN started but its EplanMcp add-in did not answer in time; EPLAN shows {string.Join(", ", inTheWay)}. EPLAN was left running for the engineer to answer it.", metadata);
+        }
+
+        EplanClose close = await EplanCloser.CloseAsync(eplan, time, timings, cancellationToken, closeHarmless).ConfigureAwait(false);
+        await RecordAsync(close.ClosedWindows, eplan.Id, "eplan_session_start", cancellationToken).ConfigureAwait(false);
+        return new EplanLifecycleException(ErrorReason.Timeout, close.Closed
+            ? "EPLAN started but its EplanMcp add-in did not answer in time, with no dialog in the way; EplanMcp closed that EPLAN so the next start is not blocked. Check that the add-in is registered for this variant (doctor)."
+            : "EPLAN started but its EplanMcp add-in did not answer in time; asked to close, EPLAN stayed open. Ask the engineer to close it.", metadata);
     }
 
     private EplanInstallation? Newest() => EplanInstallation.Find(machine.ProgramFiles, machine.FileVersion)

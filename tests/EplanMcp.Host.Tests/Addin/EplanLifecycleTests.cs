@@ -57,7 +57,7 @@ public sealed class EplanLifecycleTests : IDisposable
     }
 
     [Fact]
-    public async Task Start_ReportsAnEplanThatExits_AndOneWhoseAddinNeverAnswers_LeavingItRunning()
+    public async Task Start_ReportsAnEplanThatExits_AndClosesOneWhoseAddinNeverAnswers_WithNothingInTheWay()
     {
         _eplan.ExitsBeforePipe = true;
         EplanLifecycleException exited = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
@@ -65,9 +65,52 @@ public sealed class EplanLifecycleTests : IDisposable
         _eplan.PipeAfterLooks = null;
         EplanLifecycleException silent = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
 
+        // ADR-0063 decision 7: nothing in the way, so it is asked to close (never forced) and does not block the next start.
         Assert.Equal(ErrorReason.EplanNotConnected, exited.Reason);
         Assert.Equal(ErrorReason.Timeout, silent.Reason);
-        Assert.Contains("left running", silent.Message, StringComparison.Ordinal);
+        Assert.Contains("closed that EPLAN", silent.Message, StringComparison.Ordinal);
+        Assert.Contains(_eplan.Log, line => line.StartsWith("close", StringComparison.Ordinal));
+        Assert.Empty(_eplan.Running());
+    }
+
+    [Fact]
+    public async Task Start_ClosesTheSystemMessagesWindow_ThatKeepsTheAddinFromLoading()
+    {
+        _eplan.Dialogs.Add(EplanTestWindows.SystemMessages);
+        _eplan.PipeAfterLooks = 20;
+
+        EplanStart started = await Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken);
+
+        Assert.Equal("system messages", Assert.Single(started.ClosedWindows).Name);
+        Assert.Empty(_eplan.Dialogs);
+        Assert.Contains(_eplan.Log, line => line.StartsWith("close window", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Start_BehindAnotherDialog_NamesIt_AndLeavesEplanRunning()
+    {
+        _eplan.Dialogs.Add(EplanTestWindows.SavePrompt);
+        _eplan.PipeAfterLooks = null;
+
+        EplanLifecycleException timedOut = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle().StartAsync(null, null, TestContext.Current.CancellationToken));
+
+        Assert.Equal(ErrorReason.Timeout, timedOut.Reason);
+        Assert.Contains("left running", timedOut.Message, StringComparison.Ordinal);
+        Assert.Contains(EplanTestWindows.SavePrompt.ToString(), timedOut.Metadata["windows"], StringComparison.Ordinal);
+        Assert.DoesNotContain(_eplan.Log, line => line.StartsWith("close", StringComparison.Ordinal));
+        Assert.Single(_eplan.Running());
+    }
+
+    [Fact]
+    public async Task Start_WithTheWatchOnReport_LeavesTheSystemMessagesWindowOpen_AndNamesIt()
+    {
+        _eplan.Dialogs.Add(EplanTestWindows.SystemMessages);
+        _eplan.PipeAfterLooks = null;
+
+        EplanLifecycleException timedOut = await Assert.ThrowsAsync<EplanLifecycleException>(() => Lifecycle(closeHarmless: false).StartAsync(null, null, TestContext.Current.CancellationToken));
+
+        Assert.Contains(EplanTestWindows.SystemMessages.ToString(), timedOut.Metadata["windows"], StringComparison.Ordinal);
+        Assert.Single(_eplan.Dialogs);
         Assert.DoesNotContain(_eplan.Log, line => line.StartsWith("close", StringComparison.Ordinal));
     }
 
@@ -82,10 +125,10 @@ public sealed class EplanLifecycleTests : IDisposable
         Assert.Empty(_eplan.Log);
     }
 
-    private EplanLifecycle Lifecycle(bool pinned = false) => new(
+    private EplanLifecycle Lifecycle(bool pinned = false, bool closeHarmless = true) => new(
         new AddinMachine(ProgramFiles, Path.Combine(_root, "Public"), Path.Combine(_root, "Profile"), Path.Combine(_root, "App"),
             exe => Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(exe))) + ".1"),
-        _eplan, _eplan, _clock, _timings, pinned);
+        _eplan, _eplan, _clock, _timings, pinned, closeHarmless);
 
     private string Exe(string folder) => Path.Combine(ProgramFiles, "EPLAN", "Platform", folder, "Bin", "EPLAN.exe");
 

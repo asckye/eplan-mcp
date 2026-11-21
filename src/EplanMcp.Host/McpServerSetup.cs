@@ -22,7 +22,12 @@ internal static class McpServerSetup
     {
         services.AddSingleton<IBridgeDiscovery>(_ => new PipeBridgeDiscovery());
         services.AddSingleton<IBridgeConnector, PipeBridgeConnector>();
-        services.AddSingleton<IBridgeClient, BridgeClient>();
+        services.AddSingleton<BridgeClient>();
+
+        // ADR-0063: every Bridge call passes the EPLAN window watch, which looks once when EPLAN is busy behind a window.
+        services.AddSingleton<IBridgeClient>(provider => new WatchingBridgeClient(provider.GetRequiredService<BridgeClient>(), provider.GetRequiredService<Addin.WindowWatch>()));
+        services.TryAddSingleton<Addin.IEplanProcesses, Addin.EplanProcesses>();
+        services.TryAddSingleton<Addin.WindowWatch>();
 
         // serve registers the locations it loaded the configuration from; tests get the environment's.
         services.TryAddSingleton(_ => HostDataLocations.FromEnvironment());
@@ -96,7 +101,10 @@ internal static class McpServerSetup
         services.AddOptions<McpServerOptions>().PostConfigure<HostConfig, ToolProfileChoice>((options, config, profile) => ApiTrySchema.Configure(options, config.ApiTry == ActionRunSwitch.On && profile.Profile != ToolProfile.Core));
         services.TryAddSingleton<ToolRegistry>();
         // HTTP mode registers HttpCaller first: that Host serves one EPLAN process and must not start another (ADR-0018).
-        services.TryAddSingleton(sp => Addin.EplanLifecycle.ForMachine(pinned: sp.GetService<EplanMcp.Host.Http.HttpCaller>() is not null));
+        services.TryAddSingleton(sp => Addin.EplanLifecycle.ForMachine(
+            pinned: sp.GetService<EplanMcp.Host.Http.HttpCaller>() is not null,
+            closeHarmless: sp.GetRequiredService<HostConfig>().EplanWindowWatch == EplanWindowWatch.Close,
+            watch: sp.GetRequiredService<Addin.WindowWatch>()));
         services.AddOptions<McpServerOptions>().PostConfigure<ToolProfileChoice, ToolRegistry>((options, choice, registry) =>
         {
             registry.Apply(options.ToolCollection ?? [], choice.Profile);

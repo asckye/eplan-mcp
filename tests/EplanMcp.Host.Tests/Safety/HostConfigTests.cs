@@ -22,6 +22,22 @@ public sealed class HostConfigTests
         Assert.Empty(config.PackSources);
     }
 
+    [Theory]
+    [InlineData("{}", true)]
+    [InlineData("""{"eplanWindowWatch":"close"}""", true)]
+    [InlineData("""{"eplanWindowWatch":"report"}""", false)]
+    public void TheWindowWatch_ClosesHarmlessWindowsByDefault_AndCanOnlyReport(string json, bool closes)
+    {
+        (HostConfig? config, string? problem) = HostConfig.Parse(json, _locations);
+
+        Assert.Null(problem);
+        Assert.Equal(closes ? EplanWindowWatch.Close : EplanWindowWatch.Report, config!.EplanWindowWatch);
+    }
+
+    [Fact]
+    public void AnUnknownWindowWatch_IsInvalid() =>
+        Assert.NotNull(HostConfig.Parse("""{"eplanWindowWatch":"force"}""", _locations).Problem);
+
     [Fact]
     public void Parse_ReadsEverySetting()
     {

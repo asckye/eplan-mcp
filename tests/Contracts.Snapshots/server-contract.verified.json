@@ -25850,6 +25850,13 @@
                 "description": "Seconds from the start to the add-in's handshake.",
                 "type": "number"
               },
+              "closedWindows": {
+                "description": "EPLAN windows closed while waiting, such as 'system messages'; their messages stay in EPLAN's system log.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
               "hint": {
                 "description": "What to do next.",
                 "type": [
@@ -25959,6 +25966,13 @@
           "seconds": {
             "description": "Seconds from the start to the add-in's handshake.",
             "type": "number"
+          },
+          "closedWindows": {
+            "description": "EPLAN windows closed while waiting, such as 'system messages'; their messages stay in EPLAN's system log.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "hint": {
             "description": "What to do next.",

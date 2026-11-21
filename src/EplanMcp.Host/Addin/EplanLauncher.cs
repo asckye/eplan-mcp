@@ -44,7 +44,8 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
         {
             string pid = started.Id.ToString(CultureInfo.InvariantCulture);
             result = result with { ProcessId = started.Id };
-            switch (await WaitForPipeAsync(started).ConfigureAwait(false))
+            var swept = new List<ClosedWindow>();
+            switch (await WaitForPipeAsync(started, swept).ConfigureAwait(false))
             {
                 case null:
                     return new(result, new(AddinProblem.EplanExited, pid), null, EplanClose.Gone);
@@ -56,6 +57,7 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
             await Task.Delay(settle, time).ConfigureAwait(false);
             loaded(handshake);
             EplanClose close = await CloseAsync(started).ConfigureAwait(false);
+            close = close with { ClosedWindows = [.. swept, .. close.ClosedWindows] }; // all the windows closed on the way
             IEnumerable<AddinNote> notes = result.Notes;
             if (close.ClosedWindows.Count > 0 && !result.Notes.Contains(AddinNote.SystemMessagesClosed))
             {
@@ -90,12 +92,23 @@ internal sealed class EplanLauncher(IEplanProcesses processes, IBridgeProbe brid
         }
     }
 
-    /// <summary>True once the started EPLAN's Bridge pipe is up, false when it is still missing after the wait, null when EPLAN exited.</summary>
-    private async Task<bool?> WaitForPipeAsync(IStartedEplan started)
+    /// <summary>
+    /// True once the started EPLAN's Bridge pipe is up, false when it is still missing after the wait, null when EPLAN
+    /// exited. Closes the harmless windows on the way (ADR-0063 decision 6): the system messages window stops the add-in
+    /// from loading (#664).
+    /// </summary>
+    private async Task<bool?> WaitForPipeAsync(IStartedEplan started, List<ClosedWindow> swept)
     {
         long start = time.GetTimestamp();
+        TimeSpan looked = TimeSpan.Zero;
         while (true)
         {
+            if (time.GetElapsedTime(start) - looked >= timings.Resend)
+            {
+                EplanCloser.Sweep(started, swept);
+                looked = time.GetElapsedTime(start);
+            }
+
             if (bridge.IsUp(started.Id))
             {
                 return true;

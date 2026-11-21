@@ -27,7 +27,7 @@ internal sealed class AuditView(string directory, HostCommands host, TimeProvide
     private const string DayFormat = "yyyy-MM-dd";
 
     /// <summary>The kinds, decisions and results the Host writes (WritePipeline, DanglingWrites), each with its own text.</summary>
-    internal static readonly string[] Kinds = ["execution_started", "execution_result", "approval", "suspension_release", "writes_suspended"];
+    internal static readonly string[] Kinds = ["execution_started", "execution_result", "approval", "suspension_release", "writes_suspended", "eplan_window_closed"];
 
     internal static readonly string[] Decisions = ["granted", "denied", "cancelled", "expired", "unavailable"];
 

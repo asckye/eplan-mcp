@@ -31,7 +31,7 @@ internal static class EplanCloser
     /// again every <see cref="AddinTimings.Resend"/> in case a request did not take. Not closed when EPLAN is still
     /// running after <see cref="AddinTimings.Close"/>, for example behind a dialog that is not on the list.
     /// </summary>
-    public static async Task<EplanClose> CloseAsync(IStartedEplan eplan, TimeProvider time, AddinTimings timings, CancellationToken cancellationToken)
+    public static async Task<EplanClose> CloseAsync(IStartedEplan eplan, TimeProvider time, AddinTimings timings, CancellationToken cancellationToken, bool closeHarmless = true)
     {
         long start = time.GetTimestamp();
         TimeSpan? asked = null;
@@ -47,7 +47,7 @@ internal static class EplanCloser
 
             if (asked is null || elapsed - asked >= timings.Resend)
             {
-                inTheWay = CloseHarmless(eplan, closed);
+                inTheWay = Sweep(eplan, closed, closeHarmless);
                 eplan.Refresh();
                 eplan.CloseMainWindow();
                 asked = elapsed;
@@ -60,16 +60,21 @@ internal static class EplanCloser
     }
 
     /// <summary>
-    /// Closes the windows on the list and adds them to <paramref name="closed"/> once each; returns the other windows
-    /// that can keep EPLAN open: dialogs and windows with an owner, other than EPLAN's main frame.
+    /// Closes the windows on the list, when <paramref name="close"/> (ADR-0063 decision 8), and adds them to
+    /// <paramref name="closed"/> once each; returns the other windows that can keep EPLAN open: dialogs and windows with
+    /// an owner, other than EPLAN's main frame, and the listed ones left open.
     /// </summary>
-    private static List<EplanWindow> CloseHarmless(IStartedEplan eplan, List<ClosedWindow> closed)
+    internal static List<EplanWindow> Sweep(IStartedEplan eplan, List<ClosedWindow> closed, bool close = true)
     {
         IReadOnlyList<EplanWindow> windows = eplan.Windows();
         var others = new List<EplanWindow>();
         foreach (EplanWindow window in windows)
         {
-            if (HarmlessWindows.Find(window, windows) is { } entry)
+            if (!close && HarmlessWindows.Find(window, windows) is not null)
+            {
+                others.Add(window);
+            }
+            else if (HarmlessWindows.Find(window, windows) is { } entry)
             {
                 eplan.CloseWindow(window);
                 if (!closed.Any(c => c.Window.Handle == window.Handle))

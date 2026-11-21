@@ -21,6 +21,16 @@ internal enum OutsideScratchWrites
     Allow,
 }
 
+/// <summary>What EplanMcp does with an EPLAN window on the harmless list (ADR-0063 decision 8): <c>eplanWindowWatch</c>.</summary>
+internal enum EplanWindowWatch
+{
+    /// <summary>Closes it and records that in the audit; the default.</summary>
+    Close,
+
+    /// <summary>Leaves it open and only names it, as for any other window in the way.</summary>
+    Report,
+}
+
 /// <summary>What writes to EPLAN's system master data, such as the parts database, need (ADR-0019).</summary>
 internal enum MasterDataWrites
 {
@@ -67,6 +77,9 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
     public ActionRunSwitch ActionTry { get; init; } = ActionRunSwitch.Off;
 
     public int PlanLifetimeHours { get; init; } = 24;
+
+    /// <summary>Whether harmless EPLAN windows are closed or only reported: <c>eplanWindowWatch</c> (ADR-0063).</summary>
+    public EplanWindowWatch EplanWindowWatch { get; init; } = EplanWindowWatch.Close;
 
     /// <summary>
     /// The roots engineering packs may reference in place, by name: <c>packSources</c> (ADR-0024 section 6); empty by
@@ -150,6 +163,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
             PackSources = new Dictionary<string, string>(sources, StringComparer.Ordinal),
             HttpAllowedOrigins = file?.HttpAllowedOrigins ?? [],
             PlanLifetimeHours = lifetime,
+            EplanWindowWatch = file?.EplanWindowWatch ?? defaults.EplanWindowWatch,
         }, null);
     }
 
@@ -160,6 +174,7 @@ internal sealed record HostConfig(IReadOnlyList<string> ScratchRoots, OutsideScr
     {
         public JsonElement? Layout { get; set; }
         public int PlanLifetimeHours { get; set; } = 24;
+        public EplanWindowWatch? EplanWindowWatch { get; set; }
         public List<string>? HttpAllowedOrigins { get; set; }
         public List<string>? ScratchRoots { get; set; }
 

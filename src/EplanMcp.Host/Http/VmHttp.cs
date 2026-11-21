@@ -43,7 +43,8 @@ internal static class VmHttp
         builder.Services.AddEplanMcp().WithHttpTransport(http => http.SessionMode = HttpServerSessionMode.Stateless)
             .WithRequestFilters(filters => filters.AddCallToolFilter(caller.Capture));
         builder.Services.AddSingleton<IBridgeDiscovery>(new PinnedDiscovery(discovery, candidates[0]));
-        builder.Services.AddSingleton<IBridgeClient>(services => new BridgeClient(services.GetRequiredService<IBridgeDiscovery>(), services.GetRequiredService<IBridgeConnector>(), services.GetRequiredService<ILogger<BridgeClient>>()) { FixedProcessId = candidates[0].ProcessId });
+        // The pinned client replaces AddEplanMcp's, behind the same window watch; the container still disposes it.
+        builder.Services.AddSingleton(services => new BridgeClient(services.GetRequiredService<IBridgeDiscovery>(), services.GetRequiredService<IBridgeConnector>(), services.GetRequiredService<ILogger<BridgeClient>>()) { FixedProcessId = candidates[0].ProcessId });
         WebApplication app = builder.Build();
         var gate = new HttpGate(config.HttpAllowedOrigins);
         app.Use(async (context, next) =>

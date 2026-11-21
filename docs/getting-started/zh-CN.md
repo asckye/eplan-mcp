@@ -112,7 +112,7 @@ EPLAN 还没有启动时，可以让模型调用 `eplan_session_start` 启动（
 | `eplan.installation`、`bridge.handshake`、`host.version` | 核对 EPLAN 2026 和 Host/插件版本。升级后重启 EPLAN；仍不匹配时关闭 EPLAN，再补注册。不要反复在 API 管理中卸载和加载。 |
 | `bridge.licence` | 核对 API 扩展与未签名插件的授权条件；不需要也不要提供授权文件或凭据。 |
 | 没有弹出审批 | 只读、`dry_run`、没有实际变化、普通 scratch 写入本来不审批。真实项目检查 Workbench 托盘/队列与 EPLAN 对话框；读清返回的拒绝或超时原因，不能让模型代答。 |
-| `EPLAN_BUSY` | 自己关闭 EPLAN 中未处理的模态窗口，等当前操作结束后再试。 |
+| `EPLAN_BUSY` | EplanMcp 会先自动关闭 EPLAN 的系统消息窗口（可在 `config.json` 用 `"eplanWindowWatch": "report"` 改为只报告），错误信息会写明关了什么或是哪个窗口挡着；其他窗口请自己处理，等当前操作结束后再试。 |
 | `config`、`data.directory`、`audit.directory` | 按 doctor 指出的配置错误修正文件；确认数据目录可写。审计写不进去会拒绝写入，不要删审计来绕过。目录尚未创建可能只是还没使用。 |
 | `suspension` 或结果未知 | 先在 EPLAN 中核实是否已修改；下一次写入会经审批渠道请你确认。不要直接重试未知结果的修改。 |
 | `exports`、`backups` | 查看空间占用，自己清理不再需要的文件；备份不会自动删除。 |

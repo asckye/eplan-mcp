@@ -579,6 +579,7 @@ internal static class Catalogue
         ("Audit.Kind.Approval", "Approval", "审批"),
         ("Audit.Kind.SuspensionRelease", "Suspension release", "解除暂停"),
         ("Audit.Kind.WritesSuspended", "Writes suspended", "写入暂停"),
+        ("Audit.Kind.EplanWindowClosed", "EPLAN window closed", "关闭 EPLAN 窗口"),
         ("Audit.Decision.Granted", "Approved", "已批准"),
         ("Audit.Decision.Denied", "Rejected", "已拒绝"),
         ("Audit.Decision.Cancelled", "Cancelled", "已取消"),

@@ -95,7 +95,10 @@ internal sealed class SessionLifecycleTools
     }
 
     private static string Started(SessionStartResult result) => string.Create(CultureInfo.InvariantCulture,
-        $"Started EPLAN {result.Version} ({result.Variant}), process {result.ProcessId}, connected after {result.Seconds:0} s.");
+        $"Started EPLAN {result.Version} ({result.Variant}), process {result.ProcessId}, connected after {result.Seconds:0} s.")
+        + (result.ClosedWindows.Count > 0
+            ? $" Its {string.Join(", ", result.ClosedWindows)} window was closed on the way; what it showed is in EPLAN's system log, EplLog.eldb."
+            : string.Empty);
 
     private static string Closed(SessionCloseResult result) => result.Execution == ExecutionState.Committed
         ? string.Create(CultureInfo.InvariantCulture, $"Closed EPLAN process {result.ProcessId}.")
@@ -126,6 +129,7 @@ internal sealed class SessionLifecycleTools
             Version = started.Version,
             BridgeVersion = started.Handshake.BridgeVersion,
             Seconds = started.Seconds,
+            ClosedWindows = [.. started.ClosedWindows.Select(c => c.Name).Distinct()],
             Hint = "No project is open; call eplan_project_open, or eplan_project_list for what EPLAN opened by itself.",
         }, null);
     }
@@ -332,6 +336,9 @@ internal sealed class SessionStartResult
 
     [Description("Seconds from the start to the add-in's handshake.")]
     public double Seconds { get; set; }
+
+    [Description("EPLAN windows closed while waiting, such as 'system messages'; their messages stay in EPLAN's system log.")]
+    public List<string> ClosedWindows { get; set; } = [];
 
     [Description("What to do next.")]
     public string? Hint { get; set; }

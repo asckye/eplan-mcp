@@ -14,7 +14,7 @@ Start Pro Panel:
 2. The call waits up to 3 minutes for the EplanMcp add-in in the new EPLAN to answer, with progress every 5 seconds.
 3. No project is opened. Call eplan_project_open next (or eplan_project_list for what EPLAN opened by itself).
 4. EPLAN's window is shown, because approvals of later writes appear in it. Starting takes an EPLAN licence.
-5. On TIMEOUT EPLAN is left running: it may be waiting on a dialog (licence, update, system messages). Ask the engineer to look at it, then call eplan_session_status.
+5. While waiting, EPLAN's system messages window is closed (unless config.json sets eplanWindowWatch to report); closedWindows says so. On TIMEOUT behind another dialog (licence, update) EPLAN is left running and the error names that window: ask the engineer to answer it, then call eplan_session_status. On TIMEOUT with no dialog in the way EPLAN is asked to close, so the next start is not blocked.
 
 ## Fields
 

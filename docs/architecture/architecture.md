@@ -450,7 +450,7 @@ sequenceDiagram
 - `planLifetimeHours` 为整数 1–24，默认 24，只能缩短新计划的可执行期；仅通过 `config.json` 修改，doctor 展示，无 MCP 修改入口（ADR-0028）。
 - 计划存储在创建前及每小时清理已到保留期限的普通记录；隔离数据及崩溃残留计入总占用。每份仍在主存储中的记录（含终态）保留完整 16 MiB 准入预留；doctor 的 `plans` 项报告记录数、实际字节及隔离数，不触发清理。
 - `config.json` 带 JSON Schema。优先级从低到高：内置默认值 → 用户配置 → 环境变量 → 命令行参数。启动时校验，有错误就拒绝启动，并指出具体是哪一项。
-- 没有 `config.json` 时的默认值：`scratchRoots` 为 `<数据根目录>\scratch`；`writesOutsideScratch` 为 `approve`，scratch 之外的每次写入都要工程师批准（ADR-0005，M3 设计 Q5）；可设为 `deny`（拒绝）或 `allow`（普通写入不再询问，Destructive、主数据、未验证写入和解除暂停仍询问；Host 每次写入时读这个值，[ADR-0061](../adr/0061-auto-allow-ordinary-writes.md)）；`approvalTimeoutSeconds` 为 120；`masterDataWrites` 为 `approve`，写部件库等系统主数据每次都要审批，执行前先备份库（ADR-0019，可设为 `deny`）。`packSources` 为空：工程包只能复制资源，不能就地引用；列出的根目录名（如 `"packSources": {"company-refs": "\\\\server\\eplan\\refs"}`）才可以被引用（ADR-0024 第 6 节）。
+- 没有 `config.json` 时的默认值：`scratchRoots` 为 `<数据根目录>\scratch`；`writesOutsideScratch` 为 `approve`，scratch 之外的每次写入都要工程师批准（ADR-0005，M3 设计 Q5）；可设为 `deny`（拒绝）或 `allow`（普通写入不再询问，Destructive、主数据、未验证写入和解除暂停仍询问；Host 每次写入时读这个值，[ADR-0061](../adr/0061-auto-allow-ordinary-writes.md)）；`approvalTimeoutSeconds` 为 120；`masterDataWrites` 为 `approve`，写部件库等系统主数据每次都要审批，执行前先备份库（ADR-0019，可设为 `deny`）。`packSources` 为空：工程包只能复制资源，不能就地引用；列出的根目录名（如 `"packSources": {"company-refs": "\\\\server\\eplan\\refs"}`）才可以被引用（ADR-0024 第 6 节）。`eplanWindowWatch` 为 `close`：EPLAN 的系统消息窗口等名单内的无害窗口在启动、关闭和 `EPLAN_BUSY` 时被关闭并记审计；设为 `report` 只报告不关闭（ADR-0063）。
 - 安全相关的配置（scratch 根目录、自动批准规则、启用 Code 级工具）**只能通过配置文件修改**，不提供修改它们的 MCP 工具，否则 AI 可以自己给自己放宽权限。这些限制在代码中强制执行，而不是只写在配置里。
 
 ### 8.10 协议版本

@@ -38,7 +38,7 @@
 | `HANDLE_EXPIRED` | 否 | `not_started` | 句柄过期，或者所属的 EPLAN 会话已经结束；提示按名称重新查询 |
 | `SESSION_NOT_SELECTED` | 否 | `not_started` | 有多个 EPLAN 实例；提示调用 `eplan_session_select` |
 | `EPLAN_NOT_CONNECTED` | 是 | `not_started` | 找不到运行中的 EPLAN，或插件没有加载；提示启动 EPLAN，或运行 `eplanmcp doctor` |
-| `EPLAN_BUSY` | 是 | `not_started` | 主线程在超时时间内不可用（有模态对话框或正在运行的操作）；提示请工程师关闭对话框 |
+| `EPLAN_BUSY` | 是 | `not_started` | 主线程在超时时间内不可用（有模态对话框或正在运行的操作）；Host 看一次 EPLAN 的窗口（ADR-0063）：名单内的系统消息窗口被关闭并记审计，信息末尾为“Call again.”；其他窗口在信息里写明，请工程师处理。调用本身不自动重试 |
 | `BRIDGE_INCOMPATIBLE` | 否 | `not_started` | 插件和 Host 的协议版本不兼容；提示运行 `eplanmcp install-addin` |
 | `LICENCE_MISSING` | 否 | 执行前 `not_started`，事务中 `rolled_back` | 缺少 API 授权，或授权已到期 |
 | `LICENCE_RESTRICTED` | 否 | 执行前 `not_started`，事务中 `rolled_back` | 授权存在但受限，例如开发者授权的页数限制，或只允许加载已签名的插件；提示运行 `eplanmcp doctor` 进行授权自检（ADR-0007） |
