@@ -1,10 +1,8 @@
 using System.ComponentModel;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
-using EplanMcp.Workbench.Commands;
 using EplanMcp.Workbench.Shell;
 using TiaOpenness.Gui.Controls;
 using TiaOpenness.Gui.Localization;
@@ -35,7 +33,6 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         Unloaded += (_, _) => Loc.Current.LanguageChanged -= OnLanguageChanged;
     }
 
-    public event Action? ExportDiagnosticsRequested;
 
     public FrameworkElement? Heading => PageTitle;
 
@@ -104,25 +101,52 @@ public partial class StatusPage : UserControl, IWorkbenchPage
         IReadOnlyList<StatusLine> suspensions = view.Suspensions;
         SuspensionBanner.Visibility = suspensions.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         Suspensions.ItemsSource = suspensions;
-        Groups.ItemsSource = view.Groups;
 
-        StatusLine[] allLines = [.. view.Groups.SelectMany(g => g.Lines)];
-        int okCount = allLines.Count(l => l.Status is CheckStatus.Ok or CheckStatus.Info);
-        int warnCount = allLines.Count(l => l.Status == CheckStatus.Warning);
-        int failCount = allLines.Count(l => l.Status == CheckStatus.Failure);
-        StatPass.Text = okCount.ToString(CultureInfo.InvariantCulture);
-        StatWarn.Text = warnCount.ToString(CultureInfo.InvariantCulture);
-        StatFail.Text = failCount.ToString(CultureInfo.InvariantCulture);
-        StatOverall.Text = failCount > 0 ? loc["Status.Failure"] : warnCount > 0 ? loc["Status.Warning"] : loc["Status.Ok"];
-        // The design: the overall state in its tone, the counts of warnings and failures in theirs once above zero.
-        StatOverall.SetResourceReference(TextBlock.ForegroundProperty, failCount > 0 ? "State.Error.Text" : warnCount > 0 ? "State.Warning.Text" : "State.Success.Text");
-        StatWarn.SetResourceReference(TextBlock.ForegroundProperty, warnCount > 0 ? "State.Warning.Text" : "Text.Primary");
-        StatFail.SetResourceReference(TextBlock.ForegroundProperty, failCount > 0 ? "State.Error.Text" : "Text.Primary");
+        // Workbench 4.0: what needs handling first, then what passed; each check with its group as a tag.
+        CheckRow[] rows = [.. view.Groups.SelectMany(g => g.Lines.Select(l => new CheckRow(g.Key, l)))];
+        CheckRow[] failing = [.. rows.Where(r => r.NeedsAction)];
+        CheckRow[] passed = [.. rows.Where(r => !r.NeedsAction)];
+        FailRows.ItemsSource = failing;
+        PassRows.ItemsSource = ShowFailed.IsChecked == true ? [] : passed;
+        FailSection.Visibility = failing.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        PassSection.Visibility = passed.Length > 0 && ShowFailed.IsChecked != true ? Visibility.Visible : Visibility.Collapsed;
+        FailCaption.Text = loc.T("Status.FailCaption", failing.Length);
+        PassCaption.Text = loc.T("Status.PassCaption", passed.Length);
+        SummaryTag.Visibility = rows.Length > 0 && !running ? Visibility.Visible : Visibility.Collapsed;
+        SummaryGlyph.Text = failing.Length > 0 ? "✕" : "✓";
+        SummaryGlyph.Tag = failing.Length > 0 ? "Error" : "Success";
+        SummaryText.Text = failing.Length > 0 ? loc.T("Status.NeedAction", failing.Length) : loc.T("Status.AllPassed", rows.Length);
+    }
+
+    private void OnViewChanged(object sender, RoutedEventArgs e)
+    {
+        if (PassRows is not null)
+        {
+            Show();
+        }
+    }
+
+    /// <summary>The add-in's fix: register it for the variants chosen, all of them when none is.</summary>
+    private void OnFix(object sender, RoutedEventArgs e)
+    {
+        if (_view is not { } view)
+        {
+            return;
+        }
+
+        if (!view.Variants.Any(v => v.IsSelected))
+        {
+            foreach (VariantChoice variant in view.Variants)
+            {
+                variant.IsSelected = true;
+            }
+        }
+
+        _ = view.RegisterAsync(false, CancellationToken.None);
     }
 
     private void OnRefresh(object sender, RoutedEventArgs e) => Refresh();
 
-    private void OnExportDiag(object sender, RoutedEventArgs e) => ExportDiagnosticsRequested?.Invoke();
 
     private void OnVariantChanged(object sender, RoutedEventArgs e) => Dispatcher.BeginInvoke(Show);
 

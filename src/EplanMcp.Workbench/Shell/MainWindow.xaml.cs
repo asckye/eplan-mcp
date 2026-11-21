@@ -89,11 +89,7 @@ public partial class MainWindow : Window
         McpPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
         ClientsPage.NavigateRequested += p => Navigate(p, NavigationOrigin.Shortcut);
         ApprovalsPage.AuditRequested += () => Navigate(WorkbenchPage.Audit, NavigationOrigin.Shortcut);
-        StatusPage.ExportDiagnosticsRequested += () =>
-        {
-            Navigate(WorkbenchPage.Logs, NavigationOrigin.Shortcut);
-            LogsPage.ExportDiagnostics();
-        };
+
         LogsPage.StorageSettingsRequested += () =>
         {
             Navigate(WorkbenchPage.Settings, NavigationOrigin.Shortcut);

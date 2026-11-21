@@ -69,9 +69,9 @@ internal static class Catalogue
         ("Vm.Done", "Permission refreshed. Check the actual rule above; a conflicting rule must be resolved before retrying.", "网络权限已刷新。核对上方实际规则；存在冲突时需要先处理再重试。"),
         ("Vm.Failed", "Error: VM command failed. Check the Host installation and network permission, then retry. Secret output is withheld.", "错误：虚拟机命令失败。检查 Host 安装和网络权限后重试；密钥命令的输出不会显示。"),
 
-        ("Addin.Title", "EPLAN add-in", "EPLAN 插件"),
-        ("Addin.Register", "Register EPLAN add-in", "注册 EPLAN 插件"),
-        ("Addin.Unregister", "Unregister", "撤销注册"),
+        ("Addin.Title", "EPLAN Bridge add-in variants", "EPLAN Bridge 插件变体管理"),
+        ("Addin.Register", "Register chosen", "注册所选插件"),
+        ("Addin.Unregister", "Unregister add-in", "卸载插件"),
         ("Addin.Help", "Close EPLAN before registering or unregistering. Registration starts EPLAN; handle its dialogs yourself. If not confirmed, check the EPLAN window before retrying. Unregister removes all recorded variants.", "注册或撤销前先关闭 EPLAN。注册会启动 EPLAN，遇到窗口请自己处理；报告“未确认”时先看留下的 EPLAN 窗口，不要连续重复注册。撤销会处理全部已记录变体。"),
         ("Addin.Choose", "Tick the variants to register.", "勾选要注册的变体。"),
         ("Addin.NoVariants", "No supported EPLAN variants detected. Install EPLAN, then refresh.", "未检测到支持的 EPLAN 变体，安装 EPLAN 后刷新。"),
@@ -272,11 +272,6 @@ internal static class Catalogue
         ("Clients.TransportHttp", "Mode: VM HTTP", "当前模式：虚拟机 HTTP"),
 
         // Checks page summary stats (Ctrl+5)
-        ("Status.StatOverall", "Overall", "总体状态"),
-        ("Status.StatPass", "Passed", "通过项"),
-        ("Status.StatWarn", "Warnings", "警告"),
-        ("Status.StatFail", "Errors", "失败"),
-        ("Status.ExportDiag", "Export diagnostics", "导出诊断包"),
 
         // Runtime Logs page (Ctrl+7)
         ("Logs.All", "All", "全部"),
@@ -517,8 +512,16 @@ internal static class Catalogue
         ("Audit.Break.NotARecord", "the line is not a record", "这一行不是记录"),
 
         // The status page (M5 design 4.4 item 4): doctor's checks by group, each severity in words (ERR-07).
-        ("Status.Refresh", "Refresh", "刷新"),
-        ("Status.Running", "Running eplanmcp doctor…", "正在运行 eplanmcp doctor……"),
+        ("Status.Refresh", "Check again", "重新检查"),
+        ("Status.Title", "Environment health", "环境健康检查"),
+        ("Status.ShowAll", "All", "全部"),
+        ("Status.ShowFailed", "Failed only", "只看失败"),
+        ("Status.FixAddin", "Register add-in", "一键注册插件"),
+        ("Status.AllPassed", "{0}/{0} passed", "{0}/{0} 项全部通过"),
+        ("Status.NeedAction", "{0} need handling", "{0} 项需要处理"),
+        ("Status.FailCaption", "Needs handling ({0})", "需要处理 ({0})"),
+        ("Status.PassCaption", "Passed ({0})", "已通过 ({0})"),
+        ("Status.RowName", "{0}, {1}: {2}", "{0}，{1}：{2}"),        ("Status.Running", "Running eplanmcp doctor…", "正在运行 eplanmcp doctor……"),
         ("Status.Summary", "eplanmcp {0}: {1}", "eplanmcp {0}：{1}"),
         ("Status.Overall.Ok", "everything is in order", "一切正常"),
         ("Status.Overall.Info", "everything is in order", "一切正常"),

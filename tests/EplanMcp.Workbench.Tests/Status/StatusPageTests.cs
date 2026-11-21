@@ -42,9 +42,12 @@ public sealed class StatusPageTests(WpfContext wpf)
 
             Assert.Equal(2, _host.Runs.Count);
             Assert.Equal("eplanmcp 0.1.0：有检查给出警告", ((TextBlock)page.FindName("Caption")).Text);
-            GroupBox[] cards = [.. Descendants<GroupBox>(page)];
-            Assert.Equal(["EPLAN 插件", "授权", "写入暂停", "下一次审批"], cards.Select(AutomationProperties.GetName));
-            Assert.Contains(Descendants<TextBlock>(cards[1]), t => t.Text == "正常");
+            // Workbench 4.0: what needs handling first, then what passed, each check with its group as a tag.
+            CheckRow[] failing = [.. ((ItemsControl)page.FindName("FailRows")).Items.Cast<CheckRow>()];
+            CheckRow[] passed = [.. ((ItemsControl)page.FindName("PassRows")).Items.Cast<CheckRow>()];
+            Assert.All(failing, r => Assert.True(r.NeedsAction));
+            Assert.Equal(["下一次审批", "写入暂停", "授权"], failing.Concat(passed).Select(r => r.Category).Distinct().Order(StringComparer.Ordinal));
+            Assert.Contains(passed, r => r.Category == "授权" && r.Severity == "正常");
             Assert.True(((FrameworkElement)page.FindName("SuspensionBanner")).IsVisible);
             Assert.Equal(AutomationLiveSetting.Polite, AutomationProperties.GetLiveSetting((TextBlock)page.FindName("Caption")));
             Assert.Same(page.FindName("PageTitle"), System.Windows.Input.Keyboard.FocusedElement);
@@ -98,7 +101,7 @@ public sealed class StatusPageTests(WpfContext wpf)
 
             Assert.StartsWith("错误：eplanmcp.exe 没有按时完成", ((TextBlock)page.FindName("ErrorText")).Text, StringComparison.Ordinal);
             Assert.StartsWith(_host.Executable + " doctor --format json", ((TextBox)page.FindName("ErrorDetails")).Text, StringComparison.Ordinal);
-            Assert.Equal("EPLAN 插件", AutomationProperties.GetName(Assert.Single(Descendants<GroupBox>(page))));
+            Assert.False(((FrameworkElement)page.FindName("PassSection")).IsVisible); // no checks to list
         }));
     }
 

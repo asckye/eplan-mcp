@@ -84,8 +84,9 @@
   <SolidColorBrush x:Key="State.Error.Text" Color="{Binding Color, Source={StaticResource Primer.diffRed}, Mode=OneWay}" />
   <SolidColorBrush x:Key="State.Error.Graphic" Color="{Binding Color, Source={StaticResource Ant.colorError}, Mode=OneWay}" />
   <SolidColorBrush x:Key="State.Error.Background" Color="{Binding Color, Source={StaticResource Ant.colorErrorBg}, Mode=OneWay}" />
-  <SolidColorBrush x:Key="State.Error.Border" Color="{Binding Color, Source={StaticResource Ant.colorErrorBorder}, Mode=OneWay}" />
   <SolidColorBrush x:Key="State.Error.Solid" Color="{Binding Color, Source={StaticResource Ant.colorErrorSolid}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Warning.Solid" Color="{Binding Color, Source={StaticResource Ant.colorWarningBorder}, Mode=OneWay}" />
+  <SolidColorBrush x:Key="State.Error.Border" Color="{Binding Color, Source={StaticResource Ant.colorErrorBorder}, Mode=OneWay}" />
   <SolidColorBrush x:Key="State.Info.Text" Color="{Binding Color, Source={StaticResource Primer.noteAccent}, Mode=OneWay}" />
   <SolidColorBrush x:Key="State.Info.Background" Color="{Binding Color, Source={StaticResource Primer.noteBg}, Mode=OneWay}" />
   <SolidColorBrush x:Key="State.Info.Border" Color="{Binding Color, Source={StaticResource Primer.noteBorder}, Mode=OneWay}" />
