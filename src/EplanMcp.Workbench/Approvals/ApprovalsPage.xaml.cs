@@ -103,6 +103,7 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     internal void Open(QuestionItem item)
     {
         ApprovalsTab.IsChecked = true;
+        PendingView.IsChecked = true;
         if (_view is not null && (_view.Pending.Contains(item) || _view.Answered.Contains(item)))
         {
             _view.Select(item);
@@ -112,8 +113,8 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     internal void FocusList()
     {
         UpdateLayout();
-        // The selected row in whichever section holds it, else the first waiting row, else the first answered one.
-        ListBox list = AnsweredList.SelectedItem is not null || Questions.Items.Count == 0 && AnsweredList.Items.Count > 0 ? AnsweredList : Questions;
+        // The list of the view shown: the waiting questions, or the history table.
+        ListBox list = HistoryView.IsChecked == true ? AnsweredList : Questions;
         object? row = list.Items.Count == 0 ? null : list.ItemContainerGenerator.ContainerFromItem(list.SelectedItem ?? list.Items[0]);
         Keyboard.Focus(row as IInputElement ?? list);
     }
@@ -127,9 +128,19 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
     private void Show()
     {
         bool shown = _view?.Shown is not null;
+        bool anyWaiting = _view?.Pending.Count > 0;
+        bool history = HistoryView.IsChecked == true;
+        // The pending view: the queue only while questions wait; the question shown beside it; else the empty page.
+        Layout.Visibility = history ? Visibility.Collapsed : Visibility.Visible;
+        HistoryPanel.Visibility = history ? Visibility.Visible : Visibility.Collapsed;
+        QueuePane.Visibility = QueueScroll.Visibility = anyWaiting ? Visibility.Visible : Visibility.Collapsed;
+        QueueColumn.Width = anyWaiting ? new GridLength(260) : new GridLength(0);
         DetailArea.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
         Empty.Visibility = shown ? Visibility.Collapsed : Visibility.Visible;
-        NoPending.Visibility = _view?.Pending.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
+        NoPending.Visibility = Empty.Visibility;
+        bool anyAnswered = _view?.Answered.Count > 0;
+        HistoryBox.Visibility = anyAnswered ? Visibility.Visible : Visibility.Collapsed;
+        HistoryEmpty.Visibility = anyAnswered ? Visibility.Collapsed : Visibility.Visible;
         // One selection across both sections: the shown question, in the section that holds it.
         Questions.SelectedItem = _view?.Shown is { IsPending: true } waiting ? waiting : null;
         AnsweredList.SelectedItem = _view?.Shown is { IsPending: false } answered ? answered : null;
@@ -146,14 +157,10 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
 
     private void ApplyPolicy()
     {
+        // The empty page says what still queues while routine writes are auto-approved (Workbench 4.0 design).
         bool manual = _policy?.RequireNormalWriteApproval ?? true;
-        Loc loc = Loc.Current;
-        bool denied = _policy?.WritesDenied == true;
-        PolicyBadgeText.Text = loc[denied ? "Approvals.PolicyDenied" : manual ? "Approvals.PolicyManual" : "Approvals.PolicyAuto"];
-        PolicyToggleButton.Content = loc[manual ? "Approvals.ToggleToAuto" : "Approvals.ToggleToManual"];
-        PolicyToggleButton.IsEnabled = !denied;
-        ApprovalPolicyBar.Visibility = _policy is not null && ApprovalsTab.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-        PolicyDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, manual && !denied ? "State.Success.Text" : "State.Warning.Text");
+        Empty.Text = Loc.Current[manual ? "Approvals.EmptyManual" : "Approvals.EmptyAuto"];
+        ViewSwitch.Visibility = ApprovalsTab.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ApplyButtons()
@@ -174,9 +181,6 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         {
             ApproveButton.Style = (Style)FindResource(approve);
         }
-
-        KindTag.Style = (Style)FindResource(destructive ? "Workbench.Tag.Error" : shown?.IsRelease == true ? "Workbench.Tag.Warning" : "Workbench.Tag.Accent");
-        StatusTag.Style = (Style)FindResource(shown?.IsPending == true ? "Workbench.Tag.Warning" : "Workbench.Tag");
     }
 
     private void OnViewChanged(object? sender, PropertyChangedEventArgs e) => Dispatcher.BeginInvoke(() =>
@@ -227,13 +231,20 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         }
     }
 
-    private void OnPolicyToggle(object sender, RoutedEventArgs e)
+    private void OnViewSwitched(object sender, RoutedEventArgs e)
     {
-        if (_policy is { } policy)
+        if (Layout is not null && HistoryPanel is not null)
         {
-            ApprovalPolicyUi.Set(policy, !policy.RequireNormalWriteApproval, this);
+            Show();
         }
     }
+
+    private void OnToHistory(object sender, RoutedEventArgs e) => HistoryView.IsChecked = true;
+
+    /// <summary>A history row's audit link: the audit page, where the decision is in the chain.</summary>
+    internal event Action? AuditRequested;
+
+    private void OnHistoryAudit(object sender, RoutedEventArgs e) => AuditRequested?.Invoke();
 
     private void ReloadCalls()
     {
@@ -341,6 +352,12 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         {
             _view.Select(item);
         }
+
+        // A history row opens its question in the pending view, where the detail shows how it ended.
+        if (ReferenceEquals(sender, AnsweredList) && AnsweredList.IsKeyboardFocusWithin && AnsweredList.SelectedItem is not null)
+        {
+            PendingView.IsChecked = true;
+        }
     }
 
     private void OnListKeyDown(object sender, KeyEventArgs e)
@@ -421,7 +438,7 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         // Side by side, the detail fills the right of the queue pane; in a narrow window it goes below the list.
         bool wide = ActualWidth == 0 || ActualWidth >= SideBySide;
         NarrowDetailRow.Height = wide || DetailArea.Visibility != Visibility.Visible ? GridLength.Auto : new GridLength(2, GridUnitType.Star);
-        Grid.SetColumnSpan(Questions, wide ? 1 : 2);
+        Grid.SetColumnSpan(QueueScroll, wide ? 1 : 2);
         Grid.SetColumnSpan(QueuePane, wide ? 1 : 2);
         Grid.SetRow(DetailArea, wide ? 0 : 2);
         Grid.SetRowSpan(DetailArea, wide ? 2 : 1);
@@ -440,7 +457,8 @@ public partial class ApprovalsPage : UserControl, IWorkbenchPage
         int waiting = _view?.Pending.Count ?? 0;
         int answered = _view?.Answered.Count ?? 0;
         WaitingCount.Text = waiting.ToString(CultureInfo.CurrentCulture);
-        AnsweredCount.Text = answered.ToString(CultureInfo.CurrentCulture);
+        PendingViewCount.Text = loc.T("Approvals.SegCount", waiting);
+        HistoryViewCount.Text = loc.T("Approvals.SegCount", answered);
         AutomationProperties.SetName(Questions, loc.T("Approvals.Waiting", waiting));
         AutomationProperties.SetName(AnsweredList, loc.T("Approvals.Answered", answered));
         PendingCountText.Text = waiting.ToString(CultureInfo.CurrentCulture);

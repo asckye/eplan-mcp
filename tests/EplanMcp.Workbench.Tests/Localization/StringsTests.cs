@@ -18,7 +18,7 @@ public sealed partial class StringsTests
     private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.Brand", "Shell.WindowTitle", "Shell.Section", "Rail.Mcp", "Mcp.TagStdio", "Settings.Chinese", "Settings.English", "Question.SuspendedValue",
         "Clients.Name.ClaudeCode", "Clients.Name.Codex", "Clients.Name.GeminiCli", "Clients.Name.QwenCode", "Clients.Name.KimiCode", "Clients.Name.Codebuddy",
         "Clients.Name.Opencode", "Clients.Name.QwenAgent", "Clients.Name.Cursor", "Clients.Name.VscodeCopilot",
-        "Shell.NoEplan", "Shell.ClientPid", "Shell.AuditCount", "Shell.CrumbSeparator", "Shell.StatusSeparator", "Session.Detail",
+        "Shell.NoEplan", "Shell.ClientPid", "Shell.AuditCount", "Shell.CrumbSeparator", "Shell.StatusSeparator", "Session.Detail", "Question.DestructiveTier", "Approvals.SegCount",
     ];
 
     public static TheoryData<string, string, string> Entries()

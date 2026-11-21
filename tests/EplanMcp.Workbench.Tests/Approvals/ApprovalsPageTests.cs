@@ -101,7 +101,10 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Assert.True(icon.IsVisible);
             Assert.Equal(page.FindResource("Primer.warn"), text.Foreground);
             Assert.StartsWith("结果未知：写入已暂停", text.Text, StringComparison.Ordinal);
-            var rows = (ListBox)page.FindName("AnsweredList"); // answered questions are in their own section
+            var history = (RadioButton)page.FindName("HistoryView");
+            history.IsChecked = true; // answered questions are in the history table (Workbench 4.0)
+            WpfContext.Drain();
+            var rows = (ListBox)page.FindName("AnsweredList");
             Assert.Single(Descendants<System.Windows.Shapes.Path>(rows), p => p.IsVisible && p.Style == page.FindResource("Primer.AlertIcon.Warning")); // the row of r1
 
             window.Open(Item(done));
@@ -237,7 +240,9 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
 
             Assert.True(backup.IsVisible && backup.IsReadOnly);
             Assert.Equal(@"执行前先备份到 D:\EplanMcp\backups\Line1", backup.Text);
-            Assert.Contains(Descendants<TextBlock>(page), t => t.Text == "破坏性操作：执行前先备份项目" && t.IsVisible);
+            // The Workbench 4.0 box names the tier and the backup at the top of the question.
+            Assert.Contains(Descendants<TextBlock>(page), t => t.Text == "DESTRUCTIVE · ADR-0035" && t.IsVisible);
+            Assert.Contains(Descendants<TextBlock>(page), t => t.Text == "执行前备份" && t.IsVisible);
         }));
     }
 
@@ -286,8 +291,8 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
             Question question = Add("r1");
             Open();
             Press(Button(page, "ApproveButton"));
-            // Both sections show at once (the 2026-11-20 design): the counts beside their captions, the lists named with them.
-            Assert.Equal(("0", "1"), (((TextBlock)page.FindName("WaitingCount")).Text, ((TextBlock)page.FindName("AnsweredCount")).Text));
+            // The counts beside the queue's caption and in the pending/history switch (Workbench 4.0), the lists named with them.
+            Assert.Equal(("0", " (1)"), (((TextBlock)page.FindName("WaitingCount")).Text, ((System.Windows.Documents.Run)page.FindName("HistoryViewCount")).Text));
             Assert.Equal("等待中（0）", AutomationProperties.GetName((ListBox)page.FindName("Questions")));
             Assert.True(((FrameworkElement)page.FindName("NoPending")).IsVisible);
 
@@ -311,7 +316,7 @@ public sealed class ApprovalsPageTests(WpfContext wpf) : IDisposable
         {
             Add("r1");
             var detail = (FrameworkElement)page.FindName("DetailArea");
-            var list = (FrameworkElement)page.FindName("Questions");
+            var list = (FrameworkElement)page.FindName("QueueScroll");
 
             Resize(window, 800); // narrow window puts page under 760
             Assert.True(page.ActualWidth < 760);

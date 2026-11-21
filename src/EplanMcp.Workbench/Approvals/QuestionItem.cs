@@ -144,10 +144,57 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
         ? Loc.Current.T("Question.ItemName", Tool, Tier, ProjectName, Countdown.Clock(Left))
         : Loc.Current.T("Question.AnsweredName", Tool, ProjectName, Result);
 
+    /// <summary>The queue row's tone word (Workbench 4.0): "!" for a Write that waits, "✕" for a Destructive write or a release; how it ended once answered.</summary>
+    public string BadgeGlyph => !IsPending ? (Question.End == QuestionEnd.Approved ? "✓" : "✕") : IsDestructive || IsRelease ? "✕" : "!";
+
+    /// <summary>What kind of question this is, as the queue row's first line names it.</summary>
+    public string Badge => !IsPending ? Result : Text(IsRelease ? "Question.BadgeRelease" : IsDestructive ? "Question.BadgeDestructive" : "Question.BadgeWrite");
+
+    /// <summary>The badge's tone (Workbench 4.0): a Destructive write, a release and a refusal in the error colour; an approval in the success colour; else the warning colour.</summary>
+    public string BadgeTone => !IsPending ? (Question.End == QuestionEnd.Approved ? "Success" : "Error") : IsDestructive || IsRelease ? "Error" : "Warning";
+
+    /// <summary>The time left as <c>m:ss</c>, beside the badge; empty once answered.</summary>
+    public string Timer => IsPending ? Countdown.Clock(Left) : ArrivedText;
+
+    /// <summary>The project and how many changes, under the tool in the queue row.</summary>
+    public string Summary => Loc.Current.T("Question.Summary", ProjectName, _changes.Lines.Count + _changes.MoreLines);
+
+    /// <summary>The detail's first line: who asks, the Host's request ID and the tool, as data (APR-07, APR-08).</summary>
+    public string MetaLine => Client + " · " + ProjectText.Line(RequestId, 64) + " · " + Tool;
+
+    /// <summary>The tag beside the title: the time left and what happens at the end, or how the question ended.</summary>
+    public string StateText => !IsPending ? Result
+        : Loc.Current.T(IsRelease ? "Question.StateRelease" : IsDestructive ? "Question.StateDestructive" : "Question.StateWrite", Countdown.Clock(Left));
+
+    /// <summary>The change list with a line number and, for lines the Host writes as "+ " or "- ", the diff's sign.</summary>
+    public IReadOnlyList<DiffLine> DiffLines => [.. _changes.Lines.Select((line, i) => DiffLine.Of(i + 1, line))];
+
+    /// <summary>"+3 −2" for the diff's header; empty when no line is an addition or removal.</summary>
+    public string DiffCounts
+    {
+        get
+        {
+            int added = _changes.Lines.Count(l => DiffLine.Of(0, l).IsAdded);
+            int removed = _changes.Lines.Count(l => DiffLine.Of(0, l).IsRemoved);
+            return added + removed == 0 ? string.Empty : "+" + added.ToString(CultureInfo.InvariantCulture) + " −" + removed.ToString(CultureInfo.InvariantCulture);
+        }
+    }
     private ApprovalAskParams Ask => Question.Ask;
 
     /// <summary>Every property may have changed: the question ended, the language switched or a second passed.</summary>
     public void Refresh() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
 
     private static string Text(string key) => Loc.Current[key];
+}
+
+/// <summary>One line of a question's change list as the Workbench 4.0 diff shows it: its number and its sign.</summary>
+internal sealed record DiffLine(string Number, string Sign, bool IsAdded, bool IsRemoved)
+{
+    /// <summary>A line is an addition or removal only when the Host wrote "+ " or "- " first: "-K1" is a device, not a removal.</summary>
+    public static DiffLine Of(int number, string line)
+    {
+        bool added = line.StartsWith("+ ", StringComparison.Ordinal);
+        bool removed = line.StartsWith("- ", StringComparison.Ordinal);
+        return new DiffLine(number.ToString(CultureInfo.InvariantCulture), added ? "+" : removed ? "−" : string.Empty, added, removed);
+    }
 }
