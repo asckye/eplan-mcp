@@ -2,65 +2,69 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization" Focusable="False">
+  <!--
+    The VM's key-free HTTP service (Workbench 4.0 design): the addresses in one row with their actions, the start or stop
+    on the right; the endpoint and the service's state in a code line; the firewall rule below.
+  -->
   <StackPanel>
-    <TextBlock Text="{l:Tr Vm.Help}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Bottom.SM}" />
-
-    <Grid Margin="{StaticResource Ui.Gap.Bottom.XS}">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*" />
-        <ColumnDefinition Width="12" />
-        <ColumnDefinition Width="120" />
-        <ColumnDefinition Width="12" />
-        <ColumnDefinition Width="*" />
-      </Grid.ColumnDefinitions>
-      <StackPanel Grid.Column="0">
-        <Label x:Name="AddressLabel" Content="{l:Tr Vm.Address}" Target="{Binding ElementName=Address}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-        <ComboBox x:Name="Address" Style="{StaticResource Primer.Select}" FocusVisualStyle="{StaticResource Primer.Focus}" AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}" SelectionChanged="OnInput" />
-        <TextBlock x:Name="AddressError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="{StaticResource Ui.Gap.Left.SM}">
+        <Button x:Name="Start" Tag="start" Content="{l:Tr Vm.Start}" Style="{StaticResource Workbench.ButtonPrimaryMd}" Click="OnAction" />
+        <Button x:Name="Stop" Tag="stop" Content="{l:Tr Vm.Stop}" Style="{StaticResource Workbench.ButtonDangerMd}" Click="OnAction" />
       </StackPanel>
-      <StackPanel Grid.Column="2">
-        <Label x:Name="PortLabel" Content="{l:Tr Vm.Port}" Target="{Binding ElementName=Port}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-        <TextBox x:Name="Port" Style="{StaticResource Primer.Input}" AutomationProperties.LabeledBy="{Binding ElementName=PortLabel}" TextChanged="OnInput" />
-        <TextBlock x:Name="PortError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-      </StackPanel>
-      <StackPanel Grid.Column="4">
-        <Label x:Name="HostLabel" Content="{l:Tr Vm.Host}" Target="{Binding ElementName=HostAddress}" Margin="{StaticResource Ui.Gap.Bottom.XS}" />
-        <TextBox x:Name="HostAddress" Style="{StaticResource Primer.Input}" AutomationProperties.LabeledBy="{Binding ElementName=HostLabel}" TextChanged="OnInput" />
-        <TextBlock x:Name="HostError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-      </StackPanel>
-    </Grid>
+      <WrapPanel>
+        <StackPanel Margin="{StaticResource Ui.Gap.Wrap.XS}">
+          <Label x:Name="AddressLabel" Content="{l:Tr Vm.Address}" Target="{Binding ElementName=Address}" Style="{StaticResource Workbench.FieldLabel}" />
+          <ComboBox x:Name="Address" Width="140" Style="{StaticResource Primer.Select}" FontFamily="{DynamicResource Ui.FontMono}" FocusVisualStyle="{StaticResource Primer.Focus}" AutomationProperties.LabeledBy="{Binding ElementName=AddressLabel}" SelectionChanged="OnInput" />
+          <TextBlock x:Name="AddressError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" MaxWidth="140" AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+        <StackPanel Margin="{StaticResource Ui.Gap.Wrap.XS}">
+          <Label x:Name="PortLabel" Content="{l:Tr Vm.Port}" Target="{Binding ElementName=Port}" Style="{StaticResource Workbench.FieldLabel}" />
+          <TextBox x:Name="Port" Width="72" Style="{StaticResource Primer.Input}" FontFamily="{DynamicResource Ui.FontMono}" AutomationProperties.LabeledBy="{Binding ElementName=PortLabel}" TextChanged="OnInput" />
+          <TextBlock x:Name="PortError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" MaxWidth="72" AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+        <StackPanel Margin="{StaticResource Ui.Gap.Wrap.XS}">
+          <Label x:Name="HostLabel" Content="{l:Tr Vm.Host}" Target="{Binding ElementName=HostAddress}" Style="{StaticResource Workbench.FieldLabel}" />
+          <TextBox x:Name="HostAddress" Width="130" Style="{StaticResource Primer.Input}" FontFamily="{DynamicResource Ui.FontMono}" AutomationProperties.LabeledBy="{Binding ElementName=HostLabel}" TextChanged="OnInput" />
+          <TextBlock x:Name="HostError" Style="{StaticResource Primer.Text.warn}" TextWrapping="Wrap" MaxWidth="130" AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+        <StackPanel Margin="{StaticResource Ui.Gap.Wrap.XS}">
+          <Label x:Name="InstanceLabel" Content="{l:Tr Vm.Instance}" Target="{Binding ElementName=Instance}" Style="{StaticResource Workbench.FieldLabel}" />
+          <ComboBox x:Name="Instance" Width="100" Style="{StaticResource Primer.Select}" FontFamily="{DynamicResource Ui.FontMono}" FocusVisualStyle="{StaticResource Primer.Focus}" AutomationProperties.LabeledBy="{Binding ElementName=InstanceLabel}" SelectionChanged="OnInstance" />
+        </StackPanel>
+        <Button x:Name="Instances" Tag="instances" Content="{l:Tr Vm.CheckInstances}" Style="{StaticResource Workbench.ButtonMd}" Click="OnAction" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.VmButton}" />
+        <Button x:Name="Allow" Tag="allow" Content="{l:Tr Vm.Allow}" Style="{StaticResource Workbench.ButtonMd}" Click="OnAction" VerticalAlignment="Top" Margin="{StaticResource Ui.Gap.VmButton}" />
+      </WrapPanel>
+    </DockPanel>
 
-    <Label x:Name="InstanceLabel" Content="{l:Tr Vm.Instance}" Target="{Binding ElementName=Instance}" Margin="{StaticResource Ui.Inset.Vertical.XS}" />
-    <ComboBox x:Name="Instance" Style="{StaticResource Primer.Select}" FocusVisualStyle="{StaticResource Primer.Focus}" AutomationProperties.LabeledBy="{Binding ElementName=InstanceLabel}" SelectionChanged="OnInstance" />
-
-    <WrapPanel Margin="{StaticResource Ui.Inset.Vertical.XS}">
-      <Button x:Name="Instances" Tag="instances" Content="{l:Tr Vm.CheckInstances}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="{StaticResource Ui.Gap.Wrap.XS}" />
-      <Button x:Name="Start" Tag="start" Content="{l:Tr Vm.Start}" Style="{StaticResource Primer.Primary}" Click="OnAction" Margin="{StaticResource Ui.Gap.Wrap.XS}" />
-      <Button x:Name="Stop" Tag="stop" Content="{l:Tr Vm.Stop}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="{StaticResource Ui.Gap.Wrap.XS}" />
-    </WrapPanel>
-
-    <Border Style="{StaticResource Primer.Alert.Info}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
+    <!-- The endpoint and the service's state, as a code line. -->
+    <Border Style="{StaticResource Workbench.CodeBox}" Padding="{StaticResource Ui.Inset.CodeLine}" Margin="{StaticResource Ui.Gap.Top.XS}">
       <DockPanel>
-        <Path x:Name="ServiceIcon" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Info}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Right.XS}" />
-        <TextBlock x:Name="ServiceStatus" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.SM}">
+          <Path x:Name="ServiceIcon" Style="{StaticResource Primer.AlertIcon.Info}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+          <TextBlock x:Name="ServiceStatus" Style="{StaticResource Workbench.CellMono}" Foreground="{DynamicResource Text.Secondary}" TextWrapping="Wrap" MaxWidth="360" AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+        <TextBlock x:Name="Endpoint" Style="{StaticResource Workbench.CellMono}" Foreground="{DynamicResource Text.Secondary}" VerticalAlignment="Center" />
       </DockPanel>
     </Border>
 
-    <TextBlock x:Name="FirewallLabel" Text="{l:Tr Vm.Network}" Style="{StaticResource Ui.Text.BodyStrong}" Margin="{StaticResource Ui.Gap.Top.XS}" />
-    <TextBox x:Name="FirewallValue" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.LabeledBy="{Binding ElementName=FirewallLabel}" Margin="{StaticResource Ui.Gap.Top.XXS}" />
-    <WrapPanel Margin="{StaticResource Ui.Inset.Vertical.XS}">
-      <Button x:Name="Allow" Tag="allow" Content="{l:Tr Vm.Allow}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="{StaticResource Ui.Gap.Wrap.XS}" />
-      <Button x:Name="Remove" Tag="remove" Content="{l:Tr Vm.Remove}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="{StaticResource Ui.Gap.Wrap.XS}" />
-      <Button x:Name="Refresh" Tag="refresh" Content="{l:Tr Vm.Refresh}" Style="{StaticResource Primer.Secondary}" Click="OnAction" Margin="{StaticResource Ui.Gap.Wrap.XS}" />
-    </WrapPanel>
-    <TextBlock Text="{l:Tr Vm.Uac}" Style="{StaticResource Primer.Muted}" TextWrapping="Wrap" />
+    <!-- The firewall rule that lets only the host in. -->
+    <DockPanel Margin="{StaticResource Ui.Gap.Top.SM}">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="{StaticResource Ui.Gap.Left.SM}">
+        <Button x:Name="Remove" Tag="remove" Content="{l:Tr Vm.Remove}" Style="{StaticResource Workbench.ButtonSm}" Click="OnAction" Margin="{StaticResource Ui.Gap.Right.XXS}" />
+        <Button x:Name="Refresh" Tag="refresh" Content="{l:Tr Vm.Refresh}" Style="{StaticResource Workbench.ToolButton}" Click="OnAction" />
+      </StackPanel>
+      <StackPanel>
+        <TextBlock x:Name="FirewallLabel" Text="{l:Tr Vm.Network}" Style="{StaticResource Workbench.BoxCaption}" />
+        <TextBox x:Name="FirewallValue" Style="{StaticResource Workbench.CodeValue}" AutomationProperties.LabeledBy="{Binding ElementName=FirewallLabel}" />
+      </StackPanel>
+    </DockPanel>
+    <TextBlock Text="{l:Tr Vm.Uac}" Style="{StaticResource Workbench.SettingHelp}" />
 
-    <ProgressBar x:Name="Working" Style="{StaticResource Primer.Progress}" IsIndeterminate="True" AutomationProperties.Name="{l:Tr Vm.Working}" Visibility="Collapsed" Margin="{StaticResource Ui.Gap.Top.XS}" />
-    <Border Style="{StaticResource Primer.Alert.Info}" Margin="{StaticResource Ui.Gap.Top.XS}">
-      <DockPanel>
-        <Path x:Name="StatusIcon" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Info}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Right.XS}" />
-        <TextBlock x:Name="Status" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-      </DockPanel>
-    </Border>
+    <ProgressBar x:Name="Working" Style="{StaticResource Primer.Progress}" IsIndeterminate="True" Height="2" AutomationProperties.Name="{l:Tr Vm.Working}" Visibility="Collapsed" Margin="{StaticResource Ui.Gap.Top.XS}" />
+    <DockPanel Margin="{StaticResource Ui.Gap.Top.XS}">
+      <Path x:Name="StatusIcon" DockPanel.Dock="Left" Style="{StaticResource Primer.AlertIcon.Info}" Width="{StaticResource Ui.IconSize.Small}" Height="{StaticResource Ui.IconSize.Small}" Margin="{StaticResource Ui.Gap.Right.XS}" VerticalAlignment="Top" />
+      <TextBlock x:Name="Status" Style="{StaticResource Workbench.CellText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+    </DockPanel>
   </StackPanel>
 </UserControl>

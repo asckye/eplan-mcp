@@ -1603,4 +1603,48 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
+  </Style>
+
+  <!-- ===== Workbench 4.0 MCP page: field labels, 32 px buttons, version tiles ===== -->
+  <Style x:Key="Workbench.FieldLabel" TargetType="Label">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.FieldLabel}" />
+  </Style>
+  <Style x:Key="Workbench.ButtonMd" TargetType="Button" BasedOn="{StaticResource Primer.Secondary}">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.ButtonMd}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="ux:Ux.CornerRadius" Value="8" />
+  </Style>
+  <Style x:Key="Workbench.ButtonPrimaryMd" TargetType="Button" BasedOn="{StaticResource Primer.Primary}">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.ButtonMd}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="ux:Ux.CornerRadius" Value="8" />
+  </Style>
+  <Style x:Key="Workbench.ButtonDangerMd" TargetType="Button" BasedOn="{StaticResource Primer.Danger}">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.ButtonMd}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="ux:Ux.CornerRadius" Value="8" />
+  </Style>
+  <Style x:Key="Workbench.TileCode" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource Ui.FontMono}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource Text.Tertiary}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <!-- A year's tile: faded on the pane colour when not installed, elevated when it is, the accent border on the newest. -->
+  <Style x:Key="Workbench.VersionTile" TargetType="Border">
+    <Setter Property="Padding" Value="{StaticResource Ui.Inset.VersionTile}" />
+    <Setter Property="Margin" Value="{StaticResource Ui.Gap.VersionTile}" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Border.Layer}" />
+    <Setter Property="Background" Value="{DynamicResource Surface.Pane}" />
+    <Setter Property="Opacity" Value="0.62" />
   </Style></ResourceDictionary>

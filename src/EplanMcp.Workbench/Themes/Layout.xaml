@@ -159,6 +159,13 @@
   <Thickness x:Key="Ui.Inset.SettingsFooter">16</Thickness>
   <Thickness x:Key="Ui.Inset.FooterNote">0,8,0,0</Thickness>
   <Thickness x:Key="Ui.Inset.CcTile">14</Thickness>
+  <Thickness x:Key="Ui.Gap.Left.SM">12,0,0,0</Thickness>
+  <Thickness x:Key="Ui.Gap.VersionTile">0,0,10,0</Thickness>
+  <Thickness x:Key="Ui.Inset.VersionTile">12,10</Thickness>
+  <Thickness x:Key="Ui.Inset.ButtonMd">12,0</Thickness>
+  <Thickness x:Key="Ui.Inset.FieldLabel">0,0,0,4</Thickness>
+  <Thickness x:Key="Ui.Gap.VmButton">0,17,8,8</Thickness>
+  <Thickness x:Key="Ui.Inset.CodeLine">14,8</Thickness>
   <Thickness x:Key="Ui.Gap.SectionLabel">2,0,0,8</Thickness>
   <Thickness x:Key="Ui.Gap.Horizontal.SM">12,0</Thickness>
   <Thickness x:Key="Ui.Inset.ResultStrip">16,8</Thickness>

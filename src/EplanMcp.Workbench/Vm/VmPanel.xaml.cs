@@ -97,6 +97,8 @@ public partial class VmPanel : UserControl
         }
 
         FirewallValue.Text = view.Firewall;
+        // The design's code line: where the clients reach the service; no key, the firewall rule decides (ADR-0062).
+        Endpoint.Text = Loc.Current.T("Vm.Endpoint", view.Address, view.Port);
         foreach ((Control field, TextBlock error, string text) in new[] { ((Control)Address, AddressError, view.AddressError), (Port, PortError, view.PortError), (HostAddress, HostError, view.HostError) })
         {
             if (error.Text != text)
@@ -120,6 +122,9 @@ public partial class VmPanel : UserControl
         AutomationProperties.SetHelpText(Instance, view.Running ? Loc.Current["Vm.StopFirst"] : view.DisabledReason("start"));
         Instance.ToolTip = AutomationProperties.GetHelpText(Instance);
         HostAddress.IsEnabled = !view.Busy;
+        // One place for start or stop, as the design's single service button.
+        Start.Visibility = view.Running ? Visibility.Collapsed : Visibility.Visible;
+        Stop.Visibility = view.Running ? Visibility.Visible : Visibility.Collapsed;
         Working.Visibility = view.Busy || view.Starting ? Visibility.Visible : Visibility.Collapsed;
         ServiceIcon.SetResourceReference(StyleProperty, view.ServiceFailed ? "Primer.AlertIcon.Error" : "Primer.AlertIcon.Info");
         if (ServiceStatus.Text != view.ServiceStatus)

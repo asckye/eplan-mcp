@@ -18,7 +18,7 @@ public sealed partial class StringsTests
     private static readonly string[] _sameInBothLanguages = ["App.Name", "Shell.Brand", "Shell.WindowTitle", "Shell.Section", "Rail.Mcp", "Mcp.TagStdio", "Settings.Chinese", "Settings.English", "Question.SuspendedValue",
         "Clients.Name.ClaudeCode", "Clients.Name.Codex", "Clients.Name.GeminiCli", "Clients.Name.QwenCode", "Clients.Name.KimiCode", "Clients.Name.Codebuddy",
         "Clients.Name.Opencode", "Clients.Name.QwenAgent", "Clients.Name.Cursor", "Clients.Name.VscodeCopilot",
-        "Shell.NoEplan", "Shell.ClientPid", "Shell.AuditCount", "Shell.CrumbSeparator", "Shell.StatusSeparator", "Session.Detail", "Question.DestructiveTier", "Approvals.SegCount", "Audit.ColHash", "Audit.Prev", "Audit.HashLabel", "Audit.InspectorX", "Settings.Timeout60", "Settings.Timeout120", "Settings.Timeout300", "Settings.AboutTitle", "Settings.Releases", "Settings.ReleasesUrl", "Settings.HomepageUrl",
+        "Shell.NoEplan", "Shell.ClientPid", "Shell.AuditCount", "Shell.CrumbSeparator", "Shell.StatusSeparator", "Session.Detail", "Question.DestructiveTier", "Approvals.SegCount", "Audit.ColHash", "Audit.Prev", "Audit.HashLabel", "Audit.InspectorX", "Settings.Timeout60", "Settings.Timeout120", "Settings.Timeout300", "Settings.AboutTitle", "Settings.Releases", "Settings.ReleasesUrl", "Settings.HomepageUrl", "Mcp.StdioCode", "Mcp.HttpCode", "Mcp.Check", "Mcp.Dot",
     ];
 
     public static TheoryData<string, string, string> Entries()

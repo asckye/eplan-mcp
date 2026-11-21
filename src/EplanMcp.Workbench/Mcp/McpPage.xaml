@@ -5,83 +5,117 @@
     xmlns:l="clr-namespace:TiaOpenness.Gui.Localization"
     xmlns:vm="clr-namespace:EplanMcp.Workbench.Vm"
     Focusable="False">
-  <!-- MCP server (2026-11-20 design): the bar with the transport tag, the transport card with two tiles, the Host card. -->
+  <!--
+    MCP server (Workbench 4.0 design): the title and the transport's state in the bar, "Configure AI clients" on the
+    right; the transport box with two tiles and, for HTTP, the VM service; the EPLAN versions and the Host program.
+  -->
   <DockPanel>
     <Border DockPanel.Dock="Top" Style="{StaticResource Workbench.IdeBar}">
       <DockPanel>
-        <Button x:Name="GoClientsButton" DockPanel.Dock="Right" Style="{StaticResource Primer.Secondary}" MinHeight="28" Content="{l:Tr Mcp.GoClients}" Click="OnGoClients" />
+        <Button x:Name="GoClientsButton" DockPanel.Dock="Right" Style="{StaticResource Workbench.ButtonSmPrimary}" Content="{l:Tr Mcp.GoClients}" Click="OnGoClients" />
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <TextBlock x:Name="PageTitle" Text="{l:Tr Mcp.Title}" Style="{StaticResource Ui.Text.BodyStrong}" FontSize="13" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Right.SM}"
+          <TextBlock x:Name="PageTitle" Text="{l:Tr Mcp.Title}" Style="{StaticResource Workbench.BarTitle}"
                      AutomationProperties.HeadingLevel="Level1" Focusable="True" KeyboardNavigation.IsTabStop="False" FocusVisualStyle="{StaticResource Primer.Focus}" />
-          <Border x:Name="TransportTag" Style="{StaticResource Workbench.Tag.Success}">
-            <TextBlock x:Name="TransportTagText" VerticalAlignment="Center" />
+          <Border Style="{StaticResource Workbench.BarSeparator}" />
+          <Border x:Name="TransportTag" Style="{StaticResource Workbench.CcTag}">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock x:Name="TransportGlyph" Style="{StaticResource Workbench.ToneGlyph}" />
+              <TextBlock x:Name="TransportTagText" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+            </StackPanel>
           </Border>
         </StackPanel>
       </DockPanel>
     </Border>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-      <StackPanel Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="820">
-        <!-- Card 1: transport and endpoint, the two choices as tiles. -->
-        <Border Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.SettingsCard}" Margin="{StaticResource Ui.Gap.Bottom.Card}">
+      <StackPanel Margin="{StaticResource Ui.Inset.DetailPage}" MaxWidth="880">
+        <!-- Transport and address: two tiles; for HTTP the VM service below them. -->
+        <Border Style="{StaticResource Workbench.Box}" Padding="{StaticResource Ui.Inset.SettingsBox}" Margin="{StaticResource Ui.Gap.Bottom.Normal}">
           <StackPanel>
             <DockPanel>
-              <Border x:Name="ExposureTag" DockPanel.Dock="Right" Style="{StaticResource Workbench.Tag.Success}" VerticalAlignment="Top">
-                <TextBlock x:Name="ExposureTagText" VerticalAlignment="Center" />
+              <Border x:Name="ExposureTag" DockPanel.Dock="Right" Style="{StaticResource Workbench.CcTag}" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="{l:Tr Mcp.Dot}" Style="{StaticResource Workbench.ToneGlyph}" />
+                  <TextBlock x:Name="ExposureTagText" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.Dot}" />
+                </StackPanel>
               </Border>
               <StackPanel>
-                <TextBlock Text="{l:Tr Mcp.TransportCard}" Style="{StaticResource Workbench.RowTitle}" FontSize="14" AutomationProperties.HeadingLevel="Level2" />
-                <TextBlock Text="{l:Tr Mcp.TransportHelp}" Style="{StaticResource Workbench.RowHelp}" FontSize="12" />
+                <TextBlock Text="{l:Tr Mcp.TransportCard}" Style="{StaticResource Workbench.CheckTitle}" FontSize="14" AutomationProperties.HeadingLevel="Level2" />
+                <TextBlock Text="{l:Tr Mcp.TransportHelp}" Style="{StaticResource Workbench.SettingHelp}" />
               </StackPanel>
             </DockPanel>
 
             <UniformGrid Rows="1" Margin="{StaticResource Ui.Gap.Top.Normal}" KeyboardNavigation.TabNavigation="Once" KeyboardNavigation.DirectionalNavigation="Cycle">
-              <RadioButton x:Name="StdioChoice" GroupName="McpTransport" Style="{StaticResource Workbench.Tile}" Padding="{StaticResource Ui.Inset.CheckRow}" Margin="{StaticResource Ui.Gap.Right.SM}"
+              <RadioButton x:Name="StdioChoice" GroupName="McpTransport" Style="{StaticResource Workbench.CcTile}" Padding="{StaticResource Ui.Inset.BoxBody}" Margin="{StaticResource Ui.Gap.Right.SM}"
                            AutomationProperties.Name="{l:Tr Mcp.LocalStdio}" IsChecked="True" Checked="OnTransportChanged">
                 <StackPanel>
                   <DockPanel>
-                    <Border DockPanel.Dock="Right" Style="{StaticResource Workbench.Tag.Accent}">
-                      <TextBlock Text="{l:Tr Mcp.StdioTag}" VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="{l:Tr Mcp.LocalStdio}" Style="{StaticResource Workbench.RowTitle}" VerticalAlignment="Center" />
+                    <TextBlock x:Name="StdioCheck" DockPanel.Dock="Right" Text="{l:Tr Mcp.Check}" Style="{StaticResource Workbench.CheckTitle}" />
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Text="{l:Tr Mcp.LocalStdio}" Style="{StaticResource Workbench.CheckTitle}" />
+                      <TextBlock Text="{l:Tr Mcp.StdioCode}" Style="{StaticResource Workbench.TileCode}" />
+                    </StackPanel>
                   </DockPanel>
-                  <TextBlock Text="{l:Tr Mcp.LocalStdioDesc}" Style="{StaticResource Workbench.RowHelp}" FontSize="12" Margin="{StaticResource Ui.Gap.Top.XS}" />
+                  <TextBlock Text="{l:Tr Mcp.LocalStdioDesc}" Style="{StaticResource Workbench.CellText}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XXS}" />
                 </StackPanel>
               </RadioButton>
-              <RadioButton x:Name="HttpChoice" GroupName="McpTransport" Style="{StaticResource Workbench.Tile}" Padding="{StaticResource Ui.Inset.CheckRow}"
+              <RadioButton x:Name="HttpChoice" GroupName="McpTransport" Style="{StaticResource Workbench.CcTile}" Padding="{StaticResource Ui.Inset.BoxBody}"
                            AutomationProperties.Name="{l:Tr Mcp.RemoteHttp}" Checked="OnTransportChanged">
                 <StackPanel>
                   <DockPanel>
-                    <Border DockPanel.Dock="Right" Style="{StaticResource Workbench.Tag}">
-                      <TextBlock Text="{l:Tr Mcp.HttpTag}" VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Text="{l:Tr Mcp.RemoteHttp}" Style="{StaticResource Workbench.RowTitle}" VerticalAlignment="Center" />
+                    <TextBlock x:Name="HttpCheck" DockPanel.Dock="Right" Text="{l:Tr Mcp.Check}" Style="{StaticResource Workbench.CheckTitle}" Visibility="Hidden" />
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Text="{l:Tr Mcp.RemoteHttp}" Style="{StaticResource Workbench.CheckTitle}" />
+                      <TextBlock Text="{l:Tr Mcp.HttpCode}" Style="{StaticResource Workbench.TileCode}" />
+                    </StackPanel>
                   </DockPanel>
-                  <TextBlock Text="{l:Tr Mcp.RemoteHttpDesc}" Style="{StaticResource Workbench.RowHelp}" FontSize="12" Margin="{StaticResource Ui.Gap.Top.XS}" />
+                  <TextBlock Text="{l:Tr Mcp.RemoteHttpDesc}" Style="{StaticResource Workbench.CellText}" TextWrapping="Wrap" Margin="{StaticResource Ui.Gap.Top.XXS}" />
                 </StackPanel>
               </RadioButton>
             </UniformGrid>
 
-            <!-- The key-free VM HTTP service, shown only for the HTTP choice. -->
-            <Border x:Name="HttpSection" Visibility="Collapsed" Style="{StaticResource Workbench.RowDivider}">
-              <StackPanel>
-                <Border Style="{StaticResource Primer.Alert.Info}" Margin="{StaticResource Ui.Gap.Bottom.SM}">
-                  <TextBlock Text="{l:Tr Mcp.KeyFreeNote}" Style="{StaticResource Primer.Text}" TextWrapping="Wrap" />
-                </Border>
-                <vm:VmPanel x:Name="VmConnection" />
-              </StackPanel>
+            <Border x:Name="HttpSection" Visibility="Collapsed" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="0,1,0,0" Padding="{StaticResource Ui.Inset.SettingsDivided}" Margin="{StaticResource Ui.Gap.Top.Normal}">
+              <vm:VmPanel x:Name="VmConnection" />
             </Border>
           </StackPanel>
         </Border>
 
-        <!-- Card 2: the Host program that the client configurations start. -->
-        <Border Style="{StaticResource Workbench.Card}" Padding="{StaticResource Ui.Inset.SettingsCard}">
+        <!-- The EPLAN versions on this computer and the Host program the clients start. -->
+        <Border Style="{StaticResource Workbench.Box}" Padding="{StaticResource Ui.Inset.SettingsBox}">
           <StackPanel>
-            <TextBlock Text="{l:Tr Mcp.PlatformCard}" Style="{StaticResource Workbench.RowTitle}" FontSize="14" AutomationProperties.HeadingLevel="Level2" />
-            <TextBlock Text="{l:Tr Mcp.PlatformHelp}" Style="{StaticResource Workbench.RowHelp}" FontSize="12" />
-            <Border CornerRadius="8" Background="{DynamicResource Surface.Code}" BorderBrush="{DynamicResource Border.Layer}" BorderThickness="1" Padding="{StaticResource Ui.Inset.CheckRow}" Margin="{StaticResource Ui.Gap.Top.Normal}">
+            <TextBlock Text="{l:Tr Mcp.PlatformCard}" Style="{StaticResource Workbench.CheckTitle}" FontSize="14" AutomationProperties.HeadingLevel="Level2" />
+            <TextBlock Text="{l:Tr Mcp.PlatformHelp}" Style="{StaticResource Workbench.SettingHelp}" />
+            <ItemsControl x:Name="Versions" Focusable="False" Margin="{StaticResource Ui.Gap.Top.SM}" AutomationProperties.Name="{l:Tr Mcp.PlatformCard}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <UniformGrid Rows="1" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border x:Name="Tile" Style="{StaticResource Workbench.VersionTile}" AutomationProperties.Name="{Binding Name}">
+                    <StackPanel HorizontalAlignment="Center">
+                      <TextBlock Text="{Binding Title}" Style="{StaticResource Workbench.CellMonoStrong}" HorizontalAlignment="Center" />
+                      <TextBlock x:Name="State" Text="{Binding State}" Style="{StaticResource Workbench.CellText}" FontSize="10.5" HorizontalAlignment="Center" Margin="{StaticResource Ui.Gap.Top.Hair}" />
+                    </StackPanel>
+                  </Border>
+                  <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding Installed}" Value="True">
+                      <Setter TargetName="State" Property="Foreground" Value="{DynamicResource State.Success.Text}" />
+                      <Setter TargetName="Tile" Property="Opacity" Value="1" />
+                      <Setter TargetName="Tile" Property="Background" Value="{DynamicResource Surface.Elevated}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Current}" Value="True">
+                      <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource Accent.Graphic}" />
+                      <Setter TargetName="Tile" Property="BorderThickness" Value="2" />
+                    </DataTrigger>
+                  </DataTemplate.Triggers>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Border Style="{StaticResource Workbench.CodeBox}" Padding="{StaticResource Ui.Inset.CodeLine}" Margin="{StaticResource Ui.Gap.Top.SM}">
               <DockPanel>
-                <TextBlock x:Name="HostPathLabel" DockPanel.Dock="Right" Text="{l:Tr Mcp.HostPathLabel}" Style="{StaticResource Primer.Muted}" FontSize="11.5" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XS}" />
+                <TextBlock x:Name="HostPathLabel" DockPanel.Dock="Right" Style="{StaticResource Workbench.CellMono}" VerticalAlignment="Center" Margin="{StaticResource Ui.Gap.Left.XS}" />
                 <TextBox x:Name="HostPathBox" Style="{StaticResource Workbench.CodeValue}" Padding="0" AutomationProperties.LabeledBy="{Binding ElementName=HostPathLabel}" />
               </DockPanel>
             </Border>
