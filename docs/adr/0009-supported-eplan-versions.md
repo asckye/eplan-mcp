@@ -68,3 +68,4 @@
 | 日期 | 修订内容与原因 | 确认依据 / 取代 ADR |
 |---|---|---|
 | 2026-11-20 | 尚未修订，本 ADR 仍然有效。[ADR-0060](0060-per-version-bridge-builds.md)（Proposed）提议把“一份构建”改为每个支持的版本各构建一份：背景第 3 点“签名相同”已被 [asckye/eplan-mcp#664](https://github.com/asckye/eplan-mcp/issues/664) 证明不成立（api-notes B17、B18）。支持范围不在修订之列。 | 等项目负责人对 ADR-0060 的决定 |
+| 2026-11-20 | 构建方式改由 [ADR-0060](0060-per-version-bridge-builds.md) 规定：每个支持的版本各构建一份插件，版本差异在编译期暴露。背景第 3 点“签名相同”不再作为前提；支持范围不变 | [ADR-0060](0060-per-version-bridge-builds.md)（项目负责人 2026-11-20 接受） |
