@@ -105,6 +105,7 @@ internal sealed class QuestionItem(Question question, TimeProvider clock) : INot
     public string Result => Question.End switch
     {
         null => string.Empty,
+        QuestionEnd.Approved when Question.StartedInWorkbench => Text("Result.StartedInWorkbench"),
         QuestionEnd.Approved => Text(IsRelease ? "Result.Continued" : "Result.Approved"),
         QuestionEnd.Rejected => Text(IsRelease ? "Result.KeptSuspended" : "Result.Rejected"),
         QuestionEnd.Expired => Text("Result.Expired"),

@@ -44,14 +44,17 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     private readonly SecurityIdentifier? _owner;
     private readonly TimeProvider _clock;
     private readonly ILogger _logger;
+    private readonly EngineerWrites? _engineerWrites;
+    private readonly Func<int, bool> _isOwnChild;
     private readonly CancellationTokenSource _stop = new();
     private readonly List<Task> _instances = [];
     private volatile bool _quitting;
     private int _disposed;
 
     /// <summary>The Workbench of this user and <paramref name="dataRoot"/>, serving the Host installed beside it.</summary>
-    public ApprovalServer(ApprovalQueue queue, string dataRoot, TimeProvider clock, ILogger logger)
-        : this(queue, WorkbenchPipeName.ForCurrentUser(dataRoot), ClientBeside(AppContext.BaseDirectory), clock, logger)
+    /// <paramref name="engineerWrites"/>: the writes the engineer started here, answered for that click (ADR-0065).
+    public ApprovalServer(ApprovalQueue queue, string dataRoot, TimeProvider clock, ILogger logger, EngineerWrites? engineerWrites = null)
+        : this(queue, WorkbenchPipeName.ForCurrentUser(dataRoot), ClientBeside(AppContext.BaseDirectory), clock, logger, engineerWrites: engineerWrites)
     {
     }
 
@@ -60,8 +63,18 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     /// elevated, as on CI, gives its token's owner (Administrators), which the Host's <c>CurrentUserOnly</c> compares with;
     /// the Workbench itself always makes the user the owner.
     /// </summary>
-    internal ApprovalServer(ApprovalQueue queue, string pipeName, string expectedClient, TimeProvider clock, ILogger logger, SecurityIdentifier? owner = null)
+    internal ApprovalServer(
+        ApprovalQueue queue,
+        string pipeName,
+        string expectedClient,
+        TimeProvider clock,
+        ILogger logger,
+        SecurityIdentifier? owner = null,
+        EngineerWrites? engineerWrites = null,
+        Func<int, bool>? isOwnChild = null)
     {
+        _engineerWrites = engineerWrites;
+        _isOwnChild = isOwnChild ?? PipeClient.IsOwnChild;
         _queue = queue;
         PipeName = pipeName;
         _expectedClient = expectedClient;
@@ -264,12 +277,12 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
 
         if (accepting)
         {
-            await QuestionAsync(pipe, client).ConfigureAwait(false);
+            await QuestionAsync(pipe, client, version).ConfigureAwait(false);
         }
     }
 
     /// <summary>The one question of a connection: read strictly into the queue, then answered there.</summary>
-    private async Task QuestionAsync(Stream pipe, int client)
+    private async Task QuestionAsync(Stream pipe, int client, int version)
     {
         Question? question = null;
         bool reserved = true;
@@ -307,6 +320,13 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
             }
 
             LogAsked(question.RequestId, ask.Tool, client);
+            if (StartedHere(ask, client, version))
+            {
+                question.StartedInWorkbench = true;
+                _queue.Answer(question, approve: true);
+                LogStartedHere(question.RequestId, ask.Tool);
+            }
+
             await AnswerAsync(pipe, question, askId).ConfigureAwait(false);
         }
         finally
@@ -333,6 +353,16 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         && ask.DeadlineUnixMs <= (_clock.GetUtcNow() + MaxDeadline).ToUnixTimeMilliseconds()
         && (ask.Kind == QuestionKind.SuspensionRelease) == (ask.Suspension is not null)
         && ask.Suspension?.TimeUnixMs is null or (>= 0 and <= LatestTime);
+
+    /// <summary>
+    /// ADR-0065 decision 3: a question is answered for the engineer's click only when all hold: protocol 2, so the Host
+    /// records it as such; an approval of an ordinary write, never a destructive one or a release; from the Host this
+    /// Workbench started; and a write the engineer started here with the same tool and arguments hash, used up by the
+    /// match. The match is checked last, so a question that fails another test leaves the started write unclaimed.
+    /// </summary>
+    private bool StartedHere(ApprovalAskParams ask, int client, int version) =>
+        version >= 2 && ask.Kind == QuestionKind.Approval && ask.Tier == QuestionTier.Write
+        && _engineerWrites is { } writes && _isOwnChild(client) && writes.TryClaim(ask.Tool, ask.ArgumentsHash);
 
     /// <summary>Whether the message the Host sent while its question waited is the cancel of that question.</summary>
     private static bool IsCancel(Task<RpcMessage?> next, Question question)
@@ -373,7 +403,8 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
         ApprovalAskParams ask = question.Ask;
         try
         {
-            await SendAsync(pipe, WorkbenchJson.Result(askId, new ApprovalAskResult(ask.RequestId, ask.Fingerprint, ask.ArgumentsHash, decision))).ConfigureAwait(false);
+            string? initiatedBy = question.StartedInWorkbench ? WorkbenchProtocol.InitiatedByWorkbench : null;
+            await SendAsync(pipe, WorkbenchJson.Result(askId, new ApprovalAskResult(ask.RequestId, ask.Fingerprint, ask.ArgumentsHash, decision, initiatedBy))).ConfigureAwait(false);
             LogEnded(question.RequestId, question.End);
             if (question.Execution == QuestionExecution.Running)
             {
@@ -418,6 +449,9 @@ internal sealed partial class ApprovalServer : IAsyncDisposable
     }
 
     private Task SendAsync(Stream pipe, byte[] message) => WorkbenchFraming.WriteAsync(pipe, message, _stop.Token);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Question {RequestId} ({Tool}) answered for the write the engineer started in the Workbench")]
+    private partial void LogStartedHere(string requestId, string tool);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Approval pipe {PipeName} is listening")]
     private partial void LogListening(string pipeName);

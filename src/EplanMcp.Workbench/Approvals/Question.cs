@@ -43,6 +43,9 @@ internal sealed class Question
     /// </summary>
     public bool Dropped { get; internal set; }
 
+    /// <summary>The Workbench answered it for a write the engineer started here (ADR-0065); set before it is answered.</summary>
+    public bool StartedInWorkbench { get; internal set; }
+
     /// <summary>The answer the connection sends; set once, when the question ends.</summary>
     internal TaskCompletionSource<WorkbenchDecision> Decision { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 }

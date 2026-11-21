@@ -2116,7 +2116,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_create.md",
       "small": 16,
-      "medium": 18,
+      "medium": 19,
       "large": 21,
       "apiNotes": [
         "A7",
@@ -2148,7 +2148,7 @@
       "actions": 0,
       "spec": "docs/tools/eplan_page_delete.md",
       "small": 4,
-      "medium": 10,
+      "medium": 11,
       "large": 1,
       "apiNotes": [
         "A15",

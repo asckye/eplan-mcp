@@ -25476,6 +25476,11 @@
             "file": "tests/EplanMcp.Bridge.Core.Tests/Operations/WriteInvokeTests.cs"
           },
           {
+            "name": "ApprovalAutoAnswerTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Approvals/ApprovalAutoAnswerTests.cs"
+          },
+          {
             "name": "ApprovalDialogInteropTests",
             "size": "Medium",
             "file": "tests/EplanMcp.Host.Tests/Bridge/ApprovalDialogInteropTests.cs"
@@ -25832,6 +25837,11 @@
             "name": "WorkbenchJsonTests",
             "size": "Small",
             "file": "tests/EplanMcp.Workbench.Protocol.Tests/WorkbenchJsonTests.cs"
+          },
+          {
+            "name": "ApprovalAutoAnswerTests",
+            "size": "Medium",
+            "file": "tests/EplanMcp.Workbench.Tests/Approvals/ApprovalAutoAnswerTests.cs"
           },
           {
             "name": "ApprovalPipeTests",

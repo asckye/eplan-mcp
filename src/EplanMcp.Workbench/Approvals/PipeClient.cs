@@ -28,6 +28,24 @@ internal static class PipeClient
     }
 
     /// <summary>
+    /// Whether <paramref name="processId"/> was started by this process (ADR-0065 decision 3): its parent is this process,
+    /// and it started after this process did, so a parent ID left over from an earlier holder of this PID does not count.
+    /// False when either cannot be read.
+    /// </summary>
+    public static bool IsOwnChild(int processId)
+    {
+        using SafeProcessHandle child = OpenProcess(QueryLimitedInformation, inheritHandle: false, (uint)processId);
+        if (child.IsInvalid || NtQueryInformationProcess(child, 0, out BasicInformation basic, Marshal.SizeOf<BasicInformation>(), out _) != 0
+            || (long)basic.InheritedFromUniqueProcessId != Environment.ProcessId)
+        {
+            return false;
+        }
+
+        using var self = System.Diagnostics.Process.GetCurrentProcess();
+        return GetProcessTimes(child, out long created, out _, out _, out _) && DateTime.FromFileTimeUtc(created) >= self.StartTime.ToUniversalTime();
+    }
+
+    /// <summary>
     /// Whether two paths lead to one file: same volume and file index, so that links, short names and letter case do not
     /// matter. False when either cannot be opened.
     /// </summary>
@@ -57,9 +75,28 @@ internal static class PipeClient
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool QueryFullProcessImageName(SafeProcessHandle process, uint flags, [Out] char[] image, ref int length);
 
+    [DllImport("ntdll.dll")]
+    private static extern int NtQueryInformationProcess(SafeProcessHandle process, int informationClass, out BasicInformation information, int length, out int returned);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetProcessTimes(SafeProcessHandle process, out long creation, out long exit, out long kernel, out long user);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GetFileInformationByHandle(SafeFileHandle file, out FileInformation information);
+
+    /// <summary>PROCESS_BASIC_INFORMATION.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    private struct BasicInformation
+    {
+        public nint ExitStatus;
+        public nint PebBaseAddress;
+        public nuint AffinityMask;
+        public nint BasePriority;
+        public nuint UniqueProcessId;
+        public nuint InheritedFromUniqueProcessId;
+    }
 
     /// <summary>BY_HANDLE_FILE_INFORMATION.</summary>
     [StructLayout(LayoutKind.Sequential)]

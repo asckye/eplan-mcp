@@ -41,6 +41,9 @@ public sealed partial class App : Application, IDisposable
     private Vm.VmView? _vm;
     private Project.HostToolClient? _tools;
 
+    /// <summary>The writes the engineer starts in the Workbench, which its approval server answers for (ADR-0065).</summary>
+    private readonly EngineerWrites _engineerWrites = new();
+
     internal int Pending { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -110,7 +113,7 @@ public sealed partial class App : Application, IDisposable
         _window.AttachLogs(new LogsView(_locations.Logs, _locations.Config));
         _window.AttachSettings(StartAtLogin.ForCurrentUser(), _locations.Config, _policy);
 
-        _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"));
+        _server = new ApprovalServer(_queue, _locations.Root, TimeProvider.System, _log.CreateLogger("Approvals"), _engineerWrites);
         _listening = _server.Start();
         ShowQueue();
         _window.Show();

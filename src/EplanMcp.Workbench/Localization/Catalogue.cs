@@ -456,6 +456,7 @@ internal static class Catalogue
 
         // How a question ended and what became of the write (APR-11, APR-12).
         ("Result.Approved", "Approved", "已批准"),
+        ("Result.StartedInWorkbench", "Started by the engineer in the Workbench", "工程师在 Workbench 发起"),
         ("Result.Rejected", "Rejected", "已拒绝"),
         ("Result.Continued", "Continued", "已继续"),
         ("Result.KeptSuspended", "Kept suspended", "保持暂停"),
